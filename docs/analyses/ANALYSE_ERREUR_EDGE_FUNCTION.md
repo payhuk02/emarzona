@@ -48,7 +48,7 @@ if (!customerEmail || typeof customerEmail !== 'string' || !customerEmail.includ
 const finalStoreId = String(storeId).trim();
 const finalProductId = String(product.id).trim();
 const finalAmount = Number(price);
-const finalCurrency = (product.currency || "XOF").trim();
+const finalCurrency = (product.currency || 'XOF').trim();
 
 // Validation finale avant l'appel
 if (!finalStoreId || finalStoreId.length < 30) {
@@ -63,7 +63,7 @@ if (!finalProductId || finalProductId.length < 30) {
 ### 3. Logs Détaillés
 
 ```typescript
-logger.log("Initiating Moneroo payment from ProductDetail:", {
+logger.log('Initiating Moneroo payment from ProductDetail:', {
   storeId: finalStoreId,
   productId: finalProductId,
   amount: finalAmount,
@@ -78,9 +78,10 @@ logger.log("Initiating Moneroo payment from ProductDetail:", {
 ### 4. Logs dans moneroo-payment.ts
 
 ```typescript
-logger.log("Initiating Moneroo checkout:", {
+logger.log('Initiating Moneroo checkout:', {
   ...checkoutData,
-  amount: typeof checkoutData.amount === 'number' ? checkoutData.amount : Number(checkoutData.amount),
+  amount:
+    typeof checkoutData.amount === 'number' ? checkoutData.amount : Number(checkoutData.amount),
   currency: checkoutData.currency,
   hasReturnUrl: !!checkoutData.return_url,
   hasCancelUrl: !!checkoutData.cancel_url,
@@ -97,9 +98,9 @@ logger.log("Initiating Moneroo checkout:", {
 ## 📊 Résultat Attendu
 
 Avec ces validations et logs, nous devrions pouvoir :
+
 - ✅ Identifier exactement quel paramètre cause l'erreur
 - ✅ Voir la différence entre ProductDetail et les autres pages
 - ✅ Corriger le problème spécifique
 
 Les logs détaillés permettront de diagnostiquer précisément le problème.
-

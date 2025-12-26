@@ -17,6 +17,7 @@ Créer des utilitaires pour simplifier les opérations avec retry, la gestion du
 **Fichier** : `src/lib/retry-utils.ts`
 
 **Fonctionnalités** :
+
 - ✅ **retry** : Exécute une fonction avec retry automatique
 - ✅ **withRetry** : Crée une fonction avec retry automatique
 - ✅ **retryWithExponentialBackoff** : Retry avec backoff exponentiel
@@ -28,28 +29,33 @@ Créer des utilitaires pour simplifier les opérations avec retry, la gestion du
 - ✅ **onRetry/onMaxRetries** : Callbacks pour les événements
 
 **Bénéfices** :
+
 - 🟢 Retry automatique simplifié
 - 🟢 Stratégies de backoff configurables
 - 🟢 Réduction du code répétitif : ~50-60%
 
 **Exemple d'utilisation** :
+
 ```tsx
 import { retry, retryWithExponentialBackoff } from '@/lib/retry-utils';
 
 // Retry simple
-const result = await retry(async () => {
-  return await fetchData();
-}, {
-  maxRetries: 3,
-  initialDelay: 1000,
-  strategy: 'exponential',
-});
+const result = await retry(
+  async () => {
+    return await fetchData();
+  },
+  {
+    maxRetries: 3,
+    initialDelay: 1000,
+    strategy: 'exponential',
+  }
+);
 
 // Retry avec backoff exponentiel
-const result = await retryWithExponentialBackoff(
-  async () => await fetchData(),
-  { maxRetries: 5, jitter: true }
-);
+const result = await retryWithExponentialBackoff(async () => await fetchData(), {
+  maxRetries: 5,
+  jitter: true,
+});
 ```
 
 ---
@@ -59,6 +65,7 @@ const result = await retryWithExponentialBackoff(
 **Fichier** : `src/lib/cache-utils.ts`
 
 **Fonctionnalités** :
+
 - ✅ **MemoryCache** : Cache en mémoire simple avec TTL
 - ✅ **LRUCache** : Cache LRU (Least Recently Used)
 - ✅ **FactoryCache** : Cache avec fonction de factory (getOrSet)
@@ -68,11 +75,13 @@ const result = await retryWithExponentialBackoff(
 - ✅ **keys/values/entries** : Obtient toutes les clés/valeurs/entrées
 
 **Bénéfices** :
+
 - 🟢 Gestion de cache simplifiée
 - 🟢 Support de différentes stratégies (LRU, TTL)
 - 🟢 Réduction du code répétitif : ~50-60%
 
 **Exemple d'utilisation** :
+
 ```tsx
 import { MemoryCache, LRUCache, FactoryCache } from '@/lib/cache-utils';
 
@@ -99,6 +108,7 @@ const data = await factoryCache.getOrSet('key', async () => {
 **Fichier** : `src/hooks/useErrorState.ts`
 
 **Fonctionnalités** :
+
 - ✅ **error** : Erreur actuelle
 - ✅ **errorMessage** : Message d'erreur
 - ✅ **hasError** : Indique si une erreur existe
@@ -107,11 +117,13 @@ const data = await factoryCache.getOrSet('key', async () => {
 - ✅ **execute** : Exécuter une opération et gérer automatiquement les erreurs
 
 **Bénéfices** :
+
 - 🟢 Gestion d'erreur simplifiée
 - 🟢 API simple et intuitive
 - 🟢 Réduction du code répétitif : ~50-60%
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 const [error, setError] = useState<Error | null>(null);
@@ -135,6 +147,7 @@ await execute(async () => {
 **Fichier** : `src/lib/function-utils.ts`
 
 **Fonctionnalités** :
+
 - ✅ **debounce/debounceAsync** : Debounce pour fonctions sync/async
 - ✅ **throttle/throttleAsync** : Throttle pour fonctions sync/async
 - ✅ **memoize** : Mémorise le résultat d'une fonction
@@ -146,11 +159,13 @@ await execute(async () => {
 - ✅ **compose/pipe** : Compose plusieurs fonctions
 
 **Bénéfices** :
+
 - 🟢 Manipulation de fonctions simplifiée
 - 🟢 Optimisations de performance
 - 🟢 Réduction du code répétitif : ~50-60%
 
 **Exemple d'utilisation** :
+
 ```tsx
 import { debounce, throttle, memoize, once, compose } from '@/lib/function-utils';
 
@@ -188,16 +203,19 @@ const process = compose(
 ## 📊 IMPACT ATTENDU
 
 ### Code Quality
+
 - **Réduction du code répétitif** : ~50-60% selon le type
 - **Maintenabilité** : Code plus cohérent et réutilisable
 - **DX (Developer Experience)** : API plus simple et intuitive
 
 ### Performance
+
 - **Retry** : Retry automatique avec stratégies optimisées
 - **Cache** : Gestion de cache optimisée avec TTL et LRU
 - **Function** : Optimisations de performance (debounce, throttle, memoize)
 
 ### UX
+
 - **Retry** : Meilleure résilience aux erreurs réseau
 - **Cache** : Chargement plus rapide avec cache
 - **Error** : Gestion d'erreur améliorée
@@ -209,6 +227,7 @@ const process = compose(
 ### Pour retry-utils
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 let attempts = 0;
@@ -229,6 +248,7 @@ const result = await retry(() => fetchData(), { maxRetries: 3 });
 ### Pour cache-utils
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 const cache = new Map();
@@ -246,6 +266,7 @@ const data = await cache.getOrSet(key, () => fetchData());
 ### Pour useErrorState
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 const [error, setError] = useState<Error | null>(null);
@@ -259,6 +280,7 @@ await execute(() => operation());
 ### Pour function-utils
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 let timeout: NodeJS.Timeout;
@@ -277,6 +299,7 @@ const debounced = debounce(func, 300);
 ## 📝 RECOMMANDATIONS
 
 ### Priorité HAUTE
+
 1. ✅ **Utilitaires retry-utils** - COMPLÉTÉ
 2. ✅ **Utilitaires cache-utils** - COMPLÉTÉ
 3. ✅ **Hook useErrorState** - COMPLÉTÉ
@@ -284,6 +307,7 @@ const debounced = debounce(func, 300);
 5. ⏳ **Migrer progressivement** les composants vers ces utilitaires/hooks
 
 ### Priorité MOYENNE
+
 6. ⏳ **Créer des utilitaires spécialisés** pour des cas d'usage spécifiques
 7. ⏳ **Ajouter des tests** pour les nouveaux utilitaires/hooks
 
@@ -292,6 +316,7 @@ const debounced = debounce(func, 300);
 ## ✅ CONCLUSION
 
 **Améliorations appliquées** :
+
 - ✅ Utilitaires retry-utils créés avec stratégies de retry configurables
 - ✅ Utilitaires cache-utils créés avec MemoryCache, LRUCache et FactoryCache
 - ✅ Hook useErrorState créé avec gestion simplifiée des erreurs
@@ -300,6 +325,7 @@ const debounced = debounce(func, 300);
 **Impact** : 🟢 **MOYEN-ÉLEVÉ** - Réduction significative du code répétitif et amélioration de la cohérence UX.
 
 **Prochaines étapes** :
+
 - ⏳ Migrer les composants vers retry-utils
 - ⏳ Migrer les composants vers cache-utils
 - ⏳ Migrer les composants vers useErrorState
@@ -310,5 +336,4 @@ const debounced = debounce(func, 300);
 ## 📚 RESSOURCES
 
 - [Exponential Backoff](https://en.wikipedia.org/wiki/Exponential_backoff)
-- [LRU Cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU))
-
+- [LRU Cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>)

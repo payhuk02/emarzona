@@ -1,9 +1,11 @@
 # 🔧 Fix : Admin Users - Récupération des Emails
 
 ## 🐛 Problème
+
 **Erreur :** `ERROR: 42703: column profiles.role does not exist`
 
 **Cause :** Le hook `useAllUsers` essayait de trier et rechercher par des colonnes qui n'existent pas dans la table `profiles` :
+
 - ❌ `email` → existe dans `auth.users`, pas dans `profiles`
 - ❌ `role` → existe dans `user_roles`, pas dans `profiles`
 
@@ -12,18 +14,22 @@
 ## ✅ Solution Appliquée
 
 ### 1. Colonnes de Tri Corrigées
+
 - ✅ `created_at` (existe dans `profiles`)
 - ✅ `display_name` (existe dans `profiles`)
 - ❌ ~~`email`~~ (retiré, n'existe pas dans `profiles`)
 
 ### 2. Recherche Corrigée
+
 - Recherche uniquement dans : `display_name`, `first_name`, `last_name`
 - Email exclu de la recherche directe (nécessiterait un JOIN complexe)
 
 ### 3. Fonction RPC pour Récupérer les Emails
+
 Une nouvelle fonction SQL a été créée : `get_users_emails(p_user_ids UUID[])`
 
 Cette fonction :
+
 - ✅ Récupère les emails depuis `auth.users` en une seule requête
 - ✅ Utilisée par le hook `useAllUsers` pour afficher les emails
 - ✅ Sécurisée avec `SECURITY DEFINER`
@@ -36,6 +42,7 @@ Cette fonction :
 ### Étape 1 : Exécuter la Migration SQL
 
 **Via Supabase SQL Editor:**
+
 1. Allez sur https://supabase.com/dashboard/project/YOUR_PROJECT/sql
 2. Copiez TOUT le contenu du fichier : `supabase/migrations/20250124_get_user_emails_function.sql`
 3. Collez dans l'éditeur SQL
@@ -43,6 +50,7 @@ Cette fonction :
 5. Vérifiez : Vous devriez voir ✅ **"Success"**
 
 **Contenu de la migration:**
+
 ```sql
 -- Fonction pour récupérer l'email d'un utilisateur
 CREATE OR REPLACE FUNCTION get_user_email(p_user_id UUID)
@@ -59,8 +67,8 @@ RETURNS TABLE(user_id UUID, email TEXT)
 LANGUAGE sql
 SECURITY DEFINER
 AS $$
-  SELECT id as user_id, email 
-  FROM auth.users 
+  SELECT id as user_id, email
+  FROM auth.users
   WHERE id = ANY(p_user_ids);
 $$;
 
@@ -102,6 +110,7 @@ SELECT * FROM get_users_emails(ARRAY[
 ## 🏗️ Architecture Technique
 
 ### Avant (❌ Incorrect)
+
 ```typescript
 // ❌ Erreur : tri par 'email' qui n'existe pas dans profiles
 query = query.order('email', { ascending: true });
@@ -111,16 +120,19 @@ query = query.or(`email.ilike.%${search}%,display_name.ilike.%${search}%`);
 ```
 
 ### Après (✅ Correct)
+
 ```typescript
 // ✅ Tri uniquement sur colonnes existantes
 type SortColumn = 'created_at' | 'display_name'; // 'email' retiré
 
 // ✅ Recherche uniquement dans profiles
-query = query.or(`display_name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+query = query.or(
+  `display_name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`
+);
 
 // ✅ Récupération emails via RPC
-const { data: emailsData } = await supabase.rpc('get_users_emails', { 
-  p_user_ids: userIds 
+const { data: emailsData } = await supabase.rpc('get_users_emails', {
+  p_user_ids: userIds,
 });
 ```
 
@@ -128,24 +140,25 @@ const { data: emailsData } = await supabase.rpc('get_users_emails', {
 
 ## 📊 Comparaison Avant/Après
 
-| Aspect | ❌ AVANT | ✅ APRÈS |
-|--------|---------|----------|
-| **Tri par email** | Plantage (colonne n'existe pas) | Retiré, tri par nom à la place |
-| **Recherche email** | Plantage (colonne n'existe pas) | Recherche par nom uniquement |
-| **Affichage email** | `display_name` utilisé comme email | Vrai email depuis auth.users |
-| **Performance** | N+1 queries pour emails | 1 seule requête RPC |
-| **Erreurs** | `column profiles.role does not exist` | Aucune erreur |
+| Aspect              | ❌ AVANT                              | ✅ APRÈS                       |
+| ------------------- | ------------------------------------- | ------------------------------ |
+| **Tri par email**   | Plantage (colonne n'existe pas)       | Retiré, tri par nom à la place |
+| **Recherche email** | Plantage (colonne n'existe pas)       | Recherche par nom uniquement   |
+| **Affichage email** | `display_name` utilisé comme email    | Vrai email depuis auth.users   |
+| **Performance**     | N+1 queries pour emails               | 1 seule requête RPC            |
+| **Erreurs**         | `column profiles.role does not exist` | Aucune erreur                  |
 
 ---
 
 ## 🎯 Améliorations Futures (Optionnel)
 
 ### Option 1 : Vue SQL avec JOIN
+
 Créer une vue qui fait le JOIN entre `profiles` et `auth.users` :
 
 ```sql
 CREATE VIEW admin_users_view AS
-SELECT 
+SELECT
   p.*,
   u.email,
   ur.role
@@ -155,22 +168,25 @@ LEFT JOIN user_roles ur ON p.user_id = ur.user_id;
 ```
 
 **Avantages :**
+
 - Tri et recherche par email directement
 - Plus besoin de RPC
 - Requête unique
 
 **Inconvénients :**
+
 - Nécessite des permissions spéciales sur `auth.users`
 - Plus complexe à maintenir
 
 ### Option 2 : Fonction RPC Complète
+
 Créer une fonction qui retourne tout (profil + email + rôle) :
 
 ```sql
 CREATE FUNCTION get_admin_users(...)
 RETURNS TABLE(...)
 AS $$
-  SELECT 
+  SELECT
     p.*,
     u.email,
     COALESCE(ur.role, 'user') as role
@@ -182,11 +198,13 @@ $$;
 ```
 
 **Avantages :**
+
 - Performance optimale
 - Tout côté serveur
 - Pagination/tri/filtres SQL natifs
 
 **Inconvénients :**
+
 - Plus complexe à coder
 - Nécessite expertise SQL
 
@@ -209,8 +227,8 @@ $$;
 ---
 
 **Commande rapide pour appliquer la migration :**
+
 ```bash
 # Dans Supabase SQL Editor, copiez-collez :
 supabase/migrations/20250124_get_user_emails_function.sql
 ```
-

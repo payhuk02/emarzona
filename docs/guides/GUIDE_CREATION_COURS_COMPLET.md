@@ -35,6 +35,7 @@
 ### ÉTAPE 1 : Accéder à la création de produit
 
 1. **Lancer l'application** :
+
    ```bash
    npm run dev
    ```
@@ -270,6 +271,7 @@
 
 **Cause** : Cache navigateur  
 **Solution** :
+
 ```
 Ctrl + Shift + R (vider cache et recharger)
 ```
@@ -280,6 +282,7 @@ Ctrl + Shift + R (vider cache et recharger)
 
 **Cause** : Condition non remplie  
 **Solution** :
+
 1. Vérifier que "Cours en ligne" est bien sélectionné
 2. Vérifier la console pour erreurs
 3. Recharger la page
@@ -290,6 +293,7 @@ Ctrl + Shift + R (vider cache et recharger)
 
 **Cause** : Import manquant  
 **Solution** :
+
 ```bash
 # Redémarrer le serveur
 npm run dev
@@ -301,7 +305,8 @@ npm run dev
 
 **Cause** : Champs requis vides  
 **Solution** :
-- Vérifier que TOUS les champs avec * sont remplis
+
+- Vérifier que TOUS les champs avec \* sont remplis
 - Vérifier les messages d'erreur en rouge
 
 ---
@@ -405,7 +410,7 @@ Curriculum:
     - Bienvenue
     - Setup environnement
     - Premier composant
-    
+
   Section 2: Les bases (4 leçons)
     - Variables et types
     - Fonctions
@@ -428,4 +433,3 @@ Prérequis: JavaScript de base
 **Document créé le** : 27 Octobre 2025  
 **Dernière mise à jour** : 27 Octobre 2025 à 02:30  
 **Statut** : ✅ Système opérationnel
-

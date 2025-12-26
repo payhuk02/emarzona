@@ -52,4 +52,3 @@ Edge Function pour recevoir et traiter les webhooks SendGrid.
 ```bash
 supabase functions deploy sendgrid-webhook-handler
 ```
-

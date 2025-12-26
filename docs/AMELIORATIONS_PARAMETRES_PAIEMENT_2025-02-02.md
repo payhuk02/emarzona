@@ -68,12 +68,14 @@ Ajout de paramètres de paiement avancés pour les boutiques, permettant une con
 ## 📁 Fichiers Créés/Modifiés
 
 ### Migration SQL
+
 - `supabase/migrations/20250202_store_payment_settings_advanced.sql`
   - Ajout de 8 colonnes à la table `stores`
   - Index GIN pour `accepted_currencies`
   - Commentaires de documentation
 
 ### Composants React
+
 - **`src/components/store/StorePaymentSettings.tsx`** (NOUVEAU)
   - Composant complet pour la configuration des paramètres de paiement
   - Interface utilisateur intuitive avec cards et switches
@@ -205,4 +207,3 @@ supabase db push
 **Statut Final :** ✅ **IMPLÉMENTATION COMPLÈTE**
 
 Toutes les fonctionnalités de paramètres de paiement avancés sont maintenant disponibles dans l'onglet Commerce → Paiement.
-

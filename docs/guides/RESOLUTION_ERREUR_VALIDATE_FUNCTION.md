@@ -10,8 +10,8 @@
 Si vous voyez dans Supabase que la requête suivante retourne la fonction :
 
 ```sql
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_name = 'validate_unified_promotion';
 ```
 
@@ -53,6 +53,7 @@ Si vous voulez être sûr que tout est correct, exécutez ce script complet :
 4. Exécutez (Run ou CTRL+Enter)
 
 Ce script :
+
 - Supprime toutes les anciennes versions
 - Recrée la fonction complète
 - Ajoute le commentaire avec la bonne signature
@@ -81,12 +82,12 @@ Pour tester que tout fonctionne, exécutez cette séquence :
 ```sql
 -- 1. Vérifier que la fonction existe
 SELECT routine_name, routine_type
-FROM information_schema.routines 
+FROM information_schema.routines
 WHERE routine_name = 'validate_unified_promotion'
   AND routine_schema = 'public';
 
 -- 2. Vérifier la signature de la fonction
-SELECT 
+SELECT
   p.proname as function_name,
   pg_get_function_arguments(p.oid) as arguments,
   pg_get_function_result(p.oid) as return_type
@@ -115,11 +116,13 @@ SELECT validate_unified_promotion(
 ### Erreur : "function validate_unified_promotion() does not exist"
 
 **Causes possibles :**
+
 1. La fonction n'a pas été créée
 2. Vous essayez d'appeler la fonction sans paramètres
 3. Le schéma n'est pas spécifié
 
 **Solutions :**
+
 - Vérifiez que la fonction existe avec la requête de vérification
 - Utilisez toujours la signature complète avec tous les paramètres
 - Préfixez avec `public.` si nécessaire
@@ -155,4 +158,3 @@ COMMENT ON FUNCTION public.validate_unified_promotion(TEXT, UUID, UUID[], UUID[]
 ---
 
 **Dernière mise à jour :** 28 Janvier 2025
-

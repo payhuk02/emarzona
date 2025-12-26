@@ -9,6 +9,7 @@
 ## 🔍 Problème Identifié
 
 ### Symptômes
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF (affiché)
 - **Total: 4000 XOF** ❌ (devrait être 3600 XOF)
@@ -18,21 +19,25 @@
 **Conflit entre deux systèmes de calcul :**
 
 1. **`useCart.ts`** calcule `summary.subtotal` :
+
    ```typescript
    const subtotal = items.reduce((sum, item) => {
      const itemPrice = (item.unit_price - (item.discount_amount || 0)) * item.quantity;
      return sum + itemPrice;
    }, 0);
    ```
+
    - `summary.subtotal` = **prix APRÈS remises sur items** (déjà soustrait)
 
 2. **`Checkout.tsx`** calculait :
+
    ```typescript
    const itemDiscounts = items.reduce(...); // Remises items
    const couponDiscount = appliedCouponCode?.discountAmount;
    const totalDiscounts = itemDiscounts + couponDiscount;
    const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
    ```
+
    - **PROBLÈME** : On soustrayait `itemDiscounts` alors qu'ils sont **déjà dans `summary.subtotal`**
    - Résultat : Double soustraction des remises items OU confusion
 
@@ -43,6 +48,7 @@
 ### 1. Correction du Calcul
 
 **Avant (Incorrect):**
+
 ```typescript
 const itemDiscounts = items.reduce(...); // Remises items
 const couponDiscount = appliedCouponCode?.discountAmount;
@@ -52,6 +58,7 @@ const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
 ```
 
 **Après (Correct):**
+
 ```typescript
 // Calculer les remises items (pour affichage uniquement)
 const itemDiscounts = items.reduce(...);
@@ -67,6 +74,7 @@ const subtotalAfterDiscounts = Math.max(0, summary.subtotal - couponDiscount);
 ### 2. Prévention de la Double Application
 
 **Amélioration du chargement depuis localStorage:**
+
 ```typescript
 useEffect(() => {
   // Ne charger que si appliedCouponCode n'est pas déjà défini
@@ -95,6 +103,7 @@ useEffect(() => {
 ### 3. Amélioration du Debug
 
 Ajout de logs pour détecter les conflits :
+
 ```typescript
 console.log('[Checkout] Coupon appliqué:', {
   couponCode: appliedCouponCode.code,
@@ -106,7 +115,7 @@ console.log('[Checkout] Coupon appliqué:', {
   finalTotal,
   // Vérifier qu'il n'y a pas de double application
   summaryDiscountAmount: summary.discount_amount,
-  appliedCouponLegacy: appliedCouponLegacy
+  appliedCouponLegacy: appliedCouponLegacy,
 });
 ```
 
@@ -117,11 +126,13 @@ console.log('[Checkout] Coupon appliqué:', {
 ### Exemple: Prix original 5000 XOF, Remise item 1000 XOF, Code promo -400 XOF
 
 **Dans `useCart.ts`:**
+
 1. Prix item: 5000 XOF
 2. Remise item: 1000 XOF
 3. `summary.subtotal` = 5000 - 1000 = **4000 XOF** ✅
 
 **Dans `Checkout.tsx`:**
+
 1. `summary.subtotal` = 4000 XOF (déjà avec remises items)
 2. `itemDiscounts` = 1000 XOF (pour affichage uniquement)
 3. `couponDiscount` = 400 XOF
@@ -154,6 +165,7 @@ console.log('[Checkout] Coupon appliqué:', {
 ## ✅ Résultat
 
 Le total se met maintenant à jour **correctement** :
+
 - Sous-total: 4000 XOF (avec remises items)
 - Code promo: -400 XOF
 - **Total: 3600 XOF** ✅ (avant taxes et shipping)
@@ -162,4 +174,3 @@ Le total se met maintenant à jour **correctement** :
 
 **Date de correction:** 30 Janvier 2025  
 **Statut:** ✅ **CORRIGÉ**
-

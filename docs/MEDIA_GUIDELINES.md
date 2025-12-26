@@ -38,4 +38,3 @@ Le front applique `width`/`height` et/ou la transformation Supabase Storage pour
 
 - Renseignez `alt` descriptif et concis.
 - Les pages produit intègrent `ProductSchema`/`CourseSchema` avec `image` optimisée.
-

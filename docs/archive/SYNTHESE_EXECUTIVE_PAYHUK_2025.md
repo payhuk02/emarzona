@@ -71,18 +71,18 @@
 
 ## 📋 SCORES DÉTAILLÉS
 
-| Catégorie | Score | Niveau |
-|-----------|-------|--------|
-| Architecture | 90/100 | ⭐⭐⭐⭐⭐ |
-| Base de Données | 92/100 | ⭐⭐⭐⭐⭐ |
-| E-commerce Core | 88/100 | ⭐⭐⭐⭐ |
+| Catégorie           | Score  | Niveau     |
+| ------------------- | ------ | ---------- |
+| Architecture        | 90/100 | ⭐⭐⭐⭐⭐ |
+| Base de Données     | 92/100 | ⭐⭐⭐⭐⭐ |
+| E-commerce Core     | 88/100 | ⭐⭐⭐⭐   |
 | Système Affiliation | 95/100 | ⭐⭐⭐⭐⭐ |
-| Sécurité | 85/100 | ⭐⭐⭐⭐ |
-| Performances | 88/100 | ⭐⭐⭐⭐ |
-| UI/UX Design | 90/100 | ⭐⭐⭐⭐⭐ |
-| SEO | 80/100 | ⭐⭐⭐⭐ |
-| Tests & QA | 75/100 | ⭐⭐⭐ |
-| Documentation | 70/100 | ⭐⭐⭐ |
+| Sécurité            | 85/100 | ⭐⭐⭐⭐   |
+| Performances        | 88/100 | ⭐⭐⭐⭐   |
+| UI/UX Design        | 90/100 | ⭐⭐⭐⭐⭐ |
+| SEO                 | 80/100 | ⭐⭐⭐⭐   |
+| Tests & QA          | 75/100 | ⭐⭐⭐     |
+| Documentation       | 70/100 | ⭐⭐⭐     |
 
 **MOYENNE : 87/100** 🏆
 
@@ -131,6 +131,7 @@
 ## 💰 BUDGET ESTIMÉ
 
 ### Infrastructure mensuelle
+
 ```
 Supabase Pro       : $25
 Vercel Pro         : $20
@@ -142,6 +143,7 @@ TOTAL MENSUEL      : ~$200 (~120,000 XOF)
 ```
 
 ### Développement
+
 ```
 Phase 1 (Quick Wins)   : 80h  (~$4,000)
 Phase 2 (Essentiels)   : 160h (~$8,000)
@@ -200,5 +202,3 @@ L'analyse détaillée est disponible en 3 parties :
 **Rapport préparé le :** 26 Octobre 2025  
 **Par :** Expert Technique Senior  
 **Score Global :** **87/100** ⭐⭐⭐⭐
-
-

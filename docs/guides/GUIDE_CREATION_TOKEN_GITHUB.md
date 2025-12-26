@@ -9,6 +9,7 @@
 ### ✅ Étape 1 : Note (Nom du Token)
 
 **Dans le champ "Note"** :
+
 - Tapez : `Payhula Issues Creator`
 - Ou : `Payhula - Création Issues Automatique`
 - **But** : Identifier facilement ce token plus tard
@@ -18,6 +19,7 @@
 ### ✅ Étape 2 : Expiration
 
 **Dans le dropdown "Expiration"** :
+
 - Choisissez : **`30 days`** (recommandé pour la sécurité)
 - Ou : **`90 days`** si vous préférez
 - Ou : **`No expiration`** (moins sécurisé mais pratique)
@@ -35,6 +37,7 @@
 **Cochez la case principale** : ✅ **`repo`**
 
 Cette case cochera automatiquement toutes les sous-permissions :
+
 - ✅ `repo:status` (Access commit status)
 - ✅ `repo_deployment` (Access deployment status)
 - ✅ `public_repo` (Access public repositories)
@@ -64,11 +67,13 @@ Cette case cochera automatiquement toutes les sous-permissions :
 ### ✅ Étape 5 : Copier le Token
 
 **Le token ressemble à** :
+
 ```
 ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Actions** :
+
 1. **Cliquez sur l'icône de copie** (à droite du token) pour copier automatiquement
 2. **OU** sélectionnez tout le token et copiez-le (Ctrl+C)
 3. **⚠️ SAUVEGARDEZ-LE** dans un endroit sûr temporairement
@@ -136,19 +141,21 @@ Avant de générer, vérifiez :
 ## 🆘 PROBLÈMES COURANTS
 
 ### "Je ne vois pas la section 'Select scopes'"
+
 - Scroll vers le bas de la page
 - Elle est après "Expiration"
 
 ### "Le token ne fonctionne pas"
+
 - Vérifiez que vous avez bien coché `repo`
 - Vérifiez que vous avez copié tout le token (commence par `ghp_`)
 - Vérifiez que le token n'a pas expiré
 
 ### "Je ne vois pas le token après génération"
+
 - Le token s'affiche une seule fois après "Generate token"
 - Si vous avez fermé la page, vous devrez créer un nouveau token
 
 ---
 
 **Une fois le token créé, dites-moi "token créé" et je créerai les issues pour vous ! 🚀**
-

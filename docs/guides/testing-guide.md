@@ -277,4 +277,3 @@ Avant de créer un nouveau composant :
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

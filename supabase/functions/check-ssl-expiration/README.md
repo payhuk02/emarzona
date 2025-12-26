@@ -51,6 +51,7 @@ VALUES (
 ### Variables d'Environnement
 
 Aucune variable d'environnement spécifique requise. La fonction utilise :
+
 - `SUPABASE_URL` (automatique)
 - `SUPABASE_SERVICE_ROLE_KEY` (automatique)
 - `SITE_URL` (optionnel, pour les liens dans les emails)
@@ -114,4 +115,3 @@ Les alertes sont envoyées via la fonction `send-email` avec le template `ssl-al
 1. Vérifiez que la fonction `send-email` est déployée
 2. Vérifiez que le template `ssl-alert` existe
 3. Vérifiez que l'email de notification est valide
-

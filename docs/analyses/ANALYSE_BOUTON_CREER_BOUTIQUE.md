@@ -25,6 +25,7 @@ Le bouton "Créer ma boutique" apparaît dans **deux contextes** :
 ```
 
 **Comportement** :
+
 - ✅ Affiché uniquement si `canCreateStore()` retourne `true`
 - ✅ Affiche le nombre de boutiques restantes : `(X restante(s))`
 - ✅ Change l'onglet actif vers `"create"` au clic
@@ -45,6 +46,7 @@ Le bouton "Créer ma boutique" apparaît dans **deux contextes** :
 ```
 
 **Comportement** :
+
 - ✅ Affiché uniquement si `stores.length === 0` (aucune boutique)
 - ✅ Change l'onglet actif vers `"create"` au clic
 - ✅ Pas de vérification de limite (car aucune boutique n'existe)
@@ -68,10 +70,12 @@ const canCreateStore = () => {
 **Constante** : `MAX_STORES_PER_USER = 3`
 
 **Logique** :
+
 - ✅ Retourne `true` si `stores.length < 3`
 - ❌ Retourne `false` si `stores.length >= 3`
 
 **Résultat** :
+
 - **0 boutiques** : ✅ Bouton visible
 - **1 boutique** : ✅ Bouton visible (affiche "2 restantes")
 - **2 boutiques** : ✅ Bouton visible (affiche "1 restante")
@@ -96,6 +100,7 @@ const canCreateStore = () => {
 **Lignes** : 301-385
 
 **Structure** :
+
 ```typescript
 <TabsContent value="create" className="space-y-4">
   {!canCreateStore() ? (
@@ -111,7 +116,7 @@ const canCreateStore = () => {
       <CardHeader>
         <CardTitle>Créer votre boutique</CardTitle>
         <CardDescription>
-          {stores.length > 0 
+          {stores.length > 0
             ? `Vous avez ${stores.length} boutique(s). Vous pouvez créer jusqu'à ${getRemainingStores()} boutique(s) supplémentaire(s).`
             : "Configurez votre boutique pour commencer à vendre vos produits"
           }
@@ -126,6 +131,7 @@ const canCreateStore = () => {
 ```
 
 **Double Vérification** :
+
 1. ✅ **Avant d'afficher l'onglet** : `canCreateStore()` dans `TabsTrigger`
 2. ✅ **Dans le contenu de l'onglet** : `!canCreateStore()` pour afficher l'alerte
 
@@ -159,36 +165,40 @@ const canCreateStore = () => {
 **Étapes** :
 
 1. **Validation** :
+
    ```typescript
    if (!newStoreData.name.trim()) {
-     toast({ title: "Erreur", description: "Le nom de la boutique est requis" });
+     toast({ title: 'Erreur', description: 'Le nom de la boutique est requis' });
      return;
    }
    ```
 
 2. **Génération du slug** :
+
    ```typescript
    const slug = newStoreData.slug.trim() || generateSlug(newStoreData.name);
    ```
 
 3. **Appel à `createStore()`** :
+
    ```typescript
    await createStore({
      name: newStoreData.name.trim(),
      description: newStoreData.description.trim() || null,
-     slug: slug
+     slug: slug,
    });
    ```
 
 4. **Rafraîchissement** :
+
    ```typescript
    await refreshStores(); // Rafraîchit le contexte
    ```
 
 5. **Réinitialisation** :
    ```typescript
-   setNewStoreData({ name: "", description: "", slug: "" });
-   setActiveTab("list"); // Retour à la liste
+   setNewStoreData({ name: '', description: '', slug: '' });
+   setActiveTab('list'); // Retour à la liste
    ```
 
 ---
@@ -204,19 +214,19 @@ const canCreateStore = () => {
 ```typescript
 const createStore = async (storeData: Partial<Store>) => {
   // ...
-  
+
   // Vérifier la limite de 3 boutiques
   if (!canCreateStore()) {
     throw new Error(`Limite de ${MAX_STORES_PER_USER} boutiques par utilisateur atteinte...`);
   }
-  
+
   // Insertion dans la base de données
   const { data, error } = await supabase
     .from('stores')
     .insert([{ ...storeData, user_id: user.id, is_active: true }])
     .select()
     .single();
-  
+
   // ...
 };
 ```
@@ -238,11 +248,11 @@ BEGIN
   SELECT COUNT(*) INTO store_count
   FROM public.stores
   WHERE user_id = NEW.user_id;
-  
+
   IF store_count >= 3 THEN
     RAISE EXCEPTION 'Limite de 3 boutiques par utilisateur atteinte...';
   END IF;
-  
+
   RETURN NEW;
 END;
 $$;
@@ -347,21 +357,25 @@ CREATE TRIGGER enforce_store_limit
 ### Texte du Bouton
 
 **Cas 1** : Aucune boutique
+
 ```
 "Créer"
 ```
 
 **Cas 2** : 1 boutique existante
+
 ```
 "Créer (2 restantes)"
 ```
 
 **Cas 3** : 2 boutiques existantes
+
 ```
 "Créer (1 restante)"
 ```
 
 **Cas 4** : 3 boutiques existantes
+
 ```
 [Bouton masqué]
 ```
@@ -371,11 +385,13 @@ CREATE TRIGGER enforce_store_limit
 ### Description dans le Formulaire
 
 **Cas 1** : Aucune boutique
+
 ```
 "Configurez votre boutique pour commencer à vendre vos produits"
 ```
 
 **Cas 2** : Boutiques existantes
+
 ```
 "Vous avez X boutique(s). Vous pouvez créer jusqu'à Y boutique(s) supplémentaire(s)."
 ```
@@ -437,18 +453,17 @@ CREATE TRIGGER enforce_store_limit
 
 ## 📝 RÉSUMÉ
 
-| Aspect | Comportement |
-|--------|--------------|
-| **Affichage** | Conditionnel (`canCreateStore()`) |
-| **Texte** | Dynamique avec nombre de boutiques restantes |
-| **Action** | Change l'onglet vers "create" |
-| **Validation** | Triple (Frontend, Hook, Backend) |
-| **Limite** | 3 boutiques maximum par utilisateur |
-| **UX** | Messages clairs et informatifs |
+| Aspect         | Comportement                                 |
+| -------------- | -------------------------------------------- |
+| **Affichage**  | Conditionnel (`canCreateStore()`)            |
+| **Texte**      | Dynamique avec nombre de boutiques restantes |
+| **Action**     | Change l'onglet vers "create"                |
+| **Validation** | Triple (Frontend, Hook, Backend)             |
+| **Limite**     | 3 boutiques maximum par utilisateur          |
+| **UX**         | Messages clairs et informatifs               |
 
 ---
 
 **Document créé le** : 2 Février 2025  
 **Dernière modification** : 2 Février 2025  
 **Version** : 1.0
-

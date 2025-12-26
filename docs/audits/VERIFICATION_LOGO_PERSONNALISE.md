@@ -10,6 +10,7 @@
 ### 1. Références à l'Ancien Logo ✅
 
 **Fichiers vérifiés** :
+
 - ✅ `src/components/marketplace/MarketplaceHeader.tsx` : Corrigé (utilise `usePlatformLogo()`)
 - ✅ `src/pages/Auth.tsx` : Corrigé (utilise `usePlatformLogo()`)
 - ✅ `src/components/seo/WebsiteSchema.tsx` : Corrigé (référence `emarzona-logo.png`)
@@ -22,6 +23,7 @@
 ### 2. Utilisation du Hook `usePlatformLogo` ✅
 
 **Fichiers utilisant le hook** :
+
 - ✅ `src/components/AppSidebar.tsx` : Utilise `usePlatformLogo()`
 - ✅ `src/components/marketplace/MarketplaceHeader.tsx` : Utilise `usePlatformLogo()`
 - ✅ `src/components/marketplace/MarketplaceFooter.tsx` : Utilise `usePlatformLogoLight()`
@@ -49,6 +51,7 @@
    - Support des thèmes `light`, `dark`, et `auto`
 
 **Code ajouté** :
+
 ```typescript
 // Préchargement du logo pour éviter les flashs
 useEffect(() => {
@@ -58,7 +61,7 @@ useEffect(() => {
       customizationData.design.logo.dark,
     ].filter(Boolean) as string[];
 
-    logosToPreload.forEach((logoUrl) => {
+    logosToPreload.forEach(logoUrl => {
       const img = new Image();
       img.src = logoUrl;
       img.onload = () => setIsLogoLoaded(true);
@@ -73,12 +76,14 @@ useEffect(() => {
 ### 4. Mise à Jour en Temps Réel ✅
 
 **Mécanisme** :
+
 - ✅ Le contexte `PlatformCustomizationContext` écoute l'événement `platform-customization-updated`
 - ✅ Lors de la sauvegarde d'un logo, l'événement est déclenché
 - ✅ Le contexte se met à jour automatiquement
 - ✅ Les composants utilisant `usePlatformLogo()` se re-rendent avec le nouveau logo
 
 **Flux** :
+
 1. Admin upload un logo → `DesignBrandingSection.tsx`
 2. Logo sauvegardé → `usePlatformCustomization.save()`
 3. Événement déclenché → `platform-customization-updated`
@@ -90,6 +95,7 @@ useEffect(() => {
 ## 📋 RÉFÉRENCES RESTANTES (Normales)
 
 **Fichiers avec référence à `payhukLogo` (comme fallback)** :
+
 - ✅ `src/hooks/usePlatformLogo.ts` : Utilise `payhukLogo` comme logo par défaut (normal)
 - ✅ `src/components/debug/MobileResponsiveTest.tsx` : Fichier de test (non critique)
 
@@ -127,4 +133,3 @@ useEffect(() => {
 ---
 
 **Prochaine révision** : Après tests manuels
-

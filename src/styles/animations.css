@@ -78,7 +78,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -89,7 +90,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -107,7 +109,8 @@
 }
 
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   25% {
@@ -183,7 +186,9 @@
 .animate-on-scroll {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
 }
 
 .animate-on-scroll.animate-in {
@@ -214,7 +219,9 @@
 
 /* Hover effects - Optimisés avec GPU acceleration */
 .hover-lift {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
   will-change: transform;
   transform: translateZ(0); /* Force GPU acceleration */
 }
@@ -257,24 +264,14 @@
 
 /* Skeleton loading */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 0%,
-    #e0e0e0 50%,
-    #f0f0f0 100%
-  );
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
   border-radius: 4px;
 }
 
 .skeleton-dark {
-  background: linear-gradient(
-    90deg,
-    #2a2a2a 0%,
-    #1a1a1a 50%,
-    #2a2a2a 100%
-  );
+  background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 50%, #2a2a2a 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
 }
@@ -301,7 +298,9 @@
 .page-enter-active {
   opacity: 1;
   transform: translateX(0);
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 .page-exit {
@@ -312,7 +311,9 @@
 .page-exit-active {
   opacity: 0;
   transform: translateX(20px);
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 /* Modal/Dialog animations */
@@ -342,7 +343,9 @@
 .modal-content-enter-active {
   opacity: 1;
   transform: scale(1) translateY(0);
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 .modal-content-exit {
@@ -353,7 +356,9 @@
 .modal-content-exit-active {
   opacity: 0;
   transform: scale(0.95) translateY(20px);
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 /* Notification/Toast animations */
@@ -365,7 +370,9 @@
 .toast-enter-active {
   opacity: 1;
   transform: translateX(0);
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 .toast-exit {
@@ -376,7 +383,9 @@
 .toast-exit-active {
   opacity: 0;
   transform: translateX(100%);
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 /* Loading spinner */
@@ -395,7 +404,9 @@
 
 /* Card hover effect - Optimisé avec GPU acceleration */
 .card-hover {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
   will-change: transform;
   transform: translateZ(0); /* Force GPU acceleration */
 }
@@ -438,7 +449,9 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
 }
 
 .button-ripple:active::after {
@@ -462,4 +475,3 @@ html {
     scroll-behavior: auto !important;
   }
 }
-

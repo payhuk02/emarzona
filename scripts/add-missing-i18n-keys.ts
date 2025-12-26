@@ -93,7 +93,8 @@ const translations: Record<string, Record<string, string>> = {
     'wizard.shortcuts.save': 'Entwurf',
     'wizard.shortcuts.next': 'Weiter',
     'wizard.shortcuts.prev': 'Zurück',
-    'wizard.seo.faq.description': 'Optimieren Sie Ihr SEO und fügen Sie Antworten auf häufig gestellte Fragen hinzu',
+    'wizard.seo.faq.description':
+      'Optimieren Sie Ihr SEO und fügen Sie Antworten auf häufig gestellte Fragen hinzu',
     'wizard.errors.title': 'Fehler',
     'wizard.errors.requiredFields': 'Bitte füllen Sie alle Pflichtfelder aus',
     'wizard.errors.noFiles': 'Bitte fügen Sie einen Hauptlink für Ihr Produkt hinzu',
@@ -132,7 +133,7 @@ const translations: Record<string, Record<string, string>> = {
 function setNestedValue(obj: any, path: string, value: string) {
   const keys = path.split('.');
   let current = obj;
-  
+
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
     if (!current[key] || typeof current[key] !== 'object') {
@@ -140,22 +141,22 @@ function setNestedValue(obj: any, path: string, value: string) {
     }
     current = current[key];
   }
-  
+
   current[keys[keys.length - 1]] = value;
 }
 
 function addMissingKeys(lang: string, missingKeys: string[]) {
   const filePath = path.join(LOCALES_DIR, `${lang}.json`);
-  
+
   if (!fs.existsSync(filePath)) {
     console.error(`❌ Fichier introuvable: ${filePath}`);
     return;
   }
-  
+
   try {
     const content = fs.readFileSync(filePath, 'utf-8');
     const data: TranslationData = JSON.parse(content);
-    
+
     let added = 0;
     for (const key of missingKeys) {
       if (translations[lang] && translations[lang][key]) {
@@ -163,10 +164,10 @@ function addMissingKeys(lang: string, missingKeys: string[]) {
         added++;
       }
     }
-    
+
     // Réécrire le fichier avec indentation
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
-    
+
     console.log(`✅ ${lang.toUpperCase()}: ${added} clé(s) ajoutée(s)`);
   } catch (error: any) {
     console.error(`❌ Erreur pour ${lang}:`, error.message);
@@ -176,7 +177,7 @@ function addMissingKeys(lang: string, missingKeys: string[]) {
 // Lire le rapport de vérification
 const reportPath = path.join(process.cwd(), 'docs/analyses/I18N_KEYS_VERIFICATION_REPORT.json');
 if (!fs.existsSync(reportPath)) {
-  console.error('❌ Rapport de vérification introuvable. Exécutez d\'abord verify-i18n-keys.ts');
+  console.error("❌ Rapport de vérification introuvable. Exécutez d'abord verify-i18n-keys.ts");
   process.exit(1);
 }
 
@@ -187,9 +188,11 @@ console.log('\n=== AJOUT DES CLÉS MANQUANTES ===\n');
 // Ajouter les clés manquantes pour chaque langue
 for (const langData of report.languages) {
   if (langData.code === 'fr') continue; // FR est la référence
-  
+
   if (langData.missingKeys.length > 0) {
-    console.log(`\n📝 Ajout de ${langData.missingKeys.length} clé(s) pour ${langData.code.toUpperCase()}...`);
+    console.log(
+      `\n📝 Ajout de ${langData.missingKeys.length} clé(s) pour ${langData.code.toUpperCase()}...`
+    );
     addMissingKeys(langData.code, langData.missingKeys);
   } else {
     console.log(`✅ ${langData.code.toUpperCase()}: Aucune clé manquante`);
@@ -197,4 +200,3 @@ for (const langData of report.languages) {
 }
 
 console.log('\n✅ Terminé !\n');
-

@@ -10,22 +10,22 @@
 
 ## 📊 COMPARAISON GÉNÉRALE
 
-| Fonctionnalité | Payhuk | Udemy | Teachable | Thinkific | Shopify | Gumroad |
-|----------------|--------|-------|-----------|-----------|---------|---------|
-| **E-commerce produits digitaux** | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| **E-commerce produits physiques** | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **E-commerce services** | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **Cours en ligne (LMS)** | 🔄 | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
-| **Marketplace intégré** | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| **Système affiliation** | ✅ | ⚠️ | ✅ | ✅ | ⚠️ | ✅ |
-| **Paiements mobile money** | ✅ | ❌ | ❌ | ❌ | ⚠️ | ❌ |
-| **Multi-devises africaines** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Certificats automatiques** | 🔄 | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **Quiz/Évaluations** | 🔄 | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **Analytics avancés** | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
-| **SEO optimisé** | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
-| **Support français** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Prix abordable** | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| Fonctionnalité                    | Payhuk | Udemy | Teachable | Thinkific | Shopify | Gumroad |
+| --------------------------------- | ------ | ----- | --------- | --------- | ------- | ------- |
+| **E-commerce produits digitaux**  | ✅     | ❌    | ❌        | ❌        | ✅      | ✅      |
+| **E-commerce produits physiques** | ✅     | ❌    | ❌        | ❌        | ✅      | ❌      |
+| **E-commerce services**           | ✅     | ❌    | ❌        | ❌        | ✅      | ❌      |
+| **Cours en ligne (LMS)**          | 🔄     | ✅    | ✅        | ✅        | ⚠️      | ⚠️      |
+| **Marketplace intégré**           | ✅     | ✅    | ❌        | ❌        | ❌      | ✅      |
+| **Système affiliation**           | ✅     | ⚠️    | ✅        | ✅        | ⚠️      | ✅      |
+| **Paiements mobile money**        | ✅     | ❌    | ❌        | ❌        | ⚠️      | ❌      |
+| **Multi-devises africaines**      | ✅     | ✅    | ✅        | ✅        | ✅      | ✅      |
+| **Certificats automatiques**      | 🔄     | ✅    | ✅        | ✅        | ❌      | ❌      |
+| **Quiz/Évaluations**              | 🔄     | ✅    | ✅        | ✅        | ❌      | ❌      |
+| **Analytics avancés**             | ✅     | ✅    | ✅        | ✅        | ✅      | ⚠️      |
+| **SEO optimisé**                  | ✅     | ✅    | ✅        | ✅        | ✅      | ⚠️      |
+| **Support français**              | ✅     | ✅    | ✅        | ✅        | ✅      | ✅      |
+| **Prix abordable**                | ✅     | ✅    | ⚠️        | ⚠️        | ⚠️      | ✅      |
 
 **Légende** :  
 ✅ = Fonctionnalité complète  
@@ -40,6 +40,7 @@
 ### 🌟 AVANTAGES COMPÉTITIFS
 
 #### 1. **Tout-en-un réel**
+
 ```
 Payhuk après ajout Cours :
 ✅ E-commerce complet (digitaux + physiques + services)
@@ -60,6 +61,7 @@ Vs Concurrents :
 ---
 
 #### 2. **Optimisé pour l'Afrique**
+
 ```
 Payhuk :
 ✅ Mobile Money (MTN, Moov, Orange, etc.)
@@ -79,6 +81,7 @@ Vs Concurrents :
 ---
 
 #### 3. **Commission attractive**
+
 ```
 Payhuk (proposé) :
 🎯 70-80% pour le créateur
@@ -108,6 +111,7 @@ Gumroad :
 ---
 
 #### 4. **Pas d'abonnement obligatoire**
+
 ```
 Payhuk :
 ✅ Gratuit pour commencer
@@ -128,18 +132,18 @@ Vs Concurrents :
 
 ### 🎓 CRÉATION DE COURS
 
-| Fonctionnalité | Payhuk | Udemy | Teachable | Thinkific |
-|----------------|--------|-------|-----------|-----------|
-| **Curriculum builder** | ✅ | ✅ | ✅ | ✅ |
-| **Drag & drop** | ✅ | ✅ | ✅ | ✅ |
-| **Upload vidéos illimité** | ✅ | ✅ | ✅ | ⚠️ |
-| **Hébergement vidéo** | ✅ | ✅ | ✅ | ✅ |
-| **Transcription auto** | 🔮 V2 | ✅ | ⚠️ | ⚠️ |
-| **Ressources téléchargeables** | ✅ | ✅ | ✅ | ✅ |
-| **Quiz automatiques** | ✅ | ✅ | ✅ | ✅ |
-| **Certificats auto PDF** | ✅ | ✅ | ✅ | ✅ |
-| **Drip content** | ✅ | ❌ | ✅ | ✅ |
-| **Templates cours** | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| Fonctionnalité                 | Payhuk | Udemy | Teachable | Thinkific |
+| ------------------------------ | ------ | ----- | --------- | --------- |
+| **Curriculum builder**         | ✅     | ✅    | ✅        | ✅        |
+| **Drag & drop**                | ✅     | ✅    | ✅        | ✅        |
+| **Upload vidéos illimité**     | ✅     | ✅    | ✅        | ⚠️        |
+| **Hébergement vidéo**          | ✅     | ✅    | ✅        | ✅        |
+| **Transcription auto**         | 🔮 V2  | ✅    | ⚠️        | ⚠️        |
+| **Ressources téléchargeables** | ✅     | ✅    | ✅        | ✅        |
+| **Quiz automatiques**          | ✅     | ✅    | ✅        | ✅        |
+| **Certificats auto PDF**       | ✅     | ✅    | ✅        | ✅        |
+| **Drip content**               | ✅     | ❌    | ✅        | ✅        |
+| **Templates cours**            | ✅     | ⚠️    | ⚠️        | ⚠️        |
 
 **Score** : Payhuk 9/10 (au niveau des leaders)
 
@@ -147,18 +151,18 @@ Vs Concurrents :
 
 ### 🎥 EXPÉRIENCE ÉTUDIANT
 
-| Fonctionnalité | Payhuk | Udemy | Teachable | Thinkific |
-|----------------|--------|-------|-----------|-----------|
-| **Player vidéo custom** | ✅ | ✅ | ✅ | ✅ |
-| **Vitesse lecture** | ✅ | ✅ | ✅ | ✅ |
-| **Sous-titres** | ✅ | ✅ | ✅ | ✅ |
-| **Prise de notes** | ✅ | ✅ | ✅ | ✅ |
-| **Marque-pages** | ✅ | ✅ | ✅ | ✅ |
-| **Mobile responsive** | ✅ | ✅ | ✅ | ✅ |
-| **App mobile** | 🔮 V2 | ✅ | ✅ | ✅ |
-| **Download offline** | 🔮 V2 | ✅ | ⚠️ | ⚠️ |
-| **Q&A intégré** | ✅ | ✅ | ✅ | ✅ |
-| **Communauté** | ✅ | ✅ | ⚠️ | ✅ |
+| Fonctionnalité          | Payhuk | Udemy | Teachable | Thinkific |
+| ----------------------- | ------ | ----- | --------- | --------- |
+| **Player vidéo custom** | ✅     | ✅    | ✅        | ✅        |
+| **Vitesse lecture**     | ✅     | ✅    | ✅        | ✅        |
+| **Sous-titres**         | ✅     | ✅    | ✅        | ✅        |
+| **Prise de notes**      | ✅     | ✅    | ✅        | ✅        |
+| **Marque-pages**        | ✅     | ✅    | ✅        | ✅        |
+| **Mobile responsive**   | ✅     | ✅    | ✅        | ✅        |
+| **App mobile**          | 🔮 V2  | ✅    | ✅        | ✅        |
+| **Download offline**    | 🔮 V2  | ✅    | ⚠️        | ⚠️        |
+| **Q&A intégré**         | ✅     | ✅    | ✅        | ✅        |
+| **Communauté**          | ✅     | ✅    | ⚠️        | ✅        |
 
 **Score** : Payhuk 8/10 (excellent pour MVP)
 
@@ -166,15 +170,15 @@ Vs Concurrents :
 
 ### 💬 COMMUNAUTÉ & INTERACTION
 
-| Fonctionnalité | Payhuk | Udemy | Teachable | Thinkific |
-|----------------|--------|-------|-----------|-----------|
-| **Q&A par leçon** | ✅ | ✅ | ⚠️ | ✅ |
-| **Upvotes/downvotes** | ✅ | ✅ | ❌ | ⚠️ |
-| **Réponses instructeur** | ✅ | ✅ | ✅ | ✅ |
-| **Marquer solution** | ✅ | ✅ | ❌ | ⚠️ |
-| **Discussions générales** | ✅ | ⚠️ | ⚠️ | ✅ |
-| **Messages privés** | 🔮 V2 | ⚠️ | ⚠️ | ⚠️ |
-| **Forum cours** | ✅ | ❌ | ⚠️ | ✅ |
+| Fonctionnalité            | Payhuk | Udemy | Teachable | Thinkific |
+| ------------------------- | ------ | ----- | --------- | --------- |
+| **Q&A par leçon**         | ✅     | ✅    | ⚠️        | ✅        |
+| **Upvotes/downvotes**     | ✅     | ✅    | ❌        | ⚠️        |
+| **Réponses instructeur**  | ✅     | ✅    | ✅        | ✅        |
+| **Marquer solution**      | ✅     | ✅    | ❌        | ⚠️        |
+| **Discussions générales** | ✅     | ⚠️    | ⚠️        | ✅        |
+| **Messages privés**       | 🔮 V2  | ⚠️    | ⚠️        | ⚠️        |
+| **Forum cours**           | ✅     | ❌    | ⚠️        | ✅        |
 
 **Score** : Payhuk 10/10 (meilleur que Teachable)
 
@@ -182,16 +186,16 @@ Vs Concurrents :
 
 ### 📊 ANALYTICS INSTRUCTEUR
 
-| Fonctionnalité | Payhuk | Udemy | Teachable | Thinkific |
-|----------------|--------|-------|-----------|-----------|
-| **Dashboard insights** | ✅ | ✅ | ✅ | ✅ |
-| **Revenus détaillés** | ✅ | ✅ | ✅ | ✅ |
-| **Taux complétion** | ✅ | ✅ | ✅ | ✅ |
-| **Temps moyen/leçon** | ✅ | ⚠️ | ✅ | ✅ |
-| **Leçons rejouées** | ✅ | ⚠️ | ⚠️ | ✅ |
-| **Performance quiz** | ✅ | ✅ | ✅ | ✅ |
-| **Abandons par section** | ✅ | ⚠️ | ✅ | ✅ |
-| **Export données** | ✅ | ✅ | ✅ | ✅ |
+| Fonctionnalité           | Payhuk | Udemy | Teachable | Thinkific |
+| ------------------------ | ------ | ----- | --------- | --------- |
+| **Dashboard insights**   | ✅     | ✅    | ✅        | ✅        |
+| **Revenus détaillés**    | ✅     | ✅    | ✅        | ✅        |
+| **Taux complétion**      | ✅     | ✅    | ✅        | ✅        |
+| **Temps moyen/leçon**    | ✅     | ⚠️    | ✅        | ✅        |
+| **Leçons rejouées**      | ✅     | ⚠️    | ⚠️        | ✅        |
+| **Performance quiz**     | ✅     | ✅    | ✅        | ✅        |
+| **Abandons par section** | ✅     | ⚠️    | ✅        | ✅        |
+| **Export données**       | ✅     | ✅    | ✅        | ✅        |
 
 **Score** : Payhuk 10/10 (égale aux leaders)
 
@@ -199,15 +203,15 @@ Vs Concurrents :
 
 ### 🏪 MARKETPLACE & DÉCOUVRABILITÉ
 
-| Fonctionnalité | Payhuk | Udemy | Teachable | Thinkific |
-|----------------|--------|-------|-----------|-----------|
-| **Marketplace intégré** | ✅ | ✅ | ❌ | ❌ |
-| **Filtres avancés** | ✅ | ✅ | N/A | N/A |
-| **Algorithme recommandation** | 🔮 V2 | ✅ | N/A | N/A |
-| **SEO optimisé** | ✅ | ✅ | ✅ | ✅ |
-| **Page instructeur** | ✅ | ✅ | ✅ | ✅ |
-| **Avis et ratings** | ✅ | ✅ | ✅ | ✅ |
-| **Coupons/promos** | ✅ | ✅ | ✅ | ✅ |
+| Fonctionnalité                | Payhuk | Udemy | Teachable | Thinkific |
+| ----------------------------- | ------ | ----- | --------- | --------- |
+| **Marketplace intégré**       | ✅     | ✅    | ❌        | ❌        |
+| **Filtres avancés**           | ✅     | ✅    | N/A       | N/A       |
+| **Algorithme recommandation** | 🔮 V2  | ✅    | N/A       | N/A       |
+| **SEO optimisé**              | ✅     | ✅    | ✅        | ✅        |
+| **Page instructeur**          | ✅     | ✅    | ✅        | ✅        |
+| **Avis et ratings**           | ✅     | ✅    | ✅        | ✅        |
+| **Coupons/promos**            | ✅     | ✅    | ✅        | ✅        |
 
 **Score** : Payhuk 9/10 (avantage vs Teachable/Thinkific)
 
@@ -265,6 +269,7 @@ Défis :
 ### Pour un créateur qui vend 10,000$ de cours/mois
 
 #### Payhuk (proposé)
+
 ```
 Revenus cours : $10,000
 Commission (25%) : -$2,500
@@ -274,6 +279,7 @@ NET CRÉATEUR : $7,500 (75%)
 ```
 
 #### Udemy (Marketplace)
+
 ```
 Revenus cours : $10,000
 Commission (63%) : -$6,300
@@ -283,6 +289,7 @@ NET CRÉATEUR : $3,700 (37%) ❌
 ```
 
 #### Udemy (Vente directe)
+
 ```
 Revenus cours : $10,000
 Commission (3%) : -$300
@@ -293,6 +300,7 @@ NET CRÉATEUR : $9,700 (97%) ✅
 ```
 
 #### Teachable (Plan Pro)
+
 ```
 Revenus cours : $10,000
 Commission (0%) : $0
@@ -304,6 +312,7 @@ NET CRÉATEUR : ~$9,900 (99%) ✅
 ```
 
 #### Thinkific (Plan Pro)
+
 ```
 Revenus cours : $10,000
 Commission (0%) : $0
@@ -315,6 +324,7 @@ NET CRÉATEUR : ~$9,900 (99%) ✅
 ```
 
 #### Gumroad
+
 ```
 Revenus cours : $10,000
 Commission (10%) : -$1,000
@@ -327,6 +337,7 @@ NET CRÉATEUR : $9,000 (90%) ✅
 ### 📊 Verdict Coûts
 
 **Meilleur rapport qualité/prix** :
+
 1. 🥇 **Payhuk** : 75% + marketplace + e-commerce + pas d'abonnement
 2. 🥈 Gumroad : 90% mais LMS basique
 3. 🥉 Teachable/Thinkific : 99% mais $99-119/mois + pas de marketplace
@@ -344,6 +355,7 @@ NET CRÉATEUR : $9,000 (90%) ✅
 ### Ce que Payhuk offre en PLUS
 
 #### 1. **Vente croisée naturelle**
+
 ```
 Scénario : Un designer vend ses cours
 ✅ Cours Photoshop : $97
@@ -359,6 +371,7 @@ Scénario : Un designer vend ses cours
 ---
 
 #### 2. **Affiliation intégrée**
+
 ```
 Payhuk :
 ✅ Système affiliation natif
@@ -377,6 +390,7 @@ Concurrents :
 ---
 
 #### 3. **Marketplace multi-produits**
+
 ```
 Payhuk :
 ✅ Un seul marketplace pour cours + produits + services
@@ -394,6 +408,7 @@ Concurrents :
 ---
 
 #### 4. **Localement adapté**
+
 ```
 Payhuk :
 ✅ Mobile Money (essentiel Afrique)
@@ -425,6 +440,7 @@ Croissance : 35% par an
 ```
 
 **Opportunité Payhuk** :
+
 - Capter 5% du marché = $35M GMV/an
 - Avec 25% commission = $8.75M revenus/an
 - Avec 1000 créateurs actifs = $8,750/créateur/an
@@ -451,6 +467,7 @@ Fenêtre d'opportunité :
 ### Comment Payhuk bat les géants
 
 #### 1. **Niche géographique**
+
 ```
 Focus : Afrique de l'Ouest d'abord
 → Devenir #1 local
@@ -459,6 +476,7 @@ Focus : Afrique de l'Ouest d'abord
 ```
 
 #### 2. **Multi-produits unique**
+
 ```
 Positionnement : "La plateforme tout-en-un pour créateurs"
 → Pas besoin Shopify + Teachable
@@ -466,12 +484,14 @@ Positionnement : "La plateforme tout-en-un pour créateurs"
 ```
 
 #### 3. **Prix disruptif**
+
 ```
 Pas d'abonnement = accessible à tous
 Commission équitable = gagnant-gagnant
 ```
 
 #### 4. **Communauté locale**
+
 ```
 Support français/anglais natif
 WhatsApp support
@@ -486,6 +506,7 @@ Success stories africaines
 ### Avec fonctionnalité Cours, Payhuk aura :
 
 **Fonctionnalités de base** :
+
 - [x] E-commerce complet ✅
 - [ ] LMS professionnel (en développement)
 - [x] Marketplace ✅
@@ -495,12 +516,14 @@ Success stories africaines
 - [x] SEO ✅
 
 **Fonctionnalités avancées** :
+
 - [ ] Mobile app (V2)
 - [ ] AI features (V2)
 - [ ] Live sessions (V2)
 - [ ] API publique (V2)
 
 **Compétitivité** :
+
 - 🏆 **Afrique** : Leader (aucun concurrent équivalent)
 - 🌐 **International** : Concurrent sérieux (niche multi-produits)
 
@@ -522,6 +545,7 @@ Success stories africaines
 **PAYHUK PEUT DEVENIR LE LEADER INCONTESTÉ EN AFRIQUE DE L'OUEST**
 
 Avec la fonctionnalité Cours :
+
 - 🥇 **Afrique de l'Ouest** : Aucun concurrent équivalent
 - 🥈 **Afrique** : Top 3 plateformes
 - 🥉 **International** : Niche "multi-produits" unique
@@ -537,4 +561,3 @@ Avec la fonctionnalité Cours :
 ---
 
 🚀 **Payhuk est positionnée pour dominer le marché africain !**
-

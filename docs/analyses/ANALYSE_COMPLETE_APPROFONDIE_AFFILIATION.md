@@ -58,17 +58,17 @@ Le système d'affiliation d'Emarzona permet aux vendeurs de définir des taux de
 CREATE TABLE public.affiliates (
   id UUID PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id),
-  
+
   -- Informations personnelles
   email TEXT NOT NULL UNIQUE,
   first_name TEXT,
   last_name TEXT,
   display_name TEXT,
   avatar_url TEXT,
-  
+
   -- Identifiant unique
   affiliate_code TEXT NOT NULL UNIQUE,  -- Ex: "JOHN25", "MARIE25001"
-  
+
   -- Statistiques agrégées
   total_clicks INTEGER DEFAULT 0,
   total_sales INTEGER DEFAULT 0,
@@ -76,16 +76,16 @@ CREATE TABLE public.affiliates (
   total_commission_earned NUMERIC DEFAULT 0,
   total_commission_paid NUMERIC DEFAULT 0,
   pending_commission NUMERIC DEFAULT 0,
-  
+
   -- Paiement
   payment_method TEXT,  -- mobile_money, bank_transfer, paypal
   payment_details JSONB,
-  
+
   -- Statut
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'pending')),
   suspension_reason TEXT,
   suspended_at TIMESTAMPTZ,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   last_login_at TIMESTAMPTZ
@@ -93,6 +93,7 @@ CREATE TABLE public.affiliates (
 ```
 
 **Caractéristiques**:
+
 - ✅ Code affilié auto-généré unique (`generate_affiliate_code()`)
 - ✅ Peut exister sans compte utilisateur (`user_id` nullable)
 - ✅ Statistiques agrégées pour performance
@@ -105,34 +106,35 @@ CREATE TABLE public.product_affiliate_settings (
   id UUID PRIMARY KEY,
   product_id UUID UNIQUE REFERENCES products(id),
   store_id UUID REFERENCES stores(id),
-  
+
   -- Activation
   affiliate_enabled BOOLEAN DEFAULT false,
-  
+
   -- Commission
   commission_rate NUMERIC CHECK (0-100),  -- Pourcentage
   commission_type TEXT CHECK (IN ('percentage', 'fixed')),
   fixed_commission_amount NUMERIC,
   max_commission_per_sale NUMERIC,
   min_order_amount NUMERIC DEFAULT 0,
-  
+
   -- Tracking
   cookie_duration_days INTEGER DEFAULT 30,
-  
+
   -- Restrictions
   allow_self_referral BOOLEAN DEFAULT false,
   require_approval BOOLEAN DEFAULT false,
-  
+
   -- Contenu
   terms_and_conditions TEXT,
   promotional_materials JSONB,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 ```
 
 **Caractéristiques**:
+
 - ✅ Configuration granulaire par produit
 - ✅ Support commission fixe ou pourcentage
 - ✅ Durée de cookie personnalisable (7, 30, 60, 90 jours)
@@ -147,33 +149,34 @@ CREATE TABLE public.affiliate_links (
   affiliate_id UUID REFERENCES affiliates(id),
   product_id UUID REFERENCES products(id),
   store_id UUID REFERENCES stores(id),
-  
+
   -- Lien unique
   link_code TEXT NOT NULL UNIQUE,  -- Ex: "ABC123DEF456"
   full_url TEXT NOT NULL,  -- URL complète avec paramètres
-  
+
   -- Statistiques
   total_clicks INTEGER DEFAULT 0,
   total_sales INTEGER DEFAULT 0,
   total_revenue NUMERIC DEFAULT 0,
   total_commission NUMERIC DEFAULT 0,
-  
+
   -- Tracking UTM
   utm_source TEXT,
   utm_medium TEXT,
   utm_campaign TEXT,
   custom_parameters JSONB,
-  
+
   status TEXT DEFAULT 'active',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   last_used_at TIMESTAMPTZ,
-  
+
   UNIQUE(affiliate_id, product_id)  -- Un lien par produit par affilié
 );
 ```
 
 **Caractéristiques**:
+
 - ✅ Code de lien unique généré (`generate_affiliate_link_code()`)
 - ✅ Support paramètres UTM personnalisés
 - ✅ Statistiques par lien
@@ -187,7 +190,7 @@ CREATE TABLE public.affiliate_clicks (
   affiliate_link_id UUID REFERENCES affiliate_links(id),
   affiliate_id UUID REFERENCES affiliates(id),
   product_id UUID REFERENCES products(id),
-  
+
   -- Informations visiteur
   ip_address INET,
   user_agent TEXT,
@@ -197,21 +200,22 @@ CREATE TABLE public.affiliate_clicks (
   device_type TEXT,
   browser TEXT,
   os TEXT,
-  
+
   -- Cookie tracking
   tracking_cookie TEXT NOT NULL,  -- Cookie unique
   cookie_expires_at TIMESTAMPTZ NOT NULL,
-  
+
   -- Conversion
   converted BOOLEAN DEFAULT false,
   order_id UUID REFERENCES orders(id),
   converted_at TIMESTAMPTZ,
-  
+
   clicked_at TIMESTAMPTZ DEFAULT now()
 );
 ```
 
 **Caractéristiques**:
+
 - ✅ Tracking détaillé (IP, user agent, géolocalisation)
 - ✅ Cookie unique pour attribution précise
 - ✅ Marque les conversions avec `order_id`
@@ -228,28 +232,28 @@ CREATE TABLE public.affiliate_commissions (
   store_id UUID REFERENCES stores(id),
   order_id UUID REFERENCES orders(id),
   payment_id UUID REFERENCES payments(id),
-  
+
   -- Montants
   order_total NUMERIC NOT NULL,
   commission_base NUMERIC NOT NULL,  -- Après commission plateforme
   commission_rate NUMERIC NOT NULL,
   commission_type TEXT,
   commission_amount NUMERIC NOT NULL,
-  
+
   -- Statut workflow
   status TEXT DEFAULT 'pending' CHECK (IN ('pending', 'approved', 'paid', 'rejected', 'cancelled')),
   approved_at TIMESTAMPTZ,
   approved_by UUID REFERENCES auth.users(id),
   rejected_at TIMESTAMPTZ,
   rejection_reason TEXT,
-  
+
   -- Paiement
   paid_at TIMESTAMPTZ,
   paid_by UUID REFERENCES auth.users(id),
   payment_method TEXT,
   payment_reference TEXT,
   payment_proof_url TEXT,
-  
+
   notes TEXT,
   metadata JSONB,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -258,6 +262,7 @@ CREATE TABLE public.affiliate_commissions (
 ```
 
 **Caractéristiques**:
+
 - ✅ Workflow complet : pending → approved → paid
 - ✅ Traçabilité complète (qui a approuvé, payé)
 - ✅ Base de commission calculée (après commission plateforme 10%)
@@ -269,15 +274,15 @@ CREATE TABLE public.affiliate_commissions (
 CREATE TABLE public.affiliate_withdrawals (
   id UUID PRIMARY KEY,
   affiliate_id UUID REFERENCES affiliates(id),
-  
+
   -- Montant
   amount NUMERIC CHECK (amount > 0),
   currency TEXT DEFAULT 'XOF',
-  
+
   -- Méthode
   payment_method TEXT CHECK (IN ('mobile_money', 'bank_transfer', 'paypal', 'stripe')),
   payment_details JSONB,
-  
+
   -- Workflow
   status TEXT DEFAULT 'pending' CHECK (IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
   approved_at TIMESTAMPTZ,
@@ -290,7 +295,7 @@ CREATE TABLE public.affiliate_withdrawals (
   proof_url TEXT,
   failed_at TIMESTAMPTZ,
   failure_reason TEXT,
-  
+
   notes TEXT,
   admin_notes TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -299,6 +304,7 @@ CREATE TABLE public.affiliate_withdrawals (
 ```
 
 **Caractéristiques**:
+
 - ✅ Workflow complet de retrait
 - ✅ Support multiple méthodes de paiement
 - ✅ Traçabilité des échecs
@@ -311,16 +317,16 @@ CREATE TABLE public.affiliate_short_links (
   id UUID PRIMARY KEY,
   affiliate_link_id UUID REFERENCES affiliate_links(id),
   affiliate_id UUID REFERENCES affiliates(id),
-  
+
   short_code TEXT NOT NULL UNIQUE,  -- Ex: "ABC123"
   target_url TEXT NOT NULL,
   custom_alias TEXT,  -- Alias personnalisé
   expires_at TIMESTAMPTZ,
-  
+
   total_clicks INTEGER DEFAULT 0,
   unique_clicks INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   last_used_at TIMESTAMPTZ
@@ -328,6 +334,7 @@ CREATE TABLE public.affiliate_short_links (
 ```
 
 **Caractéristiques**:
+
 - ✅ Format court : `emarzona.com/aff/ABC123`
 - ✅ Alias personnalisables
 - ✅ Expiration optionnelle
@@ -412,6 +419,7 @@ Notification : "Votre code affilié : JOHN25"
 ```
 
 **Fichiers impliqués**:
+
 - `src/hooks/useAffiliates.ts` - Hook d'inscription
 - `src/components/affiliate/RegistrationDialog.tsx` - UI
 - `supabase/migrations/20251025_affiliate_system_complete.sql` - Fonction SQL
@@ -439,6 +447,7 @@ Produit disponible pour affiliation
 ```
 
 **Fichiers impliqués**:
+
 - `src/components/products/ProductAffiliateSettings.tsx`
 - `src/hooks/useProductAffiliateSettings.ts`
 - Types spéciaux : `DigitalAffiliateSettings`, `PhysicalAffiliateSettings`, `ServiceAffiliateSettings`, `CourseAffiliateSettings`
@@ -469,6 +478,7 @@ Affiché dans dashboard avec bouton copier
 ```
 
 **Fichiers impliqués**:
+
 - `src/hooks/useAffiliateLinks.ts`
 - `src/components/affiliate/CreateAffiliateLinkDialog.tsx`
 - `src/pages/AffiliateDashboard.tsx`
@@ -503,6 +513,7 @@ Cookie stocké dans navigateur
 ```
 
 **Fichiers impliqués**:
+
 - `src/components/affiliate/AffiliateLinkTracker.tsx` - Détection automatique
 - `src/lib/affiliation-tracking.ts` - Service de tracking
 - `supabase/migrations/20251025_affiliate_system_complete.sql` - Fonction `track_affiliate_click()`
@@ -543,6 +554,7 @@ Commission créée en statut 'pending'
 ```
 
 **Fichiers impliqués**:
+
 - `src/lib/affiliation-tracking.ts` - Récupération cookie
 - `supabase/migrations/20251124_update_affiliate_trigger_with_cookie.sql` - Trigger amélioré
 - `supabase/migrations/20251124_add_affiliate_tracking_to_orders.sql` - Colonne dans orders
@@ -577,6 +589,7 @@ Commission visible dans dashboard affilié
 ```
 
 **Fichiers impliqués**:
+
 - `src/pages/dashboard/StoreAffiliateManagement.tsx`
 - `src/components/affiliate/StoreAffiliateDashboard.tsx`
 - `src/hooks/useStoreAffiliates.ts`
@@ -634,6 +647,7 @@ Notification affilié : "Votre retrait a été traité"
 ```
 
 **Fichiers impliqués**:
+
 - `src/pages/AffiliateDashboard.tsx`
 - `src/hooks/useAffiliateWithdrawals.ts`
 - `src/pages/admin/AdminAffiliates.tsx`
@@ -651,6 +665,7 @@ Notification affilié : "Votre retrait a été traité"
 **Rôle**: Interface principale pour les affiliés
 
 **Sections**:
+
 - 📊 **Statistiques** : Clics, ventes, revenus, commissions
 - 🔗 **Mes Liens** : Liste des liens d'affiliation avec statistiques
 - 💰 **Commissions** : Historique des commissions (pending, approved, paid)
@@ -658,12 +673,14 @@ Notification affilié : "Votre retrait a été traité"
 - 🔗 **Liens Courts** : Gestion des liens courts
 
 **Fonctionnalités**:
+
 - ✅ Création de nouveaux liens
 - ✅ Copie rapide des liens
 - ✅ Filtres et pagination
 - ✅ Graphiques de performance (si implémentés)
 
 **Hooks utilisés**:
+
 - `useCurrentAffiliate()` - Profil affilié connecté
 - `useAffiliateLinks()` - Gestion des liens
 - `useAffiliateCommissions()` - Commissions
@@ -676,18 +693,21 @@ Notification affilié : "Votre retrait a été traité"
 **Rôle**: Interface pour les vendeurs pour gérer leurs affiliés
 
 **Sections**:
+
 - 👥 **Affiliés** : Liste des affiliés qui promeuvent leurs produits
 - 🔗 **Liens d'Affiliation** : Tous les liens créés pour leurs produits
 - 💰 **Commissions** : Commissions à approuver/rejeter
 - 📊 **Statistiques** : Vue d'ensemble de l'affiliation
 
 **Fonctionnalités**:
+
 - ✅ Approuver/rejeter affiliés (si require_approval)
 - ✅ Approuver/rejeter commissions
 - ✅ Voir statistiques par affilié
 - ✅ Exporter données
 
 **Hooks utilisés**:
+
 - `useStore()` - Store du vendeur
 - `useStoreAffiliates()` - Gestion complète
 
@@ -697,12 +717,14 @@ Notification affilié : "Votre retrait a été traité"
 **Rôle**: Panel d'administration global
 
 **Sections**:
+
 - 👥 **Tous les Affiliés** : Liste complète
 - 💰 **Commissions** : Toutes les commissions
 - 💵 **Retraits** : Toutes les demandes de retrait
 - 📊 **Statistiques Globales** : Vue plateforme
 
 **Fonctionnalités**:
+
 - ✅ Suspendre/réactiver affiliés
 - ✅ Approuver/rejeter retraits
 - ✅ Gérer tous les paiements
@@ -712,31 +734,37 @@ Notification affilié : "Votre retrait a été traité"
 ### Composants Spécialisés
 
 #### 1. `CreateAffiliateLinkDialog.tsx`
+
 - Modal pour créer un nouveau lien
 - Sélection de produit
 - Paramètres UTM optionnels
 
 #### 2. `ProductAffiliateSettings.tsx`
+
 - Configuration affiliation par produit
 - Taux, type, durée cookie
 - Validation des valeurs
 
 #### 3. `StoreAffiliateDashboard.tsx`
+
 - Dashboard intégré dans StoreAffiliateManagement
 - Statistiques par store
 - Liste des affiliés avec actions
 
 #### 4. `AffiliateLinkTracker.tsx`
+
 - Composant invisible qui détecte `?aff=` dans l'URL
 - Déclenche automatiquement le tracking
 - Gère le cookie
 
 #### 5. `ShortLinkManager.tsx`
+
 - Gestion des liens courts
 - Création avec alias personnalisé
 - Statistiques par lien court
 
 #### 6. `AffiliateStatsCards.tsx`
+
 - Cartes de statistiques réutilisables
 - Formatage des montants
 - Animations
@@ -748,9 +776,11 @@ Notification affilié : "Votre retrait a été traité"
 ### Hooks Disponibles
 
 #### 1. `useAffiliates.ts`
+
 **Responsabilité**: CRUD complet des affiliés
 
 **Fonctions**:
+
 - `fetchAffiliates()` - Liste avec filtres/pagination
 - `registerAffiliate()` - Inscription
 - `updateAffiliate()` - Mise à jour profil
@@ -758,40 +788,49 @@ Notification affilié : "Votre retrait a été traité"
 - `getAffiliateStats()` - Statistiques d'un affilié
 
 **Utilisé dans**:
+
 - `AffiliateDashboard.tsx`
 - `AdminAffiliates.tsx`
 - `RegistrationDialog.tsx`
 
 #### 2. `useCurrentAffiliate.ts`
+
 **Responsabilité**: Affilié connecté actuellement
 
 **Retourne**:
+
 - `affiliate` - Profil complet
 - `loading` - État de chargement
 - `isAffiliate` - Boolean
 - `refetch()` - Rafraîchir
 
 **Utilisé dans**:
+
 - `AffiliateDashboard.tsx`
 - Vérification d'accès
 
 #### 3. `useAffiliateLinks.ts`
+
 **Responsabilité**: Gestion des liens d'affiliation
 
 **Fonctions**:
+
 - `fetchLinks()` - Liste avec pagination
 - `createLink()` - Créer un lien
 - `updateLink()` - Modifier (UTM, statut)
 - `deleteLink()` - Supprimer (soft delete)
 
 **Utilisé dans**:
+
 - `AffiliateDashboard.tsx`
 - `CreateAffiliateLinkDialog.tsx`
 
 #### 4. `useAffiliateCommissions.ts`
+
 **Responsabilité**: Gestion des commissions
 
 **Fonctions**:
+
 - `fetchCommissions()` - Liste avec filtres
 - `approveCommission()` - Approuver (vendeur/admin)
 - `rejectCommission()` - Rejeter avec raison
@@ -799,14 +838,17 @@ Notification affilié : "Votre retrait a été traité"
 - `getStats()` - Statistiques agrégées
 
 **Utilisé dans**:
+
 - `AffiliateDashboard.tsx`
 - `StoreAffiliateManagement.tsx`
 - `AdminAffiliates.tsx`
 
 #### 5. `useAffiliateWithdrawals.ts`
+
 **Responsabilité**: Gestion des retraits
 
 **Fonctions**:
+
 - `fetchWithdrawals()` - Liste des retraits
 - `requestWithdrawal()` - Créer demande
 - `cancelWithdrawal()` - Annuler (si pending)
@@ -814,13 +856,16 @@ Notification affilié : "Votre retrait a été traité"
 - `getPendingWithdrawals()` - Retraits en attente
 
 **Utilisé dans**:
+
 - `AffiliateDashboard.tsx`
 - `AdminAffiliates.tsx`
 
 #### 6. `useStoreAffiliates.ts`
+
 **Responsabilité**: Vue vendeur sur les affiliés
 
 **Fonctions**:
+
 - `fetchAffiliates()` - Affiliés qui promeuvent leurs produits
 - `fetchLinks()` - Liens pour leurs produits
 - `fetchCommissions()` - Commissions à approuver
@@ -829,53 +874,65 @@ Notification affilié : "Votre retrait a été traité"
 - `rejectCommission()` - Rejeter commission
 
 **Utilisé dans**:
+
 - `StoreAffiliateManagement.tsx`
 - `StoreAffiliateDashboard.tsx`
 
 #### 7. `useProductAffiliateSettings.ts`
+
 **Responsabilité**: Configuration affiliation par produit
 
 **Fonctions**:
+
 - `getSettings(productId)` - Récupérer config
 - `saveSettings(productId, settings)` - Sauvegarder
 - `enableAffiliate(productId)` - Activer rapidement
 - `disableAffiliate(productId)` - Désactiver
 
 **Utilisé dans**:
+
 - `ProductAffiliateSettings.tsx`
 - Formulaires de création produit
 
 #### 8. `useAffiliateShortLinks.ts`
+
 **Responsabilité**: Gestion des liens courts
 
 **Fonctions**:
+
 - `createShortLink()` - Créer lien court
 - `fetchShortLinks()` - Liste des liens courts
 - `updateShortLink()` - Modifier (alias, expiration)
 - `deleteShortLink()` - Supprimer
 
 **Utilisé dans**:
+
 - `ShortLinkManager.tsx`
 - `AffiliateDashboard.tsx`
 
 #### 9. `useAffiliateTracking.ts`
+
 **Responsabilité**: Tracking côté frontend
 
 **Fonctions**:
+
 - `trackClick()` - Déclencher tracking
 - `getTrackingCookie()` - Récupérer cookie
 - `setTrackingCookie()` - Définir cookie
 
 **Utilisé dans**:
+
 - `AffiliateLinkTracker.tsx`
 - Checkout
 
 ### Services
 
 #### 1. `affiliation-tracking.ts`
+
 **Fichier**: `src/lib/affiliation-tracking.ts`
 
 **Fonctions principales**:
+
 - `getAffiliateCookie()` - Lire cookie navigateur
 - `setAffiliateCookie()` - Écrire cookie
 - `trackAffiliateClick()` - Tracker un clic
@@ -883,33 +940,40 @@ Notification affilié : "Votre retrait a été traité"
 - `createAffiliateCommission()` - Créer commission (fallback)
 
 **Constantes**:
+
 - `AFFILIATE_COOKIE_NAME = 'emarzona_affiliate'`
 - `AFFILIATE_COOKIE_EXPIRY_DAYS = 30`
 
 #### 2. `commission-payment-service.ts`
+
 **Fichier**: `src/lib/commission-payment-service.ts`
 
 **Fonctions principales**:
+
 - `createCommissionPaymentRequest()` - Créer demande retrait
 - `approveCommissionPayment()` - Approuver (admin)
 - `processCommissionPayment()` - Traiter paiement
 - `rejectCommissionPayment()` - Rejeter
 
 **Validation**:
+
 - Montant minimum depuis `platform_settings`
 - Vérification solde disponible
 - Vérification commissions approuvées
 
 #### 3. `commission-notifications.ts`
+
 **Fichier**: `src/lib/commission-notifications.ts`
 
 **Fonctions principales**:
+
 - `notifyCommissionApproved()` - Notification approbation
 - `notifyCommissionRejected()` - Notification rejet
 - `notifyPaymentRequestApproved()` - Notification retrait approuvé
 - `notifyPaymentCompleted()` - Notification paiement complété
 
 **Intégration**:
+
 - Système de notifications global
 - Emails (si configuré)
 - Notifications in-app
@@ -926,7 +990,7 @@ Notification affilié : "Votre retrait a été traité"
 Si commission_type = 'percentage':
   commission_base = order_total * 0.90  (après 10% plateforme)
   commission_amount = commission_base * (commission_rate / 100)
-  
+
 Si commission_type = 'fixed':
   commission_amount = fixed_commission_amount
 
@@ -967,6 +1031,7 @@ Répartition finale:
 Le cookie est valide pendant `cookie_duration_days` définis dans `product_affiliate_settings`.
 
 **Options courantes**:
+
 - 7 jours - Court terme
 - 30 jours - Standard (par défaut)
 - 60 jours - Long terme
@@ -1083,12 +1148,14 @@ Les statistiques sont stockées directement dans la table `affiliates` pour perf
 - `pending_commission` - Commissions en attente
 
 **Mise à jour** :
+
 - Automatique via triggers SQL
 - Lors de chaque clic/vente/paiement
 
 #### Niveau Lien
 
 Chaque `affiliate_link` a ses propres statistiques :
+
 - `total_clicks`
 - `total_sales`
 - `total_revenue`
@@ -1258,6 +1325,7 @@ CREATE POLICY "Store owners can approve/reject commissions"
 Les composants font parfois plusieurs requêtes séquentielles au lieu d'une seule.
 
 **Exemple** :
+
 ```typescript
 // ❌ Actuel : Multiple requêtes
 const affiliate = await getAffiliate();
@@ -1283,6 +1351,7 @@ Les statistiques sont recalculées à chaque chargement.
 Les dashboards affichent des chiffres mais pas de graphiques temporels.
 
 **Recommandation** : Ajouter des graphiques (Recharts, Chart.js) :
+
 - Évolution des clics sur 30 jours
 - Évolution des ventes
 - Répartition par produit
@@ -1293,6 +1362,7 @@ Les dashboards affichent des chiffres mais pas de graphiques temporels.
 Pas de fonctionnalité d'export CSV/Excel pour les affiliés.
 
 **Recommandation** : Ajouter bouton "Exporter" dans les tableaux :
+
 - Export des commissions
 - Export des liens avec statistiques
 - Export pour déclaration fiscale
@@ -1302,6 +1372,7 @@ Pas de fonctionnalité d'export CSV/Excel pour les affiliés.
 Les notifications sont uniquement in-app, pas de push notifications.
 
 **Recommandation** : Intégrer un service de push notifications (OneSignal, Firebase) :
+
 - Notification quand commission approuvée
 - Notification quand retrait traité
 - Rappel de solde disponible
@@ -1311,6 +1382,7 @@ Les notifications sont uniquement in-app, pas de push notifications.
 Pas de système de récompenses ou de niveaux pour motiver les affiliés.
 
 **Recommandation** : Créer un système de badges/niveaux :
+
 - Bronze : 0-10 ventes
 - Argent : 10-50 ventes
 - Or : 50+ ventes
@@ -1323,6 +1395,7 @@ Pas de système de récompenses ou de niveaux pour motiver les affiliés.
 Pas de guide d'utilisation pour nouveaux affiliés.
 
 **Recommandation** : Créer un onboarding interactif :
+
 1. Tour guidé du dashboard
 2. Tutoriel création de premier lien
 3. Vidéo explicative
@@ -1332,6 +1405,7 @@ Pas de guide d'utilisation pour nouveaux affiliés.
 Dans `CreateAffiliateLinkDialog`, la recherche de produits pourrait être améliorée.
 
 **Recommandation** :
+
 - Autocomplete avec debounce
 - Filtres (catégorie, prix, store)
 - Vue en grille avec images
@@ -1341,6 +1415,7 @@ Dans `CreateAffiliateLinkDialog`, la recherche de produits pourrait être améli
 Certaines pages ne sont pas optimisées pour mobile.
 
 **Recommandation** : Audit mobile et améliorations :
+
 - Tableaux scrollables horizontalement
 - Cartes au lieu de tableaux sur mobile
 - Actions rapides (swipe)
@@ -1352,6 +1427,7 @@ Certaines pages ne sont pas optimisées pour mobile.
 Certaines erreurs affichent "Erreur inconnue" au lieu de messages explicites.
 
 **Recommandation** : Améliorer la gestion d'erreurs :
+
 - Messages spécifiques pour chaque cas
 - Codes d'erreur standardisés
 - Guide de résolution de problèmes
@@ -1363,6 +1439,7 @@ Certaines erreurs affichent "Erreur inconnue" au lieu de messages explicites.
 Pas de tests unitaires ou d'intégration pour le système d'affiliation.
 
 **Recommandation** : Créer une suite de tests :
+
 - Tests unitaires pour les hooks
 - Tests d'intégration pour les workflows
 - Tests E2E pour les scénarios critiques
@@ -1374,6 +1451,7 @@ Pas de tests unitaires ou d'intégration pour le système d'affiliation.
 Certaines fonctions SQL ne sont pas documentées.
 
 **Recommandation** : Documenter :
+
 - Toutes les fonctions SQL avec exemples
 - API des hooks (JSDoc complet)
 - Diagrammes de séquence pour les workflows
@@ -1483,6 +1561,7 @@ Certaines fonctions SQL ne sont pas documentées.
 Le système d'affiliation d'Emarzona est **bien architecturé, sécurisé et fonctionnel**. Il offre une base solide pour gérer un programme d'affiliation à grande échelle.
 
 **Points clés** :
+
 - ✅ Architecture modulaire et extensible
 - ✅ Sécurité robuste avec RLS
 - ✅ Workflow complet de bout en bout
@@ -1490,6 +1569,7 @@ Le système d'affiliation d'Emarzona est **bien architecturé, sécurisé et fon
 - ✅ Interface utilisateur complète
 
 **Prochaines étapes recommandées** :
+
 1. Optimiser les performances (requêtes, cache)
 2. Ajouter des graphiques de performance
 3. Améliorer l'UX (onboarding, mobile)
@@ -1502,4 +1582,3 @@ Le système est prêt pour la production, avec des améliorations progressives p
 **Document généré le** : 28 Janvier 2025  
 **Dernière mise à jour** : 28 Janvier 2025  
 **Version** : 1.0
-

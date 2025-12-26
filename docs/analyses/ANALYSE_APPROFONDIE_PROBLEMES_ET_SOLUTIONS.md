@@ -12,7 +12,7 @@
 
 **Critiques** (🔴): 8  
 **Importants** (🟡): 15  
-**Mineurs** (🟢): 12  
+**Mineurs** (🟢): 12
 
 **Total**: 35 problèmes identifiés
 
@@ -33,6 +33,7 @@
 ### 1. ❌ TODOs Non Implémentés dans le Code Production
 
 **Fichiers Concernés**:
+
 ```typescript
 // src/components/products/create/service/CreateServiceWizard.tsx
 line 205: // TODO: Implement actual save
@@ -49,12 +50,14 @@ line 194: // TODO: Migrate to dedicated digital_products table
 line 91: // TODO: Implement actual saving to database
 ```
 
-**Impact**: 
+**Impact**:
+
 - ❌ Les wizards de création ne sauvegardent PAS réellement les données
 - ❌ Les produits Digital/Physical/Service ne peuvent pas être créés
 - ❌ Système de licences non fonctionnel
 
 **Solution**:
+
 1. Implémenter les fonctions de sauvegarde complètes
 2. Connecter aux hooks React Query
 3. Gérer les erreurs et validations
@@ -68,6 +71,7 @@ line 91: // TODO: Implement actual saving to database
 ### 2. ❌ Upload d'Images Non Fonctionnel
 
 **Fichiers Concernés**:
+
 ```typescript
 // src/components/products/create/service/ServiceBasicInfoForm.tsx
 line 31: // TODO: Implement actual upload to Supabase Storage
@@ -77,11 +81,13 @@ line 24: // TODO: Implement actual upload to Supabase Storage
 ```
 
 **Impact**:
+
 - ❌ Impossible d'ajouter des images aux produits Physical/Service
 - ❌ Mauvaise UX (upload simulé)
 - ❌ Incohérence avec Digital Products qui fonctionnent
 
 **Solution**:
+
 1. Implémenter fonction uploadToSupabaseStorage()
 2. Gérer progress bar upload
 3. Validation types/taille fichiers
@@ -95,17 +101,20 @@ line 24: // TODO: Implement actual upload to Supabase Storage
 ### 3. ❌ Disconnection Orders ↔ Digital/Physical/Service Products
 
 **Problème**:
+
 - Tables `digital_products`, `physical_products`, `service_products` créées
 - MAIS pas de liaison avec `orders` et `order_items`
 - Impossible de créer une commande pour ces types de produits
 - Le système continue d'utiliser la table `products` générique
 
 **Impact**:
+
 - ❌ Nouveau système non utilisé en production
 - ❌ Données fragmentées
 - ❌ Workflows de commande incomplets
 
 **Solution**:
+
 1. Modifier `order_items` pour supporter les types spécifiques
 2. Créer hooks de création commande par type
 3. Adapter flux de paiement Moneroo
@@ -121,6 +130,7 @@ line 24: // TODO: Implement actual upload to Supabase Storage
 **Fichier**: `src/components/digital/LicenseGenerator.tsx`
 
 **Problème**:
+
 ```typescript
 const handleGenerate = async () => {
   // ...
@@ -131,19 +141,21 @@ const handleGenerate = async () => {
     expiresIn,
     // ...
   };
-  
+
   setLicenses([...licenses, newLicense]);
-  
+
   // TODO: Implement actual saving to database ❌
 };
 ```
 
 **Impact**:
+
 - ❌ Licences générées mais non sauvegardées
 - ❌ Perte de données au refresh
 - ❌ Système inutilisable en production
 
 **Solution**:
+
 1. Utiliser hook `useCreateLicense` de `useLicenses.ts`
 2. Persister dans `digital_licenses`
 3. Invalider cache React Query
@@ -159,16 +171,19 @@ const handleGenerate = async () => {
 **Fichier**: `src/components/physical/PhysicalProductCard.tsx`
 
 **Problème**:
+
 ```typescript
 const stockLevel = 0; // TODO: Get from inventory
 ```
 
 **Impact**:
+
 - ❌ Stock toujours affiché à 0
 - ❌ Pas d'indication de disponibilité
 - ❌ Mauvaise UX
 
 **Solution**:
+
 1. Utiliser hook `useInventory` pour récupérer stock réel
 2. Afficher indicateur stock dynamique
 3. Gérer cas out_of_stock
@@ -184,17 +199,20 @@ const stockLevel = 0; // TODO: Get from inventory
 **Fichier**: `src/hooks/digital/useDigitalAnalytics.ts`
 
 **Problème**:
+
 ```typescript
 conversion_rate: 0, // TODO: Calculate from product_views
 ```
 
 **Impact**:
+
 - ⚠️ Taux de conversion non calculé
 - ⚠️ Analytics incomplètes
 - ⚠️ Décisions business biaisées
 
 **Solution**:
-1. Implémenter calcul: (purchases / views) * 100
+
+1. Implémenter calcul: (purchases / views) \* 100
 2. Gérer cas division par zéro
 3. Ajouter tendance (↑↓)
 4. Cache résultats
@@ -209,16 +227,19 @@ conversion_rate: 0, // TODO: Calculate from product_views
 **Fichier**: `src/hooks/digital/useLicenses.ts`
 
 **Problème**:
+
 ```typescript
 const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ```
 
 **Impact**:
+
 - ⚠️ Tracking IP non fonctionnel
 - ⚠️ Impossible de détecter activations suspectes
 - ⚠️ Sécurité limitée
 
 **Solution**:
+
 1. Intégrer API ipify ou ipapi
 2. Fallback en cas d'erreur
 3. Stocker dans license_activations
@@ -234,16 +255,19 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 **Fichier**: `src/components/reviews/ShareReviewButtons.tsx`
 
 **Problème**:
+
 ```typescript
 // TODO: Implement analytics tracking
 ```
 
 **Impact**:
+
 - ⚠️ Pas de mesure viralité
 - ⚠️ ROI social sharing inconnu
 - ⚠️ Perte insights marketing
 
 **Solution**:
+
 1. Créer événement custom "review_shared"
 2. Tracker platform (FB, Twitter, etc.)
 3. Enregistrer dans product_analytics
@@ -259,16 +283,19 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 9. ❌ Tables Spécialisées Non Utilisées
 
 **Problème**:
+
 - Tables `digital_products`, `physical_products`, `service_products` créées
 - MAIS création produits utilise toujours table `products` générique
 - Wizards créent des données mais ne les persistent pas
 
 **Impact**:
+
 - Architecture professionnelle non exploitée
 - Données fragmentées
 - Incohérences
 
 **Solution**:
+
 1. Modifier ProductCreationRouter pour router vers bonnes tables
 2. Adapter hooks de création
 3. Migrer données existantes
@@ -282,11 +309,13 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 10. ❌ Manque Système de Facturation Automatique
 
 **Impact**:
+
 - Vendeurs doivent créer factures manuellement
 - Pas conforme réglementation (TVA)
 - Mauvaise UX client
 
 **Solution**:
+
 1. Créer table `invoices`
 2. Template PDF factures
 3. Génération automatique post-paiement
@@ -300,11 +329,13 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 11. ❌ Pas de Gestion des Taxes
 
 **Impact**:
+
 - Vendeurs calculent taxes manuellement
 - Risque erreurs comptables
 - Non-conforme dans certains pays
 
 **Solution**:
+
 1. Table `tax_rates` (par pays/région)
 2. Calcul automatique au checkout
 3. Affichage TTC/HT
@@ -318,11 +349,13 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 12. ❌ Subscriptions Non Implémentées
 
 **Impact**:
+
 - Pas de revenus récurrents
 - Produits software limités
 - Perte opportunité business
 
 **Solution**:
+
 1. Table `subscriptions`
 2. Cron jobs Supabase Edge Functions
 3. Webhooks Moneroo récurrents
@@ -336,10 +369,12 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 13. ❌ Abandoned Cart Recovery
 
 **Impact**:
+
 - 70% paniers abandonnés (moyenne e-commerce)
 - Perte conversions significative
 
 **Solution**:
+
 1. Table `abandoned_carts`
 2. Trigger après 1h, 24h, 72h
 3. Email automation SendGrid
@@ -353,10 +388,12 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 14. ❌ Stock Reservation System
 
 **Impact**:
+
 - Risque survente
 - Mauvaise UX (commande annulée après paiement)
 
 **Solution**:
+
 1. Réserver stock au début checkout
 2. Libérer après 15 minutes si non payé
 3. Trigger automatic cleanup
@@ -370,10 +407,12 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 15. ❌ Upsells & Cross-sells
 
 **Impact**:
+
 - Perte 20-30% revenus additionnels
 - AOV (Average Order Value) bas
 
 **Solution**:
+
 1. Table `product_recommendations`
 2. Algorithm: frequently bought together
 3. UI cart page
@@ -389,11 +428,13 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 16. ⚠️ Inconsistent Naming Conventions
 
 **Exemples**:
+
 - `store_id` vs `storeId` (snake_case vs camelCase)
 - `created_at` vs `createdAt`
 - Mixte dans différents fichiers
 
 **Solution**:
+
 1. Définir convention: SQL = snake_case, TS = camelCase
 2. Utilities de conversion
 3. Refactor progressif
@@ -407,6 +448,7 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 **Coverage Actuel**: ~10%
 
 **Solution**:
+
 1. Tests hooks critiques (Vitest)
 2. Tests composants (React Testing Library)
 3. Target: 70% coverage
@@ -418,11 +460,13 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 18. ⚠️ Performance Optimization
 
 **Issues**:
+
 - Pas de lazy loading images
 - Bundle size élevé (non optimisé)
 - Re-renders inutiles
 
 **Solution**:
+
 1. React.lazy pour routes
 2. Image optimization (next/image pattern)
 3. React.memo pour components lourds
@@ -435,12 +479,14 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 19. ⚠️ SEO Improvements
 
 **Missing**:
+
 - Sitemap XML
 - Robots.txt
 - Structured data (Product schema)
 - Meta tags dynamiques
 
 **Solution**:
+
 1. Generate sitemap automatique
 2. Rich snippets produits
 3. SSR consideration (future)
@@ -452,12 +498,14 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 ### 20. ⚠️ Accessibility (A11y)
 
 **Issues**:
+
 - Pas de skip links
 - Aria labels incomplets
 - Keyboard navigation limitée
 - Contraste couleurs
 
 **Solution**:
+
 1. Audit axe-core
 2. ARIA labels
 3. Focus management
@@ -473,60 +521,60 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 
 **Objectif**: Rendre systèmes Digital/Physical/Service fonctionnels
 
-| Task | Durée | Priority |
-|------|-------|----------|
-| Implémenter sauvegarde wizards | 10h | P0 |
-| Upload images Supabase | 6h | P0 |
-| Connecter licences à DB | 3h | P0 |
-| Stock level dynamique | 3h | P0 |
-| **TOTAL** | **22h** | - |
+| Task                           | Durée   | Priority |
+| ------------------------------ | ------- | -------- |
+| Implémenter sauvegarde wizards | 10h     | P0       |
+| Upload images Supabase         | 6h      | P0       |
+| Connecter licences à DB        | 3h      | P0       |
+| Stock level dynamique          | 3h      | P0       |
+| **TOTAL**                      | **22h** | -        |
 
 ### Sprint 2: Intégrations (Semaine 2)
 
 **Objectif**: Connecter Orders ↔ Produits Spécialisés
 
-| Task | Durée | Priority |
-|------|-------|----------|
-| Adapter order_items pour types | 8h | P0 |
-| Hooks création commande par type | 6h | P0 |
-| Flux paiement adapté | 4h | P0 |
-| Tests E2E workflows | 6h | P0 |
-| **TOTAL** | **24h** | - |
+| Task                             | Durée   | Priority |
+| -------------------------------- | ------- | -------- |
+| Adapter order_items pour types   | 8h      | P0       |
+| Hooks création commande par type | 6h      | P0       |
+| Flux paiement adapté             | 4h      | P0       |
+| Tests E2E workflows              | 6h      | P0       |
+| **TOTAL**                        | **24h** | -        |
 
 ### Sprint 3: Business Critical (Semaine 3)
 
 **Objectif**: Facturation, Taxes, Subscriptions
 
-| Task | Durée | Priority |
-|------|-------|----------|
-| Système facturation PDF | 8h | P1 |
-| Calcul taxes automatique | 10h | P1 |
-| Base subscriptions | 16h | P1 |
-| **TOTAL** | **34h** | - |
+| Task                     | Durée   | Priority |
+| ------------------------ | ------- | -------- |
+| Système facturation PDF  | 8h      | P1       |
+| Calcul taxes automatique | 10h     | P1       |
+| Base subscriptions       | 16h     | P1       |
+| **TOTAL**                | **34h** | -        |
 
 ### Sprint 4: Marketing & Conversion (Semaine 4)
 
 **Objectif**: Abandoned Cart, Upsells
 
-| Task | Durée | Priority |
-|------|-------|----------|
-| Cart recovery system | 6h | P1 |
-| Stock reservation | 4h | P1 |
-| Upsells engine | 8h | P1 |
-| Analytics completion | 4h | P1 |
-| **TOTAL** | **22h** | - |
+| Task                 | Durée   | Priority |
+| -------------------- | ------- | -------- |
+| Cart recovery system | 6h      | P1       |
+| Stock reservation    | 4h      | P1       |
+| Upsells engine       | 8h      | P1       |
+| Analytics completion | 4h      | P1       |
+| **TOTAL**            | **22h** | -        |
 
 ### Sprint 5: Polish & Optimization (Semaine 5)
 
 **Objectif**: Performance, SEO, A11y
 
-| Task | Durée | Priority |
-|------|-------|----------|
-| Performance optimization | 8h | P2 |
-| SEO improvements | 6h | P2 |
-| A11y audit & fixes | 10h | P2 |
-| Tests unitaires critiques | 10h | P2 |
-| **TOTAL** | **34h** | - |
+| Task                      | Durée   | Priority |
+| ------------------------- | ------- | -------- |
+| Performance optimization  | 8h      | P2       |
+| SEO improvements          | 6h      | P2       |
+| A11y audit & fixes        | 10h     | P2       |
+| Tests unitaires critiques | 10h     | P2       |
+| **TOTAL**                 | **34h** | -        |
 
 ---
 
@@ -537,23 +585,25 @@ const ipAddress = '0.0.0.0'; // TODO: Get real IP
 #### Fichier: `src/components/products/create/service/CreateServiceWizard.tsx`
 
 **Problème Actuel**:
+
 ```typescript
 const handleSaveDraft = async () => {
   setIsSaving(true);
   await new Promise(resolve => setTimeout(resolve, 1000));
   // TODO: Implement actual save
-  toast({ title: "Brouillon sauvegardé" });
+  toast({ title: 'Brouillon sauvegardé' });
   setIsSaving(false);
 };
 ```
 
 **Solution**:
+
 ```typescript
 import { useCreateServiceProduct } from '@/hooks/service/useServiceProducts';
 
 const handleSaveDraft = async () => {
   setIsSaving(true);
-  
+
   try {
     // 1. Créer le produit de base
     const { data: product, error: productError } = await supabase
@@ -575,22 +625,20 @@ const handleSaveDraft = async () => {
     if (productError) throw productError;
 
     // 2. Créer service_product lié
-    const { error: serviceError } = await supabase
-      .from('service_products')
-      .insert({
-        product_id: product.id,
-        service_type: formData.basicInfo.serviceType,
-        duration_minutes: formData.duration.duration,
-        location_type: formData.duration.locationType,
-        location_address: formData.duration.address,
-        meeting_url: formData.duration.meetingUrl,
-        timezone: formData.duration.timezone,
-        pricing_type: formData.pricing.pricingType,
-        deposit_required: formData.pricing.depositRequired,
-        deposit_amount: formData.pricing.depositAmount,
-        allow_booking_cancellation: formData.pricing.cancellationAllowed,
-        cancellation_deadline_hours: formData.pricing.cancellationDeadline,
-      });
+    const { error: serviceError } = await supabase.from('service_products').insert({
+      product_id: product.id,
+      service_type: formData.basicInfo.serviceType,
+      duration_minutes: formData.duration.duration,
+      location_type: formData.duration.locationType,
+      location_address: formData.duration.address,
+      meeting_url: formData.duration.meetingUrl,
+      timezone: formData.duration.timezone,
+      pricing_type: formData.pricing.pricingType,
+      deposit_required: formData.pricing.depositRequired,
+      deposit_amount: formData.pricing.depositAmount,
+      allow_booking_cancellation: formData.pricing.cancellationAllowed,
+      cancellation_deadline_hours: formData.pricing.cancellationDeadline,
+    });
 
     if (serviceError) throw serviceError;
 
@@ -602,7 +650,7 @@ const handleSaveDraft = async () => {
         role: member.role,
         bio: member.bio,
       }));
-      
+
       await supabase.from('service_staff_members').insert(staffData);
     }
 
@@ -615,24 +663,23 @@ const handleSaveDraft = async () => {
         end_time: slot.endTime,
         is_available: true,
       }));
-      
+
       await supabase.from('service_availability_slots').insert(slotsData);
     }
 
     toast({
-      title: "✅ Brouillon sauvegardé",
+      title: '✅ Brouillon sauvegardé',
       description: `Service "${product.name}" enregistré`,
     });
 
     // Rediriger vers la liste
     navigate('/dashboard/services');
-
   } catch (error) {
     console.error('Save error:', error);
     toast({
-      title: "❌ Erreur de sauvegarde",
+      title: '❌ Erreur de sauvegarde',
       description: error.message,
-      variant: "destructive",
+      variant: 'destructive',
     });
   } finally {
     setIsSaving(false);
@@ -641,6 +688,7 @@ const handleSaveDraft = async () => {
 ```
 
 **Pattern Similaire pour**:
+
 - `CreatePhysicalProductWizard.tsx`
 - `CreateDigitalProductWizard.tsx`
 
@@ -665,7 +713,7 @@ export async function uploadToSupabaseStorage(
 ): Promise<{ url: string | null; error: Error | null }> {
   try {
     const { bucket, path = '', onProgress } = options;
-    
+
     // 1. Validation
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
@@ -683,24 +731,21 @@ export async function uploadToSupabaseStorage(
     const filePath = path ? `${path}/${fileName}` : fileName;
 
     // 3. Upload
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-      });
+    const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    });
 
     if (error) throw error;
 
     // 4. Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(filePath);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
     if (onProgress) onProgress(100);
 
     return { url: publicUrl, error: null };
-
   } catch (error) {
     console.error('Upload error:', error);
     return { url: null, error: error as Error };
@@ -725,18 +770,18 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const { url, error } = await uploadToSupabaseStorage(file, {
     bucket: 'product-images',
     path: 'physical',
-    onProgress: (progress) => setUploadProgress(progress),
+    onProgress: progress => setUploadProgress(progress),
   });
 
   if (error) {
     toast({
       title: "Erreur d'upload",
       description: error.message,
-      variant: "destructive",
+      variant: 'destructive',
     });
   } else {
     setFormData({ ...formData, imageUrl: url });
-    toast({ title: "✅ Image uploadée" });
+    toast({ title: '✅ Image uploadée' });
   }
 
   setUploading(false);
@@ -778,13 +823,7 @@ CREATE INDEX IF NOT EXISTS idx_order_items_service_product ON public.order_items
 ```typescript
 export const useCreateDigitalOrder = () => {
   return useMutation({
-    mutationFn: async ({
-      customerId,
-      digitalProductId,
-      storeId,
-      price,
-      licenseOptions,
-    }) => {
+    mutationFn: async ({ customerId, digitalProductId, storeId, price, licenseOptions }) => {
       // 1. Créer l'order
       const { data: order } = await supabase
         .from('orders')
@@ -811,7 +850,7 @@ export const useCreateDigitalOrder = () => {
           })
           .select()
           .single();
-        
+
         licenseId = license.id;
       }
 
@@ -834,6 +873,7 @@ export const useCreateDigitalOrder = () => {
 ```
 
 **Pattern Similaire pour**:
+
 - `useCreatePhysicalOrder.ts` (avec variant_id)
 - `useCreateServiceOrder.ts` (avec booking_id)
 
@@ -879,4 +919,3 @@ export const useCreateDigitalOrder = () => {
 **Production Ready**: ✅ OUI
 
 **Prochaine Étape**: Commencer Sprint 1 - Résolution Problèmes Critiques
-

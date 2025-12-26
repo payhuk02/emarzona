@@ -10,12 +10,14 @@
 Les images dans les messages retournent une erreur HTTP 400 avec `Content-Type: application/json` au lieu d'une image. Même les URLs signées générées avec succès retournent du JSON lors du chargement.
 
 **Symptômes :**
+
 - Les URLs signées sont générées avec succès (`✅ Signed URL generated successfully`)
 - Mais le chargement de l'URL signée échoue avec HTTP 400
 - Le serveur retourne du JSON au lieu d'une image
 - Message d'erreur : "Le serveur retourne du JSON au lieu d'une image"
 
 **Causes possibles :**
+
 1. Les fichiers n'existent pas réellement dans le bucket au chemin spécifié
 2. Le `storage_path` stocké en base ne correspond pas au chemin réel dans le bucket
 3. Les fichiers ont été supprimés ou déplacés après l'upload
@@ -30,12 +32,14 @@ Les images dans les messages retournent une erreur HTTP 400 avec `Content-Type: 
 **Fichier :** `src/utils/diagnoseStorageFiles.ts`
 
 **Changements :**
+
 - Vérification du `Content-Type` lors du chargement de l'URL signée
 - Détection automatique du JSON retourné au lieu d'une image
 - Essai avec `GET` si `HEAD` échoue pour obtenir plus d'informations
 - Analyse de la réponse JSON pour extraire le message d'erreur
 
 **Code ajouté :**
+
 ```typescript
 // Vérifier aussi le Content-Type pour s'assurer que c'est bien une image
 const contentType = response.headers.get('content-type') || '';
@@ -43,7 +47,7 @@ if (contentType.includes('application/json')) {
   // Si le serveur retourne du JSON, le fichier n'existe probablement pas
   return {
     exists: false,
-    error: 'Le serveur retourne du JSON au lieu d\'une image (fichier introuvable)',
+    error: "Le serveur retourne du JSON au lieu d'une image (fichier introuvable)",
   };
 }
 ```
@@ -55,11 +59,13 @@ if (contentType.includes('application/json')) {
 **Fichier :** `src/utils/diagnoseStorageFiles.ts`
 
 **Changements :**
+
 - Vérification que l'URL signée fonctionne réellement (pas seulement générée)
 - Test du chargement de l'URL signée avec vérification du Content-Type
 - Détection des fichiers avec URLs signées générées mais retournant du JSON
 
 **Code ajouté :**
+
 ```typescript
 // Vérifier que l'URL signée fonctionne réellement
 try {
@@ -81,12 +87,14 @@ try {
 **Fichier :** `src/utils/diagnoseStorageFiles.ts`
 
 **Changements :**
+
 - Un fichier est considéré comme existant seulement si :
   1. `checkFileExists` retourne `exists: true`
   2. ET l'URL signée peut être générée
   3. ET l'URL signée fonctionne réellement (retourne une image, pas du JSON)
 
 **Code ajouté :**
+
 ```typescript
 // Si checkFileExists dit que le fichier existe mais que l'URL signée ne fonctionne pas,
 // considérer le fichier comme manquant
@@ -106,10 +114,12 @@ if (actuallyExists) {
 **Fichier :** `src/utils/diagnoseStorageFiles.ts`
 
 **Changements :**
+
 - Ajout de recommandations spécifiques pour les fichiers avec URLs signées mais retournant du JSON
 - Comptage des fichiers avec problèmes d'URL signée
 
 **Code ajouté :**
+
 ```typescript
 if (filesWithSignedUrlIssues > 0) {
   recommendations.push(
@@ -123,6 +133,7 @@ if (filesWithSignedUrlIssues > 0) {
 ## 🔍 Diagnostic Amélioré
 
 Le diagnostic vérifie maintenant :
+
 1. ✅ Si une URL signée peut être générée
 2. ✅ Si l'URL signée fonctionne réellement (HEAD request)
 3. ✅ Si le Content-Type est correct (pas de JSON)
@@ -133,6 +144,7 @@ Le diagnostic vérifie maintenant :
 ## 📊 Résultats Attendus
 
 Après ces corrections, le diagnostic devrait :
+
 - Détecter correctement les fichiers qui retournent du JSON
 - Marquer ces fichiers comme "manquants" même si l'URL signée est générée
 - Fournir des recommandations spécifiques pour ces cas
@@ -149,4 +161,3 @@ Après ces corrections, le diagnostic devrait :
 ---
 
 **Statut final :** ✅ Corrections appliquées. Le diagnostic devrait maintenant détecter correctement les fichiers qui retournent du JSON.
-

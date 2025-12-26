@@ -17,13 +17,13 @@
 
 ### Score Global par Système
 
-| Système | Création | Achat | Paiement | Livraison/Accès | Commandes | Spécificités | **TOTAL** |
-|---------|----------|-------|----------|-----------------|-----------|--------------|-----------|
-| **Digital** | 95% | 100% | 100% | 100% | 100% | 90% | **97%** ⭐⭐⭐⭐⭐ |
-| **Physique** | 95% | 100% | 100% | 85% | 100% | 90% | **95%** ⭐⭐⭐⭐⭐ |
-| **Service** | 90% | 100% | 100% | 100% | 100% | 85% | **96%** ⭐⭐⭐⭐⭐ |
-| **Cours** | 95% | 100% | 100% | 100% | 100% | 95% | **98%** ⭐⭐⭐⭐⭐ |
-| **Artiste** | 90% | 100% | 100% | 80% | 100% | 85% | **93%** ⭐⭐⭐⭐ |
+| Système      | Création | Achat | Paiement | Livraison/Accès | Commandes | Spécificités | **TOTAL**          |
+| ------------ | -------- | ----- | -------- | --------------- | --------- | ------------ | ------------------ |
+| **Digital**  | 95%      | 100%  | 100%     | 100%            | 100%      | 90%          | **97%** ⭐⭐⭐⭐⭐ |
+| **Physique** | 95%      | 100%  | 100%     | 85%             | 100%      | 90%          | **95%** ⭐⭐⭐⭐⭐ |
+| **Service**  | 90%      | 100%  | 100%     | 100%            | 100%      | 85%          | **96%** ⭐⭐⭐⭐⭐ |
+| **Cours**    | 95%      | 100%  | 100%     | 100%            | 100%      | 95%          | **98%** ⭐⭐⭐⭐⭐ |
+| **Artiste**  | 90%      | 100%  | 100%     | 80%             | 100%      | 85%          | **93%** ⭐⭐⭐⭐   |
 
 ---
 
@@ -42,6 +42,7 @@
 #### A. Création de Produits (95%)
 
 **Wizard Professionnel** - 6 étapes complètes :
+
 1. ✅ **Informations de base** (`DigitalBasicInfoForm.tsx`)
    - Nom, description, catégorie, prix
    - Tags, statut (brouillon/actif)
@@ -76,6 +77,7 @@
    - Prévisualisation complète
 
 **Catégories Supportées** :
+
 - ✅ Ebook
 - ✅ Template
 - ✅ Logiciel
@@ -88,6 +90,7 @@
 #### B. Achat et Vente (100%)
 
 **Page de Détail** (`DigitalProductDetail.tsx`) :
+
 - ✅ Affichage complet des informations
 - ✅ Bouton d'achat direct
 - ✅ Ajout au panier
@@ -100,6 +103,7 @@
 - ✅ SEO optimisé
 
 **Fonctionnalités Spécifiques** :
+
 - ✅ Prévisualisation fichiers (si autorisé)
 - ✅ Affichage formats disponibles
 - ✅ Affichage taille fichiers
@@ -110,6 +114,7 @@
 #### C. Paiement (100%)
 
 **Intégration Moneroo/PayDunya** :
+
 - ✅ Création commande (`useCreateDigitalOrder`)
 - ✅ Initiation paiement Moneroo
 - ✅ Webhooks paiement
@@ -117,6 +122,7 @@
 - ✅ Gestion erreurs paiement
 
 **Options de Paiement** :
+
 - ✅ Paiement complet
 - ✅ Paiement partiel (si configuré)
 - ✅ Codes promo
@@ -125,6 +131,7 @@
 #### D. Livraison/Accès (100%)
 
 **Accès Immédiat** :
+
 - ✅ Téléchargement instantané après paiement
 - ✅ Lien de téléchargement sécurisé
 - ✅ Gestion des licences
@@ -133,12 +140,14 @@
 - ✅ Expiration des liens (si configuré)
 
 **Gestion des Fichiers** :
+
 - ✅ Téléchargement multiple
 - ✅ Téléchargement par catégorie
 - ✅ Historique téléchargements
 - ✅ Ré-téléchargement (selon limite)
 
 **Notifications** :
+
 - ✅ Email confirmation avec liens
 - ✅ Email rappel téléchargement
 - ✅ Notifications push
@@ -146,12 +155,14 @@
 #### E. Gestion des Commandes (100%)
 
 **Création Commande** :
+
 - ✅ `useCreateDigitalOrder` hook complet
 - ✅ Enregistrement dans `orders` et `order_items`
 - ✅ Statut paiement géré
 - ✅ Métadonnées complètes
 
 **Suivi** :
+
 - ✅ Historique commandes client
 - ✅ Détails commande admin
 - ✅ Statuts multiples
@@ -160,12 +171,14 @@
 #### F. Fonctionnalités Spécifiques (90%)
 
 **Licences** :
+
 - ✅ Gestion DRM
 - ✅ Clés de licence
 - ✅ Limites d'activation
 - ⚠️ Génération automatique clés (à améliorer)
 
 **Fichiers** :
+
 - ✅ Versioning
 - ✅ Métadonnées
 - ✅ Catégories
@@ -173,6 +186,7 @@
 - ⚠️ Streaming (non implémenté)
 
 **Analytics** :
+
 - ✅ Vues produit
 - ✅ Conversions
 - ✅ Téléchargements
@@ -209,6 +223,7 @@
 #### A. Création de Produits (95%)
 
 **Wizard Professionnel** - 7 étapes complètes :
+
 1. ✅ **Informations de base**
    - Nom, description, catégorie, prix
    - Images multiples
@@ -253,6 +268,7 @@
 #### B. Achat et Vente (100%)
 
 **Page de Détail** (`PhysicalProductDetail.tsx`) :
+
 - ✅ Affichage complet
 - ✅ Sélecteur de variants (couleur, taille)
 - ✅ Indicateur stock (en stock, faible, épuisé)
@@ -265,6 +281,7 @@
 - ✅ SEO optimisé
 
 **Fonctionnalités Spécifiques** :
+
 - ✅ Affichage dimensions
 - ✅ Affichage poids
 - ✅ Affichage classe shipping
@@ -274,6 +291,7 @@
 #### C. Paiement (100%)
 
 **Intégration Moneroo/PayDunya** :
+
 - ✅ Création commande (`useCreatePhysicalOrder`)
 - ✅ Initiation paiement
 - ✅ Webhooks paiement
@@ -281,6 +299,7 @@
 - ✅ Confirmation automatique
 
 **Options** :
+
 - ✅ Paiement complet
 - ✅ Paiement partiel (30% par défaut, configurable)
 - ✅ Codes promo
@@ -289,6 +308,7 @@
 #### D. Livraison/Expédition (85%)
 
 **Configuration Shipping** :
+
 - ✅ Zones de livraison
 - ✅ Tarifs shipping (flat, weight_based, price_based, free)
 - ✅ Calcul dynamique (`useCalculateShipping`)
@@ -296,6 +316,7 @@
 - ✅ Classes shipping
 
 **Intégration Transporteurs** :
+
 - ✅ Intégration FedEx (`shipping_fedex_system`)
 - ✅ Création étiquettes automatique
 - ✅ Tracking commandes
@@ -303,6 +324,7 @@
 - ✅ Page Expéditions complète (`Shipments.tsx`)
 
 **Lacunes** :
+
 - ❌ Intégrations DHL, UPS, Chronopost
 - ❌ Calcul tarifs temps réel transporteurs
 - ❌ Tracking automatique colis
@@ -312,6 +334,7 @@
 #### E. Gestion des Commandes (100%)
 
 **Création Commande** :
+
 - ✅ `useCreatePhysicalOrder` hook complet
 - ✅ Gestion variants
 - ✅ Gestion stock
@@ -319,6 +342,7 @@
 - ✅ Enregistrement complet
 
 **Suivi** :
+
 - ✅ Historique commandes
 - ✅ Détails commande
 - ✅ Statuts multiples
@@ -328,12 +352,14 @@
 #### F. Fonctionnalités Spécifiques (90%)
 
 **Variants** :
+
 - ✅ 3 options configurables
 - ✅ Génération combinaisons
 - ✅ Prix, SKU, stock par variant
 - ⚠️ Images par variant (UI à améliorer)
 
 **Inventaire** :
+
 - ✅ Multi-emplacements
 - ✅ Mouvements stock
 - ✅ Historique
@@ -341,6 +367,7 @@
 - ✅ SKU & Barcodes
 
 **Shipping** :
+
 - ✅ Zones et tarifs
 - ✅ Calcul dynamique
 - ✅ Intégration FedEx
@@ -384,6 +411,7 @@
 #### A. Création de Produits (90%)
 
 **Formulaire de Création** :
+
 - ✅ Informations de base (nom, description, prix)
 - ✅ Durée service (minute, heure, jour, semaine)
 - ✅ Type service (appointment, class, event, consultation, other)
@@ -394,12 +422,14 @@
 - ✅ Images et description
 
 **Lacunes** :
+
 - ⚠️ Pas de wizard structuré (comme digital/physical)
 - ⚠️ Gestion staff limitée
 
 #### B. Achat et Réservation (100%)
 
 **Page de Détail** (`ServiceDetail.tsx`) :
+
 - ✅ Affichage complet
 - ✅ Calendrier de réservation (`ServiceCalendar`, `ServiceCalendarEnhanced`)
 - ✅ Sélecteur créneaux horaires (`TimeSlotPicker`)
@@ -412,6 +442,7 @@
 - ✅ SEO optimisé
 
 **Fonctionnalités Spécifiques** :
+
 - ✅ Affichage durée
 - ✅ Affichage type service
 - ✅ Affichage localisation
@@ -421,12 +452,14 @@
 #### C. Paiement (100%)
 
 **Intégration Moneroo/PayDunya** :
+
 - ✅ Création commande (`useCreateServiceOrder`)
 - ✅ Initiation paiement
 - ✅ Webhooks paiement
 - ✅ Confirmation automatique
 
 **Options** :
+
 - ✅ Paiement complet
 - ✅ Codes promo
 - ✅ Cartes cadeaux
@@ -434,6 +467,7 @@
 #### D. Livraison/Accès (100%)
 
 **Réservation** :
+
 - ✅ Création réservation automatique
 - ✅ Confirmation email
 - ✅ Rappels email
@@ -442,6 +476,7 @@
 - ✅ Détails localisation (si on_site)
 
 **Gestion** :
+
 - ✅ Calendrier client
 - ✅ Calendrier admin
 - ✅ Annulation/modification
@@ -450,12 +485,14 @@
 #### E. Gestion des Commandes (100%)
 
 **Création Commande** :
+
 - ✅ `useCreateServiceOrder` hook complet
 - ✅ Enregistrement réservation
 - ✅ Gestion créneaux
 - ✅ Enregistrement complet
 
 **Suivi** :
+
 - ✅ Historique commandes
 - ✅ Détails réservation
 - ✅ Statuts multiples
@@ -464,17 +501,20 @@
 #### F. Fonctionnalités Spécifiques (85%)
 
 **Calendrier** :
+
 - ✅ Affichage disponibilités
 - ✅ Sélection créneaux
 - ✅ Gestion conflits
 - ⚠️ Gestion récurrence limitée
 
 **Staff** :
+
 - ✅ Association staff
 - ✅ Disponibilités staff
 - ⚠️ Gestion multi-staff limitée
 
 **Réservations Récurrentes** :
+
 - ⚠️ Support basique
 - ⚠️ Gestion avancée à améliorer
 
@@ -512,6 +552,7 @@
 #### A. Création de Produits (95%)
 
 **Système Complet** :
+
 - ✅ Informations de base (nom, description, prix)
 - ✅ Modules et leçons
 - ✅ Vidéos upload
@@ -524,6 +565,7 @@
 - ✅ Devoirs
 
 **Fonctionnalités Avancées** :
+
 - ✅ Prévisualisation vidéo
 - ✅ Type accès (lifetime, subscription)
 - ✅ Difficulté (beginner, intermediate, advanced)
@@ -533,6 +575,7 @@
 #### B. Achat et Inscription (100%)
 
 **Page de Détail** (`CourseDetail.tsx`) :
+
 - ✅ Affichage complet
 - ✅ Programme détaillé (curriculum)
 - ✅ Prévisualisation leçons
@@ -546,6 +589,7 @@
 - ✅ SEO optimisé
 
 **Fonctionnalités Spécifiques** :
+
 - ✅ Affichage modules/leçons
 - ✅ Barre de progression
 - ✅ Statistiques avancées
@@ -554,12 +598,14 @@
 #### C. Paiement (100%)
 
 **Intégration Moneroo/PayDunya** :
+
 - ✅ Création commande (`useCreateCourseOrder`)
 - ✅ Initiation paiement
 - ✅ Webhooks paiement
 - ✅ Confirmation automatique
 
 **Options** :
+
 - ✅ Paiement complet
 - ✅ Abonnements (si configuré)
 - ✅ Codes promo
@@ -568,6 +614,7 @@
 #### D. Livraison/Accès (100%)
 
 **Accès Immédiat** :
+
 - ✅ Accès cours après paiement
 - ✅ Player vidéo intégré (`VideoPlayerWithNotes`)
 - ✅ Navigation modules/leçons
@@ -576,6 +623,7 @@
 - ✅ Certificats générés automatiquement
 
 **Fonctionnalités** :
+
 - ✅ Gamification (points, badges)
 - ✅ Leaderboard
 - ✅ Cohorts
@@ -584,6 +632,7 @@
 - ✅ Quiz et évaluations
 
 **Notifications** :
+
 - ✅ Email confirmation
 - ✅ Rappels progression
 - ✅ Notifications push
@@ -591,12 +640,14 @@
 #### E. Gestion des Commandes (100%)
 
 **Création Commande** :
+
 - ✅ `useCreateCourseOrder` hook complet
 - ✅ Enregistrement inscription
 - ✅ Accès immédiat
 - ✅ Enregistrement complet
 
 **Suivi** :
+
 - ✅ Historique commandes
 - ✅ Détails inscription
 - ✅ Progression
@@ -606,6 +657,7 @@
 #### F. Fonctionnalités Spécifiques (95%)
 
 **Player Vidéo** :
+
 - ✅ Player intégré
 - ✅ Notes synchronisées
 - ✅ Progression automatique
@@ -613,17 +665,20 @@
 - ✅ Sous-titres (si disponibles)
 
 **Gamification** :
+
 - ✅ Points
 - ✅ Badges
 - ✅ Leaderboard
 - ✅ Achievements
 
 **Cohorts** :
+
 - ✅ Groupes d'étudiants
 - ✅ Sessions live
 - ✅ Interactions
 
 **Certificats** :
+
 - ✅ Génération automatique
 - ✅ Téléchargement
 - ✅ Vérification
@@ -655,6 +710,7 @@
 #### A. Création de Produits (90%)
 
 **Wizard Spécialisé** (`CreateArtistProductWizard.tsx`) :
+
 - ✅ Informations de base
 - ✅ Type d'artiste (writer, musician, visual_artist, designer, multimedia, other)
 - ✅ Informations artiste (nom, bio, site web, réseaux sociaux)
@@ -667,6 +723,7 @@
 - ✅ Configuration shipping (fragile, assurance)
 
 **Types d'Artistes Supportés** :
+
 - ✅ Écrivain/Auteur (writer)
 - ✅ Musicien/Compositeur (musician)
 - ✅ Artiste Visuel (visual_artist)
@@ -675,6 +732,7 @@
 - ✅ Autre (other)
 
 **Spécificités par Type** :
+
 - ✅ Writer : ISBN, pages, langue, format, genre, éditeur
 - ✅ Musician : format album, pistes, genre, label, date sortie
 - ✅ Visual Artist : style, sujet, encadré, certificat
@@ -684,6 +742,7 @@
 #### B. Achat et Vente (100%)
 
 **Page de Détail** (`ArtistProductDetail.tsx`) :
+
 - ✅ Affichage complet
 - ✅ Informations artiste
 - ✅ Informations œuvre
@@ -699,6 +758,7 @@
 - ✅ SEO optimisé
 
 **Fonctionnalités Spécifiques** :
+
 - ✅ Affichage type artiste
 - ✅ Affichage informations œuvre
 - ✅ Badge "Édition limitée" (si applicable)
@@ -708,12 +768,14 @@
 #### C. Paiement (100%)
 
 **Intégration Moneroo/PayDunya** :
+
 - ✅ Création commande (`useCreateArtistOrder`)
 - ✅ Initiation paiement
 - ✅ Webhooks paiement
 - ✅ Confirmation automatique
 
 **Options** :
+
 - ✅ Paiement complet
 - ✅ Codes promo
 - ✅ Cartes cadeaux
@@ -721,6 +783,7 @@
 #### D. Livraison/Expédition (80%)
 
 **Configuration Shipping** :
+
 - ✅ Shipping requis (configurable)
 - ✅ Temps de préparation (handling_time)
 - ✅ Fragile (flag)
@@ -728,6 +791,7 @@
 - ✅ Montant assurance
 
 **Lacunes** :
+
 - ❌ Intégration transporteurs spécialisés art
 - ❌ Emballage spécialisé art
 - ❌ Suivi température/humidité
@@ -736,12 +800,14 @@
 #### E. Gestion des Commandes (100%)
 
 **Création Commande** :
+
 - ✅ `useCreateArtistOrder` hook complet
 - ✅ Enregistrement certificat
 - ✅ Gestion shipping
 - ✅ Enregistrement complet
 
 **Suivi** :
+
 - ✅ Historique commandes
 - ✅ Détails commande
 - ✅ Certificat inclus
@@ -751,23 +817,27 @@
 #### F. Fonctionnalités Spécifiques (85%)
 
 **Certificats** :
+
 - ✅ Certificat d'authenticité
 - ✅ Affichage certificat (`ArtistCertificateDisplay`)
 - ✅ Upload certificat
 - ⚠️ Génération automatique (à améliorer)
 
 **Authentification** :
+
 - ✅ Signature authentifiée
 - ✅ Localisation signature
 - ⚠️ Vérification automatique (à améliorer)
 
 **Éditions Limitées** :
+
 - ✅ Numéro édition
 - ✅ Total éditions
 - ✅ Suivi disponibilité
 - ⚠️ Alerts épuisement (à améliorer)
 
 **Shipping Spécialisé** :
+
 - ✅ Flag fragile
 - ✅ Assurance
 - ⚠️ Emballage spécialisé (à améliorer)
@@ -871,4 +941,3 @@ Les lacunes identifiées sont principalement des **améliorations** plutôt que 
 
 **Date de dernière mise à jour** : 31 Janvier 2025  
 **Statut** : ✅ Audit Complet - Prêt pour Production
-

@@ -10,6 +10,7 @@
 ### ✅ A) Cleanups manquants dans useEffect
 
 #### 1. `src/hooks/useNotifications.ts` - **CORRIGÉ**
+
 **Problème** : Cleanup dans une fonction async (ne fonctionne pas)  
 **Solution** : Cleanup déplacé dans le useEffect avec flag `isMounted`
 
@@ -18,7 +19,9 @@
 useEffect(() => {
   const setupSubscription = async () => {
     // ...
-    return () => { channel.unsubscribe(); }; // ❌ Ne fonctionne pas dans async
+    return () => {
+      channel.unsubscribe();
+    }; // ❌ Ne fonctionne pas dans async
   };
   setupSubscription();
 }, [queryClient]);
@@ -27,14 +30,14 @@ useEffect(() => {
 useEffect(() => {
   let channel = null;
   let isMounted = true;
-  
+
   const setupSubscription = async () => {
     // ...
     if (isMounted) setIsSubscribed(true);
   };
-  
+
   setupSubscription();
-  
+
   return () => {
     isMounted = false;
     if (channel) supabase.removeChannel(channel);
@@ -44,6 +47,7 @@ useEffect(() => {
 ```
 
 #### 2. `src/pages/Marketplace.tsx` - **CORRIGÉ**
+
 **Problème** : Dépendances instables dans useEffect  
 **Solution** : Utilisation de dépendances primitives au lieu de `fetchProducts`
 
@@ -52,11 +56,14 @@ useEffect(() => {
 ### ✅ B) Re-renders infinis restants
 
 #### 1. `src/pages/Marketplace.tsx` - **CORRIGÉ**
-**Problème** : 
+
+**Problème** :
+
 - `toast` dans les dépendances de `useCallback`
 - `fetchProducts` dans les dépendances de `useEffect`
 
 **Solution** :
+
 ```typescript
 // ✅ Retiré toast des dépendances (stable en pratique)
 const fetchProducts = useCallback(async () => {
@@ -75,10 +82,12 @@ useEffect(() => {
 ### ✅ C) Standardisation gestion d'erreurs
 
 **Fichiers de référence** :
+
 - `src/lib/error-handling.ts` - `normalizeError()`, `logError()`, `shouldRetryError()`
 - `src/lib/logger.ts` - Logger unifié avec Sentry
 
 **Pattern recommandé** :
+
 ```typescript
 import { normalizeError, logError } from '@/lib/error-handling';
 import { logger } from '@/lib/logger';
@@ -88,7 +97,7 @@ try {
 } catch (error) {
   const normalized = normalizeError(error);
   logError(error, { context: 'MyComponent', action: 'fetchData' });
-  
+
   toast({
     title: 'Erreur',
     description: normalized.userMessage,
@@ -98,6 +107,7 @@ try {
 ```
 
 **Fichiers déjà corrigés** :
+
 - ✅ `src/lib/moneroo-client.ts` - Gestion d'erreur améliorée
 - ✅ `src/pages/checkout/Checkout.tsx` - Affichage d'erreur amélioré
 - ✅ `supabase/functions/moneroo/index.ts` - Parsing amélioré
@@ -107,12 +117,14 @@ try {
 ### ✅ D) TODOs critiques identifiés
 
 #### TODOs non-critiques (fonctionnalités futures)
+
 - `src/lib/pwa.ts:168` - TODO: Implémenter l'envoi au backend
 - `src/lib/image-upload.ts:83` - TODO: Implémenter la compression
 - `src/components/reviews/ShareReviewButtons.tsx:110` - TODO: Implement analytics tracking
 - `src/pages/customer/MyOrders.tsx:641` - TODO: Download invoice
 
 #### TODOs à prioriser
+
 1. **`src/pages/Products.tsx:355`** - TODO: Implémenter la duplication via l'API
    - **Impact** : Fonctionnalité manquante pour dupliquer produits
    - **Priorité** : Moyenne
@@ -146,5 +158,3 @@ try {
 ---
 
 **Corrections en cours...**
-
-

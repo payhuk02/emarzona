@@ -119,27 +119,27 @@ const { data: quote } = useCalculateArtistShipping(
 
 ### Système de Tracking Automatique
 
-| Fonctionnalité | Statut | Priorité |
-|----------------|--------|----------|
-| Adaptateurs transporteurs | ✅ Implémenté | Haute |
-| Tracking automatique | ✅ Implémenté | Haute |
-| Mise à jour statuts | ✅ Implémenté | Haute |
-| Événements tracking | ✅ Implémenté | Haute |
-| Notifications clients | ⚠️ Partiel | Haute |
-| APIs réelles transporteurs | ❌ À faire | Haute |
-| Webhooks temps réel | ❌ À faire | Moyenne |
+| Fonctionnalité             | Statut        | Priorité |
+| -------------------------- | ------------- | -------- |
+| Adaptateurs transporteurs  | ✅ Implémenté | Haute    |
+| Tracking automatique       | ✅ Implémenté | Haute    |
+| Mise à jour statuts        | ✅ Implémenté | Haute    |
+| Événements tracking        | ✅ Implémenté | Haute    |
+| Notifications clients      | ⚠️ Partiel    | Haute    |
+| APIs réelles transporteurs | ❌ À faire    | Haute    |
+| Webhooks temps réel        | ❌ À faire    | Moyenne  |
 
 ### Shipping Spécialisé Art
 
-| Fonctionnalité | Statut | Priorité |
-|----------------|--------|----------|
-| Calcul shipping spécialisé | ✅ Implémenté | Haute |
-| Emballage spécialisé | ✅ Implémenté | Haute |
-| Assurance automatique | ✅ Implémenté | Haute |
-| Manutention spéciale | ✅ Implémenté | Haute |
-| Recommandations transporteurs | ✅ Implémenté | Haute |
-| Intégration checkout | ❌ À faire | Moyenne |
-| APIs transporteurs art | ❌ À faire | Moyenne |
+| Fonctionnalité                | Statut        | Priorité |
+| ----------------------------- | ------------- | -------- |
+| Calcul shipping spécialisé    | ✅ Implémenté | Haute    |
+| Emballage spécialisé          | ✅ Implémenté | Haute    |
+| Assurance automatique         | ✅ Implémenté | Haute    |
+| Manutention spéciale          | ✅ Implémenté | Haute    |
+| Recommandations transporteurs | ✅ Implémenté | Haute    |
+| Intégration checkout          | ❌ À faire    | Moyenne  |
+| APIs transporteurs art        | ❌ À faire    | Moyenne  |
 
 ---
 
@@ -219,4 +219,3 @@ const { data: quote } = useCalculateArtistShipping(
 
 **Date de dernière mise à jour** : 31 Janvier 2025  
 **Statut** : ✅ Implémentations Complétées - Prêt pour Intégration APIs
-

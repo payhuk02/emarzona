@@ -23,9 +23,10 @@
 #### ShippingDashboard
 
 **Modifications** :
+
 - ✅ Titre principal : `text-2xl` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Icône Truck : `h-5 w-5` → `h-4 w-4` → `h-5 w-5` → `h-6 w-6` → `h-7 w-7`
-- ✅ Cards de statistiques : 
+- ✅ Cards de statistiques :
   - CardHeaders : Paddings réduits (`pb-2` → `pb-1.5` → `pb-2` → `pb-3`)
   - CardTitles : `text-xs` → `text-[9px]` → `text-[10px]` → `text-xs` → `text-sm`
   - Valeurs : `text-xl` → `text-sm` → `text-base` → `text-lg` → `text-xl` → `text-2xl`
@@ -35,6 +36,7 @@
 #### AdminShipping
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Container : Paddings réduits (`p-6` → `p-3` → `p-4` → `p-6`)
 - ✅ Cards de statistiques :
@@ -52,6 +54,7 @@
 #### ServicesList
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Container : Paddings réduits (`p-6` → `p-3` → `p-4` → `p-6`)
 - ✅ Header : Layout responsive (`flex-col` sur mobile)
@@ -66,6 +69,7 @@
 #### MyCourses
 
 **Modifications** :
+
 - ✅ Titre header sticky : `text-base` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Hero section :
   - Titre : `text-2xl` → `text-xl` → `text-2xl` → `text-3xl` → `text-4xl` → `text-5xl`
@@ -86,31 +90,31 @@
 
 ### Tailles de Texte
 
-| Élément | Mobile | Tablet | Desktop | Large |
-|---------|--------|--------|---------|-------|
-| **H1 (Shipping)** | `text-base` | `text-lg` | `text-xl` → `text-2xl` | `text-3xl` |
-| **H1 (Courses Hero)** | `text-xl` | `text-2xl` | `text-3xl` → `text-4xl` | `text-5xl` |
-| **Valeurs Stats** | `text-sm` | `text-base` | `text-lg` | `text-xl` → `text-2xl` |
-| **Labels** | `text-[9px]` | `text-[10px]` | `text-xs` | `text-sm` |
-| **CardTitles** | `text-[9px]` | `text-[10px]` | `text-xs` | `text-sm` |
-| **Descriptions** | `text-[9px]` | `text-[10px]` | `text-xs` | `text-sm` |
+| Élément               | Mobile       | Tablet        | Desktop                 | Large                  |
+| --------------------- | ------------ | ------------- | ----------------------- | ---------------------- |
+| **H1 (Shipping)**     | `text-base`  | `text-lg`     | `text-xl` → `text-2xl`  | `text-3xl`             |
+| **H1 (Courses Hero)** | `text-xl`    | `text-2xl`    | `text-3xl` → `text-4xl` | `text-5xl`             |
+| **Valeurs Stats**     | `text-sm`    | `text-base`   | `text-lg`               | `text-xl` → `text-2xl` |
+| **Labels**            | `text-[9px]` | `text-[10px]` | `text-xs`               | `text-sm`              |
+| **CardTitles**        | `text-[9px]` | `text-[10px]` | `text-xs`               | `text-sm`              |
+| **Descriptions**      | `text-[9px]` | `text-[10px]` | `text-xs`               | `text-sm`              |
 
 ### Espacements
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Card padding** | `p-2.5` | `p-3` | `p-4` → `p-6` |
+| Élément                | Mobile          | Tablet        | Desktop       |
+| ---------------------- | --------------- | ------------- | ------------- |
+| **Card padding**       | `p-2.5`         | `p-3`         | `p-4` → `p-6` |
 | **CardHeader padding** | `p-2.5` → `p-3` | `p-3` → `p-4` | `p-4` → `p-6` |
-| **CardHeader pb** | `pb-1.5` | `pb-2` | `pb-3` |
-| **Container padding** | `p-3` | `p-4` | `p-6` |
-| **Gaps** | `gap-2` | `gap-3` | `gap-4` |
+| **CardHeader pb**      | `pb-1.5`        | `pb-2`        | `pb-3`        |
+| **Container padding**  | `p-3`           | `p-4`         | `p-6`         |
+| **Gaps**               | `gap-2`         | `gap-3`       | `gap-4`       |
 
 ### Icônes
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Icônes stats** | `h-3 w-3` | `h-3.5 w-3.5` | `h-4 w-4` → `h-5 w-5` |
-| **Icônes titres** | `h-4 w-4` | `h-5 w-5` | `h-6 w-6` → `h-7 w-7` |
+| Élément           | Mobile    | Tablet        | Desktop               |
+| ----------------- | --------- | ------------- | --------------------- |
+| **Icônes stats**  | `h-3 w-3` | `h-3.5 w-3.5` | `h-4 w-4` → `h-5 w-5` |
+| **Icônes titres** | `h-4 w-4` | `h-5 w-5`     | `h-6 w-6` → `h-7 w-7` |
 
 ---
 
@@ -197,4 +201,3 @@
 
 **Date de validation** : 1 Février 2025  
 **Statut** : ✅ **COMPLÉTÉ**
-

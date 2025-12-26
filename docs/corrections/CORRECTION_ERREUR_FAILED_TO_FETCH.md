@@ -37,6 +37,7 @@ Ces logs permettront de voir exactement où l'Edge Function échoue dans les log
 ### 3. Amélioration des Messages d'Erreur
 
 Les messages d'erreur incluent maintenant :
+
 - Des étapes de diagnostic claires
 - L'URL de l'Edge Function pour vérification
 - Des liens vers les logs Supabase
@@ -128,8 +129,3 @@ Si l'erreur "Failed to fetch" persiste après le redéploiement :
 - [Supabase Edge Functions](https://supabase.com/docs/guides/functions)
 - [Supabase Edge Functions Logs](https://supabase.com/docs/guides/functions/debugging)
 - [Supabase Edge Functions Secrets](https://supabase.com/docs/guides/functions/secrets)
-
-
-
-
-

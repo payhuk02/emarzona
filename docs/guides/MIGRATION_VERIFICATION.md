@@ -17,9 +17,9 @@ Si vous voyez "Success. No rows returned", cela signifie que le script s'est ex�
 Exécutez cette requête pour vérifier que les colonnes existent :
 
 ```sql
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'product_promotions' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'product_promotions'
   AND column_name IN (
     'original_promotion_id',
     'original_digital_coupon_id',
@@ -36,8 +36,8 @@ Vous devriez voir les 4 colonnes listées.
 ### 2. Vérifier les Fonctions de Migration
 
 ```sql
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_name IN (
   'migrate_promotions_to_product_promotions',
   'migrate_digital_coupons_to_product_promotions',
@@ -54,7 +54,7 @@ Vous devriez voir 3 fonctions.
 
 ```sql
 -- Compter les promotions migrées
-SELECT 
+SELECT
   migration_source,
   COUNT(*) as count,
   COUNT(CASE WHEN is_active THEN 1 END) as active_count
@@ -69,7 +69,7 @@ GROUP BY migration_source;
 
 ```sql
 -- Voir quelques promotions migrées
-SELECT 
+SELECT
   id,
   name,
   code,
@@ -96,6 +96,7 @@ Utilisez le script de vérification complet :
 3. Exécutez dans Supabase SQL Editor
 
 Ce script vous donnera :
+
 - ✅ Vérification des colonnes
 - ✅ Vérification des fonctions
 - ✅ Statistiques des données
@@ -114,4 +115,3 @@ Ce script vous donnera :
 ---
 
 **Prochaine étape :** Tester l'interface unifiée de gestion des promotions !
-

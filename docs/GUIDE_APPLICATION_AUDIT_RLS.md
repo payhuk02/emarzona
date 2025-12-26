@@ -7,21 +7,27 @@
 ## 📊 Interprétation des Résultats
 
 ### ✅ Tables avec RLS Activé + Politiques
+
 ```
 ✅ Table: products - RLS activé avec 3 politique(s)
 ```
+
 **Action**: Aucune action requise - Configuration correcte
 
 ### ❌ Tables sans RLS
+
 ```
 ❌ Table: digital_product_downloads_partitioned - RLS DÉSACTIVÉ
 ```
+
 **Action**: Activer RLS immédiatement
 
 ### ⚠️ Tables avec RLS mais Sans Politiques
+
 ```
 ⚠️ Table: orders_partitioned - RLS activé mais AUCUNE politique (Accès bloqué!)
 ```
+
 **Action**: Créer des politiques ou désactiver RLS temporairement
 
 ---
@@ -104,6 +110,7 @@ CREATE POLICY "Vendors can view orders for their products"
 ## 🧪 Tests des Politiques
 
 ### Test 1: Utilisateur Anonyme
+
 ```sql
 SET ROLE anon;
 SELECT * FROM table_name; -- Devrait retourner vide ou données publiques
@@ -111,6 +118,7 @@ RESET ROLE;
 ```
 
 ### Test 2: Utilisateur Authentifié
+
 ```sql
 SET ROLE authenticated;
 SELECT * FROM table_name; -- Devrait retourner seulement ses données
@@ -118,6 +126,7 @@ RESET ROLE;
 ```
 
 ### Test 3: Vendeur
+
 ```sql
 -- Tester avec un user_id de vendeur
 SET ROLE authenticated;
@@ -144,10 +153,12 @@ Un script prêt à l'emploi est disponible pour corriger les tables partitionné
 **Fichier**: `supabase/scripts/fix-rls-partitioned-tables.sql`
 
 **Tables corrigées**:
+
 - ✅ `digital_product_downloads_partitioned` - Activation RLS + Politiques
 - ✅ `orders_partitioned` - Création des politiques manquantes
 
 **Usage**:
+
 1. Ouvrir `supabase/scripts/fix-rls-partitioned-tables.sql`
 2. Copier le contenu dans Supabase SQL Editor
 3. Exécuter le script
@@ -163,6 +174,5 @@ Un script prêt à l'emploi est disponible pour corriger les tables partitionné
 
 ---
 
-*Guide créé le 2025-01-30*  
-*Mis à jour avec script de correction rapide*
-
+_Guide créé le 2025-01-30_  
+_Mis à jour avec script de correction rapide_

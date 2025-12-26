@@ -26,6 +26,7 @@ Exécutez cette migration pour corriger le cron job :
 ```
 
 Cette migration :
+
 1. Supprime l'ancien cron job
 2. Recrée le cron job avec le header `Authorization` inclus
 3. Conserve le header `x-cron-secret` pour l'authentification personnalisée
@@ -68,7 +69,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 ### 4. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -81,6 +82,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -110,5 +112,3 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025, 11:10 UTC
-
-

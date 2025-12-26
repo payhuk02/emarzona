@@ -13,6 +13,7 @@
 **Cause** : Déploiement bloqué par une règle de protection
 
 **Solutions** :
+
 1. Vérifier les règles de protection dans Vercel Dashboard
 2. Vérifier les branches protégées
 3. Vérifier les conditions de déploiement
@@ -24,6 +25,7 @@
 **Cause** : Erreur dans une fonction serverless
 
 **Solutions** :
+
 1. Vérifier les logs Vercel pour l'erreur spécifique
 2. Vérifier que le dossier `api/` existe si configuré
 3. Vérifier les variables d'environnement
@@ -38,6 +40,7 @@
 **Cause** : Ressource non trouvée
 
 **Solutions** :
+
 1. Vérifier que le fichier existe
 2. Vérifier les `rewrites` dans `vercel.json`
 3. Vérifier les routes de l'application
@@ -49,6 +52,7 @@
 **Cause** : Méthode HTTP non supportée
 
 **Solutions** :
+
 1. Vérifier que la méthode HTTP est correcte (GET, POST, etc.)
 2. Vérifier les routes API
 
@@ -59,6 +63,7 @@
 **Cause** : URL trop longue
 
 **Solutions** :
+
 1. Réduire la longueur de l'URL
 2. Utiliser POST au lieu de GET pour les données longues
 
@@ -69,6 +74,7 @@
 **Cause** : Le body retourné par une fonction n'est pas une string
 
 **Solutions** :
+
 1. Vérifier que les fonctions retournent des strings
 2. Utiliser `JSON.stringify()` si nécessaire
 
@@ -81,6 +87,7 @@
 **Cause** : Trop de requêtes vers une fonction
 
 **Solutions** :
+
 1. Attendre quelques minutes
 2. Réduire la fréquence des appels
 3. Implémenter un rate limiting côté client
@@ -92,6 +99,7 @@
 **Cause** : Erreur interne Vercel
 
 **Solutions** :
+
 1. Vérifier le statut Vercel : https://vercel-status.com
 2. Contacter le support Vercel
 3. Réessayer le déploiement
@@ -103,6 +111,7 @@
 **Cause** : Échec de récupération du déploiement
 
 **Solutions** :
+
 1. Vérifier la connexion réseau
 2. Réessayer le déploiement
 3. Vérifier les logs de build
@@ -164,11 +173,13 @@
 ### Checklist de Diagnostic
 
 1. **Vérifier les logs Vercel**
+
    ```bash
    vercel logs
    ```
 
 2. **Vérifier le build local**
+
    ```bash
    npm run build
    ```
@@ -192,5 +203,3 @@
 ---
 
 **Dernière mise à jour** : 28 janvier 2025
-
-

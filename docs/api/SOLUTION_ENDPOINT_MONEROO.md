@@ -3,11 +3,13 @@
 ## ❌ Problème Identifié
 
 **Erreur dans les logs :**
+
 ```
 ERROR Moneroo API error: { status: 404, statusText: "Not Found", response: { message: "The route v1/payments could not be found." } }
 ```
 
 **Analyse :**
+
 - ✅ Edge Function déployée et fonctionnelle
 - ✅ CORS configuré correctement
 - ✅ API Key configurée
@@ -18,11 +20,13 @@ ERROR Moneroo API error: { status: 404, statusText: "Not Found", response: { mes
 ## ✅ Correction Appliquée
 
 J'ai changé l'endpoint de `/payments` à `/checkout` car :
+
 1. C'était l'endpoint original
 2. Les logs montrent que `/payments` n'existe pas
 3. `/checkout` est plus logique pour créer un paiement
 
 **Code corrigé :**
+
 ```typescript
 case 'create_checkout':
   endpoint = '/checkout';  // Changé de '/payments' à '/checkout'
@@ -84,7 +88,7 @@ Si `/checkout` ne fonctionne pas, essayer :
 endpoint = '/checkout';
 
 // Option 2
-endpoint = '/payment';  // singulier
+endpoint = '/payment'; // singulier
 
 // Option 3
 endpoint = '/transactions';
@@ -99,6 +103,7 @@ endpoint = '/checkout/create';
 ### Option 3 : Vérifier la Documentation Moneroo
 
 **Action requise :**
+
 1. Consulter la documentation officielle Moneroo
 2. Vérifier l'endpoint exact pour créer un paiement
 3. Vérifier l'URL de base de l'API
@@ -137,6 +142,7 @@ endpoint = '/checkout/create';
 ## 📝 Note Importante
 
 **Il est crucial de vérifier la documentation officielle Moneroo** pour connaître :
+
 - L'endpoint exact pour créer un paiement
 - L'URL de base de l'API
 - Le format des données attendu
@@ -150,7 +156,3 @@ endpoint = '/checkout/create';
 2. **Tester le paiement**
 3. **Si erreur 404 persiste**, essayer les autres options
 4. **Consulter la documentation Moneroo** si nécessaire
-
-
-
-

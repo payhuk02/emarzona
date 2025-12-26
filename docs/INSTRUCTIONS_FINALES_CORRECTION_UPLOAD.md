@@ -26,6 +26,7 @@ Le fichier est **toujours uploadé comme JSON** malgré toutes les corrections. 
 ### ÉTAPE 2 : Exécuter les Migrations SQL (DANS L'ORDRE)
 
 #### Migration 1 : Configuration Complète
+
 1. **Supabase Dashboard** > **SQL Editor**
 2. Ouvrir : `supabase/migrations/20250201_fix_attachments_final_complete.sql`
 3. Copier tout le contenu
@@ -34,6 +35,7 @@ Le fichier est **toujours uploadé comme JSON** malgré toutes les corrections. 
 6. **Lire le rapport** affiché
 
 #### Migration 2 : Supprimer Restrictions MIME
+
 1. **Supabase Dashboard** > **SQL Editor**
 2. Ouvrir : `supabase/migrations/20250201_fix_attachments_mime_types.sql`
 3. Copier tout le contenu
@@ -98,15 +100,18 @@ Ce rapport indiquera exactement ce qui ne va pas.
    - ✅ 4 politiques doivent exister (voir ci-dessus)
 
 3. **SQL Editor** > Exécuter cette requête :
+
    ```sql
    SELECT id, name, public, allowed_mime_types
    FROM storage.buckets
    WHERE id = 'attachments';
    ```
+
    - ✅ `public` doit être `true`
    - ✅ `allowed_mime_types` doit être `NULL`
 
 4. **SQL Editor** > Exécuter cette requête :
+
    ```sql
    SELECT policyname, cmd, roles::text
    FROM pg_policies
@@ -115,6 +120,7 @@ Ce rapport indiquera exactement ce qui ne va pas.
      AND policyname ILIKE '%attachment%'
    ORDER BY cmd;
    ```
+
    - ✅ 4 politiques doivent être listées
 
 ---
@@ -129,4 +135,3 @@ Ce rapport indiquera exactement ce qui ne va pas.
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

@@ -19,6 +19,7 @@ Ce document explique comment utiliser et maintenir le système SEO professionnel
 **Localisation:** `src/components/seo/SEOMeta.tsx`
 
 **Usage:**
+
 ```typescript
 import { SEOMeta } from '@/components/seo';
 
@@ -31,12 +32,12 @@ import { SEOMeta } from '@/components/seo';
   image="https://payhula.com/og-image.jpg"
   imageAlt="Description de l'image"
   type="website"  // 'website', 'article', 'product'
-  
+
   // Pour les produits uniquement
   price={50000}
   currency="XOF"
   availability="instock"
-  
+
   // Robots
   noindex={false}
   nofollow={false}
@@ -44,6 +45,7 @@ import { SEOMeta } from '@/components/seo';
 ```
 
 **Props Disponibles:**
+
 - `title` (requis) - Titre de la page
 - `description` (requis) - Description 120-160 caractères
 - `keywords` - Mots-clés SEO (optionnel)
@@ -65,6 +67,7 @@ import { SEOMeta } from '@/components/seo';
 **Localisation:** `src/components/seo/ProductSchema.tsx`
 
 **Usage:**
+
 ```typescript
 import { ProductSchema } from '@/components/seo';
 
@@ -97,6 +100,7 @@ import { ProductSchema } from '@/components/seo';
 **Localisation:** `src/components/seo/StoreSchema.tsx`
 
 **Usage:**
+
 ```typescript
 import { StoreSchema } from '@/components/seo';
 
@@ -125,6 +129,7 @@ import { StoreSchema } from '@/components/seo';
 **Localisation:** `src/components/seo/BreadcrumbSchema.tsx`
 
 **Usage:**
+
 ```typescript
 import { BreadcrumbSchema } from '@/components/seo';
 
@@ -146,6 +151,7 @@ import { BreadcrumbSchema } from '@/components/seo';
 **Localisation:** `src/components/seo/WebsiteSchema.tsx`
 
 **Usage:**
+
 ```typescript
 import { WebsiteSchema } from '@/components/seo';
 
@@ -172,6 +178,7 @@ npm run build
 **Fichier généré:** `public/sitemap.xml`
 
 **Contenu:**
+
 - Page d'accueil
 - Page marketplace
 - Toutes les boutiques actives
@@ -187,6 +194,7 @@ npm run build
 **Localisation:** `public/robots.txt`
 
 **Configuration actuelle:**
+
 - ✅ Autorise tous les crawlers sur pages publiques
 - ✅ Bloque /dashboard, /admin, /auth, /payment
 - ✅ Bloque bad bots (AhrefsBot, SemrushBot, etc.)
@@ -202,6 +210,7 @@ npm run build
 **Localisation:** `public/sitemap.xml` (généré)
 
 **Régénération:**
+
 1. Modifier `scripts/generate-sitemap.js` si besoin
 2. Exécuter `npm run sitemap:generate`
 3. Soumettre à Google Search Console
@@ -213,17 +222,20 @@ npm run build
 ### Titres (Title Tags)
 
 **✅ BON:**
+
 ```
 Formation Marketing Digital - Ma Boutique | Payhula
 ```
 
 **❌ MAUVAIS:**
+
 ```
 Page
 Ma Boutique
 ```
 
 **Règles:**
+
 - 50-60 caractères max
 - Inclure mot-clé principal
 - Unique pour chaque page
@@ -234,16 +246,19 @@ Ma Boutique
 ### Descriptions (Meta Description)
 
 **✅ BON:**
+
 ```
 Découvrez notre formation complète en marketing digital. 20h de contenu vidéo, certificat inclus. Paiement sécurisé en XOF. Note: 4.8/5 ⭐
 ```
 
 **❌ MAUVAIS:**
+
 ```
 Formation
 ```
 
 **Règles:**
+
 - 120-160 caractères
 - Inclure call-to-action
 - Mentionner bénéfice principal
@@ -254,16 +269,19 @@ Formation
 ### Mots-Clés (Keywords)
 
 **✅ BON:**
+
 ```
 formation marketing digital, cours en ligne afrique, marketing digital burkina, certificat marketing, XOF
 ```
 
 **❌ MAUVAIS:**
+
 ```
 marketing, cours, formation
 ```
 
 **Règles:**
+
 - 5-10 mots-clés pertinents
 - Longue traîne > mots génériques
 - Inclure variantes (synonymes, localisations)
@@ -273,8 +291,9 @@ marketing, cours, formation
 ### Images
 
 **✅ BON:**
+
 ```typescript
-<img 
+<img
   src="formation-marketing.jpg"
   alt="Formation Marketing Digital - 20h de contenu vidéo"
   loading="lazy"
@@ -284,11 +303,13 @@ marketing, cours, formation
 ```
 
 **❌ MAUVAIS:**
+
 ```typescript
 <img src="img1.jpg" />
 ```
 
 **Règles:**
+
 - **Toujours** un attribut `alt` descriptif
 - Format WebP ou JPEG optimisé
 - Dimensions explicites (évite CLS)
@@ -299,16 +320,19 @@ marketing, cours, formation
 ### URLs
 
 **✅ BON:**
+
 ```
 /stores/ma-boutique/products/formation-marketing-digital
 ```
 
 **❌ MAUVAIS:**
+
 ```
 /store.php?id=123&product=456
 ```
 
 **Règles:**
+
 - Slugs lisibles (kebab-case)
 - Hiérarchie logique
 - Pas de caractères spéciaux
@@ -323,6 +347,7 @@ marketing, cours, formation
 **Fichier:** `src/pages/Marketplace.tsx`
 
 **SEO Implémenté:**
+
 - ✅ Meta dynamiques (stats temps réel)
 - ✅ Title optimisé: `{count} Produits Digitaux en Afrique`
 - ✅ Description riche
@@ -340,6 +365,7 @@ marketing, cours, formation
 **Fichier:** `src/pages/ProductDetail.tsx`
 
 **SEO Implémenté:**
+
 - ✅ Meta dynamiques par produit
 - ✅ ProductSchema (Rich Snippets)
 - ✅ BreadcrumbSchema
@@ -357,6 +383,7 @@ marketing, cours, formation
 **Fichier:** `src/pages/Storefront.tsx`
 
 **SEO Implémenté:**
+
 - ✅ Meta dynamiques par boutique
 - ✅ StoreSchema
 - ✅ BreadcrumbSchema
@@ -373,15 +400,19 @@ marketing, cours, formation
 ### Google Search Console
 
 **Configuration:**
+
 1. Ajouter propriété: `https://payhula.vercel.app`
 2. Vérification: Balise meta dans `index.html`
+
 ```html
 <meta name="google-site-verification" content="VOTRE_CODE" />
 ```
+
 3. Soumettre sitemap: `https://payhula.vercel.app/sitemap.xml`
 4. Activer indexation mobile-first
 
 **Vérifier:**
+
 - Pages indexées (cible: 500+)
 - Erreurs crawl (404, 500, etc.)
 - Core Web Vitals
@@ -392,6 +423,7 @@ marketing, cours, formation
 ### Google Analytics 4
 
 **Configuration:**
+
 1. Créer propriété GA4
 2. Ajouter script dans `index.html`
 3. Configurer événements:
@@ -409,11 +441,14 @@ marketing, cours, formation
 **Problème:** `npm run sitemap:generate` échoue
 
 **Solution:**
+
 1. Vérifier variables d'environnement:
+
 ```bash
 VITE_SUPABASE_URL=https://...
 VITE_SUPABASE_ANON_KEY=...
 ```
+
 2. Vérifier connexion Supabase
 3. Logs: `node scripts/generate-sitemap.js`
 
@@ -424,6 +459,7 @@ VITE_SUPABASE_ANON_KEY=...
 **Problème:** Facebook Debugger ne voit pas OG tags
 
 **Solution:**
+
 1. Vérifier que `<SEOMeta>` est dans le composant
 2. Tester avec: https://developers.facebook.com/tools/debug/
 3. Clear cache Facebook: Cliquer "Scrape Again"
@@ -436,6 +472,7 @@ VITE_SUPABASE_ANON_KEY=...
 **Problème:** Google n'affiche pas étoiles/prix
 
 **Solution:**
+
 1. Tester Schema: https://validator.schema.org/
 2. Vérifier `<ProductSchema>` est présent
 3. Attendre indexation (2-4 semaines)
@@ -466,10 +503,12 @@ Lors de la création d'une nouvelle page:
 ## 📞 SUPPORT
 
 **Questions?** Consultez:
+
 - Analyse complète: `ANALYSE_COMPLETE_SEO_PLATEFORME_2025.md`
 - Rapport affiliation: `RAPPORT_ANALYSE_COMPLETE_SYSTEME_AFFILIATION.md`
 
 **Ressources externes:**
+
 - Google SEO Starter Guide
 - Schema.org Documentation
 - Moz Beginner's Guide to SEO
@@ -478,4 +517,3 @@ Lors de la création d'une nouvelle page:
 
 **Dernière mise à jour:** 25 Octobre 2025  
 **Version:** 1.0
-

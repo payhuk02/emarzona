@@ -9,10 +9,12 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 ### ✅ Existantes (Déjà déployées)
 
 #### 1. `20251027_digital_products_professional.sql`
+
 **Date:** 27 Octobre 2025  
-**Status:** ✅ Déployé  
+**Status:** ✅ Déployé
 
 **Contenu:**
+
 - Tables de base pour produits digitaux
 - Système de fichiers multi-fichiers
 - Tracking des téléchargements
@@ -20,6 +22,7 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 - Système de mises à jour
 
 **Tables créées:** 6
+
 - `digital_products`
 - `digital_product_files`
 - `digital_product_downloads`
@@ -30,10 +33,12 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 ---
 
 #### 2. `20251029_digital_license_management_system.sql`
+
 **Date:** 29 Octobre 2025  
-**Status:** ✅ Déployé  
+**Status:** ✅ Déployé
 
 **Contenu:**
+
 - Système de licenses professionnel
 - Support multi-devices
 - Activations avec device fingerprinting
@@ -41,21 +46,25 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 - Fonctions de génération et validation
 
 **Tables créées:** 3
+
 - `digital_product_licenses`
 - `license_activations`
 - `license_events`
 
 **Fonctions créées:** 2
+
 - `generate_license_key()` - Génère une clé unique
 - `validate_license(TEXT, TEXT)` - Valide une license
 
 ---
 
 #### 3. `20251029_product_versioning_system.sql`
+
 **Date:** 29 Octobre 2025  
-**Status:** ✅ Déployé  
+**Status:** ✅ Déployé
 
 **Contenu:**
+
 - Versioning sémantique (major.minor.patch)
 - Changelog détaillé
 - Historique des versions
@@ -63,16 +72,19 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 - Notifications de mises à jour
 
 **Tables créées:** 2
+
 - `product_versions`
 - `version_download_logs`
 
 ---
 
 #### 4. `20251029_download_protection_system.sql`
+
 **Date:** 29 Octobre 2025  
-**Status:** ✅ Déployé  
+**Status:** ✅ Déployé
 
 **Contenu:**
+
 - Tokens de téléchargement sécurisés
 - Expiration automatique
 - Limitations (IP, nombre, durée)
@@ -80,10 +92,12 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 - Analytics de téléchargement
 
 **Tables créées:** 2
+
 - `download_tokens`
 - `download_logs`
 
 **Fonctions créées:** 2
+
 - `generate_download_token(...)` - Génère un token sécurisé
 - `validate_download_token(TEXT)` - Valide un token
 
@@ -92,10 +106,12 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 ### ⭐ NOUVELLES (À déployer)
 
 #### 5. `20251029_digital_bundles_system.sql` 🆕
+
 **Date:** 29 Octobre 2025  
-**Status:** ⏳ À déployer  
+**Status:** ⏳ À déployer
 
 **Contenu:**
+
 - Système de bundles (packs de produits)
 - Pricing dynamique avec remises
 - 3 types de remise (%, fixe, custom)
@@ -104,19 +120,23 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 - Statistiques intégrées
 
 **Tables créées:** 2
+
 - `digital_bundles`
 - `digital_bundle_items`
 
 **ENUMS créés:** 2
+
 - `bundle_discount_type`
 - `bundle_status`
 
 **Fonctions créées:** 3
+
 - `calculate_bundle_original_price(UUID)` - Calcule le prix total
 - `update_bundle_pricing()` - Recalcule automatiquement
 - `generate_bundle_slug(UUID, TEXT)` - Génère un slug unique
 
 **Vues créées:** 1
+
 - `digital_bundles_with_stats` - Bundles avec statistiques
 
 **RLS Policies:** 4
@@ -126,10 +146,12 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 ---
 
 #### 6. `20251029_digital_products_enhancements.sql` 🆕
+
 **Date:** 29 Octobre 2025  
-**Status:** ⏳ À déployer  
+**Status:** ⏳ À déployer
 
 **Contenu:**
+
 - Optimisations de performance
 - Indexes supplémentaires
 - Vues pour dashboards
@@ -140,16 +162,19 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 **Tables créées:** 0 (améliore l'existant)
 
 **Indexes créés:** 8
+
 - Performance queries
 - Recherches optimisées
 - Agrégations rapides
 
 **Vues créées:** 3
+
 - `digital_products_stats` - Stats complètes par produit
 - `recent_digital_downloads` - Téléchargements récents
 - `active_digital_licenses` - Licenses actives avec calculs
 
 **Fonctions créées:** 5
+
 - `get_remaining_downloads(UUID, UUID)` - Downloads restants
 - `has_digital_access(UUID, TEXT)` - Vérifier l'accès
 - `get_download_analytics(UUID, INTEGER)` - Analytics détaillées
@@ -157,6 +182,7 @@ Ce dossier contient toutes les migrations SQL pour le système de **Produits Dig
 - `expire_digital_licenses()` - Expirer licenses (cron job)
 
 **Triggers créés:** 1
+
 - `update_stats_after_download` - MAJ automatique stats
 
 **Lignes de code:** ~430 lignes SQL
@@ -212,19 +238,20 @@ Après chaque migration, exécuter :
 
 ```sql
 -- Vérifier les tables
-SELECT tablename FROM pg_tables 
+SELECT tablename FROM pg_tables
 WHERE schemaname = 'public' AND tablename LIKE 'digital_%';
 
 -- Vérifier les fonctions
-SELECT proname FROM pg_proc 
+SELECT proname FROM pg_proc
 WHERE proname LIKE '%digital%' OR proname LIKE '%bundle%';
 
 -- Vérifier les vues
-SELECT viewname FROM pg_views 
+SELECT viewname FROM pg_views
 WHERE schemaname = 'public' AND viewname LIKE '%digital%';
 ```
 
 Ou exécuter le fichier complet de tests :
+
 ```bash
 psql -f supabase/DIGITAL_VALIDATION_TESTS.sql
 ```
@@ -235,16 +262,16 @@ psql -f supabase/DIGITAL_VALIDATION_TESTS.sql
 
 ### Après toutes les migrations
 
-| Métrique | Valeur |
-|----------|--------|
-| **Tables totales** | 15 |
-| **Fonctions totales** | 12 |
-| **Vues totales** | 4 |
-| **Indexes totaux** | ~58 |
-| **RLS Policies** | ~24 |
-| **ENUMS** | 7 |
-| **Triggers** | ~10 |
-| **Lignes SQL** | ~3,000+ |
+| Métrique              | Valeur  |
+| --------------------- | ------- |
+| **Tables totales**    | 15      |
+| **Fonctions totales** | 12      |
+| **Vues totales**      | 4       |
+| **Indexes totaux**    | ~58     |
+| **RLS Policies**      | ~24     |
+| **ENUMS**             | 7       |
+| **Triggers**          | ~10     |
+| **Lignes SQL**        | ~3,000+ |
 
 ---
 
@@ -253,6 +280,7 @@ psql -f supabase/DIGITAL_VALIDATION_TESTS.sql
 ### Tâches régulières recommandées
 
 1. **Quotidiennement** (via pg_cron)
+
    ```sql
    SELECT expire_digital_licenses();
    ```
@@ -272,13 +300,17 @@ psql -f supabase/DIGITAL_VALIDATION_TESTS.sql
 ## 🐛 TROUBLESHOOTING
 
 ### Problème: "relation already exists"
+
 **Solution:** Normal si migration déjà exécutée. Les scripts utilisent `IF NOT EXISTS`.
 
 ### Problème: "permission denied"
+
 **Solution:** Exécuter avec un user SUPERUSER (généralement `postgres`).
 
 ### Problème: Performances lentes
-**Solution:** 
+
+**Solution:**
+
 1. Vérifier les indexes : `SELECT * FROM pg_stat_user_indexes;`
 2. Analyser les queries : `EXPLAIN ANALYZE ...`
 3. Reindex si nécessaire : `REINDEX INDEX index_name;`
@@ -330,4 +362,3 @@ En cas de problème :
 **Last Updated:** 29 Octobre 2025  
 **Maintainer:** Payhula Team  
 **Project:** Emarzona SaaS Platform
-

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * Hook personnalisé pour gérer les favoris du marketplace
@@ -11,6 +12,7 @@ import { logger } from '@/lib/logger';
  */
 export const useMarketplaceFavorites = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -163,6 +165,9 @@ export const useMarketplaceFavorites = () => {
               return newFavorites;
             });
 
+            // Invalider le cache React Query pour forcer le refetch sur la page Wishlist
+            queryClient.invalidateQueries({ queryKey: ['favorite-products'] });
+
             toast({
               title: 'Retiré des favoris',
               description: 'Le produit a été retiré de vos favoris',
@@ -183,6 +188,9 @@ export const useMarketplaceFavorites = () => {
             }
 
             setFavorites(prev => new Set([...prev, productId]));
+
+            // Invalider le cache React Query pour forcer le refetch sur la page Wishlist
+            queryClient.invalidateQueries({ queryKey: ['favorite-products'] });
 
             toast({
               title: 'Ajouté aux favoris',
@@ -209,6 +217,9 @@ export const useMarketplaceFavorites = () => {
 
           setFavorites(newFavorites);
           localStorage.setItem('marketplace-favorites', JSON.stringify([...newFavorites]));
+
+          // Invalider le cache React Query même pour les visiteurs anonymes
+          queryClient.invalidateQueries({ queryKey: ['favorite-products'] });
         }
       } catch (error) {
         logger.error('Erreur lors de la modification des favoris:', error);

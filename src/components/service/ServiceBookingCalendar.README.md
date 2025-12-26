@@ -47,4 +47,3 @@ import ServiceBookingCalendar from '@/components/service/ServiceBookingCalendar'
 - Support clavier complet
 - ARIA labels appropriés
 - Navigation au clavier entre créneaux
-

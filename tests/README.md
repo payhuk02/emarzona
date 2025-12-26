@@ -80,6 +80,7 @@ npx playwright test --debug
 ## 📊 Test Coverage
 
 ### Authentication Tests ✅
+
 - Landing page display
 - Navigation to auth page
 - Form validation
@@ -90,6 +91,7 @@ npx playwright test --debug
 - Protected route redirection
 
 ### Digital Products Tests ✅
+
 - Product creation wizard (6 steps)
 - Field validation
 - File upload
@@ -99,6 +101,7 @@ npx playwright test --debug
 - Product details view
 
 ### Physical Products Tests ✅
+
 - Product creation with inventory
 - Stock management
 - Inventory dashboard
@@ -107,6 +110,7 @@ npx playwright test --debug
 - Product variants
 
 ### Service Products Tests ✅
+
 - Service creation wizard
 - Booking calendar
 - Service booking flow
@@ -114,6 +118,7 @@ npx playwright test --debug
 - Booking cancellation
 
 ### Online Courses Tests ✅
+
 - Course creation
 - Course enrollment
 - Course lessons viewing
@@ -122,6 +127,7 @@ npx playwright test --debug
 - Certificate download
 
 ### Purchase Flow Tests ✅
+
 - Complete digital product purchase
 - Percentage payment
 - Escrow payment
@@ -131,6 +137,7 @@ npx playwright test --debug
 - Invoice download
 
 ### Shipping & Tracking Tests ✅
+
 - Shipping rate calculation
 - Shipping method selection
 - Label creation
@@ -140,6 +147,7 @@ npx playwright test --debug
 - Delivery status updates
 
 ### Messaging & Payments Tests ✅
+
 - Order messaging
 - Media upload in chat
 - Payment management
@@ -174,10 +182,10 @@ test.describe('Feature Name', () => {
   test('should do something specific', async ({ page }) => {
     // Arrange
     await page.goto('/some-page');
-    
+
     // Act
     await page.click('button');
-    
+
     // Assert
     await expect(page.locator('text=Success')).toBeVisible();
   });
@@ -196,6 +204,7 @@ test.describe('Feature Name', () => {
 ## 🎯 CI/CD Integration
 
 Tests run automatically on:
+
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop`
 
@@ -215,6 +224,7 @@ Reports are also generated in CI and available as artifacts.
 ## 🐛 Troubleshooting
 
 ### Tests timing out?
+
 Increase timeout in `playwright.config.ts` or individual tests:
 
 ```typescript
@@ -224,6 +234,7 @@ test('slow test', async ({ page }) => {
 ```
 
 ### Elements not found?
+
 Add explicit waits:
 
 ```typescript
@@ -231,6 +242,7 @@ await page.waitForSelector('[data-testid="element"]');
 ```
 
 ### Network issues?
+
 Check if dev server is running:
 
 ```bash
@@ -246,6 +258,7 @@ npm run dev
 ## 🤝 Contributing
 
 When adding new features:
+
 1. Write E2E tests for the new functionality
 2. Ensure all tests pass locally
 3. Add test descriptions to this README
@@ -256,4 +269,3 @@ When adding new features:
 **Total Tests**: 50+  
 **Coverage**: Authentication, Products (4 types), Purchase Flows, Shipping, Messaging, Payments  
 **Last Updated**: October 2025
-

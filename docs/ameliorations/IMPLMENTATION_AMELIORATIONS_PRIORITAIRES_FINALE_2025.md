@@ -32,6 +32,7 @@ Implémentation complète des améliorations prioritaires identifiées dans l'au
 ## 3️⃣ Paiement Automatique des Commissions
 
 ### Fichiers créés:
+
 - `supabase/functions/auto-pay-commissions/index.ts`
 - `supabase/functions/auto-pay-commissions/README.md`
 
@@ -55,7 +56,7 @@ Implémentation complète des améliorations prioritaires identifiées dans l'au
 ```json
 {
   "auto_pay_commissions": {
-    "enabled": false,  // Désactivé par défaut (nécessite validation admin)
+    "enabled": false, // Désactivé par défaut (nécessite validation admin)
     "minCommissionAmount": 50000
   }
 }
@@ -64,11 +65,13 @@ Implémentation complète des améliorations prioritaires identifiées dans l'au
 ### Déploiement:
 
 1. **Déployer l'Edge Function:**
+
 ```bash
 supabase functions deploy auto-pay-commissions
 ```
 
 2. **Configurer le Cron Job:**
+
 - Schedule: `0 2 * * *` (tous les jours à 2h du matin)
 - Voir `supabase/functions/auto-pay-commissions/README.md` pour les détails
 
@@ -79,6 +82,7 @@ supabase functions deploy auto-pay-commissions
 ## 4️⃣ Monitoring et Alertes Transactions
 
 ### Fichiers créés:
+
 - `supabase/functions/transaction-alerts/index.ts`
 - `supabase/functions/transaction-alerts/README.md`
 
@@ -116,11 +120,13 @@ supabase functions deploy auto-pay-commissions
 ### Déploiement:
 
 1. **Déployer l'Edge Function:**
+
 ```bash
 supabase functions deploy transaction-alerts
 ```
 
 2. **Configurer le Cron Job:**
+
 - Schedule: `0 */6 * * *` (toutes les 6 heures)
 - Voir `supabase/functions/transaction-alerts/README.md` pour les détails
 
@@ -128,7 +134,7 @@ supabase functions deploy transaction-alerts
 
 ```sql
 -- Toutes les alertes des dernières 24h
-SELECT 
+SELECT
   *,
   request_data->>'message' as alert_message
 FROM transaction_logs
@@ -142,6 +148,7 @@ ORDER BY created_at DESC;
 ## 5️⃣ Interface de Réconciliation
 
 ### Fichiers créés:
+
 - `src/pages/admin/AdminTransactionReconciliation.tsx`
 - Route ajoutée dans `src/App.tsx`
 
@@ -193,6 +200,7 @@ Route: `/admin/transaction-reconciliation`
 ## 6️⃣ Migrations SQL
 
 ### Fichiers créés:
+
 - `supabase/migrations/20250201_add_amount_tolerance_setting.sql`
 - `supabase/migrations/20250201_add_auto_pay_and_alerts_config.sql`
 - `supabase/migrations/20250201_fix_transaction_retries_trigger.sql`
@@ -201,18 +209,21 @@ Route: `/admin/transaction-reconciliation`
 ### À appliquer:
 
 1. **Migration amount tolerance:**
+
 ```bash
 # Via Supabase Dashboard → SQL Editor
 # Exécuter: supabase/migrations/20250201_add_amount_tolerance_setting.sql
 ```
 
 2. **Migration auto-pay et alertes:**
+
 ```bash
 # Via Supabase Dashboard → SQL Editor
 # Exécuter: supabase/migrations/20250201_add_auto_pay_and_alerts_config.sql
 ```
 
 3. **Migration trigger transaction_retries:**
+
 ```bash
 # Via Supabase Dashboard → SQL Editor
 # Exécuter: supabase/migrations/20250201_fix_transaction_retries_trigger.sql
@@ -227,6 +238,7 @@ Route: `/admin/transaction-reconciliation`
 1. **Appliquer les migrations SQL** (voir section 6)
 
 2. **Déployer les Edge Functions:**
+
 ```bash
 supabase functions deploy retry-failed-transactions
 supabase functions deploy auto-pay-commissions
@@ -266,4 +278,3 @@ supabase functions deploy transaction-alerts
 
 **Date d'implémentation**: 1 Février 2025  
 **Statut**: ✅ Prêt pour déploiement et tests
-

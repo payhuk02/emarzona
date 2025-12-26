@@ -9,7 +9,7 @@
 ### 1. Voir tous les cron jobs actifs
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -21,6 +21,7 @@ ORDER BY jobname;
 ```
 
 **Résultat attendu** :
+
 - `auto-payout-vendors-daily` : schedule `0 3 * * *`, active `true`
 - `auto-pay-referral-commissions-daily` : schedule `0 4 * * *`, active `true`
 
@@ -33,7 +34,7 @@ ORDER BY jobname;
 La table `cron.job_run_details` utilise `jobid` au lieu de `jobname`. Voici la requête corrigée :
 
 ```sql
-SELECT 
+SELECT
   jrd.runid,
   j.jobname,
   jrd.status,
@@ -49,6 +50,7 @@ LIMIT 20;
 ```
 
 **Colonnes disponibles dans `cron.job_run_details`** :
+
 - `runid` : ID de l'exécution
 - `jobid` : ID du job (FK vers `cron.job`)
 - `status` : Statut de l'exécution (`succeeded`, `failed`, `running`)
@@ -64,7 +66,7 @@ LIMIT 20;
 ### 3. Vérifier que les fonctionnalités sont activées
 
 ```sql
-SELECT 
+SELECT
   settings->'auto_payout_vendors'->>'enabled' as auto_payout_enabled,
   settings->'auto_payout_vendors'->>'delay_days' as delay_days,
   settings->'auto_payout_vendors'->>'min_amount' as min_amount,
@@ -75,6 +77,7 @@ WHERE key = 'admin';
 ```
 
 **Résultat attendu** :
+
 - `auto_payout_enabled`: `true`
 - `delay_days`: `7`
 - `min_amount`: `50000`
@@ -88,7 +91,7 @@ WHERE key = 'admin';
 ### 4. Statistiques des exécutions (succès/échecs)
 
 ```sql
-SELECT 
+SELECT
   j.jobname,
   COUNT(*) as total_runs,
   COUNT(*) FILTER (WHERE jrd.status = 'succeeded') as succeeded,
@@ -146,7 +149,7 @@ FROM cron.job
 WHERE jobname IN ('auto-payout-vendors-daily', 'auto-pay-referral-commissions-daily');
 
 -- Vérifier les erreurs récentes
-SELECT 
+SELECT
   j.jobname,
   jrd.status,
   jrd.return_message,
@@ -162,5 +165,3 @@ LIMIT 10;
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

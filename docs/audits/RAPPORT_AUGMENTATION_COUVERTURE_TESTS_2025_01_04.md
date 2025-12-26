@@ -27,6 +27,7 @@
 **Fichier**: `src/components/ui/__tests__/LanguageSwitcher.test.tsx`
 
 **Couverture**:
+
 - ✅ Affichage de la langue actuelle (flag et nom)
 - ✅ Affichage du bouton de sélection
 - ✅ Ouverture du menu dropdown
@@ -43,10 +44,12 @@
 **Tests**: 13 tests (6 passent, 7 nécessitent configuration Radix UI)
 
 **Problèmes Identifiés**:
+
 - ⚠️ Radix UI nécessite un mock de `IntersectionObserver` pour les tests
 - ⚠️ Les tests d'interaction avec le dropdown nécessitent une configuration spéciale
 
 **Recommandations**:
+
 ```typescript
 // Ajouter dans vitest.setup.ts
 global.IntersectionObserver = class IntersectionObserver {
@@ -64,6 +67,7 @@ global.IntersectionObserver = class IntersectionObserver {
 **Fichier**: `src/components/__tests__/AppSidebar.test.tsx`
 
 **Couverture**:
+
 - ✅ Affichage du logo
 - ✅ Affichage des sections de menu
 - ✅ Navigation vers les routes (Dashboard, Produits, Commandes)
@@ -77,6 +81,7 @@ global.IntersectionObserver = class IntersectionObserver {
 **Tests**: 10 tests (nécessitent mocks des contextes)
 
 **Dépendances Mockées**:
+
 - ✅ `StoreContext`
 - ✅ `AuthContext`
 - ✅ `useAdmin` hook
@@ -91,6 +96,7 @@ global.IntersectionObserver = class IntersectionObserver {
 **Fichier**: `src/components/checkout/__tests__/PaymentProviderSelector.test.tsx`
 
 **Couverture**:
+
 - ✅ Affichage des providers disponibles (Moneroo, PayDunya)
 - ✅ Sélection d'un provider
 - ✅ Sauvegarde de la préférence utilisateur
@@ -105,6 +111,7 @@ global.IntersectionObserver = class IntersectionObserver {
 **Tests**: 10 tests (tous fonctionnels avec mocks Supabase)
 
 **Dépendances Mockées**:
+
 - ✅ `AuthContext`
 - ✅ `supabase` client
 
@@ -113,16 +120,19 @@ global.IntersectionObserver = class IntersectionObserver {
 ## 📊 Statistiques
 
 ### Avant
+
 - **Tests unitaires**: 48 fichiers
 - **Tests E2E**: 27 fichiers
 - **Composants critiques testés**: ~60%
 
 ### Après
+
 - **Tests unitaires**: **51 fichiers** (+3)
 - **Tests E2E**: 27 fichiers
 - **Composants critiques testés**: **~75%** (+15%)
 
 ### Nouveaux Tests
+
 - **LanguageSwitcher**: 13 tests
 - **AppSidebar**: 10 tests
 - **PaymentProviderSelector**: 10 tests
@@ -177,16 +187,19 @@ export default defineConfig({
 ## ✅ Tests Fonctionnels
 
 ### PaymentProviderSelector
+
 - ✅ **100% des tests passent** (10/10)
 - ✅ Mocks Supabase fonctionnels
 - ✅ Tests d'interaction complets
 
 ### LanguageSwitcher
+
 - ✅ **46% des tests passent** (6/13)
 - ⚠️ 7 tests nécessitent configuration Radix UI
 - ✅ Tests de base fonctionnels
 
 ### AppSidebar
+
 - ⚠️ Nécessite configuration des mocks de contextes
 - ✅ Structure de tests complète
 
@@ -195,11 +208,13 @@ export default defineConfig({
 ## 📝 Prochaines Étapes
 
 ### Court Terme
+
 1. ⏳ Ajouter mocks `IntersectionObserver` et `ResizeObserver` dans `vitest.setup.ts`
 2. ⏳ Configurer les mocks de contextes pour `AppSidebar`
 3. ⏳ Exécuter tous les tests et corriger les échecs
 
 ### Moyen Terme
+
 4. ⏳ Créer des tests pour d'autres composants critiques :
    - `Checkout` (page complète)
    - `Cart` (panier)
@@ -207,6 +222,7 @@ export default defineConfig({
    - `OrderDetail` (détails de commande)
 
 ### Long Terme
+
 5. ⏳ Atteindre **80% de couverture** globale
 6. ⏳ Intégrer les tests dans CI/CD
 7. ⏳ Ajouter des tests de performance
@@ -216,6 +232,7 @@ export default defineConfig({
 ## 🎉 Résultats
 
 ### Améliorations
+
 - ✅ **+3 fichiers de tests** créés
 - ✅ **+33 tests** ajoutés
 - ✅ **+15% de couverture** sur les composants critiques
@@ -223,6 +240,7 @@ export default defineConfig({
 - ✅ Mocks appropriés pour les dépendances
 
 ### Composants Critiques Maintenant Testés
+
 - ✅ **LanguageSwitcher** (i18n)
 - ✅ **AppSidebar** (navigation)
 - ✅ **PaymentProviderSelector** (paiements)
@@ -246,8 +264,3 @@ export default defineConfig({
 **Prochaine révision**: 2025-01-11
 
 **Status**: ✅ **TESTS CRÉÉS** - Configuration Radix UI nécessaire pour compléter
-
-
-
-
-

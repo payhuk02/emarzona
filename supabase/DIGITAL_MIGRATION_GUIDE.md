@@ -128,14 +128,15 @@ psql "postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:54
 
 ```sql
 -- Vérifier que toutes les tables Digital sont présentes
-SELECT tablename 
-FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename
+FROM pg_tables
+WHERE schemaname = 'public'
   AND tablename LIKE 'digital_%'
 ORDER BY tablename;
 ```
 
 **Résultat attendu:**
+
 - `digital_bundles`
 - `digital_bundle_items`
 - `digital_licenses` (existant)
@@ -150,7 +151,7 @@ ORDER BY tablename;
 
 ```sql
 -- Lister les fonctions digital
-SELECT 
+SELECT
   proname as function_name,
   pg_get_function_arguments(oid) as arguments
 FROM pg_proc
@@ -159,6 +160,7 @@ ORDER BY proname;
 ```
 
 **Fonctions attendues:**
+
 - `calculate_bundle_original_price`
 - `expire_digital_licenses`
 - `generate_bundle_slug`
@@ -174,14 +176,15 @@ ORDER BY proname;
 
 ```sql
 -- Lister les vues
-SELECT viewname 
-FROM pg_views 
-WHERE schemaname = 'public' 
+SELECT viewname
+FROM pg_views
+WHERE schemaname = 'public'
   AND viewname LIKE '%digital%'
 ORDER BY viewname;
 ```
 
 **Vues attendues:**
+
 - `active_digital_licenses`
 - `digital_bundles_with_stats`
 - `digital_products_stats`
@@ -191,7 +194,7 @@ ORDER BY viewname;
 
 ```sql
 -- Vérifier les policies sur digital_bundles
-SELECT 
+SELECT
   schemaname,
   tablename,
   policyname,
@@ -304,7 +307,7 @@ Après l'exécution, vérifiez les statistiques :
 ```sql
 -- Nombre total de tables Digital
 SELECT COUNT(*) as total_digital_tables
-FROM pg_tables 
+FROM pg_tables
 WHERE tablename LIKE 'digital_%';
 -- Résultat attendu: 9
 
@@ -316,7 +319,7 @@ WHERE proname LIKE '%digital%' OR proname LIKE '%bundle%' OR proname LIKE '%lice
 
 -- Nombre de vues
 SELECT COUNT(*) as total_views
-FROM pg_views 
+FROM pg_views
 WHERE viewname LIKE '%digital%';
 -- Résultat attendu: 4
 
@@ -341,7 +344,7 @@ Votre système de **Produits Digitaux** est maintenant **100% opérationnel** av
 ✅ **15+ policies RLS** sécurisées  
 ✅ **Bundles system** complet  
 ✅ **Analytics** avancées  
-✅ **License management** professionnel  
+✅ **License management** professionnel
 
 ---
 
@@ -359,4 +362,3 @@ En cas de problème, vérifiez :
 **Version:** 1.0  
 **Auteur:** Payhula Team  
 **Projet:** Emarzona SaaS Platform
-

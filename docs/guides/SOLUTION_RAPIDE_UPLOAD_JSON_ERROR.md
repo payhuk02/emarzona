@@ -55,9 +55,11 @@ Si vous voyez des ⚠️ ou ❌, suivez les instructions affichées.
 Pour vérifier que tout fonctionne :
 
 1. **Testez une URL publique** dans votre navigateur :
+
    ```
    https://[votre-projet].supabase.co/storage/v1/object/public/attachments/[chemin-fichier]
    ```
+
    - Si l'image s'affiche → ✅ Problème résolu
    - Si vous voyez du JSON → ❌ Le problème persiste
 
@@ -90,6 +92,7 @@ Si rien ne fonctionne, vous pouvez recréer le bucket :
 ### Option 3 : Contacter le Support
 
 Si le problème persiste après toutes ces étapes :
+
 - 📧 Email : support@emarzona.com
 - 💬 Chat : Disponible dans le dashboard
 - 📝 Incluez :
@@ -124,4 +127,3 @@ Pour éviter ce problème à l'avenir :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

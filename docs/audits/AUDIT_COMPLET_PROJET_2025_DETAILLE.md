@@ -74,7 +74,7 @@ src/
 
 - **164 pages** avec lazy loading
 - **Problème** : Maintenance difficile, risque de routes orphelines
-- **Recommandation** : 
+- **Recommandation** :
   - Documenter toutes les routes dans un fichier central
   - Créer un script de vérification des routes
   - Considérer la consolidation de routes similaires
@@ -83,7 +83,7 @@ src/
 
 - **100+ fichiers .md** à la racine
 - **Problème** : Pollution du workspace, difficulté de navigation
-- **Recommandation** : 
+- **Recommandation** :
   - Déplacer dans `docs/` avec structure organisée
   - Créer un index centralisé
   - Archiver les anciens audits
@@ -95,6 +95,7 @@ src/
 ### ✅ Configuration Vite
 
 **Points positifs** :
+
 - Code splitting configuré
 - Optimisations de build (esbuild, tree-shaking)
 - Plugin Sentry pour source maps
@@ -110,23 +111,27 @@ src/
 return undefined; // Garder dans le chunk principal par défaut
 ```
 
-**Problème** : 
+**Problème** :
+
 - Toutes les dépendances React restent dans le chunk principal
 - Bundle initial potentiellement volumineux
 - Code splitting limité
 
 **Recommandation** :
+
 - Analyser la taille réelle du bundle avec `rollup-plugin-visualizer`
 - Identifier les dépendances qui peuvent être séparées
 - Implémenter un code splitting plus agressif pour les pages admin
 
 #### 3.2 Absence de `.env.example`
 
-**Problème** : 
+**Problème** :
+
 - Variables d'environnement non documentées
 - Difficulté pour les nouveaux développeurs
 
 **Recommandation** :
+
 ```bash
 # Créer .env.example avec toutes les variables nécessaires
 VITE_SUPABASE_URL=
@@ -140,11 +145,13 @@ VITE_SENTRY_DSN=
 #### 3.3 TypeScript Configuration
 
 **Points positifs** :
+
 - `strictNullChecks: true`
 - `noImplicitAny: true`
 - `noUnusedLocals: true`
 
 **Recommandation** :
+
 - Activer `strict: true` dans `tsconfig.app.json`
 - Ajouter `noUncheckedIndexedAccess: true` pour plus de sécurité
 
@@ -165,20 +172,24 @@ VITE_SENTRY_DSN=
 #### 4.1 Utilisation de `console.*` Résiduelle
 
 **Fichiers concernés** :
+
 - `src/hooks/useKeyboardNavigation.ts:144` : `console.log`
 - `scripts/analyze-bundle-imports.js` : Utilisation normale (script Node)
 
 **Recommandation** :
+
 - Remplacer `console.log` par `logger.debug()` dans `useKeyboardNavigation.ts`
 - Vérifier qu'aucun autre `console.*` n'existe dans le code source
 
 #### 4.2 TODOs Non Résolus
 
 **Fichiers concernés** :
+
 - `src/components/products/create/digital/CreateDigitalProductWizard_v2.tsx:301` : TODO sauvegarde BDD
 - `src/hooks/useKeyboardNavigation.ts:143` : TODO recherche globale
 
 **Recommandation** :
+
 - Créer des issues GitHub pour chaque TODO
 - Ou implémenter les fonctionnalités manquantes
 - Ou supprimer les TODOs obsolètes
@@ -186,21 +197,25 @@ VITE_SENTRY_DSN=
 #### 4.3 Gestion d'Erreurs Incohérente
 
 **Problème** :
+
 - Certains hooks utilisent `useErrorHandler`
 - D'autres gèrent les erreurs manuellement
 - Pas de stratégie uniforme
 
 **Recommandation** :
+
 - Standardiser l'utilisation de `useErrorHandler` ou `useQueryWithErrorHandling`
 - Créer un guide de gestion d'erreurs
 
 #### 4.4 Duplication de Logique
 
 **Exemples** :
+
 - Plusieurs hooks pour les statistiques dashboard
 - Logique de validation dupliquée dans plusieurs composants
 
 **Recommandation** :
+
 - Extraire la logique commune dans des hooks partagés
 - Créer des utilitaires réutilisables
 
@@ -221,10 +236,12 @@ VITE_SENTRY_DSN=
 #### 5.1 Bundle Size Potentiellement Élevé
 
 **Problème** :
+
 - Configuration conservatrice garde tout dans le chunk principal
 - Pas de visualisation du bundle size
 
 **Recommandation** :
+
 ```bash
 # Activer le visualizer pour analyser
 npm run build:analyze
@@ -238,12 +255,14 @@ visualizer({
 #### 5.2 React Query Configuration
 
 **Configuration actuelle** :
+
 ```typescript
 staleTime: 5 * 60 * 1000, // 5 minutes
 gcTime: 10 * 60 * 1000, // 10 minutes
 ```
 
 **Recommandation** :
+
 - Ajuster selon le type de données :
   - Données statiques (produits) : `staleTime: 30 * 60 * 1000` (30 min)
   - Données dynamiques (commandes) : `staleTime: 1 * 60 * 1000` (1 min)
@@ -252,12 +271,14 @@ gcTime: 10 * 60 * 1000, // 10 minutes
 #### 5.3 Absence de Prefetching
 
 **Recommandation** :
+
 - Implémenter le prefetching pour les routes fréquentes
 - Utiliser `queryClient.prefetchQuery()` dans les composants de navigation
 
 #### 5.4 Images Non Optimisées
 
 **Recommandation** :
+
 - Implémenter le lazy loading des images avec `loading="lazy"`
 - Utiliser des formats modernes (WebP, AVIF)
 - Implémenter un CDN pour les images
@@ -279,10 +300,12 @@ gcTime: 10 * 60 * 1000, // 10 minutes
 #### 6.1 Variables d'Environnement Non Validées
 
 **Problème** :
+
 - Validation basique dans `supabase/client.ts`
 - Pas de validation pour toutes les variables
 
 **Recommandation** :
+
 ```typescript
 // Créer src/lib/env-validator.ts
 import { z } from 'zod';
@@ -300,22 +323,26 @@ export const env = envSchema.parse(import.meta.env);
 #### 6.2 Absence de CSRF Protection
 
 **Recommandation** :
+
 - Implémenter des tokens CSRF pour les formulaires critiques
 - Utiliser les headers Supabase pour la protection
 
 #### 6.3 Validation Côté Serveur
 
 **Problème** :
+
 - Validation Zod côté client uniquement
 - Pas de validation serveur garantie
 
 **Recommandation** :
+
 - Implémenter des Edge Functions Supabase avec validation
 - Utiliser les RLS (Row Level Security) de Supabase
 
 #### 6.4 Gestion des Secrets
 
 **Recommandation** :
+
 - Ne jamais exposer les clés secrètes dans le code client
 - Utiliser des Edge Functions pour les opérations sensibles
 - Documenter les bonnes pratiques dans le README
@@ -336,6 +363,7 @@ export const env = envSchema.parse(import.meta.env);
 #### 7.1 Tests d'Accessibilité Non Automatisés
 
 **Recommandation** :
+
 ```bash
 # Ajouter dans CI/CD
 npm run test:a11y
@@ -344,12 +372,14 @@ npm run test:a11y
 #### 7.2 Responsivité Non Vérifiée Systématiquement
 
 **Recommandation** :
+
 - Activer les tests responsive dans Playwright
 - Créer des tests visuels pour les breakpoints critiques
 
 #### 7.3 Absence de Lighthouse CI
 
 **Recommandation** :
+
 - Intégrer Lighthouse CI dans le pipeline
 - Objectif : Score 90+ sur Performance et Accessibility
 
@@ -371,28 +401,33 @@ npm run test:a11y
 #### 8.1 Configuration Moneroo
 
 **Points positifs** :
+
 - Retry logic avec exponential backoff
 - Rate limiting
 - Cache intelligent
 - Error handling robuste
 
 **Recommandation** :
+
 - Documenter les variables d'environnement Moneroo
 - Créer un guide de troubleshooting
 
 #### 8.2 Gestion des Erreurs API
 
 **Problème** :
+
 - Erreurs Moneroo bien gérées
 - Autres APIs (PayDunya, etc.) moins robustes
 
 **Recommandation** :
+
 - Standardiser la gestion d'erreurs pour toutes les APIs
 - Créer un wrapper générique pour les appels API
 
 #### 8.3 Webhooks Non Sécurisés
 
 **Recommandation** :
+
 - Valider les signatures des webhooks
 - Implémenter un système de vérification
 
@@ -411,10 +446,12 @@ npm run test:a11y
 #### 9.1 Couverture de Tests Insuffisante
 
 **Problème** :
+
 - 28 fichiers de test pour 164 pages + 216 hooks
 - Couverture estimée < 20%
 
 **Recommandation** :
+
 - Objectif : 70% de couverture minimum
 - Prioriser les composants critiques (paiements, auth, produits)
 - Ajouter des tests pour les hooks les plus utilisés
@@ -422,6 +459,7 @@ npm run test:a11y
 #### 9.2 Tests E2E Limités
 
 **Recommandation** :
+
 - Ajouter des tests E2E pour les flux critiques :
   - Création de compte → Achat → Paiement
   - Création de produit → Publication → Vente
@@ -430,6 +468,7 @@ npm run test:a11y
 #### 9.3 Absence de Tests d'Intégration
 
 **Recommandation** :
+
 - Créer des tests d'intégration pour les Edge Functions Supabase
 - Tester les webhooks
 
@@ -448,10 +487,12 @@ npm run test:a11y
 #### 10.1 Documentation Proliférante
 
 **Problème** :
+
 - 100+ fichiers .md à la racine
 - Difficile de trouver l'information
 
 **Recommandation** :
+
 ```
 docs/
 ├── architecture/
@@ -465,6 +506,7 @@ docs/
 #### 10.2 Absence de Documentation API
 
 **Recommandation** :
+
 - Documenter les hooks personnalisés
 - Créer un guide d'utilisation des composants
 - Documenter les types TypeScript
@@ -472,6 +514,7 @@ docs/
 #### 10.3 README Potentiellement Obsolète
 
 **Recommandation** :
+
 - Vérifier et mettre à jour le README
 - Ajouter :
   - Guide d'installation
@@ -578,18 +621,21 @@ docs/
 ### Score Global : 7.5/10
 
 **Forces** :
+
 - Architecture moderne et bien structurée
 - Stack technique solide
 - Gestion d'erreurs robuste
 - Monitoring intégré
 
 **Faiblesses** :
+
 - Documentation désorganisée
 - Couverture de tests insuffisante
 - Configuration Vite trop conservatrice
 - Variables d'environnement non validées
 
 **Priorités** :
+
 1. Organisation et nettoyage
 2. Tests et qualité
 3. Performance
@@ -600,4 +646,3 @@ docs/
 **Audit réalisé par** : Auto (Cursor AI)  
 **Date** : Janvier 2025  
 **Prochaine révision** : Février 2025
-

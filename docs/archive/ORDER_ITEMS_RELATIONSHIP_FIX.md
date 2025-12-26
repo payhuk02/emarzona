@@ -9,6 +9,7 @@ Erreur: Could not find a relationship between 'order_items' and 'orders' in the 
 ```
 
 ### **Cause du Problème**
+
 - Le cache de schéma Supabase n'est pas synchronisé
 - Les relations entre les tables `order_items` et `orders` ne sont pas reconnues
 - Les contraintes de clé étrangère peuvent être corrompues ou manquantes
@@ -16,11 +17,13 @@ Erreur: Could not find a relationship between 'order_items' and 'orders' in the 
 ## 🔍 Analyse du Problème
 
 ### **Tables Concernées**
+
 - **`orders`** : Table des commandes
 - **`order_items`** : Table des éléments de commande
 - **Relation** : `order_items.order_id` → `orders.id`
 
 ### **Structure Attendue**
+
 ```sql
 -- Table orders
 CREATE TABLE public.orders (
@@ -44,6 +47,7 @@ CREATE TABLE public.order_items (
 ```
 
 ### **Problème de Cache**
+
 - Supabase utilise un cache de schéma pour optimiser les performances
 - Ce cache peut devenir désynchronisé après des modifications
 - Les relations ne sont plus reconnues par l'API
@@ -56,7 +60,7 @@ CREATE TABLE public.order_items (
 
 ```sql
 -- 1. Vérifier l'existence des tables
-SELECT schemaname, tablename FROM pg_tables 
+SELECT schemaname, tablename FROM pg_tables
 WHERE tablename IN ('orders', 'order_items');
 
 -- 2. Vérifier les contraintes de clé étrangère
@@ -68,17 +72,17 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
     AND tc.table_name IN ('orders', 'order_items');
 
 -- 3. Recréer la contrainte de clé étrangère
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 DROP CONSTRAINT IF EXISTS order_items_order_id_fkey;
 
-ALTER TABLE public.order_items 
-ADD CONSTRAINT order_items_order_id_fkey 
-FOREIGN KEY (order_id) 
-REFERENCES public.orders(id) 
+ALTER TABLE public.order_items
+ADD CONSTRAINT order_items_order_id_fkey
+FOREIGN KEY (order_id)
+REFERENCES public.orders(id)
 ON DELETE CASCADE;
 
 -- 4. S'assurer que order_number existe
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS order_number TEXT UNIQUE;
 
 -- 5. Créer un index pour les performances
@@ -104,21 +108,25 @@ LIMIT 5;
 ## 🎯 Fonctionnalités de la Correction
 
 ### **1. Vérification Complète**
+
 - **Existence des tables** : Vérifie que `orders` et `order_items` existent
 - **Contraintes** : Vérifie les clés étrangères existantes
 - **Index** : Vérifie les index de performance
 
 ### **2. Recréation des Relations**
+
 - **Contrainte FK** : Recrée `order_items_order_id_fkey`
 - **Cascade Delete** : Supprime les éléments si la commande est supprimée
 - **Index** : Optimise les performances des requêtes
 
 ### **3. Synchronisation du Cache**
+
 - **NOTIFY pgrst** : Force Supabase à recharger le schéma
 - **Cache Refresh** : Synchronise les métadonnées
 - **API Update** : Met à jour l'API automatiquement
 
 ### **4. Tests de Validation**
+
 - **JOIN Tests** : Vérifie que les relations fonctionnent
 - **Insertion Tests** : Teste la création de données liées
 - **Performance Tests** : Vérifie les performances
@@ -126,6 +134,7 @@ LIMIT 5;
 ## 🚀 Instructions d'Exécution
 
 ### **1. Exécuter le SQL dans Supabase**
+
 ```
 1. Ouvrez : https://supabase.com/dashboard/project/your-project-id
 2. Allez dans "SQL Editor"
@@ -134,12 +143,14 @@ LIMIT 5;
 ```
 
 ### **2. Vérifier la Correction**
+
 ```bash
 # Tester les relations
 node scripts/test-order-items-relationship.js
 ```
 
 ### **3. Tester l'Application**
+
 - Rechargez l'application sur `https://payhuk.vercel.app/dashboard`
 - L'erreur "Could not find a relationship" devrait disparaître
 - Les requêtes avec JOIN fonctionneront correctement
@@ -147,11 +158,13 @@ node scripts/test-order-items-relationship.js
 ## 📊 Résultat Attendu
 
 ### **Avant la Correction**
+
 - ❌ Erreur : "Could not find a relationship between 'order_items' and 'orders'"
 - ❌ Requêtes JOIN échouent
 - ❌ Application non fonctionnelle
 
 ### **Après la Correction**
+
 - ✅ Relations `order_items` ↔ `orders` reconnues
 - ✅ Requêtes JOIN fonctionnelles
 - ✅ Cache de schéma synchronisé
@@ -160,6 +173,7 @@ node scripts/test-order-items-relationship.js
 ## 🧪 Tests de Validation
 
 ### **1. Test de Relation Simple**
+
 ```sql
 SELECT o.id, o.order_number, oi.product_name
 FROM orders o
@@ -168,8 +182,9 @@ LIMIT 5;
 ```
 
 ### **2. Test de Relation Complexe**
+
 ```sql
-SELECT 
+SELECT
     o.order_number,
     o.total_amount,
     COUNT(oi.id) as item_count,
@@ -180,9 +195,10 @@ GROUP BY o.id, o.order_number, o.total_amount;
 ```
 
 ### **3. Test d'Insertion**
+
 ```sql
 -- Créer une commande
-INSERT INTO orders (store_id, status, total_amount) 
+INSERT INTO orders (store_id, status, total_amount)
 VALUES ('store-uuid', 'pending', 1000);
 
 -- Créer un élément de commande

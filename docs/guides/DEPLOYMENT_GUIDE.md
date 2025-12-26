@@ -42,19 +42,19 @@
 
 ### Variables obligatoires :
 
-| Variable | Description | Où la trouver |
-|----------|-------------|---------------|
-| `VITE_SUPABASE_URL` | URL du projet Supabase | Supabase Dashboard > Settings > API |
+| Variable                        | Description                      | Où la trouver                       |
+| ------------------------------- | -------------------------------- | ----------------------------------- |
+| `VITE_SUPABASE_URL`             | URL du projet Supabase           | Supabase Dashboard > Settings > API |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Clé publique Supabase (anon key) | Supabase Dashboard > Settings > API |
 
 ### Variables optionnelles :
 
-| Variable | Description | Où la trouver |
-|----------|-------------|---------------|
-| `VITE_SENTRY_DSN` | DSN Sentry pour le monitoring | Sentry.io > Project Settings > Client Keys |
-| `VITE_MONEROO_API_KEY` | Clé API Moneroo | Moneroo Dashboard > API Keys |
-| `VITE_GA_ID` | Google Analytics ID | Google Analytics |
-| `VITE_FB_PIXEL_ID` | Facebook Pixel ID | Facebook Business Manager |
+| Variable               | Description                   | Où la trouver                              |
+| ---------------------- | ----------------------------- | ------------------------------------------ |
+| `VITE_SENTRY_DSN`      | DSN Sentry pour le monitoring | Sentry.io > Project Settings > Client Keys |
+| `VITE_MONEROO_API_KEY` | Clé API Moneroo               | Moneroo Dashboard > API Keys               |
+| `VITE_GA_ID`           | Google Analytics ID           | Google Analytics                           |
+| `VITE_FB_PIXEL_ID`     | Facebook Pixel ID             | Facebook Business Manager                  |
 
 ### Créer un fichier `.env.local` pour le développement :
 
@@ -94,13 +94,13 @@ git push -u origin main
 
 Dans la page de configuration :
 
-| Champ | Valeur |
-|-------|--------|
-| **Framework Preset** | Vite |
-| **Build Command** | `npm run build` |
-| **Output Directory** | `dist` |
-| **Install Command** | `npm install` |
-| **Node.js Version** | 18.x |
+| Champ                | Valeur          |
+| -------------------- | --------------- |
+| **Framework Preset** | Vite            |
+| **Build Command**    | `npm run build` |
+| **Output Directory** | `dist`          |
+| **Install Command**  | `npm install`   |
+| **Node.js Version**  | 18.x            |
 
 #### 4️⃣ **Ajouter les variables d'environnement**
 
@@ -269,10 +269,10 @@ Vercel vous donnera des instructions pour configurer vos DNS :
 
 #### Si vous utilisez Namecheap, GoDaddy, etc. :
 
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| A | @ | `76.76.21.21` | 3600 |
-| CNAME | www | `cname.vercel-dns.com` | 3600 |
+| Type  | Name | Value                  | TTL  |
+| ----- | ---- | ---------------------- | ---- |
+| A     | @    | `76.76.21.21`          | 3600 |
+| CNAME | www  | `cname.vercel-dns.com` | 3600 |
 
 #### Si vous utilisez Cloudflare :
 
@@ -353,6 +353,7 @@ https://pagespeed.web.dev/?url=https://payhuk.com
 ```
 
 **Objectifs :**
+
 - ✅ Performance : > 90
 - ✅ Accessibility : > 95
 - ✅ Best Practices : > 95
@@ -374,6 +375,7 @@ https://securityheaders.com/?q=https://payhuk.com
 ```
 
 **Headers attendus :**
+
 - ✅ Strict-Transport-Security
 - ✅ X-Frame-Options
 - ✅ X-Content-Type-Options
@@ -406,6 +408,7 @@ https://securityheaders.com/?q=https://payhuk.com
 4. Redéployez l'app
 
 **Dashboard Sentry :**
+
 - Erreurs en temps réel
 - Stack traces complètes
 - Breadcrumbs des utilisateurs
@@ -421,6 +424,7 @@ Dans **Supabase Dashboard > Reports** :
 - Active connections
 
 **Alertes automatiques :**
+
 - CPU > 80%
 - Storage > 90%
 - Connections > 90%
@@ -440,6 +444,7 @@ vercel logs --url=your-deployment-url.vercel.app
 #### Supabase Logs :
 
 Dans **Logs > API Logs**, filtrez par :
+
 - Niveau (Error, Warning, Info)
 - Endpoint
 - Date/heure
@@ -464,6 +469,7 @@ Le rollback est instantané ! ⚡
 #### ❌ **"VITE_SUPABASE_URL is required"**
 
 **Solution :**
+
 ```bash
 # Vérifier que les variables sont bien configurées
 vercel env ls
@@ -479,11 +485,13 @@ vercel --prod
 #### ❌ **"Failed to fetch" sur les API calls**
 
 **Causes possibles :**
+
 1. Supabase URL incorrecte
 2. CORS mal configuré
 3. RLS policies trop restrictives
 
 **Solution :**
+
 ```bash
 # Vérifier les variables
 echo $VITE_SUPABASE_URL
@@ -496,10 +504,12 @@ curl https://votre-project-id.supabase.co/rest/v1/
 #### ❌ **Images ne se chargent pas**
 
 **Causes possibles :**
+
 1. Buckets Storage non créés
 2. Policies Storage manquantes
 
 **Solution :**
+
 ```sql
 -- Dans Supabase SQL Editor
 -- Vérifier les buckets
@@ -512,11 +522,13 @@ SELECT * FROM storage.policies;
 #### ❌ **Build échoue sur Vercel**
 
 **Causes possibles :**
+
 1. Dépendances manquantes
 2. Type errors
 3. Out of memory
 
 **Solution :**
+
 ```bash
 # Nettoyer le cache
 vercel --force
@@ -534,10 +546,12 @@ vercel --force
 #### ❌ **Traductions ne fonctionnent pas**
 
 **Causes possibles :**
+
 1. Fichiers JSON manquants
 2. i18n mal configuré
 
 **Solution :**
+
 ```bash
 # Vérifier que tous les fichiers de traduction sont présents
 ls src/i18n/locales/
@@ -609,4 +623,3 @@ Votre application **Payhuk** est maintenant en production avec :
 - [ ] Documentation lue et comprise
 
 **Tout est coché ? Vous êtes prêt pour la production ! 🚀**
-

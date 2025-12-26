@@ -9,6 +9,7 @@ Cette Edge Function effectue un retry automatique des transactions en statut "pr
 ### Variables d'environnement
 
 Aucune variable d'environnement spécifique requise. La fonction utilise :
+
 - `SUPABASE_URL` (automatique)
 - `SUPABASE_SERVICE_ROLE_KEY` (automatique)
 
@@ -20,13 +21,14 @@ Vous pouvez configurer le comportement via `platform_settings` :
 {
   "retry_config": {
     "maxAttempts": 3,
-    "backoffIntervals": [1, 6, 24],  // En heures
-    "minAgeForRetry": 1  // En heures
+    "backoffIntervals": [1, 6, 24], // En heures
+    "minAgeForRetry": 1 // En heures
   }
 }
 ```
 
 **Paramètres par défaut :**
+
 - `maxAttempts`: 3 tentatives maximum
 - `backoffIntervals`: [1h, 6h, 24h] - Intervalles entre chaque tentative
 - `minAgeForRetry`: 1h - Âge minimum avant premier retry
@@ -46,6 +48,7 @@ Dans Supabase Dashboard :
    - **Name**: `retry-failed-transactions`
    - **Schedule**: `0 * * * *` (toutes les heures)
    - **SQL Command**:
+
    ```sql
    SELECT net.http_post(
      url := 'https://YOUR_PROJECT.supabase.co/functions/v1/retry-failed-transactions',
@@ -99,6 +102,7 @@ Dans Supabase Dashboard :
 ## Logs
 
 Tous les retries sont loggés dans :
+
 - `transaction_retries` : Détails de chaque tentative
 - `transaction_logs` : Événements de retry
 
@@ -108,7 +112,7 @@ Pour surveiller les retries :
 
 ```sql
 -- Transactions en attente de retry
-SELECT 
+SELECT
   t.id,
   t.moneroo_transaction_id,
   t.amount,
@@ -121,7 +125,7 @@ WHERE t.status = 'processing'
 ORDER BY t.created_at ASC;
 
 -- Historique des retries
-SELECT 
+SELECT
   tr.*,
   t.amount,
   t.status as transaction_status
@@ -130,4 +134,3 @@ JOIN transactions t ON t.id = tr.transaction_id
 ORDER BY tr.created_at DESC
 LIMIT 50;
 ```
-

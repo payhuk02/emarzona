@@ -10,16 +10,19 @@
 **Problème** : Le total ne se mettait pas à jour après application du code promo.
 
 **Solution** :
+
 - Extraction explicite de `couponDiscount` pour garantir la détection par React
 - Ajout d'un `useEffect` de debug (uniquement en développement) pour vérifier les valeurs
 - Calcul direct sans `useMemo` pour éviter les problèmes de dépendances
 
 **Code** :
+
 ```typescript
 // 2. Montant du coupon du nouveau système - Extraction explicite pour garantir la détection
-const couponDiscount = appliedCouponCode && appliedCouponCode.discountAmount 
-  ? Number(appliedCouponCode.discountAmount) 
-  : 0;
+const couponDiscount =
+  appliedCouponCode && appliedCouponCode.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
 
 // Debug: Vérifier que le coupon est bien pris en compte dans le calcul
 useEffect(() => {
@@ -32,7 +35,7 @@ useEffect(() => {
         itemDiscounts,
         couponDiscount,
         totalDiscounts,
-        finalTotal
+        finalTotal,
       });
     }
   } else {
@@ -48,18 +51,24 @@ useEffect(() => {
 **Problème** : Variables `isMultiStore`, `storeGroups`, `isCheckingStores` non déclarées.
 
 **Solution** :
+
 ```typescript
 // State pour la gestion multi-stores
 const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
-const [storeGroups, setStoreGroups] = useState<Map<string, { 
-  items: any[]; 
-  store_name?: string; 
-  subtotal?: number; 
-  tax_amount?: number; 
-  shipping_amount?: number; 
-  discount_amount?: number; 
-  total?: number 
-}>>(new Map());
+const [storeGroups, setStoreGroups] = useState<
+  Map<
+    string,
+    {
+      items: any[];
+      store_name?: string;
+      subtotal?: number;
+      tax_amount?: number;
+      shipping_amount?: number;
+      discount_amount?: number;
+      total?: number;
+    }
+  >
+>(new Map());
 const [isCheckingStores, setIsCheckingStores] = useState<boolean>(false);
 ```
 
@@ -68,6 +77,7 @@ const [isCheckingStores, setIsCheckingStores] = useState<boolean>(false);
 **Problème** : Fonction `groupItemsByStore` n'existait pas.
 
 **Solution** : Implémentation directe dans le `useEffect` :
+
 ```typescript
 // Grouper les items par boutique (fonction simplifiée pour l'instant)
 const groups = new Map<string, { items: any[]; store_name?: string; subtotal?: number; ... }>();
@@ -94,13 +104,15 @@ for (const item of items) {
 **Problème** : Fonction `processMultiStoreCheckout` n'existait pas.
 
 **Solution** : Code multi-store temporairement simplifié avec un message d'information :
+
 ```typescript
 if (isMultiStore && storeGroups.size > 1) {
   logger.log('Multi-store checkout detected', { storeCount: storeGroups.size });
-  
+
   toast({
     title: 'Checkout multi-boutiques',
-    description: 'Le checkout multi-boutiques est en cours de développement. Seuls les produits de la première boutique seront traités pour l\'instant.',
+    description:
+      "Le checkout multi-boutiques est en cours de développement. Seuls les produits de la première boutique seront traités pour l'instant.",
     variant: 'default',
   });
 
@@ -114,12 +126,13 @@ if (isMultiStore && storeGroups.size > 1) {
 **Problème** : Fonction RPC `increment_promotion_usage` peut ne pas exister.
 
 **Solution** : Utilisation avec gestion d'erreur :
+
 ```typescript
 try {
   const { error: rpcError } = await (supabase.rpc as any)('increment_promotion_usage', {
     p_promotion_id: appliedCouponCode.id,
   });
-  
+
   if (rpcError) {
     logger.warn('Could not increment promotion usage (RPC may not exist):', { error: rpcError });
   }
@@ -133,16 +146,22 @@ try {
 **Problème** : Type `any[]` pour `group` causait des erreurs TypeScript.
 
 **Solution** : Type explicite avec propriétés optionnelles :
+
 ```typescript
-const [storeGroups, setStoreGroups] = useState<Map<string, { 
-  items: any[]; 
-  store_name?: string; 
-  subtotal?: number; 
-  tax_amount?: number; 
-  shipping_amount?: number; 
-  discount_amount?: number; 
-  total?: number 
-}>>(new Map());
+const [storeGroups, setStoreGroups] = useState<
+  Map<
+    string,
+    {
+      items: any[];
+      store_name?: string;
+      subtotal?: number;
+      tax_amount?: number;
+      shipping_amount?: number;
+      discount_amount?: number;
+      total?: number;
+    }
+  >
+>(new Map());
 ```
 
 ### 7. Correction des Valeurs Optionnelles
@@ -150,6 +169,7 @@ const [storeGroups, setStoreGroups] = useState<Map<string, {
 **Problème** : Propriétés optionnelles causant des erreurs "possibly undefined".
 
 **Solution** : Utilisation de valeurs par défaut :
+
 ```typescript
 {(group.subtotal || 0).toLocaleString('fr-FR')}
 {(group.total || 0).toLocaleString('fr-FR')}
@@ -161,6 +181,7 @@ const [storeGroups, setStoreGroups] = useState<Map<string, {
 **Problème** : Type `unknown` pour l'erreur dans le catch.
 
 **Solution** :
+
 ```typescript
 } catch (error: unknown) {
   const errorObj = error instanceof Error ? error : new Error(String(error));
@@ -180,4 +201,3 @@ const [storeGroups, setStoreGroups] = useState<Map<string, {
 - Le système multi-store nécessite encore une implémentation complète de `processMultiStoreCheckout`
 - Le debug console.log est uniquement actif en développement (`import.meta.env.DEV`)
 - Les valeurs optionnelles sont gérées avec des valeurs par défaut pour éviter les erreurs TypeScript
-

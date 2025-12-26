@@ -12,20 +12,24 @@
 **Statut**: ✅ **10/10 tests passent (100%)**
 
 #### SelectTrigger
+
 - ✅ Devrait rendre le trigger avec le placeholder
 - ✅ Devrait avoir les attributs ARIA corrects
 - ✅ Devrait être désactivé si disabled
 
 #### SelectContent et SelectItem
+
 - ✅ Devrait afficher les options quand ouvert
 - ✅ Devrait sélectionner une option
 - ✅ Devrait avoir le rôle "option" pour les items
 - ✅ Devrait désactiver un item si disabled
 
 #### Accessibilité
+
 - ✅ Devrait avoir les attributs ARIA corrects
 
 #### Touch Targets
+
 - ✅ Devrait avoir une hauteur minimale de 44px pour le trigger
 - ✅ Devrait avoir une hauteur minimale de 44px pour les items
 
@@ -36,19 +40,23 @@
 **Statut**: ✅ **8/8 tests passent (100%)**
 
 #### Conformité WCAG
+
 - ✅ Devrait avoir tous les attributs ARIA nécessaires pour WCAG
 
 #### Attributs ARIA
+
 - ✅ Devrait avoir aria-label sur le trigger
 - ✅ Devrait avoir aria-haspopup="listbox" sur le trigger
 - ✅ Devrait avoir role="option" sur les items
 - ✅ Devrait avoir les attributs ARIA de base
 
 #### Navigation au Clavier
+
 - ✅ Devrait pouvoir ouvrir avec Enter
 - ✅ Devrait pouvoir ouvrir avec Espace
 
 #### Éléments Décoratifs
+
 - ✅ Devrait avoir aria-hidden sur les icônes
 
 ---
@@ -60,6 +68,7 @@
 **Fichier**: `src/test/setup.ts`
 
 **Ajouts**:
+
 ```typescript
 // Mock hasPointerCapture pour Radix UI Select
 Element.prototype.hasPointerCapture = vi.fn(() => false);
@@ -90,6 +99,7 @@ Element.prototype.getBoundingClientRect = vi.fn(() => ({
 ### 2. Ajustements des Tests
 
 **Problèmes résolus**:
+
 - ✅ Timeouts augmentés pour attendre le rendu du Portal (Radix UI)
 - ✅ Vérification des classes CSS au lieu de `getComputedStyle` (plus fiable dans jsdom)
 - ✅ Import de `waitFor` ajouté dans `select-accessibility.test.tsx`
@@ -99,19 +109,20 @@ Element.prototype.getBoundingClientRect = vi.fn(() => ({
 
 ## 📈 Statistiques Finales
 
-| Métrique | Valeur |
-|---------|--------|
-| **Tests totaux** | 18 |
-| **Tests passés** | 18 |
-| **Tests échoués** | 0 |
-| **Taux de réussite** | **100%** ✅ |
-| **Temps d'exécution** | ~8.4s |
+| Métrique              | Valeur      |
+| --------------------- | ----------- |
+| **Tests totaux**      | 18          |
+| **Tests passés**      | 18          |
+| **Tests échoués**     | 0           |
+| **Taux de réussite**  | **100%** ✅ |
+| **Temps d'exécution** | ~8.4s       |
 
 ---
 
 ## ✅ Couverture Testée
 
 ### Fonctionnalités
+
 - ✅ Rendu du trigger
 - ✅ Affichage des options
 - ✅ Sélection d'options
@@ -119,12 +130,14 @@ Element.prototype.getBoundingClientRect = vi.fn(() => ({
 - ✅ Placeholder
 
 ### Accessibilité
+
 - ✅ Attributs ARIA complets
 - ✅ Rôles corrects
 - ✅ Navigation au clavier
 - ✅ Éléments décoratifs
 
 ### Mobile
+
 - ✅ Touch targets (44px minimum)
 - ✅ Classes CSS correctes
 
@@ -133,11 +146,13 @@ Element.prototype.getBoundingClientRect = vi.fn(() => ({
 ## 🎯 Prochaines Étapes Recommandées
 
 ### Tests E2E (Optionnel)
+
 - Tests Playwright pour interactions complètes
 - Tests sur mobile réel (iOS/Android)
 - Tests de performance avec grandes listes
 
 ### Tests de Performance
+
 - Mesurer le temps de rendu avec 1000+ items
 - Comparer Select vs SelectVirtualized
 
@@ -169,6 +184,5 @@ npm run test -- src/components/ui/__tests__/select*.test.tsx
 
 ---
 
-*Tests vérifiés le 2025-01-30* ✅  
-*Tous les tests passent* 🎉
-
+_Tests vérifiés le 2025-01-30_ ✅  
+_Tous les tests passent_ 🎉

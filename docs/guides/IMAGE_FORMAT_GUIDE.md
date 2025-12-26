@@ -8,6 +8,7 @@
 ## 🎯 FORMAT PRINCIPAL
 
 ### Images de Produits
+
 ```
 Dimensions: 1280 x 720 pixels
 Ratio: 16:9
@@ -16,6 +17,7 @@ Taille max: 5MB
 ```
 
 **Pourquoi 1280x720 ?**
+
 - ✅ Format 16:9 (standard universel)
 - ✅ Parfait pour écrans HD
 - ✅ Bon équilibre qualité/poids
@@ -27,6 +29,7 @@ Taille max: 5MB
 ## 📊 TOUS LES FORMATS
 
 ### 1. Image Produit Principale
+
 ```
 1280 x 720 px (16:9)
 ━━━━━━━━━━━━━━━━━━
@@ -37,6 +40,7 @@ Qualité: 85-90%
 ```
 
 ### 2. Miniature (Thumbnail)
+
 ```
 640 x 360 px (16:9)
 ━━━━━━━━━━━━━━━━━━
@@ -47,6 +51,7 @@ Qualité: 80-85%
 ```
 
 ### 3. Image Haute Résolution
+
 ```
 1920 x 1080 px (16:9)
 ━━━━━━━━━━━━━━━━━━
@@ -57,6 +62,7 @@ Qualité: 90-95%
 ```
 
 ### 4. Galerie Produit
+
 ```
 1280 x 720 px (16:9)
 ━━━━━━━━━━━━━━━━━━
@@ -67,6 +73,7 @@ Quantité: 4-8 images
 ```
 
 ### 5. Image Réseaux Sociaux (OG)
+
 ```
 1200 x 630 px (1.91:1)
 ━━━━━━━━━━━━━━━━━━
@@ -81,13 +88,14 @@ Texte: Lisible
 ## 🎨 BONNES PRATIQUES
 
 ### Composition
+
 ```
 ┌─────────────────────────────┐
 │                             │
 │     ┌───────────────┐       │
-│     │               │       │ 
+│     │               │       │
 │     │   PRODUIT     │       │ Centré
-│     │               │       │ 
+│     │               │       │
 │     └───────────────┘       │
 │                             │
 └─────────────────────────────┘
@@ -95,6 +103,7 @@ Texte: Lisible
 ```
 
 ### Qualité d'Image
+
 - **Résolution:** Minimum 1280x720, jamais moins
 - **Netteté:** Image nette, pas floue
 - **Éclairage:** Uniforme, sans ombres dures
@@ -108,6 +117,7 @@ Texte: Lisible
 ### Recommandés
 
 #### WebP (⭐ Recommandé)
+
 ```
 ✅ Meilleure compression
 ✅ Qualité excellente
@@ -116,6 +126,7 @@ Texte: Lisible
 ```
 
 #### JPEG
+
 ```
 ✅ Compatibilité universelle
 ✅ Bonne compression
@@ -124,6 +135,7 @@ Texte: Lisible
 ```
 
 #### PNG
+
 ```
 ✅ Transparence supportée
 ✅ Qualité sans perte
@@ -132,6 +144,7 @@ Texte: Lisible
 ```
 
 ### Non Recommandés
+
 - ❌ GIF (sauf animations)
 - ❌ BMP (trop lourd)
 - ❌ TIFF (non web)
@@ -141,6 +154,7 @@ Texte: Lisible
 ## 🔧 OUTILS DE REDIMENSIONNEMENT
 
 ### En Ligne (Gratuit)
+
 1. **Squoosh** (squoosh.app)
    - Google tool
    - Excellent pour WebP
@@ -157,7 +171,9 @@ Texte: Lisible
    - Export optimisé
 
 ### Logiciels
+
 1. **Photoshop**
+
    ```
    Fichier > Exporter > Exporter sous
    Format: JPEG/WebP
@@ -166,6 +182,7 @@ Texte: Lisible
    ```
 
 2. **GIMP** (Gratuit)
+
    ```
    Image > Échelle et taille d'image
    Largeur: 1280
@@ -183,6 +200,7 @@ Texte: Lisible
 ## 📋 CHECKLIST AVANT UPLOAD
 
 ### Vérifications Techniques
+
 - [ ] ✅ Dimensions: 1280 x 720 pixels
 - [ ] ✅ Format: JPEG, PNG, ou WebP
 - [ ] ✅ Taille: < 5MB
@@ -190,6 +208,7 @@ Texte: Lisible
 - [ ] ✅ Qualité: Minimum 85%
 
 ### Vérifications Visuelles
+
 - [ ] ✅ Image nette et claire
 - [ ] ✅ Produit bien visible
 - [ ] ✅ Couleurs fidèles
@@ -197,6 +216,7 @@ Texte: Lisible
 - [ ] ✅ Éclairage correct
 
 ### Vérifications SEO
+
 - [ ] ✅ Nom de fichier descriptif
 - [ ] ✅ Alt text défini
 - [ ] ✅ Compression optimale
@@ -207,24 +227,28 @@ Texte: Lisible
 ## 🚨 ERREURS COURANTES
 
 ### ❌ Mauvaises Dimensions
+
 ```
 Problem: 800x600, 1024x768, 1920x1080
 Solution: Toujours utiliser 1280x720
 ```
 
 ### ❌ Ratio Incorrect
+
 ```
 Problem: Image étirée ou coupée
 Solution: Respecter le ratio 16:9
 ```
 
 ### ❌ Fichier Trop Lourd
+
 ```
 Problem: > 5MB
 Solution: Compresser avec TinyPNG ou Squoosh
 ```
 
 ### ❌ Qualité Trop Basse
+
 ```
 Problem: Image pixelisée
 Solution: Utiliser source haute résolution
@@ -235,6 +259,7 @@ Solution: Utiliser source haute résolution
 ## 🎯 EXEMPLES PAR TYPE DE PRODUIT
 
 ### Produits Digitaux
+
 ```
 ┌─────────────────────────────┐
 │  [Screenshot / Mockup]      │
@@ -246,6 +271,7 @@ Solution: Utiliser source haute résolution
 ```
 
 ### Produits Physiques
+
 ```
 ┌─────────────────────────────┐
 │  [Photo produit]            │
@@ -257,6 +283,7 @@ Solution: Utiliser source haute résolution
 ```
 
 ### Services
+
 ```
 ┌─────────────────────────────┐
 │  [Personne / Action]        │
@@ -268,6 +295,7 @@ Solution: Utiliser source haute résolution
 ```
 
 ### Cours
+
 ```
 ┌─────────────────────────────┐
 │  [Thumbnail cours]          │
@@ -283,6 +311,7 @@ Solution: Utiliser source haute résolution
 ## 💡 CONSEILS PRO
 
 ### Optimisation Web
+
 ```javascript
 // Dimensions idéales
 const productImage = {
@@ -290,11 +319,12 @@ const productImage = {
   height: 720,
   quality: 85,
   format: 'webp',
-  fallback: 'jpeg'
+  fallback: 'jpeg',
 };
 ```
 
 ### Nommage de Fichiers
+
 ```
 ✅ BON:
 - produit-nom-1280x720.jpg
@@ -308,15 +338,12 @@ const productImage = {
 ```
 
 ### Responsive Images
+
 ```html
 <!-- Utiliser srcset pour différentes résolutions -->
-<img 
+<img
   src="product-1280x720.webp"
-  srcset="
-    product-640x360.webp 640w,
-    product-1280x720.webp 1280w,
-    product-1920x1080.webp 1920w
-  "
+  srcset="product-640x360.webp 640w, product-1280x720.webp 1280w, product-1920x1080.webp 1920w"
   alt="Description produit"
 />
 ```
@@ -325,25 +352,27 @@ const productImage = {
 
 ## 📊 TABLEAU RÉCAPITULATIF
 
-| Type | Dimensions | Ratio | Taille Max | Format |
-|------|------------|-------|------------|--------|
-| **Produit** | 1280x720 | 16:9 | 5MB | JPEG/WebP |
-| **Thumbnail** | 640x360 | 16:9 | 1MB | JPEG/WebP |
-| **HD** | 1920x1080 | 16:9 | 10MB | JPEG/WebP |
-| **Galerie** | 1280x720 | 16:9 | 5MB | JPEG/WebP |
-| **OG Social** | 1200x630 | 1.91:1 | 2MB | JPEG/PNG |
-| **Avatar** | 500x500 | 1:1 | 1MB | PNG/WebP |
+| Type          | Dimensions | Ratio  | Taille Max | Format    |
+| ------------- | ---------- | ------ | ---------- | --------- |
+| **Produit**   | 1280x720   | 16:9   | 5MB        | JPEG/WebP |
+| **Thumbnail** | 640x360    | 16:9   | 1MB        | JPEG/WebP |
+| **HD**        | 1920x1080  | 16:9   | 10MB       | JPEG/WebP |
+| **Galerie**   | 1280x720   | 16:9   | 5MB        | JPEG/WebP |
+| **OG Social** | 1200x630   | 1.91:1 | 2MB        | JPEG/PNG  |
+| **Avatar**    | 500x500    | 1:1    | 1MB        | PNG/WebP  |
 
 ---
 
 ## 🔗 RESSOURCES UTILES
 
 ### Outils
+
 - [Squoosh](https://squoosh.app) - Compression d'images
 - [TinyPNG](https://tinypng.com) - Optimisation PNG/JPEG
 - [Canva](https://canva.com) - Création d'images
 
 ### Validation
+
 ```typescript
 import { isValidProductImageSize } from '@/config/image-formats';
 
@@ -369,4 +398,3 @@ const isValid = isValidProductImageSize({ width: 1280, height: 720 });
 ---
 
 **Questions ?** Consultez `src/config/image-formats.ts` pour plus de détails techniques.
-

@@ -18,7 +18,7 @@ Corrections apportées aux points critiques identifiés dans l'audit v2.0 :
 
 ### ✅ Corrections Implémentées
 
-#### 1. Modification de `refundMonerooPayment()` 
+#### 1. Modification de `refundMonerooPayment()`
 
 **Fichier** : `src/lib/moneroo-payment.ts`
 
@@ -28,17 +28,17 @@ Corrections apportées aux points critiques identifiés dans l'audit v2.0 :
 // 🔧 CORRECTION : Mettre à jour l'order associée pour déclencher la mise à jour de store_earnings
 if (transaction.order_id) {
   const { error: orderUpdateError } = await supabase
-    .from("orders")
+    .from('orders')
     .update({
-      payment_status: "refunded",
+      payment_status: 'refunded',
       updated_at: new Date().toISOString(),
     })
-    .eq("id", transaction.order_id);
+    .eq('id', transaction.order_id);
 
   if (orderUpdateError) {
-    logger.error("Error updating order with refund:", orderUpdateError);
+    logger.error('Error updating order with refund:', orderUpdateError);
   } else {
-    logger.log("Order updated with refund status:", {
+    logger.log('Order updated with refund status:', {
       orderId: transaction.order_id,
       transactionId,
     });
@@ -55,7 +55,7 @@ if (transaction.order_id) {
 ```typescript
 } else if (mappedStatus === 'refunded') {
   // ... mise à jour transaction ...
-  
+
   // 🔧 CORRECTION : Mettre à jour l'order associée
   if (transaction.order_id) {
     await supabase
@@ -88,12 +88,12 @@ BEGIN
   IF NEW.status = 'completed' AND NEW.payment_status = 'paid' THEN
     PERFORM public.update_store_earnings(NEW.store_id);
   END IF;
-  
+
   -- 🆕 Mettre à jour les revenus si la commande est remboursée
   IF NEW.payment_status = 'refunded' AND (OLD.payment_status IS NULL OR OLD.payment_status != 'refunded') THEN
     PERFORM public.update_store_earnings(NEW.store_id);
   END IF;
-  
+
   RETURN NEW;
 END;
 $$;
@@ -102,11 +102,13 @@ $$;
 ### 📊 Impact des Corrections
 
 **Avant** :
+
 - ❌ Lors d'un remboursement, l'order gardait `payment_status = 'paid'`
 - ❌ L'order continuait d'être comptée dans `total_revenue`
 - ❌ `store_earnings` n'était pas mis à jour
 
 **Après** :
+
 - ✅ Lors d'un remboursement, l'order est mise à jour avec `payment_status = 'refunded'`
 - ✅ L'order n'est plus comptée dans `total_revenue` (car `payment_status != 'paid'`)
 - ✅ `store_earnings` est automatiquement recalculé via le trigger SQL
@@ -141,6 +143,7 @@ $$;
 **Statut** : ✅ **CONFIRMÉ - Pas d'action requise**
 
 **Raison** :
+
 - PayDunya n'envoie pas toujours de signature dans les webhooks
 - La sécurité est assurée par :
   - ✅ Validation du montant (comparaison avec l'order)
@@ -153,11 +156,11 @@ $$;
 
 ## 📝 Fichiers Modifiés
 
-| Fichier | Type | Description |
-|---------|------|-------------|
-| `src/lib/moneroo-payment.ts` | Correction | Ajout mise à jour order lors remboursement |
-| `supabase/functions/moneroo-webhook/index.ts` | Correction | Ajout mise à jour order lors remboursement webhook |
-| `supabase/migrations/20250230_fix_store_earnings_on_refund.sql` | Nouveau | Migration pour modifier le trigger SQL |
+| Fichier                                                         | Type       | Description                                        |
+| --------------------------------------------------------------- | ---------- | -------------------------------------------------- |
+| `src/lib/moneroo-payment.ts`                                    | Correction | Ajout mise à jour order lors remboursement         |
+| `supabase/functions/moneroo-webhook/index.ts`                   | Correction | Ajout mise à jour order lors remboursement webhook |
+| `supabase/migrations/20250230_fix_store_earnings_on_refund.sql` | Nouveau    | Migration pour modifier le trigger SQL             |
 
 ---
 
@@ -206,6 +209,7 @@ $$;
 ### Étapes :
 
 1. **Appliquer la migration SQL** :
+
    ```bash
    supabase db push
    ```
@@ -229,6 +233,7 @@ $$;
 **Score Audit** : 95/100 → **97/100** (+2 points)
 
 **Améliorations** :
+
 - ✅ Correction du problème critique de remboursement
 - ✅ Cohérence financière garantie
 - ✅ Automatisation complète
@@ -237,5 +242,3 @@ $$;
 
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ Corrections implémentées, prêtes pour déploiement
-
-

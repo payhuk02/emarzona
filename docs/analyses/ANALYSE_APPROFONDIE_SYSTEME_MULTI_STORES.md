@@ -9,12 +9,14 @@
 ## 📋 RÉSUMÉ EXÉCUTIF
 
 ### ✅ Points Forts
+
 - **Isolation des données** : Excellente isolation via RLS et filtrage par `store_id`
 - **Contexte centralisé** : StoreContext bien implémenté avec persistance
 - **Hooks cohérents** : La plupart des hooks utilisent correctement `store_id`
 - **Interface utilisateur** : Sélecteur de boutique fonctionnel dans le sidebar
 
 ### ⚠️ Points d'Attention
+
 - **Quelques hooks sans store_id** : Certains hooks ne filtrent pas explicitement par boutique
 - **Pages sans vérification** : Certaines pages n'utilisent pas le contexte
 - **Gestion d'erreurs** : Amélioration possible de la gestion des cas sans boutique
@@ -26,9 +28,11 @@
 ### 1. ✅ CONTEXTE ET GESTION GLOBALE
 
 #### StoreContext (`src/contexts/StoreContext.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Gestion centralisée de la boutique sélectionnée
 - ✅ Persistance dans `localStorage`
 - ✅ Synchronisation entre onglets (via `storage` event)
@@ -37,6 +41,7 @@
 - ✅ Auto-sélection de la première boutique si aucune sélectionnée
 
 **Recommandations** :
+
 - ✅ Aucune modification nécessaire
 
 ---
@@ -44,15 +49,18 @@
 ### 2. ✅ HOOKS PRINCIPAUX
 
 #### useStore (`src/hooks/useStore.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `selectedStoreId` du contexte
 - ✅ Réagit aux changements de boutique
 - ✅ Gestion des cas sans boutique
 - ✅ Logs détaillés pour le debugging
 
 **Vérification** :
+
 ```typescript
 // ✅ Utilise le contexte
 const { selectedStoreId, selectedStore: contextStore, loading: contextLoading } = useStoreContext();
@@ -68,14 +76,17 @@ useEffect(() => {
 ---
 
 #### useStores (`src/hooks/useStores.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Fonctions `canCreateStore()` et `getRemainingStores()` implémentées
 - ✅ Validation pour 3 boutiques maximum
 - ✅ Gestion des erreurs
 
 **Vérification** :
+
 ```typescript
 // ✅ Limite de 3 boutiques
 const MAX_STORES_PER_USER = 3;
@@ -86,14 +97,17 @@ const getRemainingStores = () => Math.max(0, MAX_STORES_PER_USER - stores.length
 ---
 
 #### useDashboardStats (`src/hooks/useDashboardStats.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre par `store.id` dans toutes les requêtes
 - ✅ Gestion des cas sans boutique
 - ✅ Logs détaillés
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage par store_id
 .eq("store_id", store.id)  // Produits
@@ -104,13 +118,16 @@ const getRemainingStores = () => Math.max(0, MAX_STORES_PER_USER - stores.length
 ---
 
 #### useProducts (`src/hooks/useProducts.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre par `store_id` si fourni
 - ✅ Gestion des cas sans `storeId`
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage conditionnel
 if (storeId) {
@@ -121,13 +138,16 @@ if (storeId) {
 ---
 
 #### useProductsOptimized (`src/hooks/useProductsOptimized.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre obligatoire par `store_id`
 - ✅ Retourne tableau vide si pas de `storeId`
 
 **Vérification** :
+
 ```typescript
 // ✅ Validation
 if (!storeId) {
@@ -141,13 +161,16 @@ if (!storeId) {
 ---
 
 #### useOrders (`src/hooks/useOrders.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre par `store_id` obligatoire
 - ✅ Gestion des cas sans `storeId`
 
 **Vérification** :
+
 ```typescript
 // ✅ Validation
 if (!storeId) {
@@ -162,13 +185,16 @@ if (!storeId) {
 ---
 
 #### useCustomers (`src/hooks/useCustomers.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre par `store_id` obligatoire
 - ✅ Pagination serveur avec filtrage
 
 **Vérification** :
+
 ```typescript
 // ✅ Validation
 if (!storeId) {
@@ -182,13 +208,16 @@ if (!storeId) {
 ---
 
 #### useTransactions (`src/hooks/useTransactions.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre par `store_id` obligatoire
 - ✅ Gestion des cas sans `storeId`
 
 **Vérification** :
+
 ```typescript
 // ✅ Validation
 if (!storeId) {
@@ -203,13 +232,16 @@ if (!storeId) {
 ---
 
 #### useStoreWithdrawals (`src/hooks/useStoreWithdrawals.ts`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Filtre optionnel par `store_id` via filters
 - ✅ Peut être utilisé pour toutes les boutiques ou une seule
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage conditionnel
 if (filters?.store_id) {
@@ -222,14 +254,17 @@ if (filters?.store_id) {
 ### 3. ✅ PAGES PRINCIPALES
 
 #### Dashboard (`src/pages/Dashboard.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique active
 - ✅ Utilise `useDashboardStats()` qui filtre par `store.id`
 - ✅ Gestion des cas sans boutique
 
 **Vérification** :
+
 ```typescript
 // ✅ Utilise le hook qui filtre automatiquement
 const { store, loading: storeLoading } = useStore();
@@ -239,50 +274,62 @@ const { stats, loading, error: hookError, refetch } = useDashboardStats();
 ---
 
 #### Products (`src/pages/Products.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique active
 - ✅ Utilise `useProductsOptimized(store?.id)` qui filtre par boutique
 - ✅ Fallback si pas de boutique
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage par boutique
-const { products, total, totalPages, isLoading: productsLoading } = 
+const { products, total, totalPages, isLoading: productsLoading } =
   useProductsOptimized(store?.id, { ... });
 ```
 
 ---
 
 #### Orders (`src/pages/Orders.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique active
 - ✅ Utilise `useOrders(store?.id)` qui filtre par boutique
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage par boutique
-const { orders, loading: ordersLoading, totalCount } = 
-  useOrders(store?.id, { page, pageSize, sortBy, sortDirection });
+const {
+  orders,
+  loading: ordersLoading,
+  totalCount,
+} = useOrders(store?.id, { page, pageSize, sortBy, sortDirection });
 ```
 
 ---
 
 #### Customers (`src/pages/Customers.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique active
 - ✅ Utilise `useCustomers(store?.id)` qui filtre par boutique
 - ✅ Realtime updates filtrés par `store_id`
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage par boutique
-const { data: customersResult, isLoading: customersLoading } = 
+const { data: customersResult, isLoading: customersLoading } =
   useCustomers(store?.id, { page: currentPage, pageSize, ... });
 
 // ✅ Realtime filtré
@@ -292,13 +339,16 @@ const { data: customersResult, isLoading: customersLoading } =
 ---
 
 #### Payments (`src/pages/Payments.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique active
 - ✅ Utilise `usePayments(store?.id)` qui filtre par boutique
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage par boutique
 const { payments, loading: paymentsLoading, refetch } = usePayments(store?.id);
@@ -307,13 +357,16 @@ const { payments, loading: paymentsLoading, refetch } = usePayments(store?.id);
 ---
 
 #### Analytics (`src/pages/Analytics.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique active
 - ✅ Tous les hooks utilisent `store?.id` pour filtrer
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage par boutique
 const { store, loading: storeLoading } = useStore();
@@ -325,9 +378,11 @@ const { products, isLoading: productsLoading } = useProductsOptimized(store?.id,
 ---
 
 #### Store (`src/pages/Store.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Utilise `useStores()` pour afficher toutes les boutiques
 - ✅ Permet la création jusqu'à 3 boutiques
 - ✅ Interface adaptée au multi-stores
@@ -337,13 +392,16 @@ const { products, isLoading: productsLoading } = useProductsOptimized(store?.id,
 ### 4. ✅ COMPOSANTS SPÉCIALISÉS
 
 #### StoreAnalytics (`src/components/store/StoreAnalytics.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Reçoit `storeId` en prop
 - ✅ Filtre toutes les requêtes par `store_id`
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtrage explicite
 .eq("store_id", storeId)  // Produits
@@ -354,9 +412,11 @@ const { products, isLoading: productsLoading } = useProductsOptimized(store?.id,
 ---
 
 #### StoreSettings (`src/components/settings/StoreSettings.tsx`)
+
 **Statut** : ✅ **EXCELLENT** (après modifications)
 
 **Points Positifs** :
+
 - ✅ Utilise `canCreateStore()` et `getRemainingStores()`
 - ✅ Affiche l'onglet "Créer" tant qu'il reste moins de 3 boutiques
 - ✅ Messages adaptés au multi-stores
@@ -364,9 +424,11 @@ const { products, isLoading: productsLoading } = useProductsOptimized(store?.id,
 ---
 
 #### AppSidebar (`src/components/AppSidebar.tsx`)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Sous-menu avec toutes les boutiques
 - ✅ Indicateur de sélection (✓)
 - ✅ Bouton "Créer une boutique" si < 3 boutiques
@@ -382,17 +444,16 @@ const { products, isLoading: productsLoading } = useProductsOptimized(store?.id,
 **Statut** : ⚠️ **ATTENTION**
 
 **Problème** :
+
 - Si `storeId` n'est pas fourni, récupère tous les stores de l'utilisateur
 - Peut mélanger les produits de différentes boutiques
 
 **Recommandation** :
+
 ```typescript
 // ⚠️ Actuel : Récupère tous les stores si pas de storeId
 if (!storeId) {
-  const { data: stores } = await supabase
-    .from('stores')
-    .select('id')
-    .eq('user_id', user.id);
+  const { data: stores } = await supabase.from('stores').select('id').eq('user_id', user.id);
   // Récupère les produits de TOUTES les boutiques
 }
 
@@ -415,14 +476,17 @@ const storeId = storeId || selectedStoreId;
 ### 6. 🔒 SÉCURITÉ ET ISOLATION
 
 #### Row Level Security (RLS)
+
 **Statut** : ✅ **EXCELLENT**
 
 **Vérification** :
+
 - ✅ Toutes les tables ont RLS activé
 - ✅ Les politiques filtrent par `store_id` via `user_id`
 - ✅ Isolation garantie au niveau base de données
 
 **Exemple** :
+
 ```sql
 -- ✅ Politique RLS pour products
 CREATE POLICY "Store owners can manage their products"
@@ -430,8 +494,8 @@ CREATE POLICY "Store owners can manage their products"
   FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM public.stores 
-      WHERE stores.id = products.store_id 
+      SELECT 1 FROM public.stores
+      WHERE stores.id = products.store_id
       AND stores.user_id = auth.uid()
     )
   );
@@ -440,9 +504,11 @@ CREATE POLICY "Store owners can manage their products"
 ---
 
 #### Validation Côté Client
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Tous les hooks valident `storeId` avant les requêtes
 - ✅ Retournent des tableaux vides si pas de `storeId`
 - ✅ Gestion des erreurs appropriée
@@ -452,9 +518,11 @@ CREATE POLICY "Store owners can manage their products"
 ### 7. 📊 STATISTIQUES ET ANALYTICS
 
 #### Dashboard Stats
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Toutes les statistiques filtrées par `store.id`
 - ✅ Produits, commandes, clients isolés
 - ✅ Revenus calculés par boutique
@@ -462,9 +530,11 @@ CREATE POLICY "Store owners can manage their products"
 ---
 
 #### Analytics Avancées
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ `StoreAnalytics` filtre par `storeId`
 - ✅ `PhysicalAnalyticsDashboard` filtre par `storeId`
 - ✅ Toutes les métriques isolées par boutique
@@ -474,18 +544,22 @@ CREATE POLICY "Store owners can manage their products"
 ### 8. 🛒 COMMANDES ET TRANSACTIONS
 
 #### Création de Commandes
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ Les commandes sont créées avec `store_id`
 - ✅ Isolation garantie par RLS
 
 ---
 
 #### Transactions
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ `useTransactions` filtre par `store_id`
 - ✅ Toutes les transactions isolées par boutique
 
@@ -494,9 +568,11 @@ CREATE POLICY "Store owners can manage their products"
 ### 9. 👥 CLIENTS ET AFFILIATION
 
 #### Clients
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ `useCustomers` filtre par `store_id`
 - ✅ Realtime updates filtrés par boutique
 - ✅ Isolation complète
@@ -504,9 +580,11 @@ CREATE POLICY "Store owners can manage their products"
 ---
 
 #### Affiliation
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ `useStoreAffiliates` filtre par `store_id`
 - ✅ `useAffiliateLinks` filtre par `store_id`
 - ✅ Commissions isolées par boutique
@@ -516,18 +594,22 @@ CREATE POLICY "Store owners can manage their products"
 ### 10. 💰 PAIEMENTS ET RETRAITS
 
 #### Paiements
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ `usePayments` filtre par `store_id`
 - ✅ Tous les paiements isolés par boutique
 
 ---
 
 #### Retraits
+
 **Statut** : ✅ **EXCELLENT**
 
 **Points Positifs** :
+
 - ✅ `useStoreWithdrawals` peut filtrer par `store_id`
 - ✅ `useStoreEarnings` filtre par `store_id`
 - ✅ Isolation complète
@@ -539,9 +621,11 @@ CREATE POLICY "Store owners can manage their products"
 ### 1. ✅ Améliorations Mineures
 
 #### A. useDigitalProducts
+
 **Priorité** : ✅ **CORRIGÉ**
 
 **Action** :
+
 - ✅ Utilise maintenant `selectedStoreId` du contexte si `storeId` n'est pas fourni
 - ✅ Retourne un tableau vide si aucune boutique n'est sélectionnée
 - ✅ Évite de récupérer tous les stores par défaut
@@ -549,9 +633,11 @@ CREATE POLICY "Store owners can manage their products"
 ---
 
 #### B. Gestion des Cas Sans Boutique
+
 **Priorité** : ✅ **CORRIGÉ**
 
 **Action** :
+
 - ✅ Messages d'erreur améliorés dans Customers, Analytics, Payments
 - ✅ Boutons d'action ajoutés (Créer une boutique, Retour au tableau de bord)
 - ✅ Messages cohérents dans toute l'application
@@ -561,6 +647,7 @@ CREATE POLICY "Store owners can manage their products"
 ### 2. ✅ Tests Recommandés
 
 #### Tests Fonctionnels
+
 - [ ] Créer 3 boutiques et vérifier l'isolation
 - [ ] Changer de boutique et vérifier que les données changent
 - [ ] Vérifier que les produits d'une boutique n'apparaissent pas dans une autre
@@ -569,11 +656,13 @@ CREATE POLICY "Store owners can manage their products"
 - [ ] Vérifier que les analytics sont isolés
 
 #### Tests de Performance
+
 - [ ] Vérifier le temps de chargement lors du switch de boutique
 - [ ] Vérifier que les requêtes sont optimisées
 - [ ] Vérifier qu'il n'y a pas de re-renders inutiles
 
 #### Tests de Sécurité
+
 - [ ] Vérifier que les RLS empêchent l'accès aux données d'autres boutiques
 - [ ] Vérifier que les utilisateurs ne peuvent pas modifier les données d'autres boutiques
 
@@ -581,28 +670,28 @@ CREATE POLICY "Store owners can manage their products"
 
 ## 📊 TABLEAU RÉCAPITULATIF
 
-| Composant | Statut | Isolation | Notes |
-|-----------|--------|-----------|-------|
-| StoreContext | ✅ Excellent | ✅ | Contexte centralisé |
-| useStore | ✅ Excellent | ✅ | Utilise le contexte |
-| useStores | ✅ Excellent | ✅ | Gestion de 3 boutiques |
-| useDashboardStats | ✅ Excellent | ✅ | Filtre par store.id |
-| useProducts | ✅ Excellent | ✅ | Filtre par store_id |
-| useProductsOptimized | ✅ Excellent | ✅ | Filtre obligatoire |
-| useOrders | ✅ Excellent | ✅ | Filtre par store_id |
-| useCustomers | ✅ Excellent | ✅ | Filtre par store_id |
-| useTransactions | ✅ Excellent | ✅ | Filtre par store_id |
-| usePayments | ✅ Excellent | ✅ | Filtre par store_id |
-| Dashboard | ✅ Excellent | ✅ | Utilise useStore |
-| Products | ✅ Excellent | ✅ | Utilise useStore |
-| Orders | ✅ Excellent | ✅ | Utilise useStore |
-| Customers | ✅ Excellent | ✅ | Utilise useStore |
-| Payments | ✅ Excellent | ✅ | Utilise useStore |
-| Analytics | ✅ Excellent | ✅ | Utilise useStore |
-| StoreAnalytics | ✅ Excellent | ✅ | Filtre par storeId |
-| StoreSettings | ✅ Excellent | ✅ | Multi-stores supporté |
-| AppSidebar | ✅ Excellent | ✅ | Sélecteur fonctionnel |
-| useDigitalProducts | ✅ Excellent | ✅ | Utilise le contexte si storeId non fourni |
+| Composant            | Statut       | Isolation | Notes                                     |
+| -------------------- | ------------ | --------- | ----------------------------------------- |
+| StoreContext         | ✅ Excellent | ✅        | Contexte centralisé                       |
+| useStore             | ✅ Excellent | ✅        | Utilise le contexte                       |
+| useStores            | ✅ Excellent | ✅        | Gestion de 3 boutiques                    |
+| useDashboardStats    | ✅ Excellent | ✅        | Filtre par store.id                       |
+| useProducts          | ✅ Excellent | ✅        | Filtre par store_id                       |
+| useProductsOptimized | ✅ Excellent | ✅        | Filtre obligatoire                        |
+| useOrders            | ✅ Excellent | ✅        | Filtre par store_id                       |
+| useCustomers         | ✅ Excellent | ✅        | Filtre par store_id                       |
+| useTransactions      | ✅ Excellent | ✅        | Filtre par store_id                       |
+| usePayments          | ✅ Excellent | ✅        | Filtre par store_id                       |
+| Dashboard            | ✅ Excellent | ✅        | Utilise useStore                          |
+| Products             | ✅ Excellent | ✅        | Utilise useStore                          |
+| Orders               | ✅ Excellent | ✅        | Utilise useStore                          |
+| Customers            | ✅ Excellent | ✅        | Utilise useStore                          |
+| Payments             | ✅ Excellent | ✅        | Utilise useStore                          |
+| Analytics            | ✅ Excellent | ✅        | Utilise useStore                          |
+| StoreAnalytics       | ✅ Excellent | ✅        | Filtre par storeId                        |
+| StoreSettings        | ✅ Excellent | ✅        | Multi-stores supporté                     |
+| AppSidebar           | ✅ Excellent | ✅        | Sélecteur fonctionnel                     |
+| useDigitalProducts   | ✅ Excellent | ✅        | Utilise le contexte si storeId non fourni |
 
 ---
 
@@ -634,4 +723,3 @@ Le système multi-stores est **bien implémenté** et **professionnel** :
 **Document créé le** : 2 Février 2025  
 **Dernière modification** : 2 Février 2025  
 **Version** : 1.0
-

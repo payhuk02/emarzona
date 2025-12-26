@@ -44,127 +44,145 @@ Appliquer le système de typographie responsive à toutes les pages principales 
 ### Pattern Standard
 
 #### Titres Principaux (H1)
+
 ```tsx
 // Avant
-className="text-2xl sm:text-3xl lg:text-4xl"
+className = 'text-2xl sm:text-3xl lg:text-4xl';
 
 // Après
-className="text-lg sm:text-2xl md:text-3xl lg:text-4xl"
+className = 'text-lg sm:text-2xl md:text-3xl lg:text-4xl';
 ```
 
 #### Sous-titres
+
 ```tsx
 // Avant
-className="text-xs sm:text-sm lg:text-base"
+className = 'text-xs sm:text-sm lg:text-base';
 
 // Après
-className="text-[10px] sm:text-xs md:text-sm lg:text-base"
+className = 'text-[10px] sm:text-xs md:text-sm lg:text-base';
 ```
 
 #### Cartes Statistiques - Labels
+
 ```tsx
 // Avant
-className="text-xs sm:text-sm"
+className = 'text-xs sm:text-sm';
 
 // Après
-className="text-[10px] sm:text-xs md:text-sm"
+className = 'text-[10px] sm:text-xs md:text-sm';
 ```
 
 #### Cartes Statistiques - Valeurs
+
 ```tsx
 // Avant
-className="text-xl sm:text-2xl lg:text-3xl"
+className = 'text-xl sm:text-2xl lg:text-3xl';
 
 // Après
-className="text-base sm:text-xl md:text-2xl lg:text-3xl"
+className = 'text-base sm:text-xl md:text-2xl lg:text-3xl';
 ```
 
 #### États Vides - Titres
+
 ```tsx
 // Avant
-className="text-lg sm:text-xl"
+className = 'text-lg sm:text-xl';
 
 // Après
-className="text-sm sm:text-lg md:text-xl"
+className = 'text-sm sm:text-lg md:text-xl';
 ```
 
 #### États Vides - Descriptions
+
 ```tsx
 // Avant
-className="text-sm sm:text-base"
+className = 'text-sm sm:text-base';
 
 // Après
-className="text-xs sm:text-sm md:text-base"
+className = 'text-xs sm:text-sm md:text-base';
 ```
 
 ---
 
 ## 📱 Breakpoints Utilisés
 
-| Breakpoint | Taille | Usage |
-|------------|--------|-------|
-| **Mobile** | `< 640px` | `text-lg`, `text-[10px]`, `text-sm`, `text-base` |
-| **Tablet** | `≥ 640px` | `text-2xl`, `text-xs`, `text-sm` |
-| **Desktop** | `≥ 768px` | `text-3xl`, `text-sm`, `text-base` |
-| **Large** | `≥ 1024px` | `text-4xl`, `text-base` |
+| Breakpoint  | Taille     | Usage                                            |
+| ----------- | ---------- | ------------------------------------------------ |
+| **Mobile**  | `< 640px`  | `text-lg`, `text-[10px]`, `text-sm`, `text-base` |
+| **Tablet**  | `≥ 640px`  | `text-2xl`, `text-xs`, `text-sm`                 |
+| **Desktop** | `≥ 768px`  | `text-3xl`, `text-sm`, `text-base`               |
+| **Large**   | `≥ 1024px` | `text-4xl`, `text-base`                          |
 
 ---
 
 ## 🎨 Modifications Détaillées par Page
 
 ### 1. Dashboard.tsx
+
 - ✅ Titre: `text-xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 - ✅ Icônes: Tailles réduites sur mobile
 
 ### 2. Analytics.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 - ✅ Stats labels: `text-xs` → `text-[10px]` sur mobile
 - ✅ Stats valeurs: `text-xl` → `text-base` sur mobile
 
 ### 3. Promotions.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 - ✅ Stats: Toutes les cartes mises à jour
 
 ### 4. Settings.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 
 ### 5. Marketing.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-sm` → `text-[10px]` sur mobile
 
 ### 6. Store.tsx
+
 - ✅ Titre vide: `text-2xl` → `text-lg` sur mobile
 - ✅ Description: `text-sm` → `text-xs` sur mobile
 
 ### 7. Payments.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 - ✅ Stats cartes: Toutes les valeurs mises à jour
 - ✅ États vides: Titres et descriptions ajustés
 
 ### 8. Withdrawals.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-sm` → `text-[10px]` sur mobile
 
 ### 9. AdminDashboard.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-sm` → `text-[10px]` sur mobile
 - ✅ Stats: Labels et valeurs ajustés
 
 ### 10. AdminOrders.tsx
+
 - ✅ Titre: `text-2xl` → `text-lg` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 - ✅ Stats: Toutes les cartes mises à jour
 
 ### 11. AffiliateDashboard.tsx
+
 - ✅ Titre: `text-xl` → `text-lg` sur mobile
 - ✅ Description: `text-sm` → `text-[10px]` sur mobile
 
 ### 12. AdvancedOrderManagement.tsx
+
 - ✅ Titre: `text-lg` → `text-base` sur mobile
 - ✅ Sous-titre: `text-xs` → `text-[10px]` sur mobile
 
@@ -173,18 +191,21 @@ className="text-xs sm:text-sm md:text-base"
 ## 📈 Résultats
 
 ### Avant
+
 - Titres: 24px sur mobile (trop grands)
 - Sous-titres: 12px sur mobile (acceptable)
 - Stats: 20px sur mobile (trop grands)
 - Labels: 12px sur mobile (acceptable)
 
 ### Après
+
 - Titres: 18px sur mobile (-25%)
 - Sous-titres: 10px sur mobile (-17%)
 - Stats: 16px sur mobile (-20%)
 - Labels: 10px sur mobile (-17%)
 
 ### Impact Global
+
 - **Espace vertical économisé**: ~15-20% sur mobile
 - **Lisibilité**: Maintenue avec hiérarchie claire
 - **Cohérence**: Système uniforme sur 15 pages
@@ -195,6 +216,7 @@ className="text-xs sm:text-sm md:text-base"
 ## 🔄 Pages Restantes à Migrer (Optionnel)
 
 ### Pages Email (6)
+
 - ⏳ EmailCampaignsPage.tsx
 - ⏳ EmailSequencesPage.tsx
 - ⏳ EmailSegmentsPage.tsx
@@ -203,6 +225,7 @@ className="text-xs sm:text-sm md:text-base"
 - ⏳ EmailAnalyticsPage.tsx
 
 ### Pages Customer (10+)
+
 - ⏳ CustomerPortal.tsx
 - ⏳ MyOrders.tsx
 - ⏳ MyDownloads.tsx
@@ -215,6 +238,7 @@ className="text-xs sm:text-sm md:text-base"
 - ⏳ MyProfile.tsx
 
 ### Pages Admin Supplémentaires (30+)
+
 - ⏳ AdminUsers.tsx
 - ⏳ AdminProducts.tsx
 - ⏳ AdminInventory.tsx
@@ -225,6 +249,7 @@ className="text-xs sm:text-sm md:text-base"
 - ⏳ ... (et autres)
 
 ### Pages Service (9)
+
 - ⏳ BookingsManagement.tsx
 - ⏳ AdvancedCalendarPage.tsx
 - ⏳ ServiceManagementPage.tsx
@@ -234,12 +259,14 @@ className="text-xs sm:text-sm md:text-base"
 - ⏳ ... (et autres)
 
 ### Pages Digital (12)
+
 - ⏳ DigitalProductsList.tsx
 - ⏳ DigitalProductDetail.tsx
 - ⏳ DigitalProductAnalytics.tsx
 - ⏳ ... (et autres)
 
 ### Pages Autres
+
 - ⏳ Referrals.tsx
 - ⏳ MyTasks.tsx
 - ⏳ PlatformRevenue.tsx
@@ -250,11 +277,13 @@ className="text-xs sm:text-sm md:text-base"
 ## 🎯 Priorités
 
 ### ✅ Complété (15 pages)
+
 - Pages principales dashboard
 - Pages admin principales
 - Pages spéciales principales
 
 ### 🔄 En Attente (Optionnel)
+
 - Pages email (6)
 - Pages customer (10+)
 - Pages admin supplémentaires (30+)
@@ -277,4 +306,3 @@ className="text-xs sm:text-sm md:text-base"
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **15 PAGES PRINCIPALES COMPLÉTÉES**
-

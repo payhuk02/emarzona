@@ -114,6 +114,7 @@ await notifyPaymentSuccess({
 ### Intégration
 
 Les notifications sont automatiquement envoyées lors de :
+
 - ✅ Réception d'un webhook de paiement réussi/échoué
 - ✅ Vérification manuelle du statut d'un paiement
 - ✅ Remboursement d'un paiement
@@ -353,10 +354,3 @@ Une fois cette phase complétée, les prochaines améliorations peuvent être :
 ---
 
 **Fin du Document**
-
-
-
-
-
-
-

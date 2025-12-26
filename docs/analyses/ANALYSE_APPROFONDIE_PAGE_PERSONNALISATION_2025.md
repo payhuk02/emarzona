@@ -112,6 +112,7 @@ CREATE TABLE platform_settings (
   - Espacement de base
 
 **Fonctionnalités** :
+
 - ✅ Application en temps réel des couleurs
 - ✅ Upload d'images pour logos
 - ✅ Réinitialisation des valeurs par défaut
@@ -381,14 +382,14 @@ Les modifications de design sont appliquées **immédiatement** sans rechargemen
 const applyColorInRealTime = (colorKey: string, value: string) => {
   const root = document.documentElement;
   let hslValue = value.replace('hsl(', '').replace(')', '');
-  
+
   const cssVarMap = {
     primary: '--primary',
     secondary: '--secondary',
     accent: '--accent',
     // ...
   };
-  
+
   root.style.setProperty(cssVarMap[colorKey], hslValue);
 };
 ```
@@ -401,17 +402,17 @@ const applyColorInRealTime = (colorKey: string, value: string) => {
 
 ```sql
 -- Lecture : Tous les utilisateurs authentifiés
-CREATE POLICY "Allow select to authenticated" 
-ON platform_settings FOR SELECT 
+CREATE POLICY "Allow select to authenticated"
+ON platform_settings FOR SELECT
 TO authenticated USING (true);
 
 -- Écriture : Seulement les admins
-CREATE POLICY "Allow update to admins" 
-ON platform_settings FOR UPDATE 
+CREATE POLICY "Allow update to admins"
+ON platform_settings FOR UPDATE
 TO authenticated USING (
   EXISTS (
     SELECT 1 FROM profiles p
-    WHERE p.user_id = auth.uid() 
+    WHERE p.user_id = auth.uid()
     AND (p.is_super_admin = true OR p.role = 'admin')
   )
 );
@@ -476,7 +477,8 @@ TO authenticated USING (
 
 **Problème** : Erreurs silencieuses lors du chargement peuvent masquer des problèmes
 
-**Recommandation** : 
+**Recommandation** :
+
 - Logger les erreurs dans un service de monitoring (Sentry)
 - Afficher un indicateur visuel si les données par défaut sont utilisées
 
@@ -485,6 +487,7 @@ TO authenticated USING (
 **Problème** : Pas de validation stricte des valeurs saisies (ex: couleurs HSL)
 
 **Recommandation** :
+
 - Ajouter validation Zod pour les données de personnalisation
 - Valider les formats HSL, URLs, etc.
 
@@ -493,6 +496,7 @@ TO authenticated USING (
 **Problème** : Pas de gestion des conflits si deux admins modifient simultanément
 
 **Recommandation** :
+
 - Implémenter un système de verrouillage (optimistic locking)
 - Afficher un avertissement si les données ont changé depuis le chargement
 
@@ -501,6 +505,7 @@ TO authenticated USING (
 **Problème** : Si `pages` contient beaucoup de données, le JSON peut être volumineux
 
 **Recommandation** :
+
 - Pagination ou lazy loading des pages
 - Compression des données JSON si nécessaire
 
@@ -509,6 +514,7 @@ TO authenticated USING (
 **Problème** : Les modifications en mode aperçu sont perdues si l'utilisateur quitte sans sauvegarder
 
 **Recommandation** :
+
 - Sauvegarder les modifications d'aperçu dans `localStorage`
 - Proposer de restaurer les modifications à la réouverture
 
@@ -611,4 +617,3 @@ Les principales améliorations à apporter concernent la **validation des donné
 
 **Document généré automatiquement**  
 **Dernière mise à jour** : 31 Janvier 2025
-

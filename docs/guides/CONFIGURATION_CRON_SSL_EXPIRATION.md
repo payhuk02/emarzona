@@ -72,7 +72,7 @@ VALUES (
 Exécutez cette requête pour vérifier que le cron job est bien créé :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   schedule,
   command,
@@ -80,11 +80,12 @@ SELECT
   active,
   jobname,
   description
-FROM cron.job 
+FROM cron.job
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 Vous devriez voir :
+
 - `active: true`
 - `schedule: 0 9 * * *`
 - `jobname: check-ssl-expiration-daily`
@@ -130,46 +131,46 @@ Pour vérifier plus souvent, modifiez le `schedule` :
 
 ```sql
 -- Toutes les 6 heures
-UPDATE cron.job 
-SET schedule = '0 */6 * * *' 
+UPDATE cron.job
+SET schedule = '0 */6 * * *'
 WHERE jobname = 'check-ssl-expiration-daily';
 
 -- Toutes les 12 heures
-UPDATE cron.job 
-SET schedule = '0 */12 * * *' 
+UPDATE cron.job
+SET schedule = '0 */12 * * *'
 WHERE jobname = 'check-ssl-expiration-daily';
 
 -- Deux fois par jour (9h00 et 21h00)
-UPDATE cron.job 
-SET schedule = '0 9,21 * * *' 
+UPDATE cron.job
+SET schedule = '0 9,21 * * *'
 WHERE jobname = 'check-ssl-expiration-daily';
 
 -- Toutes les heures (pour tests)
-UPDATE cron.job 
-SET schedule = '0 * * * *' 
+UPDATE cron.job
+SET schedule = '0 * * * *'
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 ### Désactiver Temporairement
 
 ```sql
-UPDATE cron.job 
-SET active = false 
+UPDATE cron.job
+SET active = false
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 ### Réactiver
 
 ```sql
-UPDATE cron.job 
-SET active = true 
+UPDATE cron.job
+SET active = true
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 ### Supprimer le Cron Job
 
 ```sql
-DELETE FROM cron.job 
+DELETE FROM cron.job
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
@@ -178,7 +179,7 @@ WHERE jobname = 'check-ssl-expiration-daily';
 ### Voir l'Historique des Exécutions
 
 ```sql
-SELECT 
+SELECT
   j.jobname,
   j.schedule,
   j.active,
@@ -198,7 +199,7 @@ LIMIT 10;
 ### Voir les Erreurs Récentes
 
 ```sql
-SELECT 
+SELECT
   runid,
   start_time,
   end_time,
@@ -228,11 +229,13 @@ Les alertes sont envoyées selon les paramètres configurés dans l'onglet **Not
 ### Le cron job ne s'exécute pas
 
 1. Vérifiez qu'il est actif :
+
    ```sql
    SELECT active FROM cron.job WHERE jobname = 'check-ssl-expiration-daily';
    ```
 
 2. Vérifiez l'extension pg_cron :
+
    ```sql
    SELECT * FROM pg_extension WHERE extname = 'pg_cron';
    ```
@@ -247,13 +250,15 @@ Les alertes sont envoyées selon les paramètres configurés dans l'onglet **Not
 ### Pas d'alertes reçues
 
 1. Vérifiez qu'il y a des certificats SSL à vérifier :
+
    ```sql
    SELECT * FROM ssl_certificate_status WHERE certificate_valid = true;
    ```
 
 2. Vérifiez que les notifications sont activées :
+
    ```sql
-   SELECT 
+   SELECT
      s.name,
      s.custom_domain,
      ns.email_enabled,
@@ -278,4 +283,3 @@ Les alertes sont envoyées selon les paramètres configurés dans l'onglet **Not
 
 **Date de création :** 2025-02-02  
 **Dernière mise à jour :** 2025-02-02
-

@@ -15,10 +15,12 @@
 **Ouvrir :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/sql/new
 
 #### Migration A
+
 - Fichier : `supabase/migrations/20250201_fix_email_templates_complete_structure.sql`
 - **Copier tout** → **Coller** → **Run**
 
-#### Migration B  
+#### Migration B
+
 - **+ New query**
 - Fichier : `supabase/migrations/20250201_add_missing_email_templates.sql`
 - **Copier tout** → **Coller** → **Run**
@@ -42,4 +44,3 @@
 ---
 
 **Créé le 1er Février 2025** ✅
-

@@ -58,7 +58,9 @@ L'audit contient 9 sections principales :
 ## 🚨 Priorités de Sécurité
 
 ### 🔴 CRITIQUE (Priorité 1)
+
 Tables avec données très sensibles :
+
 - `platform_settings` - Paramètres de la plateforme
 - `admin_config` - Configuration admin
 - `commissions` - Commissions (si différente de `commission_payments`)
@@ -67,7 +69,9 @@ Tables avec données très sensibles :
 - `invoices` - Factures
 
 ### 🟠 HAUTE (Priorité 2)
+
 Tables avec données utilisateurs importantes :
+
 - `lessons` - Leçons de cours
 - `quizzes` - Quiz
 - `assignments` - Devoirs
@@ -76,7 +80,9 @@ Tables avec données utilisateurs importantes :
 - `recurring_bookings` - Réservations récurrentes
 
 ### 🟡 MOYENNE (Priorité 3)
+
 Tables importantes mais moins critiques :
+
 - `product_analytics` - Analytics produits
 - `store_analytics` - Analytics boutiques
 - `daily_stats` - Statistiques quotidiennes
@@ -84,7 +90,9 @@ Tables importantes mais moins critiques :
 - `course_resources` - Ressources de cours
 
 ### 🟢 BASSE (Priorité 4)
+
 Tables moins sensibles :
+
 - Tables de logs et historique
 - Tables de cache
 - Tables de configuration non-critiques
@@ -92,22 +100,26 @@ Tables moins sensibles :
 ## 📝 Plan d'Action Recommandé
 
 ### Étape 1 : Exécuter l'Audit
+
 ```sql
 -- Exécuter supabase/FINAL_RLS_AUDIT.sql
 ```
 
 ### Étape 2 : Analyser les Résultats
+
 - Identifier les tables critiques sans RLS
 - Prioriser les tables par niveau de sensibilité
 - Documenter les tables par catégorie
 
 ### Étape 3 : Créer Phase 4 (si nécessaire)
+
 - Tables critiques restantes
 - Tables de cours et formations
 - Tables de souscriptions
 - Tables de configuration
 
 ### Étape 4 : Tests et Validation
+
 - Tester toutes les politiques RLS
 - Vérifier l'isolation des données
 - Valider les accès utilisateurs, propriétaires et admins
@@ -133,5 +145,4 @@ Tables moins sensibles :
 
 ---
 
-*Dernière mise à jour : 2025-01-30*
-
+_Dernière mise à jour : 2025-01-30_

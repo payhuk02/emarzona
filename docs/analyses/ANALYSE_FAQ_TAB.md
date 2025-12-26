@@ -11,6 +11,7 @@ L'onglet FAQ a été **totalement refactorisé et amélioré** avec des fonction
 ### 1. 🏗️ **Architecture & Structure**
 
 #### **Interface TypeScript Stricte**
+
 ```typescript
 interface FAQItem {
   id: string;
@@ -20,15 +21,16 @@ interface FAQItem {
   order: number;
   isActive: boolean;
   isFeatured: boolean;
-  views?: number;          // Analytics
-  helpful?: number;        // Votes positifs
-  notHelpful?: number;     // Votes négatifs
+  views?: number; // Analytics
+  helpful?: number; // Votes positifs
+  notHelpful?: number; // Votes négatifs
   createdAt: Date;
   updatedAt: Date;
 }
 ```
 
 #### **Composants Modulaires**
+
 - ✅ **ProductFAQTab** : Composant principal (gestionnaire de FAQ)
 - ✅ **FAQForm** : Formulaire isolé pour création/édition
 - ✅ **Statistiques en temps réel** : Panel latéral interactif
@@ -39,27 +41,29 @@ interface FAQItem {
 ### 2. 🚀 **Fonctionnalités Avancées**
 
 #### **a) Templates Prédéfinis** 🎨
+
 ```typescript
 FAQ_TEMPLATES = {
   digital: [
-    "Comment télécharger ce produit ?",
-    "Est-il compatible avec mon système ?",
-    "Politique de remboursement ?"
+    'Comment télécharger ce produit ?',
+    'Est-il compatible avec mon système ?',
+    'Politique de remboursement ?',
   ],
   physical: [
-    "Délais de livraison ?",
-    "Puis-je retourner le produit ?",
-    "Modes de paiement acceptés ?"
+    'Délais de livraison ?',
+    'Puis-je retourner le produit ?',
+    'Modes de paiement acceptés ?',
   ],
   service: [
-    "Comment prendre rendez-vous ?",
-    "Annuler ou reporter un RDV ?",
-    "En ligne ou présentiel ?"
-  ]
-}
+    'Comment prendre rendez-vous ?',
+    'Annuler ou reporter un RDV ?',
+    'En ligne ou présentiel ?',
+  ],
+};
 ```
 
 **Utilisation** :
+
 1. Cliquer sur le bouton du type de produit souhaité
 2. Les FAQ correspondantes sont ajoutées automatiquement
 3. 3 FAQ par type (personnalisables)
@@ -67,17 +71,20 @@ FAQ_TEMPLATES = {
 #### **b) Import/Export JSON** 📥📤
 
 **Export** :
+
 - 🔹 Exporte toutes les FAQ au format JSON
 - 🔹 Nom de fichier automatique : `faqs_YYYY-MM-DD.json`
 - 🔹 Structure préservée (IDs, dates, catégories, stats)
 
 **Import** :
+
 - 🔹 Importe des FAQ depuis un fichier JSON
 - 🔹 Génération automatique des IDs et dates
 - 🔹 Validation du format JSON
 - 🔹 Notification de succès/échec
 
 **Cas d'usage** :
+
 - Migrer des FAQ entre produits
 - Sauvegarder des templates personnalisés
 - Partager des FAQ avec d'autres vendeurs
@@ -85,29 +92,34 @@ FAQ_TEMPLATES = {
 #### **c) Gestion de l'Ordre** ⬆️⬇️
 
 **Déplacement dynamique** :
+
 - ✅ Boutons "Monter" / "Descendre" pour chaque FAQ
 - ✅ Réorganisation instantanée
 - ✅ Mise à jour automatique de l'ordre
 - ✅ Désactivation des boutons aux extrémités
 
 **Alternatives** :
+
 - Champ "Ordre d'affichage" dans le formulaire
 - Tri automatique par ordre croissant
 
 #### **d) Recherche & Filtres** 🔍
 
 **Recherche en temps réel** :
+
 - 🔹 Recherche dans : question, réponse, catégorie
 - 🔹 Insensible à la casse
 - 🔹 Résultats instantanés
 
 **Filtres multiples** :
+
 - 🔹 **Par catégorie** : Affichage dynamique des catégories existantes
 - 🔹 **Par tri** : Ordre, Question (A-Z), Date, Vues
 - 🔹 **Ordre croissant/décroissant** : Toggle avec icônes
 - 🔹 **Mode d'affichage** : Liste ou Prévisualisation
 
 **Compteur de résultats** :
+
 ```
 "5 FAQ(s) trouvée(s)"
 ```
@@ -125,6 +137,7 @@ FAQ_TEMPLATES = {
 | **Avg. Utile** | Moyenne des votes positifs |
 
 **Analytics par FAQ** :
+
 - 👁️ Vues (compteur)
 - ✅ Votes "Utile" (helpful)
 - ❌ Votes "Non utile" (notHelpful)
@@ -132,6 +145,7 @@ FAQ_TEMPLATES = {
 #### **f) Validation Avancée** ✅
 
 **Validation du formulaire** :
+
 ```typescript
 - Question : Minimum 10 caractères, requis
 - Réponse : Minimum 20 caractères, requis
@@ -140,6 +154,7 @@ FAQ_TEMPLATES = {
 ```
 
 **Feedback visuel** :
+
 - ❌ Bordure rouge + message d'erreur pour les champs invalides
 - ✅ Compteur de caractères en temps réel
 - 📝 Indication du support Markdown
@@ -147,11 +162,13 @@ FAQ_TEMPLATES = {
 #### **g) Expansion/Collapse** 🔽🔼
 
 **Vue condensée par défaut** :
+
 - Question + badges (vedette, catégorie, statut)
 - Métadonnées (vues, votes, date)
 - Icône chevron pour expand
 
 **Vue étendue** :
+
 - Affichage complet de la réponse
 - Fond gris foncé pour distinction
 - Préservation du formatage (whitespace-pre-wrap)
@@ -172,6 +189,7 @@ FAQ_TEMPLATES = {
 #### **i) Catégories Dynamiques** 🏷️
 
 **Panel latéral des catégories** :
+
 - 📌 Affichage de toutes les catégories uniques
 - 🔢 Compteur de FAQ par catégorie
 - 🖱️ Clic pour filtrer par catégorie
@@ -181,6 +199,7 @@ FAQ_TEMPLATES = {
 #### **j) Bonnes Pratiques** 💡
 
 **Panel de conseils** :
+
 - ✅ Questions claires et spécifiques
 - ✅ Organisation par catégories
 - ✅ Mise en vedette des questions importantes
@@ -189,25 +208,27 @@ FAQ_TEMPLATES = {
 
 #### **k) Raccourcis Clavier** ⌨️
 
-| Raccourci | Action |
-|-----------|--------|
-| `Ctrl + N` | Nouvelle FAQ |
+| Raccourci  | Action          |
+| ---------- | --------------- |
+| `Ctrl + N` | Nouvelle FAQ    |
 | `Ctrl + F` | Focus recherche |
-| `Ctrl + E` | Exporter FAQ |
+| `Ctrl + E` | Exporter FAQ    |
 
-*(Note : L'implémentation complète nécessiterait un `useEffect` avec écouteurs d'événements)*
+_(Note : L'implémentation complète nécessiterait un `useEffect` avec écouteurs d'événements)_
 
 ---
 
 ### 3. 🎨 **Design & UX**
 
 #### **Dark Mode Professionnel**
+
 - 🌙 Couleurs cohérentes avec le reste de l'app
 - 🎨 Palette : Gray-800/700/600 + Blue/Green/Purple accents
 - 🔳 Cards avec `border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm`
 - ✨ Transitions fluides (`transition-all`)
 
 #### **Responsive Design**
+
 ```css
 Mobile (< 640px)  : Colonnes simples, boutons empilés
 Tablet (640-1024) : 2 colonnes pour certaines sections
@@ -215,11 +236,13 @@ Desktop (> 1024)  : 3 colonnes (2 pour liste + 1 pour sidebar)
 ```
 
 **Grilles adaptatives** :
+
 - Templates : `grid-cols-1 sm:grid-cols-3`
 - Statistiques : `grid-cols-2 sm:grid-cols-6`
 - Formulaire : `grid-cols-1 sm:grid-cols-2`
 
 #### **Accessibilité (A11y)**
+
 - ✅ Labels `htmlFor` + `id` pour tous les champs
 - ✅ `aria-label` pour les boutons d'action
 - ✅ Tooltips explicatifs (via Radix UI)
@@ -228,15 +251,17 @@ Desktop (> 1024)  : 3 colonnes (2 pour liste + 1 pour sidebar)
 - ✅ Support clavier complet
 
 #### **États Visuels**
-| État | Indicateur |
-|------|-----------|
-| Actif | Badge vert "Actif" + opacité 100% |
-| Inactif | Badge gris "Inactif" + opacité 60% |
-| Vedette | Badge jaune avec étoile remplie |
-| Étendu | Bordure bleue + fond bleu/5 |
-| Sélectionné | Highlight de la catégorie |
+
+| État        | Indicateur                         |
+| ----------- | ---------------------------------- |
+| Actif       | Badge vert "Actif" + opacité 100%  |
+| Inactif     | Badge gris "Inactif" + opacité 60% |
+| Vedette     | Badge jaune avec étoile remplie    |
+| Étendu      | Bordure bleue + fond bleu/5        |
+| Sélectionné | Highlight de la catégorie          |
 
 #### **Feedback Utilisateur**
+
 - 🎉 Toast notifications (via Sonner)
   - ✅ Succès : Ajout, modification, duplication
   - ❌ Erreur : Suppression, import invalide
@@ -249,6 +274,7 @@ Desktop (> 1024)  : 3 colonnes (2 pour liste + 1 pour sidebar)
 ### 4. ⚙️ **Performance & Optimisation**
 
 #### **Hooks React Optimisés**
+
 ```typescript
 useCallback() : Pour toutes les fonctions (évite re-renders)
 useMemo()     : Pour filtres, tris, stats calculées
@@ -256,11 +282,13 @@ useState()    : Pour les états locaux
 ```
 
 #### **Calculs Mémorisés**
+
 - `filteredFAQs` : Recalculé seulement si dépendances changent
 - `categories` : Extrait unique une seule fois
 - `stats` : Calculées en temps réel mais mémorisées
 
 #### **Structure de Données**
+
 - IDs uniques générés avec `Date.now() + random()`
 - Dates gérées en `Date` objects (pas de strings)
 - Ordres automatiques lors des déplacements
@@ -270,12 +298,14 @@ useState()    : Pour les états locaux
 ### 5. 🔧 **Code Quality**
 
 #### **TypeScript Strict**
+
 - ✅ Interfaces explicites pour tous les types
 - ✅ Type checking pour les callbacks
 - ✅ Pas de `any` dans les composants
 - ✅ Types génériques pour les fonctions
 
 #### **Imports Organisés**
+
 ```typescript
 1. React hooks
 2. UI Components (shadcn/ui)
@@ -284,11 +314,13 @@ useState()    : Pour les états locaux
 ```
 
 #### **Composants Purs**
+
 - `FAQForm` : Isolé, réutilisable
 - Props clairement définies
 - Pas de side-effects non contrôlés
 
 #### **Gestion d'Erreurs**
+
 - Try/catch pour import JSON
 - Validation côté client
 - Messages d'erreur explicites
@@ -299,20 +331,24 @@ useState()    : Pour les états locaux
 ## 📦 **Dépendances Utilisées**
 
 ### **Core**
+
 - `react` : Hooks (useState, useCallback, useMemo)
 - `typescript` : Typage strict
 
 ### **UI Components (shadcn/ui)**
+
 - `Button`, `Input`, `Textarea`, `Label`
 - `Card`, `Badge`, `Switch`
 - `Select`, `Separator`, `Tabs`
 - `Tooltip` (via Radix UI)
 
 ### **Icons (lucide-react)**
+
 - 30+ icônes pour toutes les actions
 - Cohérence visuelle
 
 ### **Toast Notifications**
+
 - `useToast` (hook personnalisé)
 - Basé sur Sonner
 
@@ -321,21 +357,25 @@ useState()    : Pour les états locaux
 ## 🚀 **Utilisation**
 
 ### **Ajouter une FAQ**
+
 1. Cliquer sur "Nouvelle FAQ"
 2. Remplir le formulaire (question, réponse, catégorie)
 3. Configurer l'ordre, l'état actif, et vedette
 4. Cliquer sur "Créer"
 
 ### **Utiliser un Template**
+
 1. Cliquer sur le type de produit (Digital/Physique/Service)
 2. 3 FAQ sont ajoutées automatiquement
 3. Modifier si nécessaire
 
 ### **Réorganiser les FAQ**
+
 1. Utiliser les boutons ⬆️⬇️ pour déplacer
 2. Ou modifier le champ "Ordre" dans le formulaire
 
 ### **Exporter/Importer**
+
 ```json
 // Format d'export
 [
@@ -357,6 +397,7 @@ useState()    : Pour les états locaux
 ```
 
 ### **Rechercher & Filtrer**
+
 1. Taper dans la barre de recherche
 2. Sélectionner une catégorie dans le dropdown
 3. Choisir un tri (Ordre, Question, Date, Vues)
@@ -368,21 +409,25 @@ useState()    : Pour les états locaux
 ## 🎯 **Cas d'Usage**
 
 ### **E-commerce**
+
 - ❓ "Délais de livraison ?"
 - ❓ "Politique de retour ?"
 - ❓ "Garantie produit ?"
 
 ### **Produits Digitaux**
+
 - ❓ "Comment télécharger ?"
 - ❓ "Compatible avec quel système ?"
 - ❓ "Mises à jour gratuites ?"
 
 ### **Services**
+
 - ❓ "Comment prendre RDV ?"
 - ❓ "Annulation possible ?"
 - ❓ "En ligne ou présentiel ?"
 
 ### **SaaS**
+
 - ❓ "Comment créer un compte ?"
 - ❓ "Essai gratuit disponible ?"
 - ❓ "Support client ?"
@@ -392,43 +437,53 @@ useState()    : Pour les états locaux
 ## 🔮 **Améliorations Futures Possibles**
 
 ### **1. Drag & Drop**
+
 - Librairie : `@dnd-kit/core`
 - Réorganisation visuelle par glisser-déposer
 
 ### **2. Rich Text Editor**
+
 - Librairie : `Tiptap` ou `Slate`
 - Formatage avancé (gras, italique, listes, liens, images)
 
 ### **3. Prévisualisation Markdown**
+
 - Librairie : `react-markdown`
 - Rendu HTML depuis Markdown
 
 ### **4. Support Multilingue**
+
 - FAQ traduites en plusieurs langues
 - Sélecteur de langue
 
 ### **5. Analytics Avancées**
+
 - Graphiques de vues par période
 - Taux d'utilité par FAQ
 - Questions les plus consultées
 
 ### **6. AI-Generated FAQ**
+
 - Génération automatique via GPT-4
 - Suggestions de réponses
 
 ### **7. FAQ Hiérarchiques**
+
 - Sous-questions / Réponses imbriquées
 - Accordéons multi-niveaux
 
 ### **8. Recherche Fuzzy**
+
 - Librairie : `fuse.js`
 - Recherche tolérante aux fautes de frappe
 
 ### **9. Versioning**
+
 - Historique des modifications
 - Rollback possible
 
 ### **10. Commentaires & Feedback**
+
 - Utilisateurs peuvent commenter
 - Système de notation étoiles
 
@@ -436,15 +491,15 @@ useState()    : Pour les états locaux
 
 ## 📊 **Métriques de Qualité**
 
-| Critère | Score |
-|---------|-------|
+| Critère                   | Score          |
+| ------------------------- | -------------- |
 | **TypeScript Strictness** | ⭐⭐⭐⭐⭐ 5/5 |
-| **Accessibilité (A11y)** | ⭐⭐⭐⭐⭐ 5/5 |
-| **Responsive Design** | ⭐⭐⭐⭐⭐ 5/5 |
-| **Performance** | ⭐⭐⭐⭐⭐ 5/5 |
-| **UX/UI** | ⭐⭐⭐⭐⭐ 5/5 |
-| **Code Quality** | ⭐⭐⭐⭐⭐ 5/5 |
-| **Fonctionnalités** | ⭐⭐⭐⭐⭐ 5/5 |
+| **Accessibilité (A11y)**  | ⭐⭐⭐⭐⭐ 5/5 |
+| **Responsive Design**     | ⭐⭐⭐⭐⭐ 5/5 |
+| **Performance**           | ⭐⭐⭐⭐⭐ 5/5 |
+| **UX/UI**                 | ⭐⭐⭐⭐⭐ 5/5 |
+| **Code Quality**          | ⭐⭐⭐⭐⭐ 5/5 |
+| **Fonctionnalités**       | ⭐⭐⭐⭐⭐ 5/5 |
 
 **Score Global : 35/35 (100%)** 🏆
 
@@ -460,7 +515,7 @@ L'onglet FAQ a été **transformé en un système de gestion professionnel et co
 ✅ **Performance optimisée**  
 ✅ **Accessibilité complète**  
 ✅ **UX intuitive avec tooltips & feedback**  
-✅ **Import/Export, Templates, Analytics**  
+✅ **Import/Export, Templates, Analytics**
 
 **Status** : ✅ **PRODUCTION READY** 🚀
 
@@ -492,4 +547,3 @@ Status : ✅ Fonctionnel & Testé
 ---
 
 **FIN DE L'ANALYSE** ✅
-

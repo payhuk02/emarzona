@@ -18,7 +18,9 @@
 Recherchez les logs suivants dans la console :
 
 #### Log 1 : "MediaAttachment - Component render"
+
 Ce log montre toutes les informations de l'attachment :
+
 ```javascript
 {
   attachmentId: "...",
@@ -36,21 +38,26 @@ Ce log montre toutes les informations de l'attachment :
 ```
 
 **Points à vérifier :**
+
 - ✅ `mediaType` doit être `"image"` (pas `"file"`)
 - ✅ `fileName` doit contenir une extension d'image (`.png`, `.jpg`, etc.)
 - ✅ `fileType` doit commencer par `"image/"` ou être vide
 - ✅ `originalUrl` et `correctedUrl` doivent être des URLs valides
 
 #### Log 2 : "MediaAttachment - Attempting to display image"
+
 Ce log apparaît si le composant essaie d'afficher l'image.
 
 #### Log 3 : "Image loaded successfully"
+
 Ce log apparaît si l'image se charge correctement.
 
 #### Log 4 : "Image load error"
+
 Ce log apparaît si l'image ne peut pas être chargée.
 
 #### Log 5 : "MediaAttachment - Image file detected as generic file"
+
 ⚠️ **Ce log indique un problème** : Un fichier avec une extension d'image est détecté comme fichier générique.
 
 ---
@@ -60,6 +67,7 @@ Ce log apparaît si l'image ne peut pas être chargée.
 ### Problème 1 : `mediaType` est `"file"` au lieu de `"image"`
 
 **Causes possibles :**
+
 - `file_name` est vide ou ne contient pas d'extension
 - `file_type` est vide ou incorrect
 - La détection de type échoue
@@ -68,6 +76,7 @@ Ce log apparaît si l'image ne peut pas être chargée.
 Vérifier dans la console les valeurs de `fileName` et `fileType` dans le log "MediaAttachment - Component render".
 
 **Exemple de problème :**
+
 ```javascript
 {
   fileName: "", // ❌ Vide
@@ -84,12 +93,14 @@ S'assurer que lors de l'upload, `file_name` et `file_type` sont correctement sto
 ### Problème 2 : `imageError` est `true` immédiatement
 
 **Causes possibles :**
+
 - L'URL est invalide
 - Le fichier n'existe pas dans le bucket
 - Les permissions RLS bloquent l'accès
 
 **Solution :**
 Vérifier dans la console :
+
 - Les logs "Image load error"
 - Les logs "File existence check"
 - Les logs "Could not generate signed URL"
@@ -99,12 +110,14 @@ Vérifier dans la console :
 ### Problème 3 : L'URL n'est pas valide
 
 **Causes possibles :**
+
 - `file_url` stocké dans la base de données est incorrect
 - `storage_path` est incorrect
 - La correction d'URL ne fonctionne pas
 
 **Solution :**
 Vérifier dans la console :
+
 - `originalUrl` : URL stockée dans la base
 - `correctedUrl` : URL après correction
 - `displayUrl` : URL utilisée pour l'affichage
@@ -117,18 +130,21 @@ Copier `displayUrl` depuis les logs et l'ouvrir dans un nouvel onglet pour voir 
 ### Problème 4 : Le fichier n'existe pas dans le bucket
 
 **Causes possibles :**
+
 - L'upload a échoué silencieusement
 - Le fichier a été supprimé
 - Le chemin est incorrect
 
 **Solution :**
+
 1. Aller dans **Supabase Dashboard** > **Storage** > **attachments**
 2. Naviguer dans `vendor-message-attachments/`
 3. Vérifier si le fichier existe
 
 **Vérification SQL :**
+
 ```sql
-SELECT 
+SELECT
   id,
   file_name,
   file_url,
@@ -154,7 +170,7 @@ attachments: selectedFiles.map((file, index) => ({
   file_type: file.type, // ✅ Doit contenir le type MIME (ex: "image/png")
   file_size: file.size,
   file_url: fileUrls[index] || '',
-}))
+}));
 ```
 
 ### Si l'URL est invalide
@@ -193,7 +209,8 @@ Dans la console du navigateur, exécutez :
 
 ```javascript
 // Remplacer par les valeurs depuis les logs
-const testUrl = "https://hbdnzajbyjakdhuavrvb.supabase.co/storage/v1/object/public/attachments/vendor-message-attachments/1765207968982-y0xu1n9lneq.png";
+const testUrl =
+  'https://hbdnzajbyjakdhuavrvb.supabase.co/storage/v1/object/public/attachments/vendor-message-attachments/1765207968982-y0xu1n9lneq.png';
 
 // Test 1 : Vérifier si l'URL est accessible
 fetch(testUrl, { method: 'HEAD' })
@@ -201,9 +218,9 @@ fetch(testUrl, { method: 'HEAD' })
     console.log('Status:', response.status);
     console.log('OK:', response.ok);
     if (response.ok) {
-      console.log('✅ L\'URL est accessible');
+      console.log("✅ L'URL est accessible");
     } else {
-      console.log('❌ L\'URL n\'est pas accessible');
+      console.log("❌ L'URL n'est pas accessible");
     }
   })
   .catch(error => {
@@ -213,7 +230,7 @@ fetch(testUrl, { method: 'HEAD' })
 // Test 2 : Créer une image pour tester
 const img = new Image();
 img.onload = () => console.log('✅ Image chargée avec succès');
-img.onerror = () => console.log('❌ Erreur de chargement de l\'image');
+img.onerror = () => console.log("❌ Erreur de chargement de l'image");
 img.src = testUrl;
 ```
 
@@ -248,4 +265,3 @@ Si le problème persiste, fournir :
 ## ✅ Solution Attendu
 
 Après ces vérifications, les images devraient s'afficher correctement. Si le problème persiste, les logs permettront d'identifier la cause exacte.
-

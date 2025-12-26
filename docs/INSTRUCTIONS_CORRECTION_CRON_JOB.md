@@ -44,7 +44,7 @@ SELECT cron.schedule(
 );
 
 -- Vérification
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -94,22 +94,22 @@ SELECT net.http_post(
 ## ✅ Vérifications
 
 1. **Cron Job** : Vérifiez que le cron job contient bien le header `Authorization` :
+
    ```sql
    SELECT command FROM cron.job WHERE jobname = 'process-scheduled-email-campaigns';
    ```
+
    Le `command` devrait contenir `'Authorization', 'Bearer ' || current_setting(...)`
 
 2. **Invocations** : Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Invocations**, devrait être **200 OK**
 
 3. **Campagne** : La campagne devrait être traitée :
    ```sql
-   SELECT status, metrics->>'sent' as emails_sent 
-   FROM public.email_campaigns 
+   SELECT status, metrics->>'sent' as emails_sent
+   FROM public.email_campaigns
    WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
    ```
 
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

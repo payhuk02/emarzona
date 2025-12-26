@@ -13,6 +13,7 @@ Malgré la configuration correcte des permissions SQL (`SECURITY DEFINER`, `GRAN
 ### Cause
 
 Supabase peut bloquer l'accès au schéma `cron` via l'API REST, même pour les fonctions avec `SECURITY DEFINER`, car :
+
 - Le schéma `cron` est un schéma système protégé
 - L'API REST de Supabase peut avoir des restrictions supplémentaires
 - Les permissions SQL ne garantissent pas l'accès via l'API REST
@@ -22,6 +23,7 @@ Supabase peut bloquer l'accès au schéma `cron` via l'API REST, même pour les 
 ## ✅ Solution : Edge Function
 
 Création d'une **Edge Function Supabase** qui :
+
 - ✅ Utilise le **service role key** pour appeler les fonctions SQL
 - ✅ Vérifie l'authentification de l'utilisateur
 - ✅ Contourne les restrictions de l'API REST
@@ -36,6 +38,7 @@ Création d'une **Edge Function Supabase** qui :
 **Fichier** : `supabase/functions/manage-email-tags-cron-jobs/index.ts`
 
 Cette fonction expose deux actions :
+
 - `get_status` : Récupère le statut des cron jobs
 - `toggle` : Active/désactive un cron job
 
@@ -44,6 +47,7 @@ Cette fonction expose deux actions :
 **Fichier** : `src/components/email/EmailTagsDashboard.tsx`
 
 Le composant utilise maintenant l'Edge Function au lieu des appels RPC directs :
+
 - `loadData()` : Appelle l'Edge Function pour récupérer le statut
 - `handleToggleCronJob()` : Appelle l'Edge Function pour modifier l'état
 
@@ -54,11 +58,13 @@ Le composant utilise maintenant l'Edge Function au lieu des appels RPC directs :
 ### Étape 1 : Déployer l'Edge Function
 
 Via Supabase CLI :
+
 ```bash
 supabase functions deploy manage-email-tags-cron-jobs
 ```
 
 Via Supabase Dashboard :
+
 1. Allez dans **Edge Functions**
 2. Cliquez sur **Create a new function**
 3. Nommez-la `manage-email-tags-cron-jobs`
@@ -68,6 +74,7 @@ Via Supabase Dashboard :
 ### Étape 2 : Vérifier le Déploiement
 
 Testez l'Edge Function :
+
 ```bash
 curl -X GET \
   "https://YOUR_PROJECT.supabase.co/functions/v1/manage-email-tags-cron-jobs?action=get_status" \
@@ -115,6 +122,7 @@ Rechargez complètement la page "Gestion des Tags Email" dans votre application.
 Le composant React a été modifié pour utiliser l'Edge Function. Les anciens appels RPC sont remplacés par des appels HTTP à l'Edge Function.
 
 ### Avant (RPC direct)
+
 ```typescript
 const { data, error } = await supabase.rpc('toggle_email_tags_cron_job', {
   p_job_name: jobName,
@@ -123,13 +131,14 @@ const { data, error } = await supabase.rpc('toggle_email_tags_cron_job', {
 ```
 
 ### Après (Edge Function)
+
 ```typescript
 const response = await fetch(
   `${SUPABASE_URL}/functions/v1/manage-email-tags-cron-jobs?action=toggle`,
   {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${session.access_token}`,
+      Authorization: `Bearer ${session.access_token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -161,6 +170,6 @@ const response = await fetch(
 ---
 
 **Fichiers à déployer** :
+
 - `supabase/functions/manage-email-tags-cron-jobs/index.ts` (Edge Function)
 - `src/components/email/EmailTagsDashboard.tsx` (déjà modifié)
-

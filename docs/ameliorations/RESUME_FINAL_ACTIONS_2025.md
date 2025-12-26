@@ -12,11 +12,13 @@
 **Fichier** : `supabase/migrations/20250231_add_tracking_email_templates.sql`
 
 **Templates créés** :
+
 - ✅ `shipment-tracking-update` - Mise à jour générale de tracking
 - ✅ `shipment-delivered` - Notification de livraison
 - ✅ `shipment-out-for-delivery` - En cours de livraison
 
 **Caractéristiques** :
+
 - Templates multilingues (FR/EN)
 - Design responsive et professionnel
 - Variables dynamiques supportées
@@ -31,6 +33,7 @@
 **Fichier** : `supabase/functions/track-shipments/index.ts`
 
 **Fonctionnalités** :
+
 - ✅ Récupération automatique des shipments en attente
 - ✅ Traitement séquentiel avec pause entre appels
 - ✅ Gestion d'erreurs complète
@@ -48,6 +51,7 @@
 **Documentation** : `docs/ameliorations/DEPLOIEMENT_ET_CONFIGURATION_2025.md`
 
 **Instructions complètes pour** :
+
 - ✅ Création du cron job via Dashboard
 - ✅ Création du cron job via SQL
 - ✅ Vérification et monitoring
@@ -62,6 +66,7 @@
 **Adaptateurs créés** :
 
 #### FedEx
+
 - **Fichier** : `src/lib/shipping/carriers/fedex-adapter.ts`
 - ✅ OAuth token management
 - ✅ API Track v1 intégration
@@ -70,6 +75,7 @@
 - ✅ Simulation pour développement
 
 #### DHL
+
 - **Fichier** : `src/lib/shipping/carriers/dhl-adapter.ts`
 - ✅ API Tracking intégration
 - ✅ Transformation de réponse
@@ -77,6 +83,7 @@
 - ✅ Simulation pour développement
 
 #### UPS
+
 - **Fichier** : `src/lib/shipping/carriers/ups-adapter.ts`
 - ✅ OAuth token management
 - ✅ API Track v1 intégration
@@ -85,6 +92,7 @@
 - ✅ Simulation pour développement
 
 #### Chronopost
+
 - **Fichier** : `src/lib/shipping/carriers/chronopost-adapter.ts`
 - ✅ API Tracking intégration
 - ✅ Transformation de réponse
@@ -92,6 +100,7 @@
 - ✅ Simulation pour développement
 
 **Intégration** :
+
 - ✅ Adaptateurs intégrés dans `automatic-tracking.ts`
 - ✅ Factory pattern pour instanciation
 - ✅ Support des credentials via variables d'environnement
@@ -103,12 +112,12 @@
 
 ## 📊 STATUT GLOBAL
 
-| Action | Statut | Fichiers | Documentation |
-|--------|--------|----------|---------------|
-| **Templates Email** | ✅ Complété | 1 migration SQL | Incluse dans migration |
-| **Edge Function** | ✅ Complété | 1 fonction + README | `supabase/functions/track-shipments/README.md` |
-| **Cron Job Config** | ✅ Complété | 1 guide | `docs/ameliorations/DEPLOIEMENT_ET_CONFIGURATION_2025.md` |
-| **APIs Transporteurs** | ✅ Complété | 4 adaptateurs | Incluse dans code |
+| Action                 | Statut      | Fichiers            | Documentation                                             |
+| ---------------------- | ----------- | ------------------- | --------------------------------------------------------- |
+| **Templates Email**    | ✅ Complété | 1 migration SQL     | Incluse dans migration                                    |
+| **Edge Function**      | ✅ Complété | 1 fonction + README | `supabase/functions/track-shipments/README.md`            |
+| **Cron Job Config**    | ✅ Complété | 1 guide             | `docs/ameliorations/DEPLOIEMENT_ET_CONFIGURATION_2025.md` |
+| **APIs Transporteurs** | ✅ Complété | 4 adaptateurs       | Incluse dans code                                         |
 
 ---
 
@@ -136,6 +145,7 @@ Suivre les instructions dans `docs/ameliorations/DEPLOIEMENT_ET_CONFIGURATION_20
 ### 4. Configurer Variables d'Environnement
 
 Ajouter dans `.env` :
+
 ```env
 VITE_FEDEX_API_KEY=...
 VITE_FEDEX_API_SECRET=...
@@ -160,4 +170,3 @@ VITE_CHRONOPOST_PASSWORD=...
 
 **Date de dernière mise à jour** : 31 Janvier 2025  
 **Statut** : ✅ Toutes les Actions Complétées - Prêt pour Déploiement
-

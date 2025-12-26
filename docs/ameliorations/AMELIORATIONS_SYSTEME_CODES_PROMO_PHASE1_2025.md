@@ -76,7 +76,7 @@ Cette phase d'amélioration se concentre sur la **stabilisation** du système de
 const handleCodeChange = (value: string) => {
   const normalizedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
   setFormData({ ...formData, code: normalizedValue });
-  
+
   if (normalizedValue.length > 0) {
     const validation = validateCodeFormat(normalizedValue);
     setCodeValidation(validation);
@@ -277,4 +277,3 @@ promotionValidation.ts
 
 **Date de complétion:** 30 Janvier 2025  
 **Prochaine phase:** Phase 2 - Unification (Semaine 3-4)
-

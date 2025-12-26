@@ -176,4 +176,3 @@ Plusieurs badges utilisent `(product as any)` pour accéder à des propriétés 
 ---
 
 _Vérification terminée le 2 Février 2025_
-

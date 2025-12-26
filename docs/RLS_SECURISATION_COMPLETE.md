@@ -20,6 +20,7 @@
 ### Objectif Atteint
 
 Toutes les tables de la base de données sont maintenant protégées par Row Level Security (RLS), garantissant que :
+
 - Les utilisateurs ne peuvent accéder qu'à leurs propres données
 - Les propriétaires de boutique ne voient que les données de leur boutique
 - Les clients ne voient que leurs propres informations
@@ -30,10 +31,12 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ## 📋 Phases de Sécurisation
 
 ### Phase 1 : Tables Critiques (11 tables)
+
 **Date** : 2025-01-30  
 **Migration** : `20250130_rls_critical_tables_phase1.sql`
 
 **Tables sécurisées** :
+
 - `orders` - Commandes
 - `order_items` - Articles de commande
 - `payments` - Paiements
@@ -51,10 +54,12 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ---
 
 ### Phase 2 : Produits & Marketing (6 tables)
+
 **Date** : 2025-01-30  
 **Migration** : `20250130_rls_products_marketing_phase2.sql`
 
 **Tables sécurisées** :
+
 - `products` - Produits
 - `product_variants` - Variantes de produits
 - `product_images` - Images de produits
@@ -67,10 +72,12 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ---
 
 ### Phase 3 : Affiliation, Cours & Produits Spécialisés (9 tables)
+
 **Date** : 2025-01-30  
 **Migration** : `20250130_rls_affiliates_courses_products_phase3.sql`
 
 **Tables sécurisées** :
+
 - `affiliates` - Affiliés
 - `affiliate_links` - Liens d'affiliation
 - `commission_payments` - Paiements de commissions
@@ -86,10 +93,12 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ---
 
 ### Phase 4A : Tables Critiques Restantes (3 tables)
+
 **Date** : 2025-01-30  
 **Migration** : `20250130_rls_phase4a_critical_tables.sql`
 
 **Tables sécurisées** :
+
 - `subscriptions` - Abonnements (🔴 CRITIQUE)
 - `daily_stats` - Statistiques quotidiennes (🟡 MOYENNE)
 - `stats` - Statistiques (🟡 MOYENNE)
@@ -99,12 +108,14 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ---
 
 ### Phase 4B : Tables Restantes (37 tables)
+
 **Date** : 2025-01-30  
 **Migration** : `20250130_rls_phase4b_remaining_tables.sql`
 
 **Stratégie** : Création automatique de politiques génériques pour toutes les tables sans politiques
 
 **Fonctionnalités** :
+
 - Détection automatique de la structure des tables (store_id, user_id, customer_id)
 - Création de politiques adaptées à chaque structure
 - Gestion d'erreurs individuelle
@@ -114,12 +125,14 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ---
 
 ### Phase 4C : Complétion des Politiques (263 tables)
+
 **Date** : 2025-01-30  
 **Migration** : `20250130_rls_phase4c_complete_policies.sql`
 
 **Objectif** : Compléter les politiques manquantes (INSERT, UPDATE, DELETE) pour toutes les tables
 
 **Fonctionnalités** :
+
 - Détection des politiques existantes
 - Ajout uniquement des politiques manquantes
 - Gestion intelligente selon la structure de chaque table
@@ -184,22 +197,22 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 
 ### Répartition par Type de Politique
 
-| Type de Politique | Nombre de Tables | Pourcentage |
-|-------------------|------------------|-------------|
-| ✅ SELECT | 329 | 100% |
-| ✅ INSERT | 329 | 100% |
-| ✅ UPDATE | 329 | 100% |
-| ✅ DELETE | 329 | 100% |
-| ✅ **TOUTES (4/4)** | **329** | **100%** |
+| Type de Politique   | Nombre de Tables | Pourcentage |
+| ------------------- | ---------------- | ----------- |
+| ✅ SELECT           | 329              | 100%        |
+| ✅ INSERT           | 329              | 100%        |
+| ✅ UPDATE           | 329              | 100%        |
+| ✅ DELETE           | 329              | 100%        |
+| ✅ **TOUTES (4/4)** | **329**          | **100%**    |
 
 ### Répartition par Structure
 
-| Structure | Nombre de Tables | Politiques |
-|-----------|------------------|------------|
-| Tables avec `store_id` | ~150 | Propriétaires de boutique |
-| Tables avec `user_id` | ~100 | Utilisateurs |
-| Tables avec `customer_id` | ~50 | Clients |
-| Tables système/config | ~29 | Accès public contrôlé |
+| Structure                 | Nombre de Tables | Politiques                |
+| ------------------------- | ---------------- | ------------------------- |
+| Tables avec `store_id`    | ~150             | Propriétaires de boutique |
+| Tables avec `user_id`     | ~100             | Utilisateurs              |
+| Tables avec `customer_id` | ~50              | Clients                   |
+| Tables système/config     | ~29              | Accès public contrôlé     |
 
 ---
 
@@ -208,28 +221,36 @@ Toutes les tables de la base de données sont maintenant protégées par Row Lev
 ### Politiques par Type de Table
 
 #### 1. Tables avec `store_id`
+
 **Accès** : Propriétaires de boutique
+
 ```sql
 store_id IN (SELECT id FROM public.stores WHERE user_id = auth.uid())
 ```
 
 #### 2. Tables avec `user_id`
+
 **Accès** : Utilisateurs authentifiés
+
 ```sql
 user_id = auth.uid()
 ```
 
 #### 3. Tables avec `customer_id`
+
 **Accès** : Clients (via email)
+
 ```sql
 customer_id IN (
-  SELECT id FROM public.customers 
+  SELECT id FROM public.customers
   WHERE email = (SELECT email FROM auth.users WHERE id = auth.uid())
 )
 ```
 
 #### 4. Tables système/config
+
 **Accès** : Public contrôlé (selon le besoin)
+
 ```sql
 -- Lecture publique ou accès restreint selon le cas
 ```
@@ -299,11 +320,13 @@ customer_id IN (
 ### Ajout de Nouvelles Tables
 
 **Procédure** :
+
 1. Créer la table avec RLS activé
 2. Ajouter les politiques appropriées selon la structure
 3. Vérifier avec l'audit
 
 **Exemple** :
+
 ```sql
 -- Créer la table
 CREATE TABLE public.ma_nouvelle_table (
@@ -316,7 +339,7 @@ CREATE TABLE public.ma_nouvelle_table (
 ALTER TABLE public.ma_nouvelle_table ENABLE ROW LEVEL SECURITY;
 
 -- Créer les politiques
-CREATE POLICY "ma_nouvelle_table_select_policy" 
+CREATE POLICY "ma_nouvelle_table_select_policy"
   ON public.ma_nouvelle_table FOR SELECT
   USING (store_id IN (SELECT id FROM public.stores WHERE user_id = auth.uid()));
 
@@ -359,6 +382,7 @@ Les politiques RLS peuvent avoir un impact sur les performances. Si vous remarqu
 ### Tests
 
 **Important** : Tester toutes les fonctionnalités de l'application après la sécurisation RLS pour s'assurer que :
+
 - Les utilisateurs peuvent accéder à leurs données
 - Les propriétaires peuvent gérer leur boutique
 - Les clients peuvent voir leurs commandes
@@ -410,6 +434,7 @@ Les politiques RLS peuvent avoir un impact sur les performances. Si vous remarqu
 ### Scripts Disponibles
 
 Tous les scripts sont disponibles dans :
+
 - `supabase/migrations/` - Migrations RLS
 - `supabase/` - Scripts d'audit et d'analyse
 - `docs/` - Documentation complète
@@ -460,7 +485,6 @@ SELECT * FROM pg_policies WHERE tablename = 'nom_table';
 
 ---
 
-*Document créé le : 2025-01-30*  
-*Dernière mise à jour : 2025-01-30*  
-*Version : 1.0*
-
+_Document créé le : 2025-01-30_  
+_Dernière mise à jour : 2025-01-30_  
+_Version : 1.0_

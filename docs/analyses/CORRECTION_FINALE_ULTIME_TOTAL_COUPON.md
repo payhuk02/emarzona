@@ -32,16 +32,16 @@ const finalTotal = useMemo(() => {
   const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
   return finalAmount;
 }, [
-  summary.subtotal, 
-  summary.discount_amount, 
+  summary.subtotal,
+  summary.discount_amount,
   couponDiscountAmount,
   couponDiscountValue, // Valeur primitive
   couponId, // ID pour détecter le changement
   appliedCouponCode?.discountAmount ?? 0, // Valeur directe
   appliedCouponCode?.id ?? null, // ID direct
-  taxAmount, 
-  shippingAmount, 
-  giftCardAmount
+  taxAmount,
+  shippingAmount,
+  giftCardAmount,
 ]);
 ```
 
@@ -80,7 +80,7 @@ Si le problème persiste encore, il faudrait :
 ## ⚠️ Note Importante
 
 Si le problème persiste, il pourrait être nécessaire de :
+
 - Vérifier que le navigateur n'utilise pas une version en cache
 - Vérifier que le build a été fait après les modifications
 - Utiliser les DevTools React pour inspecter les states et props
-

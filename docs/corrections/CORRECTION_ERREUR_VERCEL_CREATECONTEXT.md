@@ -10,17 +10,20 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 ### Erreur Console Vercel
+
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'createContext')
   at chunk-BeLvQHV1.js:9:25181
 ```
 
 ### Symptômes
+
 - ✅ Application fonctionne **localement** (`npm run dev`)
 - ❌ Application **ne démarre pas** sur Vercel (écran noir)
 - ❌ Erreur d'accès à `createContext` dans le code minifié
 
 ### Cause Root
+
 L'erreur `Cannot read properties of undefined (reading 'createContext')` se produit quand :
 
 1. **React n'est pas chargé avant les composants** : Les composants qui utilisent `React.createContext` sont chargés avant React
@@ -28,7 +31,9 @@ L'erreur `Cannot read properties of undefined (reading 'createContext')` se prod
 3. **Ordre de chargement non garanti** : Même avec `preserveEntrySignatures: 'strict'`, le chunk React n'était pas chargé avant les autres chunks
 
 ### Composants affectés
+
 De nombreux composants utilisent `React.createContext` :
+
 - `AuthContext`, `SidebarContext`, `ChartContext`, `CarouselContext`, etc.
 - Tous les composants qui utilisent le Context API de React
 
@@ -41,19 +46,21 @@ De nombreux composants utilisent `React.createContext` :
 #### 1. Mettre React dans le chunk principal (index)
 
 **AVANT** :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   // IMPORTANT: React doit être chargé en premier, donc dans un chunk séparé mais prioritaire
   if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
     return 'vendor-react'; // Chunk séparé mais chargé en premier
   }
   // ...
-}
+};
 ```
 
 **APRÈS** :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   // CRITIQUE: React doit être dans le chunk principal (index)
   // pour être chargé en premier et éviter les erreurs createContext/forwardRef
   if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
@@ -62,10 +69,11 @@ manualChunks: (id) => {
     return undefined;
   }
   // ...
-}
+};
 ```
 
 **Explication** :
+
 - En retournant `undefined`, React reste dans le chunk principal (`index.js`)
 - Le chunk principal est **toujours** chargé en premier dans le HTML
 - Cela garantit que React est disponible avant tous les autres chunks qui en dépendent
@@ -74,6 +82,7 @@ manualChunks: (id) => {
 #### 2. Configuration déjà en place
 
 **Déduplication React** :
+
 ```typescript
 resolve: {
   dedupe: ['react', 'react-dom'],
@@ -81,6 +90,7 @@ resolve: {
 ```
 
 **Préservation des signatures** :
+
 ```typescript
 rollupOptions: {
   preserveEntrySignatures: 'strict',
@@ -91,13 +101,13 @@ rollupOptions: {
 
 ## 📊 RÉSULTAT
 
-| Avant | Après |
-|-------|-------|
+| Avant                                     | Après                                 |
+| ----------------------------------------- | ------------------------------------- |
 | ❌ React dans chunk séparé `vendor-react` | ✅ React dans chunk principal `index` |
-| ❌ React chargé après les composants | ✅ React chargé en premier |
-| ❌ Erreur `createContext` undefined | ✅ `createContext` accessible |
-| ❌ Écran noir sur Vercel | ✅ Application démarre |
-| ❌ Ordre de chargement non garanti | ✅ Ordre garanti (chunk principal) |
+| ❌ React chargé après les composants      | ✅ React chargé en premier            |
+| ❌ Erreur `createContext` undefined       | ✅ `createContext` accessible         |
+| ❌ Écran noir sur Vercel                  | ✅ Application démarre                |
+| ❌ Ordre de chargement non garanti        | ✅ Ordre garanti (chunk principal)    |
 
 ---
 
@@ -106,18 +116,22 @@ rollupOptions: {
 **Statut**: ✅ **CORRIGÉ & PUSHÉ**
 
 ### Commit
+
 ```
 db4af2b - fix: Mettre React dans le chunk principal pour garantir le chargement avant createContext
 ```
 
 ### Push GitHub
+
 ✅ **Push réussi** sur `main`
+
 ```
 To https://github.com/payhuk02/payhula.git
    9d215b5..db4af2b  main -> main
 ```
 
 ### Build Vercel
+
 ⏳ **Rebuild automatique en cours** (détection du nouveau commit)
 
 ---
@@ -154,10 +168,12 @@ To https://github.com/payhuk02/payhula.git
 ### Trade-off
 
 **Avant** :
+
 - ✅ React dans un chunk séparé → Meilleure mise en cache
 - ❌ Problème d'ordre de chargement → Erreurs en production
 
 **Après** :
+
 - ✅ React dans le chunk principal → Ordre garanti
 - ⚠️ Chunk principal plus volumineux → Mais React est petit (~40KB gzippé)
 - ✅ Pas d'erreurs en production
@@ -179,6 +195,7 @@ To https://github.com/payhuk02/payhula.git
 ### Si l'erreur persiste
 
 1. **Vérifier l'ordre de chargement des chunks** :
+
    ```bash
    npm run build
    # Vérifier dist/index.html pour voir l'ordre des scripts
@@ -186,12 +203,14 @@ To https://github.com/payhuk02/payhula.git
    ```
 
 2. **Vérifier les dépendances** :
+
    ```bash
    npm ls react react-dom
    # S'assurer qu'il n'y a qu'une seule version
    ```
 
 3. **Vérifier les imports** :
+
    ```bash
    grep -r "React.createContext" src/ | wc -l
    # Vérifier que tous les imports sont corrects
@@ -215,7 +234,10 @@ To https://github.com/payhuk02/payhula.git
    Et dans `index.html` :
    ```html
    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+   <script
+     crossorigin
+     src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+   ></script>
    ```
 
 ---
@@ -257,5 +279,3 @@ To https://github.com/payhuk02/payhula.git
 **Date de correction** : 5 Novembre 2025  
 **Commit** : `db4af2b`  
 **Status** : ✅ **RÉSOLU**
-
-

@@ -45,6 +45,7 @@ CREATE INDEX idx_customers_created_at ON customers(created_at DESC);
 ### 1. Utiliser les Indexes
 
 ✅ **BON** :
+
 ```typescript
 // Utilise l'index idx_products_store_id
 const { data } = await supabase
@@ -55,17 +56,16 @@ const { data } = await supabase
 ```
 
 ❌ **MAUVAIS** :
+
 ```typescript
 // Pas d'index sur category, scan complet
-const { data } = await supabase
-  .from('products')
-  .select('*')
-  .eq('category', 'ebook');
+const { data } = await supabase.from('products').select('*').eq('category', 'ebook');
 ```
 
 ### 2. Pagination Côté Serveur
 
 ✅ **BON** :
+
 ```typescript
 const startIndex = (page - 1) * itemsPerPage;
 const endIndex = startIndex + itemsPerPage - 1;
@@ -78,17 +78,16 @@ const { data, count } = await supabase
 ```
 
 ❌ **MAUVAIS** :
+
 ```typescript
 // Charge tous les produits
-const { data } = await supabase
-  .from('products')
-  .select('*')
-  .eq('store_id', storeId);
+const { data } = await supabase.from('products').select('*').eq('store_id', storeId);
 ```
 
 ### 3. Sélectionner Seulement les Colonnes Nécessaires
 
 ✅ **BON** :
+
 ```typescript
 const { data } = await supabase
   .from('products')
@@ -97,29 +96,31 @@ const { data } = await supabase
 ```
 
 ❌ **MAUVAIS** :
+
 ```typescript
 // Charge toutes les colonnes
-const { data } = await supabase
-  .from('products')
-  .select('*')
-  .eq('store_id', storeId);
+const { data } = await supabase.from('products').select('*').eq('store_id', storeId);
 ```
 
 ### 4. Utiliser les Jointures Efficacement
 
 ✅ **BON** :
+
 ```typescript
 const { data } = await supabase
   .from('products')
-  .select(`
+  .select(
+    `
     id,
     name,
     stores!inner(id, name, slug)
-  `)
+  `
+  )
   .eq('stores.is_active', true);
 ```
 
 ❌ **MAUVAIS** :
+
 ```typescript
 // Charge tous les stores puis filtre côté client
 const { data: products } = await supabase.from('products').select('*');
@@ -129,17 +130,17 @@ const { data: stores } = await supabase.from('stores').select('*');
 ### 5. Éviter les Requêtes N+1
 
 ✅ **BON** :
+
 ```typescript
 // Une seule requête avec jointure
-const { data } = await supabase
-  .from('products')
-  .select(`
+const { data } = await supabase.from('products').select(`
     *,
     stores!inner(*)
   `);
 ```
 
 ❌ **MAUVAIS** :
+
 ```typescript
 // Requête N+1
 const { data: products } = await supabase.from('products').select('*');
@@ -176,7 +177,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     p.id,
     p.name,
     p.price,
@@ -192,11 +193,12 @@ $$;
 ```
 
 Utilisation :
+
 ```typescript
 const { data } = await supabase.rpc('get_products_optimized', {
   p_store_id: storeId,
   p_limit: 20,
-  p_offset: 0
+  p_offset: 0,
 });
 ```
 
@@ -229,10 +231,10 @@ useEffect(() => {
 
 ### Objectifs
 
-| Métrique | Cible | Actuel |
-|----------|-------|--------|
-| Temps de réponse | < 200ms | À mesurer |
-| Requêtes par page | < 5 | À mesurer |
+| Métrique          | Cible    | Actuel    |
+| ----------------- | -------- | --------- |
+| Temps de réponse  | < 200ms  | À mesurer |
+| Requêtes par page | < 5      | À mesurer |
 | Taille de réponse | < 100 KB | À mesurer |
 
 ---
@@ -249,4 +251,3 @@ useEffect(() => {
 ---
 
 **Dernière mise à jour** : Février 2025
-

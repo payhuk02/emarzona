@@ -8,6 +8,7 @@
 ## 📊 Résumé Exécutif
 
 ### ✅ Points Forts
+
 - ✅ Hook `useAffiliateLinks` avec fonction `createLink` bien implémentée
 - ✅ Validation de l'activation de l'affiliation pour le produit
 - ✅ Génération automatique du code de lien via SQL function
@@ -134,7 +135,7 @@ if (existingLink) {
 **Problème 1 : Boutons sans handler (lignes 511-518 et 680-687)**
 
 ```typescript
-<Button 
+<Button
   className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600..."
   size="sm"
 >
@@ -171,6 +172,7 @@ export interface CreateAffiliateLinkForm {
 **Composant à créer** : `src/components/affiliate/CreateAffiliateLinkDialog.tsx`
 
 **Fonctionnalités requises** :
+
 1. Sélection de produit (avec recherche/filtre)
 2. Affichage des produits avec affiliation activée uniquement
 3. Champs optionnels UTM (source, medium, campaign)
@@ -199,7 +201,8 @@ interface CreateAffiliateLinkDialogProps {
 
 **Fichier** : `src/hooks/useAffiliateLinks.ts` (fonction `createLink`)
 
-**Action** : 
+**Action** :
+
 - Vérifier l'existence d'un lien avant création
 - Proposer de réactiver si le lien existe en statut "deleted"
 - Afficher un message clair si le lien existe déjà
@@ -207,6 +210,7 @@ interface CreateAffiliateLinkDialogProps {
 ### 🟢 PRIORITÉ 4 : Améliorer l'UX
 
 **Actions** :
+
 - Ajouter une recherche de produits dans le dialog
 - Afficher les informations du produit (prix, image, commission)
 - Prévisualiser l'URL générée
@@ -217,11 +221,13 @@ interface CreateAffiliateLinkDialogProps {
 ## 📋 Checklist d'Implémentation
 
 ### Phase 1 : Correction des Bugs
+
 - [ ] Corriger la génération d'URL (récupérer le slug du store)
 - [ ] Gérer la contrainte unique (vérifier existence avant création)
 - [ ] Ajouter gestion d'erreur pour lien existant
 
 ### Phase 2 : Création de l'UI
+
 - [ ] Créer `CreateAffiliateLinkDialog.tsx`
 - [ ] Implémenter la sélection de produit avec recherche
 - [ ] Ajouter les champs UTM optionnels
@@ -229,12 +235,14 @@ interface CreateAffiliateLinkDialogProps {
 - [ ] Ajouter validation Zod côté client
 
 ### Phase 3 : Intégration
+
 - [ ] Connecter les boutons "Créer un lien" au dialog
 - [ ] Tester le flux complet de création
 - [ ] Vérifier la mise à jour de la liste après création
 - [ ] Ajouter tests unitaires
 
 ### Phase 4 : Améliorations UX
+
 - [ ] Ajouter prévisualisation de l'URL
 - [ ] Copier automatiquement le lien après création
 - [ ] Afficher les statistiques du produit (commission, etc.)
@@ -290,4 +298,3 @@ Le système de création de lien est **fonctionnel au niveau backend** mais **in
 3. **Gérer la contrainte unique** (amélioration UX)
 
 Une fois ces corrections appliquées, le système sera pleinement opérationnel.
-

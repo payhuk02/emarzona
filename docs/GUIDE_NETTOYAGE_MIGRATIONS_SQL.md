@@ -47,14 +47,17 @@ Créer un fichier `supabase/migrations/AUDIT_MIGRATIONS.md` :
 # Audit des Migrations
 
 ## Migrations Actives (à conserver)
+
 - [ ] Liste des migrations essentielles
 
 ## Migrations Obsolètes (à archiver)
+
 - [ ] Migrations remplacées par de nouvelles versions
 - [ ] Migrations de test
 - [ ] Migrations rollback non utilisées
 
 ## Migrations à Consolider
+
 - [ ] Migrations liées à une même fonctionnalité
 - [ ] Migrations de fix multiples pour le même problème
 ```
@@ -74,6 +77,7 @@ mkdir -p supabase/migrations/archive
 **Stratégie recommandée**:
 
 1. **Grouper par fonctionnalité**:
+
    ```
    migrations/
    ├── 001_initial_schema.sql
@@ -92,11 +96,13 @@ mkdir -p supabase/migrations/archive
 ### Étape 5: Nettoyer les Fichiers SQL de Fix
 
 **Fichiers à traiter**:
+
 - `fix_*.sql`
 - `FIX_*.sql`
 - `quick_fix_*.sql`
 
 **Actions**:
+
 1. Vérifier si le fix a été appliqué en production
 2. Si oui: Créer une migration dans `supabase/migrations/` avec le fix
 3. Si non: Appliquer le fix puis créer la migration
@@ -113,7 +119,8 @@ const fs = require('fs');
 const path = require('path');
 
 const migrationsDir = path.join(__dirname, '../supabase/migrations');
-const migrations = fs.readdirSync(migrationsDir)
+const migrations = fs
+  .readdirSync(migrationsDir)
   .filter(file => file.endsWith('.sql'))
   .map(file => {
     const stats = fs.statSync(path.join(migrationsDir, file));
@@ -156,6 +163,7 @@ YYYYMMDDHHMMSS_description.sql
 ```
 
 Exemple:
+
 ```
 20250130120000_add_user_preferences.sql
 20250130120001_update_products_table.sql
@@ -191,5 +199,4 @@ supabase/
 
 ---
 
-*Dernière mise à jour: 2025-01-30*
-
+_Dernière mise à jour: 2025-01-30_

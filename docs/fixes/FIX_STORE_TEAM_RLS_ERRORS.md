@@ -5,6 +5,7 @@
 Les requêtes vers `store_members` et `store_tasks` retournent des erreurs 500 (Internal Server Error).
 
 **Erreurs observées :**
+
 ```
 Failed to load resource: the server responded with a status of 500
 Error fetching store members
@@ -18,6 +19,7 @@ Les politiques RLS (Row Level Security) sont trop restrictives et ne permettent 
 ## ✅ Solution
 
 Une migration SQL a été créée pour :
+
 1. **Ajouter automatiquement le propriétaire comme membre** lors de la création d'une boutique
 2. **Ajouter tous les propriétaires existants** comme membres owner
 3. **Améliorer les politiques RLS** pour permettre l'accès aux propriétaires même s'ils ne sont pas membres
@@ -45,7 +47,7 @@ Dans le SQL Editor, exécutez cette requête pour vérifier que les propriétair
 
 ```sql
 -- Vérifier les membres owner
-SELECT 
+SELECT
   s.name as store_name,
   s.user_id as owner_id,
   sm.id as member_id,
@@ -71,7 +73,7 @@ Si les erreurs persistent, vérifiez que les politiques RLS sont bien créées :
 
 ```sql
 -- Vérifier les politiques pour store_members
-SELECT 
+SELECT
   schemaname,
   tablename,
   policyname,
@@ -86,6 +88,7 @@ ORDER BY tablename, policyname;
 ```
 
 Vous devriez voir :
+
 - `Members and owners can view team members`
 - `Members and owners can view tasks`
 - `Members and owners can create tasks`
@@ -102,15 +105,16 @@ Vous devriez voir :
    - Vérifiez dans la console : `auth.uid()` doit retourner votre user_id
 
 3. **Vérifiez que la boutique existe** :
+
    ```sql
-   SELECT id, name, user_id 
-   FROM public.stores 
+   SELECT id, name, user_id
+   FROM public.stores
    WHERE id = '17cc4002-e248-4cad-a7bd-571577e0018a';
    ```
 
 4. **Vérifiez que vous êtes propriétaire ou membre** :
    ```sql
-   SELECT 
+   SELECT
      s.id as store_id,
      s.name as store_name,
      s.user_id as owner_id,
@@ -129,8 +133,8 @@ Vous devriez voir :
 ## ✅ Après la correction
 
 Une fois la migration appliquée :
+
 - ✅ Les propriétaires peuvent accéder à `/dashboard/store/team`
 - ✅ Les propriétaires peuvent accéder à `/dashboard/tasks`
 - ✅ Les nouveaux propriétaires sont automatiquement ajoutés comme membres
 - ✅ Les politiques RLS permettent l'accès aux propriétaires
-

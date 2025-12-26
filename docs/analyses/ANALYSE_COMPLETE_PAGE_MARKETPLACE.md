@@ -39,6 +39,7 @@
 ### 🎯 Objectif de la Page
 
 La page Marketplace est le **cœur commercial** de Payhuk. Elle permet aux visiteurs de:
+
 - Découvrir tous les produits digitaux disponibles
 - Filtrer et rechercher des produits
 - Comparer jusqu'à 4 produits
@@ -73,6 +74,7 @@ src/
 ### 🏗️ Composants Internes
 
 Le fichier `Marketplace.tsx` contient **2 composants**:
+
 1. **Marketplace** (composant principal) - Lignes 52-928
 2. **ProductCardAdvanced** (composant interne non utilisé) - Lignes 930-1257 ❌ **DEAD CODE**
 
@@ -83,6 +85,7 @@ Le fichier `Marketplace.tsx` contient **2 composants**:
 ### ✅ Fonctionnalités Implémentées
 
 #### 🔍 **Recherche et Filtrage**
+
 - ✅ Recherche textuelle (nom, description, boutique, catégorie, tags)
 - ✅ Filtrage par catégorie
 - ✅ Filtrage par type de produit
@@ -93,6 +96,7 @@ Le fichier `Marketplace.tsx` contient **2 composants**:
 - ✅ Recherche intelligente (modale dédiée)
 
 #### 📊 **Tri et Affichage**
+
 - ✅ Tri par: date, prix, note, ventes, nom, popularité
 - ✅ Ordre croissant/décroissant
 - ✅ Mode grille / liste
@@ -100,6 +104,7 @@ Le fichier `Marketplace.tsx` contient **2 composants**:
 - ✅ Indicateur de nombre de résultats
 
 #### ⭐ **Favoris**
+
 - ✅ Ajout/retrait de favoris
 - ✅ Persistance dans localStorage
 - ✅ Gestionnaire de favoris avec modale dédiée
@@ -109,23 +114,27 @@ Le fichier `Marketplace.tsx` contient **2 composants**:
 - ✅ Partage de tous les favoris
 
 #### 🔄 **Comparaison**
+
 - ✅ Comparaison jusqu'à 4 produits
 - ✅ Tableau comparatif détaillé (12 critères)
 - ✅ Actions rapides (voir, partager)
 - ✅ Suppression individuelle
 
 #### 💳 **Achat**
+
 - ✅ Intégration Moneroo Payment
 - ✅ États de chargement pendant l'achat
 - ✅ Gestion des erreurs de paiement
 - ✅ Redirection vers checkout Moneroo
 
 #### 📡 **Temps Réel**
+
 - ✅ Abonnement Supabase Realtime
 - ✅ Mise à jour automatique des produits (INSERT, UPDATE, DELETE)
 - ✅ Logs console pour debug
 
 #### 📈 **Statistiques**
+
 - ✅ Nombre total de produits
 - ✅ Nombre de boutiques
 - ✅ Note moyenne globale
@@ -133,6 +142,7 @@ Le fichier `Marketplace.tsx` contient **2 composants**:
 - ✅ Affichage en Hero Section
 
 #### 🎨 **UI/UX**
+
 - ✅ Design moderne gradient (Slate 900 → 800 → 900)
 - ✅ Animations (pulse, bounce, scale, translate)
 - ✅ Badges dynamiques (promotions, catégories, tags)
@@ -156,11 +166,13 @@ Le fichier `Marketplace.tsx` contient **2 composants**:
    - États bien organisés et clairs
 
 3. **Temps Réel Implémenté**
+
    ```typescript
    const channel = supabase.channel("realtime:products")
      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, ...)
      .subscribe();
    ```
+
    - Détection automatique des changements
    - Mise à jour optimiste de l'UI
 
@@ -194,16 +206,19 @@ const ProductCardAdvanced = ({ ... }: ProductCardAdvancedProps) => {
 ```
 
 **Problème:**
+
 - Composant `ProductCardAdvanced` défini mais **jamais utilisé**
 - Le composant `ProductCardProfessional` (importé ligne 47) est utilisé à la place
 - **~26% du fichier** est du code mort
 
 **Impact:**
+
 - ⚠️ Augmente la taille du bundle JavaScript
 - ⚠️ Confusion pour les développeurs
 - ⚠️ Maintenance plus difficile
 
 **Solution:**
+
 ```typescript
 // À SUPPRIMER: Lignes 930-1257
 // Ou extraire dans un fichier séparé si nécessaire à l'avenir
@@ -216,6 +231,7 @@ const ProductCardAdvanced = ({ ... }: ProductCardAdvancedProps) => {
 **Localisation:** `Marketplace.tsx` - 1,259 lignes
 
 **Problème:**
+
 - Fichier monolithique dépassant la limite recommandée (500 lignes)
 - Difficile à maintenir et à tester
 - Temps de chargement de l'éditeur ralenti
@@ -243,23 +259,28 @@ customerEmail: "client@example.com", // ❌ HARDCODÉ
 ```
 
 **Problème:**
+
 - Email factice utilisé pour tous les paiements
 - **Aucune récupération de l'email utilisateur authentifié**
 - Impossible de retrouver le client réel
 
 **Impact:**
+
 - 🔴 **Bloquant pour la production**
 - Perte de traçabilité des achats
 - Impossible d'envoyer des reçus
 
 **Solution:**
+
 ```typescript
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 const result = await initiateMonerooPayment({
   // ...
-  customerEmail: user?.email || "noreply@payhuk.com",
-  customerName: user?.user_metadata?.full_name || "",
+  customerEmail: user?.email || 'noreply@payhuk.com',
+  customerName: user?.user_metadata?.full_name || '',
   userId: user?.id,
   // ...
 });
@@ -274,7 +295,7 @@ const result = await initiateMonerooPayment({
 ```typescript
 const filteredProducts = useMemo(() => {
   let filtered = products;
-  
+
   // Recherche textuelle sur TOUS les produits
   if (filters.search) {
     const searchLower = filters.search.toLowerCase();
@@ -290,11 +311,13 @@ const filteredProducts = useMemo(() => {
 ```
 
 **Problème:**
+
 - **Tous les produits** sont chargés en mémoire
 - Filtrage côté client uniquement
 - Performance dégradée avec 1000+ produits
 
 **Impact:**
+
 - ⚠️ Lenteur si base de données volumineuse
 - ⚠️ Consommation mémoire excessive
 - ⚠️ Temps de première peinture élevé
@@ -304,16 +327,16 @@ Implémenter la recherche full-text côté Supabase:
 
 ```typescript
 let query = supabase
-  .from("products")
+  .from('products')
   .select(`*, stores!inner(*)`)
-  .eq("is_active", true)
-  .eq("is_draft", false);
+  .eq('is_active', true)
+  .eq('is_draft', false);
 
 // Recherche full-text
 if (filters.search) {
   query = query.textSearch('fts', filters.search, {
     type: 'websearch',
-    config: 'french'
+    config: 'french',
   });
 }
 
@@ -330,21 +353,26 @@ Nécessite l'ajout d'une colonne `fts` (Full-Text Search) dans Supabase.
 **Localisation:** Lignes 294-324
 
 ```typescript
-const toggleFavorite = useCallback((productId: string) => {
-  setFavorites(prev => {
-    // ...
-    localStorage.setItem('marketplace-favorites', JSON.stringify([...newFavorites]));
-    return newFavorites;
-  });
-}, [toast]);
+const toggleFavorite = useCallback(
+  (productId: string) => {
+    setFavorites(prev => {
+      // ...
+      localStorage.setItem('marketplace-favorites', JSON.stringify([...newFavorites]));
+      return newFavorites;
+    });
+  },
+  [toast]
+);
 ```
 
 **Problème:**
+
 - Favoris stockés **uniquement dans localStorage**
 - Perte des favoris si l'utilisateur change de navigateur/appareil
 - Pas de synchronisation avec le compte utilisateur
 
 **Impact:**
+
 - ⚠️ Mauvaise UX pour utilisateurs multi-appareils
 - ⚠️ Perte de données si localStorage est vidé
 
@@ -365,17 +393,19 @@ Implémenter la synchronisation:
 
 ```typescript
 const toggleFavorite = async (productId: string) => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (user) {
     // Sauvegarde en BDD pour utilisateurs authentifiés
     if (favorites.has(productId)) {
-      await supabase.from('user_favorites')
+      await supabase
+        .from('user_favorites')
         .delete()
         .match({ user_id: user.id, product_id: productId });
     } else {
-      await supabase.from('user_favorites')
-        .insert({ user_id: user.id, product_id: productId });
+      await supabase.from('user_favorites').insert({ user_id: user.id, product_id: productId });
     }
   } else {
     // Fallback localStorage pour visiteurs
@@ -393,37 +423,40 @@ const toggleFavorite = async (productId: string) => {
 **Localisation:** Lignes 138-157
 
 ```typescript
-if (filters.priceRange !== "all") {
-  const [min, max] = filters.priceRange.split("-").map(Number);
+if (filters.priceRange !== 'all') {
+  const [min, max] = filters.priceRange.split('-').map(Number);
   if (max) {
-    query = query.gte("price", min).lte("price", max);
+    query = query.gte('price', min).lte('price', max);
   } else {
-    query = query.gte("price", min);
+    query = query.gte('price', min);
   }
 }
 ```
 
 **Problème:**
+
 - Les filtres `verifiedOnly`, `featuredOnly`, `inStock` sont définis (lignes 72-74)
 - **Mais jamais appliqués dans la requête Supabase** (lignes 118-188)
 - Ils ne sont présents que dans l'UI
 
 **Impact:**
+
 - ⚠️ Fausse impression de filtrage
 - ⚠️ Incohérence entre UI et données
 
 **Solution:**
+
 ```typescript
 if (filters.verifiedOnly) {
-  query = query.eq("stores.is_verified", true);
+  query = query.eq('stores.is_verified', true);
 }
 
 if (filters.featuredOnly) {
-  query = query.eq("is_featured", true);
+  query = query.eq('is_featured', true);
 }
 
 if (filters.inStock) {
-  query = query.or("stock_quantity.gt.0,stock_quantity.is.null");
+  query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
 }
 ```
 
@@ -436,40 +469,51 @@ if (filters.inStock) {
 **Localisation:** Lignes 448-456
 
 ```typescript
-const stats = useMemo(() => ({
-  totalProducts: products.length,
-  totalStores: new Set(products.map(p => p.store_id)).size,
-  averageRating: products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length || 0,
-  totalSales: products.reduce((sum, p) => sum + (p.reviews_count || 0), 0), // ⚠️ reviews_count ≠ sales
-  categoriesCount: categories.length,
-  featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price).length
-}), [products, categories]);
+const stats = useMemo(
+  () => ({
+    totalProducts: products.length,
+    totalStores: new Set(products.map(p => p.store_id)).size,
+    averageRating: products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length || 0,
+    totalSales: products.reduce((sum, p) => sum + (p.reviews_count || 0), 0), // ⚠️ reviews_count ≠ sales
+    categoriesCount: categories.length,
+    featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price)
+      .length,
+  }),
+  [products, categories]
+);
 ```
 
 **Problème:**
+
 - `totalSales` utilise `reviews_count` (nombre d'avis) au lieu de `purchases_count` ou `sales_count`
 - Confusion sémantique
 - Si un produit a 5 avis mais 100 ventes, les stats sont fausses
 
 **Impact:**
+
 - ⚠️ Données trompeuses pour les utilisateurs
 - ⚠️ Décisions business basées sur de mauvaises métriques
 
 **Solution:**
+
 ```typescript
-const stats = useMemo(() => ({
-  // ...
-  totalSales: products.reduce((sum, p) => sum + (p.purchases_count || p.sales_count || 0), 0),
-  totalRevenue: products.reduce((sum, p) => {
-    const price = p.promotional_price || p.price;
-    const sales = p.purchases_count || 0;
-    return sum + (price * sales);
-  }, 0),
-  // ...
-}), [products, categories]);
+const stats = useMemo(
+  () => ({
+    // ...
+    totalSales: products.reduce((sum, p) => sum + (p.purchases_count || p.sales_count || 0), 0),
+    totalRevenue: products.reduce((sum, p) => {
+      const price = p.promotional_price || p.price;
+      const sales = p.purchases_count || 0;
+      return sum + price * sales;
+    }, 0),
+    // ...
+  }),
+  [products, categories]
+);
 ```
 
 Afficher aussi le revenu total:
+
 ```typescript
 <div className="text-2xl font-bold text-green-400">
   {formatRevenue(stats.totalRevenue)} FCFA
@@ -491,11 +535,13 @@ const goToPage = useCallback((page: number) => {
 ```
 
 **Problème:**
+
 - La page actuelle n'est **pas reflétée dans l'URL**
 - Impossible de partager un lien vers une page spécifique
 - Le bouton "Retour" ne fonctionne pas intuitivement
 
 **Impact:**
+
 - ⚠️ Mauvais SEO (toutes les pages indexées comme page 1)
 - ⚠️ UX dégradée (pas de deep linking)
 
@@ -503,15 +549,18 @@ const goToPage = useCallback((page: number) => {
 Utiliser `react-router-dom` avec query params:
 
 ```typescript
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from 'react-router-dom';
 
 const [searchParams, setSearchParams] = useSearchParams();
 const currentPage = parseInt(searchParams.get('page') || '1');
 
-const goToPage = useCallback((page: number) => {
-  setSearchParams({ page: page.toString() });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}, [setSearchParams]);
+const goToPage = useCallback(
+  (page: number) => {
+    setSearchParams({ page: page.toString() });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+  [setSearchParams]
+);
 ```
 
 ---
@@ -527,26 +576,29 @@ setProducts((data || []) as unknown as Product[]);
 ```
 
 **Problème:**
+
 - **Tous les produits** matchant les filtres sont chargés
 - Pas de limite (`LIMIT`) dans la requête
 - Peut charger 10 000+ produits si la base est volumineuse
 
 **Impact:**
+
 - 🔴 **Risque de plantage du navigateur**
 - ⚠️ Temps de chargement très long
 - ⚠️ Consommation mémoire excessive
 
 **Solution:**
+
 ```typescript
 // Pagination côté serveur
 const PRODUCTS_PER_PAGE = 12;
 const startIndex = (pagination.currentPage - 1) * PRODUCTS_PER_PAGE;
 
 let query = supabase
-  .from("products")
+  .from('products')
   .select(`*, stores!inner(*)`, { count: 'exact' })
-  .eq("is_active", true)
-  .eq("is_draft", false)
+  .eq('is_active', true)
+  .eq('is_draft', false)
   .range(startIndex, startIndex + PRODUCTS_PER_PAGE - 1);
 
 const { data, error, count } = await query;
@@ -572,11 +624,13 @@ setPagination(prev => ({ ...prev, totalItems: count || 0 }));
 ```
 
 **Problème:**
+
 - Chaque frappe déclenche `updateFilter`
 - Qui déclenche `fetchProducts` (ligne 192: `useEffect(() => { fetchProducts(); }, [fetchProducts])`)
 - **Requête Supabase à chaque caractère tapé**
 
 **Impact:**
+
 - ⚠️ Surcharge du serveur Supabase
 - ⚠️ Risque de dépassement des limites API
 - ⚠️ UX saccadée si connexion lente
@@ -613,14 +667,17 @@ const [comparisonProducts, setComparisonProducts] = useState<Product[]>([]);
 ```
 
 **Problème:**
+
 - Les produits en comparaison sont perdus au refresh de la page
 - Pas de sauvegarde dans `localStorage` ou Supabase
 
 **Impact:**
+
 - ⚠️ Frustration utilisateur si refresh accidentel
 - ⚠️ Perte de travail de sélection
 
 **Solution:**
+
 ```typescript
 // Initialisation depuis localStorage
 const [comparisonProducts, setComparisonProducts] = useState<Product[]>(() => {
@@ -643,11 +700,12 @@ useEffect(() => {
 **Localisation:** Lignes 174, 200
 
 ```typescript
-console.log("Produits chargés:", data);
-console.log("🔁 Changement détecté sur products :", payload);
+console.log('Produits chargés:', data);
+console.log('🔁 Changement détecté sur products :', payload);
 ```
 
 **Problème:**
+
 - Logs de debug visibles en production
 - Expose la structure des données
 - Pollue la console utilisateur
@@ -658,8 +716,8 @@ Utiliser le logger existant (`@/lib/logger`):
 ```typescript
 import { logger } from '@/lib/logger';
 
-logger.info("Produits chargés:", data);
-logger.debug("🔁 Changement détecté sur products :", payload);
+logger.info('Produits chargés:', data);
+logger.debug('🔁 Changement détecté sur products :', payload);
 ```
 
 Configurer pour ne logger qu'en développement.
@@ -675,6 +733,7 @@ setProducts((data || []) as unknown as Product[]);
 ```
 
 **Problème:**
+
 - `as unknown as Product[]` indique un problème de typage
 - Perte de la sécurité TypeScript
 
@@ -704,6 +763,7 @@ if (comparisonProducts.length >= 4) { // ❌ Pourquoi 4 ?
 ```
 
 **Problème:**
+
 - Valeurs hardcodées sans explication
 - Difficile à modifier globalement
 
@@ -737,10 +797,12 @@ const [loading, setLoading] = useState(true);
 ```
 
 **Problème:**
+
 - `loading` démarre à `true`
 - Mais si `fetchProducts` échoue rapidement, l'UI reste en loading
 
 **Solution:**
+
 ```typescript
 const [loading, setLoading] = useState(true);
 const [error, setError] = useState<string | null>(null);
@@ -778,7 +840,8 @@ const fetchProducts = useCallback(async () => {
 useEffect(() => {
   fetchProducts();
 
-  const channel = supabase.channel("realtime:products")
+  const channel = supabase
+    .channel('realtime:products')
     // ...
     .subscribe();
 
@@ -789,11 +852,13 @@ useEffect(() => {
 ```
 
 **Problème:**
+
 - `fetchProducts` est dans les dépendances
 - Mais `supabase` ne l'est pas
 - ESLint devrait warning
 
 **Solution:**
+
 ```typescript
 }, [fetchProducts, supabase]); // Ajouter supabase
 ```
@@ -809,7 +874,7 @@ Ou utiliser `useRef` pour `supabase` si importé statiquement.
 ```typescript
 const handleShare = useCallback(async (product: Product) => {
   const url = `${window.location.origin}/${product.stores?.slug}/${product.slug}`;
-  
+
   if (navigator.share) {
     try {
       await navigator.share({ title: product.name, text: ..., url });
@@ -824,14 +889,16 @@ const handleShare = useCallback(async (product: Product) => {
 ```
 
 **Problème:**
+
 - Si l'utilisateur annule le partage, rien ne se passe
 - Si `clipboard.writeText` échoue (permissions), pas de toast d'erreur
 
 **Solution:**
+
 ```typescript
 const handleShare = useCallback(async (product: Product) => {
   const url = `${window.location.origin}/${product.stores?.slug}/${product.slug}`;
-  
+
   if (navigator.share) {
     try {
       await navigator.share({ title: product.name, text: ..., url });
@@ -872,20 +939,24 @@ const handleShare = useCallback(async (product: Product) => {
 #### ✅ **Points Positifs**
 
 1. **useMemo pour Calculs Coûteux**
+
    ```typescript
    const filteredProducts = useMemo(() => { ... }, [products, filters.search, filters.tags]);
    const paginatedProducts = useMemo(() => { ... }, [filteredProducts, pagination]);
    const stats = useMemo(() => { ... }, [products, categories]);
    ```
+
    ✅ Évite recalcul inutile
 
 2. **useCallback pour Fonctions**
+
    ```typescript
    const updateFilter = useCallback(...);
    const clearFilters = useCallback(...);
    const toggleFavorite = useCallback(...);
    const handlePurchase = useCallback(...);
    ```
+
    ✅ Évite re-création de fonctions
 
 3. **Lazy Loading des Images**
@@ -895,11 +966,12 @@ const handleShare = useCallback(async (product: Product) => {
 #### ⚠️ **Points d'Amélioration**
 
 1. **Code Splitting**
+
    ```typescript
    // Charger les modales à la demande
-   const AdvancedFilters = lazy(() => import("@/components/marketplace/AdvancedFilters"));
-   const ProductComparison = lazy(() => import("@/components/marketplace/ProductComparison"));
-   const FavoritesManager = lazy(() => import("@/components/marketplace/FavoritesManager"));
+   const AdvancedFilters = lazy(() => import('@/components/marketplace/AdvancedFilters'));
+   const ProductComparison = lazy(() => import('@/components/marketplace/ProductComparison'));
+   const FavoritesManager = lazy(() => import('@/components/marketplace/FavoritesManager'));
    ```
 
 2. **Virtualisation pour Grandes Listes**
@@ -922,6 +994,7 @@ const handleShare = useCallback(async (product: Product) => {
 ### ❌ **Problèmes d'Accessibilité**
 
 1. **Aucun attribut ARIA**
+
    ```typescript
    <Input
      type="text"
@@ -933,6 +1006,7 @@ const handleShare = useCallback(async (product: Product) => {
    ```
 
    **Solution:**
+
    ```typescript
    <Input
      type="search"
@@ -945,6 +1019,7 @@ const handleShare = useCallback(async (product: Product) => {
    ```
 
 2. **Boutons Sans Label**
+
    ```typescript
    <Button onClick={() => setShowFilters(!showFilters)}>
      <Filter className="h-4 w-4 mr-2" />
@@ -954,6 +1029,7 @@ const handleShare = useCallback(async (product: Product) => {
    ```
 
    Mais dans les icônes seules:
+
    ```typescript
    <Button onClick={() => updateFilter({ viewMode: "grid" })}>
      <Grid3X3 className="h-4 w-4" /> {/* ❌ Pas de texte */}
@@ -961,6 +1037,7 @@ const handleShare = useCallback(async (product: Product) => {
    ```
 
    **Solution:**
+
    ```typescript
    <Button
      onClick={() => updateFilter({ viewMode: "grid" })}
@@ -991,6 +1068,7 @@ const handleShare = useCallback(async (product: Product) => {
    - Pas de skip links
 
    **Solution:**
+
    ```typescript
    <div className="min-h-screen bg-...">
      <a href="#main-content" className="sr-only focus:not-sr-only">
@@ -1030,13 +1108,16 @@ const handleShare = useCallback(async (product: Product) => {
 #### ⚠️ **Points d'Attention**
 
 1. **Validation des Données**
+
    ```typescript
    setProducts((data || []) as unknown as Product[]);
    ```
+
    - Aucune validation des données reçues
    - Si Supabase renvoie des données corrompues, l'app peut crasher
 
    **Solution:**
+
    ```typescript
    import { z } from 'zod';
 
@@ -1053,8 +1134,8 @@ const handleShare = useCallback(async (product: Product) => {
    const validatedData = ProductsArraySchema.safeParse(data);
 
    if (!validatedData.success) {
-     logger.error("Données invalides:", validatedData.error);
-     toast({ title: "Erreur de données", variant: "destructive" });
+     logger.error('Données invalides:', validatedData.error);
+     toast({ title: 'Erreur de données', variant: 'destructive' });
      return;
    }
 
@@ -1062,6 +1143,7 @@ const handleShare = useCallback(async (product: Product) => {
    ```
 
 2. **XSS via Description Produit**
+
    ```typescript
    <p className="text-slate-400 text-sm mb-2 line-clamp-2">
      {product.description} {/* ⚠️ Potentiellement dangereux si HTML */}
@@ -1074,15 +1156,17 @@ const handleShare = useCallback(async (product: Product) => {
    **Solution:**
    - S'assurer que Supabase RLS interdit l'insertion de HTML
    - Ou utiliser `DOMPurify` pour sanitizer:
+
    ```typescript
    import DOMPurify from 'dompurify';
 
-   <p dangerouslySetInnerHTML={{ 
-     __html: DOMPurify.sanitize(product.description || '') 
+   <p dangerouslySetInnerHTML={{
+     __html: DOMPurify.sanitize(product.description || '')
    }} />
    ```
 
 3. **Open Redirect via window.location.href**
+
    ```typescript
    if (result.checkout_url) {
      window.location.href = result.checkout_url;
@@ -1092,6 +1176,7 @@ const handleShare = useCallback(async (product: Product) => {
    - Si Moneroo renvoie une URL malveillante, l'utilisateur est redirigé
 
    **Solution:**
+
    ```typescript
    const ALLOWED_DOMAINS = ['moneroo.io', 'payhuk.com'];
 
@@ -1107,7 +1192,7 @@ const handleShare = useCallback(async (product: Product) => {
    if (result.checkout_url && isValidUrl(result.checkout_url)) {
      window.location.href = result.checkout_url;
    } else {
-     toast({ title: "URL de paiement invalide", variant: "destructive" });
+     toast({ title: 'URL de paiement invalide', variant: 'destructive' });
    }
    ```
 
@@ -1120,6 +1205,7 @@ const handleShare = useCallback(async (product: Product) => {
 #### ✅ **Points Positifs**
 
 1. **Breakpoints TailwindCSS Utilisés**
+
    ```typescript
    <h1 className="text-4xl md:text-6xl ...">
    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1138,45 +1224,54 @@ const handleShare = useCallback(async (product: Product) => {
 #### ⚠️ **Points d'Amélioration**
 
 1. **Hero Title Trop Grand sur Mobile**
+
    ```typescript
    <h1 className="text-4xl md:text-6xl ...">
      Marketplace Payhuk
    </h1>
    ```
+
    - Sur petit écran (320px), `text-4xl` = 36px
    - Peut déborder
 
    **Solution:**
+
    ```typescript
    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl ...">
    ```
 
 2. **Boutons Trop Petits sur Mobile**
+
    ```typescript
    <Button size="sm" ...>
      <Filter className="h-4 w-4 mr-2" />
      Filtres avancés
    </Button>
    ```
+
    - `size="sm"` = min-h-8 = 32px
    - **Minimum tactile: 44x44px** (Apple, Google)
 
    **Solution:**
+
    ```typescript
-   <Button 
-     size="sm" 
+   <Button
+     size="sm"
      className="min-h-[44px] md:min-h-auto"
    >
    ```
 
 3. **Pagination Non Responsive**
+
    ```typescript
    {Array.from({ length: Math.min(7, totalPages) }, (_, i) => { ... })}
    ```
+
    - Affiche toujours 7 boutons
    - Sur mobile, peut déborder
 
    **Solution:**
+
    ```typescript
    const maxButtons = isMobile ? 3 : 7;
    {Array.from({ length: Math.min(maxButtons, totalPages) }, ...)}
@@ -1214,6 +1309,7 @@ const handleShare = useCallback(async (product: Product) => {
    - Google ne peut pas afficher de "Rich Snippets"
 
    **Solution:**
+
    ```typescript
    <script type="application/ld+json">
      {JSON.stringify({
@@ -1240,6 +1336,7 @@ const handleShare = useCallback(async (product: Product) => {
 
    **Solution:**
    Synchroniser tous les filtres avec URL:
+
    ```typescript
    const [searchParams, setSearchParams] = useSearchParams();
 
@@ -1362,15 +1459,15 @@ const handleShare = useCallback(async (product: Product) => {
 
 ### 📈 **Impact Estimé des Corrections**
 
-| Correction | Temps | Impact Performance | Impact UX | Impact SEO |
-|------------|-------|-------------------|-----------|------------|
-| Email authentifié | 30 min | - | ⭐⭐⭐⭐⭐ | - |
-| Pagination serveur | 3h | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Debounce recherche | 30 min | ⭐⭐⭐⭐ | ⭐⭐⭐ | - |
-| Favoris BDD | 2h | ⭐⭐ | ⭐⭐⭐⭐⭐ | - |
-| Refactoring fichiers | 4h | ⭐⭐⭐ | - | - |
-| SEO meta tags | 2h | - | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Accessibilité | 3h | - | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Correction           | Temps  | Impact Performance | Impact UX  | Impact SEO |
+| -------------------- | ------ | ------------------ | ---------- | ---------- |
+| Email authentifié    | 30 min | -                  | ⭐⭐⭐⭐⭐ | -          |
+| Pagination serveur   | 3h     | ⭐⭐⭐⭐⭐         | ⭐⭐⭐⭐   | ⭐⭐⭐     |
+| Debounce recherche   | 30 min | ⭐⭐⭐⭐           | ⭐⭐⭐     | -          |
+| Favoris BDD          | 2h     | ⭐⭐               | ⭐⭐⭐⭐⭐ | -          |
+| Refactoring fichiers | 4h     | ⭐⭐⭐             | -          | -          |
+| SEO meta tags        | 2h     | -                  | ⭐⭐       | ⭐⭐⭐⭐⭐ |
+| Accessibilité        | 3h     | -                  | ⭐⭐⭐⭐   | ⭐⭐⭐     |
 
 ### 🎯 **Temps Total Estimé pour Corrections**
 
@@ -1406,5 +1503,4 @@ Une fois ces corrections apportées, la page sera **production-ready** et offrir
 
 ---
 
-*Analyse réalisée par Assistant AI - Payhuk Project*
-
+_Analyse réalisée par Assistant AI - Payhuk Project_

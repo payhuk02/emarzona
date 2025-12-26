@@ -14,6 +14,7 @@
 3. **Exécutez le script** pour voir l'état actuel
 
 Le script vous montrera :
+
 - ✅ Si le bucket est public
 - ✅ Quelles politiques RLS existent
 - ✅ Les fichiers dans le dossier `artist/`
@@ -22,6 +23,7 @@ Le script vous montrera :
 ### Étape 2 : Vérifier les résultats
 
 #### Résultat attendu pour le bucket :
+
 ```sql
 id: product-images
 name: product-images
@@ -29,7 +31,9 @@ public: true  ← DOIT ÊTRE true
 ```
 
 #### Résultat attendu pour les politiques :
+
 Vous devriez voir **4 politiques** :
+
 1. `product-images - Upload authenticated` (INSERT)
 2. `product-images - Public read access` (SELECT) ← CRITIQUE
 3. `product-images - Update authenticated` (UPDATE)
@@ -74,6 +78,7 @@ Vous devriez voir **4 politiques** :
    - Sauvegardez
 
 2. **Ou exécutez ce SQL** :
+
 ```sql
 UPDATE storage.buckets
 SET public = true
@@ -195,6 +200,7 @@ Si les images ne se chargent toujours pas, vérifiez les paramètres CORS de Sup
 ### Option 2 : Contacter le support Supabase
 
 Si toutes les vérifications sont correctes mais que le problème persiste, contactez le support Supabase avec :
+
 - L'URL de l'image qui ne fonctionne pas
 - Les résultats du script de diagnostic
 - Les logs d'erreur du navigateur
@@ -214,13 +220,3 @@ En dernier recours, vous pouvez créer un proxy côté serveur pour servir les i
 ---
 
 **Prochaine étape** : Exécutez le script de diagnostic pour identifier le problème exact.
-
-
-
-
-
-
-
-
-
-

@@ -101,6 +101,7 @@ npm run test
 ```
 
 **Points d'Attention**:
+
 - React 19 introduit des breaking changes
 - Vérifier la compatibilité avec toutes les dépendances
 - Tester toutes les fonctionnalités avant de déployer
@@ -108,6 +109,7 @@ npm run test
 ### Option 3: Ignorer l'Alerte (Si Faux Positif)
 
 Si après vérification, l'alerte est un faux positif :
+
 - Cliquer sur "Rejeter" dans Vercel
 - Documenter la décision
 - Surveiller les futures alertes
@@ -184,4 +186,3 @@ Avant de mettre à jour vers React 19, vérifier la compatibilité de :
 ---
 
 **Prochaine Action**: Cliquer sur "Vérifier pour les projets vulnérables" dans Vercel pour obtenir plus de détails.
-

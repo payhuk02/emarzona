@@ -13,9 +13,6 @@ declare const Deno: {
 };
 
 // Déclaration pour les imports Deno HTTP
-declare module "https://deno.land/std@0.168.0/http/server.ts" {
-  export function serve(
-    handler: (req: Request) => Promise<Response> | Response
-  ): void;
+declare module 'https://deno.land/std@0.168.0/http/server.ts' {
+  export function serve(handler: (req: Request) => Promise<Response> | Response): void;
 }
-

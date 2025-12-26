@@ -10,6 +10,7 @@
 ### 1. Erreur `column profiles.name does not exist`
 
 **Erreur :**
+
 ```
 ERROR: column profiles.name does not exist
 Code: 42703
@@ -20,6 +21,7 @@ Code: 42703
 **Fichier affecté :** `src/hooks/useVendorMessaging.ts`
 
 **Correction appliquée :**
+
 - ✅ Changé `.select("user_id, name, avatar_url")` → `.select("user_id, display_name, avatar_url")`
 - ✅ Changé `profile.name` → `profile.display_name || profile.first_name || 'Utilisateur'`
 
@@ -28,27 +30,32 @@ Code: 42703
 ### 2. Erreurs HTTP 400 pour toutes les images
 
 **Erreur :**
+
 ```
 Failed to load resource: the server responded with a status of 400 ()
 Content-Type: application/json; charset=utf-8
 ```
 
 **Causes possibles :**
+
 1. Les fichiers n'existent pas dans le bucket au chemin spécifié
 2. Le `storage_path` stocké en base ne correspond pas au chemin réel dans le bucket
 3. Les fichiers ont été supprimés ou déplacés
 
 **Observations :**
+
 - Les fichiers dans `vendor-message-attachments/{conversation_id}/filename.png` génèrent parfois des URLs signées avec succès
 - Les fichiers directement dans `vendor-message-attachments/filename.png` échouent toujours
 - Même les URLs signées retournent HTTP 400 pour certains fichiers
 
 **Corrections appliquées :**
+
 - ✅ Amélioration du logging pour diagnostiquer les erreurs
 - ✅ Détection automatique des fichiers introuvables
 - ✅ Messages d'erreur plus explicites
 
 **Fichiers modifiés :**
+
 - `src/hooks/useMediaErrorHandler.ts` : Amélioration du diagnostic
 
 ---
@@ -56,6 +63,7 @@ Content-Type: application/json; charset=utf-8
 ### 3. Erreur `messagesTopRef is not defined`
 
 **Erreur :**
+
 ```
 ReferenceError: messagesTopRef is not defined
 at VendorMessaging.tsx:103:28
@@ -64,6 +72,7 @@ at VendorMessaging.tsx:103:28
 **Cause :** Référence utilisée mais non déclarée.
 
 **Correction appliquée :**
+
 - ✅ Ajout de `const messagesTopRef = useRef<HTMLDivElement>(null);`
 - ✅ Ajout du div avec la ref dans le JSX
 
@@ -74,6 +83,7 @@ at VendorMessaging.tsx:103:28
 ### 4. Erreur 400 lors de la récupération des profils
 
 **Erreur :**
+
 ```
 Failed to load resource: the server responded with a status of 400 ()
 GET /rest/v1/profiles?select=user_id%2Cname%2Cavatar_url&user_id=in.(...)
@@ -82,6 +92,7 @@ GET /rest/v1/profiles?select=user_id%2Cname%2Cavatar_url&user_id=in.(...)
 **Cause :** Colonne `name` inexistante + trop d'IDs dans la requête.
 
 **Corrections appliquées :**
+
 - ✅ Changé `name` → `display_name`
 - ✅ Limité à 50 IDs au lieu de 100
 - ✅ Validation des UUIDs avant la requête
@@ -97,6 +108,7 @@ GET /rest/v1/profiles?select=user_id%2Cname%2Cavatar_url&user_id=in.(...)
 **Fichier :** `src/hooks/useVendorMessaging.ts`
 
 **Avant :**
+
 ```typescript
 .select("user_id, name, avatar_url")
 // ...
@@ -104,6 +116,7 @@ name: profile.name,
 ```
 
 **Après :**
+
 ```typescript
 .select("user_id, display_name, avatar_url")
 // ...
@@ -117,23 +130,28 @@ name: profile.display_name || profile.first_name || 'Utilisateur',
 **Fichier :** `src/hooks/useMediaErrorHandler.ts`
 
 **Ajouts :**
+
 - Détection automatique des fichiers introuvables (404, "not found", "does not exist")
 - Messages d'erreur plus explicites avec suggestions
 - Logging amélioré avec tous les détails nécessaires
 
 **Code ajouté :**
+
 ```typescript
-const isFileNotFound = signedUrlError?.message?.toLowerCase().includes('not found') ||
-                       signedUrlError?.message?.toLowerCase().includes('does not exist') ||
-                       signedUrlError?.code === '404' ||
-                       signedUrlError?.status === 404;
+const isFileNotFound =
+  signedUrlError?.message?.toLowerCase().includes('not found') ||
+  signedUrlError?.message?.toLowerCase().includes('does not exist') ||
+  signedUrlError?.code === '404' ||
+  signedUrlError?.status === 404;
 
 // Message d'erreur personnalisé
-onError?.(new Error(
-  isFileNotFound 
-    ? `Fichier introuvable dans le bucket: ${path}. Le fichier a peut-être été supprimé ou le chemin est incorrect.`
-    : signedUrlError?.message || 'Impossible de générer une URL signée.'
-));
+onError?.(
+  new Error(
+    isFileNotFound
+      ? `Fichier introuvable dans le bucket: ${path}. Le fichier a peut-être été supprimé ou le chemin est incorrect.`
+      : signedUrlError?.message || 'Impossible de générer une URL signée.'
+  )
+);
 ```
 
 ---
@@ -143,6 +161,7 @@ onError?.(new Error(
 **Fichier :** `src/pages/vendor/VendorMessaging.tsx`
 
 **Ajouts :**
+
 ```typescript
 const messagesTopRef = useRef<HTMLDivElement>(null);
 // ...
@@ -213,4 +232,3 @@ const messagesTopRef = useRef<HTMLDivElement>(null);
 ---
 
 **Statut final :** ✅ Toutes les corrections de code appliquées. Le problème principal (fichiers introuvables) nécessite une vérification manuelle dans Supabase Dashboard.
-

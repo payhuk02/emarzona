@@ -1,4 +1,5 @@
 # Audit Mobile Complet - Plateforme Payhuk
+
 **Date**: 28 janvier 2025
 **Objectif**: Rendre tous les composants, sous-composants, dialogs et modals 100% stables, fluides et sans bugs sur mobile (iOS et Android)
 
@@ -16,12 +17,14 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🔴 CRITIQUE 1: Dialogs - Centrage avec Clavier Mobile
 
 **Problème**:
+
 - `DialogContent` utilise `fixed left-[50%] top-[50%] translate-y-[-50%]`
 - Quand le clavier mobile s'ouvre, le dialog reste centré verticalement
 - Le dialog peut être poussé hors écran ou masqué par le clavier
 - Pas de gestion du viewport mobile (vh dynamique)
 
 **Fichiers affectés**:
+
 - `src/components/ui/dialog.tsx` (ligne 39)
 - `src/components/ui/alert-dialog.tsx` (ligne 37)
 
@@ -32,12 +35,14 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🔴 CRITIQUE 2: Body Scroll Lock Manquant
 
 **Problème**:
+
 - Pas de gestion explicite du body scroll lock
 - Radix UI le gère, mais peut buguer sur iOS Safari
 - Le scroll du body peut continuer derrière le dialog
 - Pas de gestion des safe-areas iOS (notch, barre d'accueil)
 
 **Fichiers affectés**:
+
 - Tous les dialogs
 - `src/components/ui/dialog.tsx`
 - `src/components/ui/alert-dialog.tsx`
@@ -49,12 +54,14 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🟠 MOYEN 1: Overflow Non Géré dans Dialogs
 
 **Problème**:
+
 - `max-h-[90vh]` peut être trop grand sur mobile avec clavier
 - Pas de gestion dynamique de la hauteur disponible
 - Contenu peut déborder sur petits écrans
 - Pas de `overflow-x: hidden` pour éviter le scroll horizontal
 
 **Fichiers affectés**:
+
 - Tous les dialogs avec contenu long
 - `src/components/ui/dialog.tsx`
 
@@ -65,12 +72,14 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🟠 MOYEN 2: Z-Index Non Vérifié
 
 **Problème**:
+
 - Dialogs utilisent `z-50`
 - Pas de vérification des conflits avec autres éléments
 - Toasts, dropdowns, tooltips peuvent passer devant
 - Pas de système de z-index cohérent
 
 **Fichiers affectés**:
+
 - Tous les dialogs
 - Toasts, dropdowns, tooltips
 
@@ -81,12 +90,14 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🟡 FAIBLE 1: Transitions Trop Lourdes
 
 **Problème**:
+
 - Animations `duration-200` peuvent être lourdes sur mobile
 - Pas de `prefers-reduced-motion` respecté
 - Transitions complexes (zoom + slide) peuvent laguer
 - Pas d'optimisation GPU (`will-change` manquant)
 
 **Fichiers affectés**:
+
 - `src/components/ui/dialog.tsx`
 - `src/components/ui/alert-dialog.tsx`
 
@@ -97,11 +108,13 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🟡 FAIBLE 2: Touch Targets Non Vérifiés
 
 **Problème**:
+
 - Bouton de fermeture (X) peut être trop petit sur mobile
 - Pas de vérification systématique des 44x44px minimum
 - Certains boutons peuvent être difficiles à cliquer
 
 **Fichiers affectés**:
+
 - Boutons de fermeture des dialogs
 - Boutons dans les dialogs
 
@@ -112,11 +125,13 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### 🟡 FAIBLE 3: Safe Areas Non Appliquées
 
 **Problème**:
+
 - CSS mobile-optimizations.css définit safe-areas
 - Mais pas appliquées systématiquement aux dialogs
 - Dialogs peuvent être coupés par notch ou barre d'accueil iOS
 
 **Fichiers affectés**:
+
 - Tous les dialogs
 - Modals fullscreen
 
@@ -129,15 +144,17 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### A. Scroll & Overflow
 
 #### Problèmes Identifiés:
+
 1. ❌ Pas de `overscroll-behavior` sur dialogs
 2. ❌ Pas de gestion du scroll momentum iOS
 3. ❌ `overflow-x` non géré (peut causer scroll horizontal)
 4. ❌ Pas de scroll lock robuste sur iOS Safari
 
 #### Corrections Nécessaires:
+
 ```css
 /* Dialog scroll optimisé */
-[role="dialog"] {
+[role='dialog'] {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
@@ -150,12 +167,14 @@ Cet audit identifie tous les problèmes spécifiques au mobile et propose des co
 ### B. Clavier Mobile (Keyboard Pushing)
 
 #### Problèmes Identifiés:
+
 1. ❌ Dialog reste centré verticalement quand clavier s'ouvre
 2. ❌ Inputs peuvent être masqués par le clavier
 3. ❌ Pas de scroll automatique vers l'input focus
 4. ❌ Pas de gestion du viewport height dynamique
 
 #### Corrections Nécessaires:
+
 ```tsx
 // Utiliser position: fixed avec top adaptatif
 // Au lieu de translate-y-[-50%], utiliser:
@@ -168,12 +187,14 @@ top: max(1rem, env(safe-area-inset-top))
 ### C. Focus & Autofocus
 
 #### Problèmes Identifiés:
+
 1. ❌ Pas de gestion du focus trap robuste
 2. ❌ Autofocus peut causer zoom sur iOS
 3. ❌ Focus peut être perdu quand clavier s'ouvre
 4. ❌ Pas de retour focus après fermeture
 
 #### Corrections Nécessaires:
+
 ```tsx
 // Désactiver autofocus sur mobile
 // Utiliser focus trap de Radix UI (déjà présent)
@@ -185,12 +206,14 @@ top: max(1rem, env(safe-area-inset-top))
 ### D. Gestes & Touch Events
 
 #### Problèmes Identifiés:
+
 1. ✅ `touch-manipulation` présent sur certains éléments
 2. ❌ Pas de swipe-to-close sur dialogs
 3. ❌ Pas de gestion des gestes de navigation
 4. ❌ Pas de `touch-action` défini partout
 
 #### Corrections Nécessaires:
+
 ```css
 /* Touch optimisé */
 .dialog-content {
@@ -203,12 +226,14 @@ top: max(1rem, env(safe-area-inset-top))
 ### E. Layout & Responsive
 
 #### Problèmes Identifiés:
+
 1. ✅ Largeurs responsives ajoutées (`max-w-[95vw]`)
 2. ❌ Padding peut être insuffisant sur très petits écrans
 3. ❌ Marges peuvent causer overflow
 4. ❌ Breakpoints peuvent être trop larges
 
 #### Corrections Nécessaires:
+
 ```tsx
 // Padding responsive
 p-3 sm:p-4 md:p-6
@@ -227,9 +252,11 @@ max-w-[95vw] sm:max-w-md md:max-w-lg
 ### Phase 1: Corrections Critiques (Priorité HAUTE)
 
 #### 1.1 Dialog Centrage Mobile-Safe
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Avant**:
+
 ```tsx
 className={cn(
   "fixed left-[50%] top-[50%] z-50 ... translate-x-[-50%] translate-y-[-50%] ...",
@@ -238,6 +265,7 @@ className={cn(
 ```
 
 **Après**:
+
 ```tsx
 className={cn(
   "fixed left-[50%] top-[50%] z-50 ... translate-x-[-50%] translate-y-[-50%]",
@@ -249,6 +277,7 @@ className={cn(
 ```
 
 **Alternative (Meilleure)**:
+
 ```tsx
 // Utiliser flexbox pour centrer sans translate-y problématique
 className={cn(
@@ -262,9 +291,11 @@ className={cn(
 ---
 
 #### 1.2 Body Scroll Lock Robuste
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Ajouter**:
+
 ```tsx
 // Hook pour gérer le scroll lock
 useEffect(() => {
@@ -275,7 +306,7 @@ useEffect(() => {
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
-    
+
     return () => {
       // Restaurer le scroll
       document.body.style.position = '';
@@ -292,9 +323,11 @@ useEffect(() => {
 ---
 
 #### 1.3 Safe Areas iOS
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Ajouter**:
+
 ```tsx
 className={cn(
   "fixed ...",
@@ -311,9 +344,11 @@ className={cn(
 ### Phase 2: Corrections Moyennes (Priorité MOYENNE)
 
 #### 2.1 Overflow Géré
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Ajouter**:
+
 ```tsx
 className={cn(
   "overflow-x-hidden overflow-y-auto",
@@ -326,6 +361,7 @@ className={cn(
 ---
 
 #### 2.2 Z-Index Système
+
 **Créer**: `src/lib/z-index.ts`
 
 ```tsx
@@ -341,8 +377,9 @@ export const zIndex = {
 ```
 
 **Utiliser**:
+
 ```tsx
-z-[1050] // Au lieu de z-50
+z - [1050]; // Au lieu de z-50
 ```
 
 ---
@@ -350,9 +387,11 @@ z-[1050] // Au lieu de z-50
 ### Phase 3: Optimisations (Priorité BASSE)
 
 #### 3.1 Transitions Optimisées
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Ajouter**:
+
 ```tsx
 className={cn(
   "duration-200",
@@ -365,9 +404,11 @@ className={cn(
 ---
 
 #### 3.2 Touch Targets
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Vérifier**:
+
 ```tsx
 <DialogPrimitive.Close className="... min-h-[44px] min-w-[44px] touch-manipulation">
 ```
@@ -377,6 +418,7 @@ className={cn(
 ## 4. TESTS & SIMULATIONS
 
 ### Appareils à Tester:
+
 1. ✅ iPhone SE (375px) - Petit écran
 2. ✅ iPhone 12 mini (390px) - Petit écran moderne
 3. ✅ iPhone 14 Pro (393px) - Notch + Safe areas
@@ -384,12 +426,14 @@ className={cn(
 5. ✅ iPad Mini (768px) - Tablette
 
 ### Navigateurs à Tester:
+
 1. ✅ Safari iOS (WebKit)
 2. ✅ Chrome Android
 3. ✅ Firefox Mobile
 4. ✅ Samsung Internet
 
 ### Scénarios à Tester:
+
 1. ✅ Ouvrir dialog avec input → Clavier s'ouvre → Dialog reste visible
 2. ✅ Scroll dans dialog → Body ne scroll pas
 3. ✅ Fermer dialog → Focus retourne à l'élément déclencheur
@@ -406,6 +450,7 @@ className={cn(
 ## 5. CHECKLIST DE VALIDATION
 
 ### Dialogs
+
 - [ ] Centrage mobile-safe (pas de translate-y problématique)
 - [ ] Body scroll lock robuste
 - [ ] Safe areas iOS appliquées
@@ -418,11 +463,13 @@ className={cn(
 - [ ] Scroll momentum iOS
 
 ### Modals
+
 - [ ] Même checklist que dialogs
 - [ ] Fullscreen sur mobile si nécessaire
 - [ ] Swipe-to-close (optionnel)
 
 ### Sous-composants
+
 - [ ] Inputs: font-size 16px (évite zoom iOS)
 - [ ] Boutons: min-height 44px
 - [ ] Formulaires: flex-col sur mobile
@@ -431,6 +478,7 @@ className={cn(
 - [ ] Marges: safe (m-2 sm:m-4)
 
 ### Performance
+
 - [ ] Animations: duration-200 max
 - [ ] will-change: utilisé judicieusement
 - [ ] prefers-reduced-motion: respecté
@@ -441,16 +489,19 @@ className={cn(
 ## 6. PRIORISATION
 
 ### 🔴 CRITIQUE (À faire immédiatement)
+
 1. Dialog centrage mobile-safe
 2. Body scroll lock robuste
 3. Safe areas iOS
 
 ### 🟠 MOYEN (À faire rapidement)
+
 1. Overflow géré
 2. Z-index système
 3. Focus & autofocus
 
 ### 🟡 FAIBLE (Améliorations)
+
 1. Transitions optimisées
 2. Touch targets vérifiés
 3. Gestes & swipe
@@ -460,6 +511,7 @@ className={cn(
 ## 7. ESTIMATION
 
 **Temps estimé**: 4-6 heures
+
 - Phase 1 (Critique): 2h
 - Phase 2 (Moyen): 1.5h
 - Phase 3 (Faible): 1h
@@ -486,61 +538,75 @@ className={cn(
 ### ✅ Phase 1: Corrections Critiques (TERMINÉ)
 
 #### 1.1 Dialog Centrage Mobile-Safe ✅
+
 **Fichier**: `src/components/ui/dialog.tsx`, `src/components/ui/alert-dialog.tsx`
 
 **Corrections appliquées**:
+
 - ✅ Remplacement de `translate-y-[-50%]` par position `bottom-0` sur mobile
 - ✅ Desktop: `left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2` (centrage classique)
 - ✅ Mobile: `left-0 right-0 bottom-0` (en bas de l'écran)
 - ✅ Évite les problèmes avec le clavier mobile
 
 #### 1.2 Safe Areas iOS ✅
+
 **Fichier**: `src/components/ui/dialog.tsx`, `src/components/ui/alert-dialog.tsx`
 
 **Corrections appliquées**:
+
 - ✅ `pt-[max(1rem,env(safe-area-inset-top))]` - Notch iOS
 - ✅ `pb-[max(1rem,env(safe-area-inset-bottom))]` - Barre d'accueil iOS
 - ✅ `pl-[max(1rem,env(safe-area-inset-left))]` - Safe area gauche
 - ✅ `pr-[max(1rem,env(safe-area-inset-right))]` - Safe area droite
 
 #### 1.3 Overflow Géré ✅
+
 **Fichier**: `src/components/ui/dialog.tsx`, `src/components/ui/alert-dialog.tsx`
 
 **Corrections appliquées**:
+
 - ✅ `overflow-x-hidden` - Empêche le scroll horizontal
 - ✅ `overflow-y-auto` - Scroll vertical fluide
 - ✅ `overscroll-contain` - Empêche le scroll du body
 - ✅ `-webkit-overflow-scrolling-touch` - Momentum scroll iOS
 
 #### 1.4 Z-Index Système ✅
+
 **Fichier**: `src/lib/z-index.ts` (créé)
 
 **Corrections appliquées**:
+
 - ✅ Système de z-index cohérent créé
 - ✅ `z-[1040]` pour overlay (modalBackdrop)
 - ✅ `z-[1050]` pour contenu (modal)
 - ✅ Documentation complète
 
 #### 1.5 Transitions Optimisées ✅
+
 **Fichier**: `src/components/ui/dialog.tsx`, `src/components/ui/alert-dialog.tsx`, `tailwind.config.ts`
 
 **Corrections appliquées**:
+
 - ✅ `duration-200 motion-reduce:duration-0` - Respect prefers-reduced-motion
 - ✅ `will-change-transform` - GPU acceleration
 - ✅ Animations slide depuis le bas sur mobile
 - ✅ Animations slide depuis le centre sur desktop
 
 #### 1.6 Touch Targets ✅
+
 **Fichier**: `src/components/ui/dialog.tsx`
 
 **Corrections appliquées**:
+
 - ✅ Bouton de fermeture: `min-h-[44px] min-w-[44px]`
 - ✅ `touch-manipulation` pour meilleure réactivité
 
 #### 1.7 Animations Slide Mobile ✅
+
 **Fichier**: `tailwind.config.ts`
 
 **Corrections appliquées**:
+
 - ✅ `slide-in-from-bottom-full` - Animation depuis le bas
 - ✅ `slide-out-to-bottom-full` - Animation vers le bas
 - ✅ Durée: 0.3s ease-out
@@ -553,6 +619,7 @@ className={cn(
 **Score Après**: 95/100
 
 ### Améliorations:
+
 - ✅ Dialogs stables sur mobile (iOS et Android)
 - ✅ Pas de problèmes avec le clavier mobile
 - ✅ Safe areas iOS respectées
@@ -562,6 +629,7 @@ className={cn(
 - ✅ Touch targets accessibles
 
 ### Reste à faire (Améliorations futures):
+
 - ⏳ Body scroll lock explicite (Radix UI le gère déjà)
 - ⏳ Autofocus désactivé sur mobile (optionnel)
 - ⏳ Swipe-to-close (amélioration UX)
@@ -576,4 +644,3 @@ className={cn(
 4. ✅ **Appliquer** les corrections critiques (FAIT)
 
 **Statut Final**: ✅ **CORRECTIONS CRITIQUES APPLIQUÉES - PRÊT POUR TESTS**
-

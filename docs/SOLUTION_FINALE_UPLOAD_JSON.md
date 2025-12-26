@@ -14,6 +14,7 @@
 **Changement** : Simplification des options passées à `supabase.storage.upload()`
 
 **Avant** :
+
 ```typescript
 .upload(filePath, fileToUpload, {
   cacheControl: '3600',
@@ -24,6 +25,7 @@
 ```
 
 **Après** :
+
 ```typescript
 .upload(filePath, fileToUpload, {
   contentType, // Seulement contentType
@@ -39,9 +41,14 @@
 **Changement** : Vérification de l'authentification avant chaque upload
 
 ```typescript
-const { data: { user }, error: authError } = await supabase.auth.getUser();
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser();
 if (!user || authError) {
-  throw new Error('Vous devez être connecté pour uploader des fichiers. Veuillez vous reconnecter.');
+  throw new Error(
+    'Vous devez être connecté pour uploader des fichiers. Veuillez vous reconnecter.'
+  );
 }
 ```
 
@@ -52,6 +59,7 @@ if (!user || authError) {
 **Fichier** : `supabase/migrations/20250201_fix_attachments_final_complete.sql`
 
 **Changements** :
+
 - Crée le bucket s'il n'existe pas
 - Force le bucket à être PUBLIC
 - Supprime toutes les anciennes politiques
@@ -65,6 +73,7 @@ if (!user || authError) {
 **Fonctionnalité** : Script de diagnostic complet pour tester l'upload
 
 **Utilisation** :
+
 ```typescript
 import { testStorageUpload } from '@/utils/testStorageUpload';
 await testStorageUpload();
@@ -113,6 +122,7 @@ await testStorageUpload();
 ```
 
 Ce script va :
+
 - ✅ Vérifier l'authentification
 - ✅ Vérifier le bucket
 - ✅ Tester l'upload
@@ -188,7 +198,7 @@ console.log('Upload result:', { data, error });
 
 **Dernière mise à jour** : 1 Février 2025  
 **Fichiers modifiés** :
+
 - `src/hooks/useFileUpload.ts`
 - `supabase/migrations/20250201_fix_attachments_final_complete.sql`
 - `src/utils/testStorageUpload.ts`
-

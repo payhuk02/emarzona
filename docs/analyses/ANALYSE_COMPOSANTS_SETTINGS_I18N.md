@@ -6,14 +6,14 @@
 
 ## 📋 Composants à Analyser
 
-| Composant | Lignes | Complexité | Priorité |
-|-----------|--------|------------|----------|
-| `AdvancedProfileSettings.tsx` | 868 | ⚠️ Très élevée | 🔴 Haute |
-| `StoreSettings.tsx` | ? | ? | 🔴 Haute |
-| `ProfileSettings.tsx` | ? | ? | 🟡 Moyenne |
-| `NotificationSettings.tsx` | ? | ? | 🟡 Moyenne |
-| `SecuritySettings.tsx` | ? | ? | 🟡 Moyenne |
-| `DomainSettings.tsx` | ? | ? | 🟢 Basse |
+| Composant                     | Lignes | Complexité     | Priorité   |
+| ----------------------------- | ------ | -------------- | ---------- |
+| `AdvancedProfileSettings.tsx` | 868    | ⚠️ Très élevée | 🔴 Haute   |
+| `StoreSettings.tsx`           | ?      | ?              | 🔴 Haute   |
+| `ProfileSettings.tsx`         | ?      | ?              | 🟡 Moyenne |
+| `NotificationSettings.tsx`    | ?      | ?              | 🟡 Moyenne |
+| `SecuritySettings.tsx`        | ?      | ?              | 🟡 Moyenne |
+| `DomainSettings.tsx`          | ?      | ?              | 🟢 Basse   |
 
 ---
 
@@ -22,24 +22,29 @@
 ### **Textes Identifiés** :
 
 #### **Toasts / Notifications** :
+
 - `"Lien partagé"`
 - `"Le lien de parrainage a été copié dans le presse-papiers"`
 - `"Le code de parrainage a été copié dans le presse-papiers"`
 
 #### **Messages d'État** :
+
 - `"Chargement du profil..."`
 - `"Impossible de charger le profil. Veuillez réessayer."`
 
 #### **Labels / Badges** :
+
 - `"Membre depuis"` (x2)
 - `"% complété"`
 - `"Suspendu"`
 
 #### **Boutons** :
+
 - `"Annuler"` (x2)
 - `"Modifier"`
 
 ### **Estimation** :
+
 - **Textes hardcodés** : ~15-20
 - **Formulaires** : Utilise principalement des variables de la DB
 - **Complexité** : La plupart des textes sont dynamiques via `profile`, `formData`, etc.
@@ -49,12 +54,14 @@
 ## 💡 Recommandation Stratégique
 
 ### **Option A : Traduction Complète** ⏰ (~2-3 heures)
+
 - Traduire tous les composants Settings ligne par ligne
 - Ajouter ~150-200 nouvelles clés de traduction
 - **Avantages** : 100% multilingue
 - **Inconvénients** : Très long, peu de texte hardcodé
 
 ### **Option B : Traduction Ciblée** ⏰ (~30 minutes) ⭐ **RECOMMANDÉ**
+
 - Traduire uniquement les textes hardcodés identifiés
 - Créer des clés communes réutilisables
 - Focus sur les messages d'erreur, toasts, et labels
@@ -62,6 +69,7 @@
 - **Inconvénients** : Certains labels de formulaires peuvent rester en anglais
 
 ### **Option C : Phase Ultérieure** ⏰ (Plus tard)
+
 - Reporter la traduction des composants Settings
 - Créer une issue GitHub pour référence
 - Se concentrer sur d'autres fonctionnalités
@@ -116,6 +124,7 @@
 ```
 
 ### **Composants à Modifier** :
+
 1. ✅ `AdvancedProfileSettings.tsx` (~15 remplacements)
 2. ✅ `StoreSettings.tsx` (~10 remplacements)
 3. ✅ `ProfileSettings.tsx` (~5 remplacements)
@@ -130,17 +139,21 @@
 ## 🚀 Plan d'Action
 
 ### **Étape 1 : Ajouter les Clés** (5 min)
+
 - Ajouter les clés dans `fr.json` et `en.json`
 
 ### **Étape 2 : AdvancedProfileSettings** (10 min)
+
 - Importer `useTranslation`
 - Remplacer les 15 textes hardcodés
 
 ### **Étape 3 : Autres Composants** (15 min)
+
 - Traduire les messages communs (loading, save, cancel)
 - Utiliser les clés réutilisables
 
 ### **Étape 4 : Test** (5 min)
+
 - Vérifier que tout fonctionne
 - Changer de langue et tester
 
@@ -148,12 +161,12 @@
 
 ## 📊 Impact
 
-| Métrique | Avant | Après (Option B) |
-|----------|-------|------------------|
-| **Couverture i18n** | 95% | **98%** ✅ |
-| **Clés ajoutées** | 560+ | **~610** ✅ |
-| **Temps requis** | - | **30 min** ✅ |
-| **Composants traduits** | 13 | **19** ✅ |
+| Métrique                | Avant | Après (Option B) |
+| ----------------------- | ----- | ---------------- |
+| **Couverture i18n**     | 95%   | **98%** ✅       |
+| **Clés ajoutées**       | 560+  | **~610** ✅      |
+| **Temps requis**        | -     | **30 min** ✅    |
+| **Composants traduits** | 13    | **19** ✅        |
 
 ---
 
@@ -173,4 +186,3 @@
 **Votre choix ?** 🎯
 
 Si vous ne répondez pas, je procède automatiquement avec **Option B** (la plus efficace).
-

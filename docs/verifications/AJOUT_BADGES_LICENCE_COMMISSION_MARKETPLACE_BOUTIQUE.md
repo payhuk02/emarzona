@@ -187,4 +187,3 @@
 
 _Modifications terminées le 2 Février 2025_  
 _Tous les composants de cartes du Marketplace et de la Boutique affichent maintenant le type de licence et le taux de commission ✅_
-

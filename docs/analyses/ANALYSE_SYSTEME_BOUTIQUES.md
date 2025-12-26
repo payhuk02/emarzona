@@ -22,7 +22,7 @@ L'analyse révèle **plusieurs failles de sécurité critiques** dans le systèm
       if (!user) throw new Error("Non authentifié");
 
       const slug = generateSlug(name);
-      
+
       // Vérifier disponibilité
       const isAvailable = await checkSlugAvailability(slug);
       if (!isAvailable) {
@@ -107,7 +107,8 @@ L'analyse révèle **plusieurs failles de sécurité critiques** dans le systèm
 
 **Problème** : Aucune contrainte CHECK, trigger ou fonction en base de données pour limiter à 3 boutiques par utilisateur.
 
-**Impact** : 
+**Impact** :
+
 - La validation côté client peut être contournée
 - Race condition : si deux requêtes sont envoyées simultanément, les deux pourraient passer la vérification
 - Un utilisateur malveillant peut créer plus de 3 boutiques via l'API directement
@@ -119,6 +120,7 @@ L'analyse révèle **plusieurs failles de sécurité critiques** dans le systèm
 ### 4. **Incohérence entre hooks** (MOYEN)
 
 **Problème** : Deux hooks différents gèrent les boutiques :
+
 - `useStores` : Gère plusieurs boutiques, vérifie la limite ✅
 - `useStore` : Gère une seule boutique, ne vérifie PAS la limite ❌
 
@@ -162,11 +164,11 @@ BEGIN
   SELECT COUNT(*) INTO store_count
   FROM public.stores
   WHERE user_id = NEW.user_id;
-  
+
   IF store_count >= 3 THEN
     RAISE EXCEPTION 'Limite de 3 boutiques par utilisateur atteinte';
   END IF;
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -223,6 +225,7 @@ $$ LANGUAGE sql STABLE;
 ## ✅ Conclusion
 
 Le système actuel présente des **failles de sécurité critiques** qui permettent de contourner la limite de 3 boutiques. Il est **impératif** de :
+
 1. Ajouter une validation côté serveur (trigger)
 2. Corriger tous les points d'entrée côté client
 3. Tester exhaustivement les corrections
@@ -234,6 +237,7 @@ Une fois ces corrections appliquées, le système sera sécurisé et cohérent.
 ## ✅ Corrections Appliquées (2025-01-30)
 
 ### ✅ Correction 1 : useStore.ts
+
 - **Fichier modifié** : `src/hooks/useStore.ts`
 - **Changements** :
   - Ajout de la vérification de limite avant création (lignes 150-171)
@@ -241,6 +245,7 @@ Une fois ces corrections appliquées, le système sera sécurisé et cohérent.
   - Utilisation de `count` pour vérifier le nombre de boutiques existantes
 
 ### ✅ Correction 2 : StoreForm.tsx
+
 - **Fichier modifié** : `src/components/store/StoreForm.tsx`
 - **Changements** :
   - Ajout de la vérification de limite avant création (lignes 124-143)
@@ -248,6 +253,7 @@ Une fois ces corrections appliquées, le système sera sécurisé et cohérent.
   - Message d'erreur clair pour l'utilisateur
 
 ### ✅ Correction 3 : Trigger en base de données
+
 - **Fichier créé** : `supabase/migrations/20250130_enforce_store_limit.sql`
 - **Fonctionnalités** :
   - Fonction `check_store_limit()` qui vérifie le nombre de boutiques avant INSERT
@@ -256,6 +262,7 @@ Une fois ces corrections appliquées, le système sera sécurisé et cohérent.
   - Protection contre les race conditions
 
 ### 📋 Prochaines Étapes
+
 1. **Appliquer la migration** : Exécuter `supabase/migrations/20250130_enforce_store_limit.sql` sur la base de données
 2. **Tester les corrections** : Vérifier que la limite fonctionne correctement
 3. **Tests E2E** : Créer des tests pour valider le comportement
@@ -265,9 +272,9 @@ Une fois ces corrections appliquées, le système sera sécurisé et cohérent.
 ## 🔒 Sécurité Renforcée
 
 Le système est maintenant protégé à **trois niveaux** :
+
 1. **Côté client** : Vérification dans `useStores`, `useStore`, et `StoreForm`
 2. **Côté serveur** : Trigger en base de données qui garantit la limite
 3. **Gestion d'erreurs** : Messages clairs pour l'utilisateur en cas de limite atteinte
 
 Cette approche en couches garantit que même si une validation côté client est contournée, la base de données empêchera la création de plus de 3 boutiques.
-

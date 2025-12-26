@@ -10,7 +10,7 @@
 ### Erreur Console
 
 ```javascript
-Uncaught TypeError: Cannot read properties of undefined 
+Uncaught TypeError: Cannot read properties of undefined
 (reading 'startsWith')
 
 at StoreSchema (StoreSchema.tsx:28:23)
@@ -22,12 +22,14 @@ at Storefront (Storefront.tsx:166:22)
 Les composants SEO `StoreSchema` et `ProductSchema` essayaient d'appeler `.startsWith()` sur la prop `url` qui n'était pas fournie lors de l'appel dans `Storefront.tsx`.
 
 **Dans Storefront.tsx (ligne 166) :**
+
 ```typescript
 // ❌ Prop 'url' manquante
 <StoreSchema store={store} />
 ```
 
 **Dans StoreSchema.tsx (ligne 28) :**
+
 ```typescript
 // ❌ Crash si 'url' est undefined
 const fullUrl = url.startsWith('http') ? url : `https://payhuk.com${url}`;
@@ -46,6 +48,7 @@ const fullUrl = url.startsWith('http') ? url : `https://payhuk.com${url}`;
 #### A. Interface - Prop `url` rendue optionnelle
 
 **Avant ❌**
+
 ```typescript
 interface StoreSchemaProps {
   store: { ... };
@@ -54,6 +57,7 @@ interface StoreSchemaProps {
 ```
 
 **Après ✅**
+
 ```typescript
 interface StoreSchemaProps {
   store: { ... };
@@ -64,6 +68,7 @@ interface StoreSchemaProps {
 #### B. Logique - Génération automatique de l'URL
 
 **Avant ❌**
+
 ```typescript
 export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
   const fullUrl = url.startsWith('http') ? url : `https://payhuk.com${url}`;
@@ -71,20 +76,22 @@ export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
 ```
 
 **Après ✅**
+
 ```typescript
 export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
   // Générer l'URL par défaut à partir du slug si non fournie
   const defaultUrl = `/stores/${store.slug}`;
   const providedUrl = url || defaultUrl;
-  
+
   // Construire l'URL complète
-  const fullUrl = providedUrl.startsWith('http') 
-    ? providedUrl 
+  const fullUrl = providedUrl.startsWith('http')
+    ? providedUrl
     : `https://payhuk.com${providedUrl}`;
   // ✅ Fonctionne même sans url
 ```
 
 **Bénéfices :**
+
 - ✅ Plus de crash si `url` n'est pas fourni
 - ✅ URL générée automatiquement à partir du slug de la boutique
 - ✅ Possibilité de surcharger l'URL si nécessaire
@@ -100,6 +107,7 @@ export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
 #### A. Interface - Prop `url` rendue optionnelle
 
 **Avant ❌**
+
 ```typescript
 interface ProductSchemaProps {
   product: { ... };
@@ -109,6 +117,7 @@ interface ProductSchemaProps {
 ```
 
 **Après ✅**
+
 ```typescript
 interface ProductSchemaProps {
   product: {
@@ -125,6 +134,7 @@ interface ProductSchemaProps {
 #### B. Logique - Génération automatique de l'URL
 
 **Avant ❌**
+
 ```typescript
 export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
   const fullUrl = url.startsWith('http') ? url : `https://payhuk.com${url}`;
@@ -132,22 +142,24 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
 ```
 
 **Après ✅**
+
 ```typescript
 export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
   // Générer l'URL par défaut si non fournie
-  const defaultUrl = product.slug 
+  const defaultUrl = product.slug
     ? `/stores/${store.slug}/products/${product.slug}`
     : `/stores/${store.slug}`;
   const providedUrl = url || defaultUrl;
-  
+
   // Construire l'URL complète
-  const fullUrl = providedUrl.startsWith('http') 
-    ? providedUrl 
+  const fullUrl = providedUrl.startsWith('http')
+    ? providedUrl
     : `https://payhuk.com${providedUrl}`;
   // ✅ Fonctionne même sans url
 ```
 
 **Bénéfices :**
+
 - ✅ Plus de crash si `url` n'est pas fourni
 - ✅ URL générée automatiquement à partir des slugs
 - ✅ Possibilité de surcharger l'URL si nécessaire
@@ -175,6 +187,7 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
 ### Utilisation dans les pages
 
 **Storefront.tsx (ligne 166) :**
+
 ```typescript
 // ✅ Fonctionne maintenant sans la prop 'url'
 <StoreSchema store={store} />
@@ -184,6 +197,7 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
 ```
 
 **ProductDetail.tsx :**
+
 ```typescript
 // ✅ Fonctionne avec ou sans 'url'
 <ProductSchema product={product} store={store} />
@@ -197,10 +211,12 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
 ### Pourquoi cette erreur ?
 
 **Création des composants SEO (Phase 1) :**
+
 - Nous avons créé `StoreSchema` et `ProductSchema` avec la prop `url` **requise**
 - L'idée était de fournir explicitement l'URL complète pour le SEO
 
 **Intégration dans les pages :**
+
 - Lors de l'intégration, certains composants ont été appelés **sans** la prop `url`
 - JavaScript a essayé d'appeler `.startsWith()` sur `undefined` → Crash
 
@@ -218,7 +234,7 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
 
 ```typescript
 // Composants SEO fragiles
-<StoreSchema store={store} url={url} /> 
+<StoreSchema store={store} url={url} />
 // ❌ Crash si url est undefined
 
 // Props requises strictes
@@ -244,6 +260,7 @@ interface StoreSchemaProps {
 ```
 
 **Avantages :**
+
 - ✅ **Plus robuste** : Pas de crash si `url` manque
 - ✅ **Plus simple** : Pas besoin de passer `url` à chaque fois
 - ✅ **Plus flexible** : Peut surcharger l'URL si besoin
@@ -292,10 +309,9 @@ http://localhost:8082/stores/{slug}/products/{productSlug}
 
 ```javascript
 // Dans la console (F12)
-document.querySelectorAll('script[type="application/ld+json"]')
-  .forEach((s, i) => {
-    console.log(`Schema ${i+1}:`, JSON.parse(s.textContent));
-  });
+document.querySelectorAll('script[type="application/ld+json"]').forEach((s, i) => {
+  console.log(`Schema ${i + 1}:`, JSON.parse(s.textContent));
+});
 
 // Résultat attendu sur Storefront :
 // Schema 1: { "@type": "Store", "url": "https://payhuk.com/stores/edigjt-1", ... }
@@ -374,5 +390,3 @@ Total : 2 fichiers modifiés, 22 lignes changées
 **Rapport créé le :** 26 Octobre 2025, 23:30  
 **Temps de correction :** 15 minutes  
 **Impact :** ✅ Storefront et ProductDetail opérationnels
-
-

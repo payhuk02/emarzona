@@ -32,6 +32,7 @@
 ## 🔴 ÉTAPE 5 : Vérifier le Code
 
 Vérifiez que le code contient bien :
+
 - ✅ Les logs améliorés avec `[Moneroo Edge Function]`
 - ✅ La gestion d'erreurs améliorée
 - ✅ Les logs pour le diagnostic
@@ -70,6 +71,7 @@ Vérifiez que le code contient bien :
 Le code complet se trouve dans : `supabase/functions/moneroo/index.ts`
 
 **Important :** Assurez-vous de copier TOUT le contenu du fichier, y compris :
+
 - La référence aux types Deno : `/// <reference path="../deno.d.ts" />`
 - Les imports
 - Tout le code de la fonction `serve`
@@ -96,6 +98,7 @@ Après le déploiement, vérifiez :
 ### Problème : Le déploiement échoue
 
 **Solution :**
+
 - Vérifiez que le code est valide (pas d'erreurs de syntaxe)
 - Vérifiez que tous les imports sont corrects
 - Essayez de déployer à nouveau
@@ -103,6 +106,7 @@ Après le déploiement, vérifiez :
 ### Problème : L'erreur "Failed to fetch" persiste
 
 **Solution :**
+
 1. Vérifiez les logs dans Supabase Dashboard
 2. Vérifiez que `MONEROO_API_KEY` est configuré dans les Secrets
 3. Vérifiez que l'utilisateur est authentifié
@@ -111,6 +115,7 @@ Après le déploiement, vérifiez :
 ### Problème : Les logs n'apparaissent pas
 
 **Solution :**
+
 - Attendez quelques secondes après le déploiement
 - Rafraîchissez la page des logs
 - Vérifiez que vous êtes dans le bon environnement (Production)
@@ -139,8 +144,3 @@ Après le déploiement :
 1. **Tester le paiement** sur la marketplace
 2. **Vérifier les logs** pour s'assurer que tout fonctionne
 3. **Résoudre les erreurs** si nécessaire en utilisant les logs améliorés
-
-
-
-
-

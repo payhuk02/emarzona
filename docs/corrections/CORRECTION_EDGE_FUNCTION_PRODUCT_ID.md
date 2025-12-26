@@ -5,6 +5,7 @@
 ## 🔍 Problème Identifié
 
 D'après les logs Supabase Edge Functions :
+
 - ✅ L'Edge Function reçoit `productId` dans les données (`dataKeys: ["amount", "currency", "customerEmail", "storeId", "productId", "returnUrl", "cancelUrl"]`)
 - ❌ Mais l'Edge Function ne transmet pas `productId` dans `metadata` lors de l'appel à l'API Moneroo
 - ❌ L'API Moneroo retourne une erreur 422 : `"The metadata.product_id field is required."`
@@ -12,16 +13,19 @@ D'après les logs Supabase Edge Functions :
 ## 🔍 Analyse des Logs
 
 **Log de l'Edge Function :**
+
 ```
 INFO Moneroo Edge Function Processing request: [action: "create_checkout", hasData: true, dataKeys: ["amount", "currency", "customerEmail", "storeId", "productId", "returnUrl", "cancelUrl"]]
 ```
 
 **Log de l'appel à l'API Moneroo :**
+
 ```
 INFO Moneroo Edge Function Calling Moneroo API: [url: "https://api.moneroo.io/v1/payments/initialize", method: "POST", body: { amount: 5000, currency: "XOF", customer: {...}, metadata: { store_id: "ecb9d915-b37b-4383-afb1-256bab22da73" } }]
 ```
 
 **Erreur Moneroo :**
+
 ```
 ERROR Moneroo API error: [status 422, statusText: "Unprocessable Entity", response: { message: "The metadata.product_id field is required.", code: "validation_error" }]
 ```
@@ -31,6 +35,7 @@ ERROR Moneroo API error: [status 422, statusText: "Unprocessable Entity", respon
 ### Modification dans `supabase/functions/moneroo/index.ts`
 
 **Avant :**
+
 ```typescript
 body = {
   amount: data.amount,
@@ -42,12 +47,13 @@ body = {
     last_name: lastName,
   },
   return_url: data.return_url,
-  metadata: data.metadata || {},  // ❌ Ne contient pas product_id
+  metadata: data.metadata || {}, // ❌ Ne contient pas product_id
   ...(data.methods && { methods: data.methods }),
 };
 ```
 
 **Après :**
+
 ```typescript
 // Construire metadata en incluant productId et storeId si présents
 // L'API Moneroo exige metadata.product_id
@@ -81,7 +87,7 @@ body = {
     last_name: lastName,
   },
   return_url: data.return_url,
-  metadata: metadata,  // ✅ Contient maintenant product_id
+  metadata: metadata, // ✅ Contient maintenant product_id
   ...(data.methods && { methods: data.methods }),
 };
 ```
@@ -89,6 +95,7 @@ body = {
 ## 🎯 Résultat Attendu
 
 Après le redéploiement de l'Edge Function :
+
 1. ✅ `productId` sera automatiquement ajouté à `metadata.product_id`
 2. ✅ `storeId` sera automatiquement ajouté à `metadata.store_id` si présent
 3. ✅ L'API Moneroo acceptera la requête (plus d'erreur 422)
@@ -113,11 +120,13 @@ Après le redéploiement de l'Edge Function :
 ## 🔍 Vérification
 
 Après le redéploiement, les logs devraient montrer :
+
 ```
 INFO Moneroo Edge Function Metadata construction: [originalMetadata: {...}, productId: "a6dbf752-22ca-4931-abdc-0aee713dbd99", storeId: "ecb9d915-b37b-4383-afb1-256bab22da73", finalMetadata: { product_id: "a6dbf752-22ca-4931-abdc-0aee713dbd99", store_id: "ecb9d915-b37b-4383-afb1-256bab22da73", ... }]
 ```
 
 Et l'appel à l'API Moneroo devrait maintenant inclure :
+
 ```json
 {
   "metadata": {
@@ -127,4 +136,3 @@ Et l'appel à l'API Moneroo devrait maintenant inclure :
   }
 }
 ```
-

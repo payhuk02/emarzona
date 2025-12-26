@@ -7,16 +7,19 @@ Ce document définit les standards et bonnes pratiques pour développer une appl
 ## 🎯 Principes fondamentaux
 
 ### 1. Mobile-First Approach
+
 - **Toujours commencer par mobile** (320px - 767px)
 - Puis adapter pour tablette (768px - 1023px)
 - Enfin optimiser pour desktop (1024px+)
 
 ### 2. Touch-First Design
+
 - Toutes les zones interactives ≥ 44px (WCAG 2.5.5)
 - Espacement minimum de 8px entre les éléments cliquables
 - Feedback visuel immédiat sur toutes les interactions
 
 ### 3. Performance First
+
 - Optimiser pour les connexions lentes
 - Lazy loading des images et composants
 - Réduire les animations sur mobile
@@ -51,17 +54,8 @@ h3: 24px (1.5rem)
 
 ```css
 /* Mobile */
---spacing-xs: 4px
---spacing-sm: 8px
---spacing-md: 12px
---spacing-base: 16px
---spacing-lg: 24px
---spacing-xl: 32px
-
-/* Container padding */
-Mobile: 16px
-Tablet: 24px
-Desktop: 32px
+--spacing-xs: 4px --spacing-sm: 8px --spacing-md: 12px --spacing-base: 16px --spacing-lg: 24px
+  --spacing-xl: 32px /* Container padding */ Mobile: 16px Tablet: 24px Desktop: 32px;
 ```
 
 ### Touch Targets
@@ -84,7 +78,7 @@ Desktop: 32px
 
 ```tsx
 // Toujours inclure min-height et min-width
-<Button 
+<Button
   className="min-h-[44px] min-w-[44px] touch-manipulation"
   size="default" // h-11 avec min-h-[44px]
 >
@@ -96,7 +90,7 @@ Desktop: 32px
 
 ```tsx
 // Toujours font-size: 16px pour éviter le zoom iOS
-<Input 
+<Input
   className="min-h-[44px] text-base" // text-base = 16px
   type="text"
 />
@@ -131,9 +125,7 @@ Desktop: 32px
   <SelectTrigger className="min-h-[44px] text-base">
     <SelectValue />
   </SelectTrigger>
-  <SelectContent>
-    {/* Options */}
-  </SelectContent>
+  <SelectContent>{/* Options */}</SelectContent>
 </Select>
 ```
 
@@ -142,27 +134,21 @@ Desktop: 32px
 ### Container
 
 ```tsx
-<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-  {/* Contenu */}
-</div>
+<div className="container mx-auto px-4 sm:px-6 lg:px-8">{/* Contenu */}</div>
 ```
 
 ### Grid System
 
 ```tsx
 // Mobile: 1 colonne, Tablet: 2 colonnes, Desktop: 3 colonnes
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-  {/* Items */}
-</div>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{/* Items */}</div>
 ```
 
 ### Flexbox Mobile-First
 
 ```tsx
 // Mobile: colonne, Desktop: ligne
-<div className="flex flex-col md:flex-row gap-4">
-  {/* Items */}
-</div>
+<div className="flex flex-col md:flex-row gap-4">{/* Items */}</div>
 ```
 
 ## 🚫 À éviter
@@ -212,17 +198,13 @@ Desktop: 32px
 ### 1. Safe Areas iOS
 
 ```tsx
-<div className="safe-all">
-  {/* Respecte les safe areas (notch, barre d'accueil) */}
-</div>
+<div className="safe-all">{/* Respecte les safe areas (notch, barre d'accueil) */}</div>
 ```
 
 ### 2. Touch Manipulation
 
 ```tsx
-<Button className="touch-manipulation">
-  {/* Améliore la réactivité tactile */}
-</Button>
+<Button className="touch-manipulation">{/* Améliore la réactivité tactile */}</Button>
 ```
 
 ### 3. Prevent Zoom iOS
@@ -237,23 +219,16 @@ Desktop: 32px
 ### 4. Lazy Loading Images
 
 ```tsx
-<img 
-  src={src}
-  loading="lazy"
-  className="w-full h-auto"
-  alt="Description"
-/>
+<img src={src} loading="lazy" className="w-full h-auto" alt="Description" />
 ```
 
 ### 5. Skeleton Loading
 
 ```tsx
 // Afficher un skeleton pendant le chargement
-{isLoading ? (
-  <Skeleton className="h-44 w-full" />
-) : (
-  <Content />
-)}
+{
+  isLoading ? <Skeleton className="h-44 w-full" /> : <Content />;
+}
 ```
 
 ## 🧪 Tests Mobile
@@ -323,4 +298,3 @@ screens: {
 - [WCAG 2.5.5 - Target Size](https://www.w3.org/WAI/WCAG21/Understanding/target-size.html)
 - [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
 - [Material Design - Touch Targets](https://material.io/design/usability/accessibility.html#layout-and-typography)
-

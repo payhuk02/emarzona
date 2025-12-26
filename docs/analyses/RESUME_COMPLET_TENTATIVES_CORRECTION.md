@@ -10,19 +10,23 @@ Le code promo s'affiche comme appliqué (-400 XOF), mais le total reste à 4000 
 ## ✅ Corrections Appliquées (Multiple Tentatives)
 
 ### Tentative 1: Simplification de `couponDiscountAmount`
+
 - Calcul direct sans `useMemo`
 - Résultat: ❌ Ne fonctionne pas
 
 ### Tentative 2: Amélioration des Dépendances
+
 - Utilisation des propriétés individuelles
 - Résultat: ❌ Ne fonctionne pas
 
 ### Tentative 3: Extraction des Valeurs Primitives
+
 - Extraction de `couponDiscountValue` et `couponId`
 - Utilisation dans `useMemo`
 - Résultat: ⚠️ En cours de test
 
 ### Tentative 4: Dépendances Multiples
+
 - Ajout de toutes les valeurs primitives dans les dépendances
 - Résultat: ⚠️ En cours de test
 
@@ -43,16 +47,16 @@ const finalTotal = useMemo(() => {
   const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
   return finalAmount;
 }, [
-  summary.subtotal, 
-  summary.discount_amount, 
+  summary.subtotal,
+  summary.discount_amount,
   couponDiscountAmount,
   couponDiscountValue,
   couponId,
   appliedCouponCode?.discountAmount ?? 0,
   appliedCouponCode?.id ?? null,
-  taxAmount, 
-  shippingAmount, 
-  giftCardAmount
+  taxAmount,
+  shippingAmount,
+  giftCardAmount,
 ]);
 ```
 
@@ -62,4 +66,3 @@ const finalTotal = useMemo(() => {
 2. **Utiliser `useEffect` pour forcer le recalcul**
 3. **Calculer le total directement sans `useMemo`**
 4. **Vérifier le cache du navigateur**
-

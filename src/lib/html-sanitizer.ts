@@ -123,14 +123,46 @@ export function sanitizeHTML(html: string | null | undefined): string {
 
 /**
  * Convertit du HTML en texte brut sécurisé
- * Supprime TOUTES les balises HTML
+ * Supprime TOUTES les balises HTML et décode les entités HTML
  *
  * @param html - HTML à convertir
- * @returns Texte brut
+ * @returns Texte brut avec entités HTML décodées
  */
 export function htmlToPlainText(html: string | null | undefined): string {
   if (!html) return '';
-  return DOMPurify.sanitize(html, PLAIN_TEXT_CONFIG);
+
+  // Étape 1: Sanitizer avec DOMPurify pour supprimer les balises HTML
+  const sanitized = DOMPurify.sanitize(html, PLAIN_TEXT_CONFIG);
+
+  // Étape 2: Décoder les entités HTML restantes
+  // Utiliser le DOM pour décoder toutes les entités HTML (y compris &nbsp;, &#39;, etc.)
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = sanitized;
+    const decoded = textarea.value;
+
+    // Nettoyer les espaces multiples et les retours à la ligne
+    return decoded
+      .replace(/\s+/g, ' ') // Remplacer les espaces multiples par un seul espace
+      .replace(/\n\s*\n/g, '\n') // Remplacer les retours à la ligne multiples
+      .trim();
+  }
+
+  // Fallback pour Node.js: décoder manuellement les entités communes
+  return sanitized
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&#x([0-9A-Fa-f]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**

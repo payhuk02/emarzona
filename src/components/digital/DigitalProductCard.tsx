@@ -10,7 +10,20 @@ import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, Star, FileText, TrendingUp, Eye, Heart, Play, ZoomIn } from 'lucide-react';
+import {
+  Download,
+  Star,
+  FileText,
+  TrendingUp,
+  Eye,
+  Heart,
+  Play,
+  ZoomIn,
+  CheckSquare,
+  Square,
+  Edit,
+} from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
@@ -19,6 +32,8 @@ import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/Pa
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import { DigitalDownloadLimitBadge } from '@/components/products/DigitalInfoBadges';
 import { useToast } from '@/hooks/use-toast';
+import { useStore } from '@/hooks/useStore';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
 import {
   Dialog,
   DialogContent,
@@ -59,6 +74,9 @@ interface DigitalProductCardProps {
   variant?: 'default' | 'compact' | 'featured';
   showActions?: boolean;
   onDownload?: () => void;
+  selectable?: boolean;
+  isSelected?: boolean;
+  onSelect?: (productId: string, selected: boolean) => void;
 }
 
 const DIGITAL_TYPE_ICONS = {
@@ -89,10 +107,14 @@ const DigitalProductCardComponent = ({
   variant = 'default',
   showActions = true,
   onDownload,
+  selectable = false,
+  isSelected = false,
+  onSelect,
 }: DigitalProductCardProps) => {
   const isCompact = variant === 'compact';
   const isFeatured = variant === 'featured';
   const { toast } = useToast();
+  const { store } = useStore();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const imageSizes =
@@ -126,12 +148,21 @@ const DigitalProductCardComponent = ({
     setIsZoomOpen(true);
   }, []);
 
+  const handleSelect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onSelect) {
+      onSelect(product.id, !isSelected);
+    }
+  };
+
   return (
     <Card
       className={cn(
         'group relative overflow-hidden transition-all duration-300',
         'hover:shadow-xl hover:scale-[1.02]',
         isFeatured && 'border-primary border-2',
+        selectable && isSelected && 'ring-2 ring-primary',
         'cursor-pointer'
       )}
       style={{ willChange: 'transform' }}
@@ -205,9 +236,26 @@ const DigitalProductCardComponent = ({
           />
         </button>
 
+        {/* Selection checkbox */}
+        {selectable && (
+          <div className="absolute top-2 left-2 z-10">
+            <button
+              onClick={handleSelect}
+              className="p-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
+              aria-label={isSelected ? 'Désélectionner' : 'Sélectionner'}
+            >
+              {isSelected ? (
+                <CheckSquare className="h-5 w-5 text-primary" />
+              ) : (
+                <Square className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Version badge */}
         {product.version && (
-          <div className="absolute top-2 left-2 z-10">
+          <div className={cn('absolute top-2 z-10', selectable ? 'right-2' : 'left-2')}>
             <Badge variant="secondary" className="text-xs shadow-lg">
               v{product.version}
             </Badge>
@@ -241,7 +289,13 @@ const DigitalProductCardComponent = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <Link to={`/products/${product.slug}`}>
+            <Link
+              to={
+                store?.slug && product.slug
+                  ? `/stores/${store.slug}/products/${product.slug}`
+                  : `/products/${product.slug}`
+              }
+            >
               <h3
                 className={cn(
                   'font-semibold truncate hover:text-primary transition-colors mb-3',
@@ -262,7 +316,7 @@ const DigitalProductCardComponent = ({
 
             {!isCompact && product.description && (
               <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                {product.description}
+                {htmlToPlainText(product.description)}
               </p>
             )}
           </div>
@@ -360,7 +414,19 @@ const DigitalProductCardComponent = ({
         <CardFooter className="pt-3">
           <div className="flex gap-2 w-full">
             <Button variant="outline" className="flex-1" asChild>
-              <Link to={`/products/${product.slug}`}>
+              <Link to={`/dashboard/products/${product.id}/edit`}>
+                <Edit className="h-4 w-4 mr-2" />
+                Modifier
+              </Link>
+            </Button>
+            <Button variant="outline" className="flex-1" asChild>
+              <Link
+                to={
+                  store?.slug && product.slug
+                    ? `/stores/${store.slug}/products/${product.slug}`
+                    : `/products/${product.slug}`
+                }
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 Détails
               </Link>
@@ -372,7 +438,15 @@ const DigitalProductCardComponent = ({
               </Button>
             ) : (
               <Button className="flex-1" asChild>
-                <Link to={`/products/${product.slug}`}>Acheter</Link>
+                <Link
+                  to={
+                    store?.slug && product.slug
+                      ? `/stores/${store.slug}/products/${product.slug}`
+                      : `/products/${product.slug}`
+                  }
+                >
+                  Acheter
+                </Link>
               </Button>
             )}
           </div>

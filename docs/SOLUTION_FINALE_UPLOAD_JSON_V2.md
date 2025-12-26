@@ -10,6 +10,7 @@
 L'erreur a évolué : **"mime type application/json is not supported"**
 
 Cela signifie que :
+
 1. ✅ Le système détecte maintenant que le fichier est JSON
 2. ❌ Mais le fichier est **toujours uploadé comme JSON** au lieu d'image
 3. ❌ Le problème fondamental persiste : Supabase retourne JSON au lieu d'accepter l'upload
@@ -29,7 +30,9 @@ Cela signifie que :
 const { data: buckets } = await supabase.storage.listBuckets();
 const attachmentsBucket = buckets?.find(b => b.id === bucket);
 if (attachmentsBucket && !attachmentsBucket.public) {
-  throw new Error(`Le bucket "${bucket}" n'est pas public. Activez "Public bucket" dans Supabase Dashboard.`);
+  throw new Error(
+    `Le bucket "${bucket}" n'est pas public. Activez "Public bucket" dans Supabase Dashboard.`
+  );
 }
 ```
 
@@ -43,12 +46,13 @@ if (attachmentsBucket && !attachmentsBucket.public) {
 
 ```typescript
 // Essai 1 : Upload sans options (Supabase détecte automatiquement le Content-Type)
-const uploadResult = await supabase.storage
-  .from(bucket)
-  .upload(filePath, fileToUpload);
+const uploadResult = await supabase.storage.from(bucket).upload(filePath, fileToUpload);
 
 // Si échec avec erreur JSON ou RLS, réessayer avec contentType explicite
-if (uploadError && (uploadError.message?.includes('json') || uploadError.message?.includes('RLS'))) {
+if (
+  uploadError &&
+  (uploadError.message?.includes('json') || uploadError.message?.includes('RLS'))
+) {
   const retryResult = await supabase.storage
     .from(bucket)
     .upload(filePath, fileToUpload, { contentType });
@@ -62,6 +66,7 @@ if (uploadError && (uploadError.message?.includes('json') || uploadError.message
 **Fichier** : `supabase/migrations/20250201_fix_attachments_final_complete.sql`
 
 **Fonctionnalités** :
+
 - Crée le bucket s'il n'existe pas
 - Force le bucket à être PUBLIC
 - Supprime toutes les anciennes politiques
@@ -97,6 +102,7 @@ if (uploadError && (uploadError.message?.includes('json') || uploadError.message
 ### Étape 3 : Attendre la Propagation
 
 ⏳ **Attendre 2-3 minutes** après :
+
 - L'activation du bucket public
 - L'exécution de la migration SQL
 
@@ -144,6 +150,7 @@ await testStorageUpload();
 ```
 
 Ce script va :
+
 - ✅ Vérifier l'authentification
 - ✅ Vérifier le bucket (existence, public)
 - ✅ Tester l'upload
@@ -160,6 +167,7 @@ Ce script va :
 **Symptôme** : Le fichier est toujours uploadé comme JSON
 
 **Solution** :
+
 1. Supabase Dashboard > Storage > Buckets > "attachments"
 2. **Vérifier visuellement** que "Public bucket" est activé
 3. Si ce n'est pas activé, **activer** et **sauvegarder**
@@ -171,6 +179,7 @@ Ce script va :
 **Symptôme** : Erreur "RLS" dans les logs
 
 **Solution** :
+
 1. Exécuter la migration SQL : `20250201_fix_attachments_final_complete.sql`
 2. Vérifier dans Supabase Dashboard > Storage > Policies
 3. S'assurer que 4 politiques existent (SELECT, INSERT, UPDATE, DELETE)
@@ -180,6 +189,7 @@ Ce script va :
 **Symptôme** : Erreur d'authentification
 
 **Solution** :
+
 1. Se déconnecter
 2. Se reconnecter
 3. Tester à nouveau
@@ -189,6 +199,7 @@ Ce script va :
 **Symptôme** : Les changements ne semblent pas prendre effet
 
 **Solution** :
+
 1. Attendre 2-3 minutes après chaque modification
 2. Recharger l'application (F5)
 3. Tester à nouveau
@@ -216,7 +227,7 @@ Ce script va :
 
 **Dernière mise à jour** : 1 Février 2025  
 **Fichiers modifiés** :
+
 - `src/hooks/useFileUpload.ts` (V2)
 - `supabase/migrations/20250201_fix_attachments_final_complete.sql`
 - `src/utils/testStorageUpload.ts`
-

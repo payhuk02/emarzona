@@ -19,6 +19,7 @@ App.tsx
 ```
 
 **Timeline sur mobile** :
+
 - T0: App démarre
 - T1: PlatformCustomizationProvider monte
 - T2: `load()` est appelé (async)
@@ -44,20 +45,24 @@ App.tsx
 ### 3. Problèmes Identifiés
 
 #### Problème 1 : Cache localStorage non utilisé correctement
+
 - Le cache est chargé une seule fois au montage
 - Si `customizationData` est `{}` au montage, le cache est utilisé
 - Mais si `customizationData` est `null` ou n'existe pas encore, le cache n'est pas utilisé
 
 #### Problème 2 : Race condition
+
 - Sur mobile, le chargement peut être lent
 - Le composant se rend avant que `customizationData` soit chargé
 - Le cache devrait être utilisé, mais la logique ne le permet pas toujours
 
 #### Problème 3 : Dépendances manquantes
+
 - Le premier `useEffect` devrait avoir `customizationData` dans ses dépendances
 - Sinon, il ne réagit pas aux changements de `customizationData`
 
 #### Problème 4 : Préchargement du logo
+
 - Le logo est préchargé avec `new Image()`
 - Mais sur mobile, si le réseau est lent, le `onload` peut prendre du temps
 - Pendant ce temps, `logoUrl` reste `null`
@@ -69,6 +74,7 @@ App.tsx
 ### Correction 1 : Améliorer la logique de cache
 
 Le cache doit être :
+
 1. Chargé immédiatement au montage
 2. Utilisé si `customizationData` n'est pas encore chargé
 3. Mis à jour quand `customizationData` est chargé
@@ -77,6 +83,7 @@ Le cache doit être :
 ### Correction 2 : Synchroniser les useEffect
 
 Les deux `useEffect` doivent être mieux synchronisés :
+
 - Le premier doit charger le cache immédiatement
 - Le deuxième doit mettre à jour avec les vraies données
 - Il ne doit pas y avoir de conflit entre les deux
@@ -89,6 +96,7 @@ Mais le cache devrait être utilisé dans ce cas.
 ### Correction 4 : Améliorer le préchargement
 
 Le préchargement doit :
+
 - Se faire immédiatement avec le cache
 - Se mettre à jour avec les vraies données
 - Gérer les erreurs de chargement
@@ -100,6 +108,7 @@ Le préchargement doit :
 ### 1. Fusionner les deux useEffect en un seul
 
 Un seul `useEffect` qui :
+
 - Charge le cache immédiatement
 - Met à jour avec les vraies données quand disponibles
 - Gère le préchargement
@@ -107,6 +116,7 @@ Un seul `useEffect` qui :
 ### 2. Utiliser useMemo pour la sélection du logo
 
 Utiliser `useMemo` pour déterminer quelle URL de logo utiliser, basé sur :
+
 - Le cache (si disponible)
 - Les données réelles (si chargées)
 - Le thème actuel
@@ -114,6 +124,7 @@ Utiliser `useMemo` pour déterminer quelle URL de logo utiliser, basé sur :
 ### 3. Améliorer la gestion d'état
 
 Utiliser un état plus robuste qui :
+
 - Indique si le logo est en cours de chargement
 - Stocke l'URL du logo (cache ou réel)
 - Gère les erreurs de chargement
@@ -127,4 +138,3 @@ Utiliser un état plus robuste qui :
 3. ✅ Ajouter une gestion d'erreur robuste
 4. ✅ Tester sur mobile avec réseau lent
 5. ✅ Vérifier que le logo s'affiche immédiatement depuis le cache
-

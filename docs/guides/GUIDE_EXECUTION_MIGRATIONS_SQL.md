@@ -20,12 +20,14 @@ Ces migrations doivent être exécutées dans l'ordre suivant :
 ### Fichier : `supabase/migrations/20250128_staff_availability_settings.sql`
 
 **Instructions** :
+
 1. Ouvrir Supabase Dashboard → SQL Editor
 2. Créer une nouvelle requête
 3. Copier-coller le contenu du fichier
 4. Exécuter la requête (Ctrl+Enter ou bouton "Run")
 
 **Vérification** :
+
 ```sql
 -- Vérifier que la table existe
 SELECT * FROM staff_availability_settings LIMIT 1;
@@ -41,12 +43,14 @@ SELECT has_table_privilege('authenticated', 'staff_availability_settings', 'SELE
 ### Fichier : `supabase/migrations/20250128_resource_conflict_settings.sql`
 
 **Instructions** :
+
 1. Dans le même SQL Editor
 2. Créer une nouvelle requête
 3. Copier-coller le contenu du fichier
 4. Exécuter la requête
 
 **Vérification** :
+
 ```sql
 -- Vérifier que la table existe
 SELECT * FROM resource_conflict_settings LIMIT 1;
@@ -62,17 +66,19 @@ SELECT has_table_privilege('authenticated', 'resource_conflict_settings', 'SELEC
 ### Fichier : `supabase/migrations/20250128_wizard_server_validation.sql`
 
 **Instructions** :
+
 1. Dans le même SQL Editor
 2. Créer une nouvelle requête
 3. Copier-coller le contenu du fichier
 4. Exécuter la requête
 
 **Vérification** :
+
 ```sql
 -- Vérifier que les fonctions existent
-SELECT routine_name, routine_type 
-FROM information_schema.routines 
-WHERE routine_schema = 'public' 
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_schema = 'public'
 AND routine_name IN (
   'validate_product_slug',
   'validate_sku',
@@ -141,12 +147,15 @@ SELECT validate_service(
 ## 🚨 EN CAS D'ERREUR
 
 ### Erreur : "relation already exists"
+
 - **Solution** : La table/fonction existe déjà. Vérifier si elle est correcte ou la supprimer avant de réexécuter.
 
 ### Erreur : "permission denied"
+
 - **Solution** : Vérifier que vous êtes connecté avec un compte ayant les permissions nécessaires.
 
 ### Erreur : "column does not exist"
+
 - **Solution** : Vérifier que les tables référencées existent (`products`, `digital_products`, `physical_products`, `services`, `stores`).
 
 ---
@@ -170,4 +179,3 @@ Après exécution réussie :
 
 **Date** : 28 Janvier 2025  
 **Statut** : ⚠️ **À EXÉCUTER MANUELLEMENT DANS SUPABASE DASHBOARD**
-

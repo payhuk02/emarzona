@@ -37,18 +37,18 @@ Le système d'affichage des médias est un **système centralisé** qui gère l'
 
 ### 1.2 Score Global
 
-| Catégorie | Score | Statut |
-|-----------|-------|--------|
-| **Architecture** | 9.0/10 | ✅ Excellent |
-| **Qualité du Code** | 8.5/10 | ✅ Très Bon |
-| **Performance** | 7.5/10 | ⚠️ Bon (améliorable) |
-| **Sécurité** | 8.0/10 | ✅ Bon |
-| **Gestion d'Erreurs** | 8.5/10 | ✅ Très Bon |
-| **Tests** | 3.0/10 | ❌ Insuffisant |
-| **Documentation** | 9.0/10 | ✅ Excellent |
-| **Accessibilité** | 7.0/10 | ⚠️ Bon (améliorable) |
-| **Maintenabilité** | 8.5/10 | ✅ Très Bon |
-| **Conformité Standards** | 8.0/10 | ✅ Bon |
+| Catégorie                | Score  | Statut               |
+| ------------------------ | ------ | -------------------- |
+| **Architecture**         | 9.0/10 | ✅ Excellent         |
+| **Qualité du Code**      | 8.5/10 | ✅ Très Bon          |
+| **Performance**          | 7.5/10 | ⚠️ Bon (améliorable) |
+| **Sécurité**             | 8.0/10 | ✅ Bon               |
+| **Gestion d'Erreurs**    | 8.5/10 | ✅ Très Bon          |
+| **Tests**                | 3.0/10 | ❌ Insuffisant       |
+| **Documentation**        | 9.0/10 | ✅ Excellent         |
+| **Accessibilité**        | 7.0/10 | ⚠️ Bon (améliorable) |
+| **Maintenabilité**       | 8.5/10 | ✅ Très Bon          |
+| **Conformité Standards** | 8.0/10 | ✅ Bon               |
 
 **Score Global :** **8.0/10** ✅
 
@@ -59,14 +59,14 @@ Le système d'affichage des médias est un **système centralisé** qui gère l'
 ✅ **Gestion d'erreurs robuste** : Fallback vers URL signée, liens de secours  
 ✅ **Documentation complète** : Guides, audits, corrections documentés  
 ✅ **Sécurité** : Validation des fichiers, RLS policies, bucket configuré  
-✅ **Cohérence** : Tous les systèmes utilisent le même bucket `attachments`  
+✅ **Cohérence** : Tous les systèmes utilisent le même bucket `attachments`
 
 ### 1.4 Points d'Amélioration
 
 ⚠️ **Tests unitaires** : Aucun test pour `MediaAttachment` et utilitaires  
 ⚠️ **Performance** : `useEffect` avec trop de dépendances, logs verbeux en production  
 ⚠️ **Accessibilité** : Manque d'attributs ARIA, pas de support clavier complet  
-⚠️ **Optimisations** : Pas de memoization, pas de lazy loading avancé  
+⚠️ **Optimisations** : Pas de memoization, pas de lazy loading avancé
 
 ---
 
@@ -118,11 +118,13 @@ src/
 **Score :** 9.0/10 ✅
 
 **Points Forts :**
+
 - Structure claire et organisée
 - Séparation des responsabilités
 - Exports centralisés
 
 **Points d'Amélioration :**
+
 - Pourrait bénéficier d'un dossier `types/` pour les interfaces partagées
 
 ### 3.2 Flux de Données
@@ -148,6 +150,7 @@ src/
 **Score :** 9.0/10 ✅
 
 **Points Forts :**
+
 - Flux clair et linéaire
 - Gestion d'erreurs à chaque étape
 - Fallback intelligent
@@ -155,6 +158,7 @@ src/
 ### 3.3 Intégrations
 
 **5 Systèmes de Messagerie :**
+
 1. ✅ `VendorMessaging.tsx` → Utilise `MediaAttachment`
 2. ✅ `OrderMessaging.tsx` → Utilise `MediaAttachment` (bucket corrigé)
 3. ✅ `ConversationComponent.tsx` → Utilise `MediaAttachment`
@@ -164,6 +168,7 @@ src/
 **Score :** 9.0/10 ✅
 
 **Points Forts :**
+
 - Cohérence totale entre les systèmes
 - Réutilisation maximale
 - Maintenance facilitée
@@ -182,12 +187,14 @@ src/
 **Analyse :**
 
 ✅ **Points Forts :**
+
 - TypeScript strict avec interfaces claires
 - Gestion d'erreurs complète
 - Logs de débogage détaillés
 - Support de 3 types de médias (image, video, file)
 
 ⚠️ **Points d'Amélioration :**
+
 - `useEffect` avec 12 dépendances (ligne 78) → Peut causer des re-renders excessifs
 - Logs très verbeux → Devrait être conditionnés avec `import.meta.env.DEV`
 - Pas de memoization → `useMemo` pour `correctedUrl`, `displayUrl`, `mediaType`
@@ -206,6 +213,7 @@ src/
 **Analyse :**
 
 ✅ **Points Forts :**
+
 - Détection robuste (extension + MIME type)
 - Priorité extension > MIME (plus fiable)
 - Support de nombreux formats
@@ -221,11 +229,13 @@ src/
 **Analyse :**
 
 ✅ **Points Forts :**
+
 - Correction automatique des URLs
 - Support de multiples formats d'URL
 - Extraction robuste du chemin
 
 ⚠️ **Points d'Amélioration :**
+
 - Gestion d'erreur basique si `VITE_SUPABASE_URL` manque (ligne 19-23)
 - Logique complexe avec plusieurs fallbacks → Pourrait être simplifiée
 
@@ -239,6 +249,7 @@ src/
 **Analyse :**
 
 ✅ **Points Forts :**
+
 - Tailles standardisées et réutilisables
 - Types TypeScript stricts
 - Documentation claire
@@ -256,12 +267,14 @@ src/
 **Analyse :**
 
 ✅ **Points Forts :**
+
 - Gestion complète du cycle de vie
 - Realtime subscriptions
 - Pagination
 - Gestion d'erreurs
 
 ⚠️ **Points d'Amélioration :**
+
 - Logique d'extraction `storage_path` dupliquée (lignes 464-473)
 - Devrait utiliser `extractStoragePath` de `storage.ts`
 
@@ -276,6 +289,7 @@ src/
 **Analyse :**
 
 ✅ **Points Forts :**
+
 - Utilise le bon bucket `attachments`
 - Validation des fichiers
 - Gestion complète
@@ -295,11 +309,28 @@ src/
 **Problèmes Identifiés :**
 
 1. **`useEffect` avec 12 dépendances** (ligne 78)
+
    ```typescript
    useEffect(() => {
-     logger.info('MediaAttachment - Component render', { /* ... */ });
-   }, [attachment.id, attachment.file_name, attachment.file_type, attachment.file_url, attachment.storage_path, mediaType, correctedUrl, displayUrl, signedUrl, imageError, triedSignedUrl, size]);
+     logger.info('MediaAttachment - Component render', {
+       /* ... */
+     });
+   }, [
+     attachment.id,
+     attachment.file_name,
+     attachment.file_type,
+     attachment.file_url,
+     attachment.storage_path,
+     mediaType,
+     correctedUrl,
+     displayUrl,
+     signedUrl,
+     imageError,
+     triedSignedUrl,
+     size,
+   ]);
    ```
+
    **Impact :** Re-render à chaque changement de dépendance, même si non nécessaire
 
 2. **Pas de memoization**
@@ -327,7 +358,9 @@ const mediaType = useMemo(
 
 // Conditionner les logs
 if (import.meta.env.DEV) {
-  logger.info('MediaAttachment - Component render', { /* ... */ });
+  logger.info('MediaAttachment - Component render', {
+    /* ... */
+  });
 }
 ```
 
@@ -348,6 +381,7 @@ if (import.meta.env.DEV) {
 ### 6.1 Validation des Fichiers
 
 ✅ **Points Forts :**
+
 - Validation côté client avec `file-security.ts`
 - Validation magic bytes (signatures réelles)
 - Liste d'extensions dangereuses
@@ -359,17 +393,20 @@ if (import.meta.env.DEV) {
 ### 6.2 Configuration Supabase
 
 ✅ **Bucket `attachments` :**
+
 - Public : `true` (nécessaire pour l'affichage)
 - Limite taille : 10MB
 - Types MIME autorisés : Liste exhaustive
 
 ✅ **Politiques RLS :**
+
 - ✅ "Anyone can view attachments" (SELECT)
 - ✅ "Authenticated users can upload attachments" (INSERT)
 - ✅ "Users can update their own attachments" (UPDATE)
 - ✅ "Users can delete their own attachments" (DELETE)
 
 ⚠️ **Points d'Amélioration :**
+
 - Politique UPDATE/DELETE trop permissive (tous les utilisateurs authentifiés)
 - Devrait vérifier la propriété du fichier
 
@@ -378,6 +415,7 @@ if (import.meta.env.DEV) {
 ### 6.3 Protection contre les Attaques
 
 ✅ **Protections en Place :**
+
 - Validation extension/MIME/signature
 - Pas d'exécution de code
 - URLs signées avec expiration (1h)
@@ -394,6 +432,7 @@ if (import.meta.env.DEV) {
 ### 7.1 Analyse
 
 ✅ **Points Forts :**
+
 - Try/catch dans toutes les fonctions async
 - Fallback vers URL signée si URL publique échoue
 - Lien de secours si tout échoue
@@ -406,14 +445,14 @@ if (import.meta.env.DEV) {
 const handleImageError = async () => {
   // 1. Vérifier si déjà essayé
   if (triedSignedUrl && imageError) return;
-  
+
   // 2. Essayer URL signée
   if (!triedSignedUrl) {
     // Vérifier existence fichier
     // Générer URL signée
     // Réessayer
   }
-  
+
   // 3. Fallback lien
   if (triedSignedUrl && imageError) {
     // Afficher lien de secours
@@ -430,12 +469,14 @@ const handleImageError = async () => {
 ### 8.1 État Actuel
 
 ❌ **Aucun test unitaire** pour :
+
 - `MediaAttachment.tsx`
 - `media-detection.ts`
 - `storage.ts`
 - `media.ts`
 
 ❌ **Aucun test d'intégration** pour :
+
 - Upload de fichiers
 - Affichage des médias
 - Gestion d'erreurs
@@ -450,7 +491,7 @@ describe('detectMediaType', () => {
   it('should detect image by extension', () => {
     expect(detectMediaType('photo.jpg', '')).toBe('image');
   });
-  
+
   it('should detect video by MIME type', () => {
     expect(detectMediaType('file', 'video/mp4')).toBe('video');
   });
@@ -470,7 +511,7 @@ describe('MediaAttachment', () => {
     render(<MediaAttachment attachment={imageAttachment} />);
     expect(screen.getByRole('img')).toBeInTheDocument();
   });
-  
+
   it('should fallback to link on error', async () => {
     // Mock image error
     // Verify fallback link
@@ -495,6 +536,7 @@ describe('MediaAttachment', () => {
 ### 9.1 État Actuel
 
 ✅ **Documentation Exhaustive :**
+
 - `AUDIT_COMPLET_SYSTEME_AFFICHAGE_MEDIAS.md`
 - `ANALYSE_COMPLETE_AFFICHAGE_MEDIAS_MESSAGES.md`
 - `IMPLEMENTATION_MEDIAS_MESSAGES_COMPLETE.md`
@@ -503,6 +545,7 @@ describe('MediaAttachment', () => {
 - Guides pour bucket, tests, debug
 
 ✅ **Commentaires Code :**
+
 - JSDoc pour toutes les fonctions publiques
 - Commentaires explicatifs pour logique complexe
 - Exemples d'utilisation
@@ -516,6 +559,7 @@ describe('MediaAttachment', () => {
 ### 10.1 Analyse
 
 ⚠️ **Points Manquants :**
+
 - Pas d'attribut `alt` descriptif (utilise `file_name` par défaut)
 - Pas d'attributs ARIA pour les états (loading, error)
 - Pas de support clavier complet pour navigation
@@ -547,12 +591,14 @@ describe('MediaAttachment', () => {
 ### 11.1 Analyse
 
 ✅ **Points Forts :**
+
 - Code modulaire et réutilisable
 - Séparation des responsabilités
 - Types TypeScript stricts
 - Utilitaires centralisés
 
 ⚠️ **Points d'Amélioration :**
+
 - Duplication de code dans `useVendorMessaging.ts` (extraction `storage_path`)
 - Logique complexe dans `handleImageError` (pourrait être extraite)
 
@@ -565,17 +611,20 @@ describe('MediaAttachment', () => {
 ### 12.1 React
 
 ✅ **Bonnes Pratiques :**
+
 - Hooks utilisés correctement
 - Props typées avec TypeScript
 - Gestion d'état appropriée
 
 ⚠️ **Améliorations :**
+
 - Utiliser `React.memo` pour optimiser
 - Utiliser `useMemo`/`useCallback` pour performance
 
 ### 12.2 TypeScript
 
 ✅ **Conformité :**
+
 - Types stricts
 - Interfaces claires
 - Pas de `any` (sauf cas exceptionnels)
@@ -583,6 +632,7 @@ describe('MediaAttachment', () => {
 ### 12.3 ESLint
 
 ✅ **Conformité :**
+
 - Pas d'erreurs de linter détectées
 - Code formaté correctement
 
@@ -600,21 +650,21 @@ describe('MediaAttachment', () => {
 
 **Détails :**
 
-| Aspect | Score | Commentaire |
-|--------|-------|-------------|
-| Structure | 9/10 | Bien organisé |
-| Gestion erreurs | 9/10 | Très robuste |
-| Performance | 6/10 | Optimisations nécessaires |
-| Accessibilité | 7/10 | Améliorations possibles |
-| Tests | 0/10 | Aucun test |
+| Aspect          | Score | Commentaire               |
+| --------------- | ----- | ------------------------- |
+| Structure       | 9/10  | Bien organisé             |
+| Gestion erreurs | 9/10  | Très robuste              |
+| Performance     | 6/10  | Optimisations nécessaires |
+| Accessibilité   | 7/10  | Améliorations possibles   |
+| Tests           | 0/10  | Aucun test                |
 
 ### 13.2 Utilitaires
 
-| Fichier | Lignes | Score | Commentaire |
-|---------|--------|-------|-------------|
-| `media-detection.ts` | 123 | 9.5/10 | Excellent |
-| `storage.ts` | 112 | 8.0/10 | Bon, améliorable |
-| `media.ts` | 41 | 10/10 | Parfait |
+| Fichier              | Lignes | Score  | Commentaire      |
+| -------------------- | ------ | ------ | ---------------- |
+| `media-detection.ts` | 123    | 9.5/10 | Excellent        |
+| `storage.ts`         | 112    | 8.0/10 | Bon, améliorable |
+| `media.ts`           | 41     | 10/10  | Parfait          |
 
 ---
 
@@ -627,25 +677,30 @@ describe('MediaAttachment', () => {
 ### 14.2 Problèmes Moyens
 
 ⚠️ **MOYEN 1 : Tests Manquants**
+
 - **Impact :** Risque de régression, maintenance difficile
 - **Priorité :** 🔴 **HAUTE**
 
 ⚠️ **MOYEN 2 : Performance**
+
 - **Impact :** Re-renders excessifs, logs verbeux
 - **Priorité :** 🟡 **MOYENNE**
 
 ⚠️ **MOYEN 3 : Accessibilité**
+
 - **Impact :** Expérience utilisateur dégradée pour utilisateurs assistés
 - **Priorité :** 🟡 **MOYENNE**
 
 ### 14.3 Problèmes Mineurs
 
 ℹ️ **MINEUR 1 : Duplication de Code**
+
 - **Fichier :** `useVendorMessaging.ts`
 - **Impact :** Maintenance
 - **Priorité :** 🟢 **FAIBLE**
 
 ℹ️ **MINEUR 2 : RLS Policies**
+
 - **Impact :** Sécurité (mineur)
 - **Priorité :** 🟢 **FAIBLE**
 
@@ -730,17 +785,17 @@ describe('MediaAttachment', () => {
 
 ### 17.1 Scores par Catégorie
 
-| Catégorie | Score | Poids | Score Pondéré |
-|-----------|-------|-------|---------------|
-| Architecture | 9.0/10 | 15% | 1.35 |
-| Qualité Code | 8.5/10 | 20% | 1.70 |
-| Performance | 7.5/10 | 15% | 1.13 |
-| Sécurité | 8.0/10 | 15% | 1.20 |
-| Gestion Erreurs | 8.5/10 | 10% | 0.85 |
-| Tests | 3.0/10 | 10% | 0.30 |
-| Documentation | 9.0/10 | 5% | 0.45 |
-| Accessibilité | 7.0/10 | 5% | 0.35 |
-| Maintenabilité | 8.5/10 | 5% | 0.43 |
+| Catégorie       | Score  | Poids | Score Pondéré |
+| --------------- | ------ | ----- | ------------- |
+| Architecture    | 9.0/10 | 15%   | 1.35          |
+| Qualité Code    | 8.5/10 | 20%   | 1.70          |
+| Performance     | 7.5/10 | 15%   | 1.13          |
+| Sécurité        | 8.0/10 | 15%   | 1.20          |
+| Gestion Erreurs | 8.5/10 | 10%   | 0.85          |
+| Tests           | 3.0/10 | 10%   | 0.30          |
+| Documentation   | 9.0/10 | 5%    | 0.45          |
+| Accessibilité   | 7.0/10 | 5%    | 0.35          |
+| Maintenabilité  | 8.5/10 | 5%    | 0.43          |
 
 **Score Global Pondéré :** **8.0/10** ✅
 
@@ -763,6 +818,7 @@ Le système d'affichage des médias est **globalement excellent** avec une archi
 ### 18.2 Recommandation Finale
 
 ✅ **Le système est production-ready** mais nécessite :
+
 1. Ajout de tests unitaires (priorité haute)
 2. Optimisations de performance (priorité haute)
 3. Améliorations d'accessibilité (priorité moyenne)
@@ -780,5 +836,3 @@ Le système d'affichage des médias est **globalement excellent** avec une archi
 **Auditeur :** Auto (Cursor AI)  
 **Version :** 2.0  
 **Prochaine révision :** Après implémentation des tests et optimisations
-
-

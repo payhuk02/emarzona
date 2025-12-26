@@ -9,9 +9,11 @@
 ## ✅ CE QUI A ÉTÉ IMPLÉMENTÉ
 
 ### 1. Hook de Création Complète
+
 **Fichier** : `src/hooks/courses/useCreateFullCourse.ts`
 
 ✅ **Fonctionnalités** :
+
 - Création du produit (table `products`)
 - Création du cours (table `courses`)
 - Création des sections (table `course_sections`)
@@ -22,9 +24,11 @@
 - Redirection automatique après succès
 
 ### 2. Wizard Amélioré
+
 **Fichier** : `src/components/courses/create/CreateCourseWizard.tsx`
 
 ✅ **Modifications** :
+
 - Intégration du hook `useCreateFullCourse`
 - Récupération automatique du store de l'utilisateur
 - Bouton de publication avec état de chargement
@@ -42,11 +46,13 @@ npm run dev
 ```
 
 ### ÉTAPE 2 : Se connecter
+
 1. Aller sur http://localhost:5173
 2. Se connecter avec un compte qui a une boutique
 3. Aller dans **Dashboard → Produits**
 
 ### ÉTAPE 3 : Créer un nouveau cours
+
 1. Cliquer sur **"Nouveau produit"**
 2. Sélectionner **"Cours en ligne"**
 3. Le wizard de création de cours s'affiche
@@ -54,6 +60,7 @@ npm run dev
 ### ÉTAPE 4 : Remplir les informations
 
 #### **Étape 1 - Informations de base**
+
 - **Titre** : "Formation React Avancée"
 - **Slug** : "formation-react-avancee"
 - **Description courte** : "Maîtrisez React de A à Z"
@@ -64,6 +71,7 @@ npm run dev
 - Cliquer sur **"Suivant"**
 
 #### **Étape 2 - Curriculum**
+
 1. Cliquer sur **"Ajouter une section"**
    - **Titre** : "Introduction à React"
    - **Description** : "Les bases de React"
@@ -84,6 +92,7 @@ npm run dev
 6. Cliquer sur **"Suivant"**
 
 #### **Étape 3 - Configuration**
+
 - **Prix** : 25000
 - **Devise** : XOF
 - **Prix promotionnel** : 15000
@@ -102,6 +111,7 @@ npm run dev
 - Cliquer sur **"Suivant"**
 
 #### **Étape 4 - Révision**
+
 1. Vérifier toutes les informations
 2. Lire l'avertissement
 3. Cliquer sur **"Publier le cours"**
@@ -111,26 +121,33 @@ npm run dev
 ## 🔍 VÉRIFICATIONS À FAIRE
 
 ### 1. Pendant la création
+
 ✅ Le bouton affiche **"Publication en cours..."** avec une icône de chargement  
 ✅ Le bouton est désactivé pendant le processus  
-✅ Aucune erreur dans la console  
+✅ Aucune erreur dans la console
 
 ### 2. Après la création
+
 ✅ Un toast de succès s'affiche :
-   - Titre : "🎉 Cours créé avec succès !"
-   - Description : "Votre cours 'Formation React Avancée' a été publié avec 2 sections et 3 leçons."
-   
+
+- Titre : "🎉 Cours créé avec succès !"
+- Description : "Votre cours 'Formation React Avancée' a été publié avec 2 sections et 3 leçons."
+
 ✅ Redirection automatique vers `/dashboard/products`  
-✅ Le cours apparaît dans la liste des produits  
+✅ Le cours apparaît dans la liste des produits
 
 ### 3. Dans Supabase
+
 Ouvrir le tableau de bord Supabase et vérifier :
 
 #### Table `products`
+
 ```sql
 SELECT * FROM products WHERE product_type = 'course' ORDER BY created_at DESC LIMIT 1;
 ```
+
 ✅ Une ligne existe avec :
+
 - `name` = "Formation React Avancée"
 - `slug` = "formation-react-avancee"
 - `product_type` = "course"
@@ -139,10 +156,13 @@ SELECT * FROM products WHERE product_type = 'course' ORDER BY created_at DESC LI
 - `is_active` = true
 
 #### Table `courses`
+
 ```sql
 SELECT * FROM courses ORDER BY created_at DESC LIMIT 1;
 ```
+
 ✅ Une ligne existe avec :
+
 - `product_id` = (l'ID du produit créé)
 - `level` = "Intermédiaire"
 - `language` = "Français"
@@ -151,18 +171,24 @@ SELECT * FROM courses ORDER BY created_at DESC LIMIT 1;
 - `certificate_enabled` = true
 
 #### Table `course_sections`
+
 ```sql
 SELECT * FROM course_sections WHERE course_id = 'XXX' ORDER BY order_index;
 ```
+
 ✅ 2 lignes existent :
+
 - Section 1 : "Introduction à React"
 - Section 2 : "Composants React"
 
 #### Table `course_lessons`
+
 ```sql
 SELECT * FROM course_lessons WHERE course_id = 'XXX' ORDER BY section_id, order_index;
 ```
+
 ✅ 3 leçons (ou plus) existent avec :
+
 - `title`, `description`, `video_url`, `video_duration_seconds`
 - `is_preview` = true pour la première leçon
 
@@ -171,22 +197,26 @@ SELECT * FROM course_lessons WHERE course_id = 'XXX' ORDER BY section_id, order_
 ## ❌ TESTS D'ERREUR
 
 ### Test 1 : Sans boutique
+
 1. Se connecter avec un compte sans boutique
 2. Essayer de créer un cours
 3. ✅ Un toast d'erreur doit s'afficher : "Vous devez avoir une boutique pour créer un cours"
 
 ### Test 2 : Champs requis manquants
+
 1. Laisser des champs vides à l'étape 1
 2. Cliquer sur "Suivant"
 3. ✅ Les erreurs doivent s'afficher sous les champs
 
 ### Test 3 : Curriculum vide
+
 1. Aller à l'étape 2
 2. Ne pas ajouter de section
 3. Cliquer sur "Suivant"
 4. ✅ Un toast d'erreur doit s'afficher : "Ajoutez au moins une section avec une leçon"
 
 ### Test 4 : Erreur réseau
+
 1. Ouvrir les DevTools
 2. Aller dans Network → Offline
 3. Essayer de publier le cours
@@ -197,15 +227,19 @@ SELECT * FROM course_lessons WHERE course_id = 'XXX' ORDER BY section_id, order_
 ## 🐛 RÉSOLUTION DES PROBLÈMES
 
 ### Erreur : "Utilisateur non connecté"
+
 **Solution** : Se reconnecter et réessayer
 
 ### Erreur : "Vous devez avoir une boutique"
+
 **Solution** : Créer une boutique d'abord dans les paramètres
 
 ### Erreur : "Erreur lors de la création du produit"
+
 **Solution** : Vérifier la console pour plus de détails et les logs Supabase
 
 ### Le cours n'apparaît pas dans la liste
+
 **Solution** : Rafraîchir la page ou vider le cache
 
 ---
@@ -239,7 +273,7 @@ Pendant la création, vous devriez voir dans la console :
 ✅ **Rollback** : En cas d'erreur, les données partielles sont supprimées  
 ✅ **UX** : Toast de succès + Redirection automatique  
 ✅ **Performance** : Création en moins de 5 secondes  
-✅ **Logs** : Console logs clairs et informatifs  
+✅ **Logs** : Console logs clairs et informatifs
 
 ---
 
@@ -256,4 +290,3 @@ Pendant la création, vous devriez voir dans la console :
 **Statut** : ✅ **PHASE 2 COMPLÈTE - BACKEND INTÉGRÉ**
 
 Vous pouvez maintenant créer des cours complets qui sont sauvegardés dans Supabase ! 🎉
-

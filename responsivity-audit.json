@@ -923,20 +923,8 @@
     }
   },
   "recommendations": {
-    "priority1": [
-      "Marketplace",
-      "Storefront",
-      "ProductDetail"
-    ],
-    "priority2": [
-      "Landing",
-      "Auth",
-      "Dashboard"
-    ],
-    "priority3": [
-      "Settings",
-      "Payments",
-      "Orders"
-    ]
+    "priority1": ["Marketplace", "Storefront", "ProductDetail"],
+    "priority2": ["Landing", "Auth", "Dashboard"],
+    "priority3": ["Settings", "Payments", "Orders"]
   }
 }

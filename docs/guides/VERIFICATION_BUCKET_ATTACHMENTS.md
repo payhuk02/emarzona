@@ -53,6 +53,7 @@ fetch(testUrl)
 ### Solution 1 : Vérifier que le fichier existe
 
 Si le fichier n'existe pas dans le bucket :
+
 - Le fichier n'a peut-être pas été uploadé correctement
 - Vérifiez les logs d'upload dans la console
 - Réessayez d'envoyer une nouvelle image
@@ -60,6 +61,7 @@ Si le fichier n'existe pas dans le bucket :
 ### Solution 2 : Vérifier les permissions RLS
 
 Si les politiques RLS ne sont pas correctes :
+
 1. Allez dans **Storage** > **Policies**
 2. Supprimez les anciennes politiques
 3. Réexécutez la migration `20250230_create_attachments_storage_bucket.sql`
@@ -67,6 +69,7 @@ Si les politiques RLS ne sont pas correctes :
 ### Solution 3 : Vérifier l'URL
 
 Si l'URL est incorrecte :
+
 - Vérifiez que `VITE_SUPABASE_URL` est correctement configuré
 - Vérifiez que le chemin du fichier est correct
 - Les logs dans la console devraient montrer l'URL corrigée
@@ -75,7 +78,7 @@ Si l'URL est incorrecte :
 
 ```sql
 -- Vérifier les attachments récents
-SELECT 
+SELECT
   id,
   message_id,
   file_name,
@@ -91,7 +94,7 @@ LIMIT 10;
 ## 🔍 Vérification dans la console
 
 Après le rechargement de la page, vérifiez dans la console :
+
 1. Les logs "Corrected file URL:" pour voir l'URL corrigée
 2. Les logs "Image load error:" pour voir pourquoi l'image ne charge pas
 3. Les logs "File existence check:" pour voir si le fichier existe
-

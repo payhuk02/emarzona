@@ -83,13 +83,13 @@ Ajout du lien dans la section "Mon Compte" :
 
 ## 🎯 Différences entre les Routes
 
-| Route | Description | Utilisateur |
-|-------|-------------|-------------|
-| `/affiliate/dashboard` | Tableau de bord pour les affiliés | Affiliés |
-| `/dashboard/affiliates` | Liste des affiliés pour un vendeur | Vendeurs |
-| `/dashboard/store-affiliates` | Gestion des affiliés d'un store | Vendeurs |
-| `/admin/affiliates` | Gestion globale des affiliés | Admins |
-| `/affiliate/courses` | Dashboard des cours affiliés | Affiliés |
+| Route                         | Description                        | Utilisateur |
+| ----------------------------- | ---------------------------------- | ----------- |
+| `/affiliate/dashboard`        | Tableau de bord pour les affiliés  | Affiliés    |
+| `/dashboard/affiliates`       | Liste des affiliés pour un vendeur | Vendeurs    |
+| `/dashboard/store-affiliates` | Gestion des affiliés d'un store    | Vendeurs    |
+| `/admin/affiliates`           | Gestion globale des affiliés       | Admins      |
+| `/affiliate/courses`          | Dashboard des cours affiliés       | Affiliés    |
 
 ---
 
@@ -113,4 +113,3 @@ Ajout du lien dans la section "Mon Compte" :
 **Date** : Janvier 2025  
 **Commit** : `[commit hash]`  
 **Statut** : ✅ Complété
-

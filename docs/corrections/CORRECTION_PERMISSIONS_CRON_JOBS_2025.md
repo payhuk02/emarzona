@@ -27,12 +27,14 @@ Cette erreur se produit car les utilisateurs authentifiés n'ont pas les permiss
 **Fichier** : `supabase/migrations/20250219_fix_email_tags_cron_permissions_SIMPLE.sql`
 
 Ce script :
+
 - ✅ Supprime et recrée les fonctions avec les bonnes permissions
 - ✅ Utilise `SECURITY DEFINER` pour exécuter avec les permissions du superutilisateur
 - ✅ Donne les permissions `EXECUTE` aux rôles `authenticated`, `anon` et `service_role`
 - ✅ Inclut des vérifications automatiques
 
 **Instructions** :
+
 1. Ouvrez **Supabase Dashboard > SQL Editor**
 2. Copiez-collez le contenu du fichier `20250219_fix_email_tags_cron_permissions_SIMPLE.sql`
 3. Cliquez sur **Run** ou appuyez sur `Ctrl+Enter`
@@ -66,6 +68,7 @@ Si ces requêtes fonctionnent sans erreur 403, le problème est résolu.
 ### Pourquoi cette erreur ?
 
 Dans Supabase, le schéma `cron` est protégé et n'est accessible que par :
+
 - Le superutilisateur (`postgres`)
 - Les fonctions avec `SECURITY DEFINER` créées par un superutilisateur
 
@@ -97,6 +100,7 @@ GRANT EXECUTE ON FUNCTION public.get_email_tags_cron_jobs_status() TO authentica
 ### Composant React
 
 Le composant `EmailTagsDashboard.tsx` a été mis à jour pour :
+
 - ✅ Logger les erreurs de permission sans bloquer l'interface
 - ✅ Gérer gracieusement l'absence de données de cron jobs
 
@@ -124,4 +128,3 @@ Le composant `EmailTagsDashboard.tsx` a été mis à jour pour :
 ---
 
 **Migration à exécuter** : `supabase/migrations/20250219_fix_email_tags_cron_permissions.sql`
-

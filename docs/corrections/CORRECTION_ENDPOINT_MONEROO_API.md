@@ -3,6 +3,7 @@
 ## ❌ Problème Identifié
 
 **Erreur dans les logs Supabase :**
+
 ```
 ERROR Moneroo API error: { status: 404, statusText: "Not Found", response: { message: "The route v1/payments could not be found." } }
 ```
@@ -14,6 +15,7 @@ ERROR Moneroo API error: { status: 404, statusText: "Not Found", response: { mes
 ## 🔍 Analyse
 
 D'après les logs :
+
 - ✅ L'Edge Function est bien déployée
 - ✅ CORS fonctionne correctement (localhost autorisé)
 - ✅ L'API Key est configurée (`hasApiKey: true, apiKeyLength: 37`)
@@ -33,6 +35,7 @@ L'endpoint `/checkout` pourrait être le bon endpoint pour créer un paiement Mo
 ### Option 2 : Vérifier l'URL de Base
 
 L'URL de base pourrait être incorrecte. Vérifier :
+
 - `https://api.moneroo.io/v1` (actuel)
 - `https://api.moneroo.io` (sans /v1)
 - `https://moneroo.io/api/v1` (alternative)
@@ -40,6 +43,7 @@ L'URL de base pourrait être incorrecte. Vérifier :
 ### Option 3 : Endpoint Différent
 
 L'endpoint pourrait être :
+
 - `/payment` (singulier)
 - `/transactions`
 - `/orders`
@@ -109,6 +113,7 @@ case 'create_checkout':
 ## 📝 Note Importante
 
 **Il est crucial de vérifier la documentation officielle Moneroo** pour connaître l'endpoint exact. Les endpoints peuvent varier selon :
+
 - La version de l'API
 - Le type de compte (test/production)
 - La région
@@ -128,7 +133,3 @@ case 'create_checkout':
 3. **Contacter Moneroo**
    - Demander l'endpoint exact
    - Vérifier que le compte est actif
-
-
-
-

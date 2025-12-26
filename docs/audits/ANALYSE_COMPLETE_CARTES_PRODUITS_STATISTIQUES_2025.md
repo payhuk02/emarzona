@@ -44,18 +44,21 @@
 #### Cartes Produits
 
 **Fichiers analysés:**
+
 - `src/components/digital/DigitalProductCard.tsx`
 - `src/components/products/UnifiedProductCard.tsx`
 - `src/components/marketplace/ProductCardModern.tsx`
 - `src/components/storefront/ProductCard.tsx`
 
 **Statistiques affichées:**
+
 - ✅ `total_downloads` (téléchargements)
 - ✅ `average_rating` (note moyenne)
 - ✅ `total_reviews` (nombre d'avis)
 - ⚠️ `purchases_count` (affiché mais **ne respecte pas `hide_purchase_count`**)
 
 **Exemple de code problématique:**
+
 ```typescript:src/components/marketplace/ProductCardModern.tsx
 {/* Nombre d'achats */}
 {product.purchases_count !== undefined && product.purchases_count > 0 && (
@@ -73,10 +76,12 @@
 **Fichier:** `src/components/products/create/digital/CreateDigitalProductWizard_v2.tsx`
 
 **Options disponibles:**
+
 - ❌ **Aucune checkbox** pour contrôler l'affichage des statistiques
 - ✅ Le champ `hide_purchase_count` existe dans `ProductInfoTab` et `ProductVisualTab`
 
 **Localisation des checkboxes:**
+
 - `src/components/products/tabs/ProductInfoTab.tsx` (ligne 926-945)
 - `src/components/products/tabs/ProductVisualTab.tsx` (ligne 421-432)
 
@@ -89,11 +94,13 @@
 **Fichier:** `src/components/physical/PhysicalProductCard.tsx`
 
 **Statistiques affichées:**
+
 - ✅ `total_quantity_sold` (ventes)
 - ✅ `total_revenue` (revenus)
 - ⚠️ **Pas de vérification de `hide_purchase_count`**
 
 **Code actuel:**
+
 ```typescript:src/components/physical/PhysicalProductCard.tsx
 {/* Stats */}
 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -115,6 +122,7 @@
 **Fichier:** `src/components/products/create/physical/CreatePhysicalProductWizard_v2.tsx`
 
 **Options disponibles:**
+
 - ❌ **Aucune checkbox** dans le wizard pour contrôler l'affichage des statistiques
 - ✅ Le champ `hide_purchase_count` existe dans les onglets d'édition
 
@@ -127,11 +135,13 @@
 **Fichier:** `src/components/service/ServiceCard.tsx`
 
 **Statistiques affichées:**
+
 - ✅ `total_bookings` (réservations)
 - ✅ `average_rating` (note moyenne)
 - ⚠️ **Pas de vérification de `hide_purchase_count`**
 
 **Code actuel:**
+
 ```typescript:src/components/service/ServiceCard.tsx
 {/* Stats */}
 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -157,6 +167,7 @@
 **Fichier:** `src/components/products/create/service/CreateServiceWizard_v2.tsx`
 
 **Options disponibles:**
+
 - ❌ **Aucune checkbox** dans le wizard pour contrôler l'affichage des statistiques
 
 ---
@@ -168,6 +179,7 @@
 **Fichier:** `src/components/courses/marketplace/CourseCard.tsx`
 
 **Statistiques affichées:**
+
 - ✅ `total_enrollments` (inscriptions)
 - ✅ `total_lessons` (leçons)
 - ✅ `total_duration_minutes` (durée)
@@ -175,6 +187,7 @@
 - ⚠️ **Pas de vérification de `hide_purchase_count`**
 
 **Code actuel:**
+
 ```typescript:src/components/courses/marketplace/CourseCard.tsx
 {/* Stats du cours */}
 <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
@@ -198,6 +211,7 @@
 **Fichier:** `src/components/products/create/courses/create/CreateCourseWizard.tsx` (non trouvé)
 
 **Options disponibles:**
+
 - ❌ **Aucune checkbox** identifiée pour contrôler l'affichage des statistiques
 
 ---
@@ -207,16 +221,19 @@
 #### Cartes Produits
 
 **Fichiers analysés:**
+
 - `src/components/artist/ArtistGalleryGrid.tsx`
 - `src/pages/artist/ArtistProductDetail.tsx`
 
 **Statistiques affichées:**
+
 - ✅ `views_count` (vues pour les œuvres 3D)
 - ✅ Système de likes pour les portfolios (`artist_portfolio_likes`)
 - ⚠️ **Pas de statistiques d'achats** sur les cartes de galerie
 - ⚠️ **Pas de vérification de `hide_purchase_count`**
 
 **Code actuel:**
+
 ```typescript:src/pages/artist/ArtistProductDetail.tsx
 <div className="text-sm text-muted-foreground text-center">
   {artwork3D.views_count} vue{artwork3D.views_count > 1 ? 's' : ''}
@@ -228,6 +245,7 @@
 **Fichier:** `src/components/products/create/artist/CreateArtistProductWizard.tsx`
 
 **Options disponibles:**
+
 - ❌ **Aucune checkbox** identifiée pour contrôler l'affichage des statistiques
 
 ---
@@ -236,18 +254,18 @@
 
 ### Statistiques Disponibles dans la Base de Données
 
-| Statistique | Champ DB | Affiché sur Cartes | Masquable |
-|------------|----------|-------------------|-----------|
-| Nombre d'achats | `purchases_count` | ✅ Oui | ⚠️ Partiel (`hide_purchase_count` existe mais non respecté) |
-| Téléchargements | `total_downloads` | ✅ Oui (digitaux) | ❌ Non |
-| Réservations | `total_bookings` | ✅ Oui (services) | ❌ Non |
-| Inscriptions | `total_enrollments` | ✅ Oui (cours) | ❌ Non |
-| Ventes | `total_quantity_sold` | ✅ Oui (physiques) | ❌ Non |
-| Note moyenne | `average_rating` | ✅ Oui | ❌ Non |
-| Nombre d'avis | `total_reviews` / `reviews_count` | ✅ Oui | ❌ Non |
-| Likes | `likes_count` (portfolios) | ✅ Oui (portfolios) | ❌ Non |
-| Recommandations | `recommendations_count` | ❌ Non | ❌ Non |
-| Favoris | `user_favorites` (table) | ❌ Non | ❌ Non |
+| Statistique     | Champ DB                          | Affiché sur Cartes  | Masquable                                                   |
+| --------------- | --------------------------------- | ------------------- | ----------------------------------------------------------- |
+| Nombre d'achats | `purchases_count`                 | ✅ Oui              | ⚠️ Partiel (`hide_purchase_count` existe mais non respecté) |
+| Téléchargements | `total_downloads`                 | ✅ Oui (digitaux)   | ❌ Non                                                      |
+| Réservations    | `total_bookings`                  | ✅ Oui (services)   | ❌ Non                                                      |
+| Inscriptions    | `total_enrollments`               | ✅ Oui (cours)      | ❌ Non                                                      |
+| Ventes          | `total_quantity_sold`             | ✅ Oui (physiques)  | ❌ Non                                                      |
+| Note moyenne    | `average_rating`                  | ✅ Oui              | ❌ Non                                                      |
+| Nombre d'avis   | `total_reviews` / `reviews_count` | ✅ Oui              | ❌ Non                                                      |
+| Likes           | `likes_count` (portfolios)        | ✅ Oui (portfolios) | ❌ Non                                                      |
+| Recommandations | `recommendations_count`           | ❌ Non              | ❌ Non                                                      |
+| Favoris         | `user_favorites` (table)          | ❌ Non              | ❌ Non                                                      |
 
 ### Système de Favoris
 
@@ -270,7 +288,7 @@
 #### ✅ Options Disponibles
 
 1. **`hide_purchase_count`** (Masquer le nombre d'achats)
-   - **Localisation:** 
+   - **Localisation:**
      - `src/components/products/tabs/ProductInfoTab.tsx` (ligne 926-945)
      - `src/components/products/tabs/ProductVisualTab.tsx` (ligne 421-432)
    - **Type:** Switch/Toggle
@@ -304,10 +322,12 @@
 #### Formulaires Génériques (Tous Types)
 
 **Fichiers:**
+
 - `src/components/products/tabs/ProductInfoTab.tsx`
 - `src/components/products/tabs/ProductVisualTab.tsx`
 
 **Options disponibles:**
+
 - ✅ `hide_purchase_count` (Switch)
 
 #### Wizards de Création
@@ -315,6 +335,7 @@
 **Aucun wizard ne contient d'options pour contrôler l'affichage des statistiques.**
 
 **Wizards analysés:**
+
 1. `CreateDigitalProductWizard_v2.tsx` - ❌ Aucune option
 2. `CreatePhysicalProductWizard_v2.tsx` - ❌ Aucune option
 3. `CreateServiceWizard_v2.tsx` - ❌ Aucune option
@@ -332,6 +353,7 @@
 **Impact:** Les vendeurs ne peuvent pas masquer le nombre d'achats même s'ils cochent l'option.
 
 **Fichiers affectés:**
+
 - `src/components/marketplace/ProductCardModern.tsx` (ligne 391-396)
 - `src/components/marketplace/ProductCardProfessional.tsx` (ligne 493-498)
 - `src/components/storefront/ProductCard.tsx` (ligne 482-487)
@@ -346,7 +368,8 @@
 
 **Impact:** Les vendeurs ne peuvent pas contrôler l'affichage du nombre de likes.
 
-**Solution:** 
+**Solution:**
+
 - Créer le champ `hide_likes_count` dans la table `products`
 - Ajouter une checkbox dans les formulaires
 - Respecter le champ dans les cartes produits
@@ -356,6 +379,7 @@
 **Impact:** Les vendeurs ne peuvent pas contrôler l'affichage du nombre de recommandations.
 
 **Solution:**
+
 - Créer le champ `hide_recommendations_count` dans la table `products`
 - Ajouter une checkbox dans les formulaires
 - Respecter le champ dans les cartes produits
@@ -381,15 +405,17 @@
 ### Priorité 1: Corriger le respect de `hide_purchase_count`
 
 **Actions:**
+
 1. Modifier toutes les cartes produits pour vérifier `hide_purchase_count`
 2. Tester sur tous les types de produits
 3. Vérifier que l'option fonctionne correctement
 
 **Exemple de correction:**
+
 ```typescript
 {/* Nombre d'achats */}
-{!product.hide_purchase_count && 
- product.purchases_count !== undefined && 
+{!product.hide_purchase_count &&
+ product.purchases_count !== undefined &&
  product.purchases_count > 0 && (
   <div className="flex items-center gap-1 text-xs text-gray-600">
     <TrendingUp className="h-3 w-3" aria-hidden="true" />
@@ -401,6 +427,7 @@
 ### Priorité 2: Ajouter les champs manquants
 
 **Migration SQL:**
+
 ```sql
 -- Ajouter les champs pour masquer les statistiques
 ALTER TABLE public.products
@@ -414,11 +441,13 @@ ALTER TABLE public.products
 ### Priorité 3: Ajouter les checkboxes dans les formulaires
 
 **Fichiers à modifier:**
+
 1. `src/components/products/tabs/ProductInfoTab.tsx`
 2. `src/components/products/tabs/ProductVisualTab.tsx`
 3. Tous les wizards de création
 
 **Section à ajouter:**
+
 ```typescript
 <Card>
   <CardHeader>
@@ -448,6 +477,7 @@ ALTER TABLE public.products
 ### Priorité 4: Standardiser l'affichage des statistiques
 
 **Créer un composant partagé:**
+
 ```typescript
 // src/components/products/ProductStatsDisplay.tsx
 interface ProductStatsDisplayProps {
@@ -479,6 +509,7 @@ export const ProductStatsDisplay = ({ product, variant = 'default' }: ProductSta
 ### Priorité 5: Ajouter les statistiques manquantes
 
 **Actions:**
+
 1. Implémenter l'affichage du nombre de favoris sur les cartes
 2. Implémenter l'affichage du nombre de recommandations
 3. Ajouter les compteurs dans les requêtes de produits
@@ -525,6 +556,7 @@ export const ProductStatsDisplay = ({ product, variant = 'default' }: ProductSta
 ### Fichiers Clés
 
 **Cartes Produits:**
+
 - `src/components/products/UnifiedProductCard.tsx`
 - `src/components/digital/DigitalProductCard.tsx`
 - `src/components/physical/PhysicalProductCard.tsx`
@@ -534,6 +566,7 @@ export const ProductStatsDisplay = ({ product, variant = 'default' }: ProductSta
 - `src/components/storefront/ProductCard.tsx`
 
 **Formulaires:**
+
 - `src/components/products/tabs/ProductInfoTab.tsx`
 - `src/components/products/tabs/ProductVisualTab.tsx`
 - `src/components/products/create/digital/CreateDigitalProductWizard_v2.tsx`
@@ -542,6 +575,7 @@ export const ProductStatsDisplay = ({ product, variant = 'default' }: ProductSta
 - `src/components/products/create/artist/CreateArtistProductWizard.tsx`
 
 **Hooks:**
+
 - `src/hooks/useMarketplaceFavorites.ts`
 - `src/hooks/artist/useTogglePortfolioLike.ts`
 
@@ -552,10 +586,10 @@ export const ProductStatsDisplay = ({ product, variant = 'default' }: ProductSta
 L'analyse révèle que le système possède une base solide avec le champ `hide_purchase_count`, mais celui-ci n'est pas respecté dans les cartes produits. De plus, il manque des options pour contrôler l'affichage des autres statistiques (likes, recommandations, etc.).
 
 Les recommandations prioritaires sont:
+
 1. **Corriger le respect de `hide_purchase_count`** (critique)
 2. **Ajouter les champs manquants** pour les autres statistiques
 3. **Ajouter les checkboxes dans les wizards** pour une meilleure UX
 4. **Standardiser l'affichage** avec un composant partagé
 
 Une fois ces corrections effectuées, les vendeurs auront un contrôle complet sur l'affichage des statistiques de leurs produits.
-

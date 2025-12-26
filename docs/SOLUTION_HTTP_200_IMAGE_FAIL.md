@@ -24,44 +24,46 @@ Les images dans les messages retournent un statut HTTP 200 (succès) mais avec u
 ### 1. Amélioration de l'Upload avec Content-Type Explicite
 
 **Fichiers modifiés :**
+
 - `src/pages/vendor/VendorMessaging.tsx`
 - `src/hooks/useMessaging.ts`
 
 **Changements :**
+
 - Ajout de `contentType` explicite lors de l'upload pour garantir le bon type MIME
 - Ajout de metadata (`originalName`, `uploadedAt`) pour le tracking
 - Vérification que l'upload retourne bien un `path`
 - Enregistrement du `storage_path` réel retourné par Supabase
 
 **Code avant :**
+
 ```typescript
-await supabase.storage
-  .from('attachments')
-  .upload(filePath, file);
+await supabase.storage.from('attachments').upload(filePath, file);
 ```
 
 **Code après :**
+
 ```typescript
-await supabase.storage
-  .from('attachments')
-  .upload(filePath, file, {
-    cacheControl: '3600',
-    contentType: file.type || 'application/octet-stream',
-    metadata: {
-      originalName: file.name,
-      uploadedAt: new Date().toISOString(),
-    }
-  });
+await supabase.storage.from('attachments').upload(filePath, file, {
+  cacheControl: '3600',
+  contentType: file.type || 'application/octet-stream',
+  metadata: {
+    originalName: file.name,
+    uploadedAt: new Date().toISOString(),
+  },
+});
 ```
 
 ### 2. Enregistrement du storage_path
 
 **Fichiers modifiés :**
+
 - `src/pages/vendor/VendorMessaging.tsx`
 - `src/hooks/useMessaging.ts`
 - `src/hooks/useVendorMessaging.ts`
 
 **Changements :**
+
 - Le `storage_path` est maintenant toujours enregistré dans la base de données
 - Utilisation du `path` réel retourné par l'upload plutôt que celui construit
 - Le type `VendorMessageFormData` a été mis à jour pour inclure `storage_path` optionnel
@@ -69,9 +71,11 @@ await supabase.storage
 ### 3. Diagnostic Amélioré dans MediaAttachment
 
 **Fichier modifié :**
+
 - `src/components/media/MediaAttachment.tsx`
 
 **Changements :**
+
 - Analyse approfondie des réponses JSON/HTML pour identifier les erreurs Supabase
 - Parsing du contenu JSON pour extraire les messages d'erreur
 - Détection des pages d'erreur HTML
@@ -80,10 +84,12 @@ await supabase.storage
 - **Vérification du blob type** : Le composant vérifie maintenant si le blob est vraiment une image même si le Content-Type HTTP est incorrect
 
 **Nouveaux états ajoutés :**
+
 - `jsonError` : Stocke l'erreur JSON parsée de Supabase
 - `isImageBlob` : Indique si le blob téléchargé est vraiment une image
 
 **Nouveaux logs :**
+
 ```typescript
 // Si réponse JSON, parser pour voir l'erreur Supabase
 if (detectedContentType.includes('application/json')) {
@@ -91,14 +97,16 @@ if (detectedContentType.includes('application/json')) {
   setJsonError(jsonContent); // Stocker dans l'état pour affichage UI
   logger.error('❌ JSON Response Analysis (Supabase Error)', {
     jsonError: jsonContent,
-    suggestion: jsonContent.error || jsonContent.message 
-      ? `Erreur Supabase: ${jsonContent.error || jsonContent.message}`
-      : 'Problème de permissions RLS ou fichier introuvable.'
+    suggestion:
+      jsonContent.error || jsonContent.message
+        ? `Erreur Supabase: ${jsonContent.error || jsonContent.message}`
+        : 'Problème de permissions RLS ou fichier introuvable.',
   });
 }
 ```
 
 **Affichage UI amélioré :**
+
 - L'overlay d'erreur affiche maintenant le message d'erreur JSON si disponible
 - Le bouton "Debug" inclut toutes les informations de diagnostic (jsonError, contentType, isImageBlob, etc.)
 
@@ -121,7 +129,7 @@ async function testImageUrl(url) {
     const response = await fetch(url, { method: 'HEAD' });
     console.log('Status:', response.status);
     console.log('Content-Type:', response.headers.get('content-type'));
-    
+
     if (response.headers.get('content-type')?.includes('application/json')) {
       const fullResponse = await fetch(url);
       const blob = await fullResponse.blob();
@@ -166,11 +174,13 @@ async function testImageUrl(url) {
 Exécutez la migration pour s'assurer que les politiques RLS sont correctes :
 
 **Option A : Via Supabase Dashboard (Recommandé)**
+
 1. Ouvrez Supabase Dashboard > SQL Editor
 2. Copiez le contenu de `supabase/migrations/20250230_fix_attachments_rls_policies.sql`
 3. Collez et exécutez la requête
 
 **Option B : Via Supabase CLI**
+
 ```bash
 # Exécuter toutes les migrations en attente
 supabase db push
@@ -181,6 +191,7 @@ supabase db execute -f supabase/migrations/20250230_fix_attachments_rls_policies
 
 **Option C : Vérifier la configuration**
 Exécutez le script de vérification pour diagnostiquer :
+
 ```sql
 -- Fichier: supabase/migrations/20250230_verify_attachments_rls.sql
 ```
@@ -230,7 +241,8 @@ Pour les images qui ne s'affichent pas actuellement :
 
 ### Problème : Toutes les images échouent même après la migration
 
-**Solution :** 
+**Solution :**
+
 1. Vérifiez que la migration a bien créé les politiques (voir les NOTICE dans les logs SQL)
 2. Vérifiez que le bucket est bien nommé `attachments` (pas `attachment` ou autre)
 3. Essayez de supprimer et recréer la politique "Anyone can view attachments" manuellement dans le Dashboard
@@ -250,12 +262,14 @@ https://[PROJECT_REF].supabase.co/storage/v1/object/public/attachments/[PATH]
 ```
 
 Où `[PATH]` peut être :
+
 - `vendor-message-attachments/[filename]`
 - `message-attachments/[filename]`
 
 ### Format de storage_path Attendu
 
 Le `storage_path` stocké en base doit être le chemin relatif dans le bucket :
+
 - ✅ `vendor-message-attachments/1234567890-abc123.png`
 - ❌ `/vendor-message-attachments/1234567890-abc123.png` (pas de slash initial)
 - ❌ `https://xxx.supabase.co/storage/v1/object/public/attachments/...` (pas l'URL complète)

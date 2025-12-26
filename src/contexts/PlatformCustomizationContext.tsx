@@ -28,7 +28,9 @@ interface PlatformCustomizationContextType {
   previewMode: boolean;
 }
 
-const PlatformCustomizationContext = createContext<PlatformCustomizationContextType | undefined>(undefined);
+const PlatformCustomizationContext = createContext<PlatformCustomizationContextType | undefined>(
+  undefined
+);
 
 export const PlatformCustomizationProvider = ({ children }: { children: ReactNode }) => {
   const { customizationData, load } = usePlatformCustomization();
@@ -37,13 +39,17 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
 
   // Nettoyer le cache Payhuk au montage du provider
   useEffect(() => {
-    try {
-      const { clearPayhukLogoCache, clearAllPayhukReferences } = require('@/utils/clearPayhukLogoCache');
-      clearPayhukLogoCache();
-      clearAllPayhukReferences();
-    } catch (error) {
-      // Ignorer les erreurs
-    }
+    const clearCache = async () => {
+      try {
+        const { clearPayhukLogoCache, clearAllPayhukReferences } =
+          await import('@/utils/clearPayhukLogoCache');
+        clearPayhukLogoCache();
+        clearAllPayhukReferences();
+      } catch {
+        // Ignorer les erreurs
+      }
+    };
+    void clearCache();
   }, []);
 
   useEffect(() => {
@@ -65,21 +71,30 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
   // Appliquer les changements de design au chargement initial
   useEffect(() => {
     if (!isLoading && customizationData?.design) {
-      applyDesignCustomization(customizationData.design);
+      const cleanup = applyDesignCustomization(customizationData.design);
+      return cleanup;
     }
   }, [customizationData, isLoading]);
 
   // Écouter les événements de mise à jour depuis usePlatformCustomization.save()
   // pour appliquer les changements en temps réel (design + pages)
   useEffect(() => {
+    let cleanupFn: (() => void) | undefined;
+
     const handleCustomizationUpdate = (event: CustomEvent) => {
       const updatedData = event.detail?.customizationData;
-      
+
+      // Nettoyer le cleanup précédent s'il existe
+      if (cleanupFn) {
+        cleanupFn();
+        cleanupFn = undefined;
+      }
+
       // Appliquer les changements de design immédiatement
       if (updatedData?.design) {
-        applyDesignCustomization(updatedData.design);
+        cleanupFn = applyDesignCustomization(updatedData.design);
       }
-      
+
       // Mettre à jour le contexte pour forcer le re-render des composants
       // qui utilisent usePageCustomization
       if (updatedData) {
@@ -88,15 +103,24 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
       }
     };
 
-    window.addEventListener('platform-customization-updated', handleCustomizationUpdate as EventListener);
-    
+    window.addEventListener(
+      'platform-customization-updated',
+      handleCustomizationUpdate as EventListener
+    );
+
     return () => {
-      window.removeEventListener('platform-customization-updated', handleCustomizationUpdate as EventListener);
+      window.removeEventListener(
+        'platform-customization-updated',
+        handleCustomizationUpdate as EventListener
+      );
+      if (cleanupFn) {
+        cleanupFn();
+      }
     };
   }, []);
 
-  const applyDesignCustomization = (design: DesignCustomization) => {
-    if (!design) return;
+  const applyDesignCustomization = (design: DesignCustomization): (() => void) | undefined => {
+    if (!design) return undefined;
 
     const root = document.documentElement;
 
@@ -109,7 +133,7 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
           if (value.startsWith('hsl(')) {
             hslValue = value.replace('hsl(', '').replace(')', '');
           }
-          
+
           // Mapper les clés aux variables CSS
           const cssVarMap: Record<string, string> = {
             primary: '--primary',
@@ -122,7 +146,7 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
 
           const cssVar = cssVarMap[key] || `--${key}`;
           root.style.setProperty(cssVar, hslValue);
-          
+
           // Appliquer aussi aux variantes (primary-foreground, etc.)
           if (key === 'primary') {
             root.style.setProperty('--primary-foreground', '0 0% 100%');
@@ -198,7 +222,7 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
         } else {
           root.classList.remove('dark');
         }
-        
+
         // Écouter les changements de préférence système
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleChange = (e: MediaQueryListEvent) => {
@@ -209,13 +233,15 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
           }
         };
         mediaQuery.addEventListener('change', handleChange);
-        
+
         // Cleanup
         return () => {
           mediaQuery.removeEventListener('change', handleChange);
         };
       }
     }
+
+    return undefined;
   };
 
   const applyCustomization = () => {
@@ -251,8 +277,9 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
 export const usePlatformCustomizationContext = () => {
   const context = useContext(PlatformCustomizationContext);
   if (!context) {
-    throw new Error('usePlatformCustomizationContext must be used within PlatformCustomizationProvider');
+    throw new Error(
+      'usePlatformCustomizationContext must be used within PlatformCustomizationProvider'
+    );
   }
   return context;
 };
-

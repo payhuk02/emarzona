@@ -219,4 +219,3 @@ src/components/products/
 
 _Phase 2 terminée le 2 Février 2025_  
 _Toutes les informations prioritaires sont maintenant affichées sur les cartes produits ✅_
-

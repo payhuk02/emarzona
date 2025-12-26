@@ -8,20 +8,23 @@ Ce document liste les TODOs identifiés dans le code et les améliorations prév
 
 **Lignes**: 516, 529
 
-**Description**: 
+**Description**:
 Le système de checkout actuel ne gère pas complètement les commandes multi-boutiques. Actuellement, seul le premier store est traité.
 
 **TODOs**:
+
 - [ ] Implémenter le traitement complet multi-stores
 - [ ] Créer la fonction `processMultiStoreCheckout` pour gérer tous les stores
 
 **Complexité**: 🔴 Haute - Nécessite une refonte partielle du système de checkout
 
-**Impact**: 
+**Impact**:
+
 - Les utilisateurs ne peuvent pas commander des produits de plusieurs boutiques en une seule transaction
 - Expérience utilisateur limitée
 
 **Solution proposée**:
+
 1. Créer une fonction `processMultiStoreCheckout` qui :
    - Sépare les produits par store
    - Crée une commande par store
@@ -40,15 +43,17 @@ Le système de checkout actuel ne gère pas complètement les commandes multi-bo
 
 **Ligne**: 224
 
-**Description**: 
+**Description**:
 La table `service_availability` n'est pas incluse dans les types Supabase générés automatiquement.
 
 **TODO**:
+
 - [ ] Ajouter `service_availability` aux types Supabase générés
 
 **Complexité**: 🟡 Moyenne - Nécessite la régénération des types
 
 **Solution proposée**:
+
 1. Vérifier que la table `service_availability` existe dans Supabase
 2. Régénérer les types avec : `npm run supabase:types`
 3. Si la table n'existe pas, créer la migration SQL nécessaire
@@ -67,6 +72,4 @@ La table `service_availability` n'est pas incluse dans les types Supabase géné
 
 ---
 
-*Dernière mise à jour : 2025-01-30*
-
-
+_Dernière mise à jour : 2025-01-30_

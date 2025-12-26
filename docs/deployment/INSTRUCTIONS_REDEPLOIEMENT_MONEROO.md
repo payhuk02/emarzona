@@ -3,6 +3,7 @@
 ## 📋 Situation Actuelle
 
 D'après le dashboard Supabase :
+
 - ✅ L'Edge Function `moneroo` est déployée
 - ⚠️ **Dernière mise à jour** : Il y a un mois
 - ⚠️ **Corrections récentes** : Non déployées (endpoint corrigé, logs améliorés)
@@ -24,6 +25,7 @@ Les corrections suivantes ont été apportées au code mais ne sont pas encore d
 ### Prérequis
 
 1. **Installer Supabase CLI** :
+
    ```bash
    npm install -g supabase
    ```
@@ -36,20 +38,25 @@ Les corrections suivantes ont été apportées au code mais ne sont pas encore d
 ### Étapes de Redéploiement
 
 1. **Se connecter à Supabase** :
+
    ```bash
    supabase login
    ```
+
    - Cela ouvrira votre navigateur pour l'authentification
    - Suivez les instructions à l'écran
 
 2. **Lier le projet** :
+
    ```bash
    supabase link --project-ref your-project-id
    ```
+
    - Remplacez `your-project-id` par votre project-ref si différent
    - Vous pouvez trouver le project-ref dans l'URL Supabase Dashboard
 
 3. **Déployer l'Edge Function** :
+
    ```bash
    supabase functions deploy moneroo
    ```
@@ -189,9 +196,3 @@ curl -X POST https://api.moneroo.io/v1/checkout \
 ## ⚠️ Important
 
 **Le redéploiement est nécessaire** pour que les corrections soient prises en compte. Sans redéploiement, l'Edge Function continuera d'utiliser l'ancien code avec l'endpoint `/checkout/initialize` qui n'existe pas.
-
-
-
-
-
-

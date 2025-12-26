@@ -88,6 +88,7 @@
 ## 🔍 Tests à Effectuer
 
 ### Test 1 : Produit Digital
+
 - [ ] Créer une commande de produit digital
 - [ ] Vérifier que la transaction est créée (status: "pending")
 - [ ] Vérifier que le checkout_url est généré
@@ -99,6 +100,7 @@
 - [ ] Vérifier que la licence est activée
 
 ### Test 2 : Produit Physique
+
 - [ ] Créer une commande de produit physique
 - [ ] Vérifier que la transaction est créée
 - [ ] Vérifier que le checkout_url est généré
@@ -109,6 +111,7 @@
 - [ ] Vérifier que l'order est mise à jour
 
 ### Test 3 : Service
+
 - [ ] Créer une réservation de service
 - [ ] Vérifier que la transaction est créée
 - [ ] Vérifier que le checkout_url est généré
@@ -119,6 +122,7 @@
 - [ ] Vérifier que le booking est confirmé
 
 ### Test 4 : Marketplace (Achat Direct)
+
 - [ ] Acheter un produit depuis la marketplace
 - [ ] Vérifier que la transaction est créée (sans order)
 - [ ] Vérifier que le checkout_url est généré
@@ -128,6 +132,7 @@
 - [ ] Vérifier que la transaction est mise à jour
 
 ### Test 5 : Multi-Store Checkout
+
 - [ ] Ajouter des produits de différentes boutiques au panier
 - [ ] Aller au checkout
 - [ ] Vérifier que les commandes sont groupées par store
@@ -138,6 +143,7 @@
 - [ ] Vérifier que les transactions sont mises à jour
 
 ### Test 6 : Affiliation
+
 - [ ] Acheter un produit avec un lien d'affiliation
 - [ ] Vérifier que le tracking cookie est dans metadata
 - [ ] Vérifier que l'affiliate_link_id est dans metadata
@@ -146,6 +152,7 @@
 - [ ] Vérifier que la commission est créée dans la table
 
 ### Test 7 : Webhook
+
 - [ ] Vérifier que le webhook Moneroo est configuré dans Supabase
 - [ ] Vérifier que la signature est validée
 - [ ] Vérifier que l'idempotence fonctionne (évite doublons)
@@ -154,6 +161,7 @@
 - [ ] Vérifier que les webhooks sont déclenchés
 
 ### Test 8 : Gestion d'Erreurs
+
 - [ ] Tester avec un montant invalide (≤ 0)
 - [ ] Tester avec une devise invalide
 - [ ] Tester avec un Edge Function non déployé
@@ -162,6 +170,7 @@
 - [ ] Vérifier que les logs sont créés
 
 ### Test 9 : Sécurité
+
 - [ ] Vérifier que RLS est activé sur transactions
 - [ ] Vérifier que seuls les utilisateurs authentifiés peuvent créer des transactions
 - [ ] Vérifier que la validation du montant fonctionne (anti-fraude)
@@ -169,6 +178,7 @@
 - [ ] Vérifier que la signature du webhook est validée
 
 ### Test 10 : Performance
+
 - [ ] Vérifier que les transactions sont créées rapidement
 - [ ] Vérifier que les webhooks sont traités rapidement
 - [ ] Vérifier que les logs ne ralentissent pas l'application
@@ -179,18 +189,21 @@
 ## 📊 Métriques à Surveiller
 
 ### Transactions
+
 - Nombre de transactions créées par jour
 - Taux de succès des transactions
 - Temps moyen de création de transaction
 - Temps moyen de traitement de webhook
 
 ### Erreurs
+
 - Nombre d'erreurs Edge Function
 - Nombre d'erreurs webhook
 - Nombre d'erreurs de validation
 - Nombre d'erreurs réseau
 
 ### Performance
+
 - Temps de réponse Edge Function
 - Temps de traitement webhook
 - Temps de mise à jour transaction
@@ -201,6 +214,7 @@
 ## 🔧 Configuration Requise
 
 ### Supabase
+
 - [x] Edge Function `moneroo` déployée
 - [x] Edge Function `moneroo-webhook` déployée
 - [x] Secret `MONEROO_API_KEY` configuré
@@ -211,12 +225,14 @@
 - [x] Triggers SQL pour commissions
 
 ### Moneroo
+
 - [x] Compte Moneroo créé
 - [x] Clé API Moneroo obtenue
 - [x] Webhook URL configurée dans Moneroo
 - [x] Webhook secret configuré (si applicable)
 
 ### Application
+
 - [x] Variables d'environnement configurées
 - [x] Service de paiement intégré
 - [x] Pages de checkout créées
@@ -233,7 +249,3 @@
 Tous les composants de l'intégration Moneroo sont présents et opérationnels dans l'application. Les transactions sont créées correctement, les webhooks sont traités, et la sécurité est en place.
 
 **Prochaine étape** : Effectuer les tests de paiement en conditions réelles pour valider le fonctionnement complet.
-
-
-
-

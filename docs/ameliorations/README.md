@@ -62,18 +62,21 @@ Cette section contient la documentation de toutes les améliorations apportées 
 ## 🔍 Recherche par Sujet
 
 ### Responsive
+
 - Améliorations responsive et mobile
 
 ### UI/UX
+
 - Améliorations design et interface
 
 ### Performance
+
 - Améliorations de performance
 
 ### Fonctionnalités
+
 - Nouvelles fonctionnalités
 
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

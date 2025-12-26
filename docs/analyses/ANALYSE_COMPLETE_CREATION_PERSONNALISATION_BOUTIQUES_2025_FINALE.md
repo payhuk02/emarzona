@@ -38,9 +38,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 1. ✅ CRÉATION DE BOUTIQUE - COMPLET (100%)
 
 #### 1.1 Informations de Base
+
 **Statut :** ✅ **COMPLET ET FONCTIONNEL**
 
 **Champs implémentés :**
+
 - ✅ Nom de la boutique (obligatoire, validation Zod)
 - ✅ Slug/URL unique (obligatoire, vérification temps réel, validation format)
 - ✅ Description courte (optionnelle, max 2000 caractères)
@@ -52,6 +54,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Police personnalisée (sélection)
 
 **Fonctionnalités avancées :**
+
 - ✅ Génération automatique de slug depuis le nom
 - ✅ Vérification de disponibilité en temps réel (RPC `is_store_slug_available`)
 - ✅ Validation Zod complète avec messages d'erreur en français
@@ -61,15 +64,18 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Wizard multi-étapes pour simplifier la création
 
 **Fichiers :**
+
 - `src/components/store/StoreForm.tsx` (Ligne 138-295)
 - `src/components/store/StoreFormWizard.tsx` (Wizard 8 étapes)
 - `src/lib/store-validation.ts` (Validation Zod)
 - `src/lib/store-suggestions.ts` (Suggestions automatiques)
 
 #### 1.2 Gestion des Images et Branding
+
 **Statut :** ✅ **COMPLET (100%)**
 
 **Images principales :**
+
 - ✅ Logo de la boutique
   - ✅ Upload via composant dédié `StoreImageUpload`
   - ✅ Formats acceptés (images)
@@ -82,6 +88,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Prévisualisation en temps réel
 
 **Images supplémentaires (Phase 2 - COMPLET) :**
+
 - ✅ Favicon (favicon_url)
   - ✅ Champ dans DB et formulaire
   - ✅ Upload via StoreImageUpload
@@ -93,18 +100,22 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Champ dans DB et formulaire
 
 **Fichiers :**
+
 - `src/components/store/StoreImageUpload.tsx`
 - `src/components/store/StoreForm.tsx` (Onglet "branding")
 
 **Points Forts :**
+
 - ✅ Interface unifiée pour tous les types d'images
 - ✅ Validation des formats et tailles
 - ✅ Gestion des erreurs upload
 
 #### 1.3 Contact et Réseaux Sociaux
+
 **Statut :** ✅ **COMPLET (100%)**
 
 **Contacts Principaux :**
+
 - ✅ Email de contact (contact_email)
   - ✅ Validation email Zod
   - ✅ Tooltip d'aide
@@ -113,6 +124,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Format international supporté
 
 **Réseaux Sociaux Classiques :**
+
 - ✅ Facebook (facebook_url)
   - ✅ Validation URL spécifique (doit contenir facebook.com)
 - ✅ Instagram (instagram_url)
@@ -123,6 +135,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Validation URL spécifique (doit contenir linkedin.com)
 
 **Contacts Supplémentaires (Phase 2 - COMPLET) :**
+
 - ✅ Support email (support_email)
 - ✅ Sales email (sales_email)
 - ✅ Press email (press_email)
@@ -136,6 +149,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Validation format (lettres, chiffres, underscores)
 
 **Réseaux Sociaux Supplémentaires (Phase 2 - COMPLET) :**
+
 - ✅ YouTube (youtube_url)
   - ✅ Validation URL (doit contenir youtube.com)
 - ✅ TikTok (tiktok_url)
@@ -148,6 +162,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Validation URL (doit contenir twitch.tv)
 
 **Fichiers :**
+
 - `src/components/store/StoreForm.tsx` (Onglet "contact")
 - `src/lib/schemas.ts` (Validation URLs)
 
@@ -156,9 +171,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 2. ✅ PERSONNALISATION VISUELLE - COMPLET (100%)
 
 #### 2.1 Thème et Couleurs
+
 **Statut :** ✅ **COMPLET**
 
 **Couleurs Principales :**
+
 - ✅ Couleur principale (primary_color)
 - ✅ Couleur secondaire (secondary_color)
 - ✅ Couleur d'accentuation (accent_color)
@@ -167,32 +184,39 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Couleur texte secondaire (text_secondary_color)
 
 **Couleurs Boutons :**
+
 - ✅ Couleur bouton principal (button_primary_color)
 - ✅ Texte bouton principal (button_primary_text)
 - ✅ Couleur bouton secondaire (button_secondary_color)
 - ✅ Texte bouton secondaire (button_secondary_text)
 
 **Couleurs Liens :**
+
 - ✅ Couleur des liens (link_color)
 - ✅ Couleur liens au survol (link_hover_color)
 
 **Style :**
+
 - ✅ Rayon des bordures (border_radius) : none, sm, md, lg, xl, full
 - ✅ Intensité des ombres (shadow_intensity) : none, sm, md, lg, xl
 
 **Implémentation :**
+
 - ✅ Composant : `src/components/store/StoreThemeSettings.tsx`
 - ✅ Application : `src/components/storefront/StoreThemeProvider.tsx`
 - ✅ CSS Variables pour performance optimale
 - ✅ Aperçu en temps réel dans le formulaire
 
 #### 2.2 Typographie
+
 **Statut :** ✅ **COMPLET**
 
 **Polices Disponibles :**
+
 - ✅ 10 polices Google Fonts : Inter, Roboto, Open Sans, Lato, Montserrat, Poppins, Raleway, Ubuntu, Nunito, Playfair Display
 
 **Paramètres :**
+
 - ✅ Police des titres (heading_font)
 - ✅ Police du corps (body_font)
 - ✅ Taille de base (font_size_base)
@@ -201,43 +225,54 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Espacement des lettres (letter_spacing)
 
 **Application :**
+
 - ✅ Chargement automatique des polices Google Fonts
 - ✅ Application sur le storefront via CSS Variables
 
 #### 2.3 Layout et Structure
+
 **Statut :** ✅ **COMPLET**
 
 **Header :**
+
 - ✅ Style du header : minimal, standard, extended
 
 **Footer :**
+
 - ✅ Style du footer : minimal, standard, extended
 
 **Sidebar :**
+
 - ✅ Sidebar activable/désactivable (sidebar_enabled)
 - ✅ Position sidebar : left, right
 
 **Produits :**
+
 - ✅ Colonnes grille produits : 2 à 6 colonnes (product_grid_columns)
 - ✅ Style cartes produits : minimal, standard, detailed (product_card_style)
 
 **Navigation :**
+
 - ✅ Style navigation : horizontal, vertical, mega (navigation_style)
 
 **Support Responsive :**
+
 - ✅ Grille produits adaptative (mobile : 1 col, tablet : 2 cols, desktop : configuré)
 - ✅ Tous les composants responsive
 
 #### 2.4 Templates de Thème
+
 **Statut :** ✅ **FONCTIONNEL**
 
 **Fonctionnalités :**
+
 - ✅ Bibliothèque de templates prédéfinis
 - ✅ Fichier : `src/lib/store-theme-templates.ts`
 - ✅ Composant : `src/components/store/StoreThemeTemplateSelector.tsx`
 - ✅ Application d'un template en un clic
 
 **Templates Disponibles :**
+
 - ✅ Modern Blue
 - ✅ Elegant Purple
 - ✅ (Vérifier nombre exact dans le fichier)
@@ -247,9 +282,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 3. ✅ SEO ET MÉTADONNÉES - COMPLET (95%)
 
 #### 3.1 SEO de Base
+
 **Statut :** ✅ **COMPLET**
 
 **Champs :**
+
 - ✅ Titre SEO (meta_title)
   - ✅ Validation longueur optimale (max 60 caractères)
   - ✅ Compteur de caractères en temps réel
@@ -265,13 +302,16 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Image Open Graph (og_image)
 
 **Fichiers :**
+
 - `src/components/store/StoreSEOSettings.tsx`
 - `src/components/seo/StoreSchema.tsx` (JSON-LD)
 
 #### 3.2 SEO Avancé (Phase 1 - COMPLET)
+
 **Statut :** ✅ **IMPLÉMENTÉ**
 
 **Données Structurées JSON-LD :**
+
 - ✅ Schema.org Store
 - ✅ Schema.org Product (pour produits)
 - ✅ Schema.org Breadcrumb
@@ -279,28 +319,33 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Intégration dans `src/pages/Storefront.tsx`
 
 **Sitemap XML :**
+
 - ✅ Génération automatique
 - ✅ Composant : `src/components/store/StoreSitemapGenerator.tsx`
 - ✅ Inclut produits et pages légales
 - ✅ Téléchargement XML
 
 **Validation SEO :**
+
 - ✅ Score SEO automatique
 - ✅ Composant : `src/components/store/StoreSEOValidator.tsx`
 - ✅ Recommandations automatiques
 - ✅ Calcul basé sur : titre, description, images, contenu, etc.
 
 **Fichiers :**
+
 - `src/lib/seo-validator.ts`
 - `src/lib/sitemap-generator.ts`
 - `src/components/seo/StoreSchema.tsx`
 
 **Points Forts :**
+
 - ✅ Validation automatique avec score
 - ✅ Recommandations contextuelles
 - ✅ Données structurées complètes
 
 **Améliorations Possibles :**
+
 - ⚠️ Prévisualisation résultats Google (non implémenté)
 - ⚠️ robots.txt personnalisé (non implémenté)
 
@@ -309,9 +354,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 4. ✅ LOCALISATION ET HORAIRES - COMPLET (100%)
 
 #### 4.1 Adresse Complète
+
 **Statut :** ✅ **COMPLET**
 
 **Champs :**
+
 - ✅ Adresse ligne 1 (address_line1)
 - ✅ Adresse ligne 2 (address_line2)
 - ✅ Ville (city)
@@ -323,18 +370,22 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Fuseau horaire (timezone)
 
 **Implémentation :**
+
 - ✅ Composant : `src/components/store/StoreLocationSettings.tsx`
 - ✅ Validation Zod complète
 
 **Améliorations Possibles :**
+
 - ⚠️ Géocodage automatique (adresse → coordonnées) - Non implémenté
 - ⚠️ Autocomplétion d'adresse - Non implémenté
 - ⚠️ Carte interactive pour sélection - Non implémenté
 
 #### 4.2 Horaires d'Ouverture
+
 **Statut :** ✅ **COMPLET**
 
 **Structure JSONB :**
+
 - ✅ Horaires par jour (lundi à dimanche)
   - ✅ Heure d'ouverture (open) - Format HH:MM
   - ✅ Heure de fermeture (close) - Format HH:MM
@@ -347,6 +398,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Raison (reason)
 
 **Implémentation :**
+
 - ✅ Type : `StoreOpeningHours` dans `src/hooks/useStores.ts`
 - ✅ Composant : Intégré dans `StoreLocationSettings.tsx`
 - ✅ Validation Zod des formats
@@ -358,6 +410,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ✅ **COMPLET ET FONCTIONNEL**
 
 **Pages Disponibles :**
+
 - ✅ Conditions générales de vente (terms_of_service)
 - ✅ Politique de confidentialité (privacy_policy)
 - ✅ Politique de retour (return_policy)
@@ -368,6 +421,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ FAQ (faq_content)
 
 **Implémentation :**
+
 - ✅ Type : `StoreLegalPages` dans `src/hooks/useStores.ts`
 - ✅ Composant : `src/components/store/StoreLegalPages.tsx`
 - ✅ Stockage : JSONB dans la base de données
@@ -375,12 +429,14 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Éditeur de texte intégré
 
 **Points Forts :**
+
 - ✅ Structure flexible avec JSONB
 - ✅ CRUD complet pour chaque page
 - ✅ Pages accessibles publiquement
 - ✅ Navigation automatique
 
 **Améliorations Possibles :**
+
 - ⚠️ Éditeur riche (Markdown/WYSIWYG) - Non implémenté
 - ⚠️ Templates préremplis - Non implémenté
 - ⚠️ Versioning des pages légales - Non implémenté
@@ -392,6 +448,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ✅ **COMPLET ET FONCTIONNEL**
 
 **Fonctionnalités :**
+
 - ✅ Message de bienvenue (welcome_message)
 - ✅ Mission (mission_statement)
 - ✅ Vision (vision_statement)
@@ -399,12 +456,14 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Histoire (story)
 
 **Équipe :**
+
 - ✅ Membres d'équipe (team_section)
   - ✅ Nom, rôle, biographie
   - ✅ Photo (URL)
   - ✅ Liens sociaux (Record<string, string>)
 
 **Témoignages :**
+
 - ✅ Témoignages clients (testimonials)
   - ✅ Auteur, contenu
   - ✅ Note (1-5)
@@ -412,6 +471,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Entreprise (optionnelle)
 
 **Certifications :**
+
 - ✅ Certifications (certifications)
   - ✅ Nom, émetteur
   - ✅ Image (URL)
@@ -419,17 +479,20 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Date d'expiration (optionnelle)
 
 **Implémentation :**
+
 - ✅ Type : `StoreMarketingContent` dans `src/hooks/useStores.ts`
 - ✅ Composant : `src/components/store/StoreMarketingContent.tsx`
 - ✅ Stockage : JSONB
 - ✅ CRUD complet pour équipe, témoignages, certifications
 
 **Points Forts :**
+
 - ✅ Interface complète de gestion
 - ✅ Sauvegarde automatique
 - ✅ Gestion d'images intégrée
 
 **Améliorations Possibles :**
+
 - ⚠️ Affichage automatique sur le storefront - À vérifier
 - ⚠️ Modération des témoignages - Non implémenté
 - ⚠️ Import/export de contenu - Non implémenté
@@ -441,6 +504,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ⚠️ **PARTIELLEMENT IMPLÉMENTÉ**
 
 **Champs en Base de Données :**
+
 - ✅ custom_domain
 - ✅ domain_status (not_configured, pending, verified, error)
 - ✅ domain_verification_token
@@ -452,6 +516,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ dns_records (JSONB)
 
 **Implémentation Actuelle :**
+
 - ✅ Composant : `src/components/store/StoreDomainSettings.tsx`
 - ✅ Interface de configuration
 - ✅ Instructions DNS affichées
@@ -462,6 +527,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Vérification propagation DNS via Google DNS API
 
 **Fonctionnalités Implémentées :**
+
 - ✅ Saisie du domaine personnalisé
 - ✅ Génération du token de vérification
 - ✅ Instructions DNS détaillées (A, CNAME, TXT)
@@ -472,6 +538,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Redirection HTTPS (toggle)
 
 **Fonctionnalités Manquantes :**
+
 - ❌ Configuration SSL automatique (nécessite backend/infrastructure)
 - ❌ Redirection automatique serveur (nécessite proxy/routing)
 - ❌ Vérification DNS automatique en arrière-plan (cron job)
@@ -480,6 +547,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Priorité :** 🔴 HAUTE (pour compléter l'automatisation)
 
 **Fichiers :**
+
 - `src/components/store/StoreDomainSettings.tsx` (618 lignes)
 - `src/lib/domainUtils.ts`
 
@@ -490,9 +558,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ✅ **IMPLÉMENTÉ (Phase 2)**
 
 #### 8.1 Zones de Livraison
+
 **Statut :** ✅ **COMPLET**
 
 **Fonctionnalités :**
+
 - ✅ Création de zones géographiques
   - ✅ Nom de zone
   - ✅ Pays (array de codes ISO)
@@ -504,14 +574,17 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Interface utilisateur complète
 
 **Fichiers :**
+
 - `src/components/shipping/ShippingZonesManager.tsx`
 - `src/components/store/StoreCommerceSettings.tsx` (intégration)
 - Tables : `shipping_zones`, `shipping_rates` (existantes)
 
 #### 8.2 Tarifs de Livraison
+
 **Statut :** ✅ **COMPLET**
 
 **Fonctionnalités :**
+
 - ✅ Tarifs par zone
 - ✅ Types de tarifs :
   - ✅ Fixe (flat)
@@ -528,13 +601,16 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Actif/Inactif
 
 **Fichiers :**
+
 - `src/components/shipping/ShippingRatesManager.tsx`
 - Hooks : `src/hooks/physical/useShipping.ts`
 
 #### 8.3 Taxes
+
 **Statut :** ✅ **COMPLET**
 
 **Fonctionnalités :**
+
 - ✅ Configuration de taxes par boutique
 - ✅ Support multi-pays (codes ISO)
 - ✅ États/Provinces (optionnel)
@@ -555,17 +631,20 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Actif/Inactif
 
 **Fichiers :**
+
 - `src/components/store/StoreCommerceSettings.tsx`
 - `src/hooks/admin/useTaxConfigurations.ts`
 - Table : `tax_configurations` (existante)
 
 **Interface :**
+
 - ✅ Liste des configurations de taxes
 - ✅ Création/Modification/Suppression
 - ✅ Validation des formulaires
 - ✅ Support 12+ pays d'Afrique de l'Ouest et autres
 
 **Fichiers :**
+
 - `src/components/store/StoreCommerceSettings.tsx` (Complet)
 
 ---
@@ -575,6 +654,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ✅ **IMPLÉMENTÉ (Phase 2)**
 
 #### 9.1 Google Analytics
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Google Analytics ID (google_analytics_id)
@@ -586,6 +666,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Initialisation : `src/lib/analytics/initPixels.ts`
 
 #### 9.2 Facebook Pixel
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Facebook Pixel ID (facebook_pixel_id)
@@ -595,6 +676,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Injection automatique
 
 #### 9.3 Google Tag Manager
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Google Tag Manager ID (google_tag_manager_id)
@@ -603,6 +685,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Injection automatique
 
 #### 9.4 TikTok Pixel
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ TikTok Pixel ID (tiktok_pixel_id)
@@ -611,6 +694,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Injection automatique
 
 #### 9.5 Scripts Personnalisés
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Scripts personnalisés (custom_tracking_scripts)
@@ -621,12 +705,14 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Injection dans `<head>` du storefront
 
 **Implémentation :**
+
 - ✅ Composant : `src/components/store/StoreAnalyticsSettings.tsx`
 - ✅ Injection : `src/components/storefront/StoreAnalyticsScripts.tsx`
 - ✅ Migration : `supabase/migrations/20250202_store_analytics_tracking_phase2.sql`
 - ✅ Intégré dans `StoreForm.tsx` et `StoreDetails.tsx`
 
 **Fichiers :**
+
 - `src/components/store/StoreAnalyticsSettings.tsx`
 - `src/components/storefront/StoreAnalyticsScripts.tsx`
 - `src/lib/analytics/initPixels.ts`
@@ -636,6 +722,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 10. ✅ SÉCURITÉ ET CONFORMITÉ - COMPLET (90%)
 
 #### 10.1 Consentement Cookies (Phase 1)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Bannière de consentement cookies
@@ -647,10 +734,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Intégration dans `App.tsx`
 
 **Fichiers :**
+
 - `src/components/legal/CookieConsentBanner.tsx`
 - `src/hooks/useLegal.ts` (gestion préférences)
 
 #### 10.2 Acceptation CGV Obligatoire (Phase 1)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Composant : `src/components/store/RequireTermsConsent.tsx`
@@ -661,11 +750,13 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Enregistrement de l'acceptation dans `user_consents`
 
 **Fichiers :**
+
 - `src/components/store/RequireTermsConsent.tsx`
 - `src/hooks/useRequireTermsConsent.ts`
 - Table : `user_consents` (existante)
 
 #### 10.3 SSL/HTTPS
+
 **Statut :** ⚠️ **PARTIELLEMENT IMPLÉMENTÉ**
 
 - ✅ Champ ssl_enabled dans DB
@@ -674,6 +765,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ❌ Configuration SSL automatique non implémentée (nécessite infrastructure)
 
 **Manques :**
+
 - ❌ Vérification périodique du certificat SSL
 - ❌ Alertes si certificat expire
 
@@ -682,6 +774,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 11. ✅ AMÉLIORATIONS UX - COMPLET (100%)
 
 #### 11.1 Wizard Multi-Étapes (Phase 3)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Composant : `src/components/store/StoreFormWizard.tsx`
@@ -700,10 +793,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Validation par étape
 
 **Fichiers :**
+
 - `src/components/store/StoreFormWizard.tsx`
 - Intégration dans `StoreForm.tsx` (mode wizard)
 
 #### 11.2 Guide Contextuel et Tooltips (Phase 3)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Composant : `src/components/store/StoreFieldHelper.tsx`
@@ -713,6 +808,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Messages contextuels selon le type de champ
 
 **Champs avec Tooltips :**
+
 - ✅ Nom de la boutique
 - ✅ Slug
 - ✅ Meta title et description
@@ -722,10 +818,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Et autres champs importants
 
 **Fichiers :**
+
 - `src/components/store/StoreFieldHelper.tsx`
 - Intégration dans `StoreForm.tsx`
 
 #### 11.3 Mode Avancé/Simplifié (Phase 3)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Composant : `src/components/store/StoreFormModeToggle.tsx`
@@ -740,10 +838,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Sauvegarde du préférence utilisateur (à implémenter)
 
 **Fichiers :**
+
 - `src/components/store/StoreFormModeToggle.tsx`
 - Logique dans `StoreForm.tsx`
 
 #### 11.4 Suggestions Automatiques (Phase 3)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Composant : `src/components/store/StoreSuggestions.tsx`
@@ -756,10 +856,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Dismissible individuellement
 
 **Fichiers :**
+
 - `src/components/store/StoreSuggestions.tsx`
 - `src/lib/store-suggestions.ts` (fonctions utilitaires)
 
 #### 11.5 Validation Zod Complète (Phase 3)
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Schémas Zod complets dans `src/lib/schemas.ts`
@@ -776,6 +878,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - `getFieldHelp()`
 
 **Fichiers :**
+
 - `src/lib/schemas.ts` (Schémas complets)
 - `src/lib/store-validation.ts` (Utilitaires)
 
@@ -786,6 +889,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ✅ **COMPLET**
 
 **Fonctionnalités :**
+
 - ✅ Mise à jour de boutique
   - ✅ Tous les champs modifiables
   - ✅ Validation avant sauvegarde
@@ -804,6 +908,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
   - ✅ Gestion d'état centralisée
 
 **Fichiers :**
+
 - Hook : `src/hooks/useStores.ts`
 - Composant : `src/components/store/StoreDetails.tsx`
 - Contexte : `src/contexts/StoreContext.tsx`
@@ -815,12 +920,14 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 1. ⚠️ Domaine Personnalisé (70%)
 
 **Ce qui fonctionne :**
+
 - ✅ Interface de configuration
 - ✅ Instructions DNS
 - ✅ Vérification propagation DNS (temps réel)
 - ✅ Génération token de vérification
 
 **Ce qui manque :**
+
 - ❌ Configuration SSL automatique (nécessite backend/infrastructure)
 - ❌ Redirection automatique serveur (nécessite proxy/routing)
 - ❌ Vérification DNS automatique en arrière-plan (cron)
@@ -834,6 +941,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 1. ❌ Marketing Automation (0%)
 
 **Manques :**
+
 - ❌ Newsletter activable
 - ❌ Intégration MailChimp/SendGrid
 - ❌ Email marketing
@@ -848,6 +956,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 2. ❌ Internationalisation (0%)
 
 **Manques :**
+
 - ❌ Langue par défaut de la boutique
 - ❌ Langues supportées multiples
 - ❌ Sélecteur de langue
@@ -861,6 +970,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 3. ❌ Communication Client (0%)
 
 **Manques :**
+
 - ❌ Répondeur automatique
 - ❌ Widget de chat
 - ❌ Intégrations chat (Intercom, Zendesk, Tawk)
@@ -872,6 +982,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 4. ❌ Notifications (0%)
 
 **Manques :**
+
 - ❌ Notifications email configurables par boutique
 - ❌ Notifications SMS
 - ❌ Notifications push
@@ -886,30 +997,30 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 
 ## 📊 Matrice de Complétude Détaillée
 
-| Catégorie | Complétude | Priorité | Statut | Notes |
-|-----------|------------|----------|--------|-------|
-| **Création de Boutique** | 100% | 🔴 HAUTE | ✅ Excellent | Tous les champs implémentés, validation complète |
-| **Personnalisation Visuelle** | 100% | 🔴 HAUTE | ✅ Excellent | Thème complet, typographie, layout |
-| **Images et Branding** | 100% | 🔴 HAUTE | ✅ Excellent | Logo, bannière, favicon, watermark, etc. |
-| **Contact et Réseaux** | 100% | 🔴 HAUTE | ✅ Excellent | Tous les contacts et réseaux sociaux |
-| **SEO de Base** | 100% | 🔴 HAUTE | ✅ Excellent | Meta tags, Open Graph |
-| **SEO Avancé** | 95% | 🔴 HAUTE | ✅ Excellent | JSON-LD, Sitemap, Validation |
-| **Localisation** | 100% | 🟡 MOYENNE | ✅ Excellent | Adresse, horaires, coordonnées |
-| **Pages Légales** | 100% | 🔴 HAUTE | ✅ Excellent | 8 pages légales, CRUD complet |
-| **Contenu Marketing** | 100% | 🟡 MOYENNE | ✅ Excellent | Équipe, témoignages, certifications |
-| **Domaine Personnalisé** | 70% | 🔴 HAUTE | ⚠️ Partiel | Interface OK, automatisation manquante |
-| **Commerce (Zones/Taxes)** | 100% | 🟡 MOYENNE | ✅ Excellent | Zones, tarifs, taxes complets |
-| **Analytics et Tracking** | 100% | 🟡 MOYENNE | ✅ Excellent | GA, FB, GTM, TikTok, scripts custom |
-| **Sécurité/Conformité** | 90% | 🔴 HAUTE | ✅ Bon | Cookies, CGV OK, SSL partiel |
-| **Wizard Multi-Étapes** | 100% | 🟡 MOYENNE | ✅ Excellent | 8 étapes, navigation fluide |
-| **Guide Contextuel** | 100% | 🟡 MOYENNE | ✅ Excellent | Tooltips, messages d'aide |
-| **Mode Avancé/Simplifié** | 100% | 🟡 MOYENNE | ✅ Excellent | Toggle fonctionnel |
-| **Suggestions Automatiques** | 100% | 🟡 MOYENNE | ✅ Excellent | Slug, SEO, couleurs, domaines |
-| **Validation Zod** | 100% | 🔴 HAUTE | ✅ Excellent | Schémas complets, messages FR |
-| **Marketing Automation** | 0% | 🟢 BASSE | ❌ Manquant | Non prioritaire |
-| **Internationalisation** | 0% | 🟢 BASSE | ❌ Manquant | Non prioritaire |
-| **Communication Client** | 0% | 🟢 BASSE | ❌ Manquant | Non prioritaire |
-| **Notifications Boutique** | 0% | 🟡 MOYENNE | ❌ Manquant | Système plateforme existe |
+| Catégorie                     | Complétude | Priorité   | Statut       | Notes                                            |
+| ----------------------------- | ---------- | ---------- | ------------ | ------------------------------------------------ |
+| **Création de Boutique**      | 100%       | 🔴 HAUTE   | ✅ Excellent | Tous les champs implémentés, validation complète |
+| **Personnalisation Visuelle** | 100%       | 🔴 HAUTE   | ✅ Excellent | Thème complet, typographie, layout               |
+| **Images et Branding**        | 100%       | 🔴 HAUTE   | ✅ Excellent | Logo, bannière, favicon, watermark, etc.         |
+| **Contact et Réseaux**        | 100%       | 🔴 HAUTE   | ✅ Excellent | Tous les contacts et réseaux sociaux             |
+| **SEO de Base**               | 100%       | 🔴 HAUTE   | ✅ Excellent | Meta tags, Open Graph                            |
+| **SEO Avancé**                | 95%        | 🔴 HAUTE   | ✅ Excellent | JSON-LD, Sitemap, Validation                     |
+| **Localisation**              | 100%       | 🟡 MOYENNE | ✅ Excellent | Adresse, horaires, coordonnées                   |
+| **Pages Légales**             | 100%       | 🔴 HAUTE   | ✅ Excellent | 8 pages légales, CRUD complet                    |
+| **Contenu Marketing**         | 100%       | 🟡 MOYENNE | ✅ Excellent | Équipe, témoignages, certifications              |
+| **Domaine Personnalisé**      | 70%        | 🔴 HAUTE   | ⚠️ Partiel   | Interface OK, automatisation manquante           |
+| **Commerce (Zones/Taxes)**    | 100%       | 🟡 MOYENNE | ✅ Excellent | Zones, tarifs, taxes complets                    |
+| **Analytics et Tracking**     | 100%       | 🟡 MOYENNE | ✅ Excellent | GA, FB, GTM, TikTok, scripts custom              |
+| **Sécurité/Conformité**       | 90%        | 🔴 HAUTE   | ✅ Bon       | Cookies, CGV OK, SSL partiel                     |
+| **Wizard Multi-Étapes**       | 100%       | 🟡 MOYENNE | ✅ Excellent | 8 étapes, navigation fluide                      |
+| **Guide Contextuel**          | 100%       | 🟡 MOYENNE | ✅ Excellent | Tooltips, messages d'aide                        |
+| **Mode Avancé/Simplifié**     | 100%       | 🟡 MOYENNE | ✅ Excellent | Toggle fonctionnel                               |
+| **Suggestions Automatiques**  | 100%       | 🟡 MOYENNE | ✅ Excellent | Slug, SEO, couleurs, domaines                    |
+| **Validation Zod**            | 100%       | 🔴 HAUTE   | ✅ Excellent | Schémas complets, messages FR                    |
+| **Marketing Automation**      | 0%         | 🟢 BASSE   | ❌ Manquant  | Non prioritaire                                  |
+| **Internationalisation**      | 0%         | 🟢 BASSE   | ❌ Manquant  | Non prioritaire                                  |
+| **Communication Client**      | 0%         | 🟢 BASSE   | ❌ Manquant  | Non prioritaire                                  |
+| **Notifications Boutique**    | 0%         | 🟡 MOYENNE | ❌ Manquant  | Système plateforme existe                        |
 
 **Moyenne Globale :** ~92% de complétude (vs 65% initialement)
 
@@ -1044,4 +1155,3 @@ Le système de création et personnalisation de boutiques est maintenant **très
 **Document créé le :** 2025-02-02  
 **Dernière mise à jour :** 2025-02-02  
 **Prochaine révision :** Après complétion automatisation domaine
-

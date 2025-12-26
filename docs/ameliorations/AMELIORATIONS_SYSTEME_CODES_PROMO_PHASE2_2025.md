@@ -110,7 +110,7 @@ const { data: promotionsData } = usePromotions({
 #### Utilisation
 
 ```typescript
-const [searchQuery, setSearchQuery] = useState("");
+const [searchQuery, setSearchQuery] = useState('');
 const debouncedSearch = useDebounce(searchQuery, 300);
 
 // Utiliser debouncedSearch dans les requêtes
@@ -392,4 +392,3 @@ Query: "PROMO2"
 
 **Date de complétion:** 30 Janvier 2025  
 **Prochaine phase:** Phase 3 - Tests E2E et Optimisations Avancées
-

@@ -45,7 +45,7 @@ Vérifier rapidement que le Marketplace et les boutiques fonctionnent après les
    - ✅ Redirection vers la page produit
    - ✅ Pas d'erreur 404
 
-**Status Marketplace :** ⬜ OK  ⬜ KO
+**Status Marketplace :** ⬜ OK ⬜ KO
 
 ---
 
@@ -54,15 +54,18 @@ Vérifier rapidement que le Marketplace et les boutiques fonctionnent après les
 ### Étape 1 : Accéder à une boutique
 
 **Option A :** Depuis le Marketplace
+
 1. Cliquer sur "Voir la boutique" sous un produit
 
 **Option B :** URL directe
+
 1. Aller sur : **http://localhost:8082/stores/[slug-boutique]**
    - (Remplacer `[slug-boutique]` par un slug réel de votre base)
 
 ### Étape 2 : Vérifier l'affichage
 
 **Vérifier :**
+
 - ✅ Le header de la boutique s'affiche
 - ✅ Le logo/bannière s'affiche
 - ✅ Le nom de la boutique s'affiche
@@ -85,7 +88,7 @@ Vérifier rapidement que le Marketplace et les boutiques fonctionnent après les
    - ✅ Page produit s'ouvre
    - ✅ Fil d'Ariane visible : Accueil > Boutique > Produit
 
-**Status Storefront :** ⬜ OK  ⬜ KO
+**Status Storefront :** ⬜ OK ⬜ KO
 
 ---
 
@@ -94,6 +97,7 @@ Vérifier rapidement que le Marketplace et les boutiques fonctionnent après les
 ### Vérifier l'affichage
 
 **Éléments à vérifier :**
+
 - ✅ Image(s) du produit s'affichent
 - ✅ Titre du produit s'affiche
 - ✅ Prix s'affiche correctement
@@ -110,7 +114,7 @@ Vérifier rapidement que le Marketplace et les boutiques fonctionnent après les
    - ✅ L'image principale change
    - ✅ Pas de bug d'affichage
 
-**Status Page Produit :** ⬜ OK  ⬜ KO
+**Status Page Produit :** ⬜ OK ⬜ KO
 
 ---
 
@@ -132,6 +136,7 @@ document.querySelectorAll('script[type="application/ld+json"]').forEach((script,
 4. Appuyer sur Entrée
 
 **Vérifier :**
+
 - ✅ Au moins 1 schema s'affiche
 - ✅ Aucune erreur de parsing JSON
 - ✅ Le schema contient des données correctes (nom, prix, etc.)
@@ -146,7 +151,7 @@ document.querySelectorAll('script[type="application/ld+json"]').forEach((script,
    - ✅ Présence de `<meta property="og:title"`
    - ✅ Présence de `<script type="application/ld+json">`
 
-**Status SEO :** ⬜ OK  ⬜ KO
+**Status SEO :** ⬜ OK ⬜ KO
 
 ---
 
@@ -246,5 +251,3 @@ STATUT GLOBAL : ⬜ TOUT OK  ⬜ ERREUR
 
 **Durée du test :** ~5 minutes  
 **Dernière mise à jour :** 26 Octobre 2025
-
-

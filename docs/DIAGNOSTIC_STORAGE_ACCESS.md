@@ -3,6 +3,7 @@
 ## Problème
 
 Les images uploadées dans le bucket `product-images` (notamment dans `artist/`) ne se chargent pas, même si :
+
 - ✅ L'upload semble réussir
 - ✅ Le fichier est confirmé présent dans le bucket
 - ✅ Les URLs publiques et signées sont générées correctement
@@ -64,6 +65,7 @@ node scripts/diagnose-storage-access.js
 ```
 
 Ce script va :
+
 - ✅ Vérifier si le bucket existe et est public
 - ✅ Lister les fichiers dans `artist/`
 - ✅ Tester l'accès HTTP à un fichier
@@ -78,6 +80,7 @@ supabase/migrations/20250301_verify_product_images_rls.sql
 ```
 
 Cette migration affichera :
+
 - ✅ Si le bucket est public
 - ✅ Les politiques RLS existantes
 - ✅ Le nombre de fichiers dans `artist/`
@@ -132,8 +135,3 @@ Si le problème persiste après avoir suivi toutes les étapes :
 1. Vérifiez les logs Supabase : Dashboard > Logs > Postgres Logs
 2. Vérifiez les erreurs réseau dans les DevTools du navigateur (onglet Network)
 3. Contactez le support Supabase si les politiques RLS ne peuvent pas être créées
-
-
-
-
-

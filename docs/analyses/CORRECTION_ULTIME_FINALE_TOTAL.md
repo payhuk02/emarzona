@@ -48,6 +48,7 @@ Même si le calcul se fait à chaque render, c'est un calcul très simple (quelq
 ## 🎯 Résultat Attendu
 
 Quand un code promo de -400 XOF est appliqué sur un sous-total de 4000 XOF :
+
 - **Avant**: Total = 4000 XOF
 - **Après**: Total = 3600 XOF ✅
 
@@ -55,4 +56,3 @@ Quand un code promo de -400 XOF est appliqué sur un sous-total de 4000 XOF :
 
 - `src/pages/Checkout.tsx`
   - Ligne 309-315: Calcul direct du total sans `useMemo`
-

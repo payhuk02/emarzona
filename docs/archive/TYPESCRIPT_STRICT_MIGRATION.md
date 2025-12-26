@@ -10,7 +10,9 @@
 ## 📋 PLAN D'ACTION
 
 ### Phase 1 : Activer strictNullChecks (4h)
+
 ### Phase 2 : Activer noImplicitAny (3h)
+
 ### Phase 3 : Autres flags strict (1h)
 
 ---
@@ -22,7 +24,7 @@
 ```json
 {
   "compilerOptions": {
-    "strictNullChecks": true,  // ✅ Activer
+    "strictNullChecks": true // ✅ Activer
     // ... autres options
   }
 }
@@ -143,7 +145,7 @@ npm run test:unit
 {
   "compilerOptions": {
     "strictNullChecks": true,
-    "noImplicitAny": true,  // ✅ Activer
+    "noImplicitAny": true // ✅ Activer
   }
 }
 ```
@@ -210,7 +212,8 @@ try {
 ```typescript
 // ❌ AVANT
 const entries = Object.entries(obj);
-entries.forEach(([key, value]) => { // key et value sont 'any'
+entries.forEach(([key, value]) => {
+  // key et value sont 'any'
   console.log(key, value);
 });
 
@@ -231,28 +234,28 @@ entries.forEach(([key, value]: [string, MyType]) => {
 {
   "compilerOptions": {
     // Type Checking
-    "strict": true,                           // ✅ Active TOUT
-    "noImplicitAny": true,                    // ✅ Explicite
-    "strictNullChecks": true,                 // ✅ Explicite
-    "strictFunctionTypes": true,              // ✅ Nouveau
-    "strictBindCallApply": true,              // ✅ Nouveau
-    "strictPropertyInitialization": true,     // ✅ Nouveau
-    "noImplicitThis": true,                   // ✅ Nouveau
-    "alwaysStrict": true,                     // ✅ Nouveau
-    
+    "strict": true, // ✅ Active TOUT
+    "noImplicitAny": true, // ✅ Explicite
+    "strictNullChecks": true, // ✅ Explicite
+    "strictFunctionTypes": true, // ✅ Nouveau
+    "strictBindCallApply": true, // ✅ Nouveau
+    "strictPropertyInitialization": true, // ✅ Nouveau
+    "noImplicitThis": true, // ✅ Nouveau
+    "alwaysStrict": true, // ✅ Nouveau
+
     // Unused Code
-    "noUnusedLocals": true,                   // ✅ Nouveau
-    "noUnusedParameters": true,               // ✅ Nouveau
-    
+    "noUnusedLocals": true, // ✅ Nouveau
+    "noUnusedParameters": true, // ✅ Nouveau
+
     // Other
-    "noImplicitReturns": true,                // ✅ Nouveau
-    "noFallthroughCasesInSwitch": true,       // ✅ Nouveau
-    "allowUnusedLabels": false,               // ✅ Nouveau
-    "allowUnreachableCode": false,            // ✅ Nouveau
-    
+    "noImplicitReturns": true, // ✅ Nouveau
+    "noFallthroughCasesInSwitch": true, // ✅ Nouveau
+    "allowUnusedLabels": false, // ✅ Nouveau
+    "allowUnreachableCode": false, // ✅ Nouveau
+
     // Compatibility
-    "skipLibCheck": true,                     // ✅ Garder (perf)
-    "allowJs": false,                         // ✅ Changer (was true)
+    "skipLibCheck": true, // ✅ Garder (perf)
+    "allowJs": false // ✅ Changer (was true)
   }
 }
 ```
@@ -293,11 +296,13 @@ Get-ChildItem -Recurse -Filter "*.ts" -Exclude "*.d.ts" | ForEach-Object {
 ## ✅ CHECKLIST DE MIGRATION
 
 ### Préparation
+
 - [ ] Commit tous les changements en cours
 - [ ] Créer une branche `feature/typescript-strict`
 - [ ] Informer l'équipe
 
 ### Phase 1 : strictNullChecks
+
 - [ ] Modifier tsconfig.json
 - [ ] Build et lister les erreurs
 - [ ] Corriger hooks critiques (2h)
@@ -307,6 +312,7 @@ Get-ChildItem -Recurse -Filter "*.ts" -Exclude "*.d.ts" | ForEach-Object {
 - [ ] Tests passés
 
 ### Phase 2 : noImplicitAny
+
 - [ ] Activer noImplicitAny
 - [ ] Corriger paramètres fonctions
 - [ ] Corriger catch blocks
@@ -315,6 +321,7 @@ Get-ChildItem -Recurse -Filter "*.ts" -Exclude "*.d.ts" | ForEach-Object {
 - [ ] Tests passés
 
 ### Phase 3 : Full Strict
+
 - [ ] Activer tous les flags
 - [ ] Corriger erreurs restantes
 - [ ] Build réussi
@@ -348,6 +355,7 @@ Get-ChildItem -Recurse -Filter "*.ts" -Exclude "*.d.ts" | ForEach-Object {
 ## 📊 MÉTRIQUES DE SUCCÈS
 
 ### Avant
+
 ```
 TypeScript Strict: ❌
 Erreurs potentielles: ~100+
@@ -355,6 +363,7 @@ Type Safety: ~60%
 ```
 
 ### Après
+
 ```
 TypeScript Strict: ✅
 Erreurs potentielles: 0
@@ -402,4 +411,3 @@ git checkout -b feature/typescript-strict
 # Modifiez tsconfig.json
 npm run build
 ```
-

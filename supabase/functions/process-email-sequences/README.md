@@ -95,4 +95,3 @@ La fonction retourne :
   ]
 }
 ```
-

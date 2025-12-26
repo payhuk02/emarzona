@@ -78,4 +78,3 @@ Si après la création du bucket, l'upload échoue toujours :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

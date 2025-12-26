@@ -10,12 +10,14 @@
 ### Pour les Edge Functions Supabase
 
 Les Edge Functions Supabase ont accès automatiquement à ces variables (injectées par Supabase) :
+
 - ✅ `SUPABASE_URL` : Injecté automatiquement
 - ✅ `SUPABASE_SERVICE_ROLE_KEY` : Injecté automatiquement
 - ✅ `SUPABASE_ANON_KEY` : Injecté automatiquement
 
 **⚠️ IMPORTANT** : Vous ne pouvez PAS ajouter ces secrets manuellement dans Supabase Dashboard > Edge Functions > Secrets car Supabase affiche l'erreur :
-> "Name must not start with the SUPABASE_ prefix"
+
+> "Name must not start with the SUPABASE\_ prefix"
 
 ### Variables à Configurer Manuellement
 
@@ -24,6 +26,7 @@ Les Edge Functions Supabase ont accès automatiquement à ces variables (inject�
 **Où configurer** : Supabase Dashboard > Edge Functions > Secrets
 
 **Comment obtenir** :
+
 1. Créez un compte sur [SendGrid](https://sendgrid.com)
 2. Allez dans Settings > API Keys
 3. Créez une nouvelle clé API avec les permissions "Mail Send"
@@ -32,6 +35,7 @@ Les Edge Functions Supabase ont accès automatiquement à ces variables (inject�
 **Valeur** : `SG.xxxxxxxxxxxxx` (commence par `SG.`)
 
 **Edge Functions qui l'utilisent** :
+
 - `send-email-campaign`
 - `process-email-sequences`
 - `process-scheduled-campaigns` (optionnel, mais recommandé)
@@ -43,6 +47,7 @@ Les Edge Functions Supabase ont accès automatiquement à ces variables (inject�
 **Où configurer** : Supabase Dashboard > Edge Functions > Secrets
 
 **Comment obtenir** :
+
 1. Dans SendGrid Dashboard > Settings > Mail Settings > Event Webhook
 2. Configurez l'URL : `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sendgrid-webhook-handler`
 3. Générez un secret (optionnel mais recommandé pour la sécurité)
@@ -50,6 +55,7 @@ Les Edge Functions Supabase ont accès automatiquement à ces variables (inject�
 **Valeur** : Une chaîne aléatoire (ex: `sendgrid-webhook-secret-2025`)
 
 **Edge Function qui l'utilise** :
+
 - `sendgrid-webhook-handler`
 
 #### 3. `CRON_SECRET` (Optionnel)
@@ -59,6 +65,7 @@ Les Edge Functions Supabase ont accès automatiquement à ces variables (inject�
 **Valeur** : `process-scheduled-campaigns-secret-2025` (ou une autre valeur sécurisée)
 
 **Edge Function qui l'utilise** :
+
 - `process-scheduled-campaigns` (pour l'authentification personnalisée)
 
 ---
@@ -82,6 +89,7 @@ Les Edge Functions Supabase ont accès automatiquement à ces variables (inject�
 ### Vérifier que les Secrets sont Configurés
 
 Dans Supabase Dashboard > Edge Functions > Secrets, vous devriez voir :
+
 - ✅ `SENDGRID_API_KEY` (si configuré)
 - ✅ `SENDGRID_WEBHOOK_SECRET` (si configuré)
 - ✅ `CRON_SECRET` (si configuré)
@@ -91,6 +99,7 @@ Dans Supabase Dashboard > Edge Functions > Secrets, vous devriez voir :
 ### Vérifier dans les Logs
 
 Dans les logs des Edge Functions, vous devriez voir :
+
 - ✅ Pas de warning `SENDGRID_API_KEY is not set` si la clé est configurée
 - ✅ Les appels à SendGrid réussissent
 
@@ -114,7 +123,7 @@ Dans les logs des Edge Functions, vous devriez voir :
 
 **Solution** : Ajouter `SENDGRID_API_KEY` dans Supabase Dashboard > Edge Functions > Secrets
 
-### Problème 2 : "Name must not start with the SUPABASE_ prefix"
+### Problème 2 : "Name must not start with the SUPABASE\_ prefix"
 
 **Cause** : Tentative d'ajouter `SUPABASE_URL` ou `SUPABASE_SERVICE_ROLE_KEY` comme secret
 
@@ -129,5 +138,3 @@ Dans les logs des Edge Functions, vous devriez voir :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

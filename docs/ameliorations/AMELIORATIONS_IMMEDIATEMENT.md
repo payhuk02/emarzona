@@ -9,6 +9,7 @@
 ## ✅ CE QUI FONCTIONNE DÉJÀ (95%)
 
 Toutes les fonctionnalités principales sont **opérationnelles** :
+
 - ✅ Base de données (tables, colonnes, index)
 - ✅ Wizards V2 (8 étapes)
 - ✅ Hooks purchase (paiements avancés)
@@ -26,6 +27,7 @@ Toutes les fonctionnalités principales sont **opérationnelles** :
 **Solution** : Appliquer la migration `supabase/migrations/20251028_improvements_critical.sql`
 
 **Dans Supabase SQL Editor** :
+
 ```sql
 -- Copier-coller tout le contenu de 20251028_improvements_critical.sql
 -- Inclut :
@@ -37,6 +39,7 @@ Toutes les fonctionnalités principales sont **opérationnelles** :
 ```
 
 **Impact** :
+
 - ✅ Clients peuvent voir status escrow
 - ✅ Impossible d'avoir 5% ou 95% (validation)
 - ✅ Paiements libérés automatiquement après deadline
@@ -53,6 +56,7 @@ Toutes les fonctionnalités principales sont **opérationnelles** :
 **Fichier** : `src/pages/payments/PaymentManagement.tsx`
 
 **Ajouter** :
+
 ```typescript
 import { CountdownTimer, CountdownBadge } from '@/components/ui/countdown-timer';
 
@@ -60,7 +64,7 @@ import { CountdownTimer, CountdownBadge } from '@/components/ui/countdown-timer'
 {securedPayment.held_until && (
   <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950 rounded">
     <p className="text-sm font-medium mb-1">Libération automatique dans :</p>
-    <CountdownTimer 
+    <CountdownTimer
       targetDate={securedPayment.held_until}
       onComplete={() => {
         toast({
@@ -78,6 +82,7 @@ import { CountdownTimer, CountdownBadge } from '@/components/ui/countdown-timer'
 ```
 
 **Impact** :
+
 - ✅ Utilisateurs savent exactement quand libération
 - ✅ Transparence totale
 - ✅ Réduit support client
@@ -91,12 +96,13 @@ import { CountdownTimer, CountdownBadge } from '@/components/ui/countdown-timer'
 **Fichier** : `src/components/orders/OrderDetailDialog.tsx`
 
 **Ajouter** :
+
 ```typescript
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 
 export const OrderDetailDialog = ({ order, ... }) => {
   const { unreadCount } = useUnreadCount(order.id);
-  
+
   return (
     // ...
     <Button onClick={() => navigate(`/orders/${order.id}/messaging`)}>
@@ -113,6 +119,7 @@ export const OrderDetailDialog = ({ order, ... }) => {
 ```
 
 **Créer le hook** : `src/hooks/useUnreadCount.ts`
+
 ```typescript
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -121,9 +128,10 @@ export const useUnreadCount = (orderId: string) => {
   return useQuery({
     queryKey: ['unread-count', orderId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_unread_message_count_for_order', { order_id: orderId });
-      
+      const { data, error } = await supabase.rpc('get_unread_message_count_for_order', {
+        order_id: orderId,
+      });
+
       if (error) throw error;
       return data || 0;
     },
@@ -133,6 +141,7 @@ export const useUnreadCount = (orderId: string) => {
 ```
 
 **Impact** :
+
 - ✅ Utilisateurs voient immédiatement nouveaux messages
 - ✅ +40% engagement messagerie
 - ✅ Réduit messages manqués
@@ -144,6 +153,7 @@ export const useUnreadCount = (orderId: string) => {
 **Fichier** : `src/components/orders/OrderDetailDialog.tsx`
 
 **Ajouter dans la section paiement** :
+
 ```typescript
 {/* Payment Type Badge */}
 <div className="flex items-center gap-2 mb-4">
@@ -154,14 +164,14 @@ export const useUnreadCount = (orderId: string) => {
       Complet
     </Badge>
   )}
-  
+
   {order.payment_type === 'percentage' && (
     <Badge variant="default" className="bg-blue-600">
       <Percent className="h-3 w-3 mr-1" />
       Acompte {((order.percentage_paid / order.total_amount) * 100).toFixed(0)}%
     </Badge>
   )}
-  
+
   {order.payment_type === 'delivery_secured' && (
     <Badge variant="warning" className="bg-yellow-600">
       <Shield className="h-3 w-3 mr-1" />
@@ -189,6 +199,7 @@ export const useUnreadCount = (orderId: string) => {
 ```
 
 **Impact** :
+
 - ✅ Transparence totale sur mode paiement
 - ✅ Clients savent exactement ce qu'ils doivent
 - ✅ Facilite paiement du solde
@@ -202,13 +213,14 @@ export const useUnreadCount = (orderId: string) => {
 **Fichier** : `src/components/products/create/shared/PaymentOptionsForm.tsx`
 
 **Modifier la grid des options** :
+
 ```typescript
 <div className="space-y-4">
   {/* Option 1 : Full Payment */}
   <div className="flex items-start space-x-3 p-4 rounded-lg border-2 hover:border-primary transition-colors cursor-pointer">
     {/* ... contenu ... */}
   </div>
-  
+
   {/* Avant : Pas responsive */}
   {/* Après : Empilé verticalement sur mobile */}
 </div>
@@ -227,6 +239,7 @@ export const useUnreadCount = (orderId: string) => {
 ```
 
 **Impact** :
+
 - ✅ Parfait sur mobile (pas de scroll horizontal)
 - ✅ Touch-friendly
 - ✅ +30% completion mobile
@@ -270,6 +283,7 @@ export const useUnreadCount = (orderId: string) => {
 **Fichier** : `src/components/products/create/shared/PaymentOptionsForm.tsx`
 
 **Ajouter tracking** :
+
 ```typescript
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 
@@ -280,7 +294,7 @@ const handlePaymentTypeChange = (value: PaymentType) => {
     ...data,
     payment_type: value,
   });
-  
+
   // Track selection
   trackEvent('payment_option_selected', {
     payment_type: value,
@@ -291,6 +305,7 @@ const handlePaymentTypeChange = (value: PaymentType) => {
 ```
 
 **Impact** :
+
 - ✅ Savoir quelles options sont populaires
 - ✅ Optimiser selon usage réel
 - ✅ Mesurer ROI features
@@ -300,22 +315,26 @@ const handlePaymentTypeChange = (value: PaymentType) => {
 ## 🎯 PLAN D'EXÉCUTION (Total : 2-3h)
 
 ### Phase 1 : Critique (30 min)
+
 1. ✅ Appliquer migration `20251028_improvements_critical.sql`
 2. ✅ Tester query RLS clients
 3. ✅ Vérifier validation percentage_rate
 
 ### Phase 2 : UX (1h)
+
 1. ✅ Ajouter CountdownTimer component
 2. ✅ Intégrer dans PaymentManagement
 3. ✅ Ajouter unread count badges
 4. ✅ Ajouter payment type badges OrderDetail
 
 ### Phase 3 : Mobile + Tests (45 min)
+
 1. ✅ Responsive PaymentOptionsForm
 2. ✅ Tests visuels 4 scénarios
 3. ✅ Corrections mineures
 
 ### Phase 4 : Monitoring (15 min)
+
 1. ✅ Analytics events
 2. ✅ Vérifier tracking
 3. ✅ Dashboard metrics
@@ -343,7 +362,7 @@ const handlePaymentTypeChange = (value: PaymentType) => {
 
 **Option A** : Appliquer immédiatement (2-3h)  
 **Option B** : Appliquer Phase 1 seulement (30 min critique)  
-**Option C** : Review détaillée d'abord  
+**Option C** : Review détaillée d'abord
 
 **RECOMMANDATION** : **Option A** pour avoir un produit 99% parfait avant déploiement beta.
 
@@ -355,4 +374,3 @@ const handlePaymentTypeChange = (value: PaymentType) => {
 - **B)** Oui, faire toutes les phases (2-3h)
 - **C)** Non, juste git commit ce qu'on a
 - **D)** Autre chose
-

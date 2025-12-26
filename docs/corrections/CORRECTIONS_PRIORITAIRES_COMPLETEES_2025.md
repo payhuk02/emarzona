@@ -10,13 +10,13 @@
 
 ### Statut des 5 Bugs Critiques
 
-| # | Bug Critique | Statut | Action | Temps |
-|---|--------------|--------|--------|-------|
-| 1 | Wizard Digital sauvegarde incomplète | ✅ **CORRIGÉ** | Mapping amélioré | 30min |
-| 2 | Licence créée au wizard | ✅ **DÉJÀ CORRIGÉ** | Vérifié - OK | 0min |
-| 3 | Page PhysicalProductDetail manquante | ✅ **DÉJÀ EXISTE** | Vérifié - OK | 0min |
-| 4 | Page ServiceDetail manquante | ✅ **DÉJÀ EXISTE** | Vérifié - OK | 0min |
-| 5 | Page "Payer le solde" manquante | ✅ **DÉJÀ EXISTE** | Vérifié - OK | 0min |
+| #   | Bug Critique                         | Statut              | Action           | Temps |
+| --- | ------------------------------------ | ------------------- | ---------------- | ----- |
+| 1   | Wizard Digital sauvegarde incomplète | ✅ **CORRIGÉ**      | Mapping amélioré | 30min |
+| 2   | Licence créée au wizard              | ✅ **DÉJÀ CORRIGÉ** | Vérifié - OK     | 0min  |
+| 3   | Page PhysicalProductDetail manquante | ✅ **DÉJÀ EXISTE**  | Vérifié - OK     | 0min  |
+| 4   | Page ServiceDetail manquante         | ✅ **DÉJÀ EXISTE**  | Vérifié - OK     | 0min  |
+| 5   | Page "Payer le solde" manquante      | ✅ **DÉJÀ EXISTE**  | Vérifié - OK     | 0min  |
 
 **Temps total** : **30 minutes** (au lieu de 14h estimées)  
 **Raison** : 4 bugs sur 5 étaient déjà corrigés !
@@ -26,18 +26,22 @@
 ## 🔧 CORRECTION #1 : WIZARD DIGITAL - MAPPING COMPLET
 
 ### Problème Identifié
+
 Le wizard `CreateDigitalProductWizard_v2.tsx` ne sauvegardait pas tous les champs disponibles dans la table `digital_products`, notamment :
+
 - Champs de protection avancée (IP, geo restrictions)
 - Champs de versioning (changelog, auto_update)
 - Champs preview/demo
 - Champs advanced features (documentation, support, compatible_os)
 
 ### Solution Appliquée
+
 **Fichier modifié** : `src/components/products/create/digital/CreateDigitalProductWizard_v2.tsx`
 
 **Lignes modifiées** : 460-522
 
 **Champs ajoutés au mapping** :
+
 ```typescript
 // Protection avancée
 ip_restriction_enabled: formData.ip_restriction_enabled || false,
@@ -76,11 +80,13 @@ total_reviews: 0,
 ```
 
 **Champs également ajoutés** :
+
 - `license_key_format` : Format de la clé de licence
 - `main_file_hash` : Hash pour intégrité
 - `additional_files` : Fichiers additionnels (JSONB)
 
 ### Impact
+
 ✅ **Tous les champs de `digital_products` sont maintenant mappés**  
 ✅ **Le wizard peut maintenant sauvegarder toutes les fonctionnalités avancées**  
 ✅ **Compatibilité complète avec la structure de la base de données**
@@ -90,15 +96,18 @@ total_reviews: 0,
 ## ✅ VÉRIFICATIONS EFFECTUÉES
 
 ### Bug #2 : Création Licence Post-Achat
+
 **Fichier vérifié** : `src/hooks/orders/useCreateDigitalOrder.ts`
 
 **Résultat** : ✅ **DÉJÀ CORRIGÉ**
+
 - Les licences sont créées dans `useCreateDigitalOrder` (lignes 184-218)
 - Création POST-ACHAT uniquement (quand `generateLicense` est true)
 - Aucune création de licence dans le wizard
 - Statut initial : `'pending'` → devient `'active'` après confirmation paiement
 
 **Code vérifié** :
+
 ```typescript
 // 3. Générer une licence si nécessaire (AFTER purchase, with correct columns)
 if (generateLicense) {
@@ -122,9 +131,11 @@ if (generateLicense) {
 ```
 
 ### Bug #3 : Page PhysicalProductDetail
+
 **Fichier vérifié** : `src/pages/physical/PhysicalProductDetail.tsx`
 
 **Résultat** : ✅ **DÉJÀ EXISTE**
+
 - Page complète (773 lignes)
 - Route configurée : `/physical/:productId`
 - Fonctionnalités :
@@ -141,9 +152,11 @@ if (generateLicense) {
   - ✅ Wishlist
 
 ### Bug #4 : Page ServiceDetail
+
 **Fichier vérifié** : `src/pages/service/ServiceDetail.tsx`
 
 **Résultat** : ✅ **DÉJÀ EXISTE**
+
 - Page complète (584 lignes)
 - Route configurée : `/service/:serviceId`
 - Fonctionnalités :
@@ -156,18 +169,20 @@ if (generateLicense) {
   - ✅ Analytics
 
 ### Bug #5 : Page "Payer le solde"
+
 **Fichier vérifié** : `src/pages/payments/PayBalance.tsx`
 
 **Résultat** : ✅ **DÉJÀ EXISTE**
+
 - Page complète (337 lignes)
 - Route configurée : `/payments/:orderId/balance`
 - Fonctionnalités :
   - ✅ Fetch order avec customer et order_items
   - ✅ Détection si solde = 0 (message success)
   - ✅ Breakdown paiement visuel :
-     - Montant total
-     - Acompte payé (avec % calculé)
-     - Solde restant (highlight orange)
+    - Montant total
+    - Acompte payé (avec % calculé)
+    - Solde restant (highlight orange)
   - ✅ Liste articles commandés
   - ✅ Informations client
   - ✅ Mutation Moneroo payment initiation
@@ -179,31 +194,34 @@ if (generateLicense) {
 
 ## 📈 STATISTIQUES
 
-| Métrique | Valeur |
-|----------|--------|
-| **Bugs critiques identifiés** | 5 |
-| **Bugs déjà corrigés** | 4 (80%) |
-| **Bugs corrigés aujourd'hui** | 1 (20%) |
-| **Temps estimé initial** | 14 heures |
-| **Temps réel** | 30 minutes |
-| **Gain de temps** | 96% |
-| **Fichiers modifiés** | 1 |
-| **Lignes de code modifiées** | ~60 |
+| Métrique                      | Valeur     |
+| ----------------------------- | ---------- |
+| **Bugs critiques identifiés** | 5          |
+| **Bugs déjà corrigés**        | 4 (80%)    |
+| **Bugs corrigés aujourd'hui** | 1 (20%)    |
+| **Temps estimé initial**      | 14 heures  |
+| **Temps réel**                | 30 minutes |
+| **Gain de temps**             | 96%        |
+| **Fichiers modifiés**         | 1          |
+| **Lignes de code modifiées**  | ~60        |
 
 ---
 
 ## ✅ VALIDATION
 
 ### Tests Effectués
+
 1. ✅ Vérification mapping wizard Digital → tous les champs présents
 2. ✅ Vérification création licence → post-achat uniquement
 3. ✅ Vérification routes → toutes les pages routées
 4. ✅ Vérification fonctionnalités → toutes présentes
 
 ### Linter
+
 ✅ **Aucune erreur de linter**
 
 ### Compatibilité
+
 ✅ **Compatible avec la structure DB existante**  
 ✅ **Rétrocompatible avec les produits existants**
 
@@ -212,6 +230,7 @@ if (generateLicense) {
 ## 🎯 PROCHAINES ÉTAPES
 
 ### Améliorations Importantes (Priorité 2)
+
 Les 5 bugs critiques sont corrigés. Les améliorations importantes suivantes sont recommandées :
 
 1. **Refonte calendrier services** (8h)
@@ -242,11 +261,13 @@ Les 5 bugs critiques sont corrigés. Les améliorations importantes suivantes so
 ## 📝 NOTES
 
 ### Observations
+
 - La plupart des bugs critiques étaient déjà corrigés
 - L'analyse initiale était basée sur une version antérieure du code
 - Le code actuel est plus avancé que prévu
 
 ### Recommandations
+
 1. ✅ Mettre à jour l'analyse avec les corrections actuelles
 2. ✅ Documenter les fonctionnalités existantes
 3. ✅ Prioriser les améliorations importantes
@@ -267,4 +288,3 @@ Les 5 bugs critiques sont corrigés. Les améliorations importantes suivantes so
 **Fin du rapport**  
 **Date** : 28 Janvier 2025  
 **Version** : 1.0
-

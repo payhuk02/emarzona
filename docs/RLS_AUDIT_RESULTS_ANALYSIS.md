@@ -7,11 +7,11 @@
 
 ### Priorisation des Tables Restantes
 
-| Priorité | Description | Nombre | Action Requise |
-|----------|------------|--------|----------------|
-| 🟠 **IMPORTANT** | Sans politiques | **40 tables** | ⚠️ URGENT : Ajouter des politiques RLS |
-| 🟡 **RECOMMANDÉ** | SELECT manquant | **46 tables** | Ajouter politique SELECT |
-| 🟢 **OPTIONNEL** | Politiques incomplètes | **200 tables** | Compléter les politiques |
+| Priorité          | Description            | Nombre         | Action Requise                         |
+| ----------------- | ---------------------- | -------------- | -------------------------------------- |
+| 🟠 **IMPORTANT**  | Sans politiques        | **40 tables**  | ⚠️ URGENT : Ajouter des politiques RLS |
+| 🟡 **RECOMMANDÉ** | SELECT manquant        | **46 tables**  | Ajouter politique SELECT               |
+| 🟢 **OPTIONNEL**  | Politiques incomplètes | **200 tables** | Compléter les politiques               |
 
 ### Recommandations
 
@@ -27,6 +27,7 @@
 ### Tables avec RLS mais Sans Politiques (40 tables)
 
 **Impact** : Ces tables ont RLS activé mais **aucune politique**, ce qui signifie :
+
 - ❌ **Accès bloqué pour TOUS** (même les admins si pas de politique admin)
 - ❌ **L'application ne peut pas lire/écrire** dans ces tables
 - ⚠️ **URGENT** : Ces tables doivent être corrigées en priorité
@@ -34,6 +35,7 @@
 ### Tables Sans Politique SELECT (46 tables)
 
 **Impact** : Ces tables ont des politiques mais **pas de SELECT**, ce qui signifie :
+
 - ❌ **Impossible de lire** les données
 - ⚠️ **IMPORTANT** : Ajouter une politique SELECT
 
@@ -44,12 +46,14 @@
 **Objectif** : Ajouter des politiques RLS de base pour débloquer l'accès
 
 **Stratégie** :
+
 1. Identifier les 40 tables exactes
 2. Créer des politiques minimales (au moins SELECT)
 3. Tester que l'application fonctionne
 4. Compléter les politiques ensuite
 
 **Exécuter** :
+
 ```sql
 -- Identifier les tables
 SELECT * FROM get_tables_without_policies() ORDER BY table_name;
@@ -60,6 +64,7 @@ SELECT * FROM get_tables_without_policies() ORDER BY table_name;
 **Objectif** : Ajouter des politiques SELECT pour permettre la lecture
 
 **Stratégie** :
+
 1. Identifier les 46 tables
 2. Ajouter une politique SELECT appropriée
 3. Vérifier que les données sont accessibles
@@ -69,6 +74,7 @@ SELECT * FROM get_tables_without_policies() ORDER BY table_name;
 **Objectif** : Compléter les politiques manquantes (INSERT/UPDATE/DELETE)
 
 **Stratégie** :
+
 - Prioriser par sensibilité des données
 - Ajouter les politiques manquantes progressivement
 
@@ -87,6 +93,7 @@ SELECT * FROM get_tables_without_policies() ORDER BY table_name;
 ### Étape 2 : Analyser par Priorité
 
 Le script `IDENTIFY_TABLES_WITHOUT_POLICIES.sql` classera automatiquement les tables par :
+
 - 🔴 **CRITIQUE** : `platform_settings`, `admin_config`, `commissions`, `subscriptions`, `disputes`, `invoices`
 - 🟠 **HAUTE** : `lessons`, `quizzes`, `assignments`, `certificates`, `service_availability`
 - 🟡 **MOYENNE** : Tables analytics et statistiques
@@ -120,5 +127,4 @@ Le script `IDENTIFY_TABLES_WITHOUT_POLICIES.sql` classera automatiquement les ta
 
 ---
 
-*Dernière mise à jour : 2025-01-30*
-
+_Dernière mise à jour : 2025-01-30_

@@ -17,6 +17,7 @@
 ### Couleur Appliquée
 
 **Bleu Royal** : Gradient `from-blue-700 via-blue-800 to-blue-900`
+
 - **Avant** : `from-slate-900 via-blue-950 to-black` (bleu très foncé)
 - **Après** : `from-blue-700 via-blue-800 to-blue-900` (bleu royal vif)
 
@@ -29,13 +30,17 @@
 #### A. Arrière-plan
 
 **Avant** :
+
 ```tsx
-className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-slate-900 [&_[data-sidebar=sidebar]]:!via-blue-950 [&_[data-sidebar=sidebar]]:!to-black"
+className =
+  '[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-slate-900 [&_[data-sidebar=sidebar]]:!via-blue-950 [&_[data-sidebar=sidebar]]:!to-black';
 ```
 
 **Après** :
+
 ```tsx
-className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-700 [&_[data-sidebar=sidebar]]:!via-blue-800 [&_[data-sidebar=sidebar]]:!to-blue-900"
+className =
+  '[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sidebar]]:!from-blue-700 [&_[data-sidebar=sidebar]]:!via-blue-800 [&_[data-sidebar=sidebar]]:!to-blue-900';
 ```
 
 #### B. Bordures
@@ -46,22 +51,27 @@ className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sideba
 #### C. Couleurs de Texte
 
 **Labels de sections** :
+
 - **Avant** : `text-blue-200`
 - **Après** : `text-blue-100` (plus clair pour meilleure lisibilité)
 
 **Items de menu inactifs** :
+
 - **Avant** : `text-slate-300`
 - **Après** : `text-blue-100` (cohérence avec le fond bleu)
 
 **Items de menu actifs** :
+
 - **Avant** : `bg-blue-600/30 text-blue-200`
 - **Après** : `bg-blue-600/40 text-white` (plus contrasté)
 
 **Hover** :
+
 - **Avant** : `hover:bg-blue-900/30 hover:text-white`
 - **Après** : `hover:bg-blue-600/40 hover:text-white` (cohérence avec le fond)
 
 **Bordures actives** :
+
 - **Avant** : `border-blue-400`
 - **Après** : `border-blue-300` (plus clair)
 
@@ -72,41 +82,47 @@ className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sideba
 #### A. Arrière-plan Desktop
 
 **Avant** :
+
 ```tsx
-'bg-gradient-to-br from-slate-900 via-blue-950 to-black'
+'bg-gradient-to-br from-slate-900 via-blue-950 to-black';
 ```
 
 **Après** :
+
 ```tsx
-'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900'
+'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900';
 ```
 
 #### B. Arrière-plan Mobile (Sheet)
 
 **Avant** :
+
 ```tsx
-'bg-gradient-to-br from-slate-900 via-blue-950 to-black'
+'bg-gradient-to-br from-slate-900 via-blue-950 to-black';
 ```
 
 **Après** :
+
 ```tsx
-'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900'
+'bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900';
 ```
 
 #### C. Bouton Trigger Mobile
 
 **Avant** :
+
 ```tsx
-'bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-black/95'
-'border-blue-800/30 text-blue-200'
-'hover:bg-blue-900/30'
+'bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-black/95';
+'border-blue-800/30 text-blue-200';
+'hover:bg-blue-900/30';
 ```
 
 **Après** :
+
 ```tsx
-'bg-gradient-to-br from-blue-700/95 via-blue-800/95 to-blue-900/95'
-'border-blue-600/30 text-blue-100'
-'hover:bg-blue-600/40'
+'bg-gradient-to-br from-blue-700/95 via-blue-800/95 to-blue-900/95';
+'border-blue-600/30 text-blue-100';
+'hover:bg-blue-600/40';
 ```
 
 #### D. Bordures
@@ -126,37 +142,43 @@ className="[&_[data-sidebar=sidebar]]:!bg-gradient-to-br [&_[data-sidebar=sideba
 #### A. État Actif
 
 **Avant** :
+
 ```tsx
-'bg-blue-600/30 text-blue-200 shadow-md shadow-blue-600/20 border-l-2 border-blue-400'
+'bg-blue-600/30 text-blue-200 shadow-md shadow-blue-600/20 border-l-2 border-blue-400';
 ```
 
 **Après** :
+
 ```tsx
-'bg-blue-600/40 text-white shadow-md shadow-blue-600/20 border-l-2 border-blue-300'
+'bg-blue-600/40 text-white shadow-md shadow-blue-600/20 border-l-2 border-blue-300';
 ```
 
 #### B. État Inactif
 
 **Avant** :
+
 ```tsx
-'text-slate-300 hover:bg-blue-900/30 hover:text-white'
+'text-slate-300 hover:bg-blue-900/30 hover:text-white';
 ```
 
 **Après** :
+
 ```tsx
-'text-blue-100 hover:bg-blue-600/40 hover:text-white'
+'text-blue-100 hover:bg-blue-600/40 hover:text-white';
 ```
 
 #### C. Icônes
 
 **Avant** :
+
 ```tsx
-isActive ? 'text-blue-300' : 'text-slate-400 group-hover:text-blue-200'
+isActive ? 'text-blue-300' : 'text-slate-400 group-hover:text-blue-200';
 ```
 
 **Après** :
+
 ```tsx
-isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
+isActive ? 'text-white' : 'text-blue-100 group-hover:text-white';
 ```
 
 #### D. Indicateur Actif
@@ -290,4 +312,3 @@ isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
 
 **Date de validation** : 1 Février 2025  
 **Statut** : ✅ **COMPLÉTÉ**
-

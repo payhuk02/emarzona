@@ -11,6 +11,7 @@ L'erreur **"Failed to fetch"** apparaît lors de la tentative de paiement sur le
 **Cause** : L'Edge Function `moneroo` n'est pas déployée ou n'est pas accessible.
 
 **Solution** :
+
 1. Vérifier dans Supabase Dashboard → Edge Functions → Functions → moneroo
 2. Vérifier que "LAST UPDATED" est récent
 3. Redéployer l'Edge Function si nécessaire
@@ -20,6 +21,7 @@ L'erreur **"Failed to fetch"** apparaît lors de la tentative de paiement sur le
 **Cause** : Les headers CORS ne sont pas correctement configurés.
 
 **Solution** :
+
 1. Vérifier que `SITE_URL` est configuré dans Supabase Dashboard → Edge Functions → Secrets
 2. Vérifier que la valeur est `https://payhula.vercel.app` (sans slash final)
 3. Redéployer l'Edge Function après configuration
@@ -29,6 +31,7 @@ L'erreur **"Failed to fetch"** apparaît lors de la tentative de paiement sur le
 **Cause** : Problème de connexion Internet ou de firewall.
 
 **Solution** :
+
 1. Vérifier votre connexion Internet
 2. Vérifier que les services Supabase sont accessibles
 3. Essayer depuis un autre réseau
@@ -38,6 +41,7 @@ L'erreur **"Failed to fetch"** apparaît lors de la tentative de paiement sur le
 **Cause** : L'Edge Function est en train de se déployer.
 
 **Solution** :
+
 1. Attendre quelques secondes
 2. Rafraîchir la page
 3. Réessayer le paiement
@@ -126,9 +130,3 @@ Après résolution, le paiement devrait fonctionner et l'erreur "Failed to fetch
 - **URL Edge Function** : https://your-project-id.supabase.co/functions/v1/moneroo
 - **Dashboard Supabase** : https://supabase.com/dashboard/project/your-project-id/functions
 - **Guide Redéploiement** : `DEPLOIEMENT_DASHBOARD_ETAPE_PAR_ETAPE.md`
-
-
-
-
-
-

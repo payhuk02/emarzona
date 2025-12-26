@@ -10,6 +10,7 @@
 La plateforme utilise une hiérarchie de z-index cohérente pour gérer les différents niveaux de superposition des éléments UI.
 
 ### Règle Générale
+
 - **Plus le z-index est élevé, plus l'élément est au-dessus**
 - **Les z-index sont organisés par tranches de 10** pour faciliter l'ajout d'éléments intermédiaires
 - **Les valeurs sont documentées ici pour référence**
@@ -19,6 +20,7 @@ La plateforme utilise une hiérarchie de z-index cohérente pour gérer les diff
 ## 🎯 Hiérarchie Complète
 
 ### Niveau 0-50 : Éléments de Base
+
 ```
 z-0    → Éléments de base (contenu principal)
 z-10   → Éléments légèrement au-dessus (cards, etc.)
@@ -29,6 +31,7 @@ z-50   → Top navigation bar
 ```
 
 **Fichiers concernés**:
+
 - `src/components/layout/TopNavigationBar.tsx`: `z-50`
 - `src/components/layout/BaseContextSidebar.tsx`: `z-40` (desktop sidebar)
 - `src/components/AppSidebar.tsx`: `z-30` (via Sidebar component)
@@ -36,6 +39,7 @@ z-50   → Top navigation bar
 ---
 
 ### Niveau 60-100 : Navigation Mobile
+
 ```
 z-60   → Hamburger button (mobile)
 z-70   → Mobile menu drawer
@@ -44,6 +48,7 @@ z-100  → Navigation mobile principale
 ```
 
 **Fichiers concernés**:
+
 - `src/components/layout/BaseContextSidebar.tsx`: `z-[60]` (hamburger)
 - `src/components/ui/MobileBottomNav.tsx`: `z-50` (peut être augmenté si nécessaire)
 - `src/components/layout/TopNavigationBar.tsx`: Mobile menu drawer
@@ -51,6 +56,7 @@ z-100  → Navigation mobile principale
 ---
 
 ### Niveau 100-1000 : Overlays et Modals
+
 ```
 z-[100] → Navigation mobile sticky
 z-[110] → Bottom navigation contextuelle (mobile)
@@ -65,7 +71,8 @@ z-[1200] → Toast notifications (Sonner)
 ```
 
 **Fichiers concernés**:
-- `src/components/ui/dialog.tsx`: 
+
+- `src/components/ui/dialog.tsx`:
   - Overlay: `z-[1040]`
   - Content: `z-[1050]`
 - `src/components/ui/alert-dialog.tsx`:
@@ -74,19 +81,21 @@ z-[1200] → Toast notifications (Sonner)
 - `src/components/ui/sheet.tsx`:
   - Overlay: `z-50` (par défaut Radix)
   - Content: `z-50` (par défaut Radix)
-- `src/components/layout/BaseContextSidebar.tsx`: 
+- `src/components/layout/BaseContextSidebar.tsx`:
   - Bottom nav: `z-[110]`
 - `src/components/ui/toast.tsx`: `z-[1200]` (Sonner)
 
 ---
 
 ### Niveau 1000+ : Éléments Critiques
+
 ```
 z-[9999] → Loading bar (top)
 z-[10000] → Error boundaries (si nécessaire)
 ```
 
 **Fichiers concernés**:
+
 - `src/components/navigation/LoadingBar.tsx`: `z-[9999]`
 
 ---
@@ -130,25 +139,31 @@ z-[10000] → Error boundaries (si nécessaire)
 ## 🔍 Cas d'Usage Spécifiques
 
 ### Dialog sur Mobile
+
 ```
 Overlay: z-[1040]
 Content: z-[1050]
 ```
+
 Le Dialog est au-dessus de tout sauf les toasts.
 
 ### Navigation Mobile
+
 ```
 Hamburger: z-[60]
 Bottom nav: z-[110]
 ```
+
 La bottom nav est au-dessus du hamburger pour être accessible.
 
 ### Sidebar Desktop
+
 ```
 AppSidebar: z-30 (via Sidebar component)
 ContextSidebar: z-40
 TopNav: z-50
 ```
+
 La TopNav est au-dessus des sidebars.
 
 ---
@@ -170,7 +185,7 @@ La TopNav est au-dessus des sidebars.
 
 4. **Utiliser dans le code**
    ```tsx
-   className="z-[1050]" // Documenté dans z-index-hierarchy.md
+   className = 'z-[1050]'; // Documenté dans z-index-hierarchy.md
    ```
 
 ---
@@ -178,6 +193,7 @@ La TopNav est au-dessus des sidebars.
 ## 📝 Changelog
 
 ### 4 décembre 2025
+
 - Documentation initiale créée
 - Hiérarchie complète documentée
 - Règles d'utilisation définies
@@ -194,4 +210,3 @@ La TopNav est au-dessus des sidebars.
 
 **Maintenu par**: Équipe de développement Emarzona  
 **Dernière mise à jour**: 4 décembre 2025
-

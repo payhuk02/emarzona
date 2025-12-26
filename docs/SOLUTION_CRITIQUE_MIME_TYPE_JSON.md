@@ -32,6 +32,7 @@ Le bucket "attachments" a des restrictions MIME types (`allowed_mime_types`) qui
 **Fichier** : `supabase/migrations/20250201_fix_attachments_mime_types.sql`
 
 Cette migration :
+
 1. ✅ Supprime les restrictions `allowed_mime_types` du bucket
 2. ✅ Force le bucket à être PUBLIC
 3. ✅ Vérifie la configuration
@@ -78,6 +79,7 @@ Cette migration :
 ### Après la Correction
 
 Si les politiques RLS sont correctes :
+
 ```
 [INFO] Pre-upload verification {fileType: 'image/png', ...}
 [INFO] Upload response details {hasData: true, hasError: false, ...}
@@ -85,6 +87,7 @@ Si les politiques RLS sont correctes :
 ```
 
 Si les politiques RLS bloquent toujours :
+
 ```
 [INFO] Pre-upload verification {fileType: 'image/png', ...}
 [ERROR] new row violates row-level security policy
@@ -105,6 +108,7 @@ Si les politiques RLS bloquent toujours :
 ### Sécurité
 
 La sécurité est assurée par :
+
 - ✅ **Politiques RLS** : Contrôlent qui peut uploader/quels fichiers
 - ✅ **Validation côté client** : `validateFile()` dans `fileValidation.ts`
 - ✅ **Taille maximale** : `file_size_limit` (10MB)
@@ -149,6 +153,6 @@ Les restrictions MIME types ne sont **pas nécessaires** si les politiques RLS s
 
 **Dernière mise à jour** : 1 Février 2025  
 **Fichiers modifiés** :
+
 - `supabase/migrations/20250201_fix_attachments_mime_types.sql` (nouveau)
 - `supabase/migrations/20250201_fix_attachments_final_complete.sql` (mis à jour)
-

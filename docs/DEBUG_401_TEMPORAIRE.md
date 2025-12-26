@@ -51,6 +51,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Log
 2. Recherchez les messages commençant par `=== REQUEST DEBUG ===`
 
 Vous devriez voir :
+
 ```
 === REQUEST DEBUG ===
 Method: POST
@@ -66,6 +67,7 @@ x-cron-secret header: process-scheduled-campaigns-secret-2025
 ```
 
 **Ces logs nous diront** :
+
 - Si le header `x-cron-secret` est bien reçu
 - Si la casse des headers est correcte (parfois les headers sont en minuscules)
 - Si d'autres headers sont présents
@@ -80,7 +82,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 ### 4. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -93,6 +95,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -104,6 +107,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### Si l'invocation retourne maintenant `200 OK` :
 
 ✅ **Le problème était l'authentification**. Les logs nous diront pourquoi :
+
 - Si `x-cron-secret` n'est pas reçu → Problème avec `pg_net` ou le cron job
 - Si `x-cron-secret` est reçu mais avec une casse différente → Problème de casse des headers
 - Si d'autres headers sont présents → Problème de configuration
@@ -111,6 +115,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### Si l'invocation retourne toujours `401` :
 
 ⚠️ **Il y a un problème plus profond** :
+
 - Cache de l'Edge Function (attendre quelques minutes)
 - Problème avec Supabase lui-même
 - Problème avec le déploiement
@@ -122,6 +127,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 1. Analyser les Logs
 
 Une fois que vous avez les logs, identifiez :
+
 - Si `x-cron-secret` est bien reçu
 - Quelle est la casse exacte des headers
 - S'il y a d'autres headers inattendus
@@ -129,6 +135,7 @@ Une fois que vous avez les logs, identifiez :
 ### 2. Corriger le Problème
 
 Selon ce que les logs révèlent :
+
 - **Si `x-cron-secret` n'est pas reçu** : Vérifier la configuration du cron job
 - **Si la casse est différente** : Utiliser `req.headers.get('x-cron-secret')` avec la bonne casse
 - **Si d'autres headers sont présents** : Ajuster la logique d'authentification
@@ -140,7 +147,7 @@ Une fois le problème identifié et corrigé, réactiver l'authentification dans
 ```typescript
 // Réactiver cette partie :
 const expectedCronSecret = Deno.env.get('CRON_SECRET') || 'process-scheduled-campaigns-secret-2025';
-const isAuthenticated = 
+const isAuthenticated =
   (authHeader && (authHeader.startsWith('Bearer ') || authHeader.startsWith('apikey '))) ||
   (cronSecret && cronSecret.trim() === expectedCronSecret.trim()) ||
   (!authHeader && !cronSecret);
@@ -165,5 +172,3 @@ const isAuthenticated =
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025, 11:05 UTC
-
-

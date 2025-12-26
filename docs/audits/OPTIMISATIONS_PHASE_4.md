@@ -12,6 +12,7 @@
 **Fichier** : `src/lib/cache-optimization.ts`
 
 **Améliorations** :
+
 - ✅ Ajout de `structuralSharing: true` pour éviter les re-renders inutiles
 - ✅ Optimisation `notifyOnChangeProps` pour notifier seulement sur data/error
 - ✅ Nouvelles stratégies de cache :
@@ -28,24 +29,27 @@
 **Fichier** : `src/hooks/useOptimizedDebounce.ts`
 
 **Nouvelles fonctionnalités** :
+
 - ✅ Debounce avec cache React Query intégré
 - ✅ Délai minimum configurable pour éviter trop de requêtes
 - ✅ Vérification du cache avant de déclencher la requête
 - ✅ Hook `useMultipleDebounce` pour debounce multiple valeurs
 
 **Avantages** :
+
 - Réduction des requêtes API identiques
 - Meilleure performance sur les recherches
 - Support pour filtres complexes
 
 **Exemple d'utilisation** :
+
 ```typescript
 const [search, debouncedSearch] = useOptimizedDebounce('', {
   delay: 500,
   useCache: true,
-  onDebounce: (value) => {
+  onDebounce: value => {
     // Requête API seulement si valeur changée et pas en cache
-  }
+  },
 });
 ```
 
@@ -55,20 +59,20 @@ const [search, debouncedSearch] = useOptimizedDebounce('', {
 
 ### Performance
 
-| Métrique | Avant | Après | Gain |
-|----------|-------|-------|------|
-| Requêtes API identiques | 100% | ~30% | -70% |
-| Re-renders inutiles | Élevés | Réduits | ~40% |
-| Cache hit rate | ~40% | ~60% | +50% |
+| Métrique                | Avant  | Après   | Gain |
+| ----------------------- | ------ | ------- | ---- |
+| Requêtes API identiques | 100%   | ~30%    | -70% |
+| Re-renders inutiles     | Élevés | Réduits | ~40% |
+| Cache hit rate          | ~40%   | ~60%    | +50% |
 
 ### Cache React Query
 
-| Type de données | Stale Time | GC Time | Optimisation |
-|-----------------|------------|---------|--------------|
-| Produits | 10 min | 30 min | Cache agressif |
-| Commandes | 2 min | 10 min | Cache modéré |
-| Recherche | 1 min | 5 min | Cache court |
-| Statique | 30 min | 60 min | Cache très long |
+| Type de données | Stale Time | GC Time | Optimisation    |
+| --------------- | ---------- | ------- | --------------- |
+| Produits        | 10 min     | 30 min  | Cache agressif  |
+| Commandes       | 2 min      | 10 min  | Cache modéré    |
+| Recherche       | 1 min      | 5 min   | Cache court     |
+| Statique        | 30 min     | 60 min  | Cache très long |
 
 ---
 
@@ -110,4 +114,3 @@ const [search, debouncedSearch] = useOptimizedDebounce('', {
 ---
 
 **Dernière mise à jour** : Février 2025
-

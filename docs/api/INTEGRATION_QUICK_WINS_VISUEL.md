@@ -3,6 +3,7 @@
 ## 📊 AVANT / APRÈS
 
 ### AVANT (Cours seuls)
+
 ```
 Cours en ligne
 ├── Création cours ✅
@@ -14,6 +15,7 @@ Cours en ligne
 ```
 
 ### APRÈS (Cours + Fonctionnalités Avancées)
+
 ```
 Cours en ligne COMPLET
 ├── Création cours ✅
@@ -527,4 +529,3 @@ Monitoring:
 - Sprint 6: Marketplace (3h)
 
 **Total : 14h pour plateforme complète** 💪
-

@@ -63,6 +63,4 @@ Si vous avez besoin de réappliquer un fix, vérifiez d'abord si une migration �
 
 ---
 
-*Archivé le : 2025-01-30*
-
-
+_Archivé le : 2025-01-30_

@@ -11,6 +11,7 @@
 ### 1. Erreur critique : Auth.tsx ne peut pas être chargé
 
 **Message** :
+
 ```
 TypeError: Failed to fetch dynamically imported module: http://localhost:8080/src/pages/Auth.tsx
 ```
@@ -22,6 +23,7 @@ TypeError: Failed to fetch dynamically imported module: http://localhost:8080/sr
 ### 2. Erreur 504 : @radix-ui/react-tabs
 
 **Message** :
+
 ```
 Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)
 @radix-ui_react-tabs.js?v=47e042b6:1
@@ -80,6 +82,7 @@ optimizeDeps: {
 ### 2. Nettoyage du cache Vite
 
 **Action** :
+
 ```powershell
 Remove-Item -Path node_modules\.vite -Recurse -Force
 ```
@@ -91,6 +94,7 @@ Remove-Item -Path node_modules\.vite -Recurse -Force
 ## 📊 FICHIERS MODIFIÉS
 
 ### `vite.config.ts`
+
 - ✅ Ajout de toutes les dépendances Radix UI dans `optimizeDeps.include`
 - ✅ 24 dépendances Radix UI ajoutées pour éviter les erreurs futures
 
@@ -101,6 +105,7 @@ Remove-Item -Path node_modules\.vite -Recurse -Force
 ### Tests à effectuer
 
 1. **Redémarrer le serveur de développement** :
+
    ```bash
    npm run dev
    ```
@@ -122,18 +127,20 @@ Remove-Item -Path node_modules\.vite -Recurse -Force
 ### Si l'erreur persiste
 
 1. **Nettoyer complètement** :
+
    ```powershell
    # Arrêter tous les processus Node
    Get-Process | Where-Object {$_.ProcessName -like "*node*"} | Stop-Process -Force
-   
+
    # Nettoyer le cache Vite
    Remove-Item -Path node_modules\.vite -Recurse -Force
-   
+
    # Redémarrer le serveur
    npm run dev
    ```
 
 2. **Vérifier les dépendances** :
+
    ```bash
    npm list @radix-ui/react-tabs
    npm list @radix-ui/react-dialog
@@ -174,6 +181,7 @@ Remove-Item -Path node_modules\.vite -Recurse -Force
 ## ✅ RÉSULTAT ATTENDU
 
 Après ces corrections :
+
 - ✅ `Auth.tsx` se charge correctement
 - ✅ Aucune erreur `Failed to fetch dynamically imported module`
 - ✅ Aucune erreur 504 pour les dépendances Radix UI
@@ -185,6 +193,7 @@ Après ces corrections :
 ## 🎯 PROCHAINES ÉTAPES
 
 1. **Redémarrer le serveur** :
+
    ```bash
    npm run dev
    ```
@@ -241,6 +250,3 @@ Après ces corrections :
 **Document généré le** : Janvier 2025  
 **Version** : 1.0  
 **Statut** : ✅ Corrigé
-
-
-

@@ -151,7 +151,7 @@ const savePreviewToLocalStorage = useCallback((data: PlatformCustomizationData) 
   try {
     localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
-    logger.warn('Erreur lors de la sauvegarde des données d\'aperçu', { error });
+    logger.warn("Erreur lors de la sauvegarde des données d'aperçu", { error });
   }
 }, []);
 
@@ -320,4 +320,3 @@ Les améliorations sont prêtes pour la production et améliorent significativem
 
 **Document généré automatiquement**  
 **Dernière mise à jour** : 31 Janvier 2025
-

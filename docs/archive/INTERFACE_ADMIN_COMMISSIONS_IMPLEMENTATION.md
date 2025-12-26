@@ -14,12 +14,14 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 ### 1. Hook pour Platform Settings
 
 **`src/hooks/usePlatformSettingsDirect.ts`**
+
 - Hook React Query pour gérer `platform_settings`
 - Fonctions: `usePlatformSettingsDirect()`, `updateSettings()`
 - Gestion d'erreurs et toasts
 - Cache automatique avec React Query
 
 **Fonctionnalités**:
+
 - ✅ Récupération des paramètres depuis `platform_settings`
 - ✅ Mise à jour des paramètres avec tracking de l'utilisateur
 - ✅ Invalidation automatique du cache
@@ -29,6 +31,7 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 ### 2. Page Admin Commission Settings
 
 **`src/pages/admin/AdminCommissionSettings.tsx`**
+
 - Interface complète pour configurer les commissions
 - 3 onglets: Commissions, Retraits, Simulation
 - Validation des données
@@ -36,6 +39,7 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 - Design professionnel avec gradients et badges
 
 **Fonctionnalités**:
+
 - ✅ Configuration taux commission plateforme (0-100%)
 - ✅ Configuration taux commission parrainage (0-100%)
 - ✅ Configuration montant minimum de retrait
@@ -54,6 +58,7 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 ### Onglet 1: Commissions
 
 #### Commission Plateforme
+
 - Input numérique avec validation (0-100%)
 - Boutons rapides: 5%, 10%, 15%
 - Exemple de calcul dynamique
@@ -61,6 +66,7 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 - Description et recommandations
 
 #### Commission Parrainage
+
 - Input numérique avec validation (0-100%)
 - Boutons rapides: 1%, 2%, 5%
 - Exemple de calcul dynamique
@@ -93,6 +99,7 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 ### Routes
 
 **`src/App.tsx`**
+
 - Route ajoutée: `/admin/commission-settings`
 - Lazy loading configuré
 - Protection avec `ProtectedRoute`
@@ -100,11 +107,13 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 ### Navigation
 
 **`src/components/AppSidebar.tsx`**
+
 - Menu item ajouté dans la section "Configuration"
 - Icône: `Percent`
 - Label: "Commissions"
 
 **`src/components/admin/AdminLayout.tsx`**
+
 - Menu item ajouté dans la section "Configuration"
 - Icône: `Percent`
 - Label: "Commissions"
@@ -211,6 +220,7 @@ Implémentation complète d'une interface admin professionnelle pour configurer 
 ### Platform Settings
 
 Les paramètres sont stockés dans la table `platform_settings`:
+
 - `platform_commission_rate`: Taux commission plateforme
 - `referral_commission_rate`: Taux commission parrainage
 - `min_withdrawal_amount`: Montant minimum de retrait
@@ -219,6 +229,7 @@ Les paramètres sont stockés dans la table `platform_settings`:
 ### Triggers
 
 Les triggers SQL utilisent ces paramètres:
+
 - `calculate_referral_commission()`: Utilise `referral_commission_rate`
 - Les nouveaux paiements utilisent les taux configurés
 - Les transactions existantes conservent leurs taux d'origine
@@ -346,10 +357,3 @@ Les triggers SQL utilisent ces paramètres:
 ---
 
 **Fin du Document**
-
-
-
-
-
-
-

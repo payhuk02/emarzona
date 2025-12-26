@@ -35,6 +35,7 @@ Les migrations doivent être exécutées dans cet ordre :
 5. Vérifier qu'il n'y a pas d'erreur
 
 **Résultat attendu** :
+
 ```
 Success. No rows returned
 ```
@@ -51,6 +52,7 @@ Success. No rows returned
 6. Vérifier qu'il n'y a pas d'erreur
 
 **Résultat attendu** :
+
 ```
 Success. No rows returned
 ```
@@ -67,6 +69,7 @@ Success. No rows returned
 6. Vérifier qu'il n'y a pas d'erreur
 
 **Résultat attendu** :
+
 ```
 Success. No rows returned
 ```
@@ -79,9 +82,9 @@ Success. No rows returned
 
 ```sql
 -- Vérifier que les tables existent
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name IN ('staff_availability_settings', 'resource_conflict_settings');
 ```
 
@@ -91,9 +94,9 @@ AND table_name IN ('staff_availability_settings', 'resource_conflict_settings');
 
 ```sql
 -- Vérifier que les fonctions existent
-SELECT routine_name, routine_type 
-FROM information_schema.routines 
-WHERE routine_schema = 'public' 
+SELECT routine_name, routine_type
+FROM information_schema.routines
+WHERE routine_schema = 'public'
 AND routine_name IN (
   'validate_product_slug',
   'validate_sku',
@@ -145,6 +148,7 @@ SELECT validate_digital_product(
 **Cause** : La table/fonction existe déjà.
 
 **Solution** :
+
 ```sql
 -- Vérifier si la table existe
 SELECT * FROM staff_availability_settings LIMIT 1;
@@ -165,6 +169,7 @@ SELECT * FROM staff_availability_settings LIMIT 1;
 **Cause** : Table référencée n'existe pas.
 
 **Solution** : Vérifier que les tables suivantes existent :
+
 - `products`
 - `digital_products`
 - `physical_products`
@@ -185,10 +190,12 @@ SELECT * FROM staff_availability_settings LIMIT 1;
 Après exécution réussie des 3 migrations :
 
 ### Tables Créées (2)
+
 - ✅ `staff_availability_settings` avec RLS activé
 - ✅ `resource_conflict_settings` avec RLS activé
 
 ### Fonctions Créées (6)
+
 - ✅ `validate_product_slug`
 - ✅ `validate_sku`
 - ✅ `validate_digital_version`
@@ -197,6 +204,7 @@ Après exécution réussie des 3 migrations :
 - ✅ `validate_service`
 
 ### Permissions Configurées
+
 - ✅ `GRANT EXECUTE` sur toutes les fonctions pour `authenticated`
 
 ---
@@ -214,4 +222,3 @@ Après exécution réussie :
 
 **Date** : 28 Janvier 2025  
 **Statut** : ⚠️ **À EXÉCUTER MANUELLEMENT DANS SUPABASE DASHBOARD**
-

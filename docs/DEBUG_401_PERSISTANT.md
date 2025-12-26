@@ -10,6 +10,7 @@
 Même avec le header `Authorization` dans le cron job, toutes les invocations retournent encore `401 Unauthorized`.
 
 **Causes possibles** :
+
 1. `current_setting('app.settings.service_role_key', true)` ne retourne pas la clé
 2. Le format du header `Authorization` n'est pas correct
 3. Supabase exige un format différent pour l'authentification
@@ -23,12 +24,13 @@ Même avec le header `Authorization` dans le cron job, toutes les invocations re
 Testez si `current_setting` retourne bien une valeur :
 
 ```sql
-SELECT 
+SELECT
   current_setting('app.settings.service_role_key', true) as service_role_key,
   LENGTH(current_setting('app.settings.service_role_key', true)) as key_length;
 ```
 
 **Résultat attendu** :
+
 - `service_role_key` : Une longue chaîne (la service role key)
 - `key_length` : > 0
 
@@ -178,5 +180,3 @@ SELECT net.http_post(
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

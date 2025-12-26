@@ -3,11 +3,12 @@
 ## 🔴 Problème Identifié
 
 L'erreur CORS suivante apparaît lors du développement local :
+
 ```
-Access to fetch at 'https://your-project-id.supabase.co/functions/v1/moneroo' 
-from origin 'http://localhost:8080' has been blocked by CORS policy: 
-Response to preflight request doesn't pass access control check: 
-The 'Access-Control-Allow-Origin' header has a value 'https://payhula.vercel.app/' 
+Access to fetch at 'https://your-project-id.supabase.co/functions/v1/moneroo'
+from origin 'http://localhost:8080' has been blocked by CORS policy:
+Response to preflight request doesn't pass access control check:
+The 'Access-Control-Allow-Origin' header has a value 'https://payhula.vercel.app/'
 that is not equal to the supplied origin.
 ```
 
@@ -16,6 +17,7 @@ that is not equal to the supplied origin.
 ### 1. CORS Dynamique dans l'Edge Function
 
 L'Edge Function Moneroo a été modifiée pour :
+
 - ✅ Détecter automatiquement l'origine de la requête
 - ✅ Autoriser `localhost` et `127.0.0.1` pour le développement
 - ✅ Autoriser le domaine de production (`https://payhula.vercel.app`)
@@ -26,6 +28,7 @@ L'Edge Function Moneroo a été modifiée pour :
 **Fichier :** `supabase/functions/moneroo/index.ts`
 
 **Changements :**
+
 1. Fonction `getCorsOrigin()` pour déterminer l'origine autorisée
 2. Fonction `getCorsHeaders()` pour créer les headers CORS dynamiques
 3. Support de `localhost` et `127.0.0.1` pour le développement
@@ -63,6 +66,7 @@ supabase functions deploy moneroo
 Après le redéploiement :
 
 1. **Redémarrer le serveur de développement :**
+
    ```bash
    npm run dev
    ```
@@ -120,8 +124,3 @@ Si l'erreur CORS persiste après le redéploiement :
 
 - [Documentation CORS Supabase](https://supabase.com/docs/guides/functions/cors)
 - [Documentation CORS MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
-
-
-
-
-

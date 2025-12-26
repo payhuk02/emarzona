@@ -94,6 +94,7 @@ Si un fichier ne peut pas être uploadé :
 ### Consulter l'Historique
 
 L'historique affiche toutes les versions avec :
+
 - Numéro de version
 - Statut (Active, Beta, Dépréciée)
 - Date de publication
@@ -118,6 +119,7 @@ L'historique affiche toutes les versions avec :
 ### Marquer comme Version Courante
 
 Quand vous créez une nouvelle version et cochez **"Version courante"** :
+
 - Toutes les autres versions perdent ce statut
 - Les clients voient cette version comme la principale
 - Les notifications sont envoyées automatiquement
@@ -129,6 +131,7 @@ Quand vous créez une nouvelle version et cochez **"Version courante"** :
 ### Quand les Notifications sont Envoyées
 
 Les clients reçoivent une notification quand :
+
 - Une nouvelle version est marquée comme **"Version courante"**
 - Ils ont acheté le produit précédemment
 - La commande est complétée
@@ -142,6 +145,7 @@ Les clients reçoivent une notification quand :
 ### Désactiver les Notifications
 
 Les notifications sont activées par défaut. Pour les désactiver :
+
 1. Allez dans les paramètres du produit
 2. Décochez **"Notifications automatiques"**
 
@@ -160,6 +164,7 @@ Utilisez le format `major.minor.patch` :
 ### Notes de Version
 
 Rédigez des notes claires avec :
+
 - ✅ Liste des nouvelles fonctionnalités
 - 🐛 Corrections de bugs
 - ⚠️ Notes de migration (si nécessaire)
@@ -174,6 +179,7 @@ Rédigez des notes claires avec :
 ### Versions Beta
 
 Utilisez les versions beta pour :
+
 - Tester avec un groupe restreint de clients
 - Recueillir des retours avant la version finale
 - Corriger les bugs avant la publication
@@ -203,6 +209,7 @@ Oui, dès qu'une version est marquée comme "Version courante", les notification
 ## 🆘 Support
 
 Pour toute question ou problème :
+
 - 📧 Email : support@emarzona.com
 - 💬 Chat : Disponible dans le dashboard
 - 📚 Documentation : `/docs`
@@ -210,4 +217,3 @@ Pour toute question ou problème :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

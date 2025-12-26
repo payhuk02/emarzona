@@ -48,7 +48,7 @@
   @apply hover:bg-muted/50;
 }
 
-.store-tabs-trigger[data-state="active"] {
+.store-tabs-trigger[data-state='active'] {
   @apply bg-primary text-primary-foreground;
   @apply shadow-sm;
 }
@@ -247,27 +247,27 @@
   .store-tabs-list {
     @apply grid-cols-2 gap-1;
   }
-  
+
   .store-tabs-trigger {
     @apply text-xs px-2;
   }
-  
+
   .store-card-header {
     @apply p-4;
   }
-  
+
   .store-card-content {
     @apply p-4;
   }
-  
+
   .store-analytics-grid {
     @apply grid-cols-1 gap-4;
   }
-  
+
   .store-social-links {
     @apply flex-col gap-2;
   }
-  
+
   .store-social-link {
     @apply justify-center;
   }
@@ -278,7 +278,7 @@
   .store-tabs-list {
     @apply grid-cols-4 gap-2;
   }
-  
+
   .store-analytics-grid {
     @apply grid-cols-2 gap-6;
   }
@@ -289,11 +289,11 @@
   .store-tabs-list {
     @apply grid-cols-4 gap-2;
   }
-  
+
   .store-analytics-grid {
     @apply grid-cols-3 gap-6;
   }
-  
+
   .store-card:hover {
     @apply transform -translate-y-2;
   }
@@ -321,11 +321,11 @@
   .store-card {
     @apply bg-card border-border;
   }
-  
+
   .store-header {
     @apply bg-card/95;
   }
-  
+
   .store-url-card {
     @apply from-muted/20 to-muted/5;
   }
@@ -336,15 +336,15 @@
   .store-card {
     @apply transition-none;
   }
-  
+
   .store-card:hover {
     @apply transform-none;
   }
-  
+
   .store-button:hover {
     @apply scale-100;
   }
-  
+
   .animate-fade-in {
     animation: none;
   }

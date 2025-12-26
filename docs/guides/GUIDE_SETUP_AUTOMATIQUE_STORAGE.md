@@ -70,6 +70,7 @@ Vous devez les créer manuellement :
 ## 🔐 POLITIQUES À CRÉER
 
 ### 1. INSERT (Upload)
+
 ```
 Nom: Authenticated users can upload videos
 Opération: INSERT
@@ -78,6 +79,7 @@ WITH CHECK: bucket_id = 'videos' AND (storage.foldername(name))[1] = 'course-vid
 ```
 
 ### 2. SELECT (Lecture)
+
 ```
 Nom: Anyone can view videos
 Opération: SELECT
@@ -86,6 +88,7 @@ USING: bucket_id = 'videos'
 ```
 
 ### 3. UPDATE (Modification)
+
 ```
 Nom: Users can update their own videos
 Opération: UPDATE
@@ -95,6 +98,7 @@ WITH CHECK: bucket_id = 'videos' AND owner = auth.uid()
 ```
 
 ### 4. DELETE (Suppression)
+
 ```
 Nom: Users can delete their own videos
 Opération: DELETE
@@ -128,6 +132,7 @@ USING: bucket_id = 'videos' AND owner = auth.uid()
 8. Tester l'upload d'une petite vidéo (< 50 MB)
 
 **Résultat attendu** :
+
 - ✅ Barre de progression affichée
 - ✅ Upload réussi
 - ✅ Preview de la vidéo affichée
@@ -137,15 +142,19 @@ USING: bucket_id = 'videos' AND owner = auth.uid()
 ## ❌ EN CAS D'ERREUR
 
 ### Erreur : "Cannot find module '@supabase/supabase-js'"
+
 **Solution** : Le package est déjà installé dans le projet. Si l'erreur persiste :
+
 ```bash
 npm install @supabase/supabase-js
 ```
 
 ### Erreur : "Bucket already exists"
+
 **Solution** : C'est normal ! Le script détectera le bucket existant et mettra à jour ses paramètres.
 
 ### Erreur upload dans l'app : "Access denied"
+
 **Solution** : Les politiques ne sont pas créées. Suivez l'étape 2 pour les créer via le Dashboard.
 
 ---
@@ -163,4 +172,3 @@ npm install @supabase/supabase-js
 **Statut** : ✅ **SCRIPT PRÊT À L'EMPLOI**
 
 Exécutez maintenant : `node scripts/setup-storage.js` 🚀
-

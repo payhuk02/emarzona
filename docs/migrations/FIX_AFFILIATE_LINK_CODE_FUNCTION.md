@@ -2,6 +2,7 @@
 
 **Date** : 31/01/2025  
 **Problème** : La fonction `generate_affiliate_link_code` échoue avec l'erreur :
+
 ```
 function digest(text, unknown) does not exist
 ```
@@ -13,6 +14,7 @@ function digest(text, unknown) does not exist
 ## ✅ Solution
 
 Une migration a été créée pour :
+
 1. Activer l'extension `pgcrypto`
 2. Corriger la fonction `generate_affiliate_link_code` pour utiliser correctement `digest()`
 
@@ -46,11 +48,13 @@ supabase db push
 Après l'exécution de la migration, vérifiez que :
 
 1. **L'extension est activée** :
+
 ```sql
 SELECT * FROM pg_extension WHERE extname = 'pgcrypto';
 ```
 
 2. **La fonction existe et fonctionne** :
+
 ```sql
 SELECT public.generate_affiliate_link_code('TEST123', 'test-product');
 -- Devrait retourner un code de 12 caractères en majuscules
@@ -91,4 +95,3 @@ Une fois la migration exécutée avec succès :
 1. Testez la création d'un lien d'affiliation depuis l'interface
 2. Vérifiez que le code généré est bien un code de 12 caractères
 3. Vérifiez que les liens d'affiliation peuvent être créés sans erreur
-

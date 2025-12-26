@@ -1,4 +1,5 @@
 ﻿# Configuration Vercel pour Payhuk
+
 # Ce fichier contient les instructions pour configurer le déploiement
 
 ## 🚀 Déploiement sur Vercel
@@ -16,6 +17,7 @@ VITE_SUPABASE_PROJECT_ID=your-project-id
 ### 2. Configuration du build
 
 Le fichier `vercel.json` est configuré pour :
+
 - ✅ Build automatique avec Vite
 - ✅ Service Worker pour PWA
 - ✅ Headers de sécurité
@@ -39,6 +41,7 @@ vercel --prod
 ### 4. Fonctionnalités PWA
 
 Le projet est configuré comme PWA avec :
+
 - Service Worker (`/sw.js`)
 - Manifest (`/manifest.json`)
 - Cache optimisé pour les assets
@@ -47,6 +50,7 @@ Le projet est configuré comme PWA avec :
 ### 5. Sécurité
 
 Headers de sécurité configurés :
+
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 - `X-XSS-Protection: 1; mode=block`
@@ -73,6 +77,7 @@ Headers de sécurité configurés :
 ## 🎯 Résultat attendu
 
 Après déploiement, votre application Payhuk sera accessible via :
+
 - URL Vercel : `https://payhuk.vercel.app`
 - PWA installable sur mobile/desktop
 - Performance optimisée

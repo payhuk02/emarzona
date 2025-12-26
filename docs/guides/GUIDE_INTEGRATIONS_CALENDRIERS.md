@@ -134,6 +134,7 @@ Les intégrations calendriers permettent de synchroniser vos réservations de se
 ### Synchronisation Automatique
 
 La synchronisation automatique se fait à l'intervalle configuré :
+
 - **15 minutes** : Pour les calendriers très actifs
 - **30 minutes** : Recommandé pour la plupart des cas
 - **60 minutes** : Pour les calendriers peu actifs
@@ -141,6 +142,7 @@ La synchronisation automatique se fait à l'intervalle configuré :
 ### Logs de Synchronisation
 
 Consultez les logs pour voir :
+
 - Nombre d'événements créés/mis à jour/supprimés
 - Erreurs éventuelles
 - Durée de la synchronisation
@@ -153,6 +155,7 @@ Consultez les logs pour voir :
 ### Détection Automatique
 
 Le système détecte automatiquement les conflits quand :
+
 - Un événement externe chevauche une réservation
 - Une réservation chevauche un événement externe
 - Deux événements sont créés au même moment
@@ -173,6 +176,7 @@ Le système détecte automatiquement les conflits quand :
 ### Problème : Synchronisation échoue
 
 **Solutions** :
+
 1. Vérifiez que les credentials sont valides
 2. Vérifiez que les tokens ne sont pas expirés
 3. Vérifiez les permissions de l'application
@@ -181,6 +185,7 @@ Le système détecte automatiquement les conflits quand :
 ### Problème : Événements dupliqués
 
 **Solutions** :
+
 1. Vérifiez la direction de synchronisation
 2. Désactivez temporairement la synchronisation automatique
 3. Nettoyez les doublons manuellement
@@ -189,6 +194,7 @@ Le système détecte automatiquement les conflits quand :
 ### Problème : Synchronisation lente
 
 **Solutions** :
+
 1. Réduisez l'intervalle de synchronisation
 2. Utilisez la synchronisation incrémentale
 3. Limitez le nombre d'événements synchronisés
@@ -244,6 +250,7 @@ Oui, créez une intégration pour chaque calendrier.
 ## 🆘 Support
 
 Pour toute question ou problème :
+
 - 📧 Email : support@emarzona.com
 - 💬 Chat : Disponible dans le dashboard
 - 📚 Documentation : `/docs`
@@ -251,4 +258,3 @@ Pour toute question ou problème :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

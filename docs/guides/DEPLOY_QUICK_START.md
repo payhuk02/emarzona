@@ -29,17 +29,20 @@ git push origin main
 ### 3️⃣ Déploiement Vercel (10 min)
 
 #### A. Créer compte Vercel
+
 1. Aller sur https://vercel.com/signup
 2. Se connecter avec GitHub
 3. ✅ Compte créé !
 
 #### B. Import projet
+
 1. Cliquer **"Add New..."** → **"Project"**
 2. **Import Git Repository**
    - Sélectionner `payhuk`
    - Cliquer **"Import"**
 
 #### C. Configuration build
+
 ```
 Framework Preset: Vite
 Root Directory: ./
@@ -67,10 +70,12 @@ Valeur: production
 ```
 
 **Où trouver ces valeurs ?**
+
 - Supabase Dashboard → Settings → API
 - Copier "Project URL" et "anon/public key"
 
 #### E. Deploy
+
 1. Cliquer **"Deploy"**
 2. ☕ Attendre 2-3 minutes
 3. ✅ **Déployé !**
@@ -81,10 +86,10 @@ Valeur: production
 
 1. **Aller dans Supabase Dashboard**
 2. **Authentication → URL Configuration**
-   
+
    ```
    Site URL: https://payhuk-xxx.vercel.app
-   
+
    Redirect URLs:
    https://payhuk-xxx.vercel.app
    https://payhuk-xxx.vercel.app/auth/callback
@@ -92,8 +97,9 @@ Valeur: production
    ```
 
 3. **API Settings → CORS**
-   
+
    Ajouter :
+
    ```
    https://payhuk-xxx.vercel.app
    ```
@@ -103,6 +109,7 @@ Valeur: production
 ### 5️⃣ Premier test (5 min)
 
 1. **Ouvrir l'app**
+
    ```
    https://payhuk-xxx.vercel.app
    ```
@@ -127,6 +134,7 @@ Valeur: production
 ### A. Acheter un domaine
 
 Recommandations :
+
 - **Namecheap** : ~$10/an
 - **GoDaddy** : ~$15/an
 - **OVH** : ~$10/an
@@ -141,8 +149,9 @@ Suggestion : `payhuk.com`, `monpayhuk.com`, `learn-payhuk.com`
    - Copier les valeurs DNS affichées
 
 2. **Chez votre registrar**
-   
+
    Ajouter ces enregistrements :
+
    ```
    Type    Name    Value                   TTL
    A       @       76.76.21.21             3600
@@ -186,6 +195,7 @@ https://payhuk.com/**
 ### Vercel Analytics (Gratuit)
 
 Automatiquement activé :
+
 - Page views
 - Performance metrics
 - Device stats
@@ -215,6 +225,7 @@ Automatiquement activé :
 ### ❌ Build failed
 
 **Solution :**
+
 ```bash
 # Vérifier en local
 npm install
@@ -228,6 +239,7 @@ npm run build
 ### ❌ Variables d'environnement non chargées
 
 **Solution :**
+
 ```bash
 # Vercel → Settings → Environment Variables
 # Vérifier que toutes les variables sont là
@@ -238,6 +250,7 @@ npm run build
 ### ❌ Supabase CORS Error
 
 **Solution :**
+
 ```bash
 # Supabase → Settings → API → CORS Allowed Origins
 # Ajouter votre domaine Vercel
@@ -247,6 +260,7 @@ npm run build
 ### ❌ Auth redirect pas bon
 
 **Solution :**
+
 ```bash
 # Supabase → Authentication → URL Configuration
 # Site URL doit être EXACTEMENT votre URL Vercel
@@ -256,9 +270,10 @@ npm run build
 ### ❌ Page blanche après déploiement
 
 **Solution :**
+
 ```bash
 # Vérifier Console Browser (F12)
-# Souvent : 
+# Souvent :
 # 1. Vérifier vercel.json (rewrites pour SPA)
 # 2. Vérifier base dans vite.config.ts
 # 3. Hard refresh : Ctrl+Shift+R
@@ -269,21 +284,25 @@ npm run build
 ## 🎯 PROCHAINES ÉTAPES
 
 ### Contenu
+
 1. **Créer 3-5 cours de démo**
 2. **Ajouter images/bannières**
 3. **Remplir page À propos**
 
 ### Marketing
+
 1. **Annoncer sur réseaux sociaux**
 2. **Email liste d'attente**
 3. **Blog post launch**
 
 ### Optimisation
+
 1. **Google Analytics configuré**
 2. **SEO meta tags tous remplis**
 3. **Sitemap généré**
 
 ### Légal
+
 1. **CGU / CGV**
 2. **Politique de confidentialité**
 3. **Mentions légales**
@@ -301,4 +320,3 @@ npm run build
 ```
 
 **Bon lancement !** 🚀
-

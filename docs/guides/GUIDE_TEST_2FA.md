@@ -29,11 +29,13 @@ Téléchargez une de ces apps sur votre smartphone :
 ## ✅ TEST 1 : ENROLLMENT (Inscription 2FA)
 
 ### Objectif
+
 Activer le 2FA pour la première fois sur un compte admin.
 
 ### Étapes
 
 #### 1. Navigation
+
 ```
 1. Se connecter à Payhula
 2. Cliquer sur "Settings" (menu gauche)
@@ -44,6 +46,7 @@ Activer le 2FA pour la première fois sur un compte admin.
 #### 2. Vérifications Initiales
 
 **✓ Affichage attendu** :
+
 - ❌ Alert orange : "L'authentification à deux facteurs n'est pas activée"
 - 🔘 Bouton "Activer le 2FA" visible et cliquable
 - 📝 Card "Configuration" avec description des apps
@@ -56,6 +59,7 @@ Activer le 2FA pour la première fois sur un compte admin.
 ```
 
 **✓ Vérifications** :
+
 - Loader s'affiche pendant l'initialisation
 - Pas d'erreur dans la console
 - Appel API Supabase `mfa.enroll()` réussi
@@ -63,6 +67,7 @@ Activer le 2FA pour la première fois sur un compte admin.
 #### 4. QR Code Généré
 
 **✓ Affichage attendu** :
+
 - 📱 QR Code affiché (image 192x192px)
 - 🔑 Clé secrète manuelle affichée (format : ABC123DEF456)
 - 📋 Bouton "Copier" pour la clé
@@ -71,6 +76,7 @@ Activer le 2FA pour la première fois sur un compte admin.
 - ❌ Bouton "Annuler"
 
 **✓ Actions** :
+
 ```
 1. Ouvrir Google Authenticator sur smartphone
 2. Scanner le QR Code avec l'app
@@ -79,6 +85,7 @@ Activer le 2FA pour la première fois sur un compte admin.
 ```
 
 **✓ Résultat dans l'app** :
+
 - Entrée "Payhula" ou "supabase" créée
 - Code à 6 chiffres affiché et rafraîchi toutes les 30s
 
@@ -90,12 +97,14 @@ Activer le 2FA pour la première fois sur un compte admin.
 ```
 
 **✓ Vérifications** :
+
 - Input accepte uniquement des chiffres
 - Maximum 6 caractères
 - Bouton désactivé si moins de 6 chiffres
 - Loading pendant la vérification
 
 **✓ Succès attendu** :
+
 - ✅ Toast : "2FA activé !"
 - 🔄 Section 2FA se ferme
 - 🟢 Alert verte : "2FA activé - Votre compte est protégé"
@@ -107,26 +116,29 @@ Activer le 2FA pour la première fois sur un compte admin.
 
 #### 6. Erreurs Possibles
 
-| Erreur | Cause | Solution |
-|--------|-------|----------|
-| "Code incorrect" | Code expiré (>30s) | Attendre nouveau code et réessayer |
-| "Erreur Supabase" | MFA pas configuré | Vérifier config Supabase |
-| QR Code ne s'affiche pas | Dépendance manquante | Vérifier `qrcode` installé |
+| Erreur                   | Cause                | Solution                           |
+| ------------------------ | -------------------- | ---------------------------------- |
+| "Code incorrect"         | Code expiré (>30s)   | Attendre nouveau code et réessayer |
+| "Erreur Supabase"        | MFA pas configuré    | Vérifier config Supabase           |
+| QR Code ne s'affiche pas | Dépendance manquante | Vérifier `qrcode` installé         |
 
 ---
 
 ## ✅ TEST 2 : LOGIN AVEC 2FA
 
 ### Objectif
+
 Se connecter avec l'authentification à deux facteurs active.
 
 ### Pré-requis
+
 - 2FA activé (Test 1 complété)
 - Se déconnecter de Payhula
 
 ### Étapes
 
 #### 1. Login Standard
+
 ```
 1. Aller sur /login
 2. Entrer email + mot de passe
@@ -136,6 +148,7 @@ Se connecter avec l'authentification à deux facteurs active.
 #### 2. Prompt 2FA
 
 **✓ Affichage attendu** :
+
 - 🔐 Écran : "Authentification à deux facteurs"
 - 📝 Description : "Entrez le code depuis votre app authenticator"
 - 🔢 Input : Code à 6 chiffres
@@ -152,11 +165,13 @@ Se connecter avec l'authentification à deux facteurs active.
 ```
 
 **✓ Vérifications** :
+
 - Code accepté si valide
 - Redirection vers Dashboard
 - Session créée avec 2FA validé
 
 **✓ Erreurs possibles** :
+
 - "Code invalide" → Attendre nouveau code
 - "Code expiré" → Utiliser code de récupération
 - "Trop de tentatives" → Attendre 5 minutes
@@ -164,6 +179,7 @@ Se connecter avec l'authentification à deux facteurs active.
 #### 4. Session Sécurisée
 
 **✓ Vérifications post-login** :
+
 - User connecté
 - Token session contient `aal2` (Authentication Assurance Level 2)
 - Badge "2FA" visible dans profil (optionnel)
@@ -173,11 +189,13 @@ Se connecter avec l'authentification à deux facteurs active.
 ## ✅ TEST 3 : DÉSACTIVATION 2FA
 
 ### Objectif
+
 Désactiver le 2FA sur un compte.
 
 ### Étapes
 
 #### 1. Navigation
+
 ```
 1. Settings → Sécurité
 2. Section "Authentification à deux facteurs"
@@ -192,6 +210,7 @@ Désactiver le 2FA sur un compte.
 ```
 
 **✓ Vérifications** :
+
 - ✅ Toast : "2FA désactivé"
 - ❌ Alert orange : "2FA non activé"
 - 🔘 Bouton "Activer le 2FA" réapparaît
@@ -209,9 +228,11 @@ Désactiver le 2FA sur un compte.
 ## ✅ TEST 4 : CODES DE RÉCUPÉRATION (Backup Codes)
 
 ### Objectif
+
 Utiliser un code de récupération si l'app authenticator est perdue.
 
 ### Pré-requis
+
 - 2FA activé
 - Générer codes de récupération (fonctionnalité à implémenter)
 
@@ -224,6 +245,7 @@ Settings → Sécurité → 2FA → "Générer codes de récupération"
 ```
 
 **✓ Affichage** :
+
 - 10 codes à usage unique
 - Format : `ABCD-1234-EFGH-5678`
 - Boutons : Copier / Télécharger / Imprimer
@@ -238,6 +260,7 @@ Settings → Sécurité → 2FA → "Générer codes de récupération"
 ```
 
 **✓ Résultat** :
+
 - Accès au compte
 - Code utilisé devient invalide
 - Avertissement : "9 codes restants"
@@ -364,20 +387,20 @@ test.describe('2FA Flow', () => {
     await page.fill('[name="email"]', 'admin@payhula.com');
     await page.fill('[name="password"]', 'password123');
     await page.click('button[type="submit"]');
-    
+
     // Navigate to Security Settings
     await page.goto('/dashboard/settings?tab=security');
-    
+
     // Click Enable 2FA
     await page.click('text=Activer le 2FA');
-    
+
     // Wait for QR Code
     await expect(page.locator('img[alt="QR Code 2FA"]')).toBeVisible();
-    
+
     // Verify secret is displayed
     await expect(page.locator('input[readonly]')).toHaveValue(/^[A-Z0-9]{32}$/);
   });
-  
+
   test('should login with 2FA', async ({ page }) => {
     // TODO: Implement with TOTP library
   });
@@ -405,4 +428,3 @@ test.describe('2FA Flow', () => {
 **Guide créé le 28 Octobre 2025**  
 **Version** : 1.0.0  
 **Status** : Ready for Testing ✅
-

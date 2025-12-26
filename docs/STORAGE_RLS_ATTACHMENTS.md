@@ -9,11 +9,13 @@
 ## 📋 Vue d'Ensemble
 
 Le bucket `attachments` stocke tous les fichiers uploadés dans le système de messaging :
+
 - Images (JPG, PNG, GIF, WEBP)
 - Vidéos (MP4, WEBM)
 - Documents (PDF, DOC, DOCX, etc.)
 
 **Structure des dossiers**:
+
 ```
 attachments/
 ├── message-attachments/
@@ -41,6 +43,7 @@ USING (bucket_id = 'attachments');
 ```
 
 **⚠️ Alternative sécurisée** (si vous ne voulez pas de lecture publique):
+
 ```sql
 -- Politique: Participants can view their attachments
 CREATE POLICY "Participants can view their attachments"
@@ -263,6 +266,7 @@ USING (
 ### Tester les Politiques
 
 1. **Test de lecture**:
+
 ```sql
 -- Devrait retourner les fichiers si la politique SELECT fonctionne
 SELECT * FROM storage.objects
@@ -271,6 +275,7 @@ LIMIT 10;
 ```
 
 2. **Test d'upload** (depuis le client):
+
 ```typescript
 const { data, error } = await supabase.storage
   .from('attachments')
@@ -284,10 +289,9 @@ if (error) {
 ```
 
 3. **Test de lecture publique**:
+
 ```typescript
-const { data } = supabase.storage
-  .from('attachments')
-  .getPublicUrl('test/test.txt');
+const { data } = supabase.storage.from('attachments').getPublicUrl('test/test.txt');
 
 console.log('Public URL:', data.publicUrl);
 // Tester l'URL dans le navigateur
@@ -300,11 +304,13 @@ console.log('Public URL:', data.publicUrl);
 ### Problème: "403 Forbidden" lors de la lecture
 
 **Causes possibles**:
+
 1. Politique SELECT manquante ou incorrecte
 2. Bucket non public alors que `getPublicUrl()` est utilisé
 3. Chemin de fichier incorrect
 
 **Solutions**:
+
 1. Vérifier que la politique SELECT existe
 2. Vérifier `storage.buckets.public = true` si vous utilisez `getPublicUrl()`
 3. Vérifier le chemin dans `storage_path` de la table `*_message_attachments`
@@ -314,11 +320,13 @@ console.log('Public URL:', data.publicUrl);
 ### Problème: "403 Forbidden" lors de l'upload
 
 **Causes possibles**:
+
 1. Politique INSERT manquante ou incorrecte
 2. Utilisateur non authentifié
 3. Chemin ne correspond pas aux patterns autorisés
 
 **Solutions**:
+
 1. Vérifier que la politique INSERT existe
 2. Vérifier que `auth.uid()` n'est pas NULL
 3. Vérifier que le chemin commence par un des patterns autorisés
@@ -335,4 +343,3 @@ console.log('Public URL:', data.publicUrl);
 ---
 
 **Dernière mise à jour**: 1 Février 2025
-

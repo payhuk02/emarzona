@@ -29,7 +29,7 @@ D'après la requête de schéma, voici les colonnes disponibles :
 ## ✅ Requête Corrigée pour Voir les Logs d'Emails
 
 ```sql
-SELECT 
+SELECT
   id,
   to_email,
   subject,
@@ -55,7 +55,7 @@ LIMIT 10;
 ## 🔍 Vérifier si des Emails ont été Créés
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   COUNT(CASE WHEN status IS NOT NULL THEN 1 END) as with_status,
   COUNT(CASE WHEN sendgrid_message_id IS NOT NULL THEN 1 END) as with_sendgrid_id,
@@ -81,14 +81,14 @@ LIMIT 10;
 
 ## 🎯 Mapping des Colonnes
 
-| Colonne Documentée | Colonne Réelle | Notes |
-|-------------------|----------------|-------|
-| `recipient_email` | `to_email` | ✅ Utiliser `to_email` |
-| `sendgrid_status` | `status` | ✅ Utiliser `status` |
-| `sent_at` | `created_at` | ✅ Utiliser `created_at` |
-| `delivered_at` | ❌ N'existe pas | Vérifier dans `metadata` ou `status` |
-| `opened_at` | `opened_at` | ✅ Existe |
-| `clicked_at` | `clicked_at` | ✅ Existe |
+| Colonne Documentée | Colonne Réelle  | Notes                                |
+| ------------------ | --------------- | ------------------------------------ |
+| `recipient_email`  | `to_email`      | ✅ Utiliser `to_email`               |
+| `sendgrid_status`  | `status`        | ✅ Utiliser `status`                 |
+| `sent_at`          | `created_at`    | ✅ Utiliser `created_at`             |
+| `delivered_at`     | ❌ N'existe pas | Vérifier dans `metadata` ou `status` |
+| `opened_at`        | `opened_at`     | ✅ Existe                            |
+| `clicked_at`       | `clicked_at`    | ✅ Existe                            |
 
 ---
 
@@ -106,7 +106,7 @@ LIMIT 10;
 Si vous voulez voir ce qui est stocké dans `metadata` :
 
 ```sql
-SELECT 
+SELECT
   id,
   to_email,
   subject,
@@ -122,4 +122,3 @@ LIMIT 5;
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

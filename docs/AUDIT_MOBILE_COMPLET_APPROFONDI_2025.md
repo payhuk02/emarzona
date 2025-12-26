@@ -10,4 +10,3 @@
 - Problèmes critiques (P0) et plan de correction
 - Problèmes importants (P1/P2) et quick wins
 - Checklist de validation (mobile/tablet)
-

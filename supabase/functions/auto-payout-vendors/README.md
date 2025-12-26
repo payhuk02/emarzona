@@ -13,9 +13,9 @@ La configuration se trouve dans `platform_settings` sous la clé `admin` :
 ```json
 {
   "auto_payout_vendors": {
-    "enabled": false,  // Activer/désactiver le reversement automatique
-    "delay_days": 7,   // Délai en jours avant reversement automatique
-    "min_amount": 50000  // Montant minimum en XOF pour reversement automatique
+    "enabled": false, // Activer/désactiver le reversement automatique
+    "delay_days": 7, // Délai en jours avant reversement automatique
+    "min_amount": 50000 // Montant minimum en XOF pour reversement automatique
   }
 }
 ```
@@ -23,6 +23,7 @@ La configuration se trouve dans `platform_settings` sous la clé `admin` :
 ## Conditions d'éligibilité
 
 Un store est éligible si :
+
 1. `available_balance >= min_amount` (configuré)
 2. Le dernier calcul (`last_calculated_at`) est antérieur à `delay_days` jours OU est NULL
 3. Le store a une méthode de paiement par défaut configurée
@@ -48,7 +49,7 @@ Dans Supabase Dashboard > Database > Cron Jobs, créer un job :
 
 - **Schedule**: `0 3 * * *` (tous les jours à 3h du matin)
 - **Function**: `auto-payout-vendors`
-- **Headers**: 
+- **Headers**:
   - `x-cron-secret`: `auto-payout-vendors-secret-2025` (ou votre secret)
 
 ## Notes
@@ -56,5 +57,3 @@ Dans Supabase Dashboard > Database > Cron Jobs, créer un job :
 - Les retraits créés automatiquement ont le status `pending` et nécessitent l'approbation d'un admin
 - La fonction limite à 50 stores par exécution pour éviter la surcharge
 - Les stores sans méthode de paiement par défaut sont ignorés
-
-

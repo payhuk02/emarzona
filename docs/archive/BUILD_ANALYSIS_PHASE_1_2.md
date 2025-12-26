@@ -9,6 +9,7 @@
 ## ✅ RÉSULTATS DU BUILD
 
 ### Build Status
+
 - ✅ **Build réussi** : Aucune erreur
 - ⚠️ **Warnings** : 3 warnings mineurs (non bloquants)
 - ⏱️ **Temps de build** : 1m 42s
@@ -63,11 +64,13 @@
 ### 1. Module "crypto" externalisé
 
 **Message** :
+
 ```
 Module "crypto" has been externalized for browser compatibility
 ```
 
 **Fichier concerné** :
+
 - `src/services/webhooks/digitalProductWebhooks.ts`
 
 **Impact** : ⚠️ Mineur - Le module crypto n'est pas disponible dans le navigateur
@@ -77,11 +80,13 @@ Module "crypto" has been externalized for browser compatibility
 ### 2. Import dynamique/statique mixte
 
 **Message** :
+
 ```
 physicalProductWebhooks.ts is dynamically imported but also statically imported
 ```
 
 **Fichiers concernés** :
+
 - `src/hooks/physical/useReturns.ts` (import dynamique)
 - `src/hooks/physical/usePhysicalWebhooks.ts` (import statique)
 
@@ -92,6 +97,7 @@ physicalProductWebhooks.ts is dynamically imported but also statically imported
 ### 3. Chunks > 500KB
 
 **Message** :
+
 ```
 Some chunks are larger than 500 kB after minification
 ```
@@ -133,6 +139,7 @@ Some chunks are larger than 500 kB after minification
 #### Chunk chunk-B6lpjbna.js (1,035 KB)
 
 **Actions** :
+
 1. Identifier le contenu du chunk
 2. Séparer par fonctionnalité
 3. Utiliser dynamic imports pour les fonctionnalités non critiques
@@ -140,6 +147,7 @@ Some chunks are larger than 500 kB after minification
 #### Chunk chunk-Da80ZbAM.js (852 KB)
 
 **Actions** :
+
 1. Analyser les dépendances
 2. Séparer les vendors lourds
 3. Lazy load les composants volumineux
@@ -173,20 +181,20 @@ import { webhooks } from './physicalProductWebhooks';
 #### Optimisation vite.config.ts
 
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   // Séparer les chunks volumineux
   if (id.includes('heavy-library')) {
     return 'vendor-heavy';
   }
-  
+
   // Séparer par route
   if (id.includes('/pages/')) {
     const match = id.match(/\/pages\/([^/]+)/);
     return match ? `page-${match[1]}` : 'pages';
   }
-  
+
   // ... reste de la logique
-}
+};
 ```
 
 ---
@@ -214,19 +222,19 @@ manualChunks: (id) => {
 
 ### Bundle Size
 
-| Métrique | Avant Phase 1 | Après Phase 1-2 | Amélioration |
-|----------|---------------|-----------------|--------------|
-| **Bundle initial** | ~800 KB | ~1,035 KB | ⚠️ À optimiser |
-| **Bundle gzipped** | ~200 KB | ~319 KB | ⚠️ À optimiser |
-| **Chunks > 500KB** | 3-4 | 5 | ⚠️ À réduire |
+| Métrique           | Avant Phase 1 | Après Phase 1-2 | Amélioration   |
+| ------------------ | ------------- | --------------- | -------------- |
+| **Bundle initial** | ~800 KB       | ~1,035 KB       | ⚠️ À optimiser |
+| **Bundle gzipped** | ~200 KB       | ~319 KB         | ⚠️ À optimiser |
+| **Chunks > 500KB** | 3-4           | 5               | ⚠️ À réduire   |
 
 ### Build Performance
 
-| Métrique | Valeur | Statut |
-|----------|--------|--------|
-| **Temps de build** | 1m 42s | ✅ Bon |
-| **Modules transformés** | 5,123 | ✅ Normal |
-| **Warnings** | 3 | ⚠️ Mineurs |
+| Métrique                | Valeur | Statut     |
+| ----------------------- | ------ | ---------- |
+| **Temps de build**      | 1m 42s | ✅ Bon     |
+| **Modules transformés** | 5,123  | ✅ Normal  |
+| **Warnings**            | 3      | ⚠️ Mineurs |
 
 ---
 
@@ -280,6 +288,3 @@ Le build est **réussi** avec les optimisations des Phases 1 & 2. Il y a quelque
 **Document généré le** : Janvier 2025  
 **Version** : 1.0  
 **Statut** : ✅ Build réussi
-
-
-

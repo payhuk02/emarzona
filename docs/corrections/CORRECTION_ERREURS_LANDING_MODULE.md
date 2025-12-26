@@ -11,6 +11,7 @@
 ### 1. Erreur critique : Landing.tsx ne peut pas être chargé
 
 **Message** :
+
 ```
 TypeError: Failed to fetch dynamically imported module: http://localhost:8080/src/pages/Landing.tsx
 ```
@@ -22,6 +23,7 @@ TypeError: Failed to fetch dynamically imported module: http://localhost:8080/sr
 ### 2. Erreur 504 : embla-carousel-autoplay
 
 **Message** :
+
 ```
 Failed to load resource: the server responded with a status of 504 (Outdated Optimize Dep)
 embla-carousel-autoplay.js?v=2554c786:1
@@ -34,6 +36,7 @@ embla-carousel-autoplay.js?v=2554c786:1
 ### 3. Erreur Sentry DSN invalide
 
 **Message** :
+
 ```
 [ERROR] Invalid Sentry Dsn: https://41fb924c28b3e18f148e62de87b9b2efe6c451826194294744.ingest.de.sentry.io/4518261989488848
 ```
@@ -66,6 +69,7 @@ optimizeDeps: {
 ### 2. Nettoyage du cache Vite
 
 **Action** :
+
 ```powershell
 Remove-Item -Path node_modules\.vite -Recurse -Force
 ```
@@ -82,7 +86,11 @@ Remove-Item -Path node_modules\.vite -Recurse -Force
 // Valider le format du DSN
 try {
   // Vérifier que le DSN est valide (format: https://xxx@xxx.ingest.sentry.io/xxx)
-  if (!SENTRY_DSN.match(/^https:\/\/[a-f0-9]+@[a-z0-9-]+\.ingest\.(sentry\.io|de\.sentry\.io)\/[0-9]+$/)) {
+  if (
+    !SENTRY_DSN.match(
+      /^https:\/\/[a-f0-9]+@[a-z0-9-]+\.ingest\.(sentry\.io|de\.sentry\.io)\/[0-9]+$/
+    )
+  ) {
     logger.error('Invalid Sentry Dsn:', SENTRY_DSN);
     return;
   }
@@ -99,14 +107,17 @@ try {
 ## 📊 FICHIERS MODIFIÉS
 
 ### 1. `vite.config.ts`
+
 - ✅ Ajout de `embla-carousel-autoplay` dans `optimizeDeps.include`
 - ✅ Ajout de `embla-carousel-react` dans `optimizeDeps.include`
 
 ### 2. `src/lib/sentry.ts`
+
 - ✅ Ajout de la validation du DSN Sentry
 - ✅ Retour anticipé si le DSN est invalide
 
 ### 3. Cache Vite
+
 - ✅ Cache nettoyé pour forcer la re-optimisation
 
 ---
@@ -116,6 +127,7 @@ try {
 ### Tests à effectuer
 
 1. **Redémarrer le serveur de développement** :
+
    ```bash
    npm run dev
    ```
@@ -137,13 +149,14 @@ try {
 ### Si l'erreur persiste
 
 1. **Nettoyer complètement** :
+
    ```powershell
    # Arrêter tous les processus Node
    Get-Process | Where-Object {$_.ProcessName -like "*node*"} | Stop-Process -Force
-   
+
    # Nettoyer le cache Vite
    Remove-Item -Path node_modules\.vite -Recurse -Force
-   
+
    # Redémarrer le serveur
    npm run dev
    ```
@@ -187,6 +200,7 @@ try {
 ## ✅ RÉSULTAT ATTENDU
 
 Après ces corrections :
+
 - ✅ `Landing.tsx` se charge correctement
 - ✅ Aucune erreur `Failed to fetch dynamically imported module`
 - ✅ Aucune erreur 504 pour `embla-carousel-autoplay`
@@ -198,6 +212,7 @@ Après ces corrections :
 ## 🎯 PROCHAINES ÉTAPES
 
 1. **Redémarrer le serveur** :
+
    ```bash
    npm run dev
    ```
@@ -219,6 +234,3 @@ Après ces corrections :
 **Document généré le** : Janvier 2025  
 **Version** : 1.0  
 **Statut** : ✅ Corrigé
-
-
-

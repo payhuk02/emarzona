@@ -8,6 +8,7 @@
 ## 📊 MÉTHODOLOGIE D'AUDIT
 
 Analyse des fonctionnalités avancées pour chaque type de produit :
+
 1. ✅ **Cours en Ligne** (référence)
 2. 🔵 **Produits Digitaux**
 3. 📦 **Produits Physiques**
@@ -19,21 +20,21 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 
 ### ✅ Fonctionnalités Avancées Confirmées
 
-| Fonctionnalité | Status | Détails |
-|----------------|--------|---------|
-| **Affiliation** | ✅ Complet | `CourseAffiliateSettings`, dashboard, liens, commissions |
-| **SEO Avancé** | ✅ Complet | `meta_title`, `meta_description`, `og_image`, Schema.org Course |
-| **Analytics** | ✅ Complet | `CourseAnalyticsDashboard`, Google Analytics, Facebook Pixel, TikTok |
-| **FAQs** | ✅ Complet | JSONB `faqs`, accordion interactif |
-| **Reviews** | ✅ Complet | Système de notation, commentaires, votes |
-| **Pixels Tracking** | ✅ Complet | Google, Facebook, TikTok, événements personnalisés |
-| **Notifications** | ✅ Complet | Email, push, centre de notifications |
-| **Email Marketing** | ✅ Complet | Templates, logs, préférences |
-| **Legal Pages** | ✅ Complet | CGU, Privacy, Cookies, Refund |
-| **Live Chat** | ✅ Complet | Crisp intégré |
-| **Certificats** | ✅ Unique | PDF, téléchargement |
-| **Quiz** | ✅ Unique | Questions, notation auto |
-| **Progression** | ✅ Unique | Tracking vidéos, leçons |
+| Fonctionnalité      | Status     | Détails                                                              |
+| ------------------- | ---------- | -------------------------------------------------------------------- |
+| **Affiliation**     | ✅ Complet | `CourseAffiliateSettings`, dashboard, liens, commissions             |
+| **SEO Avancé**      | ✅ Complet | `meta_title`, `meta_description`, `og_image`, Schema.org Course      |
+| **Analytics**       | ✅ Complet | `CourseAnalyticsDashboard`, Google Analytics, Facebook Pixel, TikTok |
+| **FAQs**            | ✅ Complet | JSONB `faqs`, accordion interactif                                   |
+| **Reviews**         | ✅ Complet | Système de notation, commentaires, votes                             |
+| **Pixels Tracking** | ✅ Complet | Google, Facebook, TikTok, événements personnalisés                   |
+| **Notifications**   | ✅ Complet | Email, push, centre de notifications                                 |
+| **Email Marketing** | ✅ Complet | Templates, logs, préférences                                         |
+| **Legal Pages**     | ✅ Complet | CGU, Privacy, Cookies, Refund                                        |
+| **Live Chat**       | ✅ Complet | Crisp intégré                                                        |
+| **Certificats**     | ✅ Unique  | PDF, téléchargement                                                  |
+| **Quiz**            | ✅ Unique  | Questions, notation auto                                             |
+| **Progression**     | ✅ Unique  | Tracking vidéos, leçons                                              |
 
 ---
 
@@ -41,35 +42,35 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 
 ### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Status | Implémentation |
-|----------------|--------|----------------|
-| **Création Wizard** | ✅ | `CreateDigitalProductWizard` (4 étapes) |
-| **Upload Fichiers** | ✅ | Supabase Storage |
-| **Licences** | ✅ | `digital_licenses` table, génération auto |
-| **Téléchargements** | ✅ | `digital_product_downloads` tracking |
-| **Analytics** | ✅ | `DigitalAnalyticsDashboard`, tracking téléchargements |
-| **Database Dédiée** | ✅ | 6 tables spécialisées |
+| Fonctionnalité      | Status | Implémentation                                        |
+| ------------------- | ------ | ----------------------------------------------------- |
+| **Création Wizard** | ✅     | `CreateDigitalProductWizard` (4 étapes)               |
+| **Upload Fichiers** | ✅     | Supabase Storage                                      |
+| **Licences**        | ✅     | `digital_licenses` table, génération auto             |
+| **Téléchargements** | ✅     | `digital_product_downloads` tracking                  |
+| **Analytics**       | ✅     | `DigitalAnalyticsDashboard`, tracking téléchargements |
+| **Database Dédiée** | ✅     | 6 tables spécialisées                                 |
 
 ### ❌ Fonctionnalités Manquantes vs Cours
 
-| Fonctionnalité | Status | Priorité |
-|----------------|--------|----------|
-| **Affiliation** | ❌ Absente | 🔴 HAUTE |
-| **SEO Avancé** | ❌ Partiel | 🔴 HAUTE |
-| **FAQs** | ❌ Absente | 🟡 MOYENNE |
-| **Reviews** | ❌ Absente | 🔴 HAUTE |
+| Fonctionnalité      | Status     | Priorité   |
+| ------------------- | ---------- | ---------- |
+| **Affiliation**     | ❌ Absente | 🔴 HAUTE   |
+| **SEO Avancé**      | ❌ Partiel | 🔴 HAUTE   |
+| **FAQs**            | ❌ Absente | 🟡 MOYENNE |
+| **Reviews**         | ❌ Absente | 🔴 HAUTE   |
 | **Pixels Tracking** | ❌ Absente | 🟡 MOYENNE |
-| **Email Marketing** | ✅ Global | ✅ OK |
-| **Live Chat** | ✅ Global | ✅ OK |
+| **Email Marketing** | ✅ Global  | ✅ OK      |
+| **Live Chat**       | ✅ Global  | ✅ OK      |
 
 ### 💡 Fonctionnalités Uniques Potentielles
 
-| Fonctionnalité | Description | Priorité |
-|----------------|-------------|----------|
-| **Preview Avant Achat** | Extrait PDF, démo vidéo | 🟡 MOYENNE |
-| **Versions & Updates** | Notifier clients des MAJ | 🟡 MOYENNE |
-| **DRM Protection** | Watermarking, limitation copies | 🔵 BASSE |
-| **Bundle Offers** | Grouper plusieurs produits | 🟡 MOYENNE |
+| Fonctionnalité          | Description                     | Priorité   |
+| ----------------------- | ------------------------------- | ---------- |
+| **Preview Avant Achat** | Extrait PDF, démo vidéo         | 🟡 MOYENNE |
+| **Versions & Updates**  | Notifier clients des MAJ        | 🟡 MOYENNE |
+| **DRM Protection**      | Watermarking, limitation copies | 🔵 BASSE   |
+| **Bundle Offers**       | Grouper plusieurs produits      | 🟡 MOYENNE |
 
 ---
 
@@ -77,38 +78,38 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 
 ### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Status | Implémentation |
-|----------------|--------|----------------|
-| **Création Wizard** | ✅ | `CreatePhysicalProductWizard` (5 étapes) |
-| **Variantes** | ✅ | `physical_product_variants` (couleurs, tailles, etc.) |
-| **Inventaire** | ✅ | `inventory_items`, stock tracking |
-| **Livraison** | ✅ | Zones, tarifs, calcul automatique |
-| **Database Dédiée** | ✅ | 12 tables spécialisées |
+| Fonctionnalité      | Status | Implémentation                                        |
+| ------------------- | ------ | ----------------------------------------------------- |
+| **Création Wizard** | ✅     | `CreatePhysicalProductWizard` (5 étapes)              |
+| **Variantes**       | ✅     | `physical_product_variants` (couleurs, tailles, etc.) |
+| **Inventaire**      | ✅     | `inventory_items`, stock tracking                     |
+| **Livraison**       | ✅     | Zones, tarifs, calcul automatique                     |
+| **Database Dédiée** | ✅     | 12 tables spécialisées                                |
 
 ### ❌ Fonctionnalités Manquantes vs Cours
 
-| Fonctionnalité | Status | Priorité |
-|----------------|--------|----------|
-| **Affiliation** | ❌ Absente | 🔴 HAUTE |
-| **SEO Avancé** | ❌ Partiel | 🔴 HAUTE |
-| **FAQs** | ❌ Absente | 🟡 MOYENNE |
-| **Reviews** | ❌ Absente | 🔴 HAUTE |
-| **Pixels Tracking** | ❌ Absente | 🟡 MOYENNE |
+| Fonctionnalité         | Status     | Priorité   |
+| ---------------------- | ---------- | ---------- |
+| **Affiliation**        | ❌ Absente | 🔴 HAUTE   |
+| **SEO Avancé**         | ❌ Partiel | 🔴 HAUTE   |
+| **FAQs**               | ❌ Absente | 🟡 MOYENNE |
+| **Reviews**            | ❌ Absente | 🔴 HAUTE   |
+| **Pixels Tracking**    | ❌ Absente | 🟡 MOYENNE |
 | **Analytics Avancées** | ❌ Basique | 🟡 MOYENNE |
-| **Email Marketing** | ✅ Global | ✅ OK |
-| **Live Chat** | ✅ Global | ✅ OK |
+| **Email Marketing**    | ✅ Global  | ✅ OK      |
+| **Live Chat**          | ✅ Global  | ✅ OK      |
 
 ### 💡 Fonctionnalités Uniques Potentielles
 
-| Fonctionnalité | Description | Priorité |
-|----------------|-------------|----------|
-| **Tableau de Tailles** | Guide des tailles interactif | 🟡 MOYENNE |
-| **Stock Alerts** | Alertes stock faible pour clients | 🟡 MOYENNE |
-| **Tracking Livraison** | Suivi colis en temps réel | 🔴 HAUTE |
-| **Retours/Échanges** | Système de gestion retours | 🟡 MOYENNE |
-| **Wishlist** | Liste de souhaits | 🔵 BASSE |
-| **Compare Products** | Comparateur de produits | 🔵 BASSE |
-| **3D View** | Vue 360° du produit | 🔵 BASSE |
+| Fonctionnalité         | Description                       | Priorité   |
+| ---------------------- | --------------------------------- | ---------- |
+| **Tableau de Tailles** | Guide des tailles interactif      | 🟡 MOYENNE |
+| **Stock Alerts**       | Alertes stock faible pour clients | 🟡 MOYENNE |
+| **Tracking Livraison** | Suivi colis en temps réel         | 🔴 HAUTE   |
+| **Retours/Échanges**   | Système de gestion retours        | 🟡 MOYENNE |
+| **Wishlist**           | Liste de souhaits                 | 🔵 BASSE   |
+| **Compare Products**   | Comparateur de produits           | 🔵 BASSE   |
+| **3D View**            | Vue 360° du produit               | 🔵 BASSE   |
 
 ---
 
@@ -116,38 +117,38 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 
 ### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Status | Implémentation |
-|----------------|--------|----------------|
-| **Création Wizard** | ✅ | `CreateServiceWizard` (5 étapes) |
-| **Bookings** | ✅ | `service_bookings`, réservations |
-| **Disponibilités** | ✅ | `service_availability_slots`, créneaux |
-| **Staff** | ✅ | `service_staff_members`, gestion équipe |
-| **Ressources** | ✅ | `service_resources`, équipements |
-| **Database Dédiée** | ✅ | 6 tables spécialisées |
+| Fonctionnalité      | Status | Implémentation                          |
+| ------------------- | ------ | --------------------------------------- |
+| **Création Wizard** | ✅     | `CreateServiceWizard` (5 étapes)        |
+| **Bookings**        | ✅     | `service_bookings`, réservations        |
+| **Disponibilités**  | ✅     | `service_availability_slots`, créneaux  |
+| **Staff**           | ✅     | `service_staff_members`, gestion équipe |
+| **Ressources**      | ✅     | `service_resources`, équipements        |
+| **Database Dédiée** | ✅     | 6 tables spécialisées                   |
 
 ### ❌ Fonctionnalités Manquantes vs Cours
 
-| Fonctionnalité | Status | Priorité |
-|----------------|--------|----------|
-| **Affiliation** | ❌ Absente | 🔴 HAUTE |
-| **SEO Avancé** | ❌ Partiel | 🔴 HAUTE |
-| **FAQs** | ❌ Absente | 🟡 MOYENNE |
-| **Reviews** | ❌ Absente | 🔴 HAUTE |
-| **Pixels Tracking** | ❌ Absente | 🟡 MOYENNE |
+| Fonctionnalité         | Status     | Priorité   |
+| ---------------------- | ---------- | ---------- |
+| **Affiliation**        | ❌ Absente | 🔴 HAUTE   |
+| **SEO Avancé**         | ❌ Partiel | 🔴 HAUTE   |
+| **FAQs**               | ❌ Absente | 🟡 MOYENNE |
+| **Reviews**            | ❌ Absente | 🔴 HAUTE   |
+| **Pixels Tracking**    | ❌ Absente | 🟡 MOYENNE |
 | **Analytics Avancées** | ❌ Basique | 🟡 MOYENNE |
-| **Email Marketing** | ✅ Global | ✅ OK |
-| **Live Chat** | ✅ Global | ✅ OK |
+| **Email Marketing**    | ✅ Global  | ✅ OK      |
+| **Live Chat**          | ✅ Global  | ✅ OK      |
 
 ### 💡 Fonctionnalités Uniques Potentielles
 
-| Fonctionnalité | Description | Priorité |
-|----------------|-------------|----------|
-| **Calendrier Partagé** | Vue calendrier pour clients | 🔴 HAUTE |
-| **Rappels Auto** | SMS/Email 24h avant RDV | 🔴 HAUTE |
-| **Salle d'Attente Virtuelle** | Pour services en ligne | 🟡 MOYENNE |
-| **Visio-conférence** | Intégration Zoom/Meet | 🟡 MOYENNE |
-| **Notes de Session** | Rapport après rendez-vous | 🔵 BASSE |
-| **Feedback Post-Service** | Enquête satisfaction | 🟡 MOYENNE |
+| Fonctionnalité                | Description                 | Priorité   |
+| ----------------------------- | --------------------------- | ---------- |
+| **Calendrier Partagé**        | Vue calendrier pour clients | 🔴 HAUTE   |
+| **Rappels Auto**              | SMS/Email 24h avant RDV     | 🔴 HAUTE   |
+| **Salle d'Attente Virtuelle** | Pour services en ligne      | 🟡 MOYENNE |
+| **Visio-conférence**          | Intégration Zoom/Meet       | 🟡 MOYENNE |
+| **Notes de Session**          | Rapport après rendez-vous   | 🔵 BASSE   |
+| **Feedback Post-Service**     | Enquête satisfaction        | 🟡 MOYENNE |
 
 ---
 
@@ -155,19 +156,19 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 
 ### 🔴 Fonctionnalités CRITIQUES Manquantes (Priorité HAUTE)
 
-| Fonctionnalité | Digital | Physical | Service | Impact |
-|----------------|---------|----------|---------|--------|
-| **Affiliation** | ❌ | ❌ | ❌ | Perte revenus affiliés |
-| **SEO Avancé** | ❌ | ❌ | ❌ | Moins de visibilité |
-| **Reviews** | ❌ | ❌ | ❌ | Pas de preuve sociale |
+| Fonctionnalité  | Digital | Physical | Service | Impact                 |
+| --------------- | ------- | -------- | ------- | ---------------------- |
+| **Affiliation** | ❌      | ❌       | ❌      | Perte revenus affiliés |
+| **SEO Avancé**  | ❌      | ❌       | ❌      | Moins de visibilité    |
+| **Reviews**     | ❌      | ❌       | ❌      | Pas de preuve sociale  |
 
 ### 🟡 Fonctionnalités IMPORTANTES Manquantes (Priorité MOYENNE)
 
-| Fonctionnalité | Digital | Physical | Service | Impact |
-|----------------|---------|----------|---------|--------|
-| **FAQs** | ❌ | ❌ | ❌ | Support client accru |
-| **Pixels Tracking** | ❌ | ❌ | ❌ | Analytics limitées |
-| **Analytics Avancées** | ✅ | ❌ | ❌ | Décisions data-driven |
+| Fonctionnalité         | Digital | Physical | Service | Impact                |
+| ---------------------- | ------- | -------- | ------- | --------------------- |
+| **FAQs**               | ❌      | ❌       | ❌      | Support client accru  |
+| **Pixels Tracking**    | ❌      | ❌       | ❌      | Analytics limitées    |
+| **Analytics Avancées** | ✅      | ❌       | ❌      | Décisions data-driven |
 
 ---
 
@@ -221,6 +222,7 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 ## 💡 STRATÉGIE D'IMPLÉMENTATION
 
 ### Option A: ⚡ Quick Win (2-3h)
+
 ✅ **RECOMMANDÉ**
 
 1. Intégrer Affiliation (existe déjà)
@@ -307,6 +309,7 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 **Objectif** : Atteindre 95%+ de parité avec Cours en Ligne
 
 **Recommandation** : **Option B (Parité Complète - 4-6h)**
+
 - ROI maximal
 - Cohérence plateforme
 - Expérience utilisateur homogène
@@ -314,4 +317,3 @@ Analyse des fonctionnalités avancées pour chaque type de produit :
 ---
 
 **Prêt à commencer l'implémentation ?** 🚀
-

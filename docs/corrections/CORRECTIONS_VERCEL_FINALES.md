@@ -17,6 +17,7 @@ L'application **payhula.vercel.app** fonctionne maintenant correctement après l
 ### 1. ✅ Erreur "forwardRef"
 
 **Erreur initiale** :
+
 ```
 Cannot read properties of undefined (reading 'forwardRef')
 at radix-ui-CVJS-uL0.js:1:3244
@@ -25,6 +26,7 @@ at radix-ui-CVJS-uL0.js:1:3244
 **Cause** : React était dans un chunk séparé, Radix UI chargeait avant React.
 
 **Solution** :
+
 - ✅ React et React-DOM gardés dans le chunk principal
 - ✅ `preserveEntrySignatures: 'strict'` activé
 - ✅ Header MIME type ajouté dans `vercel.json`
@@ -36,6 +38,7 @@ at radix-ui-CVJS-uL0.js:1:3244
 ### 2. ✅ Erreur "unstable_scheduleCallback"
 
 **Erreur suivante** :
+
 ```
 Cannot read properties of undefined (reading 'unstable_scheduleCallback')
 at radix-ui-hJLcS6Fx.js:5:11478
@@ -44,6 +47,7 @@ at radix-ui-hJLcS6Fx.js:5:11478
 **Cause** : React Scheduler (`scheduler`) était dans un chunk séparé, Radix UI ne trouvait pas la fonction.
 
 **Solution** :
+
 - ✅ `scheduler` inclus dans le chunk principal avec React
 - ✅ `scheduler` ajouté à `dedupe`
 - ✅ `scheduler` ajouté à `optimizeDeps.include`
@@ -57,6 +61,7 @@ at radix-ui-hJLcS6Fx.js:5:11478
 ### Chunk Principal (`index-[hash].js`)
 
 Contient :
+
 - ✅ `react` - Core React
 - ✅ `react-dom` - React DOM renderer
 - ✅ `scheduler` - React Scheduler
@@ -94,7 +99,7 @@ build: {
       manualChunks: (id) => {
         // React, React-DOM et Scheduler dans le chunk principal
         if (
-          id.includes('node_modules/react/') || 
+          id.includes('node_modules/react/') ||
           id.includes('node_modules/react-dom/') ||
           id.includes('node_modules/scheduler/')
         ) {
@@ -146,11 +151,13 @@ optimizeDeps: {
 ## 📈 PERFORMANCES
 
 ### Avant (Code Splitting Désactivé)
+
 - ❌ Bundle unique : ~5-10MB
 - ❌ Temps de chargement initial : ~3-5s
 - ❌ Pas de cache par chunk
 
 ### Après (Code Splitting Optimisé)
+
 - ✅ Bundle initial : ~2-3MB (React + React-DOM + Scheduler)
 - ✅ Chunks séparés : ~500KB-1MB chacun
 - ✅ Temps de chargement initial : ~1-2s (amélioration 50%)
@@ -176,6 +183,7 @@ optimizeDeps: {
 ### 1. Dépendances React à garder ensemble
 
 Les packages suivants doivent **toujours** être dans le chunk principal :
+
 - `react` - Core
 - `react-dom` - Renderer
 - `scheduler` - Scheduler (utilisé par react-dom et Radix UI)
@@ -197,16 +205,19 @@ Les packages suivants doivent **toujours** être dans le chunk principal :
 ## 🚀 PROCHAINES AMÉLIORATIONS POSSIBLES
 
 ### Court Terme
+
 - [ ] Monitorer les performances sur Vercel
 - [ ] Vérifier les métriques Lighthouse
 - [ ] Tester sur différents appareils
 
 ### Moyen Terme
+
 - [ ] Optimiser les images (lazy loading, compression)
 - [ ] Implémenter Service Worker
 - [ ] Analyser le bundle avec visualizer
 
 ### Long Terme
+
 - [ ] Tests de performance automatisés
 - [ ] Lighthouse CI
 - [ ] Performance budgets
@@ -238,6 +249,5 @@ Si d'autres erreurs apparaissent :
 
 ---
 
-*Dernière mise à jour : Janvier 2025*  
-*Statut : ✅ PRODUCTION READY*
-
+_Dernière mise à jour : Janvier 2025_  
+_Statut : ✅ PRODUCTION READY_

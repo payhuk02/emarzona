@@ -10,13 +10,13 @@
 
 ### Problèmes Identifiés
 
-| Catégorie | Nombre | Priorité |
-|-----------|--------|----------|
-| **Hooks sans pagination** | 2 | 🔴 CRITIQUE |
-| **console.* restants** | 223 occurrences | 🟡 HAUTE |
-| **Erreurs de syntaxe** | 0 | ✅ Aucune |
-| **Optimisations manquantes** | 5+ | 🟡 HAUTE |
-| **Composants sans React.memo** | 3+ | 🟢 MOYENNE |
+| Catégorie                      | Nombre          | Priorité    |
+| ------------------------------ | --------------- | ----------- |
+| **Hooks sans pagination**      | 2               | 🔴 CRITIQUE |
+| **console.\* restants**        | 223 occurrences | 🟡 HAUTE    |
+| **Erreurs de syntaxe**         | 0               | ✅ Aucune   |
+| **Optimisations manquantes**   | 5+              | 🟡 HAUTE    |
+| **Composants sans React.memo** | 3+              | 🟢 MOYENNE  |
 
 ---
 
@@ -29,6 +29,7 @@
 **Fichier** : `src/hooks/useCustomers.ts`
 
 **Problème** :
+
 ```typescript
 // ❌ Charge TOUS les clients sans pagination
 const { data, error } = await supabase
@@ -39,12 +40,14 @@ const { data, error } = await supabase
 ```
 
 **Impact** :
+
 - ⚠️ **CRITIQUE** : Charge 1000+ clients en une seule requête
 - ⚠️ **CRITIQUE** : Temps de réponse élevé (2-5s)
 - ⚠️ **CRITIQUE** : Utilisation mémoire excessive
 - ⚠️ **MOYEN** : Expérience utilisateur dégradée
 
 **Solution** :
+
 ```typescript
 export const useCustomers = (storeId?: string, options?: { page?: number; pageSize?: number }) => {
   const page = options?.page || 1;
@@ -81,15 +84,14 @@ export const useCustomers = (storeId?: string, options?: { page?: number; pageSi
 **Fichier** : `src/hooks/useProducts.ts`
 
 **Problème** :
+
 ```typescript
 // ❌ Charge TOUS les produits sans pagination
-let query = supabase
-  .from('products')
-  .select(`...`)
-  .order('created_at', { ascending: false });
+let query = supabase.from('products').select(`...`).order('created_at', { ascending: false });
 ```
 
 **Impact** :
+
 - ⚠️ **CRITIQUE** : Charge 1000+ produits en une seule requête
 - ⚠️ **CRITIQUE** : Temps de réponse élevé (3-8s)
 - ⚠️ **CRITIQUE** : Utilisation mémoire excessive
@@ -97,6 +99,7 @@ let query = supabase
 **Note** : Il existe déjà `useProductsOptimized` avec pagination, mais l'ancien hook est encore utilisé dans certains endroits.
 
 **Solution** :
+
 - ✅ Migrer tous les usages vers `useProductsOptimized`
 - ✅ Déprécier l'ancien `useProducts`
 - ✅ Ajouter pagination si nécessaire
@@ -116,11 +119,12 @@ let query = supabase
 
 ## 🟡 AMÉLIORATIONS HAUTE PRIORITÉ
 
-### 3. Remplacement console.* Restants
+### 3. Remplacement console.\* Restants
 
 **Statut** : 223 occurrences dans 56 fichiers
 
 **Fichiers Principaux** :
+
 - `src/lib/` : 50+ occurrences (utilitaires, helpers)
 - `src/pages/` : 30+ occurrences (pages)
 - `src/hooks/` : 20+ occurrences (hooks)
@@ -137,6 +141,7 @@ let query = supabase
 #### 4.1 Chaînes de `.map().map()` ou `.filter().map()`
 
 **Fichiers Identifiés** :
+
 - `src/pages/ProductDetail.tsx`
 - `src/components/orders/OrderEditDialog.tsx`
 - `src/components/orders/CreateOrderDialog.tsx`
@@ -147,18 +152,21 @@ let query = supabase
 - `src/components/ui/currency-select.tsx`
 
 **Problème** :
+
 ```typescript
 // ❌ Chaîne inefficace
-items.filter(x => x.active).map(x => x.name).map(name => name.toUpperCase())
+items
+  .filter(x => x.active)
+  .map(x => x.name)
+  .map(name => name.toUpperCase());
 ```
 
 **Solution** :
+
 ```typescript
 // ✅ Optimisé avec useMemo
 const processedItems = useMemo(() => {
-  return items
-    .filter(x => x.active)
-    .map(x => x.name.toUpperCase());
+  return items.filter(x => x.active).map(x => x.name.toUpperCase());
 }, [items]);
 ```
 
@@ -171,6 +179,7 @@ const processedItems = useMemo(() => {
 #### 4.2 Composants sans React.memo
 
 **Composants Identifiés** :
+
 - `src/components/physical/PhysicalProductCard.tsx` - Utilisé dans listes
 - `src/components/digital/DigitalProductCard.tsx` - Utilisé dans listes
 - `src/components/service/ServiceCard.tsx` - Utilisé dans listes
@@ -186,6 +195,7 @@ const processedItems = useMemo(() => {
 #### 5.1 Requêtes N+1 Potentielles
 
 **À Vérifier** :
+
 - Hooks qui chargent des listes avec relations (`.select('*, relation(*)')`)
 - Composants qui font plusieurs appels API séquentiels
 
@@ -235,7 +245,7 @@ const processedItems = useMemo(() => {
 
 ### Phase 3B - Optimisations Haute Priorité
 
-1. ✅ **Remplacer console.* restants** (6-8h)
+1. ✅ **Remplacer console.\* restants** (6-8h)
 2. ✅ **Optimiser chaînes .map().map()** (2-3h)
 3. ✅ **Vérifier requêtes N+1** (4-6h)
 
@@ -257,14 +267,14 @@ const processedItems = useMemo(() => {
 
 ## 📊 IMPACT GLOBAL ESTIMÉ
 
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| **Données chargées (customers)** | 1000+ | 20/page | ✅ -98% |
-| **Données chargées (products)** | 1000+ | 20/page | ✅ -98% |
-| **Temps réponse (customers)** | 2-5s | ~300ms | ✅ -85% |
-| **Temps réponse (products)** | 3-8s | ~400ms | ✅ -90% |
-| **console.* restants** | 223 | 0 | ✅ -100% |
-| **Re-renders inutiles** | Élevés | Minimaux | ✅ -40% |
+| Métrique                         | Avant  | Après    | Amélioration |
+| -------------------------------- | ------ | -------- | ------------ |
+| **Données chargées (customers)** | 1000+  | 20/page  | ✅ -98%      |
+| **Données chargées (products)**  | 1000+  | 20/page  | ✅ -98%      |
+| **Temps réponse (customers)**    | 2-5s   | ~300ms   | ✅ -85%      |
+| **Temps réponse (products)**     | 3-8s   | ~400ms   | ✅ -90%      |
+| **console.\* restants**          | 223    | 0        | ✅ -100%     |
+| **Re-renders inutiles**          | Élevés | Minimaux | ✅ -40%      |
 
 ---
 
@@ -278,4 +288,3 @@ const processedItems = useMemo(() => {
 ---
 
 **Prêt pour implémentation Phase 3**
-

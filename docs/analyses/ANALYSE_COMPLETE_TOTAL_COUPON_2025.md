@@ -11,6 +11,7 @@
 ### Problème Observé
 
 D'après l'image de l'interface :
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF (affiché correctement)
 - **Total: 4000 XOF** ❌ (devrait être 3600 XOF)
@@ -41,6 +42,7 @@ const displayPrice = calculatePrice();
 ```
 
 **Problème:**
+
 - `displayPrice` est calculé **une seule fois** au render initial
 - Même si `calculatePrice` est un `useCallback` qui dépend de `appliedCouponCode`
 - `displayPrice` n'est **pas recalculé** quand `appliedCouponCode` change
@@ -66,11 +68,13 @@ const displayPrice = calculatePrice();
 ### Correction dans `src/pages/checkout/Checkout.tsx`
 
 **Avant (Incorrect):**
+
 ```typescript
 const displayPrice = calculatePrice(); // Calculé une seule fois
 ```
 
 **Après (Correct):**
+
 ```typescript
 const displayPrice = useMemo(() => {
   return calculatePrice();
@@ -78,6 +82,7 @@ const displayPrice = useMemo(() => {
 ```
 
 **Avantages:**
+
 - `displayPrice` se recalcule automatiquement quand `calculatePrice` change
 - `calculatePrice` change quand `appliedCouponCode` change (dépendance dans `useCallback`)
 - Le total se met à jour immédiatement ✅
@@ -85,6 +90,7 @@ const displayPrice = useMemo(() => {
 ### Correction dans `src/pages/Checkout.tsx`
 
 **Nettoyage du useEffect de debug:**
+
 - Supprimé référence à `totalDiscounts` qui n'existe plus
 
 ---
@@ -131,10 +137,12 @@ const displayPrice = useMemo(() => {
 ## 📝 Fichiers Modifiés
 
 ### `src/pages/checkout/Checkout.tsx`
+
 - Ligne 1: Ajout de `useMemo` dans les imports
 - Lignes 439-441: Migration de `displayPrice` vers `useMemo`
 
 ### `src/pages/Checkout.tsx`
+
 - Ligne 408: Suppression de référence à `totalDiscounts` (n'existe plus)
 
 ---
@@ -150,4 +158,3 @@ Le total se met maintenant à jour **immédiatement** après l'application ou le
 
 **Date de correction:** 30 Janvier 2025  
 **Statut:** ✅ **CORRIGÉ**
-

@@ -18,6 +18,7 @@ Vérification effectuée pour confirmer que la page "Tableau de bord affilié" (
 ❌ **La page "Tableau de bord affilié" n'était PAS référencée** dans la section de personnalisation des pages.
 
 La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait uniquement :
+
 - `landing` - Page d'accueil
 - `marketplace` - Marketplace
 - `dashboard` - Dashboard général (vendeurs)
@@ -44,11 +45,13 @@ La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait u
 ### Sections Configurées
 
 #### 1. **En-tête** (`header`)
+
 - Titre principal : "Tableau de bord affilié"
 - Message de bienvenue : "Bienvenue, {name} • Code : {code}"
 - Bouton "Nouveau lien"
 
 #### 2. **Statistiques** (`stats`)
+
 - Label "Clics totaux"
 - Label "Ventes générées"
 - Label "CA généré"
@@ -57,6 +60,7 @@ La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait u
 - Label "Taux de conversion"
 
 #### 3. **Mes liens** (`links`)
+
 - Titre onglet "Mes liens d'affiliation"
 - Bouton "Créer un lien"
 - Message "Aucun lien d'affiliation pour le moment"
@@ -64,17 +68,20 @@ La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait u
 - Labels : Clics, Ventes, CA généré, Commission, Conversion
 
 #### 4. **Commissions** (`commissions`)
+
 - Titre onglet "Mes commissions"
 - Labels de statut : En attente, Approuvées, Payées, Rejetées
 - Message "Aucune commission pour le moment"
 
 #### 5. **Retraits** (`withdrawals`)
+
 - Titre onglet "Mes retraits"
 - Bouton "Demander un retrait"
 - Message "Montant minimum pour retrait : {amount}"
 - Message "Aucun retrait pour le moment"
 
 #### 6. **Inscription** (`registration`)
+
 - Titre page inscription : "Rejoignez notre programme d'affiliation"
 - Description du programme
 - Bouton "Devenir affilié"
@@ -86,10 +93,12 @@ La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait u
 ### `src/components/admin/customization/PagesCustomizationSection.tsx`
 
 **Modifications** :
+
 1. ✅ Ajout de l'import `TrendingUp` depuis `lucide-react`
 2. ✅ Ajout de la configuration complète pour `affiliateDashboard` dans `PAGES_CONFIG`
 
 **Code ajouté** :
+
 ```typescript
 {
   id: 'affiliateDashboard',
@@ -109,14 +118,14 @@ La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait u
 
 ### Total : **30+ éléments** répartis en **6 sections**
 
-| Section | Nombre d'éléments | Types |
-|---------|------------------|-------|
-| En-tête | 3 | text, textarea |
-| Statistiques | 6 | text |
-| Mes liens | 11 | text, textarea |
-| Commissions | 5 | text, textarea |
-| Retraits | 4 | text, textarea |
-| Inscription | 3 | text, textarea |
+| Section      | Nombre d'éléments | Types          |
+| ------------ | ----------------- | -------------- |
+| En-tête      | 3                 | text, textarea |
+| Statistiques | 6                 | text           |
+| Mes liens    | 11                | text, textarea |
+| Commissions  | 5                 | text, textarea |
+| Retraits     | 4                 | text, textarea |
+| Inscription  | 3                 | text, textarea |
 
 ---
 
@@ -144,6 +153,7 @@ La configuration `PAGES_CONFIG` dans `PagesCustomizationSection.tsx` contenait u
 Toutes les clés suivent le format : `affiliateDashboard.{section}.{element}`
 
 **Exemples** :
+
 - `affiliateDashboard.title` - Titre principal
 - `affiliateDashboard.stats.clicks` - Label "Clics totaux"
 - `affiliateDashboard.links.createButton` - Bouton "Créer un lien"
@@ -180,6 +190,7 @@ Toutes les clés suivent le format : `affiliateDashboard.{section}.{element}`
 ### Variables Dynamiques
 
 Certains messages utilisent des variables dynamiques :
+
 - `{name}` - Nom d'affichage de l'affilié
 - `{code}` - Code affilié
 - `{amount}` - Montant minimum pour retrait
@@ -189,6 +200,7 @@ Ces variables sont remplacées dynamiquement dans le code React, pas dans la con
 ### Extensibilité
 
 La configuration peut être facilement étendue pour ajouter :
+
 - Nouvelles sections
 - Nouveaux éléments personnalisables
 - Options de style (couleurs, polices)
@@ -206,4 +218,3 @@ La page "Tableau de bord affilié" est maintenant **complètement référencée*
 
 **Document généré automatiquement**  
 **Dernière mise à jour** : 31 Janvier 2025
-

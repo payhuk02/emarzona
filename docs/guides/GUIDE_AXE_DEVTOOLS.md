@@ -8,11 +8,13 @@
 ## 📋 Installation
 
 ### Chrome/Edge
+
 1. Ouvrir Chrome Web Store
 2. Rechercher "axe DevTools"
 3. Installer l'extension [axe DevTools](https://chrome.google.com/webstore/detail/axe-devtools-web-accessibility/lhdoppojpmngadmnindnejefpokejbdd)
 
 ### Firefox
+
 1. Ouvrir Firefox Add-ons
 2. Rechercher "axe DevTools"
 3. Installer l'extension
@@ -22,17 +24,21 @@
 ## 🚀 Utilisation
 
 ### Étape 1: Ouvrir DevTools
+
 1. Ouvrir l'application dans le navigateur
 2. Appuyer sur `F12` ou `Ctrl+Shift+I` (Windows/Linux) / `Cmd+Option+I` (Mac)
 3. Aller dans l'onglet **"axe DevTools"**
 
 ### Étape 2: Lancer l'Audit
+
 1. Cliquer sur **"Scan ALL of my page"** pour auditer toute la page
 2. Ou cliquer sur **"Scan part of my page"** pour auditer une section spécifique
 3. Attendre la fin du scan (quelques secondes)
 
 ### Étape 3: Analyser les Résultats
+
 L'audit affiche :
+
 - **Violations** : Problèmes critiques à corriger
 - **Incomplete** : Problèmes potentiels à vérifier
 - **Passes** : Éléments conformes
@@ -45,11 +51,13 @@ L'audit affiche :
 ### 1. Images sans texte alternatif
 
 **Problème**:
+
 ```
 Image elements must have an alt attribute
 ```
 
 **Solution**:
+
 ```tsx
 // ❌ Avant
 <img src="/logo.png" />
@@ -63,11 +71,13 @@ Image elements must have an alt attribute
 ### 2. Boutons sans label
 
 **Problème**:
+
 ```
 Buttons must have discernible text
 ```
 
 **Solution**:
+
 ```tsx
 // ❌ Avant
 <Button>
@@ -85,11 +95,13 @@ Buttons must have discernible text
 ### 3. Contraste insuffisant
 
 **Problème**:
+
 ```
 Elements must have sufficient color contrast
 ```
 
 **Solution**:
+
 - Vérifier le ratio de contraste (minimum 4.5:1 pour texte normal, 3:1 pour texte large)
 - Utiliser des couleurs avec meilleur contraste
 - Vérifier avec [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
@@ -99,11 +111,13 @@ Elements must have sufficient color contrast
 ### 4. Formulaires sans labels
 
 **Problème**:
+
 ```
 Form elements must have labels
 ```
 
 **Solution**:
+
 ```tsx
 // ❌ Avant
 <input type="text" name="email" />
@@ -118,11 +132,13 @@ Form elements must have labels
 ### 5. Navigation clavier
 
 **Problème**:
+
 ```
 All page content must be contained by landmarks
 ```
 
 **Solution**:
+
 - Utiliser des éléments sémantiques (`<main>`, `<nav>`, `<header>`, `<footer>`)
 - Ajouter `role="main"` si nécessaire
 
@@ -131,6 +147,7 @@ All page content must be contained by landmarks
 ## 📊 Checklist d'Audit
 
 ### Pages à Auditer
+
 - [ ] Page d'accueil (Landing)
 - [ ] Page de connexion (Auth)
 - [ ] Dashboard
@@ -142,6 +159,7 @@ All page content must be contained by landmarks
 - [ ] Paramètres
 
 ### Éléments à Vérifier
+
 - [ ] Toutes les images ont un `alt`
 - [ ] Tous les boutons ont un label ou `aria-label`
 - [ ] Tous les formulaires ont des labels
@@ -155,11 +173,13 @@ All page content must be contained by landmarks
 ## 🎯 Objectifs
 
 ### Conformité WCAG 2.1
+
 - **Level A** : 100% conforme ✅
 - **Level AA** : 95%+ conforme ⚠️
 - **Level AAA** : 70%+ conforme (optionnel) 💡
 
 ### Métriques
+
 - **0 violations critiques** (Level A)
 - **< 5 violations** Level AA
 - **Score axe** : > 90/100
@@ -169,21 +189,26 @@ All page content must be contained by landmarks
 ## 📝 Rapport d'Audit
 
 ### Template de Rapport
+
 ```markdown
 # Audit axe DevTools - [Page Name]
+
 **Date**: [Date]
 **Page**: [URL]
 
 ## Résultats
+
 - Violations: X
 - Incomplete: Y
 - Passes: Z
 
 ## Violations Critiques
+
 1. [Description] - [Fichier] - [Ligne]
 2. [Description] - [Fichier] - [Ligne]
 
 ## Actions Correctives
+
 - [ ] [Action 1]
 - [ ] [Action 2]
 ```
@@ -210,9 +235,3 @@ All page content must be contained by landmarks
 ---
 
 **Prochaine révision**: 2025-01-11 (hebdomadaire)
-
-
-
-
-
-

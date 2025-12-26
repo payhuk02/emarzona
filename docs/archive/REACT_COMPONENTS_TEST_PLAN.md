@@ -10,25 +10,25 @@ Tester tous les composants React créés en Phase 4 pour s'assurer qu'ils foncti
 
 ### Composants créés en Phase 4
 
-| # | Composant | Fichier | Status |
-|---|-----------|---------|--------|
-| 1 | DigitalProductStatusIndicator | `src/components/digital/DigitalProductStatusIndicator.tsx` | ⏳ |
-| 2 | DownloadInfoDisplay | `src/components/digital/DownloadInfoDisplay.tsx` | ⏳ |
-| 3 | DigitalProductsList | `src/components/digital/DigitalProductsList.tsx` | ⏳ |
-| 4 | DigitalBundleManager | `src/components/digital/DigitalBundleManager.tsx` | ⏳ |
-| 5 | DownloadHistory | `src/components/digital/DownloadHistory.tsx` | ⏳ |
-| 6 | BulkDigitalUpdate | `src/components/digital/BulkDigitalUpdate.tsx` | ⏳ |
-| 7 | CustomerAccessManager | `src/components/digital/CustomerAccessManager.tsx` | ⏳ |
-| 8 | DigitalProductsDashboard | `src/components/digital/DigitalProductsDashboard.tsx` | ⏳ |
+| #   | Composant                     | Fichier                                                    | Status |
+| --- | ----------------------------- | ---------------------------------------------------------- | ------ |
+| 1   | DigitalProductStatusIndicator | `src/components/digital/DigitalProductStatusIndicator.tsx` | ⏳     |
+| 2   | DownloadInfoDisplay           | `src/components/digital/DownloadInfoDisplay.tsx`           | ⏳     |
+| 3   | DigitalProductsList           | `src/components/digital/DigitalProductsList.tsx`           | ⏳     |
+| 4   | DigitalBundleManager          | `src/components/digital/DigitalBundleManager.tsx`          | ⏳     |
+| 5   | DownloadHistory               | `src/components/digital/DownloadHistory.tsx`               | ⏳     |
+| 6   | BulkDigitalUpdate             | `src/components/digital/BulkDigitalUpdate.tsx`             | ⏳     |
+| 7   | CustomerAccessManager         | `src/components/digital/CustomerAccessManager.tsx`         | ⏳     |
+| 8   | DigitalProductsDashboard      | `src/components/digital/DigitalProductsDashboard.tsx`      | ⏳     |
 
 ### Hooks à tester
 
-| # | Hook | Fichier | Status |
-|---|------|---------|--------|
-| 1 | useDigitalProducts | `src/hooks/digital/useDigitalProducts.ts` | ⏳ |
-| 2 | useCustomerDownloads | `src/hooks/digital/useCustomerDownloads.ts` | ⏳ |
-| 3 | useDigitalAlerts | `src/hooks/digital/useDigitalAlerts.ts` | ⏳ |
-| 4 | useDigitalReports | `src/hooks/digital/useDigitalReports.ts` | ⏳ |
+| #   | Hook                 | Fichier                                     | Status |
+| --- | -------------------- | ------------------------------------------- | ------ |
+| 1   | useDigitalProducts   | `src/hooks/digital/useDigitalProducts.ts`   | ⏳     |
+| 2   | useCustomerDownloads | `src/hooks/digital/useCustomerDownloads.ts` | ⏳     |
+| 3   | useDigitalAlerts     | `src/hooks/digital/useDigitalAlerts.ts`     | ⏳     |
+| 4   | useDigitalReports    | `src/hooks/digital/useDigitalReports.ts`    | ⏳     |
 
 ---
 
@@ -203,15 +203,16 @@ import { useDigitalProducts } from '@/hooks/digital/useDigitalProducts';
 
 function TestUseDigitalProducts() {
   const { data: products, isLoading } = useDigitalProducts.useList();
-  
+
   console.log('Products:', products);
   console.log('Loading:', isLoading);
-  
+
   return <div>Check console</div>;
 }
 ```
 
 **Vérifier:**
+
 - [ ] Liste récupérée depuis Supabase
 - [ ] Loading state correct
 - [ ] Données formatées correctement
@@ -223,14 +224,15 @@ import { useCustomerDownloads } from '@/hooks/digital/useCustomerDownloads';
 
 function TestCustomerDownloads() {
   const { data: downloads } = useCustomerDownloads();
-  
+
   console.log('Downloads:', downloads);
-  
+
   return <div>Check console</div>;
 }
 ```
 
 **Vérifier:**
+
 - [ ] Downloads récupérés
 - [ ] Vue `recent_digital_downloads` utilisée
 - [ ] Données correctes
@@ -240,12 +242,14 @@ function TestCustomerDownloads() {
 ## 📊 CHECKLIST DE TEST COMPLÈTE
 
 ### Phase 1: Setup (5 min)
+
 - [ ] Base de données prête (migrations exécutées)
 - [ ] Tests SQL passés
 - [ ] Données de test créées (bundles, produits)
 - [ ] Dev server lancé (`npm run dev`)
 
 ### Phase 2: Tests des composants principaux (30 min)
+
 - [ ] DigitalBundleManager
   - [ ] Création bundle
   - [ ] Édition bundle
@@ -257,6 +261,7 @@ function TestCustomerDownloads() {
   - [ ] Liste produits
 
 ### Phase 3: Tests des composants secondaires (20 min)
+
 - [ ] DigitalProductsList
 - [ ] CustomerAccessManager
 - [ ] DownloadHistory
@@ -265,18 +270,21 @@ function TestCustomerDownloads() {
 - [ ] DownloadInfoDisplay
 
 ### Phase 4: Tests des hooks (15 min)
+
 - [ ] useDigitalProducts
 - [ ] useCustomerDownloads
 - [ ] useDigitalAlerts
 - [ ] useDigitalReports
 
 ### Phase 5: Tests d'intégration (20 min)
+
 - [ ] Créer bundle → Voir dans liste
 - [ ] Éditer bundle → Changements sauvegardés
 - [ ] Supprimer bundle → Disparaît de partout
 - [ ] Stats mises à jour en temps réel
 
 ### Phase 6: Tests de performance (10 min)
+
 - [ ] Chargement rapide (<2s)
 - [ ] Pas de lag lors du scroll
 - [ ] Filtres réactifs
@@ -289,6 +297,7 @@ function TestCustomerDownloads() {
 ### Erreur: "Could not load Supabase client"
 
 **Solution:**
+
 ```bash
 # Vérifier que les variables d'environnement sont définies
 cat .env.local
@@ -301,6 +310,7 @@ VITE_SUPABASE_ANON_KEY=...
 ### Erreur: "Table does not exist"
 
 **Solution:** Exécuter les migrations d'abord
+
 ```sql
 -- Dans Supabase Dashboard
 \i 20251029_digital_bundles_clean.sql
@@ -310,6 +320,7 @@ VITE_SUPABASE_ANON_KEY=...
 ### Composant ne charge pas de données
 
 **Solution:** Vérifier les RLS policies
+
 ```sql
 -- Désactiver temporairement RLS pour debug
 ALTER TABLE digital_bundles DISABLE ROW LEVEL SECURITY;
@@ -319,6 +330,7 @@ ALTER TABLE digital_bundles DISABLE ROW LEVEL SECURITY;
 ### Hook retourne undefined
 
 **Solution:** Vérifier que React Query est configuré
+
 ```tsx
 // Dans App.tsx ou main.tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -327,7 +339,7 @@ const queryClient = new QueryClient();
 
 <QueryClientProvider client={queryClient}>
   <App />
-</QueryClientProvider>
+</QueryClientProvider>;
 ```
 
 ---
@@ -341,7 +353,7 @@ Un test est réussi si :
 ✅ Actions CRUD fonctionnent  
 ✅ Temps de chargement < 2s  
 ✅ UI responsive et fluide  
-✅ Données synchronisées avec la BD  
+✅ Données synchronisées avec la BD
 
 ---
 
@@ -375,6 +387,7 @@ Testeur: [NOM]
 ## Résultats
 
 ### Composants
+
 - DigitalBundleManager: ✅ / ❌
 - DigitalProductsDashboard: ✅ / ❌
 - DigitalProductsList: ✅ / ❌
@@ -385,20 +398,24 @@ Testeur: [NOM]
 - DownloadInfoDisplay: ✅ / ❌
 
 ### Hooks
+
 - useDigitalProducts: ✅ / ❌
 - useCustomerDownloads: ✅ / ❌
 - useDigitalAlerts: ✅ / ❌
 - useDigitalReports: ✅ / ❌
 
 ## Bugs trouvés
+
 1. [Description]
 2. [Description]
 
 ## Recommandations
+
 1. [Recommandation]
 2. [Recommandation]
 
 ## Conclusion
+
 [PASS / FAIL]
 ```
 
@@ -408,4 +425,3 @@ Testeur: [NOM]
 **Version:** 1.0  
 **Durée estimée:** ~90 minutes  
 **Prérequis:** Migrations SQL exécutées ✅
-

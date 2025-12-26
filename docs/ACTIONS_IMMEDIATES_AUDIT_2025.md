@@ -12,6 +12,7 @@
 **Statut** : ✅ Fichier créé (voir `.env.example`)
 
 **Action** :
+
 - [ ] Vérifier que toutes les variables sont documentées
 - [ ] Ajouter le fichier au repository (s'il n'est pas dans .gitignore)
 - [ ] Mettre à jour le README avec les instructions
@@ -25,10 +26,12 @@
 **Statut** : ✅ Validateur créé (voir `src/lib/env-validator.ts`)
 
 **Action** :
+
 - [ ] Importer et utiliser le validateur dans `src/main.tsx` :
+
   ```typescript
   import { validateEnv } from '@/lib/env-validator';
-  
+
   // Au début de main.tsx
   validateEnv();
   ```
@@ -42,9 +45,11 @@
 **Statut** : ✅ Corrigé
 
 **Fichiers concernés** :
+
 - `src/hooks/useKeyboardNavigation.ts:144` : `console.log` ✅ Corrigé
 
 **Action** :
+
 - [x] Remplacer `console.log` par `logger.debug()` dans `useKeyboardNavigation.ts` ✅
 - [ ] Vérifier qu'aucun autre `console.*` n'existe dans le code source :
   ```bash
@@ -58,6 +63,7 @@
 **Statut** : ⚠️ À faire
 
 **Action** :
+
 - [ ] Créer la structure `docs/` :
   ```
   docs/
@@ -72,6 +78,7 @@
 - [ ] Créer un `docs/README.md` avec index
 
 **Script suggéré** :
+
 ```bash
 # Créer la structure
 mkdir -p docs/{architecture,guides,api,deployment,audits/archive}
@@ -90,11 +97,13 @@ mv AMELIORATION_*.md docs/audits/
 ### 5. Consolider les hooks dupliqués
 
 **Fichiers concernés** :
+
 - `src/hooks/useDashboardStats.ts`
 - `src/hooks/useDashboardStatsFixed.ts`
 - `src/hooks/useDashboardStatsRobust.ts`
 
 **Action** :
+
 - [ ] Analyser les différences entre les 3 hooks
 - [ ] Fusionner en un seul hook avec options de configuration
 - [ ] Mettre à jour les imports dans les composants
@@ -105,10 +114,12 @@ mv AMELIORATION_*.md docs/audits/
 ### 6. Supprimer les pages dupliquées
 
 **Fichiers concernés** :
+
 - `src/pages/Dashboard.tsx`
 - `src/pages/DashboardFixed.tsx`
 
 **Action** :
+
 - [ ] Identifier quelle version est utilisée
 - [ ] Fusionner les fonctionnalités si nécessaire
 - [ ] Supprimer la version non utilisée
@@ -119,6 +130,7 @@ mv AMELIORATION_*.md docs/audits/
 ### 7. Documenter les routes
 
 **Action** :
+
 - [ ] Créer `docs/architecture/routes.md`
 - [ ] Lister toutes les routes avec :
   - Path
@@ -128,18 +140,21 @@ mv AMELIORATION_*.md docs/audits/
 - [ ] Créer un script de vérification des routes orphelines
 
 **Exemple** :
+
 ```markdown
 # Routes de l'application
 
 ## Routes Publiques
+
 - `/` - Landing page
 - `/auth` - Authentification
 - `/marketplace` - Marketplace publique
-...
+  ...
 
 ## Routes Protégées
+
 - `/dashboard` - Dashboard utilisateur
-...
+  ...
 ```
 
 ---
@@ -149,6 +164,7 @@ mv AMELIORATION_*.md docs/audits/
 **Objectif** : 50% minimum
 
 **Action** :
+
 - [ ] Identifier les composants critiques :
   - Paiements
   - Authentification
@@ -158,6 +174,7 @@ mv AMELIORATION_*.md docs/audits/
 - [ ] Ajouter des tests E2E pour les flux critiques
 
 **Commandes** :
+
 ```bash
 # Vérifier la couverture actuelle
 npm run test:coverage
@@ -170,18 +187,21 @@ npm run test:coverage
 ### 9. Analyser le bundle size
 
 **Action** :
+
 - [ ] Activer le visualizer dans `vite.config.ts` :
+
   ```typescript
   import { visualizer } from 'rollup-plugin-visualizer';
-  
+
   plugins: [
     // ...
     visualizer({
       filename: './dist/stats.html',
       open: true,
     }),
-  ]
+  ];
   ```
+
 - [ ] Lancer `npm run build`
 - [ ] Analyser `dist/stats.html`
 - [ ] Identifier les opportunités d'optimisation
@@ -193,6 +213,7 @@ npm run test:coverage
 ### 10. Implémenter le prefetching
 
 **Action** :
+
 - [ ] Identifier les routes fréquentes
 - [ ] Implémenter `queryClient.prefetchQuery()` dans les composants de navigation
 - [ ] Prefetch des données critiques au hover des liens
@@ -202,6 +223,7 @@ npm run test:coverage
 ### 11. Optimiser les images
 
 **Action** :
+
 - [ ] Ajouter `loading="lazy"` sur toutes les images
 - [ ] Implémenter le support WebP/AVIF
 - [ ] Configurer un CDN pour les images
@@ -211,6 +233,7 @@ npm run test:coverage
 ### 12. Automatiser les tests d'accessibilité
 
 **Action** :
+
 - [ ] Ajouter dans CI/CD :
   ```bash
   npm run test:a11y
@@ -223,6 +246,7 @@ npm run test:coverage
 ### 13. Standardiser la gestion d'erreurs
 
 **Action** :
+
 - [ ] Créer `docs/guides/error-handling.md`
 - [ ] Documenter les bonnes pratiques
 - [ ] Créer un wrapper API générique
@@ -233,6 +257,7 @@ npm run test:coverage
 ## 📋 CHECKLIST GLOBALE
 
 ### Semaine 1 : Nettoyage et Organisation
+
 - [ ] Créer `.env.example` ✅
 - [ ] Valider les variables d'environnement ✅
 - [ ] Remplacer les `console.*` résiduels
@@ -240,17 +265,20 @@ npm run test:coverage
 - [ ] Supprimer les fichiers dupliqués
 
 ### Semaine 2-3 : Qualité et Tests
+
 - [ ] Consolider les hooks dupliqués
 - [ ] Documenter les routes
 - [ ] Améliorer la couverture de tests
 - [ ] Analyser le bundle size
 
 ### Semaine 4 : Performance
+
 - [ ] Optimiser le code splitting
 - [ ] Implémenter le prefetching
 - [ ] Optimiser les images
 
 ### Semaine 5 : Sécurité et Accessibilité
+
 - [ ] Automatiser les tests d'accessibilité
 - [ ] Intégrer Lighthouse CI
 - [ ] Standardiser la gestion d'erreurs
@@ -276,4 +304,3 @@ npm run test:coverage
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

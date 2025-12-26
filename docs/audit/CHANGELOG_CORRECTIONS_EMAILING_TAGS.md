@@ -1,4 +1,5 @@
 # 📝 CHANGELOG - Corrections Système Emailing & Tags
+
 ## Date: 2 Février 2025
 
 ---
@@ -6,6 +7,7 @@
 ## ✅ Corrections Implémentées (Phase 1 - Critiques)
 
 ### 1. Fonction SQL `remove_user_tag` ✅
+
 **Fichier**: `supabase/migrations/20250202_fix_emailing_tags_workflows_critical.sql`
 
 - ✅ Création de la fonction `remove_user_tag`
@@ -14,31 +16,37 @@
 - ✅ Retourne `true` si le tag a été supprimé, `false` sinon
 
 **Utilisation**:
+
 ```sql
 SELECT remove_user_tag('user-id', 'store-id', 'vip');
 ```
 
 ### 2. Fonctions SQL Helper pour Tags ✅
+
 **Fichier**: `supabase/migrations/20250202_fix_emailing_tags_workflows_critical.sql`
 
 - ✅ `get_user_tags(user_id, store_id)` - Récupère tous les tags d'un utilisateur
 - ✅ `get_users_by_tag(store_id, tag)` - Récupère tous les utilisateurs ayant un tag
 
 ### 3. Amélioration Fonction `add_user_tag` ✅
+
 **Fichier**: `supabase/migrations/20250202_fix_emailing_tags_workflows_critical.sql`
 
 **Améliorations**:
+
 - ✅ Validation de longueur (1-50 caractères)
 - ✅ Normalisation automatique (trim + lowercase)
 - ✅ Validation des caractères (alphanumériques, underscore, tiret uniquement)
 - ✅ Messages d'erreur explicites
 
 **Avant**:
+
 ```sql
 -- Pas de validation, tags dupliqués possibles ("VIP" vs "vip")
 ```
 
 **Après**:
+
 ```sql
 -- Validation complète, normalisation automatique
 SELECT add_user_tag('user-id', 'store-id', 'VIP'); -- Devient "vip"
@@ -46,17 +54,20 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
 ```
 
 ### 4. Correction Fonction `calculate_dynamic_segment_members` ✅
+
 **Fichier**: `supabase/migrations/20250202_fix_emailing_tags_workflows_critical.sql`
 
 **Avant**: Retournait toujours 0 résultats (LIMIT 0)
 
 **Après**: Support complet pour:
+
 - ✅ Filtres par tags (inclus et exclus)
 - ✅ Filtres par date d'inscription (created_after, created_before)
 - ✅ Filtres par nombre de commandes (min_orders, max_orders)
 - ✅ Filtres par montant total (min_total_spent, max_total_spent)
 
 **Exemple de critères**:
+
 ```json
 {
   "tags": ["vip", "premium"],
@@ -68,6 +79,7 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
 ```
 
 ### 5. Amélioration Fonction `update_segment_member_count` ✅
+
 **Fichier**: `supabase/migrations/20250202_fix_emailing_tags_workflows_critical.sql`
 
 - ✅ Calcul correct pour segments dynamiques
@@ -75,11 +87,13 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
 - ✅ Mise à jour automatique de `last_calculated_at`
 
 ### 6. Amélioration Fonction `execute_email_workflow` ✅
+
 **Fichier**: `supabase/migrations/20250202_fix_emailing_tags_workflows_critical.sql`
 
 **Avant**: Ne faisait rien dans la boucle des actions
 
 **Après**: Support complet pour:
+
 - ✅ Action `add_tag` - Ajoute un tag à l'utilisateur
 - ✅ Action `remove_tag` - Supprime un tag de l'utilisateur
 - ✅ Action `send_email` - Prêt pour délégation à Edge Function
@@ -88,6 +102,7 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
 - ✅ Actions critiques (arrêt du workflow si échec)
 
 **Exemple de workflow**:
+
 ```json
 {
   "actions": [
@@ -95,13 +110,13 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
       "type": "add_tag",
       "config": {
         "tag": "new_customer",
-        "context": {"source": "workflow"}
+        "context": { "source": "workflow" }
       },
       "order": 1
     },
     {
       "type": "wait",
-      "config": {"duration": 3600},
+      "config": { "duration": 3600 },
       "order": 2
     },
     {
@@ -117,9 +132,11 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
 ```
 
 ### 7. Service TypeScript `EmailTagService` ✅
+
 **Fichier**: `src/lib/email/email-tag-service.ts`
 
 **Fonctionnalités**:
+
 - ✅ `validateAndNormalizeTag(tag)` - Validation et normalisation
 - ✅ `addTag(userId, storeId, tag, context?)` - Ajouter un tag
 - ✅ `removeTag(userId, storeId, tag)` - Supprimer un tag
@@ -131,6 +148,7 @@ SELECT add_user_tag('user-id', 'store-id', '  vip  '); -- Devient "vip"
 - ✅ `getStoreTags(storeId)` - Récupérer tous les tags uniques d'un store
 
 **Exemple d'utilisation**:
+
 ```typescript
 import { emailTagService } from '@/lib/email/email-tag-service';
 
@@ -148,6 +166,7 @@ const isVip = await emailTagService.hasTag(userId, storeId, 'vip');
 ```
 
 ### 8. Intégration dans `MarketingAutomation` ✅
+
 **Fichier**: `src/lib/marketing/automation.ts`
 
 - ✅ Implémentation de `updateTag()` pour l'action `update_tag`
@@ -155,6 +174,7 @@ const isVip = await emailTagService.hasTag(userId, storeId, 'vip');
 - ✅ Gestion d'erreurs améliorée
 
 ### 9. Amélioration `EmailWorkflowService` ✅
+
 **Fichier**: `src/lib/email/email-workflow-service.ts`
 
 - ✅ Enrichissement automatique du contexte (user_id, email)
@@ -165,20 +185,21 @@ const isVip = await emailTagService.hasTag(userId, storeId, 'vip');
 
 ## 📊 Résumé des Corrections
 
-| Problème | Statut | Fichier |
-|----------|--------|---------|
-| Fonction `remove_user_tag` manquante | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
-| Fonction `execute_email_workflow` incomplète | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
+| Problème                                                | Statut     | Fichier                                             |
+| ------------------------------------------------------- | ---------- | --------------------------------------------------- |
+| Fonction `remove_user_tag` manquante                    | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
+| Fonction `execute_email_workflow` incomplète            | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
 | Fonction `calculate_dynamic_segment_members` incomplète | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
-| Actions `add_tag` et `remove_tag` non implémentées | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
-| Pas de service TypeScript pour tags | ✅ Corrigé | `src/lib/email/email-tag-service.ts` |
-| Pas de validation des tags | ✅ Corrigé | Fonction SQL + Service TypeScript |
+| Actions `add_tag` et `remove_tag` non implémentées      | ✅ Corrigé | `20250202_fix_emailing_tags_workflows_critical.sql` |
+| Pas de service TypeScript pour tags                     | ✅ Corrigé | `src/lib/email/email-tag-service.ts`                |
+| Pas de validation des tags                              | ✅ Corrigé | Fonction SQL + Service TypeScript                   |
 
 ---
 
 ## 🚀 Prochaines Étapes (Phase 2)
 
 ### À implémenter prochainement:
+
 1. ⏳ Rate limiting pour SendGrid
 2. ⏳ Retry automatique avec backoff exponentiel
 3. ⏳ Système de catégories pour tags
@@ -191,15 +212,19 @@ const isVip = await emailTagService.hasTag(userId, storeId, 'vip');
 ## 📝 Notes Techniques
 
 ### Migration SQL
+
 La migration `20250202_fix_emailing_tags_workflows_critical.sql` doit être exécutée après:
+
 - `20250201_emailing_advanced_foundations.sql`
 - `20250201_emailing_functions_base.sql`
 - `20250201_phase7_email_workflows.sql`
 
 ### Breaking Changes
+
 Aucun breaking change. Les fonctions existantes sont améliorées mais restent compatibles.
 
 ### Tests Recommandés
+
 1. Tester l'ajout/suppression de tags
 2. Tester les segments dynamiques avec critères de tags
 3. Tester les workflows avec actions `add_tag` et `remove_tag`
@@ -209,4 +234,3 @@ Aucun breaking change. Les fonctions existantes sont améliorées mais restent c
 
 **Date de mise à jour**: 2 Février 2025  
 **Version**: 1.1.0
-

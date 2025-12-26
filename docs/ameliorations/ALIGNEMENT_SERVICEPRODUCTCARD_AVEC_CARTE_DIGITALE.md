@@ -230,4 +230,3 @@
 
 _Alignement terminé le 2 Février 2025_  
 _Style et informations identiques à la carte digitale ✅_
-

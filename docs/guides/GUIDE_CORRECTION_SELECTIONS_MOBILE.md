@@ -7,6 +7,7 @@
 ## 🔴 CORRECTION 1: Unifier la Détection Mobile
 
 ### Problème
+
 Détection mobile incohérente avec 3 méthodes différentes.
 
 ### Solution
@@ -15,7 +16,7 @@ Détection mobile incohérente avec 3 méthodes différentes.
 
 ```typescript
 // src/hooks/use-mobile.tsx
-import * as React from "react";
+import * as React from 'react';
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -27,9 +28,9 @@ export function useIsMobile() {
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
-    mql.addEventListener("change", onChange);
+    mql.addEventListener('change', onChange);
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    return () => mql.removeEventListener("change", onChange);
+    return () => mql.removeEventListener('change', onChange);
   }, []);
 
   return !!isMobile;
@@ -44,7 +45,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const SelectContent = React.forwardRef<...>(({ className, children, position = "popper", ...props }, ref) => {
   const isMobile = useIsMobile(); // ✅ Utiliser le hook
-  
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -60,7 +61,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const DropdownMenuContent = React.forwardRef<...>(({ className, sideOffset = 4, mobileOptimized = true, ...props }, ref) => {
   const isMobile = useIsMobile(); // ✅ Utiliser le hook
-  
+
   return (
     <DropdownMenuPrimitive.Portal>
       // ... reste du code
@@ -74,7 +75,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const DropdownMenuItem = React.forwardRef<...>(({ className, inset, onSelect, ...props }, ref) => {
   const isMobile = useIsMobile(); // ✅ Utiliser le hook
-  
+
   return (
     <DropdownMenuPrimitive.Item
       // ... reste du code
@@ -85,6 +86,7 @@ const DropdownMenuItem = React.forwardRef<...>(({ className, inset, onSelect, ..
 ## 🔴 CORRECTION 2: Nettoyer le Code Mort
 
 ### Problème
+
 Code commenté et variables inutilisées dans `mobile-dropdown.tsx`.
 
 ### Solution
@@ -92,6 +94,7 @@ Code commenté et variables inutilisées dans `mobile-dropdown.tsx`.
 **Fichier**: `src/components/ui/mobile-dropdown.tsx`
 
 **Supprimer** (lignes 107-111):
+
 ```typescript
 // ❌ SUPPRIMER
 // DÉSACTIVÉ: Ne plus utiliser le hook de verrouillage agressif
@@ -102,6 +105,7 @@ const isLocked = false;
 ```
 
 **Remplacer par**:
+
 ```typescript
 // ✅ Code propre
 // Le positionnement est géré par Radix UI via les props
@@ -113,6 +117,7 @@ const isLocked = false;
 ## 🔴 CORRECTION 3: Corriger les Types TypeScript
 
 ### Problème
+
 Props manquantes dans les interfaces TypeScript.
 
 ### Solution
@@ -120,6 +125,7 @@ Props manquantes dans les interfaces TypeScript.
 **Fichier**: `src/components/ui/LanguageSwitcher.tsx`
 
 **Avant**:
+
 ```typescript
 interface LanguageSwitcherProps {
   className?: string;
@@ -130,6 +136,7 @@ interface LanguageSwitcherProps {
 ```
 
 **Après**:
+
 ```typescript
 interface LanguageSwitcherProps {
   className?: string;
@@ -187,13 +194,14 @@ export const DESKTOP_ANIMATION_DELAY = 0; // ms
 ```
 
 **Utiliser dans les composants**:
+
 ```typescript
 // src/components/ui/select.tsx
 import { MOBILE_COLLISION_PADDING, DESKTOP_COLLISION_PADDING } from '@/constants/mobile';
 
 const SelectContent = React.forwardRef<...>(({ ...props }, ref) => {
   const isMobile = useIsMobile();
-  
+
   return (
     <SelectPrimitive.Content
       collisionPadding={isMobile ? MOBILE_COLLISION_PADDING : DESKTOP_COLLISION_PADDING}
@@ -209,10 +217,10 @@ const SelectContent = React.forwardRef<...>(({ ...props }, ref) => {
 
 **Ajouter JSDoc complet**:
 
-```typescript
+````typescript
 /**
  * Composant Select optimisé pour mobile
- * 
+ *
  * @example
  * ```tsx
  * <Select value={value} onValueChange={setValue}>
@@ -245,7 +253,7 @@ interface SelectTriggerProps {
    */
   disabled?: boolean;
 }
-```
+````
 
 ---
 
@@ -256,39 +264,51 @@ interface SelectTriggerProps {
 **Fichier**: `src/components/ui/LanguageSwitcher.tsx`
 
 **Avant**:
+
 ```typescript
-const changeLanguage = useCallback((langCode: LanguageCode) => {
-  setOpen(false);
-  
-  setTimeout(() => {
-    i18n.changeLanguage(langCode);
-    localStorage.setItem('emarzona_language', langCode);
-    document.documentElement.lang = langCode;
-  }, isMobile ? 100 : 50); // ❌ Délai artificiel
-}, [i18n, isMobile]);
+const changeLanguage = useCallback(
+  (langCode: LanguageCode) => {
+    setOpen(false);
+
+    setTimeout(
+      () => {
+        i18n.changeLanguage(langCode);
+        localStorage.setItem('emarzona_language', langCode);
+        document.documentElement.lang = langCode;
+      },
+      isMobile ? 100 : 50
+    ); // ❌ Délai artificiel
+  },
+  [i18n, isMobile]
+);
 ```
 
 **Après**:
+
 ```typescript
 const [isChanging, setIsChanging] = useState(false);
 
-const changeLanguage = useCallback((langCode: LanguageCode) => {
-  if (isChanging) return; // ✅ Prévenir les doubles clics
-  
-  setIsChanging(true);
-  setOpen(false);
-  
-  // ✅ Changement immédiat (pas de délai)
-  i18n.changeLanguage(langCode);
-  localStorage.setItem('emarzona_language', langCode);
-  document.documentElement.lang = langCode;
-  
-  // ✅ Réactiver après un court délai pour le feedback
-  setTimeout(() => setIsChanging(false), 100);
-}, [i18n, isChanging]);
+const changeLanguage = useCallback(
+  (langCode: LanguageCode) => {
+    if (isChanging) return; // ✅ Prévenir les doubles clics
+
+    setIsChanging(true);
+    setOpen(false);
+
+    // ✅ Changement immédiat (pas de délai)
+    i18n.changeLanguage(langCode);
+    localStorage.setItem('emarzona_language', langCode);
+    document.documentElement.lang = langCode;
+
+    // ✅ Réactiver après un court délai pour le feedback
+    setTimeout(() => setIsChanging(false), 100);
+  },
+  [i18n, isChanging]
+);
 ```
 
 **Utiliser dans le JSX**:
+
 ```typescript
 <Button
   variant={variant}
@@ -313,17 +333,20 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 ## ✅ Checklist de Correction
 
 ### Corrections Critiques
+
 - [ ] Remplacer toutes les détections inline par `useIsMobile()`
 - [ ] Nettoyer le code mort dans `mobile-dropdown.tsx`
 - [ ] Corriger les interfaces TypeScript
 
 ### Corrections Moyennes
+
 - [ ] Créer `src/constants/mobile.ts`
 - [ ] Utiliser les constantes dans tous les composants
 - [ ] Ajouter JSDoc complet
 - [ ] Optimiser le changement de langue
 
 ### Tests
+
 - [ ] Tester sur mobile réel (iOS/Android)
 - [ ] Tester le changement d'orientation
 - [ ] Tester avec lecteurs d'écran
@@ -339,5 +362,4 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 
 ---
 
-*Guide créé le 2025-01-30*
-
+_Guide créé le 2025-01-30_

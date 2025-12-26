@@ -58,4 +58,3 @@
 - ✅ Touch targets conformes (≥ 44px)
 - ✅ Meilleure accessibilité
 - ✅ UX améliorée avec indicateurs visuels
-

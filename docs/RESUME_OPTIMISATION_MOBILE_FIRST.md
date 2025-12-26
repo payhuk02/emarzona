@@ -11,6 +11,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 **Fichier :** `src/styles/mobile-first-system.css`
 
 **Contenu :**
+
 - ✅ Typographie responsive (16px base pour prévenir zoom iOS)
 - ✅ Système d'espacement mobile-first
 - ✅ Touch targets ≥ 44px (WCAG 2.5.5)
@@ -19,6 +20,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 - ✅ Optimisations de performance
 
 **Breakpoints :**
+
 - Mobile: 320px - 767px (base)
 - Tablet: 768px - 1023px
 - Desktop: 1024px+
@@ -26,23 +28,27 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ### 2. Composants mobile-first créés
 
 #### BottomSheet (`src/components/ui/bottom-sheet.tsx`)
+
 - ✅ Modale native mobile (slide depuis le bas)
 - ✅ Swipe to close sur mobile
 - ✅ Safe areas respectées
 - ✅ Desktop: Dialog classique
 
 #### MobileTableCard (`src/components/ui/mobile-table-card.tsx`)
+
 - ✅ Transformation automatique tableau → cartes sur mobile
 - ✅ Colonnes par priorité (high/medium/low)
 - ✅ Actions intégrées dans chaque carte
 
 #### MobileFormField (`src/components/ui/mobile-form-field.tsx`)
+
 - ✅ Champs optimisés mobile (labels, erreurs, descriptions)
 - ✅ Font-size 16px (prévient zoom iOS)
 - ✅ Full-width sur mobile
 - ✅ MobileFormSection pour groupement logique
 
 #### LazyImage (`src/components/ui/lazy-image.tsx`)
+
 - ✅ Lazy loading avec Intersection Observer
 - ✅ Skeleton loading
 - ✅ Ratios fixes (évite layout shift)
@@ -51,6 +57,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ### 3. Hooks utilitaires
 
 #### useResponsiveModal (`src/hooks/use-responsive-modal.tsx`)
+
 - ✅ Détection automatique mobile/desktop
 - ✅ Choix BottomSheet vs Dialog
 - ✅ API simple et cohérente
@@ -58,28 +65,33 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ### 4. Composants de base optimisés
 
 #### Button
+
 - ✅ Touch targets 44px minimum
 - ✅ Font-size adaptatif
 - ✅ Touch manipulation
 - ✅ Feedback haptique
 
 #### Input / Textarea
+
 - ✅ Font-size 16px (prévient zoom iOS)
 - ✅ Touch targets 44px
 - ✅ Full-width sur mobile
 
 #### Dialog
+
 - ✅ Position mobile (bottom) vs desktop (centré)
 - ✅ Safe areas iOS
 - ✅ Scroll interne optimisé
 - ✅ Animations légères
 
 #### Select / Dropdown
+
 - ✅ Optimisations mobiles appliquées
 - ✅ Largeurs responsive
 - ✅ Positionnement stable
 
 #### Card
+
 - ✅ Padding responsive (16px mobile, 24px desktop)
 - ✅ Overflow-x hidden
 - ✅ Transitions légères
@@ -87,11 +99,13 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ### 5. Layouts existants
 
 #### MainLayout
+
 - ✅ Sidebar déjà gérée en drawer mobile (via SidebarProvider)
 - ✅ TopNavigationBar optimisé
 - ✅ Marges responsive
 
 #### Sidebar
+
 - ✅ Détection mobile automatique
 - ✅ Sheet sur mobile, sidebar fixe sur desktop
 - ✅ Largeur adaptative
@@ -105,22 +119,26 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ## 📐 Standards appliqués
 
 ### Typographie
+
 - **Mobile base :** 16px (prévient zoom iOS)
 - **Titres mobile :** 20-24px
 - **Sous-titres :** 16-18px
 - **Texte :** 14-16px
 
 ### Touch Targets
+
 - **Minimum :** 44x44px (WCAG 2.5.5)
 - **Confortable :** 48x48px
 - **Espacement :** 8px minimum
 
 ### Espacement
+
 - **Mobile :** 16px container padding
 - **Tablet :** 24px
 - **Desktop :** 32px
 
 ### Safe Areas
+
 - Respect automatique des safe areas iOS
 - Padding adaptatif (notch, barre d'accueil)
 
@@ -168,18 +186,21 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ## 📊 Métriques de succès
 
 ### Performance cible
+
 - Lighthouse Mobile Score > 90
 - First Contentful Paint < 1.5s
 - Time to Interactive < 3s
 - Cumulative Layout Shift < 0.1
 
 ### Accessibilité
+
 - WCAG 2.1 AA compliance
 - Touch targets ≥ 44px
 - Contraste texte ≥ 4.5:1
 - Navigation clavier complète
 
 ### UX Mobile
+
 - Pas de scroll horizontal
 - Interactions fluides (< 100ms)
 - Animations légères
@@ -188,6 +209,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ## 🧪 Tests recommandés
 
 ### Devices
+
 - iPhone SE (1st gen) : 320px
 - iPhone 12/13/14 : 390px
 - iPhone 14 Pro Max : 430px
@@ -195,6 +217,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 - iPad Mini : 768px
 
 ### Scénarios
+
 1. ✅ Rotation portrait/paysage
 2. ✅ Zoom in/out
 3. ✅ Scroll vertical/horizontal
@@ -207,6 +230,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 ## 📚 Fichiers créés/modifiés
 
 ### Nouveaux fichiers
+
 - `src/styles/mobile-first-system.css`
 - `src/components/ui/bottom-sheet.tsx`
 - `src/components/ui/mobile-table-card.tsx`
@@ -218,6 +242,7 @@ Optimisation complète de l'application pour une expérience 100% mobile-first, 
 - `docs/RESUME_OPTIMISATION_MOBILE_FIRST.md`
 
 ### Fichiers modifiés
+
 - `src/index.css` - Import du système mobile-first
 - `src/components/ui/card.tsx` - Optimisations mobile
 
@@ -233,4 +258,3 @@ L'application dispose maintenant d'une **base solide mobile-first** avec :
 - ✅ Performance optimisée
 
 **Prochaine étape :** Migration progressive des composants existants vers les nouveaux composants mobile-first.
-

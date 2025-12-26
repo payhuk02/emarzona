@@ -68,7 +68,7 @@ function Dashboard() {
 ✅ **Déjà implémenté** dans `App.tsx` :
 
 ```typescript
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
 ```
 
 ---
@@ -78,6 +78,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 ### Configuration Vite
 
 Le `vite.config.ts` est configuré pour :
+
 - Séparer les dépendances lourdes (PDF, Canvas, QR Code)
 - Garder React dans le chunk principal
 - Optimiser les chunks par fonctionnalité
@@ -99,8 +100,8 @@ Ouvre `dist/stats.html` pour visualiser le bundle.
 ```typescript
 import { OptimizedImg } from '@/components/shared/OptimizedImg';
 
-<OptimizedImg 
-  src="/image.jpg" 
+<OptimizedImg
+  src="/image.jpg"
   alt="Description"
   priority={false} // lazy par défaut
 />
@@ -220,4 +221,3 @@ queryClient.prefetchQuery({
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

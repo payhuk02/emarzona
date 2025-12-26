@@ -19,6 +19,7 @@
 ## 🔐 ÉTAPE 2 : Créer les politiques via le Dashboard
 
 ### 1. Aller dans Storage
+
 1. Dans le menu de gauche, cliquer sur **"Storage"**
 2. Vous devriez voir le bucket **"videos"**
 3. Cliquer sur **"videos"**
@@ -129,29 +130,32 @@ USING (
 
 Dans l'onglet **Policies** du bucket "videos", vous devriez voir **4 politiques** :
 
-| Nom | Opération | Rôle |
-|-----|-----------|------|
-| Authenticated users can upload videos | INSERT | authenticated |
-| Anyone can view videos | SELECT | public |
-| Users can update their own videos | UPDATE | authenticated |
-| Users can delete their own videos | DELETE | authenticated |
+| Nom                                   | Opération | Rôle          |
+| ------------------------------------- | --------- | ------------- |
+| Authenticated users can upload videos | INSERT    | authenticated |
+| Anyone can view videos                | SELECT    | public        |
+| Users can update their own videos     | UPDATE    | authenticated |
+| Users can delete their own videos     | DELETE    | authenticated |
 
 ---
 
 ## 🧪 TEST RAPIDE
 
 ### Test 1 : Créer un dossier
+
 1. Dans le bucket "videos", cliquer sur **"Create folder"**
 2. Nom : `course-videos`
 3. Cliquer sur **"Create"**
 
 ### Test 2 : Upload un fichier de test
+
 1. Entrer dans le dossier `course-videos`
 2. Cliquer sur **"Upload file"**
 3. Sélectionner une petite vidéo (< 10 MB)
 4. ✅ L'upload devrait fonctionner
 
 ### Test 3 : Récupérer l'URL
+
 1. Cliquer sur le fichier uploadé
 2. Copier l'URL publique
 3. Ouvrir l'URL dans un nouvel onglet
@@ -162,13 +166,17 @@ Dans l'onglet **Policies** du bucket "videos", vous devriez voir **4 politiques*
 ## ❌ EN CAS DE PROBLÈME
 
 ### Problème : "New policy failed to save"
+
 **Solution** : Vérifier que vous avez bien rempli tous les champs requis.
 
 ### Problème : "Policy already exists"
+
 **Solution** : Supprimer l'ancienne politique d'abord, puis recréer.
 
 ### Problème : Upload échoue
-**Solution** : 
+
+**Solution** :
+
 1. Vérifier que l'utilisateur est bien connecté
 2. Vérifier que le dossier est bien `course-videos`
 
@@ -177,6 +185,7 @@ Dans l'onglet **Policies** du bucket "videos", vous devriez voir **4 politiques*
 ## 📸 CAPTURES D'ÉCRAN (Aide visuelle)
 
 ### Création d'une politique
+
 ```
 ┌─────────────────────────────────────────┐
 │  New Policy                             │
@@ -219,4 +228,3 @@ Dans l'onglet **Policies** du bucket "videos", vous devriez voir **4 politiques*
 **Développeur** : Intelli / payhuk02  
 **Projet** : Payhuk SaaS Platform  
 **Statut** : ✅ **GUIDE COMPLET**
-

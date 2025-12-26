@@ -8,6 +8,7 @@
 ## ✅ Résultats
 
 ### Avant
+
 - 🇫🇷 FR : 816 clés (100% - référence)
 - 🇬🇧 EN : 789 clés (96.7% - 27 clés manquantes)
 - 🇪🇸 ES : 644 clés (78.9% - 172 clés manquantes)
@@ -15,6 +16,7 @@
 - 🇵🇹 PT : 595 clés (72.9% - 330 clés manquantes)
 
 ### Après
+
 - 🇫🇷 FR : 815 clés (100% - référence) ✅
 - 🇬🇧 EN : 815 clés (100% - complété) ✅
 - 🇪🇸 ES : 815 clés (100% - complété) ✅
@@ -26,16 +28,19 @@
 ## 📝 Actions Réalisées
 
 ### 1. Ajout des clés `wizard` et `common.coverage`
+
 - ✅ Ajout de `common.coverage` dans EN, ES, DE, PT
 - ✅ Ajout de toute la section `wizard` dans EN, ES, DE, PT
 - ✅ Correction de la structure `wizard.shortcuts` (objet au lieu de clés séparées)
 
 ### 2. Ajout de la section `courses` complète
+
 - ✅ Ajout de 147 clés `courses` dans ES
 - ✅ Ajout de 147 clés `courses` dans DE
 - ✅ Ajout de 147 clés `courses` dans PT
 
 ### 3. Scripts créés
+
 - ✅ `scripts/verify-i18n-pages.ts` - Vérifie l'utilisation d'i18n dans les pages
 - ✅ `scripts/verify-i18n-keys.ts` - Vérifie les clés manquantes
 - ✅ `scripts/add-missing-i18n-keys.ts` - Ajoute automatiquement les clés manquantes
@@ -46,6 +51,7 @@
 ## ⚠️ Clés Manquantes Restantes (PT)
 
 **157 clés manquantes** dans PT, principalement dans :
+
 - `auth.*` (clés d'authentification)
 - `marketplace.*` (filtres, tri, etc.)
 - `products.*` (actions, filtres, etc.)
@@ -72,4 +78,3 @@
 
 **Document généré automatiquement**  
 **Dernière mise à jour** : 31 Janvier 2025
-

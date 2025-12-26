@@ -19,6 +19,7 @@ L'unification du système de promotions consolide tous les systèmes de promotio
 **Fichier:** `supabase/migrations/20250128_unify_promotions_system.sql`
 
 **Contenu:**
+
 - Extension de la table `product_promotions` avec toutes les colonnes nécessaires
 - Fonctions de migration depuis `promotions` et `digital_product_coupons`
 - Fonction unifiée de validation `validate_unified_promotion()`
@@ -31,11 +32,13 @@ L'unification du système de promotions consolide tous les systèmes de promotio
 ### 2. Interface Unifiée ✅
 
 **Fichiers créés:**
+
 - `src/pages/promotions/UnifiedPromotionsPage.tsx` - Page unifiée
 - `src/components/physical/promotions/PromotionsManager.tsx` - Amélioré avec support complet
 - `src/components/promotions/PromotionScopeSelector.tsx` - Sélecteur unifié
 
 **Fonctionnalités:**
+
 - ✅ Création, modification, suppression de promotions
 - ✅ Support pour tous les types de produits
 - ✅ Sélection de produits/catégories/collections
@@ -97,11 +100,13 @@ La table `product_promotions` supporte maintenant :
 ### 1. Système Simple (`promotions`)
 
 **Avant:**
+
 - Table séparée `promotions`
 - Fonctionnalités limitées
 - Pas de gestion de portée avancée
 
 **Après:**
+
 - Migré vers `product_promotions`
 - Toutes les fonctionnalités unifiées disponibles
 - Traçabilité via `original_promotion_id`
@@ -111,11 +116,13 @@ La table `product_promotions` supporte maintenant :
 ### 2. Système Digital (`digital_product_coupons`)
 
 **Avant:**
+
 - Table séparée `digital_product_coupons`
 - Fonctionnalités spécifiques aux produits digitaux
 - Gestion complexe avec plusieurs hooks
 
 **Après:**
+
 - Migré vers `product_promotions`
 - Toutes les fonctionnalités digitales préservées
 - Traçabilité via `original_digital_coupon_id`
@@ -125,10 +132,12 @@ La table `product_promotions` supporte maintenant :
 ### 3. Système Physique (`product_promotions`)
 
 **Avant:**
+
 - Table pour produits physiques uniquement
 - Fonctionnalités de base
 
 **Après:**
+
 - Devenue la table principale unifiée
 - Supporte tous les types de produits
 - Toutes les fonctionnalités avancées
@@ -169,6 +178,7 @@ La table `product_promotions` supporte maintenant :
 ### Phase 1 : Migration des Données (À faire)
 
 1. **Exécuter la migration SQL**
+
    ```sql
    SELECT * FROM migrate_promotions_to_product_promotions();
    SELECT * FROM migrate_digital_coupons_to_product_promotions();
@@ -315,4 +325,3 @@ L'unification du système de promotions est **complète au niveau conceptuel et 
 **Dernière mise à jour :** 28 Janvier 2025  
 **Version :** 1.0  
 **Auteur :** Équipe de développement Emarzona
-

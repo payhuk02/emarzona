@@ -24,12 +24,16 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ### 1. MainLayout.tsx
 
 **Avant:**
+
 ```typescript
 // Une seule sidebar à la fois
-{renderSidebar()} // Soit AppSidebar, soit sidebar contextuelle
+{
+  renderSidebar();
+} // Soit AppSidebar, soit sidebar contextuelle
 ```
 
 **Après:**
+
 ```typescript
 // AppSidebar TOUJOURS + Sidebar contextuelle à côté
 <AppSidebar /> // TOUJOURS présent (stable)
@@ -39,6 +43,7 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ### 2. Position des Sidebars Contextuelles
 
 **Toutes les 20 sidebars contextuelles:**
+
 - `left-0` → `left-64` (position après AppSidebar)
 - AppSidebar: `left-0` (256px de large)
 - ContextSidebar: `left-64` (256px après AppSidebar)
@@ -46,9 +51,11 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ### 3. Marges du Contenu
 
 **Sans sidebar contextuelle:**
+
 - `lg:ml-64` (256px pour AppSidebar)
 
 **Avec sidebar contextuelle:**
+
 - `md:ml-[28rem] lg:ml-[32rem]` (512px pour AppSidebar + ContextSidebar)
 
 ---
@@ -135,4 +142,3 @@ Toutes les sidebars contextuelles ont été mises à jour avec `left-64` :
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **TERMINÉ - TOUTES LES SIDEBARS SONT STABLES ET STATIQUES**
-

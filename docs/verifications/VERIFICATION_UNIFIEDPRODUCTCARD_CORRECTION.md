@@ -61,4 +61,3 @@ Maintenant, `UnifiedProductCard.tsx` affiche **toutes les informations** sur le 
 ---
 
 _Correction appliquée le 2 Février 2025_
-

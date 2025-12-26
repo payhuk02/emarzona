@@ -6,6 +6,7 @@
 ## ✅ Corrections Appliquées
 
 ### 1. Simplification de `couponDiscountAmount`
+
 ```typescript
 // Avant (avec useMemo qui pouvait causer des problèmes)
 const couponDiscountAmount = useMemo(() => {
@@ -14,36 +15,50 @@ const couponDiscountAmount = useMemo(() => {
 }, [appliedCouponCode]);
 
 // Après (calcul direct, toujours à jour)
-const couponDiscountAmount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscountAmount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 ```
 
 ### 2. Amélioration des Dépendances de `taxAmount`
+
 ```typescript
 const taxAmount = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscount;
   return Math.max(0, taxableAmount * taxRate);
-}, [summary.subtotal, summary.discount_amount, appliedCouponCode?.discountAmount, appliedCouponCode?.id, taxRate]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  appliedCouponCode?.discountAmount,
+  appliedCouponCode?.id,
+  taxRate,
+]);
 ```
 
 ### 3. Amélioration des Dépendances de `finalTotal`
+
 ```typescript
 const finalTotal = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
   const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
   const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
   const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
   return finalAmount;
 }, [
-  summary.subtotal, 
-  summary.discount_amount, 
-  taxAmount, 
-  shippingAmount, 
+  summary.subtotal,
+  summary.discount_amount,
+  taxAmount,
+  shippingAmount,
   appliedCouponCode?.id,
   appliedCouponCode?.discountAmount,
   appliedCouponCode?.code,
-  giftCardAmount
+  giftCardAmount,
 ]);
 ```
 
@@ -57,6 +72,7 @@ const finalTotal = useMemo(() => {
 ## 📊 Calcul du Total
 
 **Ordre des opérations:**
+
 1. `subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount`
 2. `subtotalWithTaxes = subtotalAfterDiscounts + taxAmount`
 3. `subtotalWithShipping = subtotalWithTaxes + shippingAmount`
@@ -65,12 +81,14 @@ const finalTotal = useMemo(() => {
 ## 🧪 Test Rapide
 
 **Scénario:**
+
 - Sous-total: 4000 XOF
 - Code promo: -400 XOF
 - Taxes: 0 XOF
 - Shipping: 0 XOF
 
 **Résultat attendu:**
+
 - Total: 4000 - 400 = **3600 XOF**
 
 ## ⚠️ Points d'Attention
@@ -79,4 +97,3 @@ const finalTotal = useMemo(() => {
 2. S'assurer que toutes les dépendances sont correctes
 3. Tester avec différents types de promotions (pourcentage, montant fixe)
 4. Vérifier que le total ne devient jamais négatif
-

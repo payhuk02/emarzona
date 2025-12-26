@@ -143,28 +143,28 @@ Obtenir les statistiques Moneroo :
 ```typescript
 import { getAllMonerooStats } from '@/lib/moneroo-stats';
 
-const stats = await getAllMonerooStats(
-  new Date('2025-01-01'),
-  new Date('2025-12-31'),
-  'store-id'
-);
+const stats = await getAllMonerooStats(new Date('2025-01-01'), new Date('2025-12-31'), 'store-id');
 
-console.log(stats.payments);  // Statistiques de paiement
-console.log(stats.revenue);   // Statistiques de revenus
+console.log(stats.payments); // Statistiques de paiement
+console.log(stats.revenue); // Statistiques de revenus
 ```
 
 ## 🔍 Dépannage
 
 ### Erreur "Rate limit dépassé"
+
 → Attendre quelques secondes ou augmenter `VITE_MONEROO_RATE_LIMIT_MAX`
 
 ### Erreur "Failed to fetch"
+
 → Vérifier la connexion Internet et que l'Edge Function est déployée
 
 ### Erreur "Configuration API manquante"
+
 → Vérifier que `MONEROO_API_KEY` est configuré dans Supabase
 
 ### Erreur "Montant invalide"
+
 → Vérifier que le montant est dans les limites (min: 100 XOF, max: 10M XOF)
 
 ## 📈 Performance
@@ -176,6 +176,7 @@ console.log(stats.revenue);   // Statistiques de revenus
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! Veuillez :
+
 1. Lire le [Guide de Contribution](./CONTRIBUTING.md)
 2. Suivre les conventions de code
 3. Ajouter des tests pour les nouvelles fonctionnalités
@@ -193,5 +194,3 @@ Ce projet est sous licence MIT. Voir [LICENSE](./LICENSE) pour plus de détails.
 ---
 
 **Dernière mise à jour** : Novembre 2025
-
-

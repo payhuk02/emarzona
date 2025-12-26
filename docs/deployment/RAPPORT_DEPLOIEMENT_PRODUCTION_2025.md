@@ -26,16 +26,16 @@
 
 ### ✅ Statut Global
 
-| Critère | Statut | Score |
-|---------|--------|-------|
-| **Build Production** | ✅ Réussi | 100% |
-| **Code Splitting** | ✅ Optimisé | Excellent |
-| **Compression** | ✅ Brotli + Gzip | -70% taille |
-| **Security Headers** | ✅ Configurés | A+ |
-| **SEO** | ✅ Optimisé | 100% |
-| **PWA** | ✅ Actif | Ready |
-| **i18n** | ✅ FR/EN | Actif |
-| **Vercel Config** | ✅ Optimisée | Ready |
+| Critère              | Statut           | Score       |
+| -------------------- | ---------------- | ----------- |
+| **Build Production** | ✅ Réussi        | 100%        |
+| **Code Splitting**   | ✅ Optimisé      | Excellent   |
+| **Compression**      | ✅ Brotli + Gzip | -70% taille |
+| **Security Headers** | ✅ Configurés    | A+          |
+| **SEO**              | ✅ Optimisé      | 100%        |
+| **PWA**              | ✅ Actif         | Ready       |
+| **i18n**             | ✅ FR/EN         | Actif       |
+| **Vercel Config**    | ✅ Optimisée     | Ready       |
 
 ### 🎯 Objectifs Atteints
 
@@ -71,6 +71,7 @@
 ```
 
 **Pages incluses :**
+
 - / (Homepage)
 - /marketplace (Marketplace)
 - /auth (Authentication)
@@ -94,6 +95,7 @@ Errors : 0
 ### 3.1 Vue d'Ensemble
 
 **Bundle Initial (avant compression) :**
+
 - Total : ~1.5 MB
 - **Après Gzip : ~430 KB** ✅
 - **Après Brotli : ~360 KB** ✅
@@ -101,44 +103,47 @@ Errors : 0
 
 ### 3.2 Chunks Principaux
 
-| Chunk | Taille Originale | Gzipped | Brotli | Lazy ? |
-|-------|-----------------|---------|--------|--------|
-| **vendor-react** | 161.68 KB | 52.55 KB | 44 KB | ❌ |
-| **vendor-supabase** | 146.01 KB | 37.10 KB | 31 KB | ❌ |
-| **vendor-ui** | 110.71 KB | 34.82 KB | 29 KB | ❌ |
-| **vendor-i18n** | 46.48 KB | 14.80 KB | 12 KB | ❌ |
-| **vendor-query** | 34.79 KB | 10.21 KB | 8 KB | ❌ |
-| **index** (app) | 135.93 KB | 43.40 KB | 36 KB | ❌ |
-| **charts** | 412.68 KB | 104.64 KB | 87 KB | ✅ |
+| Chunk               | Taille Originale | Gzipped   | Brotli | Lazy ? |
+| ------------------- | ---------------- | --------- | ------ | ------ |
+| **vendor-react**    | 161.68 KB        | 52.55 KB  | 44 KB  | ❌     |
+| **vendor-supabase** | 146.01 KB        | 37.10 KB  | 31 KB  | ❌     |
+| **vendor-ui**       | 110.71 KB        | 34.82 KB  | 29 KB  | ❌     |
+| **vendor-i18n**     | 46.48 KB         | 14.80 KB  | 12 KB  | ❌     |
+| **vendor-query**    | 34.79 KB         | 10.21 KB  | 8 KB   | ❌     |
+| **index** (app)     | 135.93 KB        | 43.40 KB  | 36 KB  | ❌     |
+| **charts**          | 412.68 KB        | 104.64 KB | 87 KB  | ✅     |
 
 **Total Initial (Critical Path) : ~635 KB (~192 KB gzipped)**
 
 ### 3.3 Pages Lazy Loaded
 
-| Page | Taille | Gzipped |
-|------|--------|---------|
-| **Marketplace** | 85.26 KB | 20.81 KB |
-| **Products** | 139.43 KB | 35.39 KB |
-| **Settings** | 126.44 KB | 25.54 KB |
-| **Dashboard** | 18.87 KB | 4.69 KB |
-| **Store** | 45.81 KB | 11.22 KB |
-| **Analytics** | 8.53 KB | 2.48 KB |
-| **Orders** | 37.59 KB | 8.51 KB |
-| **Payments** | 39.54 KB | 9.21 KB |
+| Page            | Taille    | Gzipped  |
+| --------------- | --------- | -------- |
+| **Marketplace** | 85.26 KB  | 20.81 KB |
+| **Products**    | 139.43 KB | 35.39 KB |
+| **Settings**    | 126.44 KB | 25.54 KB |
+| **Dashboard**   | 18.87 KB  | 4.69 KB  |
+| **Store**       | 45.81 KB  | 11.22 KB |
+| **Analytics**   | 8.53 KB   | 2.48 KB  |
+| **Orders**      | 37.59 KB  | 8.51 KB  |
+| **Payments**    | 39.54 KB  | 9.21 KB  |
 
 ### 3.4 Recommandations
 
 ✅ **Bien :**
+
 - Code splitting efficace
 - Charts lazy loadé (gros module)
 - Vendors séparés correctement
 - Compression active
 
 ⚠️ **À surveiller :**
+
 - `charts-6vMz7s1H.js` : 412 KB (mais lazy loaded)
 - `Products-BLrlgVbY.js` : 139 KB (normal pour une page complexe)
 
 💡 **Suggestions futures :**
+
 - Considérer un CDN pour les vendors stables (React, UI)
 - Ajouter le prefetching pour les pages critiques (déjà fait ✅)
 - Monitorer les metrics Core Web Vitals
@@ -150,6 +155,7 @@ Errors : 0
 ### 4.1 Vercel Configuration (vercel.json)
 
 #### ✅ Rewrites SPA
+
 ```json
 {
   "rewrites": [
@@ -163,32 +169,32 @@ Errors : 0
 
 #### ✅ Security Headers
 
-| Header | Valeur | Description |
-|--------|--------|-------------|
-| **Strict-Transport-Security** | max-age=63072000 | Force HTTPS (2 ans) |
-| **X-Frame-Options** | SAMEORIGIN | Protection clickjacking |
-| **X-Content-Type-Options** | nosniff | Prévention MIME sniffing |
-| **X-XSS-Protection** | 1; mode=block | Protection XSS |
-| **Referrer-Policy** | strict-origin-when-cross-origin | Contrôle referrer |
-| **Permissions-Policy** | camera=(), microphone=() | Désactive APIs sensibles |
-| **Content-Security-Policy** | (détaillé) | Protection injections |
+| Header                        | Valeur                          | Description              |
+| ----------------------------- | ------------------------------- | ------------------------ |
+| **Strict-Transport-Security** | max-age=63072000                | Force HTTPS (2 ans)      |
+| **X-Frame-Options**           | SAMEORIGIN                      | Protection clickjacking  |
+| **X-Content-Type-Options**    | nosniff                         | Prévention MIME sniffing |
+| **X-XSS-Protection**          | 1; mode=block                   | Protection XSS           |
+| **Referrer-Policy**           | strict-origin-when-cross-origin | Contrôle referrer        |
+| **Permissions-Policy**        | camera=(), microphone=()        | Désactive APIs sensibles |
+| **Content-Security-Policy**   | (détaillé)                      | Protection injections    |
 
 #### ✅ CSP (Content Security Policy)
 
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline' 'unsafe-eval' 
-  https://fonts.googleapis.com 
-  https://cdn.jsdelivr.net 
+script-src 'self' 'unsafe-inline' 'unsafe-eval'
+  https://fonts.googleapis.com
+  https://cdn.jsdelivr.net
   https://*.supabase.co;
-style-src 'self' 'unsafe-inline' 
+style-src 'self' 'unsafe-inline'
   https://fonts.googleapis.com;
-font-src 'self' 
+font-src 'self'
   https://fonts.gstatic.com;
 img-src 'self' data: blob: https: http:;
-connect-src 'self' 
-  https://*.supabase.co 
-  wss://*.supabase.co 
+connect-src 'self'
+  https://*.supabase.co
+  wss://*.supabase.co
   https://api.moneroo.io;
 frame-ancestors 'self';
 base-uri 'self';
@@ -196,6 +202,7 @@ form-action 'self'
 ```
 
 #### ✅ CORS Headers (API Routes)
+
 ```json
 {
   "Access-Control-Allow-Origin": "*",
@@ -207,11 +214,13 @@ form-action 'self'
 ### 4.2 Vite Configuration
 
 #### ✅ Plugins Actifs
+
 - `@vitejs/plugin-react-swc` (Fast Refresh)
 - `vite-plugin-compression2` (Brotli + Gzip)
 - `rollup-plugin-visualizer` (Bundle analysis)
 
 #### ✅ Build Options
+
 ```typescript
 build: {
   target: 'esnext',
@@ -244,6 +253,7 @@ build: {
 ### 4.3 Environment Variables (Production)
 
 **Variables requises :**
+
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_anon_key
@@ -252,6 +262,7 @@ VITE_SENTRY_DSN=your_sentry_dsn (optional)
 ```
 
 **⚠️ Important :**
+
 - Toutes les variables doivent être préfixées par `VITE_`
 - Ne jamais commiter les secrets dans Git
 - Configurer dans Vercel Dashboard > Settings > Environment Variables
@@ -262,62 +273,62 @@ VITE_SENTRY_DSN=your_sentry_dsn (optional)
 
 ### 5.1 Performance
 
-| Optimisation | Statut | Impact |
-|--------------|--------|--------|
-| **Code Splitting** | ✅ | -70% bundle initial |
-| **Lazy Loading** | ✅ | FCP -40% |
-| **Image Optimization** | ✅ | WebP, lazy load |
-| **Font Display Swap** | ✅ | FCP -15% |
-| **Prefetching** | ✅ | Navigation instantanée |
-| **Compression** | ✅ | -76% taille totale |
-| **Tree Shaking** | ✅ | -30% code mort |
-| **Minification** | ✅ | -40% JS/CSS |
+| Optimisation           | Statut | Impact                 |
+| ---------------------- | ------ | ---------------------- |
+| **Code Splitting**     | ✅     | -70% bundle initial    |
+| **Lazy Loading**       | ✅     | FCP -40%               |
+| **Image Optimization** | ✅     | WebP, lazy load        |
+| **Font Display Swap**  | ✅     | FCP -15%               |
+| **Prefetching**        | ✅     | Navigation instantanée |
+| **Compression**        | ✅     | -76% taille totale     |
+| **Tree Shaking**       | ✅     | -30% code mort         |
+| **Minification**       | ✅     | -40% JS/CSS            |
 
 ### 5.2 SEO
 
-| Optimisation | Statut |
-|--------------|--------|
-| **Sitemap.xml** | ✅ Dynamique |
-| **Robots.txt** | ✅ Configuré |
-| **Meta Tags** | ✅ Dynamiques |
-| **Schema.org** | ✅ Product, Store, Org |
-| **Open Graph** | ✅ FB/Twitter |
-| **Canonical URLs** | ✅ |
-| **Breadcrumbs** | ✅ Schema |
+| Optimisation       | Statut                 |
+| ------------------ | ---------------------- |
+| **Sitemap.xml**    | ✅ Dynamique           |
+| **Robots.txt**     | ✅ Configuré           |
+| **Meta Tags**      | ✅ Dynamiques          |
+| **Schema.org**     | ✅ Product, Store, Org |
+| **Open Graph**     | ✅ FB/Twitter          |
+| **Canonical URLs** | ✅                     |
+| **Breadcrumbs**    | ✅ Schema              |
 
 ### 5.3 Security
 
-| Mesure | Statut |
-|--------|--------|
-| **HTTPS Enforcé** | ✅ HSTS |
-| **CSP Headers** | ✅ Strict |
-| **XSS Protection** | ✅ |
-| **CSRF Protection** | ✅ Supabase |
-| **Rate Limiting** | ✅ Edge Function |
-| **Input Validation** | ✅ Zod |
-| **SQL Injection** | ✅ Parameterized |
-| **Dependencies Audit** | ✅ npm audit |
+| Mesure                 | Statut           |
+| ---------------------- | ---------------- |
+| **HTTPS Enforcé**      | ✅ HSTS          |
+| **CSP Headers**        | ✅ Strict        |
+| **XSS Protection**     | ✅               |
+| **CSRF Protection**    | ✅ Supabase      |
+| **Rate Limiting**      | ✅ Edge Function |
+| **Input Validation**   | ✅ Zod           |
+| **SQL Injection**      | ✅ Parameterized |
+| **Dependencies Audit** | ✅ npm audit     |
 
 ### 5.4 PWA
 
-| Feature | Statut |
-|---------|--------|
-| **Service Worker** | ✅ Registered |
-| **Offline Mode** | ✅ Elegant fallback |
-| **Cache Strategy** | ✅ Multi-level |
-| **Manifest.json** | ⚠️ À créer |
-| **Icons** | ⚠️ À générer |
-| **Push Notifications** | ⚠️ Optionnel |
+| Feature                | Statut              |
+| ---------------------- | ------------------- |
+| **Service Worker**     | ✅ Registered       |
+| **Offline Mode**       | ✅ Elegant fallback |
+| **Cache Strategy**     | ✅ Multi-level      |
+| **Manifest.json**      | ⚠️ À créer          |
+| **Icons**              | ⚠️ À générer        |
+| **Push Notifications** | ⚠️ Optionnel        |
 
 ### 5.5 i18n (Internationalization)
 
-| Langue | Statut | Couverture |
-|--------|--------|------------|
-| **Français** | ✅ | 100% |
-| **English** | ✅ | 100% |
+| Langue          | Statut          | Couverture |
+| --------------- | --------------- | ---------- |
+| **Français**    | ✅              | 100%       |
+| **English**     | ✅              | 100%       |
 | **Persistence** | ✅ LocalStorage |
-| **Detection** | ✅ Browser |
-| **Fallback** | ✅ FR |
+| **Detection**   | ✅ Browser      |
+| **Fallback**    | ✅ FR           |
 
 ---
 
@@ -327,30 +338,31 @@ VITE_SENTRY_DSN=your_sentry_dsn (optional)
 
 **Scores attendus :**
 
-| Métrique | Score Cible | Valeur Cible |
-|----------|-------------|--------------|
-| **Performance** | 90-100 | ✅ |
-| **Accessibility** | 90-100 | ✅ |
-| **Best Practices** | 90-100 | ✅ |
-| **SEO** | 90-100 | ✅ |
+| Métrique           | Score Cible | Valeur Cible |
+| ------------------ | ----------- | ------------ |
+| **Performance**    | 90-100      | ✅           |
+| **Accessibility**  | 90-100      | ✅           |
+| **Best Practices** | 90-100      | ✅           |
+| **SEO**            | 90-100      | ✅           |
 
 ### 6.2 Core Web Vitals
 
 **Objectifs :**
 
-| Métrique | Cible | Valeur Mesurée |
-|----------|-------|----------------|
-| **LCP** (Largest Contentful Paint) | < 2.5s | ⏱️ À tester |
-| **FID** (First Input Delay) | < 100ms | ⏱️ À tester |
-| **CLS** (Cumulative Layout Shift) | < 0.1 | ⏱️ À tester |
-| **FCP** (First Contentful Paint) | < 1.8s | ⏱️ À tester |
-| **TTI** (Time to Interactive) | < 3.8s | ⏱️ À tester |
+| Métrique                           | Cible   | Valeur Mesurée |
+| ---------------------------------- | ------- | -------------- |
+| **LCP** (Largest Contentful Paint) | < 2.5s  | ⏱️ À tester    |
+| **FID** (First Input Delay)        | < 100ms | ⏱️ À tester    |
+| **CLS** (Cumulative Layout Shift)  | < 0.1   | ⏱️ À tester    |
+| **FCP** (First Contentful Paint)   | < 1.8s  | ⏱️ À tester    |
+| **TTI** (Time to Interactive)      | < 3.8s  | ⏱️ À tester    |
 
 ### 6.3 Bundle Analysis
 
 **Fichier généré :** `dist/stats.html`
 
 **Comment ouvrir :**
+
 ```bash
 # Ouvrir dans le navigateur
 start dist/stats.html
@@ -360,6 +372,7 @@ file:///C:/Users/SAWADOGO/Desktop/payhula/dist/stats.html
 ```
 
 **Visualisation :**
+
 - Treemap interactif des chunks
 - Tailles originales, gzip, brotli
 - Identification des gros modules
@@ -434,6 +447,7 @@ file:///C:/Users/SAWADOGO/Desktop/payhula/dist/stats.html
 **Via GitHub + Vercel :**
 
 1. **Commit & Push :**
+
    ```bash
    git add .
    git commit -m "feat: production build ready"
@@ -526,24 +540,28 @@ vercel deploy --prod --prebuilt
 ### 9.1 Métriques Clés à Surveiller
 
 **Performance :**
+
 - Temps de chargement initial (< 3s)
 - Core Web Vitals (LCP, FID, CLS)
 - Bundle size (< 500 KB gzipped)
 - API response times (< 500ms)
 
 **Erreurs :**
+
 - Taux d'erreur JavaScript (< 1%)
 - Erreurs 5xx (< 0.1%)
 - Failed API calls (< 2%)
 - Supabase connection errors
 
 **Utilisation :**
+
 - Nombre de visiteurs uniques
 - Pages vues
 - Taux de rebond (< 50%)
 - Durée moyenne de session (> 2 min)
 
 **Business :**
+
 - Conversions (création compte/boutique)
 - Transactions Moneroo
 - Taux de complétion checkout
@@ -552,12 +570,14 @@ vercel deploy --prod --prebuilt
 ### 9.2 Outils Recommandés
 
 **Gratuits :**
+
 - Google Analytics 4
 - Google Search Console
 - Vercel Analytics (intégré)
 - Lighthouse CI
 
 **Payants (optionnel) :**
+
 - Sentry (error tracking) - $26/mois
 - LogRocket (session replay) - $99/mois
 - Datadog (monitoring) - $15/host/mois
@@ -566,13 +586,13 @@ vercel deploy --prod --prebuilt
 
 **Configurer des alertes pour :**
 
-| Condition | Seuil | Action |
-|-----------|-------|--------|
-| Error rate > 5% | 5 minutes | Email + SMS |
-| API latency > 2s | 10 minutes | Email |
-| Build failed | Immédiat | Email + Slack |
-| 5xx errors | 3 en 5 min | Email |
-| Downtime | 1 minute | Email + SMS |
+| Condition        | Seuil      | Action        |
+| ---------------- | ---------- | ------------- |
+| Error rate > 5%  | 5 minutes  | Email + SMS   |
+| API latency > 2s | 10 minutes | Email         |
+| Build failed     | Immédiat   | Email + Slack |
+| 5xx errors       | 3 en 5 min | Email         |
+| Downtime         | 1 minute   | Email + SMS   |
 
 ---
 
@@ -590,6 +610,7 @@ vercel deploy --prod --prebuilt
 6. Confirmer
 
 **Via Vercel CLI :**
+
 ```bash
 vercel rollback
 ```
@@ -649,26 +670,27 @@ git push origin main --force
 ```html
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maintenance - Payhuk</title>
-  <style>
-    /* Styles élégants */
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🔧 Maintenance en cours</h1>
-    <p>Nous mettons à jour notre plateforme pour vous offrir une meilleure expérience.</p>
-    <p>Retour estimé : <strong>30 minutes</strong></p>
-    <p>Merci de votre patience !</p>
-  </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maintenance - Payhuk</title>
+    <style>
+      /* Styles élégants */
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Maintenance en cours</h1>
+      <p>Nous mettons à jour notre plateforme pour vous offrir une meilleure expérience.</p>
+      <p>Retour estimé : <strong>30 minutes</strong></p>
+      <p>Merci de votre patience !</p>
+    </div>
+  </body>
 </html>
 ```
 
 **Activer dans Vercel :**
+
 ```json
 // vercel.json (temporaire)
 {
@@ -711,6 +733,7 @@ git push origin main --force
 ### 🚀 Prochaines Étapes
 
 #### Immédiat (Avant déploiement)
+
 1. ⏱️ Exécuter les tests E2E complets
 2. ⏱️ Créer `manifest.json` pour PWA
 3. ⏱️ Générer les icons PWA (512x512, 192x192)
@@ -718,6 +741,7 @@ git push origin main --force
 5. ⏱️ Tester le preview build manuellement
 
 #### Court terme (Semaine 1)
+
 1. ⏱️ Configurer Sentry pour error tracking
 2. ⏱️ Configurer Google Analytics
 3. ⏱️ Mettre en place les alertes
@@ -725,6 +749,7 @@ git push origin main --force
 5. ⏱️ Optimiser Core Web Vitals
 
 #### Moyen terme (Semaine 2-4)
+
 1. ⏱️ Monitorer les performances réelles
 2. ⏱️ Analyser le comportement utilisateur
 3. ⏱️ Optimiser les pages lentes
@@ -736,16 +761,19 @@ git push origin main --force
 ## 📞 CONTACTS & RESSOURCES
 
 ### Documentation
+
 - **Vercel Docs :** https://vercel.com/docs
 - **Vite Docs :** https://vitejs.dev
 - **Supabase Docs :** https://supabase.io/docs
 - **React Router :** https://reactrouter.com
 
 ### Support
+
 - **Vercel Support :** support@vercel.com
 - **Supabase Support :** support@supabase.io
 
 ### Dashboard
+
 - **Vercel Dashboard :** https://vercel.com/dashboard
 - **Supabase Dashboard :** https://supabase.com/dashboard
 - **Bundle Analysis :** `dist/stats.html`
@@ -789,5 +817,4 @@ git push origin main --force
 
 ---
 
-*Bon déploiement ! 🎉*
-
+_Bon déploiement ! 🎉_

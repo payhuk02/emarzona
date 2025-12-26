@@ -1,4 +1,5 @@
 # Proposition de Restructuration - Layout Systeme.io
+
 **Date:** 2 Décembre 2025  
 **Objectif:** Restructurer le layout d'Emarzona pour correspondre à la disposition de systeme.io
 
@@ -7,6 +8,7 @@
 ## 🎯 Objectif Principal
 
 Créer une structure de layout similaire à systeme.io avec :
+
 1. **Top Navigation Bar** - Navigation principale horizontale
 2. **Left Sidebar** - Navigation contextuelle (paramètres)
 3. **Main Content** - Zone de contenu avec breadcrumb
@@ -46,6 +48,7 @@ Créer une structure de layout similaire à systeme.io avec :
 ### 1. TopNavigationBar.tsx
 
 **Fonctionnalités:**
+
 - Logo Emarzona à gauche
 - Navigation principale horizontale
 - Icônes utilisateur à droite (notifications, thème, langue, profil)
@@ -53,6 +56,7 @@ Créer une structure de layout similaire à systeme.io avec :
 - Responsive avec menu hamburger sur mobile
 
 **Structure:**
+
 ```typescript
 <TopNavigationBar>
   <Logo />
@@ -72,12 +76,14 @@ Créer une structure de layout similaire à systeme.io avec :
 ### 2. SettingsSidebar.tsx
 
 **Fonctionnalités:**
+
 - Navigation contextuelle pour les paramètres
 - Breadcrumb en haut
 - Liste des sous-sections
 - Lien actif surligné
 
 **Structure:**
+
 ```typescript
 <SettingsSidebar>
   <Breadcrumb path="Paramètres > Emails" />
@@ -95,12 +101,14 @@ Créer une structure de layout similaire à systeme.io avec :
 ### 3. MainLayout.tsx
 
 **Fonctionnalités:**
+
 - Wrapper principal
 - Gère TopNav + Sidebar + Content
 - Responsive
 - Gère différents types de sidebars
 
 **Structure:**
+
 ```typescript
 <MainLayout sidebarType="settings">
   <TopNavigationBar />
@@ -116,6 +124,7 @@ Créer une structure de layout similaire à systeme.io avec :
 ### 4. Breadcrumb.tsx
 
 **Fonctionnalités:**
+
 - Affiche le chemin: "Paramètres > Emails"
 - Liens cliquables
 - Responsive
@@ -129,11 +138,13 @@ Créer une structure de layout similaire à systeme.io avec :
 **Fichier:** `src/components/layout/TopNavigationBar.tsx`
 
 **Éléments:**
+
 - Logo avec lien vers dashboard
 - Navigation principale (Tableau de bord, Produits, Commandes, etc.)
 - Zone droite: Notifications, Thème, Langue, Profil, Sauvegarder
 
 **Navigation principale:**
+
 ```typescript
 const mainNavItems = [
   { label: 'Tableau de bord', path: '/dashboard', icon: LayoutDashboard },
@@ -154,6 +165,7 @@ const mainNavItems = [
 **Fichier:** `src/components/layout/SettingsSidebar.tsx`
 
 **Navigation des paramètres:**
+
 ```typescript
 const settingsNavItems = [
   { label: 'Profil', path: '/dashboard/settings?tab=profile' },
@@ -174,6 +186,7 @@ const settingsNavItems = [
 **Fichier:** `src/components/layout/MainLayout.tsx`
 
 **Types de layouts:**
+
 - `default` - TopNav + AppSidebar (navigation principale)
 - `settings` - TopNav + SettingsSidebar (paramètres)
 - `minimal` - TopNav uniquement (pages publiques)
@@ -183,6 +196,7 @@ const settingsNavItems = [
 ### Étape 4: Intégrer dans les Pages
 
 **Modifier:**
+
 - `Settings.tsx` - Utiliser MainLayout avec sidebarType="settings"
 - `Dashboard.tsx` - Utiliser MainLayout avec sidebarType="default"
 - Autres pages - Adapter selon besoin
@@ -194,6 +208,7 @@ const settingsNavItems = [
 ### Top Navigation Bar
 
 **Desktop:**
+
 - Hauteur: 64px
 - Fond: `hsl(var(--primary))` ou blanc selon thème
 - Texte: Blanc (si fond coloré) ou `hsl(var(--foreground))`
@@ -201,12 +216,14 @@ const settingsNavItems = [
 - Position: Sticky top-0 z-50
 
 **Mobile:**
+
 - Hauteur: 56px
 - Menu hamburger à gauche
 - Logo centré
 - Actions à droite
 
 **Section active:**
+
 - Fond: `hsl(var(--primary))` avec opacité 20%
 - Texte: `hsl(var(--primary))` ou blanc
 - Border-bottom: 2px solid `hsl(var(--primary))`
@@ -216,6 +233,7 @@ const settingsNavItems = [
 ### Settings Sidebar
 
 **Desktop:**
+
 - Largeur: 256px
 - Fond: Blanc ou `hsl(var(--card))`
 - Padding: 16px
@@ -223,12 +241,14 @@ const settingsNavItems = [
 - Hauteur: calc(100vh - 64px)
 
 **Breadcrumb:**
+
 - Police: 14px
 - Couleur: `hsl(var(--muted-foreground))`
 - Padding: 16px 0
 - Border-bottom: 1px solid `hsl(var(--border))`
 
 **Nav Item:**
+
 - Padding: 12px 16px
 - Border-radius: 8px
 - Hover: Fond `hsl(var(--accent))`
@@ -239,12 +259,14 @@ const settingsNavItems = [
 ### Main Content
 
 **Desktop:**
+
 - Margin-left: 256px (pour sidebar)
 - Padding: 24px 32px
 - Max-width: 1400px
 - Margin: 0 auto
 
 **Mobile:**
+
 - Margin-left: 0
 - Padding: 16px
 - Full width
@@ -254,16 +276,19 @@ const settingsNavItems = [
 ## 📱 Responsive Breakpoints
 
 ### Desktop (> 1024px)
+
 - TopNav: Visible, navigation horizontale
 - Sidebar: Fixe à gauche (256px)
 - Content: Margin-left 256px
 
 ### Tablet (768px - 1024px)
+
 - TopNav: Visible, navigation horizontale (scroll si nécessaire)
 - Sidebar: Rétractable (overlay)
 - Content: Full width quand sidebar fermée
 
 ### Mobile (< 768px)
+
 - TopNav: Menu hamburger, logo centré
 - Sidebar: Overlay complet
 - Content: Full width
@@ -292,22 +317,26 @@ const settingsNavItems = [
 ## ✅ Checklist d'Implémentation
 
 ### Phase 1: Composants de Base
+
 - [ ] Créer TopNavigationBar.tsx
 - [ ] Créer SettingsSidebar.tsx
 - [ ] Créer Breadcrumb.tsx
 - [ ] Créer MainLayout.tsx
 
 ### Phase 2: Intégration
+
 - [ ] Intégrer TopNav dans App.tsx
 - [ ] Modifier Settings.tsx pour utiliser MainLayout
 - [ ] Tester responsive
 
 ### Phase 3: Migration
+
 - [ ] Migrer Dashboard.tsx
 - [ ] Migrer autres pages principales
 - [ ] Tester toutes les pages
 
 ### Phase 4: Polish
+
 - [ ] Animations et transitions
 - [ ] États actifs
 - [ ] Accessibilité
@@ -340,5 +369,3 @@ const settingsNavItems = [
 
 **Date:** 2 Décembre 2025  
 **Statut:** Analyse complète - Prêt pour implémentation
-
-

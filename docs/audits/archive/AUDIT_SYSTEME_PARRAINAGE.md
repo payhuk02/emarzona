@@ -16,6 +16,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 ### 1. **Tracking du Code de Parrainage**
 
 #### ✅ ReferralTracker (`src/components/referral/ReferralTracker.tsx`)
+
 - **Statut**: ✅ Fonctionnel
 - **Fonctionnalité**: Capture le paramètre `?ref=` dans l'URL
 - **Stockage**: localStorage + sessionStorage
@@ -23,6 +24,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 - **Fonctions utilitaires**: `getStoredReferralCode()`, `clearStoredReferralCode()`
 
 **Code vérifié**:
+
 ```typescript
 ✅ Détecte `?ref=CODE` dans l'URL
 ✅ Stocke dans localStorage et sessionStorage
@@ -35,6 +37,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 ### 2. **Intégration lors de l'Inscription**
 
 #### ✅ Auth.tsx (`src/pages/Auth.tsx` lignes 166-197)
+
 - **Statut**: ✅ Fonctionnel
 - **Flux**:
   1. Récupère le code stocké via `getStoredReferralCode()`
@@ -43,6 +46,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
   4. Nettoie le code stocké
 
 **Code vérifié**:
+
 ```typescript
 ✅ Appelé après création utilisateur réussi
 ✅ Vérifie que referrerProfile.user_id !== data.user.id (pas d'auto-parrainage)
@@ -55,10 +59,12 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 ### 3. **Création de la Relation de Parrainage**
 
 #### ✅ referral-helpers.ts (`src/lib/referral-helpers.ts`)
+
 - **Statut**: ✅ Fonctionnel
 - **Fonction**: `createReferralRelation(referrerId, referredId, referralCode)`
 
 **Fonctionnalités**:
+
 - ✅ Vérifie que le code de parrainage existe
 - ✅ Vérifie que le code appartient au referrer
 - ✅ Évite les doublons (vérifie si relation existe)
@@ -66,6 +72,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 - ✅ Met à jour `profiles.referred_by` du filleul
 
 **Logique vérifiée**:
+
 ```typescript
 ✅ Validation du code de parrainage
 ✅ Protection contre auto-parrainage (indirect)
@@ -78,6 +85,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 ### 4. **Base de Données**
 
 #### ✅ Tables Créées
+
 1. **`referrals`** (`supabase/migrations/20251007154432_*.sql`)
    - `id`, `referrer_id`, `referred_id`, `referral_code`, `created_at`, `status`
    - ✅ Contraintes UNIQUE(`referrer_id`, `referred_id`)
@@ -94,6 +102,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
    - ✅ `total_referral_earnings` (calculé automatiquement)
 
 #### ✅ Triggers et Fonctions
+
 1. **`generate_referral_code()`**
    - ✅ Génère un code unique de 8 caractères
    - ✅ Vérifie l'unicité dans une boucle
@@ -109,6 +118,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
    - ✅ Met à jour `profiles.total_referral_earnings`
 
 #### ✅ RLS Policies
+
 - ✅ `Users can view their own referrals`
 - ✅ `Users can create referrals`
 - ✅ `Admins can view all referrals`
@@ -121,6 +131,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 ### 5. **Hook useReferral**
 
 #### ✅ `src/hooks/useReferral.ts`
+
 **Fonctions vérifiées**:
 
 1. **`fetchReferralData()`**
@@ -140,6 +151,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
    - ✅ Enrichit avec les données de commandes
 
 **Améliorations apportées**:
+
 - ✅ `useCallback` pour éviter les re-renders
 - ✅ Logging amélioré
 - ✅ Gestion d'erreurs robuste
@@ -149,6 +161,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 ### 6. **Page Referrals**
 
 #### ✅ `src/pages/Referrals.tsx`
+
 **Fonctionnalités vérifiées**:
 
 1. **Onglets**:
@@ -165,6 +178,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
    - ✅ Affichage des statistiques (commandes, dépenses)
 
 **Améliorations apportées**:
+
 - ✅ Flags de chargement pour éviter les re-renders multiples
 - ✅ `useDebounce` pour la recherche
 - ✅ Gestion du clignotement corrigée
@@ -178,6 +192,7 @@ Le système de parrainage permet aux utilisateurs de parrainer d'autres utilisat
 **Problème**: Le trigger `calculate_referral_commission()` calcule la commission uniquement si le **VENDEUR** (store owner) est parrainé, pas l'acheteur.
 
 **Code actuel**:
+
 ```sql
 -- Ligne 94-102: Récupère le store owner
 SELECT user_id INTO v_store_user_id FROM stores WHERE id = NEW.store_id;
@@ -188,10 +203,12 @@ FROM profiles WHERE user_id = v_store_user_id;
 ```
 
 **Recommandation**:
+
 - **Option A**: Garder la logique actuelle si l'intention est de récompenser le parrain quand son filleul devient vendeur
 - **Option B**: Modifier pour calculer la commission quand l'**ACHETEUR** est parrainé (plus courant)
 
 **Si Option B**, modifier le trigger pour:
+
 ```sql
 -- Récupérer l'acheteur depuis orders.customer_id -> customers.email -> profiles
 SELECT p.referred_by INTO v_referrer_id
@@ -227,15 +244,15 @@ WHERE o.id = NEW.order_id;
 
 ## 📊 Résumé de Vérification
 
-| Composant | Statut | Notes |
-|-----------|--------|-------|
-| ReferralTracker | ✅ | Intégré correctement |
-| Intégration Signup | ✅ | Non-bloquante, robuste |
-| Base de données | ✅ | Tables, triggers, RLS en place |
-| Hook useReferral | ✅ | Optimisé avec useCallback |
-| Page Referrals | ✅ | Clignotement corrigé |
-| Calcul Commission | ⚠️ | Logique à confirmer (vendeur vs acheteur) |
-| RPC get_users_emails | ⚠️ | Vérifier existence en production |
+| Composant            | Statut | Notes                                     |
+| -------------------- | ------ | ----------------------------------------- |
+| ReferralTracker      | ✅     | Intégré correctement                      |
+| Intégration Signup   | ✅     | Non-bloquante, robuste                    |
+| Base de données      | ✅     | Tables, triggers, RLS en place            |
+| Hook useReferral     | ✅     | Optimisé avec useCallback                 |
+| Page Referrals       | ✅     | Clignotement corrigé                      |
+| Calcul Commission    | ⚠️     | Logique à confirmer (vendeur vs acheteur) |
+| RPC get_users_emails | ⚠️     | Vérifier existence en production          |
 
 ---
 
@@ -244,11 +261,13 @@ WHERE o.id = NEW.order_id;
 **Le système de parrainage est globalement fonctionnel et opérationnel.**
 
 **Points d'attention**:
+
 1. Confirmer la logique de commission (vendeur parrainé vs acheteur parrainé)
 2. Vérifier que la fonction RPC `get_users_emails` existe en production
 3. Considérer l'optimisation des statistiques pour de grandes listes
 
 **Actions recommandées**:
+
 - ✅ Tester le flux complet : URL avec `?ref=CODE` → Inscription → Vérification relation
 - ✅ Tester le calcul de commission sur un paiement réel
 - ✅ Vérifier les RLS policies en production
@@ -257,4 +276,3 @@ WHERE o.id = NEW.order_id;
 
 **Audit réalisé par**: Auto (Cursor AI)
 **Date**: 2025-01-26
-

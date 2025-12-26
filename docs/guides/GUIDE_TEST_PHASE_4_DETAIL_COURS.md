@@ -45,7 +45,7 @@ Section 1 : Introduction
        URL : https://www.youtube.com/watch?v=dQw4w9WgXcQ
        Durée : 300
        ✅ Aperçu gratuit
-  
+
   └─ Leçon 2 : Installation de React
        Type : YouTube
        URL : https://www.youtube.com/watch?v=dQw4w9WgXcQ
@@ -108,6 +108,7 @@ Public cible :
 ```
 
 **Checklist Hero** :
+
 - [ ] Badge "Programmation" visible
 - [ ] Titre "Formation React Complète" affiché
 - [ ] Description courte lisible
@@ -135,6 +136,7 @@ Public cible :
 ```
 
 **Actions à tester** :
+
 1. **Cliquer** sur Play
    - [ ] La vidéo démarre
    - [ ] Contrôles fonctionnent (pause, volume, fullscreen)
@@ -171,6 +173,7 @@ Public cible :
 ```
 
 **Vérifier** :
+
 - [ ] ✅ Maîtriser React
 - [ ] ✅ Créer des applications modernes
 - [ ] ✅ Comprendre les hooks
@@ -190,6 +193,7 @@ Public cible :
 ```
 
 **Vérifier** :
+
 - [ ] • Connaissances en JavaScript
 - [ ] • HTML et CSS de base
 
@@ -208,6 +212,7 @@ Public cible :
 ```
 
 #### Test Section 1 : Introduction
+
 1. **Vérifier** la section
    - [ ] Badge "Section 1"
    - [ ] Titre "Introduction"
@@ -235,6 +240,7 @@ Public cible :
    - [ ] Pas cliquable (cursor normal)
 
 #### Test Section 2 : Les Bases
+
 1. **Cliquer** pour déplier
    - [ ] Section s'ouvre/ferme
 
@@ -260,27 +266,32 @@ Public cible :
 ```
 
 #### Prix et Promotion
+
 - [ ] Prix barré : 15,000 XOF
 - [ ] Prix promo (gros) : 9,900 XOF
 - [ ] Badge "Promotion !"
 
 #### Bouton CTA (Non inscrit)
+
 - [ ] Texte : "🛒 S'inscrire maintenant"
 - [ ] Couleur : bg-orange-600
 - [ ] Taille : lg
 
 **Test** : Cliquer sur le bouton
+
 - [ ] Toast apparaît
 - [ ] Message : "Inscription au cours"
 - [ ] Description : "Fonctionnalité en cours de développement..."
 
 #### Ce cours inclut
+
 - [ ] ▶️ 3 leçons vidéo
 - [ ] ⏱️ 0h 23m de contenu
 - [ ] 🏆 Certificat de completion
 - [ ] 📈 Accès à vie
 
 #### Niveau & Langue
+
 - [ ] Badge "intermédiaire"
 - [ ] Badge "français"
 
@@ -289,6 +300,7 @@ Public cible :
 ### ÉTAPE 10 : Tests de Navigation
 
 #### Test 1 : Changer de leçon
+
 1. **Cliquer** sur "Leçon 1" (preview)
    - [ ] Vidéo YouTube chargée
    - [ ] Badge "En cours" sur Leçon 1
@@ -308,6 +320,7 @@ Public cible :
 3. **Sélectionner** "iPhone 12 Pro"
 
 **Vérifier** :
+
 - [ ] Hero responsive (stack vertical)
 - [ ] Lecteur vidéo 16:9 maintenu
 - [ ] Sidebar en dessous du contenu principal
@@ -323,6 +336,7 @@ Public cible :
 2. **Générer** un rapport (Desktop)
 
 **Objectifs** :
+
 - [ ] Performance > 90
 - [ ] Accessibility > 90
 - [ ] Best Practices > 90
@@ -332,12 +346,14 @@ Public cible :
 ## 🐛 TESTS D'ERREURS
 
 ### Test Erreur 1 : Cours inexistant
+
 1. **Aller** sur `/courses/cours-qui-nexiste-pas`
 2. ✅ Alert error s'affiche
 3. ✅ Message : "Cours non trouvé"
 4. ✅ Bouton "Retour à la marketplace"
 
 ### Test Erreur 2 : Vidéo YouTube invalide
+
 1. **Créer** une leçon avec URL invalide
 2. ✅ Message d'erreur dans le lecteur
 3. ✅ "URL YouTube invalide"
@@ -347,6 +363,7 @@ Public cible :
 ## ✅ CHECKLIST FINALE
 
 ### Affichage
+
 - [ ] Hero section complète
 - [ ] Lecteur vidéo fonctionnel
 - [ ] Description lisible
@@ -357,6 +374,7 @@ Public cible :
 - [ ] Responsive (mobile)
 
 ### Interactions
+
 - [ ] Clic sur leçon preview → vidéo change
 - [ ] Clic sur leçon verrouillée → rien
 - [ ] Clic "S'inscrire" → toast
@@ -364,12 +382,14 @@ Public cible :
 - [ ] Navigation fluide
 
 ### Types de Vidéos
+
 - [ ] YouTube fonctionne
 - [ ] Vimeo fonctionne
 - [ ] Google Drive fonctionne
 - [ ] Upload direct fonctionne
 
 ### Erreurs
+
 - [ ] Cours inexistant géré
 - [ ] URL vidéo invalide gérée
 - [ ] Skeleton loading affiché
@@ -398,7 +418,9 @@ Si **TOUS** les tests passent :
 ## 🆘 EN CAS DE PROBLÈME
 
 ### Problème 1 : Page blanche
+
 **Solution** :
+
 1. Vérifier la console (F12)
 2. Lire l'erreur
 3. Vérifier que le slug du cours est correct
@@ -406,14 +428,18 @@ Si **TOUS** les tests passent :
 5. Vérifier que le cours existe dans `courses`
 
 ### Problème 2 : Vidéo ne charge pas
+
 **Solution** :
+
 1. Vérifier le `video_type` de la leçon
 2. Vérifier que `video_url` est valide
 3. Tester l'URL dans un navigateur
 4. Vérifier la console pour erreurs
 
 ### Problème 3 : Curriculum vide
+
 **Solution** :
+
 1. Vérifier que les sections sont créées
 2. Vérifier que les leçons sont associées aux sections
 3. Vérifier dans Supabase :
@@ -421,7 +447,9 @@ Si **TOUS** les tests passent :
    - Table `course_lessons`
 
 ### Problème 4 : Sidebar pas sticky
+
 **Solution** :
+
 1. Vérifier le CSS `sticky top-4`
 2. Vérifier que le parent n'a pas `overflow: hidden`
 
@@ -430,6 +458,7 @@ Si **TOUS** les tests passent :
 ## 📸 CAPTURES D'ÉCRAN ATTENDUES
 
 ### Vue Desktop
+
 ```
 ┌─────────────────────────────────────────────────┐
 │  HERO (Gradient Orange)                         │
@@ -458,6 +487,7 @@ Si **TOUS** les tests passent :
 ```
 
 ### Vue Mobile
+
 ```
 ┌─────────────────────┐
 │  HERO               │
@@ -493,4 +523,3 @@ Ce guide vous permet de tester **100%** des fonctionnalités de la Phase 4.
 **Auteur** : Intelli / payhuk02  
 **Date** : 27 octobre 2025  
 **Version** : 1.0
-

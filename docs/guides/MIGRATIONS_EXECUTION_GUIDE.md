@@ -56,6 +56,7 @@ ERROR: 42P01: relation "public.physical_product_variants" does not exist
 5. **Exécutez les migrations dans l'ordre ci-dessus**
 
 **Pour chaque migration:**
+
 ```sql
 -- 1. Copier le contenu du fichier .sql
 -- 2. Coller dans l'éditeur SQL
@@ -89,18 +90,18 @@ Exécutez cette requête pour vérifier que toutes les tables existent :
 
 ```sql
 -- Vérifier l'existence de toutes les tables requises
-SELECT 
+SELECT
   table_name,
-  CASE 
+  CASE
     WHEN EXISTS (
-      SELECT 1 FROM information_schema.tables 
-      WHERE table_schema = 'public' 
+      SELECT 1 FROM information_schema.tables
+      WHERE table_schema = 'public'
       AND table_name = t.expected_table
     ) THEN '✅ Existe'
     ELSE '❌ Manquante'
   END as status
 FROM (
-  VALUES 
+  VALUES
     -- Digital Products
     ('digital_products'),
     ('digital_product_files'),
@@ -108,7 +109,7 @@ FROM (
     ('digital_licenses'),
     ('digital_license_activations'),
     ('digital_product_updates'),
-    
+
     -- Physical Products
     ('physical_products'),
     ('physical_product_variants'), -- ⚠️ CRUCIAL
@@ -120,7 +121,7 @@ FROM (
     ('stock_movements'),
     ('shipping_zones'),
     ('shipping_rates'),
-    
+
     -- Service Products
     ('service_products'),
     ('service_staff_members'),
@@ -128,7 +129,7 @@ FROM (
     ('service_resources'),
     ('service_bookings'),
     ('service_booking_participants'),
-    
+
     -- Orders Extension
     ('order_items') -- Devrait avoir les nouvelles colonnes
 ) AS t(expected_table)
@@ -144,37 +145,37 @@ ORDER BY expected_table;
 ```sql
 -- 1. Vérifier que la table existe
 SELECT EXISTS (
-  SELECT 1 
-  FROM information_schema.tables 
-  WHERE table_schema = 'public' 
+  SELECT 1
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
   AND table_name = 'physical_product_variants'
 ) AS table_exists;
 
 -- 2. Vérifier les indexes
-SELECT indexname 
-FROM pg_indexes 
+SELECT indexname
+FROM pg_indexes
 WHERE tablename = 'physical_product_variants';
 
 -- 3. Vérifier les policies RLS
-SELECT policyname 
-FROM pg_policies 
+SELECT policyname
+FROM pg_policies
 WHERE tablename = 'physical_product_variants';
 
 -- 4. Vérifier les foreign keys
 SELECT
-  tc.table_name, 
-  kcu.column_name, 
+  tc.table_name,
+  kcu.column_name,
   ccu.table_name AS foreign_table_name,
-  ccu.column_name AS foreign_column_name 
-FROM information_schema.table_constraints AS tc 
+  ccu.column_name AS foreign_column_name
+FROM information_schema.table_constraints AS tc
 JOIN information_schema.key_column_usage AS kcu
   ON tc.constraint_name = kcu.constraint_name
   AND tc.table_schema = kcu.table_schema
 JOIN information_schema.constraint_column_usage AS ccu
   ON ccu.constraint_name = tc.constraint_name
   AND ccu.table_schema = tc.table_schema
-WHERE tc.constraint_type = 'FOREIGN KEY' 
-  AND (tc.table_name = 'physical_product_variants' 
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND (tc.table_name = 'physical_product_variants'
     OR ccu.table_name = 'physical_product_variants');
 ```
 
@@ -216,13 +217,13 @@ SET session_replication_role = DEFAULT;
 ### Vérifier les dépendances circulaires
 
 ```sql
-SELECT 
+SELECT
   conname as constraint_name,
   conrelid::regclass as table_name,
   confrelid::regclass as referenced_table
 FROM pg_constraint
 WHERE contype = 'f'
-  AND (conrelid::regclass::text LIKE '%physical%' 
+  AND (conrelid::regclass::text LIKE '%physical%'
     OR confrelid::regclass::text LIKE '%physical%')
 ORDER BY conrelid::regclass::text;
 ```
@@ -233,13 +234,13 @@ ORDER BY conrelid::regclass::text;
 
 Après exécution de toutes les migrations :
 
-| Type | Tables | Status |
-|------|--------|--------|
-| **Digital** | 6 tables | ✅ |
-| **Physical** | 12 tables | ✅ |
-| **Service** | 6 tables | ✅ |
-| **Orders** | 1 table étendue | ✅ |
-| **TOTAL** | **25 tables** | ✅ |
+| Type         | Tables          | Status |
+| ------------ | --------------- | ------ |
+| **Digital**  | 6 tables        | ✅     |
+| **Physical** | 12 tables       | ✅     |
+| **Service**  | 6 tables        | ✅     |
+| **Orders**   | 1 table étendue | ✅     |
+| **TOTAL**    | **25 tables**   | ✅     |
 
 ---
 
@@ -276,4 +277,3 @@ Si l'erreur persiste après avoir suivi ce guide :
 ---
 
 **🎉 Une fois terminé, votre base de données sera 100% opérationnelle !**
-

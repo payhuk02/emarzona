@@ -6,18 +6,21 @@
 ## ✅ Modifications Effectuées
 
 ### 1. **Nouveau Hook de Validation Unifiée**
+
 - ✅ Créé `useValidateUnifiedPromotion` dans `src/hooks/physical/usePromotions.ts`
 - ✅ Utilise la fonction RPC `validate_unified_promotion` côté serveur
 - ✅ Accepte tous les paramètres nécessaires : `productIds`, `categoryIds`, `collectionIds`, `orderAmount`, `customerId`, `isFirstOrder`
 - ✅ Retourne toutes les informations de la promotion avec le montant de réduction calculé
 
 ### 2. **Composant CouponInput Amélioré**
+
 - ✅ Mis à jour `src/components/checkout/CouponInput.tsx` pour utiliser le nouveau hook
 - ✅ Charge automatiquement les catégories et collections des produits du panier
 - ✅ Passe toutes les informations nécessaires à la validation (produits, catégories, collections)
 - ✅ Supporte le paramètre `isFirstOrder` pour les promotions "nouveaux clients"
 
 ### 3. **Checkout Intégré**
+
 - ✅ Mis à jour `src/pages/Checkout.tsx` pour passer toutes les informations du panier
 - ✅ Passe `productIds` (tous les produits du panier) au lieu d'un seul `productId`
 - ✅ Vérifie si c'est la première commande du client (`isFirstOrder`)
@@ -25,6 +28,7 @@
 - ✅ Met à jour le compteur `current_uses` de la promotion
 
 ### 4. **Calcul de la Réduction**
+
 - ✅ La réduction est calculée côté serveur par `validate_unified_promotion`
 - ✅ Prend en compte :
   - Type de réduction (pourcentage ou montant fixe)
@@ -74,20 +78,25 @@
 ## 🎯 Règles de Validation
 
 ### Promotion par Produits Spécifiques
+
 - ✅ Vérifie que au moins un produit du panier correspond aux `product_ids` de la promotion
 
 ### Promotion par Catégories
+
 - ✅ Vérifie que au moins un produit du panier appartient aux catégories sélectionnées
 - ✅ Charge automatiquement les catégories des produits du panier
 
 ### Promotion par Collections
+
 - ✅ Vérifie que au moins un produit du panier appartient aux collections sélectionnées
 - ✅ Charge automatiquement les collections des produits du panier
 
 ### Promotion pour Tous les Produits
+
 - ✅ S'applique à tous les produits du panier sans restriction
 
 ### Promotion pour Nouveaux Clients
+
 - ✅ Vérifie si c'est la première commande du client
 - ✅ Rejette si le client a déjà passé des commandes
 
@@ -172,6 +181,7 @@
 Le système de validation des codes promo au checkout a été entièrement migré vers le système unifié. Tous les types de promotions (produits spécifiques, catégories, collections, tous produits, nouveaux clients) sont maintenant supportés avec une validation complète côté serveur.
 
 **Prochaines étapes recommandées** :
+
 1. Tester manuellement tous les scénarios décrits ci-dessus
 2. Créer la fonction RPC `increment_promotion_usage` si elle n'existe pas
 3. Ajouter des tests automatisés pour la validation des promotions

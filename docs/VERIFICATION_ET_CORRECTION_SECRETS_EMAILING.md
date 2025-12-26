@@ -12,16 +12,19 @@
 **Où configurer** : Supabase Dashboard > Edge Functions > Secrets
 
 **Edge Functions qui l'utilisent** :
+
 - ✅ `send-email-campaign` - **OBLIGATOIRE**
 - ✅ `process-email-sequences` - **OBLIGATOIRE**
 - ⚠️ `process-scheduled-campaigns` - Optionnel (mais recommandé pour les warnings)
 
 **Comment vérifier** :
+
 1. Allez dans Supabase Dashboard > Edge Functions > Secrets
 2. Recherchez `SENDGRID_API_KEY` dans la liste
 3. Si absent, ajoutez-le (voir instructions ci-dessous)
 
 **Comment obtenir** :
+
 1. Créez un compte sur [SendGrid](https://sendgrid.com)
 2. Allez dans Settings > API Keys
 3. Cliquez sur "Create API Key"
@@ -46,10 +49,12 @@
 Vérifiez si `SENDGRID_API_KEY` est déjà présent dans la liste.
 
 **Si présent** :
+
 - ✅ Vérifiez que la valeur est correcte (commence par `SG.`)
 - ✅ Vérifiez qu'elle n'est pas expirée
 
 **Si absent** :
+
 - ⚠️ **AJOUTEZ-LE** (voir Étape 3)
 
 ### Étape 3 : Ajouter `SENDGRID_API_KEY`
@@ -61,6 +66,7 @@ Vérifiez si `SENDGRID_API_KEY` est déjà présent dans la liste.
 3. Cliquez sur **"Save"**
 
 **⚠️ IMPORTANT** :
+
 - Ne mettez PAS d'espaces avant ou après la valeur
 - La clé doit commencer par `SG.`
 - La clé est sensible, ne la partagez jamais
@@ -95,6 +101,7 @@ SELECT net.http_post(
 ```
 
 **Dans les logs**, vous ne devriez plus voir :
+
 - ❌ `SENDGRID_API_KEY is not set. Campaigns will not be sent.`
 
 ---
@@ -123,11 +130,12 @@ SELECT net.http_post(
 **Cause** : La clé API est incorrecte ou expirée
 
 **Solution** :
+
 1. Vérifier que la clé commence par `SG.`
 2. Vérifier qu'il n'y a pas d'espaces avant/après
 3. Générer une nouvelle clé API dans SendGrid si nécessaire
 
-### Problème 3 : "Name must not start with the SUPABASE_ prefix"
+### Problème 3 : "Name must not start with the SUPABASE\_ prefix"
 
 **Cause** : Tentative d'ajouter `SUPABASE_URL` ou `SUPABASE_SERVICE_ROLE_KEY` comme secret
 
@@ -137,17 +145,15 @@ SELECT net.http_post(
 
 ## 📊 État Actuel des Secrets
 
-| Secret | Requis | Configuré | Edge Functions |
-|--------|--------|-----------|----------------|
-| `SENDGRID_API_KEY` | ✅ Oui | ⚠️ **À VÉRIFIER** | `send-email-campaign`, `process-email-sequences`, `process-scheduled-campaigns` |
-| `SUPABASE_URL` | ✅ Oui | ✅ Auto | Toutes (injecté automatiquement) |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ Oui | ✅ Auto | Toutes (injecté automatiquement) |
-| `SUPABASE_ANON_KEY` | ✅ Oui | ✅ Auto | Toutes (injecté automatiquement) |
-| `SENDGRID_WEBHOOK_SECRET` | ⚠️ Optionnel | ⚠️ **À VÉRIFIER** | `sendgrid-webhook-handler` |
-| `CRON_SECRET` | ⚠️ Optionnel | ⚠️ **À VÉRIFIER** | `process-scheduled-campaigns` |
+| Secret                      | Requis       | Configuré         | Edge Functions                                                                  |
+| --------------------------- | ------------ | ----------------- | ------------------------------------------------------------------------------- |
+| `SENDGRID_API_KEY`          | ✅ Oui       | ⚠️ **À VÉRIFIER** | `send-email-campaign`, `process-email-sequences`, `process-scheduled-campaigns` |
+| `SUPABASE_URL`              | ✅ Oui       | ✅ Auto           | Toutes (injecté automatiquement)                                                |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ Oui       | ✅ Auto           | Toutes (injecté automatiquement)                                                |
+| `SUPABASE_ANON_KEY`         | ✅ Oui       | ✅ Auto           | Toutes (injecté automatiquement)                                                |
+| `SENDGRID_WEBHOOK_SECRET`   | ⚠️ Optionnel | ⚠️ **À VÉRIFIER** | `sendgrid-webhook-handler`                                                      |
+| `CRON_SECRET`               | ⚠️ Optionnel | ⚠️ **À VÉRIFIER** | `process-scheduled-campaigns`                                                   |
 
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

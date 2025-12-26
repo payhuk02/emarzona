@@ -3,12 +3,20 @@
 ## ❌ Problèmes Identifiés
 
 ### 1. ProductDetail.tsx - Ligne 393
+
 **Problème :** Affiche toujours `product.price` sans tenir compte de `promotional_price`
 
 ```typescript
 // ❌ ACTUEL (ligne 393)
-{product.price.toLocaleString()}{" "}
-{product.currency}
+{
+  product.price.toLocaleString();
+}
+{
+  (' ');
+}
+{
+  product.currency;
+}
 ```
 
 **Impact :** Si un produit a un `promotional_price`, il n'est pas affiché dans la page de détail, alors qu'il est affiché dans la carte Marketplace.
@@ -16,11 +24,13 @@
 ### 2. Logique Incohérente
 
 **Marketplace (UnifiedProductCard) :**
+
 - Utilise `getDisplayPrice()` qui retourne `promo_price` si disponible
 - Affiche le prix barré si promotion
 - Affiche le pourcentage de réduction
 
 **ProductDetail :**
+
 - Affiche toujours `product.price` (ligne 393)
 - Utilise `product.promotional_price || product.price` seulement pour PriceStockAlertButton (ligne 531)
 - Pas d'affichage du prix barré
@@ -29,10 +39,12 @@
 ### 3. Formatage Incohérent
 
 **Marketplace :**
+
 - Utilise `formatPrice()` avec `toLocaleString('fr-FR')`
 - Format : `"1 234 FCFA"`
 
 **ProductDetail :**
+
 - Utilise `toLocaleString()` directement
 - Format : `"1 234"` + devise séparée
 - Incohérent avec le format Marketplace
@@ -42,11 +54,11 @@
 ### 1. Utiliser les Helpers Unifiés dans ProductDetail
 
 ```typescript
-import { 
-  formatPrice, 
-  getDisplayPrice, 
+import {
+  formatPrice,
+  getDisplayPrice,
   hasPromotion,
-  calculateDiscount 
+  calculateDiscount,
 } from '@/lib/product-helpers';
 
 // Dans le composant
@@ -88,12 +100,13 @@ currentPrice={selectedVariantPrice || priceInfo.price}
 ## 📊 Comparaison Avant/Après
 
 ### Avant
+
 - **Marketplace** : Affiche prix promo si disponible
 - **ProductDetail** : Affiche toujours prix normal
 - **Incohérence** : Prix différents entre les deux pages
 
 ### Après
+
 - **Marketplace** : Affiche prix promo si disponible ✅
 - **ProductDetail** : Affiche prix promo si disponible ✅
 - **Cohérence** : Même logique, même affichage ✅
-

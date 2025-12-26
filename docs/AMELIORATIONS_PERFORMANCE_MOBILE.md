@@ -50,12 +50,12 @@ Tous les composants de cartes principaux ont maintenant `React.memo` :
 
 ## 📈 Métriques Améliorées
 
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| **Re-renders inutiles** | ~30% | ~5% | ✅ -83% |
-| **Images lazy loaded** | 60% | 95% | ✅ +58% |
-| **Temps de chargement initial** | ~2.5s | ~1.8s | ✅ -28% |
-| **Bundle size** | ~800KB | ~800KB | 🟡 Stable |
+| Métrique                        | Avant  | Après  | Amélioration |
+| ------------------------------- | ------ | ------ | ------------ |
+| **Re-renders inutiles**         | ~30%   | ~5%    | ✅ -83%      |
+| **Images lazy loaded**          | 60%    | 95%    | ✅ +58%      |
+| **Temps de chargement initial** | ~2.5s  | ~1.8s  | ✅ -28%      |
+| **Bundle size**                 | ~800KB | ~800KB | 🟡 Stable    |
 
 ---
 
@@ -83,10 +83,12 @@ Tous les composants de cartes principaux ont maintenant `React.memo` :
 ## 📝 Fichiers Modifiés
 
 ### Composants
+
 - ✅ `src/components/marketplace/ProductComparison.tsx`
 - ✅ `src/components/marketplace/FavoritesManager.tsx`
 
 ### Pages
+
 - ✅ `src/pages/digital/DigitalProductsSearch.tsx`
 - ✅ `src/pages/digital/DigitalProductsCompare.tsx`
 - ✅ `src/pages/admin/AdminReturnManagement.tsx`
@@ -110,4 +112,3 @@ Tous les composants de cartes principaux ont maintenant `React.memo` :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

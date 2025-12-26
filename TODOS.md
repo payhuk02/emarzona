@@ -8,23 +8,26 @@
 ## 🔴 Priorité Haute
 
 ### 1. Checkout Multi-Stores
+
 **Fichier**: `src/pages/Checkout.tsx`  
 **Lignes**: 516, 529  
 **Description**: Implémenter le traitement complet du checkout multi-stores pour gérer les produits de plusieurs boutiques dans un seul panier.
 
 **Contexte**:
+
 ```typescript
 // TODO: Implémenter le traitement complet multi-stores
 if (isMultiStore && storeGroups.size > 1) {
   // Pour l'instant, on traite uniquement le premier store
   // Le traitement multi-stores complet nécessite une implémentation dédiée
   logger.log('Multi-store checkout detected', { storeCount: storeGroups.size });
-  
+
   // TODO: Implémenter processMultiStoreCheckout pour gérer tous les stores
 }
 ```
 
 **Recommandations**:
+
 - Créer une fonction `processMultiStoreCheckout` qui:
   - Sépare les produits par boutique
   - Crée une commande par boutique
@@ -38,11 +41,13 @@ if (isMultiStore && storeGroups.size > 1) {
 ## 🟡 Priorité Moyenne
 
 ### 2. Types Supabase - Service Availability
+
 **Fichier**: `src/pages/service/BookingsManagement.tsx`  
 **Ligne**: 221  
 **Description**: Ajouter `service_availability` aux types Supabase générés.
 
 **Contexte**:
+
 ```typescript
 // Type temporaire pour service_availability en attendant la régénération des types Supabase
 // TODO: Ajouter service_availability aux types Supabase générés (voir docs/TODOS.md)
@@ -54,6 +59,7 @@ interface ServiceAvailability {
 ```
 
 **Recommandations**:
+
 1. Vérifier que la table `service_availability` existe dans Supabase
 2. Régénérer les types Supabase:
    ```bash
@@ -68,11 +74,13 @@ interface ServiceAvailability {
 ## 🟢 Priorité Basse
 
 ### 3. Paiement et Inscription aux Cours
+
 **Fichier**: `src/pages/courses/CourseDetail.tsx`  
 **Ligne**: 178  
 **Description**: Implémenter le paiement et l'inscription aux cours en ligne.
 
 **Contexte**:
+
 ```typescript
 // TODO: Implémenter le paiement et l'inscription
 toast({
@@ -82,6 +90,7 @@ toast({
 ```
 
 **Recommandations**:
+
 - Intégrer avec le système de paiement Moneroo/PayDunya
 - Créer l'enrollment dans la table `course_enrollments`
 - Gérer les cas d'erreur (paiement échoué, cours complet, etc.)
@@ -90,11 +99,13 @@ toast({
 **Issue GitHub suggérée**: `#XXX - Feature: Course enrollment and payment`
 
 ### 4. Navigation vers la Page du Cohort
+
 **Fichier**: `src/pages/courses/CourseDetail.tsx`  
 **Ligne**: 497  
 **Description**: Implémenter la navigation vers la page détaillée d'un cohort.
 
 **Contexte**:
+
 ```typescript
 // TODO: Naviguer vers la page du cohort
 onCohortClick={(cohort) => {
@@ -103,6 +114,7 @@ onCohortClick={(cohort) => {
 ```
 
 **Recommandations**:
+
 - Créer une route `/courses/:courseId/cohorts/:cohortId` si nécessaire
 - Ou rediriger vers `/courses/:courseId` avec un paramètre de query `?cohort=:cohortId`
 - Implémenter la page de détails du cohort
@@ -113,12 +125,12 @@ onCohortClick={(cohort) => {
 
 ## 📊 Résumé
 
-| Priorité | Nombre | Statut |
-|----------|--------|--------|
-| 🔴 Haute | 1 | En attente |
-| 🟡 Moyenne | 1 | En attente |
-| 🟢 Basse | 2 | En attente |
-| **Total** | **4** | **4 en attente** |
+| Priorité   | Nombre | Statut           |
+| ---------- | ------ | ---------------- |
+| 🔴 Haute   | 1      | En attente       |
+| 🟡 Moyenne | 1      | En attente       |
+| 🟢 Basse   | 2      | En attente       |
+| **Total**  | **4**  | **4 en attente** |
 
 ---
 
@@ -138,5 +150,4 @@ onCohortClick={(cohort) => {
 
 ---
 
-*Dernière mise à jour: 2025-01-30*
-
+_Dernière mise à jour: 2025-01-30_

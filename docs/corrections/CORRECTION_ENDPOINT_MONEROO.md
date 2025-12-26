@@ -12,13 +12,14 @@ ERROR Moneroo API error: { status: 404, statusText: "Not Found", response: { mes
 
 ## ✅ Solution
 
-L'API Moneroo utilise `/payments` pour créer les paiements, pas `/checkout`. 
+L'API Moneroo utilise `/payments` pour créer les paiements, pas `/checkout`.
 
 ### Correction appliquée
 
 L'endpoint `create_checkout` a été modifié pour utiliser `/payments` au lieu de `/checkout`.
 
 **Avant :**
+
 ```typescript
 case 'create_checkout':
   endpoint = '/checkout';  // ❌ N'existe pas
@@ -27,6 +28,7 @@ case 'create_checkout':
 ```
 
 **Après :**
+
 ```typescript
 case 'create_checkout':
   // Utiliser /payments pour créer un paiement avec checkout
@@ -53,11 +55,13 @@ case 'create_checkout':
 ### Logs attendus après correction
 
 **Avant (erreur) :**
+
 ```
 ERROR Moneroo API error: { status: 404, statusText: "Not Found", response: { message: "The route v1/checkout could not be..." }
 ```
 
 **Après (succès) :**
+
 ```
 INFO [Moneroo Edge Function] Calling Moneroo API: { url: "https://api.moneroo.io/v1/payments", method: "POST", hasBody: true }
 INFO [Moneroo Edge Function] Moneroo API response: { status: 200, statusText: "OK", ok: true }
@@ -101,6 +105,7 @@ Les données sont formatées comme suit :
 ## ✅ Résultat Attendu
 
 Après la correction :
+
 - ✅ Plus d'erreur 404 dans les logs
 - ✅ Les paiements sont créés avec succès
 - ✅ Les URLs de checkout sont retournées correctement

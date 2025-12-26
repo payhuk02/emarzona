@@ -17,29 +17,33 @@ Créer automatiquement les 13 issues GitHub identifiées dans l'audit complet à
 **Installation** :
 
 1. **Windows** :
+
    ```powershell
    # Via winget
    winget install --id GitHub.cli
-   
+
    # Ou télécharger depuis: https://cli.github.com/
    ```
 
 2. **Linux/Mac** :
+
    ```bash
    # Ubuntu/Debian
    sudo apt install gh
-   
+
    # macOS
    brew install gh
    ```
 
 **Authentification** :
+
 ```bash
 gh auth login
 # Suivre les instructions pour se connecter
 ```
 
 **Vérification** :
+
 ```bash
 gh auth status
 ```
@@ -55,16 +59,19 @@ Si GitHub CLI n'est pas disponible, créer les issues manuellement depuis `GITHU
 ### Méthode 1 : Script Automatique (Recommandé)
 
 **Windows (PowerShell)** :
+
 ```powershell
 npm run issues:create
 ```
 
 **Linux/Mac (Bash)** :
+
 ```bash
 npm run issues:create:bash
 ```
 
 **Ou directement** :
+
 ```powershell
 # Windows
 .\scripts\create-github-issues.ps1
@@ -169,6 +176,7 @@ gh issue list --label "high-priority"
 ### Erreur : "Vous n'êtes pas authentifié"
 
 **Solution** :
+
 ```bash
 gh auth login
 # Suivre les instructions
@@ -204,4 +212,3 @@ Après exécution du script, vous devriez avoir :
 ---
 
 **Bon courage pour l'implémentation ! 🚀**
-

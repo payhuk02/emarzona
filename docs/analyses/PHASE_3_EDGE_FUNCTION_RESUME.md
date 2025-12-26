@@ -10,6 +10,7 @@
 ### 1. Edge Function Créée
 
 #### ✅ `supabase/functions/process-email-sequences/index.ts`
+
 - **Fonctionnalités principales :**
   - Récupère les prochains emails à envoyer via `get_next_sequence_emails_to_send()`
   - Vérifie les désabonnements automatiquement
@@ -26,6 +27,7 @@
   - Logging complet dans `email_logs`
 
 #### ✅ `supabase/functions/process-email-sequences/README.md`
+
 - Documentation complète
 - Instructions de configuration
 - Exemples d'utilisation
@@ -48,6 +50,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 Pour que les séquences s'envoient automatiquement, configurez un cron job :
 
 **Option 1 : Supabase Cron Jobs**
+
 ```sql
 SELECT cron.schedule(
   'process-email-sequences-hourly',
@@ -63,6 +66,7 @@ SELECT cron.schedule(
 ```
 
 **Option 2 : Service externe (cron-job.org, EasyCron, etc.)**
+
 - URL : `https://your-project.supabase.co/functions/v1/process-email-sequences`
 - Méthode : POST
 - Headers : `Authorization: Bearer YOUR_ANON_KEY`
@@ -74,6 +78,7 @@ SELECT cron.schedule(
 ## 📊 FONCTIONNALITÉS IMPLÉMENTÉES
 
 ### ✅ Traitement automatique
+
 - ✅ Récupération des prochains emails à envoyer
 - ✅ Filtrage automatique des désabonnements
 - ✅ Envoi via SendGrid
@@ -81,12 +86,14 @@ SELECT cron.schedule(
 - ✅ Gestion des séquences complétées
 
 ### ✅ Gestion des erreurs
+
 - ✅ Erreurs SendGrid capturées
 - ✅ Templates manquants gérés
 - ✅ Désabonnements respectés
 - ✅ Logging complet des erreurs
 
 ### ✅ Performance
+
 - ✅ Rate limiting (100ms entre chaque envoi)
 - ✅ Traitement par batch (limite configurable)
 - ✅ Gestion efficace des ressources
@@ -156,6 +163,7 @@ Cette fonction doit être appelée **régulièrement** (toutes les heures recomm
 Un délai de 100ms est ajouté entre chaque envoi pour éviter le rate limiting SendGrid. Pour de très grandes séquences, considérer utiliser SendGrid Batch API.
 
 ### Améliorations futures
+
 - Retry automatique en cas d'erreur
 - Support des conditions d'étape
 - Gestion des timezones utilisateurs
@@ -175,6 +183,7 @@ Un délai de 100ms est ajouté entre chaque envoi pour éviter le rate limiting 
 ## ✅ PHASE 3 : COMPLÈTEMENT TERMINÉE
 
 **Tous les composants de la Phase 3 sont maintenant créés :**
+
 - ✅ Hooks React (12 hooks)
 - ✅ Composants UI (4 composants)
 - ✅ Page principale
@@ -183,4 +192,3 @@ Un délai de 100ms est ajouté entre chaque envoi pour éviter le rate limiting 
 - ✅ Documentation complète
 
 **Prochaine étape :** Tester l'intégration complète ou passer à la Phase 4 (Segmentation)
-

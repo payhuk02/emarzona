@@ -187,7 +187,7 @@ ALTER DATABASE postgres SET app.settings.service_role_key = 'YOUR_SERVICE_ROLE_K
 
 ```sql
 -- Vérifier que le cron job est configuré
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -222,7 +222,7 @@ SELECT public.call_webhook_delivery_edge_function();
 
 ```sql
 -- Voir les deliveries en attente
-SELECT 
+SELECT
   id,
   webhook_id,
   event_type,
@@ -248,7 +248,7 @@ Consulter les logs dans Supabase Dashboard → Edge Functions → webhook-delive
 
 ```sql
 -- Statistiques des webhooks
-SELECT 
+SELECT
   w.id,
   w.name,
   w.url,
@@ -297,4 +297,3 @@ GROUP BY w.id, w.name, w.url, w.status;
 - [Documentation Supabase Edge Functions](https://supabase.com/docs/guides/functions)
 - [Documentation pg_cron](https://github.com/citusdata/pg_cron)
 - [Documentation pg_net](https://github.com/supabase/pg_net)
-

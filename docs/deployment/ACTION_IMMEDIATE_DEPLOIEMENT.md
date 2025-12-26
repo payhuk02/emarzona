@@ -82,7 +82,3 @@ POST https://your-project-id.supabase.co/functions/v1/moneroo 404 (Not Found)
 **⏱️ TEMPS ESTIMÉ : 2-3 minutes**
 
 Une fois déployé, l'erreur 404 sera résolue et les paiements fonctionneront ! 🎉
-
-
-
-

@@ -259,4 +259,3 @@
 
 _Vérification et corrections terminées le 2 Février 2025_  
 _Toutes les cartes produits affichent maintenant le type de licence et le taux de commission ✅_
-

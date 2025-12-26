@@ -15,10 +15,11 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap; /* 🚀 Performance optimization */
-  src: local('Poppins Light'),
-       local('Poppins-Light'),
-       url('/fonts/Poppins-Light.woff2') format('woff2'),
-       url('/fonts/Poppins-Light.woff') format('woff');
+  src:
+    local('Poppins Light'),
+    local('Poppins-Light'),
+    url('/fonts/Poppins-Light.woff2') format('woff2'),
+    url('/fonts/Poppins-Light.woff') format('woff');
 }
 
 /* Poppins Regular (400) */
@@ -27,10 +28,11 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local('Poppins Regular'),
-       local('Poppins-Regular'),
-       url('/fonts/Poppins-Regular.woff2') format('woff2'),
-       url('/fonts/Poppins-Regular.woff') format('woff');
+  src:
+    local('Poppins Regular'),
+    local('Poppins-Regular'),
+    url('/fonts/Poppins-Regular.woff2') format('woff2'),
+    url('/fonts/Poppins-Regular.woff') format('woff');
 }
 
 /* Poppins Medium (500) */
@@ -39,10 +41,11 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: local('Poppins Medium'),
-       local('Poppins-Medium'),
-       url('/fonts/Poppins-Medium.woff2') format('woff2'),
-       url('/fonts/Poppins-Medium.woff') format('woff');
+  src:
+    local('Poppins Medium'),
+    local('Poppins-Medium'),
+    url('/fonts/Poppins-Medium.woff2') format('woff2'),
+    url('/fonts/Poppins-Medium.woff') format('woff');
 }
 
 /* Poppins SemiBold (600) */
@@ -51,10 +54,11 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: local('Poppins SemiBold'),
-       local('Poppins-SemiBold'),
-       url('/fonts/Poppins-SemiBold.woff2') format('woff2'),
-       url('/fonts/Poppins-SemiBold.woff') format('woff');
+  src:
+    local('Poppins SemiBold'),
+    local('Poppins-SemiBold'),
+    url('/fonts/Poppins-SemiBold.woff2') format('woff2'),
+    url('/fonts/Poppins-SemiBold.woff') format('woff');
 }
 
 /* Poppins Bold (700) */
@@ -63,10 +67,11 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local('Poppins Bold'),
-       local('Poppins-Bold'),
-       url('/fonts/Poppins-Bold.woff2') format('woff2'),
-       url('/fonts/Poppins-Bold.woff') format('woff');
+  src:
+    local('Poppins Bold'),
+    local('Poppins-Bold'),
+    url('/fonts/Poppins-Bold.woff2') format('woff2'),
+    url('/fonts/Poppins-Bold.woff') format('woff');
 }
 
 /**
@@ -74,6 +79,17 @@
  * Utilisées pendant le chargement des polices web
  */
 body {
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family:
+    'Poppins',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
 }
-

@@ -1,4 +1,5 @@
 # ✅ CORRECTIONS CRITIQUES - PHASE 2
+
 ## Date : 28 Février 2025
 
 ---
@@ -16,6 +17,7 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 #### Modifications
 
 **Fichiers corrigés** :
+
 - ✅ `src/components/admin/AdminLayout.tsx`
   - Bouton toggle sidebar : `aria-label` ajouté
   - Icônes : `aria-hidden="true"` ajouté
@@ -33,6 +35,7 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
   - Icônes avec `aria-hidden="true"`
 
 **Impact** :
+
 - **8 boutons icon-only critiques corrigés** sur 164 identifiés
 - **Progression** : ~5% des corrections ARIA
 
@@ -43,11 +46,13 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 #### 2.1 Prefetch Routes (`src/hooks/usePrefetchRoutes.ts`)
 
 **Nouveau hook créé** :
+
 - ✅ Prefetch intelligent des routes critiques
 - ✅ Prefetch au hover pour routes moins critiques
 - ✅ Délai de 2s pour ne pas bloquer le chargement initial
 
 **Routes critiques prefetchées** :
+
 - `/dashboard`
 - `/dashboard/products`
 - `/dashboard/orders`
@@ -56,15 +61,18 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 - `/checkout`
 
 **Routes hover prefetchées** :
+
 - `/dashboard/analytics`
 - `/dashboard/customers`
 - `/dashboard/settings`
 
 **Intégration** :
+
 - ✅ Hook ajouté dans `App.tsx`
 - ✅ Fonctionne avec le lazy loading existant
 
 **Impact attendu** :
+
 - **FCP** : Amélioration de 5-10%
 - **LCP** : Amélioration de 10-15%
 - **Navigation** : Plus fluide
@@ -76,6 +84,7 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 #### État Actuel
 
 **Composants existants** :
+
 - ✅ `OptimizedImage` : Support WebP, srcSet responsive, lazy loading
 - ✅ `image-transform.ts` : Transformation Supabase
 - ✅ `image-optimization.ts` : Compression avant upload
@@ -84,6 +93,7 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 **Statut** : ✅ **Déjà bien optimisé**
 
 **Recommandations** :
+
 - ⚠️ Vérifier que tous les composants utilisent `OptimizedImage`
 - ⚠️ Ajouter support AVIF (format plus récent que WebP)
 - ⚠️ Vérifier lazy loading sur toutes les images
@@ -92,27 +102,30 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 
 ## 📊 PROGRESSION
 
-| Priorité | Phase 1 | Phase 2 | Total |
-|----------|---------|---------|-------|
-| **Bundle Principal** | 40% | 0% | 40% |
-| **Web Vitals** | 30% | 20% | 50% |
-| **ARIA Labels** | 50% | 5% | 55% |
+| Priorité             | Phase 1 | Phase 2 | Total |
+| -------------------- | ------- | ------- | ----- |
+| **Bundle Principal** | 40%     | 0%      | 40%   |
+| **Web Vitals**       | 30%     | 20%     | 50%   |
+| **ARIA Labels**      | 50%     | 5%      | 55%   |
 
 ---
 
 ## 🎯 PROCHAINES ÉTAPES
 
 ### Phase 3 : ARIA Labels (Priorité)
+
 1. [ ] Corriger les 156 boutons icon-only restants
 2. [ ] Prioriser les top 10 fichiers identifiés
 3. [ ] Vérifier avec axe DevTools
 
 ### Phase 3 : Images (Priorité)
+
 1. [ ] Audit des composants utilisant `<img>` au lieu de `OptimizedImage`
 2. [ ] Ajouter support AVIF
 3. [ ] Vérifier lazy loading partout
 
 ### Phase 3 : Bundle Principal
+
 1. [ ] Analyser le bundle après build
 2. [ ] Optimiser les imports d'icônes
 3. [ ] Vérifier taille finale
@@ -129,4 +142,3 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 ---
 
 **Dernière mise à jour** : 28 Février 2025
-

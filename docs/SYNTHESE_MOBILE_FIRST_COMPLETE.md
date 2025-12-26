@@ -11,6 +11,7 @@ Transformation de l'application SaaS Emarzona en une expérience **100% mobile-f
 **Fichier :** `src/styles/mobile-first-system.css`
 
 **Fonctionnalités :**
+
 - ✅ Typographie responsive (16px base - prévient zoom iOS)
 - ✅ Système d'espacement mobile-first (4px → 48px)
 - ✅ Touch targets ≥ 44px (WCAG 2.5.5)
@@ -19,6 +20,7 @@ Transformation de l'application SaaS Emarzona en une expérience **100% mobile-f
 - ✅ Optimisations de performance (GPU acceleration, reduced motion)
 
 **Breakpoints :**
+
 ```
 Mobile:   320px - 767px  (base)
 Tablet:   768px - 1023px
@@ -28,9 +30,11 @@ Desktop:  1024px+
 ### 2. Composants mobile-first créés
 
 #### 🎨 BottomSheet
+
 **Fichier :** `src/components/ui/bottom-sheet.tsx`
 
 **Fonctionnalités :**
+
 - ✅ Modale native mobile (slide depuis le bas)
 - ✅ Swipe to close sur mobile
 - ✅ Safe areas iOS respectées
@@ -39,6 +43,7 @@ Desktop:  1024px+
 - ✅ Header fixe avec titre/description
 
 **Usage :**
+
 ```tsx
 <BottomSheet>
   <BottomSheetTrigger>Ouvrir</BottomSheetTrigger>
@@ -49,15 +54,18 @@ Desktop:  1024px+
 ```
 
 #### 📋 MobileTableCard
+
 **Fichier :** `src/components/ui/mobile-table-card.tsx`
 
 **Fonctionnalités :**
+
 - ✅ Transformation automatique tableau → cartes sur mobile
 - ✅ Colonnes par priorité (high/medium/low)
 - ✅ Actions intégrées dans chaque carte
 - ✅ Desktop: tableau classique
 
 **Usage :**
+
 ```tsx
 <MobileTableCard
   data={rows}
@@ -65,14 +73,16 @@ Desktop:  1024px+
     { key: 'name', label: 'Nom', priority: 'high' },
     { key: 'email', label: 'Email', priority: 'medium' },
   ]}
-  actions={(row) => <Button>Action</Button>}
+  actions={row => <Button>Action</Button>}
 />
 ```
 
 #### 📝 MobileFormField
+
 **Fichier :** `src/components/ui/mobile-form-field.tsx`
 
 **Fonctionnalités :**
+
 - ✅ Champs optimisés mobile (labels, erreurs, descriptions)
 - ✅ Font-size 16px (prévient zoom iOS)
 - ✅ Full-width sur mobile
@@ -80,6 +90,7 @@ Desktop:  1024px+
 - ✅ MobileFormSection pour groupement logique
 
 **Usage :**
+
 ```tsx
 <MobileFormField
   label="Email"
@@ -93,9 +104,11 @@ Desktop:  1024px+
 ```
 
 #### 🖼️ LazyImage
+
 **Fichier :** `src/components/ui/lazy-image.tsx`
 
 **Fonctionnalités :**
+
 - ✅ Lazy loading avec Intersection Observer
 - ✅ Skeleton loading pendant le chargement
 - ✅ Ratios fixes (évite layout shift)
@@ -103,26 +116,25 @@ Desktop:  1024px+
 - ✅ Fallback en cas d'erreur
 
 **Usage :**
+
 ```tsx
-<LazyImage
-  src="/image.jpg"
-  alt="Description"
-  aspectRatio="16/9"
-  showSkeleton
-/>
+<LazyImage src="/image.jpg" alt="Description" aspectRatio="16/9" showSkeleton />
 ```
 
 ### 3. Hooks utilitaires
 
 #### useResponsiveModal
+
 **Fichier :** `src/hooks/use-responsive-modal.tsx`
 
 **Fonctionnalités :**
+
 - ✅ Détection automatique mobile/desktop
 - ✅ Choix BottomSheet vs Dialog
 - ✅ API simple et cohérente
 
 **Usage :**
+
 ```tsx
 const { open, setOpen, useBottomSheet, useDialog } = useResponsiveModal();
 ```
@@ -130,28 +142,33 @@ const { open, setOpen, useBottomSheet, useDialog } = useResponsiveModal();
 ### 4. Composants de base optimisés
 
 #### ✅ Button
+
 - Touch targets 44px minimum
 - Font-size adaptatif
 - Touch manipulation
 - Feedback haptique
 
 #### ✅ Input / Textarea
+
 - Font-size 16px (prévient zoom iOS)
 - Touch targets 44px
 - Full-width sur mobile
 
 #### ✅ Dialog
+
 - Position mobile (bottom) vs desktop (centré)
 - Safe areas iOS
 - Scroll interne optimisé
 - Animations légères
 
 #### ✅ Select / Dropdown
+
 - Optimisations mobiles appliquées
 - Largeurs responsive
 - Positionnement stable
 
 #### ✅ Card
+
 - Padding responsive (16px mobile, 24px desktop)
 - Overflow-x hidden
 - Transitions légères
@@ -159,11 +176,13 @@ const { open, setOpen, useBottomSheet, useDialog } = useResponsiveModal();
 ### 5. Layouts optimisés
 
 #### ✅ MainLayout
+
 - Sidebar déjà gérée en drawer mobile (via SidebarProvider)
 - TopNavigationBar optimisé
 - Marges responsive
 
 #### ✅ Sidebar
+
 - Détection mobile automatique
 - Sheet sur mobile, sidebar fixe sur desktop
 - Largeur adaptative
@@ -173,12 +192,12 @@ const { open, setOpen, useBottomSheet, useDialog } = useResponsiveModal();
 ### Typographie Mobile-First
 
 | Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| H1 | 24px | 30px | 36px |
-| H2 | 20px | 24px | 30px |
-| H3 | 18px | 20px | 24px |
-| Body | 16px | 16px | 16px |
-| Small | 14px | 14px | 14px |
+| ------- | ------ | ------ | ------- |
+| H1      | 24px   | 30px   | 36px    |
+| H2      | 20px   | 24px   | 30px    |
+| H3      | 18px   | 20px   | 24px    |
+| Body    | 16px   | 16px   | 16px    |
+| Small   | 14px   | 14px   | 14px    |
 
 **Règle d'or :** Toujours 16px minimum sur inputs pour prévenir le zoom iOS.
 
@@ -205,26 +224,20 @@ const { open, setOpen, useBottomSheet, useDialog } = useResponsiveModal();
 
 ```tsx
 // Mobile: colonne, Desktop: ligne
-<div className="flex flex-col md:flex-row gap-4">
-  {/* Items */}
-</div>
+<div className="flex flex-col md:flex-row gap-4">{/* Items */}</div>
 ```
 
 ### Grid Pattern
 
 ```tsx
 // Mobile: 1 colonne, Tablet: 2, Desktop: 3
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-  {/* Items */}
-</div>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{/* Items */}</div>
 ```
 
 ### Container Pattern
 
 ```tsx
-<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-  {/* Contenu */}
-</div>
+<div className="container mx-auto px-4 sm:px-6 lg:px-8">{/* Contenu */}</div>
 ```
 
 ### Modal Pattern
@@ -233,11 +246,13 @@ const { open, setOpen, useBottomSheet, useDialog } = useResponsiveModal();
 // Utiliser BottomSheet sur mobile, Dialog sur desktop
 const { useBottomSheet, useDialog } = useResponsiveModal();
 
-{useBottomSheet ? (
-  <BottomSheetContent>...</BottomSheetContent>
-) : (
-  <DialogContent>...</DialogContent>
-)}
+{
+  useBottomSheet ? (
+    <BottomSheetContent>...</BottomSheetContent>
+  ) : (
+    <DialogContent>...</DialogContent>
+  );
+}
 ```
 
 ## 📊 Checklist d'optimisation
@@ -261,6 +276,7 @@ Pour chaque nouveau composant/page :
 **Action :** Migrer tous les formulaires vers `MobileFormField`
 
 **Exemple :**
+
 ```tsx
 // Avant
 <Input value={email} onChange={...} />
@@ -280,6 +296,7 @@ Pour chaque nouveau composant/page :
 **Action :** Utiliser `MobileTableCard` pour transformation automatique
 
 **Exemple :**
+
 ```tsx
 // Avant
 <table>...</table>
@@ -297,18 +314,21 @@ Pour chaque nouveau composant/page :
 **Action :** Utiliser `useResponsiveModal` pour choix automatique
 
 **Exemple :**
+
 ```tsx
 const { open, setOpen, useBottomSheet } = useResponsiveModal();
 
-{useBottomSheet ? (
-  <BottomSheet open={open} onOpenChange={setOpen}>
-    <BottomSheetContent>...</BottomSheetContent>
-  </BottomSheet>
-) : (
-  <Dialog open={open} onOpenChange={setOpen}>
-    <DialogContent>...</DialogContent>
-  </Dialog>
-)}
+{
+  useBottomSheet ? (
+    <BottomSheet open={open} onOpenChange={setOpen}>
+      <BottomSheetContent>...</BottomSheetContent>
+    </BottomSheet>
+  ) : (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>...</DialogContent>
+    </Dialog>
+  );
+}
 ```
 
 ### Étape 4 : Images (Priorité MOYENNE)
@@ -316,6 +336,7 @@ const { open, setOpen, useBottomSheet } = useResponsiveModal();
 **Action :** Migrer vers `LazyImage` ou `ProductImage`
 
 **Exemple :**
+
 ```tsx
 // Avant
 <img src="/image.jpg" alt="..." />
@@ -361,18 +382,21 @@ const { open, setOpen, useBottomSheet } = useResponsiveModal();
 ## 📈 Métriques de succès
 
 ### Performance cible
+
 - Lighthouse Mobile Score > 90
 - First Contentful Paint < 1.5s
 - Time to Interactive < 3s
 - Cumulative Layout Shift < 0.1
 
 ### Accessibilité
+
 - WCAG 2.1 AA compliance
 - Touch targets ≥ 44px
 - Contraste texte ≥ 4.5:1
 - Navigation clavier complète
 
 ### UX Mobile
+
 - Pas de scroll horizontal
 - Interactions fluides (< 100ms)
 - Animations légères
@@ -391,4 +415,3 @@ L'application dispose maintenant d'une **infrastructure mobile-first complète**
 - ✅ Expérience native sur mobile
 
 **Prochaine étape :** Migration progressive des composants existants vers les nouveaux composants mobile-first selon le plan d'action.
-

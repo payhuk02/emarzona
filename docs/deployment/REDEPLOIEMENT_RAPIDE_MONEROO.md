@@ -3,6 +3,7 @@
 ## 🎯 Objectif
 
 Redéployer l'Edge Function `moneroo` avec le code corrigé pour résoudre l'erreur :
+
 - ❌ `"The route v1/checkout/initialize could not be found"`
 - ✅ Corrigé vers `/checkout`
 
@@ -33,11 +34,13 @@ Redéployer l'Edge Function `moneroo` avec le code corrigé pour résoudre l'err
 ## ✅ Vérification dans les Logs
 
 **Avant redéploiement (ERREUR) :**
+
 ```
 ERROR Moneroo API error: { message: "The route v1/checkout/initialize could not be found." }
 ```
 
 **Après redéploiement (SUCCÈS) :**
+
 ```
 INFO Calling Moneroo API: { url: "https://api.moneroo.io/v1/checkout", endpoint: "/checkout" }
 INFO Moneroo API response: { status: 200, ... }
@@ -58,9 +61,3 @@ INFO Moneroo API response: { status: 200, ... }
 ✅ L'erreur "The route v1/checkout/initialize could not be found" devrait disparaître
 ✅ Le paiement devrait fonctionner
 ✅ Les logs devraient montrer l'endpoint `/checkout` correct
-
-
-
-
-
-

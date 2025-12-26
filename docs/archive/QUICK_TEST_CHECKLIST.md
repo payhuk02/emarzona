@@ -8,6 +8,7 @@
 ## 🚀 ÉTAPE 1 : VÉRIFICATION BUILD (30 sec)
 
 ### Vercel Deploy Status
+
 ```
 ✅ Aller sur : https://vercel.com/payhuk02/payhula/deployments
 ✅ Status = "Ready" (vert)
@@ -15,6 +16,7 @@
 ```
 
 ### Console Browser
+
 ```
 ✅ Ouvrir app : https://[votre-app].vercel.app
 ✅ F12 → Console
@@ -26,12 +28,14 @@
 ## 🧪 ÉTAPE 2 : TEST WIZARD PRODUIT PHYSIQUE (2 min)
 
 1. **Accéder au wizard**
+
    ```
    ✅ /dashboard/products → "Créer un produit"
    ✅ Cliquer "Produit Physique"
    ```
 
 2. **Vérifier 8 étapes**
+
    ```
    ✅ Étape 1 : Informations de base ✓
    ✅ Étape 2 : Variantes & Options ✓
@@ -44,13 +48,14 @@
    ```
 
 3. **Tester Étape 7**
+
    ```
    ✅ Aller à l'étape 7
    ✅ 3 options radio visibles :
       - Paiement Complet
       - Paiement Partiel
       - Paiement Sécurisé
-   
+
    ✅ Sélectionner "Paiement Partiel"
    ✅ Input "Pourcentage" apparaît
    ✅ Mettre 30%
@@ -68,12 +73,14 @@
 ## 🧪 ÉTAPE 3 : TEST WIZARD SERVICE (1 min)
 
 1. **Créer service**
+
    ```
    ✅ Nouveau produit → "Service"
    ✅ Vérifier : 8 étapes aussi
    ```
 
 2. **Étape 7 - Options Paiement**
+
    ```
    ✅ Sélectionner "Paiement Sécurisé"
    ✅ Texte adapté : "à la prestation" (pas "livraison")
@@ -91,6 +98,7 @@
 ## 🧪 ÉTAPE 4 : TEST ORDERDETAIL BUTTONS (1 min)
 
 1. **Ouvrir une commande**
+
    ```
    ✅ /dashboard/orders
    ✅ Cliquer sur n'importe quelle commande
@@ -98,6 +106,7 @@
    ```
 
 2. **Vérifier boutons**
+
    ```
    ✅ Bouton "💬 Messagerie" (bleu, en haut)
    ✅ Bouton "💳 Gérer Paiements" (si payment_type avancé)
@@ -105,6 +114,7 @@
    ```
 
 3. **Test click Messagerie**
+
    ```
    ✅ Cliquer "Messagerie"
    ✅ Navigation → /orders/[orderId]/messaging
@@ -123,19 +133,20 @@
 ## 🧪 ÉTAPE 5 : VÉRIFICATION BASE DE DONNÉES (30 sec)
 
 ### SQL Quick Check
+
 Exécuter dans Supabase SQL Editor :
 
 ```sql
 -- Check 1: Colonne payment_options existe
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'products' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'products'
 AND column_name = 'payment_options';
 
 -- ✅ Résultat attendu : 1 ligne
 
 -- Check 2: Produits créés avec payment_options
-SELECT 
+SELECT
   name,
   payment_options->>'payment_type' as payment_type,
   payment_options->>'percentage_rate' as percentage_rate
@@ -152,6 +163,7 @@ LIMIT 3;
 ## ✅ RÉSULTAT FINAL
 
 ### Critères de Succès
+
 ```
 ✅ Build Vercel OK
 ✅ Wizard Physical 8 étapes
@@ -183,4 +195,3 @@ Une fois ce test rapide validé :
 **Temps total** : ~5 minutes  
 **Niveau** : Basique (validation rapide)  
 **Détails complets** : Voir `TESTING_GUIDE_PHASE2.md`
-

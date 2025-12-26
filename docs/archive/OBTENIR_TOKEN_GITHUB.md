@@ -41,12 +41,14 @@ Pour créer automatiquement les issues GitHub, vous avez besoin d'un **Personal 
 ### Méthode 1 : Variable d'environnement (Recommandé)
 
 **PowerShell** :
+
 ```powershell
 $env:GH_TOKEN="votre_token_ici"
 .\scripts\create-github-issues-api.ps1
 ```
 
 **Ou en une ligne** :
+
 ```powershell
 $env:GH_TOKEN="ghp_votre_token"; .\scripts\create-github-issues-api.ps1
 ```
@@ -84,4 +86,3 @@ Si votre token expire, créez-en un nouveau et réutilisez la même commande.
 ---
 
 **Note** : Le token vous donne accès complet au repository. Utilisez-le avec précaution !
-

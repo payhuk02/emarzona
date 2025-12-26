@@ -5,11 +5,13 @@
 D'après les logs de l'Edge Function `moneroo`, on observe :
 
 ### ✅ Ce qui fonctionne :
+
 - Les requêtes **OPTIONS** (CORS preflight) sont reçues et traitées
 - L'Edge Function démarre correctement (`booted`)
 - Les logs montrent `[Moneroo Edge Function] Request received` pour OPTIONS
 
 ### ❌ Ce qui ne fonctionne pas :
+
 - **Aucune requête POST** n'apparaît dans les logs
 - L'erreur "Failed to fetch" suggère que la requête POST n'atteint jamais l'Edge Function
 - Les nouveaux logs détaillés que nous avons ajoutés ne s'affichent pas pour les POST
@@ -17,30 +19,38 @@ D'après les logs de l'Edge Function `moneroo`, on observe :
 ## 🔴 Causes Possibles
 
 ### 1. L'Edge Function n'est pas déployée avec le dernier code
+
 **Symptôme :** Les logs ne montrent pas les nouveaux messages détaillés que nous avons ajoutés.
 
 **Solution :**
+
 - Vérifier que l'Edge Function a été déployée avec le code du fichier `MONEROO_EDGE_FUNCTION_CODE.txt`
 - Redéployer l'Edge Function via le Dashboard Supabase
 
 ### 2. Problème de CORS
+
 **Symptôme :** Les requêtes OPTIONS passent mais les POST sont bloquées.
 
 **Vérification :**
+
 - Vérifier que les headers CORS sont corrects
 - Vérifier que `SITE_URL` est configuré dans les Secrets Supabase
 
 ### 3. Problème d'authentification
+
 **Symptôme :** La requête n'est pas envoyée si l'utilisateur n'est pas authentifié.
 
 **Vérification :**
+
 - Vérifier que l'utilisateur est connecté avant d'acheter
 - Vérifier les logs du navigateur pour voir si l'authentification échoue
 
 ### 4. Problème de réseau/firewall
+
 **Symptôme :** La requête est bloquée avant d'atteindre Supabase.
 
 **Vérification :**
+
 - Vérifier la console du navigateur pour les erreurs réseau
 - Vérifier que l'URL Supabase est accessible
 
@@ -119,8 +129,3 @@ D'après les logs de l'Edge Function `moneroo`, on observe :
 - [Guide de Déploiement](DEPLOIEMENT_RAPIDE_MONEROO.md)
 - [Correction de l'Erreur](docs/corrections/CORRECTION_ERREUR_FAILED_TO_FETCH.md)
 - [Code de l'Edge Function](MONEROO_EDGE_FUNCTION_CODE.txt)
-
-
-
-
-

@@ -10,6 +10,7 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 ### Erreur Console Vercel
+
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
   at ic (chunk-ZmWiXTBQ.js:1:3240)
@@ -18,6 +19,7 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
 ```
 
 ### Symptômes
+
 - ✅ Application fonctionne **localement** (`npm run dev`)
 - ❌ Application **ne démarre pas** sur Vercel (écran noir)
 - ❌ Erreur d'accès à `forwardRef` dans le code minifié
@@ -56,12 +58,13 @@ L'erreur `Cannot read properties of undefined (reading 'forwardRef')` se produit
 ### 1. Forcer React dans le chunk principal
 
 **Configuration actuelle** :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
     return undefined; // ✅ React dans le chunk principal
   }
-}
+};
 ```
 
 **Status** : ✅ Déjà en place
@@ -69,12 +72,14 @@ manualChunks: (id) => {
 ### 2. Améliorer le plugin ensureChunkOrderPlugin
 
 **Corrections appliquées** :
+
 - ✅ Utiliser `order: 'pre'` et `handler` au lieu de `enforce` et `transform`
 - ✅ Utiliser le premier script comme fallback si le chunk principal n'est pas trouvé
 - ✅ Garantir que le chunk principal est chargé sans `defer`
 - ✅ Ajouter les autres chunks avec `defer` pour garantir l'ordre
 
 **Code** :
+
 ```typescript
 const ensureChunkOrderPlugin = (): Plugin => {
   return {
@@ -101,25 +106,25 @@ const ensureChunkOrderPlugin = (): Plugin => {
 **Problème** : Le chunk principal est nommé `chunk-XXX.js` au lieu de `index-XXX.js`
 
 **Solution** :
+
 ```typescript
-entryFileNames: (chunkInfo) => {
-  const isMainEntry = 
-    chunkInfo.isEntry && (
-      chunkInfo.facadeModuleId?.includes('main.tsx') ||
+entryFileNames: chunkInfo => {
+  const isMainEntry =
+    chunkInfo.isEntry &&
+    (chunkInfo.facadeModuleId?.includes('main.tsx') ||
       chunkInfo.facadeModuleId?.includes('main.ts') ||
       chunkInfo.facadeModuleId?.includes('src/main') ||
       chunkInfo.facadeModuleId?.includes('/main') ||
       chunkInfo.name === 'main' ||
       chunkInfo.name === 'index' ||
-      (!chunkInfo.facadeModuleId?.includes('node_modules') && 
-       !chunkInfo.facadeModuleId?.includes('chunk'))
-    );
-  
+      (!chunkInfo.facadeModuleId?.includes('node_modules') &&
+        !chunkInfo.facadeModuleId?.includes('chunk')));
+
   if (isMainEntry) {
     return 'js/index-[hash].js';
   }
   return 'js/[name]-[hash].js';
-}
+};
 ```
 
 **Status** : ✅ Implémenté (mais le plugin utilise le premier script comme fallback)
@@ -127,6 +132,7 @@ entryFileNames: (chunkInfo) => {
 ### 4. Configuration déjà en place
 
 **Déduplication React** :
+
 ```typescript
 resolve: {
   dedupe: ['react', 'react-dom'],
@@ -134,6 +140,7 @@ resolve: {
 ```
 
 **Préservation des signatures** :
+
 ```typescript
 rollupOptions: {
   preserveEntrySignatures: 'strict',
@@ -146,12 +153,12 @@ rollupOptions: {
 
 ## 📊 RÉSULTAT
 
-| Avant | Après |
-|-------|-------|
+| Avant                                | Après                                                         |
+| ------------------------------------ | ------------------------------------------------------------- |
 | ❌ React chargé après les composants | ✅ React chargé en premier (plugin utilise le premier script) |
-| ❌ Erreur `forwardRef` undefined | ✅ `forwardRef` accessible (React dans le chunk principal) |
-| ❌ Écran noir sur Vercel | ✅ Application démarre (ordre garanti) |
-| ❌ Ordre de chargement non garanti | ✅ Ordre garanti (plugin + preserveEntrySignatures) |
+| ❌ Erreur `forwardRef` undefined     | ✅ `forwardRef` accessible (React dans le chunk principal)    |
+| ❌ Écran noir sur Vercel             | ✅ Application démarre (ordre garanti)                        |
+| ❌ Ordre de chargement non garanti   | ✅ Ordre garanti (plugin + preserveEntrySignatures)           |
 
 ---
 
@@ -160,15 +167,18 @@ rollupOptions: {
 **Statut**: ✅ **CORRIGÉ & PUSHÉ**
 
 ### Commits
+
 ```
 d520d13 - fix(phase1-2): Forcer le nom du chunk principal à 'index' pour garantir l'ordre de chargement React
 [commit suivant] - fix(phase1-2): Améliorer la détection du chunk principal dans entryFileNames
 ```
 
 ### Push GitHub
+
 ✅ **Push réussi** sur `main`
 
 ### Build Vercel
+
 ⏳ **Rebuild automatique en cours** (détection du nouveau commit)
 
 ---
@@ -220,6 +230,7 @@ d520d13 - fix(phase1-2): Forcer le nom du chunk principal à 'index' pour garant
 ### Solution Finale
 
 La solution finale est de :
+
 1. ✅ Forcer React dans le chunk principal (déjà fait)
 2. ✅ Améliorer le plugin `ensureChunkOrderPlugin` (déjà fait)
 3. ✅ Utiliser le premier script comme fallback (déjà fait)
@@ -231,5 +242,3 @@ La solution finale est de :
 **Date de correction** : Janvier 2025  
 **Commits** : `d520d13`, `[commit suivant]`  
 **Status** : ✅ **RÉSOLU**
-
-

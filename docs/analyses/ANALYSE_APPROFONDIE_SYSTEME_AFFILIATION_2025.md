@@ -38,12 +38,14 @@ Le système d'affiliation de Payhula est **une implémentation complète et prof
 ### Score Global : **9.2/10** ⭐⭐⭐⭐⭐
 
 **Forces** :
+
 - Architecture solide et bien structurée
 - Sécurité robuste (RLS, validation)
 - Automatisation complète (triggers SQL)
 - Interface utilisateur complète
 
 **Faiblesses** :
+
 - Documentation technique limitée
 - Tests unitaires manquants
 - Optimisations de performance possibles
@@ -57,14 +59,14 @@ Le système d'affiliation de Payhula est **une implémentation complète et prof
 
 #### Tables Principales (6)
 
-| Table | Lignes SQL | Indexes | RLS | Description |
-|-------|-----------|---------|-----|-------------|
-| `affiliates` | 48 | 4 | ✅ | Gestion des affiliés |
-| `product_affiliate_settings` | 30 | 3 | ✅ | Configuration par produit |
-| `affiliate_links` | 33 | 5 | ✅ | Liens d'affiliation |
-| `affiliate_clicks` | 28 | 7 | ✅ | Tracking des clics |
-| `affiliate_commissions` | 36 | 6 | ✅ | Commissions générées |
-| `affiliate_withdrawals` | 36 | 3 | ✅ | Demandes de retrait |
+| Table                        | Lignes SQL | Indexes | RLS | Description               |
+| ---------------------------- | ---------- | ------- | --- | ------------------------- |
+| `affiliates`                 | 48         | 4       | ✅  | Gestion des affiliés      |
+| `product_affiliate_settings` | 30         | 3       | ✅  | Configuration par produit |
+| `affiliate_links`            | 33         | 5       | ✅  | Liens d'affiliation       |
+| `affiliate_clicks`           | 28         | 7       | ✅  | Tracking des clics        |
+| `affiliate_commissions`      | 36         | 6       | ✅  | Commissions générées      |
+| `affiliate_withdrawals`      | 36         | 3       | ✅  | Demandes de retrait       |
 
 **Total** : 211 lignes de schéma + 26 indexes + RLS complet
 
@@ -81,12 +83,12 @@ products (1) ──→ (N) affiliate_links
 
 ### 2. Fonctions SQL (4)
 
-| Fonction | Type | Lignes | Complexité | Statut |
-|----------|------|--------|------------|--------|
-| `generate_affiliate_code()` | Function | 52 | Moyenne | ✅ |
-| `generate_affiliate_link_code()` | Function | 20 | Faible | ✅ |
-| `track_affiliate_click()` | Function | 95 | Élevée | ✅ |
-| `calculate_affiliate_commission()` | Trigger | 137 | Très élevée | ✅ |
+| Fonction                           | Type     | Lignes | Complexité  | Statut |
+| ---------------------------------- | -------- | ------ | ----------- | ------ |
+| `generate_affiliate_code()`        | Function | 52     | Moyenne     | ✅     |
+| `generate_affiliate_link_code()`   | Function | 20     | Faible      | ✅     |
+| `track_affiliate_click()`          | Function | 95     | Élevée      | ✅     |
+| `calculate_affiliate_commission()` | Trigger  | 137    | Très élevée | ✅     |
 
 **Total** : 304 lignes de logique SQL
 
@@ -94,25 +96,25 @@ products (1) ──→ (N) affiliate_links
 
 #### Hooks React (5)
 
-| Hook | Lignes | Fonctions | Statut |
-|------|--------|-----------|--------|
-| `useAffiliates.ts` | 320 | 7 | ✅ |
-| `useAffiliateLinks.ts` | 330 | 6 | ✅ |
-| `useAffiliateCommissions.ts` | 349 | 5 | ✅ |
-| `useAffiliateWithdrawals.ts` | ~250 | 4 | ✅ |
-| `useProductAffiliateSettings.ts` | ~200 | 3 | ✅ |
+| Hook                             | Lignes | Fonctions | Statut |
+| -------------------------------- | ------ | --------- | ------ |
+| `useAffiliates.ts`               | 320    | 7         | ✅     |
+| `useAffiliateLinks.ts`           | 330    | 6         | ✅     |
+| `useAffiliateCommissions.ts`     | 349    | 5         | ✅     |
+| `useAffiliateWithdrawals.ts`     | ~250   | 4         | ✅     |
+| `useProductAffiliateSettings.ts` | ~200   | 3         | ✅     |
 
 **Total** : ~1,449 lignes de hooks
 
 #### Pages/Composants
 
-| Composant | Lignes | Type | Statut |
-|-----------|--------|------|--------|
-| `AffiliateDashboard.tsx` | 696 | Page | ✅ |
-| `AdminAffiliates.tsx` | 941 | Page | ✅ |
-| `StoreAffiliateManagement.tsx` | ~500 | Page | ✅ |
-| `ProductAffiliateSettings.tsx` | ~300 | Composant | ✅ |
-| `AffiliateLinkTracker.tsx` | ~100 | Composant | ✅ |
+| Composant                      | Lignes | Type      | Statut |
+| ------------------------------ | ------ | --------- | ------ |
+| `AffiliateDashboard.tsx`       | 696    | Page      | ✅     |
+| `AdminAffiliates.tsx`          | 941    | Page      | ✅     |
+| `StoreAffiliateManagement.tsx` | ~500   | Page      | ✅     |
+| `ProductAffiliateSettings.tsx` | ~300   | Composant | ✅     |
+| `AffiliateLinkTracker.tsx`     | ~100   | Composant | ✅     |
 
 **Total** : ~2,537 lignes de composants
 
@@ -154,19 +156,21 @@ products (1) ──→ (N) affiliate_links
 #### ⚠️ Points d'Amélioration
 
 1. **Gestion des Conflits de Cookie**
+
    ```sql
    -- Problème potentiel : Plusieurs clics peuvent avoir le même cookie
    -- Solution : Ajouter contrainte UNIQUE sur tracking_cookie
-   ALTER TABLE affiliate_clicks 
+   ALTER TABLE affiliate_clicks
    ADD CONSTRAINT unique_tracking_cookie UNIQUE (tracking_cookie);
    ```
 
 2. **Performance des Requêtes**
+
    ```sql
    -- Problème : Requête dans calculate_affiliate_commission() peut être lente
    -- Solution : Index composite sur (product_id, cookie_expires_at, converted)
-   CREATE INDEX idx_clicks_product_tracking 
-   ON affiliate_clicks(product_id, cookie_expires_at, converted) 
+   CREATE INDEX idx_clicks_product_tracking
+   ON affiliate_clicks(product_id, cookie_expires_at, converted)
    WHERE converted = false;
    ```
 
@@ -194,6 +198,7 @@ products (1) ──→ (N) affiliate_links
 #### ⚠️ Points d'Amélioration
 
 1. **Gestion des Concurrences**
+
    ```sql
    -- Problème : Race condition possible sur plusieurs commandes simultanées
    -- Solution : Utiliser SELECT FOR UPDATE SKIP LOCKED
@@ -208,11 +213,12 @@ products (1) ──→ (N) affiliate_links
    ```
 
 2. **Validation des Montants**
+
    ```sql
    -- Problème : Pas de validation que commission_amount > 0
    -- Solution : Ajouter CHECK constraint
    ALTER TABLE affiliate_commissions
-   ADD CONSTRAINT check_commission_positive 
+   ADD CONSTRAINT check_commission_positive
    CHECK (commission_amount > 0);
    ```
 
@@ -241,6 +247,7 @@ products (1) ──→ (N) affiliate_links
 #### ⚠️ Points d'Amélioration
 
 1. **Cache et Optimistic Updates**
+
    ```typescript
    // Problème : Pas de cache React Query
    // Solution : Intégrer @tanstack/react-query
@@ -400,12 +407,14 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ### ⚠️ Points d'Amélioration
 
 1. **Protection CSRF**
+
    ```typescript
    // Problème : Pas de protection CSRF explicite
    // Solution : Ajouter tokens CSRF pour actions critiques
    ```
 
 2. **Rate Limiting**
+
    ```typescript
    // Problème : Pas de rate limiting sur track_affiliate_click()
    // Solution : Implémenter rate limiting côté Supabase
@@ -446,6 +455,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ### ⚠️ Points d'Amélioration
 
 1. **Requêtes N+1**
+
    ```typescript
    // Problème potentiel dans useAffiliateLinks
    // Solution : Utiliser .select() avec relations
@@ -457,13 +467,13 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
    ```
 
 2. **Pagination**
+
    ```typescript
    // Problème : Pas de pagination dans les hooks
    // Solution : Implémenter pagination
    const { data, fetchNextPage } = useInfiniteQuery({
      queryKey: ['affiliate-links'],
-     queryFn: ({ pageParam = 0 }) => 
-       fetchLinks({ offset: pageParam, limit: 20 }),
+     queryFn: ({ pageParam = 0 }) => fetchLinks({ offset: pageParam, limit: 20 }),
    });
    ```
 
@@ -478,26 +488,31 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ## 💪 Points Forts
 
 ### 1. Architecture Solide
+
 - ✅ Séparation claire des responsabilités
 - ✅ Code modulaire et réutilisable
 - ✅ Types TypeScript complets
 
 ### 2. Automatisation
+
 - ✅ Triggers SQL pour calcul automatique
 - ✅ Fonctions SQL réutilisables
 - ✅ Workflow complet automatisé
 
 ### 3. Sécurité
+
 - ✅ RLS complet
 - ✅ Validation des données
 - ✅ Gestion sécurisée des cookies
 
 ### 4. Interface Utilisateur
+
 - ✅ Dashboards complets
 - ✅ UX soignée
 - ✅ Responsive design
 
 ### 5. Flexibilité
+
 - ✅ Commission pourcentage ou fixe
 - ✅ Durée cookie configurable
 - ✅ Restrictions personnalisables
@@ -507,6 +522,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ## ⚠️ Points d'Amélioration
 
 ### 1. Tests
+
 - ❌ Pas de tests unitaires
 - ❌ Pas de tests d'intégration
 - ❌ Pas de tests E2E
@@ -514,6 +530,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 **Impact** : Risque de régressions, difficulté de maintenance
 
 ### 2. Documentation
+
 - ⚠️ Documentation technique limitée
 - ⚠️ Pas de guide utilisateur
 - ⚠️ Pas de diagrammes de flux
@@ -521,6 +538,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 **Impact** : Onboarding difficile, maintenance complexe
 
 ### 3. Monitoring
+
 - ❌ Pas de métriques de performance
 - ❌ Pas d'alertes sur erreurs
 - ❌ Pas de dashboard de monitoring
@@ -528,6 +546,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 **Impact** : Détection tardive des problèmes
 
 ### 4. Gestion d'Erreurs
+
 - ⚠️ Gestion d'erreurs basique
 - ⚠️ Pas de retry automatique
 - ⚠️ Messages d'erreur génériques
@@ -535,6 +554,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 **Impact** : Expérience utilisateur dégradée
 
 ### 5. Performance
+
 - ⚠️ Pas de pagination
 - ⚠️ Pas de cache explicite
 - ⚠️ Requêtes potentiellement lourdes
@@ -548,6 +568,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ### Priorité Haute 🔴
 
 1. **Ajouter des Tests**
+
    ```typescript
    // Tests unitaires pour hooks
    describe('useAffiliates', () => {
@@ -555,7 +576,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
        // Test implementation
      });
    });
-   
+
    // Tests d'intégration pour fonctions SQL
    describe('track_affiliate_click', () => {
      it('should create click and return cookie', async () => {
@@ -565,12 +586,12 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
    ```
 
 2. **Implémenter la Pagination**
+
    ```typescript
    // Dans tous les hooks de liste
    const { data, hasNextPage, fetchNextPage } = useInfiniteQuery({
      queryKey: ['affiliates'],
-     queryFn: ({ pageParam = 0 }) => 
-       fetchAffiliates({ offset: pageParam, limit: 20 }),
+     queryFn: ({ pageParam = 0 }) => fetchAffiliates({ offset: pageParam, limit: 20 }),
    });
    ```
 
@@ -591,6 +612,7 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ### Priorité Moyenne 🟡
 
 4. **Ajouter du Monitoring**
+
    ```typescript
    // Intégrer Sentry pour tracking
    Sentry.captureMessage('Affiliate commission calculated', {
@@ -600,16 +622,17 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
    ```
 
 5. **Optimiser les Requêtes**
+
    ```sql
    -- Créer des vues matérialisées pour stats
    CREATE MATERIALIZED VIEW affiliate_stats_cache AS
-   SELECT 
+   SELECT
      affiliate_id,
      COUNT(*) as total_clicks,
      SUM(CASE WHEN converted THEN 1 ELSE 0 END) as total_sales
    FROM affiliate_clicks
    GROUP BY affiliate_id;
-   
+
    -- Refresh périodique
    REFRESH MATERIALIZED VIEW CONCURRENTLY affiliate_stats_cache;
    ```
@@ -641,16 +664,19 @@ Affilié → Demande retrait → useAffiliateWithdrawals.createWithdrawal()
 ## 📊 Métriques Recommandées
 
 ### Performance
+
 - Temps de réponse moyen : < 200ms
 - Taux d'erreur : < 0.1%
 - Disponibilité : > 99.9%
 
 ### Business
+
 - Taux de conversion : > 2%
 - Temps moyen d'approbation : < 24h
 - Satisfaction utilisateur : > 4.5/5
 
 ### Technique
+
 - Couverture de tests : > 80%
 - Temps de build : < 2min
 - Bundle size : < 500KB
@@ -664,12 +690,14 @@ Le système d'affiliation de Payhula est **une implémentation solide et complè
 ### Points Clés
 
 ✅ **Forces** :
+
 - Architecture complète et modulaire
 - Sécurité robuste (RLS, validation)
 - Automatisation intelligente (triggers SQL)
 - Interface utilisateur soignée
 
 ⚠️ **Améliorations** :
+
 - Ajouter des tests (priorité haute)
 - Implémenter la pagination
 - Améliorer la documentation
@@ -683,4 +711,3 @@ Le système est **prêt pour la production** avec quelques améliorations recomm
 
 **Date de l'analyse** : Janvier 2025  
 **Prochaine révision recommandée** : Avril 2025
-

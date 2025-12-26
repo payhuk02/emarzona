@@ -74,7 +74,8 @@ VITE_MONEROO_PUBLIC_KEY=pk_live_...
 # VITE_SENDGRID_API_KEY=SG.xxx
 ```
 
-**⚠️ IMPORTANT :** 
+**⚠️ IMPORTANT :**
+
 - Ne jamais commit `.env.production` (déjà dans .gitignore)
 - Utiliser les vraies clés PRODUCTION de Supabase
 - Utiliser les clés LIVE de Moneroo
@@ -220,6 +221,7 @@ curl -I https://payhuk.com
      - `https://payhuk.com`
 
 2. **CORS Configuration**
+
    ```
    https://payhuk.com
    https://www.payhuk.com
@@ -260,12 +262,14 @@ Déjà configuré dans `vercel.json` :
 ### 4.4 Monitoring (Optionnel)
 
 **Google Analytics**
+
 ```typescript
 // Déjà intégré dans le système de pixels !
 // Ajouter votre GA4 ID dans les settings de cours
 ```
 
 **Sentry Error Tracking**
+
 ```bash
 npm install @sentry/react
 
@@ -341,9 +345,9 @@ npm install @sentry/react
 
 ```sql
 -- Vérifier que TOUTES les tables ont RLS activé
-SELECT tablename, rowsecurity 
-FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
   AND rowsecurity = false;
 
 -- Devrait retourner 0 lignes !
@@ -510,6 +514,7 @@ ipconfig /flushdns (Windows)
 **Payhuk est maintenant en production !** 🚀
 
 Vous avez :
+
 - ✅ Une plateforme e-learning professionnelle
 - ✅ Déployée sur infrastructure serverless
 - ✅ Optimisée pour performance
@@ -518,4 +523,3 @@ Vous avez :
 - ✅ Prête pour des milliers d'utilisateurs
 
 **Bon lancement !** 🎉
-

@@ -51,7 +51,7 @@ La colonne `currency` (et potentiellement d'autres colonnes) n'existe pas dans l
 Exécutez cette requête SQL pour vérifier :
 
 ```sql
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable,
@@ -82,15 +82,15 @@ Si vous voulez une solution rapide sans exécuter tout le script, exécutez simp
 
 ```sql
 -- Ajouter la colonne currency
-ALTER TABLE public.transactions 
+ALTER TABLE public.transactions
 ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'XOF';
 
 -- Mettre à jour les valeurs NULL et rendre NOT NULL
-UPDATE public.transactions 
-SET currency = 'XOF' 
+UPDATE public.transactions
+SET currency = 'XOF'
 WHERE currency IS NULL;
 
-ALTER TABLE public.transactions 
+ALTER TABLE public.transactions
 ALTER COLUMN currency SET NOT NULL,
 ALTER COLUMN currency SET DEFAULT 'XOF';
 
@@ -123,7 +123,7 @@ Après avoir exécuté la migration, vous pouvez vérifier que tout fonctionne :
 
 ```sql
 -- Vérifier que la colonne currency existe et a la bonne structure
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable,
@@ -162,9 +162,3 @@ Si l'erreur persiste après avoir exécuté la migration :
 - [Documentation Supabase - Migrations](https://supabase.com/docs/guides/cli/local-development#database-migrations)
 - [Documentation Supabase - RLS](https://supabase.com/docs/guides/auth/row-level-security)
 - [Documentation PostgreSQL - ALTER TABLE](https://www.postgresql.org/docs/current/sql-altertable.html)
-
-
-
-
-
-

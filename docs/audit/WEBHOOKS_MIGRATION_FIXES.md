@@ -1,4 +1,5 @@
 # 🔧 CORRECTIONS DES MIGRATIONS WEBHOOKS
+
 ## Date: 2025-01-28
 
 ---
@@ -28,7 +29,8 @@ END;
 
 **Erreur initiale:** `column "events" is of type webhook_event_type[] but expression is of type text[]`
 
-**Solution:** 
+**Solution:**
+
 - Création d'une fonction helper `convert_enum_array_to_text_array()` pour convertir ENUM[] vers TEXT[]
 - Conversion forcée de la colonne `events` avant les insertions
 - Utilisation de la fonction dans `USING` pour éviter les sous-requêtes
@@ -40,8 +42,8 @@ LANGUAGE plpgsql
 IMMUTABLE
 AS $$ ... $$;
 
-ALTER TABLE public.webhooks 
-ALTER COLUMN events TYPE TEXT[] 
+ALTER TABLE public.webhooks
+ALTER COLUMN events TYPE TEXT[]
 USING public.convert_enum_array_to_text_array(events);
 ```
 
@@ -131,10 +133,11 @@ END $$;
 ## 🧪 TESTS RECOMMANDÉS
 
 ### Test 1: Vérifier la conversion de colonne
+
 ```sql
-SELECT 
-  column_name, 
-  data_type, 
+SELECT
+  column_name,
+  data_type,
   udt_name
 FROM information_schema.columns
 WHERE table_schema = 'public'
@@ -144,8 +147,9 @@ WHERE table_schema = 'public'
 ```
 
 ### Test 2: Vérifier les webhooks migrés
+
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total,
   metadata->>'source' as source
 FROM webhooks
@@ -154,6 +158,7 @@ GROUP BY metadata->>'source';
 ```
 
 ### Test 3: Vérifier le cron job
+
 ```sql
 SELECT * FROM cron.job WHERE jobname = 'process-webhook-deliveries';
 ```
@@ -163,4 +168,3 @@ SELECT * FROM cron.job WHERE jobname = 'process-webhook-deliveries';
 **Date:** 2025-01-28  
 **Version:** 1.0  
 **Status:** ✅ Toutes les erreurs corrigées
-

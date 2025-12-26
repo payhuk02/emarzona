@@ -24,6 +24,7 @@
 ### Vue d'Ensemble
 
 Le système multi-stores permet à chaque utilisateur de créer et gérer **jusqu'à 3 boutiques indépendantes**. Chaque boutique a :
+
 - ✅ Ses propres produits
 - ✅ Ses propres commandes
 - ✅ Ses propres clients
@@ -42,6 +43,7 @@ Le système multi-stores permet à chaque utilisateur de créer et gérer **jusq
 ### 1. Table `stores`
 
 **Structure** :
+
 ```sql
 CREATE TABLE public.stores (
   id UUID PRIMARY KEY,
@@ -56,10 +58,12 @@ CREATE TABLE public.stores (
 ```
 
 **Contraintes** :
+
 - ✅ `slug` unique globalement
 - ✅ `user_id` référence `auth.users`
 
 **RLS (Row Level Security)** :
+
 ```sql
 -- Les utilisateurs peuvent voir leurs propres boutiques
 CREATE POLICY "Users can view their own store"
@@ -94,6 +98,7 @@ CREATE POLICY "Anyone can view stores by slug"
 **Migration** : `supabase/migrations/20250202_restore_multi_stores_limit.sql`
 
 **Fonction SQL** :
+
 ```sql
 CREATE OR REPLACE FUNCTION check_store_limit()
 RETURNS TRIGGER AS $$
@@ -103,11 +108,11 @@ BEGIN
   SELECT COUNT(*) INTO store_count
   FROM public.stores
   WHERE user_id = NEW.user_id;
-  
+
   IF store_count >= 3 THEN
     RAISE EXCEPTION 'Limite de 3 boutiques par utilisateur atteinte...';
   END IF;
-  
+
   RETURN NEW;
 END;
 $$;
@@ -126,34 +131,34 @@ CREATE TRIGGER enforce_store_limit
 
 **Tables Principales** (avec isolation par `store_id`) :
 
-| Table | Colonne | RLS | Isolation |
-|-------|---------|-----|-----------|
-| `products` | `store_id` | ✅ | ✅ |
-| `orders` | `store_id` | ✅ | ✅ |
-| `customers` | `store_id` | ✅ | ✅ |
-| `transactions` | `store_id` | ✅ | ✅ |
-| `payments` | `store_id` | ✅ | ✅ |
-| `store_withdrawals` | `store_id` | ✅ | ✅ |
-| `store_payment_methods` | `store_id` | ✅ | ✅ |
-| `store_earnings` | `store_id` | ✅ | ✅ |
-| `store_affiliates` | `store_id` | ✅ | ✅ |
-| `affiliate_commissions` | `store_id` | ✅ | ✅ |
-| `product_affiliate_settings` | `store_id` | ✅ | ✅ |
-| `promotions` | `store_id` | ✅ | ✅ |
-| `coupons` | `store_id` | ✅ | ✅ |
-| `gift_cards` | `store_id` | ✅ | ✅ |
-| `loyalty_programs` | `store_id` | ✅ | ✅ |
-| `returns` | `store_id` | ✅ | ✅ |
-| `reviews` | `store_id` | ✅ | ✅ |
-| `vendor_conversations` | `store_id` | ✅ | ✅ |
-| `shipping_zones` | `store_id` | ✅ | ✅ |
-| `shipping_rates` | `store_id` | ✅ | ✅ |
-| `warehouses` | `store_id` | ✅ | ✅ |
-| `suppliers` | `store_id` | ✅ | ✅ |
-| `service_bookings` | `store_id` (via `product_id`) | ✅ | ✅ |
-| `digital_products` | `store_id` (via `product_id`) | ✅ | ✅ |
-| `physical_products` | `store_id` (via `product_id`) | ✅ | ✅ |
-| `courses` | `store_id` | ✅ | ✅ |
+| Table                        | Colonne                       | RLS | Isolation |
+| ---------------------------- | ----------------------------- | --- | --------- |
+| `products`                   | `store_id`                    | ✅  | ✅        |
+| `orders`                     | `store_id`                    | ✅  | ✅        |
+| `customers`                  | `store_id`                    | ✅  | ✅        |
+| `transactions`               | `store_id`                    | ✅  | ✅        |
+| `payments`                   | `store_id`                    | ✅  | ✅        |
+| `store_withdrawals`          | `store_id`                    | ✅  | ✅        |
+| `store_payment_methods`      | `store_id`                    | ✅  | ✅        |
+| `store_earnings`             | `store_id`                    | ✅  | ✅        |
+| `store_affiliates`           | `store_id`                    | ✅  | ✅        |
+| `affiliate_commissions`      | `store_id`                    | ✅  | ✅        |
+| `product_affiliate_settings` | `store_id`                    | ✅  | ✅        |
+| `promotions`                 | `store_id`                    | ✅  | ✅        |
+| `coupons`                    | `store_id`                    | ✅  | ✅        |
+| `gift_cards`                 | `store_id`                    | ✅  | ✅        |
+| `loyalty_programs`           | `store_id`                    | ✅  | ✅        |
+| `returns`                    | `store_id`                    | ✅  | ✅        |
+| `reviews`                    | `store_id`                    | ✅  | ✅        |
+| `vendor_conversations`       | `store_id`                    | ✅  | ✅        |
+| `shipping_zones`             | `store_id`                    | ✅  | ✅        |
+| `shipping_rates`             | `store_id`                    | ✅  | ✅        |
+| `warehouses`                 | `store_id`                    | ✅  | ✅        |
+| `suppliers`                  | `store_id`                    | ✅  | ✅        |
+| `service_bookings`           | `store_id` (via `product_id`) | ✅  | ✅        |
+| `digital_products`           | `store_id` (via `product_id`) | ✅  | ✅        |
+| `physical_products`          | `store_id` (via `product_id`) | ✅  | ✅        |
+| `courses`                    | `store_id`                    | ✅  | ✅        |
 
 **Total** : **25+ tables** avec isolation par `store_id`
 
@@ -166,6 +171,7 @@ CREATE TRIGGER enforce_store_limit
 **Rôle** : Gestion centralisée de l'état des boutiques
 
 **Fonctionnalités** :
+
 - ✅ Liste de toutes les boutiques de l'utilisateur
 - ✅ Boutique sélectionnée (`selectedStoreId`)
 - ✅ Persistance dans `localStorage`
@@ -174,6 +180,7 @@ CREATE TRIGGER enforce_store_limit
 - ✅ Fonctions utilitaires (`canCreateStore`, `getRemainingStores`)
 
 **Interface** :
+
 ```typescript
 interface StoreContextType {
   stores: Store[];
@@ -190,25 +197,31 @@ interface StoreContextType {
 ```
 
 **Persistance** :
+
 - ✅ `localStorage.getItem('selectedStoreId')` au chargement
 - ✅ `localStorage.setItem('selectedStoreId', storeId)` à chaque changement
 - ✅ Synchronisation via `StorageEvent` entre onglets
 
 **Realtime** :
+
 ```typescript
 useEffect(() => {
   if (!user) return;
 
   const channel = supabase
     .channel(`public:stores:user_id=eq.${user.id}`)
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'stores',
-      filter: `user_id=eq.${user.id}`
-    }, (payload) => {
-      fetchStores(); // Refetch on any change
-    })
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'stores',
+        filter: `user_id=eq.${user.id}`,
+      },
+      payload => {
+        fetchStores(); // Refetch on any change
+      }
+    )
     .subscribe();
 
   return () => supabase.removeChannel(channel);
@@ -220,6 +233,7 @@ useEffect(() => {
 ### 2. Intégration dans App.tsx
 
 **Wrapper** :
+
 ```typescript
 <StoreProvider>
   <AppContent />
@@ -237,11 +251,13 @@ useEffect(() => {
 **Rôle** : Récupérer la boutique sélectionnée
 
 **Comportement** :
+
 - ✅ Utilise `StoreContext` pour obtenir `selectedStoreId`
 - ✅ Retourne la boutique correspondante
 - ✅ Gère le loading et les erreurs
 
 **Utilisation** :
+
 ```typescript
 const { store, loading } = useStore();
 // store = boutique sélectionnée ou null
@@ -254,6 +270,7 @@ const { store, loading } = useStore();
 **Rôle** : Gérer toutes les boutiques de l'utilisateur
 
 **Fonctionnalités** :
+
 - ✅ `fetchStores()` : Récupère toutes les boutiques
 - ✅ `createStore()` : Crée une nouvelle boutique (vérifie limite)
 - ✅ `updateStore()` : Met à jour une boutique
@@ -262,6 +279,7 @@ const { store, loading } = useStore();
 - ✅ `getRemainingStores()` : Nombre de boutiques restantes
 
 **Limite** :
+
 ```typescript
 const MAX_STORES_PER_USER = 3;
 
@@ -276,24 +294,24 @@ const canCreateStore = () => {
 
 **Hooks qui filtrent par boutique** :
 
-| Hook | Filtre | Statut |
-|------|--------|--------|
-| `useDashboardStats` | `store.id` | ✅ |
-| `useProducts` | `store_id` | ✅ |
-| `useProductsOptimized` | `store_id` | ✅ |
-| `useOrders` | `store_id` | ✅ |
-| `useCustomers` | `store_id` | ✅ |
-| `useTransactions` | `store_id` | ✅ |
-| `usePayments` | `store_id` | ✅ |
-| `useStoreWithdrawals` | `store_id` | ✅ |
-| `useStoreEarnings` | `store_id` | ✅ |
-| `useStorePaymentMethods` | `store_id` | ✅ |
-| `useStoreAffiliates` | `store_id` | ✅ |
-| `useAffiliateCommissions` | `store_id` | ✅ |
-| `useDigitalProducts` | `store_id` (via contexte) | ✅ |
-| `useVendorMessaging` | `store_id` | ✅ |
-| `useReturns` | `store_id` | ✅ |
-| `useAnalytics` | `store_id` | ✅ |
+| Hook                      | Filtre                    | Statut |
+| ------------------------- | ------------------------- | ------ |
+| `useDashboardStats`       | `store.id`                | ✅     |
+| `useProducts`             | `store_id`                | ✅     |
+| `useProductsOptimized`    | `store_id`                | ✅     |
+| `useOrders`               | `store_id`                | ✅     |
+| `useCustomers`            | `store_id`                | ✅     |
+| `useTransactions`         | `store_id`                | ✅     |
+| `usePayments`             | `store_id`                | ✅     |
+| `useStoreWithdrawals`     | `store_id`                | ✅     |
+| `useStoreEarnings`        | `store_id`                | ✅     |
+| `useStorePaymentMethods`  | `store_id`                | ✅     |
+| `useStoreAffiliates`      | `store_id`                | ✅     |
+| `useAffiliateCommissions` | `store_id`                | ✅     |
+| `useDigitalProducts`      | `store_id` (via contexte) | ✅     |
+| `useVendorMessaging`      | `store_id`                | ✅     |
+| `useReturns`              | `store_id`                | ✅     |
+| `useAnalytics`            | `store_id`                | ✅     |
 
 **Total** : **16+ hooks** avec filtrage par boutique
 
@@ -306,6 +324,7 @@ const canCreateStore = () => {
 **Principe** : Les politiques RLS garantissent que les utilisateurs ne peuvent accéder qu'aux données de leurs propres boutiques.
 
 **Exemple - Table `products`** :
+
 ```sql
 CREATE POLICY "Users can view products from their stores"
   ON public.products FOR SELECT
@@ -327,19 +346,20 @@ CREATE POLICY "Users can view products from their stores"
 **Principe** : Tous les hooks filtrent par `store_id` avant de faire des requêtes.
 
 **Exemple - `useProductsOptimized`** :
+
 ```typescript
 export const useProductsOptimized = (storeId?: string | null, ...) => {
   // ...
-  
+
   if (!storeId) {
     return { data: [], total: 0, ... };
   }
-  
+
   const query = supabase
     .from('products')
     .select('*')
     .eq('store_id', storeId); // ✅ Filtre obligatoire
-    
+
   // ...
 };
 ```
@@ -353,14 +373,15 @@ export const useProductsOptimized = (storeId?: string | null, ...) => {
 **Principe** : Les composants utilisent `selectedStoreId` du contexte.
 
 **Exemple - Page Products** :
+
 ```typescript
 const Products = () => {
   const { store } = useStore(); // ✅ Boutique sélectionnée
-  
+
   const { products } = useProductsOptimized(store?.id, {
     // ... options
   });
-  
+
   // ✅ Seuls les produits de la boutique sélectionnée sont affichés
 };
 ```
@@ -376,11 +397,13 @@ const Products = () => {
 #### A. Dashboard (`src/pages/Dashboard.tsx`)
 
 **Comportement** :
+
 - ✅ Utilise `useStore()` pour obtenir la boutique sélectionnée
 - ✅ Affiche les statistiques de la boutique sélectionnée
 - ✅ Message si aucune boutique sélectionnée
 
 **Filtrage** :
+
 ```typescript
 const { store } = useStore();
 const { stats } = useDashboardStats(); // Filtre par store.id
@@ -391,11 +414,13 @@ const { stats } = useDashboardStats(); // Filtre par store.id
 #### B. Products (`src/pages/Products.tsx`)
 
 **Comportement** :
+
 - ✅ Utilise `useStore()` pour obtenir `store.id`
 - ✅ Passe `store.id` à `useProductsOptimized()`
 - ✅ Affiche uniquement les produits de la boutique sélectionnée
 
 **Filtrage** :
+
 ```typescript
 const { store } = useStore();
 const { products } = useProductsOptimized(store?.id, { ... });
@@ -406,11 +431,13 @@ const { products } = useProductsOptimized(store?.id, { ... });
 #### C. Orders (`src/pages/Orders.tsx`)
 
 **Comportement** :
+
 - ✅ Utilise `useStore()` pour obtenir `store.id`
 - ✅ Passe `store.id` à `useOrders()`
 - ✅ Affiche uniquement les commandes de la boutique sélectionnée
 
 **Filtrage** :
+
 ```typescript
 const { store } = useStore();
 const { orders } = useOrders(store?.id);
@@ -421,11 +448,13 @@ const { orders } = useOrders(store?.id);
 #### D. Customers (`src/pages/Customers.tsx`)
 
 **Comportement** :
+
 - ✅ Utilise `useStore()` pour obtenir `store.id`
 - ✅ Passe `store.id` à `useCustomers()`
 - ✅ Affiche uniquement les clients de la boutique sélectionnée
 
 **Filtrage** :
+
 ```typescript
 const { store } = useStore();
 const { customers } = useCustomers(store?.id);
@@ -436,11 +465,13 @@ const { customers } = useCustomers(store?.id);
 #### E. Payments (`src/pages/Payments.tsx`)
 
 **Comportement** :
+
 - ✅ Utilise `useStore()` pour obtenir `store.id`
 - ✅ Passe `store.id` à `usePayments()`
 - ✅ Affiche uniquement les paiements de la boutique sélectionnée
 
 **Filtrage** :
+
 ```typescript
 const { store } = useStore();
 const { payments } = usePayments(store?.id);
@@ -451,11 +482,13 @@ const { payments } = usePayments(store?.id);
 #### F. Analytics (`src/pages/Analytics.tsx`)
 
 **Comportement** :
+
 - ✅ Utilise `useStore()` pour obtenir `store.id`
 - ✅ Passe `store.id` à tous les hooks d'analytics
 - ✅ Affiche uniquement les statistiques de la boutique sélectionnée
 
 **Filtrage** :
+
 ```typescript
 const { store } = useStore();
 const { orders } = useOrders(store?.id);
@@ -472,11 +505,13 @@ const { products } = useProductsOptimized(store?.id);
 **Fonctionnalité** : Sélecteur de boutique
 
 **Comportement** :
+
 - ✅ Affiche le sélecteur si `stores.length > 1`
 - ✅ Affiche le nom de la boutique sélectionnée
 - ✅ Permet de changer de boutique via dropdown
 
 **Code** :
+
 ```typescript
 const { stores, selectedStore, setSelectedStoreId } = useStoreContext();
 
@@ -507,12 +542,14 @@ const { stores, selectedStore, setSelectedStoreId } = useStoreContext();
 **Fonctionnalité** : Gestion des boutiques
 
 **Comportement** :
+
 - ✅ Liste toutes les boutiques de l'utilisateur
 - ✅ Permet de créer une nouvelle boutique (si limite non atteinte)
 - ✅ Permet de modifier/supprimer les boutiques existantes
 - ✅ Affiche le nombre de boutiques restantes
 
 **Limite** :
+
 ```typescript
 const { canCreateStore, getRemainingStores } = useStores();
 
@@ -532,12 +569,14 @@ const { canCreateStore, getRemainingStores } = useStores();
 **Fichier** : `src/pages/Checkout.tsx`
 
 **Comportement** :
+
 - ✅ Détecte si le panier contient des produits de plusieurs boutiques
 - ✅ Crée une commande par boutique
 - ✅ Gère les paiements séparés ou groupés
 - ✅ Calcule les taxes et frais par boutique
 
 **Code** :
+
 ```typescript
 // Détection multi-stores
 const storeGroups = new Map();
@@ -562,11 +601,13 @@ if (storeGroups.size > 1) {
 **Fichier** : `src/pages/Storefront.tsx`
 
 **Comportement** :
+
 - ✅ Affiche les produits d'une boutique spécifique (via `slug`)
 - ✅ Pas de filtre par `store_id` (publique)
 - ✅ Récupère la boutique par `slug` depuis l'URL
 
 **Code** :
+
 ```typescript
 const { slug } = useParams<{ slug: string }>();
 
@@ -586,6 +627,7 @@ const { products } = useProductsOptimized(store?.id, { ... });
 **Fichier** : `src/pages/Marketplace.tsx`
 
 **Comportement** :
+
 - ✅ Affiche les produits de **toutes** les boutiques
 - ✅ Pas de filtre par `store_id` (publique)
 - ✅ Recherche globale sur toutes les boutiques
@@ -627,6 +669,7 @@ const { products } = useProductsOptimized(store?.id, { ... });
 **Fichier** : `src/hooks/digital/useDigitalProducts.ts`
 
 **Comportement Actuel** :
+
 - ✅ Utilise `StoreContext` si `storeId` n'est pas fourni
 - ✅ Retourne tableau vide si aucune boutique sélectionnée
 
@@ -645,6 +688,7 @@ const { products } = useProductsOptimized(store?.id, { ... });
 **Fichier** : `src/components/store/StoreForm.tsx`
 
 **Comportement** :
+
 - ✅ Vérifie la disponibilité du slug avant création
 - ✅ Utilise `is_store_slug_available()` RPC
 
@@ -656,14 +700,14 @@ const { products } = useProductsOptimized(store?.id, { ... });
 
 ### Couverture du Système
 
-| Aspect | Nombre | Statut |
-|--------|--------|--------|
-| **Tables avec `store_id`** | 25+ | ✅ |
-| **Hooks avec filtrage** | 16+ | ✅ |
-| **Pages principales** | 15+ | ✅ |
-| **Composants UI** | 10+ | ✅ |
-| **Politiques RLS** | 50+ | ✅ |
-| **Migrations SQL** | 3 | ✅ |
+| Aspect                     | Nombre | Statut |
+| -------------------------- | ------ | ------ |
+| **Tables avec `store_id`** | 25+    | ✅     |
+| **Hooks avec filtrage**    | 16+    | ✅     |
+| **Pages principales**      | 15+    | ✅     |
+| **Composants UI**          | 10+    | ✅     |
+| **Politiques RLS**         | 50+    | ✅     |
+| **Migrations SQL**         | 3      | ✅     |
 
 ---
 
@@ -728,4 +772,3 @@ Le système multi-stores est **bien implémenté** et **professionnel** :
 **Document créé le** : 2 Février 2025  
 **Dernière modification** : 2 Février 2025  
 **Version** : 1.0
-

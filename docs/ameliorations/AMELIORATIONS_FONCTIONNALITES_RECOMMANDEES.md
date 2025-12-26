@@ -10,15 +10,18 @@
 ### 🔴 PRIORITÉ CRITIQUE (P0) - Impact Immédiat sur Conversions
 
 #### 1. **Système de Recommandations Intelligent**
+
 **Impact:** ⭐⭐⭐⭐⭐ | **Durée:** 4-6h
 
 **Description:**
+
 - Recommandations "Produits similaires"
 - "Clients ayant acheté ce produit ont aussi acheté"
 - "Vous pourriez aimer" basé sur l'historique
 - "Tendance actuelle" (produits populaires)
 
 **Implémentation:**
+
 ```typescript
 // Nouveau hook
 src/hooks/useProductRecommendations.ts
@@ -34,6 +37,7 @@ src/components/marketplace/ProductRecommendations.tsx
 ```
 
 **Bénéfices:**
+
 - +30-40% conversions (avg)
 - Augmentation panier moyen
 - Meilleure découverte produits
@@ -41,15 +45,18 @@ src/components/marketplace/ProductRecommendations.tsx
 ---
 
 #### 2. **Alertes Prix et Stock (Wishlist Avancée)**
+
 **Impact:** ⭐⭐⭐⭐⭐ | **Durée:** 3-4h
 
 **Description:**
+
 - Alertes email/SMS si baisse de prix
 - Alertes retour en stock
 - Alertes nouvelles promotions
 - Historique des prix
 
 **Implémentation:**
+
 ```sql
 -- Nouvelle table
 CREATE TABLE price_alerts (
@@ -72,12 +79,14 @@ CREATE TABLE stock_alerts (
 ```
 
 **Fonctionnalités:**
+
 - Bouton "Alerte prix" sur ProductCard
 - Dashboard alertes utilisateur
 - Notifications automatiques (Edge Function)
 - Email templates personnalisés
 
 **Bénéfices:**
+
 - +25% conversions wishlist
 - Réduction abandon panier
 - Engagement utilisateur accru
@@ -85,9 +94,11 @@ CREATE TABLE stock_alerts (
 ---
 
 #### 3. **Système de Reviews & Ratings Complet**
+
 **Impact:** ⭐⭐⭐⭐⭐ | **Durée:** 5-6h
 
 **Description:**
+
 - Reviews avec photos/vidéos
 - Verified purchase badge
 - Helpful votes (utile/pas utile)
@@ -96,6 +107,7 @@ CREATE TABLE stock_alerts (
 - Graphique distribution notes
 
 **Implémentation:**
+
 ```typescript
 // Composants
 src/components/reviews/
@@ -114,6 +126,7 @@ src/components/reviews/
 ```
 
 **Bénéfices:**
+
 - +35% conversions (preuve sociale)
 - SEO boost (rich snippets)
 - Confiance client accrue
@@ -122,9 +135,11 @@ src/components/reviews/
 ---
 
 #### 4. **Recherche Avancée avec Auto-complétion**
+
 **Impact:** ⭐⭐⭐⭐ | **Durée:** 3-4h
 
 **Description:**
+
 - Recherche full-text Supabase
 - Auto-complétion intelligente
 - Recherche par image (reverse image search)
@@ -133,6 +148,7 @@ src/components/reviews/
 - Suggestions de recherche
 
 **Implémentation:**
+
 ```typescript
 // Hook
 src/hooks/useProductSearch.ts
@@ -150,6 +166,7 @@ src/components/marketplace/SearchAutocomplete.tsx
 ```
 
 **Bénéfices:**
+
 - +20% découverte produits
 - Meilleure UX recherche
 - Réduction taux de rebond
@@ -159,9 +176,11 @@ src/components/marketplace/SearchAutocomplete.tsx
 ### 🟠 PRIORITÉ HAUTE (P1) - Amélioration UX/Performance
 
 #### 5. **Système de Coupons et Promotions Avancé**
+
 **Impact:** ⭐⭐⭐⭐ | **Durée:** 6-8h
 
 **Description:**
+
 - Codes promo personnalisés
 - Promotions automatiques (dates, quantités)
 - Stack coupons (plusieurs coupons)
@@ -170,6 +189,7 @@ src/components/marketplace/SearchAutocomplete.tsx
 - Analytics coupons (taux de rédemption)
 
 **Implémentation:**
+
 ```sql
 -- Table existante à améliorer
 ALTER TABLE coupons ADD COLUMN IF NOT EXISTS stackable BOOLEAN DEFAULT false;
@@ -178,12 +198,14 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS user_specific BOOLEAN DEFAULT false
 ```
 
 **Features:**
+
 - Générateur codes promo
 - Import/Export CSV
 - Statistiques détaillées
 - Notifications automatiques
 
 **Bénéfices:**
+
 - +15-20% ventes promo
 - Fidélisation client
 - Campagnes marketing ciblées
@@ -191,9 +213,11 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS user_specific BOOLEAN DEFAULT false
 ---
 
 #### 6. **Comparaison Produits Avancée**
+
 **Impact:** ⭐⭐⭐⭐ | **Durée:** 2-3h
 
 **Description:**
+
 - Comparaison côte à côte (améliorer existant)
 - Comparaison visuelle (images)
 - Export comparaison PDF
@@ -201,6 +225,7 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS user_specific BOOLEAN DEFAULT false
 - Comparaison jusqu'à 6 produits (au lieu de 4)
 
 **Améliorations:**
+
 ```typescript
 // Améliorer ProductComparison.tsx
 - Ajouter images produits
@@ -211,6 +236,7 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS user_specific BOOLEAN DEFAULT false
 ```
 
 **Bénéfices:**
+
 - +10% conversions
 - Meilleure décision achat
 - Réduction retours
@@ -218,9 +244,11 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS user_specific BOOLEAN DEFAULT false
 ---
 
 #### 7. **Galerie Images Produits 360°**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 4-5h
 
 **Description:**
+
 - Rotation 360° produits
 - Zoom interactif
 - Galerie vidéo intégrée
@@ -228,6 +256,7 @@ ALTER TABLE coupons ADD COLUMN IF NOT EXISTS user_specific BOOLEAN DEFAULT false
 - Lightbox améliorée
 
 **Implémentation:**
+
 ```typescript
 // Composants
 src/components/products/
@@ -243,6 +272,7 @@ src/components/products/
 ```
 
 **Bénéfices:**
+
 - +15% conversions produits physiques
 - Réduction retours (meilleure visualisation)
 - Expérience utilisateur premium
@@ -250,9 +280,11 @@ src/components/products/
 ---
 
 #### 8. **Notifications Push et Email Marketing**
+
 **Impact:** ⭐⭐⭐⭐ | **Durée:** 5-6h
 
 **Description:**
+
 - Notifications push navigateur
 - Emails transactionnels améliorés
 - Campagnes email marketing
@@ -260,6 +292,7 @@ src/components/products/
 - Recommandations personnalisées
 
 **Implémentation:**
+
 ```typescript
 // Service Worker
 public/sw.js
@@ -275,6 +308,7 @@ supabase/functions/
 ```
 
 **Bénéfices:**
+
 - +20% récupération panier abandonné
 - +15% réengagement utilisateurs
 - ROI marketing amélioré
@@ -282,9 +316,11 @@ supabase/functions/
 ---
 
 #### 9. **Multi-devise avec Conversion Automatique**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 4-5h
 
 **Description:**
+
 - Support multi-devises (USD, EUR, XOF, etc.)
 - Conversion automatique
 - Sélection devise utilisateur
@@ -292,6 +328,7 @@ supabase/functions/
 - Prix affichés dans devise locale
 
 **Implémentation:**
+
 ```typescript
 // Améliorer useCurrency hook
 - Intégration API taux de change
@@ -301,6 +338,7 @@ supabase/functions/
 ```
 
 **Bénéfices:**
+
 - Expansion marché international
 - +10% conversions internationales
 - Meilleure UX globale
@@ -308,9 +346,11 @@ supabase/functions/
 ---
 
 #### 10. **Système de Loyalty/Points de Fidélité**
+
 **Impact:** ⭐⭐⭐⭐ | **Durée:** 6-8h
 
 **Description:**
+
 - Points par achat
 - Niveaux de fidélité (Bronze, Argent, Or, Platine)
 - Avantages par niveau
@@ -318,6 +358,7 @@ supabase/functions/
 - Échange points contre réductions
 
 **Implémentation:**
+
 ```sql
 CREATE TABLE loyalty_points (
   id UUID PRIMARY KEY,
@@ -341,6 +382,7 @@ CREATE TABLE loyalty_transactions (
 ```
 
 **Bénéfices:**
+
 - +25% rétention client
 - +15% panier moyen
 - Fidélisation accrue
@@ -350,15 +392,18 @@ CREATE TABLE loyalty_transactions (
 ### 🟡 PRIORITÉ MOYENNE (P2) - Améliorations Fonctionnelles
 
 #### 11. **AR Preview (Réalité Augmentée)**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 8-10h
 
 **Description:**
+
 - Aperçu produits en AR (mobile)
 - Placement virtuel produits
 - Mesures produits
 - Partage AR
 
 **Implémentation:**
+
 ```typescript
 // Composants
 src/components/products/ARPreview.tsx
@@ -368,6 +413,7 @@ src/components/products/ARPreview.tsx
 ```
 
 **Bénéfices:**
+
 - Expérience unique
 - +20% conversions produits physiques (mobile)
 - Différenciation concurrentielle
@@ -375,15 +421,18 @@ src/components/products/ARPreview.tsx
 ---
 
 #### 12. **Chat en Direct avec Vendeurs**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 4-5h
 
 **Description:**
+
 - Chat temps réel vendeur-client
 - Historique conversations
 - Notifications messages
 - Partage fichiers/images
 
 **Implémentation:**
+
 ```typescript
 // Améliorer messaging existant
 - Interface chat améliorée
@@ -393,6 +442,7 @@ src/components/products/ARPreview.tsx
 ```
 
 **Bénéfices:**
+
 - +15% conversions (support direct)
 - Réduction abandon panier
 - Meilleure relation client
@@ -400,9 +450,11 @@ src/components/products/ARPreview.tsx
 ---
 
 #### 13. **Programme de Parrainage Avancé**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 3-4h
 
 **Description:**
+
 - Dashboard parrainage
 - Statistiques détaillées
 - Liens de parrainage personnalisés
@@ -410,6 +462,7 @@ src/components/products/ARPreview.tsx
 - Leaderboard parrains
 
 **Améliorations:**
+
 ```typescript
 // Dashboard existant à améliorer
 - Graphiques parrainage
@@ -419,6 +472,7 @@ src/components/products/ARPreview.tsx
 ```
 
 **Bénéfices:**
+
 - +30% acquisition clients
 - Marketing viral
 - Croissance organique
@@ -426,9 +480,11 @@ src/components/products/ARPreview.tsx
 ---
 
 #### 14. **Système de Bundle/Coffrets Personnalisés**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 5-6h
 
 **Description:**
+
 - Création bundles dynamiques
 - Bundles recommandés
 - Économies bundles visibles
@@ -436,6 +492,7 @@ src/components/products/ARPreview.tsx
 - Bundles saisonniers
 
 **Implémentation:**
+
 ```typescript
 // Améliorer BundleCard existant
 - Créateur bundles dynamiques
@@ -445,6 +502,7 @@ src/components/products/ARPreview.tsx
 ```
 
 **Bénéfices:**
+
 - +20% panier moyen
 - +15% conversions
 - Upselling intelligent
@@ -452,9 +510,11 @@ src/components/products/ARPreview.tsx
 ---
 
 #### 15. **Gestion Avancée des Retours**
+
 **Impact:** ⭐⭐⭐ | **Durée:** 4-5h
 
 **Description:**
+
 - Portail retour client amélioré
 - Suivi retour en temps réel
 - Photos retours multiples
@@ -462,6 +522,7 @@ src/components/products/ARPreview.tsx
 - Analytics retours
 
 **Améliorations:**
+
 ```typescript
 // Portail retour existant
 - Interface améliorée
@@ -471,6 +532,7 @@ src/components/products/ARPreview.tsx
 ```
 
 **Bénéfices:**
+
 - Meilleure satisfaction client
 - Réduction litiges
 - Processus optimisé
@@ -480,6 +542,7 @@ src/components/products/ARPreview.tsx
 ### 🔵 PRIORITÉ BASSE (P3) - Améliorations Futures
 
 #### 16. **Intégration Réseaux Sociaux**
+
 **Impact:** ⭐⭐ | **Durée:** 3-4h
 
 - Partage produits réseaux sociaux
@@ -488,6 +551,7 @@ src/components/products/ARPreview.tsx
 - Avis réseaux sociaux intégrés
 
 #### 17. **Gamification**
+
 **Impact:** ⭐⭐ | **Durée:** 5-6h
 
 - Badges achievements
@@ -496,6 +560,7 @@ src/components/products/ARPreview.tsx
 - Récompenses gamification
 
 #### 18. **API REST Publique**
+
 **Impact:** ⭐⭐ | **Durée:** 6-8h
 
 - Documentation API complète
@@ -505,6 +570,7 @@ src/components/products/ARPreview.tsx
 - Webhooks
 
 #### 19. **Analytics Avancées**
+
 **Impact:** ⭐⭐ | **Durée:** 4-5h
 
 - Dashboard analytics amélioré
@@ -514,6 +580,7 @@ src/components/products/ARPreview.tsx
 - Cohort analysis
 
 #### 20. **Accessibilité (A11y) Améliorée**
+
 **Impact:** ⭐⭐ | **Durée:** 3-4h
 
 - Navigation clavier complète
@@ -527,6 +594,7 @@ src/components/products/ARPreview.tsx
 ## 📊 RÉSUMÉ PAR PRIORITÉ
 
 ### 🔴 Priorité Critique (P0) - 4 fonctionnalités
+
 1. Système de Recommandations Intelligent
 2. Alertes Prix et Stock
 3. Système de Reviews & Ratings Complet
@@ -538,6 +606,7 @@ src/components/products/ARPreview.tsx
 ---
 
 ### 🟠 Priorité Haute (P1) - 6 fonctionnalités
+
 5. Système de Coupons et Promotions Avancé
 6. Comparaison Produits Avancée
 7. Galerie Images Produits 360°
@@ -551,6 +620,7 @@ src/components/products/ARPreview.tsx
 ---
 
 ### 🟡 Priorité Moyenne (P2) - 5 fonctionnalités
+
 11. AR Preview
 12. Chat en Direct avec Vendeurs
 13. Programme de Parrainage Avancé
@@ -563,6 +633,7 @@ src/components/products/ARPreview.tsx
 ---
 
 ### 🔵 Priorité Basse (P3) - 5 fonctionnalités
+
 16-20. Fonctionnalités futures (voir liste)
 
 **Impact total:** Améliorations long terme  
@@ -573,7 +644,9 @@ src/components/products/ARPreview.tsx
 ## 🎯 RECOMMANDATIONS STRATÉGIQUES
 
 ### Phase 1 - Impact Immédiat (2-3 semaines)
+
 **Focus:** Fonctionnalités P0
+
 - Système de Recommandations
 - Alertes Prix/Stock
 - Reviews & Ratings
@@ -584,7 +657,9 @@ src/components/products/ARPreview.tsx
 ---
 
 ### Phase 2 - Amélioration UX (3-4 semaines)
+
 **Focus:** Fonctionnalités P1
+
 - Coupons avancés
 - Comparaison améliorée
 - Galerie 360°
@@ -597,7 +672,9 @@ src/components/products/ARPreview.tsx
 ---
 
 ### Phase 3 - Différenciation (2-3 semaines)
+
 **Focus:** Fonctionnalités P2
+
 - AR Preview
 - Chat direct
 - Parrainage avancé
@@ -610,12 +687,12 @@ src/components/products/ARPreview.tsx
 
 ## 📈 IMPACT BUSINESS ESTIMÉ
 
-| Phase | Conversions | Panier Moyen | Rétention | Durée |
-|-------|-------------|--------------|-----------|-------|
-| Phase 1 | +90-130% | +15-20% | +10-15% | 2-3 sem |
-| Phase 2 | +60-80% | +25-30% | +20-25% | 3-4 sem |
-| Phase 3 | +40-50% | +10-15% | +15-20% | 2-3 sem |
-| **Total** | **+190-260%** | **+50-65%** | **+45-60%** | **7-10 sem** |
+| Phase     | Conversions   | Panier Moyen | Rétention   | Durée        |
+| --------- | ------------- | ------------ | ----------- | ------------ |
+| Phase 1   | +90-130%      | +15-20%      | +10-15%     | 2-3 sem      |
+| Phase 2   | +60-80%       | +25-30%      | +20-25%     | 3-4 sem      |
+| Phase 3   | +40-50%       | +10-15%      | +15-20%     | 2-3 sem      |
+| **Total** | **+190-260%** | **+50-65%**  | **+45-60%** | **7-10 sem** |
 
 ---
 
@@ -630,10 +707,3 @@ src/components/products/ARPreview.tsx
 ---
 
 **Note:** Ces estimations sont basées sur les meilleures pratiques e-commerce et les analyses du code existant. L'impact réel peut varier selon le marché et les utilisateurs.
-
-
-
-
-
-
-

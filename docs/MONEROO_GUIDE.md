@@ -194,12 +194,12 @@ import { getAllMonerooStats } from '@/lib/moneroo-stats';
 const stats = await getAllMonerooStats(
   new Date('2025-01-01'), // Date de début (optionnel)
   new Date('2025-12-31'), // Date de fin (optionnel)
-  'store-id'              // Store ID (optionnel)
+  'store-id' // Store ID (optionnel)
 );
 
-console.log(stats.payments);  // Statistiques de paiement
-console.log(stats.revenue);   // Statistiques de revenus
-console.log(stats.time);      // Statistiques de temps
+console.log(stats.payments); // Statistiques de paiement
+console.log(stats.revenue); // Statistiques de revenus
+console.log(stats.time); // Statistiques de temps
 ```
 
 ---
@@ -248,6 +248,7 @@ try {
 ### Messages d'Erreur
 
 Les erreurs Moneroo incluent des messages détaillés avec :
+
 - 💡 Conseils de dépannage
 - 📋 Détails techniques
 - 🔧 Solutions suggérées
@@ -266,7 +267,7 @@ import { monerooRateLimiter } from '@/lib/moneroo-rate-limiter';
 // Vérifier les statistiques
 const stats = monerooRateLimiter.getStats('user-id');
 console.log('Requêtes restantes:', stats.remaining);
-console.log('Temps jusqu\'au reset:', stats.timeUntilReset);
+console.log("Temps jusqu'au reset:", stats.timeUntilReset);
 ```
 
 ### Cache
@@ -318,26 +319,30 @@ npm run test:e2e checkout
 
 #### 2. Erreur "Failed to fetch"
 
-**Solution**: 
+**Solution**:
+
 - Vérifier la connexion Internet
 - Vérifier que l'Edge Function est déployée
 - Vérifier les logs Supabase Edge Functions
 
 #### 3. Erreur "Configuration API manquante"
 
-**Solution**: 
+**Solution**:
+
 - Vérifier que `MONEROO_API_KEY` est configuré dans Supabase Dashboard → Edge Functions → Secrets
 - Vérifier que la clé est correcte
 
 #### 4. Erreur "Montant invalide"
 
-**Solution**: 
+**Solution**:
+
 - Vérifier que le montant est dans les limites (voir `moneroo-amount-validator.ts`)
 - Vérifier que le montant est un nombre entier (pas de décimales)
 
 #### 5. Erreur de parsing
 
-**Solution**: 
+**Solution**:
+
 - Vérifier les logs Supabase Edge Functions
 - Vérifier que l'API Moneroo répond correctement
 - Vérifier la configuration de l'Edge Function
@@ -355,6 +360,7 @@ npm run test:e2e checkout
 ## 🤝 Support
 
 Pour toute question ou problème :
+
 1. Consulter les logs Supabase Edge Functions
 2. Vérifier la configuration
 3. Consulter ce guide
@@ -363,5 +369,3 @@ Pour toute question ou problème :
 ---
 
 **Dernière mise à jour**: Novembre 2025
-
-

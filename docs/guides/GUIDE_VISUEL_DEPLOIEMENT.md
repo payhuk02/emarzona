@@ -8,6 +8,7 @@
 ## 📍 Navigation rapide
 
 🔗 **Liens directs Supabase Dashboard :**
+
 - **SQL Editor :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/sql/new
 - **Edge Functions :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions
 - **Secrets (send-order-confirmation-email) :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/send-order-confirmation-email/settings
@@ -37,24 +38,28 @@
 ### ✅ Vérification après chaque migration
 
 **Après Migration 1 :**
+
 ```sql
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'email_templates' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'email_templates'
 AND column_name IN ('product_type', 'is_default');
 ```
+
 ✅ **Doit montrer 2 lignes**
 
 **Après Migration 2 :**
+
 ```sql
-SELECT slug, name, product_type 
-FROM email_templates 
+SELECT slug, name, product_type
+FROM email_templates
 WHERE slug IN (
   'order-confirmation-service',
   'course-enrollment-confirmation',
   'order-confirmation-artist'
 );
 ```
+
 ✅ **Doit montrer 3 lignes**
 
 ---
@@ -110,13 +115,13 @@ Si vous n'avez pas encore la clé :
 
 ```sql
 -- Vérifier toutes les colonnes importantes
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable,
   column_default
-FROM information_schema.columns 
-WHERE table_name = 'email_templates' 
+FROM information_schema.columns
+WHERE table_name = 'email_templates'
 AND column_name IN (
   'product_type',
   'is_default',
@@ -136,7 +141,7 @@ ORDER BY column_name;
 
 ```sql
 -- Vérifier tous les templates par type
-SELECT 
+SELECT
   slug,
   name,
   product_type,
@@ -165,12 +170,14 @@ ORDER BY product_type, slug;
 ## 🎉 CHECKLIST FINALE
 
 ### Migrations SQL
+
 - [ ] Migration 1 exécutée sans erreur
 - [ ] Migration 2 exécutée sans erreur
 - [ ] Vérification colonnes : ✅ 2 colonnes trouvées
 - [ ] Vérification templates : ✅ 3+ templates trouvés
 
 ### Configuration
+
 - [ ] Secret `SENDGRID_API_KEY` ajouté
 - [ ] Clé SendGrid valide (commence par `SG.`)
 - [ ] Vérification secrets : ✅ 3 secrets présents
@@ -184,6 +191,7 @@ Pour tester que tout fonctionne :
 1. **Aller sur :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/send-order-confirmation-email
 2. **Cliquer sur :** Invoke (onglet en haut)
 3. **Dans Request body**, coller :
+
 ```json
 {
   "order_id": "VOTRE_ORDER_ID_ICI",
@@ -191,6 +199,7 @@ Pour tester que tout fonctionne :
   "customer_name": "Votre Nom"
 }
 ```
+
 4. **Cliquer sur :** Invoke
 5. **Vérifier les logs** pour voir le résultat
 
@@ -199,15 +208,19 @@ Pour tester que tout fonctionne :
 ## 🆘 AIDE
 
 ### Erreur : "Column already exists"
+
 ✅ **Normal !** La migration vérifie avant d'ajouter. C'est sans danger.
 
 ### Erreur : "Index already exists"
+
 ✅ **Normal !** Utilisation de `IF NOT EXISTS`. C'est sans danger.
 
 ### Erreur : "Template already exists"
+
 ✅ **Normal !** Le `ON CONFLICT` met à jour le template. C'est sans danger.
 
 ### Secret non sauvegardé
+
 - Vérifier que le nom est exact : `SENDGRID_API_KEY` (sans espace)
 - Vérifier que la clé commence par `SG.`
 - Réessayer
@@ -228,4 +241,3 @@ Pour tester que tout fonctionne :
 ---
 
 **Guide créé le 1er Février 2025** ✅
-

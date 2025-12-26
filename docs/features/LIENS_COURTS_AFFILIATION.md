@@ -102,13 +102,16 @@ CREATE TABLE affiliate_short_links (
 ## 🔧 Composants
 
 ### `ShortLinkManager`
+
 Composant React pour gérer les liens courts d'un lien d'affiliation.
 
 **Props** :
+
 - `affiliateLinkId`: ID du lien d'affiliation
 - `fullUrl`: URL complète du lien d'affiliation
 
 **Fonctionnalités** :
+
 - Affichage de la liste des liens courts
 - Création de nouveaux liens courts
 - Copie des liens courts
@@ -116,11 +119,13 @@ Composant React pour gérer les liens courts d'un lien d'affiliation.
 - Suppression
 
 ### `ShortLinkRedirect`
+
 Page de redirection pour les liens courts.
 
 **Route** : `/aff/:code`
 
 **Fonctionnalités** :
+
 - Récupération du lien court
 - Vérification de l'état actif et de l'expiration
 - Tracking des clics
@@ -131,6 +136,7 @@ Page de redirection pour les liens courts.
 ## 📊 Statistiques
 
 Les liens courts suivent :
+
 - **Total de clics** : Nombre total de clics sur le lien court
 - **Clics uniques** : Nombre de clics uniques (à implémenter)
 - **Dernière utilisation** : Date du dernier clic
@@ -163,6 +169,7 @@ Pour activer cette fonctionnalité, exécutez la migration :
 ```
 
 Cette migration crée :
+
 - La table `affiliate_short_links`
 - Les fonctions SQL nécessaires
 - Les RLS policies
@@ -204,4 +211,3 @@ Pour tester la fonctionnalité :
 - [ ] Limite de liens courts par affilié
 - [ ] Statistiques de clics uniques
 - [ ] Géolocalisation des clics
-

@@ -12,6 +12,7 @@
 **Fichier** : `src/lib/image-transform.ts`
 
 **Améliorations** :
+
 - ✅ Détection automatique du meilleur format (AVIF > WebP > original)
 - ✅ Support AVIF (format plus moderne et efficace que WebP)
 - ✅ Fallback automatique si format non supporté
@@ -26,6 +27,7 @@
 **Fichier** : `src/components/ui/OptimizedImage.tsx`
 
 **Améliorations** :
+
 - ✅ Dimensions fixes avec `aspectRatio` pour éviter les shifts de layout
 - ✅ Hauteur automatique basée sur le ratio
 - ✅ Max-width pour responsive
@@ -40,6 +42,7 @@
 **Fichier** : `docs/guides/SUPABASE_QUERY_OPTIMIZATION.md`
 
 **Contenu** :
+
 - ✅ Liste des indexes existants
 - ✅ Bonnes pratiques pour requêtes Supabase
 - ✅ Exemples de code optimisé vs non-optimisé
@@ -53,18 +56,18 @@
 
 ### Images
 
-| Format | Taille vs Original | Support Navigateur |
-|--------|-------------------|-------------------|
-| AVIF | -50% | Chrome, Firefox, Safari 16+ |
-| WebP | -30% | Tous navigateurs modernes |
-| JPEG | 0% | Tous navigateurs |
+| Format | Taille vs Original | Support Navigateur          |
+| ------ | ------------------ | --------------------------- |
+| AVIF   | -50%               | Chrome, Firefox, Safari 16+ |
+| WebP   | -30%               | Tous navigateurs modernes   |
+| JPEG   | 0%                 | Tous navigateurs            |
 
 ### CLS (Cumulative Layout Shift)
 
-| Métrique | Avant | Après | Cible |
-|----------|-------|-------|-------|
-| CLS Score | Variable | < 0.1 | < 0.1 (good) |
-| Layout Shifts | Élevés | Réduits | Minimal |
+| Métrique      | Avant    | Après   | Cible        |
+| ------------- | -------- | ------- | ------------ |
+| CLS Score     | Variable | < 0.1   | < 0.1 (good) |
+| Layout Shifts | Élevés   | Réduits | Minimal      |
 
 ---
 
@@ -105,4 +108,3 @@
 ---
 
 **Dernière mise à jour** : Février 2025
-

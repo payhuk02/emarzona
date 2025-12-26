@@ -78,7 +78,10 @@ const result = importCustomizationFromString(jsonString);
 #### Design :
 
 ```tsx
-<Badge variant="outline" className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
+<Badge
+  variant="outline"
+  className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300"
+>
   <AlertCircle className="h-3 w-3" />
   <span>Modifications non sauvegardées</span>
 </Badge>
@@ -340,4 +343,3 @@ Ces améliorations complètent les recommandations prioritaires et rendent la pa
 
 **Document généré automatiquement**  
 **Dernière mise à jour** : 31 Janvier 2025
-

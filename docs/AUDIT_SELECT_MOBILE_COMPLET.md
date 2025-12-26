@@ -8,6 +8,7 @@
 ## 📋 Résumé Exécutif
 
 ### ✅ Points Positifs
+
 - Le composant `Select` de base (`src/components/ui/select.tsx`) est bien optimisé avec :
   - `min-h-[44px]` sur SelectTrigger et SelectItem
   - `touch-manipulation` pour améliorer la réactivité
@@ -23,43 +24,46 @@
 
 #### 1. SelectTrigger avec hauteurs insuffisantes (< 44px)
 
-| Fichier | Ligne | Problème | Hauteur actuelle | Correction nécessaire |
-|---------|-------|----------|------------------|----------------------|
-| `src/components/service/staff/StaffAvailabilityCalendarView.tsx` | 327 | `h-9 sm:h-10` | 36px / 40px | `min-h-[44px] h-11` |
-| `src/components/orders/OrderEditDialog.tsx` | 324 | `h-9` | 36px | `min-h-[44px] h-11` |
-| `src/pages/PaymentsCustomers.tsx` | 735 | `h-8 sm:h-10` | 32px / 40px | `min-h-[44px] h-11` |
-| `src/components/orders/OrdersTable.tsx` | 372 | `h-8` | 32px | `min-h-[44px] h-11` |
-| `src/components/orders/OrdersTable.tsx` | 388 | `h-8` | 32px | `min-h-[44px] h-11` |
+| Fichier                                                          | Ligne | Problème      | Hauteur actuelle | Correction nécessaire |
+| ---------------------------------------------------------------- | ----- | ------------- | ---------------- | --------------------- |
+| `src/components/service/staff/StaffAvailabilityCalendarView.tsx` | 327   | `h-9 sm:h-10` | 36px / 40px      | `min-h-[44px] h-11`   |
+| `src/components/orders/OrderEditDialog.tsx`                      | 324   | `h-9`         | 36px             | `min-h-[44px] h-11`   |
+| `src/pages/PaymentsCustomers.tsx`                                | 735   | `h-8 sm:h-10` | 32px / 40px      | `min-h-[44px] h-11`   |
+| `src/components/orders/OrdersTable.tsx`                          | 372   | `h-8`         | 32px             | `min-h-[44px] h-11`   |
+| `src/components/orders/OrdersTable.tsx`                          | 388   | `h-8`         | 32px             | `min-h-[44px] h-11`   |
 
 #### 2. SelectTrigger avec largeurs fixes qui peuvent poser problème sur mobile
 
-| Fichier | Ligne | Problème | Correction nécessaire |
-|---------|-------|----------|----------------------|
-| `src/components/products/create/digital/DigitalAffiliateSettings.tsx` | 272 | `max-w-xs` | `max-w-full sm:max-w-xs` |
-| `src/components/orders/OrdersTable.tsx` | 372 | `w-[130px]` | `w-full sm:w-[130px]` |
-| `src/components/orders/OrdersTable.tsx` | 388 | `w-[120px]` | `w-full sm:w-[120px]` |
+| Fichier                                                               | Ligne | Problème    | Correction nécessaire    |
+| --------------------------------------------------------------------- | ----- | ----------- | ------------------------ |
+| `src/components/products/create/digital/DigitalAffiliateSettings.tsx` | 272   | `max-w-xs`  | `max-w-full sm:max-w-xs` |
+| `src/components/orders/OrdersTable.tsx`                               | 372   | `w-[130px]` | `w-full sm:w-[130px]`    |
+| `src/components/orders/OrdersTable.tsx`                               | 388   | `w-[120px]` | `w-full sm:w-[120px]`    |
 
 #### 3. Textes trop petits sur mobile
 
-| Fichier | Ligne | Problème | Correction nécessaire |
-|---------|-------|----------|----------------------|
-| `src/components/service/staff/StaffAvailabilityCalendarView.tsx` | 327 | `text-xs sm:text-sm` | `text-sm sm:text-sm` (minimum 14px sur mobile) |
-| `src/pages/PaymentsCustomers.tsx` | 735 | `text-xs sm:text-sm` | `text-sm sm:text-sm` |
+| Fichier                                                          | Ligne | Problème             | Correction nécessaire                          |
+| ---------------------------------------------------------------- | ----- | -------------------- | ---------------------------------------------- |
+| `src/components/service/staff/StaffAvailabilityCalendarView.tsx` | 327   | `text-xs sm:text-sm` | `text-sm sm:text-sm` (minimum 14px sur mobile) |
+| `src/pages/PaymentsCustomers.tsx`                                | 735   | `text-xs sm:text-sm` | `text-sm sm:text-sm`                           |
 
 ---
 
 ## 🎯 Standards de Conformité Mobile
 
 ### Touch Target Guidelines
+
 - **Hauteur minimale**: 44px (Apple HIG, Material Design)
 - **Largeur minimale**: 44px pour les éléments interactifs
 - **Espacement**: Minimum 8px entre les éléments interactifs
 
 ### Typography
+
 - **Taille de texte minimale**: 14px (16px recommandé pour éviter le zoom iOS)
 - **Contraste**: Minimum 4.5:1 pour le texte normal
 
 ### Responsive Design
+
 - **Mobile-first**: Les largeurs fixes doivent être remplacées par des largeurs responsives
 - **Breakpoints**: Utiliser `sm:`, `md:`, `lg:` pour les adaptations
 
@@ -77,16 +81,19 @@
 ## 🔧 Plan de Correction
 
 ### Priorité 1 (Critique) - Touch Targets < 44px
+
 1. ✅ `src/components/service/staff/StaffAvailabilityCalendarView.tsx`
 2. ✅ `src/components/orders/OrderEditDialog.tsx`
 3. ✅ `src/pages/PaymentsCustomers.tsx`
 4. ✅ `src/components/orders/OrdersTable.tsx` (2 occurrences)
 
 ### Priorité 2 (Important) - Largeurs fixes
+
 1. ✅ `src/components/products/create/digital/DigitalAffiliateSettings.tsx`
 2. ✅ `src/components/orders/OrdersTable.tsx` (2 occurrences)
 
 ### Priorité 3 (Amélioration) - Tailles de texte
+
 1. ✅ `src/components/service/staff/StaffAvailabilityCalendarView.tsx`
 2. ✅ `src/pages/PaymentsCustomers.tsx`
 
@@ -95,6 +102,7 @@
 ## ✅ Vérifications à Effectuer
 
 ### Checklist de Conformité
+
 - [ ] Tous les SelectTrigger ont `min-h-[44px]`
 - [ ] Tous les SelectItem ont `min-h-[44px]`
 - [ ] Tous les DropdownMenuItem ont `min-h-[44px]`
@@ -197,6 +205,7 @@ w-full sm:w-[fixed-width]
     - Changé `h-9 sm:h-10 text-xs sm:text-sm` → `min-h-[44px] h-11 text-sm`
 
 ### Résultat Final
+
 - ✅ **13 fichiers corrigés** avec **20+ occurrences** de SelectTrigger
 - ✅ Tous les SelectTrigger respectent maintenant la hauteur minimale de 44px
 - ✅ Toutes les largeurs fixes sont maintenant responsives (`w-full sm:w-[...]`)
@@ -204,6 +213,7 @@ w-full sm:w-[fixed-width]
 - ✅ Aucune erreur de linting
 
 ### Statistiques Finales
+
 - **Fichiers audités**: 409 fichiers avec Select, 72 fichiers avec DropdownMenu
 - **Problèmes critiques identifiés**: 20+
 - **Fichiers corrigés**: 13
@@ -211,8 +221,8 @@ w-full sm:w-[fixed-width]
 - **Taux de conformité**: ~95% (les composants de base sont déjà optimisés)
 
 ### Recommandations Futures
+
 1. **Linter personnalisé**: Créer une règle ESLint pour détecter les SelectTrigger avec `h-8`, `h-9`, `h-10` sans `min-h-[44px]`
 2. **Documentation**: Ajouter des exemples de bonnes pratiques dans le Storybook
 3. **Tests**: Ajouter des tests E2E pour vérifier les touch targets sur mobile
 4. **Formation**: Former l'équipe sur les standards de touch targets (44px minimum)
-

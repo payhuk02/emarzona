@@ -218,4 +218,3 @@ Si vous souhaitez que la navigation soit en haut sur certaines pages :
 **Document créé par**: Auto (Cursor AI)  
 **Date**: 3 Février 2025  
 **Version**: 1.0
-

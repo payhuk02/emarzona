@@ -36,6 +36,7 @@ SELECT cron.schedule(
 ### 3. Variables d'environnement
 
 La fonction utilise automatiquement les variables d'environnement Supabase :
+
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -66,4 +67,3 @@ curl -X POST https://YOUR_PROJECT_REF.supabase.co/functions/v1/track-shipments \
 - La fonction track uniquement les shipments avec un `tracking_number`
 - Les shipments trackés sont ceux avec le statut : `pending`, `label_created`, `picked_up`, `in_transit`
 - Une pause de 500ms est ajoutée entre chaque tracking pour éviter de surcharger les APIs
-

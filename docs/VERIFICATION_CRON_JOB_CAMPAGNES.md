@@ -26,7 +26,7 @@ D'après la capture d'écran Supabase SQL Editor, le cron job est **déjà confi
 Exécutez cette requête dans Supabase SQL Editor pour voir tous les détails :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -46,7 +46,7 @@ WHERE jobname = 'process-scheduled-email-campaigns';
 Pour voir les dernières exécutions du cron job :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   runid,
   job_pid,
@@ -59,7 +59,7 @@ SELECT
   end_time
 FROM cron.job_run_details
 WHERE jobid = (
-  SELECT jobid FROM cron.job 
+  SELECT jobid FROM cron.job
   WHERE jobname = 'process-scheduled-email-campaigns'
 )
 ORDER BY start_time DESC
@@ -115,7 +115,7 @@ curl -X POST \
 
 3. **Vérifier les résultats** :
    ```sql
-   SELECT 
+   SELECT
      id,
      name,
      status,
@@ -146,14 +146,17 @@ curl -X POST \
 ### Problème : Le cron job ne s'exécute pas
 
 **Solutions :**
+
 1. Vérifier que `pg_cron` est activé :
+
    ```sql
    SELECT * FROM pg_extension WHERE extname = 'pg_cron';
    ```
 
 2. Vérifier les logs du cron :
+
    ```sql
-   SELECT * FROM cron.job_run_details 
+   SELECT * FROM cron.job_run_details
    WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'process-scheduled-email-campaigns')
    ORDER BY start_time DESC LIMIT 5;
    ```
@@ -164,6 +167,7 @@ curl -X POST \
 ### Problème : Erreurs dans les logs
 
 **Solutions :**
+
 1. Vérifier les variables d'environnement de l'Edge Function
 2. Vérifier que `SUPABASE_SERVICE_ROLE_KEY` est configuré
 3. Vérifier les permissions RLS sur la table `email_campaigns`
@@ -181,4 +185,3 @@ curl -X POST \
 
 **Dernière vérification** : 30 Janvier 2025  
 **Statut** : ✅ **OPÉRATIONNEL**
-

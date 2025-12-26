@@ -17,6 +17,7 @@ Simplifier et améliorer la gestion des métadonnées SEO pour améliorer le ré
 **Fichier** : `src/hooks/useSEO.ts`
 
 **Fonctionnalités** :
+
 - ✅ Hook simple pour gérer les métadonnées SEO
 - ✅ Support automatique des breadcrumbs
 - ✅ Support automatique des structured data (Schema.org)
@@ -25,12 +26,14 @@ Simplifier et améliorer la gestion des métadonnées SEO pour améliorer le ré
 - ✅ Hooks spécialisés : `useProductSEO` et `useStoreSEO`
 
 **Bénéfices** :
+
 - 🟢 Simplifie la gestion SEO dans les composants
 - 🟢 Génération automatique des structured data
 - 🟢 Meilleur référencement Google
 - 🟢 Rich snippets dans les résultats de recherche
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Utilisation basique
 useSEO({
@@ -66,6 +69,7 @@ useStoreSEO({
 **Fichier** : `src/lib/seo-utils.ts`
 
 **Fonctionnalités** :
+
 - ✅ `truncateDescription` : Tronque les descriptions pour les meta tags (max 160 caractères)
 - ✅ `generateSEOTitle` : Génère un titre SEO optimisé avec branding
 - ✅ `extractKeywords` : Extrait les mots-clés d'un texte
@@ -76,11 +80,13 @@ useStoreSEO({
 - ✅ `generateBreadcrumbSchemaData` : Génère un schema BreadcrumbList
 
 **Bénéfices** :
+
 - 🟢 Fonctions réutilisables pour optimiser le SEO
 - 🟢 Génération automatique de structured data
 - 🟢 Validation et normalisation des données SEO
 
 **Exemple d'utilisation** :
+
 ```tsx
 import { truncateDescription, generateSEOTitle, extractKeywords } from '@/lib/seo-utils';
 
@@ -94,11 +100,13 @@ const keywords = extractKeywords(productDescription);
 ## 📊 IMPACT ATTENDU
 
 ### SEO
+
 - **Rich Snippets** : Amélioration grâce aux structured data (Schema.org)
 - **Taux de clic** : +10-20% grâce aux meta tags optimisés
 - **Référencement** : Meilleur positionnement grâce aux breadcrumbs et structured data
 
 ### Performance
+
 - **Pas d'impact négatif** : Les hooks sont légers et optimisés
 - **Chargement** : Les structured data sont générés côté client (pas de requête serveur)
 
@@ -109,13 +117,10 @@ const keywords = extractKeywords(productDescription);
 ### Pour useSEO
 
 **Option 1 : Remplacer SEOMeta**
+
 ```tsx
 // Ancien code
-<SEOMeta
-  title="Produit"
-  description="Description"
-  image="/image.jpg"
-/>
+<SEOMeta title="Produit" description="Description" image="/image.jpg" />;
 
 // Nouveau code
 useSEO({
@@ -126,6 +131,7 @@ useSEO({
 ```
 
 **Option 2 : Utiliser les hooks spécialisés**
+
 ```tsx
 // Pour un produit
 useProductSEO({
@@ -151,6 +157,7 @@ useStoreSEO({
 ## 📝 RECOMMANDATIONS
 
 ### Priorité HAUTE
+
 1. ✅ **Hook useSEO** - COMPLÉTÉ
 2. ✅ **Utilitaires SEO** - COMPLÉTÉ
 3. ⏳ **Migrer progressivement** les pages vers useSEO
@@ -158,11 +165,13 @@ useStoreSEO({
 5. ⏳ **Utiliser useStoreSEO** dans Storefront
 
 ### Priorité MOYENNE
+
 6. ⏳ **Ajouter structured data** pour les articles/blog
 7. ⏳ **Optimiser les images** pour Open Graph
 8. ⏳ **Ajouter breadcrumbs** sur toutes les pages
 
 ### Priorité BASSE
+
 9. ⏳ **Tests SEO** avec Google Search Console
 10. ⏳ **Optimiser les sitemaps**
 11. ⏳ **Ajouter hreflang** pour multi-langues
@@ -172,6 +181,7 @@ useStoreSEO({
 ## ✅ CONCLUSION
 
 **Améliorations appliquées** :
+
 - ✅ Hook useSEO créé
 - ✅ Utilitaires SEO créés
 - ✅ Hooks spécialisés (useProductSEO, useStoreSEO)
@@ -179,6 +189,7 @@ useStoreSEO({
 **Impact** : 🟢 **HAUT** - Amélioration significative du référencement et des rich snippets.
 
 **Prochaines étapes** :
+
 - ⏳ Migrer les pages critiques vers useSEO
 - ⏳ Utiliser useProductSEO dans ProductDetail
 - ⏳ Utiliser useStoreSEO dans Storefront
@@ -191,4 +202,3 @@ useStoreSEO({
 - [Google Rich Results](https://developers.google.com/search/docs/appearance/structured-data)
 - [Open Graph Protocol](https://ogp.me/)
 - [Twitter Cards](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards)
-

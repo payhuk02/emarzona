@@ -27,67 +27,72 @@
 #### A. Titres Principaux
 
 **Pattern Standard** :
+
 ```tsx
 // Avant
-className="text-lg"
-className="text-xl"
-className="text-2xl"
-className="text-3xl"
-className="text-4xl"
+className = 'text-lg';
+className = 'text-xl';
+className = 'text-2xl';
+className = 'text-3xl';
+className = 'text-4xl';
 
 // Après
-className="text-base sm:text-lg"
-className="text-lg sm:text-xl"
-className="text-lg sm:text-xl md:text-2xl"
-className="text-xl sm:text-2xl md:text-3xl"
-className="text-2xl sm:text-3xl md:text-4xl"
+className = 'text-base sm:text-lg';
+className = 'text-lg sm:text-xl';
+className = 'text-lg sm:text-xl md:text-2xl';
+className = 'text-xl sm:text-2xl md:text-3xl';
+className = 'text-2xl sm:text-3xl md:text-4xl';
 ```
 
 #### B. Sous-titres
 
 **Pattern Standard** :
+
 ```tsx
 // Avant
-className="text-sm"
-className="text-base"
+className = 'text-sm';
+className = 'text-base';
 
 // Après
-className="text-[10px] sm:text-xs md:text-sm"
-className="text-xs sm:text-sm md:text-base"
+className = 'text-[10px] sm:text-xs md:text-sm';
+className = 'text-xs sm:text-sm md:text-base';
 ```
 
 #### C. Cards et Stats
 
 **Pattern Standard** :
+
 ```tsx
 // Titres de Cards
-className="text-base sm:text-lg"
-className="text-xs sm:text-sm md:text-base"
+className = 'text-base sm:text-lg';
+className = 'text-xs sm:text-sm md:text-base';
 
 // Valeurs de Stats
-className="text-sm sm:text-base md:text-lg lg:text-2xl"
-className="text-base sm:text-xl md:text-2xl lg:text-3xl"
+className = 'text-sm sm:text-base md:text-lg lg:text-2xl';
+className = 'text-base sm:text-xl md:text-2xl lg:text-3xl';
 ```
 
 #### D. Paddings et Espacements
 
 **Pattern Standard** :
+
 ```tsx
 // Container
-className="p-3 sm:p-4 md:p-6"
-className="p-4 sm:p-6 md:p-8"
+className = 'p-3 sm:p-4 md:p-6';
+className = 'p-4 sm:p-6 md:p-8';
 
 // Gaps
-className="gap-2 sm:gap-3 md:gap-4"
-className="gap-3 sm:gap-4 md:gap-6"
+className = 'gap-2 sm:gap-3 md:gap-4';
+className = 'gap-3 sm:gap-4 md:gap-6';
 
 // Cards
-className="p-3 sm:p-4 md:p-6"
+className = 'p-3 sm:p-4 md:p-6';
 ```
 
 #### E. Boutons
 
 **Pattern Standard** :
+
 ```tsx
 // Boutons avec texte abrégé sur mobile
 <Button size="sm" className="text-xs sm:text-sm">
@@ -264,6 +269,7 @@ Pour chaque page à optimiser, vérifier :
 Analyse toutes les pages pour identifier les problèmes de responsivité.
 
 **Usage** :
+
 ```bash
 node scripts/analyze-responsive-pages.js
 ```
@@ -275,6 +281,7 @@ node scripts/analyze-responsive-pages.js
 Optimise automatiquement les patterns de texte les plus courants.
 
 **Usage** :
+
 ```bash
 node scripts/optimize-responsive-text.js
 ```
@@ -287,23 +294,23 @@ node scripts/optimize-responsive-text.js
 
 ### Tailles de Texte
 
-| Élément | Mobile | Tablet | Desktop | Large |
-|---------|--------|--------|---------|-------|
-| **Titre principal** | `text-base` | `text-lg` | `text-2xl` | `text-3xl` |
-| **Sous-titre** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **CardTitle** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **Valeurs stats** | `text-sm` | `text-base` | `text-lg` | `text-2xl` |
-| **Table headers** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **Table cells** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **Boutons** | `text-xs` | `text-sm` | - | - |
+| Élément             | Mobile        | Tablet      | Desktop    | Large      |
+| ------------------- | ------------- | ----------- | ---------- | ---------- |
+| **Titre principal** | `text-base`   | `text-lg`   | `text-2xl` | `text-3xl` |
+| **Sous-titre**      | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **CardTitle**       | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **Valeurs stats**   | `text-sm`     | `text-base` | `text-lg`  | `text-2xl` |
+| **Table headers**   | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **Table cells**     | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **Boutons**         | `text-xs`     | `text-sm`   | -          | -          |
 
 ### Espacements
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Container padding** | `p-3` | `p-4` | `p-6` |
-| **Gaps** | `gap-2` | `gap-3` | `gap-4` |
-| **Card padding** | `p-3` | `p-4` | `p-6` |
+| Élément               | Mobile  | Tablet  | Desktop |
+| --------------------- | ------- | ------- | ------- |
+| **Container padding** | `p-3`   | `p-4`   | `p-6`   |
+| **Gaps**              | `gap-2` | `gap-3` | `gap-4` |
+| **Card padding**      | `p-3`   | `p-4`   | `p-6`   |
 
 ---
 
@@ -326,6 +333,7 @@ Les classes Tailwind sont optimisées et ne génèrent que le CSS nécessaire.
 ### 4. Tests
 
 Tester sur :
+
 - Mobile (320px - 640px)
 - Tablette (641px - 1024px)
 - Desktop (1025px+)
@@ -344,4 +352,3 @@ Tester sur :
 
 **Date de validation** : 1 Février 2025  
 **Statut** : ✅ **EN COURS** - Pages principales optimisées, pages secondaires en cours
-

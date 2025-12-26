@@ -22,17 +22,19 @@
 ## ✅ CE QUI A ÉTÉ CRÉÉ
 
 ### 1. Configuration TypeScript
+
 **Fichier:** `src/config/image-formats.ts`
 
 ```typescript
 import { IMAGE_FORMATS } from '@/config/image-formats';
 
 // Format principal
-IMAGE_FORMATS.product
+IMAGE_FORMATS.product;
 // → { width: 1280, height: 720, aspectRatio: '16:9' }
 ```
 
 **Fonctions disponibles:**
+
 - `isValidProductImageSize()` - Valider dimensions
 - `hasCorrectAspectRatio()` - Vérifier ratio 16:9
 - `getRecommendedDimensions()` - Obtenir dimensions
@@ -41,9 +43,11 @@ IMAGE_FORMATS.product
 ---
 
 ### 2. Composant de Validation
+
 **Fichier:** `src/components/ui/image-upload-helper.tsx`
 
 **Composants React:**
+
 ```tsx
 // Afficher les requis
 <ImageRequirements format="product" />
@@ -56,6 +60,7 @@ IMAGE_FORMATS.product
 ```
 
 **Fonction de validation:**
+
 ```typescript
 import { validateImage } from '@/components/ui/image-upload-helper';
 
@@ -66,9 +71,11 @@ const result = await validateImage(file, 'product');
 ---
 
 ### 3. Guide Complet
+
 **Fichier:** `IMAGE_FORMAT_GUIDE.md`
 
 Contient:
+
 - ✅ Tous les formats d'images
 - ✅ Bonnes pratiques
 - ✅ Outils recommandés
@@ -83,10 +90,10 @@ Contient:
 ### Dans un Formulaire de Produit
 
 ```tsx
-import { 
-  ImageRequirements, 
+import {
+  ImageRequirements,
   validateImage,
-  ImageValidationDisplay 
+  ImageValidationDisplay,
 } from '@/components/ui/image-upload-helper';
 
 function ProductForm() {
@@ -95,7 +102,7 @@ function ProductForm() {
   const handleImageUpload = async (file: File) => {
     const result = await validateImage(file, 'product');
     setValidation(result);
-    
+
     if (result.isValid) {
       // Upload l'image
     }
@@ -115,20 +122,21 @@ function ProductForm() {
 
 ## 📊 FORMATS DISPONIBLES
 
-| Format | Dimensions | Usage |
-|--------|------------|-------|
-| **product** | 1280x720 | Image principale produit ⭐ |
-| thumbnail | 640x360 | Miniatures |
-| productLarge | 1920x1080 | Zoom haute résolution |
-| gallery | 1280x720 | Images galerie |
-| ogImage | 1200x630 | Réseaux sociaux |
-| square | 500x500 | Avatars, icônes |
+| Format       | Dimensions | Usage                       |
+| ------------ | ---------- | --------------------------- |
+| **product**  | 1280x720   | Image principale produit ⭐ |
+| thumbnail    | 640x360    | Miniatures                  |
+| productLarge | 1920x1080  | Zoom haute résolution       |
+| gallery      | 1280x720   | Images galerie              |
+| ogImage      | 1200x630   | Réseaux sociaux             |
+| square       | 500x500    | Avatars, icônes             |
 
 ---
 
 ## ✅ VALIDATION AUTOMATIQUE
 
 ### Vérifications Effectuées
+
 ```
 ✓ Format de fichier (JPEG, PNG, WebP)
 ✓ Taille du fichier (< 5MB)
@@ -138,6 +146,7 @@ function ProductForm() {
 ```
 
 ### Messages d'Erreur
+
 ```
 ❌ "Dimensions incorrectes (800x600). Requis: 1280x720 pixels"
 ❌ "Fichier trop lourd (7.5MB). Max: 5MB"
@@ -149,6 +158,7 @@ function ProductForm() {
 ## 🎨 QUICK REFERENCE
 
 ### En Code
+
 ```typescript
 // Importer config
 import { IMAGE_FORMATS } from '@/config/image-formats';
@@ -163,7 +173,9 @@ const isValid = isValidProductImageSize({ width: 1280, height: 720 });
 ```
 
 ### Dans Templates
+
 Tous les templates utilisent maintenant ces dimensions:
+
 ```typescript
 visual: {
   thumbnail: '/products/image-1280x720.jpg', // ✅ 1280x720
@@ -179,6 +191,7 @@ visual: {
 ## 📝 CHECKLIST RAPIDE
 
 ### Pour Upload d'Image
+
 - [ ] Dimensions: 1280 x 720 pixels
 - [ ] Format: JPEG, PNG, ou WebP
 - [ ] Taille: < 5MB
@@ -192,16 +205,19 @@ visual: {
 ## 🔧 OUTILS RECOMMANDÉS
 
 ### Redimensionner en 1280x720
+
 1. **Squoosh** → https://squoosh.app
-2. **TinyPNG** → https://tinypng.com  
+2. **TinyPNG** → https://tinypng.com
 3. **Canva** → https://canva.com
 
 ### CLI (ImageMagick)
+
 ```bash
 convert image.jpg -resize 1280x720 -quality 85 output.jpg
 ```
 
 ### Photoshop
+
 ```
 Fichier > Exporter > Exporter sous
 Largeur: 1280px
@@ -214,11 +230,13 @@ Qualité: 85%
 ## 💡 CONSEILS
 
 ### Optimisation
+
 - Utilisez **WebP** quand possible (-30% taille vs JPEG)
 - Qualité **85%** = bon équilibre qualité/poids
 - Compressez toujours avant upload
 
 ### Nommage
+
 ```
 ✅ BON:
 produit-chaise-moderne-1280x720.webp
@@ -234,6 +252,7 @@ photo.png
 ## 📚 DOCUMENTATION COMPLÈTE
 
 Pour plus de détails, consultez:
+
 - **Guide complet:** `IMAGE_FORMAT_GUIDE.md`
 - **Config TypeScript:** `src/config/image-formats.ts`
 - **Composants UI:** `src/components/ui/image-upload-helper.tsx`
@@ -253,4 +272,3 @@ Format Standard Payhuk: 1280 x 720 pixels (16:9)
 ```
 
 **Toutes vos images de produits doivent maintenant être en 1280x720 ! 📐**
-

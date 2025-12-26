@@ -321,6 +321,8 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
               // ✅ iOS/scroll stability: never render the main image as opacity-0
               // (can look like it "disappears" during fast scroll). Placeholder/skeleton covers loading state.
               'w-full h-full object-cover',
+              !isLoaded && 'opacity-0', // Masquer jusqu'au chargement complet
+              isLoaded && 'opacity-100 transition-opacity duration-300', // Afficher avec transition
               imageClassName
             )}
             loading={priority ? 'eager' : 'lazy'}

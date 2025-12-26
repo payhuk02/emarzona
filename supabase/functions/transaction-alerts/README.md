@@ -3,6 +3,7 @@
 ## Description
 
 Cette Edge Function surveille les transactions et génère des alertes pour :
+
 - Transactions en attente depuis plus de X heures
 - Taux d'échec élevé (> seuil configurable)
 - Différences de montants détectées dans les webhooks
@@ -12,6 +13,7 @@ Cette Edge Function surveille les transactions et génère des alertes pour :
 ### Variables d'environnement
 
 Aucune variable d'environnement spécifique requise. La fonction utilise :
+
 - `SUPABASE_URL` (automatique)
 - `SUPABASE_SERVICE_ROLE_KEY` (automatique)
 
@@ -23,13 +25,14 @@ Vous pouvez configurer le comportement via `platform_settings` :
 {
   "transaction_alerts": {
     "enabled": true,
-    "pendingThresholdHours": 24,  // Alerte si transaction en attente > 24h
-    "failureRateThreshold": 10  // Alerte si taux d'échec > 10%
+    "pendingThresholdHours": 24, // Alerte si transaction en attente > 24h
+    "failureRateThreshold": 10 // Alerte si taux d'échec > 10%
   }
 }
 ```
 
 **Paramètres par défaut :**
+
 - `enabled`: true
 - `pendingThresholdHours`: 24h
 - `failureRateThreshold`: 10%
@@ -62,6 +65,7 @@ Dans Supabase Dashboard :
 ## Types d'Alertes
 
 ### 1. Transactions en attente
+
 - **Déclencheur**: Transactions avec status `processing` depuis > `pendingThresholdHours`
 - **Sévérité**:
   - `critical`: > 50 transactions
@@ -69,6 +73,7 @@ Dans Supabase Dashboard :
   - `medium`: > 0 transactions
 
 ### 2. Taux d'échec élevé
+
 - **Déclencheur**: Taux d'échec > `failureRateThreshold` sur les dernières 24h
 - **Sévérité**:
   - `critical`: > 30%
@@ -76,6 +81,7 @@ Dans Supabase Dashboard :
   - `medium`: > 10%
 
 ### 3. Différences de montants
+
 - **Déclencheur**: > 5 événements `webhook_amount_mismatch` dans les dernières 24h
 - **Sévérité**:
   - `critical`: > 20 événements
@@ -84,6 +90,7 @@ Dans Supabase Dashboard :
 ## Logs
 
 Toutes les alertes sont loggées dans `transaction_logs` avec :
+
 - `event_type`: `alert_<type>`
 - `status`: Sévérité de l'alerte
 - `request_data`: Détails de l'alerte
@@ -94,7 +101,7 @@ Pour consulter les alertes :
 
 ```sql
 -- Toutes les alertes des dernières 24h
-SELECT 
+SELECT
   *,
   request_data->>'message' as alert_message
 FROM transaction_logs
@@ -103,7 +110,7 @@ WHERE event_type LIKE 'alert_%'
 ORDER BY created_at DESC;
 
 -- Alertes critiques uniquement
-SELECT 
+SELECT
   *,
   request_data->>'message' as alert_message
 FROM transaction_logs
@@ -121,4 +128,3 @@ Pour l'instant, les alertes sont uniquement loggées. Pour une intégration comp
 2. **SMS**: Intégrer avec un service SMS pour alertes critiques
 3. **Slack/Discord**: Webhooks pour notifications en temps réel
 4. **Dashboard**: Afficher les alertes dans le dashboard admin
-

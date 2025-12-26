@@ -14,6 +14,7 @@ Les 3 Edge Functions suivantes ont été déployées avec succès :
 3. ✅ **transaction-alerts** - Monitoring et alertes transactions
 
 **URLs des fonctions:**
+
 - `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/retry-failed-transactions`
 - `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/auto-pay-commissions`
 - `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/transaction-alerts`
@@ -31,6 +32,7 @@ Exécutez la migration SQL dans Supabase Dashboard → SQL Editor :
 ```
 
 Cette migration :
+
 - ✅ Active les extensions `pg_net` et `pg_cron`
 - ✅ Crée les 3 cron jobs avec les schedules appropriés
 - ✅ Configure les URLs et authentification
@@ -47,6 +49,7 @@ Si l'extension `pg_cron` n'est pas disponible, utilisez l'interface Supabase Das
 - **Name**: `retry-failed-transactions`
 - **Schedule**: `0 * * * *` (toutes les heures)
 - **SQL Command**:
+
 ```sql
 SELECT net.http_post(
   url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/retry-failed-transactions',
@@ -63,6 +66,7 @@ SELECT net.http_post(
 - **Name**: `auto-pay-commissions`
 - **Schedule**: `0 2 * * *` (tous les jours à 2h du matin)
 - **SQL Command**:
+
 ```sql
 SELECT net.http_post(
   url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/auto-pay-commissions',
@@ -79,6 +83,7 @@ SELECT net.http_post(
 - **Name**: `transaction-alerts`
 - **Schedule**: `0 */6 * * *` (toutes les 6 heures)
 - **SQL Command**:
+
 ```sql
 SELECT net.http_post(
   url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/transaction-alerts',
@@ -99,7 +104,7 @@ SELECT net.http_post(
 Exécutez cette requête SQL pour vérifier que les cron jobs sont bien configurés :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -114,7 +119,7 @@ ORDER BY jobname;
 ### Vérifier les Extensions
 
 ```sql
-SELECT 
+SELECT
   extname,
   extversion
 FROM pg_extension
@@ -171,7 +176,7 @@ SELECT net.http_post(
 
 ```sql
 -- Historique des exécutions des cron jobs
-SELECT 
+SELECT
   runid,
   jobid,
   job_pid,
@@ -184,7 +189,7 @@ SELECT
   end_time
 FROM cron.job_run_details
 WHERE jobid IN (
-  SELECT jobid FROM cron.job 
+  SELECT jobid FROM cron.job
   WHERE jobname IN ('retry-failed-transactions', 'auto-pay-commissions', 'transaction-alerts')
 )
 ORDER BY start_time DESC
@@ -195,7 +200,7 @@ LIMIT 50;
 
 ```sql
 -- Toutes les alertes des dernières 24h
-SELECT 
+SELECT
   *,
   request_data->>'message' as alert_message
 FROM transaction_logs
@@ -272,20 +277,24 @@ WHERE key = 'admin';
 ### Les cron jobs ne s'exécutent pas
 
 1. **Vérifier que pg_cron est activé** :
+
    ```sql
    SELECT * FROM pg_extension WHERE extname = 'pg_cron';
    ```
+
    Si pas de résultat, activez l'extension dans Supabase Dashboard → Database → Extensions
 
 2. **Vérifier que pg_net est activé** :
+
    ```sql
    SELECT * FROM pg_extension WHERE extname = 'pg_net';
    ```
+
    Si pas de résultat, activez l'extension dans Supabase Dashboard → Database → Extensions
 
 3. **Vérifier les logs des cron jobs** :
    ```sql
-   SELECT * FROM cron.job_run_details 
+   SELECT * FROM cron.job_run_details
    WHERE jobid IN (SELECT jobid FROM cron.job WHERE jobname = 'retry-failed-transactions')
    ORDER BY start_time DESC LIMIT 10;
    ```
@@ -327,4 +336,3 @@ WHERE jobname = 'retry-failed-transactions';
 **Date de déploiement**: 1 Février 2025  
 **Projet**: hbdnzajbyjakdhuavrvb  
 **Statut**: ✅ Déployé et prêt pour configuration
-

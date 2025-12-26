@@ -17,6 +17,7 @@ Créer des hooks réutilisables pour gérer les événements window (resize, scr
 **Fichier** : `src/hooks/useWindowEvents.ts`
 
 **Fonctionnalités** :
+
 - ✅ **useWindowSize** : Obtient la taille de la fenêtre avec throttling
 - ✅ **useWindowScroll** : Obtient la position de scroll avec throttling
 - ✅ **usePageVisibility** : Détecte si la page est visible (Page Visibility API)
@@ -26,12 +27,14 @@ Créer des hooks réutilisables pour gérer les événements window (resize, scr
 - ✅ **Support SSR** : Gère le cas où window/document n'existe pas
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~50-60% pour les événements window
 - 🟢 Performance optimisée avec throttling
 - 🟢 API cohérente dans toute l'application
 - 🟢 Support SSR
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 const [size, setSize] = useState({ width: 0, height: 0 });
@@ -48,9 +51,9 @@ const { width, height } = useWindowSize();
 
 // Avec callbacks
 useWindowEvents({
-  onResize: (size) => console.log('Resized:', size),
-  onScroll: (scroll) => console.log('Scrolled:', scroll),
-  onVisibilityChange: (isVisible) => console.log('Visible:', isVisible),
+  onResize: size => console.log('Resized:', size),
+  onScroll: scroll => console.log('Scrolled:', scroll),
+  onVisibilityChange: isVisible => console.log('Visible:', isVisible),
 });
 ```
 
@@ -61,6 +64,7 @@ useWindowEvents({
 **Fichier** : `src/hooks/useClickOutside.ts`
 
 **Fonctionnalités** :
+
 - ✅ **useClickOutside** : Détecte les clics en dehors d'un élément
 - ✅ **useClickOutsideMultiple** : Détecte les clics en dehors de plusieurs éléments
 - ✅ **Événements configurables** : Support mousedown, click, touchstart
@@ -68,12 +72,14 @@ useWindowEvents({
 - ✅ **Activation conditionnelle** : Support pour activer/désactiver
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~60-70% pour les click outside
 - 🟢 API simple et intuitive
 - 🟢 Support multi-éléments
 - 🟢 Gestion des exclusions
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 useEffect(() => {
@@ -103,6 +109,7 @@ useClickOutside(ref, () => setIsOpen(false), {
 **Fichier** : `src/hooks/useFocusOutside.ts`
 
 **Fonctionnalités** :
+
 - ✅ **useFocusOutside** : Détecte quand le focus sort d'un élément
 - ✅ **useFocusOutsideMultiple** : Détecte quand le focus sort de plusieurs éléments
 - ✅ **Exclusions** : Support pour exclure des éléments spécifiques
@@ -110,12 +117,14 @@ useClickOutside(ref, () => setIsOpen(false), {
 - ✅ **Accessibilité** : Améliore l'accessibilité pour la navigation clavier
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~60-70% pour les focus outside
 - 🟢 Meilleure accessibilité
 - 🟢 Support multi-éléments
 - 🟢 Gestion des exclusions
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 useEffect(() => {
@@ -138,15 +147,18 @@ useFocusOutside(ref, () => setIsOpen(false));
 ## 📊 IMPACT ATTENDU
 
 ### Code Quality
+
 - **Réduction du code répétitif** : ~50-70% selon le type
 - **Maintenabilité** : Code plus cohérent et réutilisable
 - **DX (Developer Experience)** : API plus simple et intuitive
 
 ### Performance
+
 - **Throttling** : Optimisation automatique des événements window
 - **Pas d'impact négatif** : Performance maintenue ou améliorée
 
 ### UX
+
 - **Accessibilité** : Meilleure gestion du focus pour la navigation clavier
 - **Performance** : Événements optimisés avec throttling
 
@@ -157,6 +169,7 @@ useFocusOutside(ref, () => setIsOpen(false));
 ### Pour useWindowEvents
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 const [width, setWidth] = useState(window.innerWidth);
@@ -171,16 +184,18 @@ const { width } = useWindowSize();
 ```
 
 **Option 2 : Utiliser le hook combiné**
+
 ```tsx
 const { size, scroll, isVisible, isFocused } = useWindowEvents({
-  onResize: (size) => console.log('Resized:', size),
-  onScroll: (scroll) => console.log('Scrolled:', scroll),
+  onResize: size => console.log('Resized:', size),
+  onScroll: scroll => console.log('Scrolled:', scroll),
 });
 ```
 
 ### Pour useClickOutside et useFocusOutside
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 useEffect(() => {
@@ -198,6 +213,7 @@ useClickOutside(ref, () => setIsOpen(false));
 ```
 
 **Option 2 : Utiliser avec exclusions**
+
 ```tsx
 useClickOutside(ref, () => setIsOpen(false), {
   exclude: [buttonRef, '.excluded-element'],
@@ -210,12 +226,14 @@ useClickOutside(ref, () => setIsOpen(false), {
 ## 📝 RECOMMANDATIONS
 
 ### Priorité HAUTE
+
 1. ✅ **Hook useWindowEvents** - COMPLÉTÉ
 2. ✅ **Hook useClickOutside** - COMPLÉTÉ
 3. ✅ **Hook useFocusOutside** - COMPLÉTÉ
 4. ⏳ **Migrer progressivement** les composants vers ces hooks
 
 ### Priorité MOYENNE
+
 5. ⏳ **Créer des hooks spécialisés** pour des cas d'usage spécifiques
 6. ⏳ **Ajouter des tests** pour les nouveaux hooks
 
@@ -224,6 +242,7 @@ useClickOutside(ref, () => setIsOpen(false), {
 ## ✅ CONCLUSION
 
 **Améliorations appliquées** :
+
 - ✅ Hook useWindowEvents créé avec 4 hooks spécialisés
 - ✅ Hook useClickOutside créé avec support multi-éléments
 - ✅ Hook useFocusOutside créé pour l'accessibilité
@@ -231,6 +250,7 @@ useClickOutside(ref, () => setIsOpen(false), {
 **Impact** : 🟢 **MOYEN-ÉLEVÉ** - Réduction significative du code répétitif et amélioration de la cohérence UX.
 
 **Prochaines étapes** :
+
 - ⏳ Migrer les composants vers useWindowEvents
 - ⏳ Migrer les click outside vers useClickOutside
 - ⏳ Migrer les focus outside vers useFocusOutside
@@ -242,4 +262,3 @@ useClickOutside(ref, () => setIsOpen(false), {
 - [Window Events](https://developer.mozilla.org/en-US/docs/Web/API/Window)
 - [Page Visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API)
 - [Focus Events](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent)
-

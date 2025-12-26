@@ -1,4 +1,5 @@
 # 📖 GUIDE D'UTILISATION - Système Emailing & Tags
+
 ## Date: 2 Février 2025
 
 ---
@@ -26,6 +27,7 @@ Exécutez les migrations dans cet ordre dans Supabase SQL Editor:
 ### 2. Activer l'Extension pg_cron
 
 Dans Supabase Dashboard:
+
 1. Aller dans **Database** > **Extensions**
 2. Rechercher `pg_cron`
 3. Cliquer sur **Enable**
@@ -85,13 +87,7 @@ import { emailTagService } from '@/lib/email/email-tag-service';
 await emailTagService.addTag(userId, storeId, 'vip');
 
 // Tag avec catégorie
-await emailTagService.addTag(
-  userId,
-  storeId,
-  'premium',
-  { source: 'manual' },
-  'segment'
-);
+await emailTagService.addTag(userId, storeId, 'premium', { source: 'manual' }, 'segment');
 
 // Tag avec expiration (30 jours)
 await emailTagService.addTag(
@@ -100,7 +96,7 @@ await emailTagService.addTag(
   'trial_user',
   { source: 'signup' },
   'behavior',
-  30  // expire dans 30 jours
+  30 // expire dans 30 jours
 );
 ```
 
@@ -230,7 +226,7 @@ const segment = await EmailSegmentService.createSegment({
   name: 'Clients VIP',
   type: 'dynamic',
   criteria: {
-    tags: ['vip', 'premium'],  // Utilisateurs avec ces tags
+    tags: ['vip', 'premium'], // Utilisateurs avec ces tags
     excluded_tags: ['churned'], // Exclure ces tags
     min_orders: 3,
     min_total_spent: 1000,
@@ -286,7 +282,7 @@ await emailTagService.addTag(
   'new_customer',
   { source: 'signup', date: new Date().toISOString() },
   'behavior',
-  30  // Tag expire après 30 jours
+  30 // Tag expire après 30 jours
 );
 
 // Envoyer email de bienvenue
@@ -392,23 +388,27 @@ console.log('Emails cette seconde:', stats.currentSecondCount);
 ## 📝 NOTES IMPORTANTES
 
 ### Validation des Tags
+
 - Les tags sont automatiquement normalisés (lowercase, trim)
 - Longueur maximale: 50 caractères
 - Caractères autorisés: lettres minuscules, chiffres, underscore, tiret
 - Format: `^[a-z0-9_-]+$`
 
 ### Catégories de Tags
+
 - `behavior`: Tags basés sur le comportement
 - `segment`: Tags pour segmentation
 - `custom`: Tags personnalisés
 - `system`: Tags générés automatiquement
 
 ### Rate Limiting
+
 - Limite par défaut: 10 emails/seconde
 - Ajustable selon votre plan SendGrid
 - Queue automatique pour gérer les pics
 
 ### Retry Automatique
+
 - 3 tentatives par défaut
 - Backoff exponentiel: 1s → 2s → 4s
 - Jitter pour éviter les thundering herds
@@ -417,4 +417,3 @@ console.log('Emails cette seconde:', stats.currentSecondCount);
 
 **Version**: 1.4.0  
 **Dernière mise à jour**: 2 Février 2025
-

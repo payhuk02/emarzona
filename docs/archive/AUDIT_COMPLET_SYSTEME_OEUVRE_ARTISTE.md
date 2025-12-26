@@ -13,6 +13,7 @@
 Le système "Œuvre d'artiste" est **fonctionnel et prêt pour la production** avec quelques améliorations recommandées.
 
 ### Points Forts ✅
+
 - ✅ Architecture complète et bien structurée
 - ✅ Support de 6 types d'artistes différents
 - ✅ Gestion avancée des éditions limitées
@@ -22,6 +23,7 @@ Le système "Œuvre d'artiste" est **fonctionnel et prêt pour la production** a
 - ✅ Types TypeScript complets
 
 ### Points à Améliorer ⚠️
+
 - ⚠️ Problème d'upload d'images (validation MIME type)
 - ⚠️ Manque de composants d'affichage frontend dédiés
 - ⚠️ Pas de système de recherche/filtrage par type d'artiste
@@ -42,20 +44,20 @@ CREATE TABLE artist_products (
   id UUID PRIMARY KEY,
   product_id UUID UNIQUE REFERENCES products(id),
   store_id UUID REFERENCES stores(id),
-  
+
   -- Type d'artiste (6 types supportés)
   artist_type TEXT CHECK (artist_type IN (
-    'writer', 'musician', 'visual_artist', 
+    'writer', 'musician', 'visual_artist',
     'designer', 'multimedia', 'other'
   )),
-  
+
   -- Informations artiste
   artist_name TEXT NOT NULL,
   artist_bio TEXT,
   artist_website TEXT,
   artist_social_links JSONB,
   artist_photo_url TEXT, -- ✅ Ajouté via migration séparée
-  
+
   -- Informations œuvre
   artwork_title TEXT NOT NULL,
   artwork_year INTEGER,
@@ -65,33 +67,34 @@ CREATE TABLE artist_products (
   edition_number INTEGER,
   total_editions INTEGER,
   artwork_link_url TEXT, -- ✅ Ajouté via migration séparée
-  
+
   -- Spécificités par type (JSONB)
   writer_specific JSONB,
   musician_specific JSONB,
   visual_artist_specific JSONB,
   designer_specific JSONB,
   multimedia_specific JSONB,
-  
+
   -- Livraison
   requires_shipping BOOLEAN DEFAULT true,
   shipping_handling_time INTEGER DEFAULT 7,
   shipping_fragile BOOLEAN DEFAULT false,
   shipping_insurance_required BOOLEAN DEFAULT false,
   shipping_insurance_amount DECIMAL(10, 2),
-  
+
   -- Authentification
   certificate_of_authenticity BOOLEAN DEFAULT false,
   certificate_file_url TEXT,
   signature_authenticated BOOLEAN DEFAULT false,
   signature_location TEXT,
-  
+
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 );
 ```
 
 #### Points Forts ✅
+
 - ✅ Structure normalisée avec relation `product_id`
 - ✅ Support de 6 types d'artistes différents
 - ✅ Données spécifiques par type en JSONB (flexible)
@@ -100,6 +103,7 @@ CREATE TABLE artist_products (
 - ✅ Triggers pour `updated_at`
 
 #### Points à Vérifier ⚠️
+
 - ⚠️ Migration `20250228_add_artist_photo_and_artwork_link.sql` doit être exécutée
 - ⚠️ Vérifier que les colonnes `artist_photo_url` et `artwork_link_url` existent
 
@@ -125,6 +129,7 @@ CREATE TABLE artist_products (
 **Statut** : ✅ **EXCELLENT**
 
 #### Structure
+
 - ✅ 8 étapes bien définies
 - ✅ Auto-sauvegarde dans localStorage
 - ✅ Validation par étape
@@ -132,6 +137,7 @@ CREATE TABLE artist_products (
 - ✅ Support brouillons
 
 #### Étapes
+
 1. ✅ Type d'artiste (`ArtistTypeSelector`)
 2. ✅ Informations de base (`ArtistBasicInfoForm`)
 3. ✅ Spécificités (`ArtistSpecificForms`)
@@ -142,6 +148,7 @@ CREATE TABLE artist_products (
 8. ✅ Aperçu (`ArtistPreview`)
 
 #### Points Forts ✅
+
 - ✅ UX fluide avec progression visuelle
 - ✅ Gestion d'état robuste
 - ✅ Validation complète
@@ -149,6 +156,7 @@ CREATE TABLE artist_products (
 - ✅ Support de tous les types d'artistes
 
 #### Points à Améliorer ⚠️
+
 - ⚠️ Pas de prévisualisation en temps réel (sauf étape 8)
 - ⚠️ Pas de sauvegarde automatique en base (seulement localStorage)
 
@@ -161,6 +169,7 @@ CREATE TABLE artist_products (
 **Statut** : ⚠️ **BON MAIS PROBLÈME UPLOAD**
 
 #### Fonctionnalités ✅
+
 - ✅ Champs artiste (nom, bio, website, photo, réseaux sociaux)
 - ✅ Champs œuvre (titre, année, médium, dimensions)
 - ✅ Upload photo artiste
@@ -170,18 +179,21 @@ CREATE TABLE artist_products (
 
 #### Problème Critique ❌
 
-**Erreur Upload Images** : 
+**Erreur Upload Images** :
+
 ```
-Type de fichier non supporté. Veuillez utiliser une image (PNG, JPG, WEBP). 
+Type de fichier non supporté. Veuillez utiliser une image (PNG, JPG, WEBP).
 Détails: mime type application/json is not supported
 ```
 
 **Cause Identifiée** :
+
 - Le composant tente d'uploader un fichier JSON au lieu d'une image
 - Validation MIME type insuffisante côté client
 - Possible problème avec l'input file qui accepte des fichiers non-images
 
 **Code Problématique** :
+
 ```typescript:src/components/products/create/artist/ArtistBasicInfoForm.tsx
 // Ligne 524-526
 <input
@@ -193,6 +205,7 @@ Détails: mime type application/json is not supported
 ```
 
 **Solution Recommandée** :
+
 1. Ajouter validation MIME type stricte avant upload
 2. Vérifier `file.type.startsWith('image/')`
 3. Rejeter les fichiers non-images avec message clair
@@ -206,6 +219,7 @@ Détails: mime type application/json is not supported
 **Statut** : ✅ **EXCELLENT**
 
 #### Support des Types ✅
+
 - ✅ **Écrivain** : ISBN, pages, langue, format, genre, éditeur, date publication
 - ✅ **Musicien** : Format album, genre, label, date sortie, pistes (liste dynamique)
 - ✅ **Artiste visuel** : Style, sujet
@@ -213,11 +227,13 @@ Détails: mime type application/json is not supported
 - ⚠️ **Multimedia** : Non implémenté (retourne `null`)
 
 #### Points Forts ✅
+
 - ✅ Interface adaptative selon type
 - ✅ Gestion dynamique des pistes (musicien)
 - ✅ Validation cohérente
 
 #### Points à Améliorer ⚠️
+
 - ⚠️ Type "multimedia" non implémenté
 - ⚠️ Pas de validation spécifique par type
 
@@ -230,6 +246,7 @@ Détails: mime type application/json is not supported
 **Statut** : ✅ **EXCELLENT**
 
 #### Fonctionnalités ✅
+
 - ✅ Toggle expédition requise
 - ✅ Délai de préparation (jours)
 - ✅ Marquer comme fragile
@@ -237,6 +254,7 @@ Détails: mime type application/json is not supported
 - ✅ Messages d'aide contextuels
 
 #### Points Forts ✅
+
 - ✅ UX claire avec Cards
 - ✅ Logique conditionnelle (si fragile → suggérer assurance)
 - ✅ Validation des montants
@@ -250,11 +268,13 @@ Détails: mime type application/json is not supported
 **Statut** : ✅ **EXCELLENT**
 
 #### Fonctionnalités ✅
+
 - ✅ Certificat d'authenticité (upload PDF/image)
 - ✅ Signature authentifiée (avec emplacement)
 - ✅ Informations d'édition (numéro/total)
 
 #### Points Forts ✅
+
 - ✅ Upload certificat vers `product-files/certificates`
 - ✅ Validation formats (PDF, JPG, PNG)
 - ✅ Affichage fichier uploadé
@@ -270,6 +290,7 @@ Détails: mime type application/json is not supported
 **Statut** : ✅ **EXCELLENT**
 
 #### Hooks Disponibles ✅
+
 - ✅ `useArtistProducts(storeId)` - Liste avec stats
 - ✅ `useArtistProduct(productId)` - Par product_id
 - ✅ `useArtistProductById(artistProductId)` - Par artist_product id
@@ -280,12 +301,14 @@ Détails: mime type application/json is not supported
 - ✅ `usePopularArtistProducts(storeId, limit)` - Populaires
 
 #### Points Forts ✅
+
 - ✅ React Query avec cache
 - ✅ Calcul stats ventes automatique
 - ✅ Invalidation cache après mutations
 - ✅ Gestion erreurs complète
 
 #### Points à Améliorer ⚠️
+
 - ⚠️ `usePopularArtistProducts` a une requête dupliquée (ligne 365)
 - ⚠️ Pas de pagination pour grandes listes
 
@@ -298,6 +321,7 @@ Détails: mime type application/json is not supported
 **Statut** : ✅ **EXCELLENT** (Créé récemment)
 
 #### Workflow ✅
+
 1. ✅ Récupération produit + options paiement
 2. ✅ Récupération artist_product
 3. ✅ Vérification éditions limitées (stock)
@@ -313,6 +337,7 @@ Détails: mime type application/json is not supported
 13. ✅ Webhook `order.created`
 
 #### Points Forts ✅
+
 - ✅ Gestion complète des spécificités artiste
 - ✅ Métadonnées complètes dans order/order_item
 - ✅ Rollback en cas d'erreur
@@ -320,6 +345,7 @@ Détails: mime type application/json is not supported
 - ✅ Support paiements avancés
 
 #### Points à Améliorer ⚠️
+
 - ⚠️ Vérification stock éditions limitées pourrait être optimisée (requête multiple)
 - ⚠️ Pas de gestion de réservation temporaire (race condition possible)
 
@@ -346,6 +372,7 @@ Détails: mime type application/json is not supported
 **Statut** : ✅ **EXCELLENT**
 
 #### Types Disponibles ✅
+
 - ✅ `ArtistType` - Union des 6 types
 - ✅ `EditionType` - original, limited_edition, print, reproduction
 - ✅ `ArtworkDimensions` - width, height, depth, unit
@@ -355,6 +382,7 @@ Détails: mime type application/json is not supported
 - ✅ `ArtistProduct` - Interface base de données
 
 #### Points Forts ✅
+
 - ✅ Types complets et cohérents
 - ✅ Support de tous les champs
 - ✅ Types spécifiques par artiste
@@ -381,10 +409,12 @@ Détails: mime type application/json is not supported
 **Statut** : ⚠️ **GÉNÉRIQUE**
 
 #### Composants Utilisés
+
 - ✅ `UnifiedProductCard` - Affichage générique
 - ✅ `transformToUnifiedProduct` - Transformation vers format unifié
 
 #### Points à Améliorer ⚠️
+
 - ⚠️ Pas de composant dédié pour artist products
 - ⚠️ Pas d'affichage spécifique (photo artiste, certificat, etc.)
 - ⚠️ Pas de badge "Édition limitée" ou "Certifié"
@@ -402,6 +432,7 @@ Détails: mime type application/json is not supported
 - ⚠️ Probablement utilise composant générique
 
 **Recommandation** : Créer `ArtistProductDetail.tsx` avec :
+
 - Photo artiste
 - Biographie
 - Réseaux sociaux
@@ -421,11 +452,13 @@ Détails: mime type application/json is not supported
 **Statut** : ❌ **PROBLÈME CRITIQUE**
 
 #### Problème
+
 - ❌ Erreur : "mime type application/json is not supported"
 - ❌ Validation MIME type insuffisante
 - ❌ Possible upload de fichier JSON au lieu d'image
 
 #### Code Actuel
+
 ```typescript:src/components/products/create/artist/ArtistBasicInfoForm.tsx
 // Ligne 524-526
 <input
@@ -434,12 +467,13 @@ Détails: mime type application/json is not supported
   onChange={async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     // ⚠️ Pas de validation explicite du type MIME
     // ⚠️ Le code suppose que file.type est correct
 ```
 
 #### Solution Recommandée
+
 ```typescript
 // Ajouter validation stricte AVANT upload
 if (!file.type || !file.type.startsWith('image/')) {
@@ -499,12 +533,14 @@ if (!fileExt || !validExtensions.includes(fileExt)) {
 **Statut** : ✅ **EXCELLENT**
 
 #### Fonctionnalités ✅
+
 - ✅ Vérification stock dans `useCreateArtistOrder`
 - ✅ Comptage éditions vendues (commandes payées)
 - ✅ Validation numéro d'édition vs total
 - ✅ Blocage commande si stock insuffisant
 
 #### Points Forts ✅
+
 - ✅ Logique robuste
 - ✅ Gestion erreurs claire
 
@@ -517,6 +553,7 @@ if (!fileExt || !validExtensions.includes(fileExt)) {
 **Statut** : ✅ **EXCELLENT**
 
 #### Fonctionnalités ✅
+
 - ✅ Toggle fragile
 - ✅ Assurance optionnelle avec montant
 - ✅ Calcul automatique prix total (base + assurance)
@@ -531,12 +568,14 @@ if (!fileExt || !validExtensions.includes(fileExt)) {
 **Statut** : ✅ **EXCELLENT**
 
 #### Fonctionnalités ✅
+
 - ✅ Upload certificat (PDF/image)
 - ✅ Stockage dans `product-files/certificates`
 - ✅ Flag booléen dans base
 - ✅ URL fichier stockée
 
 #### Points à Améliorer ⚠️
+
 - ⚠️ Pas d'affichage certificat sur page produit (à vérifier)
 
 **Score** : **90/100** ✅
@@ -606,6 +645,7 @@ if (!fileExt || !validExtensions.includes(fileExt)) {
 - ❌ Pas de tests d'intégration
 
 **Recommandation** : Créer tests pour :
+
 - Création artist product
 - Validation éditions limitées
 - Upload images
@@ -702,18 +742,18 @@ if (!fileExt || !validExtensions.includes(fileExt)) {
 
 ## 📊 SCORES PAR CATÉGORIE
 
-| Catégorie | Score | Statut |
-|-----------|-------|--------|
-| **Base de données** | 95/100 | ✅ Excellent |
-| **Composants Frontend** | 82/100 | ⚠️ Bon (problème upload) |
-| **Hooks & Logique** | 91/100 | ✅ Excellent |
-| **Types TypeScript** | 100/100 | ✅ Parfait |
-| **Affichage Frontend** | 65/100 | ⚠️ À améliorer |
-| **Upload Images** | 95/100 | ✅ Excellent (corrigé) |
-| **Fonctionnalités Avancées** | 93/100 | ✅ Excellent |
-| **Intégration Paiements** | 100/100 | ✅ Parfait |
-| **Webhooks** | 100/100 | ✅ Parfait |
-| **Tests** | 0/100 | ❌ Manquant |
+| Catégorie                    | Score   | Statut                   |
+| ---------------------------- | ------- | ------------------------ |
+| **Base de données**          | 95/100  | ✅ Excellent             |
+| **Composants Frontend**      | 82/100  | ⚠️ Bon (problème upload) |
+| **Hooks & Logique**          | 91/100  | ✅ Excellent             |
+| **Types TypeScript**         | 100/100 | ✅ Parfait               |
+| **Affichage Frontend**       | 65/100  | ⚠️ À améliorer           |
+| **Upload Images**            | 95/100  | ✅ Excellent (corrigé)   |
+| **Fonctionnalités Avancées** | 93/100  | ✅ Excellent             |
+| **Intégration Paiements**    | 100/100 | ✅ Parfait               |
+| **Webhooks**                 | 100/100 | ✅ Parfait               |
+| **Tests**                    | 0/100   | ❌ Manquant              |
 
 **SCORE GLOBAL** : **90/100** ⭐⭐⭐⭐⭐ (après correction upload)
 
@@ -724,6 +764,7 @@ if (!fileExt || !validExtensions.includes(fileExt)) {
 Le système "Œuvre d'artiste" est **globalement fonctionnel et prêt pour la production**. Le problème d'upload d'images a été corrigé.
 
 ### Points Clés
+
 - ✅ Architecture solide et extensible
 - ✅ Support complet de 6 types d'artistes
 - ✅ Fonctionnalités avancées (éditions, certificats, shipping)
@@ -732,6 +773,7 @@ Le système "Œuvre d'artiste" est **globalement fonctionnel et prêt pour la pr
 - ⚠️ Composants affichage à enrichir
 
 ### Prochaines Étapes
+
 1. ✅ **Corriger validation upload images** (TERMINÉ)
 2. **Créer composants affichage dédiés** (4-6h)
 3. **Implémenter type multimedia** (2h)
@@ -744,4 +786,3 @@ Le système "Œuvre d'artiste" est **globalement fonctionnel et prêt pour la pr
 **Audit réalisé par** : Auto (Cursor AI)  
 **Date** : 28 Janvier 2025  
 **Version** : 1.0
-

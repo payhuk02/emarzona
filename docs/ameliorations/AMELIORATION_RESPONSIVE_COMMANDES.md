@@ -10,6 +10,7 @@
 ## 🎯 OBJECTIF
 
 Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive** pour tous les appareils :
+
 - 📱 Mobile (< 640px)
 - 📱 Tablette (640px - 1024px)
 - 💻 Desktop (> 1024px)
@@ -21,11 +22,13 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ### 1. ✅ Dialogue de Création de Commande
 
 #### Avant
+
 - Largeur fixe ou peu adaptative
 - Formulaires difficiles à utiliser sur mobile
 - Boutons mal positionnés
 
 #### Après
+
 - **Largeur adaptative** : `max-w-[95vw]` mobile → `max-w-3xl` desktop
 - **Hauteur adaptative** : `max-h-[95vh]` mobile → `max-h-[90vh]` desktop
 - **Padding responsive** : `p-3` mobile → `p-6` desktop
@@ -36,6 +39,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - **Hauteurs d'inputs** : `h-10` mobile → `h-12` desktop
 
 #### Détails Techniques
+
 ```tsx
 // Dialogue
 <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-2xl lg:max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
@@ -58,11 +62,13 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ### 2. ✅ Cartes de Statistiques
 
 #### Avant
+
 - Grille 2 colonnes sur mobile (ok)
 - Tailles de texte fixes
 - Espacement uniforme
 
 #### Après
+
 - **Grille adaptative** : `grid-cols-2` mobile → `grid-cols-4` desktop
 - **Gaps responsives** : `gap-2` mobile → `gap-4` desktop
 - **Tailles de texte** : `text-[10px]` mobile → `text-base` desktop
@@ -72,6 +78,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - **Touch-friendly** : `touch-manipulation` + `active:scale-[0.98]`
 
 #### Détails Techniques
+
 ```tsx
 <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
   <Card className="touch-manipulation active:scale-[0.98]">
@@ -84,10 +91,12 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ### 3. ✅ Barre de Recherche et Actions
 
 #### Avant
+
 - Layout peu adaptatif
 - Tailles fixes
 
 #### Après
+
 - **Layout flex** : `flex-col` mobile → `flex-row` desktop
 - **Input responsive** : `h-10` mobile → `h-12` desktop
 - **Icônes adaptatives** : `h-4 w-4` mobile → `h-6 w-6` desktop
@@ -96,6 +105,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - **Touch-friendly** : `touch-manipulation` + `active:scale-95`
 
 #### Détails Techniques
+
 ```tsx
 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
   <Input className="h-10 sm:h-11 md:h-12 text-xs sm:text-sm md:text-base">
@@ -107,11 +117,13 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ### 4. ✅ Filtres/Tabs de Statut
 
 #### Avant
+
 - Scroll horizontal basique
 - Tailles fixes
 - Indicateurs de scroll limités
 
 #### Après
+
 - **Scroll horizontal optimisé** avec indicateurs visuels
 - **Tailles adaptatives** : `text-[9px]` mobile → `text-sm` desktop
 - **Padding** : `px-2` mobile → `px-4` desktop
@@ -121,6 +133,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - **Indicateurs de scroll** : Gradients visuels sur mobile
 
 #### Détails Techniques
+
 ```tsx
 <div className="overflow-x-auto scrollbar-hide scroll-smooth">
   <TabsTrigger className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm min-h-[34px] sm:min-h-[38px] md:min-h-[40px] lg:min-h-[44px] touch-manipulation active:scale-95">
@@ -135,10 +148,12 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ### 5. ✅ Table Desktop
 
 #### Avant
+
 - Largeur minimale fixe
 - Padding uniforme
 
 #### Après
+
 - **Largeur minimale adaptative** : `min-w-[900px]` → `min-w-[1100px]` xl
 - **Padding responsive** : `px-3` mobile → `px-6` desktop
 - **Tailles de texte** : `text-xs` mobile → `text-sm` desktop
@@ -146,6 +161,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - **Hauteurs de cellules** : `h-8` → `h-10` desktop
 
 #### Détails Techniques
+
 ```tsx
 <Table className="min-w-[900px] lg:min-w-[1000px] xl:min-w-[1100px]">
   <TableHead className="text-xs md:text-sm px-3 md:px-4 lg:px-6">
@@ -157,10 +173,12 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ### 6. ✅ Cartes Mobile/Tablette
 
 #### Avant
+
 - Layout basique
 - Espacement uniforme
 
 #### Après
+
 - **Layout flex adaptatif** : Colonne sur mobile, ligne sur desktop
 - **Espacement responsive** : `space-y-2.5` mobile → `space-y-4` desktop
 - **Tailles de texte** : `text-[10px]` mobile → `text-base` desktop
@@ -170,6 +188,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - **Touch-friendly** : `touch-manipulation` + `active:scale-[0.98]`
 
 #### Détails Techniques
+
 ```tsx
 <div className="lg:hidden space-y-2.5 sm:space-y-3 md:space-y-4">
   <Card className="touch-manipulation active:scale-[0.98]">
@@ -182,34 +201,38 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 
 ## 📱 BREAKPOINTS UTILISÉS
 
-| Breakpoint | Taille | Usage |
-|------------|--------|-------|
-| `xs` | < 475px | Très petits mobiles |
-| `sm` | ≥ 640px | Mobiles |
-| `md` | ≥ 768px | Tablettes |
-| `lg` | ≥ 1024px | Desktop |
-| `xl` | ≥ 1280px | Grands écrans |
+| Breakpoint | Taille   | Usage               |
+| ---------- | -------- | ------------------- |
+| `xs`       | < 475px  | Très petits mobiles |
+| `sm`       | ≥ 640px  | Mobiles             |
+| `md`       | ≥ 768px  | Tablettes           |
+| `lg`       | ≥ 1024px | Desktop             |
+| `xl`       | ≥ 1280px | Grands écrans       |
 
 ---
 
 ## 🎨 AMÉLIORATIONS UX
 
 ### Touch-Friendly
+
 - ✅ `touch-manipulation` sur tous les éléments interactifs
 - ✅ `active:scale-95` ou `active:scale-[0.98]` pour feedback tactile
 - ✅ Zones de touch ≥ 44px (recommandation Apple/Google)
 
 ### Espacement
+
 - ✅ Padding adaptatif selon la taille d'écran
 - ✅ Gaps responsives entre éléments
 - ✅ Marges négatives pour scroll horizontal
 
 ### Typographie
+
 - ✅ Tailles de texte adaptatives
 - ✅ `line-clamp-2` pour descriptions longues
 - ✅ `truncate` pour textes trop longs
 
 ### Navigation
+
 - ✅ Scroll horizontal avec indicateurs visuels
 - ✅ Labels courts sur mobile, complets sur desktop
 - ✅ Boutons full-width sur mobile
@@ -235,6 +258,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ## 🚀 RÉSULTATS
 
 ### Avant
+
 - ❌ Dialogue difficile à utiliser sur mobile
 - ❌ Formulaires mal adaptés
 - ❌ Textes trop petits ou trop grands
@@ -242,6 +266,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - ❌ Pas de feedback tactile
 
 ### Après
+
 - ✅ Dialogue parfaitement adapté à tous les écrans
 - ✅ Formulaires empilés et utilisables sur mobile
 - ✅ Typographie adaptative et lisible
@@ -254,6 +279,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ## 📝 NOTES TECHNIQUES
 
 ### Classes Tailwind Utilisées
+
 - `grid-cols-1 sm:grid-cols-12` - Grille adaptative
 - `flex-col sm:flex-row` - Layout flex adaptatif
 - `text-xs sm:text-sm md:text-base` - Typographie responsive
@@ -265,6 +291,7 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 - `active:scale-95` - Feedback tactile
 
 ### Bonnes Pratiques Appliquées
+
 1. **Mobile-First** : Design pensé d'abord pour mobile
 2. **Progressive Enhancement** : Amélioration progressive pour desktop
 3. **Touch-Friendly** : Zones de touch ≥ 44px
@@ -276,16 +303,19 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 ## 🎯 PROCHAINES AMÉLIORATIONS POSSIBLES
 
 ### Court Terme
+
 - [ ] Tests sur appareils réels (iPhone, Android)
 - [ ] Vérification des performances sur mobile
 - [ ] Tests d'accessibilité (screen readers)
 
 ### Moyen Terme
+
 - [ ] Animations de transition plus fluides
 - [ ] Lazy loading des images si ajoutées
 - [ ] Optimisation du scroll horizontal
 
 ### Long Terme
+
 - [ ] Mode sombre optimisé
 - [ ] Support des gestes tactiles avancés
 - [ ] PWA optimisations
@@ -296,6 +326,5 @@ Rendre la section "Commandes" de la page "Fournisseurs" **totalement responsive*
 
 ---
 
-*Dernière mise à jour : Janvier 2025*  
-*Statut : ✅ PRODUCTION READY*
-
+_Dernière mise à jour : Janvier 2025_  
+_Statut : ✅ PRODUCTION READY_

@@ -11,26 +11,32 @@
 ## 📊 TABLES CRÉÉES (11)
 
 ### 1. Pre-orders System
+
 - ✅ `pre_orders` - Table principale des pré-commandes
 - ✅ `pre_order_customers` - Clients en pré-commande
 
 ### 2. Backorders System
+
 - ✅ `backorders` - Table principale des backorders
 - ✅ `backorder_customers` - Clients en backorder
 
 ### 3. Stock Alerts System
+
 - ✅ `stock_alerts` - Alertes de stock
 
 ### 4. Size Charts System
+
 - ✅ `size_charts` - Guides des tailles
 - ✅ `size_chart_measurements` - Mesures par taille
 - ✅ `product_size_charts` - Mapping produits ↔ guides
 
 ### 5. Product Bundles System
+
 - ✅ `product_bundles` - Packs produits
 - ✅ `bundle_items` - Produits dans les packs
 
 ### 6. Variant Images System
+
 - ✅ `variant_images` - Images par variante
 
 ---
@@ -40,6 +46,7 @@
 ### Méthode 1 : Supabase Dashboard (Recommandée)
 
 1. **Aller sur Supabase Dashboard**
+
    ```
    https://supabase.com/dashboard/project/YOUR_PROJECT_ID/sql/new
    ```
@@ -56,9 +63,9 @@
 4. **Vérifier**
    ```sql
    -- Vérifier que les tables existent
-   SELECT table_name 
-   FROM information_schema.tables 
-   WHERE table_schema = 'public' 
+   SELECT table_name
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
    AND table_name IN (
      'pre_orders',
      'backorders',
@@ -87,11 +94,12 @@ supabase db remote list
 ## ✅ VÉRIFICATIONS POST-MIGRATION
 
 ### 1. Tables créées
+
 ```sql
 SELECT COUNT(*) as total_tables
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-AND table_name LIKE 'pre_order%' 
+FROM information_schema.tables
+WHERE table_schema = 'public'
+AND table_name LIKE 'pre_order%'
    OR table_name LIKE 'backorder%'
    OR table_name LIKE 'size_chart%'
    OR table_name LIKE 'product_bundle%'
@@ -101,9 +109,10 @@ AND table_name LIKE 'pre_order%'
 ```
 
 ### 2. RLS activé
+
 ```sql
-SELECT tablename, rowsecurity 
-FROM pg_tables 
+SELECT tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public'
 AND tablename IN (
   'pre_orders',
@@ -117,9 +126,10 @@ AND tablename IN (
 ```
 
 ### 3. Policies créées
+
 ```sql
-SELECT schemaname, tablename, policyname 
-FROM pg_policies 
+SELECT schemaname, tablename, policyname
+FROM pg_policies
 WHERE tablename IN (
   'pre_orders',
   'backorders',
@@ -132,9 +142,10 @@ WHERE tablename IN (
 ```
 
 ### 4. Triggers créés
+
 ```sql
-SELECT trigger_name, event_object_table 
-FROM information_schema.triggers 
+SELECT trigger_name, event_object_table
+FROM information_schema.triggers
 WHERE trigger_schema = 'public'
 AND trigger_name LIKE '%updated_at%';
 -- Expected: update triggers for main tables
@@ -145,6 +156,7 @@ AND trigger_name LIKE '%updated_at%';
 ## 🧪 TESTS DE VALIDATION
 
 ### Test 1: Créer une pré-commande
+
 ```sql
 INSERT INTO public.pre_orders (
   store_id,
@@ -162,6 +174,7 @@ INSERT INTO public.pre_orders (
 ```
 
 ### Test 2: Créer une alerte de stock
+
 ```sql
 INSERT INTO public.stock_alerts (
   store_id,
@@ -183,6 +196,7 @@ INSERT INTO public.stock_alerts (
 ```
 
 ### Test 3: Créer un guide des tailles
+
 ```sql
 INSERT INTO public.size_charts (
   store_id,
@@ -198,6 +212,7 @@ INSERT INTO public.size_charts (
 ```
 
 ### Test 4: Créer un pack produit
+
 ```sql
 INSERT INTO public.product_bundles (
   store_id,
@@ -221,6 +236,7 @@ INSERT INTO public.product_bundles (
 ## 🔧 ROLLBACK (Si nécessaire)
 
 ### Méthode complète
+
 ```sql
 -- ATTENTION: Supprime toutes les tables créées
 DROP TABLE IF EXISTS public.variant_images CASCADE;
@@ -241,6 +257,7 @@ DROP TABLE IF EXISTS public.pre_orders CASCADE;
 ## 📈 PERFORMANCES
 
 ### Indexes créés automatiquement
+
 - ✅ Pre-orders: store_id, product_id, status
 - ✅ Backorders: store_id, product_id, status, priority
 - ✅ Stock alerts: store_id, product_id, type, severity, resolved
@@ -253,6 +270,7 @@ DROP TABLE IF EXISTS public.pre_orders CASCADE;
 ## 🔒 SÉCURITÉ
 
 ### RLS Policies appliquées
+
 - ✅ Users can only access their own store data
 - ✅ Public read for variant images
 - ✅ Full CRUD for store owners
@@ -294,6 +312,7 @@ DROP TABLE IF EXISTS public.pre_orders CASCADE;
 ## 📞 SUPPORT
 
 En cas de problème:
+
 1. Vérifier les logs Supabase Dashboard > Database > Logs
 2. Vérifier les conflits de noms de tables
 3. Vérifier que toutes les tables dépendantes existent
@@ -304,4 +323,3 @@ En cas de problème:
 **Date de création:** 29 Octobre 2025  
 **Version:** 1.0  
 **Auteur:** Emarzona Dev Team
-

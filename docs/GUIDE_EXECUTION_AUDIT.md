@@ -24,6 +24,7 @@ Exécutez d'abord `ANALYZE_RLS_STATUS.sql` pour obtenir un résumé :
 ```
 
 **Résultats attendus** :
+
 - 📊 Résumé exécutif avec pourcentage de sécurisation
 - 🚨 Top 20 tables critiques restantes
 - ✅ Vérification des phases (Phase 1, 2, 3)
@@ -43,11 +44,13 @@ Si l'analyse rapide montre des tables restantes, exécutez `FINAL_RLS_AUDIT_SIMP
 ### Résumé Exécutif
 
 **Pourcentage de Sécurisation** :
+
 - **≥ 80%** : ✅ Excellent - La plupart des tables sont sécurisées
 - **60-79%** : ⚠️ Bon - Quelques améliorations nécessaires
 - **< 60%** : 🚨 Critique - Action urgente requise
 
 **Métriques Clés** :
+
 - `tables_securisees` : Tables avec RLS + politiques
 - `tables_sans_rls` : Tables sans RLS (priorité 1)
 - `tables_sans_politiques` : Tables avec RLS mais sans politiques (priorité 2)
@@ -56,12 +59,14 @@ Si l'analyse rapide montre des tables restantes, exécutez `FINAL_RLS_AUDIT_SIMP
 ### Top 20 Tables Critiques
 
 **Statuts** :
+
 - ❌ **Sans RLS** : Activer RLS immédiatement
 - ⚠️ **Sans politiques** : Ajouter des politiques RLS
 - ⚠️ **SELECT manquant** : Ajouter politique SELECT (critique)
 - ℹ️ **Politiques incomplètes** : Compléter les politiques
 
 **Priorités** :
+
 - 🔴 **CRITIQUE** : Données très sensibles (settings, commissions, retraits)
 - 🟠 **HAUTE** : Données utilisateurs importantes (cours, inscriptions)
 - 🟡 **MOYENNE** : Données importantes mais moins critiques
@@ -69,6 +74,7 @@ Si l'analyse rapide montre des tables restantes, exécutez `FINAL_RLS_AUDIT_SIMP
 ### Vérification des Phases
 
 **Statut attendu** :
+
 - Phase 1 : ✅ 11 tables sécurisées
 - Phase 2 : ✅ 6 tables sécurisées
 - Phase 3 : ✅ 9 tables sécurisées
@@ -78,19 +84,23 @@ Si une phase montre "⚠️ Incomplète", vérifier les tables manquantes.
 ## 🔍 Analyse Section par Section
 
 ### Section 1 : Vue d'Ensemble
+
 **Objectif** : Obtenir les statistiques globales
 
 **Questions à se poser** :
+
 - Quel est le pourcentage de sécurisation ?
 - Combien de tables restent à sécuriser ?
 - Quelle est la priorité d'action ?
 
 ### Section 2 : Tables Sans RLS
+
 **Objectif** : Identifier les tables critiques sans RLS
 
 **Action** : Créer une migration pour activer RLS sur ces tables
 
 ### Section 3 : Tables Sans Politiques
+
 **Objectif** : Identifier les tables avec RLS mais sans politiques
 
 **Action** : Créer des politiques RLS appropriées
@@ -98,37 +108,44 @@ Si une phase montre "⚠️ Incomplète", vérifier les tables manquantes.
 **⚠️ Important** : RLS activé sans politiques = accès bloqué pour tous !
 
 ### Section 4 : Politiques Incomplètes
+
 **Objectif** : Identifier les tables avec politiques partielles
 
 **Action** : Compléter les politiques manquantes
 
 **Ordre de priorité** :
+
 1. SELECT (le plus critique)
 2. INSERT
 3. UPDATE
 4. DELETE
 
 ### Section 5 : Toutes les Tables Restantes
+
 **Objectif** : Liste complète pour planification
 
 **Utilisation** : Vue d'ensemble pour créer Phase 4
 
 ### Section 6 : Priorisation par Sensibilité
+
 **Objectif** : Classer les tables par niveau de criticité
 
 **Utilisation** : Planifier les migrations par priorité
 
 ### Section 7 : Résumé par Phase
+
 **Objectif** : Vérifier le succès des phases précédentes
 
 **Vérification** : S'assurer que toutes les phases sont complètes
 
 ### Section 8 : Tables par Domaine
+
 **Objectif** : Organiser les tables restantes par domaine fonctionnel
 
 **Utilisation** : Créer des migrations par domaine (ex: cours, souscriptions)
 
 ### Section 9 : Recommandations Finales
+
 **Objectif** : Synthèse des actions prioritaires
 
 **Utilisation** : Plan d'action final
@@ -147,28 +164,37 @@ Si une phase montre "⚠️ Incomplète", vérifier les tables manquantes.
 ## 🎯 Plan d'Action selon les Résultats
 
 ### Scénario 1 : ≥ 80% Sécurisé
+
 ```
 ✅ Excellent niveau de sécurité
 ```
+
 **Action** :
+
 - Sécuriser les tables restantes par priorité
 - Focus sur les tables critiques (🔴)
 - Phase 4 optionnelle pour tables moins critiques
 
 ### Scénario 2 : 60-79% Sécurisé
+
 ```
 ⚠️ Bon niveau mais amélioration nécessaire
 ```
+
 **Action** :
+
 - Créer Phase 4 pour tables critiques (🔴)
 - Puis tables haute priorité (🟠)
 - Compléter les politiques incomplètes
 
 ### Scénario 3 : < 60% Sécurisé
+
 ```
 🚨 Niveau insuffisant - Action urgente requise
 ```
+
 **Action** :
+
 - **URGENT** : Activer RLS sur toutes les tables critiques
 - Créer politiques pour toutes les tables sans politiques
 - Compléter les politiques incomplètes
@@ -189,6 +215,7 @@ Si une phase montre "⚠️ Incomplète", vérifier les tables manquantes.
 ```
 
 **Interprétation** :
+
 - Seulement 17% des tables sont sécurisées
 - 45 tables sans RLS (priorité 1)
 - 12 tables sans politiques (priorité 2)
@@ -204,5 +231,4 @@ Si une phase montre "⚠️ Incomplète", vérifier les tables manquantes.
 
 ---
 
-*Dernière mise à jour : 2025-01-30*
-
+_Dernière mise à jour : 2025-01-30_

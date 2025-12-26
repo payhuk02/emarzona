@@ -8,6 +8,7 @@
 ## ✅ Installation Actuelle
 
 Supabase CLI est **déjà installé** sur votre système :
+
 - **Version** : 2.51.0
 - **Version disponible** : 2.58.5 (mise à jour recommandée)
 
@@ -50,6 +51,7 @@ choco upgrade supabase
 ## 🔗 Lier le Projet
 
 Votre projet est déjà configuré avec :
+
 - **Project ID** : `hbdnzajbyjakdhuavrvb` (dans `supabase/config.toml`)
 
 ### Se connecter à Supabase
@@ -106,6 +108,7 @@ supabase db push --file supabase/migrations/20250131_fix_affiliate_link_code_fun
 ```
 
 **OU** via SQL Editor dans Supabase Dashboard :
+
 - Copier le contenu de `supabase/migrations/20250131_fix_affiliate_link_code_function.sql`
 - Exécuter dans SQL Editor
 
@@ -116,6 +119,7 @@ supabase db push --file supabase/migrations/20250131_affiliate_short_links.sql
 ```
 
 **OU** via SQL Editor dans Supabase Dashboard :
+
 - Copier le contenu de `supabase/migrations/20250131_affiliate_short_links.sql`
 - Exécuter dans SQL Editor
 
@@ -180,6 +184,7 @@ cat supabase/config.toml
 ```
 
 Devrait afficher :
+
 ```toml
 project_id = "hbdnzajbyjakdhuavrvb"
 ```
@@ -230,4 +235,3 @@ supabase db push
 - [ ] Connecté à Supabase (`supabase login`)
 - [ ] Projet lié (`supabase link`)
 - [ ] Migrations exécutées (`supabase db push`)
-

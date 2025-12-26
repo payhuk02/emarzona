@@ -9,6 +9,7 @@
 ## ⚠️ IMPORTANT
 
 Cette migration corrige les problèmes d'accès aux fichiers dans le bucket `attachments`, qui peuvent causer :
+
 - Images ne s'affichant pas (HTTP 200 mais Content-Type JSON)
 - Erreurs 403 (Forbidden)
 - Erreurs 404 (Not Found) même si le fichier existe
@@ -43,6 +44,7 @@ Cette migration corrige les problèmes d'accès aux fichiers dans le bucket `att
 ### Étape 3 : Vérifier le Résultat
 
 Vous devriez voir dans les logs :
+
 ```
 ✅ Bucket "attachments" est public
 ✅ 4 politiques RLS créées pour le bucket "attachments"
@@ -79,11 +81,11 @@ Exécutez cette requête dans Supabase SQL Editor pour vérifier que la migratio
 
 ```sql
 -- 1. Vérifier que le bucket est public
-SELECT 
+SELECT
   id,
   name,
   public,
-  CASE 
+  CASE
     WHEN public THEN '✅ Public'
     ELSE '❌ Privé (PROBLÈME!)'
   END as status
@@ -91,11 +93,11 @@ FROM storage.buckets
 WHERE id = 'attachments';
 
 -- 2. Vérifier que les politiques RLS existent
-SELECT 
+SELECT
   policyname,
   cmd,
   qual,
-  CASE 
+  CASE
     WHEN cmd = 'SELECT' AND qual LIKE '%bucket_id%attachments%' THEN '✅ Lecture publique'
     WHEN cmd = 'INSERT' THEN '✅ Upload authentifié'
     WHEN cmd = 'UPDATE' THEN '✅ Mise à jour authentifiée'
@@ -155,11 +157,16 @@ async function testImageUrl(url) {
     const response = await fetch(url, { method: 'HEAD' });
     console.log('Status:', response.status);
     console.log('Content-Type:', response.headers.get('content-type'));
-    
+
     if (response.status === 200 && response.headers.get('content-type')?.startsWith('image/')) {
       console.log('✅ Image accessible et Content-Type correct');
-    } else if (response.status === 200 && response.headers.get('content-type')?.includes('application/json')) {
-      console.error('❌ HTTP 200 mais Content-Type JSON - La migration n\'a peut-être pas fonctionné');
+    } else if (
+      response.status === 200 &&
+      response.headers.get('content-type')?.includes('application/json')
+    ) {
+      console.error(
+        "❌ HTTP 200 mais Content-Type JSON - La migration n'a peut-être pas fonctionné"
+      );
       const fullResponse = await fetch(url);
       const json = await fullResponse.json();
       console.error('Erreur JSON:', json);
@@ -182,19 +189,22 @@ async function testImageUrl(url) {
 ### Problème 1 : "Bucket not found"
 
 **Solution** : Exécutez d'abord la migration de création du bucket :
+
 ```sql
 -- Fichier: supabase/migrations/20250230_create_attachments_storage_bucket.sql
 ```
 
 ### Problème 2 : "Permission denied" lors de l'exécution
 
-**Solution** : 
+**Solution** :
+
 1. Vérifiez que vous êtes connecté en tant qu'administrateur du projet
 2. Ou exécutez via Supabase CLI avec les bonnes permissions
 
 ### Problème 3 : Les politiques existent mais les images ne s'affichent toujours pas
 
 **Solutions** :
+
 1. Vérifiez que le bucket est bien **public** (pas seulement les politiques RLS)
 2. Vérifiez que les fichiers existent réellement dans le bucket
 3. Vérifiez les logs de la console du navigateur pour voir l'erreur exacte
@@ -210,6 +220,7 @@ async function testImageUrl(url) {
 4. Cliquez sur **"Run"**
 
 Ce script :
+
 - Supprime toutes les politiques existantes (y compris avec des noms légèrement différents)
 - Recrée les politiques avec la bonne configuration
 - Vérifie que tout est correct après la création
@@ -231,6 +242,7 @@ Ce script :
 ### Pourquoi cette migration est nécessaire
 
 Les politiques RLS peuvent être corrompues ou mal configurées, causant :
+
 - Des réponses JSON d'erreur au lieu d'images (HTTP 200 avec `Content-Type: application/json`)
 - Des erreurs 403 même si le fichier existe
 - Des erreurs 404 même si le fichier est dans le bucket
@@ -251,4 +263,3 @@ Après avoir exécuté la migration, vérifiez :
 - [ ] Aucune erreur dans la console du navigateur
 
 Si tous les points sont cochés, la migration est réussie ! 🎉
-

@@ -77,17 +77,13 @@ if (webhookSecret) {
 ### Utilisation
 
 ```typescript
-import { 
-  MonerooError,
-  MonerooNetworkError,
-  parseMonerooError 
-} from './moneroo-errors';
+import { MonerooError, MonerooNetworkError, parseMonerooError } from './moneroo-errors';
 
 try {
   await monerooClient.createPayment(paymentData);
 } catch (error) {
   const monerooError = parseMonerooError(error);
-  
+
   if (error instanceof MonerooNetworkError) {
     // Gérer l'erreur réseau
     console.error('Network error:', error.message);
@@ -187,19 +183,11 @@ MONEROO_WEBHOOK_SECRET=your_webhook_secret  # Pour la vérification de signature
 
 ```typescript
 // Test avec signature valide
-const isValid = await verifyMonerooWebhookSignature(
-  payload,
-  signature,
-  secret
-);
+const isValid = await verifyMonerooWebhookSignature(payload, signature, secret);
 expect(isValid).toBe(true);
 
 // Test avec signature invalide
-const isInvalid = await verifyMonerooWebhookSignature(
-  payload,
-  'invalid_signature',
-  secret
-);
+const isInvalid = await verifyMonerooWebhookSignature(payload, 'invalid_signature', secret);
 expect(isInvalid).toBe(false);
 ```
 
@@ -305,10 +293,3 @@ Une fois cette phase complétée, les prochaines améliorations peuvent être :
 ---
 
 **Fin du Document**
-
-
-
-
-
-
-

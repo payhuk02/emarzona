@@ -9,13 +9,16 @@
 ## 📊 RÉSUMÉ EXÉCUTIF
 
 ### Objectif
+
 Compléter l'intégration des transporteurs FedEx et DHL avec :
+
 - Authentification OAuth 2.0 complète
 - Appels API réels pour calcul de tarifs
 - Génération d'étiquettes d'expédition
 - Système de tracking automatique
 
 ### Résultat
+
 ✅ **Authentification OAuth implémentée pour FedEx et DHL**  
 ✅ **Appels API réels pour calcul de tarifs**  
 ✅ **Génération d'étiquettes complète**  
@@ -29,21 +32,25 @@ Compléter l'intégration des transporteurs FedEx et DHL avec :
 ### 1. Service FedEx (`src/integrations/shipping/fedex.ts`)
 
 #### Authentification OAuth 2.0
+
 - ✅ Implémentation complète de `getAccessToken()`
 - ✅ Support mode test et production
 - ✅ Gestion des erreurs d'authentification
 
 #### Calcul de tarifs (`getRates`)
+
 - ✅ Appel API réel vers `/rate/v1/rates/quotes`
 - ✅ Formatage correct des requêtes selon documentation FedEx
 - ✅ Parsing des réponses et conversion au format standard
 
 #### Génération d'étiquettes (`createLabel`)
+
 - ✅ Appel API réel vers `/ship/v1/shipments`
 - ✅ Construction complète du payload selon spécifications FedEx
 - ✅ Extraction des informations d'étiquette (numéro, tracking, URL, coût)
 
 #### Tracking (`trackShipment`)
+
 - ✅ Nouvelle méthode pour suivre les colis
 - ✅ Appel API vers `/track/v1/trackingnumbers`
 - ✅ Parsing des événements de suivi
@@ -52,11 +59,13 @@ Compléter l'intégration des transporteurs FedEx et DHL avec :
 ### 2. Service DHL (`src/integrations/shipping/dhl.ts`)
 
 #### Authentification OAuth 2.0
+
 - ✅ Implémentation de `getAccessToken()`
 - ✅ Support Basic Auth en fallback
 - ✅ Gestion des erreurs
 
 #### Tracking (`trackShipment`)
+
 - ✅ Méthode déjà existante améliorée
 - ✅ Parsing correct des événements DHL
 - ✅ Support des différents formats de réponse
@@ -64,6 +73,7 @@ Compléter l'intégration des transporteurs FedEx et DHL avec :
 ### 3. Edge Function Tracking (`supabase/functions/track-shipments/index.ts`)
 
 #### Fonctionnalités ajoutées
+
 - ✅ **`getFedExAccessToken()`** : Obtention token OAuth FedEx
 - ✅ **`trackFedExShipment()`** : Tracking via API FedEx
 - ✅ **`getDHLAccessToken()`** : Obtention token OAuth DHL
@@ -71,6 +81,7 @@ Compléter l'intégration des transporteurs FedEx et DHL avec :
 - ✅ **`trackShipmentByCarrier()`** : Fonction unifiée de tracking
 
 #### Améliorations
+
 - ✅ Récupération automatique des transporteurs avec les shipments
 - ✅ Mise à jour automatique du statut des shipments
 - ✅ Insertion des événements de tracking en base
@@ -80,6 +91,7 @@ Compléter l'intégration des transporteurs FedEx et DHL avec :
 ### 4. Hook React (`src/hooks/physical/useShippingCarriers.ts`)
 
 #### Amélioration `useTrackShipment`
+
 - ✅ Support du paramètre `carrierId` optionnel
 - ✅ Tracking automatique via API transporteur si disponible
 - ✅ Fallback vers base de données si API indisponible
@@ -93,10 +105,10 @@ Compléter l'intégration des transporteurs FedEx et DHL avec :
 
 ```typescript
 interface TrackingEvent {
-  eventType: string;           // 'pickup', 'in_transit', 'delivered', etc.
-  eventDescription: string;    // Description lisible
-  eventLocation: string;        // Ville/localisation
-  eventTimestamp: string;       // ISO timestamp
+  eventType: string; // 'pickup', 'in_transit', 'delivered', etc.
+  eventDescription: string; // Description lisible
+  eventLocation: string; // Ville/localisation
+  eventTimestamp: string; // ISO timestamp
 }
 ```
 
@@ -155,8 +167,12 @@ generateLabel({
   orderId: 'order-uuid',
   carrierId: 'carrier-uuid',
   serviceType: 'FEDEX_EXPRESS',
-  fromAddress: { /* adresse expéditeur */ },
-  toAddress: { /* adresse destinataire */ },
+  fromAddress: {
+    /* adresse expéditeur */
+  },
+  toAddress: {
+    /* adresse destinataire */
+  },
   weight: 2.5,
   dimensions: { length: 30, width: 20, height: 15 },
 });
@@ -242,4 +258,3 @@ Les clés API dans `shipping_carriers` doivent être chiffrées au niveau de l'a
 
 **Auteur** : Auto (Cursor AI)  
 **Date de dernière mise à jour** : 31 Janvier 2025
-

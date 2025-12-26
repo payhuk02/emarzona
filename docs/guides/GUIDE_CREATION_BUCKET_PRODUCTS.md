@@ -1,6 +1,7 @@
 # Guide : Création du Bucket "products" dans Supabase Storage
 
 ## 🔴 Problème
+
 L'erreur "Le bucket 'products' n'existe pas" apparaît lors de l'upload de fichiers.
 
 ## ✅ Solution : Exécuter la Migration SQL
@@ -56,6 +57,7 @@ Si les migrations ne fonctionnent pas :
    - Créez les politiques suivantes pour le bucket "products" :
 
    **Politique 1 : Lecture publique**
+
    ```
    Name: Public can read product files
    Operation: SELECT
@@ -64,6 +66,7 @@ Si les migrations ne fonctionnent pas :
    ```
 
    **Politique 2 : Upload pour utilisateurs authentifiés**
+
    ```
    Name: Authenticated users can upload
    Operation: INSERT
@@ -72,6 +75,7 @@ Si les migrations ne fonctionnent pas :
    ```
 
    **Politique 3 : Mise à jour pour utilisateurs authentifiés**
+
    ```
    Name: Authenticated users can update
    Operation: UPDATE
@@ -81,6 +85,7 @@ Si les migrations ne fonctionnent pas :
    ```
 
    **Politique 4 : Suppression pour utilisateurs authentifiés**
+
    ```
    Name: Authenticated users can delete
    Operation: DELETE
@@ -115,7 +120,7 @@ Si l'erreur persiste après avoir créé le bucket :
 ## 📧 Support
 
 Si le problème persiste, vérifiez :
+
 - Les logs dans la console du navigateur (F12 > Console)
 - Les logs dans Supabase Dashboard > Logs
 - Que votre clé API Supabase est correctement configurée dans `.env`
-

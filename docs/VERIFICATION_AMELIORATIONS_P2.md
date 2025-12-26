@@ -300,4 +300,3 @@ Les erreurs de linting suivantes existent dans des fichiers **non modifiés** da
 - ✅ Prêtes à être utilisées
 
 **Statut global : 100% COMPLET ET FONCTIONNEL**
-

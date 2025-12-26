@@ -12,6 +12,7 @@ Le total reste à 4000 XOF au lieu de 3600 XOF quand un code promo de -400 XOF e
 ### Cause Racine
 
 Le problème venait de la façon dont React détecte les changements dans les dépendances des `useMemo` :
+
 1. `couponDiscountAmount` était calculé directement sans `useMemo`, ce qui pouvait causer des problèmes de détection de changement
 2. Les dépendances utilisaient des propriétés optionnelles d'objets (`appliedCouponCode?.discountAmount`), ce qui peut ne pas déclencher correctement le recalcul
 3. `taxAmount` et `giftCardAmount` recalculaient la valeur du coupon au lieu d'utiliser `couponDiscountAmount`
@@ -21,11 +22,15 @@ Le problème venait de la façon dont React détecte les changements dans les d�
 ### 1. `couponDiscountAmount` dans un `useMemo`
 
 **Avant:**
+
 ```typescript
-const couponDiscountAmount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscountAmount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 ```
 
 **Après:**
+
 ```typescript
 const couponDiscountAmount = useMemo(() => {
   return appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
@@ -33,6 +38,7 @@ const couponDiscountAmount = useMemo(() => {
 ```
 
 **Avantages:**
+
 - React détecte correctement les changements grâce aux dépendances explicites
 - La valeur est mémorisée et ne se recalcule que quand nécessaire
 - Les autres calculs peuvent dépendre de cette valeur
@@ -40,15 +46,25 @@ const couponDiscountAmount = useMemo(() => {
 ### 2. Utilisation de `couponDiscountAmount` dans `taxAmount`
 
 **Avant:**
+
 ```typescript
 const taxAmount = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscount;
   return Math.max(0, taxableAmount * taxRate);
-}, [summary.subtotal, summary.discount_amount, appliedCouponCode?.discountAmount, appliedCouponCode?.id, taxRate]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  appliedCouponCode?.discountAmount,
+  appliedCouponCode?.id,
+  taxRate,
+]);
 ```
 
 **Après:**
+
 ```typescript
 const taxAmount = useMemo(() => {
   const taxableAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
@@ -57,6 +73,7 @@ const taxAmount = useMemo(() => {
 ```
 
 **Avantages:**
+
 - Utilise la valeur calculée au lieu de recalculer
 - Dépendance claire et directe
 - Moins de duplication de code
@@ -64,44 +81,84 @@ const taxAmount = useMemo(() => {
 ### 3. Utilisation de `couponDiscountAmount` dans `giftCardAmount`
 
 **Avant:**
+
 ```typescript
 const giftCardAmount = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   // ...
-}, [appliedGiftCard, summary.subtotal, summary.discount_amount, appliedCouponCode?.discountAmount, appliedCouponCode?.id, taxRate, shippingAmount]);
+}, [
+  appliedGiftCard,
+  summary.subtotal,
+  summary.discount_amount,
+  appliedCouponCode?.discountAmount,
+  appliedCouponCode?.id,
+  taxRate,
+  shippingAmount,
+]);
 ```
 
 **Après:**
+
 ```typescript
 const giftCardAmount = useMemo(() => {
   const baseAmount = summary.subtotal - summary.discount_amount - couponDiscountAmount;
   // ...
-}, [appliedGiftCard, summary.subtotal, summary.discount_amount, couponDiscountAmount, taxRate, shippingAmount]);
+}, [
+  appliedGiftCard,
+  summary.subtotal,
+  summary.discount_amount,
+  couponDiscountAmount,
+  taxRate,
+  shippingAmount,
+]);
 ```
 
 **Avantages:**
+
 - Cohérence avec les autres calculs
 - Source unique de vérité pour le montant du coupon
 
 ### 4. Simplification de `finalTotal`
 
 **Avant:**
+
 ```typescript
 const finalTotal = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   // ...
-}, [summary.subtotal, summary.discount_amount, appliedCouponCode?.discountAmount ?? 0, appliedCouponCode?.id ?? null, taxAmount, shippingAmount, giftCardAmount]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  appliedCouponCode?.discountAmount ?? 0,
+  appliedCouponCode?.id ?? null,
+  taxAmount,
+  shippingAmount,
+  giftCardAmount,
+]);
 ```
 
 **Après:**
+
 ```typescript
 const finalTotal = useMemo(() => {
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscountAmount;
   // ...
-}, [summary.subtotal, summary.discount_amount, couponDiscountAmount, taxAmount, shippingAmount, giftCardAmount]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  couponDiscountAmount,
+  taxAmount,
+  shippingAmount,
+  giftCardAmount,
+]);
 ```
 
 **Avantages:**
+
 - Utilise directement `couponDiscountAmount` calculé
 - Dépendances plus simples et claires
 - Pas de duplication de logique
@@ -156,4 +213,3 @@ finalTotal se recalcule (dépend de couponDiscountAmount, taxAmount, giftCardAmo
 - Les dépendances utilisent maintenant des valeurs primitives calculées plutôt que des propriétés d'objets optionnels
 - La chaîne de dépendances garantit que tous les calculs se mettent à jour en cascade
 - Cette solution est plus robuste et moins sujette aux problèmes de détection de changement par React
-

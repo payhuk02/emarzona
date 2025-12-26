@@ -12,6 +12,7 @@
 **13 Composants principaux + 6 Hooks:**
 
 #### Composants (13):
+
 1. ✅ InventoryStockIndicator (3 variants)
 2. ✅ ShippingInfoDisplay (3 variants)
 3. ✅ PhysicalProductsList (liste avec filtres)
@@ -27,6 +28,7 @@
 13. ✅ ShippingDashboard (dashboard expéditions)
 
 #### Hooks (6):
+
 1. ✅ usePhysicalProducts
 2. ✅ useStockAlerts
 3. ✅ useInventoryReports
@@ -41,6 +43,7 @@
 ### SERVICES SYSTEM (État actuel)
 
 #### Composants existants (8):
+
 1. ✅ ServiceCard
 2. ✅ ServiceCalendar
 3. ✅ ServiceBookingCalendar
@@ -51,6 +54,7 @@
 8. ✅ ServiceBasicInfoForm
 
 #### Composants de création (7):
+
 1. ✅ ServiceBasicInfoForm
 2. ✅ ServicePricingOptionsForm
 3. ✅ ServiceDurationAvailabilityForm
@@ -68,6 +72,7 @@
 ### 🎯 PRIORITÉ HAUTE - Semaine 1 (Jours 1-3)
 
 #### JOUR 1 - Indicateurs & Affichage:
+
 1. **ServiceStatusIndicator** (équivalent InventoryStockIndicator)
    - 3 variants: Compact, Default, Detailed
    - Statuts: available, booked, pending, completed, cancelled
@@ -81,6 +86,7 @@
    - Notes et instructions
 
 #### JOUR 2 - Listes & Gestion:
+
 3. **ServicesList** (équivalent PhysicalProductsList)
    - Liste complète avec stats
    - Filtres (status, category, staff)
@@ -95,6 +101,7 @@
    - Bulk edit
 
 #### JOUR 3 - Historique & Updates:
+
 5. **BookingHistory** (équivalent StockMovementHistory)
    - Historique complet des réservations
    - 7 types d'événements
@@ -112,12 +119,14 @@
 ### 🎯 PRIORITÉ MOYENNE - Semaine 2 (Jours 4-5)
 
 #### JOUR 4 - Hooks & Logic:
+
 7. **useServices** (CRUD services)
 8. **useBookings** (CRUD bookings)
 9. **useServiceAlerts** (alertes capacité)
 10. **useServiceReports** (4 types rapports)
 
 #### JOUR 5 - Features Avancées:
+
 11. **RecurringBookingManager** (réservations récurrentes)
 12. **WaitlistManager** (liste d'attente)
 13. **ServiceBundleBuilder** (packs services)
@@ -127,12 +136,12 @@
 ### 🎯 PRIORITÉ SPÉCIALE - Semaine 3 (Jour 6)
 
 #### JOUR 6 - Dashboards:
+
 14. **ServicesDashboard** (dashboard complet)
     - Vue d'ensemble
     - Bookings récents
     - Analytics
     - Staff performance
-    
 15. **BookingsDashboard** (dashboard réservations)
     - Calendrier global
     - Stats temps réel
@@ -144,6 +153,7 @@
 ## 🔧 HOOKS À CRÉER (6)
 
 ### Essentiels:
+
 1. **useServices.ts**
    - CRUD services
    - Stats & analytics
@@ -181,16 +191,19 @@
 ### Week 1 - Composants Essentiels
 
 **Jour 1 (2 composants):**
+
 - ServiceStatusIndicator (280 lignes)
 - BookingInfoDisplay (480 lignes)
 - **Total:** 760 lignes
 
 **Jour 2 (2 composants):**
+
 - ServicesList (560 lignes)
 - ServicePackageManager (690 lignes)
 - **Total:** 1,250 lignes
 
 **Jour 3 (2 composants):**
+
 - BookingHistory (700 lignes)
 - BulkServiceUpdate (620 lignes)
 - **Total:** 1,320 lignes
@@ -198,6 +211,7 @@
 ### Week 2 - Hooks & Features
 
 **Jour 4 (4 hooks):**
+
 - useServices (100 lignes)
 - useBookings (150 lignes)
 - useServiceAlerts (380 lignes)
@@ -205,12 +219,14 @@
 - **Total:** 980 lignes
 
 **Jour 5 (3 composants):**
+
 - RecurringBookingManager (550 lignes)
 - WaitlistManager (480 lignes)
 - ServiceBundleBuilder (660 lignes)
 - **Total:** 1,690 lignes
 
 **Jour 6 (2 dashboards):**
+
 - ServicesDashboard (500 lignes)
 - BookingsDashboard (530 lignes)
 - **Total:** 1,030 lignes
@@ -221,7 +237,7 @@
 
 **Total composants:** 15  
 **Total hooks:** 6  
-**Total lignes:** ~7,030  
+**Total lignes:** ~7,030
 
 **Ratio Physical/Services:** ~68% (suffisant car Services ≠ Physical complexity)
 
@@ -230,6 +246,7 @@
 ## ✅ CRITÈRES DE QUALITÉ
 
 Chaque composant doit avoir:
+
 - ✅ TypeScript 100%
 - ✅ 0 erreurs de linting
 - ✅ Props bien typées
@@ -248,4 +265,3 @@ Créer un **système Services professionnel** au même niveau de qualité que Ph
 ---
 
 **Next:** Jour 1 - ServiceStatusIndicator + BookingInfoDisplay
-

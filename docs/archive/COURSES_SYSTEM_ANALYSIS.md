@@ -20,6 +20,7 @@
 #### Composants existants (24):
 
 **Dossier `create/` (8):**
+
 1. ✅ CreateCourseWizard
 2. ✅ CourseBasicInfoForm
 3. ✅ CourseCurriculumBuilder
@@ -30,32 +31,19 @@
 8. ✅ CoursePixelsConfig
 9. ✅ VideoUploader
 
-**Dossier `detail/` (2):**
-10. ✅ CourseCurriculum
-11. ✅ CourseProgressBar
+**Dossier `detail/` (2):** 10. ✅ CourseCurriculum 11. ✅ CourseProgressBar
 
-**Dossier `player/` (2):**
-12. ✅ VideoPlayer
-13. ✅ LessonCompletionButton
+**Dossier `player/` (2):** 12. ✅ VideoPlayer 13. ✅ LessonCompletionButton
 
-**Dossier `quiz/` (4):**
-14. ✅ QuizBuilder
-15. ✅ QuizContainer
-16. ✅ QuizTaker
-17. ✅ QuizResults
+**Dossier `quiz/` (4):** 14. ✅ QuizBuilder 15. ✅ QuizContainer 16. ✅ QuizTaker 17. ✅ QuizResults
 
-**Dossier `certificates/` (2):**
-18. ✅ CertificateGenerator
-19. ✅ CertificateTemplate
+**Dossier `certificates/` (2):** 18. ✅ CertificateGenerator 19. ✅ CertificateTemplate
 
-**Dossier `analytics/` (1):**
-20. ✅ CourseAnalyticsDashboard
+**Dossier `analytics/` (1):** 20. ✅ CourseAnalyticsDashboard
 
-**Dossier `marketplace/` (1):**
-21. ✅ CourseCard
+**Dossier `marketplace/` (1):** 21. ✅ CourseCard
 
-**Dossier `shared/` (1):**
-22. ✅ CourseLoadingState
+**Dossier `shared/` (1):** 22. ✅ CourseLoadingState
 
 **Total estimé:** ~4,000 lignes (50% du niveau Services)
 
@@ -66,6 +54,7 @@
 ### 🎯 PRIORITÉ HAUTE - Semaine 1 (Jours 1-3)
 
 #### JOUR 1 - Indicateurs & Affichage:
+
 1. **CourseStatusIndicator** (équivalent ServiceStatusIndicator)
    - 3 variants: Compact, Default, Detailed
    - Statuts: draft, published, in_progress, completed, archived
@@ -81,6 +70,7 @@
    - Payment information
 
 #### JOUR 2 - Listes & Gestion:
+
 3. **CoursesList** (équivalent ServicesList)
    - Liste complète avec stats
    - Filtres (status, category, instructor)
@@ -97,6 +87,7 @@
    - Discount management
 
 #### JOUR 3 - Historique & Updates:
+
 5. **EnrollmentHistory** (équivalent BookingHistory)
    - Historique complet des inscriptions
    - 7 types d'événements
@@ -116,41 +107,46 @@
 ### 🎯 PRIORITÉ MOYENNE - Semaine 2 (Jours 4-5)
 
 #### JOUR 4 - Hooks & Logic:
+
 7. **useCourses** (CRUD courses)
 8. **useEnrollments** (CRUD enrollments)
 9. **useCourseAlerts** (alertes capacité/deadline)
 10. **useCourseReports** (4 types rapports)
 
 #### JOUR 5 - Features Avancées:
+
 11. **StudentProgressManager** (suivi détaillé)
-   - Progress tracking
-   - Completion certificates
-   - Milestone notifications
-   - Performance analytics
+
+- Progress tracking
+- Completion certificates
+- Milestone notifications
+- Performance analytics
 
 12. **CourseAccessManager** (contrôle d'accès)
-   - Drip content
-   - Prerequisites management
-   - Time-based access
-   - Geographic restrictions
+
+- Drip content
+- Prerequisites management
+- Time-based access
+- Geographic restrictions
 
 13. **CourseBundleBuilder** (packs de cours)
-   - Multi-course bundles
-   - Learning paths
-   - Special pricing
-   - Cross-sells
+
+- Multi-course bundles
+- Learning paths
+- Special pricing
+- Cross-sells
 
 ---
 
 ### 🎯 PRIORITÉ SPÉCIALE - Semaine 3 (Jour 6)
 
 #### JOUR 6 - Dashboards:
+
 14. **CoursesDashboard** (dashboard complet)
     - Vue d'ensemble
     - Enrollments récents
     - Revenue tracking
     - Student analytics
-    
 15. **StudentsDashboard** (dashboard étudiants)
     - Student lifecycle
     - Progress overview
@@ -162,6 +158,7 @@
 ## 🔧 HOOKS À CRÉER (4)
 
 ### Essentiels:
+
 1. **useCourses.ts**
    - CRUD courses
    - Publish/Unpublish
@@ -191,16 +188,19 @@
 ### Week 1 - Composants Essentiels
 
 **Jour 1 (2 composants):**
+
 - CourseStatusIndicator (320 lignes)
 - EnrollmentInfoDisplay (520 lignes)
 - **Total:** 840 lignes
 
 **Jour 2 (2 composants):**
+
 - CoursesList (620 lignes)
 - CoursePackageManager (740 lignes)
 - **Total:** 1,360 lignes
 
 **Jour 3 (2 composants):**
+
 - EnrollmentHistory (600 lignes)
 - BulkCourseUpdate (650 lignes)
 - **Total:** 1,250 lignes
@@ -208,6 +208,7 @@
 ### Week 2 - Hooks & Features
 
 **Jour 4 (4 hooks):**
+
 - useCourses (160 lignes)
 - useEnrollments (240 lignes)
 - useCourseAlerts (400 lignes)
@@ -215,12 +216,14 @@
 - **Total:** 1,180 lignes
 
 **Jour 5 (3 composants):**
+
 - StudentProgressManager (580 lignes)
 - CourseAccessManager (520 lignes)
 - CourseBundleBuilder (680 lignes)
 - **Total:** 1,780 lignes
 
 **Jour 6 (2 dashboards):**
+
 - CoursesDashboard (540 lignes)
 - StudentsDashboard (560 lignes)
 - **Total:** 1,100 lignes
@@ -231,7 +234,7 @@
 
 **Total composants manquants:** 15  
 **Total hooks:** 4  
-**Total lignes à créer:** ~7,510  
+**Total lignes à créer:** ~7,510
 
 **Système existant:** ~4,000 lignes  
 **Système final:** ~11,510 lignes
@@ -243,6 +246,7 @@
 ## ✅ CRITÈRES DE QUALITÉ
 
 Chaque composant doit avoir:
+
 - ✅ TypeScript 100%
 - ✅ 0 erreurs de linting
 - ✅ Props bien typées
@@ -306,6 +310,7 @@ Ces composants existants sont spécifiques aux courses et n'ont pas d'équivalen
 ## 📋 FONCTIONNALITÉS PAR RAPPORT AUX RÉFÉRENCES
 
 ### Physical Products (Référence):
+
 - ✅ Inventory management → **Enrollment management**
 - ✅ Shipping tracking → **Progress tracking**
 - ✅ Stock alerts → **Capacity/deadline alerts**
@@ -314,6 +319,7 @@ Ces composants existants sont spécifiques aux courses et n'ont pas d'équivalen
 - ✅ Product bundles → **Course bundles/paths**
 
 ### Services (Référence):
+
 - ✅ Service status → **Course status**
 - ✅ Booking info → **Enrollment info**
 - ✅ Services list → **Courses list**
@@ -327,6 +333,7 @@ Ces composants existants sont spécifiques aux courses et n'ont pas d'équivalen
 ## 🎯 OBJECTIF FINAL
 
 Créer un **système Courses professionnel** au niveau de Physical Products et Services, adapté aux spécificités de l'e-learning:
+
 - Gestion complète des cours
 - Suivi détaillé des étudiants
 - Analytics avancées
@@ -338,4 +345,3 @@ Créer un **système Courses professionnel** au niveau de Physical Products et S
 **Next:** Jour 1 - CourseStatusIndicator + EnrollmentInfoDisplay
 
 **Estimation totale:** 7,510 lignes de code professionnel en 6 jours
-

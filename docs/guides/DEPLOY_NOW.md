@@ -33,15 +33,18 @@ git push origin main
 ### ÉTAPE 2 : DÉPLOYER VERCEL (15 min)
 
 #### A. Créer compte (si pas déjà fait)
+
 👉 https://vercel.com/signup  
 → Se connecter avec GitHub
 
 #### B. Import projet
+
 1. Cliquer **"Add New..."** → **"Project"**
 2. Sélectionner `payhuk`
 3. Cliquer **"Import"**
 
 #### C. Configuration automatique
+
 ```
 Framework Preset: Vite ✅ (auto-détecté)
 Build Command: npm run build ✅
@@ -49,6 +52,7 @@ Output Directory: dist ✅
 ```
 
 #### D. Ajouter variables
+
 Cliquer **"Environment Variables"** :
 
 ```env
@@ -61,6 +65,7 @@ VITE_APP_ENV = production
 💡 **Où trouver ?** Supabase Dashboard → Settings → API
 
 #### E. Deploy !
+
 Cliquer **"Deploy"**  
 ☕ Attendre 2-3 minutes...
 
@@ -110,15 +115,16 @@ Cliquer **"Save"**
 
 ### Guides Disponibles
 
-| Guide | Durée | Pour qui ? |
-|-------|-------|-----------|
-| **DEPLOY_QUICK_START.md** | 30 min | Débutants |
-| **DEPLOYMENT_PRODUCTION_GUIDE.md** | 1h30 | Complet + domaine |
-| **PRODUCTION_CHECKLIST.md** | - | Validation finale |
+| Guide                              | Durée  | Pour qui ?        |
+| ---------------------------------- | ------ | ----------------- |
+| **DEPLOY_QUICK_START.md**          | 30 min | Débutants         |
+| **DEPLOYMENT_PRODUCTION_GUIDE.md** | 1h30   | Complet + domaine |
+| **PRODUCTION_CHECKLIST.md**        | -      | Validation finale |
 
 ### Problèmes Courants
 
 **❌ Build failed**
+
 ```bash
 # Vérifier en local d'abord
 npm install
@@ -126,6 +132,7 @@ npm run build
 ```
 
 **❌ Variables pas chargées**
+
 ```bash
 # Vercel → Settings → Environment Variables
 # Cocher "Production" ET "Preview"
@@ -133,6 +140,7 @@ npm run build
 ```
 
 **❌ CORS error**
+
 ```bash
 # Supabase → Settings → API → CORS
 # Ajouter URL Vercel (sans / à la fin)
@@ -145,6 +153,7 @@ npm run build
 ### Avoir votre propre domaine : `payhuk.com`
 
 **1. Acheter domaine** (~$10/an)
+
 - Namecheap.com
 - GoDaddy.com
 - OVH.com
@@ -152,6 +161,7 @@ npm run build
 **2. Configurer DNS**
 
 Chez votre registrar :
+
 ```
 Type    Name    Value
 A       @       76.76.21.21
@@ -161,6 +171,7 @@ CNAME   www     cname.vercel-dns.com
 **3. Ajouter dans Vercel**
 
 Vercel → Settings → Domains → Add :
+
 ```
 payhuk.com
 ```
@@ -172,6 +183,7 @@ payhuk.com
 ✅ www → non-www redirect
 
 **5. Mettre à jour Supabase**
+
 ```
 Site URL: https://payhuk.com
 ```
@@ -200,16 +212,19 @@ Avant de dire "C'est en ligne !" :
 ## 📊 APRÈS LE DÉPLOIEMENT
 
 ### Jour 1
+
 - [ ] Tester toutes les fonctionnalités
 - [ ] Créer 2-3 cours de démo
 - [ ] Inviter beta testers
 
 ### Semaine 1
+
 - [ ] Configurer Google Analytics
 - [ ] Ajouter pages légales (CGU, confidentialité)
 - [ ] Optimiser images
 
 ### Mois 1
+
 - [ ] Marketing (social media)
 - [ ] Email marketing setup
 - [ ] Collecter feedback utilisateurs
@@ -240,6 +255,7 @@ Avant de dire "C'est en ligne !" :
 ## 🎊 FÉLICITATIONS !
 
 **Vous avez construit une plateforme comparable à :**
+
 - ✅ Udemy
 - ✅ Teachable
 - ✅ Kajabi
@@ -273,4 +289,3 @@ git push origin main
 → Ouvrir `DEPLOY_QUICK_START.md`
 
 **Prêt ?** LET'S GO ! 🚀
-

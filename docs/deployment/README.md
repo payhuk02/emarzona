@@ -45,15 +45,17 @@ Cette section contient tous les guides de déploiement et configuration de produ
 ## 🔍 Recherche par Sujet
 
 ### Vercel
+
 - Guides de déploiement sur Vercel
 
 ### Moneroo
+
 - Guides spécifiques au déploiement Moneroo
 
 ### Production
+
 - Guides pour la production
 
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

@@ -152,4 +152,3 @@ Pour contribuer à la documentation :
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

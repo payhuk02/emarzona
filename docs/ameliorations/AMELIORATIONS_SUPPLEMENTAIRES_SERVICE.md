@@ -390,4 +390,3 @@ Les améliorations supplémentaires apportent :
 
 _Document créé le 1 Février 2025_  
 _Toutes les améliorations bonus terminées ✅_
-

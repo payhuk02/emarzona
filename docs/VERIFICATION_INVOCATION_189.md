@@ -58,7 +58,7 @@ LIMIT 10;
 Exécutez cette requête pour vérifier si la campagne répond aux critères :
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -72,6 +72,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Vérifications** :
+
 - `status` doit être `'scheduled'` ✅
 - `is_due` doit être `true` (scheduled_at <= NOW()) ⚠️
 - `has_template` doit être `true` (template_id IS NOT NULL) ⚠️
@@ -81,7 +82,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 Si `scheduled_at` est dans le futur, la campagne ne sera pas traitée. Vérifiez :
 
 ```sql
-SELECT 
+SELECT
   scheduled_at,
   NOW() as current_time,
   scheduled_at <= NOW() as is_due,
@@ -99,11 +100,13 @@ Si `is_due` est `false`, la campagne est programmée pour le futur et ne sera pa
 ### Problème 1 : Invocation 200 OK mais Campagne Non Traitée
 
 **Causes possibles** :
+
 1. **`scheduled_at` dans le futur** : La campagne est programmée pour plus tard
 2. **`template_id` manquant** : La campagne n'a pas de template
 3. **Aucune campagne trouvée** : L'Edge Function n'a trouvé aucune campagne à traiter
 
 **Solution** :
+
 - Vérifier les critères de la campagne (voir section 3.B)
 - Si `scheduled_at` est dans le futur, attendre ou modifier `scheduled_at` pour le passé
 
@@ -112,6 +115,7 @@ Si `is_due` est `false`, la campagne est programmée pour le futur et ne sera pa
 **Cause** : Le header `Authorization` n'est pas correctement envoyé ou reçu
 
 **Solution** :
+
 - Vérifier que le cron job contient bien le header `Authorization`
 - Vérifier les logs de l'Edge Function pour voir les headers reçus
 
@@ -120,6 +124,7 @@ Si `is_due` est `false`, la campagne est programmée pour le futur et ne sera pa
 **Cause** : Erreur dans le code de l'Edge Function
 
 **Solution** :
+
 - Vérifier les logs de l'Edge Function pour voir l'erreur exacte
 - Vérifier que `send-email-campaign` est bien déployée
 
@@ -137,5 +142,3 @@ Si `is_due` est `false`, la campagne est programmée pour le futur et ne sera pa
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

@@ -1,4 +1,5 @@
 # ✅ RÉSUMÉ CORRECTIONS CRITIQUES - PHASE 2
+
 ## Date : 28 Février 2025
 
 ---
@@ -16,6 +17,7 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 #### Modifications
 
 **Fichiers corrigés** :
+
 - ✅ `src/components/admin/AdminLayout.tsx`
   - Bouton toggle sidebar : `aria-label` ajouté
   - Icônes : `aria-hidden="true"` ajouté
@@ -33,6 +35,7 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
   - Icônes avec `aria-hidden="true"`
 
 **Impact** :
+
 - **8 boutons icon-only critiques corrigés** sur 164 identifiés
 - **Progression** : ~5% des corrections ARIA
 
@@ -43,16 +46,19 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 #### 2.1 Prefetch Routes
 
 **Hook créé** : `src/hooks/usePrefetchRoutes.ts`
+
 - ✅ Prefetch intelligent des routes critiques
 - ✅ Prefetch au hover pour routes moins critiques
 - ✅ Délai de 2s pour ne pas bloquer le chargement initial
 - ✅ Intégré dans `App.tsx`
 
 **Resource Hints** (`index.html`) :
+
 - ✅ Prefetch pour routes critiques (Dashboard, Marketplace, Cart)
 - ✅ Preconnect pour CDN et API externes
 
 **Impact attendu** :
+
 - **FCP** : Amélioration de 5-10%
 - **LCP** : Amélioration de 10-15%
 - **Navigation** : Plus fluide
@@ -64,12 +70,14 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 #### État Actuel
 
 **Composants existants** :
+
 - ✅ `OptimizedImage` : Support WebP, srcSet responsive, lazy loading
 - ✅ `image-transform.ts` : Transformation Supabase avec détection AVIF/WebP
 - ✅ `image-optimization.ts` : Compression avant upload
 - ✅ `useImageOptimization` : Hook pour optimisation
 
 **Améliorations** :
+
 - ✅ Détection AVIF améliorée dans `image-transform.ts`
 - ✅ Priorité : AVIF > WebP > Original
 - ✅ Support AVIF (format le plus moderne, ~50% meilleur que WebP)
@@ -80,27 +88,30 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 
 ## 📊 PROGRESSION
 
-| Priorité | Phase 1 | Phase 2 | Total |
-|----------|---------|---------|-------|
-| **Bundle Principal** | 40% | 0% | 40% |
-| **Web Vitals** | 30% | 25% | 55% |
-| **ARIA Labels** | 50% | 5% | 55% |
+| Priorité             | Phase 1 | Phase 2 | Total |
+| -------------------- | ------- | ------- | ----- |
+| **Bundle Principal** | 40%     | 0%      | 40%   |
+| **Web Vitals**       | 30%     | 25%     | 55%   |
+| **ARIA Labels**      | 50%     | 5%      | 55%   |
 
 ---
 
 ## 🎯 PROCHAINES ÉTAPES
 
 ### Phase 3 : ARIA Labels (Priorité)
+
 1. [ ] Corriger les 156 boutons icon-only restants
 2. [ ] Prioriser les top 10 fichiers identifiés
 3. [ ] Vérifier avec axe DevTools
 
 ### Phase 3 : Bundle Principal
+
 1. [ ] Analyser le bundle après build
 2. [ ] Optimiser les imports d'icônes (lucide-react)
 3. [ ] Vérifier taille finale (< 300 KB)
 
 ### Phase 3 : Web Vitals
+
 1. [ ] Mesurer les Web Vitals après optimisations
 2. [ ] Optimiser le chargement des polices si nécessaire
 3. [ ] Vérifier les métriques Lighthouse
@@ -126,4 +137,3 @@ Continuer les corrections critiques : ARIA labels, optimisation images, prefetch
 ---
 
 **Dernière mise à jour** : 28 Février 2025
-

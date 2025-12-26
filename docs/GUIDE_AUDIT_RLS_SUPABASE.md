@@ -30,7 +30,7 @@ Exécuter dans Supabase SQL Editor:
 
 ```sql
 -- Lister toutes les tables
-SELECT 
+SELECT
   schemaname,
   tablename,
   tableowner
@@ -43,7 +43,7 @@ ORDER BY tablename;
 
 ```sql
 -- Vérifier si RLS est activé sur chaque table
-SELECT 
+SELECT
   schemaname,
   tablename,
   rowsecurity as rls_enabled
@@ -52,7 +52,7 @@ WHERE schemaname = 'public'
 ORDER BY tablename;
 
 -- Lister toutes les politiques RLS existantes
-SELECT 
+SELECT
   schemaname,
   tablename,
   policyname,
@@ -70,7 +70,7 @@ ORDER BY tablename, policyname;
 
 ```sql
 -- Tables sans RLS activé
-SELECT 
+SELECT
   t.tablename,
   t.rowsecurity as rls_enabled,
   COUNT(p.policyname) as policy_count
@@ -155,8 +155,8 @@ DECLARE
 BEGIN
   RAISE NOTICE '=== AUDIT RLS ===';
   RAISE NOTICE '';
-  
-  FOR table_record IN 
+
+  FOR table_record IN
     SELECT tablename, rowsecurity
     FROM pg_tables
     WHERE schemaname = 'public'
@@ -165,7 +165,7 @@ BEGIN
     SELECT COUNT(*) INTO policy_count
     FROM pg_policies
     WHERE schemaname = 'public' AND tablename = table_record.tablename;
-    
+
     IF table_record.rowsecurity = false THEN
       RAISE NOTICE '⚠️  Table: % - RLS DÉSACTIVÉ', table_record.tablename;
     ELSIF policy_count = 0 THEN
@@ -174,7 +174,7 @@ BEGIN
       RAISE NOTICE '✅ Table: % - RLS activé avec % politique(s)', table_record.tablename, policy_count;
     END IF;
   END LOOP;
-  
+
   RAISE NOTICE '';
   RAISE NOTICE '=== FIN AUDIT ===';
 END $$;
@@ -253,11 +253,13 @@ Documenter chaque politique dans un fichier `supabase/rls-policies.md`:
 ## Table: products
 
 ### Politique: "Products are viewable by everyone"
+
 - **Type**: SELECT
 - **Condition**: `is_active = true`
 - **Description**: Tous les utilisateurs peuvent voir les produits actifs
 
 ### Politique: "Vendors can update their own products"
+
 - **Type**: UPDATE
 - **Condition**: Vendeur propriétaire de la boutique
 - **Description**: Seuls les vendeurs peuvent modifier leurs produits
@@ -306,5 +308,4 @@ Après l'audit complet:
 
 ---
 
-*Dernière mise à jour: 2025-01-30*
-
+_Dernière mise à jour: 2025-01-30_

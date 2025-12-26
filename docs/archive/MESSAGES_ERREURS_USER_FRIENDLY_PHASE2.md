@@ -16,6 +16,7 @@ Implémentation d'un système de messages d'erreur user-friendly avec contexte, 
 ### 1. Système de Messages User-Friendly
 
 #### `src/lib/user-friendly-errors.ts` (nouveau)
+
 - ✅ **Messages contextuels** : Messages adaptés selon le type d'erreur
 - ✅ **Suggestions d'actions** : Actions suggérées pour résoudre l'erreur
 - ✅ **Messages par contexte** : Messages spécifiques par opération (product.create, order.payment, etc.)
@@ -23,6 +24,7 @@ Implémentation d'un système de messages d'erreur user-friendly avec contexte, 
 - ✅ **Durée d'affichage** : Durée adaptée selon la sévérité
 
 #### Types d'Actions Suggérées
+
 - ✅ `retry` : Réessayer l'opération
 - ✅ `refresh` : Rafraîchir la page
 - ✅ `check-connection` : Vérifier la connexion
@@ -36,6 +38,7 @@ Implémentation d'un système de messages d'erreur user-friendly avec contexte, 
 ### 2. Composant UserFriendlyErrorToast
 
 #### `src/components/errors/UserFriendlyErrorToast.tsx` (nouveau)
+
 - ✅ **Affichage structuré** : Titre, description, aide
 - ✅ **Actions cliquables** : Boutons pour actions suggérées
 - ✅ **Détails techniques** : Section pliable pour debug
@@ -45,6 +48,7 @@ Implémentation d'un système de messages d'erreur user-friendly avec contexte, 
 ### 3. Intégration dans Hooks
 
 #### Hooks Améliorés
+
 - ✅ **`useMutationWithRetry`** : Utilise `getUserFriendlyError()` pour les toasts
 - ✅ **`useQueryWithErrorHandling`** : Utilise `getUserFriendlyError()` pour les toasts
 
@@ -53,12 +57,14 @@ Implémentation d'un système de messages d'erreur user-friendly avec contexte, 
 ## 📊 COMPARAISON AVANT/APRÈS
 
 ### Avant
+
 - ❌ Messages génériques : "Erreur", "Une erreur s'est produite"
 - ❌ Pas de suggestions d'actions
 - ❌ Pas de contexte spécifique
 - ❌ Pas d'aide pour résoudre l'erreur
 
 ### Après
+
 - ✅ **Messages contextuels** : Messages adaptés selon le type d'erreur
 - ✅ **Suggestions d'actions** : Actions cliquables pour résoudre
 - ✅ **Contexte spécifique** : Messages par opération
@@ -79,7 +85,7 @@ try {
 } catch (error) {
   const normalized = normalizeError(error);
   const friendly = getUserFriendlyError(normalized);
-  
+
   toast({
     title: friendly.title,
     description: friendly.description,
@@ -107,13 +113,13 @@ const error = getUserFriendlyError(normalized, { operation: 'order.payment' });
 
 <UserFriendlyErrorToast
   error={error}
-  onAction={(action) => {
+  onAction={action => {
     if (action === 'retry') {
       // Réessayer l'opération
     }
   }}
   showTechnical={true}
-/>
+/>;
 ```
 
 ---
@@ -121,10 +127,12 @@ const error = getUserFriendlyError(normalized, { operation: 'order.payment' });
 ## 📁 FICHIERS CRÉÉS/MODIFIÉS
 
 ### Nouveaux Fichiers
+
 - ✅ `src/lib/user-friendly-errors.ts` (créé)
 - ✅ `src/components/errors/UserFriendlyErrorToast.tsx` (créé)
 
 ### Fichiers Modifiés
+
 - ✅ `src/hooks/useMutationWithRetry.ts` (intégration messages user-friendly)
 - ✅ `src/hooks/useQueryWithErrorHandling.ts` (intégration messages user-friendly)
 
@@ -134,29 +142,29 @@ const error = getUserFriendlyError(normalized, { operation: 'order.payment' });
 
 ### Messages par Type d'Erreur
 
-| Type | Titre | Actions Suggérées |
-|------|-------|-------------------|
-| `NETWORK_ERROR` | Problème de connexion | check-connection, retry |
-| `TIMEOUT_ERROR` | Temps d'attente dépassé | retry, check-connection |
-| `PERMISSION_DENIED` | Accès refusé | check-permissions, contact-support |
-| `UNAUTHORIZED` | Session expirée | login, refresh |
-| `NOT_FOUND` | Ressource introuvable | refresh, contact-support |
-| `VALIDATION_ERROR` | Données invalides | check-input |
-| `CONSTRAINT_VIOLATION` | Données en conflit | check-input |
-| `CRITICAL_ERROR` | Erreur critique | refresh, clear-cache, contact-support |
+| Type                   | Titre                   | Actions Suggérées                     |
+| ---------------------- | ----------------------- | ------------------------------------- |
+| `NETWORK_ERROR`        | Problème de connexion   | check-connection, retry               |
+| `TIMEOUT_ERROR`        | Temps d'attente dépassé | retry, check-connection               |
+| `PERMISSION_DENIED`    | Accès refusé            | check-permissions, contact-support    |
+| `UNAUTHORIZED`         | Session expirée         | login, refresh                        |
+| `NOT_FOUND`            | Ressource introuvable   | refresh, contact-support              |
+| `VALIDATION_ERROR`     | Données invalides       | check-input                           |
+| `CONSTRAINT_VIOLATION` | Données en conflit      | check-input                           |
+| `CRITICAL_ERROR`       | Erreur critique         | refresh, clear-cache, contact-support |
 
 ### Messages par Contexte
 
-| Contexte | Titre | Description |
-|----------|-------|-------------|
-| `product.create` | Impossible de créer le produit | Vérifiez les informations saisies |
-| `product.update` | Impossible de mettre à jour | Vérifiez les modifications |
-| `product.delete` | Impossible de supprimer | Peut-être utilisé dans des commandes |
-| `order.create` | Impossible de créer la commande | Vérifiez votre panier |
-| `order.payment` | Paiement échoué | Vérifiez vos informations de paiement |
-| `upload.file` | Téléchargement échoué | Fichier trop volumineux ou erreur |
-| `auth.login` | Connexion échouée | Identifiants incorrects |
-| `auth.register` | Inscription échouée | Email déjà utilisé |
+| Contexte         | Titre                           | Description                           |
+| ---------------- | ------------------------------- | ------------------------------------- |
+| `product.create` | Impossible de créer le produit  | Vérifiez les informations saisies     |
+| `product.update` | Impossible de mettre à jour     | Vérifiez les modifications            |
+| `product.delete` | Impossible de supprimer         | Peut-être utilisé dans des commandes  |
+| `order.create`   | Impossible de créer la commande | Vérifiez votre panier                 |
+| `order.payment`  | Paiement échoué                 | Vérifiez vos informations de paiement |
+| `upload.file`    | Téléchargement échoué           | Fichier trop volumineux ou erreur     |
+| `auth.login`     | Connexion échouée               | Identifiants incorrects               |
+| `auth.register`  | Inscription échouée             | Email déjà utilisé                    |
 
 ---
 
@@ -187,16 +195,19 @@ const error = getUserFriendlyError(normalized, { operation: 'order.payment' });
 ## ⚠️ NOTES IMPORTANTES
 
 ### Messages Contextuels
+
 - ✅ **Opération** : Messages spécifiques selon l'opération
 - ✅ **Ressource** : Messages adaptés selon la ressource
 - ✅ **Champ** : Messages spécifiques pour validation de champs
 
 ### Actions Suggérées
+
 - ✅ **Cliquables** : Boutons pour actions dans le composant
 - ✅ **Par défaut** : Actions par défaut si pas de callback
 - ✅ **Flexibles** : Support pour actions personnalisées
 
 ### Intégration
+
 - ✅ **Automatique** : Intégré dans hooks existants
 - ✅ **Rétrocompatible** : Compatible avec système existant
 - ✅ **Extensible** : Facile d'ajouter nouveaux messages
@@ -213,4 +224,3 @@ const error = getUserFriendlyError(normalized, { operation: 'order.payment' });
 
 **Date de complétion** : 28 Janvier 2025  
 **Version** : 1.0.0
-

@@ -47,7 +47,9 @@ import autoTable from 'jspdf-autotable';
 
 export async function generatePDF() {
   const doc = new jsPDF();
-  autoTable(doc, { /* ... */ });
+  autoTable(doc, {
+    /* ... */
+  });
 }
 ```
 
@@ -59,7 +61,9 @@ import { loadPDFModules } from '@/lib/pdf-loader';
 export async function generatePDF() {
   const { jsPDF, autoTable } = await loadPDFModules();
   const doc = new jsPDF();
-  autoTable(doc, { /* ... */ });
+  autoTable(doc, {
+    /* ... */
+  });
 }
 ```
 
@@ -200,15 +204,15 @@ export function ExportButton() {
     try {
       const { jsPDF, autoTable } = await loadPDFModules();
       const doc = new jsPDF();
-      
+
       // Générer le PDF
       autoTable(doc, { /* ... */ });
-      
+
       doc.save('export.pdf');
       toast({ title: 'Export réussi' });
     } catch (error) {
-      toast({ 
-        title: 'Erreur', 
+      toast({
+        title: 'Erreur',
         description: 'Impossible d\'exporter le PDF',
         variant: 'destructive'
       });
@@ -232,8 +236,8 @@ import { OptimizedImg } from '@/components/shared/OptimizedImg';
 export function ProductCard({ image, name }) {
   return (
     <div>
-      <OptimizedImg 
-        src={image} 
+      <OptimizedImg
+        src={image}
         alt={name}
         priority={false} // lazy par défaut
       />
@@ -254,4 +258,3 @@ export function ProductCard({ image, name }) {
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

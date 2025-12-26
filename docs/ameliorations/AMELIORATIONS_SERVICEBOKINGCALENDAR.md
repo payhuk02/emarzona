@@ -198,4 +198,3 @@ Total: 20 événements
 
 _Améliorations terminées le 2 Février 2025_  
 _Toutes les erreurs corrigées ✅_
-

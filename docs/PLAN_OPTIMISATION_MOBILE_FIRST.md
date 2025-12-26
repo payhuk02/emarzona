@@ -74,6 +74,7 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 **Objectif :** Transformer la sidebar en drawer sur mobile
 
 **Actions :**
+
 - [ ] Créer un composant `MobileSidebarDrawer`
 - [ ] Utiliser Sheet/Drawer de Radix UI
 - [ ] Ajouter un bouton hamburger dans TopNavigationBar
@@ -81,6 +82,7 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 - [ ] Animation slide-in depuis la gauche
 
 **Fichiers à modifier :**
+
 - `src/components/layout/MainLayout.tsx`
 - `src/components/AppSidebar.tsx`
 - `src/components/layout/TopNavigationBar.tsx`
@@ -90,12 +92,14 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 **Objectif :** Navigation claire et compacte sur mobile
 
 **Actions :**
+
 - [ ] Réduire les éléments visibles sur mobile
 - [ ] Menu hamburger pour navigation principale
 - [ ] Actions importantes toujours visibles
 - [ ] Safe areas respectées
 
 **Fichiers à modifier :**
+
 - `src/components/layout/TopNavigationBar.tsx`
 
 ### Phase 2 : Formulaires (Priorité HAUTE)
@@ -105,6 +109,7 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 **Objectif :** Tous les formulaires optimisés pour mobile
 
 **Actions :**
+
 - [ ] Créer un composant `MobileFormField`
 - [ ] Labels toujours visibles
 - [ ] Champs full-width sur mobile
@@ -112,6 +117,7 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 - [ ] Groupement logique des sections
 
 **Fichiers à créer/modifier :**
+
 - `src/components/ui/mobile-form-field.tsx`
 - Tous les fichiers de formulaires
 
@@ -122,12 +128,14 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 **Objectif :** Afficher les tableaux sous forme de cartes sur mobile
 
 **Actions :**
+
 - [ ] Créer un composant `MobileTableCard`
 - [ ] Détecter mobile et afficher cartes
 - [ ] Desktop: tableau classique
 - [ ] Pagination mobile-friendly
 
 **Fichiers à créer/modifier :**
+
 - `src/components/ui/mobile-table-card.tsx`
 - Tous les composants de tableaux
 
@@ -138,12 +146,14 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 **Objectif :** Utiliser BottomSheet sur mobile, Dialog sur desktop
 
 **Actions :**
+
 - [ ] Créer un hook `useResponsiveModal`
 - [ ] Détecter mobile et utiliser BottomSheet
 - [ ] Desktop: Dialog classique
 - [ ] Migration progressive des modales existantes
 
 **Fichiers à créer/modifier :**
+
 - `src/hooks/use-responsive-modal.tsx`
 - Modales existantes
 
@@ -154,12 +164,14 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 **Objectif :** Images optimisées pour mobile
 
 **Actions :**
+
 - [ ] Lazy loading systématique
 - [ ] Formats WebP avec fallback
 - [ ] Ratios fixes pour éviter layout shift
 - [ ] Skeleton loading
 
 **Fichiers à modifier :**
+
 - Composants avec images
 - `src/components/ui/lazy-image.tsx` (à créer)
 
@@ -201,4 +213,3 @@ Ce document détaille le plan complet d'optimisation mobile-first pour transform
 - **Prévenir le zoom iOS** (font-size ≥ 16px sur inputs)
 - **Performance first** - Optimiser pour connexions lentes
 - **Accessibilité** - WCAG 2.1 AA minimum
-

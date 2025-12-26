@@ -17,6 +17,7 @@ Créer des hooks intelligents pour React Query qui combinent les meilleures prat
 **Fichier** : `src/hooks/useSmartQuery.ts`
 
 **Fonctionnalités** :
+
 - ✅ **Stratégies de cache intelligentes** : Utilise automatiquement la stratégie optimale selon le type de données (products, orders, search, etc.)
 - ✅ **Cache LocalStorage** : Option pour utiliser le cache LocalStorage en plus du cache React Query
 - ✅ **Prefetching intelligent** : Prefetch automatique de la page suivante pour les requêtes paginées
@@ -26,12 +27,14 @@ Créer des hooks intelligents pour React Query qui combinent les meilleures prat
 - ✅ **Hooks spécialisés** : `useSmartProductQuery`, `useSmartOrderQuery`, `useSmartSearchQuery`
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~40-50% pour les requêtes
 - 🟢 Meilleure performance grâce aux stratégies de cache optimisées
 - 🟢 UX améliorée avec prefetching et cache LocalStorage
 - 🟢 Gestion d'erreurs cohérente dans toute l'application
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 const { data, isLoading, error } = useQuery({
@@ -40,7 +43,7 @@ const { data, isLoading, error } = useQuery({
   staleTime: 10 * 60 * 1000,
   gcTime: 30 * 60 * 1000,
   retry: 2,
-  onError: (error) => {
+  onError: error => {
     toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
   },
 });
@@ -63,6 +66,7 @@ const { data, isLoading, error } = useSmartQuery({
 **Fichier** : `src/hooks/useSmartMutation.ts`
 
 **Fonctionnalités** :
+
 - ✅ **Optimistic updates** : Mise à jour optimiste des données avant la réponse serveur
 - ✅ **Invalidation automatique** : Invalide automatiquement les requêtes spécifiées après succès
 - ✅ **Toasts automatiques** : Affiche automatiquement des toasts de succès/erreur
@@ -71,28 +75,30 @@ const { data, isLoading, error } = useSmartQuery({
 - ✅ **Hooks spécialisés** : `useSmartCreateMutation`, `useSmartUpdateMutation`, `useSmartDeleteMutation`
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~50-60% pour les mutations
 - 🟢 UX améliorée avec optimistic updates
 - 🟢 Gestion d'erreurs cohérente
 - 🟢 Code plus maintenable
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 const mutation = useMutation({
-  mutationFn: (data) => createProduct(data),
-  onSuccess: (data) => {
+  mutationFn: data => createProduct(data),
+  onSuccess: data => {
     queryClient.invalidateQueries(['products']);
     toast({ title: 'Succès', description: 'Produit créé' });
   },
-  onError: (error) => {
+  onError: error => {
     toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
   },
 });
 
 // Nouveau code
 const { mutate, isLoading } = useSmartMutation({
-  mutationFn: (data) => createProduct(data),
+  mutationFn: data => createProduct(data),
   invalidateQueries: [['products']],
   successMessage: 'Produit créé avec succès',
   optimisticUpdate: {
@@ -107,16 +113,19 @@ const { mutate, isLoading } = useSmartMutation({
 ## 📊 IMPACT ATTENDU
 
 ### Performance
+
 - **Cache hit rate** : +20-30% grâce aux stratégies optimisées
 - **Requêtes API** : -30-40% grâce au prefetching et cache LocalStorage
 - **Temps de réponse perçu** : -50-70% avec optimistic updates
 
 ### Code Quality
+
 - **Réduction du code répétitif** : ~40-60% selon le type
 - **Maintenabilité** : Code plus cohérent et réutilisable
 - **DX (Developer Experience)** : API plus simple et intuitive
 
 ### UX
+
 - **Temps de chargement perçu** : Réduit avec optimistic updates
 - **Cohérence** : Messages d'erreur et de succès uniformes
 - **Performance** : Navigation plus fluide avec prefetching
@@ -128,6 +137,7 @@ const { mutate, isLoading } = useSmartMutation({
 ### Pour useSmartQuery
 
 **Option 1 : Remplacer les useQuery simples**
+
 ```tsx
 // Ancien
 const { data } = useQuery({
@@ -144,6 +154,7 @@ const { data } = useSmartQuery({
 ```
 
 **Option 2 : Utiliser les hooks spécialisés**
+
 ```tsx
 // Pour les produits
 const { data } = useSmartProductQuery({
@@ -161,6 +172,7 @@ const { data } = useSmartOrderQuery({
 ### Pour useSmartMutation
 
 **Option 1 : Remplacer les useMutation simples**
+
 ```tsx
 // Ancien
 const mutation = useMutation({
@@ -180,6 +192,7 @@ const { mutate } = useSmartMutation({
 ```
 
 **Option 2 : Utiliser les hooks spécialisés**
+
 ```tsx
 // Pour les créations
 const { mutate } = useSmartCreateMutation({
@@ -201,12 +214,14 @@ const { mutate } = useSmartDeleteMutation({
 ## 📝 RECOMMANDATIONS
 
 ### Priorité HAUTE
+
 1. ✅ **Hook useSmartQuery** - COMPLÉTÉ
 2. ✅ **Hook useSmartMutation** - COMPLÉTÉ
 3. ⏳ **Migrer progressivement** les composants vers useSmartQuery
 4. ⏳ **Migrer progressivement** les mutations vers useSmartMutation
 
 ### Priorité MOYENNE
+
 5. ⏳ **Créer des hooks spécialisés** pour des cas d'usage spécifiques
 6. ⏳ **Optimiser les stratégies de cache** selon les métriques réelles
 
@@ -215,6 +230,7 @@ const { mutate } = useSmartDeleteMutation({
 ## ✅ CONCLUSION
 
 **Améliorations appliquées** :
+
 - ✅ Hook useSmartQuery créé avec stratégies de cache intelligentes
 - ✅ Hook useSmartMutation créé avec optimistic updates
 - ✅ Hooks spécialisés pour produits, commandes, recherches
@@ -223,6 +239,7 @@ const { mutate } = useSmartDeleteMutation({
 **Impact** : 🟢 **ÉLEVÉ** - Réduction significative du code répétitif, meilleure performance, UX améliorée.
 
 **Prochaines étapes** :
+
 - ⏳ Migrer les composants vers useSmartQuery
 - ⏳ Migrer les mutations vers useSmartMutation
 - ⏳ Mesurer l'impact sur les performances
@@ -234,4 +251,3 @@ const { mutate } = useSmartDeleteMutation({
 - [React Query Best Practices](https://tanstack.com/query/latest/docs/react/guides/best-practices)
 - [Optimistic Updates](https://tanstack.com/query/latest/docs/react/guides/optimistic-updates)
 - [Query Invalidation](https://tanstack.com/query/latest/docs/react/guides/query-invalidation)
-

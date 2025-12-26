@@ -8,6 +8,7 @@
 ## ⚠️ Problème Identifié
 
 D'après les logs :
+
 ```
 Error invoking send-email-campaign: {"code":401, "message":"Invalid JWT"}
 ```
@@ -29,7 +30,7 @@ const response = await fetch(functionUrl, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${supabaseServiceKey}`,
+    Authorization: `Bearer ${supabaseServiceKey}`,
   },
   body: JSON.stringify({
     campaign_id: campaignId,
@@ -44,6 +45,7 @@ const response = await fetch(functionUrl, {
 L'Edge Function `send-email-campaign` n'a **PAS de vérification d'authentification dans son code**, mais Supabase exige quand même un header `Authorization` valide pour appeler les Edge Functions.
 
 Le problème est que `supabaseServiceKey` pourrait être :
+
 - `undefined` ou vide
 - Mal formaté
 - Expiré ou invalide
@@ -75,9 +77,9 @@ async function sendCampaign(
       serviceKeyLength: supabaseServiceKey?.length || 0,
       serviceKeyPrefix: supabaseServiceKey?.substring(0, 20) || 'N/A'
     });
-    
+
     const functionUrl = `${supabaseUrl}/functions/v1/send-email-campaign`;
-    
+
     const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
@@ -114,6 +116,7 @@ Comme on l'a fait pour `process-scheduled-campaigns`, désactiver temporairement
 ## 🧪 Test Immédiat
 
 Vérifiez les logs de `process-scheduled-campaigns` pour voir :
+
 1. Si `supabaseServiceKey` est bien défini
 2. Si l'URL est correcte
 3. Si le header `Authorization` est bien formaté
@@ -131,5 +134,3 @@ Vérifiez les logs de `process-scheduled-campaigns` pour voir :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

@@ -24,6 +24,7 @@
 ## 1. Pourquoi Crisp ?
 
 ### Avantages
+
 ```
 ✅ GRATUIT illimité (plan basique)
 ✅ Installation ultra-rapide (5 min)
@@ -37,6 +38,7 @@
 ```
 
 ### Impact Business
+
 ```
 📈 +40% taux de conversion (support immédiat)
 📈 +35% satisfaction client
@@ -50,9 +52,11 @@
 ## 2. Créer compte Crisp
 
 ### Étape 2.1 : Inscription
+
 👉 https://crisp.chat/fr/signup/
 
 **Plan recommandé pour démarrer :** BASIC (GRATUIT)
+
 - ✅ 2 agents
 - ✅ Conversations illimitées
 - ✅ Chat en temps réel
@@ -69,6 +73,7 @@
 5. Copier le **Website ID**
 
 Exemple Website ID :
+
 ```
 abc12345-6789-def0-1234-56789abcdef0
 ```
@@ -113,6 +118,7 @@ VITE_CRISP_WEBSITE_ID = abc12345-6789-def0-1234-56789abcdef0
 L'intégration Crisp est **déjà complète** dans Payhuk :
 
 **Fichiers créés :**
+
 ```
 src/lib/crisp.ts             → Fonctions Crisp
 src/components/chat/CrispChat.tsx  → Composant React
@@ -121,6 +127,7 @@ src/App.tsx                  → Crisp activé globalement
 ```
 
 **Features incluses :**
+
 - ✅ Chargement automatique du script
 - ✅ Sync utilisateur (email, nom, avatar)
 - ✅ Tracking de navigation
@@ -158,6 +165,7 @@ const ProductDetail = () => {
 ```
 
 **Résultat :**
+
 - ✅ Segment : `digital-product-visitor`
 - ✅ Contexte : Type produit, nom, prix
 - ✅ Event : `viewed_product`
@@ -184,6 +192,7 @@ const ProductDetail = () => {
 ```
 
 **Résultat :**
+
 - ✅ Segment : `physical-product-visitor`
 - ✅ Contexte : Livraison, stock
 - ✅ Event : `viewed_product`
@@ -210,6 +219,7 @@ const ProductDetail = () => {
 ```
 
 **Résultat :**
+
 - ✅ Segment : `service-visitor`
 - ✅ Contexte : Disponibilité, réservation
 - ✅ Event : `viewed_product`
@@ -236,6 +246,7 @@ const CourseDetail = () => {
 ```
 
 **Résultat :**
+
 - ✅ Segment : `course-visitor`
 - ✅ Contexte : Durée cours, niveau
 - ✅ Event : `viewed_product`
@@ -261,6 +272,7 @@ const Checkout = () => {
 ```
 
 **Résultat :**
+
 - ✅ Segment : `checkout-visitor`
 - ✅ Event : `started_checkout`
 - ✅ Priorité support HIGH
@@ -292,12 +304,14 @@ Crisp crée automatiquement ces segments :
 **Déclencheur :** Visiteur arrive sur page produit  
 **Délai :** 15 secondes  
 **Message :**
+
 ```
-👋 Bonjour ! Vous consultez [PRODUCT_NAME]. 
+👋 Bonjour ! Vous consultez [PRODUCT_NAME].
 Une question sur ce produit ? Je suis là pour vous aider ! 😊
 ```
 
 **Configuration dans Crisp :**
+
 1. Settings → Chatbot → New Scenario
 2. Trigger : Visitor lands on page
 3. Condition : URL contains `/products/`
@@ -307,12 +321,14 @@ Une question sur ce produit ? Je suis là pour vous aider ! 😊
 
 **Déclencheur :** Visiteur sur checkout depuis 2 min sans acheter  
 **Message :**
+
 ```
-💳 Besoin d'aide pour finaliser votre commande ? 
+💳 Besoin d'aide pour finaliser votre commande ?
 Je peux répondre à vos questions sur le paiement !
 ```
 
 **Configuration dans Crisp :**
+
 1. Settings → Chatbot → New Scenario
 2. Trigger : User inactive for 2 minutes
 3. Condition : Segment = `checkout-visitor`
@@ -322,12 +338,14 @@ Je peux répondre à vos questions sur le paiement !
 
 **Déclencheur :** Après achat (événement `completed_purchase`)  
 **Message :**
+
 ```
-🎉 Félicitations pour votre achat ! 
+🎉 Félicitations pour votre achat !
 Si vous avez besoin d'aide, n'hésitez pas à me contacter.
 ```
 
 **Configuration dans Crisp :**
+
 1. Settings → Chatbot → New Scenario
 2. Trigger : Event `completed_purchase`
 3. Action : Send message
@@ -339,6 +357,7 @@ Si vous avez besoin d'aide, n'hésitez pas à me contacter.
 ### Étape 7.1 : Test en développement
 
 1. Lancer Payhuk en dev :
+
 ```bash
 npm run dev
 ```
@@ -386,6 +405,7 @@ npm run dev
 Crisp peut répondre automatiquement aux questions fréquentes :
 
 **Setup :**
+
 1. Settings → Knowledge
 2. Add Article :
    - "Comment acheter un produit ?"
@@ -432,6 +452,7 @@ Voir l'écran du client en temps réel :
 ### 8.6 Statistiques avancées
 
 **Métriques disponibles :**
+
 ```
 📊 Temps de réponse moyen
 📊 Taux de satisfaction
@@ -448,6 +469,7 @@ Voir l'écran du client en temps réel :
 ## 🎯 CHECKLIST FINALE
 
 ### Setup Initial
+
 - [ ] Compte Crisp créé
 - [ ] Website créé
 - [ ] Website ID copié
@@ -455,6 +477,7 @@ Voir l'écran du client en temps réel :
 - [ ] Couleur personnalisée (#9b87f5)
 
 ### Testing
+
 - [ ] Bulle visible en dev
 - [ ] Chatbox s'ouvre
 - [ ] User sync (email, nom)
@@ -462,6 +485,7 @@ Voir l'écran du client en temps réel :
 - [ ] Segments créés
 
 ### Production
+
 - [ ] Déployé sur Vercel
 - [ ] Test en production
 - [ ] Email notifications configurées
@@ -511,6 +535,7 @@ Voir l'écran du client en temps réel :
 ### Problème : Bulle Crisp ne s'affiche pas
 
 **Solution :**
+
 ```bash
 # Vérifier variable env
 echo $VITE_CRISP_WEBSITE_ID
@@ -522,6 +547,7 @@ echo $VITE_CRISP_WEBSITE_ID
 ### Problème : User data pas sync
 
 **Solution :**
+
 ```typescript
 // Vérifier que useAuth retourne bien l'user
 console.log('User:', user);
@@ -533,6 +559,7 @@ window.$crisp.push(['get', 'user:email']);
 ### Problème : Contexte produit pas envoyé
 
 **Solution :**
+
 ```typescript
 // Vérifier que useCrispProduct est appelé
 console.log('Product context:', product);
@@ -557,6 +584,7 @@ console.log('Product context:', product);
 Crisp Chat est maintenant configuré pour **TOUS les types de produits** de Payhuk !
 
 **Avantages immédiats :**
+
 - ✅ Support live 24/7
 - ✅ +40% taux de conversion
 - ✅ Chatbot IA automatique
@@ -573,21 +601,25 @@ Crisp Chat est maintenant configuré pour **TOUS les types de produits** de Payh
 ### Workflow recommandé
 
 **Matin (9h) :**
+
 1. Ouvrir app Crisp mobile
 2. Répondre aux messages de nuit
 3. Vérifier conversations en attente
 
 **Journée :**
+
 1. Notifications temps réel
 2. Réponse sous 5 min (objectif)
 3. Utiliser templates réponses
 
 **Soir (18h) :**
+
 1. Review conversations du jour
 2. Analytics : taux de satisfaction
 3. Améliorer chatbot si besoin
 
 **Tips :**
+
 - 📱 Activer notifications push (mobile)
 - 🤖 Créer templates réponses fréquentes
 - 📊 Review analytics chaque semaine
@@ -596,4 +628,3 @@ Crisp Chat est maintenant configuré pour **TOUS les types de produits** de Payh
 ---
 
 **Crisp est prêt ! Bon support ! 💬🚀**
-

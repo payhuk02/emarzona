@@ -8,9 +8,11 @@
 ## 🌍 TEST 1 : INTERNATIONALISATION (i18n)
 
 ### Objectif
+
 Vérifier que le système de changement de langue fonctionne correctement.
 
 ### Prérequis
+
 - Application lancée : `npm run dev`
 - Navigateur ouvert sur http://localhost:8084
 
@@ -19,12 +21,14 @@ Vérifier que le système de changement de langue fonctionne correctement.
 #### 1.1 - Localiser le Language Switcher
 
 **Où chercher :**
+
 - Coin haut-droit de l'écran
 - Dans la barre de navigation (header)
 - Chercher un bouton avec un flag 🇫🇷 ou 🇬🇧
 - Ou un bouton avec une icône globe 🌐
 
 **Ce que tu dois voir :**
+
 ```
 ✅ Bouton avec flag ou icône globe
 ✅ Texte "FR" ou "Français" (langue actuelle)
@@ -39,10 +43,12 @@ Le LanguageSwitcher n'a peut-être pas été ajouté au layout principal. C'est 
 #### 1.2 - Tester le changement de langue
 
 **Action :**
+
 1. Cliquer sur le Language Switcher
 2. Sélectionner "English" (🇬🇧)
 
 **Ce que tu dois observer :**
+
 ```
 ✅ Un dropdown s'ouvre avec les langues disponibles
 ✅ "Français" a une coche ✓ (langue actuelle)
@@ -50,6 +56,7 @@ Le LanguageSwitcher n'a peut-être pas été ajouté au layout principal. C'est 
 ```
 
 **Après avoir cliqué sur "English" :**
+
 ```
 ✅ Les textes de la page changent immédiatement
 ✅ "Connexion" devient "Login"
@@ -63,10 +70,12 @@ Le LanguageSwitcher n'a peut-être pas été ajouté au layout principal. C'est 
 #### 1.3 - Vérifier la persistance
 
 **Action :**
+
 1. Changer la langue en "English"
 2. Rafraîchir la page (F5)
 
 **Ce que tu dois observer :**
+
 ```
 ✅ La langue reste en "English" après le refresh
 ✅ Pas de retour au Français
@@ -74,9 +83,10 @@ Le LanguageSwitcher n'a peut-être pas été ajouté au layout principal. C'est 
 ```
 
 **Vérifier dans DevTools :**
+
 ```javascript
 // Ouvrir Console (F12)
-localStorage.getItem('payhuk_language')
+localStorage.getItem('payhuk_language');
 // Devrait afficher : "en"
 ```
 
@@ -85,6 +95,7 @@ localStorage.getItem('payhuk_language')
 #### 1.4 - Tester le formatage
 
 **Où vérifier :**
+
 - Prix des produits
 - Dates
 - Nombres
@@ -92,6 +103,7 @@ localStorage.getItem('payhuk_language')
 **Ce que tu dois observer :**
 
 **En Français :**
+
 ```
 Prix : 25 000 FCFA
 Date : 26 octobre 2025
@@ -99,6 +111,7 @@ Nombre : 1 234 567
 ```
 
 **En English :**
+
 ```
 Price : FCFA 25,000
 Date : October 26, 2025
@@ -120,9 +133,11 @@ Number : 1,234,567
 ## 📱 TEST 2 : SERVICE WORKER & MODE OFFLINE
 
 ### Objectif
+
 Vérifier que le Service Worker fonctionne et que le mode offline est opérationnel.
 
 ### Prérequis
+
 - Application lancée
 - Navigateur Chrome/Edge (meilleur support PWA)
 
@@ -131,11 +146,13 @@ Vérifier que le Service Worker fonctionne et que le mode offline est opération
 #### 2.1 - Vérifier l'enregistrement du Service Worker
 
 **Action :**
+
 1. Ouvrir DevTools (F12)
 2. Onglet "Application" (ou "Applications")
 3. Menu gauche : "Service Workers"
 
 **Ce que tu dois voir :**
+
 ```
 ✅ Source: sw.js
 ✅ Status: activated and is running
@@ -144,10 +161,10 @@ Vérifier que le Service Worker fonctionne et que le mode offline est opération
 ```
 
 **Si le Service Worker n'est pas activé :**
+
 ```javascript
 // Dans la console, forcer l'enregistrement
-navigator.serviceWorker.register('/sw.js')
-  .then(() => location.reload())
+navigator.serviceWorker.register('/sw.js').then(() => location.reload());
 ```
 
 ---
@@ -155,10 +172,12 @@ navigator.serviceWorker.register('/sw.js')
 #### 2.2 - Vérifier les caches
 
 **Dans DevTools > Application :**
+
 1. Menu gauche : "Cache" > "Cache Storage"
 2. Développer le dossier
 
 **Ce que tu dois voir :**
+
 ```
 ✅ payhuk-v1.0.0-static (assets statiques)
 ✅ payhuk-v1.0.0-dynamic (pages)
@@ -173,11 +192,13 @@ navigator.serviceWorker.register('/sw.js')
 #### 2.3 - Tester le mode offline
 
 **Action :**
+
 1. Onglet "Network" dans DevTools
 2. Cocher la case "Offline" (en haut)
 3. Rafraîchir la page (F5 ou Ctrl+R)
 
 **Ce que tu dois voir :**
+
 ```
 ✅ Page offline élégante s'affiche
 ✅ Design moderne (fond gradient violet)
@@ -188,6 +209,7 @@ navigator.serviceWorker.register('/sw.js')
 ```
 
 **Apparence attendue :**
+
 - Fond dégradé violet/bleu
 - Carte blanche centrée
 - Icône ronde avec emoji 📡
@@ -200,10 +222,12 @@ navigator.serviceWorker.register('/sw.js')
 #### 2.4 - Tester le retour en ligne
 
 **Action :**
+
 1. Toujours en mode offline
 2. Décocher "Offline" dans Network tab
 
 **Ce que tu dois observer :**
+
 ```
 ✅ La page se recharge automatiquement
 ✅ Retour à l'application normale
@@ -215,11 +239,13 @@ navigator.serviceWorker.register('/sw.js')
 #### 2.5 - Tester la stratégie de cache
 
 **Action :**
+
 1. Naviguer sur plusieurs pages (Marketplace, Dashboard, etc.)
 2. Revenir sur la page d'accueil
 3. Onglet Network : observer les requêtes
 
 **Ce que tu dois voir :**
+
 ```
 ✅ Requêtes marquées "(from ServiceWorker)"
 ✅ Temps de réponse très rapide (< 50ms)
@@ -241,9 +267,11 @@ navigator.serviceWorker.register('/sw.js')
 ## ⚡ TEST 3 : PREFETCHING INTELLIGENT
 
 ### Objectif
+
 Vérifier que le prefetching des liens fonctionne au survol.
 
 ### Prérequis
+
 - Application lancée
 - DevTools > Network ouvert
 
@@ -252,12 +280,14 @@ Vérifier que le prefetching des liens fonctionne au survol.
 #### 3.1 - Observer le prefetch au survol
 
 **Action :**
+
 1. Ouvrir DevTools > Network
 2. Effacer les requêtes (🚫 Clear)
 3. **Sans cliquer**, survoler un lien (ex: "Marketplace")
 4. Observer le Network tab
 
 **Ce que tu dois voir :**
+
 ```
 ✅ Une nouvelle requête apparaît
 ✅ Type: "prefetch" ou "link"
@@ -267,6 +297,7 @@ Vérifier que le prefetching des liens fonctionne au survol.
 ```
 
 **Exemple :**
+
 ```
 Name              Type      Size    Time
 marketplace       prefetch  45 KB   120ms
@@ -277,11 +308,13 @@ marketplace       prefetch  45 KB   120ms
 #### 3.2 - Vérifier la navigation instantanée
 
 **Action :**
+
 1. Après avoir survolé le lien (prefetch effectué)
 2. Cliquer sur le lien
 3. Observer le temps de chargement
 
 **Ce que tu dois observer :**
+
 ```
 ✅ Navigation quasi-instantanée (< 100ms)
 ✅ Pas de requête réseau (déjà en cache)
@@ -293,10 +326,12 @@ marketplace       prefetch  45 KB   120ms
 #### 3.3 - Tester le smart prefetch (connexion)
 
 **Dans DevTools > Network :**
+
 1. Throttling: Sélectionner "Slow 3G"
 2. Survoler des liens
 
 **Ce que tu dois observer :**
+
 ```
 ✅ Moins de prefetching automatique
 ✅ Le système détecte la connexion lente
@@ -319,9 +354,11 @@ marketplace       prefetch  45 KB   120ms
 ## 🚀 TEST 4 : PERFORMANCE (LIGHTHOUSE)
 
 ### Objectif
+
 Vérifier les scores de performance de l'application.
 
 ### Prérequis
+
 - Build production : `npm run build`
 - Servir le build : `npm run preview`
 
@@ -330,6 +367,7 @@ Vérifier les scores de performance de l'application.
 #### 4.1 - Lancer Lighthouse
 
 **Action :**
+
 1. Ouvrir DevTools (F12)
 2. Onglet "Lighthouse"
 3. Options :
@@ -354,6 +392,7 @@ SEO              : 90-100  ✅ (Excellent)
 ```
 
 **Si score < 90 :**
+
 - Vérifier les recommandations Lighthouse
 - Identifier les assets lents
 - Vérifier les images non optimisées
@@ -386,11 +425,13 @@ CLS (Cumulative Layout Shift)
 #### 4.4 - Vérifier le bundle size
 
 **Dans DevTools > Network :**
+
 1. Rafraîchir la page (Ctrl+Shift+R pour vider le cache)
 2. Filtrer : "JS"
 3. Observer la colonne "Size"
 
 **Ce que tu dois voir :**
+
 ```
 ✅ vendor-react.js : ~52 KB (gzipped)
 ✅ vendor-ui.js : ~35 KB (gzipped)
@@ -414,9 +455,11 @@ CLS (Cumulative Layout Shift)
 ## 📊 TEST 5 : ANALYSE DU BUNDLE
 
 ### Objectif
+
 Visualiser la composition du bundle et identifier les optimisations.
 
 ### Prérequis
+
 - Build effectué : `npm run build`
 - Fichier généré : `dist/stats.html`
 
@@ -425,11 +468,13 @@ Visualiser la composition du bundle et identifier les optimisations.
 #### 5.1 - Ouvrir le visualiseur
 
 **Action :**
+
 1. Naviguer vers le dossier `dist/`
 2. Ouvrir `stats.html` dans le navigateur
    - Ou : `file:///C:/Users/SAWADOGO/Desktop/payhula/dist/stats.html`
 
 **Ce que tu dois voir :**
+
 ```
 ✅ Treemap interactif coloré
 ✅ Chaque rectangle = un fichier
@@ -442,6 +487,7 @@ Visualiser la composition du bundle et identifier les optimisations.
 #### 5.2 - Explorer les chunks
 
 **Survoler les rectangles pour voir :**
+
 - Nom du fichier
 - Taille originale
 - Taille gzippée
@@ -449,6 +495,7 @@ Visualiser la composition du bundle et identifier les optimisations.
 - % du bundle total
 
 **Chunks principaux à identifier :**
+
 ```
 ✅ vendor-react (React, React-DOM, React-Router)
 ✅ vendor-ui (Radix UI components)
@@ -493,35 +540,39 @@ Visualiser la composition du bundle et identifier les optimisations.
 
 ### Tests effectués
 
-| Test | Statut | Score |
-|------|--------|-------|
-| **i18n** | ⬜ À tester | - |
-| **Service Worker** | ⬜ À tester | - |
-| **Mode Offline** | ⬜ À tester | - |
-| **Prefetching** | ⬜ À tester | - |
-| **Performance** | ⬜ À tester | - |
-| **Bundle Analysis** | ⬜ À tester | - |
+| Test                | Statut      | Score |
+| ------------------- | ----------- | ----- |
+| **i18n**            | ⬜ À tester | -     |
+| **Service Worker**  | ⬜ À tester | -     |
+| **Mode Offline**    | ⬜ À tester | -     |
+| **Prefetching**     | ⬜ À tester | -     |
+| **Performance**     | ⬜ À tester | -     |
+| **Bundle Analysis** | ⬜ À tester | -     |
 
 ### Remplir après les tests
 
 **i18n :**
+
 - [ ] Language Switcher visible
 - [ ] Changement FR ↔ EN fonctionne
 - [ ] Persistance après refresh
 - [ ] Formatage correct
 
 **PWA :**
+
 - [ ] Service Worker activé
 - [ ] Caches créés
 - [ ] Mode offline fonctionnel
 - [ ] Auto-reload au retour online
 
 **Performance :**
+
 - [ ] Lighthouse Score > 90
 - [ ] LCP < 2.5s
 - [ ] Bundle < 200 KB (gzipped)
 
 **Optimisations :**
+
 - [ ] Prefetch au hover
 - [ ] Navigation instantanée
 - [ ] Chunks séparés
@@ -538,7 +589,7 @@ Visualiser la composition du bundle et identifier les optimisations.
 **Solution :**
 Il faut ajouter le `LanguageSwitcher` dans le header/navbar de l'application.
 
-**Où l'ajouter :** 
+**Où l'ajouter :**
 Dans `src/components/layout/Header.tsx` ou similaire
 
 ```typescript
@@ -553,15 +604,18 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 ### Si le Service Worker ne s'active pas
 
 **Vérifier :**
+
 1. Le fichier `public/sw.js` existe
 2. L'URL est correcte : http://localhost:8084/sw.js
 3. Le navigateur supporte les Service Workers
 4. Pas en mode "incognito" (peut bloquer les SW)
 
 **Forcer l'activation :**
+
 ```javascript
 // Console DevTools
-navigator.serviceWorker.register('/sw.js')
+navigator.serviceWorker
+  .register('/sw.js')
   .then(reg => console.log('SW registered:', reg))
   .catch(err => console.error('SW error:', err));
 ```
@@ -571,6 +625,7 @@ navigator.serviceWorker.register('/sw.js')
 ### Si le prefetch ne fonctionne pas
 
 **Vérifier :**
+
 1. La fonction `setupAutoPrefetch()` est appelée
 2. Le navigateur supporte `IntersectionObserver`
 3. Les liens ont des attributs `href` valides
@@ -581,12 +636,14 @@ navigator.serviceWorker.register('/sw.js')
 ### Si Lighthouse donne un score faible
 
 **Causes possibles :**
+
 - Mode développement (utiliser build production)
 - Extensions navigateur actives
 - Cache désactivé
 - Throttling réseau activé
 
 **Solution :**
+
 1. `npm run build`
 2. `npm run preview`
 3. Tester sur le build production
@@ -598,11 +655,10 @@ navigator.serviceWorker.register('/sw.js')
 ## 📞 AIDE
 
 Si tu rencontres des problèmes :
+
 1. Vérifier la console (F12) pour les erreurs
 2. Vérifier le Network tab pour les requêtes échouées
 3. Consulter les rapports de vérification
 4. Me dire quel test pose problème
 
 **Bon courage pour les tests ! 🚀**
-
-

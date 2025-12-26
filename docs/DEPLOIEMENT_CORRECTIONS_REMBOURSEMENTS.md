@@ -12,11 +12,13 @@
 **Statut** : ✅ **DÉPLOYÉE**
 
 La fonction a été déployée avec succès :
+
 ```
 Deployed Functions on project hbdnzajbyjakdhuavrvb: moneroo-webhook
 ```
 
 **Modifications** :
+
 - ✅ Ajout de la mise à jour de l'order lors d'un remboursement via webhook
 - ✅ Déclenchement automatique de la mise à jour de `store_earnings`
 
@@ -27,6 +29,7 @@ Deployed Functions on project hbdnzajbyjakdhuavrvb: moneroo-webhook
 **Statut** : ✅ **MODIFIÉ** (sera déployé avec le prochain build)
 
 **Modifications** :
+
 - ✅ Ajout de la mise à jour de l'order lors d'un remboursement manuel
 
 ---
@@ -67,13 +70,13 @@ BEGIN
   IF NEW.status = 'completed' AND NEW.payment_status = 'paid' THEN
     PERFORM public.update_store_earnings(NEW.store_id);
   END IF;
-  
+
   -- 🆕 Mettre à jour les revenus si la commande est remboursée
   -- Cela permet de recalculer store_earnings et d'exclure les orders remboursées du total_revenue
   IF NEW.payment_status = 'refunded' AND (OLD.payment_status IS NULL OR OLD.payment_status != 'refunded') THEN
     PERFORM public.update_store_earnings(NEW.store_id);
   END IF;
-  
+
   RETURN NEW;
 END;
 $$;
@@ -148,5 +151,3 @@ supabase db push --include-all
 
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ Edge Function déployée, Migration SQL à appliquer manuellement
-
-

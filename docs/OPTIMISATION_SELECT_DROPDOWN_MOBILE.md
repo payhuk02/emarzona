@@ -8,6 +8,7 @@
 ## 📋 Résumé Exécutif
 
 Cette optimisation garantit que **tous les composants de sélection** fonctionnent parfaitement sur mobile avec :
+
 - ✅ Clics fiables (pas de clics ignorés)
 - ✅ Menus stables (pas de fermeture intempestive)
 - ✅ Positionnement correct (pas de débordement)
@@ -23,14 +24,16 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### 1. Problèmes de Clic sur Mobile
 
 #### ❌ Problèmes Identifiés
+
 - **Clic non pris en compte** : Parfois le premier clic ne fonctionne pas
 - **Double-clic requis** : Certains menus nécessitent 2 clics pour s'ouvrir
 - **Clic sur item ferme le menu** : Le menu se ferme avant la sélection
 
 #### ✅ Solutions Appliquées
+
 1. **`touch-manipulation`** : Ajouté sur tous les éléments interactifs
    ```css
-   touch-manipulation: optimize responsiveness
+   touch-manipulation: optimize responsiveness;
    ```
 2. **`onPointerDown` avec `stopPropagation`** : Empêche la propagation qui pourrait fermer le menu
    ```tsx
@@ -46,15 +49,19 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### 2. Problèmes de Positionnement
 
 #### ❌ Problèmes Identifiés
+
 - **Menu hors écran** : Le menu s'ouvre en dehors du viewport
 - **Menu coupé** : Le menu est partiellement visible
 - **Menu qui "saute"** : Le menu change de position après ouverture
 
 #### ✅ Solutions Appliquées
+
 1. **Collision padding adaptatif** :
+
    ```tsx
    collisionPadding={isMobile ? MOBILE_COLLISION_PADDING : DESKTOP_COLLISION_PADDING}
    ```
+
    - Mobile : `{ top: 8, bottom: 8, left: 8, right: 8 }`
    - Desktop : `{ top: 8, bottom: 8, left: 8, right: 8 }`
 
@@ -69,29 +76,34 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### 3. Problèmes de Scroll
 
 #### ❌ Problèmes Identifiés
+
 - **Scroll bloqué** : Le body scroll est bloqué quand le menu est ouvert
 - **Scroll interne freeze** : Le scroll dans le menu ne fonctionne pas
 - **Scroll du body pendant l'ouverture** : Le body scroll pendant que le menu est ouvert
 
 #### ✅ Solutions Appliquées
+
 1. **`overscroll-contain`** : Empêche le scroll du body parent
+
    ```css
-   overscroll-contain: prevent body scroll
+   overscroll-contain: prevent body scroll;
    ```
 
 2. **`touch-pan-y`** : Optimise le scroll vertical tactile
+
    ```css
-   touch-pan-y: smooth vertical scrolling
+   touch-pan-y: smooth vertical scrolling;
    ```
 
 3. **`-webkit-overflow-scrolling-touch`** : Scroll momentum sur iOS
+
    ```css
-   -webkit-overflow-scrolling: touch
+   -webkit-overflow-scrolling: touch;
    ```
 
 4. **`will-change-scroll`** : Optimise les performances de scroll
    ```css
-   will-change: scroll
+   will-change: scroll;
    ```
 
 ---
@@ -99,11 +111,13 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### 4. Problèmes de Z-Index
 
 #### ❌ Problèmes Identifiés
+
 - **Menu derrière d'autres éléments** : Z-index trop bas
 - **Conflits entre menus** : Plusieurs menus avec le même z-index
 - **Menu derrière les modals** : Menu ouvert dans une modal
 
 #### ✅ Solutions Appliquées
+
 1. **Z-index hiérarchique** :
    - Select/Dropdown : `z-[1060]`
    - Popover : `z-[100]`
@@ -117,17 +131,20 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### 5. Problèmes d'Animations
 
 #### ❌ Problèmes Identifiés
+
 - **Animations lourdes** : Animations JS qui causent du lag
 - **Animations qui bloquent** : Animations qui empêchent l'interaction
 - **Animations trop longues** : Délai avant l'interaction possible
 
 #### ✅ Solutions Appliquées
+
 1. **Animations CSS only** : Pas d'animations JS
+
    ```css
    /* Mobile : fade simple */
    data-[state=open]:fade-in-0
    data-[state=closed]:fade-out-0
-   
+
    /* Desktop : fade + zoom + slide */
    data-[state=open]:zoom-in-95
    data-[state=closed]:zoom-out-95
@@ -144,12 +161,15 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### 6. Problèmes de Focus
 
 #### ❌ Problèmes Identifiés
+
 - **Focus qui fait "sauter" la page** : Le focus scroll la page vers le haut
 - **Focus non visible** : Le focus n'est pas visible sur mobile
 - **Focus qui ouvre le clavier** : Le focus ouvre le clavier virtuel
 
 #### ✅ Solutions Appliquées
+
 1. **`text-base` sur mobile** : Empêche le zoom automatique sur iOS
+
    ```tsx
    style={{ fontSize: '16px' }}
    ```
@@ -167,6 +187,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 #### ✅ Améliorations Appliquées
 
 **SelectTrigger** :
+
 - ✅ `min-h-[44px]` : Touch target optimal
 - ✅ `touch-manipulation` : Réactivité tactile
 - ✅ `text-base` sur mobile : Empêche le zoom iOS
@@ -174,6 +195,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 - ✅ `transition-colors` : Transition légère
 
 **SelectContent** :
+
 - ✅ `z-[1060]` : Z-index élevé
 - ✅ `max-w-[calc(100vw-1rem)]` : Pas de débordement
 - ✅ Animations CSS only (fade sur mobile)
@@ -182,6 +204,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 - ✅ Gestion du clavier virtuel : Ajuste la position si ouvert
 
 **SelectItem** :
+
 - ✅ `min-h-[44px]` : Touch target optimal
 - ✅ `py-2.5` sur mobile : Zone de clic plus large
 - ✅ `onPointerDown` avec `stopPropagation` : Empêche la fermeture intempestive
@@ -194,6 +217,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 #### ✅ Améliorations Appliquées
 
 **DropdownMenuContent** :
+
 - ✅ `z-[100]` : Z-index cohérent
 - ✅ `max-w-[calc(100vw-1rem)]` : Pas de débordement
 - ✅ `sticky="always"` sur mobile : Position stable
@@ -201,6 +225,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 - ✅ Positionnement adaptatif : `side="bottom"` sur mobile
 
 **DropdownMenuItem** :
+
 - ✅ `min-h-[44px]` : Touch target optimal
 - ✅ `py-2.5` sur mobile : Zone de clic plus large
 - ✅ `onPointerDown` avec `stopPropagation` : Empêche la fermeture intempestive
@@ -213,6 +238,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 #### ✅ Améliorations Appliquées
 
 **PopoverContent** :
+
 - ✅ `z-[100]` : Z-index cohérent
 - ✅ `max-w-[calc(100vw-1rem)]` : Pas de débordement
 - ✅ `sticky="always"` sur mobile : Position stable
@@ -268,6 +294,7 @@ Cette optimisation garantit que **tous les composants de sélection** fonctionne
 ### Uniformisation
 
 Tous les menus ont maintenant :
+
 - ✅ **Coins arrondis cohérents** : `rounded-md`
 - ✅ **Ombres légères premium** : `shadow-lg` / `shadow-md`
 - ✅ **Couleurs harmonisées** : Utilise les tokens Tailwind (`bg-popover`, `text-popover-foreground`)
@@ -332,7 +359,13 @@ Tous les menus ont maintenant :
 ### Select
 
 ```tsx
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 <Select value={value} onValueChange={setValue}>
   <SelectTrigger>
@@ -342,13 +375,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
     <SelectItem value="1">Option 1</SelectItem>
     <SelectItem value="2">Option 2</SelectItem>
   </SelectContent>
-</Select>
+</Select>;
 ```
 
 ### DropdownMenu
 
 ```tsx
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 <DropdownMenu>
   <DropdownMenuTrigger asChild>
@@ -358,7 +396,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
     <DropdownMenuItem>Option 1</DropdownMenuItem>
     <DropdownMenuItem>Option 2</DropdownMenuItem>
   </DropdownMenuContent>
-</DropdownMenu>
+</DropdownMenu>;
 ```
 
 ### Popover
@@ -370,10 +408,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
   <PopoverTrigger asChild>
     <Button>Ouvrir</Button>
   </PopoverTrigger>
-  <PopoverContent>
-    Contenu du popover
-  </PopoverContent>
-</Popover>
+  <PopoverContent>Contenu du popover</PopoverContent>
+</Popover>;
 ```
 
 ---
@@ -411,7 +447,7 @@ Pour chaque composant utilisant Select/Dropdown :
 
 ```tsx
 <SelectItem
-  onPointerDown={(e) => {
+  onPointerDown={e => {
     e.stopPropagation();
   }}
 >
@@ -441,7 +477,7 @@ Pour chaque composant utilisant Select/Dropdown :
 ```tsx
 <SelectPrimitive.Viewport
   className={cn(
-    "overscroll-contain touch-pan-y",
+    'overscroll-contain touch-pan-y'
     // ...
   )}
 />
@@ -488,4 +524,3 @@ Tous les composants de sélection sont maintenant **100% optimisés pour mobile*
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

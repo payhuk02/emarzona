@@ -2,7 +2,7 @@
 
 **Problème**: Erreur "mime type application/json is not supported" lors de l'upload d'images  
 **Cause**: Les politiques RLS du bucket `product-images` bloquent l'accès public  
-**Solution**: Exécuter la migration de correction  
+**Solution**: Exécuter la migration de correction
 
 ---
 
@@ -82,6 +82,7 @@ Si vous voyez des ❌ ou ⚠️, suivez les instructions affichées dans les ré
 ### Option 3 : Contacter le Support
 
 Si rien ne fonctionne après avoir suivi toutes les étapes :
+
 - Vérifiez les logs Supabase : Dashboard → Logs → Postgres Logs
 - Vérifiez les erreurs réseau dans les DevTools du navigateur (F12 → Network)
 
@@ -96,8 +97,3 @@ Le code a été amélioré pour détecter cette erreur et afficher un message cl
 **Temps estimé total**: 5 minutes  
 **Difficulté**: ⭐ Facile  
 **Dernière mise à jour**: 1 Mars 2025
-
-
-
-
-

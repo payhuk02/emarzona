@@ -99,11 +99,13 @@ Nous fournissons des mises à jour de sécurité pour les versions suivantes :
 ### 2025-10-30 - v1.0.0
 
 #### 🔴 Critique
+
 - **Régénération clés Supabase** suite exposition historique Git
 - **Nettoyage historique Git** pour retirer .env
 - **Activation TypeScript strict** (strictNullChecks, noImplicitAny)
 
 #### ✅ Améliorations
+
 - Ajout validation URLs redirections (open redirect prevention)
 - Ajout sanitization HTML (XSS prevention)
 - Création .env.example
@@ -111,6 +113,7 @@ Nous fournissons des mises à jour de sécurité pour les versions suivantes :
 - Configuration DOMPurify globale
 
 #### 📝 Documentation
+
 - Audit sécurité complet (78/100 → 90/100)
 - Guide nettoyage historique Git
 - Plan d'action sécurité 7 jours
@@ -118,6 +121,7 @@ Nous fournissons des mises à jour de sécurité pour les versions suivantes :
 ### 2025-10-15
 
 #### ✅ Améliorations
+
 - Activation 2FA pour comptes admin
 - Ajout rate limiting basique
 - Amélioration logs d'audit
@@ -125,6 +129,7 @@ Nous fournissons des mises à jour de sécurité pour les versions suivantes :
 ### 2025-10-01
 
 #### ✅ Initial Release
+
 - Row Level Security (RLS) activée
 - Validation inputs (Zod)
 - Protection CSRF
@@ -289,7 +294,7 @@ Nous remercions tous les chercheurs en sécurité qui contribuent à rendre Payh
 
 ### Hall of Fame (Security Researchers)
 
-*Prochainement...*
+_Prochainement..._
 
 ---
 
@@ -301,5 +306,4 @@ Site: https://payhula.com/security
 
 ---
 
-*Dernière mise à jour : 30 Octobre 2025*
-
+_Dernière mise à jour : 30 Octobre 2025_

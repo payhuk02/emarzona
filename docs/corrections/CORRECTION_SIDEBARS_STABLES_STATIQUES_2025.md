@@ -17,12 +17,16 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ### 1. Modification de MainLayout
 
 **Avant:**
+
 ```typescript
 // Une seule sidebar à la fois
-{renderSidebar()} // Soit AppSidebar, soit sidebar contextuelle
+{
+  renderSidebar();
+} // Soit AppSidebar, soit sidebar contextuelle
 ```
 
 **Après:**
+
 ```typescript
 // AppSidebar TOUJOURS visible + Sidebar contextuelle à côté
 <AppSidebar /> // TOUJOURS présent (stable)
@@ -32,6 +36,7 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ### 2. Position des Sidebars Contextuelles
 
 **Avant:**
+
 ```tsx
 <aside className="... fixed left-0 top-16 ...">
   {/* Positionnée à gauche, remplace AppSidebar */}
@@ -39,6 +44,7 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ```
 
 **Après:**
+
 ```tsx
 <aside className="... fixed left-64 top-16 ...">
   {/* Positionnée après AppSidebar (256px = 16rem = left-64) */}
@@ -48,17 +54,19 @@ Quand l'utilisateur cliquait sur un élément du sidebar principal (ex: "Clients
 ### 3. Calcul des Marges du Contenu
 
 **Avant:**
+
 ```typescript
 // Marge conditionnelle selon le type
-hasFixedSidebar && 'md:ml-56 lg:ml-64'
+hasFixedSidebar && 'md:ml-56 lg:ml-64';
 ```
 
 **Après:**
+
 ```typescript
 // Marge pour AppSidebar (toujours présent)
-'lg:ml-64'
+'lg:ml-64';
 // + Marge supplémentaire si sidebar contextuelle
-hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]'
+hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]';
 // = AppSidebar (256px) + ContextSidebar (256px) = 512px
 ```
 
@@ -148,6 +156,7 @@ hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]'
 ## 🎯 Exemple de Comportement
 
 ### Scénario 1: Navigation vers "Commandes"
+
 1. Utilisateur clique sur "Commandes" dans AppSidebar
 2. Route change vers `/dashboard/orders`
 3. **AppSidebar reste visible** ✅
@@ -155,6 +164,7 @@ hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]'
 5. Contenu principal avec marge de 512px ✅
 
 ### Scénario 2: Navigation vers "Clients"
+
 1. Utilisateur clique sur "Clients" dans AppSidebar
 2. Route change vers `/dashboard/customers`
 3. **AppSidebar reste visible** ✅
@@ -162,6 +172,7 @@ hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]'
 5. Contenu principal avec marge de 512px ✅
 
 ### Scénario 3: Navigation vers "Tableau de bord"
+
 1. Utilisateur clique sur "Tableau de bord" dans AppSidebar
 2. Route change vers `/dashboard`
 3. **AppSidebar reste visible** ✅
@@ -172,4 +183,3 @@ hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]'
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **CORRIGÉ - TOUTES LES SIDEBARS SONT STABLES ET STATIQUES**
-

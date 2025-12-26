@@ -11,6 +11,7 @@
 ### Option 1 : Via Supabase Dashboard (RECOMMANDÉ)
 
 1. **Aller sur Supabase Dashboard**
+
    ```
    https://supabase.com/dashboard/project/YOUR_PROJECT_ID/sql
    ```
@@ -19,8 +20,8 @@
 
 ```sql
 -- Étape 1 : Ajouter la colonne product_type si manquante
-ALTER TABLE public.reviews 
-ADD COLUMN IF NOT EXISTS product_type TEXT NOT NULL DEFAULT 'digital' 
+ALTER TABLE public.reviews
+ADD COLUMN IF NOT EXISTS product_type TEXT NOT NULL DEFAULT 'digital'
 CHECK (product_type IN ('digital', 'physical', 'service', 'course'));
 
 -- Étape 2 : Mettre à jour depuis la table products
@@ -60,13 +61,14 @@ Après avoir appliqué la migration, vérifiez avec cette requête :
 
 ```sql
 -- Vérifier que product_type existe
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'reviews' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'reviews'
 AND column_name = 'product_type';
 ```
 
 **Résultat attendu :**
+
 ```
 column_name  | data_type
 -------------+-----------
@@ -78,10 +80,13 @@ product_type | text
 ## 📊 EXPLICATION DE L'ERREUR
 
 ### Cause
+
 La table `reviews` existait déjà dans votre base de données **sans** la colonne `product_type`. Notre nouvelle migration essayait d'utiliser cette colonne qui n'existait pas.
 
 ### Solution
+
 La migration de correction :
+
 1. ✅ Ajoute la colonne manquante
 2. ✅ Remplit automatiquement les valeurs depuis `products.product_type`
 3. ✅ Crée les index nécessaires
@@ -119,6 +124,7 @@ reviews
 Une fois la migration appliquée :
 
 ### 1. Redémarrer le serveur de dev
+
 ```bash
 # Arrêter avec Ctrl+C
 # Relancer
@@ -126,6 +132,7 @@ npm run dev
 ```
 
 ### 2. Tester les reviews
+
 ```typescript
 import { useProductReviews } from '@/hooks/useReviews';
 
@@ -173,11 +180,13 @@ DROP TABLE IF EXISTS public.reviews CASCADE;
 Si l'erreur persiste après ces étapes :
 
 1. **Vérifiez les logs Supabase**
+
    ```
    Dashboard → Logs → Database
    ```
 
 2. **Exportez la structure actuelle**
+
    ```sql
    pg_dump --schema-only public.reviews
    ```
@@ -201,4 +210,3 @@ Si l'erreur persiste après ces étapes :
 ---
 
 **🎉 Après correction, votre système de Reviews sera 100% opérationnel !**
-

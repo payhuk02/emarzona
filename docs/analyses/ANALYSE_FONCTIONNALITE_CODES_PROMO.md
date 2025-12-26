@@ -38,6 +38,7 @@ L'application dispose de **deux systèmes de promotions** distincts :
 **Fichier:** `src/components/promotions/CreatePromotionDialog.tsx`
 
 **Fonctionnalités disponibles:**
+
 - ✅ Code promo (obligatoire)
 - ✅ Description
 - ✅ Type de réduction (pourcentage ou montant fixe)
@@ -48,6 +49,7 @@ L'application dispose de **deux systèmes de promotions** distincts :
 - ✅ Activation/désactivation
 
 **Limitations:**
+
 - ❌ **Aucune sélection de produits** : La promotion s'applique à tous les produits de la boutique
 - ❌ **Pas de sélection de catégories**
 - ❌ **Pas de sélection de collections**
@@ -77,6 +79,7 @@ CREATE TABLE public.promotions (
 **Fichier:** `src/components/physical/promotions/PromotionsManager.tsx`
 
 **Fonctionnalités disponibles:**
+
 - ✅ Toutes les fonctionnalités du système simple
 - ✅ Nom de la promotion
 - ✅ Types de réduction avancés (buy_x_get_y, free_shipping)
@@ -86,6 +89,7 @@ CREATE TABLE public.promotions (
 - ✅ Promotion automatique (sans code)
 
 **Interface de sélection:**
+
 ```tsx
 <Select value={formData.applies_to}>
   <SelectItem value="all_products">Tous les produits</SelectItem>
@@ -96,6 +100,7 @@ CREATE TABLE public.promotions (
 ```
 
 **Problème identifié:**
+
 - ❌ Quand l'utilisateur sélectionne "Produits spécifiques", "Catégories" ou "Collections", **aucun composant de sélection n'apparaît**
 - ❌ Les champs `product_ids`, `category_ids`, `collection_ids` existent dans le formulaire mais ne sont jamais remplis par l'utilisateur
 
@@ -124,6 +129,7 @@ CREATE TABLE public.product_promotions (
 ### Priorité 1 : Ajouter la Sélection de Produits/Catégories/Collections
 
 **Action requise:**
+
 1. Créer un composant `PromotionScopeSelector` qui affiche :
    - Un sélecteur multi-produits quand `applies_to === 'specific_products'`
    - Un sélecteur multi-catégories quand `applies_to === 'categories'`
@@ -139,10 +145,12 @@ CREATE TABLE public.product_promotions (
 ### Priorité 2 : Améliorer le Système Simple
 
 **Option A:** Migrer vers le système avancé
+
 - Utiliser uniquement `product_promotions`
 - Supprimer la table `promotions` (après migration des données)
 
 **Option B:** Ajouter les fonctionnalités manquantes au système simple
+
 - Ajouter les champs `product_ids`, `category_ids`, `collection_ids` à la table `promotions`
 - Ajouter l'interface de sélection dans `CreatePromotionDialog.tsx`
 
@@ -156,17 +164,17 @@ CREATE TABLE public.product_promotions (
 
 ## 📊 État Actuel vs État Souhaité
 
-| Fonctionnalité | Système Simple | Système Avancé | État Souhaité |
-|----------------|----------------|----------------|---------------|
-| Code promo | ✅ | ✅ | ✅ |
-| Type de réduction | ✅ (2 types) | ✅ (4 types) | ✅ |
-| Dates de validité | ✅ | ✅ | ✅ |
-| Limites d'utilisation | ✅ | ✅ | ✅ |
-| **Sélection produits** | ❌ | ⚠️ (UI manquante) | ✅ |
-| **Sélection catégories** | ❌ | ⚠️ (UI manquante) | ✅ |
-| **Sélection collections** | ❌ | ⚠️ (UI manquante) | ✅ |
-| Variantes | ❌ | ✅ | ✅ |
-| Promotion automatique | ❌ | ✅ | ✅ |
+| Fonctionnalité            | Système Simple | Système Avancé    | État Souhaité |
+| ------------------------- | -------------- | ----------------- | ------------- |
+| Code promo                | ✅             | ✅                | ✅            |
+| Type de réduction         | ✅ (2 types)   | ✅ (4 types)      | ✅            |
+| Dates de validité         | ✅             | ✅                | ✅            |
+| Limites d'utilisation     | ✅             | ✅                | ✅            |
+| **Sélection produits**    | ❌             | ⚠️ (UI manquante) | ✅            |
+| **Sélection catégories**  | ❌             | ⚠️ (UI manquante) | ✅            |
+| **Sélection collections** | ❌             | ⚠️ (UI manquante) | ✅            |
+| Variantes                 | ❌             | ✅                | ✅            |
+| Promotion automatique     | ❌             | ✅                | ✅            |
 
 ---
 
@@ -184,4 +192,3 @@ CREATE TABLE public.product_promotions (
 La fonctionnalité de création de codes promo est **partiellement complète**. Le système avancé (`product_promotions`) a toutes les capacités nécessaires au niveau de la base de données, mais l'interface utilisateur manque les composants de sélection pour permettre aux vendeurs de choisir les produits, catégories ou collections auxquels appliquer la promotion.
 
 **Action immédiate requise:** Créer et intégrer le composant `PromotionScopeSelector` dans le formulaire de promotion.
-

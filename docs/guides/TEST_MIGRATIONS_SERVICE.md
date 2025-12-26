@@ -268,4 +268,3 @@ Si tous les tests passent :
 ---
 
 _Guide créé le 1 Février 2025_
-

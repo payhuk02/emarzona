@@ -89,10 +89,12 @@ Le système unifié de promotions vous permet de créer et gérer toutes vos pro
 Réduction en pourcentage sur le montant total de la commande.
 
 **Exemple :**
+
 - Valeur : `20`
 - Résultat : 20% de réduction sur le total
 
 **Quand l'utiliser :**
+
 - Soldes générales
 - Promotions saisonnières
 - Réductions sur catégories entières
@@ -104,10 +106,12 @@ Réduction en pourcentage sur le montant total de la commande.
 Réduction d'un montant précis en XOF.
 
 **Exemple :**
+
 - Valeur : `5000`
 - Résultat : 5000 XOF de réduction sur le total
 
 **Quand l'utiliser :**
+
 - Offres spéciales avec réduction fixe
 - Promotions "économisez X XOF"
 
@@ -118,10 +122,12 @@ Réduction d'un montant précis en XOF.
 Offre la livraison gratuite sans réduction sur le prix.
 
 **Exemple :**
+
 - Type : Livraison gratuite
 - Résultat : Les frais de livraison sont offerts
 
 **Quand l'utiliser :**
+
 - Commandes supérieures à un montant minimum
 - Promotions événementielles
 
@@ -140,6 +146,7 @@ Promotion conditionnelle (à venir dans une version future).
 La promotion s'applique à **tous vos produits** sans exception.
 
 **Quand l'utiliser :**
+
 - Soldes générales
 - Promotions store-wide
 - Offres spéciales globales
@@ -151,12 +158,14 @@ La promotion s'applique à **tous vos produits** sans exception.
 La promotion s'applique uniquement aux **produits que vous sélectionnez**.
 
 **Comment procéder :**
+
 1. Sélectionnez "Produits spécifiques"
 2. Utilisez la recherche pour trouver vos produits
 3. Cochez les produits concernés
 4. Vous pouvez sélectionner "Tout sélectionner" pour une catégorie
 
 **Quand l'utiliser :**
+
 - Promotions sur des produits précis
 - Nouveautés
 - Produits en fin de série
@@ -168,11 +177,13 @@ La promotion s'applique uniquement aux **produits que vous sélectionnez**.
 La promotion s'applique à **tous les produits d'une ou plusieurs catégories**.
 
 **Comment procéder :**
+
 1. Sélectionnez "Catégories"
 2. Recherchez et sélectionnez les catégories concernées
 3. Tous les produits de ces catégories bénéficient de la promotion
 
 **Quand l'utiliser :**
+
 - Soldes par catégorie
 - Promotions thématiques
 - Offres sur des types de produits
@@ -184,11 +195,13 @@ La promotion s'applique à **tous les produits d'une ou plusieurs catégories**.
 La promotion s'applique à **tous les produits d'une ou plusieurs collections**.
 
 **Comment procéder :**
+
 1. Sélectionnez "Collections"
 2. Recherchez et sélectionnez les collections concernées
 3. Tous les produits de ces collections bénéficient de la promotion
 
 **Quand l'utiliser :**
+
 - Promotions sur des collections spécifiques
 - Offres packagées
 - Nouveautés par collection
@@ -204,6 +217,7 @@ La promotion s'applique à **tous les produits d'une ou plusieurs collections**.
 Définit combien de fois au maximum le code peut être utilisé.
 
 **Exemple :**
+
 - Limite : `100`
 - Résultat : Le code peut être utilisé maximum 100 fois au total
 
@@ -216,6 +230,7 @@ Définit combien de fois au maximum le code peut être utilisé.
 Définit combien de fois un même client peut utiliser le code.
 
 **Exemple :**
+
 - Limite : `1`
 - Résultat : Chaque client peut utiliser le code une seule fois
 
@@ -228,10 +243,12 @@ Définit combien de fois un même client peut utiliser le code.
 Définit le montant minimum d'achat requis pour utiliser la promotion.
 
 **Exemple :**
+
 - Montant minimum : `10000`
 - Résultat : La promotion ne s'applique que si le panier dépasse 10 000 XOF
 
 **Quand l'utiliser :**
+
 - Inciter à des commandes plus importantes
 - Réductions importantes avec achat minimum
 - Offres "dès X XOF d'achat"
@@ -243,6 +260,7 @@ Définit le montant minimum d'achat requis pour utiliser la promotion.
 Si activée, la promotion s'applique automatiquement sans que le client n'ait besoin d'entrer de code.
 
 **Quand l'utiliser :**
+
 - Promotions visibles sur tous les produits
 - Soldes générales
 - Promotions saisonnières automatiques
@@ -315,6 +333,7 @@ Pour chaque promotion, vous voyez :
 ### 1. Nommez vos Promotions clairement
 
 Utilisez des noms descriptifs qui vous permettront de les retrouver facilement :
+
 - ✅ "Black Friday 2025 - Tous produits"
 - ✅ "Promo Hiver - Catégorie Vêtements"
 - ❌ "Promo 1"
@@ -325,6 +344,7 @@ Utilisez des noms descriptifs qui vous permettront de les retrouver facilement :
 ### 2. Créez des Codes Mémorables
 
 Les codes promotionnels doivent être :
+
 - **Courts** : Faciles à retenir (ex: "WELCOME10")
 - **Explicites** : Qui indiquent la promotion (ex: "SUMMER25")
 - **En majuscules** : Pour faciliter la saisie
@@ -342,6 +362,7 @@ Les codes promotionnels doivent être :
 ### 4. Planifiez à l'Avance
 
 Créez vos promotions à l'avance et programmez-les avec les dates :
+
 - Activez-les automatiquement au bon moment
 - Désactivez-les automatiquement après la date de fin
 
@@ -350,6 +371,7 @@ Créez vos promotions à l'avance et programmez-les avec les dates :
 ### 5. Testez vos Promotions
 
 Avant de lancer une promotion importante :
+
 - Testez le code avec un petit montant
 - Vérifiez que la réduction s'applique correctement
 - Confirmez que les conditions fonctionnent
@@ -359,6 +381,7 @@ Avant de lancer une promotion importante :
 ### 6. Surveillez les Statistiques
 
 Consultez régulièrement :
+
 - Le nombre d'utilisations
 - Les produits les plus concernés
 - L'impact sur vos ventes
@@ -382,6 +405,7 @@ Si la date de fin est atteinte, la promotion devient inactive et ne peut plus ê
 ### Puis-je modifier une promotion déjà utilisée ?
 
 Oui, vous pouvez modifier une promotion à tout moment. Les modifications affectent :
+
 - ✅ Les nouvelles commandes
 - ❌ Les commandes déjà passées (non modifiables)
 
@@ -423,4 +447,3 @@ Pour toute question ou problème :
 
 **Dernière mise à jour :** 28 Janvier 2025  
 **Version du guide :** 1.0
-

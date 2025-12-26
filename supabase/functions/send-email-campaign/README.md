@@ -27,7 +27,7 @@ const { data, error } = await supabase.functions.invoke('send-email-campaign', {
   body: {
     campaign_id: 'campaign-uuid',
     batch_size: 100, // Optionnel, défaut: 100
-    batch_index: 0,  // Optionnel, défaut: 0
+    batch_index: 0, // Optionnel, défaut: 0
   },
 });
 ```
@@ -44,12 +44,15 @@ const { data, error } = await supabase.functions.invoke('send-email-campaign', {
 ## Types d'audience supportés
 
 ### Segment
+
 Récupère les membres d'un segment email spécifique.
 
 ### List
+
 Récupère les clients d'une liste (à implémenter).
 
 ### Filter
+
 Récupère les clients selon des filtres personnalisés (ex: clients qui ont acheté).
 
 ## Traitement en batch
@@ -73,10 +76,10 @@ if (result1.data.has_more) {
 ## Métriques
 
 La fonction met à jour automatiquement les métriques de la campagne:
+
 - `sent`: Nombre d'emails envoyés
 - `delivered`: Nombre d'emails livrés (mise à jour via webhook SendGrid)
 - `opened`: Nombre d'ouvertures (mise à jour via webhook SendGrid)
 - `clicked`: Nombre de clics (mise à jour via webhook SendGrid)
 - `bounced`: Nombre de rebonds (mise à jour via webhook SendGrid)
 - `unsubscribed`: Nombre de désabonnements
-

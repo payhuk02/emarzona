@@ -11,6 +11,7 @@
 ## ✅ CE QUI A ÉTÉ FAIT
 
 ### 1. Migration SQL ✅
+
 - ✅ 11 tables créées (courses, course_sections, course_lessons, etc.)
 - ✅ Tous les indexes optimisés
 - ✅ RLS (Row Level Security) configuré
@@ -18,16 +19,19 @@
 - ✅ Triggers automatiques
 
 ### 2. Types TypeScript ✅
+
 - ✅ Fichier `src/types/courses.ts` créé
 - ✅ 20+ interfaces définies
 - ✅ Tous les types exportés
 
 ### 3. Hooks React ✅
+
 - ✅ `useCourses.ts` - CRUD cours
 - ✅ `useCourseEnrollment.ts` - Inscriptions
 - ✅ `useCourseProgress.ts` - Progression
 
 ### 4. UI Mise à jour ✅
+
 - ✅ Type "Cours en ligne" ajouté dans ProductTypeSelector
 - ✅ Icône GraduationCap + couleur orange
 - ✅ Badge "Populaire"
@@ -39,10 +43,12 @@
 ### Option 1 : Via Supabase Dashboard (Recommandé)
 
 #### Étape 1 : Connexion au projet
+
 1. Aller sur https://supabase.com/dashboard
 2. Sélectionner votre projet : `your-project-id`
 
 #### Étape 2 : Exécuter la migration
+
 1. Cliquer sur **SQL Editor** dans le menu gauche
 2. Créer une nouvelle query
 3. Copier tout le contenu du fichier :
@@ -53,6 +59,7 @@
 5. Cliquer sur **Run** (bouton vert en bas à droite)
 
 #### Étape 3 : Vérifier les tables créées
+
 1. Aller dans **Table Editor**
 2. Vérifier que ces tables existent :
    - ✅ `courses`
@@ -68,6 +75,7 @@
    - ✅ `instructor_profiles`
 
 #### Étape 4 : Vérifier les fonctions SQL
+
 1. Aller dans **Database** → **Functions**
 2. Vérifier que ces fonctions existent :
    - ✅ `calculate_course_progress`
@@ -79,28 +87,33 @@
 ### Option 2 : Via Supabase CLI (Pour développeurs)
 
 #### Prérequis
+
 ```bash
 # Installer Supabase CLI si pas déjà fait
 npm install -g supabase
 ```
 
 #### Étape 1 : Lier le projet
+
 ```bash
 cd payhula
 supabase link --project-ref your-project-id
 ```
 
 #### Étape 2 : Exécuter la migration
+
 ```bash
 supabase db push
 ```
 
 Ou exécuter manuellement :
+
 ```bash
 supabase db execute --file supabase/migrations/20251027_courses_system_complete.sql
 ```
 
 #### Étape 3 : Vérifier les tables
+
 ```bash
 supabase db diff
 ```
@@ -155,6 +168,7 @@ supabase db diff
 ### Test 1 : Vérifier le nouveau type "Cours"
 
 1. Lancer l'application :
+
    ```bash
    npm run dev
    ```
@@ -170,6 +184,7 @@ supabase db diff
 4. Cliquer sur **"Cours en ligne"**
 
 **Résultat attendu** :
+
 - La carte se sélectionne (bordure orange)
 - Badge "Populaire" visible
 - Icône 🎓 GraduationCap
@@ -180,8 +195,10 @@ supabase db diff
 ## 🐛 ERREURS POSSIBLES & SOLUTIONS
 
 ### Erreur : "relation 'courses' already exists"
+
 **Cause** : Tables déjà créées  
 **Solution** :
+
 ```sql
 -- Supprimer les tables existantes
 DROP TABLE IF EXISTS public.course_discussion_replies CASCADE;
@@ -202,8 +219,10 @@ DROP TABLE IF EXISTS public.courses CASCADE;
 ---
 
 ### Erreur : "function update_updated_at_column() does not exist"
+
 **Cause** : Fonction manquante (doit exister dans une migration précédente)  
 **Solution** : Créer la fonction :
+
 ```sql
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER
@@ -219,6 +238,7 @@ $$;
 ---
 
 ### Erreur : "type pricing_model does not exist"
+
 **Cause** : Enum manquant  
 **Solution** : Vérifier que la migration `20251006103640_f55a08d2-0eb9-40bf-af68-8e2b744da8db.sql` a été exécutée
 
@@ -243,11 +263,13 @@ $$;
 Une fois la migration testée et validée :
 
 ### Étape suivante : Créer composant CourseCard
+
 ```
 src/components/courses/marketplace/CourseCard.tsx
 ```
 
 ### Puis : Ajouter les routes
+
 ```
 src/App.tsx
 - /dashboard/courses
@@ -256,6 +278,7 @@ src/App.tsx
 ```
 
 ### Ensuite : Créer pages
+
 ```
 src/pages/courses/
 - CreateCourse.tsx
@@ -268,11 +291,13 @@ src/pages/courses/
 ## 📞 BESOIN D'AIDE ?
 
 ### Si la migration échoue :
+
 1. Vérifier les logs dans Supabase Dashboard
 2. Partager le message d'erreur complet
 3. Vérifier que toutes les migrations précédentes sont exécutées
 
 ### Si l'UI ne se met pas à jour :
+
 1. Vider le cache du navigateur (Ctrl + Shift + R)
 2. Redémarrer le serveur dev
 3. Vérifier la console pour les erreurs
@@ -284,6 +309,7 @@ src/pages/courses/
 Si tous les tests passent, félicitations ! 🎉
 
 **Vous avez maintenant :**
+
 - ✅ Base de données complète pour les cours
 - ✅ Types TypeScript prêts
 - ✅ Hooks React opérationnels
@@ -295,4 +321,3 @@ Si tous les tests passent, félicitations ! 🎉
 
 **Document créé le** : 27 Octobre 2025  
 **Dernière mise à jour** : 27 Octobre 2025
-

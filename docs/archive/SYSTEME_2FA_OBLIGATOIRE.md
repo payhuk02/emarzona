@@ -12,6 +12,7 @@
 ### Objectif
 
 Forcer tous les utilisateurs avec rôle `admin` ou `superadmin` à activer l'authentification à deux facteurs (2FA) pour sécuriser leurs comptes contre :
+
 - Compromission de mot de passe
 - Attaques phishing
 - Accès non autorisé
@@ -86,6 +87,7 @@ src/
 ## 🔧 HOOK : `useRequire2FA`
 
 ### Fichier
+
 `src/hooks/useRequire2FA.ts`
 
 ### Fonctionnalités
@@ -93,11 +95,11 @@ src/
 #### 1. Vérification Automatique
 
 ```typescript
-const { 
-  is2FAEnabled,     // boolean - 2FA actif ?
-  requires2FA,      // boolean - 2FA requis maintenant ?
-  isLoading,        // boolean - Chargement en cours
-  daysRemaining     // number | null - Jours restants avant obligation
+const {
+  is2FAEnabled, // boolean - 2FA actif ?
+  requires2FA, // boolean - 2FA requis maintenant ?
+  isLoading, // boolean - Chargement en cours
+  daysRemaining, // number | null - Jours restants avant obligation
 } = useRequire2FA();
 ```
 
@@ -105,11 +107,12 @@ const {
 
 ```typescript
 useRequire2FA({
-  gracePeriodDays: 7,         // Défaut: 7 jours
-  disableRedirect: false,      // Désactiver redirection auto
-  onRequire2FA: () => {        // Callback custom
+  gracePeriodDays: 7, // Défaut: 7 jours
+  disableRedirect: false, // Désactiver redirection auto
+  onRequire2FA: () => {
+    // Callback custom
     console.log('2FA requis!');
-  }
+  },
 });
 ```
 
@@ -120,7 +123,9 @@ useRequire2FA({
 const isAdmin = profile.role === 'admin' || profile.role === 'superadmin';
 
 // 2. Vérifier facteurs MFA via Supabase
-const { data: { factors } } = await supabase.auth.mfa.listFactors();
+const {
+  data: { factors },
+} = await supabase.auth.mfa.listFactors();
 const has2FA = factors?.some(f => f.status === 'verified');
 
 // 3. Calculer jours restants
@@ -138,9 +143,9 @@ if (daysRemaining <= 0) {
 
 ```typescript
 const WHITELISTED_ROUTES = [
-  '/dashboard/settings',  // Pour activer le 2FA
-  '/logout',              // Pour se déconnecter
-  '/profile'              // Pour voir son profil
+  '/dashboard/settings', // Pour activer le 2FA
+  '/logout', // Pour se déconnecter
+  '/profile', // Pour voir son profil
 ];
 ```
 
@@ -151,6 +156,7 @@ Les admins peuvent accéder à ces pages même sans 2FA pour pouvoir l'activer.
 ## 🎨 COMPOSANT : `Require2FABanner`
 
 ### Fichier
+
 `src/components/auth/Require2FABanner.tsx`
 
 ### Variants
@@ -202,6 +208,7 @@ Les admins peuvent accéder à ces pages même sans 2FA pour pouvoir l'activer.
 ```
 
 **Couleurs** :
+
 - Background: `bg-orange-50`
 - Bordure: `border-orange-200`
 - Texte: `text-orange-900`
@@ -223,6 +230,7 @@ Les admins peuvent accéder à ces pages même sans 2FA pour pouvoir l'activer.
 ```
 
 **Couleurs** :
+
 - Background: `bg-red-50`
 - Bordure: `border-red-200`
 - Texte: `text-red-900`
@@ -235,25 +243,24 @@ Les admins peuvent accéder à ces pages même sans 2FA pour pouvoir l'activer.
 ## 🔗 INTÉGRATION DANS APP
 
 ### Fichier Modifié
+
 `src/App.tsx`
 
 ### Changements
 
 ```tsx
 // Import
-import { Require2FABanner } from "@/components/auth/Require2FABanner";
+import { Require2FABanner } from '@/components/auth/Require2FABanner';
 
 // Dans AppContent return
 return (
   <Sentry.ErrorBoundary fallback={<ErrorFallback />} showDialog>
     <PerformanceOptimizer />
     <LoadingBar />
-    <Require2FABanner position="top" />  {/* 🆕 AJOUTÉ */}
+    <Require2FABanner position="top" /> {/* 🆕 AJOUTÉ */}
     <ScrollToTop />
     <Suspense fallback={<LoadingFallback />}>
-      <Routes>
-        {/* ... routes ... */}
-      </Routes>
+      <Routes>{/* ... routes ... */}</Routes>
     </Suspense>
   </Sentry.ErrorBoundary>
 );
@@ -361,7 +368,7 @@ const { daysRemaining } = useRequire2FA();
 expect(toast).toHaveBeenCalledWith({
   title: '⚠️ Activation 2FA requise',
   description: 'Vous devez activer... dans 3 jours',
-  variant: 'destructive'
+  variant: 'destructive',
 });
 ```
 
@@ -375,11 +382,7 @@ expect(toast).toHaveBeenCalledWith({
 // Dans useRequire2FA.ts
 const GRACE_PERIOD_DAYS = 7; // Modifier selon besoin
 
-const WHITELISTED_ROUTES = [
-  '/dashboard/settings',
-  '/logout',
-  '/profile'
-]; // Ajouter routes si besoin
+const WHITELISTED_ROUTES = ['/dashboard/settings', '/logout', '/profile']; // Ajouter routes si besoin
 ```
 
 ### Personnalisation Grace Period
@@ -414,25 +417,25 @@ useRequire2FA({ gracePeriodDays: 0 });
 
 ### KPIs à Suivre
 
-| Métrique | Description | Objectif |
-|----------|-------------|----------|
-| **Adoption Rate** | % admins avec 2FA activé | 100% |
-| **Activation Time** | Temps moyen pour activer 2FA | < 3 min |
+| Métrique               | Description                           | Objectif       |
+| ---------------------- | ------------------------------------- | -------------- |
+| **Adoption Rate**      | % admins avec 2FA activé              | 100%           |
+| **Activation Time**    | Temps moyen pour activer 2FA          | < 3 min        |
 | **Grace Period Usage** | Distribution des activations par jour | Courbe normale |
-| **Blocked Access** | Nombre d'admins bloqués (Day 8+) | 0% |
-| **Support Tickets** | Tickets liés au 2FA obligatoire | < 5% |
+| **Blocked Access**     | Nombre d'admins bloqués (Day 8+)      | 0%             |
+| **Support Tickets**    | Tickets liés au 2FA obligatoire       | < 5%           |
 
 ### Queries Supabase
 
 ```sql
 -- % Admins avec 2FA activé
-SELECT 
+SELECT
   COUNT(CASE WHEN mfa_enabled THEN 1 END) * 100.0 / COUNT(*) as adoption_rate
 FROM profiles
 WHERE role IN ('admin', 'superadmin');
 
 -- Admins sans 2FA par ancienneté
-SELECT 
+SELECT
   id,
   email,
   created_at,
@@ -453,7 +456,7 @@ if (daysRemaining <= 2 && !hasNotified) {
     to: admin.email,
     subject: '⚠️ ACTION REQUISE: Activez le 2FA',
     template: 'require-2fa-urgent',
-    data: { daysRemaining }
+    data: { daysRemaining },
   });
 }
 ```
@@ -466,9 +469,7 @@ if (daysRemaining <= 2 && !hasNotified) {
 
 ```typescript
 // Whitelist super admin principal (founder)
-const EXCEPTION_USERS = [
-  'founder@payhula.com'
-];
+const EXCEPTION_USERS = ['founder@payhula.com'];
 
 if (EXCEPTION_USERS.includes(user.email)) {
   return { requires2FA: false };
@@ -482,7 +483,7 @@ if (EXCEPTION_USERS.includes(user.email)) {
 const MIGRATION_GROUPS = {
   week1: ['admin_group_a'],
   week2: ['admin_group_b'],
-  week3: ['admin_group_c']
+  week3: ['admin_group_c'],
 };
 ```
 
@@ -490,13 +491,11 @@ const MIGRATION_GROUPS = {
 
 ```typescript
 // Admin peut temporairement désactiver pour un user
-await supabase
-  .from('admin_2fa_overrides')
-  .insert({
-    user_id: userId,
-    expires_at: new Date(+new Date() + 24 * 60 * 60 * 1000), // 24h
-    reason: 'Lost device - support ticket #1234'
-  });
+await supabase.from('admin_2fa_overrides').insert({
+  user_id: userId,
+  expires_at: new Date(+new Date() + 24 * 60 * 60 * 1000), // 24h
+  reason: 'Lost device - support ticket #1234',
+});
 ```
 
 ---
@@ -510,8 +509,8 @@ Sujet: 🛡️ Sécurisez votre compte Payhula avec le 2FA
 
 Bonjour [Nom],
 
-Pour renforcer la sécurité de votre compte administrateur, 
-nous demandons à tous les admins d'activer l'authentification 
+Pour renforcer la sécurité de votre compte administrateur,
+nous demandons à tous les admins d'activer l'authentification
 à deux facteurs (2FA).
 
 ⏰ Vous avez 7 jours pour activer le 2FA
@@ -555,13 +554,13 @@ Il ne vous reste que 2 jours pour activer le 2FA.
 
 ### Protection Implemented
 
-| Threat | Mitigation | Status |
-|--------|------------|--------|
-| Brute force | Rate limiting sur vérification code | ✅ |
-| Bypass | Whitelist minimale de routes | ✅ |
-| Social engineering | Formation utilisateurs | ✅ |
-| Device loss | Backup codes (à implémenter) | 🚧 |
-| Account recovery | Support process défini | ✅ |
+| Threat             | Mitigation                          | Status |
+| ------------------ | ----------------------------------- | ------ |
+| Brute force        | Rate limiting sur vérification code | ✅     |
+| Bypass             | Whitelist minimale de routes        | ✅     |
+| Social engineering | Formation utilisateurs              | ✅     |
+| Device loss        | Backup codes (à implémenter)        | 🚧     |
+| Account recovery   | Support process défini              | ✅     |
 
 ### Backup Codes (Future)
 
@@ -638,30 +637,32 @@ R: 7 jours à partir de la création de votre compte admin. Passé ce délai, vo
 
 ### Avant Implémentation
 
-| Métrique | Valeur |
-|----------|--------|
-| Admins avec 2FA | 5% |
-| Comptes compromis/an | 2-3 |
-| Incidents sécurité | Moyen |
-| Score sécurité | 60/100 |
+| Métrique             | Valeur |
+| -------------------- | ------ |
+| Admins avec 2FA      | 5%     |
+| Comptes compromis/an | 2-3    |
+| Incidents sécurité   | Moyen  |
+| Score sécurité       | 60/100 |
 
 ### Après Implémentation (3 mois)
 
-| Métrique | Valeur | Amélioration |
-|----------|--------|--------------|
-| Admins avec 2FA | 100% | +1900% 🚀 |
-| Comptes compromis/an | 0 | -100% ✅ |
-| Incidents sécurité | Faible | -80% ✅ |
-| Score sécurité | 95/100 | +58% ✅ |
+| Métrique             | Valeur | Amélioration |
+| -------------------- | ------ | ------------ |
+| Admins avec 2FA      | 100%   | +1900% 🚀    |
+| Comptes compromis/an | 0      | -100% ✅     |
+| Incidents sécurité   | Faible | -80% ✅      |
+| Score sécurité       | 95/100 | +58% ✅      |
 
 ### ROI Sécurité
 
 **Coût** :
+
 - Développement: 11h (déjà fait)
 - Support: 2h/semaine (estimation)
 - Formation: 4h (one-time)
 
 **Gain** :
+
 - Prévention breach: $50,000 - $500,000
 - Conformité GDPR/PCI-DSS: ✅
 - Réputation: Inestimable
@@ -675,4 +676,3 @@ R: 7 jours à partir de la création de votre compte admin. Passé ce délai, vo
 **Version** : 1.0.0  
 **Status** : Production Ready ✅  
 **Maintainer** : Security Team Payhula
-

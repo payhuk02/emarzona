@@ -10,14 +10,14 @@
 
 ### Métriques Actuelles
 
-| Catégorie | Nombre | Priorité | Statut |
-|-----------|--------|----------|--------|
-| **TODOs dans le code** | 252 occurrences (92 fichiers) | 🔴 CRITIQUE | ⏳ À faire |
-| **console.log** | 376 occurrences (79 fichiers) | 🟡 IMPORTANT | ⏳ À faire |
-| **Types `any`** | 1598 occurrences (475 fichiers) | 🟡 IMPORTANT | ⏳ À faire |
-| **Sécurité** | 7 tâches | 🔴 CRITIQUE | ⏳ À faire |
-| **TypeScript Strict** | 3 tâches | 🔴 CRITIQUE | ⏳ À faire |
-| **Documentation** | 3 tâches | 🟢 MOYENNE | ⏳ À faire |
+| Catégorie              | Nombre                          | Priorité     | Statut     |
+| ---------------------- | ------------------------------- | ------------ | ---------- |
+| **TODOs dans le code** | 252 occurrences (92 fichiers)   | 🔴 CRITIQUE  | ⏳ À faire |
+| **console.log**        | 376 occurrences (79 fichiers)   | 🟡 IMPORTANT | ⏳ À faire |
+| **Types `any`**        | 1598 occurrences (475 fichiers) | 🟡 IMPORTANT | ⏳ À faire |
+| **Sécurité**           | 7 tâches                        | 🔴 CRITIQUE  | ⏳ À faire |
+| **TypeScript Strict**  | 3 tâches                        | 🔴 CRITIQUE  | ⏳ À faire |
+| **Documentation**      | 3 tâches                        | 🟢 MOYENNE   | ⏳ À faire |
 
 **Total** : **20+ heures de travail** identifiées
 
@@ -66,6 +66,7 @@
 ### ✅ État Actuel
 
 **✅ DÉJÀ ACTIVÉ** : TypeScript Strict est configuré dans `tsconfig.app.json` :
+
 - ✅ `strict: true` (inclut strictNullChecks)
 - ✅ `noImplicitAny: true`
 - ✅ `noUnusedLocals: true`
@@ -176,6 +177,7 @@
 ### 1. Wizards de Création - Sauvegarde Non Fonctionnelle
 
 **Fichiers** :
+
 - `src/components/products/create/service/CreateServiceWizard.tsx`
 - `src/components/products/create/physical/CreatePhysicalProductWizard.tsx`
 - `src/components/products/create/digital/CreateDigitalProductWizard.tsx`
@@ -183,6 +185,7 @@
 **Problème** : Les wizards ont des TODOs pour la sauvegarde réelle
 
 **Solution** :
+
 1. Vérifier si les hooks de sauvegarde existent (`useCreateService`, `useCreatePhysicalProduct`, `useCreateDigitalProduct`)
 2. Connecter les wizards aux hooks
 3. Gérer les erreurs et validations
@@ -198,10 +201,12 @@
 **Fichier** : `src/components/service/staff/StaffAvailabilitySettings.tsx`
 
 **Problème** :
+
 - Ligne 48 : `// TODO: Load from database if settings table exists`
 - Ligne 57 : `// TODO: Save to database`
 
 **Solution** :
+
 1. Créer table `staff_availability_settings` dans Supabase
 2. Créer hook `useStaffAvailabilitySettings`
 3. Connecter le composant au hook
@@ -217,9 +222,11 @@
 **Fichier** : `src/components/service/resources/ResourceConflictSettings.tsx`
 
 **Problème** :
+
 - Ligne 44 : `// TODO: Save to database`
 
 **Solution** :
+
 1. Créer table `resource_conflict_settings` dans Supabase
 2. Créer hook `useResourceConflictSettings`
 3. Connecter le composant au hook
@@ -237,11 +244,13 @@
 **Statut** : 376 occurrences dans 79 fichiers
 
 **Plan d'action** :
+
 1. Identifier les fichiers avec le plus de `console.log`
 2. Remplacer progressivement par `logger.info/error/warn`
 3. Vérifier que `src/lib/logger.ts` est bien configuré
 
 **Fichiers prioritaires** :
+
 - `src/hooks/useStore.ts` (13)
 - `src/lib/moneroo-client.ts` (20)
 - `src/hooks/useProfile.ts` (14)
@@ -256,6 +265,7 @@
 **Statut** : 1598 occurrences dans 475 fichiers
 
 **Plan d'action** :
+
 1. Commencer par les hooks personnalisés
 2. Typage des contextes React
 3. Typage des interfaces de données
@@ -270,11 +280,13 @@
 **Statut** : `src/lib/url-validator.ts` existe
 
 **Action** :
+
 1. Rechercher tous les usages de `window.location.href`
 2. Remplacer par `safeRedirect()` de `url-validator.ts`
 3. Tester tous les cas de redirection
 
 **Fichiers à vérifier** :
+
 - Tous les composants de paiement
 - Tous les composants d'authentification
 - Tous les composants de checkout
@@ -288,11 +300,13 @@
 **Statut** : `src/lib/html-sanitizer.ts` existe
 
 **Action** :
+
 1. Rechercher tous les usages de `dangerouslySetInnerHTML`
 2. Vérifier que `sanitizeProductDescription()` est utilisé
 3. Ajouter sanitization si manquant
 
 **Fichiers à vérifier** :
+
 - `src/components/marketplace/ProductCard.tsx`
 - `src/pages/ProductDetail.tsx`
 - Tous les composants affichant des descriptions produits
@@ -306,12 +320,15 @@
 ### Semaine 1 : Sécurité & Code Quality
 
 **Jour 1** (2h) :
+
 - ✅ Phase 1 : Sécurité Urgente (1.1 à 1.7)
 
 **Jours 2-3** (8h) :
+
 - ✅ Phase 2 : TypeScript Strict (2.1 à 2.3)
 
 **Jours 4-5** (6h) :
+
 - ✅ Phase 3 : Code Quality (3.1 à 3.3)
 
 **Total Semaine 1** : 16 heures
@@ -321,12 +338,15 @@
 ### Semaine 2 : Sécurité Avancée & Documentation
 
 **Jours 1-2** (4h) :
+
 - ✅ Phase 4 : Sécurité Avancée (4.1 à 4.3)
 
 **Jours 3-4** (4h) :
+
 - ✅ Phase 5 : Documentation (5.1 à 5.3)
 
 **Jours 5** (4h) :
+
 - ✅ TODOs Critiques (Wizards, Staff, Resources)
 
 **Total Semaine 2** : 12 heures
@@ -335,14 +355,14 @@
 
 ## 🎯 MÉTRIQUES DE SUCCÈS
 
-| Métrique | Avant | Objectif | Statut |
-|----------|-------|----------|--------|
-| **TODOs critiques** | 252 | < 50 | ⏳ |
-| **console.log** | 376 | 0 | ⏳ |
-| **Types `any`** | 1598 | < 500 | ⏳ |
-| **TypeScript Strict** | ❌ | ✅ | ⏳ |
-| **Sécurité** | 72/100 | > 90/100 | ⏳ |
-| **Documentation** | ⚠️ | ✅ | ⏳ |
+| Métrique              | Avant  | Objectif | Statut |
+| --------------------- | ------ | -------- | ------ |
+| **TODOs critiques**   | 252    | < 50     | ⏳     |
+| **console.log**       | 376    | 0        | ⏳     |
+| **Types `any`**       | 1598   | < 500    | ⏳     |
+| **TypeScript Strict** | ❌     | ✅       | ⏳     |
+| **Sécurité**          | 72/100 | > 90/100 | ⏳     |
+| **Documentation**     | ⚠️     | ✅       | ⏳     |
 
 ---
 
@@ -357,17 +377,14 @@
 ### Priorisation
 
 **🔴 CRITIQUE** (À faire immédiatement) :
+
 1. Sécurité Urgente (Phase 1)
 2. TypeScript Strict (Phase 2)
 3. TODOs bloquants (Wizards)
 
-**🟡 IMPORTANT** (Cette semaine) :
-4. Code Quality (Phase 3)
-5. Sécurité Avancée (Phase 4)
+**🟡 IMPORTANT** (Cette semaine) : 4. Code Quality (Phase 3) 5. Sécurité Avancée (Phase 4)
 
-**🟢 MOYENNE** (Ce mois) :
-6. Documentation (Phase 5)
-7. Réduction progressive des `any`
+**🟢 MOYENNE** (Ce mois) : 6. Documentation (Phase 5) 7. Réduction progressive des `any`
 
 ---
 
@@ -384,4 +401,3 @@
 **Document créé le** : 31 Janvier 2025  
 **Dernière mise à jour** : 31 Janvier 2025  
 **Version** : 1.0
-

@@ -8,6 +8,7 @@
 ## 🔍 Problème Identifié
 
 D'après les logs :
+
 ```
 Error invoking send-email-campaign: {"code":401, "message":"Invalid JWT"}
 ```
@@ -55,9 +56,9 @@ async function sendCampaign(
       serviceKeyLength: supabaseServiceKey?.length || 0,
       serviceKeyPrefix: supabaseServiceKey?.substring(0, 50) || 'N/A'
     });
-    
+
     const functionUrl = `${supabaseUrl}/functions/v1/send-email-campaign`;
-    
+
     const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
@@ -105,6 +106,7 @@ SELECT net.http_post(
 ```
 
 Puis vérifiez les logs de `process-scheduled-campaigns` pour voir :
+
 1. Si `supabaseServiceKey` est bien défini
 2. Si l'appel à `send-email-campaign` réussit maintenant
 
@@ -122,5 +124,3 @@ Puis vérifiez les logs de `process-scheduled-campaigns` pour voir :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

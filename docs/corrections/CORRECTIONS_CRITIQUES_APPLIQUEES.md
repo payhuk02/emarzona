@@ -12,6 +12,7 @@
 **Problème**: Bundle initial de 2.6 MB (2,091 KB pour vendor-uiZnfGnV.js)
 
 **Solution Appliquée**:
+
 - ✅ Séparation de Radix UI en chunk dédié (`radix-ui`)
 - ✅ Séparation de Recharts en chunk dédié (`charts`)
 - ✅ Séparation de react-big-calendar en chunk dédié (`calendar`)
@@ -22,6 +23,7 @@
 - ✅ Séparation de zod en chunk dédié (`validation`)
 
 **Impact Attendu**:
+
 - Bundle initial réduit de ~60-70%
 - Chargement initial plus rapide
 - Code splitting plus granulaire
@@ -35,12 +37,14 @@
 **Problème**: Utilisation de `any` et risque de requêtes N+1
 
 **Solution Appliquée**:
+
 - ✅ Création d'interface TypeScript `ServiceBookingWithRelations`
 - ✅ Remplacement de `(supabase as any)` par `supabase` avec `.returns<ServiceBookingWithRelations[]>()`
 - ✅ Remplacement de `any` dans les filtres par types explicites
 - ✅ Requête optimisée avec relations (évite N+1)
 
 **Impact**:
+
 - Type safety améliorée
 - Performance maintenue (requête unique avec relations)
 - Code plus maintenable
@@ -49,11 +53,12 @@
 
 ---
 
-### ✅ 3. Remplacement console.* par logger.* (main.tsx)
+### ✅ 3. Remplacement console._ par logger._ (main.tsx)
 
 **Problème**: `console.warn` dans main.tsx
 
 **Solution Appliquée**:
+
 - ✅ Import de `logger` depuis `@/lib/logger`
 - ✅ Remplacement de `console.warn` par `logger.warn`
 - ✅ Utilisation du contexte pour l'erreur
@@ -67,6 +72,7 @@
 **Problème**: Utilisation de `any` dans console-guard.ts
 
 **Solution Appliquée**:
+
 - ✅ Remplacement de `any[]` par `unknown[]` dans `ConsoleMethod`
 - ✅ Création d'interface `WindowWithRestoreConsole` au lieu de `(window as any)`
 
@@ -76,12 +82,12 @@
 
 ## 📊 RÉSUMÉ DES CORRECTIONS
 
-| Problème | Statut | Fichier | Impact |
-|----------|--------|---------|--------|
-| Bundle Size Excessif | ✅ Corrigé | vite.config.ts | 🔴 CRITIQUE |
-| Requêtes N+1 | ✅ Corrigé | BookingsManagement.tsx | 🔴 CRITIQUE |
-| console.* en production | ✅ Corrigé | main.tsx | 🔴 CRITIQUE |
-| Types `any` | ✅ Partiel | console-guard.ts | 🟡 IMPORTANT |
+| Problème                 | Statut     | Fichier                | Impact       |
+| ------------------------ | ---------- | ---------------------- | ------------ |
+| Bundle Size Excessif     | ✅ Corrigé | vite.config.ts         | 🔴 CRITIQUE  |
+| Requêtes N+1             | ✅ Corrigé | BookingsManagement.tsx | 🔴 CRITIQUE  |
+| console.\* en production | ✅ Corrigé | main.tsx               | 🔴 CRITIQUE  |
+| Types `any`              | ✅ Partiel | console-guard.ts       | 🟡 IMPORTANT |
 
 ---
 
@@ -90,9 +96,11 @@
 ### À Faire Immédiatement
 
 1. **Tester le build** :
+
    ```bash
    npm run build
    ```
+
    Vérifier que le bundle initial est <500 KB
 
 2. **Vérifier les chunks** :
@@ -119,7 +127,7 @@
 - Les corrections sont appliquées mais nécessitent des tests
 - Le bundle size devrait être réduit significativement
 - Les types TypeScript sont améliorés mais il reste du travail
-- Console.* est maintenant géré correctement via logger.*
+- Console._ est maintenant géré correctement via logger._
 
 ---
 

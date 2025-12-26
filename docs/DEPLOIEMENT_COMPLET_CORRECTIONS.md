@@ -23,6 +23,7 @@ Toutes les corrections identifiées dans l'audit v2.0 ont été **déployées et
   - ✅ Déclenchement automatique de la mise à jour de `store_earnings`
 
 **Vérification** :
+
 ```
 Deployed Functions on project hbdnzajbyjakdhuavrvb: moneroo-webhook
 ```
@@ -46,10 +47,11 @@ Deployed Functions on project hbdnzajbyjakdhuavrvb: moneroo-webhook
 **Statut** : ✅ **APPLIQUÉE ET VÉRIFIÉE**
 
 **Vérification effectuée** :
+
 ```sql
-SELECT 
+SELECT
   proname as function_name,
-  CASE 
+  CASE
     WHEN pg_get_functiondef(oid) LIKE '%refunded%' THEN '✅ Migration appliquée'
     ELSE '❌ Migration non appliquée'
   END as status
@@ -58,6 +60,7 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 ```
 
 **Résultat** : ✅ **Migration appliquée**
+
 - La fonction `trigger_update_store_earnings_on_order` contient maintenant la logique de remboursement
 - Le trigger se déclenchera automatiquement lors d'un remboursement
 
@@ -110,12 +113,14 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 ### Problème Résolu
 
 **Avant** :
+
 - ❌ Lors d'un remboursement, l'order gardait `payment_status = 'paid'`
 - ❌ L'order continuait d'être comptée dans `total_revenue`
 - ❌ `store_earnings` n'était pas mis à jour
 - ❌ `available_balance` était incorrect
 
 **Après** :
+
 - ✅ Lors d'un remboursement, l'order est mise à jour avec `payment_status = 'refunded'`
 - ✅ L'order n'est plus comptée dans `total_revenue` (car `payment_status != 'paid'`)
 - ✅ `store_earnings` est automatiquement recalculé via le trigger SQL
@@ -138,31 +143,33 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
    - Vérifier `store_earnings.total_revenue` avant remboursement
 
 2. **Effectuer le remboursement** :
+
    ```typescript
    await refundMonerooPayment({
      transactionId: 'transaction-uuid',
      amount: 10000, // ou undefined pour remboursement total
-     reason: 'Test remboursement'
+     reason: 'Test remboursement',
    });
    ```
 
 3. **Vérifier les résultats** :
+
    ```sql
    -- Vérifier la transaction
-   SELECT status, refunded_at 
-   FROM transactions 
+   SELECT status, refunded_at
+   FROM transactions
    WHERE id = 'transaction-uuid';
    -- Attendu: status = 'refunded', refunded_at IS NOT NULL
 
    -- Vérifier l'order
-   SELECT payment_status 
-   FROM orders 
+   SELECT payment_status
+   FROM orders
    WHERE id = 'order-uuid';
    -- Attendu: payment_status = 'refunded'
 
    -- Vérifier store_earnings
-   SELECT total_revenue, available_balance 
-   FROM store_earnings 
+   SELECT total_revenue, available_balance
+   FROM store_earnings
    WHERE store_id = 'store-uuid';
    -- Attendu: total_revenue diminué, available_balance ajusté
    ```
@@ -179,7 +186,7 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 
 ```sql
 -- Avant remboursement
-SELECT 
+SELECT
   store_id,
   total_revenue,
   available_balance,
@@ -190,7 +197,7 @@ WHERE store_id = 'store-uuid';
 -- Effectuer remboursement...
 
 -- Après remboursement
-SELECT 
+SELECT
   store_id,
   total_revenue,
   available_balance,
@@ -208,11 +215,11 @@ WHERE store_id = 'store-uuid';
 
 ## 📝 Fichiers Modifiés et Déployés
 
-| Fichier | Type | Statut | Description |
-|---------|------|--------|-------------|
-| `src/lib/moneroo-payment.ts` | Correction | ✅ Modifié | Mise à jour order lors remboursement manuel |
-| `supabase/functions/moneroo-webhook/index.ts` | Correction | ✅ Déployé | Mise à jour order lors remboursement webhook |
-| `supabase/migrations/20250230_fix_store_earnings_on_refund.sql` | Migration | ✅ Appliquée | Trigger SQL pour gérer remboursements |
+| Fichier                                                         | Type       | Statut       | Description                                  |
+| --------------------------------------------------------------- | ---------- | ------------ | -------------------------------------------- |
+| `src/lib/moneroo-payment.ts`                                    | Correction | ✅ Modifié   | Mise à jour order lors remboursement manuel  |
+| `supabase/functions/moneroo-webhook/index.ts`                   | Correction | ✅ Déployé   | Mise à jour order lors remboursement webhook |
+| `supabase/migrations/20250230_fix_store_earnings_on_refund.sql` | Migration  | ✅ Appliquée | Trigger SQL pour gérer remboursements        |
 
 ---
 
@@ -243,6 +250,7 @@ WHERE store_id = 'store-uuid';
 **Fonction** : `trigger_update_store_earnings_on_order()`
 
 **Logique ajoutée** :
+
 ```sql
 -- 🆕 Mettre à jour les revenus si la commande est remboursée
 IF NEW.payment_status = 'refunded' AND (OLD.payment_status IS NULL OR OLD.payment_status != 'refunded') THEN
@@ -251,6 +259,7 @@ END IF;
 ```
 
 **Impact** :
+
 - Le trigger se déclenche maintenant lors d'un changement de `payment_status` vers `'refunded'`
 - `store_earnings` est automatiquement recalculé
 - Les orders remboursées sont exclues du calcul de `total_revenue`
@@ -262,6 +271,7 @@ END IF;
 **Toutes les corrections ont été déployées et vérifiées avec succès.**
 
 Le système de transactions est maintenant **100% opérationnel** avec :
+
 - ✅ Reversement automatique des fonds vendeurs
 - ✅ Paiement automatique des commissions parrainage
 - ✅ **Gestion correcte des remboursements** (NOUVEAU)
@@ -273,5 +283,3 @@ Le système de transactions est maintenant **100% opérationnel** avec :
 
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ **DÉPLOIEMENT COMPLET ET VÉRIFIÉ**
-
-

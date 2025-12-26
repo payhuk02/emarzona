@@ -26,13 +26,13 @@ L'application **Payhuk** est **100% prête pour la production** après avoir com
 
 ### Langues disponibles : 5
 
-| # | Langue | Code | Clés | Sections | Audience | Statut |
-|---|--------|------|------|----------|----------|--------|
-| 1 | 🇫🇷 Français | FR | 1077 | 14 | ~280M | ✅ 100% |
-| 2 | 🇬🇧 English | EN | 1077 | 14 | ~1.5B | ✅ 100% |
-| 3 | 🇪🇸 Español | ES | 1077 | 14 | ~560M | ✅ 100% |
-| 4 | 🇩🇪 Deutsch | DE | 1077 | 14 | ~130M | ✅ 100% |
-| 5 | 🇵🇹 Português | PT | 969 | 11 | ~338M | ✅ 90% |
+| #   | Langue       | Code | Clés | Sections | Audience | Statut  |
+| --- | ------------ | ---- | ---- | -------- | -------- | ------- |
+| 1   | 🇫🇷 Français  | FR   | 1077 | 14       | ~280M    | ✅ 100% |
+| 2   | 🇬🇧 English   | EN   | 1077 | 14       | ~1.5B    | ✅ 100% |
+| 3   | 🇪🇸 Español   | ES   | 1077 | 14       | ~560M    | ✅ 100% |
+| 4   | 🇩🇪 Deutsch   | DE   | 1077 | 14       | ~130M    | ✅ 100% |
+| 5   | 🇵🇹 Português | PT   | 969  | 11       | ~338M    | ✅ 90%  |
 
 ### Statistiques globales :
 
@@ -114,18 +114,18 @@ $ npm run build
 
 ### Bundles générés :
 
-| Fichier | Taille | Gzip | Brotli | Description |
-|---------|--------|------|--------|-------------|
-| `index.js` | 205 kB | 62 kB | **58 kB** | Bundle principal |
-| `vendor-react.js` | 162 kB | 53 kB | **48 kB** | React + React DOM |
-| `vendor-supabase.js` | 146 kB | 37 kB | **33 kB** | Supabase client |
-| `vendor-i18n.js` | 46 kB | 15 kB | **13 kB** | Traductions (5 langues) |
-| `charts.js` | 413 kB | 105 kB | **98 kB** | Recharts |
-| `Landing.js` | 65 kB | 16 kB | **14 kB** | Page d'accueil |
-| `Auth.js` | 5 kB | 2 kB | **1.7 kB** | Authentification |
-| `Dashboard.js` | 19 kB | 5 kB | **4.5 kB** | Tableau de bord |
-| `Marketplace.js` | 86 kB | 21 kB | **19 kB** | Place de marché |
-| `Settings.js` | 127 kB | 26 kB | **23 kB** | Paramètres |
+| Fichier              | Taille | Gzip   | Brotli     | Description             |
+| -------------------- | ------ | ------ | ---------- | ----------------------- |
+| `index.js`           | 205 kB | 62 kB  | **58 kB**  | Bundle principal        |
+| `vendor-react.js`    | 162 kB | 53 kB  | **48 kB**  | React + React DOM       |
+| `vendor-supabase.js` | 146 kB | 37 kB  | **33 kB**  | Supabase client         |
+| `vendor-i18n.js`     | 46 kB  | 15 kB  | **13 kB**  | Traductions (5 langues) |
+| `charts.js`          | 413 kB | 105 kB | **98 kB**  | Recharts                |
+| `Landing.js`         | 65 kB  | 16 kB  | **14 kB**  | Page d'accueil          |
+| `Auth.js`            | 5 kB   | 2 kB   | **1.7 kB** | Authentification        |
+| `Dashboard.js`       | 19 kB  | 5 kB   | **4.5 kB** | Tableau de bord         |
+| `Marketplace.js`     | 86 kB  | 21 kB  | **19 kB**  | Place de marché         |
+| `Settings.js`        | 127 kB | 26 kB  | **23 kB**  | Paramètres              |
 
 **Taille totale (brute) :** ~2.1 MB  
 **Taille totale (Brotli) :** ~650 KB  
@@ -143,13 +143,13 @@ $ npm run build
 
 ### Performance attendue :
 
-| Métrique | Valeur | Objectif |
-|----------|--------|----------|
-| **First Contentful Paint (FCP)** | < 1.5s | ✅ < 1.8s |
-| **Largest Contentful Paint (LCP)** | < 2.5s | ✅ < 2.5s |
-| **Time to Interactive (TTI)** | < 3.5s | ✅ < 3.8s |
-| **Total Blocking Time (TBT)** | < 200ms | ✅ < 300ms |
-| **Cumulative Layout Shift (CLS)** | < 0.1 | ✅ < 0.1 |
+| Métrique                           | Valeur  | Objectif   |
+| ---------------------------------- | ------- | ---------- |
+| **First Contentful Paint (FCP)**   | < 1.5s  | ✅ < 1.8s  |
+| **Largest Contentful Paint (LCP)** | < 2.5s  | ✅ < 2.5s  |
+| **Time to Interactive (TTI)**      | < 3.5s  | ✅ < 3.8s  |
+| **Total Blocking Time (TBT)**      | < 200ms | ✅ < 300ms |
+| **Cumulative Layout Shift (CLS)**  | < 0.1   | ✅ < 0.1   |
 
 **Score PageSpeed Insights attendu :** > 90 🎯
 
@@ -159,26 +159,26 @@ $ npm run build
 
 ### 1️⃣ Traductions Portugais :
 
-| Fichier | Description | Taille |
-|---------|-------------|--------|
+| Fichier                    | Description              | Taille   |
+| -------------------------- | ------------------------ | -------- |
 | `src/i18n/locales/pt.json` | Traductions complètes PT | 969 clés |
 
 ### 2️⃣ Configuration i18n :
 
-| Fichier | Modification | Détails |
-|---------|--------------|---------|
-| `src/i18n/config.ts` | Ajout PT | Import, resources, AVAILABLE_LANGUAGES |
-| `scripts/verify-i18n-presence.js` | Ajout PT | Vérification automatique |
+| Fichier                           | Modification | Détails                                |
+| --------------------------------- | ------------ | -------------------------------------- |
+| `src/i18n/config.ts`              | Ajout PT     | Import, resources, AVAILABLE_LANGUAGES |
+| `scripts/verify-i18n-presence.js` | Ajout PT     | Vérification automatique               |
 
 ### 3️⃣ Documentation Déploiement :
 
-| Fichier | Description | Pages |
-|---------|-------------|-------|
-| `DEPLOYMENT_GUIDE.md` | **Guide complet de déploiement** | 39 pages |
-| `PRODUCTION_DEPLOYMENT_SUMMARY.md` | **Résumé déploiement** | 12 pages |
-| `QUICK_DEPLOY.md` | **Guide express (5 min)** | 6 pages |
-| `RAPPORT_AJOUT_PORTUGAIS_2025.md` | **Rapport ajout PT** | 15 pages |
-| `RAPPORT_FINAL_SESSION_DEPLOIEMENT_2025.md` | **Ce rapport** | 20 pages |
+| Fichier                                     | Description                      | Pages    |
+| ------------------------------------------- | -------------------------------- | -------- |
+| `DEPLOYMENT_GUIDE.md`                       | **Guide complet de déploiement** | 39 pages |
+| `PRODUCTION_DEPLOYMENT_SUMMARY.md`          | **Résumé déploiement**           | 12 pages |
+| `QUICK_DEPLOY.md`                           | **Guide express (5 min)**        | 6 pages  |
+| `RAPPORT_AJOUT_PORTUGAIS_2025.md`           | **Rapport ajout PT**             | 15 pages |
+| `RAPPORT_FINAL_SESSION_DEPLOIEMENT_2025.md` | **Ce rapport**                   | 20 pages |
 
 **Total documentation créée :** 92 pages 📚
 
@@ -189,15 +189,15 @@ $ npm run build
 ### `vercel.json` configuré avec :
 
 #### Rewrites :
+
 ```json
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
 ```
 
 #### Security Headers (7 configurés) :
+
 - ✅ **Strict-Transport-Security (HSTS)** - Force HTTPS
 - ✅ **X-Frame-Options** - Prévient clickjacking
 - ✅ **X-Content-Type-Options** - Prévient MIME sniffing
@@ -207,6 +207,7 @@ $ npm run build
 - ✅ **Content-Security-Policy (CSP)** - Sécurité maximale
 
 #### CORS Headers :
+
 - ✅ Configurés pour `/api/*`
 - ✅ Allow-Origin, Allow-Methods, Allow-Headers
 
@@ -229,6 +230,7 @@ VITE_FB_PIXEL_ID=...
 ## ✅ CHECKLIST FINALE
 
 ### Code & Build :
+
 - [x] Build de production réussi (0 erreurs)
 - [x] 5 langues configurées et testées
 - [x] 37/37 tests i18n passés
@@ -238,6 +240,7 @@ VITE_FB_PIXEL_ID=...
 - [x] SEO optimisé (Sitemap, Schema.org)
 
 ### Configuration :
+
 - [x] `vercel.json` configuré
 - [x] Security Headers configurés
 - [x] CORS configuré
@@ -245,6 +248,7 @@ VITE_FB_PIXEL_ID=...
 - [x] `.gitignore` configuré
 
 ### Documentation :
+
 - [x] Guide de déploiement complet (39 pages)
 - [x] Guide express (5 minutes)
 - [x] Résumé déploiement (12 pages)
@@ -252,12 +256,14 @@ VITE_FB_PIXEL_ID=...
 - [x] Rapport final session (ce document)
 
 ### Tests :
+
 - [x] Build local réussi
 - [x] Preview local testé (`npm run preview`)
 - [x] Vérification i18n automatique (37/37)
 - [x] Aucune erreur console
 
 ### Prêt pour la production :
+
 - [ ] Projet Supabase créé
 - [ ] Variables d'environnement récupérées
 - [ ] Code poussé sur GitHub
@@ -338,30 +344,30 @@ vercel --prod
 
 ### Temps de travail :
 
-| Tâche | Durée |
-|-------|-------|
-| Ajout Portugais | 15 min |
-| Vérification i18n | 5 min |
-| Build production | 2 min |
-| Création documentation | 30 min |
-| **TOTAL** | **52 minutes** |
+| Tâche                  | Durée          |
+| ---------------------- | -------------- |
+| Ajout Portugais        | 15 min         |
+| Vérification i18n      | 5 min          |
+| Build production       | 2 min          |
+| Création documentation | 30 min         |
+| **TOTAL**              | **52 minutes** |
 
 ### Lignes de code :
 
-| Type | Lignes |
-|------|--------|
-| Traductions PT (JSON) | ~2500 lignes |
-| Config i18n | 10 lignes |
-| Script vérification | 5 lignes |
-| Documentation | ~2000 lignes |
-| **TOTAL** | **~4515 lignes** |
+| Type                  | Lignes           |
+| --------------------- | ---------------- |
+| Traductions PT (JSON) | ~2500 lignes     |
+| Config i18n           | 10 lignes        |
+| Script vérification   | 5 lignes         |
+| Documentation         | ~2000 lignes     |
+| **TOTAL**             | **~4515 lignes** |
 
 ### Fichiers modifiés/créés :
 
-| Action | Nombre |
-|--------|--------|
-| Créés | 6 fichiers |
-| Modifiés | 2 fichiers |
+| Action    | Nombre         |
+| --------- | -------------- |
+| Créés     | 6 fichiers     |
+| Modifiés  | 2 fichiers     |
 | **TOTAL** | **8 fichiers** |
 
 ---
@@ -370,21 +376,21 @@ vercel --prod
 
 ### Hébergement :
 
-| Service | Plan | Prix/mois | Inclus |
-|---------|------|-----------|--------|
-| **Vercel** | Hobby | **Gratuit** | 100 GB bande passante, HTTPS, CDN |
-| **Supabase** | Free | **Gratuit** | 500 MB DB, 1 GB Storage, Auth |
-| **Sentry** | Developer | **Gratuit** | 5K erreurs/mois |
-| **Total** | - | **0€/mois** | Parfait pour démarrer ! |
+| Service      | Plan      | Prix/mois   | Inclus                            |
+| ------------ | --------- | ----------- | --------------------------------- |
+| **Vercel**   | Hobby     | **Gratuit** | 100 GB bande passante, HTTPS, CDN |
+| **Supabase** | Free      | **Gratuit** | 500 MB DB, 1 GB Storage, Auth     |
+| **Sentry**   | Developer | **Gratuit** | 5K erreurs/mois                   |
+| **Total**    | -         | **0€/mois** | Parfait pour démarrer !           |
 
 ### Mise à l'échelle (si nécessaire) :
 
-| Trafic mensuel | Coût Vercel | Coût Supabase | Total/mois |
-|----------------|-------------|---------------|------------|
-| **< 100K visits** | Gratuit | Gratuit | **0€** |
-| **100K-500K** | $20 (Pro) | Gratuit | **$20** |
-| **500K-1M** | $20 (Pro) | $25 (Pro) | **$45** |
-| **1M+** | Custom | $25-$599 | **Sur devis** |
+| Trafic mensuel    | Coût Vercel | Coût Supabase | Total/mois    |
+| ----------------- | ----------- | ------------- | ------------- |
+| **< 100K visits** | Gratuit     | Gratuit       | **0€**        |
+| **100K-500K**     | $20 (Pro)   | Gratuit       | **$20**       |
+| **500K-1M**       | $20 (Pro)   | $25 (Pro)     | **$45**       |
+| **1M+**           | Custom      | $25-$599      | **Sur devis** |
 
 **💡 Conseil :** Commencer avec les plans gratuits, upgrader selon les besoins.
 
@@ -442,11 +448,11 @@ vercel --prod
 
 ### Audience potentielle :
 
-| Métrique | Avant (4 langues) | Après (5 langues) | Croissance |
-|----------|-------------------|-------------------|------------|
-| **Locuteurs** | 2.47 milliards | 2.81 milliards | **+13.7%** |
-| **% Population** | 30.1% | 34.3% | **+4.2 pts** |
-| **Marché e-commerce** | $690B | $740B | **+$50B** |
+| Métrique              | Avant (4 langues) | Après (5 langues) | Croissance   |
+| --------------------- | ----------------- | ----------------- | ------------ |
+| **Locuteurs**         | 2.47 milliards    | 2.81 milliards    | **+13.7%**   |
+| **% Population**      | 30.1%             | 34.3%             | **+4.2 pts** |
+| **Marché e-commerce** | $690B             | $740B             | **+$50B**    |
 
 ### Nouveaux marchés :
 
@@ -622,6 +628,7 @@ vercel --prod
 ### Session accomplie avec succès ! ✅
 
 **Ce qui a été fait :**
+
 - ✅ Ajout du Portugais (PT) - 5ème langue
 - ✅ Build de production réussi
 - ✅ Vérification automatique (37/37 tests)
@@ -630,12 +637,14 @@ vercel --prod
 - ✅ Application 100% production-ready
 
 **Impact :**
+
 - 🌍 +338 millions de locuteurs potentiels
 - 💰 +$50 milliards de marché e-commerce
 - 📈 +13.7% d'audience mondiale
 - ⚡ Performance optimisée (-69% taille)
 
 **Prochaine action :**
+
 - 🚀 **Déployer sur Vercel** (10 minutes)
 - 📖 **Suivre** `QUICK_DEPLOY.md`
 
@@ -650,4 +659,3 @@ vercel --prod
 🎊 **Félicitations ! L'application Payhuk est prête pour conquérir le monde !** 🌍
 
 🚀 **Bon déploiement !**
-

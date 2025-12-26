@@ -6,9 +6,7 @@
   "pagesWithoutI18n": [
     {
       "file": "src\\pages\\UnsubscribePage.tsx",
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": ["Pas d'import i18n détecté"]
     }
   ],
   "pagesWithHardcodedText": [
@@ -146,57 +144,43 @@
       "file": "src\\pages\\admin\\AdminAffiliates.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminAnalytics.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminAudit.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminBatchShipping.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminCommissionPayments.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminCommissionSettings.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminCommunity.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminCostOptimization.tsx",
@@ -208,17 +192,13 @@
       "file": "src\\pages\\admin\\AdminCourses.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminDashboard.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminDemandForecasting.tsx",
@@ -230,41 +210,31 @@
       "file": "src\\pages\\admin\\AdminDisputes.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminErrorMonitoring.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminGiftCardManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminInventory.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminLoyaltyManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminMonitoring.tsx",
@@ -276,25 +246,19 @@
       "file": "src\\pages\\admin\\AdminNotifications.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminOrders.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminPayments.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminProductKitsManagement.tsx",
@@ -306,41 +270,31 @@
       "file": "src\\pages\\admin\\AdminProducts.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminReferrals.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminReturnManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminReviews.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminSales.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminSecurity.tsx",
@@ -352,25 +306,19 @@
       "file": "src\\pages\\admin\\AdminSettings.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminShipping.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminShippingConversations.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminStores.tsx",
@@ -382,57 +330,43 @@
       "file": "src\\pages\\admin\\AdminStoreWithdrawals.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminSuppliersManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminSupport.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminTaxManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminTransactionReconciliation.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminUsers.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminVendorConversations.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\AdminWarehousesManagement.tsx",
@@ -444,9 +378,7 @@
       "file": "src\\pages\\admin\\AdminWebhookManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\DigitalProductWebhooks.tsx",
@@ -458,9 +390,7 @@
       "file": "src\\pages\\admin\\IntegrationsPage.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\MonerooAnalytics.tsx",
@@ -472,9 +402,7 @@
       "file": "src\\pages\\admin\\MonerooReconciliation.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\PhysicalBackorders.tsx",
@@ -546,25 +474,19 @@
       "file": "src\\pages\\admin\\PlatformCustomization.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\admin\\TransactionMonitoring.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\AdminKYC.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\AdvancedDashboard.tsx",
@@ -576,9 +498,7 @@
       "file": "src\\pages\\AdvancedOrderManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\AdvancedOrderManagementSimple.tsx",
@@ -596,9 +516,7 @@
       "file": "src\\pages\\affiliate\\CourseAffiliate.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\affiliate\\ShortLinkRedirect.tsx",
@@ -610,33 +528,25 @@
       "file": "src\\pages\\AffiliateDashboard.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Analytics.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\artist\\ArtistProductDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Auth.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Cart.tsx",
@@ -648,9 +558,7 @@
       "file": "src\\pages\\checkout\\Cancel.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\checkout\\Checkout.tsx",
@@ -662,25 +570,19 @@
       "file": "src\\pages\\checkout\\Success.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Checkout.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\community\\CommunityPage.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\courses\\CourseAnalytics.tsx",
@@ -692,9 +594,7 @@
       "file": "src\\pages\\courses\\CourseDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\courses\\CreateCourse.tsx",
@@ -706,17 +606,13 @@
       "file": "src\\pages\\courses\\MyCourses.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\CreateProduct.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerDigitalPortal.tsx",
@@ -728,9 +624,7 @@
       "file": "src\\pages\\customer\\CustomerLoyalty.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerLoyaltyPage.tsx",
@@ -742,9 +636,7 @@
       "file": "src\\pages\\customer\\CustomerMyGiftCards.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerMyGiftCardsPage.tsx",
@@ -756,97 +648,73 @@
       "file": "src\\pages\\customer\\CustomerMyInvoices.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerMyReturns.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerMyWishlist.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerPhysicalPortal.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\CustomerPortal.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\MyCourses.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\MyDownloads.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\MyFavorites.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\MyOrders.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\MyProfile.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\PriceStockAlerts.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\customer\\SharedWishlist.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Customers.tsx",
@@ -858,9 +726,7 @@
       "file": "src\\pages\\dashboard\\StoreAffiliateManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Dashboard.tsx",
@@ -872,17 +738,13 @@
       "file": "src\\pages\\digital\\BundleDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\CreateBundle.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\DigitalBundlesList.tsx",
@@ -900,49 +762,37 @@
       "file": "src\\pages\\digital\\DigitalProductDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\DigitalProductsCompare.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\DigitalProductsList.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\DigitalProductsSearch.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\DigitalProductUpdatesDashboard.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\LicenseManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\digital\\MyDownloads.tsx",
@@ -954,17 +804,13 @@
       "file": "src\\pages\\digital\\MyLicenses.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\disputes\\DisputeDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\EditProduct.tsx",
@@ -1012,9 +858,7 @@
       "file": "src\\pages\\gamification\\GamificationPage.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Index.tsx",
@@ -1026,25 +870,19 @@
       "file": "src\\pages\\inventory\\InventoryDashboard.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\KYC.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Landing.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\legal\\CookiePolicy.tsx",
@@ -1062,33 +900,25 @@
       "file": "src\\pages\\legal\\RefundPolicy.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\legal\\TermsOfService.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Marketing.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Marketplace.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\MyTasks.tsx",
@@ -1106,33 +936,25 @@
       "file": "src\\pages\\notifications\\NotificationsCenter.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\orders\\OrderMessaging.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Orders.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\PaymentMethods.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\payments\\PayBalance.tsx",
@@ -1144,9 +966,7 @@
       "file": "src\\pages\\payments\\PayBalanceList.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\payments\\PaymentCancel.tsx",
@@ -1158,57 +978,43 @@
       "file": "src\\pages\\payments\\PaymentManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\payments\\PaymentManagementList.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\payments\\PaymentSuccess.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Payments.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\PaymentsCustomers.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\physical\\PhysicalProductDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\physical\\PhysicalProductsList.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Pixels.tsx",
@@ -1220,9 +1026,7 @@
       "file": "src\\pages\\PlatformRevenue.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\ProductCreationDemo.tsx",
@@ -1234,17 +1038,13 @@
       "file": "src\\pages\\ProductDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Products.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\promotions\\UnifiedPromotionsPage.tsx",
@@ -1256,17 +1056,13 @@
       "file": "src\\pages\\Promotions.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Referrals.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\SEOAnalyzer.tsx",
@@ -1278,25 +1074,19 @@
       "file": "src\\pages\\service\\AdvancedCalendarPage.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\service\\BookingsManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\service\\RecurringBookingsManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\service\\RecurringBookingsPage.tsx",
@@ -1314,17 +1104,13 @@
       "file": "src\\pages\\service\\ServiceDetail.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\service\\ServiceManagementPage.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\service\\ServicesList.tsx",
@@ -1342,41 +1128,31 @@
       "file": "src\\pages\\settings\\NotificationSettings.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Settings.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\shipping\\ContactShippingService.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\shipping\\ShippingDashboard.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\shipping\\ShippingServiceMessages.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\shipping\\ShippingServices.tsx",
@@ -1388,9 +1164,7 @@
       "file": "src\\pages\\store\\StoreTeamManagement.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Store.tsx",
@@ -1402,41 +1176,31 @@
       "file": "src\\pages\\StoreAffiliates.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Storefront.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\UnsubscribePage.tsx",
       "hasI18n": false,
       "hasHardcodedText": false,
-      "issues": [
-        "Pas d'import i18n détecté"
-      ]
+      "issues": ["Pas d'import i18n détecté"]
     },
     {
       "file": "src\\pages\\vendor\\VendorMessaging.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     },
     {
       "file": "src\\pages\\Withdrawals.tsx",
       "hasI18n": true,
       "hasHardcodedText": true,
-      "issues": [
-        "Textes français hardcodés potentiels détectés"
-      ]
+      "issues": ["Textes français hardcodés potentiels détectés"]
     }
   ]
 }

@@ -3,11 +3,13 @@
 ## Score Actuel
 
 ### Mozilla Observatory
+
 - **Score**: B+ (80/100)
 - **Tests passés**: 9/10
 - **Problème**: CSP avec `-20` points
 
 ### Security Headers
+
 - **Score**: A
 - **Avertissement**: CSP contient `'unsafe-inline'` et `'unsafe-eval'`
 
@@ -16,11 +18,13 @@
 ## ✅ Améliorations Appliquées
 
 ### 1. CSP Améliorée
+
 - ✅ `object-src 'none'` : Bloque les plugins (Flash, etc.)
 - ✅ `upgrade-insecure-requests` : Force HTTPS pour toutes les requêtes
 - ✅ `img-src` restreint : Domaines spécifiques au lieu de `https: http:`
 
 ### 2. Headers de Sécurité
+
 - ✅ HSTS préchargé (max-age=63072000; includeSubDomains; preload)
 - ✅ X-Frame-Options (SAMEORIGIN)
 - ✅ X-Content-Type-Options (nosniff)
@@ -55,10 +59,12 @@ Le score B+ (80/100) est **normal et acceptable** pour une application React/Vit
 ## 🎯 Score Objectif vs Score Réel
 
 ### Score Objectif (Théorique)
+
 - **Mozilla Observatory**: A+ (100/100) - **Non atteignable** sans refonte majeure
 - **Security Headers**: A+ (100/100) - **Non atteignable** sans nonces
 
 ### Score Réel (Acceptable)
+
 - **Mozilla Observatory**: B+ (80/100) - **Acceptable** pour React/Vite
 - **Security Headers**: A (avec avertissement) - **Excellent**
 
@@ -74,15 +80,18 @@ Le score B+ (80/100) est **normal et acceptable** pour une application React/Vit
 ## 📈 Comparaison avec d'Autres Applications
 
 ### Applications React/Vite Typiques
+
 - **Score Mozilla Observatory**: B à B+ (70-85/100)
 - **Score Security Headers**: A (avec avertissement CSP)
 
 ### Applications Next.js (Serveur-Side)
+
 - **Score Mozilla Observatory**: A à A+ (90-100/100)
 - **Score Security Headers**: A+ (100/100)
 - **Raison**: Next.js peut utiliser des nonces côté serveur
 
 ### Applications Statiques (Sans React)
+
 - **Score Mozilla Observatory**: A+ (100/100)
 - **Score Security Headers**: A+ (100/100)
 - **Raison**: Pas de scripts inline générés dynamiquement
@@ -94,6 +103,7 @@ Le score B+ (80/100) est **normal et acceptable** pour une application React/Vit
 ### Le Score B+ est Acceptable
 
 **Pourquoi ?**
+
 - ✅ **9/10 tests passent** : Excellent ratio
 - ✅ **Headers de sécurité excellents** : HSTS préchargé, X-Frame-Options, etc.
 - ✅ **Protection réelle maintenue** : L'application est bien protégée
@@ -103,6 +113,7 @@ Le score B+ (80/100) est **normal et acceptable** pour une application React/Vit
 ### Recommandation
 
 **ACCEPTER le score B+ (80/100)** car :
+
 1. C'est le score standard pour les applications React/Vite
 2. Les autres headers de sécurité sont excellents
 3. L'amélioration nécessiterait une refonte majeure
@@ -111,6 +122,7 @@ Le score B+ (80/100) est **normal et acceptable** pour une application React/Vit
 ### Actions Futures (Optionnelles)
 
 Si vous souhaitez vraiment améliorer le score (non recommandé) :
+
 1. **Utiliser Next.js** : Support natif des nonces
 2. **Refonte avec nonces** : Nécessite Edge Functions Vercel
 3. **Accepter les limitations** : Score B+ est acceptable ✅
@@ -118,4 +130,3 @@ Si vous souhaitez vraiment améliorer le score (non recommandé) :
 ---
 
 **Le score B+ (80/100) est un excellent score pour une application React/Vite sur Vercel. Les améliorations appliquées (object-src 'none', upgrade-insecure-requests) renforcent la sécurité sans compromettre la fonctionnalité.**
-

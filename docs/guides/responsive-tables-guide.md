@@ -14,12 +14,14 @@ Les tables avec plus de 5 colonnes posent des problèmes de lisibilité sur mobi
 ## 🎯 Quand Utiliser ResponsiveTable
 
 ### ✅ Utiliser ResponsiveTable si :
+
 - Table avec **plus de 5 colonnes**
 - Table avec colonnes larges (texte long, dates, montants)
 - Table qui doit être lisible sur mobile
 - Table avec données complexes
 
 ### ❌ Ne pas utiliser si :
+
 - Table simple avec ≤5 colonnes
 - Table déjà optimisée avec vue mobile séparée
 - Table avec scroll horizontal acceptable
@@ -31,12 +33,13 @@ Les tables avec plus de 5 colonnes posent des problèmes de lisibilité sur mobi
 **Fichier**: `src/components/admin/ResponsiveTable.tsx`
 
 ### Props
+
 ```typescript
 interface ResponsiveTableProps {
-  headers: ReactNode[];           // En-têtes de colonnes
-  rows: ReactNode[][];            // Données (tableau de tableaux)
+  headers: ReactNode[]; // En-têtes de colonnes
+  rows: ReactNode[][]; // Données (tableau de tableaux)
   renderMobileCard?: (cells: ReactNode[], index: number) => ReactNode;
-  emptyMessage?: ReactNode;        // Message si aucune donnée
+  emptyMessage?: ReactNode; // Message si aucune donnée
   className?: string;
 }
 ```
@@ -60,9 +63,9 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
       {user.active ? 'Actif' : 'Inactif'}
     </Badge>,
     format(new Date(user.created_at), 'dd MMM yyyy'),
-    <Button size="sm">Voir</Button>
+    <Button size="sm">Voir</Button>,
   ])}
-/>
+/>;
 ```
 
 ### Exemple 2: Table avec Rendu Mobile Personnalisé
@@ -78,7 +81,7 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
     link.total_sales,
     formatCurrency(link.total_revenue),
     formatCurrency(link.total_commission),
-    <Badge>{link.status}</Badge>
+    <Badge>{link.status}</Badge>,
   ])}
   renderMobileCard={(cells, index) => (
     <Card>
@@ -91,7 +94,7 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
             </div>
             {cells[7]} {/* Statut badge */}
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3 pt-3 border-t">
             <div>
               <p className="text-xs text-muted-foreground">Clics</p>
@@ -122,21 +125,25 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
 ## 🎨 Bonnes Pratiques
 
 ### 1. Ordre des Colonnes
+
 - **Colonnes importantes en premier** (Nom, ID, Statut)
 - **Colonnes d'actions en dernier**
 - **Colonnes secondaires au milieu**
 
 ### 2. Rendu Mobile
+
 - **Utiliser `renderMobileCard`** pour un rendu personnalisé
 - **Grouper les informations** par catégorie
 - **Utiliser des grilles** pour les métriques (grid-cols-2)
 
 ### 3. Typographie
+
 - **Textes courts** sur mobile
 - **Truncate** pour les textes longs
 - **Badges** pour les statuts
 
 ### 4. Espacement
+
 - **Padding responsive**: `p-4 sm:p-5`
 - **Gap responsive**: `gap-3 sm:gap-4`
 - **Marges cohérentes**
@@ -146,6 +153,7 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
 ## 🔄 Migration depuis Table Standard
 
 ### Avant (Table standard)
+
 ```tsx
 <Table>
   <TableHeader>
@@ -168,9 +176,10 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
 ```
 
 ### Après (ResponsiveTable)
+
 ```tsx
 <ResponsiveTable
-  headers={['Colonne 1', 'Colonne 2', /* ... */]}
+  headers={['Colonne 1', 'Colonne 2' /* ... */]}
   rows={data.map(item => [
     item.col1,
     item.col2,
@@ -178,9 +187,7 @@ import { ResponsiveTable } from '@/components/admin/ResponsiveTable';
   ])}
   renderMobileCard={(cells, index) => (
     <Card>
-      <CardContent>
-        {/* Rendu personnalisé */}
-      </CardContent>
+      <CardContent>{/* Rendu personnalisé */}</CardContent>
     </Card>
   )}
 />
@@ -218,4 +225,3 @@ Avant de créer une table, vérifier :
 
 **Maintenu par**: Équipe de développement Emarzona  
 **Dernière mise à jour**: 4 décembre 2025
-

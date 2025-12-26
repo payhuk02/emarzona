@@ -48,6 +48,7 @@ L'application contient **5 systèmes de messagerie distincts** :
 ### 1. Vendor Messaging (`VendorMessaging.tsx`)
 
 #### ✅ Points Positifs
+
 - **Détection avancée des types de fichiers** : Utilise à la fois l'extension et le type MIME
 - **Gestion d'erreurs robuste** : Fallback avec URL signée si l'URL publique échoue
 - **Vérification de l'existence des fichiers** : Vérifie si le fichier existe avant de générer une URL signée
@@ -56,12 +57,14 @@ L'application contient **5 systèmes de messagerie distincts** :
 - **Support complet** : Images, vidéos, et fichiers génériques
 
 #### ⚠️ Points à Améliorer
+
 - **Code complexe** : Logique d'affichage très longue (~200 lignes)
 - **Boucle infinie potentielle** : Corrigée récemment avec `triedSignedUrl`
 - **Pas de gestion d'erreur pour les vidéos** : Les vidéos n'ont pas de fallback si l'URL échoue
 - **Pas de prévisualisation pour les fichiers** : Les fichiers non-images/vidéos sont juste des liens
 
 #### 📝 Code Clé
+
 ```typescript
 // Détection par extension ET type MIME
 const isImageByExtension = imageExtensions.some(ext => fileName.endsWith(ext));
@@ -82,11 +85,13 @@ if (!signedUrls[attachment.id] && !triedSignedUrl[attachment.id]) {
 ### 2. Order Messaging (`OrderMessaging.tsx`)
 
 #### ✅ Points Positifs
+
 - **Code simple et lisible** : Logique d'affichage concise (~40 lignes)
 - **Support des 3 types** : Images, vidéos, fichiers
 - **Affichage de la taille** : Affiche la taille des fichiers
 
 #### ⚠️ Points à Améliorer
+
 - **Détection basique** : Utilise uniquement `file_type.startsWith('image/')` (pas d'extension)
 - **Pas de gestion d'erreur** : Aucun fallback si l'image ne charge pas
 - **Pas de correction d'URL** : N'utilise pas de fonction de correction d'URL
@@ -94,6 +99,7 @@ if (!signedUrls[attachment.id] && !triedSignedUrl[attachment.id]) {
 - **Pas de lazy loading** : Les images n'ont pas `loading="lazy"`
 
 #### 📝 Code Clé
+
 ```typescript
 {attachment.file_type.startsWith('image/') ? (
   <img src={attachment.file_url} ... />
@@ -109,10 +115,12 @@ if (!signedUrls[attachment.id] && !triedSignedUrl[attachment.id]) {
 ### 3. Conversation Component (`ConversationComponent.tsx`)
 
 #### ✅ Points Positifs
+
 - **Code simple** : Logique minimale
 - **Lazy loading** : Utilise `loading="lazy"` pour les images
 
 #### ⚠️ Points à Améliorer
+
 - **Détection très basique** : Uniquement `file_type.startsWith('image/')`
 - **Pas de support vidéo** : Les vidéos sont affichées comme des fichiers
 - **Pas de gestion d'erreur** : Aucun fallback
@@ -120,6 +128,7 @@ if (!signedUrls[attachment.id] && !triedSignedUrl[attachment.id]) {
 - **Pas de clic pour agrandir** : Les images ne sont pas cliquables
 
 #### 📝 Code Clé
+
 ```typescript
 {attachment.file_type.startsWith('image/') ? (
   <img src={attachment.file_url} className="max-w-32 max-h-32 ..." />
@@ -134,10 +143,12 @@ if (!signedUrls[attachment.id] && !triedSignedUrl[attachment.id]) {
 ### 4. Shipping Service Messages (`ShippingServiceMessages.tsx`)
 
 #### ⚠️ Problèmes Majeurs
+
 - **Pas d'affichage des médias** : Le code analysé ne montre pas de logique d'affichage des attachments
 - **Structure inconnue** : La structure des attachments n'est pas claire dans le code
 
 #### 📝 Code Clé
+
 ```typescript
 // Récupération des attachments
 attachments:shipping_service_message_attachments (*)
@@ -149,11 +160,13 @@ attachments:shipping_service_message_attachments (*)
 ### 5. Dispute Messages (`DisputeDetail.tsx`)
 
 #### ⚠️ Problèmes Majeurs
+
 - **Pas d'affichage des médias** : Les attachments sont juste des liens
 - **Pas de détection de type** : Tous les fichiers sont traités de la même manière
 - **Structure simplifiée** : Les attachments sont des URLs simples, pas des objets avec métadonnées
 
 #### 📝 Code Clé
+
 ```typescript
 {message.attachments.map((url: string, idx: number) => (
   <a href={url}>
@@ -169,67 +182,72 @@ attachments:shipping_service_message_attachments (*)
 
 ### 1. Incohérence dans la Détection des Types
 
-| Système | Images | Vidéos | Fichiers |
-|---------|--------|--------|----------|
-| Vendor Messaging | ✅ Extension + MIME | ✅ Extension + MIME | ✅ |
-| Order Messaging | ⚠️ MIME seulement | ✅ MIME seulement | ✅ |
-| Conversation Component | ⚠️ MIME seulement | ❌ Non supporté | ✅ |
-| Shipping Service | ❓ Inconnu | ❓ Inconnu | ❓ Inconnu |
-| Dispute Messages | ❌ Non supporté | ❌ Non supporté | ⚠️ Lien simple |
+| Système                | Images              | Vidéos              | Fichiers       |
+| ---------------------- | ------------------- | ------------------- | -------------- |
+| Vendor Messaging       | ✅ Extension + MIME | ✅ Extension + MIME | ✅             |
+| Order Messaging        | ⚠️ MIME seulement   | ✅ MIME seulement   | ✅             |
+| Conversation Component | ⚠️ MIME seulement   | ❌ Non supporté     | ✅             |
+| Shipping Service       | ❓ Inconnu          | ❓ Inconnu          | ❓ Inconnu     |
+| Dispute Messages       | ❌ Non supporté     | ❌ Non supporté     | ⚠️ Lien simple |
 
 ### 2. Gestion des Erreurs
 
-| Système | Fallback URL | Vérification Existence | URL Signée |
-|---------|--------------|------------------------|------------|
-| Vendor Messaging | ✅ | ✅ | ✅ |
-| Order Messaging | ❌ | ❌ | ❌ |
-| Conversation Component | ❌ | ❌ | ❌ |
-| Shipping Service | ❓ | ❓ | ❓ |
-| Dispute Messages | ❌ | ❌ | ❌ |
+| Système                | Fallback URL | Vérification Existence | URL Signée |
+| ---------------------- | ------------ | ---------------------- | ---------- |
+| Vendor Messaging       | ✅           | ✅                     | ✅         |
+| Order Messaging        | ❌           | ❌                     | ❌         |
+| Conversation Component | ❌           | ❌                     | ❌         |
+| Shipping Service       | ❓           | ❓                     | ❓         |
+| Dispute Messages       | ❌           | ❌                     | ❌         |
 
 ### 3. Correction des URLs
 
-| Système | Correction URL | Encodage | Storage Path |
-|---------|----------------|----------|--------------|
-| Vendor Messaging | ✅ | ✅ | ✅ |
-| Order Messaging | ❌ | ❌ | ❌ |
-| Conversation Component | ❌ | ❌ | ❌ |
-| Shipping Service | ❓ | ❓ | ❓ |
-| Dispute Messages | ❌ | ❌ | ❌ |
+| Système                | Correction URL | Encodage | Storage Path |
+| ---------------------- | -------------- | -------- | ------------ |
+| Vendor Messaging       | ✅             | ✅       | ✅           |
+| Order Messaging        | ❌             | ❌       | ❌           |
+| Conversation Component | ❌             | ❌       | ❌           |
+| Shipping Service       | ❓             | ❓       | ❓           |
+| Dispute Messages       | ❌             | ❌       | ❌           |
 
 ### 4. Expérience Utilisateur
 
-| Système | Lazy Loading | Clic pour Agrandir | Taille Affichée | Prévisualisation |
-|---------|--------------|-------------------|-----------------|------------------|
-| Vendor Messaging | ✅ | ✅ | ❌ | ✅ Images/Vidéos |
-| Order Messaging | ❌ | ✅ | ✅ | ✅ Images/Vidéos |
-| Conversation Component | ✅ | ❌ | ❌ | ⚠️ Images seulement |
-| Shipping Service | ❓ | ❓ | ❓ | ❓ |
-| Dispute Messages | ❌ | ❌ | ❌ | ❌ |
+| Système                | Lazy Loading | Clic pour Agrandir | Taille Affichée | Prévisualisation    |
+| ---------------------- | ------------ | ------------------ | --------------- | ------------------- |
+| Vendor Messaging       | ✅           | ✅                 | ❌              | ✅ Images/Vidéos    |
+| Order Messaging        | ❌           | ✅                 | ✅              | ✅ Images/Vidéos    |
+| Conversation Component | ✅           | ❌                 | ❌              | ⚠️ Images seulement |
+| Shipping Service       | ❓           | ❓                 | ❓              | ❓                  |
+| Dispute Messages       | ❌           | ❌                 | ❌              | ❌                  |
 
 ---
 
 ## 🔄 Incohérences Entre Systèmes
 
 ### 1. **Détection des Types de Fichiers**
+
 - **Vendor Messaging** : Utilise extension + MIME (le plus robuste)
 - **Autres systèmes** : Utilisent uniquement MIME (peut échouer si MIME incorrect)
 
 ### 2. **Gestion des Erreurs**
+
 - **Vendor Messaging** : Système complet avec fallback
 - **Autres systèmes** : Aucune gestion d'erreur
 
 ### 3. **Correction des URLs**
+
 - **Vendor Messaging** : Fonction dédiée `getCorrectedFileUrl()`
 - **Autres systèmes** : Utilisent directement `file_url` sans vérification
 
 ### 4. **Support Vidéo**
+
 - **Vendor Messaging** : ✅ Support complet
 - **Order Messaging** : ✅ Support complet
 - **Conversation Component** : ❌ Pas de support
 - **Dispute Messages** : ❌ Pas de support
 
 ### 5. **Taille des Images**
+
 - **Vendor Messaging** : `max-w-[280px] sm:max-w-[320px] max-h-64` (responsive)
 - **Order Messaging** : `max-w-full` (pleine largeur)
 - **Conversation Component** : `max-w-32 max-h-32` (128px fixe)
@@ -260,6 +278,7 @@ interface MediaAttachmentProps {
 ```
 
 **Avantages :**
+
 - Code DRY (Don't Repeat Yourself)
 - Cohérence entre tous les systèmes
 - Maintenance facilitée
@@ -273,19 +292,25 @@ Créer une fonction utilitaire `detectMediaType()` :
 export function detectMediaType(fileName: string, fileType: string): 'image' | 'video' | 'file' {
   const fileNameLower = fileName.toLowerCase();
   const fileTypeLower = fileType.toLowerCase();
-  
+
   // Détection par extension (prioritaire)
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico'];
   const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
-  
-  if (imageExtensions.some(ext => fileNameLower.endsWith(ext)) || fileTypeLower.startsWith('image/')) {
+
+  if (
+    imageExtensions.some(ext => fileNameLower.endsWith(ext)) ||
+    fileTypeLower.startsWith('image/')
+  ) {
     return 'image';
   }
-  
-  if (videoExtensions.some(ext => fileNameLower.endsWith(ext)) || fileTypeLower.startsWith('video/')) {
+
+  if (
+    videoExtensions.some(ext => fileNameLower.endsWith(ext)) ||
+    fileTypeLower.startsWith('video/')
+  ) {
     return 'video';
   }
-  
+
   return 'file';
 }
 ```
@@ -323,16 +348,19 @@ export const MEDIA_SIZES = {
 ## 📋 Plan d'Action
 
 ### Phase 1 : Création des Utilitaires (Priorité Haute)
+
 - [ ] Créer `src/utils/media-detection.ts` avec `detectMediaType()`
 - [ ] Créer `src/utils/storage.ts` avec `getCorrectedFileUrl()` (déplacer depuis VendorMessaging)
 - [ ] Créer `src/constants/media.ts` avec les tailles standardisées
 
 ### Phase 2 : Création du Composant Réutilisable (Priorité Haute)
+
 - [ ] Créer `src/components/media/MediaAttachment.tsx`
 - [ ] Implémenter la logique complète (détection, correction URL, fallback, erreurs)
 - [ ] Ajouter les tests unitaires
 
 ### Phase 3 : Migration des Systèmes (Priorité Moyenne)
+
 - [ ] Migrer `VendorMessaging.tsx` vers le nouveau composant
 - [ ] Migrer `OrderMessaging.tsx` vers le nouveau composant
 - [ ] Migrer `ConversationComponent.tsx` vers le nouveau composant
@@ -340,6 +368,7 @@ export const MEDIA_SIZES = {
 - [ ] Implémenter l'affichage dans `DisputeDetail.tsx`
 
 ### Phase 4 : Améliorations UX (Priorité Basse)
+
 - [ ] Ajouter un modal pour agrandir les images
 - [ ] Ajouter une prévisualisation pour les PDF
 - [ ] Ajouter un indicateur de progression pour les uploads
@@ -350,12 +379,14 @@ export const MEDIA_SIZES = {
 ## 📊 Métriques de Qualité
 
 ### Avant les Corrections
+
 - **Cohérence** : 20% (1/5 systèmes avec logique complète)
 - **Gestion d'erreurs** : 20% (1/5 systèmes)
 - **Support vidéo** : 40% (2/5 systèmes)
 - **Code dupliqué** : ~400 lignes de code similaire
 
 ### Après les Corrections (Objectif)
+
 - **Cohérence** : 100% (tous les systèmes utilisent le même composant)
 - **Gestion d'erreurs** : 100% (tous les systèmes)
 - **Support vidéo** : 100% (tous les systèmes)
@@ -382,10 +413,10 @@ export const MEDIA_SIZES = {
 L'analyse révèle une **incohérence majeure** dans l'affichage des médias entre les différents systèmes de messagerie. Le système **Vendor Messaging** est le plus complet et robuste, mais les autres systèmes manquent de fonctionnalités essentielles.
 
 La création d'un **composant réutilisable** et d'**utilitaires partagés** permettra de :
+
 - ✅ Uniformiser l'expérience utilisateur
 - ✅ Réduire la duplication de code
 - ✅ Faciliter la maintenance
 - ✅ Améliorer la robustesse (gestion d'erreurs partout)
 
 **Priorité recommandée :** Haute - Ce problème affecte l'expérience utilisateur et la maintenabilité du code.
-

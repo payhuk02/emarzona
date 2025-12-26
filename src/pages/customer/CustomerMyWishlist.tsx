@@ -18,12 +18,30 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQuery } from '@tanstack/react-query';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { useCart } from '@/hooks/cart/useCart';
+import { usePagination } from '@/hooks/usePagination';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import {
   usePriceDrops,
   useUpdatePriceAlertSettings,
@@ -49,12 +67,25 @@ import {
   Loader2,
   RefreshCw,
   Eye,
+  ChevronLeft,
+  ChevronRight,
+  Grid3x3,
+  List,
+  Filter,
+  Trash2,
+  FileDown,
+  CheckSquare,
+  Square,
+  DollarSign,
+  Palette,
+  CreditCard,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { logger } from '@/lib/logger';
 import { ProductType } from '@/types/cart';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
 
 interface FavoriteProduct {
   id: string;
@@ -82,15 +113,22 @@ interface FavoriteProduct {
 export default function CustomerMyWishlist() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { favorites, toggleFavorite, loading: favoritesLoading } = useMarketplaceFavorites();
   const { addItem } = useCart();
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, 300);
-  const [activeTab, setActiveTab] = useState<'all' | 'digital' | 'physical' | 'service' | 'course'>(
-    'all'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'all' | 'digital' | 'physical' | 'service' | 'course' | 'artist'
+  >('all');
+  const [sortBy, setSortBy] = useState<'date' | 'price_asc' | 'price_desc' | 'name'>('date');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [storeFilter, setStoreFilter] = useState<string>('all');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, Infinity]);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -110,8 +148,10 @@ export default function CustomerMyWishlist() {
   const markAsRead = useMarkPriceAlertAsRead();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // Convertir le Set en array pour les requêtes
-  const favoriteIds = Array.from(favorites);
+  // Convertir le Set en array pour les requêtes (trié pour stabilité de la clé)
+  const favoriteIds = useMemo(() => {
+    return Array.from(favorites).sort();
+  }, [favorites]);
 
   // Fetch favorite products with details and price alert settings - Style Inventaire
   const {
@@ -192,17 +232,77 @@ export default function CustomerMyWishlist() {
       })) as FavoriteProduct[];
     },
     enabled: favoriteIds.length > 0 && !favoritesLoading,
+    retry: 3, // Retry automatique en cas d'erreur réseau
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Backoff exponentiel
+    staleTime: 30 * 1000, // Cache réduit à 30 secondes pour détecter rapidement les changements
+    refetchOnWindowFocus: true, // Refetch quand la fenêtre reprend le focus
+    refetchOnMount: true, // Refetch au montage du composant
   });
 
-  // Filtrer les produits selon la recherche et le filtre de type - Style Inventaire
-  const filteredProducts = useMemo(() => {
+  // Refetch automatique quand favorites change (ajout/suppression depuis marketplace)
+  // Utiliser une clé de requête basée sur le contenu pour détecter les changements
+  const favoriteIdsKey = useMemo(() => favoriteIds.join(','), [favoriteIds]);
+
+  useEffect(() => {
+    if (!favoritesLoading && favoriteIds.length > 0) {
+      // Invalider et refetch la requête quand les favoris changent
+      queryClient.invalidateQueries({ queryKey: ['favorite-products'] });
+      logger.info('Favoris mis à jour, refetch de la wishlist', {
+        count: favoriteIds.length,
+        favoriteIdsKey,
+      });
+    }
+  }, [favoriteIdsKey, favoritesLoading, queryClient]); // Utiliser favoriteIdsKey pour détecter les changements de contenu
+
+  // Extraire les boutiques uniques pour le filtre
+  const uniqueStores = useMemo(() => {
+    if (!favoriteProducts) return [];
+    const storesMap = new Map<string, { id: string; name: string }>();
+    favoriteProducts.forEach(product => {
+      if (product.stores?.id && product.stores?.name) {
+        storesMap.set(product.stores.id, {
+          id: product.stores.id,
+          name: product.stores.name,
+        });
+      }
+    });
+    return Array.from(storesMap.values());
+  }, [favoriteProducts]);
+
+  // Calculer la plage de prix pour le filtre
+  const priceRangeData = useMemo(() => {
+    if (!favoriteProducts || favoriteProducts.length === 0) {
+      return { min: 0, max: 0 };
+    }
+    const prices = favoriteProducts.map(p => p.promotional_price ?? p.price);
+    return {
+      min: Math.min(...prices),
+      max: Math.max(...prices),
+    };
+  }, [favoriteProducts]);
+
+  // Filtrer et trier les produits selon la recherche et le filtre de type - Style Inventaire
+  const filteredAndSortedProducts = useMemo(() => {
     if (!favoriteProducts) return [];
 
-    let filtered = favoriteProducts;
+    let filtered = [...favoriteProducts];
 
     // Filtre par type (tab)
     if (activeTab !== 'all') {
       filtered = filtered.filter(p => p.product_type === activeTab);
+    }
+
+    // Filtre par boutique
+    if (storeFilter !== 'all') {
+      filtered = filtered.filter(p => p.stores?.id === storeFilter);
+    }
+
+    // Filtre par prix
+    if (priceRange[0] > 0 || priceRange[1] < Infinity) {
+      filtered = filtered.filter(p => {
+        const price = p.promotional_price ?? p.price;
+        return price >= priceRange[0] && price <= priceRange[1];
+      });
     }
 
     // Recherche
@@ -217,10 +317,40 @@ export default function CustomerMyWishlist() {
       );
     }
 
-    return filtered;
-  }, [favoriteProducts, activeTab, debouncedSearch]);
+    // Tri
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'price_asc':
+          return (a.promotional_price ?? a.price) - (b.promotional_price ?? b.price);
+        case 'price_desc':
+          return (b.promotional_price ?? b.price) - (a.promotional_price ?? a.price);
+        case 'name':
+          return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+        case 'date':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
 
-  // Statistiques
+    return filtered;
+  }, [favoriteProducts, activeTab, debouncedSearch, sortBy, storeFilter, priceRange]);
+
+  // Pagination
+  const pagination = usePagination({
+    total: filteredAndSortedProducts.length,
+    initialPage: 1,
+    initialPageSize: 12,
+    pageSizeOptions: [12, 24, 48, 96],
+  });
+
+  // Produits paginés
+  const paginatedProducts = useMemo(() => {
+    const start = (pagination.page - 1) * pagination.pageSize;
+    const end = start + pagination.pageSize;
+    return filteredAndSortedProducts.slice(start, end);
+  }, [filteredAndSortedProducts, pagination.page, pagination.pageSize]);
+
+  // Statistiques (basées sur les produits filtrés)
   const stats = useMemo(() => {
     if (!favoriteProducts) {
       return { total: 0, byType: {} };
@@ -234,8 +364,9 @@ export default function CustomerMyWishlist() {
     return {
       total: favoriteProducts.length,
       byType,
+      filtered: filteredAndSortedProducts.length,
     };
-  }, [favoriteProducts]);
+  }, [favoriteProducts, filteredAndSortedProducts]);
 
   // Gérer l'ajout au panier - Style Inventaire
   const handleAddToCart = useCallback(
@@ -250,7 +381,7 @@ export default function CustomerMyWishlist() {
 
         toast({
           title: 'Ajouté au panier',
-          description: `${product.name} a été ajouté à votre panier`,
+          description: `${htmlToPlainText(product.name)} a été ajouté à votre panier`,
         });
         logger.info('Produit ajouté au panier depuis wishlist', { productId: product.id });
       } catch (error: unknown) {
@@ -271,31 +402,237 @@ export default function CustomerMyWishlist() {
     [addItem, toast]
   );
 
+  // Gérer l'achat direct - Ajoute au panier et redirige vers checkout
+  const handleBuyProduct = useCallback(
+    async (product: FavoriteProduct) => {
+      setIsAddingToCart(true);
+      try {
+        // Vérifier l'authentification
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user?.email) {
+          toast({
+            title: 'Authentification requise',
+            description: 'Veuillez vous connecter pour effectuer un achat',
+            variant: 'destructive',
+          });
+          navigate('/auth');
+          return;
+        }
+
+        // Ajouter le produit au panier
+        await addItem({
+          product_id: product.id,
+          product_type: product.product_type as ProductType,
+          quantity: 1,
+        });
+
+        // Rediriger vers le checkout avec les paramètres du produit
+        const checkoutParams = new URLSearchParams({
+          productId: product.id,
+          storeId: product.store_id,
+        });
+
+        navigate(`/checkout?${checkoutParams.toString()}`);
+        logger.info('Redirection vers checkout depuis wishlist', {
+          productId: product.id,
+          storeId: product.store_id,
+        });
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        toast({
+          title: 'Erreur',
+          description: errorMessage || "Impossible de procéder à l'achat",
+          variant: 'destructive',
+        });
+        logger.error(error instanceof Error ? error : 'Erreur achat depuis wishlist', {
+          error,
+          productId: product.id,
+        });
+      } finally {
+        setIsAddingToCart(false);
+      }
+    },
+    [addItem, navigate, toast]
+  );
+
   // Gérer la suppression des favoris - Style Inventaire
   const handleRemoveFavorite = useCallback(
     async (productId: string, productName: string) => {
       await toggleFavorite(productId);
-      await refetch();
+      // Invalider le cache pour forcer le refetch
+      queryClient.invalidateQueries({ queryKey: ['favorite-products'] });
+      setSelectedProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
 
       toast({
         title: 'Retiré des favoris',
-        description: `${productName} a été retiré de votre wishlist`,
+        description: `${htmlToPlainText(productName)} a été retiré de votre wishlist`,
       });
       logger.info('Produit retiré de la wishlist', { productId });
     },
-    [toggleFavorite, refetch, toast]
+    [toggleFavorite, queryClient, toast]
   );
+
+  // Actions en masse
+  const handleBulkAddToCart = useCallback(async () => {
+    if (selectedProducts.size === 0) return;
+    setIsAddingToCart(true);
+    try {
+      const productsToAdd = filteredAndSortedProducts.filter(p => selectedProducts.has(p.id));
+      for (const product of productsToAdd) {
+        await addItem({
+          product_id: product.id,
+          product_type: product.product_type as ProductType,
+          quantity: 1,
+        });
+      }
+      toast({
+        title: 'Ajouté au panier',
+        description: `${selectedProducts.size} produit(s) ajouté(s) à votre panier`,
+      });
+      setSelectedProducts(new Set());
+      logger.info('Produits ajoutés au panier en masse', { count: selectedProducts.size });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast({
+        title: 'Erreur',
+        description: errorMessage || "Impossible d'ajouter au panier",
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
+  }, [selectedProducts, filteredAndSortedProducts, addItem, toast]);
+
+  const handleBulkRemove = useCallback(async () => {
+    if (selectedProducts.size === 0) return;
+    try {
+      for (const productId of selectedProducts) {
+        await toggleFavorite(productId);
+      }
+      await refetch();
+      toast({
+        title: 'Retiré des favoris',
+        description: `${selectedProducts.size} produit(s) retiré(s) de votre wishlist`,
+      });
+      setSelectedProducts(new Set());
+      logger.info('Produits retirés de la wishlist en masse', { count: selectedProducts.size });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast({
+        title: 'Erreur',
+        description: errorMessage || 'Impossible de retirer des favoris',
+        variant: 'destructive',
+      });
+    }
+  }, [selectedProducts, toggleFavorite, refetch, toast]);
+
+  // Export CSV
+  const handleExportCSV = useCallback(() => {
+    setIsExporting(true);
+    try {
+      const headers = [
+        'Nom',
+        'Type',
+        'Boutique',
+        'Prix',
+        'Prix promotionnel',
+        'Devise',
+        'Catégorie',
+        'Description',
+        "Date d'ajout",
+      ];
+      const csvRows: string[] = [headers.join(',')];
+
+      const productsToExport =
+        selectedProducts.size > 0
+          ? filteredAndSortedProducts.filter(p => selectedProducts.has(p.id))
+          : filteredAndSortedProducts;
+
+      for (const product of productsToExport) {
+        const row = [
+          `"${product.name.replace(/"/g, '""')}"`,
+          product.product_type,
+          `"${product.stores?.name || ''}"`,
+          product.price,
+          product.promotional_price || '',
+          product.currency,
+          product.category || '',
+          `"${(product.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+          new Date(product.created_at).toLocaleDateString('fr-FR'),
+        ];
+        csvRows.push(row.join(','));
+      }
+
+      const csvContent = '\uFEFF' + csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `wishlist_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export réussi',
+        description: `${productsToExport.length} produit(s) exporté(s) en CSV`,
+      });
+      logger.info('Wishlist exportée en CSV', { count: productsToExport.length });
+    } catch (error: unknown) {
+      logger.error("Erreur lors de l'export CSV", { error });
+      toast({
+        title: 'Erreur',
+        description: "Impossible d'exporter la wishlist",
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [selectedProducts, filteredAndSortedProducts, toast]);
+
+  // Toggle sélection produit
+  const handleToggleSelection = useCallback((productId: string) => {
+    setSelectedProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Sélectionner/désélectionner tout
+  const handleSelectAll = useCallback(() => {
+    if (selectedProducts.size === paginatedProducts.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(paginatedProducts.map(p => p.id)));
+    }
+  }, [selectedProducts.size, paginatedProducts]);
 
   // Handle refresh - Style Inventaire
   const handleRefresh = useCallback(() => {
     setError(null);
-    refetch();
+    // Invalider toutes les requêtes liées aux favoris
+    queryClient.invalidateQueries({ queryKey: ['favorite-products'] });
+    queryClient.invalidateQueries({ queryKey: ['price-drops'] });
     logger.info('Wishlist refreshed', {});
     toast({
       title: 'Actualisé',
       description: 'La wishlist a été actualisée.',
     });
-  }, [refetch, toast]);
+  }, [queryClient, toast]);
 
   // Keyboard shortcuts - Style Inventaire
   useEffect(() => {
@@ -350,19 +687,26 @@ export default function CustomerMyWishlist() {
       // Navigation selon le type de produit
       switch (productType) {
         case 'digital':
-          navigate(`/marketplace/${storeSlug}/${product.slug}`);
+          // Route correcte pour produits digitaux : /stores/:slug/products/:productSlug
+          navigate(`/stores/${storeSlug}/products/${product.slug}`);
           break;
         case 'physical':
-          navigate(`/products/physical/${product.id}`);
+          navigate(`/physical/${product.id}`);
           break;
         case 'service':
-          navigate(`/services/${product.id}`);
+          navigate(`/service/${product.id}`);
           break;
         case 'course':
-          navigate(`/courses/${product.id}`);
+          // Route correcte pour cours : /courses/:slug (utilise slug, pas id)
+          navigate(`/courses/${product.slug}`);
+          break;
+        case 'artist':
+          // Route pour œuvres d'artiste : /artist/:id
+          navigate(`/artist/${product.id}`);
           break;
         default:
-          navigate(`/marketplace/${storeSlug}/${product.slug}`);
+          // Fallback vers la route des produits digitaux
+          navigate(`/stores/${storeSlug}/products/${product.slug}`);
       }
       logger.info('Navigation vers produit depuis wishlist', {
         productId: product.id,
@@ -384,6 +728,8 @@ export default function CustomerMyWishlist() {
         return <Calendar className="h-4 w-4" />;
       case 'course':
         return <BookOpen className="h-4 w-4" />;
+      case 'artist':
+        return <Palette className="h-4 w-4" />;
       default:
         return <Package className="h-4 w-4" />;
     }
@@ -400,21 +746,60 @@ export default function CustomerMyWishlist() {
         return 'Service';
       case 'course':
         return 'Cours en Ligne';
+      case 'artist':
+        return "Oeuvre d'artiste";
       default:
         return type;
     }
   };
 
+  // Skeleton loading amélioré
   if (favoritesLoading || isLoading) {
     return (
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
-          <main className="flex-1 p-4 md:p-6 space-y-6">
-            <div className="flex items-center justify-center h-[60vh]">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Chargement de la wishlist...</p>
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+              {/* Header Skeleton */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <Skeleton className="h-10 w-32" />
+              </div>
+              {/* Stats Skeleton */}
+              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <Card key={i} className="border-border/50">
+                    <CardHeader className="pb-2">
+                      <Skeleton className="h-4 w-20" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-8 w-12" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {/* Products Grid Skeleton */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <Card key={i} className="border-border/50">
+                    <Skeleton className="h-48 w-full" />
+                    <CardHeader>
+                      <Skeleton className="h-5 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-full" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-6 w-24 mb-4" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-9 flex-1" />
+                        <Skeleton className="h-9 flex-1" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
           </main>
@@ -452,18 +837,58 @@ export default function CustomerMyWishlist() {
                     : 'Aucun produit dans votre wishlist'}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {stats.total > 0 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowShareDialog(true)}
-                    size="sm"
-                    className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
-                  >
-                    <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                    <span className="hidden sm:inline">Partager</span>
-                    <span className="sm:hidden">Partager</span>
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowShareDialog(true)}
+                      size="sm"
+                      className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
+                    >
+                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                      <span className="hidden sm:inline">Partager</span>
+                      <span className="sm:hidden">Partager</span>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
+                          disabled={isExporting}
+                        >
+                          <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          <span className="hidden sm:inline">Exporter</span>
+                          <span className="sm:hidden">Export</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleExportCSV} disabled={isExporting}>
+                          <FileDown className="h-4 w-4 mr-2" />
+                          Exporter en CSV
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                      className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
+                    >
+                      {viewMode === 'grid' ? (
+                        <>
+                          <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          <span className="hidden sm:inline">Liste</span>
+                        </>
+                      ) : (
+                        <>
+                          <Grid3x3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                          <span className="hidden sm:inline">Grille</span>
+                        </>
+                      )}
+                    </Button>
+                  </>
                 )}
                 <Button
                   onClick={handleRefresh}
@@ -555,6 +980,12 @@ export default function CustomerMyWishlist() {
                     icon: BookOpen,
                     color: 'from-purple-600 to-pink-600',
                   },
+                  {
+                    label: "Oeuvres d'artiste",
+                    value: stats.byType.artist || 0,
+                    icon: Palette,
+                    color: 'from-pink-600 to-rose-600',
+                  },
                 ].map((stat, index) => {
                   const Icon = stat.icon;
                   return (
@@ -621,6 +1052,76 @@ export default function CustomerMyWishlist() {
                         </Badge>
                       </div>
                     </div>
+                    {/* Sort */}
+                    <div className="w-full sm:w-auto">
+                      <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
+                        <SelectTrigger className="w-full sm:w-[180px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm">
+                          <SelectValue placeholder="Trier par..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date">Plus récent</SelectItem>
+                          <SelectItem value="price_asc">Prix croissant</SelectItem>
+                          <SelectItem value="price_desc">Prix décroissant</SelectItem>
+                          <SelectItem value="name">Nom A-Z</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {/* Store Filter */}
+                    {uniqueStores.length > 1 && (
+                      <div className="w-full sm:w-auto">
+                        <Select value={storeFilter} onValueChange={setStoreFilter}>
+                          <SelectTrigger className="w-full sm:w-[180px] min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm">
+                            <SelectValue placeholder="Toutes les boutiques" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Toutes les boutiques</SelectItem>
+                            {uniqueStores.map(store => (
+                              <SelectItem key={store.id} value={store.id}>
+                                {store.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    {/* Price Filter */}
+                    {priceRangeData.max > 0 && (
+                      <div className="w-full sm:w-auto flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={priceRange[0] === 0 ? '' : priceRange[0]}
+                          onChange={e =>
+                            setPriceRange([Number(e.target.value) || 0, priceRange[1]])
+                          }
+                          className="w-24 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+                          min={0}
+                        />
+                        <span className="text-muted-foreground">-</span>
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={priceRange[1] === Infinity ? '' : priceRange[1]}
+                          onChange={e =>
+                            setPriceRange([priceRange[0], Number(e.target.value) || Infinity])
+                          }
+                          className="w-24 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm"
+                          min={priceRange[0]}
+                        />
+                        {(priceRange[0] > 0 || priceRange[1] < Infinity) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setPriceRange([0, Infinity])}
+                            className="min-h-[44px] min-w-[44px]"
+                            aria-label="Réinitialiser le filtre de prix"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -631,7 +1132,9 @@ export default function CustomerMyWishlist() {
               <Tabs
                 value={activeTab}
                 onValueChange={v =>
-                  setActiveTab(v as 'all' | 'digital' | 'physical' | 'service' | 'course')
+                  setActiveTab(
+                    v as 'all' | 'digital' | 'physical' | 'service' | 'course' | 'artist'
+                  )
                 }
               >
                 <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full sm:w-auto">
@@ -673,6 +1176,14 @@ export default function CustomerMyWishlist() {
                       Cours ({stats.byType.course})
                     </TabsTrigger>
                   )}
+                  {stats.byType.artist > 0 && (
+                    <TabsTrigger
+                      value="artist"
+                      className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 min-h-[44px] text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                    >
+                      Oeuvres d'artiste ({stats.byType.artist})
+                    </TabsTrigger>
+                  )}
                 </TabsList>
               </Tabs>
             )}
@@ -705,7 +1216,7 @@ export default function CustomerMyWishlist() {
             )}
 
             {/* Résultats de recherche vides - Style Inventaire */}
-            {stats.total > 0 && filteredProducts.length === 0 && (
+            {stats.total > 0 && filteredAndSortedProducts.length === 0 && (
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <CardContent className="py-12 sm:py-16 lg:py-20 text-center">
                   <div className="max-w-md mx-auto">
@@ -724,6 +1235,9 @@ export default function CustomerMyWishlist() {
                         onClick={() => {
                           setSearchInput('');
                           setActiveTab('all');
+                          setStoreFilter('all');
+                          setPriceRange([0, Infinity]);
+                          setSortBy('date');
                         }}
                         size="lg"
                         variant="outline"
@@ -738,33 +1252,147 @@ export default function CustomerMyWishlist() {
               </Card>
             )}
 
+            {/* Actions en masse */}
+            {selectedProducts.size > 0 && (
+              <Card className="border-purple-500/50 bg-purple-50/50 dark:bg-purple-950/20 animate-in fade-in slide-in-from-bottom-4">
+                <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm font-medium">
+                      {selectedProducts.size} produit{selectedProducts.size > 1 ? 's' : ''}{' '}
+                      sélectionné{selectedProducts.size > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleBulkAddToCart}
+                      disabled={isAddingToCart}
+                      className="min-h-[44px]"
+                    >
+                      {isAddingToCart ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                      )}
+                      Ajouter au panier
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkRemove}
+                      className="min-h-[44px]"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Retirer
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedProducts(new Set())}
+                      className="min-h-[44px]"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Liste des produits favoris - Style Inventaire */}
-            {filteredProducts.length > 0 && (
+            {paginatedProducts.length > 0 && (
               <div
                 ref={productsRef}
                 className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {filteredProducts.map(product => (
+                {/* Sélectionner tout */}
+                {paginatedProducts.length > 0 && (
+                  <div className="flex items-center justify-between mb-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSelectAll}
+                      className="text-xs sm:text-sm"
+                    >
+                      {selectedProducts.size === paginatedProducts.length ? (
+                        <>
+                          <CheckSquare className="h-4 w-4 mr-2" />
+                          Tout désélectionner
+                        </>
+                      ) : (
+                        <>
+                          <Square className="h-4 w-4 mr-2" />
+                          Tout sélectionner
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'
+                      : 'space-y-4'
+                  }
+                >
+                  {paginatedProducts.map(product => (
                     <Card
                       key={product.id}
-                      className="group hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm hover:scale-[1.02] overflow-hidden"
+                      className={`group hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm hover:scale-[1.02] overflow-hidden relative ${
+                        selectedProducts.has(product.id) ? 'ring-2 ring-purple-500' : ''
+                      } ${viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''}`}
                     >
-                      <div className="relative h-40 sm:h-48 lg:h-52 overflow-hidden bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600">
-                        <img
-                          src={product.image_url || '/placeholder-product.png'}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          onError={e => {
-                            (e.target as HTMLImageElement).src = '/placeholder-product.png';
-                          }}
-                          loading="lazy"
-                        />
+                      {/* Checkbox de sélection */}
+                      <div className="absolute top-2 left-2 z-10">
+                        <button
+                          onClick={() => handleToggleSelection(product.id)}
+                          className="p-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                          aria-label={
+                            selectedProducts.has(product.id) ? 'Désélectionner' : 'Sélectionner'
+                          }
+                        >
+                          {selectedProducts.has(product.id) ? (
+                            <CheckSquare className="h-5 w-5 text-purple-600" />
+                          ) : (
+                            <Square className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                          )}
+                        </button>
+                      </div>
+                      <div
+                        className={`relative ${viewMode === 'grid' ? 'h-40 sm:h-48 lg:h-52' : 'h-32 sm:h-40 w-full sm:w-48 flex-shrink-0'} overflow-hidden bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600`}
+                      >
+                        {product.image_url && product.image_url.trim() !== '' ? (
+                          <OptimizedImage
+                            src={product.image_url}
+                            alt={product.name ? htmlToPlainText(product.name) : 'Produit'}
+                            width={viewMode === 'grid' ? 800 : 600}
+                            height={viewMode === 'grid' ? 600 : 450}
+                            quality={90}
+                            containerClassName="absolute inset-0 w-full h-full"
+                            className="!w-full !h-full"
+                            imageClassName="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            showPlaceholder={false}
+                            showSkeleton={true}
+                            priority={true}
+                            sizes={
+                              viewMode === 'grid'
+                                ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                                : '(max-width: 640px) 100vw, 300px'
+                            }
+                          />
+                        ) : (
+                          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-purple-600/20">
+                            <Package className="h-12 w-12 sm:h-16 sm:w-16 text-purple-300 dark:text-purple-400" />
+                          </div>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
                           className="absolute top-2 right-2 bg-white/90 hover:bg-white shadow-md h-8 w-8 sm:h-9 sm:w-9 touch-manipulation"
-                          onClick={() => handleRemoveFavorite(product.id, product.name)}
+                          onClick={() =>
+                            handleRemoveFavorite(product.id, htmlToPlainText(product.name))
+                          }
                           aria-label="Retirer des favoris"
                         >
                           <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 fill-red-500" />
@@ -796,10 +1424,12 @@ export default function CustomerMyWishlist() {
                       </div>
                       <CardHeader className="p-4 sm:p-6">
                         <CardTitle className="text-base sm:text-lg lg:text-xl font-bold line-clamp-2 mb-2 group-hover:text-primary transition-colors duration-200">
-                          {product.name}
+                          {product.name ? htmlToPlainText(product.name) : 'Produit sans nom'}
                         </CardTitle>
                         <CardDescription className="line-clamp-2 text-xs sm:text-sm">
-                          {product.description || 'Aucune description'}
+                          {product.description
+                            ? htmlToPlainText(product.description)
+                            : 'Aucune description'}
                         </CardDescription>
                         {product.stores && (
                           <p className="text-xs text-muted-foreground mt-1 sm:mt-2 flex items-center gap-1">
@@ -843,16 +1473,16 @@ export default function CustomerMyWishlist() {
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => handleAddToCart(product)}
+                            onClick={() => handleBuyProduct(product)}
                             disabled={isAddingToCart}
                             className="flex-1 h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-xs sm:text-sm min-h-[44px] touch-manipulation"
                           >
                             {isAddingToCart ? (
                               <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin" />
                             ) : (
-                              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                              <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                             )}
-                            Ajouter
+                            Acheter
                           </Button>
                         </div>
 
@@ -885,6 +1515,67 @@ export default function CustomerMyWishlist() {
                     </Card>
                   ))}
                 </div>
+                {/* Pagination Controls */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 sm:mt-8 pt-6 border-t border-border">
+                    <div className="text-xs sm:text-sm text-muted-foreground">
+                      Affichage de {pagination.range.start} à {pagination.range.end} sur{' '}
+                      {filteredAndSortedProducts.length} produit
+                      {filteredAndSortedProducts.length > 1 ? 's' : ''}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={pagination.previousPage}
+                        disabled={!pagination.hasPreviousPage}
+                        className="min-h-[44px] text-xs sm:text-sm"
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        Précédent
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                          let pageNum: number;
+                          if (pagination.totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (pagination.page <= 3) {
+                            pageNum = i + 1;
+                          } else if (pagination.page >= pagination.totalPages - 2) {
+                            pageNum = pagination.totalPages - 4 + i;
+                          } else {
+                            pageNum = pagination.page - 2 + i;
+                          }
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={pagination.page === pageNum ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => pagination.goToPage(pageNum)}
+                              className={`min-h-[44px] min-w-[44px] text-xs sm:text-sm ${
+                                pagination.page === pageNum
+                                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                                  : ''
+                              }`}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={pagination.nextPage}
+                        disabled={!pagination.hasNextPage}
+                        className="min-h-[44px] text-xs sm:text-sm"
+                      >
+                        Suivant
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

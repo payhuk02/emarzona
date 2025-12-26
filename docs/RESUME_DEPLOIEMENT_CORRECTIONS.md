@@ -34,9 +34,9 @@ Exécuter la requête de vérification dans le SQL Editor :
 
 ```sql
 -- Vérifier que la fonction contient la logique de remboursement
-SELECT 
+SELECT
   proname as function_name,
-  CASE 
+  CASE
     WHEN pg_get_functiondef(oid) LIKE '%refunded%' THEN '✅ Migration appliquée'
     ELSE '❌ Migration non appliquée'
   END as status
@@ -60,11 +60,13 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 ### 1. Remboursement Manuel (`refundMonerooPayment`)
 
 **Avant** :
+
 - ❌ Transaction mise à jour avec `status: "refunded"`
 - ❌ Order non mise à jour
 - ❌ `store_earnings` non recalculé
 
 **Après** :
+
 - ✅ Transaction mise à jour avec `status: "refunded"`
 - ✅ Order mise à jour avec `payment_status: "refunded"`
 - ✅ `store_earnings` automatiquement recalculé via trigger SQL
@@ -72,11 +74,13 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 ### 2. Remboursement via Webhook
 
 **Avant** :
+
 - ❌ Transaction mise à jour via webhook
 - ❌ Order non mise à jour
 - ❌ `store_earnings` non recalculé
 
 **Après** :
+
 - ✅ Transaction mise à jour via webhook
 - ✅ Order mise à jour avec `payment_status: "refunded"`
 - ✅ `store_earnings` automatiquement recalculé via trigger SQL
@@ -84,10 +88,12 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 ### 3. Calcul Automatique des Revenus
 
 **Avant** :
+
 - ❌ Les orders remboursées étaient toujours comptées dans `total_revenue`
 - ❌ `available_balance` incorrect
 
 **Après** :
+
 - ✅ Les orders remboursées sont exclues de `total_revenue` (car `payment_status != 'paid'`)
 - ✅ `available_balance` correctement calculé
 - ✅ Recalcul automatique lors de chaque remboursement
@@ -103,7 +109,7 @@ WHERE proname = 'trigger_update_store_earnings_on_order';
 const result = await refundMonerooPayment({
   transactionId: 'transaction-uuid',
   amount: 10000, // ou undefined pour remboursement total
-  reason: 'Test remboursement'
+  reason: 'Test remboursement',
 });
 
 // Vérifier ensuite dans la base de données :
@@ -117,7 +123,7 @@ const result = await refundMonerooPayment({
 
 ```sql
 -- Avant remboursement
-SELECT 
+SELECT
   store_id,
   total_revenue,
   available_balance
@@ -127,7 +133,7 @@ WHERE store_id = 'store-uuid';
 -- Effectuer remboursement...
 
 -- Après remboursement
-SELECT 
+SELECT
   store_id,
   total_revenue,
   available_balance
@@ -141,11 +147,11 @@ WHERE store_id = 'store-uuid';
 
 ## 📝 Fichiers Modifiés
 
-| Fichier | Type | Statut |
-|---------|------|--------|
-| `src/lib/moneroo-payment.ts` | Correction | ✅ Modifié |
-| `supabase/functions/moneroo-webhook/index.ts` | Correction | ✅ Déployé |
-| `supabase/migrations/20250230_fix_store_earnings_on_refund.sql` | Migration | ⚠️ À appliquer |
+| Fichier                                                         | Type       | Statut         |
+| --------------------------------------------------------------- | ---------- | -------------- |
+| `src/lib/moneroo-payment.ts`                                    | Correction | ✅ Modifié     |
+| `supabase/functions/moneroo-webhook/index.ts`                   | Correction | ✅ Déployé     |
+| `supabase/migrations/20250230_fix_store_earnings_on_refund.sql` | Migration  | ⚠️ À appliquer |
 
 ---
 
@@ -170,5 +176,3 @@ WHERE store_id = 'store-uuid';
 
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ Déploiement terminé (vérification migration SQL requise)
-
-

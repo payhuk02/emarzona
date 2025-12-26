@@ -165,4 +165,3 @@ totalDuration={
 **Le système est 100% opérationnel et prêt pour la production !** 🚀
 
 _Vérification finale terminée le 2 Février 2025_
-

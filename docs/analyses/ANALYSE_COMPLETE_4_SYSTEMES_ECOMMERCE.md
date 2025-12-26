@@ -8,12 +8,12 @@
 
 ## 📊 VUE D'ENSEMBLE COMPARATIVE
 
-| Système | Tables DB | Hooks React | UI Components | Wizards | Advanced Features | Score Pro |
-|---------|-----------|-------------|---------------|---------|-------------------|-----------|
-| **Digital Products** | 11 tables ✅ | 7 hooks ✅ | 11 components ✅ | Wizard V2 ✅ | License + Versioning + Download ✅ | **95%** 🟢 |
-| **Physical Products** | 6 tables ✅ | 3 hooks ⚠️ | 3 components ⚠️ | Wizard V2 ✅ | Inventory + Shipping ⚠️ | **70%** 🟡 |
-| **Services** | 5 tables ✅ | 3 hooks ⚠️ | 4 components ⚠️ | Wizard V2 ✅ | Bookings + Availability ⚠️ | **65%** 🟡 |
-| **Online Courses** | 11 tables ✅ | 9 hooks ✅ | 15+ components ✅ | Wizard Complet ✅ | LMS Complet ✅ | **90%** 🟢 |
+| Système               | Tables DB    | Hooks React | UI Components     | Wizards           | Advanced Features                  | Score Pro  |
+| --------------------- | ------------ | ----------- | ----------------- | ----------------- | ---------------------------------- | ---------- |
+| **Digital Products**  | 11 tables ✅ | 7 hooks ✅  | 11 components ✅  | Wizard V2 ✅      | License + Versioning + Download ✅ | **95%** 🟢 |
+| **Physical Products** | 6 tables ✅  | 3 hooks ⚠️  | 3 components ⚠️   | Wizard V2 ✅      | Inventory + Shipping ⚠️            | **70%** 🟡 |
+| **Services**          | 5 tables ✅  | 3 hooks ⚠️  | 4 components ⚠️   | Wizard V2 ✅      | Bookings + Availability ⚠️         | **65%** 🟡 |
+| **Online Courses**    | 11 tables ✅ | 9 hooks ✅  | 15+ components ✅ | Wizard Complet ✅ | LMS Complet ✅                     | **90%** 🟢 |
 
 ---
 
@@ -22,6 +22,7 @@
 ### ✅ FORCES
 
 #### Base de Données (11 tables)
+
 ```
 ✅ digital_products               - Table principale complète
 ✅ digital_product_files          - Gestion fichiers multiples
@@ -37,6 +38,7 @@
 ```
 
 #### Hooks React (7)
+
 ```typescript
 ✅ useDigitalProducts.ts          - CRUD produits digitaux
 ✅ useDownloads.ts                - Gestion téléchargements
@@ -48,6 +50,7 @@
 ```
 
 #### UI Components (11)
+
 ```typescript
 ✅ DigitalProductCard             - Card produit
 ✅ DigitalDownloadButton          - Bouton download simple
@@ -63,6 +66,7 @@
 ```
 
 #### Advanced Features
+
 ```
 ✅ License Management             - Single, Multi, Unlimited, Subscription
 ✅ Product Versioning             - Tracking versions + changelog + notifications
@@ -83,6 +87,7 @@
 ### ⚠️ POINTS À AMÉLIORER
 
 #### 1. Intégration UI Manquante
+
 ```typescript
 ❌ Routes manquantes pour nouveaux dashboards
    → Ajouter route: /dashboard/digital/:id/versions
@@ -96,18 +101,20 @@
 ```
 
 #### 2. Fonctions PostgreSQL Manquantes
+
 ```sql
 ❌ increment_version_download_count()
    → Incrémenter compteur téléchargements par version
-   
+
 ❌ cleanup_expired_tokens()
    → Nettoyer tokens expirés automatiquement
-   
+
 ❌ send_version_notification()
    → Fonction pour notifications email (Edge Function)
 ```
 
 #### 3. Analytics Avancés à Compléter
+
 ```typescript
 ❌ Conversion tracking par source
 ❌ A/B testing capabilities
@@ -116,6 +123,7 @@
 ```
 
 #### 4. Email Automation
+
 ```typescript
 ❌ Email notification nouvelle version
 ❌ Email expiration licence proche
@@ -130,6 +138,7 @@
 ### ✅ FORCES
 
 #### Base de Données (6 tables)
+
 ```
 ✅ physical_products              - Table principale
 ✅ product_variants               - Variantes (couleur, taille, etc.)
@@ -140,6 +149,7 @@
 ```
 
 #### Hooks React (3)
+
 ```typescript
 ✅ usePhysicalProducts.ts         - CRUD produits physiques
 ✅ useInventory.ts                - Gestion inventaire
@@ -147,6 +157,7 @@
 ```
 
 #### UI Components (3)
+
 ```typescript
 ✅ PhysicalProductCard            - Card produit
 ✅ VariantSelector                - Sélecteur variantes
@@ -158,6 +169,7 @@
 ### 🚨 GAPS CRITIQUES (30% MANQUANT)
 
 #### 1. Manque Components Professionnels
+
 ```typescript
 ❌ InventoryStockIndicator        - Indicateur stock visuel
 ❌ ShippingInfoDisplay            - Affichage info expédition
@@ -171,6 +183,7 @@
 ```
 
 #### 2. Manque Hooks Avancés
+
 ```typescript
 ❌ useStockAlerts()               - Alertes stock bas
 ❌ useInventoryReports()          - Rapports inventaire
@@ -182,6 +195,7 @@
 ```
 
 #### 3. Advanced Features Manquantes
+
 ```typescript
 ❌ Pre-orders system              - Système de pré-commandes
 ❌ Backorders management          - Gestion ruptures de stock
@@ -197,6 +211,7 @@
 ```
 
 #### 4. Intégrations Externes Manquantes
+
 ```typescript
 ❌ ShipStation integration        - ShipStation
 ❌ EasyPost integration           - EasyPost
@@ -208,13 +223,14 @@
 ```
 
 #### 5. Pages Admin Manquantes
+
 ```typescript
 ❌ /admin/inventory               - (créée mais basique)
    → Besoin: Filtres avancés, bulk actions, export CSV
-   
+
 ❌ /admin/shipping                - (créée mais basique)
    → Besoin: Tracking en temps réel, bulk labels
-   
+
 ❌ /dashboard/inventory-reports   - Rapports inventaire
 ❌ /dashboard/stock-movements     - Historique mouvements
 ❌ /dashboard/low-stock-alerts    - Alertes stock
@@ -222,6 +238,7 @@
 ```
 
 #### 6. Database Functions Manquantes
+
 ```sql
 ❌ update_variant_stock()         - Mise à jour stock variante
 ❌ log_stock_movement()           - Logger mouvement stock
@@ -238,6 +255,7 @@
 ### ✅ FORCES
 
 #### Base de Données (5 tables)
+
 ```
 ✅ service_products               - Table principale
 ✅ service_bookings               - Réservations
@@ -247,6 +265,7 @@
 ```
 
 #### Hooks React (3)
+
 ```typescript
 ✅ useServiceProducts.ts          - CRUD services
 ✅ useBookings.ts                 - Gestion réservations
@@ -254,6 +273,7 @@
 ```
 
 #### UI Components (4)
+
 ```typescript
 ✅ ServiceCard                    - Card service
 ✅ BookingCard                    - Card réservation
@@ -266,34 +286,35 @@
 ### 🚨 GAPS CRITIQUES (35% MANQUANT)
 
 #### 1. Manque Components Professionnels
+
 ```typescript
 ❌ ServiceCalendar                - Calendrier visuel complet
    → Besoin: Vue mensuelle, hebdomadaire, journalière
    → Besoin: Drag & drop réservations
    → Besoin: Code couleur par statut
    → Besoin: Multi-staff view
-   
+
 ❌ AdvancedTimeSlotPicker         - Sélecteur créneaux avancé
    → Besoin: Récurrence (hebdomadaire, mensuelle)
    → Besoin: Exceptions (jours fériés, vacances)
    → Besoin: Buffer time entre réservations
    → Besoin: Multiple staff members
-   
+
 ❌ BookingsList                   - Liste réservations
    → Besoin: Filtres (statut, date, staff, client)
    → Besoin: Actions bulk (confirmer, annuler)
    → Besoin: Export CSV
-   
+
 ❌ StaffManagement                - Gestion équipe
    → Besoin: CRUD staff members
    → Besoin: Disponibilités par staff
    → Besoin: Performance tracking
-   
+
 ❌ BookingDashboard               - Dashboard réservations
    → Besoin: Stats (total, confirmées, annulées)
    → Besoin: Revenus par service
    → Besoin: Taux d'occupation
-   
+
 ❌ WaitingList                    - Liste d'attente
 ❌ RecurringBookings              - Réservations récurrentes
 ❌ GroupBookings                  - Réservations groupes
@@ -302,6 +323,7 @@
 ```
 
 #### 2. Manque Hooks Avancés
+
 ```typescript
 ❌ useRecurringSlots()            - Créneaux récurrents
 ❌ useStaffPerformance()          - Performance staff
@@ -314,6 +336,7 @@
 ```
 
 #### 3. Advanced Features Manquantes
+
 ```typescript
 ❌ Recurring appointments         - Rendez-vous récurrents
 ❌ Group bookings                 - Réservations groupes
@@ -323,7 +346,7 @@
    → Email 24h avant
    → Email 1h avant
    → SMS reminders
-   
+
 ❌ Rescheduling system            - Système de reprogrammation
 ❌ Cancellation fees              - Frais d'annulation
 ❌ Service packages               - Packages services
@@ -334,6 +357,7 @@
 ```
 
 #### 4. Intégrations Calendrier Manquantes
+
 ```typescript
 ❌ Google Calendar sync           - Sync Google Calendar
 ❌ Outlook Calendar sync          - Sync Outlook
@@ -344,6 +368,7 @@
 ```
 
 #### 5. Pages Manquantes
+
 ```typescript
 ❌ /dashboard/services/calendar   - Calendrier global
 ❌ /dashboard/bookings/list       - Liste réservations
@@ -354,6 +379,7 @@
 ```
 
 #### 6. Database Functions Manquantes
+
 ```sql
 ❌ check_booking_conflict()       - Vérifier conflit
 ❌ calculate_service_revenue()    - Calculer revenus
@@ -370,6 +396,7 @@
 ### ✅ FORCES
 
 #### Base de Données (11 tables)
+
 ```
 ✅ courses                        - Table principale
 ✅ course_sections                - Sections/chapitres
@@ -385,6 +412,7 @@
 ```
 
 #### Hooks React (9)
+
 ```typescript
 ✅ useCourses.ts                  - CRUD cours
 ✅ useCourseDetail.ts             - Détails cours
@@ -398,6 +426,7 @@
 ```
 
 #### UI Components (15+)
+
 ```typescript
 ✅ CreateCourseWizard             - Wizard création complet
 ✅ CoursePlayer                   - Lecteur vidéo avancé
@@ -416,6 +445,7 @@
 ```
 
 #### Advanced Features
+
 ```
 ✅ Drip Content                   - Contenu programmé
 ✅ Quizzes & Assessments          - Quiz & évaluations
@@ -440,6 +470,7 @@
 ### ⚠️ POINTS À AMÉLIORER (10% MANQUANT)
 
 #### 1. Gamification Manquante
+
 ```typescript
 ❌ Points & Badges system         - Système points/badges
 ❌ Leaderboards                   - Classements
@@ -449,6 +480,7 @@
 ```
 
 #### 2. Collaboration Features
+
 ```typescript
 ❌ Peer review assignments        - Évaluations par pairs
 ❌ Group projects                 - Projets de groupe
@@ -458,6 +490,7 @@
 ```
 
 #### 3. Advanced Analytics
+
 ```typescript
 ❌ Student engagement score       - Score engagement
 ❌ Dropout prediction             - Prédiction abandon
@@ -467,6 +500,7 @@
 ```
 
 #### 4. Mobile App Features
+
 ```typescript
 ❌ Offline download               - Téléchargement hors ligne
 ❌ Background audio               - Audio en arrière-plan
@@ -475,6 +509,7 @@
 ```
 
 #### 5. AI-Powered Features
+
 ```typescript
 ❌ AI course recommendations      - Recommandations IA
 ❌ Smart content summarization    - Résumés automatiques
@@ -562,6 +597,7 @@
 ### 🔴 PRIORITÉ 1 : PHYSICAL PRODUCTS (1-2 semaines)
 
 **Sprint Physical 1 - Components Essentiels (3 jours)**
+
 ```typescript
 1. InventoryStockIndicator.tsx
 2. ShippingInfoDisplay.tsx
@@ -571,6 +607,7 @@
 ```
 
 **Sprint Physical 2 - Hooks Avancés (2 jours)**
+
 ```typescript
 1. useStockAlerts()
 2. useInventoryReports()
@@ -579,6 +616,7 @@
 ```
 
 **Sprint Physical 3 - Features Avancées (3 jours)**
+
 ```typescript
 1. Pre-orders system
 2. Backorders management
@@ -587,6 +625,7 @@
 ```
 
 **Sprint Physical 4 - Analytics & Dashboards (2 jours)**
+
 ```typescript
 1. InventoryDashboard complet
 2. ShippingDashboard complet
@@ -598,6 +637,7 @@
 ### 🟡 PRIORITÉ 2 : SERVICES (1-2 semaines)
 
 **Sprint Services 1 - Calendar System (4 jours)**
+
 ```typescript
 1. ServiceCalendar.tsx (vue mensuelle, hebdo, jour)
 2. AdvancedTimeSlotPicker.tsx
@@ -606,6 +646,7 @@
 ```
 
 **Sprint Services 2 - Booking Management (3 jours)**
+
 ```typescript
 1. BookingsList.tsx
 2. StaffManagement.tsx
@@ -614,6 +655,7 @@
 ```
 
 **Sprint Services 3 - Advanced Features (3 jours)**
+
 ```typescript
 1. Recurring appointments
 2. Group bookings
@@ -622,6 +664,7 @@
 ```
 
 **Sprint Services 4 - Integrations (2 jours)**
+
 ```typescript
 1. Google Calendar sync
 2. Zoom integration
@@ -633,6 +676,7 @@
 ### 🟢 PRIORITÉ 3 : COURSES (3-5 jours)
 
 **Sprint Courses - Gamification & Engagement (5 jours)**
+
 ```typescript
 1. Points & Badges system
 2. Leaderboards
@@ -646,6 +690,7 @@
 ### 🔵 PRIORITÉ 4 : FEATURES COMMUNES (1 semaine)
 
 **Sprint Commun - Email & Marketing (1 semaine)**
+
 ```typescript
 1. Email marketing system
 2. SMS notifications
@@ -660,12 +705,12 @@
 
 ### Scores Actuels vs Cibles
 
-| Système | Score Actuel | Cible 100% | Manque | Effort |
-|---------|--------------|------------|--------|--------|
-| **Digital** | 95% 🟢 | 100% | 5% | 1-2 jours |
-| **Physical** | 70% 🟡 | 100% | 30% | 1-2 semaines |
-| **Services** | 65% 🟡 | 100% | 35% | 1-2 semaines |
-| **Courses** | 90% 🟢 | 100% | 10% | 3-5 jours |
+| Système      | Score Actuel | Cible 100% | Manque | Effort       |
+| ------------ | ------------ | ---------- | ------ | ------------ |
+| **Digital**  | 95% 🟢       | 100%       | 5%     | 1-2 jours    |
+| **Physical** | 70% 🟡       | 100%       | 30%    | 1-2 semaines |
+| **Services** | 65% 🟡       | 100%       | 35%    | 1-2 semaines |
+| **Courses**  | 90% 🟢       | 100%       | 10%    | 3-5 jours    |
 
 ### Timeline Globale
 
@@ -683,6 +728,7 @@ Semaine 8      → Documentation & Lancement
 ## 🚀 RECOMMANDATIONS FINALES
 
 ### Option A : Full Professional (8 semaines)
+
 ```
 ✅ Implémenter TOUS les sprints
 ✅ 100% de fonctionnalités pour tous les systèmes
@@ -692,6 +738,7 @@ Semaine 8      → Documentation & Lancement
 ```
 
 ### Option B : Quick Wins (2 semaines)
+
 ```
 ✅ Physical Products seulement (Sprints 1-2)
 ✅ Services - Calendar System seulement
@@ -701,6 +748,7 @@ Semaine 8      → Documentation & Lancement
 ```
 
 ### Option C : Progressive (4 semaines)
+
 ```
 ✅ Physical Products complet (Sprints 1-4)
 ✅ Services - Sprints 1-2
@@ -716,12 +764,14 @@ Semaine 8      → Documentation & Lancement
 **État Actuel** : La plateforme Payhula a une base **solide et professionnelle**. Les systèmes Digital Products et Courses sont **quasi-complets (90-95%)**, mais Physical Products et Services nécessitent encore **30-35% de développement** pour atteindre le niveau "haut de gamme très professionnel".
 
 **Points Forts** :
+
 - ✅ Architecture DB excellente
 - ✅ Wizards de création professionnels
 - ✅ Features avancées (affiliation, SEO, reviews) déployées partout
 - ✅ Design moderne et UX fluide
 
 **Points à Améliorer** :
+
 - ⚠️ Physical Products : Components UI + Analytics + Integrations
 - ⚠️ Services : Calendar System + Booking Management + Reminders
 - ⚠️ Features communes : Email marketing + Loyalty + Subscription
@@ -731,4 +781,3 @@ Semaine 8      → Documentation & Lancement
 ---
 
 **Prêt à commencer ?** 🚀
-

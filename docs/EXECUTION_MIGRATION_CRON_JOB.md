@@ -8,6 +8,7 @@
 ## ⚠️ Problème Identifié
 
 Le cron job `process-scheduled-email-campaigns` n'a **PAS** le header `Authorization` dans sa commande. La commande actuelle ne contient que :
+
 - `'Content-Type'`
 - `'x-cron-secret'`
 
@@ -62,7 +63,7 @@ SELECT cron.schedule(
 Vérifiez que le cron job contient bien le header `Authorization` :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -73,6 +74,7 @@ WHERE jobname = 'process-scheduled-email-campaigns';
 ```
 
 **Vérification** : Le champ `command` devrait contenir :
+
 ```sql
 'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true)
 ```
@@ -95,7 +97,8 @@ SELECT net.http_post(
 ) AS request_id;
 ```
 
-**Résultat attendu** : 
+**Résultat attendu** :
+
 - `request_id` : Un nombre (ex: `184`, `185`, etc.)
 - **Puis vérifier les invocations** : Devrait être **200 OK** (plus de `401`)
 
@@ -122,5 +125,3 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

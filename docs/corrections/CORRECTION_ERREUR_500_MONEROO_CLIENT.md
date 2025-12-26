@@ -11,6 +11,7 @@
 L'erreur `Failed to fetch dynamically imported module: http://localhost:8081/src/lib/moneroo-client.ts?t=...` indiquait que Vite ne pouvait pas compiler le module.
 
 **Causes identifiées** :
+
 1. ❌ Indentation incorrecte dans le bloc `if (error)`
 2. ❌ Code orphelin utilisant `errorMessage` en dehors du bloc `if (error)`
 3. ❌ Structure de blocs incorrecte
@@ -22,6 +23,7 @@ L'erreur `Failed to fetch dynamically imported module: http://localhost:8081/src
 ### 1. Structure du code corrigée
 
 **Avant** :
+
 ```typescript
 if (error) {
   // ... gestion d'erreur ...
@@ -32,6 +34,7 @@ if (errorMessage.includes('timeout')) { ... }
 ```
 
 **Après** :
+
 ```typescript
 if (error) {
   // ... gestion d'erreur complète ...
@@ -67,11 +70,13 @@ if (!response?.success) { ... }
 ## 🚀 SOLUTION POUR LE PROBLÈME SUPABASE
 
 **Note importante** : Les clés Moneroo sont configurées sur :
+
 - ✅ Vercel (variables d'environnement)
 - ✅ `.env` local
 - ⚠️ **À vérifier** : Supabase Dashboard → Edge Functions → Secrets
 
 **Action requise** :
+
 1. Aller dans Supabase Dashboard
 2. Edge Functions → Secrets
 3. Vérifier que `MONEROO_API_KEY` est bien configuré
@@ -84,6 +89,7 @@ if (!response?.success) { ... }
 Si l'erreur persiste après correction :
 
 1. **Vider le cache Vite** :
+
    ```bash
    rm -rf node_modules/.vite
    npm run dev
@@ -101,5 +107,3 @@ Si l'erreur persiste après correction :
 ---
 
 **Correction complétée le** : 18 Novembre 2025
-
-

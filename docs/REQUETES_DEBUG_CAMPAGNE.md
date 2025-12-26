@@ -8,7 +8,7 @@
 ## 1. Vérifier la Structure de `email_logs`
 
 ```sql
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable
@@ -23,7 +23,7 @@ ORDER BY ordinal_position;
 ## 2. Vérifier le Statut Actuel de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -43,7 +43,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ## 3. Vérifier les Logs d'Emails (Structure Corrigée)
 
 ```sql
-SELECT 
+SELECT
   id,
   recipient_email,
   subject,
@@ -60,7 +60,7 @@ ORDER BY sent_at DESC;
 **Note** : Si `recipient_email` n'existe pas, utilisez cette requête pour voir toutes les colonnes disponibles :
 
 ```sql
-SELECT * 
+SELECT *
 FROM public.email_logs
 WHERE campaign_id = '4f3d3b29-7643-4696-8139-3b49feed4d36'
 LIMIT 1;
@@ -71,7 +71,7 @@ LIMIT 1;
 ## 4. Vérifier les Dernières Exécutions du Cron Job
 
 ```sql
-SELECT 
+SELECT
   jobid,
   runid,
   status,
@@ -91,7 +91,7 @@ LIMIT 10;
 ## 5. Vérifier les Campagnes qui Devraient Être Traitées
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -113,7 +113,7 @@ LIMIT 10;
 ## 6. Vérifier le Template
 
 ```sql
-SELECT 
+SELECT
   id,
   slug,
   name,
@@ -146,7 +146,7 @@ SELECT net.http_post(
 
 ```sql
 -- Vérifier les politiques RLS sur email_campaigns
-SELECT 
+SELECT
   schemaname,
   tablename,
   policyname,
@@ -166,4 +166,3 @@ WHERE tablename = 'email_campaigns';
 - Si `recipient_email` n'existe pas, la migration `20251027_email_system.sql` n'a peut-être pas été exécutée
 - Si la campagne n'est pas traitée, vérifiez les logs de l'Edge Function dans Supabase Dashboard
 - Le cron job retourne `1 row` mais cela peut signifier qu'il a trouvé 1 campagne mais n'a pas réussi à la traiter
-

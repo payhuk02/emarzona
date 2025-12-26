@@ -1,4 +1,5 @@
 # 🧪 GUIDE DE TEST RAPIDE - 15 minutes
+
 **Date** : 28 octobre 2025  
 **Objectif** : Valider les nouvelles pages créées
 
@@ -7,6 +8,7 @@
 ## 🚀 SETUP (2 min)
 
 ### 1. Créer les données de test
+
 ```sql
 -- Dans Supabase SQL Editor :
 -- Copier/coller le contenu de scripts/create-test-data.sql
@@ -15,6 +17,7 @@
 ```
 
 ### 2. Lancer l'application
+
 ```bash
 npm run dev
 # ✅ App démarre sur http://localhost:5173
@@ -25,11 +28,13 @@ npm run dev
 ## ✅ TEST 1 : PhysicalProductDetail (5 min)
 
 ### URL
+
 ```
 http://localhost:5173/physical/test-physical-001
 ```
 
 ### Checklist Rapide
+
 - [ ] **Page charge sans erreur** (F12 console = 0 erreur)
 - [ ] **ProductImages galerie affichée** (4 images)
 - [ ] **Clic thumbnail** → change image principale ✅
@@ -51,6 +56,7 @@ http://localhost:5173/physical/test-physical-001
   - Boutons touch-friendly
 
 ### ⚡ Test Rapide (1 min)
+
 1. Ouvrir page
 2. Cliquer 2ème thumbnail
 3. Cliquer "Expand"
@@ -64,11 +70,13 @@ http://localhost:5173/physical/test-physical-001
 ## ✅ TEST 2 : ServiceDetail (5 min)
 
 ### URL
+
 ```
 http://localhost:5173/service/test-service-001
 ```
 
 ### Checklist Rapide
+
 - [ ] **Page charge sans erreur**
 - [ ] **Image service** affichée (coiffure)
 - [ ] **Détails service** :
@@ -99,6 +107,7 @@ http://localhost:5173/service/test-service-001
   - Booking card en bas (pas sticky)
 
 ### ⚡ Test Rapide (1 min)
+
 1. Ouvrir page
 2. Scroll → vérifier staff cards (2)
 3. Vérifier avatars + status
@@ -111,11 +120,13 @@ http://localhost:5173/service/test-service-001
 ## ✅ TEST 3 : PayBalance (3 min)
 
 ### URL
+
 ```
 http://localhost:5173/payments/test-order-001/balance
 ```
 
 ### Checklist Rapide
+
 - [ ] **Page charge sans erreur**
 - [ ] **Breakdown paiement** affiché :
   - Montant total : 100,000 XOF (bleu)
@@ -139,6 +150,7 @@ http://localhost:5173/payments/test-order-001/balance
   - Bouton full-width
 
 ### ⚡ Test Rapide (30 sec)
+
 1. Ouvrir page
 2. Vérifier breakdown (3 sections)
 3. Vérifier calcul 30% correct
@@ -149,6 +161,7 @@ http://localhost:5173/payments/test-order-001/balance
 ## 📊 RÉSULTAT ATTENDU
 
 ### Si tout passe ✅
+
 ```
 ✅ PhysicalProductDetail
   - ProductImages galerie : OK
@@ -174,6 +187,7 @@ http://localhost:5173/payments/test-order-001/balance
 ```
 
 ### Si erreurs ❌
+
 - Noter l'erreur exacte (console F12)
 - Screenshot si bug visuel
 - Page concernée
@@ -183,13 +197,13 @@ http://localhost:5173/payments/test-order-001/balance
 
 ## 🐛 BUGS FRÉQUENTS
 
-| Problème | Cause probable | Solution |
-|----------|----------------|----------|
-| Images ne chargent pas | URLs Unsplash bloquées | Vérifier réseau / remplacer URLs |
-| Staff cards vides | Données pas créées | Relancer script SQL |
-| Lightbox ne s'ouvre pas | Dialog component | Vérifier import Dialog |
-| Stock indicator absent | Variantes pas créées | Vérifier inventaire table |
-| Calendrier vide | Availabilities manquantes | Vérifier service_availability |
+| Problème                | Cause probable            | Solution                         |
+| ----------------------- | ------------------------- | -------------------------------- |
+| Images ne chargent pas  | URLs Unsplash bloquées    | Vérifier réseau / remplacer URLs |
+| Staff cards vides       | Données pas créées        | Relancer script SQL              |
+| Lightbox ne s'ouvre pas | Dialog component          | Vérifier import Dialog           |
+| Stock indicator absent  | Variantes pas créées      | Vérifier inventaire table        |
+| Calendrier vide         | Availabilities manquantes | Vérifier service_availability    |
 
 ---
 
@@ -212,4 +226,3 @@ Si bugs trouvés → **Corriger puis continuer**
 ---
 
 **Prêt ? GO ! 🚀**
-

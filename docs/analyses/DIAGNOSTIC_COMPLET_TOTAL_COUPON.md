@@ -6,6 +6,7 @@
 ## 🔍 Diagnostic Approfondi
 
 ### Problème Observé
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF (affiché correctement)
 - **Total: 4000 XOF** ❌ (devrait être 3600 XOF)
@@ -15,6 +16,7 @@
 #### 1. Application du Code Promo
 
 **Dans `CouponInput.tsx` (ligne 151-155):**
+
 ```typescript
 onApply(
   validation.promotion_id,
@@ -24,6 +26,7 @@ onApply(
 ```
 
 **Dans `Checkout.tsx` (ligne 1199-1214):**
+
 ```typescript
 onApply={(promotionId, discountAmount, code) => {
   setAppliedCouponCode({
@@ -46,8 +49,11 @@ onApply={(promotionId, discountAmount, code) => {
 #### 2. Calcul du Coupon Discount
 
 **Ligne 289:**
+
 ```typescript
-const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 ```
 
 ✅ **Cette valeur devrait se mettre à jour quand `appliedCouponCode` change**
@@ -55,6 +61,7 @@ const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponC
 #### 3. Calcul de totalDiscounts
 
 **Ligne 293:**
+
 ```typescript
 const totalDiscounts = itemDiscounts + couponDiscount;
 ```
@@ -64,6 +71,7 @@ const totalDiscounts = itemDiscounts + couponDiscount;
 #### 4. Calcul de taxAmount
 
 **Lignes 295-299:**
+
 ```typescript
 const taxAmount = useMemo(() => {
   const taxableAmount = summary.subtotal - totalDiscounts;
@@ -76,6 +84,7 @@ const taxAmount = useMemo(() => {
 #### 5. Calcul de giftCardAmount
 
 **Lignes 302-311:**
+
 ```typescript
 const giftCardAmount = useMemo(() => {
   // ...
@@ -89,6 +98,7 @@ const giftCardAmount = useMemo(() => {
 #### 6. Calcul de finalTotal
 
 **Lignes 313-317:**
+
 ```typescript
 const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
 const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
@@ -96,7 +106,8 @@ const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
 const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 ```
 
-❌ **PROBLÈME CRITIQUE**: 
+❌ **PROBLÈME CRITIQUE**:
+
 - `finalTotal` est calculé directement (pas de `useMemo`)
 - Il dépend de `taxAmount` et `giftCardAmount` qui sont des `useMemo`
 - Si `taxAmount` ou `giftCardAmount` ne se recalculent pas quand `totalDiscounts` change, alors `finalTotal` utilise des valeurs obsolètes
@@ -129,11 +140,19 @@ const totalDiscounts = useMemo(() => {
 
 ```typescript
 const taxAmount = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const totalDiscounts = itemDiscounts + couponDiscount;
   const taxableAmount = summary.subtotal - totalDiscounts;
   return Math.max(0, taxableAmount * taxRate);
-}, [summary.subtotal, itemDiscounts, appliedCouponCode?.discountAmount, appliedCouponCode?.id, taxRate]);
+}, [
+  summary.subtotal,
+  itemDiscounts,
+  appliedCouponCode?.discountAmount,
+  appliedCouponCode?.id,
+  taxRate,
+]);
 ```
 
 **Problème**: Utilise `appliedCouponCode?.discountAmount` qui pourrait ne pas être détecté par React.
@@ -159,8 +178,13 @@ Supprimer tous les `useMemo` et calculer directement dans le render. Cela garant
 
 ```typescript
 // Pas de useMemo, tout est calculé directement
-const itemDiscounts = items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
-const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const itemDiscounts = items.reduce(
+  (total, item) => total + (item.discount_amount || 0) * item.quantity,
+  0
+);
+const couponDiscount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 const totalDiscounts = itemDiscounts + couponDiscount;
 const taxableAmount = summary.subtotal - totalDiscounts;
 const taxAmount = Math.max(0, taxableAmount * taxRate);
@@ -174,4 +198,3 @@ const taxAmount = Math.max(0, taxableAmount * taxRate);
 ### ✅ Solution Définitive
 
 **Calculer directement tous les montants sans `useMemo`, sauf pour les calculs vraiment lourds.**
-

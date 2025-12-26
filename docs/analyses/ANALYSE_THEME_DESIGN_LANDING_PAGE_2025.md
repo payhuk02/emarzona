@@ -46,43 +46,41 @@ La page d'accueil d'Emarzona présente un design moderne, professionnel et centr
 #### Thème Clair (Par Défaut)
 
 ```css
---background: 0 0% 100%              /* Blanc pur */
---foreground: 220 40% 15%            /* Noir bleuté (#1e293b) */
---primary: 217 91% 60%               /* Bleu moderne #3B82F6 */
---accent: 217 91% 60%                /* Bleu moderne (identique à primary) */
---secondary: 0 0% 96%                 /* Gris très clair */
---muted: 0 0% 98%                    /* Gris ultra clair */
---border: 0 0% 90%                   /* Gris clair */
+--background: 0 0% 100% /* Blanc pur */ --foreground: 220 40% 15% /* Noir bleuté (#1e293b) */
+  --primary: 217 91% 60% /* Bleu moderne #3B82F6 */ --accent: 217 91% 60%
+  /* Bleu moderne (identique à primary) */ --secondary: 0 0% 96% /* Gris très clair */ --muted: 0 0%
+  98% /* Gris ultra clair */ --border: 0 0% 90% /* Gris clair */;
 ```
 
 #### Thème Sombre
 
 ```css
---background: 220 35% 8%              /* Bleu très foncé */
---foreground: 0 0% 98%               /* Blanc cassé */
---primary: 217 91% 65%                /* Bleu plus clair */
---accent: 217 91% 65%                 /* Bleu plus clair */
---secondary: 0 0% 18%                 /* Gris foncé */
---muted: 0 0% 16%                     /* Gris très foncé */
---border: 0 0% 20%                    /* Gris foncé */
+--background: 220 35% 8% /* Bleu très foncé */ --foreground: 0 0% 98% /* Blanc cassé */
+  --primary: 217 91% 65% /* Bleu plus clair */ --accent: 217 91% 65% /* Bleu plus clair */
+  --secondary: 0 0% 18% /* Gris foncé */ --muted: 0 0% 16% /* Gris très foncé */ --border: 0 0% 20%
+  /* Gris foncé */;
 ```
 
 ### 2.2 Gradients
 
 #### Gradient Hero (Section Principale)
+
 ```css
 --gradient-hero: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(220, 50%, 8%) 100%);
 ```
+
 - **Couleur de départ** : Bleu foncé (`hsl(220, 40%, 15%)`)
 - **Couleur de fin** : Bleu très foncé (`hsl(220, 50%, 8%)`)
 - **Direction** : 135deg (diagonal)
 - **Usage** : Hero section et CTA final
 
 #### Gradient Primary/Accent (Boutons CTA)
+
 ```css
 --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 50%) 100%);
 --gradient-accent: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 50%) 100%);
 ```
+
 - **Couleur de départ** : Bleu moderne clair (`hsl(217, 91%, 60%)`)
 - **Couleur de fin** : Bleu moderne foncé (`hsl(217, 91%, 50%)`)
 - **Usage** : Boutons principaux, badges, icônes
@@ -97,6 +95,7 @@ La page d'accueil d'Emarzona présente un design moderne, professionnel et centr
 ```
 
 **Hiérarchie des ombres** :
+
 - **shadow-soft** : Header, cartes légères
 - **shadow-medium** : Cartes de fonctionnalités, témoignages
 - **shadow-large** : Carte de tarification, mockups
@@ -105,12 +104,14 @@ La page d'accueil d'Emarzona présente un design moderne, professionnel et centr
 ### 2.4 Analyse de la Palette
 
 ✅ **Points Forts** :
+
 - Palette cohérente et moderne
 - Contraste élevé pour l'accessibilité
 - Utilisation stratégique du bleu (#3B82F6) inspirée de Linear/Stripe
 - Gradients subtils pour la profondeur
 
 ⚠️ **Points à Améliorer** :
+
 - `primary` et `accent` sont identiques (217 91% 60%) - manque de distinction
 - Pas de couleur d'accent secondaire (jaune/orange) pour les éléments de mise en avant
 - Les gradients hero sont très sombres, peuvent paraître lourds sur certains écrans
@@ -122,6 +123,7 @@ La page d'accueil d'Emarzona présente un design moderne, professionnel et centr
 ### 3.1 Police Principale
 
 **Font Family** : `Inter` (Variable Font)
+
 - **Source** : Google Fonts
 - **Poids disponibles** : 300, 400, 500, 600, 700, 800
 - **Caractéristiques** : Optimisée pour l'écran, excellente lisibilité
@@ -170,12 +172,14 @@ text-muted-foreground
 ### 3.3 Analyse Typographique
 
 ✅ **Points Forts** :
+
 - Hiérarchie claire et cohérente
 - Responsive typography (scales avec la taille d'écran)
 - Utilisation d'Inter (police moderne et professionnelle)
 - `leading-relaxed` pour améliorer la lisibilité
 
 ⚠️ **Points à Améliorer** :
+
 - Pas de `letter-spacing` personnalisé pour les titres
 - Les tailles de police sont très grandes sur mobile (peut causer des problèmes de layout)
 - Pas de distinction typographique entre les sections (même style pour toutes)
@@ -187,17 +191,20 @@ text-muted-foreground
 ### 4.1 Header (Navigation)
 
 **Classes CSS principales** :
+
 ```tsx
-className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm shadow-soft"
+className = 'sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm shadow-soft';
 ```
 
 **Caractéristiques** :
+
 - **Position** : Sticky (reste en haut au scroll)
 - **Background** : `bg-card/95` (95% d'opacité) + `backdrop-blur-sm` (flou d'arrière-plan)
 - **Ombre** : `shadow-soft`
 - **Z-index** : 50 (au-dessus de tout)
 
 **Navigation Desktop** :
+
 - Liens avec `variant="ghost"` et `hover:text-primary`
 - CTA avec `gradient-accent` et `shadow-glow`
 - Menu responsive avec Sheet (drawer) sur mobile
@@ -205,24 +212,32 @@ className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm shadow-soft"
 ### 4.2 Hero Section
 
 **Classes CSS principales** :
+
 ```tsx
-className="gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32"
+className = 'gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-32';
 ```
 
 **Éléments** :
+
 1. **Badge** : Badge avec étoile et texte
+
    ```tsx
-   className="inline-flex items-center gap-2 bg-secondary/50 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full mb-6 border border-border"
+   className =
+     'inline-flex items-center gap-2 bg-secondary/50 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full mb-6 border border-border';
    ```
 
 2. **Titre Principal** :
+
    ```tsx
-   className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight text-foreground"
+   className =
+     'text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight text-foreground';
    ```
 
 3. **Sous-titre** :
+
    ```tsx
-   className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed"
+   className =
+     'text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed';
    ```
 
 4. **Boutons CTA** :
@@ -230,20 +245,25 @@ className="gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-
    - **Secondaire** : `bg-card/50 backdrop-blur-sm border-border hover:bg-card hover:scale-105`
 
 5. **Statistiques Animées** :
+
    ```tsx
-   className="bg-card/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-border"
+   className =
+     'bg-card/50 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 md:p-6 border border-border';
    ```
+
    - Compteurs animés avec `requestAnimationFrame`
    - Easing function : `ease-out` (cubic)
 
 6. **Mockup Placeholder** :
    ```tsx
-   className="relative mt-8 rounded-xl md:rounded-2xl overflow-hidden shadow-large border border-border bg-card/30 backdrop-blur-sm animate-float"
+   className =
+     'relative mt-8 rounded-xl md:rounded-2xl overflow-hidden shadow-large border border-border bg-card/30 backdrop-blur-sm animate-float';
    ```
 
 ### 4.3 Section Témoignages
 
 **Carousel avec** :
+
 - **Autoplay** : 4 secondes de délai
 - **Cards** : `shadow-medium hover:shadow-large hover:scale-105`
 - **Étoiles** : 5 étoiles jaunes (`text-accent fill="currentColor"`)
@@ -252,10 +272,12 @@ className="gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-
 ### 4.4 Sections Fonctionnalités
 
 **Layout alterné** :
+
 - **Pair** : Image à gauche, texte à droite
 - **Impair** : Texte à gauche, image à droite
 
 **Éléments** :
+
 - **Badge** : Badge coloré avec icône (`bg-accent/20` ou `bg-primary/20`)
 - **Titre** : `text-2xl md:text-3xl lg:text-4xl font-bold`
 - **Description** : `text-base md:text-lg text-muted-foreground leading-relaxed`
@@ -267,23 +289,29 @@ className="gradient-hero relative overflow-hidden py-12 sm:py-16 md:py-24 lg:py-
 **Layout** : `grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8`
 
 **Cards** :
+
 ```tsx
-className="bg-card border-border shadow-soft hover:shadow-medium hover:scale-105 transition-smooth group"
+className =
+  'bg-card border-border shadow-soft hover:shadow-medium hover:scale-105 transition-smooth group';
 ```
 
 **Icônes** :
+
 ```tsx
-className="h-11 w-11 md:h-12 md:w-12 rounded-lg gradient-accent flex items-center justify-center mb-4 mx-auto text-accent-foreground group-hover:shadow-glow"
+className =
+  'h-11 w-11 md:h-12 md:w-12 rounded-lg gradient-accent flex items-center justify-center mb-4 mx-auto text-accent-foreground group-hover:shadow-glow';
 ```
 
 ### 4.6 Section Tarification
 
 **Carte Unique** :
+
 ```tsx
-className="bg-card border-border shadow-large hover:shadow-glow transition-smooth"
+className = 'bg-card border-border shadow-large hover:shadow-glow transition-smooth';
 ```
 
 **Éléments** :
+
 - Badge avec étoile
 - Prix en grand (`text-5xl md:text-6xl font-bold text-primary`)
 - Commission highlight (`bg-accent/10 border border-accent/20`)
@@ -294,8 +322,10 @@ className="bg-card border-border shadow-large hover:shadow-glow transition-smoot
 **Layout** : `grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8`
 
 **Liens** :
+
 ```tsx
-className="text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
+className =
+  'text-muted-foreground hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation';
 ```
 
 ---
@@ -305,6 +335,7 @@ className="text-muted-foreground hover:text-primary hover:translate-x-1 block tr
 ### 5.1 Animations CSS
 
 **Classes d'animation** :
+
 - `animate-fade-in-up` : Apparition depuis le bas
 - `animate-float` : Flottement léger (pour mockups)
 - `transition-smooth` : `all 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
@@ -312,6 +343,7 @@ className="text-muted-foreground hover:text-primary hover:translate-x-1 block tr
 ### 5.2 Interactions Hover
 
 **Éléments interactifs** :
+
 - **Boutons** : `hover:scale-105` + `hover:opacity-90`
 - **Cards** : `hover:shadow-large` + `hover:scale-105`
 - **Liens** : `hover:text-primary` + `hover:translate-x-1`
@@ -320,22 +352,26 @@ className="text-muted-foreground hover:text-primary hover:translate-x-1 block tr
 ### 5.3 Animations JavaScript
 
 **Statistiques animées** :
+
 - Utilisation de `requestAnimationFrame` pour performance
 - Easing function : `ease-out` (cubic)
 - Durée : 2000ms
 
 **Scroll Animations** :
+
 - Utilisation du hook `useScrollAnimation`
 - Animations déclenchées au scroll
 
 ### 5.4 Analyse des Animations
 
 ✅ **Points Forts** :
+
 - Animations subtiles et professionnelles
 - Performance optimisée avec `requestAnimationFrame`
 - Transitions fluides avec `cubic-bezier`
 
 ⚠️ **Points à Améliorer** :
+
 - Pas de `prefers-reduced-motion` pour les utilisateurs sensibles aux animations
 - Certaines animations peuvent être trop rapides (0.4s)
 - Pas d'animation de chargement pour les images
@@ -358,20 +394,24 @@ xl: 1280px  /* Large Desktop */
 ### 6.2 Adaptations Responsive
 
 #### Typographie
+
 - **Hero Title** : `text-2xl` (mobile) → `text-7xl` (2xl)
 - **Section Titles** : `text-2xl` (mobile) → `text-4xl` (lg)
 - **Body Text** : `text-sm` (mobile) → `text-lg` (md)
 
 #### Spacing
+
 - **Padding** : `py-12` (mobile) → `py-32` (lg)
 - **Gap** : `gap-2` (mobile) → `gap-8` (md)
 - **Margin** : `mb-4` (mobile) → `mb-8` (md)
 
 #### Layout
+
 - **Grid** : `grid-cols-1` (mobile) → `grid-cols-3` (lg)
 - **Flex Direction** : `flex-col` (mobile) → `flex-row` (sm)
 
 #### Navigation
+
 - **Desktop** : Menu horizontal avec tous les liens
 - **Mobile** : Menu hamburger avec Sheet (drawer)
 
@@ -380,6 +420,7 @@ xl: 1280px  /* Large Desktop */
 **Minimum** : `min-h-[44px]` (conforme aux guidelines Apple/Google)
 
 **Éléments avec touch targets** :
+
 - Boutons
 - Liens de navigation
 - Cards cliquables
@@ -387,12 +428,14 @@ xl: 1280px  /* Large Desktop */
 ### 6.4 Analyse Responsive
 
 ✅ **Points Forts** :
+
 - Approche mobile-first
 - Breakpoints cohérents avec Tailwind
 - Touch targets conformes
 - Navigation adaptative
 
 ⚠️ **Points à Améliorer** :
+
 - Certaines sections peuvent être trop espacées sur mobile
 - Les mockups peuvent être trop grands sur petits écrans
 - Pas d'optimisation spécifique pour les très petits écrans (< 360px)
@@ -404,16 +447,19 @@ xl: 1280px  /* Large Desktop */
 ### 7.1 Design Moderne et Professionnel
 
 ✅ **Palette de couleurs cohérente** :
+
 - Utilisation stratégique du bleu moderne (#3B82F6)
 - Gradients subtils pour la profondeur
 - Ombres bien hiérarchisées
 
 ✅ **Typographie excellente** :
+
 - Police Inter (moderne et lisible)
 - Hiérarchie claire
 - Responsive typography
 
 ✅ **Composants bien structurés** :
+
 - Sections clairement définies
 - Layout alterné pour l'intérêt visuel
 - Cards avec hover effects
@@ -421,11 +467,13 @@ xl: 1280px  /* Large Desktop */
 ### 7.2 Performance et Accessibilité
 
 ✅ **Performance** :
+
 - `requestAnimationFrame` pour les animations
 - Images avec `loading="lazy"` (sauf hero)
 - Optimisation des transitions CSS
 
 ✅ **Accessibilité** :
+
 - Touch targets conformes (44px minimum)
 - ARIA labels sur les éléments interactifs
 - Contraste élevé (WCAG AA)
@@ -433,11 +481,13 @@ xl: 1280px  /* Large Desktop */
 ### 7.3 Expérience Utilisateur
 
 ✅ **Navigation intuitive** :
+
 - Menu sticky avec backdrop blur
 - Navigation mobile avec Sheet
 - Scroll smooth vers les sections
 
 ✅ **Call-to-Actions clairs** :
+
 - Boutons avec gradients et shadows
 - Hiérarchie visuelle claire
 - Animations au hover
@@ -449,40 +499,48 @@ xl: 1280px  /* Large Desktop */
 ### 8.1 Palette de Couleurs
 
 ⚠️ **Primary et Accent identiques** :
+
 - `primary` et `accent` sont tous les deux `217 91% 60%`
 - **Recommandation** : Différencier `accent` avec une couleur complémentaire (orange/jaune)
 
 ⚠️ **Gradient Hero très sombre** :
+
 - Peut paraître lourd sur certains écrans
 - **Recommandation** : Adoucir le gradient ou ajouter une variante plus claire
 
 ### 8.2 Typographie
 
 ⚠️ **Tailles de police très grandes sur mobile** :
+
 - `text-7xl` sur 2xl peut être excessif
 - **Recommandation** : Limiter à `text-5xl` maximum
 
 ⚠️ **Pas de letter-spacing personnalisé** :
+
 - Les titres peuvent bénéficier d'un `letter-spacing` négatif
 - **Recommandation** : Ajouter `tracking-tight` ou `tracking-tighter` aux titres
 
 ### 8.3 Animations
 
 ⚠️ **Pas de `prefers-reduced-motion`** :
+
 - Les utilisateurs sensibles aux animations peuvent être gênés
 - **Recommandation** : Ajouter des media queries pour désactiver les animations
 
 ⚠️ **Animations parfois trop rapides** :
+
 - `transition-smooth` (0.4s) peut être trop rapide pour certains éléments
 - **Recommandation** : Varier les durées selon l'élément
 
 ### 8.4 Responsive Design
 
 ⚠️ **Optimisation pour très petits écrans** :
+
 - Pas de règles spécifiques pour < 360px
 - **Recommandation** : Ajouter des breakpoints personnalisés
 
 ⚠️ **Mockups trop grands sur mobile** :
+
 - Les mockups peuvent prendre trop de place
 - **Recommandation** : Réduire la taille ou masquer sur très petits écrans
 
@@ -493,11 +551,13 @@ xl: 1280px  /* Large Desktop */
 ### 9.1 Court Terme (Priorité Haute)
 
 1. **Différencier Primary et Accent** :
+
    ```css
-   --accent: 45 100% 60%;  /* Orange/Jaune pour contraste */
+   --accent: 45 100% 60%; /* Orange/Jaune pour contraste */
    ```
 
 2. **Ajouter `prefers-reduced-motion`** :
+
    ```css
    @media (prefers-reduced-motion: reduce) {
      * {
@@ -557,5 +617,3 @@ Les principales améliorations à apporter concernent la différenciation des co
 
 **Document créé le** : 2025-01-30  
 **Dernière mise à jour** : 2025-01-30
-
-

@@ -9,7 +9,7 @@
 
 ### ✅ CE QUI EST DÉJÀ FAIT
 
-1. **✅ Route ajoutée** 
+1. **✅ Route ajoutée**
    - URL: `/dashboard/advanced-orders`
    - Accessible depuis le menu "Commandes Avancées"
 
@@ -30,6 +30,7 @@
 ### ⚠️ CE QUI RESTE À FAIRE
 
 **Ajouter 20 colonnes manquantes** dans 2 tables existantes :
+
 - ❌ Table `payments` (12 colonnes)
 - ❌ Table `orders` (8 colonnes)
 
@@ -91,6 +92,7 @@ node scripts/check-advanced-tables.js
 ```
 
 **Résultat attendu :**
+
 ```
 🎉 STATUT: TOUTES LES FONCTIONNALITÉS AVANCÉES SONT OPÉRATIONNELLES !
 
@@ -105,6 +107,7 @@ node scripts/check-advanced-tables.js
 ### **2. Tester dans l'Application**
 
 1. **Ouvrir l'application**
+
    ```
    http://localhost:8080/dashboard/advanced-orders
    ```
@@ -126,6 +129,7 @@ node scripts/check-advanced-tables.js
 Le script `add_missing_columns.sql` ajoute :
 
 ### **Table `payments` (12 colonnes)**
+
 ```sql
 - payment_type            → Type de paiement (full/percentage/delivery_secured)
 - percentage_amount       → Montant du pourcentage payé
@@ -142,6 +146,7 @@ Le script `add_missing_columns.sql` ajoute :
 ```
 
 ### **Table `orders` (8 colonnes)**
+
 ```sql
 - payment_type            → Type de paiement (full/percentage/delivery_secured)
 - percentage_paid         → Pourcentage déjà payé
@@ -160,24 +165,28 @@ Le script `add_missing_columns.sql` ajoute :
 Une fois le script exécuté, voici ce que vous pourrez faire :
 
 ### **1. Messagerie Client-Vendeur**
+
 - ✅ Chat en temps réel entre client et vendeur
 - ✅ Envoi de fichiers (images, PDF, vidéos)
 - ✅ Historique complet des conversations
 - ✅ Notifications de nouveaux messages
 
 ### **2. Système de Litiges**
+
 - ✅ Client ou vendeur peut ouvrir un litige
 - ✅ Admin peut intervenir dans les conversations
 - ✅ Résolution documentée avec notes admin
 - ✅ Statuts de litige (open, investigating, resolved, closed)
 
 ### **3. Paiements Sécurisés**
+
 - ✅ Rétention des fonds par la plateforme
 - ✅ Libération après confirmation de livraison
 - ✅ Protection contre les fraudes
 - ✅ Remboursement automatique si litige
 
 ### **4. Paiements Partiels**
+
 - ✅ Paiement par pourcentage (ex: 30% d'avance)
 - ✅ Suivi du montant restant
 - ✅ Calcul automatique
@@ -187,15 +196,19 @@ Une fois le script exécuté, voici ce que vous pourrez faire :
 ## 🆘 En Cas de Problème
 
 ### **Erreur : "column already exists"**
+
 ✅ **C'est normal !** Le script vérifie si les colonnes existent avant de les créer. Si certaines existent déjà, elles seront simplement ignorées.
 
 ### **Erreur : "permission denied"**
+
 ❌ Vérifiez que vous êtes connecté en tant qu'**administrateur** du projet Supabase.
 
 ### **Erreur : "relation does not exist"**
+
 ❌ La table `payments` ou `orders` n'existe pas. Contactez-moi pour vérifier la structure de votre base de données.
 
 ### **Le script ne s'exécute pas**
+
 - Vérifiez que vous avez **collé TOUT le contenu** du fichier
 - Vérifiez que vous êtes dans le bon projet Supabase
 - Essayez de rafraîchir la page et réessayer
@@ -207,6 +220,7 @@ Une fois le script exécuté, voici ce que vous pourrez faire :
 Si vous rencontrez un problème :
 
 1. **Exécutez ce script de diagnostic**
+
    ```bash
    node scripts/check-advanced-tables.js
    ```
@@ -222,10 +236,10 @@ Si vous rencontrez un problème :
 Une fois le script SQL exécuté, **toutes les fonctionnalités avancées seront opérationnelles** !
 
 Vous pourrez ensuite :
+
 - Tester la messagerie
 - Créer des paiements sécurisés
 - Gérer les litiges
 - Et bien plus encore !
 
 **Bonne chance ! 🚀**
-

@@ -19,7 +19,7 @@ const validateForm = (): boolean => {
   }
 
   if (!formData.email.trim()) {
-    errors.email = 'L\'email est requis';
+    errors.email = "L'email est requis";
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
     errors.email = 'Email invalide';
   }
@@ -47,7 +47,7 @@ const shippingAddressSchema = z.object({
   email: commonSchemas.email,
   phone: commonSchemas.phone,
   address_line1: z.string().min(5, {
-    message: 'L\'adresse doit contenir au moins 5 caractères',
+    message: "L'adresse doit contenir au moins 5 caractères",
   }),
   address_line2: z.string().optional(),
   city: z.string().min(2, {
@@ -61,18 +61,19 @@ const shippingAddressSchema = z.object({
 // Validation
 const validateForm = (): boolean => {
   const result = validateForm(shippingAddressSchema, formData);
-  
+
   if (!result.success) {
     setFormErrors(result.errors);
     return false;
   }
-  
+
   setFormErrors({});
   return true;
 };
 ```
 
 **Avantages** :
+
 - ✅ Code plus court et plus lisible
 - ✅ Validation cohérente
 - ✅ Messages d'erreur clairs
@@ -87,19 +88,19 @@ const validateForm = (): boolean => {
 ```typescript
 const validateForm = (): boolean => {
   const errors: Record<string, string> = {};
-  
+
   if (!formData.name.trim()) {
-    errors.name = "Le nom du produit est requis";
+    errors.name = 'Le nom du produit est requis';
   }
-  
+
   if (!formData.slug.trim()) {
     errors.slug = "L'URL du produit est requise";
   }
-  
+
   if (formData.price < 0) {
-    errors.price = "Le prix doit être positif";
+    errors.price = 'Le prix doit être positif';
   }
-  
+
   // ... etc
 
   setValidationErrors(errors);
@@ -115,11 +116,14 @@ import { z } from 'zod';
 
 // Schéma de validation
 const productSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Le nom du produit doit contenir au moins 2 caractères',
-  }).max(100, {
-    message: 'Le nom du produit doit contenir au plus 100 caractères',
-  }),
+  name: z
+    .string()
+    .min(2, {
+      message: 'Le nom du produit doit contenir au moins 2 caractères',
+    })
+    .max(100, {
+      message: 'Le nom du produit doit contenir au plus 100 caractères',
+    }),
   slug: commonSchemas.slug,
   category: z.string().min(1, {
     message: 'La catégorie est requise',
@@ -138,18 +142,19 @@ const productSchema = z.object({
 // Validation
 const validateForm = (): boolean => {
   const result = validateForm(productSchema, formData);
-  
+
   if (!result.success) {
     setValidationErrors(result.errors);
     return false;
   }
-  
+
   setValidationErrors({});
   return true;
 };
 ```
 
 **Avantages** :
+
 - ✅ Validation robuste
 - ✅ Messages d'erreur clairs
 - ✅ Réduction des erreurs
@@ -166,14 +171,16 @@ import { commonSchemas, validateFormAsync } from '@/lib/form-validation';
 import { z } from 'zod';
 
 // Schéma de validation
-const userSchema = z.object({
-  email: commonSchemas.email,
-  password: commonSchemas.password,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Les mots de passe ne correspondent pas',
-  path: ['confirmPassword'],
-});
+const userSchema = z
+  .object({
+    email: commonSchemas.email,
+    password: commonSchemas.password,
+    confirmPassword: z.string(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword'],
+  });
 
 // Validation côté serveur
 const serverValidation = async (data: z.infer<typeof userSchema>) => {
@@ -183,7 +190,7 @@ const serverValidation = async (data: z.infer<typeof userSchema>) => {
     .select('id')
     .eq('email', data.email)
     .single();
-  
+
   if (existingUser) {
     return {
       success: false,
@@ -192,19 +199,19 @@ const serverValidation = async (data: z.infer<typeof userSchema>) => {
       },
     };
   }
-  
+
   return { success: true };
 };
 
 // Validation
 const handleSubmit = async () => {
   const result = await validateFormAsync(userSchema, formData, serverValidation);
-  
+
   if (!result.success) {
     setFormErrors(result.errors);
     return;
   }
-  
+
   // Données validées
   console.log(result.data);
   // ... créer l'utilisateur
@@ -212,6 +219,7 @@ const handleSubmit = async () => {
 ```
 
 **Avantages** :
+
 - ✅ Validation côté client + serveur
 - ✅ Vérification de l'unicité (email, etc.)
 - ✅ Meilleure sécurité
@@ -229,18 +237,19 @@ import { commonSchemas, validateField } from '@/lib/form-validation';
 // Validation d'un champ individuel
 const handleEmailChange = (value: string) => {
   const result = validateField(commonSchemas.email, value);
-  
+
   if (!result.success) {
     setFieldError('email', result.error);
   } else {
     clearFieldError('email');
   }
-  
+
   setFormData({ ...formData, email: value });
 };
 ```
 
 **Avantages** :
+
 - ✅ Validation en temps réel
 - ✅ Feedback immédiat
 - ✅ Meilleure UX
@@ -253,11 +262,11 @@ const handleEmailChange = (value: string) => {
 ### Utilisation
 
 ```typescript
-import { 
-  formatValidationErrors, 
-  getFieldError, 
-  hasFormErrors, 
-  clearFormErrors 
+import {
+  formatValidationErrors,
+  getFieldError,
+  hasFormErrors,
+  clearFormErrors,
 } from '@/lib/form-validation';
 
 // Formater les erreurs pour l'affichage
@@ -283,6 +292,7 @@ const noErrors = clearFormErrors(errors);
 ```
 
 **Avantages** :
+
 - ✅ Helpers pratiques
 - ✅ Code plus lisible
 - ✅ Réduction des erreurs
@@ -317,6 +327,7 @@ const noErrors = clearFormErrors(errors);
 ## ✅ CONCLUSION
 
 La bibliothèque de validation offre :
+
 - ✅ **Validation cohérente** : Même validation partout
 - ✅ **Messages d'erreur clairs** : Meilleure UX
 - ✅ **Réduction des erreurs** : Validation robuste
@@ -331,7 +342,3 @@ La bibliothèque de validation offre :
 **Date de création** : 31 Janvier 2025  
 **Statut** : ✅ **COMPLET**  
 **Prochaines étapes** : Migrer les formulaires existants
-
-
-
-

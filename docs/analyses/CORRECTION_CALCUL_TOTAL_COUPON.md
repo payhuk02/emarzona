@@ -6,6 +6,7 @@
 ## 🐛 Problème Identifié
 
 D'après l'image fournie :
+
 - Sous-total : 4000 XOF
 - Code promo (PROMO10) : -400 XOF (affiché)
 - Total : 4000 XOF ❌ (devrait être 3600 XOF)
@@ -18,7 +19,8 @@ Le code promo est affiché comme appliqué avec une réduction de 400 XOF, mais 
 
 ```typescript
 const finalTotal = useMemo(() => {
-  const baseAmount = summary.subtotal + taxAmount + shippingAmount - summary.discount_amount - couponDiscountAmount;
+  const baseAmount =
+    summary.subtotal + taxAmount + shippingAmount - summary.discount_amount - couponDiscountAmount;
   return Math.max(0, baseAmount - giftCardAmount);
 }, [summary, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
 ```
@@ -34,11 +36,13 @@ const finalTotal = useMemo(() => {
 ### 1. Correction des Dépendances du useMemo
 
 **Avant:**
+
 ```typescript
 }, [summary, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
 ```
 
 **Après:**
+
 ```typescript
 }, [summary.subtotal, summary.discount_amount, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
 ```
@@ -48,22 +52,30 @@ En utilisant les propriétés individuelles au lieu de l'objet complet, on s'ass
 ### 2. Clarification du Calcul du Total
 
 **Nouveau calcul étape par étape:**
+
 ```typescript
 const finalTotal = useMemo(() => {
   // 1. Calculer le montant après réductions (panier + coupon)
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscountAmount;
-  
+
   // 2. Ajouter les taxes (calculées sur le montant après réductions)
   const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
-  
+
   // 3. Ajouter les frais de livraison
   const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
-  
+
   // 4. Appliquer la carte cadeau en dernier
   const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
-  
+
   return finalAmount;
-}, [summary.subtotal, summary.discount_amount, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  taxAmount,
+  shippingAmount,
+  couponDiscountAmount,
+  giftCardAmount,
+]);
 ```
 
 ## 📊 Ordre des Opérations
@@ -94,7 +106,7 @@ const finalTotal = useMemo(() => {
 3. **Test avec taxes et shipping**
    - Sous-total : 4000 XOF
    - Code promo : -400 XOF
-   - Taxes 18% : (4000 - 400) * 0.18 = 648 XOF
+   - Taxes 18% : (4000 - 400) \* 0.18 = 648 XOF
    - Shipping : 5000 XOF
    - **Total attendu : 9248 XOF**
 
@@ -116,4 +128,3 @@ const finalTotal = useMemo(() => {
 2. S'assurer que `summary.subtotal` reflète bien le montant avant toute réduction
 3. Tester avec différents types de promotions (pourcentage, montant fixe)
 4. Vérifier que le total se met à jour en temps réel quand le coupon est appliqué/retiré
-

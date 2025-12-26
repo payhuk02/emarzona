@@ -27,24 +27,30 @@ Dans `src/pages/orders/OrderMessaging.tsx`, la fonction `uploadFiles` utilisait 
 ### Changements
 
 **Avant :**
+
 ```typescript
 const { data, error } = await supabase.storage
-  .from('message-attachments')  // ❌ Bucket incorrect
+  .from('message-attachments') // ❌ Bucket incorrect
   .upload(filePath, file);
 
-const { data: { publicUrl } } = supabase.storage
-  .from('message-attachments')  // ❌ Bucket incorrect
+const {
+  data: { publicUrl },
+} = supabase.storage
+  .from('message-attachments') // ❌ Bucket incorrect
   .getPublicUrl(filePath);
 ```
 
 **Après :**
+
 ```typescript
 const { data, error } = await supabase.storage
-  .from('attachments')  // ✅ Bucket correct
+  .from('attachments') // ✅ Bucket correct
   .upload(filePath, file);
 
-const { data: { publicUrl } } = supabase.storage
-  .from('attachments')  // ✅ Bucket correct
+const {
+  data: { publicUrl },
+} = supabase.storage
+  .from('attachments') // ✅ Bucket correct
   .getPublicUrl(filePath);
 ```
 
@@ -60,12 +66,14 @@ const { data: { publicUrl } } = supabase.storage
 ### 1. Hook useMessaging.ts
 
 Le hook `useMessaging.ts` (utilisé par `OrderMessaging`) utilise déjà le bon bucket `attachments` :
+
 - ✅ Ligne 322 : `.from('attachments')`
 - ✅ Ligne 329 : `.from('attachments')`
 
 ### 2. Cohérence avec les Autres Systèmes
 
 Tous les systèmes de messagerie utilisent maintenant le bucket `attachments` :
+
 - ✅ `VendorMessaging.tsx` → `attachments`
 - ✅ `OrderMessaging.tsx` → `attachments` (corrigé)
 - ✅ `ConversationComponent.tsx` → `attachments` (via `useMessaging`)
@@ -113,4 +121,3 @@ Tous les systèmes de messagerie utilisent maintenant le bucket `attachments` :
 
 **Date de correction :** 30 Janvier 2025  
 **Corrigé par :** Auto (Cursor AI)
-

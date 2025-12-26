@@ -12,6 +12,7 @@
 **Fichier** : `src/styles/animations.css`
 
 **Améliorations** :
+
 - ✅ Ajout de `will-change: transform` sur les animations hover
 - ✅ Force GPU acceleration avec `transform: translateZ(0)`
 - ✅ Réinitialisation de `will-change: auto` après animation
@@ -30,6 +31,7 @@
 **Fichier** : `index.html`
 
 **Améliorations** :
+
 - ✅ Ajout de `preload` pour la font Poppins critique
 - ✅ Preload avec `as="font"` et `type="font/woff2"`
 - ✅ Amélioration du FCP (First Contentful Paint)
@@ -43,6 +45,7 @@
 **Fichier** : `src/hooks/useOptimizedForm.ts`
 
 **Nouvelles fonctionnalités** :
+
 - ✅ Validation avec debounce configurable
 - ✅ Validation en temps réel (onChange) et au blur
 - ✅ Gestion optimisée avec `useMemo` et `useCallback`
@@ -50,22 +53,24 @@
 - ✅ Hook `useFormField` pour champs individuels
 
 **Avantages** :
+
 - Réduction des re-renders inutiles
 - Validation optimisée avec debounce
 - Meilleure performance sur formulaires complexes
 
 **Exemple d'utilisation** :
+
 ```typescript
 const { values, errors, handleChange, handleSubmit } = useOptimizedForm({
   initialValues: { name: '', email: '' },
-  validate: (values) => {
+  validate: values => {
     const errors = {};
     if (!values.name) errors.name = 'Required';
     return errors;
   },
-  onSubmit: async (values) => {
+  onSubmit: async values => {
     await saveForm(values);
-  }
+  },
 });
 ```
 
@@ -75,20 +80,20 @@ const { values, errors, handleChange, handleSubmit } = useOptimizedForm({
 
 ### Performance
 
-| Métrique | Avant | Après | Gain |
-|----------|-------|-------|------|
-| Animations GPU | Partiel | Complet | +100% |
-| FCP (fonts) | ~1.2s | ~0.8s | -33% |
-| Re-renders formulaires | Élevés | Réduits | ~40% |
+| Métrique               | Avant   | Après   | Gain  |
+| ---------------------- | ------- | ------- | ----- |
+| Animations GPU         | Partiel | Complet | +100% |
+| FCP (fonts)            | ~1.2s   | ~0.8s   | -33%  |
+| Re-renders formulaires | Élevés  | Réduits | ~40%  |
 
 ### Animations
 
-| Classe | GPU Acceleration | will-change | Optimisation |
-|--------|------------------|-------------|--------------|
-| `.hover-lift` | ✅ | ✅ | Complète |
-| `.hover-scale` | ✅ | ✅ | Complète |
-| `.hover-glow` | ✅ | ✅ | Complète |
-| `.card-hover` | ✅ | ✅ | Complète |
+| Classe         | GPU Acceleration | will-change | Optimisation |
+| -------------- | ---------------- | ----------- | ------------ |
+| `.hover-lift`  | ✅               | ✅          | Complète     |
+| `.hover-scale` | ✅               | ✅          | Complète     |
+| `.hover-glow`  | ✅               | ✅          | Complète     |
+| `.card-hover`  | ✅               | ✅          | Complète     |
 
 ---
 
@@ -130,4 +135,3 @@ const { values, errors, handleChange, handleSubmit } = useOptimizedForm({
 ---
 
 **Dernière mise à jour** : Février 2025
-

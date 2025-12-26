@@ -11,6 +11,7 @@
 L'erreur `require is not defined` persistait dans la console du navigateur, provenant du module CommonJS `hoist-non-react-stat-cjs.js`.
 
 **Message d'erreur** :
+
 ```
 Uncaught ReferenceError: require is not defined
 at hoist-non-react-stat-cjs.js?v=f2c413ca:3:15
@@ -25,6 +26,7 @@ at hoist-non-react-stat-cjs.js?v=f2c413ca:3:15
 ### 1. Nettoyage du cache Vite
 
 **Action** :
+
 ```bash
 Remove-Item -Path node_modules\.vite -Recurse -Force
 ```
@@ -112,6 +114,7 @@ force: true, // Forcer la re-optimisation des dépendances
 ### `vite.config.ts`
 
 **Modifications** :
+
 1. ✅ Ajout de `hoist-non-react-statics` dans `optimizeDeps.include`
 2. ✅ Ajout de `format: 'esm'` dans `esbuildOptions`
 3. ✅ Configuration `jsxRuntime: 'automatic'` pour le plugin React
@@ -124,6 +127,7 @@ force: true, // Forcer la re-optimisation des dépendances
 ### Tests à effectuer
 
 1. **Démarrer le serveur de développement** :
+
    ```bash
    npm run build
    ```
@@ -134,9 +138,11 @@ force: true, // Forcer la re-optimisation des dépendances
    - ✅ Pas d'erreurs de chargement de modules
 
 3. **Vérifier le build de production** :
+
    ```bash
    npm run build
    ```
+
    - ✅ Build réussi sans erreurs
    - ✅ Aucun warning bloquant
 
@@ -147,6 +153,7 @@ force: true, // Forcer la re-optimisation des dépendances
 ### Si l'erreur persiste
 
 1. **Nettoyer complètement le cache** :
+
    ```bash
    Remove-Item -Path node_modules\.vite -Recurse -Force
    Remove-Item -Path dist -Recurse -Force
@@ -154,6 +161,7 @@ force: true, // Forcer la re-optimisation des dépendances
    ```
 
 2. **Réinstaller les dépendances** :
+
    ```bash
    Remove-Item -Path node_modules -Recurse -Force
    npm install
@@ -194,6 +202,7 @@ force: true, // Forcer la re-optimisation des dépendances
 ## ✅ RÉSULTAT ATTENDU
 
 Après ces corrections :
+
 - ✅ Aucune erreur `require is not defined` dans la console
 - ✅ Application fonctionne correctement
 - ✅ Tous les modules CommonJS sont transformés en ESM
@@ -223,6 +232,3 @@ Après ces corrections :
 **Document généré le** : Janvier 2025  
 **Version** : 2.0  
 **Statut** : ✅ Corrigé
-
-
-

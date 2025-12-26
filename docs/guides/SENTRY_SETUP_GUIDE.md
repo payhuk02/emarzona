@@ -22,15 +22,18 @@
 ## 1. Créer compte Sentry
 
 ### Étape 1.1 : Inscription
+
 👉 https://sentry.io/signup/
 
 **Plan recommandé pour démarrer :** FREE
+
 - ✅ 5,000 errors/mois
 - ✅ 10,000 performance units
 - ✅ 1 membre d'équipe
 - ✅ 30 jours de rétention
 
 ### Étape 1.2 : Créer un projet
+
 1. Cliquer "Create Project"
 2. **Platform :** React
 3. **Alert frequency :** Real-time
@@ -38,6 +41,7 @@
 5. Copier le **DSN** (Data Source Name)
 
 Exemple DSN :
+
 ```
 https://abc123def456ghi789jkl012mno345@o123456.ingest.sentry.io/7891011
 ```
@@ -111,6 +115,7 @@ SENTRY_AUTH_TOKEN=sntrys_votre_token_secret_ici
 ```
 
 5. Dans Vercel → Settings → Environment Variables :
+
 ```
 SENTRY_AUTH_TOKEN = sntrys_votre_token_secret_ici
 ```
@@ -134,48 +139,49 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 export default defineConfig({
   plugins: [
     react(),
-    
+
     // Sentry plugin pour source maps (seulement en production)
-    process.env.NODE_ENV === 'production' && sentryVitePlugin({
-      org: process.env.VITE_SENTRY_ORG,
-      project: process.env.VITE_SENTRY_PROJECT,
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      
-      // Upload source maps
-      sourcemaps: {
-        assets: './dist/**',
-        ignore: ['node_modules/**'],
-      },
-      
-      // Configuration release
-      release: {
-        name: process.env.VERCEL_GIT_COMMIT_SHA || 'development',
-        deploy: {
-          env: process.env.VERCEL_ENV || 'development',
+    process.env.NODE_ENV === 'production' &&
+      sentryVitePlugin({
+        org: process.env.VITE_SENTRY_ORG,
+        project: process.env.VITE_SENTRY_PROJECT,
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+
+        // Upload source maps
+        sourcemaps: {
+          assets: './dist/**',
+          ignore: ['node_modules/**'],
         },
-      },
-      
-      // Options avancées
-      telemetry: false,
-      silent: false,
-    }),
+
+        // Configuration release
+        release: {
+          name: process.env.VERCEL_GIT_COMMIT_SHA || 'development',
+          deploy: {
+            env: process.env.VERCEL_ENV || 'development',
+          },
+        },
+
+        // Options avancées
+        telemetry: false,
+        silent: false,
+      }),
   ].filter(Boolean),
-  
+
   build: {
     // Activer source maps en production
     sourcemap: true,
-    
+
     // Rollup options
     rollupOptions: {
       output: {
         // Optimiser le nom des chunks pour Sentry
         manualChunks: {
-          'sentry': ['@sentry/react'],
+          sentry: ['@sentry/react'],
         },
       },
     },
   },
-  
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -286,12 +292,16 @@ window.Sentry.captureException(new Error('Test from console'));
 import { measurePerformance } from '@/lib/sentry';
 
 const fetchCourses = async () => {
-  return measurePerformance('fetch-courses', async () => {
-    const response = await fetch('/api/courses');
-    return response.json();
-  }, {
-    category: 'api',
-  });
+  return measurePerformance(
+    'fetch-courses',
+    async () => {
+      const response = await fetch('/api/courses');
+      return response.json();
+    },
+    {
+      category: 'api',
+    }
+  );
 };
 ```
 
@@ -316,6 +326,7 @@ Configurer les alertes dans Sentry :
 Créer un dashboard pour surveiller :
 
 **Métriques clés :**
+
 - Total errors (last 24h)
 - Error rate (%)
 - Most common errors
@@ -351,6 +362,7 @@ Après déploiement, vérifier que les source maps fonctionnent :
 ## 🎯 CHECKLIST FINALE
 
 ### Setup Initial
+
 - [ ] Compte Sentry créé
 - [ ] Projet créé
 - [ ] DSN copié
@@ -358,6 +370,7 @@ Après déploiement, vérifier que les source maps fonctionnent :
 - [ ] Auth token créé
 
 ### Configuration Code
+
 - [ ] `vite.config.ts` configuré
 - [ ] Source maps activés
 - [ ] `.gitignore` à jour
@@ -365,12 +378,14 @@ Après déploiement, vérifier que les source maps fonctionnent :
 - [ ] User context intégré
 
 ### Testing
+
 - [ ] Test erreur en dev (fonctionne)
 - [ ] Test erreur en prod (stack trace correct)
 - [ ] Performance tracking (fonctionne)
 - [ ] Breadcrumbs (enregistrés)
 
 ### Production
+
 - [ ] Alertes configurées
 - [ ] Dashboard créé
 - [ ] Team invitée (optionnel)
@@ -388,17 +403,20 @@ import { withSentry } from '@/lib/sentry';
 export const useCourses = () => {
   return useQuery({
     queryKey: ['courses'],
-    queryFn: () => withSentry('fetch-courses', async () => {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*');
-      
-      if (error) throw error;
-      return data;
-    }, {
-      user_id: user?.id,
-      timestamp: Date.now(),
-    }),
+    queryFn: () =>
+      withSentry(
+        'fetch-courses',
+        async () => {
+          const { data, error } = await supabase.from('courses').select('*');
+
+          if (error) throw error;
+          return data;
+        },
+        {
+          user_id: user?.id,
+          timestamp: Date.now(),
+        }
+      ),
   });
 };
 ```
@@ -409,14 +427,18 @@ export const useCourses = () => {
 import { measurePerformance } from '@/lib/sentry';
 
 const processVideoUpload = async (file: File) => {
-  return measurePerformance('video-upload', async () => {
-    // Upload logic
-    const url = await uploadToSupabase(file);
-    return url;
-  }, {
-    file_size: file.size,
-    file_type: file.type,
-  });
+  return measurePerformance(
+    'video-upload',
+    async () => {
+      // Upload logic
+      const url = await uploadToSupabase(file);
+      return url;
+    },
+    {
+      file_size: file.size,
+      file_type: file.type,
+    }
+  );
 };
 ```
 
@@ -428,9 +450,9 @@ import { addBreadcrumb } from '@/lib/sentry';
 // Tracking du parcours utilisateur
 const handleCheckout = () => {
   addBreadcrumb('User initiated checkout', 'payment', 'info');
-  
+
   // ...checkout logic
-  
+
   addBreadcrumb('Payment processed successfully', 'payment', 'info');
 };
 ```
@@ -442,6 +464,7 @@ const handleCheckout = () => {
 ### Problème : Source maps ne s'uploadent pas
 
 **Solution :**
+
 ```bash
 # Vérifier que le token est correct
 echo $SENTRY_AUTH_TOKEN
@@ -456,6 +479,7 @@ npx @sentry/cli releases files <VERSION> upload-sourcemaps ./dist
 ### Problème : Trop d'erreurs (quota dépassé)
 
 **Solution :**
+
 ```typescript
 // Dans src/lib/sentry.ts, ajuster le sampling
 tracesSampleRate: 0.1, // 10% au lieu de 100%
@@ -465,6 +489,7 @@ replaysSessionSampleRate: 0.05, // 5%
 ### Problème : Erreurs non capturées
 
 **Solution :**
+
 ```typescript
 // Ajouter error boundary manuellement
 import * as Sentry from '@sentry/react';
@@ -490,6 +515,7 @@ import * as Sentry from '@sentry/react';
 Sentry est maintenant configuré pour Payhuk !
 
 **Avantages immédiats :**
+
 - ✅ Visibilité complète sur les erreurs production
 - ✅ Stack traces détaillés
 - ✅ Alertes temps réel
@@ -497,4 +523,3 @@ Sentry est maintenant configuré pour Payhuk !
 - ✅ Session replay (débug facile)
 
 **Next step :** Déployer et surveiller ! 🚀
-

@@ -1,4 +1,5 @@
 # Configuration du Cron Job pour les Campagnes Programmées
+
 **Date:** 1er Février 2025  
 **Statut:** ✅ Edge Function déployée
 
@@ -29,7 +30,7 @@ L'Edge Function `process-scheduled-campaigns` a été déployée avec succès su
    - Configurez:
      - **Name:** `process-scheduled-campaigns`
      - **Schedule:** `*/5 * * * *` (toutes les 5 minutes)
-     - **Command/Function:** 
+     - **Command/Function:**
        - Si vous avez pg_cron, utilisez une requête SQL qui appelle l'Edge Function
        - Sinon, utilisez un service externe (voir Option 2)
 
@@ -61,17 +62,14 @@ export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-  const response = await fetch(
-    `${supabaseUrl}/functions/v1/process-scheduled-campaigns`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-      },
-      body: JSON.stringify({ limit: 10 }),
-    }
-  );
+  const response = await fetch(`${supabaseUrl}/functions/v1/process-scheduled-campaigns`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${supabaseServiceKey}`,
+    },
+    body: JSON.stringify({ limit: 10 }),
+  });
 
   const data = await response.json();
   return NextResponse.json(data);
@@ -87,8 +85,8 @@ name: Process Scheduled Campaigns
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Toutes les 5 minutes
-  workflow_dispatch:  # Permet de déclencher manuellement
+    - cron: '*/5 * * * *' # Toutes les 5 minutes
+  workflow_dispatch: # Permet de déclencher manuellement
 
 jobs:
   process:
@@ -121,18 +119,15 @@ Créez `src/index.ts`:
 ```typescript
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    const response = await fetch(
-      `${env.SUPABASE_URL}/functions/v1/process-scheduled-campaigns`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-        body: JSON.stringify({ limit: 10 }),
-      }
-    );
-    
+    const response = await fetch(`${env.SUPABASE_URL}/functions/v1/process-scheduled-campaigns`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({ limit: 10 }),
+    });
+
     return response.json();
   },
 };
@@ -166,10 +161,7 @@ curl -X POST \
 ```typescript
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  'https://hbdnzajbyjakdhuavrvb.supabase.co',
-  'YOUR_SERVICE_ROLE_KEY'
-);
+const supabase = createClient('https://hbdnzajbyjakdhuavrvb.supabase.co', 'YOUR_SERVICE_ROLE_KEY');
 
 const { data, error } = await supabase.functions.invoke('process-scheduled-campaigns', {
   body: { limit: 10 },
@@ -193,6 +185,7 @@ const { data, error } = await supabase.functions.invoke('process-scheduled-campa
 ### Métriques
 
 La fonction retourne:
+
 ```json
 {
   "success": true,
@@ -211,6 +204,7 @@ La fonction retourne:
 ### Variables d'Environnement
 
 Assurez-vous que ces variables sont configurées dans Supabase:
+
 - `SENDGRID_API_KEY` - Clé API SendGrid
 - `SUPABASE_URL` - URL de votre projet (automatique)
 - `SUPABASE_SERVICE_ROLE_KEY` - Clé de service (automatique)
@@ -224,6 +218,7 @@ Assurez-vous que ces variables sont configurées dans Supabase:
 La fréquence recommandée est **toutes les 5 minutes** (`*/5 * * * *`).
 
 Pour une fréquence différente:
+
 - Toutes les minutes: `* * * * *`
 - Toutes les 10 minutes: `*/10 * * * *`
 - Toutes les heures: `0 * * * *`
@@ -243,17 +238,20 @@ Pour une fréquence différente:
 ## 🆘 Dépannage
 
 ### La fonction ne s'exécute pas automatiquement
+
 - Vérifiez que le cron job est bien configuré
 - Vérifiez les logs de la fonction
 - Testez manuellement la fonction
 
 ### Les campagnes ne sont pas envoyées
+
 - Vérifiez que `scheduled_at` est dans le passé
 - Vérifiez que `status = 'scheduled'`
 - Vérifiez qu'un `template_id` est associé
 - Vérifiez les logs de `send-email-campaign`
 
 ### Erreurs dans les logs
+
 - Vérifiez que `SENDGRID_API_KEY` est configurée
 - Vérifiez que la fonction `send-email-campaign` est déployée
 - Vérifiez les permissions RLS sur la table `email_campaigns`
@@ -262,4 +260,3 @@ Pour une fréquence différente:
 
 **Date de configuration:** 1er Février 2025  
 **Prochaine vérification recommandée:** Après la première exécution automatique
-

@@ -11,6 +11,7 @@
 L'erreur "Failed to get store analytics: Unknown error" se produisait sur la page Analytics Email.
 
 **Cause** : Le service `EmailAnalyticsService.getStoreAnalytics()` essayait d'accéder à la table `email_logs` avec des colonnes qui :
+
 1. N'existent pas dans les types TypeScript générés
 2. Ou ont des noms différents (`sendgrid_status` vs `status`, `sent_at` vs `created_at`)
 3. Ou la colonne `campaign_id` n'est pas accessible directement
@@ -24,6 +25,7 @@ L'erreur "Failed to get store analytics: Unknown error" se produisait sur la pag
 Au lieu d'utiliser directement les logs `email_logs`, le service utilise maintenant **les métriques agrégées des campagnes** qui sont déjà stockées dans la table `email_campaigns`.
 
 **Avantages** :
+
 - ✅ Plus fiable (pas de dépendance aux colonnes de logs)
 - ✅ Plus performant (données déjà agrégées)
 - ✅ Fonctionne même si les types TypeScript ne sont pas à jour
@@ -34,6 +36,7 @@ Au lieu d'utiliser directement les logs `email_logs`, le service utilise mainten
 **Fichier** : `src/lib/email/email-analytics-service.ts`
 
 **Changements** :
+
 1. ✅ Récupération des campagnes du store avec leurs métriques
 2. ✅ Filtrage par dates sur les campagnes (pas sur les logs)
 3. ✅ Agrégation des métriques de toutes les campagnes
@@ -58,11 +61,12 @@ Les métriques sont maintenant calculées à partir de `email_campaigns.metrics`
 ```
 
 **Taux calculés** :
-- `delivery_rate` = (delivered / sent) * 100
-- `open_rate` = (opened / delivered) * 100
-- `click_rate` = (clicked / delivered) * 100
-- `bounce_rate` = (bounced / sent) * 100
-- `unsubscribe_rate` = (unsubscribed / sent) * 100
+
+- `delivery_rate` = (delivered / sent) \* 100
+- `open_rate` = (opened / delivered) \* 100
+- `click_rate` = (clicked / delivered) \* 100
+- `bounce_rate` = (bounced / sent) \* 100
+- `unsubscribe_rate` = (unsubscribed / sent) \* 100
 
 ---
 
@@ -97,6 +101,7 @@ Les métriques sont maintenant calculées à partir de `email_campaigns.metrics`
 ### Alternative (si besoin de logs détaillés)
 
 Si vous avez besoin d'analytics basées sur les logs individuels, vous pouvez :
+
 1. Créer une fonction SQL RPC qui agrège les logs
 2. Utiliser `email_analytics_daily` (table d'agrégation quotidienne)
 3. Mettre à jour les types TypeScript pour inclure toutes les colonnes
@@ -122,4 +127,3 @@ Si vous avez besoin d'analytics basées sur les logs individuels, vous pouvez :
 **Correction terminée et testée** ✅
 
 La page Analytics Email devrait maintenant fonctionner sans erreur.
-

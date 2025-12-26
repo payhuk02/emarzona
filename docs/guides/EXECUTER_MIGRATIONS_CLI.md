@@ -20,6 +20,7 @@
 **Fichier** : `supabase/migrations/20250131_fix_affiliate_link_code_function.sql`
 
 **Objectif** :
+
 - Activer l'extension `pgcrypto`
 - Corriger la fonction `generate_affiliate_link_code` pour utiliser `digest()`
 
@@ -28,6 +29,7 @@
 **Fichier** : `supabase/migrations/20250131_affiliate_short_links.sql`
 
 **Objectif** :
+
 - Créer la table `affiliate_short_links`
 - Créer les fonctions `generate_short_link_code` et `track_short_link_click`
 - Configurer les RLS policies
@@ -44,6 +46,7 @@
 ```
 
 Le script :
+
 - Vérifie que Supabase CLI est installé
 - Vérifie la connexion
 - Affiche les migrations en attente
@@ -83,6 +86,7 @@ supabase migration list
 ### Vérifier que l'extension pgcrypto est activée
 
 Dans SQL Editor :
+
 ```sql
 SELECT * FROM pg_extension WHERE extname = 'pgcrypto';
 ```
@@ -109,6 +113,7 @@ SELECT * FROM affiliate_short_links LIMIT 1;
 **Cause** : Le pool de connexions Supabase est saturé (souvent pendant la maintenance)
 
 **Solutions** :
+
 1. **Attendre la fin de la maintenance** Supabase
 2. **Réessayer plus tard** : `supabase db push`
 3. **Utiliser SQL Editor** : Exécuter les migrations manuellement dans le dashboard
@@ -134,16 +139,19 @@ Assurez-vous d'avoir les droits d'administration sur le projet Supabase.
 ## 📝 Workflow Recommandé
 
 1. **Vérifier l'état** :
+
    ```powershell
    supabase migration list
    ```
 
 2. **Exécuter les migrations** :
+
    ```powershell
    supabase db push
    ```
 
 3. **Vérifier le résultat** :
+
    ```powershell
    supabase migration list
    ```
@@ -173,4 +181,3 @@ Assurez-vous d'avoir les droits d'administration sur le projet Supabase.
 - [ ] Table `affiliate_short_links` créée
 - [ ] Fonctions SQL créées
 - [ ] Tests fonctionnels réussis
-

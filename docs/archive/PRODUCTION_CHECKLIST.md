@@ -264,8 +264,8 @@ Vérifier avec : https://securityheaders.com
 
 ```sql
 -- Exécuter dans Supabase SQL Editor
-SELECT tablename, rowsecurity 
-FROM pg_tables 
+SELECT tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 ```
 
@@ -453,15 +453,18 @@ Ou service externe (recommandé) :
 ## 📞 CONTACTS & RESSOURCES
 
 **Documentation Technique**
+
 - Vercel Docs : https://vercel.com/docs
 - Supabase Docs : https://supabase.com/docs
 - React Docs : https://react.dev
 
 **Support**
+
 - Vercel Support : support@vercel.com
 - Supabase Support : support@supabase.io
 
 **Monitoring**
+
 - Vercel Dashboard : https://vercel.com/dashboard
 - Supabase Dashboard : https://supabase.com/dashboard
 - UptimeRobot : https://uptimerobot.com/dashboard
@@ -503,4 +506,3 @@ Status : 🟢 LIVE
 ```
 
 **Bon lancement !** 🎊
-

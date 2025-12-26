@@ -9,9 +9,11 @@
 ### 🔧 ACTION 1 : Migrations SQL (5 minutes)
 
 #### Étape 1.1 : Ouvrir SQL Editor
+
 👉 **Lien direct :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/sql/new
 
 #### Étape 1.2 : Migration Structure
+
 1. Ouvrir le fichier : `supabase/migrations/20250201_fix_email_templates_complete_structure.sql`
 2. **Sélectionner tout** (Ctrl+A) et **Copier** (Ctrl+C)
 3. **Coller dans SQL Editor** (Ctrl+V)
@@ -22,6 +24,7 @@
 ---
 
 #### Étape 1.3 : Migration Templates
+
 1. Dans SQL Editor, cliquer sur **+ New query**
 2. Ouvrir le fichier : `supabase/migrations/20250201_add_missing_email_templates.sql`
 3. **Sélectionner tout** (Ctrl+A) et **Copier** (Ctrl+C)
@@ -35,9 +38,11 @@
 ### ⚙️ ACTION 2 : Variable SendGrid (3 minutes)
 
 #### Étape 2.1 : Accéder aux Settings
+
 👉 **Lien direct :** https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/send-order-confirmation-email/settings
 
 #### Étape 2.2 : Ajouter le secret
+
 1. Cliquer sur **Secrets** (menu de gauche)
 2. Cliquer sur **Add secret** (bouton en haut à droite)
 3. **Name :** `SENDGRID_API_KEY`
@@ -63,12 +68,13 @@ Si vous n'avez pas la clé :
 ## ✅ VÉRIFICATIONS
 
 ### Vérification 1 : Colonnes
+
 Dans SQL Editor, exécuter :
 
 ```sql
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'email_templates' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'email_templates'
 AND column_name IN ('product_type', 'is_default');
 ```
 
@@ -77,9 +83,10 @@ AND column_name IN ('product_type', 'is_default');
 ---
 
 ### Vérification 2 : Templates
+
 ```sql
-SELECT slug, name, product_type 
-FROM email_templates 
+SELECT slug, name, product_type
+FROM email_templates
 WHERE slug IN (
   'order-confirmation-service',
   'course-enrollment-confirmation',
@@ -109,4 +116,3 @@ Une fois toutes les cases cochées, le système est opérationnel !
 ---
 
 **Instructions créées le 1er Février 2025** ✅
-

@@ -9,6 +9,7 @@
 **Problème :** `metadata.product_id` n'était pas inclus dans la requête à l'API Moneroo.
 
 **Solution :**
+
 - ✅ Extraction de `productId` depuis `data` et ajout à `metadata.product_id`
 - ✅ Extraction de `storeId` depuis `data` et ajout à `metadata.store_id`
 - ✅ Logs détaillés pour diagnostic
@@ -19,6 +20,7 @@
 **Problème :** `productId` n'était pas passé à l'Edge Function.
 
 **Solution :**
+
 - ✅ Ajout de `productId` dans `metadata.product_id` directement
 - ✅ Passage de `productId` et `storeId` directement dans `data` pour que l'Edge Function puisse les extraire
 - ✅ Logs détaillés pour vérifier que `productId` est bien passé
@@ -26,6 +28,7 @@
 ### 3. Interface TypeScript (`src/lib/moneroo-client.ts`)
 
 **Mise à jour :**
+
 - ✅ Ajout de `productId` et `storeId` dans l'interface `MonerooCheckoutData`
 
 ## 📋 Pages de Paiement Existantes
@@ -120,6 +123,7 @@ INFO Moneroo Edge Function Metadata construction: [finalMetadataProductId: "a6db
 ## 🔍 Structure de la Requête Finale
 
 **Requête envoyée à l'API Moneroo :**
+
 ```json
 {
   "amount": 5000,
@@ -135,7 +139,7 @@ INFO Moneroo Edge Function Metadata construction: [finalMetadataProductId: "a6db
   "metadata": {
     "transaction_id": "02d17847-5f7c-4e36-9d9d-8b92a3bdfd9e",
     "store_id": "ecb9d915-b37b-4383-afb1-256bab22da73",
-    "product_id": "a6dbf752-22ca-4931-abdc-0aee713dbd99",  // ✅ Maintenant inclus
+    "product_id": "a6dbf752-22ca-4931-abdc-0aee713dbd99", // ✅ Maintenant inclus
     "user_id": "cd50a4d0-6c7f-405a-b0ed-2ac5f12c33cc"
   }
 }
@@ -144,8 +148,8 @@ INFO Moneroo Edge Function Metadata construction: [finalMetadataProductId: "a6db
 ## 🎯 Résultat Attendu
 
 Après le redéploiement :
+
 1. ✅ `metadata.product_id` sera automatiquement inclus
 2. ✅ L'API Moneroo acceptera la requête (plus d'erreur 422)
 3. ✅ Le paiement fonctionnera sur ProductDetail, Marketplace et Storefront
 4. ✅ La redirection vers `/checkout/success` fonctionnera correctement
-

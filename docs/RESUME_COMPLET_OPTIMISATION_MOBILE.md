@@ -206,4 +206,3 @@ Optimisation complète de **tous les composants de sélection** pour garantir un
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

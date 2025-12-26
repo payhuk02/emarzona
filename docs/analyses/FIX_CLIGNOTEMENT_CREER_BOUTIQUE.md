@@ -8,7 +8,7 @@ Lors du clic sur le bouton "Créer ma boutique", une ancienne page clignotait br
 
 1. **TabsTrigger avec onClick** : Le `TabsTrigger` avec `value="create"` avait un `onClick` qui redirigeait
 2. **Comportement par défaut** : Quand on clique sur un `TabsTrigger`, Radix UI change automatiquement l'onglet actif **AVANT** l'exécution du `onClick`
-3. **Résultat** : 
+3. **Résultat** :
    - React affiche d'abord le `TabsContent value="create"` (ancienne page)
    - Puis le `onClick` s'exécute et redirige
    - **Clignotement visible** ⚠️
@@ -16,8 +16,8 @@ Lors du clic sur le bouton "Créer ma boutique", une ancienne page clignotait br
 ### Code problématique
 
 ```typescript
-<TabsTrigger 
-  value="create" 
+<TabsTrigger
+  value="create"
   onClick={handleCreateStoreRedirect}  // ❌ S'exécute APRÈS le changement d'onglet
 >
   Créer ma boutique
@@ -87,4 +87,3 @@ Affichage direct du formulaire de création dans Settings
 ```
 
 **Aucun clignotement, navigation fluide !** ✨
-

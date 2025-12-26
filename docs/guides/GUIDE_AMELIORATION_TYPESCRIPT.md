@@ -15,10 +15,10 @@
 ```json
 {
   "compilerOptions": {
-    "strict": true,                    // ✅ Activé
-    "noUnusedLocals": true,            // ✅ Activé
-    "noUnusedParameters": true,        // ✅ Activé
-    "noImplicitAny": true,             // ✅ Activé
+    "strict": true, // ✅ Activé
+    "noUnusedLocals": true, // ✅ Activé
+    "noUnusedParameters": true, // ✅ Activé
+    "noImplicitAny": true // ✅ Activé
     // strictNullChecks est inclus dans "strict": true
   }
 }
@@ -44,12 +44,14 @@ Même si TypeScript strict est activé, il reste des améliorations à faire :
 ### Étape 1 : Identifier les fichiers avec le plus de `any`
 
 **Commande** :
+
 ```bash
 # Compter les occurrences de 'any' par fichier
 grep -r ": any" src/ --include="*.ts" --include="*.tsx" | cut -d: -f1 | sort | uniq -c | sort -rn | head -20
 ```
 
 **Fichiers prioritaires** (basé sur l'audit) :
+
 - Hooks personnalisés (`src/hooks/`)
 - Contextes React (`src/contexts/`)
 - Types de données (`src/types/`)
@@ -61,6 +63,7 @@ grep -r ": any" src/ --include="*.ts" --include="*.tsx" | cut -d: -f1 | sort | u
 #### Pattern 1 : Paramètres de fonction
 
 **❌ Avant** :
+
 ```typescript
 function fetchData(params: any) {
   return params.id;
@@ -68,6 +71,7 @@ function fetchData(params: any) {
 ```
 
 **✅ Après** :
+
 ```typescript
 interface FetchDataParams {
   id: string;
@@ -82,12 +86,14 @@ function fetchData(params: FetchDataParams) {
 #### Pattern 2 : Callbacks
 
 **❌ Avant** :
+
 ```typescript
 products.map(product => product.name);
 // Si TypeScript ne peut pas inférer le type
 ```
 
 **✅ Après** :
+
 ```typescript
 products.map((product: Product) => product.name);
 // Ou mieux : typer le tableau
@@ -98,6 +104,7 @@ products.map(product => product.name); // Inférence automatique
 #### Pattern 3 : Catch blocks
 
 **❌ Avant** :
+
 ```typescript
 try {
   // ...
@@ -107,6 +114,7 @@ try {
 ```
 
 **✅ Après** :
+
 ```typescript
 try {
   // ...
@@ -123,11 +131,13 @@ try {
 #### Pattern 1 : Accès propriété potentiellement null
 
 **❌ Avant** :
+
 ```typescript
 const userName = user.name.toUpperCase(); // Erreur si user.name est null
 ```
 
 **✅ Après** :
+
 ```typescript
 const userName = user?.name?.toUpperCase() ?? 'Unknown';
 ```
@@ -135,11 +145,13 @@ const userName = user?.name?.toUpperCase() ?? 'Unknown';
 #### Pattern 2 : State potentiellement null
 
 **❌ Avant** :
+
 ```typescript
 const [user, setUser] = useState<User>(null); // Erreur
 ```
 
 **✅ Après** :
+
 ```typescript
 const [user, setUser] = useState<User | null>(null);
 
@@ -152,6 +164,7 @@ if (user) {
 #### Pattern 3 : Paramètres optionnels
 
 **❌ Avant** :
+
 ```typescript
 function formatDate(date: Date) {
   return date.toISOString(); // Erreur si date peut être null
@@ -159,6 +172,7 @@ function formatDate(date: Date) {
 ```
 
 **✅ Après** :
+
 ```typescript
 function formatDate(date: Date | null | undefined): string {
   if (!date) return '-';
@@ -171,6 +185,7 @@ function formatDate(date: Date | null | undefined): string {
 ### Étape 4 : Nettoyer les variables inutilisées
 
 **Commande pour identifier** :
+
 ```bash
 # TypeScript compiler affichera les warnings
 npm run build
@@ -179,6 +194,7 @@ npm run build
 **Exemples à nettoyer** :
 
 **❌ Avant** :
+
 ```typescript
 const MyComponent = () => {
   const [count, setCount] = useState(0);
@@ -190,6 +206,7 @@ const MyComponent = () => {
 ```
 
 **✅ Après** :
+
 ```typescript
 const MyComponent = () => {
   const [count] = useState(0);
@@ -207,6 +224,7 @@ const MyComponent = () => {
 ### 1. Hooks Personnalisés
 
 **Fichiers** :
+
 - `src/hooks/useProducts.ts`
 - `src/hooks/useOrders.ts`
 - `src/hooks/useAuth.ts`
@@ -214,6 +232,7 @@ const MyComponent = () => {
 - `src/hooks/useProfile.ts`
 
 **Actions** :
+
 1. Typer tous les paramètres de fonction
 2. Typer les retours de fonction
 3. Utiliser des interfaces pour les paramètres complexes
@@ -224,15 +243,18 @@ const MyComponent = () => {
 ### 2. Contextes React
 
 **Fichiers** :
+
 - `src/contexts/AuthContext.tsx`
 - `src/contexts/StoreContext.tsx`
 
 **Actions** :
+
 1. Typer le contexte avec une interface
 2. Typer les valeurs par défaut
 3. Gérer les cas où le contexte peut être undefined
 
 **Exemple** :
+
 ```typescript
 interface AuthContextType {
   user: User | null;
@@ -256,14 +278,17 @@ export const useAuth = () => {
 ### 3. Types de Données
 
 **Fichiers** :
+
 - `src/types/` (tous les fichiers)
 
 **Actions** :
+
 1. Créer des interfaces pour toutes les entités
 2. Utiliser des types union pour les états
 3. Éviter `any` même pour les données externes (utiliser `unknown`)
 
 **Exemple** :
+
 ```typescript
 // ❌ Avant
 interface Product {
@@ -309,6 +334,7 @@ interface Product {
 ### 3. Scripts NPM
 
 **Ajouter dans `package.json`** :
+
 ```json
 {
   "scripts": {
@@ -430,5 +456,3 @@ npm run build 2>&1 | Select-String "is declared but never used"
 **Document créé le** : 31 Janvier 2025  
 **Dernière mise à jour** : 31 Janvier 2025  
 **Version** : 1.0
-
-

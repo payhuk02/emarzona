@@ -10,6 +10,7 @@
 ### Problème Identifié
 
 **Symptôme principal** :
+
 - Les fichiers uploadés sont enregistrés dans Supabase Storage comme "application/json - 44.68 KB"
 - Quand on essaie d'accéder au fichier via l'URL publique, on obtient du JSON (erreur Supabase)
 - Le bucket existe et est PUBLIC, mais les fichiers ne sont pas accessibles
@@ -22,22 +23,26 @@ Les politiques RLS bloquent l'upload ou l'accès, et Supabase retourne une erreu
 ## ✅ Améliorations Implémentées
 
 ### 1. Vérification Pré-Upload
+
 - ✅ Vérification que `fileToUpload` est un File/Blob valide
 - ✅ Vérification que le fichier n'est pas vide
 - ✅ Logging détaillé des propriétés du fichier avant upload
 
 ### 2. Logging Détaillé de la Réponse
+
 - ✅ Logging complet de `uploadData` et `uploadError`
 - ✅ Détection d'erreurs dans `uploadData` même si `uploadError` est null
 - ✅ Vérification du type et des clés de la réponse
 
 ### 3. Vérification Immédiate Post-Upload
+
 - ✅ Vérification avec `list()` immédiatement après l'upload
 - ✅ **Détection si le fichier est enregistré comme JSON**
 - ✅ Vérification du Content-Type du fichier uploadé
 - ✅ Comparaison avec le Content-Type attendu
 
 ### 4. Détection Précoce du Problème
+
 - ✅ Si le fichier est détecté comme JSON, l'erreur est lancée immédiatement
 - ✅ Message d'erreur clair indiquant le problème RLS
 - ✅ Suggestion d'exécuter la migration SQL
@@ -105,4 +110,3 @@ Si le problème persiste après la migration SQL :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

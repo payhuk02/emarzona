@@ -22,7 +22,7 @@
 Exécutez cette requête pour voir si le cron job s'est exécuté :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   runid,
   status,
@@ -38,6 +38,7 @@ LIMIT 10;
 ```
 
 **Résultats attendus :**
+
 - Si le cron job s'est exécuté après `09:50:00`, vous devriez voir des entrées
 - `status` devrait être `succeeded`
 - `return_message` devrait contenir des informations sur les campagnes traitées
@@ -45,6 +46,7 @@ LIMIT 10;
 ### 2. Vérifier la Requête du Cron Job
 
 Le cron job cherche les campagnes avec :
+
 - `status = 'scheduled'`
 - `scheduled_at <= NOW()`
 - `template_id IS NOT NULL`
@@ -52,7 +54,7 @@ Le cron job cherche les campagnes avec :
 Vérifiez que votre campagne répond à ces critères :
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -65,6 +67,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus :**
+
 - `should_be_processed` : `true`
 - `has_template` : `true`
 - `status` : `scheduled`
@@ -94,6 +97,7 @@ SELECT net.http_post(
 ```
 
 **Résultats attendus :**
+
 - Un `request_id` est retourné
 - Vérifiez ensuite le statut de la campagne (devrait passer à `sending`)
 
@@ -102,7 +106,7 @@ SELECT net.http_post(
 Assurez-vous que le template existe et est actif :
 
 ```sql
-SELECT 
+SELECT
   id,
   slug,
   name,
@@ -113,6 +117,7 @@ WHERE id = '34abbdcb-fff1-4be9-93af-84aab0b3bd87';
 ```
 
 **Résultats attendus :**
+
 - Le template existe
 - `is_active` : `true`
 
@@ -123,17 +128,22 @@ WHERE id = '34abbdcb-fff1-4be9-93af-84aab0b3bd87';
 ### Problème 1 : Le Cron Job Ne S'Exécute Pas
 
 **Symptômes :**
+
 - Aucune entrée dans `cron.job_run_details` après `09:50:00`
 - Le cron job est actif mais ne s'exécute pas
 
 **Solutions :**
+
 1. Vérifier que le cron job est actif :
+
    ```sql
    SELECT * FROM cron.job WHERE jobname = 'process-scheduled-email-campaigns';
    ```
+
    - `active` devrait être `true`
 
 2. Vérifier que `pg_cron` est activé :
+
    ```sql
    SELECT * FROM pg_extension WHERE extname = 'pg_cron';
    ```
@@ -143,13 +153,16 @@ WHERE id = '34abbdcb-fff1-4be9-93af-84aab0b3bd87';
 ### Problème 2 : Le Cron Job S'Exécute Mais Ne Trouve Pas la Campagne
 
 **Symptômes :**
+
 - Le cron job s'exécute (`succeeded`)
 - Mais la campagne reste en `scheduled`
 
 **Solutions :**
+
 1. Vérifier la timezone :
+
    ```sql
-   SELECT 
+   SELECT
      scheduled_at,
      send_at_timezone,
      scheduled_at AT TIME ZONE send_at_timezone as scheduled_local
@@ -159,7 +172,7 @@ WHERE id = '34abbdcb-fff1-4be9-93af-84aab0b3bd87';
 
 2. Vérifier que `scheduled_at` est bien dans le passé en UTC :
    ```sql
-   SELECT 
+   SELECT
      scheduled_at,
      NOW() as current_time,
      scheduled_at <= NOW() as is_past
@@ -170,10 +183,12 @@ WHERE id = '34abbdcb-fff1-4be9-93af-84aab0b3bd87';
 ### Problème 3 : Erreur dans l'Edge Function
 
 **Symptômes :**
+
 - Le cron job s'exécute mais échoue
 - Erreurs dans les logs de l'Edge Function
 
 **Solutions :**
+
 1. Vérifier les variables d'environnement :
    - `SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
@@ -191,7 +206,7 @@ Pour tester immédiatement, exécutez cette requête qui simule ce que fait le c
 
 ```sql
 -- Récupérer les campagnes qui devraient être traitées
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -221,4 +236,3 @@ Si votre campagne apparaît dans les résultats, elle devrait être traitée par
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

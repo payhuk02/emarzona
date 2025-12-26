@@ -9,6 +9,7 @@
 ## 🔍 PROBLÈME IDENTIFIÉ
 
 L'erreur se produisait dans l'Edge Function Supabase lors du parsing de la réponse de l'API Moneroo. Le code essayait de parser la réponse comme JSON sans vérifier :
+
 - Le Content-Type de la réponse
 - Si la réponse était vide
 - Si la réponse était du HTML (erreur serveur)
@@ -21,6 +22,7 @@ L'erreur se produisait dans l'Edge Function Supabase lors du parsing de la répo
 ### 1. Edge Function (`supabase/functions/moneroo/index.ts`)
 
 **Améliorations** :
+
 - ✅ Vérification du Content-Type avant parsing
 - ✅ Gestion des réponses vides
 - ✅ Détection et gestion des réponses HTML (erreurs serveur)
@@ -29,6 +31,7 @@ L'erreur se produisait dans l'Edge Function Supabase lors du parsing de la répo
 - ✅ Guide de troubleshooting inclus dans l'erreur
 
 **Code ajouté** :
+
 ```typescript
 // Vérification du Content-Type
 const contentType = monerooResponse.headers.get('content-type') || '';
@@ -44,6 +47,7 @@ const isJson = contentType.includes('application/json');
 ### 2. Client Moneroo (`src/lib/moneroo-client.ts`)
 
 **Améliorations** :
+
 - ✅ Détection spécifique de l'erreur de parsing
 - ✅ Message d'erreur enrichi avec détails techniques
 - ✅ Guide de troubleshooting pour l'utilisateur
@@ -52,6 +56,7 @@ const isJson = contentType.includes('application/json');
 ### 3. Page Checkout (`src/pages/checkout/Checkout.tsx`)
 
 **Améliorations** :
+
 - ✅ Affichage du message d'erreur simplifié dans le toast
 - ✅ Message complet dans la console pour debugging
 - ✅ Durée d'affichage augmentée pour les erreurs avec détails
@@ -61,6 +66,7 @@ const isJson = contentType.includes('application/json');
 ## 📋 DÉTAILS TECHNIQUES
 
 ### Avant (Problème)
+
 ```typescript
 // ❌ Parsing simple sans vérification
 const responseText = await monerooResponse.text();
@@ -69,6 +75,7 @@ responseData = responseText ? JSON.parse(responseText) : {};
 ```
 
 ### Après (Solution)
+
 ```typescript
 // ✅ Parsing intelligent avec gestion d'erreurs
 const contentType = monerooResponse.headers.get('content-type') || '';
@@ -94,11 +101,13 @@ if (!responseText || responseText.trim() === '') {
 ## 🎯 RÉSULTAT
 
 ### Avant
+
 - ❌ Erreur générique : "Impossible de parser la réponse de l'API Moneroo"
 - ❌ Aucun détail pour debugging
 - ❌ Pas de guide de résolution
 
 ### Après
+
 - ✅ Message d'erreur détaillé avec :
   - Status HTTP
   - Content-Type
@@ -153,5 +162,3 @@ Si l'erreur persiste, vérifier dans **Supabase Dashboard → Edge Functions →
 ---
 
 **Correction complétée le** : 18 Novembre 2025
-
-

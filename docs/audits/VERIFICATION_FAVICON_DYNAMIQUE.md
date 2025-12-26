@@ -12,6 +12,7 @@
 **Fichier** : `src/components/seo/DynamicFavicon.tsx`
 
 **Fonctionnalités** :
+
 - ✅ Utilise `usePlatformFavicon()` pour récupérer le favicon personnalisé
 - ✅ Utilise `usePlatformLogoLight()` comme fallback
 - ✅ Met à jour automatiquement tous les liens favicon dans le `<head>`
@@ -20,6 +21,7 @@
 - ✅ Apple Touch Icon et Mask Icon (Safari)
 
 **Logique de priorité** :
+
 1. Favicon personnalisé (si uploadé depuis admin)
 2. Logo light personnalisé (si configuré)
 3. Favicon par défaut (`/favicon.ico`)
@@ -31,6 +33,7 @@
 **Fichier** : `src/App.tsx`
 
 **Ligne 403** :
+
 ```typescript
 <DynamicFavicon />
 ```
@@ -46,6 +49,7 @@
 **Fichier** : `index.html`
 
 **Avant** :
+
 ```html
 <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2" />
 <link rel="icon" type="image/png" sizes="32x32" href="/payhuk-logo.png?v=2" />
@@ -55,6 +59,7 @@
 ```
 
 **Après** :
+
 ```html
 <!-- Le favicon sera géré dynamiquement par DynamicFavicon component -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3" id="favicon-default" />
@@ -101,10 +106,10 @@
 
 ### 2. Composants Utilisant le Favicon ✅
 
-| Composant | Utilise | Statut |
-|-----------|---------|--------|
-| `DynamicFavicon` | `usePlatformFavicon()` + `usePlatformLogoLight()` | ✅ |
-| `App.tsx` | Intègre `DynamicFavicon` | ✅ |
+| Composant        | Utilise                                           | Statut |
+| ---------------- | ------------------------------------------------- | ------ |
+| `DynamicFavicon` | `usePlatformFavicon()` + `usePlatformLogoLight()` | ✅     |
+| `App.tsx`        | Intègre `DynamicFavicon`                          | ✅     |
 
 ---
 
@@ -149,4 +154,3 @@
 ---
 
 **Prochaine révision** : Après tests visuels dans le navigateur
-

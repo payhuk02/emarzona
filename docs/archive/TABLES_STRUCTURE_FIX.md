@@ -10,6 +10,7 @@ LINE 87: oi.product_name,
 ```
 
 ### **Cause du Problème**
+
 - La table `order_items` n'a pas toutes les colonnes attendues
 - Les migrations n'ont pas été appliquées correctement dans Supabase
 - La structure de la base de données est incomplète
@@ -17,6 +18,7 @@ LINE 87: oi.product_name,
 ## 🔍 Analyse du Problème
 
 ### **Colonnes Manquantes dans `order_items`**
+
 - ❌ `product_name` - Nom du produit
 - ❌ `quantity` - Quantité commandée
 - ❌ `unit_price` - Prix unitaire
@@ -24,6 +26,7 @@ LINE 87: oi.product_name,
 - ❌ `created_at` - Date de création
 
 ### **Colonnes Manquantes dans `orders`**
+
 - ❌ `order_number` - Numéro de commande unique
 - ❌ `total_amount` - Montant total
 - ❌ `currency` - Devise
@@ -41,55 +44,55 @@ LINE 87: oi.product_name,
 ```sql
 -- Vérifier la structure actuelle
 SELECT column_name, data_type, is_nullable
-FROM information_schema.columns 
+FROM information_schema.columns
 WHERE table_name = 'order_items' AND table_schema = 'public';
 
 -- Ajouter les colonnes manquantes à order_items
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 ADD COLUMN IF NOT EXISTS product_name TEXT;
 
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 ADD COLUMN IF NOT EXISTS quantity INTEGER DEFAULT 1;
 
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 ADD COLUMN IF NOT EXISTS unit_price NUMERIC;
 
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 ADD COLUMN IF NOT EXISTS total_price NUMERIC;
 
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 
 -- Ajouter les colonnes manquantes à orders
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS order_number TEXT UNIQUE;
 
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS total_amount NUMERIC DEFAULT 0;
 
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'XOF';
 
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'unpaid';
 
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
 -- Recréer les contraintes et index
-ALTER TABLE public.order_items 
+ALTER TABLE public.order_items
 DROP CONSTRAINT IF EXISTS order_items_order_id_fkey;
 
-ALTER TABLE public.order_items 
-ADD CONSTRAINT order_items_order_id_fkey 
-FOREIGN KEY (order_id) 
-REFERENCES public.orders(id) 
+ALTER TABLE public.order_items
+ADD CONSTRAINT order_items_order_id_fkey
+FOREIGN KEY (order_id)
+REFERENCES public.orders(id)
 ON DELETE CASCADE;
 
 -- Créer les index
@@ -102,7 +105,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON public.orders(customer_id);
 NOTIFY pgrst, 'reload schema';
 
 -- Test de la structure corrigée
-SELECT 
+SELECT
     o.id as order_id,
     o.order_number,
     o.total_amount,
@@ -126,20 +129,24 @@ LIMIT 5;
 ## 🎯 Fonctionnalités de la Correction
 
 ### **1. Ajout des Colonnes Manquantes**
+
 - **`order_items`** : `product_name`, `quantity`, `unit_price`, `total_price`, `created_at`
 - **`orders`** : `order_number`, `total_amount`, `currency`, `status`, `payment_status`, `created_at`, `updated_at`
 
 ### **2. Recréation des Relations**
+
 - **Contrainte FK** : `order_items_order_id_fkey`
 - **Cascade Delete** : Suppression en cascade
 - **Index** : Optimisation des performances
 
 ### **3. Synchronisation du Cache**
+
 - **NOTIFY pgrst** : Rafraîchissement du cache Supabase
 - **Métadonnées** : Mise à jour des types TypeScript
 - **API** : Synchronisation automatique
 
 ### **4. Tests de Validation**
+
 - **Structure** : Vérification des colonnes
 - **Relations** : Test des JOIN
 - **Performance** : Validation des index
@@ -147,6 +154,7 @@ LIMIT 5;
 ## 🚀 Instructions d'Exécution
 
 ### **1. Exécuter le SQL dans Supabase**
+
 ```
 1. Ouvrez : https://supabase.com/dashboard/project/your-project-id
 2. Allez dans "SQL Editor"
@@ -155,12 +163,14 @@ LIMIT 5;
 ```
 
 ### **2. Vérifier la Correction**
+
 ```bash
 # Tester la structure corrigée
 node scripts/test-order-items-relationship.js
 ```
 
 ### **3. Tester l'Application**
+
 - Rechargez l'application sur `https://payhuk.vercel.app/dashboard`
 - L'erreur "column oi.product_name does not exist" devrait disparaître
 - Les requêtes avec toutes les colonnes fonctionneront
@@ -168,12 +178,14 @@ node scripts/test-order-items-relationship.js
 ## 📊 Résultat Attendu
 
 ### **Avant la Correction**
+
 - ❌ Erreur : "column oi.product_name does not exist"
 - ❌ Colonnes manquantes dans les tables
 - ❌ Requêtes échouent
 - ❌ Application non fonctionnelle
 
 ### **Après la Correction**
+
 - ✅ Toutes les colonnes existent
 - ✅ Structure complète des tables
 - ✅ Requêtes fonctionnelles
@@ -183,19 +195,21 @@ node scripts/test-order-items-relationship.js
 ## 🧪 Tests de Validation
 
 ### **1. Test de Structure**
+
 ```sql
 -- Vérifier que toutes les colonnes existent
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'order_items' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'order_items'
     AND table_schema = 'public'
 ORDER BY ordinal_position;
 ```
 
 ### **2. Test de Relation**
+
 ```sql
 -- Tester la relation avec toutes les colonnes
-SELECT 
+SELECT
     o.order_number,
     o.total_amount,
     o.status,
@@ -209,9 +223,10 @@ LIMIT 5;
 ```
 
 ### **3. Test d'Insertion**
+
 ```sql
 -- Créer une commande complète
-INSERT INTO orders (store_id, order_number, total_amount, status) 
+INSERT INTO orders (store_id, order_number, total_amount, status)
 VALUES ('store-uuid', 'ORD-20250118-0001', 1000, 'pending');
 
 -- Créer un élément avec toutes les colonnes

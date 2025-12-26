@@ -10,6 +10,7 @@
 ### 1. Hooks React
 
 #### ✅ `src/hooks/email/useEmailSequences.ts`
+
 - **12 hooks créés :**
   - `useEmailSequences()` - Liste des séquences avec filtres
   - `useEmailSequence()` - Séquence spécifique
@@ -25,6 +26,7 @@
   - `usePauseSequenceEnrollment()` / `useCancelSequenceEnrollment()` - Gérer les inscriptions
 
 #### ✅ `src/hooks/email/index.ts`
+
 - Export ajouté pour `useEmailSequences`
 
 ---
@@ -41,14 +43,17 @@
 ## ⏳ EN COURS
 
 ### Composants UI à créer :
+
 1. `EmailSequenceBuilder` - Builder visuel de séquences
 2. `SequenceStepEditor` - Éditeur d'étapes
 3. `SequenceManager` - Gestionnaire de séquences (liste + actions)
 
 ### Page à créer :
+
 - `/dashboard/emails/sequences`
 
 ### Edge Function à créer :
+
 - `process-email-sequences` - Traitement automatique des séquences
 
 ---
@@ -56,23 +61,27 @@
 ## 🎯 FONCTIONNALITÉS PLANIFIÉES
 
 ### ✅ Gestion des Séquences
+
 - ✅ Créer/modifier/supprimer des séquences
 - ✅ Définir des triggers (event, time, behavior)
 - ✅ Configurer le statut (active, paused, archived)
 
 ### ⏳ Gestion des Étapes
+
 - ⏳ Ajouter/modifier/supprimer des étapes
 - ⏳ Configurer les délais (immediate, minutes, hours, days)
 - ⏳ Définir les conditions d'envoi
 - ⏳ Sélectionner les templates
 
 ### ⏳ Inscriptions
+
 - ⏳ Inscrire des utilisateurs manuellement
 - ⏳ Inscription automatique via triggers
 - ⏳ Mettre en pause/annuler les inscriptions
 - ⏳ Suivre la progression
 
 ### ⏳ Traitement Automatique
+
 - ⏳ Edge Function pour traiter les séquences
 - ⏳ Envoi automatique des emails selon les délais
 - ⏳ Avancement automatique des inscriptions
@@ -90,4 +99,3 @@
 
 **Phase 3 : 🔄 EN COURS**  
 **Avancement : ~25% (Hooks créés)**
-

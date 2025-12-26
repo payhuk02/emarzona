@@ -145,4 +145,3 @@ Ces éléments n'ont pas été déplacés car ils font partie de l'interaction a
 ---
 
 _Modification appliquée le 2 Février 2025_
-

@@ -33,8 +33,8 @@ supabase migration up 20250231_add_tracking_email_templates
 Vérifier que les templates ont été créés :
 
 ```sql
-SELECT slug, name, product_type, is_active 
-FROM email_templates 
+SELECT slug, name, product_type, is_active
+FROM email_templates
 WHERE slug IN (
   'shipment-tracking-update',
   'shipment-delivered',
@@ -74,6 +74,7 @@ supabase functions deploy track-shipments
 ### Variables d'Environnement
 
 Les variables suivantes sont automatiquement disponibles dans les Edge Functions :
+
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -162,9 +163,9 @@ SELECT * FROM cron.job WHERE jobname = 'track-pending-shipments';
 Voir les logs d'exécution :
 
 ```sql
-SELECT * FROM cron.job_run_details 
+SELECT * FROM cron.job_run_details
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'track-pending-shipments')
-ORDER BY start_time DESC 
+ORDER BY start_time DESC
 LIMIT 10;
 ```
 
@@ -233,6 +234,7 @@ Pour tester avec les vraies APIs :
 ### Structure des Adaptateurs
 
 Chaque adaptateur est dans un fichier séparé :
+
 - `src/lib/shipping/carriers/fedex-adapter.ts`
 - `src/lib/shipping/carriers/dhl-adapter.ts`
 - `src/lib/shipping/carriers/ups-adapter.ts`
@@ -243,22 +245,26 @@ Chaque adaptateur est dans un fichier séparé :
 ## ✅ CHECKLIST DE DÉPLOIEMENT
 
 ### Templates Email
+
 - [ ] Migration SQL exécutée
 - [ ] Templates créés dans la base de données
 - [ ] Templates testés avec un envoi d'email
 
 ### Edge Function
+
 - [ ] Fonction déployée sur Supabase
 - [ ] Fonction testée localement
 - [ ] Fonction testée en production
 
 ### Cron Job
+
 - [ ] Extension `pg_cron` activée
 - [ ] Cron job créé
 - [ ] Cron job testé
 - [ ] Logs vérifiés
 
 ### APIs Transporteurs
+
 - [ ] Credentials obtenus pour chaque transporteur
 - [ ] Variables d'environnement configurées
 - [ ] Adaptateurs testés avec vraies APIs
@@ -299,4 +305,3 @@ SELECT * FROM email_templates WHERE slug LIKE 'shipment%';
 
 **Date de dernière mise à jour** : 31 Janvier 2025  
 **Statut** : ✅ Guide Complet
-

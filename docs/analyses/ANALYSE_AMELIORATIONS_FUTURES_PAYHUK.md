@@ -9,6 +9,7 @@
 ## 📊 ÉTAT ACTUEL - CE QUI EST DÉJÀ EXCELLENT
 
 ### ✅ Fonctionnalités Core (100%)
+
 - E-commerce complet (digital, physique, services, cours)
 - Paiements Moneroo
 - Auth & profils
@@ -17,6 +18,7 @@
 - KYC
 
 ### ✅ Fonctionnalités Avancées Cours (100%)
+
 - Création wizard (7 étapes)
 - Upload vidéo (4 options)
 - Player avancé
@@ -30,6 +32,7 @@
 - Notifications temps réel
 
 ### ✅ Technique (95%)
+
 - Architecture moderne
 - Sécurité A+
 - Performance 95+
@@ -44,11 +47,13 @@
 ### PRIORITÉ 1️⃣ - CRITIQUE (Avant lancement public)
 
 #### 1. Tests Automatisés (Impact: ⭐⭐⭐⭐⭐)
+
 **Problème :** Aucun test actuellement  
 **Risque :** Bugs en production non détectés  
 **Durée estimée :** 8-12h
 
 **À implémenter :**
+
 ```typescript
 // Tests unitaires (Vitest)
 src/
@@ -71,18 +76,21 @@ tests/
 └── notifications.spec.ts (temps réel)
 ```
 
-**Couverture cible :** 
+**Couverture cible :**
+
 - Unitaire: 80%
 - E2E: 50% des user flows critiques
 
 ---
 
 #### 2. Pages Légales Obligatoires (Impact: ⭐⭐⭐⭐⭐)
+
 **Problème :** Manquantes (CGU, confidentialité, etc.)  
 **Risque :** Non-conformité RGPD/légal  
 **Durée estimée :** 4-6h
 
 **À créer :**
+
 ```
 src/pages/legal/
 ├── TermsOfService.tsx (CGU)
@@ -93,6 +101,7 @@ src/pages/legal/
 ```
 
 **Features :**
+
 - Version FR + EN + ES + PT
 - Consentement cookies (banner)
 - Export données utilisateur (RGPD)
@@ -101,6 +110,7 @@ src/pages/legal/
 ---
 
 #### 3. Email Marketing Professionnel (Impact: ⭐⭐⭐⭐⭐)
+
 **Problème :** Emails Supabase basiques  
 **Opportunité :** Augmenter engagement  
 **Durée estimée :** 6-8h
@@ -108,6 +118,7 @@ src/pages/legal/
 **Intégrations recommandées :**
 
 **Option A : SendGrid (Gratuit jusqu'à 100 emails/jour)**
+
 ```typescript
 // Templates professionnels
 - Welcome email (onboarding)
@@ -120,19 +131,22 @@ src/pages/legal/
 ```
 
 **Option B : Resend (Moderne, dev-friendly)**
+
 ```typescript
 // Mêmes templates + React Email
-import { CourseEnrollment } from '@/emails/CourseEnrollment'
+import { CourseEnrollment } from '@/emails/CourseEnrollment';
 ```
 
 ---
 
 #### 4. Monitoring & Error Tracking (Impact: ⭐⭐⭐⭐⭐)
+
 **Problème :** Aucune visibilité sur erreurs production  
 **Risque :** Bugs non détectés, bad UX  
 **Durée estimée :** 2-3h
 
 **Sentry Integration :**
+
 ```bash
 npm install @sentry/react @sentry/vite-plugin
 
@@ -149,6 +163,7 @@ Sentry.init({
 ```
 
 **Bénéfices :**
+
 - Alertes erreurs temps réel
 - Stack traces complets
 - User context (qui a eu l'erreur)
@@ -158,15 +173,17 @@ Sentry.init({
 ---
 
 #### 5. Optimisation Images (Impact: ⭐⭐⭐⭐)
+
 **Problème :** Images non optimisées  
 **Impact :** Performance, SEO  
 **Durée estimée :** 3-4h
 
 **À implémenter :**
+
 ```typescript
 // 1. Lazy loading natif
-<img 
-  src={course.thumbnail} 
+<img
+  src={course.thumbnail}
   loading="lazy"
   decoding="async"
 />
@@ -178,7 +195,7 @@ Sentry.init({
 </picture>
 
 // 3. Responsive images
-<img 
+<img
   srcset="
     thumbnail-320.webp 320w,
     thumbnail-640.webp 640w,
@@ -197,6 +214,7 @@ import Image from 'next/image' // Si migration Next.js
 ### PRIORITÉ 2️⃣ - IMPORTANT (v1.1 - Semaine 2-4)
 
 #### 6. Live Chat Support (Impact: ⭐⭐⭐⭐)
+
 **Opportunité :** Support temps réel  
 **Conversion :** +30-40% typiquement  
 **Durée estimée :** 4-6h
@@ -204,6 +222,7 @@ import Image from 'next/image' // Si migration Next.js
 **Options :**
 
 **A. Crisp (Gratuit illimité)**
+
 ```typescript
 // Simple integration
 <script type="text/javascript">
@@ -213,12 +232,14 @@ import Image from 'next/image' // Si migration Next.js
 ```
 
 **B. Tawk.to (100% gratuit)**
+
 - Widget customizable
 - Multi-agents
 - Mobile apps
 - Analytics
 
 **C. Custom (Supabase Realtime)**
+
 ```typescript
 // Plus complexe mais ownership total
 src/components/chat/
@@ -231,11 +252,13 @@ src/components/chat/
 ---
 
 #### 7. Reviews & Ratings Système (Impact: ⭐⭐⭐⭐⭐)
+
 **Problème :** Table existe mais pas d'UI  
 **Impact :** Social proof, conversions  
 **Durée estimée :** 6-8h
 
 **À créer :**
+
 ```typescript
 src/components/reviews/
 ├── CourseReviews.tsx (liste avis)
@@ -255,6 +278,7 @@ src/components/reviews/
 ```
 
 **Impact :**
+
 - +25% conversions (avg)
 - SEO boost (rich snippets)
 - Trust factor
@@ -262,10 +286,12 @@ src/components/reviews/
 ---
 
 #### 8. Système de Coupons/Promotions (Impact: ⭐⭐⭐⭐)
+
 **Opportunité :** Boost ventes  
 **Durée estimée :** 8-10h
 
 **À développer :**
+
 ```typescript
 // Database
 CREATE TABLE coupons (
@@ -301,6 +327,7 @@ src/components/coupons/
 ---
 
 #### 9. Wishlist/Favoris (Impact: ⭐⭐⭐⭐)
+
 **Opportunité :** Reminder, email remarketing  
 **Durée estimée :** 4-5h
 
@@ -329,6 +356,7 @@ src/components/wishlist/
 ---
 
 #### 10. Multi-devise (Impact: ⭐⭐⭐)
+
 **Opportunité :** International  
 **Durée estimée :** 6-8h
 
@@ -353,10 +381,12 @@ const CURRENCIES = {
 ### PRIORITÉ 3️⃣ - NICE TO HAVE (v1.2 - Mois 2-3)
 
 #### 11. Mobile App (React Native) (Impact: ⭐⭐⭐⭐⭐)
+
 **Opportunité :** 60% trafic mobile  
 **Durée estimée :** 40-60h
 
 **Stack recommandé :**
+
 - React Native + Expo
 - Partage 80% code avec web
 - Push notifications natives
@@ -364,6 +394,7 @@ const CURRENCIES = {
 - Biometric auth
 
 **Features prioritaires :**
+
 - Browse & purchase courses
 - Watch videos offline
 - Receive notifications
@@ -373,6 +404,7 @@ const CURRENCIES = {
 ---
 
 #### 12. Gamification Complète (Impact: ⭐⭐⭐⭐)
+
 **Opportunité :** Engagement, retention  
 **Durée estimée :** 12-15h
 
@@ -444,6 +476,7 @@ CREATE TABLE leaderboards (
 ---
 
 #### 13. Discussion Forums / Community (Impact: ⭐⭐⭐⭐)
+
 **Opportunité :** Engagement, support peer-to-peer  
 **Durée estimée :** 15-20h
 
@@ -503,12 +536,14 @@ CREATE TABLE forum_upvotes (
 ---
 
 #### 14. Live Streaming Courses (Impact: ⭐⭐⭐⭐⭐)
+
 **Opportunité :** Premium pricing  
 **Durée estimée :** 20-30h
 
 **Options techniques :**
 
 **A. Agora.io (Video SDK)**
+
 ```typescript
 // Features
 - HD video streaming
@@ -521,6 +556,7 @@ CREATE TABLE forum_upvotes (
 ```
 
 **B. Mux (Plus simple)**
+
 ```typescript
 // Live streaming as a service
 - Dashboard simple
@@ -531,6 +567,7 @@ CREATE TABLE forum_upvotes (
 ```
 
 **Features :**
+
 - Schedule live sessions
 - Send reminders (email/notif)
 - Live chat
@@ -542,12 +579,14 @@ CREATE TABLE forum_upvotes (
 ---
 
 #### 15. AI Features (Impact: ⭐⭐⭐⭐⭐)
+
 **Opportunité :** Différenciation forte  
 **Durée estimée :** 25-35h
 
 **Features possibles :**
 
 **A. AI Course Assistant (ChatGPT API)**
+
 ```typescript
 // Pour chaque cours
 - Chatbot IA qui répond questions
@@ -569,6 +608,7 @@ const assistant = await openai.chat.completions.create({
 ```
 
 **B. Auto-Transcription Vidéos**
+
 ```typescript
 // Whisper API (OpenAI)
 - Transcription automatique
@@ -578,6 +618,7 @@ const assistant = await openai.chat.completions.create({
 ```
 
 **C. AI Quiz Generator**
+
 ```typescript
 // Generate quizzes from course content
 - Input: course text/video transcript
@@ -587,6 +628,7 @@ const assistant = await openai.chat.completions.create({
 ```
 
 **D. AI Recommendations**
+
 ```typescript
 // Personalized course recommendations
 - Based on user history
@@ -596,6 +638,7 @@ const assistant = await openai.chat.completions.create({
 ```
 
 **E. AI Course Quality Check**
+
 ```typescript
 // Before publishing
 - Check typos
@@ -610,12 +653,14 @@ const assistant = await openai.chat.completions.create({
 ### PRIORITÉ 4️⃣ - FUTUR (v2.0 - Mois 4-6+)
 
 #### 16. Marketplace Public
+
 - Instructeurs externes peuvent vendre
 - Commission plateforme (15-30%)
 - Verification KYC instructeurs
 - Payout automatique
 
 #### 17. Corporate/Enterprise
+
 - White-label pour entreprises
 - SSO (SAML)
 - Custom branding
@@ -624,18 +669,21 @@ const assistant = await openai.chat.completions.create({
 - Bulk licenses
 
 #### 18. Course Bundles/Paths
+
 - Learning paths (multiple courses)
 - Bundles à prix réduit
 - Subscriptions (access all)
 - Membership tiers
 
 #### 19. Social Learning
+
 - Study groups
 - Peer review
 - Collaborative projects
 - Student-to-student messaging
 
 #### 20. Advanced Analytics
+
 - Predictive analytics (dropout risk)
 - A/B testing built-in
 - Cohort analysis
@@ -646,29 +694,30 @@ const assistant = await openai.chat.completions.create({
 
 ## 📊 MATRICE PRIORISATION
 
-| Feature | Impact | Effort | ROI | Priorité |
-|---------|--------|--------|-----|----------|
-| Tests automatisés | ⭐⭐⭐⭐⭐ | 8-12h | Très élevé | 1️⃣ |
-| Pages légales | ⭐⭐⭐⭐⭐ | 4-6h | Très élevé | 1️⃣ |
-| Email marketing | ⭐⭐⭐⭐⭐ | 6-8h | Très élevé | 1️⃣ |
-| Error tracking | ⭐⭐⭐⭐⭐ | 2-3h | Très élevé | 1️⃣ |
-| Image optimization | ⭐⭐⭐⭐ | 3-4h | Élevé | 1️⃣ |
-| Live chat | ⭐⭐⭐⭐ | 4-6h | Élevé | 2️⃣ |
-| Reviews system | ⭐⭐⭐⭐⭐ | 6-8h | Très élevé | 2️⃣ |
-| Coupons | ⭐⭐⭐⭐ | 8-10h | Élevé | 2️⃣ |
-| Wishlist | ⭐⭐⭐⭐ | 4-5h | Élevé | 2️⃣ |
-| Multi-devise | ⭐⭐⭐ | 6-8h | Moyen | 2️⃣ |
-| Mobile app | ⭐⭐⭐⭐⭐ | 40-60h | Très élevé | 3️⃣ |
-| Gamification | ⭐⭐⭐⭐ | 12-15h | Élevé | 3️⃣ |
-| Forums | ⭐⭐⭐⭐ | 15-20h | Élevé | 3️⃣ |
-| Live streaming | ⭐⭐⭐⭐⭐ | 20-30h | Très élevé | 3️⃣ |
-| AI features | ⭐⭐⭐⭐⭐ | 25-35h | Très élevé | 3️⃣ |
+| Feature            | Impact     | Effort | ROI        | Priorité |
+| ------------------ | ---------- | ------ | ---------- | -------- |
+| Tests automatisés  | ⭐⭐⭐⭐⭐ | 8-12h  | Très élevé | 1️⃣       |
+| Pages légales      | ⭐⭐⭐⭐⭐ | 4-6h   | Très élevé | 1️⃣       |
+| Email marketing    | ⭐⭐⭐⭐⭐ | 6-8h   | Très élevé | 1️⃣       |
+| Error tracking     | ⭐⭐⭐⭐⭐ | 2-3h   | Très élevé | 1️⃣       |
+| Image optimization | ⭐⭐⭐⭐   | 3-4h   | Élevé      | 1️⃣       |
+| Live chat          | ⭐⭐⭐⭐   | 4-6h   | Élevé      | 2️⃣       |
+| Reviews system     | ⭐⭐⭐⭐⭐ | 6-8h   | Très élevé | 2️⃣       |
+| Coupons            | ⭐⭐⭐⭐   | 8-10h  | Élevé      | 2️⃣       |
+| Wishlist           | ⭐⭐⭐⭐   | 4-5h   | Élevé      | 2️⃣       |
+| Multi-devise       | ⭐⭐⭐     | 6-8h   | Moyen      | 2️⃣       |
+| Mobile app         | ⭐⭐⭐⭐⭐ | 40-60h | Très élevé | 3️⃣       |
+| Gamification       | ⭐⭐⭐⭐   | 12-15h | Élevé      | 3️⃣       |
+| Forums             | ⭐⭐⭐⭐   | 15-20h | Élevé      | 3️⃣       |
+| Live streaming     | ⭐⭐⭐⭐⭐ | 20-30h | Très élevé | 3️⃣       |
+| AI features        | ⭐⭐⭐⭐⭐ | 25-35h | Très élevé | 3️⃣       |
 
 ---
 
 ## 🎯 ROADMAP RECOMMANDÉE
 
 ### Phase 1 : Pré-lancement (Semaine 1)
+
 **Focus :** Stabilité, légal, monitoring
 
 ```
@@ -683,6 +732,7 @@ Status : CRITIQUE avant launch
 ```
 
 ### Phase 2 : Post-lancement (Semaine 2-4)
+
 **Focus :** Conversion, engagement
 
 ```
@@ -696,6 +746,7 @@ Status : Boost conversions +30-50%
 ```
 
 ### Phase 3 : Croissance (Mois 2-3)
+
 **Focus :** Retention, premium features
 
 ```
@@ -709,6 +760,7 @@ Status : Différenciation marché
 ```
 
 ### Phase 4 : Scale (Mois 4-6)
+
 **Focus :** Mobile, AI, marketplace
 
 ```
@@ -725,6 +777,7 @@ Status : Croissance exponentielle
 ## 💰 IMPACT BUSINESS ESTIMÉ
 
 ### Sans améliorations (v1.0)
+
 ```
 Conversions : 2-3% (baseline)
 Retention : 20-30% après 30 jours
@@ -733,6 +786,7 @@ Churn : 60-70%
 ```
 
 ### Avec Phase 1+2 (v1.1)
+
 ```
 Conversions : 4-5% (+66%)
 Retention : 40-50% (+66%)
@@ -741,6 +795,7 @@ Churn : 40-50% (-30%)
 ```
 
 ### Avec Phase 1+2+3 (v1.2)
+
 ```
 Conversions : 6-8% (+166%)
 Retention : 60-70% (+133%)
@@ -749,6 +804,7 @@ Churn : 25-35% (-50%)
 ```
 
 ### Avec toutes phases (v2.0)
+
 ```
 Conversions : 10-12% (+300%)
 Retention : 80-90% (+200%)
@@ -763,6 +819,7 @@ Churn : 10-15% (-80%)
 ### FOCUS IMMÉDIAT (Cette semaine)
 
 **Si vous lancez dans les 7 jours :**
+
 1. ✅ Pages légales (OBLIGATOIRE - 6h)
 2. ✅ Error tracking Sentry (2h)
 3. ✅ Email marketing setup (4h)
@@ -773,6 +830,7 @@ Churn : 10-15% (-80%)
 ### FOCUS COURT TERME (Semaines 2-4)
 
 **Après premiers utilisateurs :**
+
 1. ✅ Tests automatisés (12h)
 2. ✅ Live chat (6h)
 3. ✅ Reviews system (8h)
@@ -783,6 +841,7 @@ Churn : 10-15% (-80%)
 ### FOCUS MOYEN TERME (Mois 2-3)
 
 **Si traction confirmée :**
+
 1. ✅ Gamification (15h)
 2. ✅ Forums community (20h)
 3. ✅ AI features phase 1 (20h)
@@ -822,6 +881,7 @@ Avant de choisir quoi développer :
 Cochez ce qui vous intéresse le plus :
 
 **CRITIQUE (à faire avant launch public)**
+
 - [ ] Tests automatisés
 - [ ] Pages légales (CGU, confidentialité)
 - [ ] Email marketing (SendGrid/Resend)
@@ -829,6 +889,7 @@ Cochez ce qui vous intéresse le plus :
 - [ ] Image optimization
 
 **IMPORTANT (v1.1 - semaines 2-4)**
+
 - [ ] Live chat support
 - [ ] Reviews & ratings
 - [ ] Système de coupons
@@ -836,6 +897,7 @@ Cochez ce qui vous intéresse le plus :
 - [ ] Multi-devise
 
 **NICE TO HAVE (v1.2 - mois 2-3)**
+
 - [ ] Mobile app (React Native)
 - [ ] Gamification complète
 - [ ] Forums community
@@ -843,6 +905,7 @@ Cochez ce qui vous intéresse le plus :
 - [ ] AI features
 
 **FUTUR (v2.0 - mois 4+)**
+
 - [ ] Marketplace public
 - [ ] Enterprise features
 - [ ] Course bundles
@@ -856,12 +919,14 @@ Cochez ce qui vous intéresse le plus :
 **Payhuk v1.0 est EXCELLENT !** 🚀
 
 Les fonctionnalités actuelles suffisent largement pour :
+
 - ✅ Lancer publiquement
 - ✅ Avoir premiers clients
 - ✅ Générer revenus
 - ✅ Prouver le concept
 
 **Les améliorations proposées sont pour :**
+
 - Augmenter conversions (+300%)
 - Réduire churn (-80%)
 - Différenciation marché
@@ -872,9 +937,9 @@ Les fonctionnalités actuelles suffisent largement pour :
 ---
 
 **Question :** Quelle phase voulez-vous prioriser ?
+
 - Phase 1 (Pré-launch) ?
 - Phase 2 (Post-launch) ?
 - Ou lancer tel quel et itérer ensuite ?
 
 Je suis prêt à implémenter n'importe quelle feature ! 😊
-

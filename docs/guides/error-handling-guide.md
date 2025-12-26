@@ -19,11 +19,13 @@
 ### 1. Toujours Utiliser le Logger
 
 ❌ **Ne pas faire** :
+
 ```typescript
 console.error('Erreur:', error);
 ```
 
 ✅ **Faire** :
+
 ```typescript
 import { logger } from '@/lib/logger';
 logger.error('Erreur lors du chargement des données', { error });
@@ -34,6 +36,7 @@ logger.error('Erreur lors du chargement des données', { error });
 Utiliser les hooks dédiés plutôt que try/catch manuel :
 
 ✅ **Recommandé** :
+
 ```typescript
 const { data, error, isLoading } = useQueryWithErrorHandling({
   queryKey: ['products'],
@@ -48,9 +51,9 @@ Toujours afficher un message clair à l'utilisateur :
 ```typescript
 if (error) {
   toast({
-    title: "Erreur",
-    description: "Impossible de charger les produits. Veuillez réessayer.",
-    variant: "destructive",
+    title: 'Erreur',
+    description: 'Impossible de charger les produits. Veuillez réessayer.',
+    variant: 'destructive',
   });
 }
 ```
@@ -74,6 +77,7 @@ const { data, error, isLoading } = useQueryWithErrorHandling({
 ```
 
 **Caractéristiques** :
+
 - Retry automatique avec exponential backoff
 - Logging automatique vers Sentry
 - Toast utilisateur automatique
@@ -89,7 +93,7 @@ import { useMutationWithRetry } from '@/hooks/useMutationWithRetry';
 const mutation = useMutationWithRetry({
   mutationFn: createProduct,
   onSuccess: () => {
-    toast({ title: "Produit créé avec succès" });
+    toast({ title: 'Produit créé avec succès' });
     queryClient.invalidateQueries(['products']);
   },
   // Gestion automatique des erreurs
@@ -112,9 +116,9 @@ try {
     // Afficher les erreurs de validation
     error.errors.forEach(err => {
       toast({
-        title: "Erreur de validation",
+        title: 'Erreur de validation',
         description: err.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     });
   }
@@ -173,7 +177,7 @@ import { useMutationWithRetry } from '@/hooks/useMutationWithRetry';
 
 const mutation = useMutationWithRetry({
   mutationFn: updateFunction,
-  onSuccess: (data) => {
+  onSuccess: data => {
     // Gestion du succès
   },
   // Retry automatique pour les erreurs réseau
@@ -193,7 +197,7 @@ try {
   await someAsyncOperation();
 } catch (error) {
   handleError(error, {
-    context: 'Nom de l\'opération',
+    context: "Nom de l'opération",
     showToast: true,
   });
 }
@@ -206,6 +210,7 @@ try {
 ### 1. Ne Jamais Ignorer les Erreurs
 
 ❌ **Ne pas faire** :
+
 ```typescript
 try {
   await operation();
@@ -215,6 +220,7 @@ try {
 ```
 
 ✅ **Faire** :
+
 ```typescript
 try {
   await operation();
@@ -281,12 +287,12 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 
 function ProductsList() {
   const { store } = useStore();
-  
-  const { 
-    data: products, 
-    error, 
-    isLoading, 
-    refetch 
+
+  const {
+    data: products,
+    error,
+    isLoading,
+    refetch
   } = useQueryWithErrorHandling({
     queryKey: ['products', store?.id],
     queryFn: () => fetchProducts(store.id),
@@ -303,9 +309,9 @@ function ProductsList() {
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Impossible de charger les produits.
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => refetch()}
             className="ml-2"
           >
@@ -365,8 +371,8 @@ function CreateProductForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* Formulaire */}
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         disabled={mutation.isPending}
       >
         {mutation.isPending ? 'Création...' : 'Créer'}
@@ -387,4 +393,3 @@ function CreateProductForm() {
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

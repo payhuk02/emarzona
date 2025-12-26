@@ -11,6 +11,7 @@
 ### 1. Architecture Actuelle
 
 #### Base de Données
+
 - ✅ Table `stores` existe avec les colonnes nécessaires
 - ✅ Migration `20250130_enforce_store_limit.sql` limite actuellement à **1 boutique** (modifiée depuis la version 3)
 - ✅ Toutes les tables liées utilisent `store_id` comme clé étrangère :
@@ -23,6 +24,7 @@
   - Et bien d'autres...
 
 #### Frontend
+
 - ❌ **StoreContext supprimé** (janvier 2025)
 - ✅ Hook `useStores()` existe mais limite à 1 boutique
 - ✅ Hook `useStore()` récupère uniquement la première boutique
@@ -30,6 +32,7 @@
 - ❌ Pas d'interface de switch entre boutiques
 
 #### Isolation des Données
+
 - ✅ **RLS (Row Level Security)** déjà en place sur toutes les tables
 - ✅ Les politiques RLS filtrent par `store_id` via `user_id`
 - ✅ Les données sont déjà isolées par boutique au niveau base de données
@@ -71,12 +74,14 @@
 **Fichier** : `src/contexts/StoreContext.tsx`
 
 **Responsabilités** :
+
 - Gérer la liste des boutiques de l'utilisateur
 - Gérer la boutique sélectionnée/active
 - Persister la sélection dans `localStorage`
 - Fournir des fonctions pour changer de boutique
 
 **Interface** :
+
 ```typescript
 interface StoreContextType {
   stores: Store[];
@@ -92,11 +97,13 @@ interface StoreContextType {
 ### 2. Hooks Modifiés
 
 #### `useStore.ts`
+
 - Modifier pour utiliser `selectedStoreId` du contexte
 - Récupérer la boutique active au lieu de la première
 - Réagir aux changements de sélection
 
 #### `useStores.ts`
+
 - Modifier pour permettre jusqu'à 3 boutiques
 - Ajouter fonction `canCreateStore()` (retourne `stores.length < 3`)
 - Ajouter fonction `getRemainingStores()` (retourne `3 - stores.length`)
@@ -104,12 +111,14 @@ interface StoreContextType {
 ### 3. Interface Utilisateur
 
 #### `AppSidebar.tsx`
+
 - Ajouter un sous-menu "Boutiques" sous "Tableau de bord"
 - Afficher la liste des boutiques avec indicateur de sélection
 - Bouton "Créer une boutique" (si < 3 boutiques)
 - Switch rapide entre boutiques
 
 #### `Store.tsx`
+
 - Afficher toutes les boutiques de l'utilisateur
 - Permettre la création jusqu'à 3 boutiques
 - Afficher les statistiques par boutique
@@ -117,9 +126,11 @@ interface StoreContextType {
 ### 4. Base de Données
 
 #### Migration SQL
+
 **Fichier** : `supabase/migrations/20250202_restore_multi_stores_limit.sql`
 
 **Actions** :
+
 - Modifier le trigger `check_store_limit()` pour limiter à **3 boutiques**
 - Mettre à jour les messages d'erreur
 - Vérifier que toutes les politiques RLS sont correctes
@@ -224,34 +235,40 @@ interface StoreContextType {
 ## 🛠️ PLAN D'IMPLÉMENTATION
 
 ### Phase 1 : Base de Données ✅
+
 - [x] Analyser les migrations existantes
 - [ ] Créer/modifier la migration pour limiter à 3 boutiques
 - [ ] Vérifier toutes les politiques RLS
 - [ ] Tester la création de boutiques multiples
 
 ### Phase 2 : Contexte React 🔄
+
 - [ ] Créer `StoreContext.tsx`
 - [ ] Implémenter la gestion de la sélection
 - [ ] Ajouter la persistance localStorage
 - [ ] Intégrer dans `App.tsx`
 
 ### Phase 3 : Hooks 🔄
+
 - [ ] Modifier `useStore.ts` pour utiliser le contexte
 - [ ] Modifier `useStores.ts` pour supporter 3 boutiques
 - [ ] Adapter tous les hooks qui utilisent `store_id`
 
 ### Phase 4 : Interface Utilisateur 🔄
+
 - [ ] Ajouter le sélecteur dans `AppSidebar.tsx`
 - [ ] Modifier `Store.tsx` pour afficher toutes les boutiques
 - [ ] Ajouter les indicateurs visuels de sélection
 - [ ] Créer le composant de création de boutique
 
 ### Phase 5 : Isolation des Données 🔄
+
 - [ ] Vérifier que toutes les pages filtrent par `selectedStoreId`
 - [ ] Adapter les dashboards pour la boutique active
 - [ ] Tester l'isolation complète des données
 
 ### Phase 6 : Tests & Validation 🔄
+
 - [ ] Tester la création de 3 boutiques
 - [ ] Tester le switch entre boutiques
 - [ ] Vérifier l'isolation des données
@@ -262,18 +279,22 @@ interface StoreContextType {
 ## ⚠️ POINTS D'ATTENTION
 
 ### 1. Performance
+
 - **Problème** : Charger toutes les boutiques à chaque fois peut être coûteux
 - **Solution** : Mettre en cache la liste des boutiques, ne recharger que si nécessaire
 
 ### 2. Synchronisation
+
 - **Problème** : Plusieurs onglets peuvent avoir des sélections différentes
 - **Solution** : Utiliser `storage` event pour synchroniser entre onglets
 
 ### 3. Données Orphelines
+
 - **Problème** : Si un utilisateur supprime une boutique, les données liées sont supprimées (CASCADE)
 - **Solution** : Ajouter une confirmation avant suppression, avec avertissement sur les données
 
 ### 4. Migration des Données Existantes
+
 - **Problème** : Les utilisateurs actuels ont peut-être déjà plusieurs boutiques
 - **Solution** : La migration SQL doit être compatible avec l'existant
 
@@ -282,10 +303,12 @@ interface StoreContextType {
 ## 📝 FICHIERS À MODIFIER/CRÉER
 
 ### Nouveaux Fichiers
+
 1. `src/contexts/StoreContext.tsx` - Contexte de gestion des boutiques
 2. `supabase/migrations/20250202_restore_multi_stores_limit.sql` - Migration SQL
 
 ### Fichiers à Modifier
+
 1. `src/App.tsx` - Ajouter StoreProvider
 2. `src/hooks/useStore.ts` - Utiliser le contexte
 3. `src/hooks/useStores.ts` - Supporter 3 boutiques
@@ -295,6 +318,7 @@ interface StoreContextType {
 7. `src/components/settings/StoreSettings.tsx` - Adapter l'interface
 
 ### Fichiers à Vérifier (Isolation des Données)
+
 - Tous les hooks qui utilisent `store_id`
 - Toutes les pages qui affichent des données par boutique
 - Tous les composants de dashboard/analytics
@@ -358,10 +382,12 @@ interface StoreContextType {
 ## 📚 RESSOURCES
 
 ### Documentation Supabase
+
 - [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
 - [Triggers](https://supabase.com/docs/guides/database/triggers)
 
 ### Documentation React
+
 - [Context API](https://react.dev/reference/react/createContext)
 - [Custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
 
@@ -370,4 +396,3 @@ interface StoreContextType {
 **Document créé le** : 2 Février 2025  
 **Version** : 1.0  
 **Statut** : 📋 Analyse complète - Prêt pour implémentation
-

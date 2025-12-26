@@ -3,6 +3,7 @@
 ## 🐛 Problème identifié
 
 Sur mobile, après avoir cliqué sur le bouton de sélection de langue (ou tout autre menu), **toute l'application était bloquée** :
+
 - Le menu s'affichait mais ne répondait pas aux interactions
 - L'application entière était figée
 - Impossible de fermer le menu ou d'interagir avec l'interface
@@ -27,6 +28,7 @@ Le **verrouillage de position agressif** dans `useMobileMenu` causait un blocage
 #### 1. Hook `useMobileMenu` - Désactivation du verrouillage agressif
 
 **Avant :**
+
 ```typescript
 // Verrouillage avec requestAnimationFrame en boucle
 const checkPosition = () => {
@@ -43,6 +45,7 @@ observerRef.current = new MutationObserver(() => {
 ```
 
 **Après :**
+
 ```typescript
 const lockPosition = useCallback(() => {
   // DÉSACTIVÉ: Le verrouillage agressif bloque l'application
@@ -58,6 +61,7 @@ const lockPosition = useCallback(() => {
 #### 2. Composant `MobileDropdown` - Suppression des handlers restrictifs
 
 **Avant :**
+
 ```typescript
 const { lockStyles, isLocked } = useMobileMenu({...});
 // Applique lockStyles qui force le positionnement
@@ -71,6 +75,7 @@ onPointerDownOutside={(e) => {
 ```
 
 **Après :**
+
 ```typescript
 // DÉSACTIVÉ: Ne plus utiliser le hook de verrouillage
 const lockStyles = undefined;
@@ -87,12 +92,14 @@ const isLocked = false;
 #### 3. Composant `DropdownMenuContent` - Configuration optimale
 
 **Avant :**
+
 ```typescript
 avoidCollisions={isMobile && mobileOptimized ? false : true}
 sticky={isMobile && mobileOptimized ? "always" : "partial"}
 ```
 
 **Après :**
+
 ```typescript
 // IMPORTANT: Laisser avoidCollisions activé pour que Radix UI gère le positionnement
 avoidCollisions={props.avoidCollisions ?? true}
@@ -110,7 +117,7 @@ sticky={props.sticky ?? "partial"}
 ✅ **Menu fonctionnel** - Le menu s'ouvre et se ferme correctement  
 ✅ **Interactions possibles** - Tous les éléments sont cliquables  
 ✅ **Positionnement stable** - Radix UI gère le positionnement de manière optimale  
-✅ **Performance améliorée** - Plus de boucle infinie qui consomme des ressources  
+✅ **Performance améliorée** - Plus de boucle infinie qui consomme des ressources
 
 ## 📝 Notes techniques
 
@@ -124,6 +131,7 @@ sticky={props.sticky ?? "partial"}
 ### Si le positionnement n'est pas parfait
 
 Si le menu "saute" encore légèrement sur mobile, c'est acceptable car :
+
 - L'application reste fonctionnelle
 - Les interactions fonctionnent
 - Le menu se ferme correctement
@@ -145,8 +153,8 @@ Si nécessaire, on peut ajouter une solution plus légère plus tard, mais pour 
 **Ne pas réactiver le verrouillage agressif** sans une analyse approfondie. Le verrouillage avec `requestAnimationFrame` et `MutationObserver` cause des problèmes de performance et de blocage.
 
 Si un positionnement plus stable est nécessaire à l'avenir, utiliser une approche plus légère :
+
 - Un seul `setTimeout` pour ajuster la position une fois
 - Pas de boucle infinie
 - Pas de `MutationObserver` continu
 - Styles CSS plutôt que JavaScript inline
-

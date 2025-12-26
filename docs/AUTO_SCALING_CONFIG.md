@@ -14,11 +14,11 @@ Vercel scale automatiquement selon la charge avec son Edge Network global.
 
 #### Plans Disponibles
 
-| Plan | Bandwidth | Functions | Auto-Scaling |
-|------|-----------|-----------|--------------|
-| **Hobby** | 100 GB/mois | 100 GB-h/mois | ⚠️ Limité |
-| **Pro** | 1 TB/mois | 1000 GB-h/mois | ✅ Activé |
-| **Enterprise** | Illimité | Illimité | ✅ Activé |
+| Plan           | Bandwidth   | Functions      | Auto-Scaling |
+| -------------- | ----------- | -------------- | ------------ |
+| **Hobby**      | 100 GB/mois | 100 GB-h/mois  | ⚠️ Limité    |
+| **Pro**        | 1 TB/mois   | 1000 GB-h/mois | ✅ Activé    |
+| **Enterprise** | Illimité    | Illimité       | ✅ Activé    |
 
 #### Configuration dans `vercel.json`
 
@@ -55,12 +55,12 @@ Supabase scale automatiquement selon la charge avec son infrastructure cloud.
 
 #### Plans Disponibles
 
-| Plan | Database | Bandwidth | Auto-Scaling |
-|------|----------|-----------|--------------|
-| **Free** | 500 MB | 5 GB/mois | ❌ Non |
-| **Pro** | 8 GB | 50 GB/mois | ✅ Activé |
-| **Team** | 100 GB | 200 GB/mois | ✅ Activé |
-| **Enterprise** | Illimité | Illimité | ✅ Activé |
+| Plan           | Database | Bandwidth   | Auto-Scaling |
+| -------------- | -------- | ----------- | ------------ |
+| **Free**       | 500 MB   | 5 GB/mois   | ❌ Non       |
+| **Pro**        | 8 GB     | 50 GB/mois  | ✅ Activé    |
+| **Team**       | 100 GB   | 200 GB/mois | ✅ Activé    |
+| **Enterprise** | Illimité | Illimité    | ✅ Activé    |
 
 #### Configuration Database
 
@@ -88,7 +88,7 @@ Supabase scale automatiquement selon la charge avec son infrastructure cloud.
 export const config = {
   maxDuration: 10, // secondes
   memory: 1024, // MB
-  regions: ['iad1', 'sfo1', 'fra1']
+  regions: ['iad1', 'sfo1', 'fra1'],
 };
 
 export default async function handler(req: Request) {
@@ -99,6 +99,7 @@ export default async function handler(req: Request) {
 #### Monitoring
 
 Vercel fournit automatiquement :
+
 - **Analytics** : Métriques de performance
 - **Logs** : Logs en temps réel
 - **Alerts** : Alertes automatiques
@@ -118,6 +119,7 @@ Supabase utilise PgBouncer pour le connection pooling :
 #### Read Replicas
 
 Configuration via Supabase Dashboard :
+
 1. Aller dans **Settings** → **Database**
 2. Cliquer sur **Add Read Replica**
 3. Sélectionner la région
@@ -186,5 +188,3 @@ Configuration via Supabase Dashboard :
 ---
 
 **Date de mise à jour** : 28 janvier 2025
-
-

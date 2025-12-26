@@ -20,6 +20,7 @@ Les 3 Edge Functions manquantes pour le système d'emailing ont été déployée
 ### 1. `send-email-campaign` ✅
 
 **Commande exécutée** :
+
 ```bash
 supabase functions deploy send-email-campaign
 ```
@@ -27,6 +28,7 @@ supabase functions deploy send-email-campaign
 **Résultat** : ✅ Déployée avec succès
 
 **Fonctionnalités** :
+
 - Envoi de campagnes email via SendGrid
 - Support des audiences (segment, list, filter)
 - Traitement en batch
@@ -41,6 +43,7 @@ supabase functions deploy send-email-campaign
 ### 2. `process-email-sequences` ✅
 
 **Commande exécutée** :
+
 ```bash
 supabase functions deploy process-email-sequences
 ```
@@ -48,6 +51,7 @@ supabase functions deploy process-email-sequences
 **Résultat** : ✅ Déployée avec succès
 
 **Fonctionnalités** :
+
 - Traite les séquences email automatiques
 - Récupère les prochains emails à envoyer
 - Vérifie les désabonnements
@@ -61,6 +65,7 @@ supabase functions deploy process-email-sequences
 ### 3. `sendgrid-webhook-handler` ✅
 
 **Commande exécutée** :
+
 ```bash
 supabase functions deploy sendgrid-webhook-handler
 ```
@@ -68,6 +73,7 @@ supabase functions deploy sendgrid-webhook-handler
 **Résultat** : ✅ Déployée avec succès
 
 **Fonctionnalités** :
+
 - Reçoit les webhooks SendGrid
 - Met à jour les logs d'emails
 - Met à jour les métriques des campagnes
@@ -80,12 +86,12 @@ supabase functions deploy sendgrid-webhook-handler
 
 ## 📋 État Final
 
-| Edge Function | Présente | Déployée | Fonctionnelle |
-|---------------|----------|----------|---------------|
-| `send-email-campaign` | ✅ | ✅ | ✅ |
-| `process-scheduled-campaigns` | ✅ | ✅ | ⚠️ (401 corrigé, à tester) |
-| `process-email-sequences` | ✅ | ✅ | ✅ |
-| `sendgrid-webhook-handler` | ✅ | ✅ | ✅ |
+| Edge Function                 | Présente | Déployée | Fonctionnelle              |
+| ----------------------------- | -------- | -------- | -------------------------- |
+| `send-email-campaign`         | ✅       | ✅       | ✅                         |
+| `process-scheduled-campaigns` | ✅       | ✅       | ⚠️ (401 corrigé, à tester) |
+| `process-email-sequences`     | ✅       | ✅       | ✅                         |
+| `sendgrid-webhook-handler`    | ✅       | ✅       | ✅                         |
 
 ---
 
@@ -96,6 +102,7 @@ supabase functions deploy sendgrid-webhook-handler
 Maintenant que `send-email-campaign` est déployée, `process-scheduled-campaigns` devrait pouvoir traiter les campagnes.
 
 **Test à effectuer** :
+
 ```sql
 SELECT net.http_post(
   url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/process-scheduled-campaigns',
@@ -108,6 +115,7 @@ SELECT net.http_post(
 ```
 
 **Vérifications** :
+
 - ✅ L'invocation retourne `200 OK` (plus de `401 Unauthorized`)
 - ✅ La campagne passe de `scheduled` à `sending` ou `completed`
 - ✅ Des logs d'emails sont créés dans `email_logs`
@@ -136,6 +144,7 @@ SELECT cron.schedule(
 ### 3. Configurer les Webhooks SendGrid
 
 Dans SendGrid Dashboard :
+
 1. Allez dans **Settings** > **Mail Settings** > **Event Webhook**
 2. Configurez l'URL : `https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sendgrid-webhook-handler`
 3. Sélectionnez les événements à recevoir :
@@ -163,5 +172,3 @@ Dans SendGrid Dashboard :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025, 10:45 UTC
-
-

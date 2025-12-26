@@ -16,6 +16,7 @@ Implémentation de la validation serveur pour les wizards de création de produi
 ### 1. Fonctions RPC Supabase
 
 #### `supabase/migrations/20250128_wizard_server_validation.sql` (nouveau)
+
 - ✅ **`validate_product_slug`** : Validation unicité slug (products, digital_products, physical_products, services)
 - ✅ **`validate_sku`** : Validation unicité SKU pour produits physiques
 - ✅ **`validate_digital_version`** : Validation unicité version pour produits digitaux
@@ -24,6 +25,7 @@ Implémentation de la validation serveur pour les wizards de création de produi
 - ✅ **`validate_service`** : Validation complète service
 
 #### Validations Implémentées
+
 - ✅ **Format** : Regex pour slug, SKU, version, URL
 - ✅ **Longueur** : Min/max pour tous les champs
 - ✅ **Unicité** : Vérification dans toutes les tables concernées
@@ -32,6 +34,7 @@ Implémentation de la validation serveur pour les wizards de création de produi
 ### 2. Service de Validation Serveur
 
 #### `src/lib/server-validation.ts` (nouveau)
+
 - ✅ **Fonctions TypeScript** : Wrappers pour appeler les RPC
 - ✅ **Gestion d'erreurs** : Normalisation et logging
 - ✅ **Types** : Interfaces TypeScript pour résultats
@@ -39,6 +42,7 @@ Implémentation de la validation serveur pour les wizards de création de produi
 ### 3. Hook useWizardServerValidation
 
 #### `src/hooks/useWizardServerValidation.ts` (nouveau)
+
 - ✅ **Validation slug** : `validateSlug()`
 - ✅ **Validation SKU** : `validateSku()`
 - ✅ **Validation version** : `validateVersion()`
@@ -51,12 +55,14 @@ Implémentation de la validation serveur pour les wizards de création de produi
 ## 📊 COMPARAISON AVANT/APRÈS
 
 ### Avant
+
 - ❌ Validation uniquement côté client (Zod)
 - ❌ Pas de vérification d'unicité serveur
 - ❌ Risque de conflits (slug, SKU dupliqués)
 - ❌ Pas de validation des contraintes métier serveur
 
 ### Après
+
 - ✅ **Validation hybride** : Client (Zod) + Serveur (RPC)
 - ✅ **Vérification unicité** : Slug, SKU, version vérifiés serveur
 - ✅ **Sécurité renforcée** : Contournement client impossible
@@ -73,7 +79,7 @@ import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 
 const wizard = () => {
   const { storeId } = useStore();
-  const { validateSlug, validateDigitalProduct, isValidating, serverErrors } = 
+  const { validateSlug, validateDigitalProduct, isValidating, serverErrors } =
     useWizardServerValidation({ storeId });
 
   const validateStep = async (step: number): Promise<boolean> => {
@@ -113,9 +119,9 @@ const handleSlugChange = async (slug: string) => {
 };
 
 // Afficher erreur serveur
-{serverErrors.slug && (
-  <p className="text-sm text-destructive">{serverErrors.slug}</p>
-)}
+{
+  serverErrors.slug && <p className="text-sm text-destructive">{serverErrors.slug}</p>;
+}
 ```
 
 ---
@@ -123,11 +129,13 @@ const handleSlugChange = async (slug: string) => {
 ## 📁 FICHIERS CRÉÉS/MODIFIÉS
 
 ### Nouveaux Fichiers
+
 - ✅ `supabase/migrations/20250128_wizard_server_validation.sql` (créé)
 - ✅ `src/lib/server-validation.ts` (créé)
 - ✅ `src/hooks/useWizardServerValidation.ts` (créé)
 
 ### Fichiers à Modifier (Intégration)
+
 - 🔄 `src/components/products/create/digital/CreateDigitalProductWizard_v2.tsx` (à intégrer)
 - 🔄 `src/components/products/create/physical/CreatePhysicalProductWizard_v2.tsx` (à intégrer)
 - 🔄 `src/components/products/create/service/CreateServiceWizard_v2.tsx` (à intégrer)
@@ -137,31 +145,37 @@ const handleSlugChange = async (slug: string) => {
 ## ⚙️ FONCTIONS RPC CRÉÉES
 
 ### validate_product_slug
+
 - **Paramètres** : `p_slug`, `p_store_id`, `p_product_id` (optionnel)
 - **Retour** : `{ valid: boolean, error?: string, message?: string }`
 - **Vérifications** : Format, longueur, unicité dans toutes les tables
 
 ### validate_sku
+
 - **Paramètres** : `p_sku`, `p_store_id`, `p_product_id` (optionnel)
 - **Retour** : `{ valid: boolean, error?: string, message?: string }`
 - **Vérifications** : Format, longueur, unicité
 
 ### validate_digital_version
+
 - **Paramètres** : `p_version`, `p_digital_product_id`, `p_store_id`
 - **Retour** : `{ valid: boolean, error?: string, message?: string }`
 - **Vérifications** : Format, unicité pour le produit
 
 ### validate_digital_product
+
 - **Paramètres** : `p_name`, `p_slug`, `p_price`, `p_store_id`, `p_product_id` (optionnel)
 - **Retour** : `{ valid: boolean, errors?: Array<{field, message}> }`
 - **Vérifications** : Nom, prix, slug (via validate_product_slug)
 
 ### validate_physical_product
+
 - **Paramètres** : `p_name`, `p_slug`, `p_price`, `p_sku`, `p_weight`, `p_quantity`, `p_store_id`, `p_product_id` (optionnel)
 - **Retour** : `{ valid: boolean, errors?: Array<{field, message}> }`
 - **Vérifications** : Nom, prix, slug, SKU, poids, quantité
 
 ### validate_service
+
 - **Paramètres** : `p_name`, `p_slug`, `p_price`, `p_duration`, `p_max_participants`, `p_meeting_url`, `p_store_id`, `p_product_id` (optionnel)
 - **Retour** : `{ valid: boolean, errors?: Array<{field, message}> }`
 - **Vérifications** : Nom, prix, slug, durée, participants, URL
@@ -196,15 +210,18 @@ const handleSlugChange = async (slug: string) => {
 ## ⚠️ NOTES IMPORTANTES
 
 ### Migration SQL
+
 - ⚠️ **Exécuter la migration** : `supabase/migrations/20250128_wizard_server_validation.sql`
 - ⚠️ **Permissions** : Les fonctions sont `SECURITY DEFINER` avec `GRANT EXECUTE TO authenticated`
 
 ### Intégration Wizards
+
 - ✅ **Validation hybride** : Client d'abord, puis serveur
 - ✅ **Async** : `validateStep` doit être async
 - ✅ **Gestion erreurs** : Utiliser `serverErrors` pour afficher erreurs
 
 ### Performance
+
 - ✅ **Validation conditionnelle** : Seulement si données valides côté client
 - ✅ **Debouncing** : Pour validation temps réel (slug, SKU)
 - ✅ **Cache** : Résultats de validation peuvent être mis en cache
@@ -221,4 +238,3 @@ const handleSlugChange = async (slug: string) => {
 
 **Date de complétion** : 28 Janvier 2025  
 **Version** : 1.0.0
-

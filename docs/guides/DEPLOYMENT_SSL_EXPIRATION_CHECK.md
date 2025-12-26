@@ -5,6 +5,7 @@
 L'Edge Function `check-ssl-expiration` a été déployée avec succès sur votre projet Supabase.
 
 **URL de la fonction :**
+
 ```
 https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration
 ```
@@ -18,7 +19,8 @@ https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration
 3. Configurez :
    - **Schedule:** `0 9 * * *` (Tous les jours à 9h00 UTC)
    - **Name:** `check-ssl-expiration-daily`
-   - **Command:** 
+   - **Command:**
+
    ```sql
    SELECT net.http_post(
      url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration',
@@ -26,6 +28,7 @@ https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration
      body := '{}'::jsonb
    ) AS request_id;
    ```
+
    - Remplacez `YOUR_SERVICE_ROLE_KEY` par votre clé service role (disponible dans Settings > API)
    - **Active:** ✅ Activé
 
@@ -47,6 +50,7 @@ curl -X POST https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-exp
 ```
 
 Ou directement dans le dashboard Supabase :
+
 1. Allez dans **Edge Functions > check-ssl-expiration**
 2. Cliquez sur **"Invoke"**
 3. Cliquez sur **"Run Function"**
@@ -72,6 +76,7 @@ Les alertes SSL respectent les paramètres configurés dans l'onglet **Notificat
 - **Email SSL expiré** : Active/désactive les alertes pour certificats expirés
 
 Les emails sont envoyés à :
+
 1. L'email de notification configuré dans les paramètres de la boutique (`notification_email`)
 2. Ou l'email de contact de la boutique (`contact_email`) si aucun email de notification n'est configuré
 
@@ -82,33 +87,35 @@ Les emails sont envoyés à :
 Pour vérifier plus souvent (par exemple, toutes les 6 heures) :
 
 ```sql
-UPDATE cron.job 
-SET schedule = '0 */6 * * *' 
+UPDATE cron.job
+SET schedule = '0 */6 * * *'
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 ### Désactiver temporairement
 
 ```sql
-UPDATE cron.job 
-SET active = false 
+UPDATE cron.job
+SET active = false
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 ### Réactiver
 
 ```sql
-UPDATE cron.job 
-SET active = true 
+UPDATE cron.job
+SET active = true
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 ## 📝 Logs
 
 Les logs de la fonction sont disponibles dans :
+
 - **Edge Functions > check-ssl-expiration > Logs**
 
 Vous pouvez voir :
+
 - Les certificats vérifiés
 - Les alertes envoyées
 - Les erreurs éventuelles
@@ -118,7 +125,7 @@ Vous pouvez voir :
 Pour voir le statut SSL de vos boutiques :
 
 ```sql
-SELECT 
+SELECT
   s.id,
   s.name as store_name,
   s.custom_domain,
@@ -126,7 +133,7 @@ SELECT
   ssl.certificate_valid,
   ssl.certificate_expires_at,
   ssl.last_checked_at,
-  CASE 
+  CASE
     WHEN ssl.certificate_expires_at < NOW() THEN 'Expired'
     WHEN ssl.certificate_expires_at < NOW() + INTERVAL '30 days' THEN 'Expiring Soon'
     ELSE 'Valid'
@@ -149,13 +156,14 @@ ORDER BY ssl.certificate_expires_at ASC;
 ### La fonction ne s'exécute pas
 
 1. Vérifiez que le cron job est actif :
+
    ```sql
    SELECT * FROM cron.job WHERE jobname = 'check-ssl-expiration-daily';
    ```
 
 2. Vérifiez les logs du cron :
    ```sql
-   SELECT * FROM cron.job_run_details 
+   SELECT * FROM cron.job_run_details
    WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'check-ssl-expiration-daily')
    ORDER BY start_time DESC
    LIMIT 10;
@@ -172,4 +180,3 @@ ORDER BY ssl.certificate_expires_at ASC;
 
 **Date de création :** 2025-02-02  
 **Dernière mise à jour :** 2025-02-02
-

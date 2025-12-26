@@ -2,7 +2,7 @@
 
 **Date**: 1 Mars 2025  
 **Problème**: Les images uploadées dans `product-images/artist/` ne sont pas accessibles publiquement  
-**Statut**: ✅ Migration de correction créée  
+**Statut**: ✅ Migration de correction créée
 
 ---
 
@@ -11,6 +11,7 @@
 Lors de l'upload d'images pour les œuvres d'artiste, les fichiers sont bien uploadés dans Supabase Storage mais les URLs publiques retournent du JSON au lieu des images. Cela est dû à un problème de configuration RLS (Row Level Security) sur le bucket `product-images`.
 
 **Symptômes**:
+
 - ✅ Upload réussi (fichier confirmé présent dans le bucket)
 - ❌ URLs publiques retournent du JSON (status 200 mais contentType: 'application/json')
 - ❌ URLs signées échouent également
@@ -28,6 +29,7 @@ Une migration consolidée a été créée pour corriger définitivement le probl
 **Fichier**: `supabase/migrations/20250301_final_fix_product_images_access.sql`
 
 Cette migration :
+
 1. ✅ S'assure que le bucket `product-images` existe et est public
 2. ✅ Nettoie toutes les anciennes politiques RLS conflictuelles
 3. ✅ Crée 4 politiques RLS correctes :
@@ -40,6 +42,7 @@ Cette migration :
 ### Workaround Temporaire Implémenté
 
 Un workaround a été implémenté dans le code (`ArtistBasicInfoForm.tsx`) :
+
 - Utilisation de blob URLs temporaires pour l'affichage immédiat
 - Après 30 secondes, test automatique de l'URL publique
 - Si l'URL publique fonctionne, passage automatique
@@ -159,6 +162,7 @@ Cette politique permet à **tout le monde** (public) de lire les fichiers du buc
 ### Pourquoi le Blob URL Temporaire ?
 
 Le code utilise un blob URL temporaire car :
+
 - Il permet l'affichage immédiat même si les URLs publiques ne fonctionnent pas encore
 - Il fonctionne via l'API Supabase Storage qui a toujours accès (même si public ne fonctionne pas)
 - Il se transforme automatiquement en URL publique après 30 secondes si possible
@@ -168,6 +172,7 @@ Le code utilise un blob URL temporaire car :
 ### Migration Idempotente
 
 La migration est idempotente, ce qui signifie qu'elle peut être exécutée plusieurs fois sans problème :
+
 - Elle supprime d'abord toutes les anciennes politiques
 - Puis crée les nouvelles politiques
 - Elle vérifie automatiquement la configuration
@@ -189,8 +194,3 @@ Après avoir exécuté la migration et attendu la propagation :
 
 **Document créé le**: 1 Mars 2025  
 **Dernière mise à jour**: 1 Mars 2025
-
-
-
-
-

@@ -572,10 +572,7 @@ const Marketplace = () => {
   // ✅ OPTIMISATION: Synchroniser les produits React Query avec l'état local
   // Version simplifiée pour éviter les boucles infinies
   // Utiliser useMemo pour créer une clé stable basée sur les IDs
-  const queryProductsKey = useMemo(
-    () => queryProducts.map(p => p.id).join(','),
-    [queryProducts]
-  );
+  const queryProductsKey = useMemo(() => queryProducts.map(p => p.id).join(','), [queryProducts]);
   const rpcProductsKey = useMemo(
     () => (rpcFilteredProducts || []).map(p => p.id).join(','),
     [rpcFilteredProducts]

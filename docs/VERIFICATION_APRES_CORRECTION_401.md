@@ -19,18 +19,21 @@
 ### 1. Vérifier les Invocations de l'Edge Function
 
 **Dans Supabase Dashboard :**
+
 1. Allez dans **Edge Functions** > **process-scheduled-campaigns** > **Invocations**
 2. Vérifiez les **dernières invocations** :
    - Devrait être **200 OK** au lieu de **401 Unauthorized**
    - Vérifiez autour de `10:37:00` (moment du test)
 
 **Si toujours 401 :**
+
 - Vérifiez que l'Edge Function a bien été redéployée
 - Vérifiez que le header `x-cron-secret` est bien envoyé
 
 ### 2. Vérifier les Logs de l'Edge Function
 
 **Dans Supabase Dashboard :**
+
 1. Allez dans **Edge Functions** > **process-scheduled-campaigns** > **Logs**
 2. Changez le filtre de temps à **"Last 15 min"** ou **"Last hour"**
 3. Vérifiez les logs pour voir :
@@ -52,6 +55,7 @@ SELECT net.http_post(
 ```
 
 **Attendez 5-10 secondes**, puis vérifiez :
+
 - Le statut de la campagne
 - Les logs d'emails
 - Les invocations de l'Edge Function
@@ -59,7 +63,7 @@ SELECT net.http_post(
 ### 4. Vérifier le Statut de la Campagne Après Test
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -78,6 +82,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### Problème 1 : Edge Function Non Redéployée
 
 **Solution :**
+
 - Vérifiez dans **Edge Functions** > **process-scheduled-campaigns** > **Code**
 - Vérifiez que le code contient la vérification `x-cron-secret`
 - Si non, redéployez : `supabase functions deploy process-scheduled-campaigns`
@@ -85,6 +90,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### Problème 2 : Cron Job Non Mis à Jour
 
 **Solution :**
+
 - Vérifiez le cron job avec :
   ```sql
   SELECT command FROM cron.job WHERE jobname = 'process-scheduled-email-campaigns';
@@ -95,6 +101,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### Problème 3 : Erreur dans l'Edge Function
 
 **Solution :**
+
 - Vérifiez les logs de l'Edge Function pour des erreurs
 - Vérifiez que `SUPABASE_SERVICE_ROLE_KEY` est configuré
 - Vérifiez que `SENDGRID_API_KEY` est configuré (optionnel mais recommandé)
@@ -113,5 +120,3 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

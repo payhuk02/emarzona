@@ -26,6 +26,7 @@
 ## ⚠️ Routes Orphelines (Non présentes dans le Sidebar)
 
 ### Routes Account (Portail Client)
+
 Ces routes sont accessibles via le sidebar "Mon Compte" mais pourraient être mieux organisées :
 
 - ✅ `/account/orders` - **DÉJÀ PRÉSENT** dans "Mon Compte" → "Mes Commandes"
@@ -115,16 +116,19 @@ L'ordre actuel est bon, mais on pourrait améliorer la logique :
 ```
 
 **Déplacer vers d'autres sections** :
+
 - "Créer un Cours" → Section "Produits & Cours"
 - "Tableau de bord Affilié" → Section "Marketing & Croissance"
 
 ### 2. Section "Produits & Cours" - Améliorations
 
 **Ajouter** :
+
 - "Créer un Cours" (déplacé depuis "Mon Compte")
 - "Gestion des Licences" (`/dashboard/license-management`)
 
 **Réorganiser** :
+
 ```typescript
 {
   label: "Produits & Cours",
@@ -133,7 +137,7 @@ L'ordre actuel est bon, mais on pourrait améliorer la logique :
     { title: "Produits", url: "/dashboard/products" },
     { title: "Mes Cours", url: "/dashboard/my-courses" },
     { title: "Créer un Cours", url: "/dashboard/courses/new" },
-    
+
     // Produits Digitaux
     { title: "Produits Digitaux", url: "/dashboard/digital-products" },
     { title: "Mes Téléchargements", url: "/dashboard/my-downloads" },
@@ -141,7 +145,7 @@ L'ordre actuel est bon, mais on pourrait améliorer la logique :
     { title: "Gestion des Licences", url: "/dashboard/license-management" },
     { title: "Bundles Produits", url: "/dashboard/digital-products/bundles/create" },
     { title: "Mises à jour Digitales", url: "/dashboard/digital/updates" },
-    
+
     // Analytics
     { title: "Analytics Digitaux", url: "/dashboard/digital-products" },
   ]
@@ -151,22 +155,26 @@ L'ordre actuel est bon, mais on pourrait améliorer la logique :
 ### 3. Section "Ventes & Logistique" - Duplications
 
 **Problème** : "Bundles Produits" apparaît deux fois :
+
 - Ligne 218 : `/dashboard/digital-products/bundles/create` (Produits Digitaux)
 - Ligne 388 : `/dashboard/physical-bundles` (Produits Physiques)
 
 **Solution** : Renommer pour clarifier :
+
 - "Bundles Produits Digitaux" → `/dashboard/digital-products/bundles/create`
 - "Bundles Produits Physiques" → `/dashboard/physical-bundles`
 
 ### 4. Section "Marketing & Croissance" - Ajouts
 
 **Ajouter** :
+
 - "Tableau de bord Affilié" (déplacé depuis "Mon Compte")
 - "Gestion des Affiliés" (`/dashboard/store-affiliates`)
 
 ### 5. Routes avec Paramètres Dynamiques
 
 Certaines routes avec paramètres ne sont pas dans le sidebar (normal) :
+
 - `/dashboard/digital/updates/:productId` - Route dynamique, accessible via la page principale
 - `/dashboard/services/staff-availability/:serviceId` - Route dynamique
 - `/dashboard/shipping-service-messages/:conversationId` - Route dynamique
@@ -199,15 +207,16 @@ Certaines routes avec paramètres ne sont pas dans le sidebar (normal) :
 ## 🎯 Conclusion
 
 Le sidebar est **globalement bien structuré** avec :
+
 - ✅ Tous les liens valides
 - ✅ Organisation logique par domaines fonctionnels
 - ✅ Séparation claire Admin/User
 - ⚠️ Quelques améliorations d'ordre et de clarté à apporter
 
 Les "routes orphelines" détectées sont en réalité :
+
 - Soit accessibles via les sidebars contextuelles (architecture correcte)
 - Soit des routes dynamiques avec paramètres (normal)
 - Soit des routes admin (correctement isolées)
 
 **Priorité** : Moyenne - Améliorations UX recommandées mais non critiques.
-

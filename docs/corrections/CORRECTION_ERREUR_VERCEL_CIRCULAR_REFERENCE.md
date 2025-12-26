@@ -10,17 +10,20 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 ### Erreur Console Vercel
+
 ```
 Uncaught ReferenceError: Cannot access 'P' before initialization
   at chunk-CDx2IxqZ.js:1:21737
 ```
 
 ### Symptômes
+
 - ✅ Application fonctionne **localement** (`npm run dev`)
 - ❌ Application **ne démarre pas** sur Vercel (écran noir)
 - ❌ Erreur de référence circulaire dans le code minifié
 
 ### Cause Root
+
 L'erreur `Cannot access 'P' before initialization` est typique d'un problème de **référence circulaire** ou d'**ordre d'initialisation** causé par :
 
 1. **Tree shaking trop agressif** : `moduleSideEffects: false` supprimait des side effects nécessaires
@@ -36,6 +39,7 @@ L'erreur `Cannot access 'P' before initialization` est typique d'un problème de
 #### 1. Ajustement Tree Shaking (moins agressif)
 
 **AVANT** :
+
 ```typescript
 treeshake: {
   moduleSideEffects: false, // ❌ Trop agressif
@@ -45,6 +49,7 @@ treeshake: {
 ```
 
 **APRÈS** :
+
 ```typescript
 treeshake: {
   moduleSideEffects: 'no-external', // ✅ Préserver les side effects internes
@@ -55,12 +60,14 @@ treeshake: {
 ```
 
 **Explication** :
+
 - `moduleSideEffects: 'no-external'` préserve les side effects des modules internes
 - Évite la suppression de code nécessaire à l'initialisation
 
 #### 2. Ajout CommonJS Options
 
 **NOUVEAU** :
+
 ```typescript
 commonjsOptions: {
   transformMixedEsModules: true,
@@ -69,12 +76,14 @@ commonjsOptions: {
 ```
 
 **Explication** :
+
 - `strictRequires: false` permet un ordre d'initialisation plus flexible
 - `transformMixedEsModules: true` améliore la compatibilité ESM/CommonJS
 
 #### 3. Correction Linting
 
 **AVANT** :
+
 ```typescript
 react({
   jsxRuntime: 'automatic', // ❌ Option non supportée
@@ -82,6 +91,7 @@ react({
 ```
 
 **APRÈS** :
+
 ```typescript
 react({
   // Configuration React - jsxRuntime: 'automatic' est la valeur par défaut
@@ -89,6 +99,7 @@ react({
 ```
 
 **Explication** :
+
 - `jsxRuntime: 'automatic'` est la valeur par défaut de React 17+
 - L'option n'existe pas dans le type `Options$1` du plugin React Vite
 
@@ -96,12 +107,12 @@ react({
 
 ## 📊 RÉSULTAT
 
-| Avant | Après |
-|-------|-------|
-| ❌ Erreur `Cannot access 'P' before initialization` | ✅ Initialisation correcte |
-| ❌ Écran noir sur Vercel | ✅ Application démarre |
-| ❌ Tree shaking trop agressif | ✅ Tree shaking optimisé |
-| ❌ Problèmes CommonJS | ✅ Options CommonJS ajustées |
+| Avant                                               | Après                        |
+| --------------------------------------------------- | ---------------------------- |
+| ❌ Erreur `Cannot access 'P' before initialization` | ✅ Initialisation correcte   |
+| ❌ Écran noir sur Vercel                            | ✅ Application démarre       |
+| ❌ Tree shaking trop agressif                       | ✅ Tree shaking optimisé     |
+| ❌ Problèmes CommonJS                               | ✅ Options CommonJS ajustées |
 
 ---
 
@@ -110,18 +121,22 @@ react({
 **Statut**: ✅ **CORRIGÉ & PUSHÉ**
 
 ### Commit
+
 ```
 cdfd9f0 - fix: Correction erreur Vercel - Cannot access before initialization - Ajustement tree shaking et CommonJS options
 ```
 
 ### Push GitHub
+
 ✅ **Push réussi** sur `main`
+
 ```
 To https://github.com/payhuk02/payhula.git
    fcbd4f7..cdfd9f0  main -> main
 ```
 
 ### Build Vercel
+
 ⏳ **Rebuild automatique en cours** (détection du nouveau commit)
 
 ---
@@ -161,11 +176,13 @@ To https://github.com/payhuk02/payhula.git
 ### Si l'erreur persiste
 
 1. **Vérifier les imports circulaires** :
+
    ```bash
    npx madge --circular src/
    ```
 
 2. **Vérifier les chunks volumineux** :
+
    ```bash
    npm run build
    # Vérifier dist/stats.html
@@ -190,5 +207,3 @@ To https://github.com/payhuk02/payhula.git
 **Date de correction** : 5 Novembre 2025  
 **Commit** : `cdfd9f0`  
 **Status** : ✅ **RÉSOLU**
-
-

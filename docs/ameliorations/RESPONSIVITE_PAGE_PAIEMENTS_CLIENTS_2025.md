@@ -25,49 +25,57 @@
 #### A. Titre Principal
 
 **Avant** :
+
 ```tsx
-className="text-lg sm:text-2xl md:text-3xl"
+className = 'text-lg sm:text-2xl md:text-3xl';
 ```
 
 **Après** :
+
 ```tsx
-className="text-base sm:text-lg md:text-2xl lg:text-3xl"
+className = 'text-base sm:text-lg md:text-2xl lg:text-3xl';
 ```
 
 #### B. Sous-titre
 
 **Avant** :
+
 ```tsx
-className="text-xs sm:text-sm"
+className = 'text-xs sm:text-sm';
 ```
 
 **Après** :
+
 ```tsx
-className="text-[10px] sm:text-xs md:text-sm"
+className = 'text-[10px] sm:text-xs md:text-sm';
 ```
 
 #### C. Icône
 
 **Avant** :
+
 ```tsx
-className="h-5 w-5 sm:h-6 sm:w-6"
+className = 'h-5 w-5 sm:h-6 sm:w-6';
 ```
 
 **Après** :
+
 ```tsx
-className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6"
+className = 'h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6';
 ```
 
 #### D. Container et Espacements
 
 **Avant** :
+
 ```tsx
-className="container mx-auto p-6 space-y-6"
+className = 'container mx-auto p-6 space-y-6';
 ```
 
 **Après** :
+
 ```tsx
-className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6"
+className = 'container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6';
 ```
 
 ---
@@ -77,6 +85,7 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 #### A. Boutons Header
 
 **Avant** :
+
 ```tsx
 <Button variant="outline">
   <RefreshCw className="h-4 w-4 mr-2" />
@@ -85,6 +94,7 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 ```
 
 **Après** :
+
 ```tsx
 <Button variant="outline" size="sm" className="text-xs sm:text-sm">
   <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -94,6 +104,7 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 ```
 
 **Changements** :
+
 - Texte abrégé sur mobile ("Raf." au lieu de "Actualiser")
 - Icônes plus petites
 - Taille de bouton réduite (`size="sm"`)
@@ -105,11 +116,13 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 #### A. Titres des Cards
 
 **Avant** :
+
 ```tsx
 <CardTitle className="text-xs sm:text-sm font-medium">
 ```
 
 **Après** :
+
 ```tsx
 <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
 ```
@@ -117,11 +130,13 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 #### B. Valeurs des Stats
 
 **Avant** :
+
 ```tsx
 <div className="text-lg sm:text-2xl font-bold">
 ```
 
 **Après** :
+
 ```tsx
 <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-bold">
 ```
@@ -129,12 +144,14 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 #### C. Paddings des Cards
 
 **Avant** :
+
 ```tsx
 <CardHeader className="... pb-2">
 <CardContent>
 ```
 
 **Après** :
+
 ```tsx
 <CardHeader className="... pb-1 sm:pb-2 p-3 sm:p-4 md:p-6">
 <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -143,16 +160,19 @@ className="container mx-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y
 #### D. Grid Layout
 
 **Avant** :
+
 ```tsx
-className="grid gap-4 md:grid-cols-4 lg:grid-cols-5"
+className = 'grid gap-4 md:grid-cols-4 lg:grid-cols-5';
 ```
 
 **Après** :
+
 ```tsx
-className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5"
+className = 'grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5';
 ```
 
 **Changements** :
+
 - Grid 2 colonnes sur mobile
 - Gaps réduits sur mobile
 
@@ -163,11 +183,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### A. TabsList
 
 **Avant** :
+
 ```tsx
 <TabsList className="grid w-full grid-cols-3">
 ```
 
 **Après** :
+
 ```tsx
 <TabsList className="grid w-full grid-cols-3 text-[10px] sm:text-xs md:text-sm">
 ```
@@ -175,11 +197,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### B. TabsTrigger
 
 **Avant** :
+
 ```tsx
 <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
 ```
 
 **Après** :
+
 ```tsx
 <TabsTrigger value="overview" className="text-[10px] sm:text-xs md:text-sm">
   Vue d'ensemble
@@ -193,24 +217,26 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### A. En-têtes de Colonnes
 
 **Avant** :
+
 ```tsx
 <TableHead>Transaction ID</TableHead>
 ```
 
 **Après** :
+
 ```tsx
-<TableHead className="text-[10px] sm:text-xs md:text-sm">
-  Transaction ID
-</TableHead>
+<TableHead className="text-[10px] sm:text-xs md:text-sm">Transaction ID</TableHead>
 ```
 
 #### B. Colonnes Masquées sur Mobile
 
 **Paiements Table** :
+
 - `Méthode` : Masquée sur mobile (`hidden md:table-cell`)
 - `Commande` : Masquée sur mobile/tablet (`hidden lg:table-cell`)
 
 **Clients Table** :
+
 - `Contact` : Masquée sur mobile (`hidden sm:table-cell`)
 - `Localisation` : Masquée sur mobile/tablet (`hidden md:table-cell`)
 - `Date` : Masquée sur mobile/tablet (`hidden lg:table-cell`)
@@ -218,11 +244,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### C. Cellules de Table
 
 **Avant** :
+
 ```tsx
 <TableCell className="font-mono text-xs">
 ```
 
 **Après** :
+
 ```tsx
 <TableCell className="font-mono text-[10px] sm:text-xs">
 ```
@@ -230,11 +258,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### D. Textes dans les Cellules
 
 **Avant** :
+
 ```tsx
 <div className="font-medium text-sm">
 ```
 
 **Après** :
+
 ```tsx
 <div className="font-medium text-[10px] sm:text-xs md:text-sm">
 ```
@@ -246,11 +276,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### A. Titres des Cards
 
 **Avant** :
+
 ```tsx
 <CardTitle className="text-base sm:text-lg">
 ```
 
 **Après** :
+
 ```tsx
 <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
 ```
@@ -258,11 +290,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### B. Descriptions
 
 **Avant** :
+
 ```tsx
 <CardDescription>Les 10 derniers paiements</CardDescription>
 ```
 
 **Après** :
+
 ```tsx
 <CardDescription className="text-[10px] sm:text-xs md:text-sm">
   Les 10 derniers paiements
@@ -272,11 +306,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### C. Items de Liste
 
 **Avant** :
+
 ```tsx
 <span className="font-medium text-sm">
 ```
 
 **Après** :
+
 ```tsx
 <span className="font-medium text-[10px] sm:text-xs md:text-sm">
 ```
@@ -288,29 +324,27 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### A. Input de Recherche
 
 **Avant** :
+
 ```tsx
-<Input
-  placeholder="Rechercher..."
-  className="pl-8"
-/>
+<Input placeholder="Rechercher..." className="pl-8" />
 ```
 
 **Après** :
+
 ```tsx
-<Input
-  placeholder="Rechercher..."
-  className="pl-7 sm:pl-8 text-xs sm:text-sm h-8 sm:h-10"
-/>
+<Input placeholder="Rechercher..." className="pl-7 sm:pl-8 text-xs sm:text-sm h-8 sm:h-10" />
 ```
 
 #### B. Select
 
 **Avant** :
+
 ```tsx
 <SelectTrigger className="w-full sm:w-[180px]">
 ```
 
 **Après** :
+
 ```tsx
 <SelectTrigger className="w-full sm:w-[180px] text-xs sm:text-sm h-8 sm:h-10">
 ```
@@ -322,40 +356,42 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### A. Titres
 
 **Avant** :
+
 ```tsx
 <DialogTitle>Détails du Paiement</DialogTitle>
 ```
 
 **Après** :
+
 ```tsx
-<DialogTitle className="text-sm sm:text-base md:text-lg">
-  Détails du Paiement
-</DialogTitle>
+<DialogTitle className="text-sm sm:text-base md:text-lg">Détails du Paiement</DialogTitle>
 ```
 
 #### B. Descriptions
 
 **Avant** :
+
 ```tsx
 <DialogDescription>Informations complètes...</DialogDescription>
 ```
 
 **Après** :
+
 ```tsx
-<DialogDescription className="text-xs sm:text-sm">
-  Informations complètes...
-</DialogDescription>
+<DialogDescription className="text-xs sm:text-sm">Informations complètes...</DialogDescription>
 ```
 
 #### C. Labels et Textes
 
 **Avant** :
+
 ```tsx
 <label className="text-sm font-medium">...</label>
 <p className="text-sm">...</p>
 ```
 
 **Après** :
+
 ```tsx
 <label className="text-xs sm:text-sm font-medium">...</label>
 <p className="text-[10px] sm:text-xs md:text-sm">...</p>
@@ -364,11 +400,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### D. Grid Layout
 
 **Avant** :
+
 ```tsx
 <div className="grid grid-cols-2 gap-4">
 ```
 
 **Après** :
+
 ```tsx
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 ```
@@ -380,12 +418,14 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### A. Loading
 
 **Avant** :
+
 ```tsx
 <Loader2 className="h-8 w-8 animate-spin" />
 <p className="text-muted-foreground">Chargement...</p>
 ```
 
 **Après** :
+
 ```tsx
 <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin" />
 <p className="text-xs sm:text-sm text-muted-foreground">Chargement...</p>
@@ -394,11 +434,13 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 #### B. Empty States
 
 **Avant** :
+
 ```tsx
 <p className="text-sm text-muted-foreground text-center py-8">
 ```
 
 **Après** :
+
 ```tsx
 <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center py-6 sm:py-8">
 ```
@@ -409,23 +451,23 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 
 ### Tailles de Texte
 
-| Élément | Mobile | Tablet | Desktop | Large |
-|---------|--------|--------|---------|-------|
-| **Titre principal** | `text-base` | `text-lg` | `text-2xl` | `text-3xl` |
-| **Sous-titre** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **CardTitle** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **Valeurs stats** | `text-sm` | `text-base` | `text-lg` | `text-2xl` |
-| **Table headers** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **Table cells** | `text-[10px]` | `text-xs` | `text-sm` | - |
-| **Boutons** | `text-xs` | `text-sm` | - | - |
+| Élément             | Mobile        | Tablet      | Desktop    | Large      |
+| ------------------- | ------------- | ----------- | ---------- | ---------- |
+| **Titre principal** | `text-base`   | `text-lg`   | `text-2xl` | `text-3xl` |
+| **Sous-titre**      | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **CardTitle**       | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **Valeurs stats**   | `text-sm`     | `text-base` | `text-lg`  | `text-2xl` |
+| **Table headers**   | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **Table cells**     | `text-[10px]` | `text-xs`   | `text-sm`  | -          |
+| **Boutons**         | `text-xs`     | `text-sm`   | -          | -          |
 
 ### Espacements
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Container padding** | `p-3` | `p-4` | `p-6` |
-| **Gaps** | `gap-2` | `gap-3` | `gap-4` |
-| **Card padding** | `p-3` | `p-4` | `p-6` |
+| Élément               | Mobile  | Tablet  | Desktop |
+| --------------------- | ------- | ------- | ------- |
+| **Container padding** | `p-3`   | `p-4`   | `p-6`   |
+| **Gaps**              | `gap-2` | `gap-3` | `gap-4` |
+| **Card padding**      | `p-3`   | `p-4`   | `p-6`   |
 
 ---
 
@@ -507,4 +549,3 @@ className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-
 
 **Date de validation** : 1 Février 2025  
 **Statut** : ✅ **COMPLÉTÉ**
-

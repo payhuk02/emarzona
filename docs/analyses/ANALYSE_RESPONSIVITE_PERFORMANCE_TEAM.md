@@ -16,6 +16,7 @@ Analyse complète de la responsivité et des performances des composants de gest
 ### 1. Responsivité ✅
 
 #### Pages Principales
+
 - ✅ **StoreTeamManagement** : Responsive avec breakpoints `sm:`, `md:`, `lg:`
 - ✅ **MyTasks** : Responsive avec breakpoints adaptatifs
 - ✅ Utilisation de `flex-col sm:flex-row` pour les layouts
@@ -24,6 +25,7 @@ Analyse complète de la responsivité et des performances des composants de gest
 - ✅ Touch-friendly : `touch-manipulation min-h-[44px]` pour les boutons
 
 #### Composants
+
 - ✅ **StoreMembersList** : Layout flexible avec `flex-wrap`
 - ✅ **StoreTasksList** : Filtres en colonne sur mobile, ligne sur desktop
 - ✅ **StoreTasksKanban** : Scroll horizontal avec `overflow-x-auto`
@@ -31,6 +33,7 @@ Analyse complète de la responsivité et des performances des composants de gest
 - ✅ **StoreTeamAnalytics** : Grid adaptatif pour les métriques
 
 #### Dialogs
+
 - ✅ Tous les dialogs utilisent `max-w-[95vw] sm:max-w-md` ou similaire
 - ✅ Footer des dialogs : `flex-col sm:flex-row` pour mobile
 - ✅ Scroll interne avec `max-h-[90vh] overflow-y-auto`
@@ -38,6 +41,7 @@ Analyse complète de la responsivité et des performances des composants de gest
 ### 2. Performances ✅
 
 #### Optimisations React
+
 - ✅ **useMemo** utilisé dans :
   - `StoreTasksKanban` : `tasksByStatus` mémorisé
   - `StoreTeamAnalytics` : `memberPerformance` et `overallStats` mémorisés
@@ -45,6 +49,7 @@ Analyse complète de la responsivité et des performances des composants de gest
 - ✅ **Lazy Loading** : Les pages sont chargées avec `lazy()` dans `App.tsx`
 
 #### Requêtes Optimisées
+
 - ✅ Requêtes séparées pour membres et tâches (pas de sur-fetching)
 - ✅ Filtres appliqués côté serveur (Supabase)
 - ✅ Pagination implicite via React Query
@@ -58,6 +63,7 @@ Analyse complète de la responsivité et des performances des composants de gest
 **Problème** : Plusieurs composants ne sont pas mémorisés, causant des re-renders inutiles.
 
 **Composants concernés** :
+
 - `StoreTaskCard` : Re-render à chaque changement de liste
 - `SortableTask` : Re-render lors du drag
 - `KanbanColumn` : Re-render lors des changements de tâches
@@ -68,7 +74,8 @@ Analyse complète de la responsivité et des performances des composants de gest
 
 **Problème** : La vue Kanban peut être difficile à utiliser sur mobile avec 4 colonnes.
 
-**Solution nécessaire** : 
+**Solution nécessaire** :
+
 - Réduire le nombre de colonnes visibles sur mobile
 - Ou permettre le scroll horizontal avec indicateurs visuels
 
@@ -92,13 +99,18 @@ Analyse complète de la responsivité et des performances des composants de gest
 
 ```typescript
 // StoreTaskCard.tsx
-export const StoreTaskCard = React.memo(({ task }: StoreTaskCardProps) => {
-  // ... code existant
-}, (prevProps, nextProps) => {
-  return prevProps.task.id === nextProps.task.id 
-    && prevProps.task.status === nextProps.task.status
-    && prevProps.task.updated_at === nextProps.task.updated_at;
-});
+export const StoreTaskCard = React.memo(
+  ({ task }: StoreTaskCardProps) => {
+    // ... code existant
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.task.id === nextProps.task.id &&
+      prevProps.task.status === nextProps.task.status &&
+      prevProps.task.updated_at === nextProps.task.updated_at
+    );
+  }
+);
 
 // SortableTask.tsx
 const SortableTask = React.memo(({ task, onTaskClick }: SortableTaskProps) => {
@@ -120,9 +132,12 @@ const tasksByStatus = useMemo(() => {
 
 ```typescript
 // StoreTasksKanban.tsx
-const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-  // ... code existant
-}, [tasks, storeId, updateTask]);
+const handleDragEnd = useCallback(
+  async (event: DragEndEvent) => {
+    // ... code existant
+  },
+  [tasks, storeId, updateTask]
+);
 ```
 
 ### 4. Lazy Loading des Dialogs
@@ -137,6 +152,7 @@ const StoreTaskDetailDialog = lazy(() => import('./StoreTaskDetailDialog'));
 ## 📋 CHECKLIST DE VÉRIFICATION
 
 ### Responsivité
+
 - [x] Mobile (< 640px) : Layouts en colonne
 - [x] Tablette (640px - 1024px) : Layouts adaptatifs
 - [x] Desktop (> 1024px) : Layouts complets
@@ -145,6 +161,7 @@ const StoreTaskDetailDialog = lazy(() => import('./StoreTaskDetailDialog'));
 - [x] Scroll horizontal géré correctement (Kanban)
 
 ### Performances
+
 - [x] useMemo pour calculs coûteux
 - [ ] React.memo pour composants enfants
 - [ ] useCallback pour handlers
@@ -153,12 +170,14 @@ const StoreTaskDetailDialog = lazy(() => import('./StoreTaskDetailDialog'));
 - [x] Pas de requêtes inutiles
 
 ### Accessibilité
+
 - [x] Touch targets appropriés
 - [x] Contraste des couleurs
 - [ ] ARIA labels (à vérifier)
 - [x] Navigation au clavier
 
 ### Fonctionnalité
+
 - [x] Toutes les fonctionnalités implémentées
 - [x] Gestion d'erreurs
 - [x] États de chargement
@@ -169,16 +188,19 @@ const StoreTaskDetailDialog = lazy(() => import('./StoreTaskDetailDialog'));
 ## 🚀 RECOMMANDATIONS
 
 ### Court Terme
+
 1. Ajouter `React.memo` aux composants enfants
 2. Utiliser `useCallback` pour les handlers
 3. Optimiser `tasksByStatus` dans `StoreTasksList`
 
 ### Moyen Terme
+
 1. Lazy load les dialogs
 2. Virtualiser les listes longues (react-window)
 3. Debounce les recherches
 
 ### Long Terme
+
 1. Service Worker pour cache offline
 2. Optimistic updates pour meilleure UX
 3. Web Workers pour calculs lourds (analytics)
@@ -188,12 +210,14 @@ const StoreTaskDetailDialog = lazy(() => import('./StoreTaskDetailDialog'));
 ## 📊 MÉTRIQUES CIBLES
 
 ### Performance
+
 - **First Contentful Paint** : < 1.5s
 - **Largest Contentful Paint** : < 2.5s
 - **Time to Interactive** : < 3.5s
 - **Cumulative Layout Shift** : < 0.1
 
 ### Responsivité
+
 - **Mobile** : 100% fonctionnel
 - **Tablette** : 100% fonctionnel
 - **Desktop** : 100% fonctionnel
@@ -201,4 +225,3 @@ const StoreTaskDetailDialog = lazy(() => import('./StoreTaskDetailDialog'));
 ---
 
 **Prochaines étapes** : Appliquer les optimisations identifiées.
-

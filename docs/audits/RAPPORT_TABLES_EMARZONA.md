@@ -1,4 +1,5 @@
 # 📊 RAPPORT COMPLET - TABLES DE LA PLATEFORME EMARZONA
+
 **Date** : 01/12/2025
 **Total de tables trouvées** : 167
 **Total de tables testées** : 167
@@ -310,4 +311,3 @@
 - ✅ `warranties`
 - ✅ `currencies`
 - ✅ `transaction_retries`
-

@@ -52,9 +52,12 @@ const ProductCard = React.memo(ProductCardComponent);
 
 ```typescript
 // ✅ Bon: Handler mémorisé
-const handleClick = useCallback((id: string) => {
-  onItemClick(id);
-}, [onItemClick]);
+const handleClick = useCallback(
+  (id: string) => {
+    onItemClick(id);
+  },
+  [onItemClick]
+);
 
 // ❌ Mauvais: Handler recréé à chaque render
 const handleClick = (id: string) => {
@@ -175,7 +178,7 @@ const FormComponent = ({ onSubmit }) => {
   const handleSubmit = (data) => {
     onSubmit(data);
   };
-  
+
   return <form onSubmit={handleSubmit}>...</form>;
 };
 
@@ -184,7 +187,7 @@ const FormComponent = ({ onSubmit }) => {
   const handleSubmit = useCallback((data) => {
     onSubmit(data);
   }, [onSubmit]);
-  
+
   return <form onSubmit={handleSubmit}>...</form>;
 };
 ```
@@ -252,5 +255,4 @@ const SimpleComponent = ({ text }) => {
 
 ---
 
-*Dernière mise à jour: 2025-01-30*
-
+_Dernière mise à jour: 2025-01-30_

@@ -46,6 +46,7 @@ const { LineChart, Line } = await loadRecharts();
 ```
 
 **Fichiers à modifier** :
+
 - Composants qui utilisent recharts directement
 - Créer un wrapper lazy pour les graphiques
 
@@ -66,6 +67,7 @@ const BigCalendar = lazy(() => import('react-big-calendar'));
 - S'assurer qu'aucun import direct n'existe
 
 **Action** :
+
 ```bash
 # Vérifier les imports restants
 grep -r "from 'lucide-react'" src/ --exclude-dir=node_modules
@@ -82,12 +84,14 @@ grep -r "from 'lucide-react'" src/ --exclude-dir=node_modules
 #### A. Tests pour Composants Critiques
 
 **Priorité** :
+
 1. Composants de paiement (Moneroo, PayDunya)
 2. Composants d'authentification
 3. Hooks de données (useProducts, useOrders)
 4. Composants de formulaire
 
 **Exemple** :
+
 ```typescript
 // src/components/__tests__/PaymentButton.test.tsx
 describe('PaymentButton', () => {
@@ -100,11 +104,13 @@ describe('PaymentButton', () => {
 #### B. Tests E2E pour Flux Critiques
 
 **Priorité** :
+
 1. Flux d'achat complet
 2. Création de compte
 3. Gestion de commandes
 
 **Action** :
+
 ```bash
 npm run test:e2e
 ```
@@ -123,6 +129,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-coverage.ps1
 #### A. Service Worker Optimisé
 
 **Action** :
+
 - Vérifier que le service worker est actif
 - Optimiser le cache des assets
 - Précharger les routes critiques
@@ -130,6 +137,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-coverage.ps1
 #### B. CDN Configuration
 
 **Action** :
+
 - Configurer CDN pour assets statiques
 - Mettre en cache les images
 - Optimiser les fonts
@@ -137,6 +145,7 @@ powershell -ExecutionPolicy Bypass -File scripts/check-coverage.ps1
 #### C. Image Optimization
 
 **Action** :
+
 - Convertir toutes les images en WebP
 - Implémenter responsive images
 - Lazy loading amélioré
@@ -192,15 +201,18 @@ npm run build
 ## 📈 Métriques à Surveiller
 
 ### Bundle Size
+
 - **Chunk principal** : < 500 KB (actuel: 598 KB)
 - **Chunks secondaires** : < 200 KB chacun
 - **Total initial** : < 300 KB (gzipped)
 
 ### Tests
+
 - **Couverture** : 50% minimum
 - **Tests critiques** : 80%+
 
 ### Performance
+
 - **FCP** : < 1.5s
 - **LCP** : < 2.5s
 - **TTI** : < 3.5s
@@ -217,4 +229,3 @@ npm run build
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

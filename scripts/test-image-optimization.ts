@@ -1,24 +1,25 @@
 /**
  * Script de test pour l'optimisation d'images
- * 
+ *
  * Usage:
  * npx tsx scripts/test-image-optimization.ts
  */
 
-import { 
-  getOptimizedImageUrl, 
+import {
+  getOptimizedImageUrl,
   getResponsiveSrcSet,
   getImageAttributesForPreset,
   IMAGE_PRESETS,
   isSupabaseStorageUrl,
   calculateOptimizationGain,
-  formatFileSize
+  formatFileSize,
 } from '../src/lib/image-transform';
 
-const SUPABASE_URL = 'https://hbdnzajbyjakdhuavrvb.supabase.co/storage/v1/object/public/store-images/test/product.jpg';
+const SUPABASE_URL =
+  'https://hbdnzajbyjakdhuavrvb.supabase.co/storage/v1/object/public/store-images/test/product.jpg';
 const NON_SUPABASE_URL = 'https://example.com/image.jpg';
 
-console.log('🧪 Test Optimisation d\'Images\n');
+console.log("🧪 Test Optimisation d'Images\n");
 console.log('='.repeat(60));
 
 // Test 1: Détection URL Supabase
@@ -32,18 +33,22 @@ console.log('\n✅ Test 2: Génération URL optimisée');
 const optimizedUrl = getOptimizedImageUrl(SUPABASE_URL, {
   width: 600,
   quality: 80,
-  format: 'webp'
+  format: 'webp',
 });
 console.log(`Original: ${SUPABASE_URL}`);
 console.log(`Optimisée: ${optimizedUrl}`);
 
 // Test 3: srcSet responsive
 console.log('\n✅ Test 3: srcSet responsive');
-const srcSet = getResponsiveSrcSet(SUPABASE_URL, {
-  mobile: 400,
-  tablet: 768,
-  desktop: 1200
-}, { quality: 80, format: 'webp' });
+const srcSet = getResponsiveSrcSet(
+  SUPABASE_URL,
+  {
+    mobile: 400,
+    tablet: 768,
+    desktop: 1200,
+  },
+  { quality: 80, format: 'webp' }
+);
 console.log(`srcSet:\n${srcSet}`);
 
 // Test 4: Presets
@@ -51,7 +56,11 @@ console.log('\n✅ Test 4: Presets disponibles');
 Object.keys(IMAGE_PRESETS).forEach(presetName => {
   const preset = IMAGE_PRESETS[presetName as keyof typeof IMAGE_PRESETS];
   console.log(`\n📦 ${presetName}:`);
-  console.log(`  Sizes: ${Object.entries(preset.sizes).map(([k, v]) => `${k}=${v}`).join(', ')}`);
+  console.log(
+    `  Sizes: ${Object.entries(preset.sizes)
+      .map(([k, v]) => `${k}=${v}`)
+      .join(', ')}`
+  );
   console.log(`  Quality: ${preset.options.quality}%`);
   console.log(`  Format: ${preset.options.format}`);
 });
@@ -75,14 +84,14 @@ console.log(`Temps économisé (3G): ${gain.loadTimeImprovement}ms`);
 console.log('\n✅ Test 7: Fallback images non-Supabase');
 const externalOptimized = getOptimizedImageUrl(NON_SUPABASE_URL, {
   width: 600,
-  quality: 80
+  quality: 80,
 });
 console.log(`URL externe retournée telle quelle: ${externalOptimized === NON_SUPABASE_URL}`);
 
 // Test 8: Validation paramètres
 console.log('\n✅ Test 8: Validation paramètres');
 const urlWithInvalidQuality = getOptimizedImageUrl(SUPABASE_URL, {
-  quality: 150 // Should be clamped to 100
+  quality: 150, // Should be clamped to 100
 });
 console.log(`Quality > 100 clampée: ${urlWithInvalidQuality?.includes('quality=100')}`);
 
@@ -105,4 +114,3 @@ console.log('  4. Lighthouse audit → Performance > 85');
 console.log('  5. Déployer en production');
 
 export {};
-

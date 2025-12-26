@@ -159,7 +159,8 @@
 
 Le code complet se trouve dans le fichier **`CODE_MONEROO_POUR_SUPABASE.txt`**.
 
-**⚠️ IMPORTANT :** 
+**⚠️ IMPORTANT :**
+
 - Ne copiez PAS la première ligne `/// <reference path="../deno.d.ts" />` si elle apparaît
 - Cette ligne est uniquement pour l'IDE local, pas pour Supabase
 
@@ -193,7 +194,3 @@ Après le déploiement :
 4. **Vérifier les logs** pour confirmer que tout fonctionne
 
 Une fois ces étapes terminées, l'erreur 404 devrait être résolue et les paiements devraient fonctionner correctement.
-
-
-
-

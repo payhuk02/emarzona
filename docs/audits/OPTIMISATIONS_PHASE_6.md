@@ -12,6 +12,7 @@
 **Fichier** : `vite.config.ts`
 
 **Améliorations** :
+
 - ✅ Séparation des dépendances utilitaires (lodash, clsx, nanoid) en chunk `utils`
 - ✅ Séparation des pages admin en chunk `admin`
 - ✅ Séparation des composants de création de produits en chunk `product-creation`
@@ -27,6 +28,7 @@
 **Fichier** : `src/lib/performance-monitor.ts`
 
 **Nouvelles fonctionnalités** :
+
 - ✅ Monitoring des Core Web Vitals (FCP, LCP, FID, CLS, TTFB, TTI)
 - ✅ Rating automatique (good/needs-improvement/poor)
 - ✅ Mesure d'actions personnalisées
@@ -34,6 +36,7 @@
 - ✅ Intégration avec PerformanceOptimizer
 
 **Métriques trackées** :
+
 - **FCP** : First Contentful Paint (< 1.8s = good)
 - **LCP** : Largest Contentful Paint (< 2.5s = good)
 - **FID** : First Input Delay (< 100ms = good)
@@ -42,6 +45,7 @@
 - **TTI** : Time to Interactive (< 3.5s = good)
 
 **Exemple d'utilisation** :
+
 ```typescript
 import { measurePerformance, getPerformanceReport } from '@/lib/performance-monitor';
 
@@ -62,6 +66,7 @@ console.log(report);
 **Fichier** : `src/components/optimization/PerformanceOptimizer.tsx`
 
 **Améliorations** :
+
 - ✅ Intégration du monitoring des performances
 - ✅ Rapport automatique après 5 secondes (dev uniquement)
 - ✅ Tracking continu des métriques
@@ -72,25 +77,25 @@ console.log(report);
 
 ### Code Splitting
 
-| Chunk | Avant | Après | Statut |
-|-------|-------|-------|--------|
-| Principal | 558 KB | ~450 KB | ✅ Réduit |
-| Utils | - | ~20 KB | ✅ Nouveau |
-| Admin | - | ~50 KB | ✅ Nouveau |
-| Product Creation | - | ~80 KB | ✅ Nouveau |
-| Marketplace | - | ~60 KB | ✅ Nouveau |
-| Dashboard | - | ~40 KB | ✅ Nouveau |
+| Chunk            | Avant  | Après   | Statut     |
+| ---------------- | ------ | ------- | ---------- |
+| Principal        | 558 KB | ~450 KB | ✅ Réduit  |
+| Utils            | -      | ~20 KB  | ✅ Nouveau |
+| Admin            | -      | ~50 KB  | ✅ Nouveau |
+| Product Creation | -      | ~80 KB  | ✅ Nouveau |
+| Marketplace      | -      | ~60 KB  | ✅ Nouveau |
+| Dashboard        | -      | ~40 KB  | ✅ Nouveau |
 
 ### Performance Monitoring
 
 | Métrique | Seuil Good | Seuil Poor | Tracking |
-|----------|------------|------------|----------|
-| FCP | < 1.8s | > 3s | ✅ |
-| LCP | < 2.5s | > 4s | ✅ |
-| FID | < 100ms | > 300ms | ✅ |
-| CLS | < 0.1 | > 0.25 | ✅ |
-| TTFB | < 800ms | > 1800ms | ✅ |
-| TTI | < 3.5s | > 7.3s | ✅ |
+| -------- | ---------- | ---------- | -------- |
+| FCP      | < 1.8s     | > 3s       | ✅       |
+| LCP      | < 2.5s     | > 4s       | ✅       |
+| FID      | < 100ms    | > 300ms    | ✅       |
+| CLS      | < 0.1      | > 0.25     | ✅       |
+| TTFB     | < 800ms    | > 1800ms   | ✅       |
+| TTI      | < 3.5s     | > 7.3s     | ✅       |
 
 ---
 
@@ -131,4 +136,3 @@ console.log(report);
 ---
 
 **Dernière mise à jour** : Février 2025
-

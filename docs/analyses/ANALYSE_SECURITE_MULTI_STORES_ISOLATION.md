@@ -34,8 +34,8 @@ CREATE POLICY "Store owners can manage their products"
   FOR ALL
   USING (
     EXISTS (
-      SELECT 1 FROM public.stores 
-      WHERE stores.id = products.store_id 
+      SELECT 1 FROM public.stores
+      WHERE stores.id = products.store_id
       AND stores.user_id = auth.uid()
     )
   );
@@ -43,24 +43,24 @@ CREATE POLICY "Store owners can manage their products"
 
 #### Tables avec RLS activé :
 
-| Table | RLS | Filtre par `store_id` | Statut |
-|-------|-----|----------------------|--------|
-| `stores` | ✅ | Via `user_id` | ✅ |
-| `products` | ✅ | Direct | ✅ |
-| `orders` | ✅ | Direct | ✅ |
-| `order_items` | ✅ | Via `order_id` → `store_id` | ✅ |
-| `customers` | ✅ | Direct | ✅ |
-| `transactions` | ✅ | Direct | ✅ |
-| `payments` | ✅ | Direct | ✅ |
-| `store_withdrawals` | ✅ | Direct | ✅ |
-| `store_earnings` | ✅ | Direct | ✅ |
-| `store_payment_methods` | ✅ | Direct | ✅ |
-| `store_affiliates` | ✅ | Direct | ✅ |
-| `affiliate_commissions` | ✅ | Direct | ✅ |
-| `product_affiliate_settings` | ✅ | Direct | ✅ |
-| `coupons` | ✅ | Direct | ✅ |
-| `gift_cards` | ✅ | Direct | ✅ |
-| `wishlists` | ✅ | Direct | ✅ |
+| Table                        | RLS | Filtre par `store_id`       | Statut |
+| ---------------------------- | --- | --------------------------- | ------ |
+| `stores`                     | ✅  | Via `user_id`               | ✅     |
+| `products`                   | ✅  | Direct                      | ✅     |
+| `orders`                     | ✅  | Direct                      | ✅     |
+| `order_items`                | ✅  | Via `order_id` → `store_id` | ✅     |
+| `customers`                  | ✅  | Direct                      | ✅     |
+| `transactions`               | ✅  | Direct                      | ✅     |
+| `payments`                   | ✅  | Direct                      | ✅     |
+| `store_withdrawals`          | ✅  | Direct                      | ✅     |
+| `store_earnings`             | ✅  | Direct                      | ✅     |
+| `store_payment_methods`      | ✅  | Direct                      | ✅     |
+| `store_affiliates`           | ✅  | Direct                      | ✅     |
+| `affiliate_commissions`      | ✅  | Direct                      | ✅     |
+| `product_affiliate_settings` | ✅  | Direct                      | ✅     |
+| `coupons`                    | ✅  | Direct                      | ✅     |
+| `gift_cards`                 | ✅  | Direct                      | ✅     |
+| `wishlists`                  | ✅  | Direct                      | ✅     |
 
 **✅ Conclusion** : L'isolation est garantie au niveau base de données.
 
@@ -73,6 +73,7 @@ CREATE POLICY "Store owners can manage their products"
 **Fichier** : `src/contexts/StoreContext.tsx`
 
 **Fonctionnalités** :
+
 - ✅ Charge toutes les boutiques de l'utilisateur filtrées par `user_id`
 - ✅ Gère la boutique sélectionnée (`selectedStoreId`)
 - ✅ Persiste la sélection dans `localStorage`
@@ -80,12 +81,13 @@ CREATE POLICY "Store owners can manage their products"
 - ✅ Valide que la boutique sélectionnée appartient à l'utilisateur
 
 **Code critique** :
+
 ```typescript
 // ✅ Filtre par user_id
 const { data, error } = await supabase
   .from('stores')
   .select('*')
-  .eq('user_id', user.id)  // ✅ Isolation par utilisateur
+  .eq('user_id', user.id) // ✅ Isolation par utilisateur
   .order('created_at', { ascending: true });
 
 // ✅ Validation de la boutique sélectionnée
@@ -104,18 +106,20 @@ if (storeId && !stores.some(s => s.id === storeId)) {
 **Fichier** : `src/hooks/useStore.ts`
 
 **Fonctionnalités** :
+
 - ✅ Utilise `selectedStoreId` du `StoreContext`
 - ✅ Filtre par `id` ET `user_id` lors de la récupération
 - ✅ Valide que la boutique appartient à l'utilisateur
 
 **Code critique** :
+
 ```typescript
 // ✅ Double validation : id ET user_id
 const { data, error } = await supabase
   .from('stores')
   .select('*')
   .eq('id', selectedStoreId)
-  .eq('user_id', user.id)  // ✅ Protection supplémentaire
+  .eq('user_id', user.id) // ✅ Protection supplémentaire
   .single();
 ```
 
@@ -128,6 +132,7 @@ const { data, error } = await supabase
 **Fichier** : `src/hooks/useProducts.ts`
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtre par store_id
 query = query.eq('store_id', storeId);
@@ -142,6 +147,7 @@ query = query.eq('store_id', storeId);
 **Fichier** : `src/hooks/useOrders.ts`
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtre par store_id
 .eq('store_id', store.id)
@@ -156,6 +162,7 @@ query = query.eq('store_id', storeId);
 **Fichier** : `src/hooks/useCustomers.ts`
 
 **Vérification** :
+
 ```typescript
 // ✅ Filtre par store_id
 .eq('store_id', storeId)
@@ -170,6 +177,7 @@ query = query.eq('store_id', storeId);
 **Fichier** : `src/hooks/useDashboardStats.ts`
 
 **Vérification** :
+
 ```typescript
 // ✅ Toutes les requêtes filtrent par store.id
 .eq("store_id", store.id)
@@ -184,6 +192,7 @@ query = query.eq('store_id', storeId);
 **Fichier** : `src/hooks/useStoreAffiliates.ts`
 
 **Vérification** :
+
 ```typescript
 // ✅ Toutes les requêtes filtrent par store_id
 .eq('store_id', storeId)
@@ -200,9 +209,10 @@ query = query.eq('store_id', storeId);
 **Fichier** : `supabase/migrations/20250202_restore_multi_stores_limit.sql`
 
 **Trigger SQL** :
+
 ```sql
 CREATE OR REPLACE FUNCTION check_store_limit()
-RETURNS TRIGGER 
+RETURNS TRIGGER
 SECURITY DEFINER
 SET search_path = public
 LANGUAGE plpgsql
@@ -213,11 +223,11 @@ BEGIN
   SELECT COUNT(*) INTO store_count
   FROM public.stores
   WHERE user_id = NEW.user_id;
-  
+
   IF store_count >= 3 THEN
     RAISE EXCEPTION 'Limite de 3 boutiques par utilisateur atteinte...';
   END IF;
-  
+
   RETURN NEW;
 END;
 $$;
@@ -237,6 +247,7 @@ CREATE TRIGGER enforce_store_limit
 **Fichier** : `src/hooks/useStores.ts`
 
 **Code** :
+
 ```typescript
 const MAX_STORES_PER_USER = 3;
 
@@ -258,23 +269,23 @@ if (!canCreateStore()) {
 
 ### 4.1 Tables principales
 
-| Table | Colonne | RLS | Hook | Statut |
-|-------|---------|-----|------|--------|
-| `products` | `store_id` | ✅ | ✅ | ✅ |
-| `orders` | `store_id` | ✅ | ✅ | ✅ |
-| `order_items` | Via `order_id` | ✅ | ✅ | ✅ |
-| `customers` | `store_id` | ✅ | ✅ | ✅ |
-| `transactions` | `store_id` | ✅ | ✅ | ✅ |
-| `payments` | `store_id` | ✅ | ✅ | ✅ |
-| `store_withdrawals` | `store_id` | ✅ | ✅ | ✅ |
-| `store_earnings` | `store_id` | ✅ | ✅ | ✅ |
-| `store_payment_methods` | `store_id` | ✅ | ✅ | ✅ |
-| `store_affiliates` | `store_id` | ✅ | ✅ | ✅ |
-| `affiliate_commissions` | `store_id` | ✅ | ✅ | ✅ |
-| `product_affiliate_settings` | `store_id` | ✅ | ✅ | ✅ |
-| `coupons` | `store_id` | ✅ | ✅ | ✅ |
-| `gift_cards` | `store_id` | ✅ | ✅ | ✅ |
-| `wishlists` | `store_id` | ✅ | ✅ | ✅ |
+| Table                        | Colonne        | RLS | Hook | Statut |
+| ---------------------------- | -------------- | --- | ---- | ------ |
+| `products`                   | `store_id`     | ✅  | ✅   | ✅     |
+| `orders`                     | `store_id`     | ✅  | ✅   | ✅     |
+| `order_items`                | Via `order_id` | ✅  | ✅   | ✅     |
+| `customers`                  | `store_id`     | ✅  | ✅   | ✅     |
+| `transactions`               | `store_id`     | ✅  | ✅   | ✅     |
+| `payments`                   | `store_id`     | ✅  | ✅   | ✅     |
+| `store_withdrawals`          | `store_id`     | ✅  | ✅   | ✅     |
+| `store_earnings`             | `store_id`     | ✅  | ✅   | ✅     |
+| `store_payment_methods`      | `store_id`     | ✅  | ✅   | ✅     |
+| `store_affiliates`           | `store_id`     | ✅  | ✅   | ✅     |
+| `affiliate_commissions`      | `store_id`     | ✅  | ✅   | ✅     |
+| `product_affiliate_settings` | `store_id`     | ✅  | ✅   | ✅     |
+| `coupons`                    | `store_id`     | ✅  | ✅   | ✅     |
+| `gift_cards`                 | `store_id`     | ✅  | ✅   | ✅     |
+| `wishlists`                  | `store_id`     | ✅  | ✅   | ✅     |
 
 **✅ Conclusion** : Toutes les tables critiques sont isolées.
 
@@ -362,19 +373,20 @@ La marketplace affiche tous les produits de toutes les boutiques, ce qui est le 
 **Vérification** : Les requêtes avec jointures doivent également filtrer par `store_id`.
 
 **Exemple vérifié** :
+
 ```typescript
 // ✅ Correct : Filtre par store_id avant la jointure
 const { data: products } = await supabase
   .from('products')
   .select('id')
-  .eq('store_id', storeId)  // ✅ Filtre d'abord
+  .eq('store_id', storeId) // ✅ Filtre d'abord
   .eq('product_type', 'service');
 
 // ✅ Correct : Utilise les IDs filtrés
 const { data: bookings } = await supabase
   .from('service_bookings')
   .select('*')
-  .in('product_id', productIds);  // ✅ Utilise les IDs déjà filtrés
+  .in('product_id', productIds); // ✅ Utilise les IDs déjà filtrés
 ```
 
 **✅ Statut** : **SÉCURISÉ**
@@ -417,6 +429,7 @@ const { data: bookings } = await supabase
 **✅ LE SYSTÈME MULTI-STORES EST SÉCURISÉ ET ISOLÉ**
 
 Chaque boutique a son propre tableau et gère bien ses propres données grâce à :
+
 - ✅ RLS au niveau base de données
 - ✅ Filtrage systématique par `store_id` dans l'application
 - ✅ Validation de la propriété des boutiques
@@ -439,4 +452,3 @@ Chaque boutique a son propre tableau et gère bien ses propres données grâce �
 **Date de l'analyse** : 28 Janvier 2025  
 **Analysé par** : AI Assistant  
 **Statut** : ✅ **APPROUVÉ**
-

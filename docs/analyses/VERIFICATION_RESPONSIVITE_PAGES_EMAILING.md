@@ -29,6 +29,7 @@ Toutes les pages emailing sont présentes dans la section "Marketing & Croissanc
 #### ✅ Points positifs
 
 Toutes les pages utilisent déjà :
+
 - Classes responsive Tailwind (`sm:`, `lg:`, etc.)
 - Padding adaptatif : `p-4 sm:p-6 lg:p-8`
 - Titres adaptatifs : `text-2xl sm:text-3xl`
@@ -40,25 +41,31 @@ Toutes les pages utilisent déjà :
 ### ❌ Points à améliorer
 
 #### 1. EmailCampaignsPage
+
 - ❌ Manque `SidebarTrigger` pour toggle mobile
 - ❌ Header pourrait être mieux organisé sur mobile
 
 #### 2. EmailSequencesPage
+
 - ❌ Manque `SidebarTrigger` pour toggle mobile
 - ❌ Les tabs pourraient être mieux adaptés sur mobile
 
 #### 3. EmailSegmentsPage
+
 - ❌ Manque `SidebarTrigger` pour toggle mobile
 - ❌ Tabs preview pourraient être mieux gérés sur mobile
 
 #### 4. EmailAnalyticsPage
+
 - ❌ Manque `SidebarTrigger` pour toggle mobile
 - ✅ Sinon bien structurée
 
 #### 5. EmailWorkflowsPage
+
 - ❌ Manque `SidebarTrigger` pour toggle mobile
 
 #### 6. EmailTemplateEditorPage
+
 - ❌ Manque `SidebarTrigger` pour toggle mobile
 - ❌ Les tabs de l'éditeur pourraient être mieux adaptés sur mobile
 
@@ -78,9 +85,11 @@ Toutes les pages utilisent déjà :
 ## 📊 RÉSUMÉ
 
 ### Présence dans le sidebar
+
 - ✅ **6/6 pages présentes** (100%)
 
 ### Responsivité
+
 - ✅ **Classes responsive utilisées** (80%)
 - ⚠️ **SidebarTrigger manquant** (0/6 pages)
 - ⚠️ **Optimisation mobile à améliorer** (60%)
@@ -88,4 +97,3 @@ Toutes les pages utilisent déjà :
 ---
 
 **Rapport créé le 1er Février 2025** ✅
-

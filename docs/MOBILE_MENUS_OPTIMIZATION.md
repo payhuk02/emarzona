@@ -12,25 +12,28 @@ Cette documentation décrit l'optimisation complète de tous les menus (dropdown
 ✅ **Z-index cohérent** - Tous les menus ont un z-index approprié (100+)  
 ✅ **Collision detection** - Les menus restent toujours dans les limites de l'écran  
 ✅ **Animations fluides** - Transitions optimisées pour mobile  
-✅ **Accessibilité** - Support complet du clavier et des lecteurs d'écran  
+✅ **Accessibilité** - Support complet du clavier et des lecteurs d'écran
 
 ## 🏗️ Architecture
 
 ### Composants de base optimisés
 
 #### 1. `dropdown-menu.tsx`
+
 - Détection automatique mobile/desktop
 - Positionnement intelligent selon la taille d'écran
 - Collision padding adaptatif
 - Animations simplifiées sur mobile
 
 #### 2. `select.tsx`
+
 - Viewport scrollable optimisé pour mobile
 - Touch targets de 44px minimum
 - Collision detection améliorée
 - Animations adaptées
 
 #### 3. `popover.tsx`
+
 - Largeur responsive automatique
 - Collision padding mobile
 - Animations optimisées
@@ -38,13 +41,16 @@ Cette documentation décrit l'optimisation complète de tous les menus (dropdown
 ### Hook personnalisé
 
 #### `useMobileMenu`
+
 Hook réutilisable qui gère :
+
 - Calcul de position optimale
 - Verrouillage de position avec MutationObserver
 - Scroll lock sur le body
 - Nettoyage automatique
 
 **Utilisation :**
+
 ```tsx
 const { lockStyles, isLocked, lockPosition, unlockPosition } = useMobileMenu({
   menuRef,
@@ -59,6 +65,7 @@ const { lockStyles, isLocked, lockPosition, unlockPosition } = useMobileMenu({
 ### Composant réutilisable
 
 #### `MobileDropdown`
+
 Composant wrapper qui encapsule toute la logique mobile :
 
 ```tsx
@@ -75,6 +82,7 @@ Composant wrapper qui encapsule toute la logique mobile :
 ```
 
 **Props :**
+
 - `trigger` - Élément qui ouvre le menu
 - `children` - Contenu du menu
 - `align` - Alignement ('start' | 'center' | 'end')
@@ -91,20 +99,18 @@ Composant wrapper qui encapsule toute la logique mobile :
 ### Pour les nouveaux menus
 
 **Option 1 : Utiliser MobileDropdown (recommandé)**
+
 ```tsx
 import { MobileDropdown, DropdownMenuItem } from '@/components/ui/mobile-dropdown';
 
-<MobileDropdown
-  trigger={<Button>Menu</Button>}
-  align="end"
-  width={200}
->
+<MobileDropdown trigger={<Button>Menu</Button>} align="end" width={200}>
   <DropdownMenuItem>Option 1</DropdownMenuItem>
   <DropdownMenuItem>Option 2</DropdownMenuItem>
-</MobileDropdown>
+</MobileDropdown>;
 ```
 
 **Option 2 : Utiliser les composants de base (déjà optimisés)**
+
 ```tsx
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
@@ -115,12 +121,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from '@/component
   <DropdownMenuContent align="end" mobileOptimized>
     <DropdownMenuItem>Option 1</DropdownMenuItem>
   </DropdownMenuContent>
-</DropdownMenu>
+</DropdownMenu>;
 ```
 
 ### Pour les Select
 
 Les composants Select sont automatiquement optimisés :
+
 ```tsx
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 
@@ -132,12 +139,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
     <SelectItem value="1">Option 1</SelectItem>
     <SelectItem value="2">Option 2</SelectItem>
   </SelectContent>
-</Select>
+</Select>;
 ```
 
 ### Pour les Popovers
 
 Les composants Popover sont automatiquement optimisés :
+
 ```tsx
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -145,10 +153,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
   <PopoverTrigger asChild>
     <Button>Ouvrir</Button>
   </PopoverTrigger>
-  <PopoverContent>
-    Contenu du popover
-  </PopoverContent>
-</Popover>
+  <PopoverContent>Contenu du popover</PopoverContent>
+</Popover>;
 ```
 
 ## 🔧 Optimisations techniques
@@ -269,4 +275,3 @@ Les composants suivants utilisent déjà les composants de base optimisés, donc
 2. Ajouter des tests E2E pour les menus sur mobile
 3. Monitorer les performances et ajuster si nécessaire
 4. Collecter les retours utilisateurs pour améliorer l'expérience
-

@@ -109,4 +109,3 @@ Pour chaque langue :
 3. Compléter les traductions PT (330 clés)
 4. Ajouter des tests automatisés pour vérifier la complétude
 5. Mettre en place un workflow de traduction continue
-

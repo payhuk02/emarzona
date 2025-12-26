@@ -24,13 +24,14 @@ L'Edge Function `process-scheduled-campaigns` vérifie et envoie automatiquement
    - Cliquez sur **New Cron Job**
 
 3. **Configurer le Cron Job**
+
    ```sql
    -- Nom du cron job
    process_scheduled_email_campaigns
-   
+
    -- Schedule (toutes les 5 minutes)
    0,5,10,15,20,25,30,35,40,45,50,55 * * * *
-   
+
    -- Commande
    SELECT net.http_post(
      url := 'https://your-project.supabase.co/functions/v1/process-scheduled-campaigns',
@@ -120,10 +121,7 @@ Créez `api/cron/process-scheduled-campaigns.ts` :
 ```typescript
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -134,7 +132,7 @@ export default async function handler(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
       },
       body: JSON.stringify({ limit: 10 }),
     }
@@ -209,4 +207,3 @@ SELECT cron.schedule(
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

@@ -19,6 +19,7 @@ Implémentation complète des améliorations prioritaires identifiées dans l'au
 ## 1️⃣ Reversement Automatique des Fonds Vendeurs
 
 ### Fichiers créés:
+
 - `supabase/functions/auto-payout-vendors/index.ts`
 - `supabase/functions/auto-payout-vendors/README.md`
 - `supabase/migrations/20250230_add_auto_payout_config.sql`
@@ -45,9 +46,9 @@ Implémentation complète des améliorations prioritaires identifiées dans l'au
 ```json
 {
   "auto_payout_vendors": {
-    "enabled": false,  // Désactivé par défaut (nécessite validation admin)
-    "delay_days": 7,    // Délai avant reversement automatique
-    "min_amount": 50000  // Montant minimum: 50000 XOF
+    "enabled": false, // Désactivé par défaut (nécessite validation admin)
+    "delay_days": 7, // Délai avant reversement automatique
+    "min_amount": 50000 // Montant minimum: 50000 XOF
   }
 }
 ```
@@ -55,16 +56,19 @@ Implémentation complète des améliorations prioritaires identifiées dans l'au
 ### Déploiement:
 
 1. **Déployer l'Edge Function:**
+
 ```bash
 supabase functions deploy auto-payout-vendors
 ```
 
 2. **Appliquer la migration:**
+
 ```bash
 supabase db push
 ```
 
 3. **Configurer le Cron Job:**
+
 - Schedule: `0 3 * * *` (tous les jours à 3h du matin)
 - Function: `auto-payout-vendors`
 - Headers: `x-cron-secret: auto-payout-vendors-secret-2025`
@@ -74,6 +78,7 @@ supabase db push
 ## 2️⃣ Paiement Automatique des Commissions Parrainage
 
 ### Fichiers créés:
+
 - `supabase/functions/auto-pay-referral-commissions/index.ts`
 - `supabase/functions/auto-pay-referral-commissions/README.md`
 
@@ -98,8 +103,8 @@ supabase db push
 ```json
 {
   "auto_pay_referral_commissions": {
-    "enabled": false,  // Désactivé par défaut
-    "min_amount": 50000  // Seuil minimum: 50000 XOF
+    "enabled": false, // Désactivé par défaut
+    "min_amount": 50000 // Seuil minimum: 50000 XOF
   }
 }
 ```
@@ -107,11 +112,13 @@ supabase db push
 ### Déploiement:
 
 1. **Déployer l'Edge Function:**
+
 ```bash
 supabase functions deploy auto-pay-referral-commissions
 ```
 
 2. **Configurer le Cron Job:**
+
 - Schedule: `0 4 * * *` (tous les jours à 4h du matin)
 - Function: `auto-pay-referral-commissions`
 - Headers: `x-cron-secret: auto-pay-referral-commissions-secret-2025`
@@ -155,6 +162,7 @@ Ajoute les configurations suivantes dans `platform_settings` :
 - ✅ `src/pages/admin/TransactionMonitoring.tsx` - Monitoring des transactions
 
 Ces pages couvrent déjà les fonctionnalités principales :
+
 - Vue globale des transactions
 - Filtres par statut
 - Vérification manuelle
@@ -167,12 +175,12 @@ Ces pages couvrent déjà les fonctionnalités principales :
 
 ## 📊 État d'Implémentation
 
-| Fonctionnalité | Statut | Fichiers |
-|----------------|--------|----------|
-| Reversement automatique fonds | ✅ | `auto-payout-vendors/` |
-| Paiement automatique commissions parrainage | ✅ | `auto-pay-referral-commissions/` |
-| Configuration platform_settings | ✅ | `20250230_add_auto_payout_config.sql` |
-| Dashboard admin transactions | ✅ | Pages existantes |
+| Fonctionnalité                              | Statut | Fichiers                              |
+| ------------------------------------------- | ------ | ------------------------------------- |
+| Reversement automatique fonds               | ✅     | `auto-payout-vendors/`                |
+| Paiement automatique commissions parrainage | ✅     | `auto-pay-referral-commissions/`      |
+| Configuration platform_settings             | ✅     | `20250230_add_auto_payout_config.sql` |
+| Dashboard admin transactions                | ✅     | Pages existantes                      |
 
 ---
 
@@ -201,5 +209,3 @@ Ces pages couvrent déjà les fonctionnalités principales :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

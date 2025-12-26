@@ -114,4 +114,3 @@ powershell -ExecutionPolicy Bypass -File scripts/migrate-icon-imports.ps1
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

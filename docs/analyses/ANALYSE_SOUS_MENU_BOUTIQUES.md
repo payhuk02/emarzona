@@ -33,12 +33,14 @@
 **Fichier** : `src/contexts/StoreContext.tsx`
 
 **Fonctionnalités** :
+
 - Gère la boutique sélectionnée globalement
 - Persiste la sélection dans `localStorage`
 - Restaure automatiquement la dernière boutique sélectionnée
 - Fournit `selectedStoreId`, `selectedStore`, et `setSelectedStoreId`
 
 **Caractéristiques** :
+
 - ✅ Initialisation automatique avec la première boutique
 - ✅ Sauvegarde dans localStorage pour persistance
 - ✅ Restauration au rechargement de la page
@@ -49,6 +51,7 @@
 **Fichier** : `src/components/AppSidebar.tsx`
 
 **Changements** :
+
 - Import de `useStoreContext` et `useStores`
 - Ajout d'un sous-menu sous "Tableau de bord" (uniquement si plusieurs boutiques)
 - Affichage de toutes les boutiques avec indicateur de sélection (✓)
@@ -56,6 +59,7 @@
 - Rechargement automatique du dashboard après changement
 
 **Comportement** :
+
 - Le sous-menu apparaît **uniquement** si l'utilisateur a **plusieurs boutiques**
 - Si une seule boutique : affichage normal sans sous-menu
 - Icône ✓ pour la boutique sélectionnée
@@ -66,12 +70,14 @@
 **Fichier** : `src/hooks/useStore.ts`
 
 **Changements** :
+
 - Utilise `useStoreContext()` pour récupérer la boutique sélectionnée
 - Priorise la boutique du contexte si disponible
 - Fallback vers la première boutique si aucune sélection
 - Réagit aux changements de `selectedStoreId`
 
 **Logique** :
+
 1. Vérifie si une boutique est sélectionnée dans le contexte
 2. Si oui, utilise cette boutique directement
 3. Sinon, récupère depuis la base de données
@@ -82,6 +88,7 @@
 **Fichier** : `src/App.tsx`
 
 **Changements** :
+
 - Ajout de `StoreProvider` autour de `AppContent`
 - Placement après `AuthProvider` pour avoir accès à l'utilisateur
 
@@ -205,5 +212,3 @@ L'implémentation est **complète et fonctionnelle**. Le système permet mainten
 - ✅ Expérience utilisateur fluide et intuitive
 
 Le système est prêt pour la production et respecte les bonnes pratiques React (Context API, hooks personnalisés, séparation des responsabilités).
-
-

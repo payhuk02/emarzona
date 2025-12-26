@@ -10,6 +10,7 @@
 ### 1. ❌ `401 Invalid JWT` dans `send-email-campaign`
 
 **Erreur** :
+
 ```
 Error invoking send-email-campaign: {
   status: 401,
@@ -25,6 +26,7 @@ Error invoking send-email-campaign: {
 ### 2. ⚠️ `SENDGRID_API_KEY is not set`
 
 **Warning** :
+
 ```
 SENDGRID_API_KEY is not set. Campaigns will not be sent.
 ```
@@ -42,6 +44,7 @@ SENDGRID_API_KEY is not set. Campaigns will not be sent.
 **Où** : Supabase Dashboard > Edge Functions > Secrets
 
 **Comment** :
+
 1. Allez dans : `https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/secrets`
 2. Cliquez sur **"Add new secret"**
 3. **Name** : `SENDGRID_API_KEY`
@@ -49,6 +52,7 @@ SENDGRID_API_KEY is not set. Campaigns will not be sent.
 5. Cliquez sur **"Save"**
 
 **Comment obtenir la clé SendGrid** :
+
 1. Allez sur [SendGrid](https://sendgrid.com)
 2. Settings > API Keys
 3. "Create API Key"
@@ -85,6 +89,7 @@ SELECT net.http_post(
 ```
 
 **Vérifications** :
+
 1. Plus de warning `SENDGRID_API_KEY is not set`
 2. Plus d'erreur `401 Invalid JWT` (ou vérifier pourquoi elle persiste)
 3. Campagne traitée avec succès
@@ -102,5 +107,3 @@ SELECT net.http_post(
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

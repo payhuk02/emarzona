@@ -9,9 +9,11 @@
 ## 📊 RÉSUMÉ EXÉCUTIF
 
 ### Objectif
+
 Intégrer les APIs de transporteurs (DHL, FedEx, UPS) pour calculer les frais de livraison en temps réel dans le processus de checkout.
 
 ### Résultat
+
 ✅ **Intégration complète des 3 transporteurs majeurs**  
 ✅ **Composant réactif pour sélection des options de livraison**  
 ✅ **Calcul automatique des tarifs en temps réel**
@@ -25,11 +27,13 @@ Intégrer les APIs de transporteurs (DHL, FedEx, UPS) pour calculer les frais de
 **Fichier modifié** : `src/hooks/physical/useShippingCarriers.ts`
 
 **Changements** :
+
 - ✅ Ajout de l'import `UPSService`
 - ✅ Implémentation du calcul de tarifs UPS dans `useCalculateCarrierRates`
 - ✅ Conversion du format UPS vers format standard unifié
 
 **Code ajouté** :
+
 ```typescript
 } else if (carrier.carrier_name === 'UPS' || carrier.carrier_name === 'UPS_Express') {
   const upsService = new UPSService({
@@ -38,7 +42,7 @@ Intégrer les APIs de transporteurs (DHL, FedEx, UPS) pour calculer les frais de
     accountNumber: carrier.account_number,
     testMode: carrier.test_mode,
   });
-  
+
   const upsRates = await upsService.getRates({
     from: {
       country: from.country,
@@ -52,7 +56,7 @@ Intégrer les APIs de transporteurs (DHL, FedEx, UPS) pour calculer les frais de
     weightUnit: 'kg',
     dimensions,
   });
-  
+
   // Convertir format UPS vers format standard
   rates = upsRates.map(rate => ({
     serviceType: rate.serviceType,
@@ -70,6 +74,7 @@ Intégrer les APIs de transporteurs (DHL, FedEx, UPS) pour calculer les frais de
 **Fichier créé** : `src/components/physical/shipping/CarrierShippingOptions.tsx`
 
 **Fonctionnalités** :
+
 - ✅ Récupération automatique de tous les transporteurs actifs
 - ✅ Calcul parallèle des tarifs pour tous les transporteurs
 - ✅ Affichage unifié des options avec :
@@ -84,6 +89,7 @@ Intégrer les APIs de transporteurs (DHL, FedEx, UPS) pour calculer les frais de
 - ✅ Tri automatique par prix (croissant)
 
 **Interface** :
+
 ```typescript
 interface CarrierShippingOptionsProps {
   from: {
@@ -110,6 +116,7 @@ interface CarrierShippingOptionsProps {
 ```
 
 **Fonctionnalités visuelles** :
+
 - 🎨 Design moderne avec cards
 - 🏷️ Badges pour "Rapide" (≤ 2 jours) et "Économique" (moins cher)
 - ⚡ Indicateurs de chargement
@@ -121,20 +128,21 @@ interface CarrierShippingOptionsProps {
 
 ## 📈 STATISTIQUES
 
-| Métrique | Valeur |
-|----------|--------|
-| **Fichiers modifiés** | 1 |
-| **Fichiers créés** | 1 |
-| **Lignes de code ajoutées** | ~350 |
+| Métrique                    | Valeur              |
+| --------------------------- | ------------------- |
+| **Fichiers modifiés**       | 1                   |
+| **Fichiers créés**          | 1                   |
+| **Lignes de code ajoutées** | ~350                |
 | **Transporteurs supportés** | 3 (DHL, FedEx, UPS) |
-| **Temps estimé** | 12 heures |
-| **Temps réel** | ~2 heures |
+| **Temps estimé**            | 12 heures           |
+| **Temps réel**              | ~2 heures           |
 
 ---
 
 ## ✅ FONCTIONNALITÉS IMPLÉMENTÉES
 
 ### Calcul de Tarifs
+
 - ✅ DHL Express
 - ✅ FedEx (Ground, Express)
 - ✅ UPS (Ground, Express, Expedited)
@@ -142,6 +150,7 @@ interface CarrierShippingOptionsProps {
 - ✅ Mode production (APIs réelles)
 
 ### Affichage
+
 - ✅ Liste unifiée de toutes les options
 - ✅ Tri automatique par prix
 - ✅ Badges visuels (Rapide, Économique)
@@ -149,11 +158,13 @@ interface CarrierShippingOptionsProps {
 - ✅ Dates de livraison formatées
 
 ### Gestion d'Erreurs
+
 - ✅ Erreurs par transporteur (non-bloquant)
 - ✅ Messages d'erreur clairs
 - ✅ Fallback gracieux si un transporteur échoue
 
 ### Performance
+
 - ✅ Calcul parallèle (Promise.all)
 - ✅ Cache des requêtes (via React Query)
 - ✅ États de chargement optimisés
@@ -189,7 +200,7 @@ import { CarrierShippingOptions } from '@/components/physical/shipping/CarrierSh
     setShippingCost(rate.totalPrice);
     setEstimatedDelivery(rate.estimatedDeliveryDays);
   }}
-/>
+/>;
 ```
 
 ---
@@ -197,6 +208,7 @@ import { CarrierShippingOptions } from '@/components/physical/shipping/CarrierSh
 ## 🎯 PROCHAINES ÉTAPES (Optionnel)
 
 ### Améliorations Futures
+
 1. **Cache avancé** : Mettre en cache les tarifs par route (from/to) pendant 1h
 2. **Tracking automatique** : Intégrer le suivi des colis
 3. **Génération d'étiquettes** : Interface pour générer les étiquettes d'expédition
@@ -209,7 +221,9 @@ import { CarrierShippingOptions } from '@/components/physical/shipping/CarrierSh
 ## 📝 NOTES TECHNIQUES
 
 ### Format de Données Unifié
+
 Tous les transporteurs retournent maintenant un format standard :
+
 ```typescript
 {
   serviceType: string;
@@ -222,11 +236,13 @@ Tous les transporteurs retournent maintenant un format standard :
 ```
 
 ### Gestion des Erreurs
+
 - Les erreurs d'un transporteur n'empêchent pas l'affichage des autres
 - Messages d'erreur contextuels par transporteur
 - Logging automatique des erreurs pour debugging
 
 ### Performance
+
 - Calcul parallèle avec `Promise.all`
 - React Query pour cache et invalidation
 - Skeleton loaders pour meilleure UX
@@ -236,6 +252,7 @@ Tous les transporteurs retournent maintenant un format standard :
 ## ✅ VALIDATION
 
 ### Tests Effectués
+
 1. ✅ Calcul de tarifs DHL (mode test)
 2. ✅ Calcul de tarifs FedEx (mode test)
 3. ✅ Calcul de tarifs UPS (mode test)
@@ -245,9 +262,11 @@ Tous les transporteurs retournent maintenant un format standard :
 7. ✅ États de chargement
 
 ### Linter
+
 ✅ **Aucune erreur de linter**
 
 ### Compatibilité
+
 ✅ **Compatible avec la structure DB existante**  
 ✅ **Rétrocompatible avec les transporteurs existants**
 
@@ -266,4 +285,3 @@ Tous les transporteurs retournent maintenant un format standard :
 **Fin du rapport**  
 **Date** : 28 Janvier 2025  
 **Version** : 1.0
-

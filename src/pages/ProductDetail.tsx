@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import StoreFooter from '@/components/storefront/StoreFooter';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
-import { ProductImageGallery } from '@/components/ui/ProductImageGallery';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { CountdownTimer } from '@/components/ui/countdown-timer';
@@ -53,24 +52,76 @@ import {
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
-import {
-  formatPrice,
-  getDisplayPrice,
-  hasPromotion,
-  calculateDiscount,
-} from '@/lib/product-helpers';
+import { formatPrice, calculateDiscount } from '@/lib/product-helpers';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { cn } from '@/lib/utils';
 import type { ProductSpecification, ProductFAQ } from '@/types/product-form';
 import type { Product } from '@/types/marketplace';
-import type { Store } from '@/types/store';
+import type { Store } from '@/hooks/useStore';
+
+// Type étendu pour Product avec toutes les propriétés utilisées
+type ExtendedProduct = Product & {
+  free_product?: Product | null;
+  paid_product?: Product | null;
+  video_url?: string | null;
+  variants?: Array<{
+    id: string;
+    name: string;
+    sku?: string;
+    price?: number;
+    stock?: number;
+    is_active?: boolean;
+    attributes: {
+      [key: string]: string;
+    };
+  }> | null;
+  features?: string[] | null;
+  specifications?: Array<{
+    name?: string;
+    label?: string;
+    key?: string;
+    value: string;
+    order?: number;
+  }> | null;
+  downloadable_files?: Array<{
+    name: string;
+    url: string;
+    size?: number;
+  }> | null;
+  download_limit?: number | null;
+  download_expiry_days?: number | null;
+  custom_fields?: Array<{
+    id?: string;
+    name: string;
+    label?: string;
+    value: string | number | boolean | null | undefined;
+    type?: string;
+    required?: boolean;
+  }> | null;
+  faqs?: Array<{
+    question: string;
+    answer: string;
+  }> | null;
+  password_protected?: boolean | null;
+  purchase_limit?: number | null;
+  preorder_allowed?: boolean | null;
+  is_free_preview?: boolean | null;
+  preview_content_description?: string | null;
+  sale_start_date?: string | null;
+  sale_end_date?: string | null;
+  pricing_model?: string | null;
+  product_affiliate_settings?: Array<{
+    commission_rate: number;
+    affiliate_enabled: boolean;
+  }> | null;
+};
 
 const ProductDetails = () => {
   const { slug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const { getValue } = usePageCustomization('productDetail');
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ExtendedProduct | null>(null);
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +160,10 @@ const ProductDetails = () => {
       }
 
       const foundStore = storeData[0];
-      setStore(foundStore);
+      setStore({
+        ...foundStore,
+        default_currency: foundStore.default_currency || undefined,
+      } as Store);
       logger.info(`Boutique chargée: ${foundStore.name} (${slug})`);
 
       // Fetch product
@@ -151,12 +205,13 @@ const ProductDetails = () => {
         const paidProduct = paidResult?.data ?? null;
 
         // S'assurer que store_id est présent (utiliser foundStore.id si manquant)
-        const productWithStore = {
+        const productWithStore: ExtendedProduct = {
           ...product,
           store_id: product.store_id || foundStore.id,
-          free_product: freeProduct,
-          paid_product: paidProduct,
-        };
+          free_product: freeProduct as Product | null,
+          paid_product: paidProduct as Product | null,
+          images: product.images as Product['images'],
+        } as ExtendedProduct;
 
         setProduct(productWithStore);
 
@@ -164,7 +219,7 @@ const ProductDetails = () => {
           productId: product.id,
           storeId: productWithStore.store_id,
           price: product.price,
-          promotional_price: product.promotional_price,
+          promotional_price: product.promotional_price ?? null,
         });
       }
     } catch (error: unknown) {
@@ -201,23 +256,28 @@ const ProductDetails = () => {
   // Prix affiché cohérent avec Marketplace
   const displayPriceInfo = useMemo(() => {
     if (!product) return null;
-    return getDisplayPrice({
+    const promoPrice = product.promotional_price ?? undefined;
+    const hasPromo = promoPrice !== undefined && promoPrice < product.price;
+    if (hasPromo && promoPrice !== undefined) {
+      return {
+        price: promoPrice,
+        originalPrice: product.price,
+        discount: calculateDiscount(product.price, promoPrice),
+      };
+    }
+    return {
       price: product.price,
-      promo_price: product.promotional_price ?? undefined,
-      currency: product.currency || 'FCFA',
-    });
-  }, [product?.price, product?.promotional_price, product?.currency]);
+    };
+  }, [product?.price, product?.promotional_price]);
 
   const hasPromo = useMemo(() => {
     if (!product) return false;
-    return hasPromotion({
-      price: product.price,
-      promo_price: product.promotional_price ?? undefined,
-    });
+    const promoPrice = product.promotional_price ?? undefined;
+    return promoPrice !== undefined && promoPrice < product.price;
   }, [product?.price, product?.promotional_price]);
 
   const discountPercent = useMemo(() => {
-    if (!hasPromo || !product) return 0;
+    if (!hasPromo || !product || !product.promotional_price) return 0;
     return calculateDiscount(product.price, product.promotional_price);
   }, [hasPromo, product?.price, product?.promotional_price]);
 
@@ -259,7 +319,9 @@ const ProductDetails = () => {
 
       navigate(`/checkout?${checkoutParams.toString()}`);
     } catch (error: unknown) {
-      logger.error('Erreur lors de la redirection vers checkout:', error);
+      logger.error('Erreur lors de la redirection vers checkout:', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       toast({
         title: 'Erreur',
         description: 'Impossible de rediriger vers la page de paiement. Veuillez réessayer.',
@@ -436,7 +498,21 @@ const ProductDetails = () => {
       )}
 
       {/* Schema.org Product */}
-      {product && store && <ProductSchema product={product} store={store} url={productUrl} />}
+      {product && store && (
+        <ProductSchema
+          product={{
+            ...product,
+            description: product.description || '',
+            image_url: product.image_url || undefined,
+          }}
+          store={{
+            name: store.name,
+            slug: store.slug,
+            logo_url: store.logo_url || undefined,
+          }}
+          url={productUrl}
+        />
+      )}
 
       {/* Breadcrumb Schema */}
       {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
@@ -640,11 +716,11 @@ const ProductDetails = () => {
                   </div>
                 )}
 
-                {product.rating > 0 && (
+                {product.rating && product.rating > 0 && (
                   <div className="flex items-center gap-2">
                     {renderStars(product.rating)}
                     <span className="text-sm text-muted-foreground">
-                      ({product.reviews_count} avis)
+                      ({product.reviews_count || 0} avis)
                     </span>
                   </div>
                 )}
@@ -802,10 +878,7 @@ const ProductDetails = () => {
                 {product.sale_end_date && (
                   <div className="flex justify-center sm:justify-start w-full">
                     <div className="w-full sm:w-auto">
-                      <CountdownTimer
-                        endDate={product.sale_end_date}
-                        startDate={product.sale_start_date}
-                      />
+                      <CountdownTimer targetDate={product.sale_end_date} />
                     </div>
                   </div>
                 )}
@@ -815,7 +888,15 @@ const ProductDetails = () => {
                   Array.isArray(product.variants) &&
                   product.variants.length > 0 && (
                     <ProductVariantSelector
-                      variants={product.variants}
+                      variants={product.variants.map(v => ({
+                        id: v.id,
+                        name: v.name,
+                        sku: v.sku,
+                        price: v.price ?? product.price,
+                        stock: v.stock ?? v.stock_quantity ?? undefined,
+                        is_active: v.is_active ?? true,
+                        attributes: v.attributes || {},
+                      }))}
                       basePrice={displayPriceInfo?.price ?? product.price}
                       currency={product.currency || 'XOF'}
                       onVariantChange={(variant, price) => {
@@ -1052,36 +1133,32 @@ const ProductDetails = () => {
                         <div className="hidden sm:block overflow-x-auto">
                           <Table className="min-w-[480px]">
                             <TableBody>
-                              {product.specifications.map(
-                                (spec: ProductSpecification, index: number) => (
-                                  <TableRow
-                                    key={index}
-                                    className={index % 2 === 0 ? 'bg-muted/50' : ''}
-                                  >
-                                    <TableCell className="font-medium w-1/3 py-3 px-4">
-                                      {spec.name || spec.label || spec.key}
-                                    </TableCell>
-                                    <TableCell className="py-3 px-4 break-words">
-                                      {spec.value}
-                                    </TableCell>
-                                  </TableRow>
-                                )
-                              )}
+                              {product.specifications.map((spec, index: number) => (
+                                <TableRow
+                                  key={index}
+                                  className={index % 2 === 0 ? 'bg-muted/50' : ''}
+                                >
+                                  <TableCell className="font-medium w-1/3 py-3 px-4">
+                                    {spec.name || 'Spécification'}
+                                  </TableCell>
+                                  <TableCell className="py-3 px-4 break-words">
+                                    {spec.value}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                             </TableBody>
                           </Table>
                         </div>
                         {/* Mobile: Card layout */}
                         <div className="sm:hidden divide-y divide-border">
-                          {product.specifications.map(
-                            (spec: ProductSpecification, index: number) => (
-                              <div key={index} className="p-3 sm:p-4 bg-card">
-                                <div className="font-medium text-sm mb-1.5 text-muted-foreground">
-                                  {spec.name || spec.label || spec.key}
-                                </div>
-                                <div className="text-sm break-words">{spec.value}</div>
+                          {product.specifications.map((spec, index: number) => (
+                            <div key={index} className="p-3 sm:p-4 bg-card">
+                              <div className="font-medium text-sm mb-1.5 text-muted-foreground">
+                                {spec.name || 'Spécification'}
                               </div>
-                            )
-                          )}
+                              <div className="text-sm break-words">{spec.value}</div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -1235,10 +1312,10 @@ const ProductDetails = () => {
         {/* Pied de page */}
         <StoreFooter
           storeName={store.name}
-          facebook_url={store.facebook_url}
-          instagram_url={store.instagram_url}
-          twitter_url={store.twitter_url}
-          linkedin_url={store.linkedin_url}
+          facebook_url={(store as Store & { facebook_url?: string | null }).facebook_url}
+          instagram_url={(store as Store & { instagram_url?: string | null }).instagram_url}
+          twitter_url={(store as Store & { twitter_url?: string | null }).twitter_url}
+          linkedin_url={(store as Store & { linkedin_url?: string | null }).linkedin_url}
         />
       </div>
     </>

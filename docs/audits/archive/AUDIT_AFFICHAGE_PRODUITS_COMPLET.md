@@ -1,4 +1,5 @@
 # Audit Complet - Affichage des Produits E-commerce
+
 **Date**: 28 janvier 2025
 **Objectif**: Analyser et optimiser l'affichage des produits (marketplace, boutique, vue détaillée) pour les 4 systèmes e-commerce
 
@@ -8,11 +9,13 @@
 **Score Cible**: 100/100
 
 Cet audit analyse l'affichage des produits pour :
+
 1. Produits digitaux
 2. Produits physiques
 3. Services
 4. Cours en ligne
-+ Système d'affiliation
+
+- Système d'affiliation
 
 ---
 
@@ -21,20 +24,24 @@ Cet audit analyse l'affichage des produits pour :
 ### Structure des Composants Identifiés
 
 #### Marketplace
+
 - `src/pages/Marketplace.tsx` - Page principale marketplace
 - `src/components/marketplace/ProductCard.tsx` - Carte produit marketplace
 - `src/components/marketplace/MarketplaceFilters.tsx` - Filtres marketplace
 - `src/components/marketplace/ProductRecommendations.tsx` - Recommandations
 
 #### Boutique Vendeur
+
 - `src/pages/Store.tsx` - Page boutique vendeur
 - Composants produits par type (DigitalProductCard, PhysicalProductCard, ServiceCard)
 
 #### Vue Détail Produit
+
 - Pages détail par type de produit
 - Composants d'affichage spécifiques
 
 #### Cartes Produits
+
 - `src/components/digital/DigitalProductCard.tsx`
 - `src/components/physical/PhysicalProductCard.tsx`
 - `src/components/service/ServiceCard.tsx`
@@ -48,6 +55,7 @@ Cet audit analyse l'affichage des produits pour :
 ### 🔴 CRITIQUE 1: Incohérence des Cartes Produits
 
 **Problème**:
+
 - ❌ Chaque type de produit a sa propre carte avec des styles différents
 - ❌ Pas de standardisation visuelle
 - ❌ Informations affichées de manière incohérente
@@ -56,6 +64,7 @@ Cet audit analyse l'affichage des produits pour :
 **Impact**: 🔴 **CRITIQUE** - Expérience utilisateur fragmentée
 
 **Exemples**:
+
 - DigitalProductCard: affiche fichiers, formats
 - PhysicalProductCard: affiche stock, poids
 - ServiceCard: affiche durée, modalités
@@ -69,6 +78,7 @@ Créer un composant `UnifiedProductCard` qui s'adapte dynamiquement selon le typ
 ### 🔴 CRITIQUE 2: Données Manquantes Non Gérées
 
 **Problème**:
+
 - ❌ Pas de fallback propre quand une information manque
 - ❌ Affichage cassé si données incomplètes
 - ❌ Pas de gestion des cas limites
@@ -83,6 +93,7 @@ Système de fallback intelligent avec valeurs par défaut.
 ### 🟠 MOYEN 1: Marketplace Non Optimisée
 
 **Problème**:
+
 - ❌ Grille pas optimale pour mobile
 - ❌ Pagination basique
 - ❌ Filtres non optimisés
@@ -99,6 +110,7 @@ Grille moderne, pagination infinie, filtres avancés, lazy loading optimisé.
 ### 🟠 MOYEN 2: Boutique Vendeur Non Cohérente
 
 **Problème**:
+
 - ❌ Affichage différent selon le type
 - ❌ Pas de hiérarchie visuelle claire
 - ❌ Responsive non optimisé
@@ -113,6 +125,7 @@ Affichage unifié avec sections par type, hiérarchie visuelle claire.
 ### 🟠 MOYEN 3: Vue Détail Non Structurée
 
 **Problème**:
+
 - ❌ Structure différente selon le type
 - ❌ Sections non organisées
 - ❌ Galerie d'images basique
@@ -128,6 +141,7 @@ Structure standardisée avec sections dynamiques selon le type.
 ### 🟡 FAIBLE 1: Performance Non Optimisée
 
 **Problème**:
+
 - ❌ Pas de SSR/ISR optimisé
 - ❌ Caching non optimal
 - ❌ Re-renders non minimisés
@@ -159,6 +173,7 @@ interface UnifiedProductCardProps {
 ```
 
 **Fonctionnalités**:
+
 - ✅ Affichage dynamique selon le type
 - ✅ Fallbacks intelligents
 - ✅ Badges standardisés
@@ -193,7 +208,7 @@ interface BaseProduct {
   status: 'active' | 'draft' | 'archived';
   created_at: string;
   updated_at: string;
-  
+
   // Affiliation
   is_affiliate?: boolean;
   affiliate_percentage?: number;
@@ -297,34 +312,40 @@ Sections dynamiques selon type:
 ## 4. PLAN D'IMPLÉMENTATION
 
 ### Phase 1: Structure de Données (2h)
+
 1. ✅ Créer types unifiés
 2. ✅ Créer helpers de transformation
 3. ✅ Créer hooks de récupération
 
 ### Phase 2: UnifiedProductCard (3h)
+
 1. ✅ Créer composant unifié
 2. ✅ Logique d'affichage dynamique
 3. ✅ Fallbacks intelligents
 4. ✅ Tests avec tous les types
 
 ### Phase 3: Marketplace (2h)
+
 1. ✅ Optimiser grille
 2. ✅ Pagination infinie
 3. ✅ Filtres avancés
 4. ✅ Lazy loading
 
 ### Phase 4: Boutique Vendeur (1.5h)
+
 1. ✅ Sections par type
 2. ✅ Hiérarchie visuelle
 3. ✅ Responsive
 
 ### Phase 5: Vue Détail (2h)
+
 1. ✅ Structure standardisée
 2. ✅ Sections dynamiques
 3. ✅ Galerie optimisée
 4. ✅ CTA optimisés
 
 ### Phase 6: Performance (1h)
+
 1. ✅ SSR/ISR optimisé
 2. ✅ Caching intelligent
 3. ✅ Re-renders minimisés
@@ -336,6 +357,7 @@ Sections dynamiques selon type:
 ## 5. COMPOSANTS À CRÉER/MODIFIER
 
 ### Nouveaux Composants
+
 1. `src/components/products/UnifiedProductCard.tsx` - Carte unifiée
 2. `src/components/products/ProductCardSkeleton.tsx` - Skeleton premium
 3. `src/components/products/ProductTypeBadge.tsx` - Badge type (existe déjà, améliorer)
@@ -348,6 +370,7 @@ Sections dynamiques selon type:
 10. `src/hooks/useProductDisplay.ts` - Hook logique affichage
 
 ### Composants à Modifier
+
 1. `src/pages/Marketplace.tsx` - Optimiser
 2. `src/pages/Store.tsx` - Optimiser
 3. `src/pages/products/[id].tsx` - Restructurer
@@ -359,6 +382,7 @@ Sections dynamiques selon type:
 ## 6. LOGIQUE D'AFFICHAGE DYNAMIQUE
 
 ### Digital Product
+
 ```tsx
 Key Info:
 - ✅ Fichiers disponibles (count)
@@ -374,6 +398,7 @@ Fallbacks:
 ```
 
 ### Physical Product
+
 ```tsx
 Key Info:
 - ✅ Stock disponible (badge)
@@ -388,6 +413,7 @@ Fallbacks:
 ```
 
 ### Service Product
+
 ```tsx
 Key Info:
 - ✅ Durée (ex: "2 heures")
@@ -401,6 +427,7 @@ Fallbacks:
 ```
 
 ### Course Product
+
 ```tsx
 Key Info:
 - ✅ Modules (count)
@@ -415,6 +442,7 @@ Fallbacks:
 ```
 
 ### Affiliation
+
 ```tsx
 Affichage:
 - ✅ Badge "Affiliation" si applicable
@@ -431,6 +459,7 @@ Fallbacks:
 ## 7. STANDARDS VISUELS
 
 ### Carte Produit Standard
+
 ```
 ┌─────────────────────────────┐
 │ [Image]                     │
@@ -449,6 +478,7 @@ Fallbacks:
 ```
 
 ### Éléments Visuels
+
 - **Image**: 16:9 ratio, lazy loading, placeholder
 - **Titre**: 2 lignes max, truncate
 - **Prix**: Formaté, devise, taille proéminente
@@ -462,6 +492,7 @@ Fallbacks:
 ## 8. OPTIMISATIONS PERFORMANCE
 
 ### SSR/ISR
+
 ```tsx
 // Pages statiques avec ISR
 export async function getStaticProps({ params }) {
@@ -474,6 +505,7 @@ export async function getStaticProps({ params }) {
 ```
 
 ### Caching
+
 ```tsx
 // React Query avec staleTime
 useQuery({
@@ -485,6 +517,7 @@ useQuery({
 ```
 
 ### Lazy Loading
+
 ```tsx
 // Intersection Observer pour images
 <LazyImage
@@ -495,11 +528,11 @@ useQuery({
 ```
 
 ### Re-renders
+
 ```tsx
 // React.memo pour cartes
 export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev, next) => {
-  return prev.product.id === next.product.id &&
-         prev.product.updated_at === next.product.updated_at;
+  return prev.product.id === next.product.id && prev.product.updated_at === next.product.updated_at;
 });
 ```
 
@@ -508,16 +541,19 @@ export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev,
 ## 9. MOBILE FIRST
 
 ### Responsive
+
 - Mobile: 1 colonne
 - Tablet: 2 colonnes
 - Desktop: 3-4 colonnes
 
 ### Touch Targets
+
 - Boutons: min 44x44px
 - Images: aspect-ratio 16:9
 - Cards: padding suffisant
 
 ### Performance Mobile
+
 - Images optimisées (WebP, srcset)
 - Lazy loading agressif
 - Skeleton loading
@@ -528,6 +564,7 @@ export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev,
 ## 10. CHECKLIST VALIDATION
 
 ### UnifiedProductCard
+
 - [ ] Affiche correctement tous les types
 - [ ] Fallbacks fonctionnels
 - [ ] Responsive mobile/tablet/desktop
@@ -535,6 +572,7 @@ export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev,
 - [ ] Accessibilité (a11y)
 
 ### Marketplace
+
 - [ ] Grille professionnelle
 - [ ] Pagination infinie
 - [ ] Filtres fonctionnels
@@ -542,11 +580,13 @@ export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev,
 - [ ] Lazy loading
 
 ### Boutique Vendeur
+
 - [ ] Sections par type
 - [ ] Hiérarchie claire
 - [ ] Responsive
 
 ### Vue Détail
+
 - [ ] Structure standardisée
 - [ ] Sections dynamiques
 - [ ] Galerie optimisée
@@ -568,16 +608,19 @@ export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev,
 ## 12. RECOMMANDATIONS
 
 ### Priorité HAUTE
+
 1. ✅ Créer UnifiedProductCard
 2. ✅ Standardiser l'affichage
 3. ✅ Gérer les fallbacks
 
 ### Priorité MOYENNE
+
 1. ✅ Optimiser Marketplace
 2. ✅ Optimiser Boutique
 3. ✅ Restructurer Vue Détail
 
 ### Priorité BASSE
+
 1. ✅ Optimiser Performance
 2. ✅ Améliorer Mobile
 3. ✅ Ajouter animations
@@ -585,4 +628,3 @@ export const UnifiedProductCard = React.memo(UnifiedProductCardComponent, (prev,
 ---
 
 **Score Attendu**: 100/100 après implémentation
-

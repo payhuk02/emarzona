@@ -159,6 +159,7 @@ User 2:
 ```
 
 **Vérifications** :
+
 - ✅ User 1 ne voit que Store A et Store B
 - ✅ User 2 ne voit que Store C
 - ✅ Store A ne voit que P1, P2, O1, O2
@@ -177,6 +178,7 @@ User 2:
 ```
 
 **Vérifications** :
+
 - ✅ Les données se rechargent correctement
 - ✅ Aucune donnée de Store A n'est visible dans Store B
 
@@ -198,16 +200,16 @@ describe('New Feature Isolation', () => {
   it('should only fetch data for the specified store', async () => {
     // Arrange
     const store1Data = [{ id: 'item-1', store_id: 'store-1' }];
-    
+
     // Act
     const { result } = renderHook(() => useNewFeature('store-1'), { wrapper });
-    
+
     // Assert
     await waitFor(() => {
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].store_id).toBe('store-1');
     });
-    
+
     // Vérifier que le filtre est appliqué
     expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');
   });
@@ -237,4 +239,3 @@ describe('New Feature Isolation', () => {
 **Date de création** : 28 Janvier 2025  
 **Dernière mise à jour** : 28 Janvier 2025  
 **Statut** : ✅ **ACTIF**
-

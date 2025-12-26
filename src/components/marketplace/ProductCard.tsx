@@ -17,6 +17,7 @@ import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { safeRedirect } from '@/lib/url-validator';
 // import { ProductBanner } from '@/components/ui/ResponsiveProductImage';
 import { logger } from '@/lib/logger';
@@ -68,9 +69,10 @@ interface ProductCardProps {
 
 const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [loading, setLoading] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const { toast } = useToast();
+  const { favorites, toggleFavorite } = useMarketplaceFavorites();
+  const isFavorite = favorites.has(product.id);
   const isDigital = product.product_type === 'digital';
 
   // Extraire les infos de boutique depuis product.stores (déjà joint dans la requête)
@@ -95,23 +97,15 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     };
   }, [product.promo_price, product.price]);
 
-  // Gérer les favoris
+  // Gérer les favoris - Utiliser le hook centralisé pour synchronisation
   const handleFavorite = useCallback(
-    (e: React.MouseEvent) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      setIsFavorite(prev => {
-        const newValue = !prev;
-        toast({
-          title: prev ? 'Retiré des favoris' : 'Ajouté aux favoris',
-          description: prev
-            ? `${product.name} a été retiré de vos favoris`
-            : `${product.name} a été ajouté à vos favoris`,
-        });
-        return newValue;
-      });
+      await toggleFavorite(product.id);
+      // Le toast est géré par useMarketplaceFavorites
     },
-    [product.name, toast]
+    [product.id, toggleFavorite]
   );
 
   // Gérer le zoom

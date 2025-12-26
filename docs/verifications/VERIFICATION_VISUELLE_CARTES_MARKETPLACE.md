@@ -91,4 +91,3 @@ Il faut ajouter PaymentOptionsBadge et PricingModelBadge dans UnifiedProductCard
 ---
 
 _Vérification effectuée le 2 Février 2025_
-

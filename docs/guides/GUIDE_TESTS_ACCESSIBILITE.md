@@ -12,6 +12,7 @@
 **Fichier**: `tests/accessibility.spec.ts`
 
 **Pages Testées**:
+
 - ✅ Accueil (`/`)
 - ✅ Marketplace (`/marketplace`)
 - ✅ Authentification (`/auth`)
@@ -57,10 +58,12 @@ npx playwright test tests/accessibility.spec.ts --ui
 **Objectif**: Détecter automatiquement les violations WCAG
 
 **Tests**:
+
 - ✅ Pas de violations WCAG 2.1 Level A
 - ✅ Pas de violations WCAG 2.1 Level AA
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "Scan Automatique"
 ```
@@ -72,6 +75,7 @@ npx playwright test tests/accessibility.spec.ts --grep "Scan Automatique"
 **Objectif**: Vérifier que la navigation au clavier fonctionne
 
 **Tests**:
+
 - ✅ Navigation avec Tab
 - ✅ Navigation en arrière avec Shift+Tab
 - ✅ Activation des liens avec Enter
@@ -79,6 +83,7 @@ npx playwright test tests/accessibility.spec.ts --grep "Scan Automatique"
 - ✅ Focus visible
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "Navigation Clavier"
 ```
@@ -90,6 +95,7 @@ npx playwright test tests/accessibility.spec.ts --grep "Navigation Clavier"
 **Objectif**: Vérifier la structure ARIA et sémantique
 
 **Tests**:
+
 - ✅ Présence de landmarks (main, nav, header, footer)
 - ✅ Images avec attributs alt
 - ✅ Boutons avec labels accessibles
@@ -97,6 +103,7 @@ npx playwright test tests/accessibility.spec.ts --grep "Navigation Clavier"
 - ✅ Formulaires avec labels
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "ARIA"
 ```
@@ -108,9 +115,11 @@ npx playwright test tests/accessibility.spec.ts --grep "ARIA"
 **Objectif**: Vérifier le contraste des couleurs
 
 **Tests**:
+
 - ✅ Contraste suffisant (WCAG 2.1 AA)
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "Contraste"
 ```
@@ -122,10 +131,12 @@ npx playwright test tests/accessibility.spec.ts --grep "Contraste"
 **Objectif**: Vérifier l'utilisabilité avec zoom et sur mobile
 
 **Tests**:
+
 - ✅ Utilisable avec zoom 200%
 - ✅ Utilisable en mode paysage mobile
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "Responsive"
 ```
@@ -137,11 +148,13 @@ npx playwright test tests/accessibility.spec.ts --grep "Responsive"
 **Objectif**: Vérifier la compatibilité avec les lecteurs d'écran
 
 **Tests**:
+
 - ✅ Titre de page descriptif
 - ✅ Hiérarchie de headings correcte
 - ✅ Contenu dynamique avec aria-live
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "Lecteur"
 ```
@@ -153,10 +166,12 @@ npx playwright test tests/accessibility.spec.ts --grep "Lecteur"
 **Objectif**: Vérifier l'accessibilité des formulaires
 
 **Tests**:
+
 - ✅ Erreurs de validation annoncées
 - ✅ Champs requis identifiés
 
 **Exécution**:
+
 ```bash
 npx playwright test tests/accessibility.spec.ts --grep "Formulaires"
 ```
@@ -170,6 +185,7 @@ npx playwright test tests/accessibility.spec.ts --grep "Formulaires"
 **Script**: `scripts/check-accessibility.js`
 
 **Usage**:
+
 ```bash
 # Vérifier toutes les pages
 node scripts/check-accessibility.js
@@ -179,6 +195,7 @@ BASE_URL=http://localhost:8080 node scripts/check-accessibility.js
 ```
 
 **Fonctionnalités**:
+
 - ✅ Scanne toutes les pages principales
 - ✅ Génère un rapport JSON
 - ✅ Affiche un résumé des résultats
@@ -212,12 +229,15 @@ const pages = [
 ## 🎯 Objectifs de Conformité
 
 ### WCAG 2.1 Level A
+
 - ✅ **100% conforme** - Obligatoire
 
 ### WCAG 2.1 Level AA
+
 - ✅ **95%+ conforme** - Recommandé
 
 ### Métriques
+
 - **0 violations** Level A
 - **< 5 violations** Level AA
 - **Score axe** : > 90/100
@@ -229,11 +249,13 @@ const pages = [
 ### Tests Échouent
 
 1. **Vérifier que le serveur est en cours d'exécution**
+
    ```bash
    npm run dev
    ```
 
 2. **Vérifier l'URL de base**
+
    ```bash
    BASE_URL=http://localhost:8080 npm run test:a11y
    ```
@@ -262,6 +284,7 @@ const pages = [
 ## ✅ Checklist
 
 Avant de commit:
+
 - [ ] Tous les tests d'accessibilité passent
 - [ ] Aucune violation Level A
 - [ ] < 5 violations Level AA
@@ -270,9 +293,3 @@ Avant de commit:
 ---
 
 **Prochaine révision**: 2025-01-11 (hebdomadaire)
-
-
-
-
-
-

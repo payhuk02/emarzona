@@ -10,6 +10,7 @@
 ## 📊 Vue d'Ensemble
 
 ### État Actuel (Capture d'écran fournie)
+
 - **Produits affichés** : 1 produit (Formation : Devenez Expert en Vente de Produits Digitaux en Afrique)
 - **Layout** : Grille responsive 1 col (mobile) / 2 cols (tablet) / 3 cols (desktop)
 - **Design** : Carte blanche sur fond gradient sombre (slate-900 → slate-800)
@@ -23,15 +24,17 @@
 ### 1️⃣ **Contraste de Couleurs**
 
 #### ✅ Points Forts
-| Élément | Fond | Texte | Ratio | WCAG |
-|---------|------|-------|-------|------|
-| Hero | Gradient violet foncé | Blanc | ~15:1 | ✅ AAA |
-| Statistiques | Slate-800/50 | Texte coloré | 8-12:1 | ✅ AAA |
-| Carte produit | Blanc (#FFFFFF) | Gris foncé (#1F2937) | 16.1:1 | ✅ AAA |
-| Bouton "Acheter" | Bleu (#2563EB) | Blanc | 8.6:1 | ✅ AAA |
-| Badge promo | Jaune (#EAB308) | Blanc | 7.2:1 | ✅ AAA |
+
+| Élément          | Fond                  | Texte                | Ratio  | WCAG   |
+| ---------------- | --------------------- | -------------------- | ------ | ------ |
+| Hero             | Gradient violet foncé | Blanc                | ~15:1  | ✅ AAA |
+| Statistiques     | Slate-800/50          | Texte coloré         | 8-12:1 | ✅ AAA |
+| Carte produit    | Blanc (#FFFFFF)       | Gris foncé (#1F2937) | 16.1:1 | ✅ AAA |
+| Bouton "Acheter" | Bleu (#2563EB)        | Blanc                | 8.6:1  | ✅ AAA |
+| Badge promo      | Jaune (#EAB308)       | Blanc                | 7.2:1  | ✅ AAA |
 
 #### ⚠️ Problèmes de Contraste
+
 ```
 ❌ Problème 1 : Contraste Hero/Carte
 - Fond page : Gradient sombre (slate-900)
@@ -43,6 +46,7 @@
 ### 2️⃣ **Hiérarchie Visuelle**
 
 #### Structure Actuelle
+
 ```
 ┌─────────────────────────────────────────┐
 │ HERO (Gradient violet foncé)           │
@@ -67,11 +71,13 @@
 ```
 
 #### ✅ Points Forts
+
 1. **Séparation claire** entre sections (Hero / Produits / CTA)
 2. **Focus visuel** sur la barre de recherche (centrale, large)
 3. **Call-to-action** bien visible en bas de page
 
 #### ⚠️ Améliorations Possibles
+
 ```
 ❌ Problème 2 : Manque de séparation visuelle
 - Transition Hero → Liste produits trop abrupte
@@ -86,6 +92,7 @@
 ### 📐 Dimensions & Spacing
 
 #### Layout Actuel
+
 ```css
 /* ProductGrid Configuration */
 grid-cols-1      /* Mobile: 1 colonne */
@@ -95,6 +102,7 @@ gap-6 sm:gap-8   /* Espacement: 24px mobile, 32px desktop */
 ```
 
 #### Carte Produit
+
 ```css
 /* ProductCardProfessional */
 Largeur : 100% (responsive)
@@ -106,11 +114,13 @@ Hover : translateY(-4px) + border-gray-300
 ```
 
 #### ✅ Points Forts
+
 - **Proportions** : Image 192px = bon équilibre texte/image
 - **Espacement** : Gap de 24-32px évite cartes collées
 - **Responsive** : Adaptatif 1/2/3 colonnes selon écran
 
 #### ⚠️ Problèmes Identifiés
+
 ```
 ❌ Problème 3 : Hauteur image fixe (192px)
 - Sur écrans larges (1920px+), image semble écrasée
@@ -140,6 +150,7 @@ gap-6 sm:gap-7 lg:gap-8  /* Progression: 24px → 28px → 32px */
 ## 📝 Informations Affichées sur la Carte
 
 ### Structure Actuelle (de haut en bas)
+
 ```
 1. IMAGE PRODUIT (192px, aspect-cover)
    ├─ Badge catégorie (top-left)
@@ -181,12 +192,14 @@ gap-6 sm:gap-7 lg:gap-8  /* Progression: 24px → 28px → 32px */
 ```
 
 ### ✅ Points Forts
+
 1. **Complétude** : Toutes les infos essentielles présentes
 2. **Hiérarchie** : Titre → Prix → Actions (lecture en Z)
 3. **Social Proof** : Badge vérifié, nombre d'avis, ventes
 4. **Urgence** : Badge promo visible immédiatement
 
 ### ⚠️ Problèmes Identifiés
+
 ```
 ❌ Problème 5 : Surcharge d'informations
 - 8 sections empilées = carte trop haute
@@ -218,7 +231,7 @@ Correction proposée :
 - Solution : Générer automatiquement depuis description complète
 
 /* Suggestion SQL */
-UPDATE products 
+UPDATE products
 SET short_description = LEFT(description, 100)
 WHERE short_description IS NULL OR short_description = '';
 ```
@@ -230,6 +243,7 @@ WHERE short_description IS NULL OR short_description = '';
 ### Boutons d'Action
 
 #### Configuration Actuelle
+
 ```tsx
 <Button variant="outline" className="flex-1">
   <Eye className="h-4 w-4 mr-2" />
@@ -243,17 +257,19 @@ WHERE short_description IS NULL OR short_description = '';
 ```
 
 #### ✅ Points Forts
+
 1. **Flexibilité** : `flex-1` = boutons égaux en largeur
 2. **Icônes** : Renforce la compréhension (Eye, Cart)
 3. **Hiérarchie** : Primaire (Acheter) + Secondaire (Voir)
 4. **Accessibilité** : ARIA labels complets (après amélioration)
 
 #### ⚠️ Problèmes Identifiés
+
 ```
 ❌ Problème 8 : Trop de friction pour acheter
 Flow actuel :
-  1. Clic "Acheter" 
-  2. → Redirection Moneroo 
+  1. Clic "Acheter"
+  2. → Redirection Moneroo
   3. → Paiement
 
 Problème : Pas de panier, pas de checkout intermédiaire
@@ -285,6 +301,7 @@ Problème : État local, non persisté
 ### Hover & Focus
 
 #### États Visuels
+
 ```css
 /* Carte */
 .hover:-translate-y-1  /* Lève de 4px au hover */
@@ -300,11 +317,13 @@ Problème : État local, non persisté
 ```
 
 #### ✅ Points Forts
+
 1. **Feedback** : Hover lift = affordance claire
 2. **Focus visible** : WCAG AA (3px outline + 2px offset)
 3. **Smooth** : Transitions 300ms = fluide
 
 #### ⚠️ Améliorations Possibles
+
 ```
 💡 Suggestion 1 : Ajouter effet "shine"
 .product-card::before {
@@ -332,6 +351,7 @@ Problème : État local, non persisté
 ## 📱 Responsivité
 
 ### Breakpoints Actuels
+
 ```css
 /* ProductGrid */
 Mobile  : < 640px  → 1 colonne  (gap-6)
@@ -344,16 +364,17 @@ max-width: 1536px (2xl) /* via container mx-auto max-w-6xl */
 
 ### Tests Multi-Devices
 
-| Device | Viewport | Colonnes | Gap | Largeur carte | Statut |
-|--------|----------|----------|-----|---------------|--------|
-| iPhone SE | 375px | 1 | 24px | 100% (375px) | ✅ OK |
-| iPhone 12 | 390px | 1 | 24px | 100% (390px) | ✅ OK |
-| iPad Mini | 768px | 2 | 32px | ~368px | ✅ OK |
-| iPad Pro | 1024px | 3 | 32px | ~320px | ⚠️ Étroit |
-| Laptop | 1440px | 3 | 32px | ~453px | ✅ Optimal |
-| Desktop 4K | 1920px | 3 | 32px | ~605px | ⚠️ Trop large |
+| Device     | Viewport | Colonnes | Gap  | Largeur carte | Statut        |
+| ---------- | -------- | -------- | ---- | ------------- | ------------- |
+| iPhone SE  | 375px    | 1        | 24px | 100% (375px)  | ✅ OK         |
+| iPhone 12  | 390px    | 1        | 24px | 100% (390px)  | ✅ OK         |
+| iPad Mini  | 768px    | 2        | 32px | ~368px        | ✅ OK         |
+| iPad Pro   | 1024px   | 3        | 32px | ~320px        | ⚠️ Étroit     |
+| Laptop     | 1440px   | 3        | 32px | ~453px        | ✅ Optimal    |
+| Desktop 4K | 1920px   | 3        | 32px | ~605px        | ⚠️ Trop large |
 
 #### ⚠️ Problèmes Identifiés
+
 ```
 ❌ Problème 10 : Pas de 4ème colonne pour larges écrans
 - Sur écrans 1920px+, cartes deviennent très larges
@@ -384,11 +405,13 @@ xl:grid-cols-4   /* 1536px+ */
 ### Mobile (< 640px)
 
 #### ✅ Points Forts
+
 - **Lisibilité** : 1 colonne = focus total sur produit
 - **Touch targets** : 44x44px minimum respecté
 - **Scroll** : Vertical naturel, pas de horizontal
 
 #### ⚠️ Problèmes
+
 ```
 ❌ Problème 12 : Barre recherche trop large mobile
 Actuel : padding-left: 48px (pour icône loupe)
@@ -401,8 +424,8 @@ Solution :
 /* Placeholder adaptatif */
 <Input
   placeholder={
-    isMobile 
-      ? "Rechercher..." 
+    isMobile
+      ? "Rechercher..."
       : "Rechercher un produit, une boutique ou une catégorie..."
   }
 />
@@ -415,6 +438,7 @@ Solution :
 ### Chargement Initial
 
 #### Métriques Actuelles
+
 ```
 Initial Load (12 produits, 1ère page) :
 - Requête Supabase : ~200ms
@@ -424,6 +448,7 @@ Initial Load (12 produits, 1ère page) :
 ```
 
 #### Lazy Loading Implémenté
+
 ```tsx
 // ProductGrid.tsx
 useEffect(() => {
@@ -441,12 +466,14 @@ useEffect(() => {
 ```
 
 #### ✅ Points Forts
+
 1. **Pagination serveur** : Seulement 12 produits chargés
 2. **Lazy loading** : Images chargées au scroll
 3. **Skeleton screens** : Feedback immédiat pendant load
 4. **Debounce recherche** : -89% appels API
 
 #### ⚠️ Optimisations Possibles
+
 ```
 💡 Suggestion 2 : Précharger page suivante
 - Lorsque user arrive en bas de page
@@ -472,7 +499,7 @@ B. Next.js Image (si migration)
 C. Compression côté client avant upload
 
 Exemple :
-<img 
+<img
   src={`${imageUrl}?width=600&quality=80`}
   srcset={`
     ${imageUrl}?width=300&quality=80 300w,
@@ -488,6 +515,7 @@ Gain estimé : -70% poids images
 ### Skeleton Loading
 
 #### Implémentation Actuelle
+
 ```tsx
 const SkeletonCard = () => (
   <div className="product-card">
@@ -505,11 +533,13 @@ const SkeletonCard = () => (
 ```
 
 #### ✅ Points Forts
+
 - **Forme fidèle** : Skeleton = structure vraie carte
 - **Animation** : Pulse doux (non agressif)
 - **Nombre** : 12 skeletons = même que pagination
 
 #### ⚠️ Amélioration
+
 ```
 💡 Suggestion 4 : Skeleton gradient animé
 Actuel : Pulse simple
@@ -539,6 +569,7 @@ Proposé : Shimmer effect (gradient qui se déplace)
 ### Funnel d'Achat
 
 #### Parcours Actuel
+
 ```
 1. DÉCOUVERTE
    └─ User arrive sur /marketplace
@@ -568,6 +599,7 @@ Proposé : Shimmer effect (gradient qui se déplace)
 ```
 
 #### ⚠️ Frictions Identifiées
+
 ```
 ❌ Problème 13 : Pas de breadcrumb
 User sur page produit → Veut revenir au marketplace
@@ -620,23 +652,21 @@ B. Badge "Bestseller" sur carte
 ### Comparaison Produits
 
 #### Feature Existante (mais cachée)
+
 ```tsx
 // useMarketplaceComparison hook existe
-const {
-  comparisonProducts,
-  addToComparison,
-  removeFromComparison,
-  clearComparison
-} = useMarketplaceComparison();
+const { comparisonProducts, addToComparison, removeFromComparison, clearComparison } =
+  useMarketplaceComparison();
 
 // Bouton "Comparer" dans toolbar
 <Button onClick={() => setShowComparison(true)}>
   <BarChart3 className="h-4 w-4 mr-2" />
   Comparer ({comparisonProducts.length})
-</Button>
+</Button>;
 ```
 
 #### ⚠️ Problème UX
+
 ```
 ❌ Problème 16 : Ajout à comparaison non évident
 - Aucun bouton "Comparer" sur carte produit
@@ -659,12 +689,13 @@ Ajouter bouton dans carte (à côté favori) :
 ## 🔢 Pagination & Navigation
 
 ### Configuration Actuelle
+
 ```tsx
 // Marketplace.tsx
 const [pagination, setPagination] = useState({
   currentPage: 1,
   itemsPerPage: 12,
-  totalItems: 0
+  totalItems: 0,
 });
 
 // Pagination côté serveur
@@ -672,18 +703,20 @@ const startIndex = (currentPage - 1) * itemsPerPage;
 const endIndex = startIndex + itemsPerPage - 1;
 
 const { data, count } = await supabase
-  .from("products")
-  .select("*", { count: 'exact' })
+  .from('products')
+  .select('*', { count: 'exact' })
   .range(startIndex, endIndex);
 ```
 
 #### ✅ Points Forts
+
 1. **Serveur-side** : Scalable (fonctionne avec 100k+ produits)
 2. **Count exact** : Total items connu
 3. **Max 7 pages** affichées : Évite pagination infinie
 4. **ARIA** : Navigation accessible
 
 #### ⚠️ Problèmes Identifiés
+
 ```
 ❌ Problème 17 : Scroll position non préservée
 User clique page 2 → Scroll auto vers page 2
@@ -693,7 +726,7 @@ User doit rescroller vers haut
 Solution :
 const goToPage = (page: number) => {
   setPagination(prev => ({ ...prev, currentPage: page }));
-  
+
   // Scroll smooth vers début liste produits
   document.getElementById('main-content')?.scrollIntoView({
     behavior: 'smooth',
@@ -721,7 +754,7 @@ Uniquement pagination classique
 Certains users préfèrent scroll infini
 
 Solution (optionnelle) :
-<Button 
+<Button
   onClick={loadMore}
   className="w-full mt-6"
   disabled={!hasMore}
@@ -733,6 +766,7 @@ Solution (optionnelle) :
 ```
 
 ### Navigation Clavier
+
 ```
 ✅ Déjà implémenté (WCAG AA) :
 - Tab : Focus bouton suivant
@@ -746,31 +780,24 @@ Solution (optionnelle) :
 ## 🎨 Cohérence Design System
 
 ### Palette de Couleurs Utilisée
+
 ```css
 /* Background */
---slate-900: #0F172A  /* Fond page */
---slate-800: #1E293B  /* Fond sections */
---white: #FFFFFF      /* Fond carte */
-
-/* Texte */
---gray-900: #111827   /* Titre produit */
---gray-700: #374151   /* Texte vendeur */
---gray-600: #4B5563   /* Description */
---gray-500: #6B7280   /* Prix barré */
-
-/* Accents */
---blue-600: #2563EB   /* Bouton primaire */
---yellow-500: #EAB308 /* Badge promo */
---red-500: #EF4444    /* Badge favori */
---green-500: #22C55E  /* Vérifié */
+--slate-900: #0f172a /* Fond page */ --slate-800: #1e293b /* Fond sections */ --white: #ffffff
+  /* Fond carte */ /* Texte */ --gray-900: #111827 /* Titre produit */ --gray-700: #374151
+  /* Texte vendeur */ --gray-600: #4b5563 /* Description */ --gray-500: #6b7280 /* Prix barré */
+  /* Accents */ --blue-600: #2563eb /* Bouton primaire */ --yellow-500: #eab308 /* Badge promo */
+  --red-500: #ef4444 /* Badge favori */ --green-500: #22c55e /* Vérifié */;
 ```
 
 #### ✅ Cohérence
+
 - **Niveaux de gris** : Hiérarchie claire (900→500)
 - **Couleurs sémantiques** : Rouge=danger, Vert=succès, Bleu=action
 - **Contraste** : Tous > 4.5:1 (WCAG AA)
 
 #### ⚠️ Incohérences
+
 ```
 ❌ Problème 20 : Fond blanc vs thème sombre
 Page entière : Thème sombre (slate-900)
@@ -783,8 +810,8 @@ A. Tout en sombre :
    .product-card { background: #1E293B; color: #F8FAFC; }
 
 B. Cartes semi-transparentes :
-   .product-card { 
-     background: rgba(255,255,255,0.05); 
+   .product-card {
+     background: rgba(255,255,255,0.05);
      backdrop-filter: blur(10px);
      border: 1px solid rgba(255,255,255,0.1);
    }
@@ -796,6 +823,7 @@ C. Thème clair pour section produits :
 ### Typographie
 
 #### Tailles Utilisées
+
 ```css
 /* Hero */
 h1: 4xl md:6xl (36px → 60px)
@@ -813,6 +841,7 @@ prix: lg       (18px)
 ```
 
 #### ✅ Cohérence
+
 - **Progression logique** : XL > LG > Base > SM
 - **Hierarchy** : Hero > Stats > Cartes
 - **Responsive** : Tailles adaptatives (4xl → 6xl)
@@ -823,15 +852,15 @@ prix: lg       (18px)
 
 ### Performance Actuelle (Estimée)
 
-| Métrique | Valeur | Objectif | Statut |
-|----------|--------|----------|--------|
-| LCP (Largest Contentful Paint) | ~800ms | < 2.5s | ✅ Excellent |
-| FID (First Input Delay) | ~50ms | < 100ms | ✅ Excellent |
-| CLS (Cumulative Layout Shift) | ~0.02 | < 0.1 | ✅ Excellent |
-| TTI (Time to Interactive) | ~400ms | < 3.5s | ✅ Excellent |
-| Lighthouse Performance | ~92/100 | 90+ | ✅ OK |
-| Lighthouse Accessibility | ~95/100 | 90+ | ✅ Excellent |
-| Bundle Size (Marketplace) | ~145KB | < 200KB | ✅ OK |
+| Métrique                       | Valeur  | Objectif | Statut       |
+| ------------------------------ | ------- | -------- | ------------ |
+| LCP (Largest Contentful Paint) | ~800ms  | < 2.5s   | ✅ Excellent |
+| FID (First Input Delay)        | ~50ms   | < 100ms  | ✅ Excellent |
+| CLS (Cumulative Layout Shift)  | ~0.02   | < 0.1    | ✅ Excellent |
+| TTI (Time to Interactive)      | ~400ms  | < 3.5s   | ✅ Excellent |
+| Lighthouse Performance         | ~92/100 | 90+      | ✅ OK        |
+| Lighthouse Accessibility       | ~95/100 | 90+      | ✅ Excellent |
+| Bundle Size (Marketplace)      | ~145KB  | < 200KB  | ✅ OK        |
 
 ### Conversion (Hypothétique)
 
@@ -865,7 +894,7 @@ Impact : Cartes semblent vides, moins attrayantes
 Fix : Générer depuis description OU rendre champ obligatoire
 
 SQL Fix :
-UPDATE products 
+UPDATE products
 SET short_description = SUBSTRING(description, 1, 120) || '...'
 WHERE short_description IS NULL;
 ```
@@ -912,7 +941,7 @@ Fix : Afficher tags filtres actifs sous barre recherche
     {activeFilters.map(filter => (
       <Badge variant="secondary" key={filter.key}>
         {filter.label}
-        <X className="h-3 w-3 ml-1 cursor-pointer" 
+        <X className="h-3 w-3 ml-1 cursor-pointer"
            onClick={() => removeFilter(filter.key)} />
       </Badge>
     ))}
@@ -945,6 +974,7 @@ Proposé : Stagger animation (apparition échelonnée)
 ### 🔥 Urgentes (Semaine 1)
 
 #### 1. Synchroniser favoris dans cartes produits
+
 **Effort** : 1h  
 **Impact** : UX cohérente  
 **Fichiers** : `ProductCardProfessional.tsx`
@@ -956,15 +986,16 @@ const isFavorite = favorites.has(product.id);
 ```
 
 #### 2. Générer descriptions courtes manquantes
+
 **Effort** : 30min  
 **Impact** : Cartes plus attrayantes  
 **Action** : SQL Update + Frontend fallback
 
 ```sql
 -- Script SQL
-UPDATE products 
+UPDATE products
 SET short_description = CASE
-  WHEN LENGTH(description) > 120 
+  WHEN LENGTH(description) > 120
   THEN SUBSTRING(description, 1, 117) || '...'
   ELSE description
 END
@@ -972,6 +1003,7 @@ WHERE short_description IS NULL OR short_description = '';
 ```
 
 #### 3. Supprimer texte "Prix Promo :"
+
 **Effort** : 10min  
 **Impact** : Interface plus propre  
 **Fichiers** : `ProductCardProfessional.tsx`
@@ -989,8 +1021,9 @@ WHERE short_description IS NULL OR short_description = '';
 ### 📅 Court Terme (Semaine 2-3)
 
 #### 4. Optimiser grille responsive
+
 **Effort** : 2h  
-**Impact** : Meilleur affichage tous écrans  
+**Impact** : Meilleur affichage tous écrans
 
 ```tsx
 // ProductGrid.tsx (ligne 90)
@@ -1005,16 +1038,17 @@ className={cn(
 ```
 
 #### 5. Ajouter bouton "Comparer" sur cartes
+
 **Effort** : 3h  
-**Impact** : Feature plus utilisée  
+**Impact** : Feature plus utilisée
 
 ```tsx
 // Dans ProductCardProfessional
 <button
-  onClick={(e) => {
+  onClick={e => {
     e.preventDefault();
     addToComparison(product);
-    toast({ title: "Ajouté à la comparaison" });
+    toast({ title: 'Ajouté à la comparaison' });
   }}
   className="absolute top-3 left-12 p-2 bg-white/90 rounded-full"
 >
@@ -1023,15 +1057,16 @@ className={cn(
 ```
 
 #### 6. Scroll auto vers produits après pagination
+
 **Effort** : 30min  
-**Impact** : Navigation plus fluide  
+**Impact** : Navigation plus fluide
 
 ```tsx
 const goToPage = (page: number) => {
   setPagination(prev => ({ ...prev, currentPage: page }));
   document.getElementById('main-content')?.scrollIntoView({
     behavior: 'smooth',
-    block: 'start'
+    block: 'start',
   });
 };
 ```
@@ -1041,12 +1076,13 @@ const goToPage = (page: number) => {
 ### 🎯 Moyen Terme (Mois 1)
 
 #### 7. Optimiser images avec transformation
+
 **Effort** : 8h  
-**Impact** : -70% poids images, +30% vitesse  
+**Impact** : -70% poids images, +30% vitesse
 
 ```tsx
 // Utiliser Supabase Image Transformation
-<img 
+<img
   src={`${imageUrl}?width=600&quality=80`}
   srcSet={`
     ${imageUrl}?width=300&quality=80 300w,
@@ -1057,8 +1093,9 @@ const goToPage = (page: number) => {
 ```
 
 #### 8. Ajouter sections "Tendances" / "Nouveautés"
+
 **Effort** : 12h  
-**Impact** : +20% engagement  
+**Impact** : +20% engagement
 
 ```tsx
 <Tabs defaultValue="all">
@@ -1068,49 +1105,42 @@ const goToPage = (page: number) => {
     <TabsTrigger value="new">✨ Nouveautés</TabsTrigger>
     <TabsTrigger value="promo">💰 Promos</TabsTrigger>
   </TabsList>
-  
-  <TabsContent value="all">
-    {/* Grille actuelle */}
-  </TabsContent>
-  
-  <TabsContent value="trending">
-    {/* Produits avec purchases_count > moyenne */}
-  </TabsContent>
+
+  <TabsContent value="all">{/* Grille actuelle */}</TabsContent>
+
+  <TabsContent value="trending">{/* Produits avec purchases_count > moyenne */}</TabsContent>
 </Tabs>
 ```
 
 #### 9. Modal confirmation avant achat
+
 **Effort** : 6h  
-**Impact** : -30% abandons panier (estimé)  
+**Impact** : -30% abandons panier (estimé)
 
 ```tsx
 <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
   <DialogContent>
     <DialogTitle>Confirmer votre achat</DialogTitle>
-    
+
     <div className="space-y-4">
       {/* Résumé produit */}
       <ProductSummary product={product} />
-      
+
       {/* Total */}
       <div className="flex justify-between font-bold text-lg">
         <span>Total</span>
         <span>{formatPrice(price)} FCFA</span>
       </div>
-      
+
       {/* CGV */}
-      <Checkbox>
-        J'accepte les conditions générales de vente
-      </Checkbox>
+      <Checkbox>J'accepte les conditions générales de vente</Checkbox>
     </div>
-    
+
     <DialogFooter>
       <Button variant="outline" onClick={() => setShowCheckout(false)}>
         Annuler
       </Button>
-      <Button onClick={proceedToPayment}>
-        Procéder au paiement
-      </Button>
+      <Button onClick={proceedToPayment}>Procéder au paiement</Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>
@@ -1121,6 +1151,7 @@ const goToPage = (page: number) => {
 ## 📝 Checklist Finale
 
 ### ✅ Ce qui fonctionne bien
+
 - [x] Pagination serveur (scalable, performant)
 - [x] Accessibilité WCAG AA (skip links, ARIA, focus)
 - [x] Responsive design (1/2/3 colonnes)
@@ -1133,6 +1164,7 @@ const goToPage = (page: number) => {
 - [x] Touch targets (44x44px minimum)
 
 ### ⚠️ À améliorer prioritairement
+
 - [ ] Synchroniser favoris dans ProductCardProfessional (1h)
 - [ ] Générer descriptions courtes manquantes (30min)
 - [ ] Supprimer "Prix Promo :" redondant (10min)
@@ -1143,6 +1175,7 @@ const goToPage = (page: number) => {
 - [ ] Filtres actifs visibles (2h)
 
 ### 💡 Optimisations futures
+
 - [ ] Optimisation images (Supabase Transform) (8h)
 - [ ] Sections Tendances/Nouveautés (12h)
 - [ ] Modal confirmation achat (6h)
@@ -1156,16 +1189,16 @@ const goToPage = (page: number) => {
 
 ## 📊 Score Global Affichage Produits
 
-| Critère | Note | Commentaire |
-|---------|------|-------------|
-| **Design Visuel** | 8/10 | Moderne, propre. Contraste carte/fond à améliorer |
-| **UX Interaction** | 7/10 | Bon, mais manque feedback favoris + comparaison |
-| **Performance** | 9/10 | Excellent (pagination serveur, lazy loading) |
-| **Accessibilité** | 9.5/10 | WCAG AA complet, exemplaire |
-| **Responsive** | 7.5/10 | Bien, mais manque 4ème colonne grands écrans |
-| **Information** | 7/10 | Complète, mais description courte manquante |
-| **Conversion** | 6.5/10 | Friction achat, manque modal confirmation |
-| **Cohérence** | 7/10 | Bonne, mais clash thème sombre/cartes blanches |
+| Critère            | Note   | Commentaire                                       |
+| ------------------ | ------ | ------------------------------------------------- |
+| **Design Visuel**  | 8/10   | Moderne, propre. Contraste carte/fond à améliorer |
+| **UX Interaction** | 7/10   | Bon, mais manque feedback favoris + comparaison   |
+| **Performance**    | 9/10   | Excellent (pagination serveur, lazy loading)      |
+| **Accessibilité**  | 9.5/10 | WCAG AA complet, exemplaire                       |
+| **Responsive**     | 7.5/10 | Bien, mais manque 4ème colonne grands écrans      |
+| **Information**    | 7/10   | Complète, mais description courte manquante       |
+| **Conversion**     | 6.5/10 | Friction achat, manque modal confirmation         |
+| **Cohérence**      | 7/10   | Bonne, mais clash thème sombre/cartes blanches    |
 
 ### Score Moyen : **7.7/10** ⭐
 
@@ -1174,21 +1207,24 @@ const goToPage = (page: number) => {
 ## 🎯 Conclusion
 
 ### Forces Principales
+
 1. ✅ **Performance exceptionnelle** : Pagination serveur + lazy loading
 2. ✅ **Accessibilité gold standard** : WCAG 2.1 AA complet
 3. ✅ **Architecture technique solide** : Hooks réutilisables, code propre
 4. ✅ **Features avancées** : Favoris sync, comparaison, debounce
 
 ### Faiblesses Principales
+
 1. ⚠️ **Cohérence visuelle** : Cartes blanches sur fond sombre (clash)
 2. ⚠️ **UX achat** : Trop de friction, manque étape confirmation
 3. ⚠️ **Visibilité features** : Comparaison cachée, pas de bouton sur carte
 4. ⚠️ **Data qualité** : Descriptions courtes manquantes
 
 ### Priorités Absolues (Cette Semaine)
+
 ```
 1. Synchroniser favoris dans cartes        [1h]   ← CRITIQUE
-2. Générer descriptions courtes manquantes [30m]  ← CRITIQUE  
+2. Générer descriptions courtes manquantes [30m]  ← CRITIQUE
 3. Supprimer "Prix Promo :" redondant     [10m]  ← FACILE
 4. Ajouter 4ème colonne xl                [1h]   ← MOYEN
 5. Scroll auto pagination                 [30m]  ← FACILE
@@ -1205,4 +1241,3 @@ Impact : Expérience utilisateur +40%
 **Prochaine analyse** : Page Produit Détaillée
 
 🎉 **Analyse complète terminée !**
-

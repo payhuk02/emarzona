@@ -1,4 +1,5 @@
 # ✅ CORRECTIONS IMPLÉMENTÉES - SYSTÈME WEBHOOKS
+
 ## Date: 2025-01-28
 
 ---
@@ -16,15 +17,18 @@ Les corrections prioritaires critiques du système de webhooks ont été implém
 **Fichier modifié:** `src/lib/webhooks/webhook-system.ts`
 
 **Problème corrigé:**
+
 - ❌ Utilisait `btoa()` pour signer les payloads (facilement falsifiable)
 - ✅ Maintenant utilise HMAC-SHA256 avec Web Crypto API (sécurisé)
 
 **Modifications:**
+
 - Fonction `signPayload()` réécrite pour être async et utiliser `crypto.subtle`
 - Fonction `sendWebhook()` mise à jour pour utiliser `await signPayload()`
 - Fonction `verifyWebhookSignature()` mise à jour pour être async et utiliser comparaison constante dans le temps
 
 **Code avant:**
+
 ```typescript
 function signPayload(payload: string, secret: string): string {
   if (typeof window !== 'undefined') {
@@ -35,12 +39,13 @@ function signPayload(payload: string, secret: string): string {
 ```
 
 **Code après:**
+
 ```typescript
 async function signPayload(payload: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
   const messageData = encoder.encode(payload);
-  
+
   const key = await crypto.subtle.importKey(
     'raw',
     keyData,
@@ -48,7 +53,7 @@ async function signPayload(payload: string, secret: string): Promise<string> {
     false,
     ['sign']
   );
-  
+
   const signature = await crypto.subtle.sign('HMAC', key, messageData);
   const hashArray = Array.from(new Uint8Array(signature));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -64,10 +69,12 @@ async function signPayload(payload: string, secret: string): Promise<string> {
 **Fichier créé:** `supabase/migrations/20250128_webhooks_system_consolidated.sql`
 
 **Problème corrigé:**
+
 - ❌ Migrations conflictuelles créant des structures différentes
 - ✅ Migration unique consolidée qui unifie toutes les structures
 
 **Caractéristiques:**
+
 - Supporte à la fois `status` (ENUM) et `is_active` (BOOLEAN calculé)
 - Compatible avec les migrations existantes
 - Ajoute les colonnes manquantes automatiquement
@@ -75,6 +82,7 @@ async function signPayload(payload: string, secret: string): Promise<string> {
 - Index optimisés pour les performances
 
 **Fonctionnalités ajoutées:**
+
 - Colonne `is_active` calculée automatiquement depuis `status`
 - Contrainte unique `(event_id, webhook_id, event_type)` pour idempotence
 - Index sur `next_retry_at` pour traitement efficace des retries
@@ -89,10 +97,12 @@ async function signPayload(payload: string, secret: string): Promise<string> {
 **Fichier créé:** `supabase/migrations/20250128_webhook_delivery_cron.sql`
 
 **Problème corrigé:**
+
 - ❌ Edge Function existait mais n'était jamais appelée automatiquement
 - ✅ Cron job configuré pour traiter les webhooks toutes les minutes
 
 **Configuration:**
+
 - Cron job programmé: `* * * * *` (toutes les minutes)
 - Traite jusqu'à 50 deliveries en attente par exécution
 - Instructions pour configuration manuelle via Supabase Dashboard si pg_cron non disponible
@@ -108,16 +118,18 @@ async function signPayload(payload: string, secret: string): Promise<string> {
 **Fichier modifié:** `src/lib/webhooks/webhook-system.ts`
 
 **Modification:**
+
 - Ajout d'un avertissement si `sendWebhook()` est appelé depuis le client
 - Documentation améliorée expliquant que cette fonction ne doit être utilisée que côté serveur
 
 **Code ajouté:**
+
 ```typescript
 // Avertissement en développement si appelé depuis le client
 if (typeof window !== 'undefined') {
   logger.warn(
     'sendWebhook called from client! This exposes webhook secrets. ' +
-    'Use triggerWebhook() instead and let the Edge Function handle delivery.'
+      'Use triggerWebhook() instead and let the Edge Function handle delivery.'
   );
 }
 ```
@@ -128,14 +140,14 @@ if (typeof window !== 'undefined') {
 
 ## 📊 STATUT DES CORRECTIONS
 
-| Priorité | Correction | Statut | Fichiers |
-|----------|-----------|--------|----------|
-| 🔴 1 | Correction HMAC | ✅ Complété | `src/lib/webhooks/webhook-system.ts` |
-| 🔴 1 | Migration consolidée | ✅ Complété | `supabase/migrations/20250128_webhooks_system_consolidated.sql` |
-| 🟠 2 | Cron job | ✅ Complété | `supabase/migrations/20250128_webhook_delivery_cron.sql` |
-| 🟠 2 | Avertissement sécurité | ✅ Complété | `src/lib/webhooks/webhook-system.ts` |
-| 🟡 3 | Unification systèmes | ⏳ En attente | - |
-| 🟡 3 | Standardisation formats | ⏳ En attente | - |
+| Priorité | Correction              | Statut        | Fichiers                                                        |
+| -------- | ----------------------- | ------------- | --------------------------------------------------------------- |
+| 🔴 1     | Correction HMAC         | ✅ Complété   | `src/lib/webhooks/webhook-system.ts`                            |
+| 🔴 1     | Migration consolidée    | ✅ Complété   | `supabase/migrations/20250128_webhooks_system_consolidated.sql` |
+| 🟠 2     | Cron job                | ✅ Complété   | `supabase/migrations/20250128_webhook_delivery_cron.sql`        |
+| 🟠 2     | Avertissement sécurité  | ✅ Complété   | `src/lib/webhooks/webhook-system.ts`                            |
+| 🟡 3     | Unification systèmes    | ⏳ En attente | -                                                               |
+| 🟡 3     | Standardisation formats | ⏳ En attente | -                                                               |
 
 ---
 
@@ -144,6 +156,7 @@ if (typeof window !== 'undefined') {
 ### À faire immédiatement:
 
 1. **Appliquer les migrations:**
+
    ```bash
    # Appliquer la migration consolidée
    supabase migration up
@@ -177,11 +190,12 @@ if (typeof window !== 'undefined') {
 ## 🧪 TESTS RECOMMANDÉS
 
 ### Test 1: Signature HMAC
+
 ```typescript
 import { signPayload, verifyWebhookSignature } from '@/lib/webhooks/webhook-system';
 
 const payload = JSON.stringify({ test: true });
-const secret = "test-secret-123";
+const secret = 'test-secret-123';
 const signature = await signPayload(payload, secret);
 
 // Vérifier que la signature est un hash hex de 64 caractères
@@ -194,24 +208,26 @@ console.assert(isValid === true);
 ```
 
 ### Test 2: Idempotence
+
 ```sql
 -- Déclencher le même événement deux fois
 SELECT trigger_webhook('store-uuid', 'order.created', 'order-123', '{}'::jsonb);
 SELECT trigger_webhook('store-uuid', 'order.created', 'order-123', '{}'::jsonb);
 
 -- Vérifier qu'une seule delivery a été créée
-SELECT COUNT(*) FROM webhook_deliveries 
+SELECT COUNT(*) FROM webhook_deliveries
 WHERE event_id = 'order-123' AND event_type = 'order.created';
 -- Devrait retourner 1
 ```
 
 ### Test 3: Cron Job
+
 ```sql
 -- Vérifier que le cron job est actif
 SELECT * FROM cron.job WHERE jobname = 'process-webhook-deliveries';
 
 -- Vérifier les exécutions récentes
-SELECT * FROM cron.job_run_details 
+SELECT * FROM cron.job_run_details
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'process-webhook-deliveries')
 ORDER BY start_time DESC
 LIMIT 10;
@@ -242,4 +258,3 @@ LIMIT 10;
 **Date de mise à jour:** 2025-01-28  
 **Version:** 1.0  
 **Statut:** ✅ Corrections prioritaires 1 et 2 complétées
-

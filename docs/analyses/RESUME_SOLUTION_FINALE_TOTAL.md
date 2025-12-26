@@ -10,6 +10,7 @@ Le total ne se mettait pas à jour après application du code promo. Malgré plu
 ## 🔍 Diagnostic Final
 
 Le problème venait d'une **cascade de dépendances React** :
+
 - `taxAmount` et `giftCardAmount` étaient dans des `useMemo` qui dépendaient de `totalDiscounts`
 - `totalDiscounts` n'était pas mémorisé, causant des problèmes de détection des changements par React
 - Quand le coupon était appliqué, les `useMemo` ne se recalculaient pas toujours correctement
@@ -17,9 +18,11 @@ Le problème venait d'une **cascade de dépendances React** :
 ## ✅ Solution Appliquée
 
 ### Principe
+
 **Supprimer tous les `useMemo` pour les calculs dépendant du coupon et calculer directement dans le render.**
 
 ### Code Avant (Problématique)
+
 ```typescript
 const totalDiscounts = itemDiscounts + couponDiscount; // Pas mémorisé
 
@@ -32,6 +35,7 @@ const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 ```
 
 ### Code Après (Solution)
+
 ```typescript
 // Calcul direct, pas de useMemo
 const itemDiscounts = items.reduce(...);
@@ -55,6 +59,7 @@ const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 ## 📊 Résultat
 
 Avec cette solution :
+
 - ✅ Le total se met à jour **immédiatement** quand le coupon est appliqué
 - ✅ Le total se remet à jour **immédiatement** quand le coupon est retiré
 - ✅ Aucun problème de dépendances React
@@ -63,6 +68,7 @@ Avec cette solution :
 ## 🧪 Test Attendu
 
 **Scénario** : Sous-total 4000 XOF, Code promo -400 XOF
+
 - Total après remise : 3600 XOF ✅
 - Taxes (18%) : 648 XOF
 - Shipping : 5000 XOF
@@ -73,4 +79,3 @@ Avec cette solution :
 - `src/pages/Checkout.tsx` (lignes 281-316)
   - Suppression de tous les `useMemo` pour les calculs dépendant du coupon
   - Calcul direct de tous les montants dans le render
-

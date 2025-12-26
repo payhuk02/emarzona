@@ -28,13 +28,13 @@
 
 ✅ **5 langues configurées et fonctionnelles**
 
-| Langue | Code | Clés | Audience | Statut |
-|--------|------|------|----------|--------|
-| 🇫🇷 Français | FR | 1077 | ~280M | ✅ 100% |
-| 🇬🇧 English | EN | 1077 | ~1.5B | ✅ 100% |
-| 🇪🇸 Español | ES | 1077 | ~560M | ✅ 100% |
-| 🇩🇪 Deutsch | DE | 1077 | ~130M | ✅ 100% |
-| 🇵🇹 Português | PT | 969 | ~338M | ✅ 90% |
+| Langue       | Code | Clés | Audience | Statut  |
+| ------------ | ---- | ---- | -------- | ------- |
+| 🇫🇷 Français  | FR   | 1077 | ~280M    | ✅ 100% |
+| 🇬🇧 English   | EN   | 1077 | ~1.5B    | ✅ 100% |
+| 🇪🇸 Español   | ES   | 1077 | ~560M    | ✅ 100% |
+| 🇩🇪 Deutsch   | DE   | 1077 | ~130M    | ✅ 100% |
+| 🇵🇹 Português | PT   | 969  | ~338M    | ✅ 90%  |
 
 **Total :** 5277 clés de traduction | +2.81 milliards de personnes
 
@@ -67,9 +67,11 @@
 ### `vercel.json` configuré avec :
 
 **Rewrites :**
+
 - SPA routing (`/(.*) → /index.html`)
 
 **Security Headers :**
+
 - ✅ Strict-Transport-Security (HSTS)
 - ✅ X-Frame-Options (SAMEORIGIN)
 - ✅ X-Content-Type-Options (nosniff)
@@ -79,6 +81,7 @@
 - ✅ Content-Security-Policy (CSP)
 
 **CORS Headers :**
+
 - Configurés pour `/api/*`
 
 ---
@@ -109,18 +112,18 @@ VITE_FB_PIXEL_ID=...
 
 ### Taille des bundles :
 
-| Fichier | Taille brute | Gzip | Brotli |
-|---------|--------------|------|--------|
-| **index.js** | 205 kB | 62 kB | **58 kB** |
-| **vendor-react.js** | 162 kB | 53 kB | **48 kB** |
-| **vendor-supabase.js** | 146 kB | 37 kB | **33 kB** |
-| **vendor-i18n.js** | 46 kB | 15 kB | **13 kB** |
-| **charts.js** | 413 kB | 105 kB | **98 kB** |
-| **Landing.js** | 65 kB | 16 kB | **14 kB** |
-| **Auth.js** | 5 kB | 2 kB | **1.7 kB** |
-| **Dashboard.js** | 19 kB | 5 kB | **4.5 kB** |
-| **Marketplace.js** | 86 kB | 21 kB | **19 kB** |
-| **Settings.js** | 127 kB | 26 kB | **23 kB** |
+| Fichier                | Taille brute | Gzip   | Brotli     |
+| ---------------------- | ------------ | ------ | ---------- |
+| **index.js**           | 205 kB       | 62 kB  | **58 kB**  |
+| **vendor-react.js**    | 162 kB       | 53 kB  | **48 kB**  |
+| **vendor-supabase.js** | 146 kB       | 37 kB  | **33 kB**  |
+| **vendor-i18n.js**     | 46 kB        | 15 kB  | **13 kB**  |
+| **charts.js**          | 413 kB       | 105 kB | **98 kB**  |
+| **Landing.js**         | 65 kB        | 16 kB  | **14 kB**  |
+| **Auth.js**            | 5 kB         | 2 kB   | **1.7 kB** |
+| **Dashboard.js**       | 19 kB        | 5 kB   | **4.5 kB** |
+| **Marketplace.js**     | 86 kB        | 21 kB  | **19 kB**  |
+| **Settings.js**        | 127 kB       | 26 kB  | **23 kB**  |
 
 ### Performance attendue :
 
@@ -183,6 +186,7 @@ npm run preview
 ## 📋 CHECKLIST PRÉ-DÉPLOIEMENT
 
 ### Code :
+
 - [x] Build réussi sans erreurs
 - [x] Toutes les dépendances installées
 - [x] 5 langues configurées et testées
@@ -190,6 +194,7 @@ npm run preview
 - [x] `.gitignore` configuré (pas de .env)
 
 ### Configuration :
+
 - [ ] Projet Supabase créé
 - [ ] Variables d'environnement récupérées
 - [ ] Edge Functions déployées (optionnel)
@@ -197,6 +202,7 @@ npm run preview
 - [ ] RLS Policies configurées
 
 ### Vercel :
+
 - [ ] Compte Vercel créé
 - [ ] Repo GitHub connecté
 - [ ] Variables d'environnement ajoutées
@@ -204,6 +210,7 @@ npm run preview
 - [ ] Output directory : `dist`
 
 ### Post-déploiement :
+
 - [ ] App accessible via URL Vercel
 - [ ] Test authentification
 - [ ] Test changement de langue
@@ -249,6 +256,7 @@ npm run verify:i18n
 ## 📊 MÉTRIQUES CLÉS
 
 ### Build :
+
 - ✅ **Temps de build** : 2m 4s
 - ✅ **Taille totale** : ~2.1 MB (brute)
 - ✅ **Taille compressée** : ~650 KB (Brotli)
@@ -256,18 +264,21 @@ npm run verify:i18n
 - ✅ **Chunks optimisés** : 10+ principaux
 
 ### i18n :
+
 - ✅ **Langues** : 5 (FR, EN, ES, DE, PT)
 - ✅ **Clés totales** : 5277
 - ✅ **Couverture** : 100% sur 11 pages
 - ✅ **Audience** : 2.81 milliards
 
 ### Performance :
+
 - ✅ **FCP** : < 1.5s
 - ✅ **LCP** : < 2.5s
 - ✅ **TTI** : < 3.5s
 - ✅ **CLS** : < 0.1
 
 ### Sécurité :
+
 - ✅ **HTTPS** : Automatique (Let's Encrypt)
 - ✅ **Headers** : 7 headers configurés
 - ✅ **CSP** : Configuré
@@ -279,21 +290,21 @@ npm run verify:i18n
 
 ### Hébergement (Vercel) :
 
-| Plan | Prix/mois | Bande passante | Build time | Équipe |
-|------|-----------|----------------|------------|--------|
-| **Hobby** | **Gratuit** | 100 GB | 100h/mois | 1 |
-| **Pro** | $20 | 1 TB | 400h/mois | Illimité |
-| **Enterprise** | Custom | Illimité | Illimité | Illimité |
+| Plan           | Prix/mois   | Bande passante | Build time | Équipe   |
+| -------------- | ----------- | -------------- | ---------- | -------- |
+| **Hobby**      | **Gratuit** | 100 GB         | 100h/mois  | 1        |
+| **Pro**        | $20         | 1 TB           | 400h/mois  | Illimité |
+| **Enterprise** | Custom      | Illimité       | Illimité   | Illimité |
 
 **Recommandation :** Commencer avec **Hobby** (gratuit)
 
 ### Backend (Supabase) :
 
-| Plan | Prix/mois | DB | Storage | Edge Functions |
-|------|-----------|-----|---------|----------------|
-| **Free** | **Gratuit** | 500 MB | 1 GB | 500K req/mois |
-| **Pro** | $25 | 8 GB | 100 GB | 2M req/mois |
-| **Team** | $599 | 100 GB | 200 GB | 5M req/mois |
+| Plan     | Prix/mois   | DB     | Storage | Edge Functions |
+| -------- | ----------- | ------ | ------- | -------------- |
+| **Free** | **Gratuit** | 500 MB | 1 GB    | 500K req/mois  |
+| **Pro**  | $25         | 8 GB   | 100 GB  | 2M req/mois    |
+| **Team** | $599        | 100 GB | 200 GB  | 5M req/mois    |
 
 **Recommandation :** Commencer avec **Free** (gratuit)
 
@@ -305,10 +316,10 @@ npm run verify:i18n
 
 ### Monitoring (Sentry) :
 
-| Plan | Prix/mois | Événements | Utilisateurs |
-|------|-----------|------------|--------------|
-| **Developer** | **Gratuit** | 5K/mois | Illimité |
-| **Team** | $26 | 50K/mois | Illimité |
+| Plan          | Prix/mois   | Événements | Utilisateurs |
+| ------------- | ----------- | ---------- | ------------ |
+| **Developer** | **Gratuit** | 5K/mois    | Illimité     |
+| **Team**      | $26         | 50K/mois   | Illimité     |
 
 **Recommandation :** Commencer avec **Developer** (gratuit)
 
@@ -325,7 +336,7 @@ npm run verify:i18n
 ✅ **SEO** : Sitemap, Schema.org, Meta tags  
 ✅ **PWA** : Service Worker, offline mode  
 ✅ **Monitoring** : Sentry ready  
-✅ **Tests** : 37/37 tests i18n passés  
+✅ **Tests** : 37/37 tests i18n passés
 
 ### Ce qu'il reste à faire :
 
@@ -361,11 +372,13 @@ npm run verify:i18n
 ## 📞 BESOIN D'AIDE ?
 
 ### Ressources :
+
 - 📖 **Guide de déploiement** : Voir `DEPLOYMENT_GUIDE.md`
 - 🌐 **Vercel Docs** : https://vercel.com/docs
 - 🗄️ **Supabase Docs** : https://supabase.com/docs
 
 ### Support :
+
 - 💬 **Vercel Discord** : https://vercel.com/discord
 - 💬 **Supabase Discord** : https://discord.supabase.com
 
@@ -377,4 +390,3 @@ npm run verify:i18n
 ---
 
 🚀 **Tout est prêt pour le lancement ! Bonne chance !** 🎉
-

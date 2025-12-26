@@ -84,10 +84,18 @@
   background: var(--primary);
 }
 
-.modern-stats-card-dark.views::before { background: var(--primary); }
-.modern-stats-card-dark.clicks::before { background: var(--accent); }
-.modern-stats-card-dark.conversions::before { background: #ec4899; }
-.modern-stats-card-dark.rate::before { background: var(--warning); }
+.modern-stats-card-dark.views::before {
+  background: var(--primary);
+}
+.modern-stats-card-dark.clicks::before {
+  background: var(--accent);
+}
+.modern-stats-card-dark.conversions::before {
+  background: #ec4899;
+}
+.modern-stats-card-dark.rate::before {
+  background: var(--warning);
+}
 
 .modern-stats-card-dark:hover {
   box-shadow: var(--shadow-lg);
@@ -212,7 +220,7 @@
 
 .modern-switch-slider-dark:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 18px;
   width: 18px;
   left: 3px;
@@ -257,7 +265,7 @@
   color: var(--text-inverse);
 }
 
-.modern-tab-trigger-dark[data-state="active"] {
+.modern-tab-trigger-dark[data-state='active'] {
   background: var(--primary);
   color: var(--text-inverse);
   box-shadow: var(--shadow);
@@ -423,15 +431,15 @@
   .modern-title-xl-dark {
     font-size: 1.5rem;
   }
-  
+
   .modern-title-lg-dark {
     font-size: 1.25rem;
   }
-  
+
   .modern-section-dark {
     padding: 1rem;
   }
-  
+
   .modern-stat-value-dark {
     font-size: 1.5rem;
   }

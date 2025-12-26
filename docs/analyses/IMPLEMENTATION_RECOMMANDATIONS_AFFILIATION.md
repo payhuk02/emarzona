@@ -79,6 +79,7 @@ catch (error: unknown) {
 ### Composant créé : `PaginationControls.tsx`
 
 Composant réutilisable avec :
+
 - Navigation (première, précédente, suivante, dernière)
 - Sélection de taille de page (10, 20, 50, 100)
 - Affichage des résultats (X à Y sur Z)
@@ -112,6 +113,7 @@ const { affiliates, pagination, goToPage, nextPage } = useAffiliates(
 ### Modifications dans tous les hooks
 
 #### Avant
+
 ```typescript
 catch (error: any) {
   logger.error('Error:', error);
@@ -120,6 +122,7 @@ catch (error: any) {
 ```
 
 #### Après
+
 ```typescript
 catch (error: unknown) {
   const affiliateError = handleSupabaseError(error);
@@ -143,7 +146,7 @@ catch (error: unknown) {
 ```typescript
 // Validation email
 if (!formData.email) {
-  throw AffiliateErrors.validationError('email', 'L\'email est requis');
+  throw AffiliateErrors.validationError('email', "L'email est requis");
 }
 
 // Validation raison
@@ -185,11 +188,11 @@ describe('useAffiliates', () => {
   it('should fetch affiliates with pagination', async () => {
     // Test implementation
   });
-  
+
   it('should handle errors gracefully', async () => {
     // Test implementation
   });
-  
+
   it('should register affiliate successfully', async () => {
     // Test implementation
   });
@@ -207,11 +210,13 @@ describe('useAffiliates', () => {
 ## 📊 Statistiques
 
 ### Fichiers créés : 3
+
 - `src/lib/affiliate-errors.ts` (350+ lignes)
 - `src/components/affiliate/PaginationControls.tsx` (100+ lignes)
 - `src/hooks/__tests__/useAffiliates.test.tsx` (150+ lignes)
 
 ### Fichiers modifiés : 3
+
 - `src/hooks/useAffiliates.ts` (+200 lignes)
 - `src/hooks/useAffiliateLinks.ts` (+180 lignes)
 - `src/hooks/useAffiliateCommissions.ts` (+200 lignes)
@@ -264,11 +269,13 @@ describe('useAffiliates', () => {
 ## 🔗 Fichiers Modifiés
 
 ### Créés
+
 - `src/lib/affiliate-errors.ts`
 - `src/components/affiliate/PaginationControls.tsx`
 - `src/hooks/__tests__/useAffiliates.test.tsx`
 
 ### Modifiés
+
 - `src/hooks/useAffiliates.ts`
 - `src/hooks/useAffiliateLinks.ts`
 - `src/hooks/useAffiliateCommissions.ts`
@@ -288,4 +295,3 @@ describe('useAffiliates', () => {
 **Date** : Janvier 2025  
 **Commit** : `f71cb8dc`  
 **Statut** : ✅ Complété
-

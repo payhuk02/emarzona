@@ -30,6 +30,7 @@ Même si l'URL signée est générée avec succès, le composant affiche quand m
 ### 1. Le Re-render ne se fait pas correctement
 
 Quand `setSignedUrl()` est appelé, React devrait re-rendre le composant avec la nouvelle URL. Mais peut-être que :
+
 - Le re-render ne se déclenche pas
 - L'image ne se recharge pas avec la nouvelle URL
 - L'état `imageError` reste à `true`
@@ -37,6 +38,7 @@ Quand `setSignedUrl()` est appelé, React devrait re-rendre le composant avec la
 ### 2. L'URL signée échoue aussi
 
 Même si l'URL signée est générée, elle peut échouer au chargement si :
+
 - Le token est invalide
 - Les permissions RLS bloquent toujours l'accès
 - L'URL signée a un format incorrect
@@ -44,6 +46,7 @@ Même si l'URL signée est générée, elle peut échouer au chargement si :
 ### 3. La Logique d'Affichage est Défectueuse
 
 La condition `if (imageError && triedSignedUrl)` peut être vraie même si l'URL signée est générée, si :
+
 - `imageError` n'est pas réinitialisé à `false`
 - Le re-render se fait avant que `imageError` soit réinitialisé
 
@@ -145,4 +148,3 @@ onLoad={() => {
 ```
 
 Le problème est que "Displaying fallback link" apparaît au lieu de "Attempting to display image" avec l'URL signée.
-

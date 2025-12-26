@@ -36,16 +36,16 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **Création Produit** | ✅ | Wizard 9 étapes professionnel |
-| **Variantes** | ✅ | 3 options (Color, Size, Material) |
-| **SKU & Barcode** | ✅ | Support UPC, EAN, ISBN, JAN, ITF |
-| **Images Multiples** | ✅ | Upload et gestion images |
-| **Templates** | ✅ | Système de templates |
-| **Auto-save** | ✅ | Sauvegarde automatique brouillon |
-| **SEO & FAQs** | ✅ | Métadonnées SEO complètes |
-| **Affiliation** | ✅ | Configuration commissions |
+| Fonctionnalité       | Statut | Détails                           |
+| -------------------- | ------ | --------------------------------- |
+| **Création Produit** | ✅     | Wizard 9 étapes professionnel     |
+| **Variantes**        | ✅     | 3 options (Color, Size, Material) |
+| **SKU & Barcode**    | ✅     | Support UPC, EAN, ISBN, JAN, ITF  |
+| **Images Multiples** | ✅     | Upload et gestion images          |
+| **Templates**        | ✅     | Système de templates              |
+| **Auto-save**        | ✅     | Sauvegarde automatique brouillon  |
+| **SEO & FAQs**       | ✅     | Métadonnées SEO complètes         |
+| **Affiliation**      | ✅     | Configuration commissions         |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -70,14 +70,14 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **Tracking Stock** | ✅ | Quantités disponibles, réservées, engagées |
-| **Movements** | ✅ | 7 types (purchase, sale, adjustment, return, damage, transfer, recount) |
-| **Low Stock Alerts** | ✅ | Seuils configurables |
-| **Multi-Locations** | ✅ | Support warehouse_location, bin_location |
-| **Auto-Create Inventory** | ✅ | Création automatique via triggers |
-| **Reserve Inventory** | ✅ | Fonction `reserve_inventory()` |
+| Fonctionnalité            | Statut | Détails                                                                 |
+| ------------------------- | ------ | ----------------------------------------------------------------------- |
+| **Tracking Stock**        | ✅     | Quantités disponibles, réservées, engagées                              |
+| **Movements**             | ✅     | 7 types (purchase, sale, adjustment, return, damage, transfer, recount) |
+| **Low Stock Alerts**      | ✅     | Seuils configurables                                                    |
+| **Multi-Locations**       | ✅     | Support warehouse_location, bin_location                                |
+| **Auto-Create Inventory** | ✅     | Création automatique via triggers                                       |
+| **Reserve Inventory**     | ✅     | Fonction `reserve_inventory()`                                          |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -110,13 +110,13 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **Shipping Zones** | ✅ | Zones par pays, état, code postal |
-| **Shipping Rates** | ✅ | 4 types (flat, weight_based, price_based, free) |
-| **Calcul Dynamique** | ✅ | Hook `useCalculateShipping` |
-| **Dimensions** | ✅ | Poids et dimensions configurables |
-| **Shipping Classes** | ✅ | Support classes (standard, express, fragile) |
+| Fonctionnalité       | Statut | Détails                                         |
+| -------------------- | ------ | ----------------------------------------------- |
+| **Shipping Zones**   | ✅     | Zones par pays, état, code postal               |
+| **Shipping Rates**   | ✅     | 4 types (flat, weight_based, price_based, free) |
+| **Calcul Dynamique** | ✅     | Hook `useCalculateShipping`                     |
+| **Dimensions**       | ✅     | Poids et dimensions configurables               |
+| **Shipping Classes** | ✅     | Support classes (standard, express, fragile)    |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -150,13 +150,13 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **3 Options** | ✅ | option1_name, option2_name, option3_name |
-| **Combinaisons Auto** | ✅ | Génération automatique variantes |
-| **Prix par Variante** | ✅ | Prix, compare_at_price, cost_per_item |
-| **SKU par Variante** | ✅ | SKU unique par variante |
-| **Stock par Variante** | ✅ | Gestion stock indépendante |
+| Fonctionnalité         | Statut | Détails                                  |
+| ---------------------- | ------ | ---------------------------------------- |
+| **3 Options**          | ✅     | option1_name, option2_name, option3_name |
+| **Combinaisons Auto**  | ✅     | Génération automatique variantes         |
+| **Prix par Variante**  | ✅     | Prix, compare_at_price, cost_per_item    |
+| **SKU par Variante**   | ✅     | SKU unique par variante                  |
+| **Stock par Variante** | ✅     | Gestion stock indépendante               |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -179,11 +179,11 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **Prix de Base** | ✅ | Prix standard et compare_at_price |
-| **Prix Variantes** | ✅ | Prix ajustables par variante |
-| **Coûts** | ✅ | cost_per_item pour marge |
+| Fonctionnalité     | Statut | Détails                           |
+| ------------------ | ------ | --------------------------------- |
+| **Prix de Base**   | ✅     | Prix standard et compare_at_price |
+| **Prix Variantes** | ✅     | Prix ajustables par variante      |
+| **Coûts**          | ✅     | cost_per_item pour marge          |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -209,12 +209,12 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **Création Commandes** | ✅ | Hook `useCreatePhysicalOrder` |
-| **Réservation Stock** | ✅ | Réservation automatique |
-| **Pre-orders** | ✅ | Système pre-orders avec dépôts |
-| **Backorders** | ✅ | Gestion backorders |
+| Fonctionnalité         | Statut | Détails                        |
+| ---------------------- | ------ | ------------------------------ |
+| **Création Commandes** | ✅     | Hook `useCreatePhysicalOrder`  |
+| **Réservation Stock**  | ✅     | Réservation automatique        |
+| **Pre-orders**         | ✅     | Système pre-orders avec dépôts |
+| **Backorders**         | ✅     | Gestion backorders             |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -270,9 +270,9 @@
 
 #### ✅ Fonctionnalités Existantes
 
-| Fonctionnalité | Statut | Détails |
-|---------------|--------|---------|
-| **Stats Produits** | ✅ | total_quantity_sold, total_revenue, average_rating |
+| Fonctionnalité     | Statut | Détails                                            |
+| ------------------ | ------ | -------------------------------------------------- |
+| **Stats Produits** | ✅     | total_quantity_sold, total_revenue, average_rating |
 
 #### ⚠️ Lacunes Identifiées
 
@@ -342,6 +342,7 @@
 **Objectif**: Gérer les retours de manière professionnelle
 
 **Fonctionnalités**:
+
 - Table `product_returns` avec workflow complet
 - Interface client pour demander retour
 - Interface admin pour traiter retours
@@ -350,6 +351,7 @@
 - Réintégration stock automatique
 
 **Fichiers à créer**:
+
 - `supabase/migrations/20250127_physical_returns_system.sql`
 - `src/hooks/physical/useReturns.ts`
 - `src/components/physical/returns/ReturnRequestForm.tsx`
@@ -364,6 +366,7 @@
 **Objectif**: Calculer tarifs réels et générer étiquettes
 
 **Fonctionnalités**:
+
 - Intégration DHL, FedEx, UPS, Chronopost
 - Calcul tarifs en temps réel
 - Génération étiquettes d'expédition
@@ -371,6 +374,7 @@
 - Webhooks pour mises à jour statut
 
 **Fichiers à créer**:
+
 - `src/integrations/shipping/dhl.ts`
 - `src/integrations/shipping/fedex.ts`
 - `src/integrations/shipping/ups.ts`
@@ -385,12 +389,14 @@
 **Objectif**: Insights détaillés pour décisions business
 
 **Fonctionnalités**:
+
 - KPIs temps réel (revenu, marge, rotation)
 - Graphiques ventes, stock, prévisions
 - Rapports exportables
 - Alertes intelligentes
 
 **Fichiers à créer**:
+
 - `src/components/physical/analytics/PhysicalProductsDashboard.tsx`
 - `src/components/physical/analytics/SalesCharts.tsx`
 - `src/components/physical/analytics/InventoryReports.tsx`
@@ -405,12 +411,14 @@
 **Objectif**: Automatiser communications critiques
 
 **Fonctionnalités**:
+
 - Alertes email stock faible/épuisé
 - Notifications client (commande, expédition, livraison)
 - Notifications admin (nouvelles commandes, problèmes)
 - Templates emails personnalisables
 
 **Fichiers à créer**:
+
 - `supabase/migrations/20250127_physical_notifications.sql`
 - `src/hooks/physical/usePhysicalNotifications.ts`
 - `src/components/physical/notifications/NotificationSettings.tsx`
@@ -426,12 +434,14 @@
 **Objectif**: Automatiser réapprovisionnement
 
 **Fonctionnalités**:
+
 - Table `suppliers` complète
 - Commandes automatiques aux fournisseurs
 - Gestion coûts d'achat
 - Tracking commandes fournisseurs
 
 **Fichiers à créer**:
+
 - `supabase/migrations/20250127_suppliers_system.sql`
 - `src/hooks/physical/useSuppliers.ts`
 - `src/components/physical/suppliers/SuppliersManagement.tsx`
@@ -445,6 +455,7 @@
 **Objectif**: Booster ventes avec promotions intelligentes
 
 **Fonctionnalités**:
+
 - Coupons produits physiques
 - Promotions flash (flash sales)
 - Promotions par quantité
@@ -452,6 +463,7 @@
 - Prix par groupe clients (B2B)
 
 **Fichiers à créer**:
+
 - `src/components/physical/promotions/PhysicalProductPromotions.tsx`
 - `src/hooks/physical/usePhysicalPromotions.ts`
 
@@ -464,12 +476,14 @@
 **Objectif**: Optimiser processus de préparation commandes
 
 **Fonctionnalités**:
+
 - Workflow étape par étape (pick → pack → ship)
 - Scan barcode pour picking
 - Gestion pickers/packers
 - Dashboard fulfillment temps réel
 
 **Fichiers à créer**:
+
 - `src/components/physical/fulfillment/FulfillmentWorkflow.tsx`
 - `src/components/physical/fulfillment/BarcodeScanner.tsx`
 
@@ -482,12 +496,14 @@
 **Objectif**: Faciliter gestion inventaire à grande échelle
 
 **Fonctionnalités**:
+
 - Import CSV/Excel pour inventaire
 - Export pour réconciliation
 - Validation données import
 - Templates import
 
 **Fichiers à créer**:
+
 - `src/components/physical/inventory/InventoryImportExport.tsx`
 - `src/utils/csvParser.ts`
 
@@ -500,12 +516,14 @@
 **Objectif**: Améliorer expérience visuelle produits
 
 **Fonctionnalités**:
+
 - Upload images par variante
 - Gallery interactive variantes
 - Preview variante avec image
 - Images principales par variante
 
 **Fichiers à créer**:
+
 - `src/components/physical/variants/VariantImageUploader.tsx`
 - `src/components/physical/variants/VariantGallery.tsx`
 
@@ -518,12 +536,14 @@
 **Objectif**: Organiser produits en collections
 
 **Fonctionnalités**:
+
 - Création collections produits
 - Multi-catégorisation
 - Collections automatiques (tags, prix, etc.)
 - Pages collections dédiées
 
 **Fichiers à créer**:
+
 - `supabase/migrations/20250127_product_collections.sql`
 - `src/components/physical/collections/CollectionsManager.tsx`
 
@@ -538,6 +558,7 @@
 **Objectif**: Vendre internationalement facilement
 
 **Fonctionnalités**:
+
 - Support multi-devises
 - Conversion automatique
 - Prix par devise/zone
@@ -552,6 +573,7 @@
 **Objectif**: Vendre produits ensemble avec réduction
 
 **Fonctionnalités**:
+
 - Création bundles produits
 - Prix bundle avec réduction
 - Variantes dans bundles
@@ -566,6 +588,7 @@
 **Objectif**: Offrir plus d'options de livraison
 
 **Fonctionnalités**:
+
 - Click & collect
 - Intégration points relais
 - Livraison programmée
@@ -580,6 +603,7 @@
 **Objectif**: Maintenir précision inventaire
 
 **Fonctionnalités**:
+
 - Planification comptages cycliques
 - Comptage par zone/catégorie
 - Réconciliation automatique
@@ -594,6 +618,7 @@
 **Objectif**: Aider clients à décider
 
 **Fonctionnalités**:
+
 - Sélection produits à comparer
 - Vue comparée attributs
 - Comparaison prix, specs
@@ -605,23 +630,23 @@
 
 ## 📈 MATRICE DE PRIORISATION
 
-| Fonctionnalité | Priorité | Impact | Effort | ROI |
-|---------------|----------|--------|--------|-----|
-| **Système Retours (RMA)** | 🔴 Haute | ⭐⭐⭐⭐⭐ | Moyen | ⭐⭐⭐⭐⭐ |
-| **Intégration Transporteurs** | 🔴 Haute | ⭐⭐⭐⭐⭐ | Élevé | ⭐⭐⭐⭐⭐ |
-| **Dashboard Analytics** | 🔴 Haute | ⭐⭐⭐⭐ | Moyen | ⭐⭐⭐⭐ |
-| **Alertes Notifications** | 🔴 Haute | ⭐⭐⭐⭐ | Faible | ⭐⭐⭐⭐⭐ |
-| **Gestion Fournisseurs** | 🟡 Moyenne | ⭐⭐⭐ | Moyen | ⭐⭐⭐ |
-| **Promotions Avancées** | 🟡 Moyenne | ⭐⭐⭐ | Moyen | ⭐⭐⭐ |
-| **Workflow Fulfillment** | 🟡 Moyenne | ⭐⭐⭐ | Moyen | ⭐⭐⭐ |
-| **Import/Export CSV** | 🟡 Moyenne | ⭐⭐⭐ | Faible | ⭐⭐⭐ |
-| **Images Variantes** | 🟡 Moyenne | ⭐⭐ | Faible | ⭐⭐ |
-| **Collections** | 🟡 Moyenne | ⭐⭐ | Faible | ⭐⭐ |
-| **Multi-Devises** | 🟢 Basse | ⭐⭐ | Élevé | ⭐⭐ |
-| **Bundles** | 🟢 Basse | ⭐⭐ | Moyen | ⭐⭐ |
-| **Click & Collect** | 🟢 Basse | ⭐⭐ | Moyen | ⭐⭐ |
-| **Cycle Counting** | 🟢 Basse | ⭐ | Moyen | ⭐ |
-| **Comparaison Produits** | 🟢 Basse | ⭐ | Faible | ⭐ |
+| Fonctionnalité                | Priorité   | Impact     | Effort | ROI        |
+| ----------------------------- | ---------- | ---------- | ------ | ---------- |
+| **Système Retours (RMA)**     | 🔴 Haute   | ⭐⭐⭐⭐⭐ | Moyen  | ⭐⭐⭐⭐⭐ |
+| **Intégration Transporteurs** | 🔴 Haute   | ⭐⭐⭐⭐⭐ | Élevé  | ⭐⭐⭐⭐⭐ |
+| **Dashboard Analytics**       | 🔴 Haute   | ⭐⭐⭐⭐   | Moyen  | ⭐⭐⭐⭐   |
+| **Alertes Notifications**     | 🔴 Haute   | ⭐⭐⭐⭐   | Faible | ⭐⭐⭐⭐⭐ |
+| **Gestion Fournisseurs**      | 🟡 Moyenne | ⭐⭐⭐     | Moyen  | ⭐⭐⭐     |
+| **Promotions Avancées**       | 🟡 Moyenne | ⭐⭐⭐     | Moyen  | ⭐⭐⭐     |
+| **Workflow Fulfillment**      | 🟡 Moyenne | ⭐⭐⭐     | Moyen  | ⭐⭐⭐     |
+| **Import/Export CSV**         | 🟡 Moyenne | ⭐⭐⭐     | Faible | ⭐⭐⭐     |
+| **Images Variantes**          | 🟡 Moyenne | ⭐⭐       | Faible | ⭐⭐       |
+| **Collections**               | 🟡 Moyenne | ⭐⭐       | Faible | ⭐⭐       |
+| **Multi-Devises**             | 🟢 Basse   | ⭐⭐       | Élevé  | ⭐⭐       |
+| **Bundles**                   | 🟢 Basse   | ⭐⭐       | Moyen  | ⭐⭐       |
+| **Click & Collect**           | 🟢 Basse   | ⭐⭐       | Moyen  | ⭐⭐       |
+| **Cycle Counting**            | 🟢 Basse   | ⭐         | Moyen  | ⭐         |
+| **Comparaison Produits**      | 🟢 Basse   | ⭐         | Faible | ⭐         |
 
 ---
 
@@ -668,18 +693,18 @@
 
 ## 📊 COMPARAISON AVEC LEADERS DU MARCHÉ
 
-| Fonctionnalité | Payhuk Actuel | Shopify | WooCommerce | BigCommerce | Amélioration Proposée |
-|---------------|---------------|---------|-------------|-------------|----------------------|
-| **Variantes** | ✅ 3 options | ✅ 3 options | ✅ Illimité | ✅ 250 | 🟡 Images par variante |
-| **Inventaire** | ✅ Avancé | ✅ Avancé | ⚠️ Basic | ✅ Avancé | ✅ Analytics + Alerts |
-| **Livraison** | ⚠️ Zones manuelles | ✅ Intégrations | ⚠️ Plugins | ✅ Intégrations | 🔴 Intégrations réelles |
-| **Retours** | ❌ | ✅ | ⚠️ Plugin | ✅ | 🔴 Système complet |
-| **Analytics** | ⚠️ Basique | ✅ Avancé | ⚠️ Plugins | ✅ Avancé | 🔴 Dashboard pro |
-| **Notifications** | ❌ | ✅ | ⚠️ Plugins | ✅ | 🔴 Système complet |
-| **Fournisseurs** | ❌ | ⚠️ App | ❌ | ⚠️ App | 🟡 Système intégré |
-| **Promotions** | ⚠️ Basique | ✅ Avancé | ⚠️ Plugins | ✅ Avancé | 🟡 Promotions avancées |
-| **Fulfillment** | ❌ | ✅ | ❌ | ✅ | 🟡 Workflow barcode |
-| **Multi-Devises** | ❌ | ✅ | ⚠️ Plugins | ✅ | 🟢 Support complet |
+| Fonctionnalité    | Payhuk Actuel      | Shopify         | WooCommerce | BigCommerce     | Amélioration Proposée   |
+| ----------------- | ------------------ | --------------- | ----------- | --------------- | ----------------------- |
+| **Variantes**     | ✅ 3 options       | ✅ 3 options    | ✅ Illimité | ✅ 250          | 🟡 Images par variante  |
+| **Inventaire**    | ✅ Avancé          | ✅ Avancé       | ⚠️ Basic    | ✅ Avancé       | ✅ Analytics + Alerts   |
+| **Livraison**     | ⚠️ Zones manuelles | ✅ Intégrations | ⚠️ Plugins  | ✅ Intégrations | 🔴 Intégrations réelles |
+| **Retours**       | ❌                 | ✅              | ⚠️ Plugin   | ✅              | 🔴 Système complet      |
+| **Analytics**     | ⚠️ Basique         | ✅ Avancé       | ⚠️ Plugins  | ✅ Avancé       | 🔴 Dashboard pro        |
+| **Notifications** | ❌                 | ✅              | ⚠️ Plugins  | ✅              | 🔴 Système complet      |
+| **Fournisseurs**  | ❌                 | ⚠️ App          | ❌          | ⚠️ App          | 🟡 Système intégré      |
+| **Promotions**    | ⚠️ Basique         | ✅ Avancé       | ⚠️ Plugins  | ✅ Avancé       | 🟡 Promotions avancées  |
+| **Fulfillment**   | ❌                 | ✅              | ❌          | ✅              | 🟡 Workflow barcode     |
+| **Multi-Devises** | ❌                 | ✅              | ⚠️ Plugins  | ✅              | 🟢 Support complet      |
 
 **Objectif**: Atteindre niveau **Shopify/BigCommerce** avec les améliorations proposées 🎯
 
@@ -688,15 +713,19 @@
 ## 💡 RECOMMANDATIONS FINALES
 
 ### 1. **Commencer par les Fondations**
+
 Prioriser **Retours (RMA)**, **Notifications**, et **Analytics** car ils sont critiques pour un e-commerce physique professionnel.
 
 ### 2. **Différenciation via Intégrations**
+
 L'intégration transporteurs réels est un **avantage compétitif majeur** qui peut justifier des prix premium.
 
 ### 3. **Automatisation Progressive**
+
 Mettre en place **Fournisseurs** et **Workflow Fulfillment** pour automatiser progressivement les opérations.
 
 ### 4. **Amélioration Continue UX**
+
 Les améliorations UX (images variantes, collections) sont rapides à implémenter et améliorent significativement l'expérience.
 
 ---
@@ -704,6 +733,7 @@ Les améliorations UX (images variantes, collections) sont rapides à implément
 ## ✅ CONCLUSION
 
 Le système **Produits Physiques** de Payhuk a une **base solide et professionnelle** avec :
+
 - ✅ Architecture bien structurée
 - ✅ Fonctionnalités de base complètes
 - ✅ Wizard de création intuitif
@@ -722,4 +752,3 @@ Avec ces améliorations, Payhuk sera **au niveau de Shopify/BigCommerce** pour l
 **Date de création**: 27 Janvier 2025  
 **Auteur**: Analyse Automatisée Payhuk  
 **Version**: 1.0
-

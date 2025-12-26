@@ -10,33 +10,41 @@ Le total ne se mettait pas à jour quand un code promo était appliqué.
 ## ✅ Solution Finale Appliquée
 
 ### 1. Calcul Direct de `couponDiscountAmount`
+
 ```typescript
-const couponDiscountAmount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscountAmount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 ```
+
 - ✅ Calcul simple et direct
 - ✅ Toujours à jour à chaque render
 - ✅ Pas de problème de dépendances
 
 ### 2. Utilisation Directe dans `finalTotal`
+
 ```typescript
 const finalTotal = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
   const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
   const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
   const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
   return finalAmount;
 }, [
-  summary.subtotal, 
-  summary.discount_amount, 
-  taxAmount, 
-  shippingAmount, 
+  summary.subtotal,
+  summary.discount_amount,
+  taxAmount,
+  shippingAmount,
   couponDiscountAmount, // ✅ Utilisation directe
-  giftCardAmount
+  giftCardAmount,
 ]);
 ```
 
 ### 3. Amélioration des Dépendances de `taxAmount` et `giftCardAmount`
+
 - Utilisation des propriétés individuelles de `appliedCouponCode`
 - Garantit la mise à jour quand le coupon change
 
@@ -80,6 +88,7 @@ const finalTotal = useMemo(() => {
 ## 🎯 Résultat Attendu
 
 Quand un code promo de -400 XOF est appliqué sur un sous-total de 4000 XOF :
+
 - **Avant**: Total = 4000 XOF
 - **Après**: Total = 3600 XOF ✅
 - **Après retrait**: Total = 4000 XOF ✅
@@ -90,4 +99,3 @@ Quand un code promo de -400 XOF est appliqué sur un sous-total de 4000 XOF :
 - Pas de dépendances complexes sur des objets
 - Le calcul est performant et réactif
 - Prêt pour les tests en production
-

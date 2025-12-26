@@ -280,4 +280,3 @@ L'interface des workflows a été considérablement améliorée avec :
 - ✅ **Recherche et filtres** avancés
 
 **L'expérience utilisateur est maintenant beaucoup plus intuitive et productive !** 🚀
-

@@ -8,6 +8,7 @@
 ## 🔍 Problème Identifié
 
 D'après les logs :
+
 - ✅ `SUPABASE_SERVICE_ROLE_KEY` est bien défini (`hasServiceKey: true`)
 - ❌ `send-email-campaign` retourne toujours `401 Invalid JWT`
 
@@ -34,15 +35,15 @@ async function sendCampaign(
     // Utiliser l'anon key pour les appels internes
     // L'anon key est disponible via SUPABASE_ANON_KEY (injecté automatiquement)
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || supabaseServiceKey;
-    
+
     console.log('Calling send-email-campaign:', {
       url: `${supabaseUrl}/functions/v1/send-email-campaign`,
       usingAnonKey: !!Deno.env.get('SUPABASE_ANON_KEY'),
       hasServiceKey: !!supabaseServiceKey
     });
-    
+
     const functionUrl = `${supabaseUrl}/functions/v1/send-email-campaign`;
-    
+
     const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
@@ -84,5 +85,3 @@ Après avoir modifié le code pour utiliser l'anon key, testez à nouveau et vé
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

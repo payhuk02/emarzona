@@ -52,11 +52,12 @@ cd C:\Users\SAWADOGO\Desktop\payhula
 ### Étape 2 : Suivre les Instructions
 
 Le script va :
+
 1. ✅ Vérifier que le repo est propre
 2. ✅ Créer un backup automatique
 3. ✅ Installer git-filter-repo (si besoin)
 4. ✅ Chercher tous les fichiers .env
-5. ⚠️  Demander confirmation
+5. ⚠️ Demander confirmation
 6. 🧹 Nettoyer l'historique
 7. 🔧 Restaurer le remote
 8. 📊 Afficher le résumé
@@ -224,6 +225,7 @@ git log
 ### Erreur "git-filter-repo not found"
 
 **Solution 1 : Installer Python**
+
 1. Télécharger Python : https://www.python.org/downloads/
 2. Cocher "Add Python to PATH" lors de l'installation
 3. Redémarrer PowerShell
@@ -285,6 +287,7 @@ https://app.supabase.com/project/YOUR_PROJECT/logs/explorer
 ```
 
 **Chercher** :
+
 - Connexions depuis IPs inconnues
 - Requêtes inhabituelles
 - Pics d'activité suspects
@@ -417,5 +420,4 @@ Si vous détectez une activité suspecte :
 
 ---
 
-*Guide créé le 30 Octobre 2025 - Nettoyage Sécurisé Historique Git*
-
+_Guide créé le 30 Octobre 2025 - Nettoyage Sécurisé Historique Git_

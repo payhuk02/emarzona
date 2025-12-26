@@ -14,6 +14,7 @@
 **Problème** : Toutes les initialisations étaient synchrones et bloquaient le premier render.
 
 **Solution** :
+
 - ✅ Render immédiat de l'application (ligne 64)
 - ✅ Initialisations critiques uniquement avant le render :
   - `installConsoleGuard()` - Nécessaire pour la production
@@ -36,6 +37,7 @@
 **Problème** : Tous les fichiers CSS étaient chargés de manière synchrone.
 
 **Solution** :
+
 - ✅ CSS critique (`index.css`) chargé immédiatement
 - ✅ CSS non-critiques chargés de manière asynchrone après le premier frame :
   - `product-banners.css`
@@ -49,10 +51,12 @@
 ### 3. Optimisation `index.html` - Resource Hints & Fonts
 
 **Problème** :
+
 - Fonts Google bloquaient le render
 - Preload de `main.tsx` causait un warning
 
 **Solution** :
+
 - ✅ Fonts Google avec `media="print"` et `onload` pour chargement asynchrone
 - ✅ `font-display=swap` pour éviter FOIT (Flash of Invisible Text)
 - ✅ Preload de `main.tsx` retiré (causait un warning, pas nécessaire)
@@ -64,6 +68,7 @@
 ### 4. Optimisation Vite Config - Code Splitting
 
 **État actuel** :
+
 - ✅ Code splitting activé
 - ✅ React, React-DOM, Radix UI dans le chunk principal (nécessaire)
 - ✅ Chunks séparés pour :
@@ -74,6 +79,7 @@
   - Monitoring
 
 **Recommandation future** :
+
 - Analyser le bundle size avec `npm run build -- --mode analyze`
 - Identifier les opportunités de lazy loading supplémentaires
 
@@ -84,24 +90,22 @@
 ### 5. Optimiser l'image LCP
 
 **Identifier l'élément LCP** :
+
 - Probablement le logo dans le header ou une image dans la section hero
 - Utiliser Chrome DevTools > Performance > Web Vitals pour identifier
 
 **Actions** :
+
 1. **Preload l'image LCP** :
+
    ```html
    <link rel="preload" as="image" href="/path/to/lcp-image.jpg" fetchpriority="high" />
    ```
 
 2. **Utiliser `loading="eager"`** :
+
    ```tsx
-   <OptimizedImg
-     src={lcpImage}
-     loading="eager"
-     fetchPriority="high"
-     width={800}
-     height={600}
-   />
+   <OptimizedImg src={lcpImage} loading="eager" fetchPriority="high" width={800} height={600} />
    ```
 
 3. **Optimiser l'image** :
@@ -113,6 +117,7 @@
 ### 6. Réduire le JavaScript de blocage
 
 **Actions** :
+
 - ✅ Lazy loading des composants non-critiques (déjà fait dans `App.tsx`)
 - ✅ Code splitting optimal (déjà configuré dans `vite.config.ts`)
 - ⚠️ Analyser avec Bundle Analyzer :
@@ -123,6 +128,7 @@
 ### 7. Optimiser TTFB (Time to First Byte)
 
 **Actions** :
+
 - Utiliser CDN pour les assets statiques
 - Optimiser les requêtes Supabase (limiter les données récupérées)
 - Mettre en cache les réponses API quand possible
@@ -131,6 +137,7 @@
 ### 8. Optimiser CLS (Cumulative Layout Shift)
 
 **Actions** :
+
 - ✅ Dimensions fixes pour toutes les images
 - ✅ Aspect ratio défini pour les conteneurs d'images
 - ⚠️ Vérifier que les fonts ont `font-display: swap`
@@ -143,6 +150,7 @@
 ### Outils de mesure
 
 1. **Chrome DevTools - Lighthouse** :
+
    ```
    F12 > Lighthouse > Run analysis
    ```
@@ -152,6 +160,7 @@
    - Mesurer en temps réel
 
 3. **PageSpeed Insights** :
+
    ```
    https://pagespeed.web.dev/
    ```
@@ -163,12 +172,12 @@
 
 ### Métriques à surveiller
 
-| Métrique | Avant | Objectif | Après |
-|----------|-------|----------|-------|
-| FCP | 2544ms | < 2000ms | _À mesurer_ |
-| LCP | 6028ms | < 2500ms | _À mesurer_ |
-| CLS | 0 | < 0.1 | _À mesurer_ |
-| TTFB | 20.9ms | < 800ms | ✅ Déjà bon |
+| Métrique | Avant  | Objectif | Après       |
+| -------- | ------ | -------- | ----------- |
+| FCP      | 2544ms | < 2000ms | _À mesurer_ |
+| LCP      | 6028ms | < 2500ms | _À mesurer_ |
+| CLS      | 0      | < 0.1    | _À mesurer_ |
+| TTFB     | 20.9ms | < 800ms  | ✅ Déjà bon |
 
 ---
 
@@ -200,4 +209,3 @@
 **Date** : 8 Décembre 2025  
 **Version** : 1.0  
 **Statut** : ✅ Optimisations appliquées, tests à effectuer
-

@@ -25,6 +25,7 @@ git push origin main
    - Output Directory: `dist`
 
 5. **Environment Variables** :
+
    ```
    VITE_SUPABASE_URL = https://votre-project.supabase.co
    VITE_SUPABASE_PUBLISHABLE_KEY = eyJ...
@@ -92,6 +93,7 @@ npm run preview
 ```
 
 **Tester :**
+
 - ✅ Changement de langue (5 langues)
 - ✅ Navigation
 - ✅ Thème clair/sombre
@@ -255,6 +257,7 @@ vercel open
 ## 📚 DOCUMENTATION COMPLÈTE
 
 Pour un guide détaillé, voir :
+
 - **`DEPLOYMENT_GUIDE.md`** (guide complet 39 pages)
 - **`PRODUCTION_DEPLOYMENT_SUMMARY.md`** (résumé)
 
@@ -262,14 +265,14 @@ Pour un guide détaillé, voir :
 
 ## ⏱️ TEMPS ESTIMÉ
 
-| Étape | Temps |
-|-------|-------|
-| Créer projet Supabase | 2 min |
-| Pousser code GitHub | 30 sec |
-| Configurer Vercel | 2 min |
-| Premier déploiement | 2-3 min |
-| Vérifications | 2 min |
-| **TOTAL** | **~10 minutes** |
+| Étape                 | Temps           |
+| --------------------- | --------------- |
+| Créer projet Supabase | 2 min           |
+| Pousser code GitHub   | 30 sec          |
+| Configurer Vercel     | 2 min           |
+| Premier déploiement   | 2-3 min         |
+| Vérifications         | 2 min           |
+| **TOTAL**             | **~10 minutes** |
 
 ---
 
@@ -290,4 +293,3 @@ Votre application **Payhuk** est maintenant **EN LIGNE** avec :
 **Besoin d'aide ?** Consultez `DEPLOYMENT_GUIDE.md` 📖
 
 🚀 **Bon déploiement !**
-

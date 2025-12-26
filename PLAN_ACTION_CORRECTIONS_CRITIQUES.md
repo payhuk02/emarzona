@@ -14,14 +14,14 @@
 
 ---
 
-## ✅ TÂCHE 1 : REMPLACER CONSOLE.* PAR LOGGER
+## ✅ TÂCHE 1 : REMPLACER CONSOLE.\* PAR LOGGER
 
 ### Fichiers avec logger déjà importé (à compléter)
 
 - [x] `src/utils/storage.ts` - ✅ Déjà fait
 - [x] `src/lib/function-utils.ts` - ✅ Déjà fait
 - [x] `src/lib/storage-utils.ts` - ✅ Déjà fait
-- [x] `src/lib/cookie-utils.ts` - ✅ Logger importé, console.* à remplacer
+- [x] `src/lib/cookie-utils.ts` - ✅ Logger importé, console.\* à remplacer
 - [x] `src/lib/serialization-utils.ts` - ✅ Déjà fait
 - [x] `src/hooks/useStorage.ts` - ✅ Déjà fait
 - [x] `src/hooks/useSmartQuery.ts` - ✅ Déjà fait
@@ -45,9 +45,9 @@
 
 ### Fichiers de test (à ignorer)
 
-- ✅ `src/utils/testStorageUpload.ts` - Fichier de test, console.* acceptable
-- ✅ `src/test/setup.ts` - Setup tests, console.* acceptable
-- ✅ `tests/setup/*.ts` - Setup Playwright, console.* acceptable
+- ✅ `src/utils/testStorageUpload.ts` - Fichier de test, console.\* acceptable
+- ✅ `src/test/setup.ts` - Setup tests, console.\* acceptable
+- ✅ `tests/setup/*.ts` - Setup Playwright, console.\* acceptable
 
 ---
 
@@ -121,16 +121,19 @@ npm run lint > lint-output.txt
 
 ## 📊 PROGRESSION
 
-### Tâche 1 : Console.* → Logger
+### Tâche 1 : Console.\* → Logger
+
 - **Progression** : 30%
 - **Fichiers traités** : 9/27
 - **Fichiers restants** : 18
 
 ### Tâche 2 : Warnings ESLint
+
 - **Progression** : 0%
 - **Action** : Exécuter `npm run lint:fix`
 
 ### Tâche 3 : Erreurs `any`
+
 - **Progression** : 0%
 - **Action** : Commencer par les types
 
@@ -138,7 +141,7 @@ npm run lint > lint-output.txt
 
 ## 🎯 PROCHAINES ÉTAPES
 
-1. ✅ Compléter le remplacement console.* dans les fichiers avec logger
+1. ✅ Compléter le remplacement console.\* dans les fichiers avec logger
 2. ⏳ Ajouter logger dans les fichiers sans logger
 3. ⏳ Exécuter `npm run lint:fix`
 4. ⏳ Créer des types pour remplacer `any` les plus fréquents
@@ -147,4 +150,3 @@ npm run lint > lint-output.txt
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

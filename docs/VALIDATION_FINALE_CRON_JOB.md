@@ -8,6 +8,7 @@
 ## ✅ Confirmation
 
 Le cron job `process-scheduled-email-campaigns` (jobid: 10) contient maintenant :
+
 - ✅ Header `Authorization` avec `current_setting('app.settings.service_role_key', true)`
 - ✅ Header `x-cron-secret` avec `'process-scheduled-campaigns-secret-2025'`
 - ✅ Header `Content-Type` avec `'application/json'`
@@ -45,7 +46,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 ### 3. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -58,6 +59,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -65,7 +67,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 4. Vérifier les Logs d'Emails
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   status,
   campaign_id
@@ -85,6 +87,7 @@ Le cron job est configuré pour s'exécuter **toutes les 5 minutes** (à :00, :0
 **Prochaine exécution** : Dans les 5 prochaines minutes
 
 **Vérification** : Après la prochaine exécution automatique, vérifiez :
+
 1. Les invocations dans Supabase Dashboard
 2. Le statut de la campagne
 3. Les logs d'emails
@@ -126,5 +129,3 @@ Une fois que tout fonctionne, vous pouvez réactiver l'authentification dans l'E
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

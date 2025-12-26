@@ -11,6 +11,7 @@ D'après la documentation Moneroo "Intégration standard" :
 **Endpoint :** `POST https://api.moneroo.io/v1/payments/initialize`
 
 **Headers requis :**
+
 - `Content-Type: application/json`
 - `Authorization: Bearer YOUR_SECRET_KEY`
 - `Accept: application/json`
@@ -22,34 +23,38 @@ D'après la documentation Moneroo "Intégration standard" :
 ### 1. Endpoint Corrigé
 
 **Avant :**
+
 ```typescript
-endpoint = '/checkout';  // ❌ N'existe pas
+endpoint = '/checkout'; // ❌ N'existe pas
 // ou
-endpoint = '/payments';  // ❌ N'existe pas
+endpoint = '/payments'; // ❌ N'existe pas
 ```
 
 **Après :**
+
 ```typescript
-endpoint = '/payments/initialize';  // ✅ Correct selon documentation
+endpoint = '/payments/initialize'; // ✅ Correct selon documentation
 ```
 
 ### 2. Format des Données Corrigé
 
 **Avant :**
+
 ```typescript
 body = {
   amount: data.amount,
   currency: data.currency || 'XOF',
   description: data.description,
-  customer_email: data.customer_email,  // ❌ Format incorrect
-  customer_name: data.customer_name,    // ❌ Format incorrect
+  customer_email: data.customer_email, // ❌ Format incorrect
+  customer_name: data.customer_name, // ❌ Format incorrect
   return_url: data.return_url,
-  cancel_url: data.cancel_url,  // ❌ Non mentionné dans la documentation
+  cancel_url: data.cancel_url, // ❌ Non mentionné dans la documentation
   metadata: data.metadata || {},
 };
 ```
 
 **Après :**
+
 ```typescript
 // Diviser customer_name en first_name et last_name
 const customerNameParts = (data.customer_name || '').split(' ');
@@ -60,7 +65,8 @@ body = {
   amount: data.amount,
   currency: data.currency || 'XOF',
   description: data.description,
-  customer: {  // ✅ Objet customer avec first_name et last_name
+  customer: {
+    // ✅ Objet customer avec first_name et last_name
     email: data.customer_email,
     first_name: firstName,
     last_name: lastName,
@@ -181,6 +187,7 @@ Le code côté client devrait utiliser `data.data.checkout_url` pour rediriger l
 ### Dans les Logs Supabase
 
 Vous devriez voir :
+
 ```
 INFO [Moneroo Edge Function] Calling Moneroo API: { url: "https://api.moneroo.io/v1/payments/initialize", method: "POST", ... }
 INFO [Moneroo Edge Function] Moneroo API response: { status: 200, statusText: "OK", ok: true }
@@ -198,6 +205,7 @@ INFO Moneroo response success: { action: "create_checkout", status: 200 }
 ## ✅ Résultat Attendu
 
 Après le déploiement :
+
 - ✅ Plus d'erreur 404 sur l'API Moneroo
 - ✅ Le paiement est initialisé avec succès
 - ✅ La réponse contient `checkout_url`
@@ -222,7 +230,3 @@ Après le déploiement :
 4. **Vérifier que l'utilisateur est redirigé** vers la page de paiement Moneroo
 
 Une fois ces étapes terminées, les paiements devraient fonctionner correctement ! 🎉
-
-
-
-

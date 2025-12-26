@@ -90,6 +90,7 @@ Envoyez-moi simplement :
 ## 🎉 C'EST TOUT !
 
 Une fois ces 3 étapes validées, on passe à la suite :
+
 - ✅ Formulaire création cours
 - ✅ Upload vidéos
 - ✅ Gestion curriculum
@@ -149,6 +150,7 @@ npm run build
 Une fois que vous avez validé les 3 étapes :
 
 **Je créerai** :
+
 1. Formulaire complet création cours
 2. Upload vidéos (avec progress bar)
 3. Curriculum builder (drag & drop)
@@ -159,4 +161,3 @@ Une fois que vous avez validé les 3 étapes :
 ---
 
 **Questions ?** → Demandez-moi dans le chat ! 💬
-

@@ -7,6 +7,7 @@
 ### Endpoint Correct
 
 D'après la documentation "Intégration standard" :
+
 - **Endpoint :** `POST https://api.moneroo.io/v1/payments/initialize`
 - **Headers :** `Authorization: Bearer YOUR_SECRET_KEY`, `Content-Type: application/json`, `Accept: application/json`
 
@@ -52,34 +53,38 @@ D'après la documentation "Intégration standard" :
 **Fichier :** `supabase/functions/moneroo/index.ts`
 
 **Avant :**
+
 ```typescript
-endpoint = '/checkout';  // ❌ N'existe pas
+endpoint = '/checkout'; // ❌ N'existe pas
 // ou
-endpoint = '/payments';  // ❌ N'existe pas
+endpoint = '/payments'; // ❌ N'existe pas
 ```
 
 **Après :**
+
 ```typescript
-endpoint = '/payments/initialize';  // ✅ Correct selon documentation
+endpoint = '/payments/initialize'; // ✅ Correct selon documentation
 ```
 
 ### 2. Format des Données Corrigé
 
 **Avant :**
+
 ```typescript
 body = {
   amount: data.amount,
   currency: data.currency || 'XOF',
   description: data.description,
-  customer_email: data.customer_email,  // ❌ Format incorrect
-  customer_name: data.customer_name,    // ❌ Format incorrect
+  customer_email: data.customer_email, // ❌ Format incorrect
+  customer_name: data.customer_name, // ❌ Format incorrect
   return_url: data.return_url,
-  cancel_url: data.cancel_url,  // ❌ Non mentionné dans la documentation
+  cancel_url: data.cancel_url, // ❌ Non mentionné dans la documentation
   metadata: data.metadata || {},
 };
 ```
 
 **Après :**
+
 ```typescript
 // Diviser customer_name en first_name et last_name
 const customerNameParts = (data.customer_name || '').split(' ');
@@ -90,7 +95,8 @@ body = {
   amount: data.amount,
   currency: data.currency || 'XOF',
   description: data.description,
-  customer: {  // ✅ Objet customer avec first_name et last_name
+  customer: {
+    // ✅ Objet customer avec first_name et last_name
     email: data.customer_email,
     first_name: firstName,
     last_name: lastName,
@@ -107,12 +113,14 @@ body = {
 **Fichier :** `src/lib/moneroo-payment.ts`
 
 **Avant :**
+
 ```typescript
 moneroo_checkout_url: monerooResponse.checkout_url,  // ❌ Accès incorrect
 moneroo_transaction_id: monerooResponse.transaction_id || monerooResponse.id,
 ```
 
 **Après :**
+
 ```typescript
 // Extraire les données de la réponse Moneroo
 // La réponse Moneroo est : { message: "...", data: { id: "...", checkout_url: "..." } }
@@ -123,8 +131,10 @@ const checkoutUrl = monerooData.checkout_url || monerooResponse.checkout_url;
 const transactionId = monerooData.id || monerooResponse.id || monerooResponse.transaction_id;
 
 if (!checkoutUrl) {
-  logger.error("Moneroo response missing checkout_url:", monerooResponse);
-  throw new Error("La réponse Moneroo ne contient pas d'URL de checkout. Vérifiez les logs Supabase pour plus de détails.");
+  logger.error('Moneroo response missing checkout_url:', monerooResponse);
+  throw new Error(
+    "La réponse Moneroo ne contient pas d'URL de checkout. Vérifiez les logs Supabase pour plus de détails."
+  );
 }
 ```
 
@@ -150,6 +160,7 @@ if (!checkoutUrl) {
    - Cliquez sur **"Deploy updates"**
 
 5. **Rebuild l'Application Frontend**
+
    ```bash
    npm run build
    npm run dev
@@ -167,6 +178,7 @@ if (!checkoutUrl) {
 ### Dans les Logs Supabase
 
 Vous devriez voir :
+
 ```
 INFO [Moneroo Edge Function] Calling Moneroo API: { url: "https://api.moneroo.io/v1/payments/initialize", method: "POST", ... }
 INFO [Moneroo Edge Function] Moneroo API response: { status: 200, statusText: "OK", ok: true }
@@ -184,6 +196,7 @@ INFO Moneroo response success: { action: "create_checkout", status: 200 }
 ## 🔍 Structure de la Réponse
 
 ### Réponse Moneroo API
+
 ```json
 {
   "message": "Transaction initialized successfully.",
@@ -195,6 +208,7 @@ INFO Moneroo response success: { action: "create_checkout", status: 200 }
 ```
 
 ### Réponse Edge Function
+
 ```json
 {
   "success": true,
@@ -209,6 +223,7 @@ INFO Moneroo response success: { action: "create_checkout", status: 200 }
 ```
 
 ### Ce que le Client Reçoit
+
 ```json
 {
   "message": "Transaction initialized successfully.",
@@ -220,10 +235,11 @@ INFO Moneroo response success: { action: "create_checkout", status: 200 }
 ```
 
 ### Extraction dans `moneroo-payment.ts`
+
 ```typescript
 const monerooData = monerooResponse.data || monerooResponse;
-const checkoutUrl = monerooData.checkout_url;  // ✅ Correct
-const transactionId = monerooData.id;          // ✅ Correct
+const checkoutUrl = monerooData.checkout_url; // ✅ Correct
+const transactionId = monerooData.id; // ✅ Correct
 ```
 
 ---
@@ -231,6 +247,7 @@ const transactionId = monerooData.id;          // ✅ Correct
 ## ✅ Résultat Attendu
 
 Après le déploiement :
+
 - ✅ Plus d'erreur 404 sur l'API Moneroo
 - ✅ Le paiement est initialisé avec succès
 - ✅ La réponse contient `checkout_url`
@@ -256,7 +273,3 @@ Après le déploiement :
 5. **Vérifier que l'utilisateur est redirigé** vers la page de paiement Moneroo
 
 Une fois ces étapes terminées, les paiements devraient fonctionner correctement ! 🎉
-
-
-
-

@@ -1,4 +1,5 @@
 # 🔴 CORRECTIONS CRITIQUES EN COURS
+
 ## Date : 28 Février 2025
 
 ---
@@ -10,6 +11,7 @@
 **Statut** : 🚧 En cours (40% complété)
 
 **Actions** :
+
 - [x] Analyser les imports statiques dans App.tsx
 - [x] Optimiser le code splitting dans vite.config.ts
 - [x] Lazy-load les composants non-critiques (SkipLink, DynamicFavicon)
@@ -26,6 +28,7 @@
 **Statut** : 🚧 En cours (55% complété)
 
 **Actions** :
+
 - [x] Ajouter preload pour ressources critiques (main.tsx)
 - [x] Ajouter preconnect pour CDN et API externes
 - [x] Créer hook usePrefetchRoutes pour prefetch intelligent
@@ -43,6 +46,7 @@
 **Statut** : ✅ Script créé et exécuté
 
 **Résultats** :
+
 - ✅ Script d'audit créé et fonctionnel
 - ✅ 6,147 éléments interactifs sans aria-label identifiés
   - 3,827 inputs
@@ -52,6 +56,7 @@
 - ✅ Rapports générés (JSON et Markdown)
 
 **Actions restantes** :
+
 - [ ] Analyser le rapport détaillé
 - [ ] Prioriser les corrections (boutons icon-only d'abord)
 - [ ] Ajouter aria-label manquants
@@ -63,9 +68,8 @@
 
 ## 📊 PROGRESSION
 
-| Priorité | Progression | Statut |
-|----------|------------|--------|
-| **Bundle Principal** | 40% | 🚧 En cours |
-| **Web Vitals** | 55% | 🚧 En cours |
-| **ARIA Labels** | 55% | 🚧 En cours (8/164 boutons critiques corrigés) |
-
+| Priorité             | Progression | Statut                                         |
+| -------------------- | ----------- | ---------------------------------------------- |
+| **Bundle Principal** | 40%         | 🚧 En cours                                    |
+| **Web Vitals**       | 55%         | 🚧 En cours                                    |
+| **ARIA Labels**      | 55%         | 🚧 En cours (8/164 boutons critiques corrigés) |

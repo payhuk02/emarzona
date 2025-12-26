@@ -73,6 +73,7 @@ SELECT * FROM migrate_promotions_to_product_promotions();
 ```
 
 Cette fonction :
+
 - Trouve toutes les promotions dans `promotions`
 - Les transforme en format `product_promotions`
 - Préserve les relations originales via `original_promotion_id`
@@ -87,6 +88,7 @@ SELECT * FROM migrate_digital_coupons_to_product_promotions();
 ```
 
 Cette fonction :
+
 - Trouve tous les coupons dans `digital_product_coupons`
 - Les transforme en format `product_promotions`
 - Préserve les relations via `original_digital_coupon_id`
@@ -108,7 +110,7 @@ Migre les données d'utilisation depuis `coupon_usages` vers `promotion_usage`.
 
 ```sql
 -- Voir les promotions migrées
-SELECT 
+SELECT
   id,
   name,
   code,
@@ -132,57 +134,57 @@ CREATE TABLE public.product_promotions (
   -- Identifiants
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES public.stores(id),
-  
+
   -- Informations de base
   name TEXT NOT NULL,
   description TEXT,
   code TEXT UNIQUE,
-  
+
   -- Type de réduction
   discount_type TEXT NOT NULL CHECK (discount_type IN (
-    'percentage', 
-    'fixed_amount', 
-    'buy_x_get_y', 
+    'percentage',
+    'fixed_amount',
+    'buy_x_get_y',
     'free_shipping'
   )),
   discount_value NUMERIC NOT NULL,
-  
+
   -- Portée (scope)
   applies_to TEXT NOT NULL CHECK (applies_to IN (
-    'all_products', 
-    'specific_products', 
-    'categories', 
+    'all_products',
+    'specific_products',
+    'categories',
     'collections'
   )) DEFAULT 'all_products',
   product_ids UUID[], -- Pour specific_products
   category_ids UUID[], -- Pour categories
   collection_ids UUID[], -- Pour collections
-  
+
   -- Variantes
   applies_to_variants BOOLEAN DEFAULT TRUE,
   variant_ids UUID[],
-  
+
   -- Conditions
   min_purchase_amount NUMERIC,
   min_quantity INTEGER,
   max_uses INTEGER,
   max_uses_per_customer INTEGER,
   current_uses INTEGER DEFAULT 0,
-  
+
   -- Dates
   starts_at TIMESTAMPTZ NOT NULL,
   ends_at TIMESTAMPTZ,
-  
+
   -- Statut
   is_active BOOLEAN DEFAULT TRUE,
   is_automatic BOOLEAN DEFAULT FALSE,
-  
+
   -- Colonnes de migration
   original_promotion_id UUID,
   original_digital_coupon_id UUID,
   migration_source TEXT, -- 'promotions', 'digital_product_coupons', 'product_promotions'
   migration_note TEXT,
-  
+
   -- Colonnes étendues (digital)
   max_discount_amount NUMERIC,
   applicable_store_ids UUID[],
@@ -192,11 +194,11 @@ CREATE TABLE public.product_promotions (
   is_platform_wide BOOLEAN DEFAULT FALSE,
   customer_eligibility TEXT DEFAULT 'all',
   metadata JSONB DEFAULT '{}'::jsonb,
-  
+
   -- Statistiques
   total_discount_given NUMERIC DEFAULT 0,
   total_orders INTEGER DEFAULT 0,
-  
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -248,11 +250,11 @@ const createMutation = useCreatePromotion();
 
 await createMutation.mutateAsync({
   store_id: storeId,
-  name: "Black Friday 2025",
-  code: "BLACKFRIDAY25",
-  discount_type: "percentage",
+  name: 'Black Friday 2025',
+  code: 'BLACKFRIDAY25',
+  discount_type: 'percentage',
   discount_value: 20,
-  applies_to: "all_products",
+  applies_to: 'all_products',
   starts_at: new Date().toISOString(),
   is_active: true,
   is_automatic: false,
@@ -290,12 +292,12 @@ Valide un code promotionnel au checkout.
 const validateMutation = useValidatePromotionCode();
 
 const result = await validateMutation.mutateAsync({
-  code: "BLACKFRIDAY25",
+  code: 'BLACKFRIDAY25',
   customerId: customerId,
   orderAmount: 15000,
-  productIdsInCart: ["product-id-1", "product-id-2"],
-  categoryIdsInCart: ["category-id-1"],
-  collectionIdsInCart: ["collection-id-1"],
+  productIdsInCart: ['product-id-1', 'product-id-2'],
+  categoryIdsInCart: ['category-id-1'],
+  collectionIdsInCart: ['collection-id-1'],
 });
 
 if (result.valid) {
@@ -314,6 +316,7 @@ if (result.valid) {
 **Fichier:** `src/components/physical/promotions/PromotionsManager.tsx`
 
 **Fonctionnalités:**
+
 - Affichage de la liste des promotions
 - Création / Modification / Suppression
 - Statistiques
@@ -324,7 +327,7 @@ if (result.valid) {
 ```tsx
 import { PromotionsManager } from '@/components/physical/promotions/PromotionsManager';
 
-<PromotionsManager />
+<PromotionsManager />;
 ```
 
 ---
@@ -334,6 +337,7 @@ import { PromotionsManager } from '@/components/physical/promotions/PromotionsMa
 **Fichier:** `src/components/promotions/PromotionScopeSelector.tsx`
 
 **Fonctionnalités:**
+
 - Sélection de produits
 - Sélection de catégories
 - Sélection de collections
@@ -353,7 +357,7 @@ import { PromotionScopeSelector } from '@/components/promotions/PromotionScopeSe
   onCategoryIdsChange={setCategoryIds}
   selectedCollectionIds={collectionIds}
   onCollectionIdsChange={setCollectionIds}
-/>
+/>;
 ```
 
 ---
@@ -363,6 +367,7 @@ import { PromotionScopeSelector } from '@/components/promotions/PromotionScopeSe
 **Fichier:** `src/pages/promotions/UnifiedPromotionsPage.tsx`
 
 **Fonctionnalités:**
+
 - Page complète de gestion
 - Guide intégré
 - Interface unifiée
@@ -370,9 +375,13 @@ import { PromotionScopeSelector } from '@/components/promotions/PromotionScopeSe
 **Route:**
 
 ```tsx
-<Route 
-  path="/dashboard/promotions" 
-  element={<ProtectedRoute><UnifiedPromotionsPage /></ProtectedRoute>} 
+<Route
+  path="/dashboard/promotions"
+  element={
+    <ProtectedRoute>
+      <UnifiedPromotionsPage />
+    </ProtectedRoute>
+  }
 />
 ```
 
@@ -485,7 +494,7 @@ SELECT migrate_coupon_usages_to_promotion_usage();
 
 ```sql
 -- Vérifier les migrations réussies
-SELECT 
+SELECT
   migration_source,
   COUNT(*) as count
 FROM product_promotions
@@ -554,11 +563,11 @@ import { usePromotions } from '@/hooks/physical/usePromotions';
 describe('usePromotions', () => {
   it('should fetch promotions for a store', async () => {
     const { result } = renderHook(() => usePromotions('store-id'));
-    
+
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
-    
+
     expect(result.current.data).toBeDefined();
   });
 });
@@ -582,13 +591,14 @@ Tester le flux complet :
 ### Problème : Migration échoue
 
 **Solution:**
+
 1. Vérifier les contraintes de la table
 2. Vérifier les types de données
 3. Consulter les logs d'erreur
 
 ```sql
 -- Vérifier les contraintes
-SELECT * FROM information_schema.table_constraints 
+SELECT * FROM information_schema.table_constraints
 WHERE table_name = 'product_promotions';
 ```
 
@@ -597,11 +607,12 @@ WHERE table_name = 'product_promotions';
 ### Problème : Validation ne fonctionne pas
 
 **Solution:**
+
 1. Vérifier que la fonction existe
 
 ```sql
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_name = 'validate_unified_promotion';
 ```
 
@@ -616,11 +627,12 @@ GRANT EXECUTE ON FUNCTION validate_unified_promotion TO authenticated;
 ### Problème : Anciennes promotions non migrées
 
 **Solution:**
+
 1. Vérifier les IDs originaux
 
 ```sql
-SELECT id, migration_source, original_promotion_id 
-FROM product_promotions 
+SELECT id, migration_source, original_promotion_id
+FROM product_promotions
 WHERE migration_source IS NULL;
 ```
 
@@ -646,4 +658,3 @@ SELECT ... FROM promotions WHERE id = 'promotion-id';
 
 **Dernière mise à jour :** 28 Janvier 2025  
 **Version du guide :** 1.0
-

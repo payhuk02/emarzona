@@ -12,6 +12,7 @@
 **Fichier** : `src/components/marketplace/MarketplaceFooter.tsx`
 
 **Ligne 16** :
+
 ```typescript
 <img src={platformLogo} alt="Emarzona" className="h-8 w-8" />
 ```
@@ -25,6 +26,7 @@
 **Fichier** : `src/pages/Landing.tsx`
 
 **Avant** (ligne 883-890) :
+
 ```typescript
 <OptimizedImage
   src={platformLogo}
@@ -37,6 +39,7 @@
 ```
 
 **Après** :
+
 ```typescript
 <img
   src={platformLogo}
@@ -49,6 +52,7 @@
 ```
 
 **Changements** :
+
 - ✅ Remplacement de `OptimizedImage` par `<img>` standard
 - ✅ `loading="lazy"` → `loading="eager"` (logo doit être chargé immédiatement)
 - ✅ Conservation de `usePlatformLogo()` pour récupérer le logo dynamique
@@ -60,6 +64,7 @@
 ### 3. Autres Footers ✅
 
 **Fichiers vérifiés** :
+
 - ✅ `src/components/storefront/StoreFooter.tsx` : Pas de logo de plateforme (logo de boutique uniquement)
 - ✅ `src/components/AppSidebar.tsx` : Logo dans le header, pas dans le footer
 
@@ -71,10 +76,10 @@
 
 ### Logos de Footer Vérifiés
 
-| Composant | Fichier | Type | Statut |
-|-----------|---------|------|--------|
+| Composant         | Fichier                 | Type             | Statut     |
+| ----------------- | ----------------------- | ---------------- | ---------- |
 | MarketplaceFooter | `MarketplaceFooter.tsx` | `<img>` standard | ✅ Correct |
-| Landing Footer | `Landing.tsx` | `<img>` standard | ✅ Corrigé |
+| Landing Footer    | `Landing.tsx`           | `<img>` standard | ✅ Corrigé |
 
 ### Pourquoi `<img>` au lieu de `OptimizedImage` ?
 
@@ -96,4 +101,3 @@
 ---
 
 **Prochaine révision** : Après tests visuels
-

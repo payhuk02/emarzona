@@ -12,10 +12,11 @@ Le tableau de bord affiche "0 produits" alors que la boutique a bien un produit.
 
 ```typescript
 // ❌ AVANT - Utilise l'ancien hook qui récupère la première boutique
-import { useStore } from "./use-store";
+import { useStore } from './use-store';
 ```
 
 **Explication** :
+
 - `use-store.ts` : Ancien hook qui récupère simplement la **première boutique** de l'utilisateur
 - `useStore.ts` : Nouveau hook qui utilise le **StoreContext** et récupère la **boutique sélectionnée**
 
@@ -31,12 +32,13 @@ Si l'utilisateur a plusieurs boutiques et que la boutique sélectionnée n'est p
 
 ```typescript
 // ✅ APRÈS - Utilise le bon hook avec StoreContext
-import { useStore } from "./useStore";
+import { useStore } from './useStore';
 ```
 
 ### Vérification
 
 Le hook `useStore` (depuis `useStore.ts`) :
+
 - ✅ Utilise `StoreContext` pour obtenir `selectedStoreId`
 - ✅ Récupère la boutique sélectionnée (pas juste la première)
 - ✅ Gère correctement le changement de boutique
@@ -52,12 +54,15 @@ Des logs ont été ajoutés pour tracer la récupération des produits :
 
 ```typescript
 if (productsResult.status === 'rejected') {
-  logger.error('❌ [useDashboardStats] Erreur lors de la récupération des produits:', productsResult.reason);
+  logger.error(
+    '❌ [useDashboardStats] Erreur lors de la récupération des produits:',
+    productsResult.reason
+  );
 } else {
   logger.info('✅ [useDashboardStats] Produits récupérés:', {
     count: products.length,
     storeId: store.id,
-    products: products.map(p => ({ id: p.id, name: p.name || 'N/A', is_active: p.is_active }))
+    products: products.map(p => ({ id: p.id, name: p.name || 'N/A', is_active: p.is_active })),
   });
 }
 ```
@@ -83,6 +88,7 @@ Le filtre est correctement appliqué :
 ## 🎯 RÉSULTAT ATTENDU
 
 Après cette correction :
+
 - ✅ Le dashboard affiche les produits de la boutique **sélectionnée**
 - ✅ Les statistiques correspondent à la bonne boutique
 - ✅ Le changement de boutique met à jour correctement les données
@@ -109,4 +115,3 @@ Après cette correction :
 
 **Date** : 28 Janvier 2025  
 **Statut** : ✅ **CORRIGÉ**
-

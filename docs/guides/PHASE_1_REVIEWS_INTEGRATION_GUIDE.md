@@ -11,24 +11,24 @@ Le système de reviews est **déjà complet et fonctionnel** :
 
 ### Composants disponibles
 
-| Composant | Description | Fichier |
-|-----------|-------------|---------|
+| Composant               | Description                | Fichier                                            |
+| ----------------------- | -------------------------- | -------------------------------------------------- |
 | `ProductReviewsSummary` | Résumé avec étoiles, stats | `src/components/reviews/ProductReviewsSummary.tsx` |
-| `ReviewsList` | Liste reviews avec filtres | `src/components/reviews/ReviewsList.tsx` |
-| `ReviewForm` | Formulaire ajout review | `src/components/reviews/ReviewForm.tsx` |
-| `ReviewCard` | Card review individuelle | `src/components/reviews/ReviewCard.tsx` |
-| `ReviewStars` | Affichage étoiles | `src/components/reviews/ReviewStars.tsx` |
-| `ReviewFilter` | Filtres advanced | `src/components/reviews/ReviewFilter.tsx` |
+| `ReviewsList`           | Liste reviews avec filtres | `src/components/reviews/ReviewsList.tsx`           |
+| `ReviewForm`            | Formulaire ajout review    | `src/components/reviews/ReviewForm.tsx`            |
+| `ReviewCard`            | Card review individuelle   | `src/components/reviews/ReviewCard.tsx`            |
+| `ReviewStars`           | Affichage étoiles          | `src/components/reviews/ReviewStars.tsx`           |
+| `ReviewFilter`          | Filtres advanced           | `src/components/reviews/ReviewFilter.tsx`          |
 
 ### Hooks disponibles
 
 ```typescript
 // Hooks React Query
-- useProductReviews(productId) // Liste reviews
-- useCreateReview() // Créer review
-- useUpdateReview() // Modifier review
-- useDeleteReview() // Supprimer review
-- useReviewStats(productId) // Stats aggregées
+-useProductReviews(productId) - // Liste reviews
+  useCreateReview() - // Créer review
+  useUpdateReview() - // Modifier review
+  useDeleteReview() - // Supprimer review
+  useReviewStats(productId); // Stats aggregées
 ```
 
 ### Tables DB
@@ -48,6 +48,7 @@ Le système de reviews est **déjà complet et fonctionnel** :
 ### 1. Digital Products
 
 **Où afficher** :
+
 - `DigitalProductCard.tsx` → Ajouter étoiles + nombre reviews
 - Page détail produit digital → Section reviews complète
 
@@ -84,12 +85,14 @@ import { ReviewsList } from '@/components/reviews/ReviewsList';
 ### 2. Physical Products
 
 Même approche que Digital :
+
 - `PhysicalProductCard.tsx` → Étoiles + count
 - Page détail → Section reviews complète
 
 ### 3. Services
 
 Même approche que Digital :
+
 - `ServiceCard.tsx` → Étoiles + count
 - Page détail → Section reviews complète
 
@@ -109,6 +112,7 @@ Même approche que Digital :
 ## 📝 CHECKLIST INTÉGRATION
 
 ### Digital Products
+
 - [ ] Importer ReviewStars dans DigitalProductCard
 - [ ] Afficher rating + count dans card
 - [ ] Créer/modifier page détail digital
@@ -118,6 +122,7 @@ Même approche que Digital :
 - [ ] Tester filtres + tri
 
 ### Physical Products
+
 - [ ] Importer ReviewStars dans PhysicalProductCard
 - [ ] Afficher rating + count dans card
 - [ ] Créer/modifier page détail physical
@@ -127,6 +132,7 @@ Même approche que Digital :
 - [ ] Tester filtres + tri
 
 ### Services
+
 - [ ] Importer ReviewStars dans ServiceCard
 - [ ] Afficher rating + count dans card
 - [ ] Créer/modifier page détail service
@@ -142,11 +148,13 @@ Même approche que Digital :
 **Temps estimé** : 15-20 minutes (les 3 types)
 
 **Approche** :
+
 1. Modifier cards (5 min)
 2. Modifier pages détail (10 min)
 3. Tests manuels (5 min)
 
 **Impact** :
+
 - ✅ Reviews visibles sur tous produits
 - ✅ Preuve sociale augmentée
 - ✅ +20% confiance acheteurs
@@ -159,9 +167,9 @@ Même approche que Digital :
 **Les reviews sont prêtes à être intégrées en 15 minutes** !
 
 Juste besoin de :
+
 1. Ajouter les imports
 2. Afficher les composants
 3. Tester
 
 **Pas de code complexe requis** ✅
-

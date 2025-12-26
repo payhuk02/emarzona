@@ -137,47 +137,59 @@ Si vous préférez configurer via l'interface Vercel :
 ## 🔍 Explication des Headers de Sécurité
 
 ### 1. **Strict-Transport-Security (HSTS)**
+
 ```
 Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 ```
+
 - **Objectif**: Force HTTPS pour toutes les connexions
 - **max-age**: 2 ans (63072000 secondes)
 - **includeSubDomains**: Applique à tous les sous-domaines
 - **preload**: Éligible pour la liste HSTS preload
 
 ### 2. **X-Frame-Options**
+
 ```
 X-Frame-Options: SAMEORIGIN
 ```
+
 - **Objectif**: Protection contre le clickjacking
 - **SAMEORIGIN**: Permet les iframes du même domaine uniquement
 - Alternative: `DENY` pour interdire tous les iframes
 
 ### 3. **X-Content-Type-Options**
+
 ```
 X-Content-Type-Options: nosniff
 ```
+
 - **Objectif**: Empêche le MIME sniffing
 - **nosniff**: Force le respect du Content-Type déclaré
 
 ### 4. **X-XSS-Protection**
+
 ```
 X-XSS-Protection: 1; mode=block
 ```
+
 - **Objectif**: Active le filtre XSS du navigateur (legacy)
 - **1; mode=block**: Bloque les pages si XSS détecté
 
 ### 5. **Referrer-Policy**
+
 ```
 Referrer-Policy: strict-origin-when-cross-origin
 ```
+
 - **Objectif**: Contrôle les informations de referrer envoyées
 - **strict-origin-when-cross-origin**: Envoie l'origine complète uniquement pour les requêtes HTTPS vers HTTPS
 
 ### 6. **Permissions-Policy**
+
 ```
 Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
 ```
+
 - **Objectif**: Désactive les APIs sensibles par défaut
 - **camera=()**: Désactive l'accès à la caméra
 - **microphone=()**: Désactive l'accès au microphone
@@ -185,9 +197,11 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
 - **interest-cohort=()**: Désactive FLoC (Federated Learning of Cohorts)
 
 ### 7. **Content-Security-Policy (CSP)**
+
 ```
 Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdn.jsdelivr.net https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.moneroo.io; frame-ancestors 'self'; base-uri 'self'; form-action 'self';
 ```
+
 - **Objectif**: Protection contre les injections (XSS, clickjacking, etc.)
 - **default-src 'self'**: Par défaut, uniquement ressources du même domaine
 - **script-src**: Autorise scripts depuis 'self', inline (React), eval (Vite), Google Fonts, CDN, Supabase
@@ -252,17 +266,20 @@ Après configuration, vous devriez obtenir :
 ### Problème : Headers non appliqués
 
 **Solution 1**: Vérifier que `vercel.json` est à la racine du projet
+
 ```bash
 ls -la vercel.json  # Doit être à la racine
 ```
 
 **Solution 2**: Vérifier la syntaxe JSON
+
 ```bash
 # Valider le JSON
 cat vercel.json | python -m json.tool
 ```
 
 **Solution 3**: Redéployer manuellement
+
 ```bash
 # Via Vercel CLI
 vercel --prod
@@ -274,12 +291,14 @@ git push origin main
 ### Problème : CSP bloque des ressources
 
 **Solution**: Ajuster la CSP dans `vercel.json`
+
 - Ajouter les domaines manquants dans les directives appropriées
 - Tester avec `Content-Security-Policy-Report-Only` d'abord
 
 ### Problème : HSTS preload non accepté
 
 **Solution**: Vérifier les prérequis
+
 - HTTPS activé sur tous les sous-domaines
 - Redirection HTTP → HTTPS configurée
 - Header HSTS présent sur la réponse HTTPS
@@ -310,4 +329,3 @@ git push origin main
 ---
 
 **🎉 Une fois ces étapes complétées, votre application Payhuk sera protégée par des headers de sécurité robustes !**
-

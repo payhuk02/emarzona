@@ -20,18 +20,22 @@ import { useCrispProduct } from '@/hooks/useCrispProduct';
 const ProductDetail = () => {
   const { slug } = useParams();
   const { storeSlug } = useParams();
-  
+
   // Récupérer le produit (votre hook existant)
   const { data: product, isLoading } = useProduct(storeSlug, slug);
 
   // 🎯 Crisp : Configuration automatique basée sur le type de produit
-  useCrispProduct(product ? {
-    id: product.id,
-    name: product.name,
-    type: product.type, // 'digital' | 'physical' | 'service' | 'course'
-    storeName: product.store?.name,
-    price: product.price,
-  } : null);
+  useCrispProduct(
+    product
+      ? {
+          id: product.id,
+          name: product.name,
+          type: product.type, // 'digital' | 'physical' | 'service' | 'course'
+          storeName: product.store?.name,
+          price: product.price,
+        }
+      : null
+  );
 
   // ...reste du composant
 };
@@ -66,6 +70,7 @@ const ProductDetail = () => {
 ```
 
 **Message auto (si configuré) :**
+
 ```
 👋 Vous consultez "Mon Ebook PDF"
 📥 Téléchargement immédiat après achat
@@ -88,6 +93,7 @@ const ProductDetail = () => {
 ```
 
 **Message auto (si configuré) :**
+
 ```
 👋 Vous consultez "T-Shirt Premium"
 🚚 Livraison sous 3-5 jours
@@ -111,6 +117,7 @@ const ProductDetail = () => {
 ```
 
 **Message auto (si configuré) :**
+
 ```
 👋 Vous consultez "Consultation Marketing"
 📅 Réservation flexible
@@ -134,6 +141,7 @@ const ProductDetail = () => {
 ```
 
 **Message auto (si configuré) :**
+
 ```
 👋 Vous consultez "React Avancé"
 🎓 Accès à vie + certificat
@@ -160,18 +168,23 @@ const Checkout = () => {
   const { product } = useCheckoutContext();
 
   // 🎯 Crisp : Contexte checkout (priorité support)
-  useCrispCheckout(product ? {
-    id: product.id,
-    name: product.name,
-    type: product.type,
-    price: product.price,
-  } : null);
+  useCrispCheckout(
+    product
+      ? {
+          id: product.id,
+          name: product.name,
+          type: product.type,
+          price: product.price,
+        }
+      : null
+  );
 
   // ...checkout form
 };
 ```
 
 **Résultat :**
+
 ```typescript
 // Segment : "checkout-visitor" (priorité HIGH)
 // Event : "started_checkout"
@@ -183,6 +196,7 @@ const Checkout = () => {
 ```
 
 **Message auto (urgent) :**
+
 ```
 💳 Besoin d'aide pour finaliser votre commande ?
 🔒 Paiement 100% sécurisé
@@ -210,11 +224,7 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (order) {
       // 🎯 Crisp : Contexte post-achat
-      setCrispPostPurchaseContext(
-        order.product.type,
-        order.id,
-        order.total_amount
-      );
+      setCrispPostPurchaseContext(order.product.type, order.id, order.total_amount);
     }
   }, [order]);
 
@@ -223,6 +233,7 @@ const PaymentSuccess = () => {
 ```
 
 **Résultat :**
+
 ```typescript
 // Segment : "customer" (client confirmé)
 // Event : "completed_purchase"
@@ -234,6 +245,7 @@ const PaymentSuccess = () => {
 ```
 
 **Message auto (congratulations) :**
+
 ```
 🎉 Félicitations pour votre achat !
 📥 Votre accès est maintenant disponible
@@ -251,6 +263,7 @@ const PaymentSuccess = () => {
 **Déclencheur :** Segment = `digital-product-visitor`  
 **Délai :** 20 secondes  
 **Message :**
+
 ```
 👋 Vous consultez un produit numérique
 
@@ -266,6 +279,7 @@ Besoin d'infos avant d'acheter ? 😊
 **Déclencheur :** Segment = `physical-product-visitor`  
 **Délai :** 25 secondes  
 **Message :**
+
 ```
 👋 Vous consultez un produit physique
 
@@ -281,6 +295,7 @@ Questions sur la livraison ? 😊
 **Déclencheur :** Segment = `service-visitor`  
 **Délai :** 15 secondes (plus urgent)  
 **Message :**
+
 ```
 👋 Vous consultez un service
 
@@ -296,6 +311,7 @@ Parlons de vos besoins ! 😊
 **Déclencheur :** Segment = `course-visitor`  
 **Délai :** 30 secondes  
 **Message :**
+
 ```
 👋 Vous consultez un cours en ligne
 
@@ -419,6 +435,7 @@ setCrispSessionData({
 ### Win 1 : Message bienvenue universel (5 min)
 
 **Setup :**
+
 1. Crisp → Settings → Chatbox → Greeting
 2. Message : "👋 Besoin d'aide ? Nous sommes là pour vous !"
 
@@ -427,6 +444,7 @@ setCrispSessionData({
 ### Win 2 : Email notifications (2 min)
 
 **Setup :**
+
 1. Crisp → Settings → Integrations → Email
 2. Activer notifications
 
@@ -435,6 +453,7 @@ setCrispSessionData({
 ### Win 3 : FAQ automatique (15 min)
 
 **Setup :**
+
 1. Crisp → Knowledge → Add Articles
 2. Créer 5 FAQs :
    - "Comment acheter ?"
@@ -448,6 +467,7 @@ setCrispSessionData({
 ### Win 4 : Horaires de disponibilité (3 min)
 
 **Setup :**
+
 1. Crisp → Settings → Availability
 2. Définir horaires (ex: 9h-18h)
 3. Message hors ligne : "Nous sommes absents. Nous répondrons dès notre retour !"
@@ -464,6 +484,7 @@ setCrispSessionData({
 **Android :** https://play.google.com/store/apps/details?id=im.crisp.client
 
 **Features :**
+
 - ✅ Notifications push temps réel
 - ✅ Réponses depuis smartphone
 - ✅ Voir contexte produit
@@ -476,12 +497,12 @@ setCrispSessionData({
 
 ## 🎉 RÉSUMÉ : CRISP EST UNIVERSEL ! ✅
 
-| Type Produit | Segment | Contexte | Automatisation |
-|--------------|---------|----------|----------------|
-| **Digital** | `digital-product-visitor` | ✅ Format, taille | ✅ Message téléchargement |
-| **Physical** | `physical-product-visitor` | ✅ Stock, livraison | ✅ Message livraison |
-| **Service** | `service-visitor` | ✅ Dispo, durée | ✅ Message booking |
-| **Course** | `course-visitor` | ✅ Durée, certificat | ✅ Message inscription |
+| Type Produit | Segment                    | Contexte             | Automatisation            |
+| ------------ | -------------------------- | -------------------- | ------------------------- |
+| **Digital**  | `digital-product-visitor`  | ✅ Format, taille    | ✅ Message téléchargement |
+| **Physical** | `physical-product-visitor` | ✅ Stock, livraison  | ✅ Message livraison      |
+| **Service**  | `service-visitor`          | ✅ Dispo, durée      | ✅ Message booking        |
+| **Course**   | `course-visitor`           | ✅ Durée, certificat | ✅ Message inscription    |
 
 **Un seul système → 4 types de produits ! 🚀**
 
@@ -497,4 +518,3 @@ setCrispSessionData({
 6. 📊 Review analytics après 1 semaine
 
 **Crisp est prêt pour TOUS vos produits ! 💬🎯**
-

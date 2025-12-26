@@ -13,9 +13,10 @@ Le tableau de bord affiche "0 produits" alors que la boutique "Boutique 1" a bie
 **Fichier** : `src/hooks/useDashboardStats.ts`
 
 **Ligne 9** :
+
 ```typescript
 // ❌ PROBLÈME : Utilise l'ancien hook
-import { useStore } from "./use-store";
+import { useStore } from './use-store';
 ```
 
 ### Explication
@@ -26,12 +27,13 @@ Il existe **deux hooks différents** dans le projet :
    - Récupère simplement la **première boutique** de l'utilisateur
    - Ne tient pas compte de la boutique sélectionnée
    - Code :
+
    ```typescript
    const { data, error } = await supabase
      .from('stores')
      .select('*')
      .eq('user_id', user.id)
-     .limit(1);  // ❌ Prend juste la première
+     .limit(1); // ❌ Prend juste la première
    ```
 
 2. **`src/hooks/useStore.ts`** (NOUVEAU - Multi-stores)
@@ -91,7 +93,7 @@ Les produits de Boutique B ne s'affichent pas ❌
 
 ```typescript
 // ✅ CORRIGÉ : Utilise le bon hook avec StoreContext
-import { useStore } from "./useStore";
+import { useStore } from './useStore';
 ```
 
 ### Fichiers Corrigés
@@ -129,12 +131,15 @@ Des logs ont été ajoutés pour tracer la récupération des produits :
 
 ```typescript
 if (productsResult.status === 'rejected') {
-  logger.error('❌ [useDashboardStats] Erreur lors de la récupération des produits:', productsResult.reason);
+  logger.error(
+    '❌ [useDashboardStats] Erreur lors de la récupération des produits:',
+    productsResult.reason
+  );
 } else {
   logger.info('✅ [useDashboardStats] Produits récupérés:', {
     count: products.length,
     storeId: store.id,
-    products: products.map(p => ({ id: p.id, name: p.name || 'N/A', is_active: p.is_active }))
+    products: products.map(p => ({ id: p.id, name: p.name || 'N/A', is_active: p.is_active })),
   });
 }
 ```
@@ -152,6 +157,7 @@ Le filtre est correctement appliqué dans la requête :
 ## 🎯 RÉSULTAT ATTENDU
 
 Après cette correction :
+
 - ✅ Le dashboard affiche les produits de la boutique **sélectionnée**
 - ✅ Les statistiques correspondent à la bonne boutique
 - ✅ Le changement de boutique met à jour correctement les données
@@ -172,6 +178,7 @@ Une fois tous les fichiers corrigés, considérer la suppression de `src/hooks/u
 ### 3. Tests
 
 Ajouter des tests pour vérifier que :
+
 - Le dashboard affiche les bonnes données pour chaque boutique
 - Le changement de boutique met à jour les statistiques
 - Les produits s'affichent correctement
@@ -181,4 +188,3 @@ Ajouter des tests pour vérifier que :
 **Date** : 28 Janvier 2025  
 **Statut** : ✅ **CORRIGÉ** (Dashboard et useDashboardStats)  
 **Action requise** : Corriger les autres fichiers utilisant `use-store`
-

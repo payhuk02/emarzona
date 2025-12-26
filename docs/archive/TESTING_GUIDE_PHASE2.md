@@ -2,7 +2,7 @@
 
 **Date** : 28 octobre 2025  
 **Version** : 2.0  
-**Testeur** : _____________
+**Testeur** : **\*\***\_**\*\***
 
 ---
 
@@ -22,14 +22,17 @@
 ## 🔧 PRÉREQUIS
 
 ### Vérifications Initiales
+
 1. **Base de données**
+
    ```sql
    -- Vérifier que la colonne existe
-   SELECT column_name, data_type 
-   FROM information_schema.columns 
-   WHERE table_name = 'products' 
+   SELECT column_name, data_type
+   FROM information_schema.columns
+   WHERE table_name = 'products'
    AND column_name = 'payment_options';
    ```
+
    ✅ Résultat attendu : `payment_options | jsonb`
 
 2. **Vercel Build**
@@ -47,12 +50,14 @@
 ## 🧪 TEST 1 : CRÉATION PRODUIT PHYSIQUE (Paiement Partiel)
 
 ### 1.1 - Accès Wizard
+
 - [ ] Aller sur `/dashboard/products`
 - [ ] Cliquer "Créer un produit"
 - [ ] Sélectionner "Produit Physique"
 - [ ] ✅ Wizard affiche "8 étapes"
 
 ### 1.2 - Étapes 1-6 (Standard)
+
 - [ ] **Étape 1** : Remplir infos de base (nom, prix, image)
 - [ ] **Étape 2** : Variantes (optionnel, skip)
 - [ ] **Étape 3** : Inventaire (SKU, stock)
@@ -61,6 +66,7 @@
 - [ ] **Étape 6** : SEO & FAQs (skip)
 
 ### 1.3 - Étape 7 : OPTIONS DE PAIEMENT ⭐
+
 - [ ] ✅ Étape 7 existe et s'affiche
 - [ ] ✅ Titre : "Options de Paiement"
 - [ ] ✅ 3 options visibles :
@@ -69,6 +75,7 @@
   - [ ] **Paiement Sécurisé** (radio button)
 
 #### Test Paiement Partiel
+
 - [ ] Sélectionner "Paiement Partiel"
 - [ ] ✅ Input "Pourcentage d'acompte" apparaît
 - [ ] Entrer : `50%`
@@ -79,24 +86,28 @@
 - [ ] ✅ Recommandations affichées
 
 ### 1.4 - Étape 8 : Aperçu & Validation
+
 - [ ] Vérifier aperçu complet
 - [ ] Cliquer "Publier le produit"
 - [ ] ✅ Toast : "🎉 Produit publié !"
 - [ ] ✅ Redirection vers `/dashboard/products`
 
 ### 1.5 - Vérification Base de Données
+
 ```sql
-SELECT 
-  id, 
-  name, 
+SELECT
+  id,
+  name,
   price,
   payment_options
-FROM products 
+FROM products
 WHERE product_type = 'physical'
-ORDER BY created_at DESC 
+ORDER BY created_at DESC
 LIMIT 1;
 ```
+
 ✅ Résultat attendu :
+
 ```json
 {
   "payment_type": "percentage",
@@ -109,11 +120,13 @@ LIMIT 1;
 ## 🧪 TEST 2 : CRÉATION SERVICE (Paiement Escrow)
 
 ### 2.1 - Accès Wizard Service
+
 - [ ] Créer un nouveau produit
 - [ ] Sélectionner "Service"
 - [ ] ✅ Wizard affiche "8 étapes"
 
 ### 2.2 - Étapes 1-6 (Standard)
+
 - [ ] **Étape 1** : Infos de base (ex: "Consultation Marketing")
 - [ ] **Étape 2** : Durée & Disponibilité
 - [ ] **Étape 3** : Personnel & Ressources
@@ -122,6 +135,7 @@ LIMIT 1;
 - [ ] **Étape 6** : SEO & FAQs (skip)
 
 ### 2.3 - Étape 7 : OPTIONS DE PAIEMENT ⭐
+
 - [ ] Sélectionner "Paiement Sécurisé (à la prestation)"
 - [ ] ✅ Texte adapté pour services :
   - "L'argent est retenu jusqu'à confirmation de la prestation"
@@ -130,21 +144,24 @@ LIMIT 1;
 - [ ] ✅ Montant total affiché (retenu en escrow)
 
 ### 2.4 - Publication
+
 - [ ] **Étape 8** : Publier
 - [ ] ✅ Toast succès
 - [ ] ✅ Service visible dans la liste
 
 ### 2.5 - Vérification DB
+
 ```sql
-SELECT 
-  name, 
+SELECT
+  name,
   price,
   payment_options->>'payment_type' as payment_type
-FROM products 
+FROM products
 WHERE product_type = 'service'
-ORDER BY created_at DESC 
+ORDER BY created_at DESC
 LIMIT 1;
 ```
+
 ✅ Résultat : `payment_type = "delivery_secured"`
 
 ---
@@ -152,6 +169,7 @@ LIMIT 1;
 ## 🧪 TEST 3 : PASSAGE COMMANDE (Physical - Paiement Partiel)
 
 ### 3.1 - Simuler Achat Client
+
 - [ ] Se déconnecter (ou mode incognito)
 - [ ] Aller sur page produit physique créé
 - [ ] Cliquer "Acheter"
@@ -161,28 +179,33 @@ LIMIT 1;
   - Adresse de livraison
 
 ### 3.2 - Vérifier Montant
+
 - [ ] ✅ Montant affiché = **50% du prix** (acompte)
 - [ ] ✅ Texte : "Acompte 50% : [Nom produit]"
 - [ ] ✅ Message : "Solde restant : [montant] XOF"
 
 ### 3.3 - Checkout Moneroo
+
 - [ ] Redirection vers Moneroo
 - [ ] ✅ Montant Moneroo = acompte (50%)
 - [ ] ✅ Description correcte
 
 ### 3.4 - Vérification Order DB
+
 ```sql
-SELECT 
+SELECT
   order_number,
   total_amount,
   payment_type,
   percentage_paid,
   remaining_amount
-FROM orders 
-ORDER BY created_at DESC 
+FROM orders
+ORDER BY created_at DESC
 LIMIT 1;
 ```
+
 ✅ Vérifier :
+
 - `payment_type = 'percentage'`
 - `percentage_paid = 50% du total_amount`
 - `remaining_amount = 50% du total_amount`
@@ -192,24 +215,28 @@ LIMIT 1;
 ## 🧪 TEST 4 : PASSAGE COMMANDE (Service - Escrow)
 
 ### 4.1 - Réserver Service
+
 - [ ] Page service créé
 - [ ] Sélectionner créneau
 - [ ] Cliquer "Réserver"
 - [ ] Remplir infos client
 
 ### 4.2 - Vérifier Montant
+
 - [ ] ✅ Montant = **100% du prix** (mais retenu)
 - [ ] ✅ Texte : "Paiement sécurisé : [Nom service]"
 - [ ] ✅ Info : "Fonds retenus jusqu'à confirmation prestation"
 
 ### 4.3 - Checkout Moneroo
+
 - [ ] Redirection Moneroo
 - [ ] ✅ Montant = 100%
 - [ ] ✅ Description avec "Paiement sécurisé"
 
 ### 4.4 - Vérification Secured Payment
+
 ```sql
-SELECT 
+SELECT
   o.order_number,
   o.payment_type,
   sp.status,
@@ -218,10 +245,12 @@ SELECT
 FROM orders o
 LEFT JOIN secured_payments sp ON sp.order_id = o.id
 WHERE o.payment_type = 'delivery_secured'
-ORDER BY o.created_at DESC 
+ORDER BY o.created_at DESC
 LIMIT 1;
 ```
+
 ✅ Vérifier :
+
 - `status = 'held'`
 - `held_amount = total du service`
 - `hold_reason = 'service_completion'`
@@ -231,23 +260,27 @@ LIMIT 1;
 ## 🧪 TEST 5 : ORDERDETAIL - BOUTONS ACTIONS
 
 ### 5.1 - Accéder OrderDetail
+
 - [ ] Aller sur `/dashboard/orders`
 - [ ] Cliquer sur une commande
 - [ ] ✅ Dialog s'ouvre
 
 ### 5.2 - Vérifier Boutons Affichés
+
 - [ ] ✅ Bouton **"💬 Messagerie"** (bleu, prominent)
 - [ ] ✅ Bouton **"💳 Gérer Paiements"** (si payment_type ≠ full)
 - [ ] ✅ Bouton **"🚨 Ouvrir litige"** (rouge, outline)
 - [ ] ✅ Boutons "Fermer" et "Imprimer" (secondaires)
 
 ### 5.3 - Test Click Messagerie
+
 - [ ] Cliquer "Messagerie"
 - [ ] ✅ Navigation vers `/orders/[orderId]/messaging`
 - [ ] ✅ Page charge correctement
 - [ ] ✅ Zone de chat visible
 
 ### 5.4 - Test Click Gérer Paiements
+
 - [ ] Revenir à OrderDetail
 - [ ] Cliquer "Gérer Paiements"
 - [ ] ✅ Navigation vers `/payments/[orderId]/manage`
@@ -255,6 +288,7 @@ LIMIT 1;
 - [ ] ✅ Infos paiement affichées
 
 ### 5.5 - Test Click Ouvrir Litige
+
 - [ ] Revenir à OrderDetail
 - [ ] Cliquer "Ouvrir litige"
 - [ ] ✅ Navigation vers `/disputes/create?order_id=[orderId]`
@@ -264,6 +298,7 @@ LIMIT 1;
 ## 🧪 TEST 6 : MESSAGERIE COMPLÈTE
 
 ### 6.1 - Interface Messagerie
+
 URL : `/orders/[orderId]/messaging`
 
 - [ ] ✅ Sidebar conversations (gauche)
@@ -272,6 +307,7 @@ URL : `/orders/[orderId]/messaging`
 - [ ] ✅ Boutons upload (📎 Image, Vidéo, Fichier)
 
 ### 6.2 - Envoyer Message Texte
+
 - [ ] Taper un message test
 - [ ] Cliquer "Envoyer"
 - [ ] ✅ Message apparaît immédiatement
@@ -279,6 +315,7 @@ URL : `/orders/[orderId]/messaging`
 - [ ] ✅ Timestamp affiché
 
 ### 6.3 - Upload Fichier
+
 - [ ] Cliquer icône 📎
 - [ ] Sélectionner une image
 - [ ] ✅ Preview fichier s'affiche
@@ -287,13 +324,15 @@ URL : `/orders/[orderId]/messaging`
 - [ ] ✅ Image cliquable (preview fullscreen)
 
 ### 6.4 - Temps Réel (optionnel)
+
 - [ ] Ouvrir 2 onglets (vendeur + client)
 - [ ] Envoyer message depuis onglet 1
 - [ ] ✅ Message apparaît dans onglet 2 (temps réel)
 
 ### 6.5 - Vérification DB
+
 ```sql
-SELECT 
+SELECT
   c.id,
   c.status,
   COUNT(m.id) as message_count
@@ -302,6 +341,7 @@ LEFT JOIN messages m ON m.conversation_id = c.id
 WHERE c.order_id = '[orderId]'
 GROUP BY c.id;
 ```
+
 ✅ Vérifier : messages créés correctement
 
 ---
@@ -309,6 +349,7 @@ GROUP BY c.id;
 ## 🧪 TEST 7 : GESTION PAIEMENTS
 
 ### 7.1 - Page Payment Management
+
 URL : `/payments/[orderId]/manage`
 
 - [ ] ✅ Stats cards affichées :
@@ -318,12 +359,14 @@ URL : `/payments/[orderId]/manage`
   - Paiements sécurisés
 
 ### 7.2 - Tab Paiements Sécurisés
+
 - [ ] ✅ Liste des secured_payments
 - [ ] ✅ Statut "🟡 Retenu" visible
 - [ ] ✅ Montant retenu affiché
 - [ ] ✅ Conditions de libération affichées
 
 ### 7.3 - Actions Vendeur (si applicable)
+
 - [ ] Bouton "🔓 Relâcher paiement"
 - [ ] Click → Confirmation dialog
 - [ ] Confirmer
@@ -331,6 +374,7 @@ URL : `/payments/[orderId]/manage`
 - [ ] ✅ Toast succès
 
 ### 7.4 - Tab Paiements Partiels
+
 - [ ] ✅ Progress bar acompte/solde
 - [ ] ✅ Pourcentage payé visible
 - [ ] ✅ Montant restant affiché
@@ -341,6 +385,7 @@ URL : `/payments/[orderId]/manage`
 ## 🧪 TEST 8 : SYSTÈME LITIGES
 
 ### 8.1 - Page Dispute Detail
+
 URL : `/disputes/[disputeId]`
 
 - [ ] ✅ Infos litige affichées :
@@ -351,6 +396,7 @@ URL : `/disputes/[disputeId]`
 - [ ] ✅ Timeline messages
 
 ### 8.2 - Envoyer Message Litige
+
 - [ ] Input message visible
 - [ ] Taper message
 - [ ] Upload preuve (image)
@@ -358,6 +404,7 @@ URL : `/disputes/[disputeId]`
 - [ ] ✅ Message + preuve affichés
 
 ### 8.3 - Actions Admin (si admin)
+
 - [ ] Bouton "Résoudre litige" visible
 - [ ] Click → Dialog résolution
 - [ ] Choisir résolution (vendeur/client)
@@ -365,8 +412,9 @@ URL : `/disputes/[disputeId]`
 - [ ] ✅ Statut change à "Resolved"
 
 ### 8.4 - Vérification DB
+
 ```sql
-SELECT 
+SELECT
   d.id,
   d.status,
   d.reason,
@@ -381,6 +429,7 @@ GROUP BY d.id;
 ## 🧪 TEST 9 : RESPONSIVE MOBILE
 
 ### 9.1 - PaymentOptionsForm
+
 - [ ] Ouvrir sur mobile (DevTools → 375px)
 - [ ] ✅ Radio buttons empilés verticalement
 - [ ] ✅ Calculs lisibles
@@ -388,12 +437,14 @@ GROUP BY d.id;
 - [ ] ✅ Pas de scroll horizontal
 
 ### 9.2 - OrderDetailDialog
+
 - [ ] Ouvrir dialog sur mobile
 - [ ] ✅ Boutons empilés (grid-cols-1 sm:grid-cols-2)
 - [ ] ✅ Tous cliquables
 - [ ] ✅ Texte lisible
 
 ### 9.3 - Messagerie Mobile
+
 - [ ] Page messaging sur 375px
 - [ ] ✅ Conversations en sidebar collapsible
 - [ ] ✅ Thread messages scrollable
@@ -405,18 +456,21 @@ GROUP BY d.id;
 ## 🧪 TEST 10 : EDGE CASES
 
 ### 10.1 - Paiement Partiel 0%
+
 - [ ] Créer produit avec percentage_rate = 10 (minimum)
 - [ ] ✅ Validation : accepte 10%
 - [ ] Essayer 5%
 - [ ] ✅ Validation : refuse < 10%
 
 ### 10.2 - Paiement Partiel 100%
+
 - [ ] Essayer percentage_rate = 95 (maximum)
 - [ ] ✅ Validation : accepte 90%
 - [ ] Essayer 100%
 - [ ] ✅ Validation : refuse > 90%
 
 ### 10.3 - Commande Sans Payment Options
+
 - [ ] Créer produit SANS modifier step 7 (laisser default)
 - [ ] Acheter ce produit
 - [ ] ✅ payment_type = 'full' en DB
@@ -424,6 +478,7 @@ GROUP BY d.id;
 - [ ] ✅ Montant Moneroo = 100% du prix
 
 ### 10.4 - Messagerie Sans Conversation
+
 - [ ] Aller sur `/orders/[orderId]/messaging` (order sans conversation)
 - [ ] ✅ Message "Aucune conversation"
 - [ ] ✅ Pas d'erreur console
@@ -433,6 +488,7 @@ GROUP BY d.id;
 ## 📊 RÉSULTATS ATTENDUS
 
 ### ✅ Succès Total
+
 - [ ] **100% des tests passés**
 - [ ] 0 erreur console
 - [ ] 0 erreur SQL
@@ -440,9 +496,11 @@ GROUP BY d.id;
 - [ ] Workflow fluide
 
 ### ⚠️ Problèmes Potentiels
+
 Si tests échouent, vérifier :
 
 1. **Migration non appliquée**
+
    ```sql
    -- Réappliquer
    \i supabase/migrations/20251028_product_payment_options.sql
@@ -464,20 +522,21 @@ Si tests échouent, vérifier :
 ## 🎯 PROCHAINES ACTIONS
 
 Si tous les tests passent ✅ :
+
 - [ ] Documenter features (README)
 - [ ] Créer vidéo démo
 - [ ] Former équipe support
 - [ ] Lancer en production
 
 Si problèmes ❌ :
+
 - [ ] Noter erreurs spécifiques
 - [ ] Créer issues GitHub
 - [ ] Corriger + re-test
 
 ---
 
-**Date du test** : __________  
-**Testeur** : __________  
+**Date du test** : \***\*\_\_\*\***  
+**Testeur** : \***\*\_\_\*\***  
 **Résultat global** : ✅ PASS / ❌ FAIL  
 **Notes** :
-

@@ -11,18 +11,18 @@
 
 ### État Actuel du SEO : **45/100** ⚠️
 
-| Critère | Note | Statut |
-|---------|------|--------|
-| **Balises Meta** | 50/100 | ⚠️ **Partiel** - Présentes uniquement sur 2 pages |
-| **Open Graph** | 60/100 | ⚠️ **Partiel** - Configurations basiques uniquement |
-| **Schema.org** | 0/100 | ❌ **Absent** - Aucune donnée structurée |
-| **Sitemap XML** | 0/100 | ❌ **Absent** - Non généré |
-| **Robots.txt** | 70/100 | ✅ **Basique** - Configuration minimale |
-| **URLs SEO** | 80/100 | ✅ **Bon** - Slugs optimisés |
-| **Images Alt** | 30/100 | ⚠️ **Faible** - Peu d'images avec alt |
-| **Performance** | 75/100 | ✅ **Bon** - PWA + optimisations |
-| **Mobile-First** | 90/100 | ✅ **Excellent** - Fully responsive |
-| **Contenu** | 60/100 | ⚠️ **Moyen** - Qualité variable |
+| Critère          | Note   | Statut                                              |
+| ---------------- | ------ | --------------------------------------------------- |
+| **Balises Meta** | 50/100 | ⚠️ **Partiel** - Présentes uniquement sur 2 pages   |
+| **Open Graph**   | 60/100 | ⚠️ **Partiel** - Configurations basiques uniquement |
+| **Schema.org**   | 0/100  | ❌ **Absent** - Aucune donnée structurée            |
+| **Sitemap XML**  | 0/100  | ❌ **Absent** - Non généré                          |
+| **Robots.txt**   | 70/100 | ✅ **Basique** - Configuration minimale             |
+| **URLs SEO**     | 80/100 | ✅ **Bon** - Slugs optimisés                        |
+| **Images Alt**   | 30/100 | ⚠️ **Faible** - Peu d'images avec alt               |
+| **Performance**  | 75/100 | ✅ **Bon** - PWA + optimisations                    |
+| **Mobile-First** | 90/100 | ✅ **Excellent** - Fully responsive                 |
+| **Contenu**      | 60/100 | ⚠️ **Moyen** - Qualité variable                     |
 
 ---
 
@@ -89,13 +89,13 @@ CREATE TABLE public.seo_pages (
 
 #### ✅ Composants Existants
 
-| Composant | Localisation | Utilisation | Status |
-|-----------|--------------|-------------|--------|
-| **react-helmet** | `package.json` | Gestion `<head>` dynamique | ✅ Installé |
-| **ProductSeoTab** | `src/components/products/tabs/ProductSeoTab.tsx` | Interface édition SEO produits | ✅ Fonctionnel |
-| **SEO Analyzer** | `src/lib/seo-analyzer.ts` | Analyse score SEO (5 critères) | ✅ Fonctionnel |
-| **Storefront Meta** | `src/pages/Storefront.tsx` | Meta dynamiques boutique | ✅ Fonctionnel |
-| **ProductDetail Meta** | `src/pages/ProductDetail.tsx` | Meta dynamiques produit | ✅ Fonctionnel |
+| Composant              | Localisation                                     | Utilisation                    | Status         |
+| ---------------------- | ------------------------------------------------ | ------------------------------ | -------------- |
+| **react-helmet**       | `package.json`                                   | Gestion `<head>` dynamique     | ✅ Installé    |
+| **ProductSeoTab**      | `src/components/products/tabs/ProductSeoTab.tsx` | Interface édition SEO produits | ✅ Fonctionnel |
+| **SEO Analyzer**       | `src/lib/seo-analyzer.ts`                        | Analyse score SEO (5 critères) | ✅ Fonctionnel |
+| **Storefront Meta**    | `src/pages/Storefront.tsx`                       | Meta dynamiques boutique       | ✅ Fonctionnel |
+| **ProductDetail Meta** | `src/pages/ProductDetail.tsx`                    | Meta dynamiques produit        | ✅ Fonctionnel |
 
 #### ❌ Composants Manquants
 
@@ -134,6 +134,7 @@ CREATE TABLE public.seo_pages (
 
 **Score:** 70/100 ✅  
 **Problèmes:**
+
 - ❌ Pas de données structurées Schema.org
 - ❌ URL hard-codée (devrait être dynamique)
 - ❌ Pas de mots-clés meta
@@ -154,6 +155,7 @@ CREATE TABLE public.seo_pages (
 
 **Score:** 10/100 ❌ **CRITIQUE**  
 **Impact:**
+
 - 🔴 **Google ne voit pas** les produits du marketplace
 - 🔴 **Partage social** affiche meta par défaut de index.html
 - 🔴 **Aucune indexation** des catégories/filtres
@@ -170,14 +172,14 @@ CREATE TABLE public.seo_pages (
 <Helmet>
   <title>{store.name} - Boutique en ligne</title>
   <meta name="description" content={store.description || `Découvrez ${store.name}`} />
-  
+
   {/* Open Graph */}
   <meta property="og:type" content="website" />
   <meta property="og:url" content={storeUrl} />
   <meta property="og:title" content={store.name} />
   <meta property="og:description" content={store.description} />
   {store.logo_url && <meta property="og:image" content={store.logo_url} />}
-  
+
   {/* Twitter */}
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content={storeUrl} />
@@ -188,11 +190,13 @@ CREATE TABLE public.seo_pages (
 
 **Score:** 65/100 ⚠️  
 **Points Positifs:**
+
 - ✅ Meta dynamiques
 - ✅ Open Graph complet
 - ✅ Twitter Cards
 
 **Problèmes:**
+
 - ❌ Pas de Schema.org (Organization/Store)
 - ❌ Pas de mots-clés meta
 - ❌ Pas de canonical URL
@@ -208,7 +212,7 @@ CREATE TABLE public.seo_pages (
 <Helmet>
   <title>{product.name} - {store.name}</title>
   <meta name="description" content={product.description} />
-  
+
   {/* Open Graph */}
   <meta property="og:type" content="product" />
   <meta property="og:title" content={product.name} />
@@ -217,7 +221,7 @@ CREATE TABLE public.seo_pages (
   <meta property="og:url" content={productUrl} />
   <meta property="product:price:amount" content={product.price} />
   <meta property="product:price:currency" content="XOF" />
-  
+
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={product.name} />
@@ -228,11 +232,13 @@ CREATE TABLE public.seo_pages (
 
 **Score:** 70/100 ✅  
 **Points Positifs:**
+
 - ✅ Meta dynamiques
 - ✅ Open Graph Product
 - ✅ Product price tags
 
 **Problèmes:**
+
 - ❌ **Pas de Schema.org Product** (CRITIQUE pour Google Shopping)
 - ❌ Pas de breadcrumb schema
 - ❌ Pas de rating/reviews schema
@@ -266,12 +272,14 @@ Allow: /
 
 **Score:** 60/100 ⚠️  
 **Problèmes:**
+
 - ❌ Pas de référence sitemap.xml
 - ❌ Pas de règles disallow (ex: /dashboard, /admin)
 - ❌ Pas de crawl-delay
 - ❌ Pas d'instructions spécifiques par user-agent
 
 **Recommandation:**
+
 ```txt
 User-agent: *
 Allow: /
@@ -296,11 +304,13 @@ Crawl-delay: 1
 
 **Score:** 0/100 ❌ **CRITIQUE**  
 **Impact:**
+
 - 🔴 Google ne découvre pas toutes les pages
 - 🔴 Indexation lente et incomplète
 - 🔴 Nouvelles pages pas signalées
 
 **Recommandation:** Générer dynamiquement :
+
 - `/` (homepage)
 - `/marketplace`
 - `/stores/{slug}` (toutes boutiques actives)
@@ -313,6 +323,7 @@ Crawl-delay: 1
 #### ✅ **SEO Analyzer** (`src/lib/seo-analyzer.ts`)
 
 **Fonctionnalités:**
+
 - ✅ Analyse titre (30-60 caractères)
 - ✅ Analyse description (120-160 caractères)
 - ✅ Analyse URL (slug SEO-friendly)
@@ -331,6 +342,7 @@ Crawl-delay: 1
 #### ✅ **ProductSeoTab** (Interface Vendeur)
 
 **Champs Disponibles:**
+
 - ✅ Meta Title
 - ✅ Meta Description
 - ✅ Meta Keywords
@@ -348,12 +360,12 @@ Crawl-delay: 1
 
 ### 2.1 Balises Meta
 
-| Page | Title | Description | Keywords | OG Tags | Twitter | Score |
-|------|-------|-------------|----------|---------|---------|-------|
-| **Accueil** | ✅ Statique | ✅ Statique | ❌ Non | ✅ Oui | ✅ Oui | 70/100 |
-| **Marketplace** | ❌ Non | ❌ Non | ❌ Non | ❌ Non | ❌ Non | 0/100 |
-| **Boutique** | ✅ Dynamique | ✅ Dynamique | ❌ Non | ✅ Oui | ✅ Oui | 70/100 |
-| **Produit** | ✅ Dynamique | ✅ Dynamique | ❌ Non | ✅ Oui | ✅ Oui | 75/100 |
+| Page            | Title        | Description  | Keywords | OG Tags | Twitter | Score  |
+| --------------- | ------------ | ------------ | -------- | ------- | ------- | ------ |
+| **Accueil**     | ✅ Statique  | ✅ Statique  | ❌ Non   | ✅ Oui  | ✅ Oui  | 70/100 |
+| **Marketplace** | ❌ Non       | ❌ Non       | ❌ Non   | ❌ Non  | ❌ Non  | 0/100  |
+| **Boutique**    | ✅ Dynamique | ✅ Dynamique | ❌ Non   | ✅ Oui  | ✅ Oui  | 70/100 |
+| **Produit**     | ✅ Dynamique | ✅ Dynamique | ❌ Non   | ✅ Oui  | ✅ Oui  | 75/100 |
 
 **Moyenne:** 54/100 ⚠️
 
@@ -361,17 +373,17 @@ Crawl-delay: 1
 
 ### 2.2 Schema.org (Données Structurées)
 
-| Type Schema | Implémenté | Priorité | Impact SEO |
-|-------------|------------|----------|------------|
-| **Product** | ❌ Non | 🔴 **HAUTE** | Rich Snippets Google Shopping |
-| **Organization** | ❌ Non | 🟠 **MOYENNE** | Knowledge Panel |
-| **Store** | ❌ Non | 🟠 **MOYENNE** | Local Business |
-| **BreadcrumbList** | ❌ Non | 🟢 **BASSE** | Navigation visuelle SERP |
-| **AggregateRating** | ❌ Non | 🔴 **HAUTE** | Étoiles dans résultats |
-| **Offer** | ❌ Non | 🔴 **HAUTE** | Prix + disponibilité |
-| **Review** | ❌ Non | 🟠 **MOYENNE** | Avis clients |
-| **WebPage** | ❌ Non | 🟢 **BASSE** | Type de page |
-| **SearchAction** | ❌ Non | 🟢 **BASSE** | Barre recherche Google |
+| Type Schema         | Implémenté | Priorité       | Impact SEO                    |
+| ------------------- | ---------- | -------------- | ----------------------------- |
+| **Product**         | ❌ Non     | 🔴 **HAUTE**   | Rich Snippets Google Shopping |
+| **Organization**    | ❌ Non     | 🟠 **MOYENNE** | Knowledge Panel               |
+| **Store**           | ❌ Non     | 🟠 **MOYENNE** | Local Business                |
+| **BreadcrumbList**  | ❌ Non     | 🟢 **BASSE**   | Navigation visuelle SERP      |
+| **AggregateRating** | ❌ Non     | 🔴 **HAUTE**   | Étoiles dans résultats        |
+| **Offer**           | ❌ Non     | 🔴 **HAUTE**   | Prix + disponibilité          |
+| **Review**          | ❌ Non     | 🟠 **MOYENNE** | Avis clients                  |
+| **WebPage**         | ❌ Non     | 🟢 **BASSE**   | Type de page                  |
+| **SearchAction**    | ❌ Non     | 🟢 **BASSE**   | Barre recherche Google        |
 
 **Score Global:** 0/100 ❌ **CRITIQUE**
 
@@ -379,14 +391,14 @@ Crawl-delay: 1
 
 ### 2.3 URLs & Structure
 
-| Critère | État | Exemple | Score |
-|---------|------|---------|-------|
-| **Slugs SEO** | ✅ Optimisés | `/stores/ma-boutique` | 100/100 |
-| **Hiérarchie** | ✅ Logique | `/stores/{store}/products/{product}` | 100/100 |
-| **Paramètres GET** | ⚠️ Non indexés | `/marketplace?category=digital` | 40/100 |
-| **Canonical** | ❌ Absentes | N/A | 0/100 |
-| **HTTPS** | ✅ Forcé | Via Vercel | 100/100 |
-| **Trailing Slash** | ✅ Cohérent | Toujours sans `/` | 100/100 |
+| Critère            | État           | Exemple                              | Score   |
+| ------------------ | -------------- | ------------------------------------ | ------- |
+| **Slugs SEO**      | ✅ Optimisés   | `/stores/ma-boutique`                | 100/100 |
+| **Hiérarchie**     | ✅ Logique     | `/stores/{store}/products/{product}` | 100/100 |
+| **Paramètres GET** | ⚠️ Non indexés | `/marketplace?category=digital`      | 40/100  |
+| **Canonical**      | ❌ Absentes    | N/A                                  | 0/100   |
+| **HTTPS**          | ✅ Forcé       | Via Vercel                           | 100/100 |
+| **Trailing Slash** | ✅ Cohérent    | Toujours sans `/`                    | 100/100 |
 
 **Moyenne:** 73/100 ✅
 
@@ -397,6 +409,7 @@ Crawl-delay: 1
 #### Analyse Produit Type
 
 **Champs Disponibles:**
+
 - ✅ `name` (titre)
 - ✅ `description` (HTML riche via TipTap)
 - ✅ `short_description`
@@ -406,6 +419,7 @@ Crawl-delay: 1
 - ✅ `tags[]`
 
 **Problèmes:**
+
 - ⚠️ **Meta keywords rarement remplis** par vendeurs
 - ⚠️ **Descriptions trop courtes** (< 300 caractères)
 - ⚠️ **Pas de densité mot-clé** automatique
@@ -415,14 +429,14 @@ Crawl-delay: 1
 
 ### 2.5 Images & Multimédia
 
-| Critère | État | Score |
-|---------|------|-------|
-| **Alt text produits** | ⚠️ Rarement rempli | 30/100 |
-| **Images optimisées** | ✅ CDN Supabase | 80/100 |
-| **Lazy loading** | ✅ Implémenté | 100/100 |
-| **WebP format** | ⚠️ Pas toujours | 60/100 |
-| **Dimensions responsive** | ✅ srcset | 90/100 |
-| **OG Image** | ⚠️ Parfois manquante | 60/100 |
+| Critère                   | État                 | Score   |
+| ------------------------- | -------------------- | ------- |
+| **Alt text produits**     | ⚠️ Rarement rempli   | 30/100  |
+| **Images optimisées**     | ✅ CDN Supabase      | 80/100  |
+| **Lazy loading**          | ✅ Implémenté        | 100/100 |
+| **WebP format**           | ⚠️ Pas toujours      | 60/100  |
+| **Dimensions responsive** | ✅ srcset            | 90/100  |
+| **OG Image**              | ⚠️ Parfois manquante | 60/100  |
 
 **Moyenne:** 70/100 ✅
 
@@ -430,17 +444,18 @@ Crawl-delay: 1
 
 ### 2.6 Performance (Core Web Vitals)
 
-| Métrique | Valeur | Cible | Score |
-|----------|--------|-------|-------|
-| **LCP** | ~1.8s | < 2.5s | ✅ 90/100 |
-| **FID** | ~80ms | < 100ms | ✅ 95/100 |
-| **CLS** | ~0.05 | < 0.1 | ✅ 95/100 |
+| Métrique | Valeur | Cible   | Score     |
+| -------- | ------ | ------- | --------- |
+| **LCP**  | ~1.8s  | < 2.5s  | ✅ 90/100 |
+| **FID**  | ~80ms  | < 100ms | ✅ 95/100 |
+| **CLS**  | ~0.05  | < 0.1   | ✅ 95/100 |
 | **TTFB** | ~400ms | < 600ms | ✅ 85/100 |
-| **FCP** | ~1.2s | < 1.8s | ✅ 90/100 |
+| **FCP**  | ~1.2s  | < 1.8s  | ✅ 90/100 |
 
 **Moyenne:** 91/100 ✅ **Excellent**
 
 **Facteurs Positifs:**
+
 - ✅ Vite build optimisé
 - ✅ Code splitting (lazy loading)
 - ✅ Tree shaking
@@ -452,14 +467,14 @@ Crawl-delay: 1
 
 ### 2.7 Mobile & Responsive
 
-| Critère | Score |
-|---------|-------|
-| **Responsive design** | 95/100 ✅ |
-| **Touch targets** | 90/100 ✅ |
-| **Viewport config** | 100/100 ✅ |
-| **Font size** | 95/100 ✅ |
+| Critère                  | Score      |
+| ------------------------ | ---------- |
+| **Responsive design**    | 95/100 ✅  |
+| **Touch targets**        | 90/100 ✅  |
+| **Viewport config**      | 100/100 ✅ |
+| **Font size**            | 95/100 ✅  |
 | **No horizontal scroll** | 100/100 ✅ |
-| **Mobile-first CSS** | 90/100 ✅ |
+| **Mobile-first CSS**     | 90/100 ✅  |
 
 **Moyenne:** 95/100 ✅ **Excellent**
 
@@ -467,14 +482,14 @@ Crawl-delay: 1
 
 ### 2.8 Indexabilité
 
-| Critère | État | Impact |
-|---------|------|--------|
-| **robots.txt** | ✅ Allow all | ✅ Bon |
-| **Sitemap XML** | ❌ Absent | ❌ **CRITIQUE** |
-| **Meta robots** | ⚠️ Par défaut | ⚠️ Moyen |
-| **Canonical URLs** | ❌ Absentes | ❌ Haute |
-| **Pagination** | ⚠️ Non SEO | ⚠️ Moyen |
-| **Filtres** | ⚠️ Non indexés | ⚠️ Moyen |
+| Critère            | État           | Impact          |
+| ------------------ | -------------- | --------------- |
+| **robots.txt**     | ✅ Allow all   | ✅ Bon          |
+| **Sitemap XML**    | ❌ Absent      | ❌ **CRITIQUE** |
+| **Meta robots**    | ⚠️ Par défaut  | ⚠️ Moyen        |
+| **Canonical URLs** | ❌ Absentes    | ❌ Haute        |
+| **Pagination**     | ⚠️ Non SEO     | ⚠️ Moyen        |
+| **Filtres**        | ⚠️ Non indexés | ⚠️ Moyen        |
 
 **Score:** 40/100 ❌
 
@@ -484,15 +499,15 @@ Crawl-delay: 1
 
 ### 3.1 Comparaison Marketplaces E-commerce Afrique
 
-| Fonctionnalité SEO | Payhula | Jumia | Konga | Afrimarket |
-|--------------------|---------|-------|-------|------------|
-| **Sitemap XML** | ❌ | ✅ | ✅ | ✅ |
-| **Schema Product** | ❌ | ✅ | ✅ | ⚠️ |
-| **Meta dynamiques** | ⚠️ | ✅ | ✅ | ✅ |
-| **AMP Pages** | ❌ | ✅ | ❌ | ❌ |
-| **Breadcrumbs** | ✅ | ✅ | ✅ | ✅ |
-| **Rich Snippets** | ❌ | ✅ | ✅ | ⚠️ |
-| **Page Speed** | 91 | 75 | 68 | 72 |
+| Fonctionnalité SEO  | Payhula | Jumia | Konga | Afrimarket |
+| ------------------- | ------- | ----- | ----- | ---------- |
+| **Sitemap XML**     | ❌      | ✅    | ✅    | ✅         |
+| **Schema Product**  | ❌      | ✅    | ✅    | ⚠️         |
+| **Meta dynamiques** | ⚠️      | ✅    | ✅    | ✅         |
+| **AMP Pages**       | ❌      | ✅    | ❌    | ❌         |
+| **Breadcrumbs**     | ✅      | ✅    | ✅    | ✅         |
+| **Rich Snippets**   | ❌      | ✅    | ✅    | ⚠️         |
+| **Page Speed**      | 91      | 75    | 68    | 72         |
 
 **Position Payhula:** 🟠 **Moyen-Bas**  
 **Opportunité:** Forte marge d'amélioration
@@ -501,14 +516,14 @@ Crawl-delay: 1
 
 ### 3.2 Mots-Clés Cibles (Afrique)
 
-| Mot-Clé | Volume | Difficulté | Payhula Rank |
-|---------|--------|------------|--------------|
-| "marketplace afrique" | 2,400/mois | Moyenne | Non classé |
-| "produits digitaux afrique" | 1,200/mois | Faible | Non classé |
-| "formation en ligne afrique" | 8,100/mois | Haute | Non classé |
-| "ebook francophone" | 3,600/mois | Moyenne | Non classé |
-| "paiement mobile afrique" | 4,900/mois | Haute | Non classé |
-| "boutique en ligne burkina" | 720/mois | Faible | Non classé |
+| Mot-Clé                      | Volume     | Difficulté | Payhula Rank |
+| ---------------------------- | ---------- | ---------- | ------------ |
+| "marketplace afrique"        | 2,400/mois | Moyenne    | Non classé   |
+| "produits digitaux afrique"  | 1,200/mois | Faible     | Non classé   |
+| "formation en ligne afrique" | 8,100/mois | Haute      | Non classé   |
+| "ebook francophone"          | 3,600/mois | Moyenne    | Non classé   |
+| "paiement mobile afrique"    | 4,900/mois | Haute      | Non classé   |
+| "boutique en ligne burkina"  | 720/mois   | Faible     | Non classé   |
 
 **Stratégie:** Cibler d'abord mots-clés faible difficulté + longue traîne
 
@@ -525,10 +540,11 @@ Crawl-delay: 1
 **Fichier à créer:** `public/sitemap.xml` (généré automatiquement)
 
 **Contenu:**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
+
   <!-- Homepage -->
   <url>
     <loc>https://payhula.com/</loc>
@@ -536,14 +552,14 @@ Crawl-delay: 1
     <priority>1.0</priority>
     <lastmod>2025-10-25</lastmod>
   </url>
-  
+
   <!-- Marketplace -->
   <url>
     <loc>https://payhula.com/marketplace</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <!-- Toutes les boutiques actives -->
   <url>
     <loc>https://payhula.com/stores/ma-boutique</loc>
@@ -551,7 +567,7 @@ Crawl-delay: 1
     <priority>0.8</priority>
     <lastmod>2025-10-20</lastmod>
   </url>
-  
+
   <!-- Tous les produits actifs -->
   <url>
     <loc>https://payhula.com/stores/ma-boutique/products/mon-produit</loc>
@@ -563,11 +579,12 @@ Crawl-delay: 1
       <image:title>Mon Produit</image:title>
     </image:image>
   </url>
-  
+
 </urlset>
 ```
 
 **Implémentation:**
+
 - Backend endpoint `/api/sitemap.xml` (Supabase Edge Function)
 - Cron job quotidien pour régénération
 - Ping Google Search Console automatique
@@ -634,6 +651,7 @@ Sitemap: https://payhula.com/sitemap-stores.xml
 **Fichier:** `src/pages/Marketplace.tsx`
 
 **Ajout:**
+
 ```typescript
 import { Helmet } from 'react-helmet';
 
@@ -652,7 +670,7 @@ const marketplaceMeta = useMemo(() => ({
   <meta name="description" content={marketplaceMeta.description} />
   <meta name="keywords" content={marketplaceMeta.keywords} />
   <link rel="canonical" href={marketplaceMeta.url} />
-  
+
   {/* Open Graph */}
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Payhula" />
@@ -661,14 +679,14 @@ const marketplaceMeta = useMemo(() => ({
   <meta property="og:image" content={marketplaceMeta.image} />
   <meta property="og:url" content={marketplaceMeta.url} />
   <meta property="og:locale" content="fr_FR" />
-  
+
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@payhuk" />
   <meta name="twitter:title" content={marketplaceMeta.title} />
   <meta name="twitter:description" content={marketplaceMeta.description} />
   <meta name="twitter:image" content={marketplaceMeta.image} />
-  
+
   {/* Additional */}
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
   <meta name="author" content="Payhula" />
@@ -730,7 +748,7 @@ export const ProductSchema = ({ product }: ProductSchemaProps) => {
       }
     }
   };
-  
+
   if (product.rating && product.reviews_count) {
     schema["aggregateRating"] = {
       "@type": "AggregateRating",
@@ -740,7 +758,7 @@ export const ProductSchema = ({ product }: ProductSchemaProps) => {
       "worstRating": 1
     };
   }
-  
+
   return (
     <Helmet>
       <script type="application/ld+json">
@@ -780,7 +798,7 @@ export const StoreSchema = ({ store }: StoreSchemaProps) => {
       store.linkedin_url
     ].filter(Boolean)
   };
-  
+
   return (
     <Helmet>
       <script type="application/ld+json">
@@ -814,7 +832,7 @@ export const BreadcrumbSchema = ({ items }: { items: BreadcrumbItem[] }) => {
       "item": item.url
     }))
   };
-  
+
   return (
     <Helmet>
       <script type="application/ld+json">
@@ -826,9 +844,10 @@ export const BreadcrumbSchema = ({ items }: { items: BreadcrumbItem[] }) => {
 ```
 
 **Utilisation:**
+
 ```typescript
 // Dans ProductDetail.tsx
-<BreadcrumbSchema 
+<BreadcrumbSchema
   items={[
     { name: "Accueil", url: "https://payhula.com" },
     { name: "Marketplace", url: "https://payhula.com/marketplace" },
@@ -861,7 +880,7 @@ export const WebsiteSchema = () => {
       "query-input": "required name=search_term_string"
     }
   };
-  
+
   return (
     <Helmet>
       <script type="application/ld+json">
@@ -922,7 +941,7 @@ export const SEOMeta = ({
     'max-snippet:-1',
     'max-video-preview:-1'
   ].join(', ');
-  
+
   return (
     <Helmet>
       {/* Basic */}
@@ -932,7 +951,7 @@ export const SEOMeta = ({
       <link rel="canonical" href={canonical || url} />
       <meta name="robots" content={robotsContent} />
       <meta name="author" content={author} />
-      
+
       {/* Open Graph */}
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content="Payhula" />
@@ -945,7 +964,7 @@ export const SEOMeta = ({
       <meta property="og:locale" content={locale} />
       {publishedTime && <meta property="article:published_time" content={publishedTime} />}
       {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
-      
+
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@payhuk" />
@@ -953,7 +972,7 @@ export const SEOMeta = ({
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
-      
+
       {/* Additional */}
       <meta name="theme-color" content="#007bff" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -968,10 +987,12 @@ export const SEOMeta = ({
 **3.2 URLs Canoniques**
 
 **Problème:** Duplications potentielles
+
 - `/marketplace?category=digital` vs `/marketplace`
 - Pagination multiples
 
 **Solution:**
+
 ```typescript
 // Dans Marketplace.tsx
 const canonicalUrl = useMemo(() => {
@@ -990,18 +1011,18 @@ const canonicalUrl = useMemo(() => {
 **Fichier:** `src/components/seo/PaginationMeta.tsx`
 
 ```typescript
-export const PaginationMeta = ({ 
-  currentPage, 
-  totalPages, 
-  baseUrl 
+export const PaginationMeta = ({
+  currentPage,
+  totalPages,
+  baseUrl
 }: PaginationMetaProps) => {
-  const prevUrl = currentPage > 1 
-    ? `${baseUrl}?page=${currentPage - 1}` 
+  const prevUrl = currentPage > 1
+    ? `${baseUrl}?page=${currentPage - 1}`
     : null;
-  const nextUrl = currentPage < totalPages 
-    ? `${baseUrl}?page=${currentPage + 1}` 
+  const nextUrl = currentPage < totalPages
+    ? `${baseUrl}?page=${currentPage + 1}`
     : null;
-  
+
   return (
     <Helmet>
       {prevUrl && <link rel="prev" href={prevUrl} />}
@@ -1017,6 +1038,7 @@ export const PaginationMeta = ({
 **3.4 Hreflang (Multilingue)**
 
 **Préparation future:**
+
 ```typescript
 <Helmet>
   <link rel="alternate" hreflang="fr" href="https://payhula.com/fr/marketplace" />
@@ -1034,6 +1056,7 @@ export const PaginationMeta = ({
 **4.1 Open Graph Avancé**
 
 **Ajouts:**
+
 ```typescript
 {/* Facebook */}
 <meta property="fb:app_id" content="VOTRE_APP_ID" />
@@ -1095,12 +1118,14 @@ export const PaginationMeta = ({
 **5.1 Google Search Console**
 
 **Intégration:**
+
 ```html
 <!-- Dans index.html -->
 <meta name="google-site-verification" content="VOTRE_CODE_VERIFICATION" />
 ```
 
 **API Search Console:**
+
 ```typescript
 // Backend: Fetch Search Console data
 const getSearchConsoleData = async () => {
@@ -1109,23 +1134,24 @@ const getSearchConsoleData = async () => {
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         startDate: '2025-10-01',
         endDate: '2025-10-25',
         dimensions: ['page', 'query'],
-        rowLimit: 1000
-      })
+        rowLimit: 1000,
+      }),
     }
   );
-  
+
   return response.json();
 };
 ```
 
 **Synchronisation table `seo_pages`:**
+
 - Impressions
 - Clicks
 - CTR
@@ -1140,27 +1166,32 @@ const getSearchConsoleData = async () => {
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag() {
+    dataLayer.push(arguments);
+  }
   gtag('js', new Date());
   gtag('config', 'G-XXXXXXXXXX', {
-    'page_title': document.title,
-    'page_path': window.location.pathname
+    page_title: document.title,
+    page_path: window.location.pathname,
   });
 </script>
 ```
 
 **Events tracking:**
+
 ```typescript
 // Tracking vues produit
 gtag('event', 'view_item', {
   currency: 'XOF',
   value: product.price,
-  items: [{
-    item_id: product.id,
-    item_name: product.name,
-    item_category: product.category,
-    price: product.price
-  }]
+  items: [
+    {
+      item_id: product.id,
+      item_name: product.name,
+      item_category: product.category,
+      price: product.price,
+    },
+  ],
 });
 ```
 
@@ -1171,6 +1202,7 @@ gtag('event', 'view_item', {
 **Page:** `/admin/seo`
 
 **Fonctionnalités:**
+
 - 📊 **Stats globales** (impressions, clicks, CTR, position)
 - 📄 **Top pages** (par impressions/clicks)
 - 🔍 **Top queries** (mots-clés qui amènent trafic)
@@ -1184,6 +1216,7 @@ gtag('event', 'view_item', {
 **5.4 Notifications Automatiques**
 
 **Alertes par email/Slack:**
+
 - 🔴 **Chute trafic organique** (> 20%)
 - 🔴 **Erreurs indexation** (nouvelles 404)
 - 🟢 **Nouveau top 3** (mot-clé en position 1-3)
@@ -1201,6 +1234,7 @@ gtag('event', 'view_item', {
 **Route:** `/blog`
 
 **Structure:**
+
 ```typescript
 interface BlogPost {
   id: string;
@@ -1221,12 +1255,14 @@ interface BlogPost {
 ```
 
 **Sujets:**
+
 - "Comment vendre des formations en ligne en Afrique"
 - "Top 10 produits digitaux rentables en 2025"
 - "Guide complet: Créer sa boutique en ligne au Burkina Faso"
 - "Paiement Mobile Money vs Carte Bancaire: Quel choisir?"
 
 **SEO Blog:**
+
 - ✅ Schema.org Article
 - ✅ Breadcrumbs
 - ✅ Internal linking (vers produits)
@@ -1238,12 +1274,14 @@ interface BlogPost {
 **6.2 Landing Pages SEO**
 
 **Pages stratégiques:**
+
 - `/formation-en-ligne-afrique`
 - `/ebook-francophone`
 - `/template-site-web-afrique`
 - `/service-freelance-burkina`
 
 **Optimisations:**
+
 - 🎯 **1 mot-clé principal** (densité 2-3%)
 - 📝 **Contenu long** (> 1500 mots)
 - 🖼️ **Images optimisées** (alt text avec mot-clé)
@@ -1258,6 +1296,7 @@ interface BlogPost {
 **Hook:** `useSEOSuggestions(productData)`
 
 **Fonctionnalité:**
+
 - Analyse titre + description produit
 - Extrait mots-clés principaux
 - Suggère meta_title optimisé
@@ -1266,6 +1305,7 @@ interface BlogPost {
 - Score densité mot-clé
 
 **Technologie:**
+
 - API OpenAI (GPT-4)
 - Prompt: "Génère 5 mots-clés SEO pour ce produit..."
 
@@ -1274,11 +1314,13 @@ interface BlogPost {
 **6.4 Alt Text Auto-Génération**
 
 **Fonctionnalité:**
+
 - Lors upload image produit
 - Génération auto alt text via IA (GPT-4 Vision ou Anthropic Claude)
 - Format: "[Nom produit] - [Description courte]"
 
 **Exemple:**
+
 ```
 Image: photo-formation-marketing.jpg
 Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour entrepreneurs africains"
@@ -1290,27 +1332,29 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 
 ### 5.1 KPIs à 3 Mois
 
-| Métrique | Avant | Objectif 3 mois | Méthode Mesure |
-|----------|-------|-----------------|----------------|
-| **Pages indexées** | ~50 | 500+ | Google Search Console |
-| **Trafic organique** | ~100/mois | 2,000/mois | Google Analytics |
-| **Mots-clés classés** | 5 | 150+ | SEMrush/Ahrefs |
-| **Position moyenne** | N/A | < 25 | Search Console |
-| **CTR SERP** | ~1% | 5%+ | Search Console |
-| **Rich Snippets** | 0 | 50+ | Manual check |
-| **Score SEO moyen** | 45/100 | 80/100 | Internal SEO Analyzer |
-| **Backlinks** | ~10 | 100+ | Ahrefs |
+| Métrique              | Avant     | Objectif 3 mois | Méthode Mesure        |
+| --------------------- | --------- | --------------- | --------------------- |
+| **Pages indexées**    | ~50       | 500+            | Google Search Console |
+| **Trafic organique**  | ~100/mois | 2,000/mois      | Google Analytics      |
+| **Mots-clés classés** | 5         | 150+            | SEMrush/Ahrefs        |
+| **Position moyenne**  | N/A       | < 25            | Search Console        |
+| **CTR SERP**          | ~1%       | 5%+             | Search Console        |
+| **Rich Snippets**     | 0         | 50+             | Manual check          |
+| **Score SEO moyen**   | 45/100    | 80/100          | Internal SEO Analyzer |
+| **Backlinks**         | ~10       | 100+            | Ahrefs                |
 
 ---
 
 ### 5.2 ROI Attendu
 
 **Investissement:**
+
 - Développement: ~40h
 - Contenu: ~20h/mois
 - Outils (SEMrush, Ahrefs): ~150€/mois
 
 **Retour:**
+
 - Trafic organique: +1,900 visiteurs/mois
 - Taux conversion: 2%
 - Panier moyen: 15,000 XOF (~25€)
@@ -1324,16 +1368,16 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 
 ### 6.1 Outils SEO Recommandés
 
-| Outil | Usage | Prix |
-|-------|-------|------|
-| **Google Search Console** | Monitoring indexation | Gratuit |
-| **Google Analytics 4** | Trafic & comportement | Gratuit |
-| **SEMrush** | Recherche mots-clés | 119$/mois |
-| **Ahrefs** | Backlinks & competitors | 99$/mois |
-| **Screaming Frog** | Audit technique | Gratuit (500 URLs) |
-| **PageSpeed Insights** | Performance | Gratuit |
-| **Schema Markup Validator** | Test données structurées | Gratuit |
-| **OpenGraph Debugger** | Test OG tags | Gratuit |
+| Outil                       | Usage                    | Prix               |
+| --------------------------- | ------------------------ | ------------------ |
+| **Google Search Console**   | Monitoring indexation    | Gratuit            |
+| **Google Analytics 4**      | Trafic & comportement    | Gratuit            |
+| **SEMrush**                 | Recherche mots-clés      | 119$/mois          |
+| **Ahrefs**                  | Backlinks & competitors  | 99$/mois           |
+| **Screaming Frog**          | Audit technique          | Gratuit (500 URLs) |
+| **PageSpeed Insights**      | Performance              | Gratuit            |
+| **Schema Markup Validator** | Test données structurées | Gratuit            |
+| **OpenGraph Debugger**      | Test OG tags             | Gratuit            |
 
 ---
 
@@ -1428,6 +1472,7 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 ### État Actuel : 45/100 ⚠️
 
 **Points Forts:**
+
 - ✅ Infrastructure base de données SEO complète
 - ✅ URLs SEO-friendly avec slugs
 - ✅ Performance excellente (91/100 Core Web Vitals)
@@ -1436,6 +1481,7 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 - ✅ SEO Analyzer intégré
 
 **Points Faibles Critiques:**
+
 - ❌ **Sitemap XML absent** → Indexation très limitée
 - ❌ **Schema.org absent** → Pas de Rich Snippets
 - ❌ **Marketplace non optimisée** → Page principale invisible
@@ -1447,6 +1493,7 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 ### État Cible : 95/100 🚀
 
 **Après Implémentation:**
+
 - ✅ **Sitemap dynamique** → Indexation complète
 - ✅ **Schema.org complet** → Rich Snippets sur tous produits
 - ✅ **Meta optimisées** → Toutes pages référencées
@@ -1456,6 +1503,7 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 - ✅ **Suggestions IA** → Meta générées automatiquement
 
 **Impact Attendu:**
+
 - 📈 **+1,900%** trafic organique (100 → 2,000 visiteurs/mois)
 - 📈 **+3,000%** pages indexées (50 → 500+)
 - 📈 **+500%** ROI à 6 mois
@@ -1489,27 +1537,27 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  
+
   <url>
     <loc>https://payhula.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <lastmod>2025-10-25T10:00:00+00:00</lastmod>
   </url>
-  
+
   <url>
     <loc>https://payhula.com/marketplace</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
+
   <url>
     <loc>https://payhula.com/stores/ma-boutique</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <lastmod>2025-10-20T15:30:00+00:00</lastmod>
   </url>
-  
+
   <url>
     <loc>https://payhula.com/stores/ma-boutique/products/formation-marketing</loc>
     <changefreq>weekly</changefreq>
@@ -1521,7 +1569,7 @@ Alt text généré: "Formation Marketing Digital - Cours en ligne complet pour e
       <image:caption>Apprenez le marketing digital de A à Z</image:caption>
     </image:image>
   </url>
-  
+
 </urlset>
 ```
 
@@ -1608,4 +1656,3 @@ npm run audit:seo
 ---
 
 **FIN DU RAPPORT D'ANALYSE SEO**
-

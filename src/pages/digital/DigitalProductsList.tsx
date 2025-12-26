@@ -24,12 +24,14 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useDigitalRevenueAnalytics } from '@/hooks/digital/useDigitalAnalytics';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Plus,
   Search,
   Download,
-  TrendingUp,
   DollarSign,
   Users,
   Filter,
@@ -48,21 +50,41 @@ import {
   ChevronsLeft,
   ChevronsRight,
   AlertTriangle,
+  FileDown,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useStore } from '@/hooks/useStore';
-import { useDigitalProducts } from '@/hooks/digital/useDigitalProducts';
-import { DigitalProductsGrid } from '@/components/digital';
+import {
+  useDigitalProducts,
+  useDigitalProductsRevenue,
+  useBulkUpdateDigitalProducts,
+  useBulkDeleteDigitalProducts,
+} from '@/hooks/digital/useDigitalProducts';
+import {
+  exportDigitalProductsToCSV,
+  exportDigitalProductsToExcel,
+  exportDigitalProductsToPDF,
+} from '@/utils/exportDigitalProducts';
+import { DigitalProductCard } from '@/components/digital';
+import { DigitalProductsBulkActions } from '@/components/digital/DigitalProductsBulkActions';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
-import { cn } from '@/lib/utils';
+import { cn, stripHtmlTags } from '@/lib/utils';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
 
 const ITEMS_PER_PAGE = 12;
 const PAGINATION_OPTIONS = [12, 24, 36, 48];
 
 type ViewMode = 'grid' | 'list';
-type StatusFilter = 'all' | 'active' | 'draft';
+type StatusFilter = 'all' | 'active' | 'draft' | 'analytics';
 
 export const DigitalProductsList = () => {
   const { t } = useTranslation();
@@ -78,9 +100,11 @@ export const DigitalProductsList = () => {
   const [sortBy, setSortBy] = useState('recent');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const debouncedStatusFilter = useDebounce(statusFilter, 300); // Debounce pour éviter trop de requêtes
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Animation hooks - useScrollAnimation retourne un ref
@@ -103,6 +127,19 @@ export const DigitalProductsList = () => {
     sortOrder:
       sortBy.includes('desc') || sortBy === 'downloads' || sortBy === 'recent' ? 'desc' : 'asc',
   });
+
+  // Récupérer les revenus réels basés sur les commandes payées
+  const { data: revenueMap } = useDigitalProductsRevenue(store?.id);
+
+  // Analytics globaux pour le dashboard
+  const { data: revenueAnalytics } = useDigitalRevenueAnalytics(store?.id, {
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 derniers jours
+    to: new Date(),
+  });
+
+  // Hook pour les actions en masse
+  const bulkUpdateMutation = useBulkUpdateDigitalProducts();
+  const bulkDeleteMutation = useBulkDeleteDigitalProducts();
 
   // Extraire les données et métadonnées de pagination
   const productsData = productsResponse?.data || productsResponse || [];
@@ -222,6 +259,7 @@ export const DigitalProductsList = () => {
 
   /**
    * Calculate stats with useMemo
+   * CORRECTION: Utiliser les revenus réels depuis les commandes payées
    */
   const stats = useMemo(() => {
     if (!products) {
@@ -233,21 +271,28 @@ export const DigitalProductsList = () => {
       };
     }
 
+    // Calculer les revenus réels depuis les commandes payées
+    let totalRevenue = 0;
+    if (revenueMap) {
+      products.forEach(p => {
+        const product = 'product' in p ? p.product : p;
+        const productId = product?.id;
+        if (productId && revenueMap.has(productId)) {
+          totalRevenue += revenueMap.get(productId) || 0;
+        }
+      });
+    }
+
     return {
       totalProducts: products.length,
       totalDownloads: products.reduce(
         (sum, p) => sum + (p.total_downloads || p.totalDownloads || 0),
         0
       ),
-      totalRevenue: products.reduce((sum, p) => {
-        const product = 'product' in p ? p.product : p;
-        const price = product.price || 0;
-        const downloads = p.total_downloads || p.totalDownloads || 0;
-        return sum + price * downloads;
-      }, 0),
+      totalRevenue,
       uniqueCustomers: new Set(products.flatMap(p => [p.user_id || p.userId || ''])).size,
     };
-  }, [products]);
+  }, [products, revenueMap]);
 
   /**
    * Keyboard shortcuts
@@ -348,6 +393,122 @@ export const DigitalProductsList = () => {
     logger.info('Items par page', { itemsPerPage: value });
   }, []);
 
+  // Handlers pour actions en masse
+  const handleBulkActivate = useCallback(
+    async (productIds: string[]) => {
+      // Récupérer les digital_product_ids depuis les product_ids
+      const digitalProductIds = products
+        .filter(p => {
+          const product = 'product' in p ? p.product : p;
+          return productIds.includes(product?.id || p.id);
+        })
+        .map(p => p.id);
+
+      await bulkUpdateMutation.mutateAsync({
+        productIds: digitalProductIds,
+        updates: { status: 'active' },
+      });
+      await refetch();
+    },
+    [bulkUpdateMutation, refetch, products]
+  );
+
+  const handleBulkDeactivate = useCallback(
+    async (productIds: string[]) => {
+      const digitalProductIds = products
+        .filter(p => {
+          const product = 'product' in p ? p.product : p;
+          return productIds.includes(product?.id || p.id);
+        })
+        .map(p => p.id);
+
+      await bulkUpdateMutation.mutateAsync({
+        productIds: digitalProductIds,
+        updates: { status: 'draft' },
+      });
+      await refetch();
+    },
+    [bulkUpdateMutation, refetch, products]
+  );
+
+  const handleBulkDelete = useCallback(
+    async (productIds: string[]) => {
+      // Récupérer les digital_product_ids depuis les product_ids
+      const digitalProductIds = products
+        .filter(p => {
+          const product = 'product' in p ? p.product : p;
+          return productIds.includes(product?.id || p.id);
+        })
+        .map(p => p.id);
+
+      await bulkDeleteMutation.mutateAsync(digitalProductIds);
+      await refetch();
+    },
+    [bulkDeleteMutation, refetch, products]
+  );
+
+  // Handler pour export
+  const handleExport = useCallback(
+    async (productIds?: string[], format: 'csv' | 'excel' | 'pdf' = 'csv') => {
+      setIsExporting(true);
+      try {
+        const productsToExport = productIds
+          ? filteredProducts.filter(p => {
+              const product = 'product' in p ? p.product : p;
+              return productIds.includes(product?.id || p.id);
+            })
+          : filteredProducts;
+
+        const exportData = productsToExport.map(p => {
+          const product = 'product' in p ? p.product : p;
+          return {
+            id: p.id,
+            name: product?.name || 'Produit sans nom',
+            slug: product?.slug || p.id,
+            description: product?.description || '',
+            price: product?.price || 0,
+            currency: product?.currency || 'XOF',
+            digital_type: p.digital_type || 'other',
+            license_type: p.license_type || 'single',
+            total_downloads: p.total_downloads || p.totalDownloads || 0,
+            average_rating: p.average_rating || 0,
+            total_reviews: p.total_reviews || 0,
+            status: product?.is_active ? 'Actif' : 'Brouillon',
+            created_at: p.created_at || '',
+            version: p.version,
+          };
+        });
+
+        switch (format) {
+          case 'csv':
+            exportDigitalProductsToCSV(exportData);
+            break;
+          case 'excel':
+            await exportDigitalProductsToExcel(exportData);
+            break;
+          case 'pdf':
+            await exportDigitalProductsToPDF(exportData, { storeName: store?.name });
+            break;
+        }
+
+        toast({
+          title: 'Export réussi',
+          description: `${productsToExport.length} produit(s) exporté(s) en ${format.toUpperCase()}`,
+        });
+      } catch (error) {
+        logger.error("Erreur lors de l'export", { error });
+        toast({
+          title: 'Erreur',
+          description: `Impossible d'exporter les produits en ${format.toUpperCase()}`,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsExporting(false);
+      }
+    },
+    [filteredProducts, toast, store?.name]
+  );
+
   /**
    * Logging on mount
    */
@@ -428,6 +589,62 @@ export const DigitalProductsList = () => {
                   />
                   <span className="hidden sm:inline">Rafraîchir</span>
                 </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 sm:h-10 text-xs sm:text-sm"
+                      disabled={isExporting || filteredProducts.length === 0}
+                    >
+                      <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                      <span className="hidden sm:inline">Exporter</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                      Exporter tous ({filteredProducts.length})
+                    </div>
+                    <DropdownMenuItem onClick={() => handleExport(undefined, 'csv')}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport(undefined, 'excel')}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      Excel (.xlsx)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport(undefined, 'pdf')}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      PDF
+                    </DropdownMenuItem>
+                    {selectedProducts.size > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                          Exporter sélectionnés ({selectedProducts.size})
+                        </div>
+                        <DropdownMenuItem
+                          onClick={() => handleExport(Array.from(selectedProducts), 'csv')}
+                        >
+                          <FileDown className="h-4 w-4 mr-2" />
+                          CSV
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleExport(Array.from(selectedProducts), 'excel')}
+                        >
+                          <FileDown className="h-4 w-4 mr-2" />
+                          Excel (.xlsx)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleExport(Array.from(selectedProducts), 'pdf')}
+                        >
+                          <FileDown className="h-4 w-4 mr-2" />
+                          PDF
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button
                   onClick={() => navigate('/dashboard/products/new/digital')}
                   size="sm"
@@ -516,6 +733,19 @@ export const DigitalProductsList = () => {
                 );
               })}
             </div>
+
+            {/* Bulk Actions Bar */}
+            {selectedProducts.size > 0 && (
+              <DigitalProductsBulkActions
+                selectedProducts={selectedProducts}
+                products={products}
+                onSelectionChange={setSelectedProducts}
+                onBulkActivate={handleBulkActivate}
+                onBulkDeactivate={handleBulkDeactivate}
+                onBulkDelete={handleBulkDelete}
+                onExport={(productIds, format) => handleExport(productIds, format)}
+              />
+            )}
 
             {/* Search & Filters - Style Inventaire */}
             <Card
@@ -681,6 +911,13 @@ export const DigitalProductsList = () => {
                   <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   {t('digitalProducts.tabs.draft', 'Brouillons')}
                 </TabsTrigger>
+                <TabsTrigger
+                  value="analytics"
+                  className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                >
+                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  {t('digitalProducts.tabs.analytics', 'Analytics')}
+                </TabsTrigger>
               </TabsList>
 
               {/* Products Grid/List */}
@@ -743,32 +980,49 @@ export const DigitalProductsList = () => {
                   ) : (
                     <>
                       {viewMode === 'grid' ? (
-                        <DigitalProductsGrid
-                          products={paginatedProducts
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {paginatedProducts
                             .filter(dp => {
                               const product = 'product' in dp ? dp.product : dp;
-                              return product && product.id; // Filtrer les produits invalides
+                              return product && product.id;
                             })
                             .map(dp => {
                               const product = 'product' in dp ? dp.product : dp;
-                              return {
-                                id: dp.id,
-                                name: product?.name || 'Produit sans nom',
-                                slug: product?.slug || dp.id,
-                                description: product?.description,
-                                price: product?.price || 0,
-                                currency: product?.currency || 'XOF',
-                                image_url: product?.image_url,
-                                digital_type: dp.digital_type || 'other',
-                                total_downloads: dp.total_downloads || dp.totalDownloads || 0,
-                                license_type: dp.license_type || 'single',
-                                average_rating: dp.average_rating || 0,
-                                total_reviews: dp.total_reviews || 0,
-                                version: dp.version,
-                              };
+                              const productId = product?.id || dp.id;
+                              return (
+                                <DigitalProductCard
+                                  key={dp.id}
+                                  product={{
+                                    id: product?.id || dp.id,
+                                    name: product?.name || 'Produit sans nom',
+                                    slug: product?.slug || dp.id,
+                                    description: product?.description,
+                                    price: product?.price || 0,
+                                    currency: product?.currency || 'XOF',
+                                    image_url: product?.image_url,
+                                    digital_type: dp.digital_type || 'other',
+                                    license_type: dp.license_type || 'single',
+                                    total_downloads: dp.total_downloads || dp.totalDownloads || 0,
+                                    average_rating: dp.average_rating || 0,
+                                    total_reviews: dp.total_reviews || 0,
+                                    version: dp.version,
+                                    is_active: product?.is_active,
+                                  }}
+                                  selectable={true}
+                                  isSelected={selectedProducts.has(productId)}
+                                  onSelect={(id, selected) => {
+                                    const newSelected = new Set(selectedProducts);
+                                    if (selected) {
+                                      newSelected.add(id);
+                                    } else {
+                                      newSelected.delete(id);
+                                    }
+                                    setSelectedProducts(newSelected);
+                                  }}
+                                />
+                              );
                             })}
-                          loading={false}
-                        />
+                        </div>
                       ) : (
                         <div className="space-y-3 sm:space-y-4">
                           {paginatedProducts
@@ -823,7 +1077,7 @@ export const DigitalProductsList = () => {
                                           </div>
                                           {product.description && (
                                             <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2 sm:mb-3">
-                                              {product.description}
+                                              {htmlToPlainText(product.description)}
                                             </p>
                                           )}
                                         </div>
@@ -832,26 +1086,70 @@ export const DigitalProductsList = () => {
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() =>
-                                              navigate(`/products/${product.slug || dp.id}`)
-                                            }
+                                            onClick={() => {
+                                              if (store?.slug && product?.slug) {
+                                                navigate(
+                                                  `/stores/${store.slug}/products/${product.slug}`
+                                                );
+                                              } else {
+                                                toast({
+                                                  title: 'Erreur',
+                                                  description:
+                                                    'Informations de produit incomplètes',
+                                                  variant: 'destructive',
+                                                });
+                                              }
+                                            }}
                                           >
                                             <Eye className="h-4 w-4 mr-2" />
                                             <span className="hidden sm:inline">
-                                              {t('digitalProducts.view', 'Voir')}
+                                              {t('digitalProducts.view', 'Détails')}
                                             </span>
+                                            <span className="sm:hidden">Détails</span>
                                           </Button>
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() =>
-                                              navigate(`/products/${product.slug || dp.id}/edit`)
-                                            }
+                                            onClick={() => {
+                                              if (product?.id) {
+                                                navigate(`/dashboard/products/${product.id}/edit`);
+                                              } else {
+                                                toast({
+                                                  title: 'Erreur',
+                                                  description: 'ID de produit manquant',
+                                                  variant: 'destructive',
+                                                });
+                                              }
+                                            }}
                                           >
                                             <Edit className="h-4 w-4 mr-2" />
                                             <span className="hidden sm:inline">
                                               {t('digitalProducts.edit', 'Modifier')}
                                             </span>
+                                            <span className="sm:hidden">Modifier</span>
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                            onClick={() => {
+                                              if (store?.slug && product?.slug) {
+                                                navigate(
+                                                  `/stores/${store.slug}/products/${product.slug}`
+                                                );
+                                              } else {
+                                                toast({
+                                                  title: 'Erreur',
+                                                  description:
+                                                    'Informations de produit incomplètes',
+                                                  variant: 'destructive',
+                                                });
+                                              }
+                                            }}
+                                          >
+                                            <span className="hidden sm:inline">
+                                              {t('digitalProducts.buy', 'Acheter')}
+                                            </span>
+                                            <span className="sm:hidden">Acheter</span>
                                           </Button>
                                         </div>
                                       </div>
@@ -982,8 +1280,8 @@ export const DigitalProductsList = () => {
                   </Card>
                 ) : (
                   <>
-                    <DigitalProductsGrid
-                      products={filteredProducts
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredProducts
                         .filter(dp => {
                           const product = 'product' in dp ? dp.product : dp;
                           return product.is_active !== undefined
@@ -993,16 +1291,41 @@ export const DigitalProductsList = () => {
                         .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                         .map(dp => {
                           const product = 'product' in dp ? dp.product : dp;
-                          return {
-                            id: dp.id,
-                            ...product,
-                            digital_type: dp.digital_type || 'other',
-                            total_downloads: dp.total_downloads || dp.totalDownloads || 0,
-                            license_type: dp.license_type || 'single',
-                          };
+                          const productId = product?.id || dp.id;
+                          return (
+                            <DigitalProductCard
+                              key={dp.id}
+                              product={{
+                                id: product?.id || dp.id,
+                                name: product?.name || 'Produit sans nom',
+                                slug: product?.slug || dp.id,
+                                description: product?.description,
+                                price: product?.price || 0,
+                                currency: product?.currency || 'XOF',
+                                image_url: product?.image_url,
+                                digital_type: dp.digital_type || 'other',
+                                license_type: dp.license_type || 'single',
+                                total_downloads: dp.total_downloads || dp.totalDownloads || 0,
+                                average_rating: dp.average_rating || 0,
+                                total_reviews: dp.total_reviews || 0,
+                                version: dp.version,
+                                is_active: product?.is_active,
+                              }}
+                              selectable={true}
+                              isSelected={selectedProducts.has(productId)}
+                              onSelect={(id, selected) => {
+                                const newSelected = new Set(selectedProducts);
+                                if (selected) {
+                                  newSelected.add(id);
+                                } else {
+                                  newSelected.delete(id);
+                                }
+                                setSelectedProducts(newSelected);
+                              }}
+                            />
+                          );
                         })}
-                      loading={false}
-                    />
+                    </div>
                     {/* Pagination pour les produits actifs */}
                     {(() => {
                       const activeProducts = filteredProducts.filter(dp => {
@@ -1131,8 +1454,8 @@ export const DigitalProductsList = () => {
                   </Card>
                 ) : (
                   <>
-                    <DigitalProductsGrid
-                      products={filteredProducts
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredProducts
                         .filter(dp => {
                           const product = 'product' in dp ? dp.product : dp;
                           return !(product.is_active !== undefined
@@ -1142,16 +1465,41 @@ export const DigitalProductsList = () => {
                         .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                         .map(dp => {
                           const product = 'product' in dp ? dp.product : dp;
-                          return {
-                            id: dp.id,
-                            ...product,
-                            digital_type: dp.digital_type || 'other',
-                            total_downloads: dp.total_downloads || dp.totalDownloads || 0,
-                            license_type: dp.license_type || 'single',
-                          };
+                          const productId = product?.id || dp.id;
+                          return (
+                            <DigitalProductCard
+                              key={dp.id}
+                              product={{
+                                id: product?.id || dp.id,
+                                name: product?.name || 'Produit sans nom',
+                                slug: product?.slug || dp.id,
+                                description: product?.description,
+                                price: product?.price || 0,
+                                currency: product?.currency || 'XOF',
+                                image_url: product?.image_url,
+                                digital_type: dp.digital_type || 'other',
+                                license_type: dp.license_type || 'single',
+                                total_downloads: dp.total_downloads || dp.totalDownloads || 0,
+                                average_rating: dp.average_rating || 0,
+                                total_reviews: dp.total_reviews || 0,
+                                version: dp.version,
+                                is_active: product?.is_active,
+                              }}
+                              selectable={true}
+                              isSelected={selectedProducts.has(productId)}
+                              onSelect={(id, selected) => {
+                                const newSelected = new Set(selectedProducts);
+                                if (selected) {
+                                  newSelected.add(id);
+                                } else {
+                                  newSelected.delete(id);
+                                }
+                                setSelectedProducts(newSelected);
+                              }}
+                            />
+                          );
                         })}
-                      loading={false}
-                    />
+                    </div>
                     {/* Pagination pour les brouillons */}
                     {(() => {
                       const draftProducts = filteredProducts.filter(dp => {
@@ -1239,6 +1587,149 @@ export const DigitalProductsList = () => {
                     })()}
                   </>
                 )}
+              </TabsContent>
+
+              {/* Analytics Tab */}
+              <TabsContent value="analytics" className="mt-4 sm:mt-6">
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Revenue Analytics Card */}
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-purple-500" />
+                        Statistiques des Revenus (30 derniers jours)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {revenueAnalytics ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">Revenus totaux</p>
+                            <p className="text-2xl font-bold text-green-600">
+                              {revenueAnalytics.total_revenue.toLocaleString()} XOF
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">Commandes</p>
+                            <p className="text-2xl font-bold">{revenueAnalytics.total_orders}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">Produits vendus</p>
+                            <p className="text-2xl font-bold">
+                              {revenueAnalytics.total_products_sold}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">Panier moyen</p>
+                            <p className="text-2xl font-bold">
+                              {revenueAnalytics.average_order_value.toLocaleString()} XOF
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center py-8">
+                          <Skeleton className="h-32 w-full" />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Products Performance */}
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle>Performance par Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <LazyRechartsWrapper>
+                        {recharts => {
+                          const typeStats = products.reduce(
+                            (acc, p) => {
+                              const type = p.digital_type || 'other';
+                              if (!acc[type]) {
+                                acc[type] = { count: 0, downloads: 0 };
+                              }
+                              acc[type].count += 1;
+                              acc[type].downloads += p.total_downloads || p.totalDownloads || 0;
+                              return acc;
+                            },
+                            {} as Record<string, { count: number; downloads: number }>
+                          );
+
+                          const chartData = Object.entries(typeStats).map(([type, stats]) => ({
+                            name: type.charAt(0).toUpperCase() + type.slice(1),
+                            produits: stats.count,
+                            téléchargements: stats.downloads,
+                          }));
+
+                          return (
+                            <recharts.ResponsiveContainer width="100%" height={300}>
+                              <recharts.BarChart data={chartData}>
+                                <recharts.CartesianGrid strokeDasharray="3 3" />
+                                <recharts.XAxis dataKey="name" />
+                                <recharts.YAxis />
+                                <recharts.Tooltip />
+                                <recharts.Legend />
+                                <recharts.Bar dataKey="produits" fill="#8b5cf6" name="Produits" />
+                                <recharts.Bar
+                                  dataKey="téléchargements"
+                                  fill="#ec4899"
+                                  name="Téléchargements"
+                                />
+                              </recharts.BarChart>
+                            </recharts.ResponsiveContainer>
+                          );
+                        }}
+                      </LazyRechartsWrapper>
+                    </CardContent>
+                  </Card>
+
+                  {/* Top Products */}
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle>Top Produits par Téléchargements</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {products
+                          .sort(
+                            (a, b) =>
+                              (b.total_downloads || b.totalDownloads || 0) -
+                              (a.total_downloads || a.totalDownloads || 0)
+                          )
+                          .slice(0, 5)
+                          .map((p, index) => {
+                            const product = 'product' in p ? p.product : p;
+                            return (
+                              <div
+                                key={p.id}
+                                className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 font-bold">
+                                    {index + 1}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium">
+                                      {product?.name || 'Produit sans nom'}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {p.digital_type || 'other'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold">
+                                    {p.total_downloads || p.totalDownloads || 0}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">téléchargements</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
           </div>

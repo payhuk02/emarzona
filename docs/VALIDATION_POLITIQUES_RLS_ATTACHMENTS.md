@@ -10,6 +10,7 @@
 Les 4 politiques RLS suivantes sont correctement configurées dans Supabase :
 
 ### 1. Lecture Publique (SELECT)
+
 - **Nom** : `Anyone can view attachments`
 - **Opération** : `SELECT`
 - **Rôles** : `{public}`
@@ -17,6 +18,7 @@ Les 4 politiques RLS suivantes sont correctement configurées dans Supabase :
 - ✅ **Statut** : Configurée correctement
 
 ### 2. Upload Authentifié (INSERT)
+
 - **Nom** : `Authenticated users can upload attachments`
 - **Opération** : `INSERT`
 - **Rôles** : `{authenticated}`
@@ -24,6 +26,7 @@ Les 4 politiques RLS suivantes sont correctement configurées dans Supabase :
 - ✅ **Statut** : Configurée correctement
 
 ### 3. Mise à Jour Authentifiée (UPDATE)
+
 - **Nom** : `Users can update their own attachments`
 - **Opération** : `UPDATE`
 - **Rôles** : `{authenticated}`
@@ -31,6 +34,7 @@ Les 4 politiques RLS suivantes sont correctement configurées dans Supabase :
 - ✅ **Statut** : Configurée correctement
 
 ### 4. Suppression Authentifiée (DELETE)
+
 - **Nom** : `Users can delete their own attachments`
 - **Opération** : `DELETE`
 - **Rôles** : `{authenticated}`
@@ -60,6 +64,7 @@ Les 4 politiques RLS suivantes sont correctement configurées dans Supabase :
 Après le prochain upload, surveillez ces logs dans la console :
 
 #### ✅ Logs de Succès Attendus :
+
 ```
 [INFO] Pre-upload verification {fileType: 'image/png', ...}
 [INFO] Upload response details {hasData: true, hasError: false, ...}
@@ -67,6 +72,7 @@ Après le prochain upload, surveillez ces logs dans la console :
 ```
 
 #### ❌ Logs d'Erreur (ne devraient plus apparaître) :
+
 ```
 [ERROR] ❌ CRITICAL: File uploaded as JSON instead of image!
 [ERROR] File upload failed
@@ -88,19 +94,23 @@ Avec les politiques RLS correctement configurées :
 ## 🚨 Si le Problème Persiste
 
 ### Vérification 1 : Bucket Public
+
 - ✅ Vérifiez que le bucket "attachments" est marqué comme **PUBLIC** dans Supabase Dashboard
 - ✅ Si ce n'est pas le cas, activez "Public bucket"
 
 ### Vérification 2 : Authentification
+
 - ✅ Vérifiez que vous êtes bien connecté
 - ✅ Vérifiez que votre session n'a pas expiré
 - ✅ Reconnectez-vous si nécessaire
 
 ### Vérification 3 : Délai de Propagation
+
 - ⏳ Attendez 2-3 minutes après la création/modification des politiques RLS
 - ⏳ Supabase a besoin de temps pour propager les changements
 
 ### Vérification 4 : Logs Supabase
+
 - 📊 Allez dans **Supabase Dashboard** > **Logs** > **Storage**
 - 📊 Cherchez les erreurs liées au bucket "attachments"
 - 📊 Vérifiez les erreurs de permissions
@@ -119,12 +129,14 @@ Avec les politiques RLS correctement configurées :
 ### Avant vs Après
 
 **Avant** :
+
 - ❌ Les politiques RLS bloquaient l'upload
 - ❌ Supabase retournait une erreur JSON
 - ❌ Cette erreur JSON était enregistrée comme fichier
 - ❌ Le Content-Type devenait "application/json"
 
 **Après** :
+
 - ✅ Les politiques RLS permettent l'upload pour les utilisateurs authentifiés
 - ✅ Les fichiers sont uploadés avec le bon Content-Type
 - ✅ Les fichiers sont accessibles publiquement (lecture)
@@ -134,4 +146,3 @@ Avec les politiques RLS correctement configurées :
 
 **Dernière mise à jour** : 1 Février 2025  
 **Migration utilisée** : `20250201_fix_attachments_rls_definitive.sql`
-

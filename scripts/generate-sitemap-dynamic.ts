@@ -1,7 +1,7 @@
 /**
  * Script de génération de sitemap.xml dynamique
  * Génère automatiquement le sitemap avec produits, boutiques et pages statiques
- * 
+ *
  * Usage: npm run sitemap:generate
  */
 
@@ -35,13 +35,17 @@ function formatDate(date: Date | string): string {
  * Génère le XML du sitemap
  */
 function generateSitemapXML(urls: SitemapUrl[]): string {
-  const urlsXML = urls.map(url => `
+  const urlsXML = urls
+    .map(
+      url => `
   <url>
     <loc>${url.loc}</loc>
     <lastmod>${url.lastmod}</lastmod>
     <changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority}</priority>
-  </url>`).join('');
+  </url>`
+    )
+    .join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -59,26 +63,26 @@ function generateSitemapXML(urls: SitemapUrl[]): string {
  */
 function getStaticPages(): SitemapUrl[] {
   const today = formatDate(new Date());
-  
+
   return [
     {
       loc: `${SITE_URL}/`,
       lastmod: today,
       changefreq: 'daily',
-      priority: 1.0
+      priority: 1.0,
     },
     {
       loc: `${SITE_URL}/marketplace`,
       lastmod: today,
       changefreq: 'hourly',
-      priority: 0.9
+      priority: 0.9,
     },
     {
       loc: `${SITE_URL}/auth`,
       lastmod: today,
       changefreq: 'monthly',
-      priority: 0.5
-    }
+      priority: 0.5,
+    },
   ];
 }
 
@@ -98,12 +102,14 @@ async function getStores(): Promise<SitemapUrl[]> {
       return [];
     }
 
-    return stores?.map(store => ({
-      loc: `${SITE_URL}/stores/${store.slug}`,
-      lastmod: formatDate(store.updated_at),
-      changefreq: 'weekly' as const,
-      priority: 0.8
-    })) || [];
+    return (
+      stores?.map(store => ({
+        loc: `${SITE_URL}/stores/${store.slug}`,
+        lastmod: formatDate(store.updated_at),
+        changefreq: 'weekly' as const,
+        priority: 0.8,
+      })) || []
+    );
   } catch (error) {
     console.error('Erreur:', error);
     return [];
@@ -117,11 +123,13 @@ async function getProducts(): Promise<SitemapUrl[]> {
   try {
     const { data: products, error } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         slug,
         updated_at,
         stores!inner (slug, is_active)
-      `)
+      `
+      )
       .eq('is_active', true)
       .eq('stores.is_active', true)
       .order('updated_at', { ascending: false })
@@ -132,12 +140,14 @@ async function getProducts(): Promise<SitemapUrl[]> {
       return [];
     }
 
-    return products?.map((product: any) => ({
-      loc: `${SITE_URL}/stores/${product.stores.slug}/products/${product.slug}`,
-      lastmod: formatDate(product.updated_at),
-      changefreq: 'weekly' as const,
-      priority: 0.7
-    })) || [];
+    return (
+      products?.map((product: any) => ({
+        loc: `${SITE_URL}/stores/${product.stores.slug}/products/${product.slug}`,
+        lastmod: formatDate(product.updated_at),
+        changefreq: 'weekly' as const,
+        priority: 0.7,
+      })) || []
+    );
   } catch (error) {
     console.error('Erreur:', error);
     return [];
@@ -164,11 +174,7 @@ async function generateSitemap(): Promise<void> {
   console.log(`   ✓ ${products.length} produits actifs\n`);
 
   // Combiner toutes les URLs
-  const allUrls = [
-    ...staticPages,
-    ...stores,
-    ...products
-  ];
+  const allUrls = [...staticPages, ...stores, ...products];
 
   console.log(`📊 Total URLs: ${allUrls.length}\n`);
 
@@ -198,8 +204,7 @@ generateSitemap()
     console.log('\n✨ Terminé !');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('\n❌ Erreur:', error);
     process.exit(1);
   });
-

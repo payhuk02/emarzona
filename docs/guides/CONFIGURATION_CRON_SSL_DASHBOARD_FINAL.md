@@ -14,6 +14,7 @@ Le Dashboard Supabase gère automatiquement les permissions, donc c'est la méth
 4. Copiez la clé complète (commence par `eyJ...`)
 
 **Votre clé :**
+
 ```
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzU5ODIzMSwiZXhwIjoyMDczMTc0MjMxfQ.MT2e4tcw_5eK0fRQFN5tF1Cwu210MKFUAUGqmYm_1XE
 ```
@@ -29,19 +30,23 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWp
 Remplissez les champs suivants :
 
 #### Schedule (Programmation) :
+
 ```
 0 9 * * *
 ```
+
 - **Signification :** Tous les jours à 9h00 UTC
 - **Format :** `minute hour day month weekday`
 - Vous pouvez tester avec `*/5 * * * *` (toutes les 5 minutes) pour vérifier que ça fonctionne
 
 #### Name (Nom) :
+
 ```
 check-ssl-expiration-daily
 ```
 
 #### Command (Commande SQL) :
+
 ```sql
 SELECT net.http_post(
   url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration',
@@ -53,6 +58,7 @@ SELECT net.http_post(
 **⚠️ IMPORTANT :** J'ai déjà inclus votre Service Role Key dans la commande ci-dessus.
 
 #### Active (Actif) :
+
 - ✅ **Cocher** pour activer immédiatement
 
 ### Étape 4 : Sauvegarder
@@ -62,6 +68,7 @@ Cliquez sur **"Save"** ou **"Create Cron Job"**
 ## ✅ Vérification
 
 Après création, vous devriez voir le cron job dans la liste avec :
+
 - ✅ Status: **Active**
 - ✅ Schedule: `0 9 * * *`
 - ✅ Name: `check-ssl-expiration-daily`
@@ -106,4 +113,3 @@ Si vous voulez changer la fréquence :
 
 **Date :** 2025-02-02  
 **Méthode :** Dashboard Supabase (recommandé)
-

@@ -183,4 +183,3 @@ Pour toute question ou problème :
 - Email : support@emarzona.com
 - Documentation : https://docs.emarzona.com
 - FAQ : https://emarzona.com/faq
-

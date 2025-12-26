@@ -9,6 +9,7 @@
 ## 🎯 Problème Identifié
 
 Le diagnostic confirme que :
+
 - ✅ L'upload semble réussir (`hasError: false`)
 - ❌ Mais le fichier est enregistré comme "application/json"
 - ❌ Cela indique que les politiques RLS bloquent l'upload
@@ -65,17 +66,20 @@ Si vous voyez des ⚠️ ou ❌, suivez les instructions affichées.
 ## 🔍 Améliorations Apportées
 
 ### 1. Détection Immédiate du Problème
+
 - ✅ Le code détecte maintenant immédiatement si le fichier est JSON
 - ✅ Lance une erreur claire avant de continuer
 - ✅ Supprime automatiquement le fichier JSON incorrect
 
 ### 2. Logging Détaillé
+
 - ✅ Logs avant upload (vérification du fichier)
 - ✅ Logs de la réponse Supabase (uploadData, uploadError)
 - ✅ Logs après upload (vérification avec list())
 - ✅ Détection du Content-Type uploadé
 
 ### 3. Migration SQL Robuste
+
 - ✅ Supprime TOUTES les anciennes politiques
 - ✅ Désactive/active RLS pour recréer proprement
 - ✅ Vérification complète après création
@@ -86,16 +90,19 @@ Si vous voyez des ⚠️ ou ❌, suivez les instructions affichées.
 ## 🚨 Si le Problème Persiste
 
 ### Vérification 1 : Authentification
+
 - ✅ Vérifiez que vous êtes bien connecté
 - ✅ Vérifiez que votre session n'a pas expiré
 - ✅ Reconnectez-vous si nécessaire
 
 ### Vérification 2 : Permissions Supabase
+
 - ✅ Vérifiez que votre compte a les droits d'upload
 - ✅ Vérifiez les logs Supabase (Dashboard > Logs > Storage)
 - ✅ Cherchez les erreurs liées au bucket "attachments"
 
 ### Vérification 3 : Recréer le Bucket
+
 Si rien ne fonctionne :
 
 1. **Supprimez le bucket "attachments"** (⚠️ Supprime tous les fichiers)
@@ -134,6 +141,7 @@ Après le prochain upload, surveillez ces logs :
 ### Pourquoi le fichier est JSON ?
 
 Quand les politiques RLS bloquent l'upload :
+
 1. Supabase accepte la requête d'upload
 2. Mais les RLS rejettent l'écriture
 3. Supabase retourne une erreur JSON
@@ -143,6 +151,7 @@ Quand les politiques RLS bloquent l'upload :
 ### Solution
 
 La migration SQL :
+
 1. Supprime toutes les anciennes politiques (conflits)
 2. Recrée les politiques avec la bonne syntaxe
 3. Vérifie que tout est correct
@@ -151,4 +160,3 @@ La migration SQL :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

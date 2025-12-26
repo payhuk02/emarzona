@@ -16,7 +16,7 @@ Ce document décrit l'audit des politiques RLS (Row Level Security) sur toutes l
 
 ```sql
 SELECT * FROM rls_audit_report
-ORDER BY 
+ORDER BY
   CASE WHEN recommendation LIKE '⚠️%' THEN 0 ELSE 1 END,
   table_name;
 ```
@@ -95,8 +95,8 @@ CREATE POLICY "Store owners can insert products"
   ON products FOR INSERT
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM stores 
-      WHERE stores.id = products.store_id 
+      SELECT 1 FROM stores
+      WHERE stores.id = products.store_id
       AND stores.owner_id = auth.uid()
     )
   );
@@ -106,8 +106,8 @@ CREATE POLICY "Store owners can update their products"
   ON products FOR UPDATE
   USING (
     EXISTS (
-      SELECT 1 FROM stores 
-      WHERE stores.id = products.store_id 
+      SELECT 1 FROM stores
+      WHERE stores.id = products.store_id
       AND stores.owner_id = auth.uid()
     )
   );
@@ -117,8 +117,8 @@ CREATE POLICY "Store owners can delete their products"
   ON products FOR DELETE
   USING (
     EXISTS (
-      SELECT 1 FROM stores 
-      WHERE stores.id = products.store_id 
+      SELECT 1 FROM stores
+      WHERE stores.id = products.store_id
       AND stores.owner_id = auth.uid()
     )
   );
@@ -204,6 +204,4 @@ Lors de la création d'une nouvelle table :
 
 ---
 
-*Dernière mise à jour : 2025-01-30*
-
-
+_Dernière mise à jour : 2025-01-30_

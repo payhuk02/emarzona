@@ -23,6 +23,7 @@ La validation des montants dans les webhooks Moneroo était trop tolérante (tol
 ### Solution Implémentée
 
 **Fichiers modifiés:**
+
 - `supabase/functions/moneroo-webhook/index.ts`
 - `supabase/migrations/20250201_add_amount_tolerance_setting.sql`
 
@@ -43,6 +44,7 @@ La validation des montants dans les webhooks Moneroo était trop tolérante (tol
    - Log dans `transaction_logs` avec sévérité "high"
 
 **Code clé:**
+
 ```typescript
 // Récupérer la tolérance depuis platform_settings (défaut: 1 XOF)
 let tolerance = 1.0;
@@ -59,7 +61,7 @@ if (settings?.settings?.max_amount_tolerance) {
 // Rejeter immédiatement si différence > tolérance
 if (amountDifference > tolerance) {
   return new Response(
-    JSON.stringify({ 
+    JSON.stringify({
       error: 'Amount mismatch - transaction rejected',
       message: `Webhook amount differs by ${amountDifference} XOF, exceeding tolerance of ${tolerance} XOF`,
     }),
@@ -69,11 +71,12 @@ if (amountDifference > tolerance) {
 ```
 
 **Migration SQL:**
+
 ```sql
 -- Ajouter MAX_AMOUNT_TOLERANCE dans les settings admin
 INSERT INTO public.platform_settings(key, settings)
 VALUES ('admin', jsonb_build_object('max_amount_tolerance', 1.0))
-ON CONFLICT (key) DO UPDATE SET 
+ON CONFLICT (key) DO UPDATE SET
   settings = CASE
     WHEN NOT (public.platform_settings.settings ? 'max_amount_tolerance') THEN
       public.platform_settings.settings || jsonb_build_object('max_amount_tolerance', 1.0)
@@ -82,6 +85,7 @@ ON CONFLICT (key) DO UPDATE SET
 ```
 
 **Configuration:**
+
 - Valeur par défaut: **1 XOF**
 - Configurable via `platform_settings` → `admin` → `max_amount_tolerance`
 - Peut être ajusté selon les besoins (ex: 0.5 XOF pour plus de strictesse)
@@ -97,10 +101,12 @@ Les transactions en statut "processing" qui restent en attente trop longtemps ne
 ### Solution Implémentée
 
 **Fichiers créés:**
+
 - `supabase/functions/retry-failed-transactions/index.ts`
 - `supabase/functions/retry-failed-transactions/README.md`
 
 **Fichiers utilisés (existants):**
+
 - `supabase/migrations/20250131_create_transaction_retries.sql` (table et fonctions SQL existantes)
 
 **Fonctionnalités:**
@@ -135,12 +141,13 @@ Les transactions en statut "processing" qui restent en attente trop longtemps ne
 **Configuration:**
 
 Via `platform_settings` (optionnel):
+
 ```json
 {
   "retry_config": {
     "maxAttempts": 3,
-    "backoffIntervals": [1, 6, 24],  // En heures
-    "minAgeForRetry": 1  // En heures
+    "backoffIntervals": [1, 6, 24], // En heures
+    "minAgeForRetry": 1 // En heures
   }
 }
 ```
@@ -148,6 +155,7 @@ Via `platform_settings` (optionnel):
 **Déploiement:**
 
 1. **Déployer l'Edge Function:**
+
 ```bash
 supabase functions deploy retry-failed-transactions
 ```
@@ -155,6 +163,7 @@ supabase functions deploy retry-failed-transactions
 2. **Configurer le Cron Job dans Supabase Dashboard:**
 
 **Option A: Via pg_cron (recommandé)**
+
 ```sql
 SELECT cron.schedule(
   'retry-failed-transactions',
@@ -172,6 +181,7 @@ SELECT cron.schedule(
 ```
 
 **Option B: Via Supabase Dashboard → Database → Cron Jobs**
+
 - Créer un nouveau cron job
 - Schedule: `0 * * * *` (toutes les heures)
 - SQL: (voir Option A)
@@ -203,7 +213,7 @@ SELECT cron.schedule(
 
 ```sql
 -- Transactions en attente de retry
-SELECT 
+SELECT
   t.id,
   t.moneroo_transaction_id,
   t.amount,
@@ -218,7 +228,7 @@ GROUP BY t.id
 ORDER BY t.created_at ASC;
 
 -- Historique des retries
-SELECT 
+SELECT
   tr.*,
   t.amount,
   t.status as transaction_status
@@ -235,6 +245,7 @@ LIMIT 50;
 ### Tests Recommandés
 
 **Test 1: Validation des montants**
+
 1. Créer une transaction avec montant 10000 XOF
 2. Envoyer un webhook avec montant 10001 XOF (différence = 1 XOF, tolérance = 1 XOF)
 3. ✅ Webhook doit être accepté
@@ -242,6 +253,7 @@ LIMIT 50;
 5. ✅ Webhook doit être rejeté (400)
 
 **Test 2: Retry automatique**
+
 1. Créer une transaction avec status "processing"
 2. Attendre 1h (ou modifier `created_at` manuellement)
 3. Déclencher manuellement l'Edge Function retry-failed-transactions
@@ -249,6 +261,7 @@ LIMIT 50;
 5. ✅ Si statut changé, transaction et order doivent être mis à jour
 
 **Test 3: Backoff exponentiel**
+
 1. Créer une transaction avec status "processing"
 2. Vérifier que `next_retry_at` est à +1h
 3. Après 1h, déclencher retry (tentative 1)
@@ -263,17 +276,20 @@ LIMIT 50;
 ### Déploiement
 
 1. **Appliquer les migrations:**
+
 ```bash
 # Via Supabase Dashboard → SQL Editor
 # Exécuter: supabase/migrations/20250201_add_amount_tolerance_setting.sql
 ```
 
 2. **Déployer l'Edge Function:**
+
 ```bash
 supabase functions deploy retry-failed-transactions
 ```
 
 3. **Configurer le Cron Job:**
+
 - Suivre les instructions dans `supabase/functions/retry-failed-transactions/README.md`
 
 ### Monitoring Post-Déploiement
@@ -311,4 +327,3 @@ supabase functions deploy retry-failed-transactions
 
 **Date d'implémentation**: 1 Février 2025  
 **Statut**: ✅ Prêt pour déploiement
-

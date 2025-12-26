@@ -46,11 +46,13 @@
 #### 📍 Étape 1.4 : Vérifier le résultat
 
 **Résultat attendu :**
+
 - ✅ Message de succès vert
 - ✅ Aucune erreur rouge
 - ✅ Notices indiquant que les colonnes ont été ajoutées
 
 **Si vous voyez des erreurs :**
+
 - "Column already exists" → ✅ C'est normal, c'est sans danger
 - "Index already exists" → ✅ C'est normal, c'est sans danger
 
@@ -77,6 +79,7 @@
 #### 📍 Étape 2.4 : Vérifier le résultat
 
 **Résultat attendu :**
+
 - ✅ Message de succès
 - ✅ Aucune erreur
 
@@ -88,14 +91,15 @@ Créez une nouvelle query et exécutez ceci pour vérifier :
 
 ```sql
 -- Vérifier que les colonnes existent
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'email_templates' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'email_templates'
 AND column_name IN ('product_type', 'is_default')
 ORDER BY column_name;
 ```
 
 **Résultat attendu :** 2 lignes
+
 - `is_default` | boolean
 - `product_type` | text
 
@@ -105,8 +109,8 @@ Puis exécutez :
 
 ```sql
 -- Vérifier que les templates sont créés
-SELECT slug, name, product_type, is_active 
-FROM email_templates 
+SELECT slug, name, product_type, is_active
+FROM email_templates
 WHERE slug IN (
   'order-confirmation-service',
   'course-enrollment-confirmation',
@@ -116,6 +120,7 @@ ORDER BY slug;
 ```
 
 **Résultat attendu :** 3 lignes
+
 - `course-enrollment-confirmation`
 - `order-confirmation-artist`
 - `order-confirmation-service`
@@ -138,6 +143,7 @@ ORDER BY slug;
 ### 📍 Étape 2.3 : Vérifier les secrets existants
 
 Vérifiez si ces secrets existent déjà :
+
 - `SUPABASE_URL` → Si présent, ✅ c'est bon
 - `SUPABASE_SERVICE_ROLE_KEY` → Si présent, ✅ c'est bon
 
@@ -210,6 +216,7 @@ WHERE product_type IN ('service', 'course', 'artist');
 5. Vérifiez l'onglet **Logs** pour voir le résultat
 
 **Résultat attendu :**
+
 - ✅ Status : 200
 - ✅ Message : "Successfully processed X emails"
 
@@ -220,16 +227,19 @@ WHERE product_type IN ('service', 'course', 'artist');
 Cochez chaque étape au fur et à mesure :
 
 ### Migrations SQL
+
 - [ ] Migration 1 exécutée (`fix_email_templates_complete_structure.sql`)
 - [ ] Migration 2 exécutée (`add_missing_email_templates.sql`)
 - [ ] Vérification des colonnes : ✅ 2 colonnes trouvées
 - [ ] Vérification des templates : ✅ 3 templates trouvés
 
 ### Configuration
+
 - [ ] Secret `SENDGRID_API_KEY` ajouté
 - [ ] Vérification des secrets : ✅ 3 secrets présents
 
 ### Tests
+
 - [ ] Test manuel effectué (optionnel)
 
 ---
@@ -249,6 +259,7 @@ Une fois toutes les cases cochées :
 ### Problème : Erreur dans la migration
 
 **Solution :**
+
 - Vérifiez que vous avez copié tout le contenu du fichier
 - Vérifiez qu'il n'y a pas d'erreur de syntaxe
 - Réessayez
@@ -256,6 +267,7 @@ Une fois toutes les cases cochées :
 ### Problème : Secret non sauvegardé
 
 **Solution :**
+
 - Vérifiez que le nom est exactement : `SENDGRID_API_KEY` (sans espace)
 - Vérifiez que la valeur est bien votre clé SendGrid
 - Réessayez de l'ajouter
@@ -263,6 +275,7 @@ Une fois toutes les cases cochées :
 ### Problème : Email non envoyé lors du test
 
 **Solutions :**
+
 - Vérifiez les logs dans Edge Functions
 - Vérifiez que `SENDGRID_API_KEY` est bien configuré
 - Vérifiez que la clé SendGrid est valide
@@ -271,4 +284,3 @@ Une fois toutes les cases cochées :
 ---
 
 **Guide créé le 1er Février 2025** ✅
-

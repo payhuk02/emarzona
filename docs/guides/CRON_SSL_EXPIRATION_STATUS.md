@@ -9,30 +9,33 @@
 
 Le cron job a été créé avec succès :
 
-| Propriété | Valeur |
-|-----------|--------|
-| **Job ID** | `23` |
-| **Nom** | `check-ssl-expiration-daily` |
-| **Schedule** | `0 9 * * *` (Tous les jours à 9h00 UTC) |
-| **Status** | ✅ **Active: true** |
-| **Edge Function** | `check-ssl-expiration` |
+| Propriété         | Valeur                                  |
+| ----------------- | --------------------------------------- |
+| **Job ID**        | `23`                                    |
+| **Nom**           | `check-ssl-expiration-daily`            |
+| **Schedule**      | `0 9 * * *` (Tous les jours à 9h00 UTC) |
+| **Status**        | ✅ **Active: true**                     |
+| **Edge Function** | `check-ssl-expiration`                  |
 
 ---
 
 ## 🎯 Fonctionnalités Actives
 
 ### 1. Vérification Automatique Quotidienne
+
 - ⏰ **Heure d'exécution :** 9h00 UTC (tous les jours)
 - 🔍 **Action :** Appelle automatiquement l'Edge Function `check-ssl-expiration`
 - 📊 **Portée :** Tous les domaines personnalisés avec SSL activé
 
 ### 2. Alertes Automatiques
+
 - ⚠️ **Alerte à 30 jours :** Email envoyé si expiration < 30 jours
 - 🚨 **Alerte à 15 jours :** Email envoyé si expiration < 15 jours
 - 🔴 **Alerte à 7 jours :** Email envoyé si expiration < 7 jours
 - ⛔ **Alerte à 3 jours :** Email envoyé si expiration < 3 jours
 
 ### 3. Mise à Jour des Statuts
+
 - 📝 Met à jour la table `ssl_certificate_status`
 - 📚 Enregistre l'historique dans `domain_verification_history`
 - 📧 Envoie les notifications selon les préférences de chaque boutique
@@ -44,16 +47,17 @@ Le cron job a été créé avec succès :
 Pour vérifier manuellement le cron job :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   schedule,
   active,
   jobname
-FROM cron.job 
+FROM cron.job
 WHERE jobname = 'check-ssl-expiration-daily';
 ```
 
 **Résultat attendu :**
+
 - `jobid`: 23
 - `schedule`: `0 9 * * *`
 - `active`: `true`
@@ -86,7 +90,7 @@ Pour tester immédiatement sans attendre le prochain schedule :
 Pour voir l'historique des vérifications SSL :
 
 ```sql
-SELECT 
+SELECT
   s.store_id,
   s.domain,
   s.certificate_valid,
@@ -101,7 +105,7 @@ LIMIT 10;
 Pour voir l'historique des vérifications de domaines :
 
 ```sql
-SELECT 
+SELECT
   d.store_id,
   d.domain,
   d.status,
@@ -158,4 +162,3 @@ SELECT cron.schedule(
 
 **Prochaine vérification automatique :** Demain à 9h00 UTC  
 **Statut système :** 🟢 **OPÉRATIONNEL**
-

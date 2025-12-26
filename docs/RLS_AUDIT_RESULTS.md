@@ -23,7 +23,7 @@ ORDER BY table_name;
 Exécutez cette requête pour obtenir un rapport complet de toutes les tables :
 
 ```sql
-SELECT 
+SELECT
   table_name,
   rls_enabled,
   policy_count,
@@ -33,11 +33,11 @@ SELECT
   has_delete_policy,
   recommendation
 FROM rls_audit_report
-ORDER BY 
-  CASE 
-    WHEN recommendation LIKE '⚠️%' THEN 0 
-    WHEN recommendation LIKE 'ℹ️%' THEN 1 
-    ELSE 2 
+ORDER BY
+  CASE
+    WHEN recommendation LIKE '⚠️%' THEN 0
+    WHEN recommendation LIKE 'ℹ️%' THEN 1
+    ELSE 2
   END,
   table_name;
 ```
@@ -61,7 +61,7 @@ SELECT * FROM get_tables_without_policies();
 ### 4. Statistiques Globales
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_tables,
   COUNT(*) FILTER (WHERE rls_enabled) as tables_with_rls,
   COUNT(*) FILTER (WHERE NOT rls_enabled) as tables_without_rls,
@@ -75,7 +75,7 @@ FROM rls_audit_report;
 ### 5. Tables Par Type de Politique
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) FILTER (WHERE has_select_policy) as with_select,
   COUNT(*) FILTER (WHERE has_insert_policy) as with_insert,
   COUNT(*) FILTER (WHERE has_update_policy) as with_update,
@@ -98,11 +98,13 @@ WHERE rls_enabled;
 Les tables suivantes doivent absolument avoir RLS activé avec des politiques appropriées :
 
 ### Données Utilisateurs
+
 - `profiles` - Profils utilisateurs
 - `customers` - Clients
 - `stores` - Boutiques
 
 ### Données Produits
+
 - `products` - Produits
 - `digital_products` - Produits digitaux
 - `physical_products` - Produits physiques
@@ -110,6 +112,7 @@ Les tables suivantes doivent absolument avoir RLS activé avec des politiques ap
 - `courses` - Cours
 
 ### Données Transactions
+
 - `orders` - Commandes
 - `order_items` - Articles de commande
 - `transactions` - Transactions
@@ -117,6 +120,7 @@ Les tables suivantes doivent absolument avoir RLS activé avec des politiques ap
 - `cart_items` - Panier
 
 ### Données Sensibles
+
 - `notifications` - Notifications
 - `messages` - Messages
 - `disputes` - Litiges
@@ -146,6 +150,4 @@ Pour chaque table identifiée comme problématique, documenter :
 
 ---
 
-*Mise à jour après exécution de la migration : 2025-01-30*
-
-
+_Mise à jour après exécution de la migration : 2025-01-30_

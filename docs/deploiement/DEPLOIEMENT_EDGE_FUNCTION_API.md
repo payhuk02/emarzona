@@ -3,6 +3,7 @@
 ## 📋 Date : 28 Janvier 2025
 
 ### Prérequis
+
 - ✅ Supabase CLI installé
 - ✅ Projet Supabase initialisé
 - ✅ Migration SQL `20250228_api_keys_table.sql` appliquée
@@ -20,6 +21,7 @@ Exécuter la migration dans Supabase SQL Editor :
 ```
 
 Ou via CLI :
+
 ```bash
 supabase db push
 ```
@@ -34,6 +36,7 @@ supabase functions deploy api/v1
 ### 3. Vérifier le Déploiement
 
 L'Edge Function sera accessible à :
+
 ```
 https://[PROJECT_REF].supabase.co/functions/v1/api/v1
 ```
@@ -76,6 +79,7 @@ curl -X GET \
 ## 📊 ENDPOINTS DISPONIBLES
 
 ### Produits
+
 - `GET /api/v1/products` - Liste des produits
 - `GET /api/v1/products/:id` - Détails d'un produit
 - `POST /api/v1/products` - Créer un produit
@@ -83,19 +87,23 @@ curl -X GET \
 - `DELETE /api/v1/products/:id` - Supprimer un produit
 
 ### Commandes
+
 - `GET /api/v1/orders` - Liste des commandes
 - `GET /api/v1/orders/:id` - Détails d'une commande
 - `POST /api/v1/orders` - Créer une commande
 
 ### Clients
+
 - `GET /api/v1/customers` - Liste des clients
 - `GET /api/v1/customers/:id` - Détails d'un client
 - `POST /api/v1/customers` - Créer un client
 
 ### Analytics (À implémenter)
+
 - `GET /api/v1/analytics` - Analytics de la boutique
 
 ### Export/Import (À implémenter)
+
 - `GET /api/v1/export` - Exporter des données
 - `POST /api/v1/import` - Importer des données
 
@@ -114,7 +122,7 @@ WHERE id = 'KEY_ID';
 ### Voir les clés API actives
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   key_prefix,
@@ -131,6 +139,7 @@ WHERE user_id = auth.uid()
 ## ✅ VÉRIFICATION
 
 Après déploiement, vérifier :
+
 1. ✅ La fonction est accessible
 2. ✅ L'authentification fonctionne
 3. ✅ Les endpoints retournent des données
@@ -141,4 +150,3 @@ Après déploiement, vérifier :
 
 **Date** : 28 Janvier 2025  
 **Version** : 1.0.0
-

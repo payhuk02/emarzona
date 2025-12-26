@@ -1,4 +1,5 @@
 # 🔍 AUDIT COMPLET DU SYSTÈME DE WEBHOOKS
+
 ## Plateforme Emarzona - Date: 2025-01-28
 
 ---
@@ -19,17 +20,20 @@
 ## 📊 RÉSUMÉ EXÉCUTIF
 
 ### État Actuel
+
 Le système de webhooks de la plateforme Emarzona présente **plusieurs systèmes fragmentés** qui se chevauchent, créant de la confusion, des risques de sécurité, et des problèmes de maintenance.
 
 ### Score Global: **⚠️ 4.5/10**
 
 **Points Positifs:**
+
 - ✅ Architecture de base solide avec tables de logs
 - ✅ Support des retries avec exponential backoff
 - ✅ Interface UI complète pour la gestion
 - ✅ Edge Function pour traitement asynchrone
 
 **Points Critiques:**
+
 - ❌ **3 systèmes de webhooks différents** qui se chevauchent
 - ❌ **Sécurité HMAC compromise** côté client
 - ❌ **Migrations conflictuelles** créant des tables dupliquées
@@ -43,53 +47,67 @@ Le système de webhooks de la plateforme Emarzona présente **plusieurs système
 ### 1. Systèmes de Webhooks Identifiés
 
 #### A. Système Général (`webhook-system.ts` + `webhooks.ts`)
+
 **Fichiers:**
+
 - `src/lib/webhooks/webhook-system.ts`
 - `src/lib/webhooks.ts`
 - `supabase/migrations/20250127_webhooks_system.sql`
 - `supabase/migrations/20250228_webhooks_system_fixed.sql`
 
 **Tables:**
+
 - `webhooks` (avec colonnes: `status`, `events`, `retry_count`, etc.)
 - `webhook_deliveries` (historique des livraisons)
 - `webhook_logs` (dans migration 20250228)
 
 **Fonction RPC:**
+
 - `trigger_webhook(p_event_type, p_event_id, p_event_data, p_store_id)`
 - `update_webhook_delivery_status()`
 
 **Problème:** Deux migrations créent des structures différentes pour la même table.
 
 #### B. Webhooks Produits Digitaux (`digitalProductWebhooks.ts`)
+
 **Fichiers:**
+
 - `src/services/webhooks/digitalProductWebhooks.ts`
 - `supabase/migrations/20250127_digital_product_webhooks.sql`
 
 **Tables:**
+
 - `digital_product_webhooks`
 - `digital_product_webhook_logs`
 
 **Caractéristiques:**
+
 - Signature HMAC correcte (Web Crypto API)
 - Retry avec exponential backoff
 - Logs détaillés
 
 #### C. Webhooks Produits Physiques (`physicalProductWebhooks.ts`)
+
 **Fichiers:**
+
 - `src/services/webhooks/physicalProductWebhooks.ts`
 - `supabase/migrations/20250127_physical_products_webhooks.sql`
 
 **Tables:**
+
 - `physical_product_webhooks`
 - `physical_product_webhook_logs`
 
 **Caractéristiques:**
+
 - Structure similaire aux webhooks digitaux
 - Retry avec exponential backoff
 - Logs détaillés
 
 #### D. Webhook Moneroo (Réception)
+
 **Fichiers:**
+
 - `src/lib/moneroo-webhook-validator.ts`
 - `supabase/functions/moneroo-webhook/index.ts`
 
@@ -103,24 +121,27 @@ Le système de webhooks de la plateforme Emarzona présente **plusieurs système
 
 **Problème:**
 Trois systèmes de webhooks distincts pour différents types de produits, créant:
+
 - Duplication de code
 - Incohérence dans les formats
 - Difficulté de maintenance
 - Risque de bugs
 
 **Impact:**
+
 - 🔴 **Élevé** - Maintenance complexe, bugs potentiels
 
 **Exemple:**
+
 ```typescript
 // Système général
-triggerWebhook(storeId, 'order.created', payload)
+triggerWebhook(storeId, 'order.created', payload);
 
 // Système produits digitaux
-triggerWebhooks(storeId, 'purchase', eventData, eventId)
+triggerWebhooks(storeId, 'purchase', eventData, eventId);
 
 // Système produits physiques
-triggerWebhooks(storeId, 'purchase', eventData, eventId)
+triggerWebhooks(storeId, 'purchase', eventData, eventId);
 ```
 
 **Recommandation:**
@@ -138,6 +159,7 @@ Plusieurs migrations créent des tables avec des structures différentes:
 3. `20250228_webhooks_system_fixed.sql` - Tente de corriger mais crée encore des conflits
 
 **Impact:**
+
 - 🔴 **Élevé** - Erreurs de migration, données incohérentes
 
 **Recommandation:**
@@ -163,10 +185,12 @@ function signPayload(payload: string, secret: string): string {
 ```
 
 **Impact:**
+
 - 🔴 **CRITIQUE** - Les signatures peuvent être facilement forgées
 - Les webhooks ne sont pas authentifiés correctement
 
 **Comparaison:**
+
 - ✅ `digitalProductWebhooks.ts` - Utilise correctement Web Crypto API
 - ❌ `webhook-system.ts` - Utilise btoa (insécurisé)
 
@@ -179,6 +203,7 @@ Utiliser Web Crypto API comme dans `digitalProductWebhooks.ts`.
 
 **Problème:**
 L'Edge Function `webhook-delivery` existe mais:
+
 - ❌ Pas de cron job configuré pour l'appeler automatiquement
 - ❌ Les deliveries restent en `pending` indéfiniment
 - ❌ Les retries ne sont pas traités automatiquement
@@ -192,6 +217,7 @@ L'Edge Function `webhook-delivery` existe mais:
 ```
 
 **Impact:**
+
 - 🟠 **Élevé** - Webhooks non livrés, retries non exécutés
 
 **Recommandation:**
@@ -205,6 +231,7 @@ Configurer un cron job Supabase pour appeler l'Edge Function toutes les minutes.
 Différents formats de payload selon le système:
 
 **Système général:**
+
 ```json
 {
   "event": "order.created",
@@ -214,6 +241,7 @@ Différents formats de payload selon le système:
 ```
 
 **Système produits digitaux:**
+
 ```json
 {
   "event": "purchase",
@@ -224,6 +252,7 @@ Différents formats de payload selon le système:
 ```
 
 **Impact:**
+
 - 🟠 **Moyen** - Confusion pour les intégrateurs
 
 **Recommandation:**
@@ -242,10 +271,11 @@ export async function sendWebhook(
   webhook: Webhook,
   eventType: WebhookEvent,
   payload: Record<string, any>
-)
+);
 ```
 
 **Impact:**
+
 - 🟠 **Élevé** - Secrets potentiellement exposés dans le code client
 
 **Recommandation:**
@@ -268,6 +298,7 @@ if (error) {
 ```
 
 **Impact:**
+
 - 🟠 **Moyen** - Erreurs non remontées, debugging difficile
 
 **Recommandation:**
@@ -288,6 +319,7 @@ rate_limit_per_minute INTEGER DEFAULT 60
 ```
 
 **Impact:**
+
 - 🟠 **Moyen** - Risque de surcharge des endpoints clients
 
 **Recommandation:**
@@ -306,6 +338,7 @@ CONSTRAINT valid_url CHECK (url ~* '^https?://')
 ```
 
 **Impact:**
+
 - 🟠 **Moyen** - URLs invalides acceptées (ex: `http://localhost`)
 
 **Recommandation:**
@@ -322,6 +355,7 @@ Aucun mécanisme pour éviter les doublons:
 - Pas de vérification `event_id` + `webhook_id` unique
 
 **Impact:**
+
 - 🟠 **Moyen** - Webhooks dupliqués possibles
 
 **Recommandation:**
@@ -332,23 +366,27 @@ Ajouter une contrainte unique `(event_id, webhook_id)` dans `webhook_deliveries`
 ## 🔒 PROBLÈMES DE SÉCURITÉ
 
 ### 1. Signature HMAC Insécurisée
+
 - **Fichier:** `src/lib/webhooks/webhook-system.ts:222-247`
 - **Sévérité:** 🔴 CRITIQUE
 - **Description:** Utilise `btoa()` au lieu de HMAC-SHA256
 - **Solution:** Utiliser Web Crypto API
 
 ### 2. Secrets Exposés Côté Client
+
 - **Sévérité:** 🟠 ÉLEVÉ
 - **Description:** Secrets stockés et utilisés dans le code client
 - **Solution:** Déplacer vers Edge Function uniquement
 
 ### 3. Validation SSL Désactivable
+
 - **Fichier:** `supabase/functions/webhook-delivery/index.ts:117-121`
 - **Sévérité:** 🟡 MOYEN
 - **Description:** Option pour désactiver la vérification SSL
 - **Solution:** Forcer SSL en production
 
 ### 4. Pas de Rate Limiting par IP
+
 - **Sévérité:** 🟡 MOYEN
 - **Description:** Pas de protection contre les attaques DDoS
 - **Solution:** Implémenter rate limiting par IP
@@ -358,6 +396,7 @@ Ajouter une contrainte unique `(event_id, webhook_id)` dans `webhook_deliveries`
 ## ⚡ PROBLÈMES DE PERFORMANCE
 
 ### 1. Traitement Synchrone dans Certains Cas
+
 **Fichier:** `src/hooks/orders/useCreateOrder.ts:314-328`
 
 ```typescript
@@ -372,11 +411,13 @@ import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
 **Impact:** Peut ralentir la création de commandes.
 
 ### 2. Pas de Batching
+
 **Problème:** Chaque webhook est envoyé individuellement, pas de batching.
 
 **Impact:** Surcharge réseau inutile.
 
 ### 3. Pas de Compression
+
 **Problème:** Payloads envoyés sans compression.
 
 **Impact:** Bande passante gaspillée.
@@ -387,27 +428,27 @@ import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
 
 ### 1. Différentes Structures de Tables
 
-| Système | Table Webhooks | Table Logs |
-|---------|---------------|------------|
-| Général | `webhooks` | `webhook_deliveries` / `webhook_logs` |
-| Digitaux | `digital_product_webhooks` | `digital_product_webhook_logs` |
-| Physiques | `physical_product_webhooks` | `physical_product_webhook_logs` |
+| Système   | Table Webhooks              | Table Logs                            |
+| --------- | --------------------------- | ------------------------------------- |
+| Général   | `webhooks`                  | `webhook_deliveries` / `webhook_logs` |
+| Digitaux  | `digital_product_webhooks`  | `digital_product_webhook_logs`        |
+| Physiques | `physical_product_webhooks` | `physical_product_webhook_logs`       |
 
 ### 2. Différents Formats de Payload
 
-| Système | Format |
-|---------|--------|
-| Général | `{ event, timestamp, data }` |
-| Digitaux | `{ event, event_id, timestamp, data }` |
+| Système   | Format                                 |
+| --------- | -------------------------------------- |
+| Général   | `{ event, timestamp, data }`           |
+| Digitaux  | `{ event, event_id, timestamp, data }` |
 | Physiques | `{ event, event_id, timestamp, data }` |
 
 ### 3. Différentes Logiques de Retry
 
-| Système | Retry Logic |
-|---------|-------------|
-| Général | Via Edge Function (non configuré) |
-| Digitaux | Exponential backoff inline |
-| Physiques | Exponential backoff inline |
+| Système   | Retry Logic                       |
+| --------- | --------------------------------- |
+| Général   | Via Edge Function (non configuré) |
+| Digitaux  | Exponential backoff inline        |
+| Physiques | Exponential backoff inline        |
 
 ---
 
@@ -470,22 +511,26 @@ import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
 ## 📋 PLAN D'ACTION
 
 ### Phase 1: Sécurité (Semaine 1)
+
 - [ ] Corriger HMAC dans `webhook-system.ts`
 - [ ] Déplacer secrets côté serveur
 - [ ] Forcer HTTPS en production
 
 ### Phase 2: Unification (Semaine 2-3)
+
 - [ ] Créer système centralisé
 - [ ] Migrer webhooks digitaux
 - [ ] Migrer webhooks physiques
 - [ ] Supprimer anciens systèmes
 
 ### Phase 3: Infrastructure (Semaine 4)
+
 - [ ] Configurer cron job
 - [ ] Implémenter rate limiting
 - [ ] Ajouter idempotence
 
 ### Phase 4: Amélioration (Mois 2)
+
 - [ ] Standardiser formats
 - [ ] Améliorer validation
 - [ ] Dashboard d'alertes
@@ -496,12 +541,14 @@ import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
 ## 📊 MÉTRIQUES DE SUCCÈS
 
 ### Avant (État Actuel)
+
 - ❌ 3 systèmes fragmentés
 - ❌ HMAC insécurisé
 - ❌ Pas de cron job
 - ❌ Formats incohérents
 
 ### Après (Objectif)
+
 - ✅ 1 système unifié
 - ✅ HMAC sécurisé (Web Crypto API)
 - ✅ Cron job configuré
@@ -514,6 +561,7 @@ import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
 ## 🔗 RESSOURCES
 
 ### Fichiers Clés à Examiner
+
 - `src/lib/webhooks/webhook-system.ts` - Système général (HMAC insécurisé)
 - `src/services/webhooks/digitalProductWebhooks.ts` - Système digitaux (✅ Correct)
 - `src/services/webhooks/physicalProductWebhooks.ts` - Système physiques
@@ -521,6 +569,7 @@ import('@/lib/webhooks/webhook-system').then(({ triggerWebhook }) => {
 - `supabase/migrations/20250127_webhooks_system.sql` - Migration principale
 
 ### Documentation à Créer
+
 - Guide d'intégration webhooks
 - Format de payload standardisé
 - Guide de migration
@@ -534,7 +583,8 @@ Ce système de webhooks nécessite une **refonte majeure** pour être production
 
 **Estimation de temps:** 3-4 semaines pour les priorités 1 et 2.
 
-**Risque si non corrigé:** 
+**Risque si non corrigé:**
+
 - 🔴 Sécurité compromise (signatures falsifiables)
 - 🟠 Webhooks non livrés (pas de cron)
 - 🟡 Maintenance complexe (systèmes fragmentés)
@@ -544,4 +594,3 @@ Ce système de webhooks nécessite une **refonte majeure** pour être production
 **Date de l'audit:** 2025-01-28  
 **Auditeur:** AI Assistant  
 **Version:** 1.0
-

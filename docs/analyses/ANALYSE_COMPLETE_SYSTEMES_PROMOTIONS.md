@@ -18,6 +18,7 @@ La plateforme Emarzona dispose de **4 systèmes distincts** de promotions/coupon
 ### 🎯 Constat Principal
 
 Il existe une **fragmentation importante** des systèmes de promotions, ce qui peut créer :
+
 - ❌ Confusion pour les vendeurs (quel système utiliser ?)
 - ❌ Duplication de code
 - ❌ Incohérences dans l'expérience utilisateur
@@ -76,6 +77,7 @@ customer_eligibility TEXT DEFAULT 'all'
 #### Fonctionnalités
 
 ✅ **Disponibles:**
+
 - Code promo simple
 - Type de réduction (pourcentage ou montant fixe)
 - Dates de validité
@@ -87,6 +89,7 @@ customer_eligibility TEXT DEFAULT 'all'
 - Éligibilité client (all, new_customers, existing_customers, vip)
 
 ❌ **Limitations:**
+
 - Pas de sélection visuelle de produits/catégories/collections dans l'interface
 - Pas de support des variantes
 - Pas de promotion automatique (toujours avec code)
@@ -117,18 +120,18 @@ customer_eligibility TEXT DEFAULT 'all'
 CREATE TABLE public.product_promotions (
   id UUID PRIMARY KEY,
   store_id UUID NOT NULL REFERENCES stores(id),
-  
+
   -- Info promotion
   name TEXT NOT NULL,
   description TEXT,
   code TEXT UNIQUE,
-  
+
   -- Type de réduction
   discount_type TEXT CHECK (
     IN ('percentage', 'fixed_amount', 'buy_x_get_y', 'free_shipping')
   ),
   discount_value NUMERIC NOT NULL,
-  
+
   -- Portée
   applies_to TEXT CHECK (
     IN ('all_products', 'specific_products', 'categories', 'collections')
@@ -136,26 +139,26 @@ CREATE TABLE public.product_promotions (
   product_ids UUID[],
   category_ids UUID[],
   collection_ids UUID[],
-  
+
   -- Variantes
   applies_to_variants BOOLEAN DEFAULT TRUE,
   variant_ids UUID[],
-  
+
   -- Conditions
   min_purchase_amount NUMERIC,
   min_quantity INTEGER,
   max_uses INTEGER,
   max_uses_per_customer INTEGER,
   current_uses INTEGER DEFAULT 0,
-  
+
   -- Dates
   starts_at TIMESTAMPTZ NOT NULL,
   ends_at TIMESTAMPTZ,
-  
+
   -- Statut
   is_active BOOLEAN DEFAULT TRUE,
   is_automatic BOOLEAN DEFAULT FALSE,
-  
+
   created_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ
 );
@@ -169,6 +172,7 @@ CREATE TABLE public.product_promotions (
 #### Fonctionnalités
 
 ✅ **Disponibles:**
+
 - Nom et description de la promotion
 - Code promo optionnel
 - Types de réduction avancés (pourcentage, montant fixe, buy_x_get_y, livraison gratuite)
@@ -207,51 +211,51 @@ CREATE TABLE public.product_promotions (
 CREATE TABLE public.digital_product_coupons (
   id UUID PRIMARY KEY,
   store_id UUID NOT NULL REFERENCES stores(id),
-  
+
   -- Coupon code
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   description TEXT,
-  
+
   -- Discount
   discount_type TEXT CHECK (IN ('percentage', 'fixed')) DEFAULT 'percentage',
   discount_value NUMERIC(10, 2) NOT NULL,
-  
+
   -- Limits
   min_purchase_amount NUMERIC(10, 2) DEFAULT 0,
   max_discount_amount NUMERIC(10, 2),
-  
+
   -- Applicability
   applicable_product_ids UUID[],
   applicable_product_types TEXT[],
   applicable_store_ids UUID[],
-  
+
   -- Usage limits
   usage_limit INTEGER,
   usage_count INTEGER DEFAULT 0,
   usage_limit_per_customer INTEGER DEFAULT 1,
-  
+
   -- Validity
   valid_from TIMESTAMPTZ NOT NULL DEFAULT now(),
   valid_until TIMESTAMPTZ,
-  
+
   -- Status
   is_active BOOLEAN DEFAULT TRUE,
   is_archived BOOLEAN DEFAULT FALSE,
-  
+
   -- Restrictions
   first_time_buyers_only BOOLEAN DEFAULT FALSE,
   exclude_sale_items BOOLEAN DEFAULT FALSE,
   exclude_bundles BOOLEAN DEFAULT FALSE,
-  
+
   -- Statistics
   total_discount_given NUMERIC(10, 2) DEFAULT 0,
   total_orders INTEGER DEFAULT 0,
-  
+
   -- Metadata
   metadata JSONB DEFAULT '{}',
   created_by UUID,
-  
+
   created_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ
 );
@@ -265,6 +269,7 @@ CREATE TABLE public.digital_product_coupons (
 #### Fonctionnalités
 
 ✅ **Disponibles:**
+
 - Code coupon unique
 - Nom et description
 - Types de réduction (pourcentage avec limite max, montant fixe)
@@ -288,6 +293,7 @@ CREATE TABLE public.digital_product_coupons (
   - Gestion des erreurs
 
 ❌ **Manque:**
+
 - Interface de gestion complète (création, modification, suppression)
 - Page dédiée pour les vendeurs
 
@@ -305,17 +311,17 @@ CREATE TABLE public.digital_product_coupons (
 CREATE TABLE public.loyalty_rewards (
   id UUID PRIMARY KEY,
   store_id UUID NOT NULL REFERENCES stores(id),
-  
+
   -- Configuration
   name TEXT NOT NULL,
   description TEXT,
-  
+
   -- Coût en points
   points_cost INTEGER NOT NULL,
-  
+
   -- Type de récompense
   reward_type loyalty_reward_type, -- 'discount', 'free_product', 'gift_card', 'cash_back', 'custom'
-  
+
   -- Valeur selon le type
   discount_percentage NUMERIC,
   discount_amount NUMERIC,
@@ -323,27 +329,27 @@ CREATE TABLE public.loyalty_rewards (
   gift_card_amount NUMERIC,
   cash_back_amount NUMERIC,
   custom_value JSONB,
-  
+
   -- Limitations
   max_redemptions INTEGER,
   max_redemptions_per_customer INTEGER,
   redemption_count INTEGER DEFAULT 0,
-  
+
   -- Disponibilité
   available_from TIMESTAMPTZ,
   available_until TIMESTAMPTZ,
-  
+
   -- Conditions
   applicable_to_product_types TEXT[],
   applicable_to_products UUID[],
-  
+
   -- Visuel
   image_url TEXT,
   badge_text TEXT,
   display_order INTEGER DEFAULT 0,
-  
+
   status TEXT DEFAULT 'active',
-  
+
   created_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ
 );
@@ -352,6 +358,7 @@ CREATE TABLE public.loyalty_rewards (
 #### Fonctionnalités
 
 ✅ **Disponibles:**
+
 - Système de points de fidélité
 - Récompenses échangeables contre des points
 - Types de récompenses multiples (réduction, produit gratuit, carte cadeau, cash-back, personnalisé)
@@ -369,23 +376,23 @@ Ce système n'est **pas directement** un système de promotions, mais il permet 
 
 ### Tableau Comparatif des Fonctionnalités
 
-| Fonctionnalité | `promotions` | `product_promotions` | `digital_product_coupons` | `loyalty_rewards` |
-|----------------|--------------|---------------------|---------------------------|-------------------|
-| **Code promo** | ✅ | ✅ (optionnel) | ✅ | ❌ (points) |
-| **Type réduction** | Pourcentage, Fixe | %, Fixe, Buy X Get Y, Free Shipping | Pourcentage, Fixe | %, Fixe, Produit, Carte, Cash-back |
-| **Sélection produits** | ✅ (via migration) | ✅ (avec UI) | ✅ | ✅ |
-| **Sélection catégories** | ❌ | ✅ (avec UI) | ❌ | ✅ |
-| **Sélection collections** | ❌ | ✅ (avec UI) | ❌ | ✅ |
-| **Variantes produits** | ❌ | ✅ | ❌ | ❌ |
-| **Promotion automatique** | ❌ | ✅ | ❌ | ❌ |
-| **Limite globale** | ✅ | ✅ | ✅ | ✅ |
-| **Limite par client** | ✅ | ✅ | ✅ | ✅ |
-| **Montant minimum** | ✅ | ✅ | ✅ | ❌ |
-| **Quantité minimum** | ❌ | ✅ | ❌ | ❌ |
-| **Dates validité** | ✅ | ✅ | ✅ | ✅ |
-| **Restrictions spéciales** | Éligibilité client | ❌ | Première fois, Exclure solde/bundles | Points requis |
-| **Interface gestion** | ✅ | ✅ | ❌ | ✅ |
-| **Validation checkout** | ✅ | ✅ | ✅ | ✅ (via points) |
+| Fonctionnalité             | `promotions`       | `product_promotions`                | `digital_product_coupons`            | `loyalty_rewards`                  |
+| -------------------------- | ------------------ | ----------------------------------- | ------------------------------------ | ---------------------------------- |
+| **Code promo**             | ✅                 | ✅ (optionnel)                      | ✅                                   | ❌ (points)                        |
+| **Type réduction**         | Pourcentage, Fixe  | %, Fixe, Buy X Get Y, Free Shipping | Pourcentage, Fixe                    | %, Fixe, Produit, Carte, Cash-back |
+| **Sélection produits**     | ✅ (via migration) | ✅ (avec UI)                        | ✅                                   | ✅                                 |
+| **Sélection catégories**   | ❌                 | ✅ (avec UI)                        | ❌                                   | ✅                                 |
+| **Sélection collections**  | ❌                 | ✅ (avec UI)                        | ❌                                   | ✅                                 |
+| **Variantes produits**     | ❌                 | ✅                                  | ❌                                   | ❌                                 |
+| **Promotion automatique**  | ❌                 | ✅                                  | ❌                                   | ❌                                 |
+| **Limite globale**         | ✅                 | ✅                                  | ✅                                   | ✅                                 |
+| **Limite par client**      | ✅                 | ✅                                  | ✅                                   | ✅                                 |
+| **Montant minimum**        | ✅                 | ✅                                  | ✅                                   | ❌                                 |
+| **Quantité minimum**       | ❌                 | ✅                                  | ❌                                   | ❌                                 |
+| **Dates validité**         | ✅                 | ✅                                  | ✅                                   | ✅                                 |
+| **Restrictions spéciales** | Éligibilité client | ❌                                  | Première fois, Exclure solde/bundles | Points requis                      |
+| **Interface gestion**      | ✅                 | ✅                                  | ❌                                   | ✅                                 |
+| **Validation checkout**    | ✅                 | ✅                                  | ✅                                   | ✅ (via points)                    |
 
 ---
 
@@ -423,6 +430,7 @@ validate_coupon(
 ```
 
 **Validations:**
+
 - Existence et validité du coupon
 - Dates de validité
 - Montant minimum
@@ -446,6 +454,7 @@ validate_coupon(
 ```
 
 **Validations supplémentaires:**
+
 - Store éligible
 - Client première fois
 - Exclusion articles en solde
@@ -507,12 +516,14 @@ Enregistre l'utilisation d'un coupon et met à jour les compteurs.
 **Objectif:** Créer un système unifié qui remplace les 3 systèmes principaux
 
 **Proposition:**
+
 - **Conserver** `product_promotions` comme système principal (le plus complet)
 - **Migrer** les données de `promotions` vers `product_promotions`
 - **Intégrer** les fonctionnalités de `digital_product_coupons` dans `product_promotions`
 - **Créer** une page unique `/dashboard/promotions` qui utilise le système unifié
 
 **Avantages:**
+
 - Une seule interface pour les vendeurs
 - Code unifié et maintenable
 - Expérience utilisateur cohérente
@@ -521,6 +532,7 @@ Enregistre l'utilisation d'un coupon et met à jour les compteurs.
 ### Priorité 2 : Interface de Gestion Complète
 
 **Créer une interface de gestion complète pour tous les types de promotions:**
+
 - Vue unifiée
 - Filtres avancés
 - Statistiques consolidées
@@ -529,6 +541,7 @@ Enregistre l'utilisation d'un coupon et met à jour les compteurs.
 ### Priorité 3 : Migration des Données
 
 **Plan de migration:**
+
 1. Créer une fonction de migration pour `promotions` → `product_promotions`
 2. Créer une fonction de migration pour `digital_product_coupons` → `product_promotions`
 3. Tester la migration sur une copie de production
@@ -537,6 +550,7 @@ Enregistre l'utilisation d'un coupon et met à jour les compteurs.
 ### Priorité 4 : Documentation
 
 **Créer une documentation claire pour:**
+
 - Les vendeurs : Guide d'utilisation des promotions
 - Les développeurs : Architecture et API
 - Les administrateurs : Gestion et maintenance
@@ -642,4 +656,3 @@ La plateforme dispose de **4 systèmes de promotions** fonctionnels mais fragmen
 - Migration digital: `supabase/migrations/20250127_digital_product_coupons.sql`
 - Migration physical: `supabase/migrations/20250128_physical_products_advanced_improvements.sql`
 - Migration collections: `supabase/migrations/20250128_collections_system.sql`
-

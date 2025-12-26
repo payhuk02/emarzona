@@ -9,7 +9,7 @@
 
 D'après les résultats de l'audit, voici la situation actuelle :
 
-1. **✅ Tables Parfaitement Sécurisées** : 
+1. **✅ Tables Parfaitement Sécurisées** :
    - Tables avec toutes les politiques (SELECT, INSERT, UPDATE, DELETE)
    - Exemples : `orders`, `order_items`, `payments`, `products`, `stores`, `subscriptions`, `transactions`, etc.
 
@@ -86,6 +86,7 @@ La Phase 4B a créé des politiques pour toutes les tables, mais :
 ### Option 1 : Compléter les Politiques Manquantes (Recommandé)
 
 Créer une migration Phase 4C pour :
+
 1. Identifier toutes les tables avec politiques incomplètes
 2. Ajouter les politiques INSERT, UPDATE, DELETE manquantes
 3. Corriger les tables avec SELECT manquant
@@ -119,5 +120,4 @@ Créer une migration Phase 4C pour :
 
 ---
 
-*Dernière mise à jour : 2025-01-30*
-
+_Dernière mise à jour : 2025-01-30_

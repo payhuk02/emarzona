@@ -135,6 +135,7 @@ const navItems = [
 ## Sections avec Sidebars
 
 ### Produits & Cours
+
 - Produits
 - Mes Cours
 - Produits Digitaux
@@ -145,6 +146,7 @@ const navItems = [
 - Mises à jour Digitales
 
 ### Ventes & Logistique
+
 - Commandes & Clients (7 items)
 - Services & Réservations (5 items)
 - Logistique & Inventaire (6 items)
@@ -152,21 +154,25 @@ const navItems = [
 - Produits Physiques (8 items)
 
 ### Finance & Paiements
+
 - Paiements
 - Solde à Payer
 - Gestion Paiements
 
 ### Marketing & Croissance
+
 - Clients & Promotions (2 items)
 - Email Marketing (6 items)
 - Croissance (3 items)
 
 ### Analytics & SEO
+
 - Statistiques
 - Mes Pixels
 - Mon SEO
 
 ### Systèmes & Intégrations
+
 - Intégrations (1 item)
 - Webhooks (3 items)
 - Programmes (2 items)
@@ -186,4 +192,3 @@ const navItems = [
 - Hauteur : `h-[calc(100vh-4rem)]` (hauteur de viewport moins la top bar)
 - Z-index : `z-40` pour être au-dessus du contenu mais sous les modals
 - Le contenu principal a une marge gauche de `lg:ml-64` sur desktop pour compenser la sidebar fixe
-

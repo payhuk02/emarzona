@@ -10,6 +10,7 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 ### Erreur Console Vercel
+
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
   at ic (chunk-DS1xwC-M.js:1:3236)
@@ -18,11 +19,13 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
 ```
 
 ### Symptômes
+
 - ✅ Application fonctionne **localement** (`npm run dev`)
 - ❌ Application **ne démarre pas** sur Vercel (écran noir)
 - ❌ Erreur d'accès à `forwardRef` dans le code minifié
 
 ### Cause Root
+
 L'erreur `Cannot read properties of undefined (reading 'forwardRef')` se produit quand :
 
 1. **React n'est pas chargé avant les composants** : Les composants qui utilisent `React.forwardRef` sont chargés avant React
@@ -30,7 +33,9 @@ L'erreur `Cannot read properties of undefined (reading 'forwardRef')` se produit
 3. **Code splitting trop agressif** : React est séparé des composants qui en dépendent
 
 ### Composants affectés
+
 De nombreux composants utilisent `React.forwardRef` :
+
 - `Button`, `FormItem`, `FormLabel`, `FormControl`, `Carousel`, `InputOTP`, etc.
 - Tous les composants ShadCN UI utilisent `forwardRef`
 
@@ -43,6 +48,7 @@ De nombreux composants utilisent `React.forwardRef` :
 #### 1. Ajout preserveEntrySignatures pour garantir l'ordre
 
 **NOUVEAU** :
+
 ```typescript
 rollupOptions: {
   // Préserver les signatures d'entrée pour garantir l'ordre de chargement
@@ -54,6 +60,7 @@ rollupOptions: {
 ```
 
 **Explication** :
+
 - `preserveEntrySignatures: 'strict'` garantit que Rollup préserve l'ordre de chargement des chunks
 - Les chunks sont chargés dans l'ordre des dépendances
 - React sera automatiquement chargé avant les chunks qui en dépendent
@@ -61,17 +68,19 @@ rollupOptions: {
 #### 2. Configuration React dans un chunk séparé mais prioritaire
 
 **CONFIGURATION ACTUELLE** :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   // IMPORTANT: React doit être chargé en premier, donc dans un chunk séparé mais prioritaire
   if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
     return 'vendor-react'; // Chunk séparé mais chargé en premier
   }
   // ...
-}
+};
 ```
 
 **Explication** :
+
 - React et React-DOM sont dans un seul chunk `vendor-react`
 - `preserveEntrySignatures: 'strict'` garantit que ce chunk est chargé en premier
 - Les autres chunks qui dépendent de React seront chargés après
@@ -79,6 +88,7 @@ manualChunks: (id) => {
 #### 3. Déduplication React (déjà en place)
 
 **CONFIGURATION ACTUELLE** :
+
 ```typescript
 resolve: {
   dedupe: ['react', 'react-dom'],
@@ -86,6 +96,7 @@ resolve: {
 ```
 
 **Explication** :
+
 - Garantit une seule instance de React et React-DOM
 - Évite les problèmes de duplication
 
@@ -93,12 +104,12 @@ resolve: {
 
 ## 📊 RÉSULTAT
 
-| Avant | Après |
-|-------|-------|
-| ❌ React chargé après les composants | ✅ React chargé en premier |
-| ❌ Erreur `forwardRef` undefined | ✅ `forwardRef` accessible |
-| ❌ Écran noir sur Vercel | ✅ Application démarre |
-| ❌ Ordre de chargement non garanti | ✅ Ordre garanti avec `preserveEntrySignatures` |
+| Avant                                | Après                                           |
+| ------------------------------------ | ----------------------------------------------- |
+| ❌ React chargé après les composants | ✅ React chargé en premier                      |
+| ❌ Erreur `forwardRef` undefined     | ✅ `forwardRef` accessible                      |
+| ❌ Écran noir sur Vercel             | ✅ Application démarre                          |
+| ❌ Ordre de chargement non garanti   | ✅ Ordre garanti avec `preserveEntrySignatures` |
 
 ---
 
@@ -107,18 +118,22 @@ resolve: {
 **Statut**: ✅ **CORRIGÉ & PUSHÉ**
 
 ### Commit
+
 ```
 9d215b5 - fix: Garantir que React est chargé avant les composants utilisant forwardRef - Ajout preserveEntrySignatures
 ```
 
 ### Push GitHub
+
 ✅ **Push réussi** sur `main`
+
 ```
 To https://github.com/payhuk02/payhula.git
    c749451..9d215b5  main -> main
 ```
 
 ### Build Vercel
+
 ⏳ **Rebuild automatique en cours** (détection du nouveau commit)
 
 ---
@@ -162,18 +177,21 @@ To https://github.com/payhuk02/payhula.git
 ### Si l'erreur persiste
 
 1. **Vérifier l'ordre de chargement des chunks** :
+
    ```bash
    npm run build
    # Vérifier dist/index.html pour voir l'ordre des scripts
    ```
 
 2. **Vérifier les dépendances** :
+
    ```bash
    npm ls react react-dom
    # S'assurer qu'il n'y a qu'une seule version
    ```
 
 3. **Vérifier les imports** :
+
    ```bash
    grep -r "React.forwardRef" src/ | wc -l
    # Vérifier que tous les imports sont corrects
@@ -218,5 +236,3 @@ To https://github.com/payhuk02/payhula.git
 **Date de correction** : 5 Novembre 2025  
 **Commit** : `9d215b5`  
 **Status** : ✅ **RÉSOLU**
-
-

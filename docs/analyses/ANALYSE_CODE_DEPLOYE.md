@@ -3,25 +3,30 @@
 ## ✅ Comparaison des Codes
 
 ### Code Source (Correct) ✅
+
 Le fichier `MONEROO_EDGE_FUNCTION_CODE.txt` contient le code correct avec :
+
 - Logs détaillés pour le diagnostic
 - Gestion d'erreurs améliorée
 - Syntaxe correcte pour `refund_payment`
 
 ### Code Déployé (Problème Identifié) ⚠️
+
 Le code que vous avez partagé a une **erreur de syntaxe** dans la partie `refund_payment` :
 
 **❌ Code déployé (incorrect) :**
+
 ```javascript
 body = {
-  ...data.amount && {
-    amount: data.amount
-  },
-  reason: data.reason || 'Customer request'
+  ...(data.amount && {
+    amount: data.amount,
+  }),
+  reason: data.reason || 'Customer request',
 };
 ```
 
 **✅ Code correct :**
+
 ```javascript
 body = {
   ...(data.amount && { amount: data.amount }),
@@ -36,6 +41,7 @@ body = {
 ### Les Requêtes POST N'Atteignent Pas l'Edge Function
 
 D'après les logs Supabase :
+
 - ✅ Les requêtes **OPTIONS** (CORS preflight) sont reçues
 - ❌ **Aucune requête POST** n'apparaît dans les logs
 - ❌ L'erreur "Failed to fetch" se produit **avant** que la requête n'atteigne Supabase
@@ -78,6 +84,7 @@ D'après les logs Supabase :
 ### Solution 2 : Vérifier la Configuration Supabase
 
 1. **Vérifier `.env` :**
+
    ```env
    VITE_SUPABASE_URL=https://your-project-id.supabase.co
    VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key_here
@@ -114,6 +121,7 @@ D'après les logs Supabase :
 ## 📝 Code Correct à Déployer
 
 Utilisez le code dans `MONEROO_EDGE_FUNCTION_CODE.txt` qui contient :
+
 - ✅ Syntaxe correcte pour `refund_payment`
 - ✅ Logs détaillés pour le diagnostic
 - ✅ Gestion d'erreurs améliorée
@@ -123,16 +131,18 @@ Utilisez le code dans `MONEROO_EDGE_FUNCTION_CODE.txt` qui contient :
 Si vous voulez corriger manuellement la partie `refund_payment` dans le code déployé :
 
 **Remplacer :**
+
 ```javascript
 body = {
-  ...data.amount && {
-    amount: data.amount
-  },
-  reason: data.reason || 'Customer request'
+  ...(data.amount && {
+    amount: data.amount,
+  }),
+  reason: data.reason || 'Customer request',
 };
 ```
 
 **Par :**
+
 ```javascript
 body = {
   ...(data.amount && { amount: data.amount }),
@@ -153,8 +163,3 @@ body = {
 - [Code Correct](MONEROO_EDGE_FUNCTION_CODE.txt)
 - [Guide de Déploiement](DEPLOIEMENT_RAPIDE_MONEROO.md)
 - [Diagnostic Détaillé](DIAGNOSTIC_ERREUR_FAILED_TO_FETCH.md)
-
-
-
-
-

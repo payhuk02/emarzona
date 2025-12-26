@@ -90,4 +90,3 @@ Toutes les pages de détails affichent maintenant les mêmes informations que le
 ---
 
 **Status** : Modifications appliquées, vérification en cours
-

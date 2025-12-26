@@ -37,12 +37,14 @@
 ## ✅ Code Prêt à Copier
 
 Le code complet se trouve dans :
+
 - **`MONEROO_EDGE_FUNCTION_CODE.txt`** ← **RECOMMANDÉ** (sans référence aux types)
 - **`supabase/functions/moneroo/index.ts`** (supprimez la première ligne)
 
 ## 🔍 Vérification Post-Déploiement
 
 ### 1. Vérifier les Secrets
+
 - **Settings** → **Edge Functions** → **Secrets**
 - Vérifiez que `MONEROO_API_KEY` est configuré
 - Si non, ajoutez-le :
@@ -50,11 +52,13 @@ Le code complet se trouve dans :
   - Valeur : Votre clé API Moneroo
 
 ### 2. Tester le Paiement
+
 - Allez sur : https://payhula.vercel.app/marketplace
 - Essayez d'acheter un produit
 - Ouvrez la console (F12) pour voir les logs
 
 ### 3. Vérifier les Logs
+
 - **Edge Functions** → **moneroo** → **Logs**
 - Vous devriez voir les logs avec le préfixe `[Moneroo Edge Function]`
 
@@ -89,10 +93,6 @@ Une fois déployé, l'Edge Function devrait fonctionner avec les logs amélioré
 ## 📚 Documentation Complète
 
 Pour plus de détails, consultez :
+
 - **GUIDE_DEPLOIEMENT_MONEROO_DASHBOARD.md** (guide détaillé)
 - **CORRECTION_ERREUR_FAILED_TO_FETCH.md** (diagnostic des erreurs)
-
-
-
-
-

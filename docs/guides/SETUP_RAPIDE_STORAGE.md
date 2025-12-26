@@ -69,6 +69,7 @@ Vous devriez voir dans les messages :
 8. Tester l'upload d'une petite vidéo (< 50 MB)
 
 **Résultat attendu** :
+
 - ✅ Barre de progression affichée
 - ✅ Upload réussi en quelques secondes
 - ✅ Preview de la vidéo affichée
@@ -79,11 +80,13 @@ Vous devriez voir dans les messages :
 ## 📊 CE QUI A ÉTÉ CRÉÉ
 
 ### Bucket "videos"
+
 - **Public** : ✅ Oui
 - **Taille max** : 500 MB par fichier
 - **Types acceptés** : MP4, WebM, OGG, MOV, AVI
 
 ### Politiques RLS (4)
+
 1. **INSERT** : Les utilisateurs authentifiés peuvent uploader
 2. **SELECT** : Tout le monde peut voir les vidéos (public)
 3. **UPDATE** : Les propriétaires peuvent modifier leurs vidéos
@@ -96,6 +99,7 @@ Vous devriez voir dans les messages :
 **Temps total** : ⏱️ **1 minute**
 
 Vous pouvez maintenant :
+
 - ✅ Uploader vos propres vidéos
 - ✅ Intégrer des vidéos YouTube
 - ✅ Intégrer des vidéos Vimeo
@@ -104,4 +108,3 @@ Vous pouvez maintenant :
 ---
 
 **🎉 BRAVO ! Le système de Storage est opérationnel !** 🎉
-

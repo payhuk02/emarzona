@@ -9,13 +9,16 @@
 ## 📊 RÉSUMÉ EXÉCUTIF
 
 ### Objectif
+
 Implémenter un système d'analytics avancés avec :
+
 - Dashboards personnalisables avec widgets configurables
 - Intégration complète FedEx et DHL pour le tracking
 - Système de monitoring de performance
 - Alertes et objectifs configurables
 
 ### Résultat
+
 ✅ **Intégration transporteurs complétée (FedEx & DHL)**  
 ✅ **Système de dashboards avancés existant vérifié**  
 ✅ **Structure de base de données complète**  
@@ -29,6 +32,7 @@ Implémenter un système d'analytics avancés avec :
 ### 1. Base de données (`supabase/migrations/20250130_advanced_analytics_phase9.sql`)
 
 #### Tables créées :
+
 - ✅ **`advanced_analytics_dashboards`** : Dashboards personnalisables
 - ✅ **`analytics_metrics`** : Métriques détaillées (vues, clics, conversions, revenus)
 - ✅ **`performance_monitoring`** : Monitoring de performance
@@ -36,6 +40,7 @@ Implémenter un système d'analytics avancés avec :
 - ✅ **`analytics_goals`** : Objectifs et suivis
 
 #### Fonctionnalités :
+
 - ✅ Layout personnalisable (JSONB)
 - ✅ Widgets configurables
 - ✅ Partage de dashboards
@@ -45,6 +50,7 @@ Implémenter un système d'analytics avancés avec :
 ### 2. Hooks React (`src/hooks/analytics/useAdvancedAnalytics.ts`)
 
 #### Hooks disponibles :
+
 - ✅ **`useAdvancedDashboards`** : Liste des dashboards
 - ✅ **`useAnalyticsMetrics`** : Métriques analytics
 - ✅ **`usePerformanceMonitoring`** : Monitoring performance
@@ -65,6 +71,7 @@ Implémenter un système d'analytics avancés avec :
 ## 📋 MÉTRIQUES DISPONIBLES
 
 ### Métriques de vente
+
 - Total views / Unique views
 - Total clicks / Unique clicks
 - Total conversions / Unique conversions
@@ -72,27 +79,32 @@ Implémenter un système d'analytics avancés avec :
 - Average order value
 
 ### Métriques d'engagement
+
 - Bounce rate
 - Average session duration
 - Pages per session
 - Returning visitors / New visitors
 
 ### Métriques de conversion
+
 - Conversion rate
 - Click-through rate
 - Cart abandonment rate
 
 ### Métriques de performance
+
 - Average page load time
 - Average time to first byte
 - Error rate
 
 ### Métriques par appareil
+
 - Desktop views
 - Mobile views
 - Tablet views
 
 ### Métriques de trafic
+
 - Organic search
 - Direct traffic
 - Referral traffic
@@ -101,6 +113,7 @@ Implémenter un système d'analytics avancés avec :
 - Email traffic
 
 ### Métriques géographiques
+
 - Country breakdown (JSONB)
 - City breakdown (JSONB)
 
@@ -116,6 +129,7 @@ Implémenter un système d'analytics avancés avec :
 6. **`custom`** : Alerte personnalisée
 
 ### Conditions disponibles
+
 - `greater_than` : Supérieur à
 - `less_than` : Inférieur à
 - `equals` : Égal à
@@ -134,6 +148,7 @@ Implémenter un système d'analytics avancés avec :
 6. **`custom`** : Objectif personnalisé
 
 ### Périodes
+
 - `daily` : Quotidien
 - `weekly` : Hebdomadaire
 - `monthly` : Mensuel
@@ -220,18 +235,21 @@ createGoal({
 ## 📊 WIDGETS DISPONIBLES
 
 ### Widgets de métriques
+
 - **Revenue Card** : Revenu total avec tendance
 - **Conversions Card** : Nombre de conversions
 - **Traffic Card** : Trafic total
 - **AOV Card** : Panier moyen
 
 ### Widgets de graphiques
+
 - **Line Chart** : Évolution dans le temps
 - **Bar Chart** : Comparaison par catégorie
 - **Pie Chart** : Répartition
 - **Area Chart** : Évolution avec zone
 
 ### Widgets avancés
+
 - **Funnel Analysis** : Analyse de funnel
 - **Cohort Analysis** : Analyse de cohorte
 - **Heatmap** : Carte de chaleur
@@ -242,6 +260,7 @@ createGoal({
 ## 🔄 PROCHAINES ÉTAPES RECOMMANDÉES
 
 ### Améliorations possibles
+
 1. **Drag-and-drop** : Système de réorganisation des widgets
 2. **Widgets personnalisés** : Création de widgets custom
 3. **Export PDF/CSV** : Export des dashboards
@@ -264,4 +283,3 @@ createGoal({
 
 **Auteur** : Auto (Cursor AI)  
 **Date de dernière mise à jour** : 31 Janvier 2025
-

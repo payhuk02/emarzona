@@ -9,12 +9,14 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 ### 1. Paiement et gestion financière avancée
 
 #### ✅ Paiement par pourcentage
+
 - Le client peut payer un pourcentage défini à l'avance (ex: 30%)
 - Calcul automatique du montant restant
 - Suivi des paiements partiels dans la base de données
 - Interface intuitive pour configurer les pourcentages
 
 #### ✅ Paiement à la livraison sécurisé
+
 - Le client paie la totalité via la plateforme
 - Le montant est retenu par la plateforme (non versé immédiatement au vendeur)
 - Libération automatique après confirmation de livraison
@@ -22,6 +24,7 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 - Rétention configurable avec date limite
 
 #### ✅ Compatibilité avec les systèmes existants
+
 - Intégration avec Moneroo, PayDunya, Fedapay
 - Gestion des statuts: `pending`, `held`, `released`, `refunded`, `disputed`
 - Logique claire et fiable dans la base de données
@@ -29,23 +32,27 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 ### 2. Système d'échanges client-vendeur
 
 #### ✅ Messagerie temps réel
+
 - Chat en temps réel via Supabase Realtime
 - Interface moderne et responsive
 - Notifications de nouveaux messages
 - Statuts de lecture (lu/non lu)
 
 #### ✅ Support des médias
+
 - Envoi d'images, vidéos, fichiers
 - Validation des types de fichiers
 - Limitation de taille (10MB max)
 - Stockage sécurisé via Supabase Storage
 
 #### ✅ Stockage des échanges
+
 - Historique complet des conversations
 - Identifiant unique par transaction/commande
 - Recherche et filtrage des messages
 
 #### ✅ Intervention administrative
+
 - Accès admin aux conversations
 - Système de modération
 - Résolution des litiges
@@ -54,18 +61,21 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 ### 3. Architecture et sécurité
 
 #### ✅ Composants réutilisables
+
 - `ConversationComponent`: Interface de messagerie complète
 - `AdvancedPaymentsComponent`: Gestion des paiements avancés
 - `AdvancedOrderManagement`: Page intégrée combinant tout
 - Composants modulaires et réutilisables
 
 #### ✅ Sécurité des fichiers
+
 - Validation des formats de fichiers
 - Limitation de taille
 - Stockage sécurisé
 - Scan de sécurité (préparé)
 
 #### ✅ Authentification et autorisation
+
 - Chaque message lié à un utilisateur authentifié
 - Vérification des permissions
 - Row Level Security (RLS) activé
@@ -85,6 +95,7 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 ### Colonnes ajoutées:
 
 **Table `payments`:**
+
 - `payment_type` (full, percentage, delivery_secured)
 - `percentage_amount`, `percentage_rate`, `remaining_amount`
 - `is_held`, `held_until`, `release_conditions`
@@ -92,6 +103,7 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 - `dispute_opened_at`, `dispute_resolved_at`, `dispute_resolution`
 
 **Table `orders`:**
+
 - `payment_type`, `percentage_paid`, `remaining_amount`
 - `delivery_status`, `delivery_tracking`, `delivery_notes`
 - `delivery_confirmed_at`, `delivery_confirmed_by`
@@ -101,6 +113,7 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 ### 1. Appliquer la migration de base de données
 
 **Option A: Via le dashboard Supabase (Recommandé)**
+
 1. Connectez-vous à votre dashboard Supabase
 2. Allez dans **SQL Editor**
 3. Copiez le contenu du fichier `supabase/migrations/20250122_advanced_payment_and_messaging.sql`
@@ -108,6 +121,7 @@ Ce guide vous accompagne dans l'implémentation des fonctionnalités avancées d
 5. Vérifiez que toutes les tables ont été créées
 
 **Option B: Via la CLI Supabase**
+
 ```bash
 supabase db push
 ```
@@ -251,18 +265,22 @@ git push
 ### Problèmes courants:
 
 **1. Tables non créées**
+
 - Vérifiez que la migration a été appliquée
 - Consultez les logs Supabase pour les erreurs
 
 **2. Upload de fichiers échoue**
+
 - Vérifiez la configuration du bucket `attachments`
 - Vérifiez les politiques RLS du bucket
 
 **3. Messages temps réel ne fonctionnent pas**
+
 - Vérifiez la configuration Supabase Realtime
 - Vérifiez les politiques RLS des tables
 
 **4. Permissions insuffisantes**
+
 - Vérifiez les politiques RLS
 - Vérifiez le rôle de l'utilisateur
 
@@ -306,4 +324,4 @@ Toutes les fonctionnalités avancées ont été implémentées avec succès:
 
 ---
 
-*Développé avec ❤️ pour Payhuk - Plateforme de paiement et e-commerce professionnelle*
+_Développé avec ❤️ pour Payhuk - Plateforme de paiement et e-commerce professionnelle_

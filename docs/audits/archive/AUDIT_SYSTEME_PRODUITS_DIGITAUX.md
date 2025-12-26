@@ -16,6 +16,7 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 ### 1. **Structure Base de Données**
 
 #### ✅ Table `products` (base)
+
 - `product_type`: 'digital', 'physical', 'service'
 - `pricing_model`: 'one-time', 'subscription', 'pay-what-you-want', **'free'** ✅
 - `price`, `promotional_price`, `currency`
@@ -25,6 +26,7 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 - `custom_fields`, `faqs`, `images`, `specifications`
 
 #### ✅ Table `digital_products` (extension)
+
 - `digital_type`: software, ebook, template, plugin, etc.
 - `license_type`: single, multi, unlimited, subscription, lifetime
 - `main_file_url`, `additional_files`: JSONB
@@ -34,6 +36,7 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 - `version`, `changelog`, `auto_update_enabled`
 
 #### ✅ Table `digital_product_files`
+
 - `is_main`: boolean
 - **`is_preview`**: boolean ✅
 - **`requires_purchase`**: boolean ✅
@@ -43,12 +46,14 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 ### 2. **Wizard de Création**
 
 #### ✅ `CreateDigitalProductWizard_v2.tsx`
+
 - 6 étapes : Infos → Fichiers → Licence → Affiliation → SEO → Preview
 - Auto-save draft
 - Template system
 - Validation par étape
 
 #### ✅ `DigitalBasicInfoForm.tsx` (Étape 1)
+
 - Nom, slug, description
 - Catégories digitales
 - **Prix** (mais pas de sélection explicite pricing_model='free')
@@ -56,6 +61,7 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 - **Licensing Type** (PLR, Copyrighted) ✅
 
 #### ⚠️ `DigitalFilesUploader.tsx` (Étape 2)
+
 - Upload fichier principal
 - Fichiers additionnels
 - **Manque** : Option pour marquer fichier comme "gratuit/preview"
@@ -69,6 +75,7 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 **Description**: Permettre au vendeur de créer un produit **gratuit** qui présente un aperçu du contenu payant.
 
 **Cas d'usage**:
+
 - Vendeur crée produit payant "Guide Complet Marketing"
 - Crée produit gratuit "Guide Marketing - Version Lite" (preview)
 - Version Lite contient chapitres 1-2, version payante chapitres 1-10
@@ -77,6 +84,7 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 **Implémentation nécessaire**:
 
 1. **Base de données** (`products` table):
+
    ```sql
    -- Ajouter colonnes
    ALTER TABLE products ADD COLUMN IF NOT EXISTS free_product_id UUID REFERENCES products(id);
@@ -106,20 +114,24 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 ## 🎯 Plan d'Implémentation
 
 ### Phase 1: Base de Données
+
 - [ ] Ajouter colonnes `free_product_id`, `paid_product_id`, `is_free_preview`
 - [ ] Migration SQL
 
 ### Phase 2: Wizard de Création
+
 - [ ] Ajouter section "Produit Preview" dans `DigitalBasicInfoForm.tsx`
 - [ ] Logique pour créer produit gratuit automatiquement
 - [ ] Marquer fichiers comme preview vs payant
 
 ### Phase 3: Affichage
+
 - [ ] Badge "GRATUIT" / "PREVIEW" sur cartes produits
 - [ ] Section preview dans `ProductDetail.tsx`
 - [ ] Lien entre produits preview et payant
 
 ### Phase 4: Téléchargement
+
 - [ ] Téléchargement gratuit pour preview
 - [ ] Protection fichiers payants
 - [ ] Tracking séparé downloads preview vs payant
@@ -157,4 +169,3 @@ Le système de produits digitaux permet aux vendeurs de créer, gérer et vendre
 ---
 
 **Prochaine étape**: Implémenter la fonctionnalité "Produit Gratuit Preview"
-

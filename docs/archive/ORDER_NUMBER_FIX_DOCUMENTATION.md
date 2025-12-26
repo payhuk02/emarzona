@@ -9,6 +9,7 @@ Erreur: column orders.order_number does not exist
 ```
 
 ### **Cause du Problème**
+
 - La colonne `order_number` est référencée dans le code de l'application
 - Cette colonne n'existe pas dans la table `orders` de la base de données
 - La table `orders` a été créée sans cette colonne essentielle
@@ -16,6 +17,7 @@ Erreur: column orders.order_number does not exist
 ## 🔍 Analyse de la Table Orders
 
 ### **Structure Actuelle**
+
 ```sql
 CREATE TABLE public.orders (
   id UUID PRIMARY KEY,
@@ -31,6 +33,7 @@ CREATE TABLE public.orders (
 ```
 
 ### **Colonne Manquante**
+
 - ❌ `order_number TEXT UNIQUE` - **MANQUANTE**
 - Cette colonne est nécessaire pour :
   - Identifier les commandes de manière unique
@@ -45,7 +48,7 @@ CREATE TABLE public.orders (
 
 ```sql
 -- Ajouter la colonne order_number
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ADD COLUMN IF NOT EXISTS order_number TEXT UNIQUE;
 
 -- Créer un index pour les performances
@@ -60,9 +63,9 @@ DECLARE
 BEGIN
     SELECT COALESCE(MAX(CAST(SUBSTRING(order_number FROM 13) AS INTEGER)), 0) + 1
     INTO counter
-    FROM orders 
+    FROM orders
     WHERE order_number LIKE 'ORD-' || TO_CHAR(NOW(), 'YYYYMMDD') || '-%';
-    
+
     order_num := 'ORD-' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(counter::TEXT, 4, '0');
     RETURN order_num;
 END;
@@ -86,12 +89,12 @@ CREATE TRIGGER trigger_set_order_number
     EXECUTE FUNCTION set_order_number();
 
 -- Mettre à jour les commandes existantes
-UPDATE public.orders 
+UPDATE public.orders
 SET order_number = generate_order_number()
 WHERE order_number IS NULL OR order_number = '';
 
 -- Ajouter la contrainte NOT NULL
-ALTER TABLE public.orders 
+ALTER TABLE public.orders
 ALTER COLUMN order_number SET NOT NULL;
 ```
 
@@ -104,23 +107,27 @@ ALTER COLUMN order_number SET NOT NULL;
 ## 🎯 Fonctionnalités Ajoutées
 
 ### **1. Génération Automatique de Numéros**
+
 - **Format** : `ORD-YYYYMMDD-XXXX`
 - **Exemples** : `ORD-20250118-0001`, `ORD-20250118-0002`
 - **Unicité** : Garantie par contrainte UNIQUE
 - **Séquentiel** : Compteur par jour
 
 ### **2. Trigger Automatique**
+
 - **Insertion** : Génère automatiquement le numéro
 - **Transparent** : Aucune action manuelle requise
 - **Robuste** : Gère les cas où le numéro est NULL
 
 ### **3. Index de Performance**
+
 - **Recherche rapide** par numéro de commande
 - **Optimisation** des requêtes fréquentes
 
 ## 🚀 Instructions d'Exécution
 
 ### **1. Exécuter le SQL dans Supabase**
+
 ```
 1. Ouvrez : https://supabase.com/dashboard/project/your-project-id
 2. Allez dans "SQL Editor"
@@ -129,12 +136,14 @@ ALTER COLUMN order_number SET NOT NULL;
 ```
 
 ### **2. Vérifier la Correction**
+
 ```bash
 # Tester la correction
 node scripts/test-order-number-fix.js
 ```
 
 ### **3. Tester l'Application**
+
 - Rechargez l'application sur `https://payhuk.vercel.app/dashboard`
 - L'erreur "column orders.order_number does not exist" devrait disparaître
 - Les commandes auront maintenant des numéros automatiques
@@ -142,11 +151,13 @@ node scripts/test-order-number-fix.js
 ## 📊 Résultat Attendu
 
 ### **Avant la Correction**
+
 - ❌ Erreur : "column orders.order_number does not exist"
 - ❌ Application non fonctionnelle
 - ❌ Pas de numéros de commande
 
 ### **Après la Correction**
+
 - ✅ Colonne `order_number` ajoutée à la table `orders`
 - ✅ Numéros de commande générés automatiquement
 - ✅ Application fonctionnelle sans erreur
@@ -155,18 +166,21 @@ node scripts/test-order-number-fix.js
 ## 🧪 Tests de Validation
 
 ### **1. Test de la Colonne**
+
 ```sql
 SELECT id, order_number, created_at FROM orders LIMIT 5;
 ```
 
 ### **2. Test de la Fonction**
+
 ```sql
 SELECT generate_order_number() as test_number;
 ```
 
 ### **3. Test d'Insertion**
+
 ```sql
-INSERT INTO orders (store_id, status, total_amount) 
+INSERT INTO orders (store_id, status, total_amount)
 VALUES ('store-uuid', 'pending', 0);
 -- Le numéro sera généré automatiquement
 ```

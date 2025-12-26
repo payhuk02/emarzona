@@ -38,9 +38,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 1. ✅ CRÉATION DE BOUTIQUE - COMPLET (100%)
 
 #### 1.1 Informations de Base
+
 **Statut :** ✅ **COMPLET ET FONCTIONNEL**
 
 **Tous les champs implémentés avec :**
+
 - ✅ Validation Zod complète
 - ✅ Vérification temps réel (slug)
 - ✅ Tooltips contextuels
@@ -49,6 +51,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Mode avancé/simplifié
 
 #### 1.2 Gestion des Images et Branding
+
 **Statut :** ✅ **COMPLET (100%)**
 
 - ✅ Logo, Bannière, Favicon, Apple Touch Icon, Watermark, Placeholder
@@ -57,6 +60,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Prévisualisation temps réel
 
 #### 1.3 Contact et Réseaux Sociaux
+
 **Statut :** ✅ **COMPLET (100%)**
 
 - ✅ 4 contacts principaux (email, téléphone)
@@ -70,21 +74,25 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 2. ✅ PERSONNALISATION VISUELLE - COMPLET (100%)
 
 #### 2.1 Thème et Couleurs
+
 - ✅ 15 propriétés de couleurs (primary, secondary, accent, background, text, buttons, links)
 - ✅ Rayon bordures, intensité ombres
 - ✅ Application temps réel via CSS Variables
 
 #### 2.2 Typographie
+
 - ✅ 10 polices Google Fonts
 - ✅ 7 paramètres typographiques (heading_font, body_font, tailles, line_height, letter_spacing)
 
 #### 2.3 Layout et Structure
+
 - ✅ Header, Footer, Sidebar configurables
 - ✅ Grille produits (2-6 colonnes)
 - ✅ Styles navigation (horizontal, vertical, mega)
 - ✅ Styles cartes produits (minimal, standard, detailed)
 
 #### 2.4 Templates de Thème
+
 - ✅ Bibliothèque de templates prédéfinis
 - ✅ Application en un clic
 
@@ -93,18 +101,21 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 3. ✅ SEO ET MÉTADONNÉES - COMPLET (100%)
 
 #### 3.1 SEO de Base
+
 - ✅ Meta title, description, keywords
 - ✅ Open Graph (title, description, image)
 - ✅ Validation longueur optimale (60/160 caractères)
 - ✅ Compteurs de caractères temps réel
 
 #### 3.2 SEO Avancé
+
 - ✅ **Données structurées JSON-LD** (Store, Product, Breadcrumb, ItemList)
 - ✅ **Sitemap XML génération automatique**
 - ✅ **Validation SEO automatique** avec score (0-100)
 - ✅ **Recommandations automatiques** contextuelles
 
 **Fichiers :**
+
 - `src/lib/seo-validator.ts`
 - `src/lib/sitemap-generator.ts`
 - `src/components/seo/StoreSchema.tsx`
@@ -116,10 +127,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 4. ✅ LOCALISATION ET HORAIRES - COMPLET (100%)
 
 #### 4.1 Adresse Complète
+
 - ✅ Tous les champs (9 propriétés)
 - ✅ Validation coordonnées GPS (-90/90, -180/180)
 
 #### 4.2 Horaires d'Ouverture
+
 - ✅ JSONB flexible (7 jours)
 - ✅ Horaires spéciaux avec raison
 - ✅ Fuseau horaire
@@ -134,6 +147,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Éditeur de texte intégré
 
 **Pages :**
+
 - Conditions générales de vente
 - Politique de confidentialité
 - Politique de retour
@@ -159,6 +173,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 **Statut :** ✅ **QUASI-COMPLET** (passé de 70% à 95%)
 
 #### 7.1 Interface et Configuration
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Saisie du domaine personnalisé
@@ -170,6 +185,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Configuration redirections (www, https)
 
 #### 7.2 Vérification DNS
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Vérification manuelle (bouton "Vérifier")
@@ -179,10 +195,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Détection d'erreurs détaillées
 
 **Fichiers :**
+
 - `src/lib/domainUtils.ts` (vérification DNS)
 - `supabase/functions/verify-domains/index.ts` (Edge Function automatique)
 
 #### 7.3 Activation SSL Automatique
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Activation automatique SSL quand domaine vérifié
@@ -191,6 +209,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Gestion erreurs avec messages détaillés
 
 #### 7.4 Monitoring et Historique
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Table `domain_verification_history` (historique 30 jours)
@@ -199,9 +218,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Cron job configuré (ID: 21, toutes les 15 minutes)
 
 **Migration :**
+
 - `supabase/migrations/20250202_domain_monitoring_table.sql`
 
 #### 7.5 Améliorations UI
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Badge statut avec icône SSL
@@ -210,6 +231,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Indication activation SSL automatique
 
 **Ce qui manque (5%) :**
+
 - ⚠️ Configuration SSL automatique au niveau infrastructure (nécessite proxy/routing serveur - hors scope code app)
 - ⚠️ Redirection automatique serveur (nécessite configuration nginx/cloudflare - hors scope code app)
 
@@ -220,6 +242,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 8. ✅ PARAMÈTRES COMMERCE - COMPLET (100%)
 
 #### 8.1 Zones de Livraison
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Création zones géographiques
@@ -228,10 +251,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Interface CRUD complète
 
 **Fichiers :**
+
 - `src/components/shipping/ShippingZonesManager.tsx`
 - Tables : `shipping_zones`, `shipping_rates`
 
 #### 8.2 Tarifs de Livraison
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Tarifs par zone
@@ -240,10 +265,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Priorité et statut
 
 **Fichiers :**
+
 - `src/components/shipping/ShippingRatesManager.tsx`
 - `src/hooks/physical/useShipping.ts`
 
 #### 8.3 Taxes
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Configuration taxes par boutique
@@ -253,6 +280,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Support 12+ pays d'Afrique de l'Ouest
 
 **Fichiers :**
+
 - `src/components/store/StoreCommerceSettings.tsx`
 - `src/hooks/admin/useTaxConfigurations.ts`
 - Table : `tax_configurations`
@@ -262,6 +290,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 9. ✅ ANALYTICS ET TRACKING - COMPLET (100%)
 
 #### 9.1 Intégrations Complètes
+
 - ✅ Google Analytics (GA4 et Universal Analytics)
 - ✅ Facebook Pixel
 - ✅ Google Tag Manager
@@ -269,12 +298,14 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Scripts personnalisés (HTML/JS)
 
 #### 9.2 Fonctionnalités
+
 - ✅ Activation/désactivation par service
 - ✅ Validation format IDs
 - ✅ Injection automatique dans storefront
 - ✅ Tooltips avec instructions
 
 **Fichiers :**
+
 - `src/components/store/StoreAnalyticsSettings.tsx`
 - `src/components/storefront/StoreAnalyticsScripts.tsx`
 - `src/lib/analytics/initPixels.ts`
@@ -285,6 +316,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 10. ✅ SÉCURITÉ ET CONFORMITÉ - COMPLET (95%)
 
 #### 10.1 Consentement Cookies
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Bannière RGPD complète
@@ -293,11 +325,13 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Intégration dans `App.tsx`
 
 **Fichiers :**
+
 - `src/components/legal/CookieConsentBanner.tsx`
 - `src/hooks/useLegal.ts`
 - Tables : `cookie_preferences`, `legal_documents`
 
 #### 10.2 Acceptation CGV Obligatoire
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Dialog bloquant si CGV non acceptées
@@ -306,11 +340,13 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Intégration création boutique
 
 **Fichiers :**
+
 - `src/components/store/RequireTermsConsent.tsx`
 - `src/hooks/useRequireTermsConsent.ts`
 - Table : `user_consents`
 
 #### 10.3 SSL/HTTPS
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Activation automatique SSL quand domaine vérifié
@@ -319,6 +355,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Table `ssl_certificate_status` pour suivi
 
 **Ce qui manque (5%) :**
+
 - ⚠️ Vérification périodique certificat SSL (expiration) - peut être ajouté facilement
 - ⚠️ Configuration SSL serveur (nécessite infrastructure - hors scope)
 
@@ -327,6 +364,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 11. ✅ AMÉLIORATIONS UX - COMPLET (100%)
 
 #### 11.1 Wizard Multi-Étapes
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ 8 étapes organisées
@@ -335,9 +373,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Validation par étape
 
 **Fichiers :**
+
 - `src/components/store/StoreFormWizard.tsx`
 
 #### 11.2 Guide Contextuel et Tooltips
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Tooltips avec icônes (Info, Warning, Success, Error)
@@ -345,9 +385,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Intégration dans tous les champs importants
 
 **Fichiers :**
+
 - `src/components/store/StoreFieldHelper.tsx`
 
 #### 11.3 Mode Avancé/Simplifié
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Toggle visuel
@@ -356,9 +398,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Basculement dynamique
 
 **Fichiers :**
+
 - `src/components/store/StoreFormModeToggle.tsx`
 
 #### 11.4 Suggestions Automatiques
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Suggestions slugs alternatifs
@@ -369,10 +413,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Application en un clic
 
 **Fichiers :**
+
 - `src/components/store/StoreSuggestions.tsx`
 - `src/lib/store-suggestions.ts`
 
 #### 11.5 Validation Zod Complète
+
 **Statut :** ✅ **COMPLET**
 
 - ✅ Schémas Zod complets pour tous les champs
@@ -381,6 +427,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Validation par étape (wizard)
 
 **Fichiers :**
+
 - `src/lib/schemas.ts`
 - `src/lib/store-validation.ts`
 
@@ -402,6 +449,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 1. ⚠️ Localisation - Géocodage (0%)
 
 **Manques :**
+
 - ❌ Géocodage automatique (adresse → coordonnées GPS)
 - ❌ Autocomplétion d'adresse
 - ❌ Carte interactive pour sélection
@@ -413,6 +461,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 2. ⚠️ SEO - Prévisualisation (0%)
 
 **Manques :**
+
 - ❌ Prévisualisation résultats Google (serp preview)
 - ❌ robots.txt personnalisé
 
@@ -423,6 +472,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 3. ⚠️ Domaines - Configuration Infrastructure (0%)
 
 **Manques :**
+
 - ❌ Configuration SSL automatique serveur (nécessite proxy/routing)
 - ❌ Redirection automatique serveur (nécessite nginx/cloudflare)
 
@@ -437,6 +487,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 1. ❌ Marketing Automation (0%)
 
 **Manques :**
+
 - ❌ Newsletter activable par boutique
 - ❌ Intégration MailChimp/SendGrid par boutique
 - ❌ Email marketing par boutique
@@ -453,6 +504,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 2. ❌ Internationalisation (0%)
 
 **Manques :**
+
 - ❌ Langue par défaut de la boutique
 - ❌ Langues supportées multiples par boutique
 - ❌ Sélecteur de langue par boutique
@@ -468,6 +520,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 3. ❌ Communication Client (0%)
 
 **Manques :**
+
 - ❌ Répondeur automatique par boutique
 - ❌ Widget de chat par boutique
 - ❌ Intégrations chat (Intercom, Zendesk, Tawk) par boutique
@@ -481,6 +534,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### 4. ❌ Notifications par Boutique (0%)
 
 **Manques :**
+
 - ❌ Notifications email configurables par boutique
 - ❌ Notifications SMS par boutique
 - ❌ Notifications push par boutique
@@ -498,6 +552,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### ✅ Systèmes Automatiques Opérationnels
 
 #### 1. Vérification DNS Automatique
+
 **Statut :** ✅ **OPÉRATIONNEL**
 
 - ✅ Edge Function : `verify-domains`
@@ -508,10 +563,12 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Enregistrement historique
 
 **Fichiers :**
+
 - `supabase/functions/verify-domains/index.ts`
 - `supabase/functions/verify-domains/README.md`
 
 #### 2. Monitoring et Historique
+
 **Statut :** ✅ **OPÉRATIONNEL**
 
 - ✅ Table `domain_verification_history` (30 jours)
@@ -520,9 +577,11 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - ✅ Index pour performances
 
 **Migration :**
+
 - `supabase/migrations/20250202_domain_monitoring_table.sql`
 
 #### 3. Validation et Suggestions
+
 **Statut :** ✅ **OPÉRATIONNEL**
 
 - ✅ Validation Zod temps réel
@@ -534,31 +593,31 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 
 ## 📊 Matrice de Complétude Finale
 
-| Catégorie | Complétude | Priorité | Statut | Notes |
-|-----------|------------|----------|--------|-------|
-| **Création de Boutique** | 100% | 🔴 HAUTE | ✅ Excellent | Tous champs, validation, wizard |
-| **Personnalisation Visuelle** | 100% | 🔴 HAUTE | ✅ Excellent | Thème complet, typographie, layout |
-| **Images et Branding** | 100% | 🔴 HAUTE | ✅ Excellent | 6 types d'images |
-| **Contact et Réseaux** | 100% | 🔴 HAUTE | ✅ Excellent | 4 contacts, 4 emails, 10 réseaux |
-| **SEO de Base** | 100% | 🔴 HAUTE | ✅ Excellent | Meta tags, Open Graph |
-| **SEO Avancé** | 100% | 🔴 HAUTE | ✅ Excellent | JSON-LD, Sitemap, Validation |
-| **Localisation** | 100% | 🟡 MOYENNE | ✅ Excellent | Adresse, horaires, coordonnées |
-| **Pages Légales** | 100% | 🔴 HAUTE | ✅ Excellent | 8 pages, CRUD complet |
-| **Contenu Marketing** | 100% | 🟡 MOYENNE | ✅ Excellent | Équipe, témoignages, certifications |
-| **Domaine Personnalisé** | 95% | 🔴 HAUTE | ✅ Excellent | Automatisation complète (95%), infrastructure (5%) |
-| **Commerce (Zones/Taxes)** | 100% | 🟡 MOYENNE | ✅ Excellent | Zones, tarifs, taxes complets |
-| **Analytics et Tracking** | 100% | 🟡 MOYENNE | ✅ Excellent | GA, FB, GTM, TikTok, scripts |
-| **Sécurité/Conformité** | 95% | 🔴 HAUTE | ✅ Excellent | Cookies, CGV, SSL auto (95%) |
-| **Wizard Multi-Étapes** | 100% | 🟡 MOYENNE | ✅ Excellent | 8 étapes, navigation |
-| **Guide Contextuel** | 100% | 🟡 MOYENNE | ✅ Excellent | Tooltips, messages d'aide |
-| **Mode Avancé/Simplifié** | 100% | 🟡 MOYENNE | ✅ Excellent | Toggle fonctionnel |
-| **Suggestions Automatiques** | 100% | 🟡 MOYENNE | ✅ Excellent | Slug, SEO, couleurs, domaines |
-| **Validation Zod** | 100% | 🔴 HAUTE | ✅ Excellent | Schémas complets, messages FR |
-| **Automatisation DNS** | 100% | 🔴 HAUTE | ✅ Excellent | Cron job, Edge Function |
-| **Marketing Automation** | 0% | 🟢 BASSE | ❌ Non prioritaire | Existe au niveau produit/plateforme |
-| **Internationalisation** | 0% | 🟢 BASSE | ❌ Non prioritaire | Existe au niveau plateforme |
-| **Communication Client** | 0% | 🟢 BASSE | ❌ Non prioritaire | Existe au niveau plateforme |
-| **Notifications Boutique** | 0% | 🟡 MOYENNE | ❌ Manquant | Système plateforme existe |
+| Catégorie                     | Complétude | Priorité   | Statut             | Notes                                              |
+| ----------------------------- | ---------- | ---------- | ------------------ | -------------------------------------------------- |
+| **Création de Boutique**      | 100%       | 🔴 HAUTE   | ✅ Excellent       | Tous champs, validation, wizard                    |
+| **Personnalisation Visuelle** | 100%       | 🔴 HAUTE   | ✅ Excellent       | Thème complet, typographie, layout                 |
+| **Images et Branding**        | 100%       | 🔴 HAUTE   | ✅ Excellent       | 6 types d'images                                   |
+| **Contact et Réseaux**        | 100%       | 🔴 HAUTE   | ✅ Excellent       | 4 contacts, 4 emails, 10 réseaux                   |
+| **SEO de Base**               | 100%       | 🔴 HAUTE   | ✅ Excellent       | Meta tags, Open Graph                              |
+| **SEO Avancé**                | 100%       | 🔴 HAUTE   | ✅ Excellent       | JSON-LD, Sitemap, Validation                       |
+| **Localisation**              | 100%       | 🟡 MOYENNE | ✅ Excellent       | Adresse, horaires, coordonnées                     |
+| **Pages Légales**             | 100%       | 🔴 HAUTE   | ✅ Excellent       | 8 pages, CRUD complet                              |
+| **Contenu Marketing**         | 100%       | 🟡 MOYENNE | ✅ Excellent       | Équipe, témoignages, certifications                |
+| **Domaine Personnalisé**      | 95%        | 🔴 HAUTE   | ✅ Excellent       | Automatisation complète (95%), infrastructure (5%) |
+| **Commerce (Zones/Taxes)**    | 100%       | 🟡 MOYENNE | ✅ Excellent       | Zones, tarifs, taxes complets                      |
+| **Analytics et Tracking**     | 100%       | 🟡 MOYENNE | ✅ Excellent       | GA, FB, GTM, TikTok, scripts                       |
+| **Sécurité/Conformité**       | 95%        | 🔴 HAUTE   | ✅ Excellent       | Cookies, CGV, SSL auto (95%)                       |
+| **Wizard Multi-Étapes**       | 100%       | 🟡 MOYENNE | ✅ Excellent       | 8 étapes, navigation                               |
+| **Guide Contextuel**          | 100%       | 🟡 MOYENNE | ✅ Excellent       | Tooltips, messages d'aide                          |
+| **Mode Avancé/Simplifié**     | 100%       | 🟡 MOYENNE | ✅ Excellent       | Toggle fonctionnel                                 |
+| **Suggestions Automatiques**  | 100%       | 🟡 MOYENNE | ✅ Excellent       | Slug, SEO, couleurs, domaines                      |
+| **Validation Zod**            | 100%       | 🔴 HAUTE   | ✅ Excellent       | Schémas complets, messages FR                      |
+| **Automatisation DNS**        | 100%       | 🔴 HAUTE   | ✅ Excellent       | Cron job, Edge Function                            |
+| **Marketing Automation**      | 0%         | 🟢 BASSE   | ❌ Non prioritaire | Existe au niveau produit/plateforme                |
+| **Internationalisation**      | 0%         | 🟢 BASSE   | ❌ Non prioritaire | Existe au niveau plateforme                        |
+| **Communication Client**      | 0%         | 🟢 BASSE   | ❌ Non prioritaire | Existe au niveau plateforme                        |
+| **Notifications Boutique**    | 0%         | 🟡 MOYENNE | ❌ Manquant        | Système plateforme existe                          |
 
 **Moyenne Globale :** ~95% de complétude (vs 65% initialement)
 
@@ -659,16 +718,19 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 ### Détail par Phase
 
 #### Phase 1 (Domaine, Sécurité, SEO Avancé)
+
 - Domaine personnalisé : 30% → 70%
 - Sécurité : 20% → 90%
 - SEO : 80% → 95%
 
 #### Phase 2 (Formulaire, Analytics, Commerce)
+
 - Formulaire : 90% → 100%
 - Analytics : 0% → 100%
 - Commerce : 0% → 100%
 
 #### Phase 3 (UX)
+
 - Wizard : 0% → 100%
 - Validation : 60% → 100%
 - Guide contextuel : 0% → 100%
@@ -676,6 +738,7 @@ Cette analyse examine en détail l'état réel de toutes les fonctionnalités ap
 - Suggestions : 0% → 100%
 
 #### Post-Phase 3 (Automatisation Domaine)
+
 - Domaine personnalisé : 70% → 95%
 - Automatisation DNS : 0% → 100%
 - Monitoring : 0% → 100%
@@ -722,23 +785,28 @@ Le système de création et personnalisation de boutiques est maintenant **EXCEP
 ### Fichiers Créés/Modifiés pour Automatisation
 
 **Edge Functions :**
+
 - `supabase/functions/verify-domains/index.ts` (200+ lignes)
 - `supabase/functions/verify-domains/README.md`
 
 **Migrations :**
+
 - `supabase/migrations/20250202_domain_monitoring_table.sql`
 
 **Composants Frontend :**
+
 - `src/components/store/StoreDomainSettings.tsx` (améliorations UI)
 
 ### Infrastructure
 
 **Cron Job :**
+
 - ID: 21
 - Fréquence: `*/15 * * * *` (toutes les 15 minutes)
 - Fonction: Appelle `verify-domains` Edge Function
 
 **Tables de Monitoring :**
+
 - `domain_verification_history` (historique 30 jours)
 - `ssl_certificate_status` (monitoring SSL)
 - Nettoyage automatique via fonction `cleanup_old_domain_history()`
@@ -746,4 +814,3 @@ Le système de création et personnalisation de boutiques est maintenant **EXCEP
 ---
 
 **🎉 SYSTÈME EXCEPTIONNEL : 95% COMPLET !**
-

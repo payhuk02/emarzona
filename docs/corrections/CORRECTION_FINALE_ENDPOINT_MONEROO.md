@@ -7,6 +7,7 @@
 ### ✅ Endpoint Correct Identifié
 
 D'après la documentation "Intégration standard" :
+
 - **Endpoint :** `POST https://api.moneroo.io/v1/payments/initialize`
 - **Headers requis :**
   - `Authorization: Bearer YOUR_SECRET_KEY`
@@ -35,7 +36,8 @@ Selon la documentation Moneroo :
 }
 ```
 
-**Important :** 
+**Important :**
+
 - `customer` doit être un objet avec `first_name` et `last_name` séparés
 - Pas de `customer_email` ou `customer_name` au niveau racine
 - Pas de `cancel_url` (non mentionné dans la documentation)
@@ -62,34 +64,38 @@ Selon la documentation Moneroo :
 **Fichier :** `supabase/functions/moneroo/index.ts` et `CODE_MONEROO_POUR_SUPABASE.txt`
 
 **Avant :**
+
 ```typescript
-endpoint = '/checkout';  // ❌ N'existe pas
+endpoint = '/checkout'; // ❌ N'existe pas
 // ou
-endpoint = '/payments';  // ❌ N'existe pas
+endpoint = '/payments'; // ❌ N'existe pas
 ```
 
 **Après :**
+
 ```typescript
-endpoint = '/payments/initialize';  // ✅ Correct selon documentation
+endpoint = '/payments/initialize'; // ✅ Correct selon documentation
 ```
 
 ### 2. Format des Données Corrigé
 
 **Avant :**
+
 ```typescript
 body = {
   amount: data.amount,
   currency: data.currency || 'XOF',
   description: data.description,
-  customer_email: data.customer_email,  // ❌ Format incorrect
-  customer_name: data.customer_name,    // ❌ Format incorrect
+  customer_email: data.customer_email, // ❌ Format incorrect
+  customer_name: data.customer_name, // ❌ Format incorrect
   return_url: data.return_url,
-  cancel_url: data.cancel_url,  // ❌ Non mentionné dans la documentation
+  cancel_url: data.cancel_url, // ❌ Non mentionné dans la documentation
   metadata: data.metadata || {},
 };
 ```
 
 **Après :**
+
 ```typescript
 // Diviser customer_name en first_name et last_name
 const customerNameParts = (data.customer_name || '').split(' ');
@@ -100,7 +106,8 @@ body = {
   amount: data.amount,
   currency: data.currency || 'XOF',
   description: data.description,
-  customer: {  // ✅ Objet customer avec first_name et last_name
+  customer: {
+    // ✅ Objet customer avec first_name et last_name
     email: data.customer_email,
     first_name: firstName,
     last_name: lastName,
@@ -115,6 +122,7 @@ body = {
 ### 3. Headers Corrigés
 
 **Avant :**
+
 ```typescript
 headers: {
   'Authorization': `Bearer ${monerooApiKey}`,
@@ -123,6 +131,7 @@ headers: {
 ```
 
 **Après :**
+
 ```typescript
 headers: {
   'Authorization': `Bearer ${monerooApiKey}`,
@@ -136,6 +145,7 @@ headers: {
 **Fichier :** `src/lib/moneroo-payment.ts`
 
 **Correction :**
+
 ```typescript
 // Extraire les données de la réponse Moneroo
 // La réponse Moneroo est : { message: "...", data: { id: "...", checkout_url: "..." } }
@@ -143,11 +153,14 @@ headers: {
 // Dans moneroo-client.ts, on retourne response.data, donc monerooResponse est : { message: "...", data: { id: "...", checkout_url: "..." } }
 const monerooData = (monerooResponse as any).data || monerooResponse;
 const checkoutUrl = monerooData?.checkout_url || (monerooResponse as any).checkout_url;
-const transactionId = monerooData?.id || (monerooResponse as any).id || (monerooResponse as any).transaction_id;
+const transactionId =
+  monerooData?.id || (monerooResponse as any).id || (monerooResponse as any).transaction_id;
 
 if (!checkoutUrl) {
-  logger.error("Moneroo response missing checkout_url:", monerooResponse);
-  throw new Error("La réponse Moneroo ne contient pas d'URL de checkout. Vérifiez les logs Supabase pour plus de détails.");
+  logger.error('Moneroo response missing checkout_url:', monerooResponse);
+  throw new Error(
+    "La réponse Moneroo ne contient pas d'URL de checkout. Vérifiez les logs Supabase pour plus de détails."
+  );
 }
 ```
 
@@ -192,6 +205,7 @@ npm run dev
 ### Dans les Logs Supabase
 
 Vous devriez voir :
+
 ```
 INFO [Moneroo Edge Function] Calling Moneroo API: { url: "https://api.moneroo.io/v1/payments/initialize", method: "POST", ... }
 INFO [Moneroo Edge Function] Moneroo API response: { status: 200, statusText: "OK", ok: true }
@@ -209,6 +223,7 @@ INFO Moneroo response success: { action: "create_checkout", status: 200 }
 ## ✅ Résultat Attendu
 
 Après le déploiement :
+
 - ✅ Plus d'erreur 404 sur l'API Moneroo
 - ✅ Le paiement est initialisé avec succès
 - ✅ La réponse contient `checkout_url`
@@ -233,7 +248,3 @@ Après le déploiement :
 4. **Vérifier les logs Supabase** pour confirmer le succès
 
 Une fois ces étapes terminées, les paiements devraient fonctionner correctement ! 🎉
-
-
-
-

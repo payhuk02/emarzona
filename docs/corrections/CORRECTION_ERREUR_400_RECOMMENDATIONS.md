@@ -3,6 +3,7 @@
 ## 📋 Problème Identifié
 
 L'erreur `400 Bad Request` sur `get_user_product_recommendations` indique que :
+
 - La requête atteint bien Supabase
 - Mais la fonction RPC rejette l'appel avec une erreur 400
 - Cela peut être dû à :
@@ -47,14 +48,15 @@ L'erreur `400 Bad Request` sur `get_user_product_recommendations` indique que :
 3. **Exécuter le script**
 4. **Vérifier que la fonction est créée :**
    ```sql
-   SELECT proname, pg_get_function_arguments(oid) 
-   FROM pg_proc 
+   SELECT proname, pg_get_function_arguments(oid)
+   FROM pg_proc
    WHERE proname = 'get_user_product_recommendations';
    ```
 
 ### Solution 2 : Vérifier les Tables
 
 Vérifier que les tables suivantes existent :
+
 - `orders` (avec colonnes `customer_id`, `payment_status`, `id`)
 - `order_items` (avec colonnes `order_id`, `product_id`)
 - `products` (avec colonnes `id`, `category`, `tags`, `is_active`, `is_draft`)
@@ -63,6 +65,7 @@ Vérifier que les tables suivantes existent :
 ### Solution 3 : Vérifier les Permissions RLS
 
 La fonction utilise `SECURITY DEFINER`, donc elle devrait bypasser RLS. Mais vérifiez que :
+
 - La fonction a les permissions nécessaires
 - Les tables ont les bonnes politiques RLS (si applicable)
 
@@ -71,6 +74,7 @@ La fonction utilise `SECURITY DEFINER`, donc elle devrait bypasser RLS. Mais vé
 Si vous voulez désactiver temporairement les recommandations utilisateur :
 
 1. **Modifier `src/pages/Marketplace.tsx` :**
+
    ```typescript
    // Commenter cette ligne :
    // {userId && filters.category === 'all' && filters.search === '' && filters.productType === 'all' && (
@@ -86,6 +90,7 @@ Si vous voulez désactiver temporairement les recommandations utilisateur :
 ## 📝 Résultat Attendu
 
 Après les corrections :
+
 - ✅ L'erreur 400 ne s'affiche plus dans la console
 - ✅ La marketplace fonctionne normalement même si les recommandations échouent
 - ✅ Les recommandations s'affichent si la fonction existe et fonctionne
@@ -124,8 +129,3 @@ Après les corrections :
 - [Documentation Supabase RPC](https://supabase.com/docs/guides/database/functions)
 - [Codes d'Erreur PostgreSQL](https://www.postgresql.org/docs/current/errcodes-appendix.html)
 - [Migration Originale](supabase/migrations/20250131_create_product_recommendations_system.sql)
-
-
-
-
-

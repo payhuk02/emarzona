@@ -11,11 +11,13 @@ Scripts pour générer automatiquement le favicon à partir du logo Emarzona.
 **Description** : Génère un favicon optimisé avec plusieurs tailles et formats.
 
 **Prérequis** :
+
 ```bash
 npm install sharp
 ```
 
 **Utilisation** :
+
 ```bash
 # Via npm script
 npm run favicon:generate
@@ -25,12 +27,14 @@ node scripts/generate-favicon.js
 ```
 
 **Génère** :
+
 - ✅ `favicon.ico` (32x32px)
 - ✅ `favicon-32x32.png`
 - ✅ `favicon-16x16.png`
 - ✅ `apple-touch-icon.png` (180x180px)
 
 **Avantages** :
+
 - Optimisation automatique des tailles
 - Préservation de la transparence
 - Qualité professionnelle
@@ -45,6 +49,7 @@ node scripts/generate-favicon.js
 **Prérequis** : Aucun (utilise uniquement Node.js natif)
 
 **Utilisation** :
+
 ```bash
 # Via npm script
 npm run favicon:generate:simple
@@ -54,15 +59,18 @@ node scripts/generate-favicon-simple.js
 ```
 
 **Génère** :
+
 - ✅ `favicon.ico` (copie du logo)
 - ✅ `favicon.png` (copie du logo)
 
 **Avantages** :
+
 - Rapide
 - Aucune dépendance
 - Simple à utiliser
 
 **Limitations** :
+
 - Pas d'optimisation des tailles
 - Une seule taille générée
 - Pour un vrai ICO optimisé, utilisez le script complet ou un outil en ligne
@@ -74,18 +82,21 @@ node scripts/generate-favicon-simple.js
 ### Étape 1 : Placer le Logo
 
 Placez votre logo dans `public/emarzona-logo.png` :
+
 - Taille recommandée : 512x512px
 - Format : PNG avec transparence
 
 ### Étape 2 : Générer le Favicon
 
 **Option A - Script Complet (Recommandé)** :
+
 ```bash
 npm install sharp
 npm run favicon:generate
 ```
 
 **Option B - Script Simple (Rapide)** :
+
 ```bash
 npm run favicon:generate:simple
 ```
@@ -111,15 +122,18 @@ npm run favicon:generate:simple
 ## 🔧 Dépannage
 
 ### Erreur : "sharp not found"
+
 ```bash
 npm install sharp
 ```
 
 ### Erreur : "emarzona-logo.png not found"
+
 - Vérifiez que le fichier existe dans `public/emarzona-logo.png`
 - Vérifiez l'orthographe du nom de fichier
 
 ### Le favicon ne s'affiche pas
+
 1. Videz le cache du navigateur (Ctrl+Shift+Delete)
 2. Redémarrez le serveur de développement
 3. Vérifiez que les fichiers sont bien dans `public/`
@@ -129,6 +143,6 @@ npm install sharp
 ## 💡 Alternative : Outils en Ligne
 
 Si les scripts ne fonctionnent pas, utilisez :
+
 - [favicon.io](https://favicon.io/favicon-converter/) - Simple et rapide
 - [realfavicongenerator.net](https://realfavicongenerator.net) - Avancé, multi-plateformes
-

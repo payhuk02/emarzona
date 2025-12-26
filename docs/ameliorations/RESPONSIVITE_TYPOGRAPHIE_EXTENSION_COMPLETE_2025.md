@@ -14,6 +14,7 @@
 ## ✅ Pages Modifiées (Phase 2)
 
 ### Pages Customer (8/15)
+
 1. ✅ **CustomerPortal** (`src/pages/customer/CustomerPortal.tsx`)
 2. ✅ **MyOrders** (`src/pages/customer/MyOrders.tsx`)
 3. ✅ **PriceStockAlerts** (`src/pages/customer/PriceStockAlerts.tsx`)
@@ -24,6 +25,7 @@
 8. ✅ **CustomerPortal** (stats cards)
 
 ### Pages Email (6/6)
+
 9. ✅ **EmailCampaignsPage** (`src/pages/emails/EmailCampaignsPage.tsx`)
 10. ✅ **EmailSegmentsPage** (`src/pages/emails/EmailSegmentsPage.tsx`)
 11. ✅ **EmailWorkflowsPage** (`src/pages/emails/EmailWorkflowsPage.tsx`)
@@ -32,12 +34,15 @@
 14. ✅ **EmailAnalyticsPage** (`src/pages/emails/EmailAnalyticsPage.tsx`)
 
 ### Pages Service (1/9)
+
 15. ✅ **BookingsManagement** (`src/pages/service/BookingsManagement.tsx`)
 
 ### Pages Digital (1/12)
+
 16. ✅ **DigitalProductsList** (`src/pages/digital/DigitalProductsList.tsx`)
 
 ### Pages Admin (8/30+)
+
 17. ✅ **AdminProducts** (`src/pages/admin/AdminProducts.tsx`)
 18. ✅ **AdminInventory** (`src/pages/admin/AdminInventory.tsx`)
 19. ✅ **AdminSales** (`src/pages/admin/AdminSales.tsx`)
@@ -49,6 +54,7 @@
 25. ✅ **AdminOrders** (déjà fait en Phase 1)
 
 ### Pages Autres (3/10+)
+
 26. ✅ **Referrals** (`src/pages/Referrals.tsx`)
 27. ✅ **MyTasks** (`src/pages/MyTasks.tsx`)
 28. ✅ **PlatformRevenue** (`src/pages/PlatformRevenue.tsx`)
@@ -60,83 +66,90 @@
 ### Pattern Standard
 
 #### Titres Principaux (H1)
+
 ```tsx
 // Avant
-className="text-2xl sm:text-3xl lg:text-4xl"
-className="text-3xl lg:text-4xl"
-className="text-xl sm:text-2xl lg:text-3xl"
+className = 'text-2xl sm:text-3xl lg:text-4xl';
+className = 'text-3xl lg:text-4xl';
+className = 'text-xl sm:text-2xl lg:text-3xl';
 
 // Après
-className="text-lg sm:text-2xl md:text-3xl lg:text-4xl"
+className = 'text-lg sm:text-2xl md:text-3xl lg:text-4xl';
 ```
 
 #### Sous-titres
+
 ```tsx
 // Avant
-className="text-xs sm:text-sm lg:text-base"
-className="text-sm lg:text-base"
-className="text-muted-foreground"
+className = 'text-xs sm:text-sm lg:text-base';
+className = 'text-sm lg:text-base';
+className = 'text-muted-foreground';
 
 // Après
-className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground"
+className = 'text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground';
 ```
 
 #### Cartes Statistiques - Labels
+
 ```tsx
 // Avant
-className="text-xs sm:text-sm"
-className="text-sm font-medium"
+className = 'text-xs sm:text-sm';
+className = 'text-sm font-medium';
 
 // Après
-className="text-[10px] sm:text-xs md:text-sm font-medium"
+className = 'text-[10px] sm:text-xs md:text-sm font-medium';
 ```
 
 #### Cartes Statistiques - Valeurs
+
 ```tsx
 // Avant
-className="text-xl sm:text-2xl lg:text-3xl"
-className="text-2xl font-bold"
-className="text-xl sm:text-2xl"
+className = 'text-xl sm:text-2xl lg:text-3xl';
+className = 'text-2xl font-bold';
+className = 'text-xl sm:text-2xl';
 
 // Après
-className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold"
+className = 'text-base sm:text-xl md:text-2xl lg:text-3xl font-bold';
 ```
 
 #### États Vides - Titres
+
 ```tsx
 // Avant
-className="text-xl sm:text-2xl"
-className="text-lg sm:text-xl"
+className = 'text-xl sm:text-2xl';
+className = 'text-lg sm:text-xl';
 
 // Après
-className="text-sm sm:text-lg md:text-xl lg:text-2xl"
+className = 'text-sm sm:text-lg md:text-xl lg:text-2xl';
 ```
 
 #### Dialog Titles
+
 ```tsx
 // Avant
-className="text-2xl"
+className = 'text-2xl';
 
 // Après
-className="text-lg sm:text-xl md:text-2xl"
+className = 'text-lg sm:text-xl md:text-2xl';
 ```
 
 ---
 
 ## 📱 Breakpoints Utilisés
 
-| Breakpoint | Taille | Usage |
-|------------|--------|-------|
-| **Mobile** | `< 640px` | `text-lg`, `text-[10px]`, `text-sm`, `text-base` |
-| **Tablet** | `≥ 640px` | `text-2xl`, `text-xs`, `text-sm` |
-| **Desktop** | `≥ 768px` | `text-3xl`, `text-sm`, `text-base` |
-| **Large** | `≥ 1024px` | `text-4xl`, `text-base` |
+| Breakpoint  | Taille     | Usage                                            |
+| ----------- | ---------- | ------------------------------------------------ |
+| **Mobile**  | `< 640px`  | `text-lg`, `text-[10px]`, `text-sm`, `text-base` |
+| **Tablet**  | `≥ 640px`  | `text-2xl`, `text-xs`, `text-sm`                 |
+| **Desktop** | `≥ 768px`  | `text-3xl`, `text-sm`, `text-base`               |
+| **Large**   | `≥ 1024px` | `text-4xl`, `text-base`                          |
 
 ---
 
 ## 🎨 Modifications Détaillées par Catégorie
 
 ### Pages Customer
+
 - ✅ **CustomerPortal**: Titre desktop et mobile, stats cards
 - ✅ **MyOrders**: Titre et sous-titre
 - ✅ **PriceStockAlerts**: Titre, sous-titre, stats cards
@@ -146,6 +159,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - ✅ **MyDownloads**: Titre, sous-titre, stats cards, card titles
 
 ### Pages Email
+
 - ✅ **EmailCampaignsPage**: Titre et sous-titre
 - ✅ **EmailSegmentsPage**: Titre et sous-titre
 - ✅ **EmailWorkflowsPage**: Titre et sous-titre
@@ -154,12 +168,15 @@ className="text-lg sm:text-xl md:text-2xl"
 - ✅ **EmailAnalyticsPage**: Titre et sous-titre
 
 ### Pages Service
+
 - ✅ **BookingsManagement**: Titre, sous-titre, stats cards, dialog title
 
 ### Pages Digital
+
 - ✅ **DigitalProductsList**: Titre, sous-titre, stats cards, empty states
 
 ### Pages Admin
+
 - ✅ **AdminProducts**: Titre et sous-titre
 - ✅ **AdminInventory**: Titre, sous-titre, stats cards (labels et valeurs)
 - ✅ **AdminSales**: Titre et sous-titre
@@ -169,6 +186,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - ✅ **AdminAnalytics**: Titre, sous-titre, stats cards (labels et valeurs)
 
 ### Pages Autres
+
 - ✅ **Referrals**: Titre et sous-titre
 - ✅ **MyTasks**: Titre
 - ✅ **PlatformRevenue**: Titre, sous-titre, stats cards (labels et valeurs)
@@ -178,18 +196,21 @@ className="text-lg sm:text-xl md:text-2xl"
 ## 📈 Résultats
 
 ### Avant
+
 - Titres: 24-30px sur mobile (trop grands)
 - Sous-titres: 12-14px sur mobile (acceptable)
 - Stats: 20-24px sur mobile (trop grands)
 - Labels: 12-14px sur mobile (acceptable)
 
 ### Après
+
 - Titres: 18px sur mobile (-25% à -40%)
 - Sous-titres: 10px sur mobile (-17% à -29%)
 - Stats: 16px sur mobile (-20% à -33%)
 - Labels: 10px sur mobile (-17% à -29%)
 
 ### Impact Global
+
 - **Espace vertical économisé**: ~15-25% sur mobile
 - **Lisibilité**: Maintenue avec hiérarchie claire
 - **Cohérence**: Système uniforme sur 28+ pages
@@ -200,6 +221,7 @@ className="text-lg sm:text-xl md:text-2xl"
 ## 🔄 Pages Restantes à Migrer (Optionnel)
 
 ### Pages Customer (7/15)
+
 - ⏳ CustomerMyWishlist.tsx
 - ⏳ CustomerMyReturns.tsx
 - ⏳ CustomerMyGiftCards.tsx
@@ -210,6 +232,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - ⏳ CustomerLoyalty.tsx
 
 ### Pages Service (8/9)
+
 - ⏳ ServiceDetail.tsx
 - ⏳ RecurringBookingsManagement.tsx
 - ⏳ StaffAvailabilityCalendar.tsx
@@ -220,6 +243,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - ⏳ AdvancedCalendarPage.tsx
 
 ### Pages Digital (11/12)
+
 - ⏳ DigitalProductDetail.tsx
 - ⏳ DigitalProductUpdatesDashboard.tsx
 - ⏳ CreateBundle.tsx
@@ -233,6 +257,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - ⏳ MyDownloads.tsx (digital)
 
 ### Pages Admin Supplémentaires (22+/30+)
+
 - ⏳ AdminUsers.tsx
 - ⏳ AdminWebhookManagement.tsx
 - ⏳ PhysicalProductsLots.tsx
@@ -253,6 +278,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - ⏳ ... (et autres)
 
 ### Pages Autres (7+/10+)
+
 - ⏳ StoreAffiliates.tsx
 - ⏳ SEOAnalyzer.tsx
 - ⏳ Pixels.tsx
@@ -265,6 +291,7 @@ className="text-lg sm:text-xl md:text-2xl"
 ## 🎯 Priorités
 
 ### ✅ Complété (28 pages)
+
 - Pages principales dashboard (12)
 - Pages admin principales (9)
 - Pages customer principales (8)
@@ -274,6 +301,7 @@ className="text-lg sm:text-xl md:text-2xl"
 - Pages autres (3)
 
 ### 🔄 En Attente (Optionnel)
+
 - Pages customer restantes (7)
 - Pages service restantes (8)
 - Pages digital restantes (11)
@@ -295,4 +323,3 @@ className="text-lg sm:text-xl md:text-2xl"
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **28 PAGES COMPLÉTÉES** (Phase 1: 15 + Phase 2: 13)
-

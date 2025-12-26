@@ -10,12 +10,14 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 ### Erreur Console Vercel
+
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'unstable_scheduleCallback')
   at radix-ui-hJLcS6Fx.js:5:11478
 ```
 
 ### Symptômes
+
 - ✅ Application fonctionne **localement** (`npm run dev`)
 - ❌ Application **ne démarre pas** sur Vercel (écran noir)
 - ❌ Erreur d'accès à `unstable_scheduleCallback` dans le chunk Radix UI
@@ -52,34 +54,37 @@ L'erreur `Cannot read properties of undefined (reading 'unstable_scheduleCallbac
 **Fichier** : `vite.config.ts`
 
 **AVANT** (problématique) :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
     return undefined; // ✅ React dans chunk principal
     // ❌ Mais scheduler peut être séparé
   }
   // ...
-}
+};
 ```
 
 **APRÈS** (corrigé) :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   // CRITIQUE: React, React DOM et Scheduler dans le chunk principal (undefined)
   // Ne pas séparer React pour garantir qu'il est chargé avant tous les composants
   // Cela évite les erreurs "forwardRef" et "unstable_scheduleCallback"
   if (
-    id.includes('node_modules/react/') || 
+    id.includes('node_modules/react/') ||
     id.includes('node_modules/react-dom/') ||
-    id.includes('node_modules/scheduler/')  // ✅ Scheduler inclus
+    id.includes('node_modules/scheduler/') // ✅ Scheduler inclus
   ) {
     return undefined; // Garder dans le chunk principal
   }
   // ...
-}
+};
 ```
 
 **Explication** :
+
 - `scheduler` reste dans le chunk principal avec React
 - Le chunk principal est toujours chargé en premier
 - Radix UI peut maintenant accéder à `unstable_scheduleCallback`
@@ -91,17 +96,20 @@ manualChunks: (id) => {
 **Fichier** : `vite.config.ts`
 
 **AVANT** :
+
 ```typescript
 dedupe: ['react', 'react-dom'],
 ```
 
 **APRÈS** :
+
 ```typescript
 // Dédupliquer React et Scheduler pour éviter les problèmes d'initialisation
 dedupe: ['react', 'react-dom', 'scheduler'],
 ```
 
 **Explication** :
+
 - Garantit une seule instance de `scheduler`
 - Évite les problèmes de duplication
 - Assure la cohérence entre React et Scheduler
@@ -113,6 +121,7 @@ dedupe: ['react', 'react-dom', 'scheduler'],
 **Fichier** : `vite.config.ts`
 
 **Ajouté** :
+
 ```typescript
 optimizeDeps: {
   include: [
@@ -121,11 +130,12 @@ optimizeDeps: {
     'scheduler', // CRITIQUE: Inclure scheduler pour Radix UI
     'react-router-dom',
     // ...
-  ]
+  ];
 }
 ```
 
 **Explication** :
+
 - Force l'inclusion de `scheduler` dans les dépendances optimisées
 - Garantit que `scheduler` est pré-bundlé avec React
 - Améliore les performances de chargement
@@ -134,12 +144,12 @@ optimizeDeps: {
 
 ## 📊 RÉSULTAT
 
-| Avant | Après |
-|-------|-------|
-| ❌ Scheduler dans chunk séparé | ✅ Scheduler dans chunk principal |
+| Avant                                                 | Après                                     |
+| ----------------------------------------------------- | ----------------------------------------- |
+| ❌ Scheduler dans chunk séparé                        | ✅ Scheduler dans chunk principal         |
 | ❌ Radix UI ne trouve pas `unstable_scheduleCallback` | ✅ `unstable_scheduleCallback` accessible |
-| ❌ Erreur sur Vercel | ✅ Application démarre |
-| ❌ Scheduler non dédupliqué | ✅ Scheduler dédupliqué |
+| ❌ Erreur sur Vercel                                  | ✅ Application démarre                    |
+| ❌ Scheduler non dédupliqué                           | ✅ Scheduler dédupliqué                   |
 
 ---
 
@@ -182,6 +192,7 @@ optimizeDeps: {
 ### Dépendances React à garder ensemble
 
 Pour éviter les erreurs similaires, ces packages doivent rester dans le chunk principal :
+
 - ✅ `react` - Core React
 - ✅ `react-dom` - React DOM renderer
 - ✅ `scheduler` - React Scheduler (utilisé par react-dom et Radix UI)
@@ -191,6 +202,7 @@ Pour éviter les erreurs similaires, ces packages doivent rester dans le chunk p
 ## 🚀 DÉPLOIEMENT
 
 ### Commandes
+
 ```bash
 # Build local pour vérifier
 npm run build
@@ -218,6 +230,7 @@ git push
 **Statut**: ✅ **CORRIGÉ**
 
 ### Changements
+
 - ✅ Scheduler inclus dans le chunk principal
 - ✅ Scheduler ajouté à `dedupe`
 - ✅ Scheduler ajouté à `optimizeDeps.include`
@@ -225,5 +238,4 @@ git push
 
 ---
 
-*Dernière mise à jour : Janvier 2025*
-
+_Dernière mise à jour : Janvier 2025_

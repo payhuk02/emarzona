@@ -31,6 +31,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Logs** :
 
 Recherchez les messages pour l'invocation 201 :
+
 - `Calling send-email-campaign:` - Devrait indiquer `usingAnonKey: true`
 - `Processing scheduled campaign: ...` - Si une campagne a été trouvée
 - `Error invoking send-email-campaign:` - Plus de `401 Invalid JWT` si ça fonctionne
@@ -40,13 +41,14 @@ Recherchez les messages pour l'invocation 201 :
 Dans Supabase Dashboard > Edge Functions > `send-email-campaign` > **Logs** :
 
 Recherchez les messages :
+
 - `send-email-campaign received request:` - Devrait apparaître si l'appel réussit
 - Plus d'erreurs `401 Invalid JWT`
 
 ### 4. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -59,6 +61,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus si tout fonctionne** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -66,7 +69,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 5. Vérifier les Logs d'Emails
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   status,
   campaign_id
@@ -84,6 +87,7 @@ GROUP BY status, campaign_id;
 ### Scénario 1 : ✅ Invocation 200 OK et Campagne Traitée
 
 **Si l'invocation 201 est `200 OK` ET la campagne est traitée** :
+
 - ✅ **Le problème est complètement résolu !**
 - ✅ Le cron job fonctionne automatiquement toutes les 5 minutes
 - ✅ Les campagnes programmées seront traitées automatiquement
@@ -95,7 +99,7 @@ GROUP BY status, campaign_id;
 Vérifier les critères de la campagne :
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -114,6 +118,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### Scénario 3 : ❌ Invocation Toujours 401
 
 **Si l'invocation 201 est toujours `401`** :
+
 - ⚠️ Problème plus profond
 - Vérifier les logs pour voir si l'anon key est bien utilisée
 - Vérifier que `SUPABASE_ANON_KEY` est bien injecté automatiquement
@@ -144,5 +149,3 @@ Si l'invocation 201 est `200 OK` et la campagne est traitée :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

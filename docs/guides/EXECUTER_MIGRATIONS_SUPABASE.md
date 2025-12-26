@@ -24,6 +24,7 @@ supabase db push
 ```
 
 Cette commande :
+
 - Détecte automatiquement les migrations non appliquées
 - Les applique dans l'ordre chronologique
 - Affiche un résumé des migrations appliquées
@@ -55,11 +56,13 @@ Si le CLI ne fonctionne pas, vous pouvez exécuter les migrations manuellement :
 3. **Exécuter les migrations**
 
    **Migration 1 : Correction fonction generate_affiliate_link_code**
+
    ```sql
    -- Copier le contenu de : supabase/migrations/20250131_fix_affiliate_link_code_function.sql
    ```
 
    **Migration 2 : Système de liens courts**
+
    ```sql
    -- Copier le contenu de : supabase/migrations/20250131_affiliate_short_links.sql
    ```
@@ -90,10 +93,12 @@ psql "postgresql://postgres:[PASSWORD]@db.hbdnzajbyjakdhuavrvb.supabase.co:5432/
 **Fichier** : `supabase/migrations/20250131_fix_affiliate_link_code_function.sql`
 
 **Objectif** :
+
 - Activer l'extension `pgcrypto`
 - Corriger la fonction `generate_affiliate_link_code` pour utiliser `digest()`
 
 **Commande** :
+
 ```bash
 supabase db push
 ```
@@ -105,11 +110,13 @@ Cette migration sera automatiquement détectée et appliquée.
 **Fichier** : `supabase/migrations/20250131_affiliate_short_links.sql`
 
 **Objectif** :
+
 - Créer la table `affiliate_short_links`
 - Créer les fonctions `generate_short_link_code` et `track_short_link_click`
 - Configurer les RLS policies
 
 **Commande** :
+
 ```bash
 supabase db push
 ```
@@ -127,6 +134,7 @@ supabase migration list
 ### Vérifier que l'extension pgcrypto est activée
 
 Dans SQL Editor :
+
 ```sql
 SELECT * FROM pg_extension WHERE extname = 'pgcrypto';
 ```
@@ -183,16 +191,19 @@ Assurez-vous d'avoir les droits d'administration sur le projet Supabase.
 ## 📝 Workflow Recommandé
 
 1. **Vérifier l'état actuel**
+
    ```bash
    supabase migration list
    ```
 
 2. **Voir ce qui serait appliqué**
+
    ```bash
    supabase db push --dry-run
    ```
 
 3. **Appliquer les migrations**
+
    ```bash
    supabase db push
    ```
@@ -209,4 +220,3 @@ Assurez-vous d'avoir les droits d'administration sur le projet Supabase.
 - **Documentation Supabase CLI** : https://supabase.com/docs/guides/cli
 - **Guide des migrations** : https://supabase.com/docs/guides/cli/local-development#database-migrations
 - **Dashboard Supabase** : https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb
-

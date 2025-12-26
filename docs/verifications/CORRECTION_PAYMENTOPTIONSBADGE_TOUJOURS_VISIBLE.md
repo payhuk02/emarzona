@@ -97,4 +97,3 @@ Maintenant, **toutes les cartes produits** du Marketplace et de la Boutique affi
 ---
 
 _Correction appliquée le 2 Février 2025_
-

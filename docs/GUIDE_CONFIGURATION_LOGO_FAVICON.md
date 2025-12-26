@@ -20,11 +20,13 @@ Deux méthodes sont disponibles pour configurer le logo et favicon :
 ### Option A : Script Complet (avec Sharp)
 
 **Prérequis** :
+
 ```bash
 npm install sharp
 ```
 
 **Utilisation** :
+
 ```bash
 # Via npm script (recommandé)
 npm run favicon:generate
@@ -34,6 +36,7 @@ node scripts/generate-favicon.js
 ```
 
 **Ce que fait le script** :
+
 - ✅ Génère `favicon.ico` (32x32px)
 - ✅ Génère `favicon-32x32.png`
 - ✅ Génère `favicon-16x16.png`
@@ -43,6 +46,7 @@ node scripts/generate-favicon.js
 ### Option B : Script Simple (sans dépendances)
 
 **Utilisation** :
+
 ```bash
 # Via npm script (recommandé)
 npm run favicon:generate:simple
@@ -52,6 +56,7 @@ node scripts/generate-favicon-simple.js
 ```
 
 **Ce que fait le script** :
+
 - ✅ Copie le logo comme favicon
 - ✅ Crée `favicon.png` pour compatibilité
 - ✅ Aucune dépendance externe requise
@@ -63,11 +68,12 @@ node scripts/generate-favicon-simple.js
    - Taille recommandée : 512x512px (PNG avec transparence)
 
 2. **Exécuter le script** :
+
    ```bash
    # Option A : Script complet (recommandé - meilleure qualité)
    npm install sharp
    npm run favicon:generate
-   
+
    # OU Option B : Script simple (rapide - sans dépendances)
    npm run favicon:generate:simple
    ```
@@ -117,16 +123,19 @@ node scripts/generate-favicon-simple.js
 ## 📋 Préparer les Images
 
 ### Logo Principal
+
 - **Fichier** : `emarzona-logo.png` ou `emarzona-logo.svg`
 - **Taille recommandée** : 512x512px (PNG) ou vectoriel (SVG)
 - **Format** : PNG avec transparence ou SVG
 
 ### Favicon
+
 - **Fichier** : `favicon.ico`
 - **Taille** : 32x32px, 16x16px (format ICO multi-tailles)
 - **Alternative** : `favicon.png` (32x32px ou 64x64px)
 
 ### Icônes PWA (Optionnel mais recommandé)
+
 - **Fichier** : `emarzona-logo.png` (utilisé pour manifest.json)
 - **Tailles** : 192x192px et 512x512px
 
@@ -135,6 +144,7 @@ node scripts/generate-favicon-simple.js
 ## ✅ Configuration Automatique
 
 Une fois les fichiers placés dans `public/`, l'application utilisera automatiquement :
+
 - Le logo : `/emarzona-logo.png` (défini dans `usePlatformLogo.ts`)
 - Le favicon : `/favicon.ico` (défini dans `index.html` et `DynamicFavicon.tsx`)
 
@@ -145,6 +155,7 @@ Une fois les fichiers placés dans `public/`, l'application utilisera automatiqu
 Après avoir configuré le logo et favicon :
 
 1. **Redémarrer le serveur de développement** :
+
    ```bash
    npm run dev
    ```
@@ -173,22 +184,24 @@ Après avoir configuré le logo et favicon :
 
 ## 📊 Comparaison des Méthodes
 
-| Méthode | Avantages | Inconvénients | Recommandation |
-|---------|-----------|--------------|----------------|
-| **Script Complet (Sharp)** | ✅ Optimisation automatique<br>✅ Multi-tailles<br>✅ Qualité professionnelle | ⚠️ Nécessite `npm install sharp` | ⭐⭐⭐⭐⭐ Recommandé |
-| **Script Simple** | ✅ Rapide<br>✅ Aucune dépendance<br>✅ Simple | ⚠️ Pas d'optimisation<br>⚠️ Une seule taille | ⭐⭐⭐ Pour tests rapides |
-| **Manuel (Outils en ligne)** | ✅ Contrôle total<br>✅ Options avancées<br>✅ Vrai format ICO | ⚠️ Plus long<br>⚠️ Nécessite upload | ⭐⭐⭐⭐ Pour production finale |
+| Méthode                      | Avantages                                                                     | Inconvénients                                | Recommandation                  |
+| ---------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------- |
+| **Script Complet (Sharp)**   | ✅ Optimisation automatique<br>✅ Multi-tailles<br>✅ Qualité professionnelle | ⚠️ Nécessite `npm install sharp`             | ⭐⭐⭐⭐⭐ Recommandé           |
+| **Script Simple**            | ✅ Rapide<br>✅ Aucune dépendance<br>✅ Simple                                | ⚠️ Pas d'optimisation<br>⚠️ Une seule taille | ⭐⭐⭐ Pour tests rapides       |
+| **Manuel (Outils en ligne)** | ✅ Contrôle total<br>✅ Options avancées<br>✅ Vrai format ICO                | ⚠️ Plus long<br>⚠️ Nécessite upload          | ⭐⭐⭐⭐ Pour production finale |
 
 ---
 
 ## 🎯 Recommandation
 
 **Pour la production** :
+
 1. Utilisez le **Script Complet** (`npm run favicon:generate`) pour générer les fichiers de base
 2. Utilisez **realfavicongenerator.net** pour optimiser et générer les variantes multi-plateformes
 3. Placez tous les fichiers dans `public/`
 
 **Pour le développement** :
+
 - Utilisez le **Script Simple** (`npm run favicon:generate:simple`) pour tester rapidement
 
 ---
@@ -205,9 +218,9 @@ Après avoir configuré le logo et favicon :
 ## 🚀 Après Configuration
 
 Une fois les fichiers remplacés, l'application utilisera automatiquement le nouveau logo et favicon partout :
+
 - Header de l'application
 - Onglets du navigateur
 - Signets/Favoris
 - Applications PWA
 - Partages sur les réseaux sociaux (si configuré)
-

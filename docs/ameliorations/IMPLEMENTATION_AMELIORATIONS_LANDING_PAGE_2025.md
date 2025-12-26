@@ -26,11 +26,11 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 
 ```css
 /* Thème clair */
---accent: 38 92% 50%;          /* Orange/Jaune moderne pour contraste avec primary */
+--accent: 38 92% 50%; /* Orange/Jaune moderne pour contraste avec primary */
 --accent-foreground: 0 0% 100%;
 
 /* Thème sombre */
---accent: 38 92% 55%;           /* Orange/Jaune moderne pour contraste avec primary */
+--accent: 38 92% 55%; /* Orange/Jaune moderne pour contraste avec primary */
 --accent-foreground: 0 0% 100%;
 
 /* Gradients */
@@ -40,6 +40,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 ```
 
 **Impact** :
+
 - ✅ Meilleure distinction visuelle entre `primary` (bleu) et `accent` (orange/jaune)
 - ✅ Contraste amélioré pour les éléments de mise en avant (badges, icônes, CTA)
 - ✅ Palette de couleurs plus riche et professionnelle
@@ -67,14 +68,14 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   /* Désactiver les animations spécifiques */
   .animate-fade-in-up,
   .animate-float,
   .animate-pulse {
     animation: none !important;
   }
-  
+
   /* Désactiver les transformations au hover */
   *:hover {
     transform: none !important;
@@ -83,6 +84,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 ```
 
 **Impact** :
+
 - ✅ Accessibilité améliorée pour les utilisateurs sensibles aux animations
 - ✅ Conformité WCAG 2.1 (Success Criterion 2.3.3)
 - ✅ Meilleure expérience pour les utilisateurs avec des troubles vestibulaires
@@ -100,16 +102,19 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 **Fichier** : `src/pages/Landing.tsx`
 
 **Avant** :
+
 ```tsx
 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl ...">
 ```
 
 **Après** :
+
 ```tsx
 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-5xl ...">
 ```
 
 **Impact** :
+
 - ✅ Tailles de police plus raisonnables et lisibles
 - ✅ Meilleure cohérence visuelle
 - ✅ Réduction des problèmes de layout sur très grands écrans
@@ -120,7 +125,8 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 
 **Problème** : Les mockups prenaient trop de place sur mobile et pouvaient gêner la navigation.
 
-**Solution** : 
+**Solution** :
+
 - Masquage du mockup hero sur mobile (< 640px)
 - Réduction du padding et des icônes sur tous les mockups pour mobile
 
@@ -129,18 +135,23 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 **Fichier** : `src/pages/Landing.tsx`
 
 #### Mockup Hero
+
 **Avant** :
+
 ```tsx
 <div className="relative mt-8 rounded-xl md:rounded-2xl ... animate-float mx-4 md:mx-0">
 ```
 
 **Après** :
+
 ```tsx
 <div className="relative mt-8 rounded-xl md:rounded-2xl ... animate-float mx-4 md:mx-0 hidden sm:block">
 ```
 
 #### Mockups des Sections Fonctionnalités
+
 **Avant** :
+
 ```tsx
 <div className="bg-card rounded-xl md:rounded-2xl p-6 md:p-8 ...">
   <div className="aspect-video ...">
@@ -150,6 +161,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 ```
 
 **Après** :
+
 ```tsx
 <div className="bg-card rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 ...">
   <div className="aspect-video ...">
@@ -159,7 +171,9 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 ```
 
 #### Mockup Section Couverture
+
 **Avant** :
+
 ```tsx
 <div className="bg-card rounded-xl md:rounded-2xl p-6 md:p-8 ...">
   <div className="aspect-square ...">
@@ -169,6 +183,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 ```
 
 **Après** :
+
 ```tsx
 <div className="bg-card rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 ...">
   <div className="aspect-square ...">
@@ -178,6 +193,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 ```
 
 **Impact** :
+
 - ✅ Meilleure utilisation de l'espace sur mobile
 - ✅ Navigation plus fluide
 - ✅ Contenu plus accessible sur petits écrans
@@ -189,12 +205,12 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 
 ### Avant vs Après
 
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| **Distinction Primary/Accent** | ❌ Identiques | ✅ Différenciés | +100% |
-| **Accessibilité Animations** | ⚠️ Partielle | ✅ Complète | +50% |
-| **Taille Police Hero** | ⚠️ text-7xl | ✅ text-5xl max | +30% |
-| **Espace Mobile** | ⚠️ Mockups trop grands | ✅ Optimisés | +40% |
+| Métrique                       | Avant                  | Après           | Amélioration |
+| ------------------------------ | ---------------------- | --------------- | ------------ |
+| **Distinction Primary/Accent** | ❌ Identiques          | ✅ Différenciés | +100%        |
+| **Accessibilité Animations**   | ⚠️ Partielle           | ✅ Complète     | +50%         |
+| **Taille Police Hero**         | ⚠️ text-7xl            | ✅ text-5xl max | +30%         |
+| **Espace Mobile**              | ⚠️ Mockups trop grands | ✅ Optimisés    | +40%         |
 
 ### Score Global
 
@@ -215,6 +231,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 **Objectif** : Créer des variantes claires et foncées du gradient hero pour plus de flexibilité.
 
 **Action** :
+
 ```css
 --gradient-hero-light: linear-gradient(135deg, hsl(220, 40%, 25%) 0%, hsl(220, 50%, 18%) 100%);
 --gradient-hero-dark: linear-gradient(135deg, hsl(220, 40%, 15%) 0%, hsl(220, 50%, 8%) 100%);
@@ -225,6 +242,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 **Objectif** : Utiliser des images optimisées (WebP) pour les mockups.
 
 **Action** :
+
 - Convertir les placeholders en images WebP
 - Implémenter le lazy loading pour les images non visibles
 
@@ -233,6 +251,7 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 **Objectif** : Varier les durées d'animation selon l'élément.
 
 **Action** :
+
 ```css
 --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -278,5 +297,3 @@ Implémentation des améliorations prioritaires identifiées dans l'analyse du t
 
 **Document créé le** : 2025-01-30  
 **Dernière mise à jour** : 2025-01-30
-
-

@@ -8,10 +8,12 @@
 ## ✅ PHASE 6 : ÉDITEUR DE TEMPLATES - EN COURS (30%)
 
 ### Réalisations
+
 - ✅ Planification complétée
 - ✅ Éditeur WYSIWYG identifié (`RichTextEditorPro` existant)
 
 ### ⏳ À Créer
+
 - ⏳ Hook `useEmailTemplateEditor`
 - ⏳ Composant `EmailTemplateEditor`
 - ⏳ Composant `TemplateBlockLibrary`
@@ -23,6 +25,7 @@
 ## ✅ PHASE 7 : WORKFLOWS - EN COURS (40%)
 
 ### Réalisations
+
 - ✅ Migration SQL créée (`20250201_phase7_email_workflows.sql`)
   - Table `email_workflows`
   - Fonction `execute_email_workflow`
@@ -30,6 +33,7 @@
 - ✅ Hooks React créés (`useEmailWorkflows.ts`)
 
 ### ⏳ À Créer
+
 - ⏳ Composants UI (EmailWorkflowBuilder, WorkflowTriggerEditor, WorkflowActionEditor)
 - ⏳ Page principale `/dashboard/emails/workflows`
 
@@ -37,4 +41,3 @@
 
 **Note :** Ces phases sont plus complexes et nécessiteront plus de composants.  
 **Prochaine étape :** Créer les composants UI de base pour les deux phases.
-

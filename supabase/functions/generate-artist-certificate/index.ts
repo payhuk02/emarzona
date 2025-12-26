@@ -1,7 +1,7 @@
 /**
  * Edge Function: Génération Automatique de Certificats Artistes
  * Date: 28 Janvier 2025
- * 
+ *
  * Déclenchée automatiquement après confirmation de paiement
  * pour générer les certificats d'authenticité
  */
@@ -22,7 +22,7 @@ interface CertificateGenerationRequest {
   user_id: string;
 }
 
-serve(async (req) => {
+serve(async req => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -32,10 +32,10 @@ serve(async (req) => {
     // Récupérer les headers
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Créer le client Supabase avec service_role pour bypass RLS
@@ -48,10 +48,10 @@ serve(async (req) => {
     const { order_id, order_item_id, product_id, artist_product_id, user_id } = body;
 
     if (!order_id || !product_id || !artist_product_id || !user_id) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Vérifier si un certificat existe déjà
@@ -76,21 +76,9 @@ serve(async (req) => {
 
     // Récupérer les informations nécessaires
     const [orderResult, artistProductResult, productResult] = await Promise.all([
-      supabase
-        .from('orders')
-        .select('*, customers(*)')
-        .eq('id', order_id)
-        .single(),
-      supabase
-        .from('artist_products')
-        .select('*')
-        .eq('id', artist_product_id)
-        .single(),
-      supabase
-        .from('products')
-        .select('*')
-        .eq('id', product_id)
-        .single(),
+      supabase.from('orders').select('*, customers(*)').eq('id', order_id).single(),
+      supabase.from('artist_products').select('*').eq('id', artist_product_id).single(),
+      supabase.from('products').select('*').eq('id', product_id).single(),
     ]);
 
     if (orderResult.error || !orderResult.data) {
@@ -108,7 +96,7 @@ serve(async (req) => {
     const product = productResult.data;
 
     // Vérifier si un certificat doit être généré
-    const shouldGenerate = 
+    const shouldGenerate =
       artistProduct.certificate_of_authenticity === true ||
       artistProduct.artwork_edition_type === 'limited_edition';
 
@@ -144,11 +132,11 @@ serve(async (req) => {
       artist_product_id,
       user_id,
       certificate_number: certificateNumber,
-      certificate_type: artistProduct.certificate_of_authenticity 
-        ? 'authenticity' 
+      certificate_type: artistProduct.certificate_of_authenticity
+        ? 'authenticity'
         : artistProduct.artwork_edition_type === 'limited_edition'
-        ? 'limited_edition'
-        : 'handmade',
+          ? 'limited_edition'
+          : 'handmade',
       edition_number: artistProduct.edition_number || null,
       total_edition: artistProduct.total_editions || null,
       signed_by_artist: artistProduct.signature_authenticated || false,
@@ -189,7 +177,6 @@ serve(async (req) => {
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
     console.error('Error in generate-artist-certificate:', error);
     return new Response(
@@ -200,4 +187,3 @@ serve(async (req) => {
     );
   }
 });
-

@@ -219,4 +219,3 @@ Le toggle du programme d'affiliation est correctement implémenté et fonctionne
 - ✅ Ajout des imports de types manquants
 
 **Le toggle fonctionne correctement !** ✅
-

@@ -21,6 +21,7 @@
 ### Stack Technique Identifié
 
 **Frontend**:
+
 - ✅ React 18.3.1 + TypeScript 5.8.3
 - ✅ Vite 5.4.19
 - ✅ TailwindCSS 3.4.17 + ShadCN UI
@@ -30,20 +31,24 @@
 - ✅ date-fns (dates)
 
 **Backend & BaaS**:
+
 - ✅ Supabase (PostgreSQL + Auth + Storage + Edge Functions + Realtime)
 - ✅ Row Level Security (RLS) activé
 
 **Paiements**:
+
 - ✅ Moneroo (principal)
 - ✅ Webhooks configurés
 
 **Monitoring & Analytics**:
+
 - ✅ Sentry (error tracking)
 - ✅ Web Vitals (performance)
 - ✅ Google Analytics
 - ✅ Facebook/TikTok Pixels
 
 **Communication**:
+
 - ✅ Crisp (Live Chat)
 - ✅ SendGrid (Email)
 - ✅ Système notifications temps réel
@@ -57,6 +62,7 @@
 #### Table Principale: `products`
 
 **Colonnes Identifiées**:
+
 ```sql
 - id, store_id, name, slug
 - description, short_description
@@ -89,16 +95,18 @@
 
 **Solutions Déjà Implémentées**:
 ✅ Tables spécialisées créées:
-  - `digital_products` (6 tables associées)
-  - `physical_products` (6 tables associées)
-  - `service_products` (5 tables + 1 étendue)
-  - `courses` (11 tables associées)
+
+- `digital_products` (6 tables associées)
+- `physical_products` (6 tables associées)
+- `service_products` (5 tables + 1 étendue)
+- `courses` (11 tables associées)
 
 ### 2. ✅ Système Commandes
 
 #### Tables: `orders`, `order_items`
 
 **Colonnes Orders**:
+
 ```sql
 - id, store_id, customer_id, order_number
 - status, total_amount, currency
@@ -479,18 +487,18 @@
 
 ## 📊 COMPARAISON AVEC LEADERS
 
-| Fonctionnalité | Payhuk | Shopify | WooCommerce | Gumroad | Score |
-|----------------|--------|---------|-------------|---------|-------|
-| **Produits Digitaux** | ✅ Avancé | ⚠️ Basic | ✅ Avancé | ✅ Excellent | 90% |
-| **Produits Physiques** | ✅ Bon | ✅ Excellent | ✅ Excellent | ❌ Non | 75% |
-| **Services/Réservations** | ✅ Bon | ⚠️ Plugins | ⚠️ Plugins | ❌ Non | 80% |
-| **Cours en Ligne** | ✅ Bon | ⚠️ Plugins | ⚠️ Plugins | ⚠️ Basic | 85% |
-| **Paiements** | ⚠️ Limité | ✅ Excellent | ✅ Excellent | ✅ Bon | 60% |
-| **Marketing** | ⚠️ Basic | ✅ Excellent | ✅ Bon | ⚠️ Basic | 50% |
-| **Subscriptions** | ❌ Non | ✅ Excellent | ✅ Bon | ✅ Bon | 0% |
-| **Analytics** | ⚠️ Basic | ✅ Excellent | ✅ Bon | ⚠️ Basic | 50% |
-| **SEO** | ✅ Bon | ✅ Excellent | ✅ Excellent | ⚠️ Basic | 70% |
-| **Support Client** | ⚠️ Basic | ✅ Excellent | ⚠️ Basic | ⚠️ Basic | 50% |
+| Fonctionnalité            | Payhuk    | Shopify      | WooCommerce  | Gumroad      | Score |
+| ------------------------- | --------- | ------------ | ------------ | ------------ | ----- |
+| **Produits Digitaux**     | ✅ Avancé | ⚠️ Basic     | ✅ Avancé    | ✅ Excellent | 90%   |
+| **Produits Physiques**    | ✅ Bon    | ✅ Excellent | ✅ Excellent | ❌ Non       | 75%   |
+| **Services/Réservations** | ✅ Bon    | ⚠️ Plugins   | ⚠️ Plugins   | ❌ Non       | 80%   |
+| **Cours en Ligne**        | ✅ Bon    | ⚠️ Plugins   | ⚠️ Plugins   | ⚠️ Basic     | 85%   |
+| **Paiements**             | ⚠️ Limité | ✅ Excellent | ✅ Excellent | ✅ Bon       | 60%   |
+| **Marketing**             | ⚠️ Basic  | ✅ Excellent | ✅ Bon       | ⚠️ Basic     | 50%   |
+| **Subscriptions**         | ❌ Non    | ✅ Excellent | ✅ Bon       | ✅ Bon       | 0%    |
+| **Analytics**             | ⚠️ Basic  | ✅ Excellent | ✅ Bon       | ⚠️ Basic     | 50%   |
+| **SEO**                   | ✅ Bon    | ✅ Excellent | ✅ Excellent | ⚠️ Basic     | 70%   |
+| **Support Client**        | ⚠️ Basic  | ✅ Excellent | ⚠️ Basic     | ⚠️ Basic     | 50%   |
 
 **Score Global**: **66%** → Objectif: **90%+**
 
@@ -512,12 +520,14 @@
 ### Phase 2: Fonctionnalités Critiques (2 semaines)
 
 **Sprint 1** - Facturation & Taxes (1 semaine):
+
 1. Génération factures PDF automatique
 2. Calcul taxes automatique
 3. Multi-devises complètes
 4. Export comptable
 
 **Sprint 2** - Subscriptions (1 semaine):
+
 1. Subscription management complet
 2. Paiements récurrents
 3. Pause/Cancel/Upgrade
@@ -526,12 +536,14 @@
 ### Phase 3: Marketing Automation (2 semaines)
 
 **Sprint 3** - Cart Recovery & Upsells (1 semaine):
+
 1. Abandoned cart tracking
 2. Email automation recovery
 3. Upsells/Cross-sells engine
 4. Product recommendations IA
 
 **Sprint 4** - Email Marketing Avancé (1 semaine):
+
 1. Drip campaigns
 2. Segmentation avancée
 3. A/B testing emails
@@ -540,12 +552,14 @@
 ### Phase 4: Fidélisation & Retention (2 semaines)
 
 **Sprint 5** - Loyalty Program (1 semaine):
+
 1. Points system
 2. Rewards catalog
 3. Tier levels
 4. Referral bonuses
 
 **Sprint 6** - Gift Cards & Coupons Avancés (1 semaine):
+
 1. Gift cards system
 2. Advanced coupons
 3. Bundle pricing
@@ -554,18 +568,21 @@
 ### Phase 7: Avancé & Différenciation (3 semaines)
 
 **Sprint 7** - Analytics Pro (1 semaine):
+
 1. Cohort analysis
 2. Funnel visualization
 3. CLV tracking
 4. Custom reports
 
 **Sprint 8** - IA & Automation (1 semaine):
+
 1. Chatbot IA
 2. Sentiment analysis reviews
 3. Predictive analytics
 4. Smart recommendations
 
 **Sprint 9** - Intégrations Pro (1 semaine):
+
 1. Transporteurs (DHL, FedEx, UPS)
 2. Accounting (QuickBooks)
 3. CRM (HubSpot)
@@ -578,18 +595,21 @@
 ### Semaine 1-2: Audit & Harmonisation
 
 **Jour 1-2**: Audit SQL complet
+
 - Vérifier toutes migrations
 - Corriger RLS policies
 - Optimiser indexes
 - Tests sécurité
 
 **Jour 3-4**: Harmonisation Code
+
 - Naming conventions
 - Structure folders
 - Types TypeScript
 - Documentation
 
 **Jour 5-7**: Tests & Corrections
+
 - Tests E2E Playwright
 - Correction bugs identifiés
 - Performance optimization
@@ -598,12 +618,14 @@
 ### Semaine 3-4: Facturation & Subscriptions
 
 **Jour 8-10**: Facturation
+
 - PDF generation
 - Tax calculation
 - Multi-currency
 - Accounting export
 
 **Jour 11-14**: Subscriptions
+
 - Recurring payments
 - Subscription CRUD
 - Webhooks
@@ -612,12 +634,14 @@
 ### Semaine 5-6: Marketing Automation
 
 **Jour 15-17**: Cart Recovery
+
 - Tracking system
 - Email templates
 - Automation rules
 - Analytics
 
 **Jour 18-21**: Upsells & Email
+
 - Recommendation engine
 - Drip campaigns
 - Segmentation
@@ -626,12 +650,14 @@
 ### Semaine 7-8: Loyalty & Gift Cards
 
 **Jour 22-24**: Loyalty Program
+
 - Points system
 - Rewards
 - Tiers
 - Dashboard
 
 **Jour 25-28**: Gift Cards
+
 - Generation
 - Redemption
 - Balance tracking
@@ -640,18 +666,21 @@
 ### Semaine 9-11: Analytics & IA
 
 **Jour 29-31**: Analytics Pro
+
 - Cohort analysis
 - Funnels
 - CLV
 - Reports builder
 
 **Jour 32-35**: IA Integration
+
 - Chatbot
 - Sentiment analysis
 - Predictions
 - Smart features
 
 **Jour 36-38**: Intégrations
+
 - Shipping carriers
 - Accounting
 - CRM
@@ -683,4 +712,3 @@
 
 **Durée Totale Estimée**: 11 semaines (2.5 mois)  
 **Résultat Attendu**: Score 90%+ comparaison leaders
-

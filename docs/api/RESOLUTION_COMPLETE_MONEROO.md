@@ -7,11 +7,13 @@
 D'après la [documentation officielle Moneroo](https://docs.moneroo.io/) :
 
 ### Endpoint d'Initialisation
+
 - **URL** : `POST /v1/payments/initialize`
 - **Base URL** : `https://api.moneroo.io/v1`
 - ✅ **Notre implémentation est correcte**
 
 ### Champs Requis
+
 - `amount` (integer) : Montant en centimes
 - `currency` (string) : Code devise (XOF, XAF, USD, etc.)
 - `description` (string) : Description du paiement
@@ -22,6 +24,7 @@ D'après la [documentation officielle Moneroo](https://docs.moneroo.io/) :
 - `cancel_url` (string) : URL de retour si annulation
 
 ### Champs Optionnels
+
 - `metadata` (object) : **Doit contenir `product_id` selon les erreurs 422**
 - `methods` (array) : Méthodes de paiement autorisées
 
@@ -41,7 +44,8 @@ D'après les exemples de la documentation PHP SDK :
 
 **Erreur 422 :** `"The metadata.product_id field is required."`
 
-**Cause :** 
+**Cause :**
+
 1. `productId` était passé dans `data` mais pas dans `metadata`
 2. L'Edge Function ne transmettait pas `productId` à `metadata.product_id`
 
@@ -50,6 +54,7 @@ D'après les exemples de la documentation PHP SDK :
 ### 1. Edge Function (`supabase/functions/moneroo/index.ts`)
 
 **Corrections :**
+
 - ✅ Extraction de `productId` depuis `data` et ajout à `metadata.product_id`
 - ✅ Extraction de `storeId` depuis `data` et ajout à `metadata.store_id`
 - ✅ Logs détaillés pour diagnostic
@@ -57,6 +62,7 @@ D'après les exemples de la documentation PHP SDK :
 - ✅ Conversion explicite en string
 
 **Code ajouté :**
+
 ```typescript
 // Ajouter productId à metadata si présent dans data
 if (data.productId) {
@@ -68,11 +74,13 @@ if (data.productId) {
 ### 2. Client Moneroo (`src/lib/moneroo-payment.ts`)
 
 **Corrections :**
+
 - ✅ Ajout de `productId` dans `metadata.product_id` directement
 - ✅ Passage de `productId` et `storeId` directement dans `data` pour que l'Edge Function puisse les extraire
 - ✅ Logs détaillés pour vérifier que `productId` est bien passé
 
 **Code modifié :**
+
 ```typescript
 const checkoutData: MonerooCheckoutData = {
   // ...
@@ -115,6 +123,7 @@ const checkoutDataWithIds = {
 ## 🎯 Structure de la Requête Finale
 
 **Requête envoyée à l'API Moneroo :**
+
 ```json
 {
   "amount": 5000,
@@ -130,7 +139,7 @@ const checkoutDataWithIds = {
   "metadata": {
     "transaction_id": "02d17847-5f7c-4e36-9d9d-8b92a3bdfd9e",
     "store_id": "ecb9d915-b37b-4383-afb1-256bab22da73",
-    "product_id": "a6dbf752-22ca-4931-abdc-0aee713dbd99",  // ✅ Maintenant inclus
+    "product_id": "a6dbf752-22ca-4931-abdc-0aee713dbd99", // ✅ Maintenant inclus
     "user_id": "cd50a4d0-6c7f-405a-b0ed-2ac5f12c33cc"
   }
 }
@@ -180,4 +189,3 @@ INFO Moneroo Edge Function Metadata construction: [finalMetadataProductId: "a6db
 - [Documentation Moneroo](https://docs.moneroo.io/)
 - [Moneroo PHP SDK - Exemple](https://docs.moneroo.io/sdks/php-sdk)
 - [Moneroo Standard Integration](https://docs.moneroo.io/payments/standard-integration)
-

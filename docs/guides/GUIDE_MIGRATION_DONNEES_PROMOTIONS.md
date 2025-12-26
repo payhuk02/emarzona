@@ -21,6 +21,7 @@ Avant de commencer la migration :
    - Les fonctions de migration doivent exister
 
 2. ✅ **Faire une sauvegarde de la base de données**
+
    ```bash
    # Via Supabase CLI (recommandé)
    supabase db dump > backup_before_migration.sql
@@ -46,7 +47,7 @@ Exécutez cette requête pour voir combien d'enregistrements vous avez :
 
 ```sql
 -- Voir l'état actuel
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM public.promotions) as promotions_count,
   (SELECT COUNT(*) FROM public.digital_product_coupons WHERE is_archived = FALSE) as digital_coupons_count,
   (SELECT COUNT(*) FROM public.product_promotions) as product_promotions_count;
@@ -68,6 +69,7 @@ Utilisez le script complet qui gère tout automatiquement :
 4. Exécutez le script
 
 Le script va :
+
 - ✅ Vérifier l'état actuel
 - ✅ Migrer depuis `promotions`
 - ✅ Migrer depuis `digital_product_coupons`
@@ -85,6 +87,7 @@ SELECT * FROM migrate_promotions_to_product_promotions();
 ```
 
 Cette fonction retourne :
+
 - `migrated_count` : Nombre de promotions migrées avec succès
 - `skipped_count` : Nombre de promotions ignorées (déjà migrées ou erreurs)
 - `errors` : Tableau des erreurs rencontrées
@@ -109,7 +112,7 @@ SELECT migrate_coupon_usages_to_promotion_usage();
 
 ```sql
 -- Voir toutes les promotions migrées depuis promotions
-SELECT 
+SELECT
   id,
   name,
   code,
@@ -124,7 +127,7 @@ ORDER BY created_at DESC;
 
 ```sql
 -- Voir toutes les promotions migrées depuis digital_product_coupons
-SELECT 
+SELECT
   id,
   name,
   code,
@@ -141,7 +144,7 @@ ORDER BY created_at DESC;
 
 ```sql
 -- Statistiques globales
-SELECT 
+SELECT
   migration_source,
   COUNT(*) as count,
   COUNT(CASE WHEN is_active THEN 1 END) as active_count
@@ -165,18 +168,21 @@ FROM public.promotion_usage;
 ### Problème : Aucune donnée migrée
 
 **Vérifications :**
+
 1. Les tables source existent-elles ?
+
    ```sql
-   SELECT table_name 
-   FROM information_schema.tables 
-   WHERE table_schema = 'public' 
+   SELECT table_name
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
      AND table_name IN ('promotions', 'digital_product_coupons');
    ```
 
 2. Les fonctions de migration existent-elles ?
+
    ```sql
-   SELECT routine_name 
-   FROM information_schema.routines 
+   SELECT routine_name
+   FROM information_schema.routines
    WHERE routine_name IN (
      'migrate_promotions_to_product_promotions',
      'migrate_digital_coupons_to_product_promotions'
@@ -199,9 +205,10 @@ Si vous voyez des erreurs dans les résultats :
    Les erreurs sont retournées dans le champ `errors` du résultat.
 
 2. **Vérifier les contraintes**
+
    ```sql
    -- Voir les contraintes sur product_promotions
-   SELECT 
+   SELECT
      constraint_name,
      constraint_type
    FROM information_schema.table_constraints
@@ -216,6 +223,7 @@ Si vous voyez des erreurs dans les résultats :
 ### Problème : Données dupliquées
 
 La migration évite automatiquement les doublons en vérifiant :
+
 - Pour `promotions` : `original_promotion_id` doit être unique
 - Pour `digital_product_coupons` : `original_digital_coupon_id` doit être unique
 
@@ -223,7 +231,7 @@ Si vous voyez des doublons, vérifiez :
 
 ```sql
 -- Vérifier les doublons par original_promotion_id
-SELECT original_promotion_id, COUNT(*) 
+SELECT original_promotion_id, COUNT(*)
 FROM public.product_promotions
 WHERE original_promotion_id IS NOT NULL
 GROUP BY original_promotion_id
@@ -238,30 +246,30 @@ Pour avoir une vue complète après la migration :
 
 ```sql
 -- Vue d'ensemble complète
-SELECT 
+SELECT
   'Total product_promotions' as type,
   COUNT(*) as count
 FROM public.product_promotions
 UNION ALL
-SELECT 
+SELECT
   'Migrées depuis promotions',
   COUNT(*)
 FROM public.product_promotions
 WHERE migration_source = 'promotions'
 UNION ALL
-SELECT 
+SELECT
   'Migrées depuis digital_product_coupons',
   COUNT(*)
 FROM public.product_promotions
 WHERE migration_source = 'digital_product_coupons'
 UNION ALL
-SELECT 
+SELECT
   'Créées directement',
   COUNT(*)
 FROM public.product_promotions
 WHERE migration_source IS NULL OR migration_source = 'product_promotions'
 UNION ALL
-SELECT 
+SELECT
   'Promotions actives',
   COUNT(*)
 FROM public.product_promotions
@@ -276,7 +284,7 @@ WHERE is_active = TRUE;
 
 ```sql
 -- Sélectionner une promotion migrée et vérifier ses données
-SELECT * 
+SELECT *
 FROM public.product_promotions
 WHERE migration_source IS NOT NULL
 LIMIT 1;
@@ -286,7 +294,7 @@ LIMIT 1;
 
 ```sql
 -- Pour une promotion migrée depuis promotions
-SELECT 
+SELECT
   pp.id as new_id,
   pp.name as new_name,
   pp.code as new_code,
@@ -367,4 +375,3 @@ Après la migration réussie :
 ---
 
 **Dernière mise à jour :** 28 Janvier 2025
-

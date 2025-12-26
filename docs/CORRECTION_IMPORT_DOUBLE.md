@@ -10,14 +10,25 @@
 L'import en double a été supprimé dans `src/hooks/useFileUpload.ts`.
 
 **Avant** :
+
 ```typescript
-import { checkStoragePermissions, formatPermissionCheckReport } from '@/utils/checkStoragePermissions';
-import { checkStoragePermissions, formatPermissionCheckReport } from '@/utils/checkStoragePermissions';
+import {
+  checkStoragePermissions,
+  formatPermissionCheckReport,
+} from '@/utils/checkStoragePermissions';
+import {
+  checkStoragePermissions,
+  formatPermissionCheckReport,
+} from '@/utils/checkStoragePermissions';
 ```
 
 **Après** :
+
 ```typescript
-import { checkStoragePermissions, formatPermissionCheckReport } from '@/utils/checkStoragePermissions';
+import {
+  checkStoragePermissions,
+  formatPermissionCheckReport,
+} from '@/utils/checkStoragePermissions';
 ```
 
 ---
@@ -37,10 +48,10 @@ Si l'erreur persiste, c'est probablement dû au cache de Vite :
    ```
 
 Ou simplement **recharger la page avec un hard refresh** :
+
 - **Windows/Linux** : `Ctrl + Shift + R` ou `Ctrl + F5`
 - **Mac** : `Cmd + Shift + R`
 
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

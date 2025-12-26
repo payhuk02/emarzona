@@ -43,8 +43,8 @@ Le rapport sera généré dans `dist/stats.html` et s'ouvrira automatiquement.
 ✅ **Déjà implémenté** dans `App.tsx` :
 
 ```typescript
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Products = lazy(() => import("./pages/Products"));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Products = lazy(() => import('./pages/Products'));
 ```
 
 ### 2. Lazy Loading des Composants Lourds
@@ -68,11 +68,13 @@ function Dashboard() {
 Utiliser des imports nommés plutôt que des imports par défaut :
 
 ❌ **Ne pas faire** :
+
 ```typescript
 import * as Icons from 'lucide-react';
 ```
 
 ✅ **Faire** :
+
 ```typescript
 import { ShoppingCart, Package, Users } from 'lucide-react';
 ```
@@ -98,7 +100,7 @@ import { ShoppingCart, Package } from '@/components/icons';
 
 ### Configuration Actuelle
 
-Le `vite.config.ts` est configuré de manière conservatrice pour éviter les erreurs React. 
+Le `vite.config.ts` est configuré de manière conservatrice pour éviter les erreurs React.
 
 ### Optimisations Possibles
 
@@ -116,31 +118,30 @@ Le `vite.config.ts` est configuré de manière conservatrice pour éviter les er
 
 ```typescript
 // vite.config.ts
-manualChunks: (id) => {
+manualChunks: id => {
   // React core - toujours dans le chunk principal
-  if (id.includes('node_modules/react/') || 
-      id.includes('node_modules/react-dom/')) {
+  if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
     return undefined;
   }
-  
+
   // Admin pages - chunk séparé
   if (id.includes('src/pages/admin')) {
     return 'admin';
   }
-  
+
   // Charts - chunk séparé (lourd)
   if (id.includes('node_modules/recharts')) {
     return 'charts';
   }
-  
+
   // Autres dépendances lourdes
   if (id.includes('node_modules/@tiptap')) {
     return 'editor';
   }
-  
+
   // Par défaut, garder dans le chunk principal
   return undefined;
-}
+};
 ```
 
 ---
@@ -257,4 +258,3 @@ npm run build && du -sh dist/
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

@@ -28,8 +28,8 @@ Après les 2 migrations, exécuter ceci pour vérifier :
 
 ```sql
 -- Vérifier que les tables existent
-SELECT tablename FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename FROM pg_tables
+WHERE schemaname = 'public'
   AND tablename IN ('digital_bundles', 'digital_bundle_items')
 ORDER BY tablename;
 
@@ -38,8 +38,8 @@ ORDER BY tablename;
 
 ```sql
 -- Vérifier que les vues existent
-SELECT viewname FROM pg_views 
-WHERE schemaname = 'public' 
+SELECT viewname FROM pg_views
+WHERE schemaname = 'public'
   AND viewname LIKE '%digital%'
 ORDER BY viewname;
 
@@ -48,7 +48,7 @@ ORDER BY viewname;
 
 ```sql
 -- Vérifier que les fonctions existent
-SELECT proname FROM pg_proc 
+SELECT proname FROM pg_proc
 WHERE proname IN (
   'calculate_bundle_original_price',
   'generate_bundle_slug',
@@ -94,9 +94,9 @@ ORDER BY proname;
 
 ## 📂 FICHIERS
 
-| Fichier | Description | Taille |
-|---------|-------------|--------|
-| `20251029_digital_bundles_clean.sql` | Système de bundles | ~350 lignes |
+| Fichier                                   | Description                | Taille      |
+| ----------------------------------------- | -------------------------- | ----------- |
+| `20251029_digital_bundles_clean.sql`      | Système de bundles         | ~350 lignes |
 | `20251029_digital_enhancements_clean.sql` | Analytics et optimisations | ~280 lignes |
 
 ---
@@ -118,4 +118,3 @@ Votre système Digital Products est maintenant **100% opérationnel** ! 🚀
 ---
 
 **Note**: Les fichiers "clean" sont des versions simplifiées sans les longs commentaires, optimisées pour Supabase Dashboard.
-

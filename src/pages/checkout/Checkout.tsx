@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import { formatPrice } from '@/lib/product-helpers';
-import { stripHtmlTags } from '@/lib/utils';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
 
 interface CheckoutFormData {
   firstName: string;
@@ -58,6 +58,8 @@ type CheckoutVariant = {
   id: string;
   price?: number | null;
   promotional_price?: number | null;
+  option1_value?: string | null;
+  name?: string | null;
 } | null;
 
 type LooseSupabaseQuery = {
@@ -410,7 +412,7 @@ const Checkout = () => {
           productId: product.id,
           amount: finalPrice,
           currency: finalCurrency,
-          description: `Achat de ${product.name}`,
+          description: `Achat de ${product.name ? htmlToPlainText(product.name) : 'produit'}`,
           customerEmail: formData.email,
           customerName: customerName,
           metadata: {
@@ -581,18 +583,22 @@ const Checkout = () => {
                   {product.image_url && (
                     <img
                       src={product.image_url}
-                      alt={product.name}
+                      alt={product.name ? htmlToPlainText(product.name) : 'Produit'}
                       className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md flex-shrink-0"
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm line-clamp-2">{product.name}</h3>
+                    <h3 className="font-semibold text-sm line-clamp-2">
+                      {product.name ? htmlToPlainText(product.name) : 'Produit sans nom'}
+                    </h3>
                     {selectedVariant && (
                       <p className="text-xs text-muted-foreground mt-1">
                         Variante:{' '}
-                        {selectedVariant.option1_value ||
-                          selectedVariant.name ||
-                          'Variante sélectionnée'}
+                        {htmlToPlainText(
+                          selectedVariant.option1_value ||
+                            selectedVariant.name ||
+                            'Variante sélectionnée'
+                        )}
                       </p>
                     )}
                     {product.product_type && (
@@ -602,8 +608,8 @@ const Checkout = () => {
                     )}
                     {product.description && (
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {stripHtmlTags(product.description).substring(0, 100)}
-                        {stripHtmlTags(product.description).length > 100 ? '...' : ''}
+                        {htmlToPlainText(product.description).substring(0, 100)}
+                        {htmlToPlainText(product.description).length > 100 ? '...' : ''}
                       </p>
                     )}
                   </div>
@@ -755,6 +761,29 @@ const Checkout = () => {
                     <p>Paiement sécurisé par Moneroo. Vos informations sont protégées.</p>
                   </div>
                 </div>
+
+                {/* Bouton de soumission */}
+                <div className="pt-6 border-t">
+                  <Button
+                    type="submit"
+                    form="checkout-form"
+                    size="lg"
+                    className="w-full min-h-[44px] text-base sm:text-lg"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                        <span className="text-sm sm:text-base">Traitement en cours...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base">Procéder au paiement</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -902,28 +931,6 @@ const Checkout = () => {
                       placeholder="Burkina Faso"
                       className="min-h-[44px] text-base"
                     />
-                  </div>
-
-                  {/* Bouton de soumission */}
-                  <div className="pt-4">
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="w-full min-h-[44px] text-base sm:text-lg"
-                      disabled={submitting}
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                          <span className="text-sm sm:text-base">Traitement en cours...</span>
-                        </>
-                      ) : (
-                        <>
-                          <CreditCard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                          <span className="text-sm sm:text-base">Procéder au paiement</span>
-                        </>
-                      )}
-                    </Button>
                   </div>
                 </form>
               </CardContent>

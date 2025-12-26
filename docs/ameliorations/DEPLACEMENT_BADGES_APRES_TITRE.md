@@ -157,4 +157,3 @@ Les badges sont maintenant :
 ---
 
 _Modification appliquée le 2 Février 2025_
-

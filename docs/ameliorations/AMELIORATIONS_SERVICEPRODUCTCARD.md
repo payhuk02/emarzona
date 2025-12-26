@@ -447,4 +447,3 @@ export const ServiceProductCardSkeleton = () => {
 
 _Améliorations terminées le 2 Février 2025_  
 _Tous les éléments des cartes digitales appliqués ✅_
-

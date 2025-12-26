@@ -14,10 +14,11 @@
 **Fichier**: `src/lib/pdf-loader.ts`
 
 **Implémentation**:
+
 ```typescript
 export const loadPDFModules = async () => {
   const [jsPDF, autoTable] = await Promise.all([
-    loadJsPDF(),  // import('jspdf')
+    loadJsPDF(), // import('jspdf')
     loadAutoTable(), // import('jspdf-autotable')
   ]);
   // ...
@@ -25,6 +26,7 @@ export const loadPDFModules = async () => {
 ```
 
 **Utilisation**:
+
 - ✅ `InvoicePDFGenerator.tsx` utilise `loadPDFModules()` de manière asynchrone
 - ✅ jspdf n'est chargé que quand nécessaire (génération de PDF)
 - ✅ Réduit le bundle initial de ~414KB
@@ -52,11 +54,13 @@ export const loadPDFModules = async () => {
 #### Analyse
 
 **Bonne nouvelle**:
+
 - ✅ La plupart des formulaires utilisent `RichTextEditorPro` (sans TipTap)
 - ✅ Seul `ProductDescriptionTab.tsx` utilise `RichTextEditor` (avec TipTap)
 - ✅ TipTap est déjà dans le chunk principal (nécessaire pour React)
 
 **Recommandation**:
+
 - ⚠️ `RichTextEditor` (avec TipTap) est utilisé uniquement dans l'onglet description des produits
 - ⚠️ Ce composant peut être lazy-loaded, mais l'impact sera limité car TipTap reste dans le chunk principal
 - 💡 Option: Convertir `RichTextEditor` pour utiliser `RichTextEditorPro` (sans TipTap) si possible
@@ -64,16 +68,18 @@ export const loadPDFModules = async () => {
 #### Action Recommandée
 
 **Option 1: Lazy Load RichTextEditor** (Impact limité)
+
 ```typescript
 // Dans ProductDescriptionTab.tsx
-const RichTextEditor = lazy(() => 
-  import('@/components/products/RichTextEditor').then(m => ({ 
-    default: m.RichTextEditor 
+const RichTextEditor = lazy(() =>
+  import('@/components/products/RichTextEditor').then(m => ({
+    default: m.RichTextEditor,
   }))
 );
 ```
 
 **Option 2: Remplacer par RichTextEditorPro** (Meilleur impact)
+
 - Utiliser `RichTextEditorPro` au lieu de `RichTextEditor` dans `ProductDescriptionTab.tsx`
 - Éliminer complètement la dépendance TipTap si possible
 
@@ -86,11 +92,13 @@ const RichTextEditor = lazy(() =>
 **Status**: ✅ **DÉJÀ OPTIMISÉ**
 
 **Configuration**:
+
 - ✅ Tree shaking activé dans Vite
 - ✅ lucide-react dans le chunk principal (nécessaire pour React.forwardRef)
 - ✅ Imports individuels (tree-shaken automatiquement)
 
 **Vérification**:
+
 - ✅ Tous les imports utilisent la syntaxe `import { Icon } from 'lucide-react'`
 - ✅ Pas d'imports `import * from 'lucide-react'`
 - ✅ Tree shaking fonctionne correctement
@@ -102,16 +110,19 @@ const RichTextEditor = lazy(() =>
 ## 📈 Impact des Optimisations
 
 ### Avant
+
 - ⚠️ jspdf dans le bundle initial (~414KB)
 - ⚠️ TipTap dans le bundle initial (~200KB)
 - ✅ lucide-react tree-shaken
 
 ### Après
+
 - ✅ jspdf lazy-loaded (0KB dans bundle initial)
 - ⚠️ TipTap toujours dans bundle (mais utilisé uniquement dans 1 composant)
 - ✅ lucide-react tree-shaken (inchangé)
 
 ### Gain Potentiel
+
 - ✅ **~414KB** économisés (jspdf lazy-loaded)
 - ⚠️ **~200KB** potentiels si TipTap est remplacé par RichTextEditorPro
 
@@ -128,14 +139,17 @@ const RichTextEditor = lazy(() =>
 ## 📝 Recommandations Finales
 
 ### Priorité HAUTE
+
 1. ✅ jspdf - **DÉJÀ OPTIMISÉ** - Aucune action nécessaire
 
 ### Priorité MOYENNE
+
 2. ⚠️ TipTap - **OPTIONNEL** - Remplacer `RichTextEditor` par `RichTextEditorPro` dans `ProductDescriptionTab.tsx` si les fonctionnalités sont suffisantes
    - Impact: ~200KB économisés
    - Effort: Moyen (vérifier compatibilité des fonctionnalités)
 
 ### Priorité BASSE
+
 3. ✅ lucide-react - **DÉJÀ OPTIMISÉ** - Aucune action nécessaire
 
 ---
@@ -143,6 +157,7 @@ const RichTextEditor = lazy(() =>
 ## ✅ Conclusion
 
 **Optimisations Complétées**:
+
 - ✅ jspdf lazy-loaded (déjà implémenté)
 - ✅ lucide-react optimisé (déjà implémenté)
 - ⚠️ TipTap - Usage limité identifié, remplacement optionnel recommandé
@@ -156,9 +171,3 @@ const RichTextEditor = lazy(() =>
 
 **Date de complétion**: 2025-01-04  
 **Prochaine révision**: 2025-01-11 (hebdomadaire)
-
-
-
-
-
-

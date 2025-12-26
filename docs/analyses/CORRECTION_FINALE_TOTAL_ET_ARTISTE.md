@@ -12,16 +12,19 @@
 **Cause** : Le calcul était correct mais React ne détectait pas toujours les changements.
 
 **Solution** :
+
 - Extraction explicite de `couponDiscount` pour garantir la détection
 - Ajout d'un `useEffect` pour debug et forcer la vérification des valeurs
 - Calcul direct sans `useMemo` pour éviter les problèmes de dépendances
 
 **Code corrigé** :
+
 ```typescript
 // Extraction explicite pour garantir la détection
-const couponDiscount = appliedCouponCode && appliedCouponCode.discountAmount 
-  ? Number(appliedCouponCode.discountAmount) 
-  : 0;
+const couponDiscount =
+  appliedCouponCode && appliedCouponCode.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
 
 // Calcul direct
 const totalDiscounts = itemDiscounts + couponDiscount;
@@ -38,10 +41,18 @@ useEffect(() => {
       subtotal: summary.subtotal,
       totalDiscounts,
       subtotalAfterDiscounts,
-      finalTotal
+      finalTotal,
     });
   }
-}, [appliedCouponCode?.id, appliedCouponCode?.discountAmount, couponDiscount, summary.subtotal, totalDiscounts, subtotalAfterDiscounts, finalTotal]);
+}, [
+  appliedCouponCode?.id,
+  appliedCouponCode?.discountAmount,
+  couponDiscount,
+  summary.subtotal,
+  totalDiscounts,
+  subtotalAfterDiscounts,
+  finalTotal,
+]);
 ```
 
 ### 2. Ajout du support "Oeuvre d'artiste" dans le système de paiement
@@ -51,6 +62,7 @@ useEffect(() => {
 **Corrections appliquées** :
 
 #### A. Mise à jour du type TypeScript (`src/types/cart.ts`)
+
 ```typescript
 // AVANT
 export type ProductType = 'digital' | 'physical' | 'service' | 'course';
@@ -60,10 +72,11 @@ export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artis
 ```
 
 #### B. Migration base de données (`supabase/migrations/20250131_add_artist_to_cart_items.sql`)
+
 ```sql
 -- Modifier la contrainte CHECK pour inclure 'artist'
-ALTER TABLE public.cart_items 
-ADD CONSTRAINT cart_items_product_type_check 
+ALTER TABLE public.cart_items
+ADD CONSTRAINT cart_items_product_type_check
 CHECK (product_type IN ('digital', 'physical', 'service', 'course', 'artist'));
 ```
 
@@ -76,11 +89,13 @@ Cette erreur provient d'un fichier minifié (`index-BTE1bmbi.js`) et est souvent
 ## 📊 Résultat Attendu
 
 ### Test 1 : Code Promo
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF
 - **Total: 3600 XOF** ✅
 
 ### Test 2 : Oeuvre d'artiste
+
 - Un produit de type 'artist' peut maintenant être ajouté au panier
 - Le checkout peut traiter les commandes de type 'artist'
 - Le paiement fonctionne normalement pour les œuvres d'artistes
@@ -109,6 +124,7 @@ Cette erreur provient d'un fichier minifié (`index-BTE1bmbi.js`) et est souvent
 ## 🧪 Instructions de Test
 
 ### Test Code Promo
+
 1. Aller au checkout avec un produit à 4000 XOF
 2. Appliquer un code promo de -400 XOF
 3. **Vérifier** : Le total doit passer à 3600 XOF immédiatement
@@ -116,9 +132,9 @@ Cette erreur provient d'un fichier minifié (`index-BTE1bmbi.js`) et est souvent
 5. **Vérifier** : Le total doit revenir à 4000 XOF
 
 ### Test Oeuvre d'Artiste
+
 1. Appliquer la migration SQL dans Supabase
 2. Créer un produit de type 'artist'
 3. L'ajouter au panier
 4. Aller au checkout
 5. **Vérifier** : La commande se crée sans erreur
-

@@ -32,7 +32,9 @@
 
 ```typescript
 // Dans la console du navigateur
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 console.log('User:', user);
 console.log('Is authenticated:', !!user);
 ```
@@ -54,7 +56,7 @@ WHERE id = 'attachments';
 
 ```sql
 -- Dans Supabase SQL Editor
-SELECT 
+SELECT
   policyname,
   cmd,
   roles::text,
@@ -126,8 +128,8 @@ DO $$
 DECLARE
   policy_record RECORD;
 BEGIN
-  FOR policy_record IN 
-    SELECT policyname 
+  FOR policy_record IN
+    SELECT policyname
     FROM pg_policies
     WHERE schemaname = 'storage'
       AND tablename = 'objects'
@@ -169,12 +171,10 @@ USING (bucket_id = 'attachments');
 Le problème peut venir des options passées à `supabase.storage.upload()`. Essayez de simplifier :
 
 ```typescript
-const { data, error } = await supabase.storage
-  .from('attachments')
-  .upload(filePath, fileToUpload, {
-    contentType, // Garder seulement contentType
-    // Retirer cacheControl, metadata, upsert
-  });
+const { data, error } = await supabase.storage.from('attachments').upload(filePath, fileToUpload, {
+  contentType, // Garder seulement contentType
+  // Retirer cacheControl, metadata, upsert
+});
 ```
 
 ### Solution 4 : Utiliser un Bucket Différent Temporairement
@@ -205,6 +205,7 @@ Le problème peut venir des headers HTTP. Vérifiez dans l'onglet **Network** du
 ### Priorité 1 : Vérifier le Bucket Public
 
 **Action** :
+
 1. Supabase Dashboard > Storage > Buckets > "attachments"
 2. Activer "Public bucket" si ce n'est pas déjà fait
 3. Attendre 2-3 minutes
@@ -213,6 +214,7 @@ Le problème peut venir des headers HTTP. Vérifiez dans l'onglet **Network** du
 ### Priorité 2 : Vérifier l'Authentification
 
 **Action** :
+
 1. Vérifier que vous êtes connecté
 2. Vérifier que la session n'a pas expiré
 3. Se reconnecter si nécessaire
@@ -221,6 +223,7 @@ Le problème peut venir des headers HTTP. Vérifiez dans l'onglet **Network** du
 ### Priorité 3 : Simplifier les Options d'Upload
 
 **Action** :
+
 1. Modifier `useFileUpload.ts` pour simplifier les options
 2. Retirer `cacheControl`, `metadata`, `upsert`
 3. Garder seulement `contentType`
@@ -229,6 +232,7 @@ Le problème peut venir des headers HTTP. Vérifiez dans l'onglet **Network** du
 ### Priorité 4 : Recréer les Politiques RLS
 
 **Action** :
+
 1. Exécuter la migration SQL de "Solution 2"
 2. Attendre 2-3 minutes
 3. Tester l'upload
@@ -236,6 +240,7 @@ Le problème peut venir des headers HTTP. Vérifiez dans l'onglet **Network** du
 ### Priorité 5 : Créer un Nouveau Bucket
 
 **Action** :
+
 1. Créer un nouveau bucket "attachments-v2" (public)
 2. Configurer les mêmes politiques RLS
 3. Modifier le code pour utiliser ce nouveau bucket
@@ -260,7 +265,10 @@ const { data: uploadData, error: uploadError } = await supabase.storage
 
 ```typescript
 // Avant l'upload, vérifier l'authentification
-const { data: { user }, error: authError } = await supabase.auth.getUser();
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser();
 if (!user || authError) {
   throw new Error('Vous devez être connecté pour uploader des fichiers');
 }
@@ -322,4 +330,3 @@ if (!response.ok) {
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

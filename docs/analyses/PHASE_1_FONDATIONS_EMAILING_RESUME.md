@@ -10,6 +10,7 @@
 ### 1. Migrations de Base de Données
 
 #### ✅ `20250201_emailing_advanced_foundations.sql`
+
 - **7 nouvelles tables créées :**
   - `email_campaigns` - Campagnes email marketing
   - `email_segments` - Segments d'audience
@@ -25,6 +26,7 @@
 - **Policies RLS** pour vendeurs et admins
 
 #### ✅ `20250201_emailing_functions_base.sql`
+
 - **7 fonctions SQL créées :**
   - `calculate_dynamic_segment_members()` - Calcul des segments
   - `update_segment_member_count()` - Mise à jour compteurs
@@ -35,11 +37,13 @@
   - `add_user_tag()` - Ajout de tags
 
 #### ✅ `20250201_fix_emailing_owner_id_to_user_id.sql`
+
 - Script de correction pour remplacer `owner_id` par `user_id` dans les policies RLS
 
 ### 2. Services TypeScript
 
 #### ✅ `src/lib/email/email-campaign-service.ts`
+
 - **EmailCampaignService** complet avec :
   - Création/gestion de campagnes
   - Scheduling, pause, reprise, annulation
@@ -47,6 +51,7 @@
   - Gestion des métriques
 
 #### ✅ `src/lib/email/email-sequence-service.ts`
+
 - **EmailSequenceService** complet avec :
   - Gestion des séquences
   - Gestion des étapes
@@ -54,11 +59,13 @@
   - Avancement automatique
 
 #### ✅ `src/lib/email/index.ts`
+
 - Point d'entrée pour les exports
 
 ### 3. Hooks React
 
 #### ✅ `src/hooks/email/useEmailCampaigns.ts`
+
 - **9 hooks créés :**
   - `useEmailCampaigns()` - Liste des campagnes
   - `useEmailCampaign()` - Campagne spécifique
@@ -71,11 +78,13 @@
   - `useDuplicateEmailCampaign()` - Duplication
 
 #### ✅ `src/hooks/email/index.ts`
+
 - Point d'entrée pour les exports
 
 ### 4. Composants UI (Début Phase 2)
 
 #### ✅ `src/components/email/CampaignMetrics.tsx`
+
 - Composant pour afficher les métriques d'une campagne
 - Affiche : envoyés, livrés, ouverts, clics, rebonds, désabonnés
 - Affiche les taux et revenus générés
@@ -99,10 +108,12 @@
 Phase 2 : Campagnes - Interface complète de gestion de campagnes
 
 ### ✅ Déjà créé :
+
 - Hook `useEmailCampaigns` complet
 - Composant `CampaignMetrics`
 
 ### ⏳ À créer :
+
 - Composant `EmailCampaignManager` (liste + gestion)
 - Composant `CampaignBuilder` (création/édition)
 - Page `/dashboard/emails/campaigns`
@@ -121,4 +132,3 @@ Phase 2 : Campagnes - Interface complète de gestion de campagnes
 
 **Phase 1 : ✅ TERMINÉE**  
 **Phase 2 : 🔄 EN COURS**
-

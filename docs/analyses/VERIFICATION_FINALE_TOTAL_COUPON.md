@@ -34,23 +34,26 @@
 ## 🔧 Code Actuel
 
 ### Calcul du Total
+
 ```typescript
 const finalTotal = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
   const subtotalWithTaxes = subtotalAfterDiscounts + taxAmount;
   const subtotalWithShipping = subtotalWithTaxes + shippingAmount;
   const finalAmount = Math.max(0, subtotalWithShipping - giftCardAmount);
   return finalAmount;
 }, [
-  summary.subtotal, 
-  summary.discount_amount, 
-  taxAmount, 
-  shippingAmount, 
+  summary.subtotal,
+  summary.discount_amount,
+  taxAmount,
+  shippingAmount,
   appliedCouponCode?.id,
   appliedCouponCode?.discountAmount,
   appliedCouponCode?.code,
-  giftCardAmount
+  giftCardAmount,
 ]);
 ```
 
@@ -65,10 +68,12 @@ Si après ces corrections le total ne se met toujours pas à jour, il faudrait :
 ## 📊 Exemple de Calcul
 
 **Scénario:**
+
 - Sous-total: 4000 XOF
 - Code promo: -400 XOF
 
 **Calcul étape par étape:**
+
 ```
 1. couponDiscount = 400
 2. subtotalAfterDiscounts = 4000 - 0 - 400 = 3600
@@ -78,4 +83,3 @@ Si après ces corrections le total ne se met toujours pas à jour, il faudrait :
 ```
 
 **Résultat attendu:** Total = 3600 XOF
-

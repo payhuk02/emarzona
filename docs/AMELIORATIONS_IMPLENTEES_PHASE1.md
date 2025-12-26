@@ -147,12 +147,12 @@ Cette document liste toutes les améliorations et corrections implémentées sui
 
 ## 📊 PROGRESSION GLOBALE
 
-| Fonctionnalité | Statut | Priorité | Fichiers |
-|---------------|--------|----------|----------|
-| Certificats Artistes Auto | ✅ Complété | 🔴 Critique | 6 fichiers |
-| Panier Multi-Produits | ✅ Existant | 🔴 Critique | Vérification |
-| Checkout Unifié | ✅ Existant | 🔴 Critique | Vérification |
-| Calendrier Services | ✅ Existant | 🔴 Critique | Amélioration |
+| Fonctionnalité            | Statut      | Priorité    | Fichiers     |
+| ------------------------- | ----------- | ----------- | ------------ |
+| Certificats Artistes Auto | ✅ Complété | 🔴 Critique | 6 fichiers   |
+| Panier Multi-Produits     | ✅ Existant | 🔴 Critique | Vérification |
+| Checkout Unifié           | ✅ Existant | 🔴 Critique | Vérification |
+| Calendrier Services       | ✅ Existant | 🔴 Critique | Amélioration |
 
 ---
 
@@ -304,44 +304,47 @@ Cette document liste toutes les améliorations et corrections implémentées sui
 
 ### Phase 1: Fonctionnalités Critiques ✅
 
-| Fonctionnalité | Statut | Fichiers |
-|---------------|--------|----------|
+| Fonctionnalité            | Statut      | Fichiers   |
+| ------------------------- | ----------- | ---------- |
 | Certificats Artistes Auto | ✅ Complété | 6 fichiers |
-| Panier Multi-Produits | ✅ Vérifié | Existant |
-| Checkout Unifié | ✅ Vérifié | Existant |
-| Calendrier Services | ✅ Vérifié | Existant |
+| Panier Multi-Produits     | ✅ Vérifié  | Existant   |
+| Checkout Unifié           | ✅ Vérifié  | Existant   |
+| Calendrier Services       | ✅ Vérifié  | Existant   |
 
 ### Phase 2: Fonctionnalités Prioritaires ✅
 
-| Fonctionnalité | Statut | Fichiers |
-|---------------|--------|----------|
-| Système Coupons Avancé | ✅ Complété | 1 fichier modifié |
-| Galerie Virtuelle Artistes | ✅ Complété | 4 fichiers |
-| Système Commentaires | ✅ Complété | 3 fichiers |
+| Fonctionnalité             | Statut      | Fichiers          |
+| -------------------------- | ----------- | ----------------- |
+| Système Coupons Avancé     | ✅ Complété | 1 fichier modifié |
+| Galerie Virtuelle Artistes | ✅ Complété | 4 fichiers        |
+| Système Commentaires       | ✅ Complété | 3 fichiers        |
 
 ### Portfolios Artistes - Étapes Complémentaires ✅
 
-| Étape | Statut | Fichiers |
-|-------|--------|----------|
-| Route /portfolio/:slug | ✅ Complété | 1 fichier modifié |
-| Interface Gestion Dashboard | ✅ Complété | 3 fichiers |
-| Système Commentaires | ✅ Complété | 3 fichiers |
+| Étape                       | Statut      | Fichiers          |
+| --------------------------- | ----------- | ----------------- |
+| Route /portfolio/:slug      | ✅ Complété | 1 fichier modifié |
+| Interface Gestion Dashboard | ✅ Complété | 3 fichiers        |
+| Système Commentaires        | ✅ Complété | 3 fichiers        |
 
 ---
 
 ## 📁 FICHIERS CRÉÉS/MODIFIÉS (TOTAL)
 
 ### Migrations Base de Données (3)
+
 - `supabase/migrations/20250128_artist_product_certificates.sql`
 - `supabase/migrations/20250128_artist_portfolios_galleries.sql`
 - `supabase/migrations/20250128_portfolio_comments.sql`
 
 ### Hooks React Query (3)
+
 - `src/hooks/artist/useArtistCertificates.ts`
 - `src/hooks/artist/useArtistPortfolios.ts`
 - `src/hooks/artist/usePortfolioComments.ts`
 
 ### Composants UI (7)
+
 - `src/components/artist/ArtistCertificateGenerator.tsx`
 - `src/components/artist/ArtistGalleryGrid.tsx`
 - `src/components/artist/PortfolioComments.tsx`
@@ -351,15 +354,16 @@ Cette document liste toutes les améliorations et corrections implémentées sui
 - `src/pages/dashboard/ArtistPortfoliosManagement.tsx`
 
 ### Utilitaires (3)
+
 - `src/lib/artist-certificate-generator.ts`
 - `src/lib/artist-certificate-auto-generator.ts`
 - `supabase/functions/generate-artist-certificate/index.ts`
 
 ### Modifications (2)
+
 - `src/components/promotions/CreatePromotionDialog.tsx` (ajout sélection produits/catégories/collections)
 - `src/App.tsx` (ajout routes portfolios)
 
 ---
 
 **Dernière mise à jour**: 28 Janvier 2025
-

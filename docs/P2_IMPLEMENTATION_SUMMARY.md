@@ -298,4 +298,3 @@ Toutes les migrations créées gèrent l'absence de tables dépendantes :
 **Tous les P2 sont implémentés et prêts à être utilisés !**
 
 Les migrations sont sécurisées et conditionnelles, les composants sont créés, et la documentation est complète.
-

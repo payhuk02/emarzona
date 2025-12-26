@@ -77,6 +77,7 @@ API_URL=your_api_url
 ## 🏗️ Architecture
 
 L'application suit une architecture modulaire avec :
+
 - **Screens** : Écrans principaux
 - **Components** : Composants réutilisables
 - **Services** : Logique métier et API
@@ -86,4 +87,3 @@ L'application suit une architecture modulaire avec :
 ## 📝 Notes
 
 Cette application mobile est en cours de développement. La structure de base est prête pour l'implémentation complète.
-

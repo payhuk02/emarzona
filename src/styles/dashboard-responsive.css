@@ -99,15 +99,15 @@
   .dashboard-card {
     @apply min-h-[120px];
   }
-  
+
   .dashboard-stats-grid {
     @apply gap-3;
   }
-  
+
   .dashboard-actions-grid {
     @apply gap-3;
   }
-  
+
   .dashboard-bottom-grid {
     @apply gap-4;
   }
@@ -118,11 +118,11 @@
   .dashboard-card {
     @apply min-h-[140px];
   }
-  
+
   .dashboard-stats-grid {
     @apply gap-4;
   }
-  
+
   .dashboard-actions-grid {
     @apply gap-4;
   }
@@ -133,15 +133,15 @@
   .dashboard-card {
     @apply min-h-[160px];
   }
-  
+
   .dashboard-stats-grid {
     @apply gap-6;
   }
-  
+
   .dashboard-actions-grid {
     @apply gap-6;
   }
-  
+
   .dashboard-bottom-grid {
     @apply gap-8;
   }
@@ -181,7 +181,7 @@
   .dashboard-card {
     @apply bg-card border-border;
   }
-  
+
   .dashboard-header {
     @apply bg-card/95;
   }
@@ -192,11 +192,11 @@
   .dashboard-card {
     @apply transition-none;
   }
-  
+
   .dashboard-card:hover {
     transform: none;
   }
-  
+
   .animate-fade-in {
     animation: none;
   }

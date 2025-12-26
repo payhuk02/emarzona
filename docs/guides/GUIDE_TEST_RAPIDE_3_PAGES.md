@@ -15,7 +15,7 @@
 3. Console (F12) : Pas d'erreur rouge
 ```
 
-**Status :** ⬜ OK  ⬜ KO
+**Status :** ⬜ OK ⬜ KO
 
 ---
 
@@ -26,14 +26,14 @@
    OU
    Ouvrir : http://localhost:8082/stores/[votre-slug-boutique]
 
-2. Vérifier : 
+2. Vérifier :
    - Logo/bannière boutique visible
    - Produits de la boutique s'affichent avec images
 
 3. Console (F12) : Pas d'erreur rouge
 ```
 
-**Status :** ⬜ OK  ⬜ KO
+**Status :** ⬜ OK ⬜ KO
 
 ---
 
@@ -53,7 +53,7 @@
 3. Console (F12) : Pas d'erreur rouge
 ```
 
-**Status :** ⬜ OK  ⬜ KO
+**Status :** ⬜ OK ⬜ KO
 
 ---
 
@@ -119,5 +119,3 @@ TOUT FONCTIONNE ? ⬜ OUI  ⬜ NON
 
 **Temps estimé :** 3 minutes  
 **Dernière mise à jour :** 26 Octobre 2025
-
-

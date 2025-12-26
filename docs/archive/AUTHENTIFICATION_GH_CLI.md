@@ -1,6 +1,6 @@
 # 🔐 Authentification GitHub CLI
 
-GitHub CLI est installé avec succès ! 
+GitHub CLI est installé avec succès !
 
 **Version installée** : 2.81.0
 
@@ -19,6 +19,7 @@ gh auth login
 ```
 
 **Suivez les instructions** :
+
 1. Choisir **GitHub.com**
 2. Choisir votre méthode préférée :
    - **HTTPS** (recommandé)
@@ -51,6 +52,7 @@ gh auth status
 ```
 
 Vous devriez voir :
+
 ```
 ✓ Logged in to github.com as <votre-username>
 ```
@@ -78,4 +80,3 @@ Ou directement :
 - L'authentification est sécurisée et stockée localement
 - Vous pouvez vous déconnecter avec `gh auth logout`
 - Pour changer de compte, utilisez `gh auth login` à nouveau
-

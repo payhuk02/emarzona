@@ -17,139 +17,139 @@
 
 ### Section "Principal"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard` | ✅ `/dashboard` | ✅ OK |
-| `/dashboard/store` | ✅ `/dashboard/store` | ✅ OK |
-| `/marketplace` | ✅ `/marketplace` | ✅ OK |
+| Route Sidebar      | Route App.tsx         | Statut |
+| ------------------ | --------------------- | ------ |
+| `/dashboard`       | ✅ `/dashboard`       | ✅ OK  |
+| `/dashboard/store` | ✅ `/dashboard/store` | ✅ OK  |
+| `/marketplace`     | ✅ `/marketplace`     | ✅ OK  |
 
 ### Section "Mon Compte"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/account` | ✅ `/account` | ✅ OK |
-| `/account/profile` | ✅ `/account/profile` | ✅ OK |
-| `/account/orders` | ✅ `/account/orders` | ✅ OK |
-| `/account/invoices` | ✅ `/account/invoices` | ✅ OK |
-| `/account/returns` | ✅ `/account/returns` | ✅ OK |
-| `/account/wishlist` | ✅ `/account/wishlist` | ✅ OK |
-| `/account/alerts` | ✅ `/account/alerts` | ✅ OK |
-| `/account/downloads` | ✅ `/account/downloads` | ✅ OK |
-| `/account/digital` | ✅ `/account/digital` | ✅ OK |
-| `/account/physical` | ✅ `/account/physical` | ✅ OK |
-| `/account/courses` | ✅ `/account/courses` | ✅ OK |
-| `/dashboard/gamification` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/auctions/watchlist` | ✅ `/dashboard/auctions/watchlist` | ✅ OK |
+| Route Sidebar                   | Route App.tsx                      | Statut |
+| ------------------------------- | ---------------------------------- | ------ |
+| `/account`                      | ✅ `/account`                      | ✅ OK  |
+| `/account/profile`              | ✅ `/account/profile`              | ✅ OK  |
+| `/account/orders`               | ✅ `/account/orders`               | ✅ OK  |
+| `/account/invoices`             | ✅ `/account/invoices`             | ✅ OK  |
+| `/account/returns`              | ✅ `/account/returns`              | ✅ OK  |
+| `/account/wishlist`             | ✅ `/account/wishlist`             | ✅ OK  |
+| `/account/alerts`               | ✅ `/account/alerts`               | ✅ OK  |
+| `/account/downloads`            | ✅ `/account/downloads`            | ✅ OK  |
+| `/account/digital`              | ✅ `/account/digital`              | ✅ OK  |
+| `/account/physical`             | ✅ `/account/physical`             | ✅ OK  |
+| `/account/courses`              | ✅ `/account/courses`              | ✅ OK  |
+| `/dashboard/gamification`       | ⚠️ À vérifier                      | ⚠️     |
+| `/dashboard/auctions/watchlist` | ✅ `/dashboard/auctions/watchlist` | ✅ OK  |
 
 ### Section "Produits & Cours"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/products` | ✅ `/dashboard/products` | ✅ OK |
-| `/dashboard/courses/new` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/digital-products` | ✅ `/dashboard/digital-products` | ✅ OK |
-| `/dashboard/my-downloads` | ✅ `/dashboard/my-downloads` | ✅ OK |
-| `/dashboard/my-licenses` | ✅ `/dashboard/my-licenses` | ✅ OK |
-| `/dashboard/license-management` | ✅ `/dashboard/license-management` | ✅ OK |
-| `/dashboard/digital-products/bundles` | ✅ `/dashboard/digital-products/bundles` | ✅ OK |
-| `/dashboard/digital/updates` | ✅ `/dashboard/digital/updates` | ✅ OK |
-| `/dashboard/auctions` | ✅ `/dashboard/auctions` | ✅ OK |
-| `/dashboard/cohorts` | ⚠️ À vérifier | ⚠️ |
+| Route Sidebar                         | Route App.tsx                            | Statut |
+| ------------------------------------- | ---------------------------------------- | ------ |
+| `/dashboard/products`                 | ✅ `/dashboard/products`                 | ✅ OK  |
+| `/dashboard/courses/new`              | ⚠️ À vérifier                            | ⚠️     |
+| `/dashboard/digital-products`         | ✅ `/dashboard/digital-products`         | ✅ OK  |
+| `/dashboard/my-downloads`             | ✅ `/dashboard/my-downloads`             | ✅ OK  |
+| `/dashboard/my-licenses`              | ✅ `/dashboard/my-licenses`              | ✅ OK  |
+| `/dashboard/license-management`       | ✅ `/dashboard/license-management`       | ✅ OK  |
+| `/dashboard/digital-products/bundles` | ✅ `/dashboard/digital-products/bundles` | ✅ OK  |
+| `/dashboard/digital/updates`          | ✅ `/dashboard/digital/updates`          | ✅ OK  |
+| `/dashboard/auctions`                 | ✅ `/dashboard/auctions`                 | ✅ OK  |
+| `/dashboard/cohorts`                  | ⚠️ À vérifier                            | ⚠️     |
 
 ### Section "Ventes & Logistique"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/orders` | ✅ `/dashboard/orders` | ✅ OK |
-| `/dashboard/store/team` | ✅ `/dashboard/store/team` | ✅ OK |
-| `/dashboard/tasks` | ✅ `/dashboard/tasks` | ✅ OK |
-| `/dashboard/withdrawals` | ✅ `/dashboard/withdrawals` | ✅ OK |
-| `/dashboard/payment-methods` | ✅ `/dashboard/payment-methods` | ✅ OK |
-| `/dashboard/advanced-orders` | ✅ `/dashboard/advanced-orders` | ✅ OK |
-| `/vendor/messaging` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/bookings` | ✅ `/dashboard/bookings` | ✅ OK |
-| `/dashboard/advanced-calendar` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/service-management` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/recurring-bookings` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/services/staff-availability` | ✅ `/dashboard/services/staff-availability` | ✅ OK |
-| `/dashboard/services/resource-conflicts` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/services/calendar-integrations` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/services/waitlist` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/services/reminders` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/inventory` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/shipping` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/shipping-services` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/contact-shipping-service` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/batch-shipping` | ✅ `/dashboard/batch-shipping` | ✅ OK |
-| `/dashboard/product-kits` | ✅ `/dashboard/product-kits` | ✅ OK |
-| `/dashboard/demand-forecasting` | ✅ `/dashboard/demand-forecasting` | ✅ OK |
-| `/dashboard/inventory-analytics` | ✅ `/dashboard/inventory-analytics` | ✅ OK |
-| `/dashboard/cost-optimization` | ✅ `/dashboard/cost-optimization` | ✅ OK |
-| `/dashboard/suppliers` | ✅ `/dashboard/suppliers` | ✅ OK |
-| `/dashboard/warehouses` | ✅ `/dashboard/warehouses` | ✅ OK |
-| `/dashboard/physical-inventory` | ✅ `/dashboard/physical-inventory` | ✅ OK |
-| `/dashboard/physical-analytics` | ✅ `/dashboard/physical-analytics` | ✅ OK |
-| `/dashboard/physical-lots` | ✅ `/dashboard/physical-lots` | ✅ OK |
-| `/dashboard/physical-serial-tracking` | ✅ `/dashboard/physical-serial-tracking` | ✅ OK |
-| `/dashboard/physical-barcode-scanner` | ✅ `/dashboard/physical-barcode-scanner` | ✅ OK |
-| `/dashboard/physical-preorders` | ✅ `/dashboard/physical-preorders` | ✅ OK |
-| `/dashboard/physical-backorders` | ✅ `/dashboard/physical-backorders` | ✅ OK |
-| `/dashboard/physical-bundles` | ✅ `/dashboard/physical-bundles` | ✅ OK |
-| `/dashboard/multi-currency` | ✅ `/dashboard/multi-currency` | ✅ OK |
+| Route Sidebar                               | Route App.tsx                               | Statut |
+| ------------------------------------------- | ------------------------------------------- | ------ |
+| `/dashboard/orders`                         | ✅ `/dashboard/orders`                      | ✅ OK  |
+| `/dashboard/store/team`                     | ✅ `/dashboard/store/team`                  | ✅ OK  |
+| `/dashboard/tasks`                          | ✅ `/dashboard/tasks`                       | ✅ OK  |
+| `/dashboard/withdrawals`                    | ✅ `/dashboard/withdrawals`                 | ✅ OK  |
+| `/dashboard/payment-methods`                | ✅ `/dashboard/payment-methods`             | ✅ OK  |
+| `/dashboard/advanced-orders`                | ✅ `/dashboard/advanced-orders`             | ✅ OK  |
+| `/vendor/messaging`                         | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/bookings`                       | ✅ `/dashboard/bookings`                    | ✅ OK  |
+| `/dashboard/advanced-calendar`              | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/service-management`             | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/recurring-bookings`             | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/services/staff-availability`    | ✅ `/dashboard/services/staff-availability` | ✅ OK  |
+| `/dashboard/services/resource-conflicts`    | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/services/calendar-integrations` | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/services/waitlist`              | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/services/reminders`             | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/inventory`                      | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/shipping`                       | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/shipping-services`              | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/contact-shipping-service`       | ⚠️ À vérifier                               | ⚠️     |
+| `/dashboard/batch-shipping`                 | ✅ `/dashboard/batch-shipping`              | ✅ OK  |
+| `/dashboard/product-kits`                   | ✅ `/dashboard/product-kits`                | ✅ OK  |
+| `/dashboard/demand-forecasting`             | ✅ `/dashboard/demand-forecasting`          | ✅ OK  |
+| `/dashboard/inventory-analytics`            | ✅ `/dashboard/inventory-analytics`         | ✅ OK  |
+| `/dashboard/cost-optimization`              | ✅ `/dashboard/cost-optimization`           | ✅ OK  |
+| `/dashboard/suppliers`                      | ✅ `/dashboard/suppliers`                   | ✅ OK  |
+| `/dashboard/warehouses`                     | ✅ `/dashboard/warehouses`                  | ✅ OK  |
+| `/dashboard/physical-inventory`             | ✅ `/dashboard/physical-inventory`          | ✅ OK  |
+| `/dashboard/physical-analytics`             | ✅ `/dashboard/physical-analytics`          | ✅ OK  |
+| `/dashboard/physical-lots`                  | ✅ `/dashboard/physical-lots`               | ✅ OK  |
+| `/dashboard/physical-serial-tracking`       | ✅ `/dashboard/physical-serial-tracking`    | ✅ OK  |
+| `/dashboard/physical-barcode-scanner`       | ✅ `/dashboard/physical-barcode-scanner`    | ✅ OK  |
+| `/dashboard/physical-preorders`             | ✅ `/dashboard/physical-preorders`          | ✅ OK  |
+| `/dashboard/physical-backorders`            | ✅ `/dashboard/physical-backorders`         | ✅ OK  |
+| `/dashboard/physical-bundles`               | ✅ `/dashboard/physical-bundles`            | ✅ OK  |
+| `/dashboard/multi-currency`                 | ✅ `/dashboard/multi-currency`              | ✅ OK  |
 
 ### Section "Finance & Paiements"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/payments` | ✅ `/dashboard/payments` | ✅ OK |
-| `/dashboard/payments-customers` | ✅ `/dashboard/payments-customers` | ✅ OK |
-| `/dashboard/pay-balance` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/payment-management` | ⚠️ À vérifier | ⚠️ |
+| Route Sidebar                   | Route App.tsx                      | Statut |
+| ------------------------------- | ---------------------------------- | ------ |
+| `/dashboard/payments`           | ✅ `/dashboard/payments`           | ✅ OK  |
+| `/dashboard/payments-customers` | ✅ `/dashboard/payments-customers` | ✅ OK  |
+| `/dashboard/pay-balance`        | ⚠️ À vérifier                      | ⚠️     |
+| `/dashboard/payment-management` | ⚠️ À vérifier                      | ⚠️     |
 
 ### Section "Marketing & Croissance"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/marketing` | ✅ `/dashboard/marketing` | ✅ OK |
-| `/dashboard/customers` | ✅ `/dashboard/customers` | ✅ OK |
-| `/dashboard/promotions` | ✅ `/dashboard/promotions` | ✅ OK |
-| `/dashboard/emails/campaigns` | ✅ `/dashboard/emails/campaigns` | ✅ OK |
-| `/dashboard/emails/sequences` | ✅ `/dashboard/emails/sequences` | ✅ OK |
-| `/dashboard/emails/segments` | ✅ `/dashboard/emails/segments` | ✅ OK |
-| `/dashboard/emails/analytics` | ✅ `/dashboard/emails/analytics` | ✅ OK |
-| `/dashboard/emails/workflows` | ✅ `/dashboard/emails/workflows` | ✅ OK |
-| `/dashboard/emails/templates/editor` | ✅ `/dashboard/emails/templates/editor` | ✅ OK |
-| `/dashboard/referrals` | ✅ `/dashboard/referrals` | ✅ OK |
-| `/dashboard/affiliates` | ✅ `/dashboard/affiliates` | ✅ OK |
-| `/affiliate/dashboard` | ✅ `/affiliate/dashboard` | ✅ OK |
-| `/affiliate/courses` | ✅ `/affiliate/courses` | ✅ OK |
+| Route Sidebar                        | Route App.tsx                           | Statut |
+| ------------------------------------ | --------------------------------------- | ------ |
+| `/dashboard/marketing`               | ✅ `/dashboard/marketing`               | ✅ OK  |
+| `/dashboard/customers`               | ✅ `/dashboard/customers`               | ✅ OK  |
+| `/dashboard/promotions`              | ✅ `/dashboard/promotions`              | ✅ OK  |
+| `/dashboard/emails/campaigns`        | ✅ `/dashboard/emails/campaigns`        | ✅ OK  |
+| `/dashboard/emails/sequences`        | ✅ `/dashboard/emails/sequences`        | ✅ OK  |
+| `/dashboard/emails/segments`         | ✅ `/dashboard/emails/segments`         | ✅ OK  |
+| `/dashboard/emails/analytics`        | ✅ `/dashboard/emails/analytics`        | ✅ OK  |
+| `/dashboard/emails/workflows`        | ✅ `/dashboard/emails/workflows`        | ✅ OK  |
+| `/dashboard/emails/templates/editor` | ✅ `/dashboard/emails/templates/editor` | ✅ OK  |
+| `/dashboard/referrals`               | ✅ `/dashboard/referrals`               | ✅ OK  |
+| `/dashboard/affiliates`              | ✅ `/dashboard/affiliates`              | ✅ OK  |
+| `/affiliate/dashboard`               | ✅ `/affiliate/dashboard`               | ✅ OK  |
+| `/affiliate/courses`                 | ✅ `/affiliate/courses`                 | ✅ OK  |
 
 ### Section "Analytics & SEO"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/analytics` | ✅ `/dashboard/analytics` | ✅ OK |
-| `/dashboard/pixels` | ✅ `/dashboard/pixels` | ✅ OK |
-| `/dashboard/seo` | ✅ `/dashboard/seo` | ✅ OK |
+| Route Sidebar          | Route App.tsx             | Statut |
+| ---------------------- | ------------------------- | ------ |
+| `/dashboard/analytics` | ✅ `/dashboard/analytics` | ✅ OK  |
+| `/dashboard/pixels`    | ✅ `/dashboard/pixels`    | ✅ OK  |
+| `/dashboard/seo`       | ✅ `/dashboard/seo`       | ✅ OK  |
 
 ### Section "Systèmes & Intégrations"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/integrations` | ⚠️ À vérifier | ⚠️ |
-| `/dashboard/webhooks` | ✅ `/dashboard/webhooks` | ✅ OK |
-| `/dashboard/digital-webhooks` | ✅ `/dashboard/digital-webhooks` | ✅ OK |
-| `/dashboard/physical-webhooks` | ✅ `/dashboard/physical-webhooks` | ✅ OK |
-| `/dashboard/loyalty` | ✅ `/dashboard/loyalty` | ✅ OK |
-| `/dashboard/gift-cards` | ✅ `/dashboard/gift-cards` | ✅ OK |
+| Route Sidebar                  | Route App.tsx                     | Statut |
+| ------------------------------ | --------------------------------- | ------ |
+| `/dashboard/integrations`      | ⚠️ À vérifier                     | ⚠️     |
+| `/dashboard/webhooks`          | ✅ `/dashboard/webhooks`          | ✅ OK  |
+| `/dashboard/digital-webhooks`  | ✅ `/dashboard/digital-webhooks`  | ✅ OK  |
+| `/dashboard/physical-webhooks` | ✅ `/dashboard/physical-webhooks` | ✅ OK  |
+| `/dashboard/loyalty`           | ✅ `/dashboard/loyalty`           | ✅ OK  |
+| `/dashboard/gift-cards`        | ✅ `/dashboard/gift-cards`        | ✅ OK  |
 
 ### Section "Configuration"
 
-| Route Sidebar | Route App.tsx | Statut |
-|---------------|---------------|--------|
-| `/dashboard/kyc` | ✅ `/dashboard/kyc` | ✅ OK |
-| `/dashboard/settings` | ✅ `/dashboard/settings` | ✅ OK |
-| `/community` | ✅ `/community` | ✅ OK |
+| Route Sidebar         | Route App.tsx            | Statut |
+| --------------------- | ------------------------ | ------ |
+| `/dashboard/kyc`      | ✅ `/dashboard/kyc`      | ✅ OK  |
+| `/dashboard/settings` | ✅ `/dashboard/settings` | ✅ OK  |
+| `/community`          | ✅ `/community`          | ✅ OK  |
 
 ---
 
@@ -233,4 +233,3 @@ Les routes suivantes existent dans `App.tsx` mais ne sont **pas présentes dans 
 ### Routes Potentiellement Manquantes
 
 Si vous souhaitez ajouter les collections au sidebar, vous pourriez les ajouter dans la section "Produits & Cours" ou créer une nouvelle section "Artistes & Collections".
-

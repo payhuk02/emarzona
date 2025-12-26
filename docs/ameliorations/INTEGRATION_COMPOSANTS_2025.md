@@ -17,10 +17,12 @@
    - ✅ Affiche le calculateur de shipping spécialisé
 
 **Emplacement** :
+
 - Section principale : Après `ShippingInfoDisplay`
 - Onglet Détails : En haut de l'onglet, avant les détails de l'œuvre
 
 **Fonctionnalités** :
+
 - Calcul automatique du shipping basé sur destination
 - Affichage détaillé des coûts (base, assurance, emballage, manutention)
 - Recommandations transporteurs spécialisés
@@ -42,6 +44,7 @@
    - ✅ Placé à côté du bouton "Suivre"
 
 **Fonctionnalités** :
+
 - Tracking individuel d'un shipment
 - Tracking batch de tous les shipments en attente
 - États de chargement visuels
@@ -62,6 +65,7 @@
    - ✅ Active automatiquement au chargement de la page
 
 **Fonctionnalités** :
+
 - Tracking périodique automatique
 - Intervalle configurable (5 minutes par défaut)
 - Peut être activé/désactivé
@@ -76,12 +80,14 @@
 **Fichier** : `src/components/shipping/TrackingStatusBadge.tsx`
 
 **Fonctionnalités** :
+
 - Badge visuel pour chaque statut de tracking
 - Icônes appropriées par statut
 - Couleurs cohérentes
 - Variants Tailwind (default, secondary, destructive, outline)
 
 **Statuts Supportés** :
+
 - pending, label_created, picked_up, in_transit
 - out_for_delivery, delivered, failed, returned, cancelled
 
@@ -94,6 +100,7 @@
 **Fichier** : `src/components/shipping/TrackingEventsList.tsx`
 
 **Fonctionnalités** :
+
 - Affichage de l'historique complet des événements de tracking
 - Timeline visuelle des événements
 - Informations de localisation
@@ -101,6 +108,7 @@
 - Codes événements affichés
 
 **Utilisation** :
+
 - À intégrer dans les pages de détail de shipment
 - Peut être utilisé dans les modals/dialogs de tracking
 
@@ -132,13 +140,13 @@
 
 ## 📊 RÉSUMÉ DES INTÉGRATIONS
 
-| Composant | Pages Intégrées | Fonctionnalité |
-|-----------|-----------------|----------------|
-| **ArtistShippingCalculator** | `ArtistProductDetail.tsx` | Calcul shipping spécialisé art |
-| **AutomaticTrackingButton** | `AdminShipping.tsx`, `ShipmentCard.tsx` | Tracking manuel shipments |
-| **TrackingAutoRefresh** | `AdminShipping.tsx`, `ShippingDashboard.tsx` | Tracking automatique périodique |
-| **TrackingStatusBadge** | Créé (à intégrer) | Badge statut tracking |
-| **TrackingEventsList** | Créé (à intégrer) | Liste événements tracking |
+| Composant                    | Pages Intégrées                              | Fonctionnalité                  |
+| ---------------------------- | -------------------------------------------- | ------------------------------- |
+| **ArtistShippingCalculator** | `ArtistProductDetail.tsx`                    | Calcul shipping spécialisé art  |
+| **AutomaticTrackingButton**  | `AdminShipping.tsx`, `ShipmentCard.tsx`      | Tracking manuel shipments       |
+| **TrackingAutoRefresh**      | `AdminShipping.tsx`, `ShippingDashboard.tsx` | Tracking automatique périodique |
+| **TrackingStatusBadge**      | Créé (à intégrer)                            | Badge statut tracking           |
+| **TrackingEventsList**       | Créé (à intégrer)                            | Liste événements tracking       |
 
 ---
 
@@ -185,4 +193,3 @@
 
 **Date de dernière mise à jour** : 31 Janvier 2025  
 **Statut** : ✅ Intégrations Complétées
-

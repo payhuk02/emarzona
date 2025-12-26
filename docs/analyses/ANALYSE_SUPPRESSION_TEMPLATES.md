@@ -10,6 +10,7 @@
 ### 1. COMPOSANTS TEMPLATES (15 fichiers)
 
 #### Composants principaux
+
 - `src/components/templates/TemplateRenderer.tsx` - Rendu des templates
 - `src/components/templates/TemplatePreviewModal.tsx` - Modal d'aperçu
 - `src/components/templates/TemplateMarketplace.tsx` - Marketplace
@@ -22,6 +23,7 @@
 - `src/components/templates/index.ts` - Exports
 
 #### Blocs de templates (11 fichiers)
+
 - `src/components/templates/blocks/HeroBlock.tsx`
 - `src/components/templates/blocks/CTABlock.tsx`
 - `src/components/templates/blocks/FeaturesBlock.tsx`
@@ -76,6 +78,7 @@
 ### 5. DONNÉES TEMPLATES (60+ fichiers)
 
 #### Structure V2
+
 - `src/data/templates/v2/index.ts` - Index principal
 - `src/data/templates/v2/digital/` - 6 templates digitaux
 - `src/data/templates/v2/physical/` - 5 templates physiques
@@ -83,6 +86,7 @@
 - `src/data/templates/v2/courses/` - 5 templates cours
 
 #### Structure V1 (ancienne)
+
 - `src/data/templates/index.ts`
 - `src/data/templates/digital-templates.ts`
 - `src/data/templates/physical-templates.ts`
@@ -106,12 +110,14 @@
 ### 7. ROUTES & NAVIGATION
 
 #### Routes dans App.tsx
+
 - `/demo/templates-ui` - TemplatesUIDemo
 - `/dashboard/my-templates` - MyTemplates
 - `/admin/templates` - AdminTemplates
 - `/admin/templates-premium` - AdminTemplatesPremium
 
 #### Liens Sidebar (AppSidebar.tsx)
+
 - Section "Templates & Design" (utilisateur)
 - Section "Templates & Design" (admin)
 
@@ -120,6 +126,7 @@
 ### 8. BASE DE DONNÉES
 
 #### Migration Supabase
+
 - `supabase/migrations/20250130_user_templates_system.sql`
   - Table `user_templates`
   - Policies RLS
@@ -140,6 +147,7 @@
 ### 10. DOCUMENTATION (30+ fichiers MD)
 
 Tous les fichiers de documentation templates peuvent être supprimés :
+
 - `TEMPLATES_*.md`
 - `SESSION_TEMPLATES_*.md`
 - `MIGRATION_*.md`
@@ -173,21 +181,25 @@ Tous les fichiers de documentation templates peuvent être supprimés :
 ## 📋 PLAN DE SUPPRESSION
 
 ### Phase 1: Suppression Routes & Navigation
+
 1. ✅ Supprimer routes dans `App.tsx`
 2. ✅ Supprimer section "Templates & Design" dans `AppSidebar.tsx`
 3. ✅ Supprimer imports lazy loading
 
 ### Phase 2: Suppression Composants
+
 1. ✅ Supprimer tous les composants dans `src/components/templates/`
 2. ✅ Supprimer tous les blocs dans `src/components/templates/blocks/`
 
 ### Phase 3: Suppression Pages
+
 1. ✅ Supprimer `src/pages/demo/TemplatesUIDemo.tsx`
 2. ✅ Supprimer `src/pages/MyTemplates.tsx`
 3. ✅ Supprimer `src/pages/admin/AdminTemplates.tsx`
 4. ✅ Supprimer `src/pages/admin/AdminTemplatesPremium.tsx`
 
 ### Phase 4: Suppression Librairies
+
 1. ✅ Supprimer `src/lib/template-engine.ts`
 2. ✅ Supprimer `src/lib/template-importer.ts`
 3. ✅ Supprimer `src/lib/template-exporter.ts`
@@ -195,26 +207,32 @@ Tous les fichiers de documentation templates peuvent être supprimés :
 5. ⚠️ Vérifier `src/lib/product-templates.ts` (utilisé par TemplateSelector produits)
 
 ### Phase 5: Suppression Types
+
 1. ✅ Supprimer `src/types/templates.ts`
 2. ✅ Supprimer `src/types/templates-v2.ts`
 
 ### Phase 6: Suppression Données
+
 1. ✅ Supprimer `src/data/templates/` (tout le dossier)
 
 ### Phase 7: Suppression Hooks
+
 1. ✅ Supprimer `src/hooks/useUserTemplates.ts`
 2. ✅ Supprimer `src/hooks/useTemplateApplier.ts`
 3. ✅ Supprimer tests associés
 
 ### Phase 8: Nettoyage Base de Données
+
 1. ⚠️ Créer migration pour supprimer table `user_templates`
 2. ⚠️ Supprimer policies et indexes associés
 
 ### Phase 9: Nettoyage Assets
+
 1. ✅ Supprimer `public/templates/` (dossier)
 2. ✅ Supprimer `public/placeholder-template.svg`
 
 ### Phase 10: Nettoyage Documentation
+
 1. ✅ Supprimer tous les fichiers MD templates
 
 ---
@@ -222,6 +240,7 @@ Tous les fichiers de documentation templates peuvent être supprimés :
 ## 📊 ESTIMATION IMPACT
 
 ### Code à supprimer
+
 - **Composants**: ~15,000 lignes
 - **Pages**: ~2,500 lignes
 - **Librairies**: ~3,500 lignes
@@ -231,6 +250,7 @@ Tous les fichiers de documentation templates peuvent être supprimés :
 - **Total**: ~32,100 lignes de code
 
 ### Fichiers à supprimer
+
 - **Composants**: 26 fichiers
 - **Pages**: 4 fichiers
 - **Librairies**: 7 fichiers
@@ -242,6 +262,7 @@ Tous les fichiers de documentation templates peuvent être supprimés :
 - **Total**: ~140+ fichiers
 
 ### Gain de performance estimé
+
 - **Bundle size**: -500KB à -1MB (gzipped)
 - **Temps de build**: -10 à -20 secondes
 - **Temps de chargement initial**: -200ms à -500ms
@@ -262,4 +283,3 @@ Tous les fichiers de documentation templates peuvent être supprimés :
 ## 🚀 EXÉCUTION
 
 Prêt à procéder à la suppression complète du système de templates.
-

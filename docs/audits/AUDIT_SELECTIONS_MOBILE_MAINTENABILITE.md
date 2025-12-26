@@ -25,11 +25,13 @@
 #### 1. Architecture Cohérente
 
 **✅ Composants de base bien structurés**
+
 - Utilisation de Radix UI comme base solide
 - Composants forwardRef pour la compatibilité
 - Types TypeScript bien définis
 
 **✅ Hook de détection mobile centralisé**
+
 ```typescript
 // src/hooks/use-mobile.tsx
 export function useIsMobile() {
@@ -39,6 +41,7 @@ export function useIsMobile() {
 ```
 
 **✅ Composant wrapper réutilisable**
+
 - `MobileDropdown` encapsule la logique mobile
 - Réduit la duplication de code
 
@@ -51,12 +54,14 @@ export function useIsMobile() {
 **Problème**: Deux méthodes différentes de détection mobile utilisées simultanément
 
 **Méthode 1** (Hook centralisé - RECOMMANDÉ):
+
 ```typescript
 // src/hooks/use-mobile.tsx
 const isMobile = useIsMobile(); // ✅ Utilise matchMedia
 ```
 
 **Méthode 2** (Détection inline - PROBLÉMATIQUE):
+
 ```typescript
 // src/components/ui/select.tsx (ligne 65)
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -64,6 +69,7 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 ```
 
 **Méthode 3** (Dans DropdownMenuItem):
+
 ```typescript
 // src/components/ui/dropdown-menu.tsx (ligne 97)
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -71,12 +77,14 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 ```
 
 **Impact**:
+
 - ❌ Incohérence dans le comportement
 - ❌ Ne réagit pas au changement d'orientation
 - ❌ Code dupliqué
 - ❌ Maintenance difficile
 
-**Recommandation**: 
+**Recommandation**:
+
 - ✅ Utiliser `useIsMobile()` partout
 - ❌ Supprimer toutes les détections inline
 
@@ -89,27 +97,29 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 **Exemples**:
 
 **Dans `SelectContent`**:
+
 ```typescript
 // src/components/ui/select.tsx (lignes 74-76)
 isMobile
-  ? "data-[state=open]:animate-in data-[state=closed]:animate-out..."
-  : "data-[state=open]:animate-in data-[state=closed]:animate-out..."
+  ? 'data-[state=open]:animate-in data-[state=closed]:animate-out...'
+  : 'data-[state=open]:animate-in data-[state=closed]:animate-out...';
 ```
 
 **Dans `DropdownMenuContent`**:
+
 ```typescript
 // src/components/ui/dropdown-menu.tsx (lignes 79-81)
-isMobile && mobileOptimized
-  ? "data-[state=open]:animate-in..."
-  : "data-[state=open]:animate-in..."
+isMobile && mobileOptimized ? 'data-[state=open]:animate-in...' : 'data-[state=open]:animate-in...';
 ```
 
 **Impact**:
+
 - ❌ Code dupliqué
 - ❌ Risque d'incohérence lors des modifications
 - ❌ Maintenance difficile
 
 **Recommandation**:
+
 - ✅ Créer des constantes CSS réutilisables
 - ✅ Créer un hook `useMobileStyles()` pour les classes conditionnelles
 
@@ -120,6 +130,7 @@ isMobile && mobileOptimized
 **Problème**: Certaines props ne sont pas typées correctement
 
 **Exemple dans `LanguageSwitcher`**:
+
 ```typescript
 // src/components/ui/LanguageSwitcher.tsx (ligne 23)
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
@@ -131,6 +142,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 ```
 
 **Interface**:
+
 ```typescript
 interface LanguageSwitcherProps {
   className?: string;
@@ -141,11 +153,13 @@ interface LanguageSwitcherProps {
 ```
 
 **Impact**:
+
 - ❌ Erreurs TypeScript potentielles
 - ❌ Auto-complétion incomplète
 - ❌ Documentation implicite
 
 **Recommandation**:
+
 - ✅ Ajouter toutes les props à l'interface
 - ✅ Utiliser des types stricts
 
@@ -156,18 +170,20 @@ interface LanguageSwitcherProps {
 **Problème**: Mélange entre état contrôlé et non-contrôlé
 
 **Dans `LanguageSwitcher`**:
+
 ```typescript
 // src/components/ui/LanguageSwitcher.tsx (ligne 31)
 const [open, setOpen] = useState(false);
 // ✅ État local
 
 // Mais aussi:
-open={open}
-onOpenChange={setOpen}
+open = { open };
+onOpenChange = { setOpen };
 // ⚠️ Pas de prop open/onOpenChange dans l'interface
 ```
 
 **Dans `MobileDropdown`**:
+
 ```typescript
 // src/components/ui/mobile-dropdown.tsx (lignes 99-105)
 const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -175,11 +191,13 @@ const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 ```
 
 **Impact**:
+
 - ❌ API confuse pour les développeurs
 - ❌ Comportement imprévisible
 - ❌ Tests difficiles
 
 **Recommandation**:
+
 - ✅ Standardiser sur un pattern (contrôlé ou non-contrôlé)
 - ✅ Documenter clairement l'API
 
@@ -190,6 +208,7 @@ const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 **Problème**: Valeurs hardcodées sans constantes
 
 **Exemples**:
+
 ```typescript
 // src/components/ui/select.tsx (ligne 65)
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -205,11 +224,13 @@ sideOffset={isMobile ? 4 : 8}
 ```
 
 **Impact**:
+
 - ❌ Difficile à maintenir
 - ❌ Risque d'incohérence
 - ❌ Pas de source unique de vérité
 
 **Recommandation**:
+
 - ✅ Créer un fichier `src/constants/mobile.ts` avec toutes les constantes
 - ✅ Utiliser les breakpoints de Tailwind
 
@@ -220,6 +241,7 @@ sideOffset={isMobile ? 4 : 8}
 **Problème**: Documentation JSDoc incomplète
 
 **Exemple**:
+
 ```typescript
 // src/components/ui/mobile-dropdown.tsx
 interface MobileDropdownProps {
@@ -231,11 +253,13 @@ interface MobileDropdownProps {
 ```
 
 **Impact**:
+
 - ❌ Auto-complétion moins utile
 - ❌ Onboarding difficile pour nouveaux développeurs
 - ❌ Risque d'utilisation incorrecte
 
 **Recommandation**:
+
 - ✅ Ajouter JSDoc complet pour toutes les props
 - ✅ Inclure des exemples d'utilisation
 
@@ -248,17 +272,19 @@ interface MobileDropdownProps {
 #### 1. Touch Targets Optimisés
 
 **✅ Hauteur minimale de 44px**
+
 ```typescript
 // src/components/ui/select.tsx (ligne 20)
-"flex min-h-[44px] h-11 w-full..."
+'flex min-h-[44px] h-11 w-full...';
 // ✅ Conforme aux guidelines Apple/Google
 
 // src/components/ui/select.tsx (ligne 119)
-"min-h-[44px] text-xs sm:text-sm..."
+'min-h-[44px] text-xs sm:text-sm...';
 // ✅ Items aussi optimisés
 ```
 
 **✅ Classe `touch-manipulation`**
+
 ```typescript
 // Utilisée dans SelectTrigger, SelectItem, LanguageSwitcher
 className={cn('... touch-manipulation', ...)}
@@ -270,13 +296,15 @@ className={cn('... touch-manipulation', ...)}
 #### 2. Scroll Optimisé
 
 **✅ Overscroll Contain**
+
 ```typescript
 // src/components/ui/select.tsx (ligne 90)
-isMobile && "overscroll-contain touch-pan-y"
+isMobile && 'overscroll-contain touch-pan-y';
 // ✅ Empêche le scroll bounce indésirable
 ```
 
 **✅ Viewport Scrollable**
+
 ```typescript
 // src/components/ui/select.tsx (lignes 86-94)
 <SelectPrimitive.Viewport
@@ -293,6 +321,7 @@ isMobile && "overscroll-contain touch-pan-y"
 #### 3. Collision Detection
 
 **✅ Padding adaptatif**
+
 ```typescript
 // src/components/ui/select.tsx (ligne 82)
 collisionPadding={isMobile ? { top: 8, bottom: 8, left: 8, right: 8 } : ...}
@@ -300,6 +329,7 @@ collisionPadding={isMobile ? { top: 8, bottom: 8, left: 8, right: 8 } : ...}
 ```
 
 **✅ Positionnement intelligent**
+
 ```typescript
 // src/components/ui/dropdown-menu.tsx (lignes 69-70)
 side={isMobile && mobileOptimized ? "bottom" : props.side}
@@ -312,11 +342,12 @@ align={isMobile && mobileOptimized ? "end" : props.align}
 #### 4. Animations Optimisées
 
 **✅ Animations simplifiées sur mobile**
+
 ```typescript
 // src/components/ui/select.tsx (lignes 74-76)
 isMobile
-  ? "data-[state=open]:animate-in data-[state=closed]:animate-out..."
-  : "data-[state=open]:animate-in... data-[state=closed]:zoom-out-95..."
+  ? 'data-[state=open]:animate-in data-[state=closed]:animate-out...'
+  : 'data-[state=open]:animate-in... data-[state=closed]:zoom-out-95...';
 // ✅ Moins de calculs = meilleure performance
 ```
 
@@ -330,19 +361,24 @@ isMobile
 
 ```typescript
 // src/components/ui/LanguageSwitcher.tsx (lignes 40-45)
-setTimeout(() => {
-  i18n.changeLanguage(langCode);
-  localStorage.setItem('emarzona_language', langCode);
-  document.documentElement.lang = langCode;
-}, isMobile ? 100 : 50); // ⚠️ Délai artificiel
+setTimeout(
+  () => {
+    i18n.changeLanguage(langCode);
+    localStorage.setItem('emarzona_language', langCode);
+    document.documentElement.lang = langCode;
+  },
+  isMobile ? 100 : 50
+); // ⚠️ Délai artificiel
 ```
 
 **Impact**:
+
 - ❌ Feedback visuel retardé
 - ❌ Expérience moins fluide
 - ❌ Pas de justification claire
 
 **Recommandation**:
+
 - ✅ Supprimer le setTimeout si possible
 - ✅ Si nécessaire, utiliser un délai plus court (10-20ms)
 - ✅ Documenter la raison du délai
@@ -363,11 +399,13 @@ const isLocked = false;
 ```
 
 **Impact**:
+
 - ⚠️ Code mort
 - ⚠️ Suggère des problèmes non résolus
 - ⚠️ Confusion pour les développeurs
 
 **Recommandation**:
+
 - ✅ Supprimer le code commenté
 - ✅ Documenter la solution actuelle
 - ✅ Ajouter des tests pour vérifier la stabilité
@@ -385,11 +423,13 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 ```
 
 **Impact**:
+
 - ❌ Utilisateur peut cliquer plusieurs fois
 - ❌ Pas de feedback visuel
 - ❌ Expérience confuse
 
 **Recommandation**:
+
 - ✅ Ajouter un état de chargement
 - ✅ Désactiver le bouton pendant le changement
 - ✅ Afficher un spinner ou indicateur
@@ -401,6 +441,7 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 **Problème**: Certains attributs ARIA manquants
 
 **Exemple dans `SelectTrigger`**:
+
 ```typescript
 // src/components/ui/select.tsx (ligne 16)
 <SelectPrimitive.Trigger
@@ -411,11 +452,13 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 ```
 
 **Impact**:
+
 - ❌ Lecteurs d'écran moins efficaces
 - ❌ Accessibilité réduite
 - ❌ Non conforme WCAG
 
 **Recommandation**:
+
 - ✅ Ajouter les attributs ARIA nécessaires
 - ✅ Tester avec les lecteurs d'écran
 - ✅ Documenter les bonnes pratiques
@@ -427,6 +470,7 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 **Problème**: Pas de virtualisation pour les longues listes
 
 **Exemple**:
+
 ```typescript
 // src/components/courses/create/CourseBasicInfoForm.tsx (lignes 443-450)
 {LANGUAGES.map((lang) => (
@@ -441,11 +485,13 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 ```
 
 **Impact**:
+
 - ❌ Rendu lent sur mobile
 - ❌ Scroll laggy
 - ❌ Mauvaise expérience utilisateur
 
 **Recommandation**:
+
 - ✅ Implémenter la virtualisation pour listes > 20 items
 - ✅ Utiliser `react-window` ou `react-virtual`
 - ✅ Ajouter un filtre de recherche pour longues listes
@@ -457,11 +503,13 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 **Problème**: Pas de gestion spécifique du clavier virtuel
 
 **Impact**:
+
 - ❌ Le clavier peut masquer le Select ouvert
 - ❌ Positionnement incorrect
 - ❌ Expérience frustrante
 
 **Recommandation**:
+
 - ✅ Détecter l'ouverture du clavier
 - ✅ Ajuster le positionnement automatiquement
 - ✅ Utiliser `visualViewport` API si disponible
@@ -521,30 +569,33 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 
 ## 📊 Score Global
 
-| Catégorie | Score | Statut |
-|-----------|-------|--------|
-| **Maintenabilité** | 72/100 | 🟡 Moyen |
-| **Fluidité Mobile** | 78/100 | 🟢 Bon |
-| **Accessibilité** | 65/100 | 🟡 Moyen |
-| **Performance** | 70/100 | 🟡 Moyen |
-| **Documentation** | 60/100 | 🟡 Moyen |
-| **TOTAL** | **69/100** | 🟡 **Moyen** |
+| Catégorie           | Score      | Statut       |
+| ------------------- | ---------- | ------------ |
+| **Maintenabilité**  | 72/100     | 🟡 Moyen     |
+| **Fluidité Mobile** | 78/100     | 🟢 Bon       |
+| **Accessibilité**   | 65/100     | 🟡 Moyen     |
+| **Performance**     | 70/100     | 🟡 Moyen     |
+| **Documentation**   | 60/100     | 🟡 Moyen     |
+| **TOTAL**           | **69/100** | 🟡 **Moyen** |
 
 ---
 
 ## 🎯 Plan d'Action Recommandé
 
 ### Phase 1: Corrections Critiques (1-2 jours)
+
 1. Unifier la détection mobile
 2. Nettoyer le code mort
 3. Corriger les types TypeScript
 
 ### Phase 2: Améliorations Moyennes (3-5 jours)
+
 4. Constantes centralisées
 5. Documentation complète
 6. Optimisations performance
 
 ### Phase 3: Améliorations Futures (1-2 semaines)
+
 7. Accessibilité complète
 8. Tests automatisés
 9. Feedback visuel avancé
@@ -560,6 +611,5 @@ changeLanguage(langCode); // Change immédiatement, mais délai après
 
 ---
 
-*Audit réalisé le 2025-01-30*  
-*Prochaine révision recommandée: 2025-02-15*
-
+_Audit réalisé le 2025-01-30_  
+_Prochaine révision recommandée: 2025-02-15_

@@ -3,29 +3,29 @@
 
 :root {
   /* Couleurs officielles du thème */
-  --theme-bg-primary: #0F172A; /* Fond principal - gris bleu foncé */
-  --theme-bg-card: #1E293B; /* Couleur des cartes/sections */
+  --theme-bg-primary: #0f172a; /* Fond principal - gris bleu foncé */
+  --theme-bg-card: #1e293b; /* Couleur des cartes/sections */
   --theme-border: #334155; /* Couleur des bordures */
-  --theme-text-primary: #FFFFFF; /* Texte principal */
-  --theme-text-secondary: #94A3B8; /* Texte secondaire */
-  --theme-button-primary: #3B82F6; /* Boutons primaires */
-  --theme-button-primary-hover: #2563EB; /* Boutons primaires hover */
-  --theme-success: #10B981; /* Success / validation */
-  --theme-error: #EF4444; /* Erreur */
-  --theme-warning: #F59E0B; /* Avertissement */
-  --theme-info: #06B6D4; /* Information */
+  --theme-text-primary: #ffffff; /* Texte principal */
+  --theme-text-secondary: #94a3b8; /* Texte secondaire */
+  --theme-button-primary: #3b82f6; /* Boutons primaires */
+  --theme-button-primary-hover: #2563eb; /* Boutons primaires hover */
+  --theme-success: #10b981; /* Success / validation */
+  --theme-error: #ef4444; /* Erreur */
+  --theme-warning: #f59e0b; /* Avertissement */
+  --theme-info: #06b6d4; /* Information */
 
   /* Couleurs d'accent pour les éléments interactifs */
-  --theme-accent-blue: #3B82F6;
-  --theme-accent-blue-light: #1E40AF;
-  --theme-accent-green: #10B981;
+  --theme-accent-blue: #3b82f6;
+  --theme-accent-blue-light: #1e40af;
+  --theme-accent-green: #10b981;
   --theme-accent-green-light: #059669;
-  --theme-accent-red: #EF4444;
-  --theme-accent-red-light: #DC2626;
-  --theme-accent-purple: #8B5CF6;
-  --theme-accent-purple-light: #7C3AED;
-  --theme-accent-orange: #F59E0B;
-  --theme-accent-orange-light: #D97706;
+  --theme-accent-red: #ef4444;
+  --theme-accent-red-light: #dc2626;
+  --theme-accent-purple: #8b5cf6;
+  --theme-accent-purple-light: #7c3aed;
+  --theme-accent-orange: #f59e0b;
+  --theme-accent-orange-light: #d97706;
 
   /* Ombres */
   --theme-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
@@ -46,7 +46,13 @@
 body {
   background-color: var(--theme-bg-primary);
   color: var(--theme-text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
 }
 
 /* Container principal de la page */
@@ -146,7 +152,7 @@ body {
   color: var(--theme-text-primary);
 }
 
-.product-tab-trigger[data-state="active"] {
+.product-tab-trigger[data-state='active'] {
   background: var(--theme-button-primary);
   color: var(--theme-text-primary);
   box-shadow: var(--theme-shadow-sm);
@@ -201,7 +207,7 @@ body {
   cursor: pointer;
 }
 
-.theme-switch[data-state="checked"] {
+.theme-switch[data-state='checked'] {
   background-color: var(--theme-button-primary);
 }
 
@@ -217,7 +223,7 @@ body {
   box-shadow: var(--theme-shadow-sm);
 }
 
-.theme-switch[data-state="checked"] .theme-switch-thumb {
+.theme-switch[data-state='checked'] .theme-switch-thumb {
   transform: translateX(20px);
 }
 
@@ -299,10 +305,18 @@ body {
   gap: 24px;
 }
 
-.theme-grid-cols-1 { grid-template-columns: 1fr; }
-.theme-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.theme-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.theme-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.theme-grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+.theme-grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.theme-grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.theme-grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
 
 @media (max-width: 640px) {
   .theme-grid-cols-2,
@@ -310,7 +324,7 @@ body {
   .theme-grid-cols-4 {
     grid-template-columns: 1fr;
   }
-  
+
   .theme-section-card {
     padding: 16px;
     margin-bottom: 16px;
@@ -325,11 +339,21 @@ body {
 }
 
 /* Espacement */
-.theme-space-y-1 > * + * { margin-top: 8px; }
-.theme-space-y-2 > * + * { margin-top: 12px; }
-.theme-space-y-3 > * + * { margin-top: 16px; }
-.theme-space-y-4 > * + * { margin-top: 24px; }
-.theme-space-y-6 > * + * { margin-top: 32px; }
+.theme-space-y-1 > * + * {
+  margin-top: 8px;
+}
+.theme-space-y-2 > * + * {
+  margin-top: 12px;
+}
+.theme-space-y-3 > * + * {
+  margin-top: 16px;
+}
+.theme-space-y-4 > * + * {
+  margin-top: 24px;
+}
+.theme-space-y-6 > * + * {
+  margin-top: 32px;
+}
 
 /* Séparateurs */
 .theme-separator {
@@ -420,32 +444,90 @@ body {
 }
 
 /* Classes utilitaires pour compatibilité */
-.saas-section-card { @extend .theme-section-card; }
-.saas-section-title { @extend .theme-section-title; }
-.saas-section-description { @extend .theme-section-description; }
-.saas-input { @extend .theme-input; }
-.saas-label { @extend .theme-label; }
-.saas-label-description { @extend .theme-label-description; }
-.saas-switch { @extend .theme-switch; }
-.saas-button { @extend .theme-button; }
-.saas-button-outline { @extend .theme-button-outline; }
-.saas-stats-card { @extend .theme-stats-card; }
-.saas-stats-value { @extend .theme-stats-value; }
-.saas-stats-label { @extend .theme-stats-label; }
-.saas-stats-change { @extend .theme-stats-change; }
-.saas-grid { @extend .theme-grid; }
-.saas-grid-cols-1 { @extend .theme-grid-cols-1; }
-.saas-grid-cols-2 { @extend .theme-grid-cols-2; }
-.saas-grid-cols-3 { @extend .theme-grid-cols-3; }
-.saas-grid-cols-4 { @extend .theme-grid-cols-4; }
-.saas-space-y-1 { @extend .theme-space-y-1; }
-.saas-space-y-2 { @extend .theme-space-y-2; }
-.saas-space-y-3 { @extend .theme-space-y-3; }
-.saas-space-y-4 { @extend .theme-space-y-4; }
-.saas-space-y-6 { @extend .theme-space-y-6; }
-.saas-separator { @extend .theme-separator; }
-.saas-badge { @extend .theme-badge; }
-.saas-badge-primary { @extend .theme-badge-primary; }
-.saas-badge-success { @extend .theme-badge-success; }
-.saas-badge-warning { @extend .theme-badge-warning; }
-.saas-badge-danger { @extend .theme-badge-danger; }
+.saas-section-card {
+  @extend .theme-section-card;
+}
+.saas-section-title {
+  @extend .theme-section-title;
+}
+.saas-section-description {
+  @extend .theme-section-description;
+}
+.saas-input {
+  @extend .theme-input;
+}
+.saas-label {
+  @extend .theme-label;
+}
+.saas-label-description {
+  @extend .theme-label-description;
+}
+.saas-switch {
+  @extend .theme-switch;
+}
+.saas-button {
+  @extend .theme-button;
+}
+.saas-button-outline {
+  @extend .theme-button-outline;
+}
+.saas-stats-card {
+  @extend .theme-stats-card;
+}
+.saas-stats-value {
+  @extend .theme-stats-value;
+}
+.saas-stats-label {
+  @extend .theme-stats-label;
+}
+.saas-stats-change {
+  @extend .theme-stats-change;
+}
+.saas-grid {
+  @extend .theme-grid;
+}
+.saas-grid-cols-1 {
+  @extend .theme-grid-cols-1;
+}
+.saas-grid-cols-2 {
+  @extend .theme-grid-cols-2;
+}
+.saas-grid-cols-3 {
+  @extend .theme-grid-cols-3;
+}
+.saas-grid-cols-4 {
+  @extend .theme-grid-cols-4;
+}
+.saas-space-y-1 {
+  @extend .theme-space-y-1;
+}
+.saas-space-y-2 {
+  @extend .theme-space-y-2;
+}
+.saas-space-y-3 {
+  @extend .theme-space-y-3;
+}
+.saas-space-y-4 {
+  @extend .theme-space-y-4;
+}
+.saas-space-y-6 {
+  @extend .theme-space-y-6;
+}
+.saas-separator {
+  @extend .theme-separator;
+}
+.saas-badge {
+  @extend .theme-badge;
+}
+.saas-badge-primary {
+  @extend .theme-badge-primary;
+}
+.saas-badge-success {
+  @extend .theme-badge-success;
+}
+.saas-badge-warning {
+  @extend .theme-badge-warning;
+}
+.saas-badge-danger {
+  @extend .theme-badge-danger;
+}

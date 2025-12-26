@@ -31,7 +31,7 @@ Après avoir appliqué la migration, vérifiez que tout est configuré :
 ### 1. Vérifier les Cron Jobs
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -41,13 +41,14 @@ WHERE jobname IN ('auto-payout-vendors-daily', 'auto-pay-referral-commissions-da
 ```
 
 **Résultat attendu** :
+
 - `auto-payout-vendors-daily` : schedule `0 3 * * *`, active `true`
 - `auto-pay-referral-commissions-daily` : schedule `0 4 * * *`, active `true`
 
 ### 2. Vérifier la Configuration
 
 ```sql
-SELECT 
+SELECT
   settings->'auto_payout_vendors'->>'enabled' as auto_payout_enabled,
   settings->'auto_payout_vendors'->>'delay_days' as delay_days,
   settings->'auto_payout_vendors'->>'min_amount' as min_amount,
@@ -58,6 +59,7 @@ WHERE key = 'admin';
 ```
 
 **Résultat attendu** :
+
 - `auto_payout_enabled`: `true`
 - `delay_days`: `7`
 - `min_amount`: `50000`
@@ -108,5 +110,3 @@ SELECT net.http_post(
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

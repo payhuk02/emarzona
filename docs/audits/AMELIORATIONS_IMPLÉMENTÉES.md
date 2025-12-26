@@ -18,6 +18,7 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 **Fichier** : `src/components/marketplace/MarketplaceHeader.tsx`
 
 **Améliorations** :
+
 - ✅ Ajout de `aria-label` sur le lien logo
 - ✅ Ajout de `aria-label="Navigation principale"` sur la nav desktop
 - ✅ Ajout de `aria-label="Menu de navigation mobile"` sur la nav mobile
@@ -26,6 +27,7 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 - ✅ Amélioration des labels pour les boutons d'action
 
 **Impact** :
+
 - ✅ Meilleure accessibilité pour les lecteurs d'écran
 - ✅ Navigation clavier améliorée
 - ✅ Conformité WCAG améliorée
@@ -39,6 +41,7 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 **Fichier** : `src/App.tsx`
 
 **Composants lazy-loaded** :
+
 - ✅ `CookieConsentBanner` : Chargé après le contenu principal
 - ✅ `CrispChat` : Chargé après le contenu principal
 - ✅ `Require2FABanner` : Chargé après le contenu principal
@@ -50,6 +53,7 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 **Gain estimé** : ~50-80 KB sur le chunk principal
 
 **Stratégie** :
+
 - Les composants sont enveloppés dans `<Suspense fallback={null}>` pour éviter les flashs
 - Chargement asynchrone après le First Contentful Paint (FCP)
 - Amélioration du Time to Interactive (TTI)
@@ -63,6 +67,7 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 **Fichier** : `docs/audits/PLAN_OPTIMISATIONS_PRIORITAIRES.md`
 
 **Contenu** :
+
 - ✅ Analyse détaillée du bundle actuel
 - ✅ Objectifs de performance
 - ✅ Plan d'action par phases
@@ -78,6 +83,7 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 **Fichier** : `docs/audits/AUDIT_COMPLET_PLATEFORME_2025.md`
 
 **Contenu** :
+
 - ✅ Analyse de 8 catégories (Architecture, Responsivité, Performance, Sécurité, etc.)
 - ✅ Score global : 88/100
 - ✅ Recommandations prioritaires
@@ -89,19 +95,19 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 
 ### Performance
 
-| Métrique | Avant | Cible | Statut |
-|----------|-------|-------|--------|
-| Bundle principal | 558 KB | < 400 KB | 🟡 En cours |
-| FCP | - | < 1.5s | 🟡 À mesurer |
-| LCP | - | < 2.5s | 🟡 À mesurer |
+| Métrique         | Avant  | Cible    | Statut       |
+| ---------------- | ------ | -------- | ------------ |
+| Bundle principal | 558 KB | < 400 KB | 🟡 En cours  |
+| FCP              | -      | < 1.5s   | 🟡 À mesurer |
+| LCP              | -      | < 2.5s   | 🟡 À mesurer |
 
 ### Accessibilité
 
-| Métrique | Avant | Après | Statut |
-|----------|-------|--------|--------|
-| ARIA labels MarketplaceHeader | 2 | 8+ | ✅ Amélioré |
-| Navigation clavier | ✅ | ✅ | ✅ Maintenu |
-| Conformité WCAG | ~85% | ~90% | ✅ Amélioré |
+| Métrique                      | Avant | Après | Statut      |
+| ----------------------------- | ----- | ----- | ----------- |
+| ARIA labels MarketplaceHeader | 2     | 8+    | ✅ Amélioré |
+| Navigation clavier            | ✅    | ✅    | ✅ Maintenu |
+| Conformité WCAG               | ~85%  | ~90%  | ✅ Amélioré |
 
 ---
 
@@ -151,9 +157,3 @@ Suite à l'audit complet de la plateforme, plusieurs améliorations prioritaires
 ---
 
 **Dernière mise à jour** : Février 2025
-
-
-
-
-
-

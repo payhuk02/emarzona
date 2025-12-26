@@ -12,6 +12,7 @@
 **Fichier :** `src/lib/email/email-segment-service.ts`
 
 **Méthodes créées :**
+
 - ✅ `createSegment()` - Création
 - ✅ `getSegment()` - Récupération
 - ✅ `getSegments()` - Liste avec filtres
@@ -25,6 +26,7 @@
 **Fichier :** `src/hooks/email/useEmailSegments.ts`
 
 **7 hooks créés :**
+
 1. ✅ `useEmailSegments()` - Liste des segments
 2. ✅ `useEmailSegment()` - Segment spécifique
 3. ✅ `useCreateEmailSegment()` - Création
@@ -47,16 +49,19 @@
 ### 1. Composants UI ⏳
 
 #### ⏳ `EmailSegmentManager.tsx`
+
 - Liste des segments
 - Actions : créer, modifier, supprimer, prévisualiser
 - Affichage des statistiques (member_count)
 
 #### ⏳ `EmailSegmentBuilder.tsx`
+
 - Dialog pour créer/éditer un segment
 - Formulaire : nom, description, type, criteria
 - Builder de critères pour segments dynamiques
 
 #### ⏳ `SegmentPreview.tsx`
+
 - Prévisualisation des membres d'un segment
 - Calcul dynamique
 - Affichage liste/pagination
@@ -64,12 +69,14 @@
 ### 2. Page Principale ⏳
 
 #### ⏳ `/dashboard/emails/segments`
+
 - Page complète avec sidebar
 - Intégration des composants
 
 ### 3. Amélioration Fonctions SQL ⏳
 
 #### ⏳ Améliorer `calculate_dynamic_segment_members`
+
 - Implémenter la logique complète de segmentation
 - Support des critères complexes
 
@@ -96,4 +103,3 @@
 ---
 
 **Phase 4 : 🔄 EN COURS**
-

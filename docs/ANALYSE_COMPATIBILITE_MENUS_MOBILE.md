@@ -41,6 +41,7 @@
 ### 3. SelectContent avec z-index personnalisé
 
 **Fichiers concernés :**
+
 - `src/components/store/WithdrawalsList.tsx` (lignes 177, 225)
 - `src/components/store/WithdrawalsFilters.tsx` (lignes 193, 211)
 
@@ -55,6 +56,7 @@
 ### 4. SelectTrigger avec hauteurs fixes
 
 **Fichiers concernés :**
+
 - `src/pages/admin/PhysicalProductsSerialTracking.tsx` (ligne 201)
 - `src/pages/admin/PhysicalProductsLots.tsx` (ligne 202)
 - `src/components/store/WithdrawalsList.tsx` (lignes 174, 222)
@@ -83,6 +85,7 @@
 ## 🔧 Corrections appliquées
 
 ### ✅ Correction 1 : NotificationBell
+
 **Fichier :** `src/components/notifications/NotificationBell.tsx`
 
 **Avant :** `className="w-96 p-0"` (largeur fixe)  
@@ -93,6 +96,7 @@
 ---
 
 ### ✅ Correction 2 : ProductCardDashboard
+
 **Fichier :** `src/components/products/ProductCardDashboard.tsx`
 
 **Avant :** `className="w-48"` (largeur fixe)  
@@ -103,6 +107,7 @@
 ---
 
 ### ✅ Correction 3 : DigitalProductsSearch
+
 **Fichier :** `src/pages/digital/DigitalProductsSearch.tsx`
 
 **Avant :** `className="w-80"` (largeur fixe)  
@@ -113,6 +118,7 @@
 ---
 
 ### ✅ Correction 4 : CreatePromotionDialog
+
 **Fichier :** `src/components/promotions/CreatePromotionDialog.tsx`
 
 **Avant :** `className="w-64 p-2"` (largeur fixe)  
@@ -123,6 +129,7 @@
 ---
 
 ### ✅ Correction 5 : PromotionFilters
+
 **Fichier :** `src/components/promotions/PromotionFilters.tsx`
 
 **Avant :** `className="w-80 p-4"` (largeur fixe)  
@@ -133,6 +140,7 @@
 ---
 
 ### ✅ Correction 6 : ProductListView
+
 **Fichier :** `src/components/products/ProductListView.tsx`
 
 **Avant :** `className="w-48"` (largeur fixe)  
@@ -143,13 +151,16 @@
 ---
 
 ### ✅ Correction 7 : SupplierOrders (2 occurrences)
+
 **Fichier :** `src/components/physical/suppliers/SupplierOrders.tsx`
 
-**Avant :** 
+**Avant :**
+
 - `className="w-44 lg:w-48 xl:w-56"` (ligne 598)
 - `className="w-44 xs:w-48 sm:w-56"` (ligne 661)
 
-**Après :** 
+**Après :**
+
 - `className="w-[calc(100vw-2rem)] sm:w-44 lg:w-48 xl:w-56 max-w-[calc(100vw-2rem)] sm:max-w-xs"` + `mobileOptimized`
 - `className="w-[calc(100vw-2rem)] xs:w-44 sm:w-48 md:w-56 max-w-[calc(100vw-2rem)] sm:max-w-xs"` + `mobileOptimized`
 
@@ -191,6 +202,7 @@ Ces composants fonctionnent mais pourraient bénéficier d'optimisations supplé
 ### Compatibilité garantie
 
 Les optimisations automatiques des composants de base (Select, DropdownMenu, Popover) garantissent que :
+
 - ✅ Tous les menus fonctionnent correctement sur mobile
 - ✅ Les largeurs s'adaptent automatiquement aux petits écrans
 - ✅ Les touch targets respectent les 44px minimum
@@ -210,4 +222,3 @@ Les optimisations automatiques des composants de base (Select, DropdownMenu, Pop
 1. Migrer progressivement les menus critiques vers `MobileDropdown` pour une expérience encore plus optimisée
 2. Ajouter des tests E2E pour les menus sur mobile
 3. Monitorer les performances et ajuster si nécessaire
-

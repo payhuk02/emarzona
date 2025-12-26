@@ -10,6 +10,7 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 ### Erreur Console Vercel
+
 ```
 Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
   at ic (radix-ui-CVJS-uL0.js:1:3244)
@@ -18,6 +19,7 @@ Uncaught TypeError: Cannot read properties of undefined (reading 'forwardRef')
 ```
 
 ### Symptômes
+
 - ✅ Application fonctionne **localement** (`npm run dev`)
 - ❌ Application **ne démarre pas** sur Vercel (écran noir)
 - ❌ Erreur d'accès à `forwardRef` dans le chunk Radix UI
@@ -55,18 +57,20 @@ L'erreur `Cannot read properties of undefined (reading 'forwardRef')` se produit
 **Fichier** : `vite.config.ts`
 
 **AVANT** (problématique) :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
     return 'react-vendor'; // ❌ Chunk séparé
   }
   // ...
-}
+};
 ```
 
 **APRÈS** (corrigé) :
+
 ```typescript
-manualChunks: (id) => {
+manualChunks: id => {
   // CRITIQUE: React et React DOM dans le chunk principal (undefined)
   // Ne pas séparer React pour garantir qu'il est chargé avant tous les composants
   // Cela évite l'erreur "Cannot read properties of undefined (reading 'forwardRef')"
@@ -74,10 +78,11 @@ manualChunks: (id) => {
     return undefined; // ✅ Garder dans le chunk principal
   }
   // ...
-}
+};
 ```
 
 **Explication** :
+
 - React reste dans le chunk principal (`index-[hash].js`)
 - Le chunk principal est toujours chargé en premier
 - Tous les autres chunks dépendent du chunk principal
@@ -90,11 +95,13 @@ manualChunks: (id) => {
 **Fichier** : `vite.config.ts`
 
 **AVANT** :
+
 ```typescript
 preserveEntrySignatures: 'allow-extension',
 ```
 
 **APRÈS** :
+
 ```typescript
 // CRITIQUE: 'strict' garantit l'ordre de chargement des chunks
 // React sera chargé avant tous les chunks qui en dépendent (Radix UI, etc.)
@@ -102,6 +109,7 @@ preserveEntrySignatures: 'strict',
 ```
 
 **Explication** :
+
 - `preserveEntrySignatures: 'strict'` garantit l'ordre de chargement
 - Rollup respecte les dépendances entre chunks
 - React sera chargé avant tous les chunks qui en dépendent
@@ -113,6 +121,7 @@ preserveEntrySignatures: 'strict',
 **Fichier** : `vercel.json`
 
 **Ajouté** :
+
 ```json
 {
   "source": "/:path*.js",
@@ -130,6 +139,7 @@ preserveEntrySignatures: 'strict',
 ```
 
 **Explication** :
+
 - Garantit que les fichiers JS sont servis avec le bon MIME type
 - Évite les problèmes de chargement de modules ES
 - Améliore la compatibilité avec Vercel
@@ -138,12 +148,12 @@ preserveEntrySignatures: 'strict',
 
 ## 📊 RÉSULTAT
 
-| Avant | Après |
-|-------|-------|
-| ❌ React dans chunk séparé | ✅ React dans chunk principal |
-| ❌ Radix UI chargé avant React | ✅ Radix UI chargé après React |
-| ❌ Erreur `forwardRef` undefined | ✅ `forwardRef` accessible |
-| ❌ Écran noir sur Vercel | ✅ Application démarre |
+| Avant                              | Après                                                     |
+| ---------------------------------- | --------------------------------------------------------- |
+| ❌ React dans chunk séparé         | ✅ React dans chunk principal                             |
+| ❌ Radix UI chargé avant React     | ✅ Radix UI chargé après React                            |
+| ❌ Erreur `forwardRef` undefined   | ✅ `forwardRef` accessible                                |
+| ❌ Écran noir sur Vercel           | ✅ Application démarre                                    |
 | ❌ Ordre de chargement non garanti | ✅ Ordre garanti avec `preserveEntrySignatures: 'strict'` |
 
 ---
@@ -151,6 +161,7 @@ preserveEntrySignatures: 'strict',
 ## 🚀 DÉPLOIEMENT
 
 ### Commandes
+
 ```bash
 # Build local pour vérifier
 npm run build
@@ -216,6 +227,7 @@ git push
 **Statut**: ✅ **CORRIGÉ**
 
 ### Changements
+
 - ✅ React gardé dans le chunk principal
 - ✅ `preserveEntrySignatures: 'strict'` activé
 - ✅ Header MIME type ajouté dans vercel.json
@@ -223,5 +235,4 @@ git push
 
 ---
 
-*Dernière mise à jour : Janvier 2025*
-
+_Dernière mise à jour : Janvier 2025_

@@ -1,4 +1,5 @@
 # 📝 CHANGELOG - Phase 3 Corrections Système Emailing & Tags
+
 ## Date: 2 Février 2025
 
 ---
@@ -6,6 +7,7 @@
 ## ✅ Améliorations Implémentées (Phase 3 - Optimisations)
 
 ### 1. Correction Erreur SQL `add_user_tag` ✅
+
 **Fichier**: `supabase/migrations/20250202_add_tag_categories.sql`
 
 **Problème**: Erreur "function name add_user_tag is not unique" car deux fonctions avec signatures différentes existaient.
@@ -21,15 +23,18 @@ CREATE OR REPLACE FUNCTION public.add_user_tag(...)
 ```
 
 ### 2. Système d'Expiration de Tags ✅
+
 **Fichier**: `supabase/migrations/20250202_add_tag_expiration_cleanup.sql`
 
 **Fonctionnalités**:
+
 - ✅ Colonne `expires_at` ajoutée à `email_user_tags`
 - ✅ Index pour améliorer les performances
 - ✅ Vue `active_email_user_tags` qui exclut automatiquement les tags expirés
 - ✅ Support de l'expiration dans `add_user_tag` via paramètre `p_expires_in_days`
 
 **Utilisation**:
+
 ```sql
 -- Ajouter un tag qui expire dans 30 jours
 SELECT add_user_tag(
@@ -43,17 +48,20 @@ SELECT add_user_tag(
 ```
 
 **Fonction SQL**:
+
 ```sql
 -- Récupérer les tags expirant bientôt
 SELECT * FROM get_expiring_tags('store-id', 7); -- Tags expirant dans 7 jours
 ```
 
 ### 3. Nettoyage Automatique des Tags ✅
+
 **Fichier**: `supabase/migrations/20250202_add_tag_expiration_cleanup.sql`
 
 **Fonctions SQL créées**:
 
 #### `cleanup_expired_tags()`
+
 Supprime tous les tags expirés et retourne les statistiques.
 
 ```sql
@@ -62,6 +70,7 @@ SELECT * FROM cleanup_expired_tags();
 ```
 
 #### `cleanup_unused_tags(store_id?, unused_days)`
+
 Supprime les tags non utilisés depuis X jours (par défaut 90).
 
 ```sql
@@ -73,21 +82,25 @@ SELECT * FROM cleanup_unused_tags(NULL, 90);
 ```
 
 **Caractéristiques**:
+
 - ✅ Ne supprime pas les tags système (`category = 'system'`)
 - ✅ Configurable par store ou global
 - ✅ Retourne les détails des tags supprimés
 - ✅ Logging complet
 
 ### 4. Service TypeScript Mis à Jour ✅
+
 **Fichier**: `src/lib/email/email-tag-service.ts`
 
 **Nouvelles méthodes**:
+
 - ✅ `addTag(..., expiresInDays?)` - Support de l'expiration
 - ✅ `cleanupExpiredTags()` - Nettoyer les tags expirés
 - ✅ `cleanupUnusedTags(storeId?, unusedDays)` - Nettoyer les tags non utilisés
 - ✅ `getExpiringTags(storeId?, daysAhead)` - Récupérer les tags expirant bientôt
 
 **Exemple d'utilisation**:
+
 ```typescript
 import { emailTagService } from '@/lib/email/email-tag-service';
 
@@ -98,7 +111,7 @@ await emailTagService.addTag(
   'trial_user',
   { source: 'signup' },
   'behavior',
-  30  // expire dans 30 jours
+  30 // expire dans 30 jours
 );
 
 // Nettoyer les tags expirés
@@ -113,9 +126,11 @@ const expiring = await emailTagService.getExpiringTags(storeId, 7);
 ```
 
 ### 5. Service Analytics Avancées ✅
+
 **Fichier**: `src/lib/email/email-analytics-service.ts`
 
 **Fonctionnalités**:
+
 - ✅ Analytics globales pour un store (taux de livraison, ouverture, clics, etc.)
 - ✅ Analytics des tags (utilisation, popularité, catégories)
 - ✅ Analytics des segments (membres, campagnes, performances)
@@ -125,6 +140,7 @@ const expiring = await emailTagService.getExpiringTags(storeId, 7);
 **Méthodes disponibles**:
 
 #### `getStoreAnalytics(storeId, startDate?, endDate?)`
+
 Retourne les statistiques globales d'emailing pour un store.
 
 ```typescript
@@ -148,6 +164,7 @@ const analytics = await emailAnalyticsService.getStoreAnalytics(
 ```
 
 #### `getTagAnalytics(storeId)`
+
 Retourne les statistiques d'utilisation des tags.
 
 ```typescript
@@ -156,6 +173,7 @@ const tagStats = await emailAnalyticsService.getTagAnalytics(storeId);
 ```
 
 #### `getSegmentAnalytics(storeId)`
+
 Retourne les performances des segments.
 
 ```typescript
@@ -164,6 +182,7 @@ const segmentStats = await emailAnalyticsService.getSegmentAnalytics(storeId);
 ```
 
 #### `getCampaignPerformance(storeId, startDate?, endDate?)`
+
 Retourne les performances détaillées des campagnes.
 
 ```typescript
@@ -172,6 +191,7 @@ const campaigns = await emailAnalyticsService.getCampaignPerformance(storeId);
 ```
 
 #### `getExpiringTags(storeId, daysAhead)`
+
 Retourne les tags qui vont expirer bientôt.
 
 ```typescript
@@ -183,29 +203,32 @@ const expiring = await emailAnalyticsService.getExpiringTags(storeId, 7);
 
 ## 📊 Résumé des Améliorations
 
-| Amélioration | Statut | Fichier |
-|--------------|--------|---------|
-| Correction erreur SQL add_user_tag | ✅ | `20250202_add_tag_categories.sql` |
-| Système d'expiration de tags | ✅ | `20250202_add_tag_expiration_cleanup.sql` |
-| Nettoyage automatique des tags | ✅ | `20250202_add_tag_expiration_cleanup.sql` |
-| Service analytics avancées | ✅ | `src/lib/email/email-analytics-service.ts` |
-| Service TypeScript mis à jour | ✅ | `src/lib/email/email-tag-service.ts` |
+| Amélioration                       | Statut | Fichier                                    |
+| ---------------------------------- | ------ | ------------------------------------------ |
+| Correction erreur SQL add_user_tag | ✅     | `20250202_add_tag_categories.sql`          |
+| Système d'expiration de tags       | ✅     | `20250202_add_tag_expiration_cleanup.sql`  |
+| Nettoyage automatique des tags     | ✅     | `20250202_add_tag_expiration_cleanup.sql`  |
+| Service analytics avancées         | ✅     | `src/lib/email/email-analytics-service.ts` |
+| Service TypeScript mis à jour      | ✅     | `src/lib/email/email-tag-service.ts`       |
 
 ---
 
 ## 🚀 Bénéfices
 
 ### Maintenance
+
 - ✅ **Nettoyage automatique** des tags expirés et non utilisés
 - ✅ **Prévention de l'accumulation** de tags obsolètes
 - ✅ **Gestion de la base de données** optimisée
 
 ### Analytics
+
 - ✅ **Visibilité complète** sur les performances emailing
 - ✅ **Statistiques détaillées** par tag, segment, campagne
 - ✅ **Métriques en temps réel** pour prise de décision
 
 ### Organisation
+
 - ✅ **Tags temporaires** avec expiration automatique
 - ✅ **Nettoyage programmé** possible via cron jobs
 - ✅ **Vue active** qui exclut automatiquement les tags expirés
@@ -215,7 +238,9 @@ const expiring = await emailAnalyticsService.getExpiringTags(storeId, 7);
 ## 📝 Notes Techniques
 
 ### Migrations SQL
+
 Les migrations doivent être exécutées dans cet ordre:
+
 1. `20250201_emailing_advanced_foundations.sql`
 2. `20250201_emailing_functions_base.sql`
 3. `20250202_fix_emailing_tags_workflows_critical.sql`
@@ -223,6 +248,7 @@ Les migrations doivent être exécutées dans cet ordre:
 5. `20250202_add_tag_expiration_cleanup.sql` (nouvelle)
 
 ### Cron Jobs Recommandés
+
 Pour automatiser le nettoyage, créer des cron jobs Supabase:
 
 ```sql
@@ -242,6 +268,7 @@ SELECT cron.schedule(
 ```
 
 ### Vue Active
+
 La vue `active_email_user_tags` peut être utilisée à la place de la table pour exclure automatiquement les tags expirés:
 
 ```sql
@@ -262,4 +289,3 @@ SELECT * FROM active_email_user_tags WHERE store_id = 'store-id';
 
 **Date de mise à jour**: 2 Février 2025  
 **Version**: 1.3.0
-

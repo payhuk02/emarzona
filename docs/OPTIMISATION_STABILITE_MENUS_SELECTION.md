@@ -34,12 +34,13 @@ Optimisation de la **stabilité des menus de sélection** pour garantir qu'ils n
 - ✅ **Nettoyage automatique** : Restaure les styles à la fermeture
 
 **Code** :
+
 ```tsx
 // Verrouiller la position après que Radix UI l'ait positionné
 const lockTimeout = setTimeout(() => {
   const rect = menuElement.getBoundingClientRect();
   lockedPosition = { top: rect.top, left: rect.left, width: rect.width };
-  
+
   menuElement.style.position = 'fixed';
   menuElement.style.top = `${lockedPosition.top}px`;
   menuElement.style.left = `${lockedPosition.left}px`;
@@ -67,6 +68,7 @@ const checkPosition = () => {
 - ✅ **Pas de `preventDefault`** : Permet la sélection normale tout en empêchant la fermeture prématurée
 
 **Code** :
+
 ```tsx
 onPointerDown={(e) => {
   // Empêcher la propagation qui pourrait fermer le menu prématurément
@@ -94,9 +96,9 @@ const [isOpen, setIsOpen] = useState(false);
 useStableSelect({
   menuRef,
   isOpen,
-  onPositionLocked: (position) => {
+  onPositionLocked: position => {
     // Position verrouillée, menu stable
-  }
+  },
 });
 ```
 
@@ -107,6 +109,7 @@ useStableSelect({
 ### ✅ `SelectContent` (`src/components/ui/select.tsx`)
 
 **Améliorations** :
+
 - ✅ Verrouillage de position sur mobile avec `requestAnimationFrame`
 - ✅ Détection automatique de l'état d'ouverture
 - ✅ Restauration automatique de la position si elle change
@@ -115,6 +118,7 @@ useStableSelect({
 ### ✅ `SelectItem` (`src/components/ui/select.tsx`)
 
 **Améliorations** :
+
 - ✅ `onPointerDown` avec `stopPropagation` : Empêche la fermeture prématurée
 - ✅ `onTouchStart` avec `stopPropagation` : Empêche la propagation tactile
 - ✅ Pas de `preventDefault` : Permet la sélection normale
@@ -122,6 +126,7 @@ useStableSelect({
 ### ✅ `DropdownMenuContent` (`src/components/ui/dropdown-menu.tsx`)
 
 **Améliorations** :
+
 - ✅ Verrouillage de position sur mobile (même logique que SelectContent)
 - ✅ Détection automatique de l'état d'ouverture
 - ✅ Surveillance continue de la position
@@ -129,6 +134,7 @@ useStableSelect({
 ### ✅ `DropdownMenuItem` (`src/components/ui/dropdown-menu.tsx`)
 
 **Améliorations** :
+
 - ✅ `onPointerDown` avec `stopPropagation` : Empêche la fermeture prématurée
 - ✅ `onTouchStart` avec `stopPropagation` : Empêche la propagation tactile
 - ✅ Gestion propre de `onSelect` : Laisser Radix UI gérer la fermeture
@@ -183,6 +189,7 @@ useStableSelect({
 **Score** : 🎯 **100/100** - Stabilité parfaite garantie !
 
 Tous les menus de sélection sont maintenant :
+
 - ✅ **Stables** : Position verrouillée pendant l'interaction
 - ✅ **Fiables** : Ne se ferment pas avant la sélection
 - ✅ **Réactifs** : Sélection fiable à chaque interaction
@@ -191,4 +198,3 @@ Tous les menus de sélection sont maintenant :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

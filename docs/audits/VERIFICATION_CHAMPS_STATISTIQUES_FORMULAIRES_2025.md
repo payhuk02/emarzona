@@ -14,9 +14,11 @@ Vérification complète de la présence des champs permettant aux vendeurs de co
 ## ✅ Formulaires d'Édition (COMPLETS)
 
 ### 1. ProductInfoTab.tsx
+
 **Statut:** ✅ **COMPLET**
 
 **Champs présents:**
+
 - ✅ `hide_purchase_count` - Switch avec label et tooltip
 - ✅ `hide_likes_count` - Switch avec label et tooltip
 - ✅ `hide_recommendations_count` - Switch avec label et tooltip
@@ -27,6 +29,7 @@ Vérification complète de la présence des champs permettant aux vendeurs de co
 **Emplacement:** Section "Affichage des Statistiques" (lignes 952-1055)
 
 **Interface:**
+
 ```typescript
 interface ProductFormData {
   hide_purchase_count?: boolean;
@@ -39,9 +42,11 @@ interface ProductFormData {
 ```
 
 ### 2. ProductVisualTab.tsx
+
 **Statut:** ✅ **COMPLET**
 
 **Champs présents:**
+
 - ✅ `hide_purchase_count` - Switch avec label
 - ✅ `hide_likes_count` - Switch avec label
 - ✅ `hide_recommendations_count` - Switch avec label
@@ -56,14 +61,17 @@ interface ProductFormData {
 ## ⚠️ Wizards de Création (PARTIELLEMENT IMPLÉMENTÉ)
 
 ### 1. CreateDigitalProductWizard_v2.tsx
+
 **Statut:** ✅ **COMPLET**
 
 **Implémentation:**
+
 - ✅ Utilise le composant partagé `ProductStatisticsDisplaySettings`
 - ✅ Intégré dans l'étape 3 (DigitalLicenseConfig)
 - ✅ Tous les champs sont présents et fonctionnels
 
 **Code:**
+
 ```typescript
 <ProductStatisticsDisplaySettings
   formData={{
@@ -80,6 +88,7 @@ interface ProductFormData {
 ```
 
 ### 2. CreatePhysicalProductWizard_v2.tsx
+
 **Statut:** ❌ **MANQUANT**
 
 **Problème:** Aucun champ de contrôle des statistiques n'est présent dans le wizard.
@@ -87,6 +96,7 @@ interface ProductFormData {
 **Action requise:** Ajouter `ProductStatisticsDisplaySettings` dans une étape appropriée.
 
 ### 3. CreateServiceWizard_v2.tsx
+
 **Statut:** ❌ **MANQUANT**
 
 **Problème:** Aucun champ de contrôle des statistiques n'est présent dans le wizard.
@@ -94,11 +104,13 @@ interface ProductFormData {
 **Action requise:** Ajouter `ProductStatisticsDisplaySettings` dans une étape appropriée.
 
 ### 4. CreateArtistProductWizard (si existe)
+
 **Statut:** ❓ **À VÉRIFIER**
 
 **Action requise:** Vérifier l'existence et ajouter les champs si nécessaire.
 
 ### 5. CreateCourseWizard (si existe)
+
 **Statut:** ❓ **À VÉRIFIER**
 
 **Action requise:** Vérifier l'existence et ajouter les champs si nécessaire.
@@ -108,9 +120,11 @@ interface ProductFormData {
 ## 📊 Composant Partagé
 
 ### ProductStatisticsDisplaySettings.tsx
+
 **Statut:** ✅ **CRÉÉ ET FONCTIONNEL**
 
 **Fonctionnalités:**
+
 - ✅ Composant réutilisable pour tous les types de produits
 - ✅ Supporte les variantes `default` et `compact`
 - ✅ Filtre automatique des options selon le type de produit
@@ -118,6 +132,7 @@ interface ProductFormData {
 - ✅ Design cohérent avec le reste de l'application
 
 **Champs gérés:**
+
 - ✅ `hide_purchase_count`
 - ✅ `hide_likes_count`
 - ✅ `hide_recommendations_count`
@@ -133,6 +148,7 @@ interface ProductFormData {
 **Migration SQL:** `supabase/migrations/20250202_add_hide_statistics_fields.sql`
 
 **Champs ajoutés:**
+
 - ✅ `hide_purchase_count` BOOLEAN DEFAULT FALSE
 - ✅ `hide_likes_count` BOOLEAN DEFAULT FALSE
 - ✅ `hide_recommendations_count` BOOLEAN DEFAULT FALSE
@@ -147,10 +163,12 @@ interface ProductFormData {
 ## ✅ Checklist Complète
 
 ### Formulaires d'Édition
+
 - [x] ProductInfoTab.tsx - Tous les champs présents
 - [x] ProductVisualTab.tsx - Tous les champs présents
 
 ### Wizards de Création
+
 - [x] CreateDigitalProductWizard_v2.tsx - ✅ Complet
 - [ ] CreatePhysicalProductWizard_v2.tsx - ❌ À ajouter
 - [ ] CreateServiceWizard_v2.tsx - ❌ À ajouter
@@ -158,13 +176,16 @@ interface ProductFormData {
 - [ ] CreateCourseWizard - ❓ À vérifier
 
 ### Composants Partagés
+
 - [x] ProductStatisticsDisplaySettings.tsx - ✅ Créé et fonctionnel
 
 ### Base de Données
+
 - [x] Migration SQL créée
 - [ ] Migration SQL exécutée dans Supabase (à vérifier)
 
 ### Types TypeScript
+
 - [x] Interfaces mises à jour dans ProductInfoTab
 - [x] Interfaces mises à jour dans ProductVisualTab
 - [x] Interfaces mises à jour dans unified-product.ts
@@ -217,7 +238,6 @@ interface ProductFormData {
 
 ## ✨ Conclusion
 
-Les formulaires d'édition sont **complets** avec tous les champs nécessaires. Le wizard de création pour les produits digitaux est également **complet**. 
+Les formulaires d'édition sont **complets** avec tous les champs nécessaires. Le wizard de création pour les produits digitaux est également **complet**.
 
 Cependant, les wizards pour les produits physiques et services **manquent** ces champs. Il est recommandé d'ajouter `ProductStatisticsDisplaySettings` dans ces wizards pour une expérience utilisateur cohérente.
-

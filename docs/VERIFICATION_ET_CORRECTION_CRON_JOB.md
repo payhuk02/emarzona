@@ -17,7 +17,7 @@
 Le header `Authorization` doit être présent dans la commande du cron job. Vérifiez avec cette requête :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   command
@@ -26,6 +26,7 @@ WHERE jobname = 'process-scheduled-email-campaigns';
 ```
 
 **Vérification** : Le champ `command` doit contenir :
+
 ```sql
 'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true)
 ```
@@ -90,5 +91,3 @@ Puis vérifiez les invocations dans Supabase Dashboard > Edge Functions > `proce
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

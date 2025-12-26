@@ -9,6 +9,7 @@
 ## 🐛 Problème Identifié
 
 L'utilisateur voulait que :
+
 1. **AppSidebar disparaisse** quand on sélectionne un élément avec sidebar contextuelle (ex: "Commandes")
 2. **Sidebar contextuelle reste stable** quand on navigue entre ses éléments
 3. **Pas de cohabitation** - une seule sidebar visible à la fois
@@ -20,6 +21,7 @@ L'utilisateur voulait que :
 ### 1. Modification de MainLayout
 
 **Avant:**
+
 ```typescript
 // AppSidebar TOUJOURS visible + Sidebar contextuelle à côté
 <AppSidebar /> // TOUJOURS présent
@@ -27,6 +29,7 @@ L'utilisateur voulait que :
 ```
 
 **Après:**
+
 ```typescript
 // AppSidebar visible seulement si pas de sidebar contextuelle
 {!hasFixedSidebar && <AppSidebar />} // Conditionnel
@@ -36,13 +39,13 @@ L'utilisateur voulait que :
 ### 2. Position des Sidebars Contextuelles
 
 **Avant:**
+
 ```tsx
-<aside className="... fixed left-64 top-16 ...">
-  {/* Positionnée après AppSidebar */}
-</aside>
+<aside className="... fixed left-64 top-16 ...">{/* Positionnée après AppSidebar */}</aside>
 ```
 
 **Après:**
+
 ```tsx
 <aside className="... fixed left-0 top-16 ...">
   {/* Positionnée à gauche, remplace AppSidebar */}
@@ -52,15 +55,17 @@ L'utilisateur voulait que :
 ### 3. Calcul des Marges du Contenu
 
 **Avant:**
+
 ```typescript
 // Marge pour AppSidebar (toujours) + ContextSidebar
-'lg:ml-64' + hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]'
+'lg:ml-64' + hasFixedSidebar && 'md:ml-[28rem] lg:ml-[32rem]';
 ```
 
 **Après:**
+
 ```typescript
 // Marge pour sidebar (AppSidebar OU ContextSidebar - même largeur)
-hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64'
+hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64';
 ```
 
 ---
@@ -138,18 +143,21 @@ hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64'
 ## 🎯 Exemple de Comportement
 
 ### Scénario 1: Navigation vers "Commandes"
+
 1. Utilisateur sur Dashboard → **AppSidebar visible** ✅
 2. Utilisateur clique sur "Commandes" → **AppSidebar disparaît** ✅
 3. **OrdersSidebar apparaît** à `left-0` ✅
 4. Utilisateur navigue dans OrdersSidebar → **OrdersSidebar reste stable** ✅
 
 ### Scénario 2: Navigation dans "Commandes"
+
 1. Utilisateur sur `/dashboard/orders` → **OrdersSidebar visible** ✅
 2. Utilisateur clique sur "Commandes avancées" → **OrdersSidebar reste visible** ✅
 3. Utilisateur clique sur "Messages clients" → **OrdersSidebar reste visible** ✅
 4. **OrdersSidebar ne disparaît jamais** lors de la navigation interne ✅
 
 ### Scénario 3: Retour au Dashboard
+
 1. Utilisateur sur `/dashboard/orders` → **OrdersSidebar visible** ✅
 2. Utilisateur clique sur "Tableau de bord" → **OrdersSidebar disparaît** ✅
 3. **AppSidebar réapparaît** ✅
@@ -158,4 +166,3 @@ hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64'
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **CORRIGÉ - APP SIDEBAR DISPARAÎT QUAND SIDEBAR CONTEXTUELLE ACTIVE**
-

@@ -6,6 +6,7 @@
 ## 🎯 Problème
 
 Le total ne se met pas à jour après application du code promo :
+
 - Sous-total: 4000 XOF
 - Code promo: -400 XOF (affiché)
 - Total: 4000 XOF ❌ (devrait être 3600 XOF)
@@ -59,10 +60,15 @@ const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 // ============================================
 
 // 1. Calculer les remises sur les items uniquement (sans coupons)
-const itemDiscounts = items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
+const itemDiscounts = items.reduce(
+  (total, item) => total + (item.discount_amount || 0) * item.quantity,
+  0
+);
 
 // 2. Montant du coupon du nouveau système
-const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 
 // 3. Total des remises : remises items + coupon
 const totalDiscounts = itemDiscounts + couponDiscount;
@@ -104,6 +110,7 @@ Les calculs sont très simples (additions, multiplications) et se font en quelqu
 ## 📊 Résultat Attendu
 
 ### Scénario 1 : Avec Code Promo
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF
 - Total après remise: 3600 XOF
@@ -112,12 +119,14 @@ Les calculs sont très simples (additions, multiplications) et se font en quelqu
 - **Total: 9248 XOF** ✅
 
 ### Scénario 2 : Sans Code Promo
+
 - Sous-total: 4000 XOF
 - Taxes (18%): 720 XOF
 - Shipping: 5000 XOF
 - **Total: 9720 XOF** ✅
 
 ### Scénario 3 : Retrait du Code Promo
+
 1. Appliquer code promo → Total = 9248 XOF
 2. Retirer code promo → Total = 9720 XOF ✅
 
@@ -149,4 +158,3 @@ Les calculs sont très simples (additions, multiplications) et se font en quelqu
 - Les calculs se font maintenant **directement dans le render**, garantissant qu'ils utilisent toujours les valeurs les plus récentes
 - `taxRate` et `shippingAmount` restent dans des `useMemo` car ils ne dépendent pas du coupon (ils dépendent seulement de `formData.country`)
 - Cette solution est **plus simple et plus fiable** que d'essayer de gérer des dépendances complexes dans des `useMemo`
-

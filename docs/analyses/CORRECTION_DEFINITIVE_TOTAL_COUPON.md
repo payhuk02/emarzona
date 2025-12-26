@@ -6,6 +6,7 @@
 ## 🎯 Problème Identifié
 
 Le code promo s'appliquait mais ne réduisait pas le montant du produit dans le total final :
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF (affiché)
 - **Total: 4000 XOF** ❌ (devrait être 3600 XOF)
@@ -37,10 +38,12 @@ Le code promo s'appliquait mais ne réduisait pas le montant du produit dans le 
    - Utilisé dans le calcul sans distinction
 
 3. **Calcul incorrect**:
+
    ```typescript
    // AVANT (incorrect)
    const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
    ```
+
    - Si `summary.discount_amount` contient un coupon de l'ancien système, on soustrait deux fois
    - Si `summary.discount_amount` ne contient que des remises items, on soustrait correctement mais avec confusion
 
@@ -59,10 +62,13 @@ const itemDiscounts = useMemo(() => {
 
 ```typescript
 // Montant du coupon du nouveau système (calculé directement)
-const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 ```
 
 **Changements**:
+
 - Supprimé `couponDiscountValue` et `couponDiscountAmount`
 - Utilisé `couponDiscount` partout dans le code
 - Calcul direct sans `useMemo` pour garantir la mise à jour
@@ -91,7 +97,7 @@ const taxAmount = useMemo(() => {
 const giftCardAmount = useMemo(() => {
   if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
   const baseAmount = summary.subtotal - totalDiscounts;
-  const amountWithTaxesAndShipping = baseAmount + (baseAmount * taxRate) + shippingAmount;
+  const amountWithTaxesAndShipping = baseAmount + baseAmount * taxRate + shippingAmount;
   return Math.min(appliedGiftCard.balance, amountWithTaxesAndShipping);
 }, [appliedGiftCard, summary.subtotal, totalDiscounts, taxRate, shippingAmount]);
 ```
@@ -113,17 +119,20 @@ const giftCardAmount = useMemo(() => {
 ## 📊 Résultat Attendu
 
 ### Scénario 1 : Avec Code Promo
+
 - Sous-total: 4000 XOF
 - Code promo (PROMO10): -400 XOF
 - **Total: 3600 XOF** ✅
 
 ### Scénario 2 : Avec Remises Items + Code Promo
+
 - Sous-total: 5000 XOF
 - Remise panier: -500 XOF
 - Code promo: -400 XOF
 - **Total: 4100 XOF** ✅
 
 ### Scénario 3 : Sans Code Promo
+
 - Sous-total: 4000 XOF
 - **Total: 4000 XOF** ✅
 
@@ -156,4 +165,3 @@ const giftCardAmount = useMemo(() => {
 - `itemDiscounts` est calculé directement depuis les items du panier
 - `couponDiscount` est calculé directement depuis `appliedCouponCode`
 - Le calcul se fait à chaque render, garantissant la mise à jour en temps réel
-

@@ -69,6 +69,7 @@ src/
 Format : `type: description`
 
 Types :
+
 - `feat:` : Nouvelle fonctionnalité
 - `fix:` : Correction de bug
 - `docs:` : Documentation
@@ -77,6 +78,7 @@ Types :
 - `chore:` : Tâches de maintenance
 
 Exemple :
+
 ```
 feat: Ajout du lazy loading pour jspdf
 fix: Correction de l'erreur DollarSignIcon
@@ -150,4 +152,3 @@ npm test
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

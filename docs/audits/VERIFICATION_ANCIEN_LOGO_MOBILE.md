@@ -12,6 +12,7 @@
 **Recherche** : `grep -r "payhukLogo\|payhuk-logo" src/`
 
 **Résultats** :
+
 - ✅ `src/hooks/usePlatformLogo.ts` : Utilise `payhukLogo` uniquement comme fallback (normal)
 - ✅ `src/components/debug/MobileResponsiveTest.tsx` : **CORRIGÉ** - Utilise maintenant `usePlatformLogo()`
 
@@ -24,6 +25,7 @@
 **Fichier** : `src/hooks/usePlatformLogo.ts`
 
 **Amélioration** :
+
 ```typescript
 // Avant
 if (!customizationData?.design?.logo) {
@@ -31,7 +33,8 @@ if (!customizationData?.design?.logo) {
 }
 
 // Après
-const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+const hasCustomLogo =
+  customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
 
 if (!hasCustomLogo) {
   return payhukLogo;
@@ -39,11 +42,13 @@ if (!hasCustomLogo) {
 ```
 
 **Avantages** :
+
 - ✅ Vérification plus précise : vérifie si un logo personnalisé existe réellement
 - ✅ Si un logo personnalisé est configuré (light OU dark), le fallback n'est jamais utilisé
 - ✅ Commentaire ajouté : "Si un logo personnalisé est configuré, on ne retourne JAMAIS le logo par défaut"
 
 **Logique de priorité** :
+
 1. ✅ Logo personnalisé selon thème (dark si dark, light si light)
 2. ✅ Logo light si disponible
 3. ✅ Logo dark si disponible
@@ -60,16 +65,20 @@ if (!hasCustomLogo) {
 **Fichier** : `src/components/marketplace/MarketplaceHeader.tsx`
 
 **Header Principal** (ligne 22) :
+
 ```typescript
 <img src={platformLogo} alt="Emarzona" className="h-7 w-7 sm:h-8 sm:w-8" />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 14)
 - ✅ Pas de référence directe à `payhukLogo`
 
 **Menu Mobile (Sheet)** (ligne 79) :
+
 ```typescript
 <img src={platformLogo} alt="Emarzona" className="h-7 w-7" />
 ```
+
 - ✅ Utilise la même variable `platformLogo`
 - ✅ Pas de référence directe à `payhukLogo`
 
@@ -82,14 +91,16 @@ if (!hasCustomLogo) {
 **Fichier** : `src/components/AppSidebar.tsx`
 
 **Logo Sidebar** (ligne 880) :
+
 ```typescript
-<img 
-  src={platformLogo} 
-  alt="Emarzona" 
+<img
+  src={platformLogo}
+  alt="Emarzona"
   className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain"
-  loading="eager" 
+  loading="eager"
 />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 846)
 - ✅ Pas de référence directe à `payhukLogo`
 
@@ -102,6 +113,7 @@ if (!hasCustomLogo) {
 **Fichier** : `src/pages/Landing.tsx`
 
 **Header** (ligne 126) :
+
 ```typescript
 <img
   src={platformLogo}
@@ -112,10 +124,12 @@ if (!hasCustomLogo) {
   loading="eager"
 />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 47)
 - ✅ Pas de référence directe à `payhukLogo`
 
 **Footer** (ligne 884) :
+
 ```typescript
 <img
   src={platformLogo}
@@ -126,6 +140,7 @@ if (!hasCustomLogo) {
   loading="eager"
 />
 ```
+
 - ✅ Utilise la même variable `platformLogo`
 - ✅ Pas de référence directe à `payhukLogo`
 
@@ -138,6 +153,7 @@ if (!hasCustomLogo) {
 **Fichier** : `src/pages/Auth.tsx`
 
 **Logo** (ligne 290) :
+
 ```typescript
 <img
   src={platformLogo}
@@ -148,6 +164,7 @@ if (!hasCustomLogo) {
   loading="eager"
 />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 26)
 - ✅ Pas de référence directe à `payhukLogo`
 
@@ -160,6 +177,7 @@ if (!hasCustomLogo) {
 **Fichier** : `src/components/debug/MobileResponsiveTest.tsx`
 
 **Avant** :
+
 ```typescript
 import payhukLogo from '@/assets/payhuk-logo.png';
 // ...
@@ -167,6 +185,7 @@ import payhukLogo from '@/assets/payhuk-logo.png';
 ```
 
 **Après** :
+
 ```typescript
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 // ...
@@ -182,29 +201,37 @@ const platformLogo = usePlatformLogo();
 ### 4. Vérification de la Logique ✅
 
 **Scénario 1 : Logo personnalisé configuré (light uniquement)**
+
 ```typescript
-customizationData.design.logo = { light: 'https://...', dark: null }
+customizationData.design.logo = { light: 'https://...', dark: null };
 ```
+
 - ✅ Résultat : Logo light personnalisé (jamais payhukLogo)
 
 **Scénario 2 : Logo personnalisé configuré (dark uniquement)**
+
 ```typescript
-customizationData.design.logo = { light: null, dark: 'https://...' }
+customizationData.design.logo = { light: null, dark: 'https://...' };
 ```
+
 - ✅ Résultat : Logo dark personnalisé (jamais payhukLogo)
 
 **Scénario 3 : Logo personnalisé configuré (light + dark)**
+
 ```typescript
-customizationData.design.logo = { light: 'https://...', dark: 'https://...' }
+customizationData.design.logo = { light: 'https://...', dark: 'https://...' };
 ```
+
 - ✅ Résultat : Logo personnalisé selon thème (jamais payhukLogo)
 
 **Scénario 4 : Aucun logo personnalisé configuré**
+
 ```typescript
-customizationData.design.logo = null
+customizationData.design.logo = null;
 // ou
-customizationData.design.logo = { light: null, dark: null }
+customizationData.design.logo = { light: null, dark: null };
 ```
+
 - ⚠️ Résultat : Logo par défaut (payhukLogo) - **NORMAL, c'est le fallback**
 
 **Statut** : ✅ **LOGIQUE CORRECTE - L'ANCIEN LOGO NE SE CHARGE QUE SI AUCUN LOGO PERSONNALISÉ N'EST CONFIGURÉ**
@@ -215,21 +242,23 @@ customizationData.design.logo = { light: null, dark: null }
 
 ### ✅ Tous les Composants Mobile Utilisent `usePlatformLogo()`
 
-| Composant | Fichier | Utilise `usePlatformLogo()` | Référence Directe |
-|-----------|---------|---------------------------|-------------------|
-| MarketplaceHeader (header) | `MarketplaceHeader.tsx` | ✅ | ❌ |
-| MarketplaceHeader (menu mobile) | `MarketplaceHeader.tsx` | ✅ | ❌ |
-| AppSidebar | `AppSidebar.tsx` | ✅ | ❌ |
-| Landing (header) | `Landing.tsx` | ✅ | ❌ |
-| Landing (footer) | `Landing.tsx` | ✅ | ❌ |
-| Auth | `Auth.tsx` | ✅ | ❌ |
-| MobileResponsiveTest | `MobileResponsiveTest.tsx` | ✅ (corrigé) | ❌ |
+| Composant                       | Fichier                    | Utilise `usePlatformLogo()` | Référence Directe |
+| ------------------------------- | -------------------------- | --------------------------- | ----------------- |
+| MarketplaceHeader (header)      | `MarketplaceHeader.tsx`    | ✅                          | ❌                |
+| MarketplaceHeader (menu mobile) | `MarketplaceHeader.tsx`    | ✅                          | ❌                |
+| AppSidebar                      | `AppSidebar.tsx`           | ✅                          | ❌                |
+| Landing (header)                | `Landing.tsx`              | ✅                          | ❌                |
+| Landing (footer)                | `Landing.tsx`              | ✅                          | ❌                |
+| Auth                            | `Auth.tsx`                 | ✅                          | ❌                |
+| MobileResponsiveTest            | `MobileResponsiveTest.tsx` | ✅ (corrigé)                | ❌                |
 
 ### ✅ Logique du Hook
 
 **Condition pour charger l'ancien logo** :
+
 ```typescript
-const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+const hasCustomLogo =
+  customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
 
 if (!hasCustomLogo) {
   return payhukLogo; // UNIQUEMENT si aucun logo personnalisé
@@ -237,6 +266,7 @@ if (!hasCustomLogo) {
 ```
 
 **Résultat** :
+
 - ✅ Si un logo personnalisé est configuré → Logo personnalisé (jamais payhukLogo)
 - ⚠️ Si aucun logo personnalisé n'est configuré → Logo par défaut (payhukLogo) - **NORMAL**
 
@@ -273,4 +303,3 @@ if (!hasCustomLogo) {
 ---
 
 **Prochaine révision** : Après tests sur appareil mobile réel
-

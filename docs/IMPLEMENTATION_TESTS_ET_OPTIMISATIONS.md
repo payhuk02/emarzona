@@ -9,12 +9,14 @@
 ## 📋 Résumé
 
 ### Tests Unitaires
+
 - ✅ **54 tests** créés et tous passent
 - ✅ Couverture complète pour `media-detection.ts`
 - ✅ Couverture complète pour `storage.ts`
 - ✅ Couverture complète pour `MediaAttachment.tsx`
 
 ### Optimisations de Performance
+
 - ✅ `useMemo` pour toutes les valeurs calculées
 - ✅ `useCallback` pour les handlers
 - ✅ `React.memo` avec comparaison personnalisée
@@ -32,6 +34,7 @@
 **Statut :** ✅ Tous passent
 
 **Couverture :**
+
 - ✅ Détection par extension (images, vidéos, fichiers)
 - ✅ Détection par type MIME (fallback)
 - ✅ Priorité extension > MIME type
@@ -40,6 +43,7 @@
 - ✅ Constantes (`IMAGE_EXTENSIONS`, `VIDEO_EXTENSIONS`)
 
 **Corrections Appliquées :**
+
 - ✅ Correction de la logique de priorité : extension vérifiée en premier, puis MIME type
 - ✅ Test corrigé pour refléter le comportement réel (PDF avec MIME image → retourne image)
 
@@ -50,6 +54,7 @@
 **Statut :** ✅ Tous passent
 
 **Couverture :**
+
 - ✅ Correction d'URLs Supabase Storage
 - ✅ Gestion des URLs encodées
 - ✅ Utilisation de `storage_path`
@@ -61,6 +66,7 @@
 - ✅ Validation d'URLs Supabase Storage
 
 **Corrections Appliquées :**
+
 - ✅ Correction du regex pour éviter les doubles slashes (sauf après protocole)
 - ✅ Test corrigé pour vérifier l'absence de doubles slashes après le protocole
 
@@ -71,6 +77,7 @@
 **Statut :** ✅ Tous passent
 
 **Couverture :**
+
 - ✅ Rendu d'images
 - ✅ Utilisation d'URLs corrigées
 - ✅ Application des classes de taille
@@ -83,6 +90,7 @@
 - ✅ Cas limites (fichiers sans nom, sans taille, sans storage_path)
 
 **Corrections Appliquées :**
+
 - ✅ Test vidéo corrigé (utilisation de `querySelector` au lieu de `getByRole`)
 - ✅ Test `onError` amélioré avec mocks appropriés
 
@@ -95,6 +103,7 @@
 #### 2.1.1 Utilisation de `useMemo`
 
 **Avant :**
+
 ```typescript
 const mediaType = detectMediaType(attachment.file_name, attachment.file_type);
 const correctedUrl = getCorrectedFileUrl(attachment.file_url, attachment.storage_path);
@@ -103,6 +112,7 @@ const sizeClasses = MEDIA_SIZES[size];
 ```
 
 **Après :**
+
 ```typescript
 const mediaType = useMemo(
   () => detectMediaType(attachment.file_name, attachment.file_type),
@@ -114,15 +124,9 @@ const correctedUrl = useMemo(
   [attachment.file_url, attachment.storage_path]
 );
 
-const displayUrl = useMemo(
-  () => signedUrl || correctedUrl,
-  [signedUrl, correctedUrl]
-);
+const displayUrl = useMemo(() => signedUrl || correctedUrl, [signedUrl, correctedUrl]);
 
-const sizeClasses = useMemo(
-  () => MEDIA_SIZES[size],
-  [size]
-);
+const sizeClasses = useMemo(() => MEDIA_SIZES[size], [size]);
 ```
 
 **Impact :** Réduction des recalculs inutiles lors des re-renders
@@ -130,6 +134,7 @@ const sizeClasses = useMemo(
 #### 2.1.2 Utilisation de `useCallback`
 
 **Avant :**
+
 ```typescript
 const handleImageError = async () => {
   // ... logique
@@ -141,10 +146,20 @@ const formatFileSize = (bytes?: number): string => {
 ```
 
 **Après :**
+
 ```typescript
 const handleImageError = useCallback(async () => {
   // ... logique
-}, [triedSignedUrl, imageError, signedUrl, correctedUrl, attachment.id, attachment.file_name, attachment.file_url, attachment.storage_path]);
+}, [
+  triedSignedUrl,
+  imageError,
+  signedUrl,
+  correctedUrl,
+  attachment.id,
+  attachment.file_name,
+  attachment.file_url,
+  attachment.storage_path,
+]);
 
 const formatFileSize = useCallback((bytes?: number): string => {
   // ... logique
@@ -156,6 +171,7 @@ const formatFileSize = useCallback((bytes?: number): string => {
 #### 2.1.3 Utilisation de `React.memo`
 
 **Avant :**
+
 ```typescript
 export function MediaAttachment({ ... }) {
   // ...
@@ -163,6 +179,7 @@ export function MediaAttachment({ ... }) {
 ```
 
 **Après :**
+
 ```typescript
 function MediaAttachmentComponent({ ... }) {
   // ...
@@ -185,33 +202,48 @@ export const MediaAttachment = memo(MediaAttachmentComponent, (prevProps, nextPr
 #### 2.1.4 Conditionnement des Logs
 
 **Avant :**
+
 ```typescript
-useEffect(() => {
-  logger.info('MediaAttachment - Component render', { /* ... */ });
-}, [/* 12 dépendances */]);
+useEffect(
+  () => {
+    logger.info('MediaAttachment - Component render', {
+      /* ... */
+    });
+  },
+  [
+    /* 12 dépendances */
+  ]
+);
 ```
 
 **Après :**
+
 ```typescript
 useEffect(() => {
   if (import.meta.env.DEV) {
-    logger.info('MediaAttachment - Component render', { /* ... */ });
+    logger.info('MediaAttachment - Component render', {
+      /* ... */
+    });
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [attachment.id, attachment.file_url, mediaType, displayUrl, imageError]);
 ```
 
 **Impact :**
+
 - Logs désactivés en production (performance)
 - Réduction des dépendances `useEffect` (de 12 à 5)
 
 #### 2.1.5 Amélioration de la Gestion d'Erreurs
 
 **Ajout :**
+
 ```typescript
 onError?.(new Error(`Could not extract storage path for: ${attachment.file_name}`));
 onError?.(new Error(`File does not exist in bucket: ${attachment.file_name}`));
-onError?.(error instanceof Error ? error : new Error(`Error checking file: ${attachment.file_name}`));
+onError?.(
+  error instanceof Error ? error : new Error(`Error checking file: ${attachment.file_name}`)
+);
 ```
 
 **Impact :** Meilleure traçabilité des erreurs
@@ -219,6 +251,7 @@ onError?.(error instanceof Error ? error : new Error(`Error checking file: ${att
 ### 2.2 Corrections dans `media-detection.ts`
 
 **Avant :**
+
 ```typescript
 // Priorité : extension > MIME
 if (isImageByExtension || isImageByMime) {
@@ -231,6 +264,7 @@ if (isVideoByExtension || isVideoByMime) {
 ```
 
 **Après :**
+
 ```typescript
 // Priorité : extension > MIME
 // Si l'extension indique un type, l'utiliser en priorité
@@ -257,9 +291,13 @@ if (isVideoByMime) {
 ### 2.3 Corrections dans `storage.ts`
 
 **Ajout :**
+
 ```typescript
 // S'assurer qu'il n'y a pas de double slash (sauf après le protocole)
-const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(/([^:]\/)\/+/g, '$1');
+const correctedUrl = `${baseUrl}/storage/v1/object/public/attachments/${encodedPath}`.replace(
+  /([^:]\/)\/+/g,
+  '$1'
+);
 ```
 
 **Impact :** Évite les doubles slashes dans les URLs (sauf `https://`)
@@ -304,11 +342,11 @@ Coverage:    ~85-90% (estimé)
 
 ### 4.2 Détail par Fichier
 
-| Fichier | Tests | Statut |
-|---------|-------|--------|
-| `media-detection.test.ts` | 21 | ✅ 100% |
-| `storage.test.ts` | 19 | ✅ 100% |
-| `MediaAttachment.test.tsx` | 14 | ✅ 100% |
+| Fichier                    | Tests | Statut  |
+| -------------------------- | ----- | ------- |
+| `media-detection.test.ts`  | 21    | ✅ 100% |
+| `storage.test.ts`          | 19    | ✅ 100% |
+| `MediaAttachment.test.tsx` | 14    | ✅ 100% |
 
 ---
 
@@ -372,6 +410,7 @@ npm run lint
 ## 8. Conclusion
 
 ✅ **Tous les objectifs atteints :**
+
 - Tests unitaires complets et fonctionnels
 - Optimisations de performance implémentées
 - Code plus maintenable et performant

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS public.store_analytics_events (
   country TEXT,
   city TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   -- Index pour optimiser les requêtes
   CONSTRAINT valid_event_type CHECK (event_type IN (
     'page_view',
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS public.store_daily_stats (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   store_id UUID NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
   date DATE NOT NULL,
-  
+
   -- Métriques principales
   total_views INT DEFAULT 0,
   unique_visitors INT DEFAULT 0,
@@ -92,21 +92,21 @@ CREATE TABLE IF NOT EXISTS public.store_daily_stats (
   checkout_initiated_count INT DEFAULT 0,
   purchases_count INT DEFAULT 0,
   revenue_amount DECIMAL(10, 2) DEFAULT 0,
-  
+
   -- Métriques par device
   mobile_views INT DEFAULT 0,
   tablet_views INT DEFAULT 0,
   desktop_views INT DEFAULT 0,
-  
+
   -- Métriques de sources
   direct_traffic INT DEFAULT 0,
   social_traffic INT DEFAULT 0,
   search_traffic INT DEFAULT 0,
   referral_traffic INT DEFAULT 0,
-  
+
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   -- Contrainte d'unicité : une seule ligne par boutique par jour
   CONSTRAINT unique_store_date UNIQUE (store_id, date)
 );
@@ -257,45 +257,49 @@ export const useAnalytics = (storeId?: string) => {
   /**
    * Tracker un événement
    */
-  const trackEvent = useCallback(async ({
-    storeId: eventStoreId,
-    eventType,
-    eventData = {}
-  }: TrackEventParams) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.from('store_analytics_events').insert({
-        store_id: eventStoreId,
-        event_type: eventType,
-        event_data: eventData,
-        session_id: getSessionId(),
-        user_id: user?.id || null,
-        user_agent: navigator.userAgent,
-        referrer: document.referrer,
-        device_type: getDeviceType()
-      });
-    } catch (error) {
-      console.error('Error tracking event:', error);
-    }
-  }, []);
+  const trackEvent = useCallback(
+    async ({ storeId: eventStoreId, eventType, eventData = {} }: TrackEventParams) => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        await supabase.from('store_analytics_events').insert({
+          store_id: eventStoreId,
+          event_type: eventType,
+          event_data: eventData,
+          session_id: getSessionId(),
+          user_id: user?.id || null,
+          user_agent: navigator.userAgent,
+          referrer: document.referrer,
+          device_type: getDeviceType(),
+        });
+      } catch (error) {
+        console.error('Error tracking event:', error);
+      }
+    },
+    []
+  );
 
   /**
    * Tracker une vue de page
    */
-  const trackPageView = useCallback((pageStoreId?: string) => {
-    const targetStoreId = pageStoreId || storeId;
-    if (!targetStoreId) return;
+  const trackPageView = useCallback(
+    (pageStoreId?: string) => {
+      const targetStoreId = pageStoreId || storeId;
+      if (!targetStoreId) return;
 
-    trackEvent({
-      storeId: targetStoreId,
-      eventType: 'page_view',
-      eventData: {
-        path: window.location.pathname,
-        title: document.title
-      }
-    });
-  }, [storeId, trackEvent]);
+      trackEvent({
+        storeId: targetStoreId,
+        eventType: 'page_view',
+        eventData: {
+          path: window.location.pathname,
+          title: document.title,
+        },
+      });
+    },
+    [storeId, trackEvent]
+  );
 
   /**
    * Tracker automatiquement la vue de page au montage
@@ -308,7 +312,7 @@ export const useAnalytics = (storeId?: string) => {
 
   return {
     trackEvent,
-    trackPageView
+    trackPageView,
   };
 };
 ```
@@ -326,10 +330,10 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 const Storefront = () => {
   const { slug } = useParams();
   const [store, setStore] = useState(null);
-  
+
   // Initialiser analytics
   const { trackEvent } = useAnalytics(store?.id);
-  
+
   // Tracker les vues de produits
   const handleProductClick = (productId: string) => {
     trackEvent({
@@ -338,7 +342,7 @@ const Storefront = () => {
       eventData: { product_id: productId }
     });
   };
-  
+
   return (
     // ... JSX
   );
@@ -357,18 +361,18 @@ const fetchRealAnalytics = async () => {
   // Récupérer les stats quotidiennes des 30 derniers jours
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  
+
   const { data: dailyStats } = await supabase
     .from('store_daily_stats')
     .select('*')
     .eq('store_id', storeId)
     .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
     .order('date', { ascending: false });
-  
+
   // Calculer les totaux
   const totalViews = dailyStats?.reduce((sum, day) => sum + day.total_views, 0) || 0;
   const uniqueVisitors = dailyStats?.reduce((sum, day) => sum + day.unique_visitors, 0) || 0;
-  
+
   // ... etc
 };
 ```
@@ -391,16 +395,16 @@ const fetchRealAnalytics = async () => {
 
 ## 📊 Événements à tracker
 
-| Événement | Où | Quand |
-|-----------|-----|-------|
-| `store_view` | Storefront | Au chargement de la boutique |
-| `product_view` | ProductDetail | Ouverture d'un produit |
-| `product_click` | Storefront | Clic sur un produit |
-| `add_to_cart` | ProductDetail | Ajout au panier |
-| `checkout_initiated` | Checkout | Démarrage du checkout |
-| `purchase` | OrderConfirmation | Commande validée |
-| `share` | Storefront | Partage sur réseaux sociaux |
-| `search` | Storefront | Recherche de produit |
+| Événement            | Où                | Quand                        |
+| -------------------- | ----------------- | ---------------------------- |
+| `store_view`         | Storefront        | Au chargement de la boutique |
+| `product_view`       | ProductDetail     | Ouverture d'un produit       |
+| `product_click`      | Storefront        | Clic sur un produit          |
+| `add_to_cart`        | ProductDetail     | Ajout au panier              |
+| `checkout_initiated` | Checkout          | Démarrage du checkout        |
+| `purchase`           | OrderConfirmation | Commande validée             |
+| `share`              | Storefront        | Partage sur réseaux sociaux  |
+| `search`             | Storefront        | Recherche de produit         |
 
 ---
 
@@ -423,4 +427,3 @@ const fetchRealAnalytics = async () => {
 ---
 
 **Prêt à implémenter !** 🚀
-

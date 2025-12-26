@@ -48,4 +48,3 @@ Les anciens audits sont disponibles dans le dossier [archive](./archive/).
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

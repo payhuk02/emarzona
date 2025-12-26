@@ -27,6 +27,7 @@ npm run verify:unsubscribe-css
 ```
 
 Ce script va :
+
 - ✅ Chercher tous les fichiers UnsubscribePage dans `dist/`
 - ✅ Afficher la taille de chaque fichier CSS
 - ✅ Comparer avec l'objectif (< 50 KB)
@@ -37,7 +38,7 @@ Ce script va :
 
 ```bash
 # Windows PowerShell
-Get-ChildItem -Path dist -Recurse -Filter "*UnsubscribePage*.css" | ForEach-Object { 
+Get-ChildItem -Path dist -Recurse -Filter "*UnsubscribePage*.css" | ForEach-Object {
     $sizeKB = [math]::Round($_.Length / 1KB, 2)
     Write-Output "$($_.Name): $sizeKB KB"
 }
@@ -80,7 +81,7 @@ UnsubscribePage CSS: UnsubscribePage-[hash].css = 275.06 KB
 
 ```bash
 # Windows PowerShell
-Get-ChildItem -Path dist/js -Filter "*unsubscribe*" | ForEach-Object { 
+Get-ChildItem -Path dist/js -Filter "*unsubscribe*" | ForEach-Object {
     $sizeKB = [math]::Round($_.Length / 1KB, 2)
     Write-Output "$($_.Name): $sizeKB KB"
 }
@@ -90,6 +91,7 @@ find dist/js -name "*unsubscribe*" -exec ls -lh {} \;
 ```
 
 **Résultat attendu** :
+
 - ✅ Chunk JS `unsubscribe-page-[hash].js` créé
 - ✅ Taille raisonnable (< 100 KB)
 
@@ -102,6 +104,7 @@ npm run analyze:bundle:quick
 ```
 
 **Vérifier** :
+
 - ✅ `UnsubscribePage` n'apparaît plus dans les "Largest Files"
 - ✅ Taille totale du bundle réduite
 - ✅ Pas de warnings sur la taille des chunks
@@ -113,11 +116,13 @@ npm run analyze:bundle:quick
 ### Problème : Aucun fichier UnsubscribePage trouvé
 
 **Causes possibles** :
+
 1. Le build n'est pas terminé
 2. Le build a échoué
 3. Le chunk est dans le bundle principal
 
 **Solutions** :
+
 1. Vérifier que le build est terminé : `npm run build`
 2. Vérifier les erreurs de build
 3. Vérifier le bundle principal : `Get-ChildItem -Path dist/js -Filter "index-*.js"`
@@ -125,11 +130,13 @@ npm run analyze:bundle:quick
 ### Problème : Taille toujours > 50 KB
 
 **Causes possibles** :
+
 1. La configuration Vite n'a pas été appliquée
 2. Le chunk n'est pas séparé correctement
 3. Les composants UI importent trop de CSS
 
 **Solutions** :
+
 1. Vérifier `vite.config.ts` : la règle `unsubscribe-page` est présente
 2. Vérifier que `cssCodeSplit: true` est activé
 3. Rebuild complet : `npm run build`
@@ -138,12 +145,12 @@ npm run analyze:bundle:quick
 
 ## 📊 Métriques de Succès
 
-| Métrique | Avant | Objectif | Critère |
-|----------|-------|----------|---------|
-| **Taille CSS** | 275 KB | < 50 KB | ✅ < 50 KB |
-| **Réduction** | - | > 80% | ✅ > 80% |
-| **Chunk JS** | N/A | Créé | ✅ Présent |
-| **Taille Chunk JS** | N/A | < 100 KB | ✅ < 100 KB |
+| Métrique            | Avant  | Objectif | Critère     |
+| ------------------- | ------ | -------- | ----------- |
+| **Taille CSS**      | 275 KB | < 50 KB  | ✅ < 50 KB  |
+| **Réduction**       | -      | > 80%    | ✅ > 80%    |
+| **Chunk JS**        | N/A    | Créé     | ✅ Présent  |
+| **Taille Chunk JS** | N/A    | < 100 KB | ✅ < 100 KB |
 
 ---
 
@@ -157,4 +164,3 @@ npm run analyze:bundle:quick
 ---
 
 **Dernière mise à jour** : 28 Février 2025
-

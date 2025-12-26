@@ -3,6 +3,7 @@
 ## 🔴 Problème Confirmé
 
 D'après les logs Supabase Edge Functions :
+
 - ✅ L'Edge Function `moneroo` reçoit bien les requêtes
 - ✅ L'Edge Function démarre correctement
 - ❌ **L'erreur persiste** : `"The route v1/checkout/initialize could not be found"`
@@ -58,12 +59,14 @@ supabase functions deploy moneroo
 Après le redéploiement, les logs devraient montrer :
 
 **✅ Avant (ancien code - ERREUR) :**
+
 ```
 INFO Moneroo request: {action: "create_checkout"}
 ERROR Moneroo API error: { message: "The route v1/checkout/initialize could not be found." }
 ```
 
 **✅ Après (nouveau code - SUCCÈS) :**
+
 ```
 INFO Calling Moneroo API: { url: "https://api.moneroo.io/v1/checkout", method: "POST", endpoint: "/checkout" }
 INFO Moneroo API response: { status: 200, ... }
@@ -113,9 +116,3 @@ INFO Moneroo API response: { status: 200, ... }
 ## 🚀 Action Immédiate Requise
 
 **Redéployer l'Edge Function `moneroo` maintenant** pour résoudre l'erreur "The route v1/checkout/initialize could not be found".
-
-
-
-
-
-

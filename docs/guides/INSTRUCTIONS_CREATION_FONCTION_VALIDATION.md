@@ -35,8 +35,8 @@ Après l'exécution, testez avec cette requête :
 
 ```sql
 -- Vérifier que la fonction existe maintenant
-SELECT routine_name 
-FROM information_schema.routines 
+SELECT routine_name
+FROM information_schema.routines
 WHERE routine_name = 'validate_unified_promotion';
 ```
 
@@ -76,4 +76,3 @@ Si l'erreur persiste après avoir exécuté le script :
 2. Vérifiez que vous êtes sur le bon schéma (public)
 3. Regardez les erreurs détaillées dans le panneau de résultats
 4. Assurez-vous que la table `product_promotions` existe
-

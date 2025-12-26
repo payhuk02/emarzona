@@ -25,10 +25,11 @@ Les webhooks SendGrid permettent de recevoir des événements en temps réel (op
    - Activez le toggle **Event Webhook**
 
 2. **Configurer l'URL**
+
    ```
    https://your-project-id.supabase.co/functions/v1/sendgrid-webhook-handler
    ```
-   
+
    **Remplacez** `your-project-id` par votre ID de projet Supabase.
 
 3. **Méthode HTTP**
@@ -90,6 +91,7 @@ supabase functions deploy sendgrid-webhook-handler
 ### Test 1 : Vérifier l'URL du Webhook
 
 1. **Test manuel**
+
    ```bash
    curl -X POST https://your-project-id.supabase.co/functions/v1/sendgrid-webhook-handler \
      -H "Content-Type: application/json" \
@@ -111,17 +113,17 @@ supabase functions deploy sendgrid-webhook-handler
    - Cliquez sur un lien
    - Vérifiez dans Supabase que les métriques sont mises à jour :
      ```sql
-     SELECT * FROM email_logs 
-     WHERE recipient_email = 'votre-email@example.com' 
-     ORDER BY created_at DESC 
+     SELECT * FROM email_logs
+     WHERE recipient_email = 'votre-email@example.com'
+     ORDER BY created_at DESC
      LIMIT 1;
      ```
 
 3. **Vérifier les métriques de campagne**
    ```sql
-     SELECT metrics FROM email_campaigns 
+     SELECT metrics FROM email_campaigns
      WHERE id = 'campaign-id';
-     ```
+   ```
 
 ---
 
@@ -129,21 +131,22 @@ supabase functions deploy sendgrid-webhook-handler
 
 ### Événements Supportés
 
-| Événement | Description | Action |
-|-----------|-------------|--------|
-| **processed** | Email en file d'attente | Met à jour `sendgrid_status = 'queued'` |
-| **delivered** | Email livré | Met à jour `sendgrid_status = 'delivered'` et `delivered_at` |
-| **open** | Email ouvert | Met à jour `opened_at`, `opened_ip` |
-| **click** | Lien cliqué | Met à jour `clicked_at`, `clicked_url`, `clicked_ip` |
-| **bounce** | Email rebondé | Met à jour `sendgrid_status = 'bounced'`, `bounced_at`, `bounce_reason` |
-| **dropped** | Email rejeté | Met à jour `sendgrid_status = 'failed'`, `bounced_at` |
-| **spamreport** | Signalé comme spam | Met à jour `sendgrid_status = 'spam'` |
-| **unsubscribe** | Désabonnement | Enregistre dans `email_unsubscribes` |
-| **group_unsubscribe** | Désabonnement de groupe | Enregistre dans `email_unsubscribes` |
+| Événement             | Description             | Action                                                                  |
+| --------------------- | ----------------------- | ----------------------------------------------------------------------- |
+| **processed**         | Email en file d'attente | Met à jour `sendgrid_status = 'queued'`                                 |
+| **delivered**         | Email livré             | Met à jour `sendgrid_status = 'delivered'` et `delivered_at`            |
+| **open**              | Email ouvert            | Met à jour `opened_at`, `opened_ip`                                     |
+| **click**             | Lien cliqué             | Met à jour `clicked_at`, `clicked_url`, `clicked_ip`                    |
+| **bounce**            | Email rebondé           | Met à jour `sendgrid_status = 'bounced'`, `bounced_at`, `bounce_reason` |
+| **dropped**           | Email rejeté            | Met à jour `sendgrid_status = 'failed'`, `bounced_at`                   |
+| **spamreport**        | Signalé comme spam      | Met à jour `sendgrid_status = 'spam'`                                   |
+| **unsubscribe**       | Désabonnement           | Enregistre dans `email_unsubscribes`                                    |
+| **group_unsubscribe** | Désabonnement de groupe | Enregistre dans `email_unsubscribes`                                    |
 
 ### Mise à Jour des Métriques
 
 Les métriques sont automatiquement mises à jour pour :
+
 - ✅ Campagnes (`email_campaigns.metrics`)
 - ✅ Séquences (`email_sequences.metrics`)
 - ✅ Logs individuels (`email_logs`)
@@ -155,6 +158,7 @@ Les métriques sont automatiquement mises à jour pour :
 ### Problème : Webhooks non reçus
 
 **Solutions :**
+
 1. Vérifier que l'URL est correcte dans SendGrid
 2. Vérifier que l'Edge Function est déployée
 3. Vérifier les logs Supabase pour des erreurs
@@ -163,6 +167,7 @@ Les métriques sont automatiquement mises à jour pour :
 ### Problème : Métriques non mises à jour
 
 **Solutions :**
+
 1. Vérifier que `custom_args` contient `email_log_id` ou `campaign_id`
 2. Vérifier que `sg_message_id` correspond dans `email_logs`
 3. Vérifier les logs de l'Edge Function pour des erreurs
@@ -170,6 +175,7 @@ Les métriques sont automatiquement mises à jour pour :
 ### Problème : Erreur 401/403
 
 **Solutions :**
+
 1. Vérifier que `SUPABASE_SERVICE_ROLE_KEY` est configuré
 2. Vérifier que le secret webhook correspond (si configuré)
 
@@ -228,4 +234,3 @@ if (SENDGRID_WEBHOOK_SECRET) {
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

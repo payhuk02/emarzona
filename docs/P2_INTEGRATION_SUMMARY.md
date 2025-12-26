@@ -168,4 +168,3 @@ const CollectionDetail = lazy(() =>
 ## 🎉 Statut Final
 
 **Tous les composants P2 sont intégrés et prêts à être utilisés !**
-

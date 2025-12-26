@@ -8,15 +8,17 @@
 ## 📊 Configuration Actuelle
 
 ### Code Splitting
+
 Le `vite.config.ts` est configuré avec une stratégie de code splitting optimisée :
 
 #### Chunks Principaux
+
 - **Chunk principal** : React, React DOM, React Router, TanStack Query, Radix UI, lucide-react
 - **charts** : Recharts (~350KB)
 - **calendar** : react-big-calendar
 - **supabase** : @supabase/supabase-js
 - **date-utils** : date-fns
-- **monitoring** : @sentry/*
+- **monitoring** : @sentry/\*
 - **pdf** : jspdf + jspdf-autotable (~414KB)
 - **csv** : papaparse
 - **qrcode** : qrcode + html5-qrcode
@@ -26,6 +28,7 @@ Le `vite.config.ts` est configuré avec une stratégie de code splitting optimis
 - **sanitization** : dompurify
 
 ### Optimisations Actuelles
+
 - ✅ Code splitting activé
 - ✅ Lazy loading des composants non-critiques
 - ✅ Tree shaking optimisé
@@ -75,15 +78,17 @@ Le `vite.config.ts` est configuré avec une stratégie de code splitting optimis
 ### Priorité HAUTE
 
 1. **Lazy Load TipTap**
+
    ```typescript
    // Au lieu de:
    import { useEditor } from '@tiptap/react';
-   
+
    // Utiliser:
    const TipTapEditor = lazy(() => import('@/components/editor/TipTapEditor'));
    ```
 
 2. **Lazy Load PDF Generation**
+
    ```typescript
    // Vérifier que jspdf est lazy-loaded
    const generatePDF = async () => {
@@ -100,9 +105,11 @@ Le `vite.config.ts` est configuré avec une stratégie de code splitting optimis
 ### Priorité MOYENNE
 
 4. **Analyser le bundle avec visualizer**
+
    ```bash
    npm run build:analyze
    ```
+
    - Ouvre `dist/stats.html` avec une visualisation interactive
 
 5. **Vérifier les imports dupliqués**
@@ -126,11 +133,13 @@ Le `vite.config.ts` est configuré avec une stratégie de code splitting optimis
 ## 🎯 Objectifs de Performance
 
 ### Bundle Size Targets
+
 - **Chunk principal** : < 300KB (gzipped)
 - **Chunks secondaires** : < 200KB chacun (gzipped)
 - **Total initial load** : < 500KB (gzipped)
 
 ### Métriques Lighthouse
+
 - **Performance Score** : > 90
 - **First Contentful Paint (FCP)** : < 1.8s
 - **Largest Contentful Paint (LCP)** : < 2.5s
@@ -141,16 +150,19 @@ Le `vite.config.ts` est configuré avec une stratégie de code splitting optimis
 ## 📝 Actions à Effectuer
 
 ### Immédiat
+
 1. ⏳ Exécuter `npm run build:analyze` pour visualiser le bundle
 2. ⏳ Vérifier que jspdf est lazy-loaded
 3. ⏳ Vérifier que TipTap est lazy-loaded
 
 ### Court Terme
+
 4. ⏳ Optimiser les imports lucide-react
 5. ⏳ Analyser les imports dupliqués
 6. ⏳ Implémenter lazy loading pour TipTap si nécessaire
 
 ### Long Terme
+
 7. ⏳ Virtual scrolling pour grandes listes
 8. ⏳ Optimisation des images
 9. ⏳ Monitoring continu du bundle size
@@ -175,6 +187,7 @@ npm run monitor:bundle
 ## 📊 Résultats Attendus
 
 Après optimisations:
+
 - ✅ Réduction de 20-30% du bundle initial
 - ✅ Amélioration du FCP de 0.5-1s
 - ✅ Amélioration du score Lighthouse Performance de 5-10 points
@@ -182,9 +195,3 @@ Après optimisations:
 ---
 
 **Prochaine analyse**: 2025-01-11 (hebdomadaire)
-
-
-
-
-
-

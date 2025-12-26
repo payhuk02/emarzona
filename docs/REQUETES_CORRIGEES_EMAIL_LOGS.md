@@ -8,8 +8,9 @@
 ## 📊 Structure Réelle de `email_logs`
 
 D'après les captures d'écran, la table `email_logs` a :
+
 - ✅ `to_email` (au lieu de `recipient_email`)
-- ✅ `campaign_id` 
+- ✅ `campaign_id`
 - ✅ `sequence_id`
 - ✅ `metadata` (jsonb)
 - ❌ Pas de `sent_at` (utiliser `created_at` à la place)
@@ -22,7 +23,7 @@ D'après les captures d'écran, la table `email_logs` a :
 ### 1. Voir Toutes les Colonnes de `email_logs`
 
 ```sql
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable
@@ -35,6 +36,7 @@ ORDER BY ordinal_position;
 ### 2. Vérifier les Logs d'Emails pour la Campagne (Version Simple)
 
 **Option A : Voir toutes les colonnes disponibles**
+
 ```sql
 SELECT *
 FROM public.email_logs
@@ -44,8 +46,9 @@ LIMIT 10;
 ```
 
 **Option B : Colonnes connues (sans celles qui n'existent pas)**
+
 ```sql
-SELECT 
+SELECT
   id,
   to_email,
   subject,
@@ -64,7 +67,7 @@ LIMIT 10;
 ### 3. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -83,7 +86,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 4. Vérifier si des Emails ont été Créés
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   COUNT(CASE WHEN sendgrid_status IS NOT NULL THEN 1 END) as with_status,
   MIN(created_at) as first_log,
@@ -159,4 +162,3 @@ Attendez 5-10 secondes, puis vérifiez à nouveau le statut de la campagne.
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

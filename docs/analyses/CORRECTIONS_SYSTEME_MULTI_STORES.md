@@ -13,15 +13,18 @@
 **Fichier** : `src/hooks/digital/useDigitalProducts.ts`
 
 **Problème** :
+
 - Si `storeId` n'était pas fourni, le hook récupérait tous les stores de l'utilisateur
 - Peut mélanger les produits de différentes boutiques
 
 **Solution** :
+
 - ✅ Utilisation de `useStoreContext()` pour obtenir la boutique sélectionnée
 - ✅ Si `storeId` n'est pas fourni, utilise `selectedStoreId` du contexte
 - ✅ Retourne un tableau vide si aucune boutique n'est sélectionnée
 
 **Changements** :
+
 ```typescript
 // ✅ Avant
 if (storeId) {
@@ -48,10 +51,12 @@ if (effectiveStoreId) {
 #### A. Page Customers (`src/pages/Customers.tsx`)
 
 **Avant** :
+
 - Message simple : "Boutique non configurée"
 - Pas de bouton d'action
 
 **Après** :
+
 - ✅ Message clair : "Aucune boutique sélectionnée"
 - ✅ Description détaillée
 - ✅ Bouton "Créer une boutique"
@@ -62,10 +67,12 @@ if (effectiveStoreId) {
 #### B. Page Analytics (`src/pages/Analytics.tsx`)
 
 **Avant** :
+
 - Message simple : "Boutique non configurée"
 - Pas de bouton d'action
 
 **Après** :
+
 - ✅ Message clair : "Aucune boutique sélectionnée"
 - ✅ Description détaillée
 - ✅ Bouton "Créer une boutique"
@@ -77,10 +84,12 @@ if (effectiveStoreId) {
 #### C. Page Payments (`src/pages/Payments.tsx`)
 
 **Avant** :
+
 - Message : "Créez votre boutique d'abord"
 - Un seul bouton
 
 **Après** :
+
 - ✅ Message clair : "Aucune boutique sélectionnée"
 - ✅ Description détaillée
 - ✅ Bouton "Créer une boutique" avec style cohérent
@@ -90,12 +99,12 @@ if (effectiveStoreId) {
 
 ## 📊 RÉSUMÉ DES CORRECTIONS
 
-| Fichier | Correction | Statut |
-|---------|-----------|--------|
+| Fichier                                   | Correction                           | Statut     |
+| ----------------------------------------- | ------------------------------------ | ---------- |
 | `src/hooks/digital/useDigitalProducts.ts` | Utilisation du contexte StoreContext | ✅ Corrigé |
-| `src/pages/Customers.tsx` | Messages d'erreur améliorés | ✅ Corrigé |
-| `src/pages/Analytics.tsx` | Messages d'erreur améliorés | ✅ Corrigé |
-| `src/pages/Payments.tsx` | Messages d'erreur améliorés | ✅ Corrigé |
+| `src/pages/Customers.tsx`                 | Messages d'erreur améliorés          | ✅ Corrigé |
+| `src/pages/Analytics.tsx`                 | Messages d'erreur améliorés          | ✅ Corrigé |
+| `src/pages/Payments.tsx`                  | Messages d'erreur améliorés          | ✅ Corrigé |
 
 ---
 
@@ -119,11 +128,13 @@ if (effectiveStoreId) {
 ## 🎯 RÉSULTAT
 
 ### Avant les Corrections
+
 - ⚠️ `useDigitalProducts` pouvait mélanger les produits de différentes boutiques
 - ⚠️ Messages d'erreur peu informatifs
 - ⚠️ Pas d'actions claires pour l'utilisateur
 
 ### Après les Corrections
+
 - ✅ `useDigitalProducts` utilise le contexte pour la cohérence
 - ✅ Messages d'erreur clairs et informatifs
 - ✅ Boutons d'action pour guider l'utilisateur
@@ -136,11 +147,13 @@ if (effectiveStoreId) {
 ### Comportement de useDigitalProducts
 
 Le hook `useDigitalProducts` peut maintenant :
+
 1. Utiliser un `storeId` fourni explicitement
 2. Utiliser la boutique sélectionnée du contexte si `storeId` n'est pas fourni
 3. Retourner un tableau vide si aucune boutique n'est sélectionnée
 
 **Cas d'usage** :
+
 - **Page publique (Marketplace)** : Peut passer `undefined` pour afficher tous les produits (comportement voulu)
 - **Pages privées** : Utilisent automatiquement la boutique sélectionnée via le contexte
 
@@ -149,4 +162,3 @@ Le hook `useDigitalProducts` peut maintenant :
 **Document créé le** : 2 Février 2025  
 **Dernière modification** : 2 Février 2025  
 **Version** : 1.0
-

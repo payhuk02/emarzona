@@ -1,6 +1,7 @@
 # 📘 Guide Utilisateur - Création et Gestion de Produits
 
 ## Table des matières
+
 1. [Introduction](#introduction)
 2. [Onglet Informations](#onglet-informations)
 3. [Onglet Description](#onglet-description)
@@ -16,6 +17,7 @@
 Ce guide vous accompagne dans la création et la gestion de produits sur la plateforme Payhula. Le système de création de produits est organisé en 4 onglets principaux, chacun gérant un aspect spécifique de votre produit.
 
 ### Types de produits supportés
+
 - **📦 Produit Physique** : Articles matériels nécessitant une expédition
 - **💎 Produit Numérique** : Fichiers téléchargeables (ebooks, logiciels, templates)
 - **🎯 Service** : Prestations, consultations, formations
@@ -27,66 +29,77 @@ Ce guide vous accompagne dans la création et la gestion de produits sur la plat
 ### 1. Sélection du type de produit
 
 **Comment choisir ?**
+
 - Cliquez sur la carte correspondant à votre type de produit
 - Les options disponibles s'adapteront automatiquement selon votre choix
 
 **Indicateurs visuels :**
+
 - ✅ Carte sélectionnée = bordure colorée et fond clair
 - 📱 Toutes les cartes sont tactiles et accessibles
 
 ### 2. Informations de base
 
 #### Nom du produit
+
 ```
 ✅ Bon exemple : "Guide complet Facebook Ads 2025"
 ❌ Mauvais exemple : "guide"
 ```
 
 **Conseils :**
+
 - Soyez descriptif et précis
 - Incluez l'année si pertinent
 - Évitez les caractères spéciaux
 - Le slug URL sera généré automatiquement
 
 #### Slug (URL)
+
 - **Généré automatiquement** depuis le nom du produit
 - Vérification de disponibilité en temps réel
 - ✅ Vert = disponible
 - ❌ Rouge = déjà utilisé
 
 **Exemples :**
+
 - `guide-facebook-ads-2025`
 - `formation-typescript-complete`
 - `tshirt-coton-bio-noir`
 
 #### Catégorie
+
 Sélectionnez la catégorie la plus appropriée :
+
 - Formations en ligne
 - Ebooks et Guides
 - Templates et Designs
 - Logiciels et Outils
 - Mode et Accessoires
-- *(et bien d'autres)*
+- _(et bien d'autres)_
 
 **💡 Astuce :** La catégorie aide vos clients à trouver votre produit facilement.
 
 ### 3. Tarification
 
 #### Prix de base
+
 - Entrez le prix de vente
 - Choisissez votre devise (FCFA, EUR, USD, etc.)
 - Le symbole s'affiche automatiquement
 
 #### Prix promotionnel (optionnel)
+
 **Deux méthodes :**
 
 1. **Saisie directe** : Entrez le nouveau prix
-2. **Pourcentage de réduction** : 
+2. **Pourcentage de réduction** :
    - Entrez entre 1% et 95%
    - Le prix est calculé automatiquement
    - L'économie est affichée en temps réel
 
 **Exemple :**
+
 ```
 Prix normal : 10 000 FCFA
 Réduction : 20%
@@ -95,6 +108,7 @@ Prix promo : 8 000 FCFA
 ```
 
 #### Coût de revient (optionnel)
+
 - Votre coût de production/achat
 - Permet de calculer votre **marge bénéficiaire**
 - Affichage automatique en montant et pourcentage
@@ -102,11 +116,13 @@ Prix promo : 8 000 FCFA
 ### 4. Visibilité
 
 #### Statut du produit
+
 - **Actif** : Visible dans votre boutique
 - **Brouillon** : Invisible, en préparation
 - **Archivé** : Masqué mais conservé
 
 #### Options avancées
+
 - **📌 En vedette** : Mis en avant sur votre boutique
 - **🔒 Masquer** : Visible uniquement via lien direct
 - **👁️ Afficher achats** : Montrer le nombre de ventes
@@ -114,16 +130,19 @@ Prix promo : 8 000 FCFA
 ### 5. Contrôle d'accès
 
 #### Type d'accès
+
 - **🌍 Public** : Accessible à tous
 - **👤 Membres** : Réservé aux utilisateurs connectés
 - **💳 Acheteurs** : Seulement pour ceux qui ont acheté
 
 #### Protection par mot de passe
+
 1. Activez le switch
 2. Définissez un mot de passe
 3. Le bouton "Copier" permet de partager facilement
 
 **Cas d'usage :**
+
 - Lancement exclusif
 - Accès VIP
 - Produits sur invitation
@@ -131,12 +150,14 @@ Prix promo : 8 000 FCFA
 ### 6. Limitations d'achat
 
 #### Quantité limitée
+
 ```
 Exemple : Webinar en direct
 → Limiter à 50 participants
 ```
 
 #### Limite par client
+
 ```
 Exemple : Offre découverte
 → 1 achat par client maximum
@@ -147,10 +168,12 @@ Exemple : Offre découverte
 ### 7. Période de vente
 
 #### Dates de début et fin
+
 - **Date de début** : Quand le produit devient disponible
 - **Date de fin** : Quand les ventes s'arrêtent automatiquement
 
 **Cas d'usage :**
+
 - Offre à durée limitée
 - Événement ponctuel
 - Précommandes
@@ -158,15 +181,18 @@ Exemple : Offre découverte
 ### 8. Métadonnées techniques
 
 #### SKU (référence)
+
 ```
 Format recommandé : PROD-2025-001
 ```
 
 #### Code-barres / ISBN
+
 - Pour les produits physiques
 - Pour les livres
 
 #### Poids et dimensions (produits physiques)
+
 - Poids en kg
 - Dimensions : L x l x H (cm)
 - Utilisé pour calculer les frais de port
@@ -180,17 +206,20 @@ Format recommandé : PROD-2025-001
 **Longueur idéale : 90-160 caractères**
 
 Indicateur de couleur :
+
 - 🔴 < 50 : Trop courte
 - 🟡 50-89 : Acceptable
 - 🟢 90+ : Optimale
 
 **Outils disponibles :**
+
 - **Générer** : Extrait automatiquement du texte long
 - **Paraphraser** : Reformule votre texte
 
 ### 2. Description complète
 
 **Éditeur riche avec :**
+
 - Mise en forme (gras, italique, souligné)
 - Titres (H1, H2, H3)
 - Listes à puces et numérotées
@@ -200,12 +229,14 @@ Indicateur de couleur :
 - Code (pour produits techniques)
 
 **Mode aperçu :**
+
 - Bouton "👁️ Aperçu" pour voir le rendu final
 - Basculez entre édition et visualisation
 
 ### 3. Caractéristiques
 
 Listez les points forts de votre produit :
+
 ```
 ✓ Accès à vie
 ✓ Mises à jour gratuites
@@ -219,9 +250,11 @@ Listez les points forts de votre produit :
 ### 4. Optimisation SEO
 
 #### Score SEO global
+
 Objectif : **80/100 minimum**
 
 **Composantes du score :**
+
 - Titre SEO (20 points)
 - Description SEO (20 points)
 - Mots-clés (15 points)
@@ -230,6 +263,7 @@ Objectif : **80/100 minimum**
 - Titre Open Graph (10 points)
 
 #### Titre SEO
+
 ```
 Longueur optimale : 30-60 caractères
 ✅ "Formation Facebook Ads - Guide Complet 2025"
@@ -238,17 +272,21 @@ Longueur optimale : 30-60 caractères
 ```
 
 #### Description SEO
+
 ```
 Longueur optimale : 120-160 caractères
 ```
+
 - Résumé attractif du produit
 - Inclure mots-clés principaux
 - Appel à l'action
 
 #### Mots-clés
+
 Format : `mot-clé1, mot-clé2, mot-clé3`
 
 **Exemple :**
+
 ```
 formation facebook, publicité facebook, facebook ads 2025
 ```
@@ -256,7 +294,9 @@ formation facebook, publicité facebook, facebook ads 2025
 ### 5. Analyse de contenu avancée
 
 #### Lisibilité
+
 **Score Flesch (français) :**
+
 - 80-100 : Très facile
 - 60-79 : Facile
 - 50-59 : Standard
@@ -266,51 +306,65 @@ formation facebook, publicité facebook, facebook ads 2025
 **Recommandation :** Visez 60+ pour un large public
 
 #### Mots-clés principaux
+
 Le système analyse automatiquement votre texte et identifie :
+
 - Les 5 mots-clés les plus fréquents
 - Leur densité (% d'utilisation)
 - Suggestions d'optimisation
 
 **Alertes :**
+
 - ⚠️ Mot-clé sous-utilisé (< 0.5%)
 - ⚠️ Mot-clé sur-utilisé (> 3%)
 
 #### Structure du contenu
+
 **Le système vérifie :**
+
 - ✅ Présence d'un titre H1
 - ✅ Utilisation de sous-titres H2
 - ✅ Hiérarchie correcte (pas de saut H1→H3)
 - ⚠️ Suggestions d'amélioration
 
 #### Détection de contenu dupliqué
+
 **Alertes :**
+
 - Phrases répétées
 - Duplication titre/description SEO
 
 #### Analyse Call-to-Action (CTA)
+
 - Nombre de CTA détectés
 - Suggestions d'optimisation
 - Position recommandée
 
 ### 6. Aperçu SERP (Google)
+
 Visualisez comment votre produit apparaîtra dans les résultats de recherche Google :
+
 - Titre bleu cliquable
 - URL verte
 - Description grise
 
 **Compteurs en temps réel :**
+
 - Titre : X/60 caractères
 - Description : X/160 caractères
 
 ### 7. Partage social (Open Graph)
 
 #### Titre Open Graph
+
 Titre affiché sur Facebook, Twitter, LinkedIn, etc.
 
 #### Description Open Graph
+
 Description pour les réseaux sociaux
 
 #### Image Open Graph
+
 ```
 Dimensions recommandées : 1200x630 px
 Format : JPG, PNG
@@ -326,11 +380,13 @@ Poids max : 5 MB
 ### 1. Image principale
 
 **Spécifications :**
+
 - Format : JPG, PNG, WebP
 - Taille max : 10 MB
 - Dimensions recommandées : 1200x1200 px (carré)
 
 **Fonctionnalités :**
+
 - Glisser-déposer
 - Sélection de fichier
 - Aperçu en temps réel
@@ -341,6 +397,7 @@ Poids max : 5 MB
 **Capacité :** Jusqu'à 10 images
 
 **Organisation :**
+
 - Numérotation automatique
 - Actions au survol :
   - 👁️ Prévisualiser
@@ -348,6 +405,7 @@ Poids max : 5 MB
 - Ordre modifiable (drag & drop)
 
 **Bonnes pratiques :**
+
 1. Montrez différents angles
 2. Utilisez des photos haute qualité
 3. Fond neutre ou contexte d'usage
@@ -356,11 +414,13 @@ Poids max : 5 MB
 ### 3. Vidéo du produit
 
 **Plateformes supportées :**
+
 - YouTube
 - Vimeo
 - Autres services d'hébergement
 
 **Format URL :**
+
 ```
 ✅ https://youtube.com/watch?v=XXXXX
 ✅ https://vimeo.com/XXXXX
@@ -372,24 +432,29 @@ Poids max : 5 MB
 ### 4. Options d'affichage
 
 #### En vedette
+
 - Produit mis en avant sur votre page d'accueil
 - Badge "⭐ Vedette" visible
 
 #### Masquer du magasin
+
 - Produit invisible dans les listings
 - Accessible uniquement via lien direct
 
 #### Masquer le compteur d'achats
+
 - Le nombre de ventes n'est pas affiché publiquement
 
 ### 5. Aperçu multi-device
 
 **3 modes de visualisation :**
+
 - 🖥️ **Desktop** : Vue ordinateur
 - 📱 **Tablet** : Vue tablette
 - 📱 **Mobile** : Vue smartphone
 
 **Éléments prévisualisés :**
+
 - Image principale
 - Nom du produit
 - Description courte
@@ -400,6 +465,7 @@ Poids max : 5 MB
 ### 6. Statistiques visuelles
 
 Tableau de bord en temps réel :
+
 - **Images principales** : 0/1
 - **Images galerie** : X/10
 - **Vidéo** : Oui/Non
@@ -409,16 +475,18 @@ Tableau de bord en temps réel :
 
 ## Onglet Fichiers
 
-*Pour les produits numériques uniquement*
+_Pour les produits numériques uniquement_
 
 ### 1. Upload de fichiers
 
 **Zone de glisser-déposer :**
+
 - Drag & Drop supporté
 - Sélection multiple
 - Barre de progression en temps réel
 
 **Formats supportés :**
+
 - 📄 Documents : PDF, DOC, DOCX, TXT
 - 📦 Archives : ZIP, RAR, 7Z
 - 🖼️ Images : JPG, PNG, GIF, SVG
@@ -432,12 +500,14 @@ Tableau de bord en temps réel :
 Pour chaque fichier uploadé :
 
 #### Informations affichées
+
 - 📁 Icône selon le type
 - Nom du fichier
 - Taille (formatée automatiquement)
 - 🔒 Badge si protégé
 
 #### Actions disponibles
+
 - **👁️ Prévisualiser** : Ouvre le fichier
 - **⬇️ Télécharger** : Télécharge le fichier
 - **🗑️ Supprimer** : Retire de la liste
@@ -445,6 +515,7 @@ Pour chaque fichier uploadé :
 ### 3. Configuration par fichier
 
 #### Limite de téléchargements
+
 ```
 Exemples :
 - Illimité : Laissez vide
@@ -452,6 +523,7 @@ Exemples :
 ```
 
 #### Date d'expiration
+
 ```
 Cas d'usage :
 - Accès temporaire (30 jours)
@@ -459,24 +531,29 @@ Cas d'usage :
 ```
 
 #### Protection
+
 **Switch "Protéger ce fichier" :**
+
 - ✅ Activé : Lien sécurisé généré
 - ❌ Désactivé : Lien direct public
 
 ### 4. Paramètres d'accès globaux
 
 #### Type d'accès
+
 - **Immédiat** : Téléchargement direct après achat
 - **Par email** : Lien envoyé par email
 - **Manuel** : Vous envoyez manuellement
 
 #### Limite globale
+
 ```
 Exemple : 5 téléchargements par client
 → Applicable à TOUS les fichiers
 ```
 
 #### Expiration globale (jours)
+
 ```
 Exemple : 90 jours
 → Les liens expirent après 90 jours
@@ -485,6 +562,7 @@ Exemple : 90 jours
 ### 5. Statistiques
 
 Tableau de bord :
+
 - **Fichiers configurés** : Nombre total
 - **Fichiers protégés** : Sécurisés vs non-sécurisés
 - **Taille totale** : Somme de tous les fichiers
@@ -493,11 +571,13 @@ Tableau de bord :
 ### 6. Instructions et bonnes pratiques
 
 ✅ **Ce qui est fait automatiquement :**
+
 - Sécurisation des fichiers
 - Tracking des téléchargements
 - Génération de liens uniques
 
 ⚠️ **Limites à connaître :**
+
 - 100 MB max par fichier
 - 10 fichiers maximum par produit
 
@@ -542,6 +622,7 @@ Tableau de bord :
 ### 💰 Tarification
 
 1. **Psychologie des prix**
+
    ```
    9 990 FCFA au lieu de 10 000 FCFA
    → Paraît plus accessible
@@ -614,7 +695,8 @@ R : Utilisez "Contrôle d'accès" → "Protection par mot de passe" OU "Masquer 
 
 ## 🎓 Tutoriels vidéo
 
-*(À venir)*
+_(À venir)_
+
 - Créer son premier produit en 5 minutes
 - Optimiser son SEO pour plus de ventes
 - Gérer les fichiers téléchargeables
@@ -624,6 +706,7 @@ R : Utilisez "Contrôle d'accès" → "Protection par mot de passe" OU "Masquer 
 ## 📞 Support
 
 Besoin d'aide ?
+
 - 📧 Email : support@payhula.com
 - 💬 Chat en direct (9h-18h GMT)
 - 📚 Centre d'aide : https://aide.payhula.com
@@ -632,4 +715,3 @@ Besoin d'aide ?
 
 **Dernière mise à jour : Octobre 2025**
 **Version du guide : 1.0**
-

@@ -37,6 +37,7 @@
    - Impact estimé : Identification des optimisations
 
 **Fichiers à modifier** :
+
 - `src/App.tsx`
 - `src/lib/error-logger.ts`
 - Vérifier tous les imports de `lucide-react`
@@ -67,9 +68,11 @@
 #### Actions identifiées :
 
 1. ⚠️ **Exécuter tests a11y**
+
    ```bash
    npm run test:a11y
    ```
+
    - Identifier les violations
    - Corriger les problèmes critiques
 
@@ -152,15 +155,18 @@
 ## 📊 MÉTRIQUES DE SUCCÈS
 
 ### Performance
+
 - ✅ Bundle principal < 500 KB
 - ✅ FCP < 1.5s
 - ✅ LCP < 2.5s
 
 ### Accessibilité
+
 - ✅ 0 violations WCAG 2.1 AA critiques
 - ✅ Tests a11y passent à 100%
 
 ### Tests
+
 - ✅ Couverture E2E > 80%
 - ✅ Tous les tests passent
 
@@ -172,6 +178,7 @@
 **Amélioration** : +4 points
 
 **Répartition** :
+
 - Performance : 90 → 95 (+5 points)
 - Accessibilité : 88 → 95 (+7 points)
 - Tests : 85 → 90 (+5 points)
@@ -179,4 +186,3 @@
 ---
 
 **Prochaine révision** : 5 Février 2025
-

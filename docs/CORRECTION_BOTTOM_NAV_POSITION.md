@@ -244,4 +244,3 @@
 **Document créé par**: Auto (Cursor AI)  
 **Date**: 3 Février 2025  
 **Version**: 1.0
-

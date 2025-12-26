@@ -112,4 +112,3 @@ Et lors de l'upload, vous devriez voir :
 
 **Dernière mise à jour** : 1 Février 2025  
 **Migration SQL** : `supabase/migrations/20250201_create_and_configure_attachments_bucket.sql`
-

@@ -8,6 +8,7 @@
 ## ❌ PROBLÈME IDENTIFIÉ
 
 Lors de la sauvegarde d'un brouillon de produit, les erreurs suivantes apparaissaient :
+
 1. `Could not find the 'meta_keywords' column of 'products' in the schema cache`
 2. `Could not find the 'og_description' column of 'products' in the schema cache`
 3. `Could not find the 'og_title' column of 'products' in the schema cache`
@@ -17,6 +18,7 @@ Lors de la sauvegarde d'un brouillon de produit, les erreurs suivantes apparaiss
 ## ✅ COLONNES EXISTANTES DANS LA TABLE `products`
 
 D'après le schéma Supabase (`src/integrations/supabase/types.ts`), les colonnes SEO suivantes **existent** :
+
 - ✅ `meta_title` (string | null)
 - ✅ `meta_description` (string | null)
 - ✅ `og_image` (string | null)
@@ -26,6 +28,7 @@ D'après le schéma Supabase (`src/integrations/supabase/types.ts`), les colonne
 ## ❌ COLONNES QUI N'EXISTENT PAS
 
 Les colonnes suivantes **n'existent pas** dans la table `products` :
+
 - ❌ `meta_keywords` (présent dans le type mais pas dans la base réelle)
 - ❌ `og_title`
 - ❌ `og_description`
@@ -37,6 +40,7 @@ Les colonnes suivantes **n'existent pas** dans la table `products` :
 ### 1. CreateDigitalProductWizard_v2.tsx ✅
 
 **Avant** :
+
 ```typescript
 meta_keywords: formData.seo?.meta_keywords,
 og_title: formData.seo?.og_title,
@@ -44,6 +48,7 @@ og_description: formData.seo?.og_description,
 ```
 
 **Après** :
+
 ```typescript
 // Note: meta_keywords, og_title, og_description are not saved to DB (columns don't exist)
 ```
@@ -65,11 +70,13 @@ og_description: formData.seo?.og_description,
 ### 4. ProductForm.tsx ✅
 
 **Avant** :
+
 ```typescript
 const { meta_keywords, ...formDataWithoutMetaKeywords } = formData;
 ```
 
 **Après** :
+
 ```typescript
 // Retirer les colonnes qui n'existent pas dans la table products
 const { meta_keywords, og_title, og_description, ...formDataCleaned } = formData;
@@ -90,6 +97,7 @@ const { meta_keywords, og_title, og_description, ...formDataCleaned } = formData
 ## 📝 NOTE IMPORTANTE
 
 Les champs `meta_keywords`, `og_title`, et `og_description` restent disponibles dans l'interface utilisateur pour :
+
 - L'analyse SEO
 - L'affichage dans les formulaires
 - Les suggestions et recommandations
@@ -97,6 +105,7 @@ Les champs `meta_keywords`, `og_title`, et `og_description` restent disponibles 
 Cependant, ces valeurs **ne sont pas sauvegardées** dans la base de données car les colonnes n'existent pas.
 
 Si vous souhaitez sauvegarder ces valeurs à l'avenir, il faudra :
+
 1. Créer une migration Supabase pour ajouter ces colonnes
 2. Mettre à jour le schéma TypeScript
 3. Réactiver la sauvegarde de ces champs
@@ -104,4 +113,3 @@ Si vous souhaitez sauvegarder ces valeurs à l'avenir, il faudra :
 ---
 
 **Dernière mise à jour** : 31 Janvier 2025
-

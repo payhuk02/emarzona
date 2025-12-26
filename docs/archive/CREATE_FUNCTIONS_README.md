@@ -12,6 +12,7 @@ Lors de la vérification de la base de données Supabase, deux fonctions personn
 ### Option 1: Exécution via Supabase Dashboard (Recommandée)
 
 1. **Ouvrez votre projet Supabase**
+
    ```
    https://supabase.com/dashboard/project/your-project-id
    ```
@@ -44,11 +45,13 @@ node scripts/test-missing-functions.js
 ## 🔍 Fonctions Créées
 
 ### `generate_order_number()`
+
 - **Format** : `ORD-YYYYMMDD-XXXX`
 - **Exemple** : `ORD-20250110-0001`
 - **Usage** : Génération automatique de numéros de commande uniques
 
 ### `generate_referral_code()`
+
 - **Format** : 8 caractères alphanumériques en majuscules
 - **Exemple** : `A1B2C3D4`
 - **Usage** : Génération de codes de parrainage uniques
@@ -63,6 +66,7 @@ node scripts/test-missing-functions.js
 ```
 
 Vous devriez voir :
+
 ```
 ✅ generate_order_number: ORD-20250110-0001
 ✅ generate_referral_code: A1B2C3D4
@@ -74,7 +78,7 @@ Vous devriez voir :
 Une fois les fonctions créées, votre base de données Supabase sera **100% complète** avec :
 
 - ✅ 21/21 tables existantes
-- ✅ 21/21 tables accessibles  
+- ✅ 21/21 tables accessibles
 - ✅ 6/6 fonctions personnalisées
 - ✅ Connexion fonctionnelle
 - ✅ Prêt pour la production
@@ -90,4 +94,4 @@ Si vous rencontrez des erreurs :
 
 ---
 
-*Ces fonctions sont essentielles pour le bon fonctionnement du système de commandes et de parrainage de Payhuk.*
+_Ces fonctions sont essentielles pour le bon fonctionnement du système de commandes et de parrainage de Payhuk._

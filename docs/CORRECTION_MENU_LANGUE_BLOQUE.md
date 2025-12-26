@@ -3,6 +3,7 @@
 ## 🐛 Problème identifié
 
 Sur mobile, le menu de sélection de langue s'affichait correctement mais restait bloqué, empêchant :
+
 - La sélection d'une langue
 - La fermeture du menu
 - Les interactions tactiles
@@ -19,6 +20,7 @@ Sur mobile, le menu de sélection de langue s'affichait correctement mais restai
 ### 1. Hook `useMobileMenu` (`src/hooks/use-mobile-menu.tsx`)
 
 **Avant :**
+
 ```typescript
 touch-action: none !important;
 overflow: hidden !important;
@@ -26,6 +28,7 @@ height: ${height}px !important;
 ```
 
 **Après :**
+
 ```typescript
 touch-action: pan-y !important; // Permet les interactions tactiles
 overflow-y: auto !important;    // Permet le scroll vertical
@@ -40,6 +43,7 @@ overflow-x: hidden !important;   // Bloque le scroll horizontal
 ### 2. Composant `MobileDropdown` (`src/components/ui/mobile-dropdown.tsx`)
 
 **Avant :**
+
 ```typescript
 onPointerDownOutside={(e) => {
   if (isLocked && isMobile && !disableMobileOptimization) {
@@ -52,6 +56,7 @@ onPointerDownOutside={(e) => {
 ```
 
 **Après :**
+
 ```typescript
 onPointerDownOutside={(e) => {
   // Permettre la fermeture normale du menu
@@ -72,6 +77,7 @@ onPointerDownOutside={(e) => {
 ### 3. Composant `DropdownMenuItem` (`src/components/ui/dropdown-menu.tsx`)
 
 **Avant :**
+
 ```typescript
 onSelect={(e) => {
   // Empêcher la propagation pour éviter les double-clics sur mobile
@@ -87,8 +93,9 @@ onSelect={(e) => {
 ```
 
 **Après :**
+
 ```typescript
-onSelect={onSelect} // Délégation directe, pas de manipulation
+onSelect = { onSelect }; // Délégation directe, pas de manipulation
 ```
 
 **Impact :** Les événements sont maintenant gérés correctement sans délai ni prévention.
@@ -98,6 +105,7 @@ onSelect={onSelect} // Délégation directe, pas de manipulation
 ### 4. Composant `LanguageSwitcher` (`src/components/ui/LanguageSwitcher.tsx`)
 
 **Avant :**
+
 ```typescript
 onSelect={(e) => {
   e.preventDefault(); // Bloquait la fermeture automatique
@@ -110,6 +118,7 @@ onClick={(e) => {
 ```
 
 **Après :**
+
 ```typescript
 onSelect={() => {
   // onSelect est appelé automatiquement par Radix UI
@@ -125,11 +134,13 @@ onSelect={() => {
 ### 5. Scroll lock (`src/hooks/use-mobile-menu.tsx`)
 
 **Avant :**
+
 ```typescript
 document.body.style.overflow = 'hidden'; // Bloquait tout
 ```
 
 **Après :**
+
 ```typescript
 // Ne pas verrouiller le scroll du body
 // Le positionnement fixe du menu suffit pour le garder visible
@@ -143,7 +154,7 @@ document.body.style.overflow = 'hidden'; // Bloquait tout
 ✅ **Fermeture normale** - Le menu se ferme en cliquant en dehors ou après sélection  
 ✅ **Sélection possible** - Les langues peuvent être sélectionnées sans problème  
 ✅ **Positionnement stable** - Le menu reste bien positionné sans sursauts  
-✅ **Scroll disponible** - Le scroll vertical est possible si le menu est long  
+✅ **Scroll disponible** - Le scroll vertical est possible si le menu est long
 
 ## 🧪 Tests recommandés
 
@@ -160,4 +171,3 @@ document.body.style.overflow = 'hidden'; // Bloquait tout
 - Le positionnement fixe du menu est maintenu via `position: fixed` et `MutationObserver`
 - Les événements sont gérés directement par Radix UI sans manipulation supplémentaire
 - Le scroll lock du body a été supprimé pour éviter de bloquer les interactions
-

@@ -12,12 +12,14 @@
 **Fichier** : `src/hooks/usePlatformLogo.ts`
 
 **Changements** :
+
 - ❌ **Supprimé** : Import de `payhukLogo` depuis `@/assets/payhuk-logo.png`
 - ✅ **Modifié** : `usePlatformLogo()` retourne maintenant `null` si aucun logo personnalisé n'est configuré (au lieu de `payhukLogo`)
 - ✅ **Modifié** : `usePlatformLogoLight()` retourne `null` si aucun logo light n'est configuré
 - ✅ **Modifié** : `usePlatformLogoDark()` retourne `null` si aucun logo dark n'est configuré
 
 **Avant** :
+
 ```typescript
 import payhukLogo from '@/assets/payhuk-logo.png';
 // ...
@@ -27,6 +29,7 @@ if (!hasCustomLogo) {
 ```
 
 **Après** :
+
 ```typescript
 // Plus d'import de payhukLogo
 // ...
@@ -44,26 +47,33 @@ if (!hasCustomLogo) {
 Tous les composants qui utilisent `usePlatformLogo()` ont été modifiés pour gérer le cas où le logo est `null` :
 
 #### 2.1 `AppSidebar.tsx` ✅
+
 - **Fallback** : Affiche un placeholder "E" dans un cercle avec couleur primaire si `platformLogo` est `null`
 
 #### 2.2 `MarketplaceHeader.tsx` ✅
+
 - **Fallback** : Affiche un placeholder "E" dans un cercle avec couleur primaire si `platformLogo` est `null`
 - **2 emplacements** : Header desktop et menu mobile
 
 #### 2.3 `MarketplaceFooter.tsx` ✅
+
 - **Fallback** : Affiche un placeholder "E" dans un cercle avec couleur primaire si `platformLogo` est `null`
 
 #### 2.4 `Auth.tsx` ✅
+
 - **Fallback** : Affiche un placeholder "E" dans un cercle avec couleur primaire si `platformLogo` est `null`
 
 #### 2.5 `Landing.tsx` ✅
+
 - **Fallback** : Affiche un placeholder "E" dans un cercle avec couleur primaire si `platformLogo` est `null`
 - **2 emplacements** : Header et footer
 
 #### 2.6 `MobileResponsiveTest.tsx` ✅
+
 - **Fallback** : Affiche un placeholder "E" dans un cercle avec couleur primaire si `platformLogo` est `null`
 
 **Exemple de fallback** :
+
 ```typescript
 {platformLogo ? (
   <img src={platformLogo} alt="Emarzona" className="h-8 w-8" />
@@ -83,10 +93,12 @@ Tous les composants qui utilisent `usePlatformLogo()` ont été modifiés pour g
 **Fichier** : `public/manifest.json`
 
 **Changements** :
+
 - ❌ **Supprimé** : Toutes les références à `/payhuk-logo.png`
 - ✅ **Remplacé** : Par `/favicon.ico` (favicon par défaut)
 
 **Avant** :
+
 ```json
 "icons": [
   {
@@ -98,6 +110,7 @@ Tous les composants qui utilisent `usePlatformLogo()` ont été modifiés pour g
 ```
 
 **Après** :
+
 ```json
 "icons": [
   {
@@ -115,6 +128,7 @@ Tous les composants qui utilisent `usePlatformLogo()` ont été modifiés pour g
 ### 4. Fichiers Physiques Supprimés ✅
 
 **Fichiers supprimés** :
+
 - ❌ `src/assets/payhuk-logo.png`
 - ❌ `public/payhuk-logo.png`
 
@@ -127,6 +141,7 @@ Tous les composants qui utilisent `usePlatformLogo()` ont été modifiés pour g
 ### ✅ Aucune Référence Restante
 
 **Recherche dans le code** :
+
 ```bash
 grep -r "payhuk-logo\|payhukLogo" src/ public/
 ```
@@ -138,11 +153,13 @@ grep -r "payhuk-logo\|payhukLogo" src/ public/
 ## 🎯 RÉSULTAT
 
 ### Avant
+
 - ❌ L'ancien logo `payhuk-logo.png` était utilisé comme fallback
 - ❌ Clignotement visible lors du chargement (ancien logo → nouveau logo)
 - ❌ Références dans `manifest.json` et fichiers physiques
 
 ### Après
+
 - ✅ Aucune référence à l'ancien logo dans le code
 - ✅ Pas de clignotement (placeholder "E" si aucun logo personnalisé)
 - ✅ `manifest.json` utilise le favicon par défaut
@@ -153,11 +170,13 @@ grep -r "payhuk-logo\|payhukLogo" src/ public/
 ## 🔄 COMPORTEMENT ACTUEL
 
 ### Scénario 1 : Logo personnalisé configuré
+
 - ✅ Affiche le logo personnalisé (light ou dark selon le thème)
 - ✅ Pas de clignotement
 - ✅ Stable et cohérent
 
 ### Scénario 2 : Aucun logo personnalisé configuré
+
 - ✅ Affiche un placeholder "E" dans un cercle avec couleur primaire
 - ✅ Pas de clignotement (pas de chargement d'ancien logo)
 - ✅ Cohérent avec le design
@@ -184,4 +203,3 @@ grep -r "payhuk-logo\|payhukLogo" src/ public/
 - [x] Fallbacks cohérents dans tous les composants
 
 **Statut Global** : ✅ **COMPLET - ANCIEN LOGO COMPLÈTEMENT SUPPRIMÉ**
-

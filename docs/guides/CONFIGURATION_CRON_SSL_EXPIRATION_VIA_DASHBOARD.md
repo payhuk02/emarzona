@@ -24,18 +24,22 @@ Si vous rencontrez des erreurs de permission avec les scripts SQL directs, utili
 Remplissez les champs suivants :
 
 **Schedule (Programmation) :**
+
 ```
 0 9 * * *
 ```
+
 - Tous les jours à 9h00 UTC
 - Format : `minute hour day month weekday`
 
 **Name (Nom) :**
+
 ```
 check-ssl-expiration-daily
 ```
 
 **Command (Commande SQL) :**
+
 ```sql
 SELECT net.http_post(
   url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration',
@@ -47,6 +51,7 @@ SELECT net.http_post(
 **⚠️ IMPORTANT :** Remplacez `VOTRE_SERVICE_ROLE_KEY_ICI` par votre vraie service role key !
 
 **Active (Actif) :**
+
 - ✅ Cocher pour activer immédiatement
 
 ### Étape 4 : Sauvegarder
@@ -56,6 +61,7 @@ Cliquez sur **"Save"** ou **"Create Cron Job"**
 ## ✅ Vérification
 
 Après création, vous devriez voir le cron job dans la liste avec :
+
 - ✅ Status: Active
 - ✅ Schedule: `0 9 * * *`
 - ✅ Name: `check-ssl-expiration-daily`
@@ -125,6 +131,7 @@ Si vous voulez vérifier plus souvent :
 ### Erreur "permission denied"
 
 Si vous avez toujours des erreurs de permission :
+
 - Utilisez la méthode Dashboard décrite ci-dessus (plus fiable)
 - Ou utilisez la fonction helper `setup_ssl_expiration_check_cron()` (voir script SQL alternatif)
 
@@ -138,4 +145,3 @@ Si vous avez toujours des erreurs de permission :
 
 **Date de création :** 2025-02-02  
 **Dernière mise à jour :** 2025-02-02
-

@@ -33,6 +33,7 @@ Le système Payhuk permet actuellement aux utilisateurs de créer et gérer jusq
 ### Objectif
 
 Créer un système complet de **gestion d'équipe** où :
+
 - ✅ Les vendeurs peuvent **inviter des membres** à rejoindre leur boutique
 - ✅ Les membres peuvent avoir des **rôles spécifiques** (gestionnaire, support, vendeur, etc.)
 - ✅ Les vendeurs peuvent **assigner des tâches** aux membres
@@ -55,6 +56,7 @@ Créer un système complet de **gestion d'équipe** où :
 ### 1. Architecture Existante
 
 #### Base de Données
+
 - ✅ Table `stores` avec `user_id` (propriétaire)
 - ✅ RLS (Row Level Security) activé sur toutes les tables
 - ✅ Isolation complète des données par `store_id`
@@ -63,6 +65,7 @@ Créer un système complet de **gestion d'équipe** où :
 - ❌ **Aucune table pour les tâches assignées**
 
 #### Frontend
+
 - ✅ `StoreContext` pour gérer la boutique sélectionnée
 - ✅ `useStore()` hook pour accéder à la boutique active
 - ✅ Dashboard vendeur avec statistiques
@@ -73,16 +76,19 @@ Créer un système complet de **gestion d'équipe** où :
 #### Systèmes Similaires Existants
 
 **1. Système d'Assignments pour Cours** (`course_assignments`)
+
 - ✅ Structure de base pour assigner des tâches
 - ✅ Système de soumission et suivi
 - ⚠️ Spécifique aux cours, pas adapté aux stores
 
 **2. Système de Rôles Platform** (`platform_roles`)
+
 - ✅ Système de permissions granulaire
 - ✅ Rôles prédéfinis (admin, manager, moderator, etc.)
 - ⚠️ Au niveau plateforme, pas au niveau store
 
 **3. Système de Service Bookings** (`service_bookings`)
+
 - ✅ Assignation de providers à des services
 - ✅ Suivi de statuts
 - ⚠️ Spécifique aux services, pas généralisable
@@ -90,11 +96,13 @@ Créer un système complet de **gestion d'équipe** où :
 ### 2. Points d'Intégration Identifiés
 
 #### Pages Existantes à Étendre
+
 - `/dashboard/store` → Ajouter un onglet "Équipe"
 - `/dashboard` → Ajouter une section "Mes Tâches"
 - `/dashboard/settings` → Ajouter une section "Gestion d'équipe"
 
 #### Hooks Existants à Réutiliser
+
 - `useStore()` → Pour obtenir la boutique active
 - `useNotifications()` → Pour notifier les membres
 - `useAuth()` → Pour l'authentification
@@ -106,6 +114,7 @@ Créer un système complet de **gestion d'équipe** où :
 ### 1. Gestion des Membres
 
 #### 1.1 Invitation de Membres
+
 - Le vendeur peut inviter un utilisateur par **email**
 - L'invitation contient :
   - Email du membre
@@ -116,6 +125,7 @@ Créer un système complet de **gestion d'équipe** où :
 - L'invitation peut être **révoquée** avant acceptation
 
 #### 1.2 Rôles et Permissions
+
 - **Rôles prédéfinis** :
   - `owner` : Propriétaire (créateur de la boutique)
   - `manager` : Gestionnaire (accès complet sauf suppression)
@@ -136,6 +146,7 @@ Créer un système complet de **gestion d'équipe** où :
   - `tasks.manage` : Gérer toutes les tâches
 
 #### 1.3 Gestion des Membres
+
 - **Liste des membres** avec leurs rôles
 - **Modifier le rôle** d'un membre
 - **Révoquer l'accès** d'un membre
@@ -145,6 +156,7 @@ Créer un système complet de **gestion d'équipe** où :
 ### 2. Gestion des Tâches
 
 #### 2.1 Création de Tâches
+
 - Le vendeur peut créer des tâches avec :
   - **Titre** et **description**
   - **Priorité** (low, medium, high, urgent)
@@ -155,6 +167,7 @@ Créer un système complet de **gestion d'équipe** où :
   - **Fichiers joints** (optionnel)
 
 #### 2.2 Types de Tâches
+
 - **Tâches générales** : Tâches libres
 - **Tâches liées aux produits** : Créer/modifier un produit
 - **Tâches liées aux commandes** : Traiter une commande
@@ -162,6 +175,7 @@ Créer un système complet de **gestion d'équipe** où :
 - **Tâches récurrentes** : Tâches répétitives
 
 #### 2.3 Statuts des Tâches
+
 - `pending` : En attente
 - `in_progress` : En cours
 - `review` : En révision
@@ -170,6 +184,7 @@ Créer un système complet de **gestion d'équipe** où :
 - `on_hold` : En pause
 
 #### 2.4 Suivi des Tâches
+
 - **Commentaires** sur les tâches
 - **Historique des modifications**
 - **Temps passé** (optionnel)
@@ -182,12 +197,14 @@ Créer un système complet de **gestion d'équipe** où :
 ### 3. Tableaux de Bord
 
 #### 3.1 Dashboard Vendeur
+
 - Vue d'ensemble de l'équipe
 - Tâches en attente
 - Performance des membres
 - Activité récente
 
 #### 3.2 Dashboard Membre
+
 - Mes tâches assignées
 - Tâches en cours
 - Tâches terminées
@@ -275,28 +292,28 @@ CREATE TABLE public.store_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
+
   -- Rôle et permissions
   role TEXT NOT NULL CHECK (role IN ('owner', 'manager', 'staff', 'support', 'viewer')) DEFAULT 'staff',
   permissions JSONB NOT NULL DEFAULT '{}'::jsonb,
-  
+
   -- Invitation
   invited_by UUID NOT NULL REFERENCES auth.users(id),
   invited_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   invitation_token TEXT UNIQUE,
   invitation_expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + INTERVAL '7 days'),
-  
+
   -- Statut
   status TEXT NOT NULL CHECK (status IN ('pending', 'active', 'inactive', 'removed')) DEFAULT 'pending',
   joined_at TIMESTAMPTZ,
   removed_at TIMESTAMPTZ,
   removed_by UUID REFERENCES auth.users(id),
-  
+
   -- Métadonnées
   metadata JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  
+
   -- Contraintes
   UNIQUE(store_id, user_id)
 );
@@ -321,33 +338,33 @@ CREATE TRIGGER update_store_members_updated_at
 CREATE TABLE public.store_tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
-  
+
   -- Création et assignation
   created_by UUID NOT NULL REFERENCES auth.users(id),
   assigned_to UUID[] NOT NULL DEFAULT '{}', -- Array de user_id
   assigned_by UUID REFERENCES auth.users(id),
-  
+
   -- Informations de la tâche
   title TEXT NOT NULL,
   description TEXT,
   category TEXT CHECK (category IN ('product', 'order', 'customer', 'marketing', 'inventory', 'other')) DEFAULT 'other',
   priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
-  
+
   -- Statut et dates
   status TEXT NOT NULL CHECK (status IN ('pending', 'in_progress', 'review', 'completed', 'cancelled', 'on_hold')) DEFAULT 'pending',
   due_date TIMESTAMPTZ,
   started_at TIMESTAMPTZ,
   completed_at TIMESTAMPTZ,
-  
+
   -- Organisation
   tags TEXT[] DEFAULT '{}',
   attachments JSONB DEFAULT '[]'::jsonb, -- [{url, name, size, type}]
-  
+
   -- Liens vers d'autres entités
   related_product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
   related_order_id UUID REFERENCES public.orders(id) ON DELETE SET NULL,
   related_customer_id UUID REFERENCES public.customers(id) ON DELETE SET NULL,
-  
+
   -- Métadonnées
   metadata JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -379,11 +396,11 @@ CREATE TABLE public.store_task_comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   task_id UUID NOT NULL REFERENCES public.store_tasks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
+
   -- Contenu
   content TEXT NOT NULL,
   attachments JSONB DEFAULT '[]'::jsonb,
-  
+
   -- Métadonnées
   is_internal BOOLEAN DEFAULT false, -- Commentaire interne (non visible par tous)
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -403,13 +420,13 @@ CREATE TABLE public.store_task_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   task_id UUID NOT NULL REFERENCES public.store_tasks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
+
   -- Changement
   action TEXT NOT NULL, -- 'created', 'assigned', 'status_changed', 'priority_changed', 'due_date_changed', etc.
   old_value TEXT,
   new_value TEXT,
   metadata JSONB DEFAULT '{}'::jsonb,
-  
+
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -534,19 +551,19 @@ CREATE POLICY "Members can update tasks"
 
 ### 2. Permissions par Rôle
 
-| Permission | Owner | Manager | Staff | Support | Viewer |
-|------------|-------|---------|-------|---------|--------|
-| `products.manage` | ✅ | ✅ | ✅ | ❌ | ❌ |
-| `products.view` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `orders.manage` | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `orders.view` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `customers.manage` | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `customers.view` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `analytics.view` | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `settings.manage` | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `team.manage` | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `tasks.assign` | ✅ | ✅ | ✅ | ❌ | ❌ |
-| `tasks.manage` | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Permission         | Owner | Manager | Staff | Support | Viewer |
+| ------------------ | ----- | ------- | ----- | ------- | ------ |
+| `products.manage`  | ✅    | ✅      | ✅    | ❌      | ❌     |
+| `products.view`    | ✅    | ✅      | ✅    | ✅      | ✅     |
+| `orders.manage`    | ✅    | ✅      | ✅    | ✅      | ❌     |
+| `orders.view`      | ✅    | ✅      | ✅    | ✅      | ✅     |
+| `customers.manage` | ✅    | ✅      | ✅    | ✅      | ❌     |
+| `customers.view`   | ✅    | ✅      | ✅    | ✅      | ✅     |
+| `analytics.view`   | ✅    | ✅      | ✅    | ❌      | ✅     |
+| `settings.manage`  | ✅    | ❌      | ❌    | ❌      | ❌     |
+| `team.manage`      | ✅    | ✅      | ❌    | ❌      | ❌     |
+| `tasks.assign`     | ✅    | ✅      | ✅    | ❌      | ❌     |
+| `tasks.manage`     | ✅    | ✅      | ✅    | ❌      | ❌     |
 
 ---
 
@@ -555,6 +572,7 @@ CREATE POLICY "Members can update tasks"
 ### Phase 1 : Base de Données (Jour 1-2)
 
 #### 1.1 Migration Supabase
+
 - [ ] Créer la migration `20250202_store_team_management.sql`
 - [ ] Créer la table `store_members`
 - [ ] Créer la table `store_tasks`
@@ -565,6 +583,7 @@ CREATE POLICY "Members can update tasks"
 - [ ] Créer les triggers
 
 #### 1.2 Fonctions Utilitaires
+
 - [ ] Fonction `is_store_member(store_id, user_id)` → boolean
 - [ ] Fonction `get_store_member_role(store_id, user_id)` → text
 - [ ] Fonction `has_store_permission(store_id, user_id, permission)` → boolean
@@ -574,6 +593,7 @@ CREATE POLICY "Members can update tasks"
 ### Phase 2 : Backend / Hooks (Jour 3-5)
 
 #### 2.1 Hooks pour Membres
+
 - [ ] `useStoreMembers()` → Liste des membres
 - [ ] `useStoreMemberInvite()` → Inviter un membre
 - [ ] `useStoreMemberUpdate()` → Modifier un membre
@@ -581,6 +601,7 @@ CREATE POLICY "Members can update tasks"
 - [ ] `useStoreMemberPermissions()` → Gérer les permissions
 
 #### 2.2 Hooks pour Tâches
+
 - [ ] `useStoreTasks()` → Liste des tâches
 - [ ] `useStoreTaskCreate()` → Créer une tâche
 - [ ] `useStoreTaskUpdate()` → Modifier une tâche
@@ -591,6 +612,7 @@ CREATE POLICY "Members can update tasks"
 ### Phase 3 : Composants UI (Jour 6-10)
 
 #### 3.1 Composants Membres
+
 - [ ] `StoreMembersList.tsx` → Liste des membres
 - [ ] `StoreMemberInviteDialog.tsx` → Inviter un membre
 - [ ] `StoreMemberCard.tsx` → Carte membre
@@ -598,6 +620,7 @@ CREATE POLICY "Members can update tasks"
 - [ ] `StoreMemberPermissionsEditor.tsx` → Éditeur de permissions
 
 #### 3.2 Composants Tâches
+
 - [ ] `StoreTasksList.tsx` → Liste des tâches
 - [ ] `StoreTaskCard.tsx` → Carte tâche
 - [ ] `StoreTaskCreateDialog.tsx` → Créer une tâche
@@ -610,12 +633,14 @@ CREATE POLICY "Members can update tasks"
 ### Phase 4 : Pages (Jour 11-12)
 
 #### 4.1 Page Gestion d'Équipe
+
 - [ ] `/dashboard/store/team` → Page principale
   - Onglet "Membres"
   - Onglet "Tâches"
   - Onglet "Statistiques"
 
 #### 4.2 Page Mes Tâches
+
 - [ ] `/dashboard/tasks` → Page des tâches assignées
   - Filtres par statut, priorité, catégorie
   - Vue liste et vue Kanban
@@ -624,17 +649,20 @@ CREATE POLICY "Members can update tasks"
 ### Phase 5 : Intégrations (Jour 13-14)
 
 #### 5.1 Notifications
+
 - [ ] Notifications pour nouvelles invitations
 - [ ] Notifications pour nouvelles tâches
 - [ ] Notifications pour mises à jour de tâches
 - [ ] Notifications pour échéances approchant
 
 #### 5.2 Emails
+
 - [ ] Email d'invitation
 - [ ] Email de rappel de tâche
 - [ ] Email d'échéance approchant
 
 #### 5.3 Sidebar
+
 - [ ] Ajouter "Équipe" dans le menu
 - [ ] Ajouter "Mes Tâches" dans le menu
 - [ ] Badge avec nombre de tâches en attente
@@ -642,12 +670,14 @@ CREATE POLICY "Members can update tasks"
 ### Phase 6 : Tests et Documentation (Jour 15)
 
 #### 6.1 Tests
+
 - [ ] Tests unitaires des hooks
 - [ ] Tests d'intégration des composants
 - [ ] Tests des RLS policies
 - [ ] Tests end-to-end des flux
 
 #### 6.2 Documentation
+
 - [ ] Documentation utilisateur
 - [ ] Documentation développeur
 - [ ] Guide d'utilisation
@@ -738,10 +768,10 @@ export const useStoreMembers = (storeId: string) => {
         .select('*, user:user_id(*)')
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data;
-    }
+    },
   });
 };
 ```
@@ -752,7 +782,7 @@ export const useStoreMembers = (storeId: string) => {
 export const useStoreMemberInvite = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   return useMutation({
     mutationFn: async (data: {
       storeId: string;
@@ -766,8 +796,8 @@ export const useStoreMemberInvite = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['store-members']);
-      toast({ title: "Invitation envoyée" });
-    }
+      toast({ title: 'Invitation envoyée' });
+    },
   });
 };
 ```
@@ -775,10 +805,7 @@ export const useStoreMemberInvite = () => {
 ### 3. useStoreTasks
 
 ```typescript
-export const useStoreTasks = (
-  storeId: string,
-  filters?: TaskFilters
-) => {
+export const useStoreTasks = (storeId: string, filters?: TaskFilters) => {
   return useQuery({
     queryKey: ['store-tasks', storeId, filters],
     queryFn: async () => {
@@ -786,7 +813,7 @@ export const useStoreTasks = (
         .from('store_tasks')
         .select('*, created_by_user:created_by(*), assigned_to_users:assigned_to(*)')
         .eq('store_id', storeId);
-      
+
       // Appliquer les filtres
       if (filters?.status) {
         query = query.eq('status', filters.status);
@@ -795,11 +822,11 @@ export const useStoreTasks = (
         query = query.eq('priority', filters.priority);
       }
       // ...
-      
+
       const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
       return data;
-    }
+    },
   });
 };
 ```
@@ -847,7 +874,7 @@ describe('useStoreMembers', () => {
   it('should fetch store members', async () => {
     // Test
   });
-  
+
   it('should handle errors', async () => {
     // Test
   });
@@ -862,7 +889,7 @@ describe('StoreMembersList', () => {
   it('should display members list', () => {
     // Test
   });
-  
+
   it('should allow inviting new members', () => {
     // Test
   });
@@ -920,6 +947,7 @@ describe('StoreMembersList', () => {
 Cette analyse couvre tous les aspects nécessaires pour implémenter un système complet de gestion d'équipe pour les vendeurs. L'implémentation doit être progressive, en commençant par les fonctionnalités de base (invitation, tâches simples) puis en ajoutant les fonctionnalités avancées.
 
 **Priorités** :
+
 1. **Critique** : Base de données, RLS, hooks de base
 2. **Important** : UI de base, invitations, création de tâches
 3. **Souhaitable** : Analytics, workflows, intégrations
@@ -929,4 +957,3 @@ Cette analyse couvre tous les aspects nécessaires pour implémenter un système
 **Document créé le** : 2 Février 2025  
 **Dernière mise à jour** : 2 Février 2025  
 **Version** : 1.0
-

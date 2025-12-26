@@ -50,14 +50,10 @@ supabase db execute --file FIX_GET_USER_PRODUCT_RECOMMENDATIONS.sql
 ## 🆘 Si Problème
 
 Vérifier que les tables suivantes existent :
+
 - `orders`
 - `order_items`
 - `products`
 - `stores`
 
 Si elles n'existent pas, exécuter les migrations manquantes d'abord.
-
-
-
-
-

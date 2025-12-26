@@ -28,6 +28,7 @@
 L'intégration Moneroo est **fonctionnelle mais nécessite des améliorations significatives** pour être production-ready et professionnelle.
 
 **Points Positifs** ✅:
+
 - Architecture modulaire bien structurée
 - Gestion d'erreurs robuste avec classes d'erreurs dédiées
 - Support complet des fonctionnalités (paiements, remboursements, annulations, webhooks)
@@ -36,6 +37,7 @@ L'intégration Moneroo est **fonctionnelle mais nécessite des améliorations si
 - Logging détaillé
 
 **Points à Améliorer** ⚠️:
+
 - Utilisation excessive de `any` (TypeScript)
 - Gestion d'erreurs incohérente dans certains endroits
 - Pas de retry automatique pour les appels API
@@ -109,6 +111,7 @@ Moneroo Integration
 **Score**: 8/10
 
 #### ✅ Points Forts
+
 - Gestion d'erreurs exhaustive avec extraction détaillée
 - Timeout configuré (30s)
 - Support de toutes les actions Moneroo
@@ -117,6 +120,7 @@ Moneroo Integration
 #### ⚠️ Problèmes Identifiés
 
 **1. Utilisation excessive de `any`**
+
 ```typescript
 // ❌ Ligne 97, 100, 114, etc.
 let errorBody: any = null;
@@ -124,6 +128,7 @@ if ((error as any)?.context instanceof Response) {
 ```
 
 **Recommandation**: Créer des interfaces TypeScript pour les erreurs Supabase
+
 ```typescript
 interface SupabaseError {
   context?: Response | Record<string, unknown>;
@@ -134,23 +139,27 @@ interface SupabaseError {
 ```
 
 **2. Timeout fixe non configurable**
+
 ```typescript
 // ❌ Ligne 79
 const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 secondes timeout
 ```
 
 **Recommandation**: Rendre configurable via paramètre ou env variable
+
 ```typescript
 const TIMEOUT_MS = parseInt(import.meta.env.VITE_MONEROO_TIMEOUT_MS || '30000', 10);
 ```
 
 **3. Pas de retry automatique**
+
 - Les erreurs réseau ne sont pas retentées automatiquement
 - Pas de backoff exponentiel
 
 **Recommandation**: Implémenter un système de retry avec backoff exponentiel
 
 **4. Logging excessif en production**
+
 - Beaucoup de `logger.info` qui peuvent polluer les logs en production
 
 **Recommandation**: Utiliser des niveaux de log appropriés (debug, info, warn, error)
@@ -162,6 +171,7 @@ const TIMEOUT_MS = parseInt(import.meta.env.VITE_MONEROO_TIMEOUT_MS || '30000', 
 **Score**: 7.5/10
 
 #### ✅ Points Forts
+
 - Validation complète des paramètres
 - Gestion des transactions dans la base de données
 - Support des métadonnées
@@ -170,6 +180,7 @@ const TIMEOUT_MS = parseInt(import.meta.env.VITE_MONEROO_TIMEOUT_MS || '30000', 
 #### ⚠️ Problèmes Identifiés
 
 **1. Gestion d'erreurs incohérente**
+
 ```typescript
 // ❌ Ligne 206 - Utilise Error générique au lieu de MonerooError
 throw new Error(userFriendlyMessage);
@@ -178,6 +189,7 @@ throw new Error(userFriendlyMessage);
 **Recommandation**: Utiliser `MonerooValidationError` ou `MonerooError`
 
 **2. Extraction de données fragile**
+
 ```typescript
 // ❌ Ligne 311-313 - Utilise `any` et accès non typé
 const monerooData = (monerooResponse as any).data || monerooResponse;
@@ -185,6 +197,7 @@ const checkoutUrl = monerooData?.checkout_url || (monerooResponse as any).checko
 ```
 
 **Recommandation**: Créer une interface pour la réponse Moneroo
+
 ```typescript
 interface MonerooCheckoutResponse {
   message: string;
@@ -197,11 +210,13 @@ interface MonerooCheckoutResponse {
 ```
 
 **3. Pas de validation du montant minimum/maximum**
+
 - Aucune vérification des limites Moneroo
 
 **Recommandation**: Ajouter validation des montants min/max
 
 **4. Gestion des erreurs de transaction DB**
+
 - Messages d'erreur très verbeux mais pas toujours utiles
 
 **Recommandation**: Simplifier les messages pour l'utilisateur final
@@ -213,6 +228,7 @@ interface MonerooCheckoutResponse {
 **Score**: 9/10
 
 #### ✅ Points Forts
+
 - Hiérarchie d'erreurs bien structurée
 - Codes d'erreur standardisés
 - Helper `parseMonerooError` utile
@@ -220,6 +236,7 @@ interface MonerooCheckoutResponse {
 #### ⚠️ Problèmes Identifiés
 
 **1. Parsing d'erreur basique**
+
 ```typescript
 // ⚠️ Ligne 104-140 - Parsing basé sur des strings
 if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
@@ -228,6 +245,7 @@ if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
 **Recommandation**: Améliorer la détection avec des regex ou des codes d'erreur
 
 **2. Pas de stack trace préservée**
+
 - Les erreurs originales perdent leur stack trace
 
 **Recommandation**: Préserver la stack trace originale
@@ -239,6 +257,7 @@ if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
 **Score**: 8.5/10
 
 #### ✅ Points Forts
+
 - Gestion robuste des réponses Moneroo (JSON, HTML, vide)
 - Parsing d'erreurs détaillé
 - CORS configuré correctement
@@ -247,6 +266,7 @@ if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
 #### ⚠️ Problèmes Identifiés
 
 **1. Gestion du nom client fragile**
+
 ```typescript
 // ⚠️ Ligne 146-179 - Logique complexe pour diviser le nom
 let customerName = (data.customer_name || '').trim();
@@ -256,6 +276,7 @@ let customerName = (data.customer_name || '').trim();
 **Recommandation**: Extraire dans une fonction utilitaire avec tests
 
 **2. Nettoyage des métadonnées répétitif**
+
 ```typescript
 // ⚠️ Ligne 196-214 - Logique de nettoyage répétée
 Object.entries(rawMetadata).forEach(([key, value]) => {
@@ -266,11 +287,13 @@ Object.entries(rawMetadata).forEach(([key, value]) => {
 **Recommandation**: Créer une fonction utilitaire réutilisable
 
 **3. Pas de validation des montants**
+
 - Aucune vérification des limites Moneroo
 
 **Recommandation**: Ajouter validation
 
 **4. Logging excessif**
+
 - Beaucoup de `console.log` qui peuvent être coûteux en production
 
 **Recommandation**: Utiliser un système de log avec niveaux
@@ -282,6 +305,7 @@ Object.entries(rawMetadata).forEach(([key, value]) => {
 **Score**: 9/10
 
 #### ✅ Points Forts
+
 - Validation de signature HMAC-SHA256
 - Vérification d'idempotence
 - Validation du montant (sécurité)
@@ -291,6 +315,7 @@ Object.entries(rawMetadata).forEach(([key, value]) => {
 #### ⚠️ Problèmes Identifiés
 
 **1. Fonction RPC manquante**
+
 ```typescript
 // ⚠️ Ligne 162 - Appelle une fonction RPC qui n'existe peut-être pas
 const { data: alreadyProcessed } = await supabase.rpc('is_webhook_already_processed', {
@@ -299,6 +324,7 @@ const { data: alreadyProcessed } = await supabase.rpc('is_webhook_already_proces
 **Recommandation**: Vérifier que la fonction existe dans les migrations
 
 **2. Tolérance de montant fixe**
+
 ```typescript
 // ⚠️ Ligne 193 - Tolérance de 1 XOF fixe
 const tolerance = 1;
@@ -307,6 +333,7 @@ const tolerance = 1;
 **Recommandation**: Rendre configurable ou basée sur le pourcentage
 
 **3. Pas de rate limiting**
+
 - Pas de protection contre les webhooks malveillants
 
 **Recommandation**: Ajouter rate limiting
@@ -318,6 +345,7 @@ const tolerance = 1;
 **Score**: 9.5/10
 
 #### ✅ Points Forts
+
 - Comparaison constante dans le temps (constant-time)
 - Support de différents formats de signature
 - Gestion d'erreurs appropriée
@@ -333,6 +361,7 @@ const tolerance = 1;
 **Score**: 8/10
 
 #### ✅ Points Forts
+
 - Validation complète
 - Mise à jour des entités associées
 - Gestion des erreurs API
@@ -340,6 +369,7 @@ const tolerance = 1;
 #### ⚠️ Problèmes Identifiés
 
 **1. Logique de fallback complexe**
+
 ```typescript
 // ⚠️ Ligne 78-104 - Logique de fallback si l'API échoue
 try {
@@ -358,6 +388,7 @@ try {
 **Score**: 8.5/10
 
 #### ✅ Points Forts
+
 - Comparaison complète (montant, statut, devise)
 - Mise à jour automatique des divergences
 - Rapport détaillé
@@ -365,6 +396,7 @@ try {
 #### ⚠️ Problèmes Identifiés
 
 **1. Pause fixe entre requêtes**
+
 ```typescript
 // ⚠️ Ligne 232 - Pause de 100ms fixe
 await new Promise(resolve => setTimeout(resolve, 100));
@@ -373,6 +405,7 @@ await new Promise(resolve => setTimeout(resolve, 100));
 **Recommandation**: Rendre configurable ou utiliser un rate limiter
 
 **2. Pas de pagination**
+
 - Limite fixe de 100 transactions
 
 **Recommandation**: Implémenter la pagination
@@ -384,6 +417,7 @@ await new Promise(resolve => setTimeout(resolve, 100));
 **Score**: 8/10
 
 #### ✅ Points Forts
+
 - Statistiques complètes (paiements, revenus, temps, méthodes)
 - Requêtes optimisées
 - Calculs précis
@@ -391,11 +425,13 @@ await new Promise(resolve => setTimeout(resolve, 100));
 #### ⚠️ Problèmes Identifiés
 
 **1. Pas de cache**
+
 - Requêtes répétées pour les mêmes données
 
 **Recommandation**: Ajouter un système de cache (Redis ou mémoire)
 
 **2. Pas de pagination pour les grandes périodes**
+
 - Peut être lent pour des périodes longues
 
 **Recommandation**: Implémenter la pagination ou le streaming
@@ -407,6 +443,7 @@ await new Promise(resolve => setTimeout(resolve, 100));
 **Score**: 7.5/10
 
 #### ✅ Points Forts
+
 - Support multi-canal (in-app, email, SMS)
 - Gestion d'erreurs non-bloquante
 - Templates structurés
@@ -414,6 +451,7 @@ await new Promise(resolve => setTimeout(resolve, 100));
 #### ⚠️ Problèmes Identifiés
 
 **1. Dépendances manquantes**
+
 ```typescript
 // ⚠️ Ligne 308 - Appelle une Edge Function qui n'existe peut-être pas
 await supabase.functions.invoke('send-email', {
@@ -422,6 +460,7 @@ await supabase.functions.invoke('send-email', {
 **Recommandation**: Vérifier que les Edge Functions existent
 
 **2. Pas de queue pour les notifications**
+
 - Les notifications peuvent échouer silencieusement
 
 **Recommandation**: Utiliser une queue (Supabase Queue ou externe)
@@ -431,30 +470,35 @@ await supabase.functions.invoke('send-email', {
 ## 🔴 Problèmes Critiques Identifiés
 
 ### 1. **Utilisation excessive de `any`**
+
 - **Impact**: Perte de sécurité de type, bugs potentiels
 - **Fichiers affectés**: `moneroo-client.ts`, `moneroo-payment.ts`
 - **Priorité**: 🔴 CRITIQUE
 - **Solution**: Créer des interfaces TypeScript pour toutes les réponses API
 
 ### 2. **Pas de retry automatique**
+
 - **Impact**: Échecs temporaires non récupérés
 - **Fichiers affectés**: `moneroo-client.ts`
 - **Priorité**: 🔴 CRITIQUE
 - **Solution**: Implémenter retry avec backoff exponentiel
 
 ### 3. **Timeout fixe non configurable**
+
 - **Impact**: Peut être trop court ou trop long selon le contexte
 - **Fichiers affectés**: `moneroo-client.ts`
 - **Priorité**: 🟡 IMPORTANT
 - **Solution**: Rendre configurable via env variable
 
 ### 4. **Pas de rate limiting**
+
 - **Impact**: Risque de surcharge de l'API Moneroo
 - **Fichiers affectés**: `moneroo-client.ts`, Edge Functions
 - **Priorité**: 🟡 IMPORTANT
 - **Solution**: Implémenter rate limiting côté client et serveur
 
 ### 5. **Fonctions RPC manquantes**
+
 - **Impact**: Erreurs en production si les fonctions n'existent pas
 - **Fichiers affectés**: `moneroo-webhook/index.ts`
 - **Priorité**: 🔴 CRITIQUE
@@ -465,22 +509,27 @@ await supabase.functions.invoke('send-email', {
 ## 🟡 Problèmes Importants
 
 ### 1. **Gestion d'erreurs incohérente**
+
 - Mélange de `Error` générique et `MonerooError`
 - **Solution**: Standardiser sur `MonerooError` et ses sous-classes
 
 ### 2. **Logging excessif en production**
+
 - Trop de logs de debug en production
 - **Solution**: Utiliser des niveaux de log appropriés
 
 ### 3. **Pas de validation des montants min/max**
+
 - Risque de rejet par Moneroo
 - **Solution**: Ajouter validation selon la documentation Moneroo
 
 ### 4. **Pas de cache pour les statistiques**
+
 - Requêtes répétées coûteuses
 - **Solution**: Implémenter cache (Redis ou mémoire)
 
 ### 5. **Pas de tests**
+
 - Aucun test unitaire ou d'intégration
 - **Solution**: Ajouter tests avec Jest/Vitest
 
@@ -489,11 +538,13 @@ await supabase.functions.invoke('send-email', {
 ## 💡 Améliorations Recommandées
 
 ### 1. **TypeScript Strict**
+
 - Remplacer tous les `any` par des types explicites
 - Créer des interfaces pour toutes les réponses API
 - Utiliser des types génériques où approprié
 
 ### 2. **Système de Retry**
+
 ```typescript
 async function callWithRetry<T>(
   fn: () => Promise<T>,
@@ -505,6 +556,7 @@ async function callWithRetry<T>(
 ```
 
 ### 3. **Configuration Centralisée**
+
 ```typescript
 export const MONEROO_CONFIG = {
   timeout: parseInt(import.meta.env.VITE_MONEROO_TIMEOUT_MS || '30000', 10),
@@ -515,6 +567,7 @@ export const MONEROO_CONFIG = {
 ```
 
 ### 4. **Rate Limiting**
+
 ```typescript
 import { RateLimiter } from './rate-limiter';
 
@@ -525,6 +578,7 @@ const rateLimiter = new RateLimiter({
 ```
 
 ### 5. **Cache pour Statistiques**
+
 ```typescript
 import { Cache } from './cache';
 
@@ -539,6 +593,7 @@ const cache = new Cache({
 ## 🔒 Sécurité
 
 ### ✅ Points Positifs
+
 - Validation de signature webhook (HMAC-SHA256)
 - Comparaison constante dans le temps
 - Validation du montant dans les webhooks
@@ -567,6 +622,7 @@ const cache = new Cache({
 ## ⚡ Performance
 
 ### ✅ Points Positifs
+
 - Requêtes parallèles avec `Promise.all` dans les stats
 - Index sur les colonnes importantes
 - Timeout configuré
@@ -590,6 +646,7 @@ const cache = new Cache({
 ## 📝 Qualité du Code
 
 ### ✅ Points Positifs
+
 - Code bien structuré et modulaire
 - Séparation des responsabilités
 - Documentation JSDoc présente
@@ -677,30 +734,32 @@ const cache = new Cache({
 ## 📊 Métriques
 
 ### Couverture de Code
+
 - **Fichiers analysés**: 15
 - **Lignes de code**: ~3500
 - **Fonctions**: ~80
 - **Classes**: 7
 
 ### Problèmes Identifiés
+
 - **Critiques**: 5
 - **Importants**: 8
 - **Améliorations**: 12
 
 ### Score Global par Composant
 
-| Composant | Score | Statut |
-|-----------|-------|--------|
-| moneroo-client.ts | 8/10 | ✅ Bon |
-| moneroo-payment.ts | 7.5/10 | ✅ Bon |
-| moneroo-errors.ts | 9/10 | ✅ Excellent |
-| Edge Function (moneroo) | 8.5/10 | ✅ Bon |
-| Webhook Handler | 9/10 | ✅ Excellent |
-| Webhook Validator | 9.5/10 | ✅ Excellent |
-| Cancellation | 8/10 | ✅ Bon |
-| Reconciliation | 8.5/10 | ✅ Bon |
-| Stats | 8/10 | ✅ Bon |
-| Notifications | 7.5/10 | ✅ Bon |
+| Composant               | Score  | Statut       |
+| ----------------------- | ------ | ------------ |
+| moneroo-client.ts       | 8/10   | ✅ Bon       |
+| moneroo-payment.ts      | 7.5/10 | ✅ Bon       |
+| moneroo-errors.ts       | 9/10   | ✅ Excellent |
+| Edge Function (moneroo) | 8.5/10 | ✅ Bon       |
+| Webhook Handler         | 9/10   | ✅ Excellent |
+| Webhook Validator       | 9.5/10 | ✅ Excellent |
+| Cancellation            | 8/10   | ✅ Bon       |
+| Reconciliation          | 8.5/10 | ✅ Bon       |
+| Stats                   | 8/10   | ✅ Bon       |
+| Notifications           | 7.5/10 | ✅ Bon       |
 
 **Score Moyen**: **8.35/10**
 
@@ -721,6 +780,7 @@ Avec ces améliorations, l'intégration Moneroo sera **prête pour la production
 ---
 
 **Prochaines Étapes**:
+
 1. Commencer par les problèmes critiques (Phase 1)
 2. Tester chaque amélioration
 3. Documenter les changements
@@ -728,6 +788,4 @@ Avec ces améliorations, l'intégration Moneroo sera **prête pour la production
 
 ---
 
-*Rapport généré automatiquement par Cursor AI*
-
-
+_Rapport généré automatiquement par Cursor AI_

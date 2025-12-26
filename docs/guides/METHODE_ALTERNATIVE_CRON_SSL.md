@@ -25,6 +25,7 @@ SELECT * FROM setup_ssl_expiration_check_cron('YOUR_SERVICE_ROLE_KEY');
 ```
 
 Cette fonction :
+
 - ✅ S'exécute avec les permissions nécessaires
 - ✅ Crée ou met à jour le cron job automatiquement
 - ✅ Retourne les informations du cron job créé
@@ -38,4 +39,3 @@ supabase db execute --file supabase/migrations/20250202_setup_ssl_expiration_che
 ---
 
 **Recommandation :** Utilisez la **Méthode 1 (Dashboard)** si possible, c'est la plus simple et la plus fiable.
-

@@ -9,16 +9,19 @@ Le paiement fonctionne sur **Marketplace** et **Storefront** mais pas sur **Prod
 ### Différence de Logique
 
 **Marketplace.tsx (✅ Fonctionne) :**
+
 ```typescript
 const price = product.promo_price ?? product.price;
 ```
 
 **Storefront.tsx (✅ Fonctionne) :**
+
 ```typescript
 const price = product.promo_price ?? product.price;
 ```
 
 **ProductDetail.tsx (❌ Ne fonctionne pas) :**
+
 ```typescript
 const price = selectedVariantPrice || (displayPriceInfo?.price ?? product.price);
 ```
@@ -26,12 +29,14 @@ const price = selectedVariantPrice || (displayPriceInfo?.price ?? product.price)
 ## ✅ Correction Appliquée
 
 ### Avant
+
 ```typescript
 // Utiliser le prix de la variante sélectionnée ou le prix affiché (promo si disponible)
 const price = selectedVariantPrice || (displayPriceInfo?.price ?? product.price);
 ```
 
 ### Après
+
 ```typescript
 // Utiliser le prix de la variante sélectionnée ou le prix promo/normal (comme Marketplace et Storefront)
 const basePrice = product.promotional_price || product.promo_price || product.price;
@@ -40,9 +45,9 @@ const price = selectedVariantPrice || basePrice;
 // S'assurer que le prix est un nombre valide
 if (!price || isNaN(price) || price <= 0) {
   toast({
-    title: "Erreur",
-    description: "Prix du produit invalide",
-    variant: "destructive",
+    title: 'Erreur',
+    description: 'Prix du produit invalide',
+    variant: 'destructive',
   });
   return;
 }
@@ -58,4 +63,3 @@ if (!price || isNaN(price) || price <= 0) {
 ## ✅ Résultat
 
 Le paiement dans ProductDetail utilise maintenant la même logique que Marketplace et Storefront, garantissant la cohérence et la fiabilité.
-

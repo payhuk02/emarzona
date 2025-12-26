@@ -94,9 +94,3 @@ Si après le redéploiement, l'erreur persiste :
 - **Code à déployer** : `supabase/functions/moneroo/index.ts`
 - **URL Edge Function** : `https://your-project-id.supabase.co/functions/v1/moneroo`
 - **Dashboard Supabase** : https://supabase.com/dashboard/project/your-project-id/functions
-
-
-
-
-
-

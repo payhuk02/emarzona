@@ -22,12 +22,14 @@ L'erreur "Edge Function returned a non-2xx status code" persiste sur ProductDeta
 ## ✅ Corrections Appliquées
 
 ### 1. Fallback pour storeId
+
 ```typescript
 // Utiliser store.id si product.store_id n'est pas disponible
 const storeId = product.store_id || store.id;
 ```
 
 ### 2. S'assurer que store_id est présent lors du chargement
+
 ```typescript
 // S'assurer que store_id est présent (utiliser foundStore.id si manquant)
 const productWithStore = {
@@ -39,6 +41,7 @@ const productWithStore = {
 ```
 
 ### 3. Validation du prix améliorée
+
 ```typescript
 // Utiliser le prix de la variante sélectionnée ou le prix promo/normal
 const basePrice = product.promotional_price || product.promo_price || product.price;
@@ -51,23 +54,26 @@ if (!price || isNaN(Number(price)) || Number(price) <= 0) {
 ```
 
 ### 4. Conversion explicite en nombre
+
 ```typescript
 amount: Number(price), // S'assurer que c'est un nombre
 ```
 
 ### 5. Logs de debug
+
 ```typescript
-logger.log("Initiating Moneroo payment from ProductDetail:", {
+logger.log('Initiating Moneroo payment from ProductDetail:', {
   storeId,
   productId: product.id,
   amount: price,
-  currency: product.currency ?? "XOF",
+  currency: product.currency ?? 'XOF',
   productName: product.name,
   storeSlug: store.slug,
 });
 ```
 
 ### 6. Gestion d'erreurs améliorée
+
 ```typescript
 // S'assurer que setIsPurchasing(false) est appelé dans tous les cas
 if (!user?.email) {
@@ -86,6 +92,7 @@ if (!price || isNaN(Number(price)) || Number(price) <= 0) {
 ## 🎯 Résultat
 
 Le paiement dans ProductDetail utilise maintenant :
+
 - ✅ Même logique de storeId que Marketplace/Storefront
 - ✅ Validation robuste du prix
 - ✅ Conversion explicite en nombre
@@ -93,4 +100,3 @@ Le paiement dans ProductDetail utilise maintenant :
 - ✅ Gestion d'erreurs complète
 
 Le paiement devrait maintenant fonctionner correctement sur la page de détails.
-

@@ -309,4 +309,3 @@ return (
 _Alignement terminé le 2 Février 2025_  
 _Style et informations identiques à la carte digitale ✅_  
 _Éléments spécifiques artiste conservés ✅_
-

@@ -1,4 +1,5 @@
 # Dépendances entre Migrations
+
 **Date:** 1 Février 2025  
 **Version:** 1.0
 
@@ -13,15 +14,18 @@ Ce document décrit les dépendances entre les migrations SQL de la base de donn
 Ces tables doivent être créées en premier car elles sont référencées par de nombreuses autres tables.
 
 #### 1.1. Tables d'Authentification
+
 - **auth.users** (Supabase built-in)
 - **public.profiles** → Dépend de `auth.users`
 - **public.user_roles** → Dépend de `auth.users`
 
 #### 1.2. Tables de Boutiques
+
 - **public.stores** → Dépend de `auth.users` (user_id)
 - **public.customers** → Dépend de `public.stores`
 
 #### 1.3. Tables de Produits de Base
+
 - **public.products** → Dépend de `public.stores`
 - **public.product_variants** → Dépend de `public.products`
 - **public.product_categories** → Table indépendante
@@ -29,17 +33,21 @@ Ces tables doivent être créées en premier car elles sont référencées par d
 ### Niveau 2 : Tables de Commandes
 
 #### 2.1. Commandes
+
 - **public.orders** → Dépend de `public.stores`, `public.customers`
 - **public.order_items** → Dépend de `public.orders`, `public.products`
 
 #### 2.2. Paiements
+
 - **public.payments** → Dépend de `public.orders`
 - **public.transactions** → Dépend de `public.payments`, `public.orders`
 
 ### Niveau 3 : Tables Spécifiques par Type de Produit
 
 #### 3.1. Produits Digitaux
+
 **Ordre d'exécution :**
+
 1. `20251027_digital_products_professional.sql`
    - `digital_products` → Dépend de `products`
    - `digital_product_files` → Dépend de `digital_products`
@@ -57,7 +65,9 @@ Ces tables doivent être créées en premier car elles sont référencées par d
    - `digital_product_version_downloads` → Dépend de `digital_product_versions`, `auth.users`
 
 #### 3.2. Produits Physiques
+
 **Ordre d'exécution :**
+
 1. `20251028_physical_products_professional.sql`
    - `physical_products` → Dépend de `products`
    - `warehouses` → Table indépendante
@@ -80,7 +90,9 @@ Ces tables doivent être créées en premier car elles sont référencées par d
    - `physical_product_images` → Dépend de `physical_products`, `products`
 
 #### 3.3. Services
+
 **Ordre d'exécution :**
+
 1. `20251027_service_bookings_system.sql`
    - `service_products` → Dépend de `products`
    - `service_bookings` → Dépend de `service_products`, `customers`
@@ -104,7 +116,9 @@ Ces tables doivent être créées en premier car elles sont référencées par d
    - `service_package_credits_usage` → Dépend de `service_package_purchases`, `service_bookings`
 
 #### 3.4. Cours en Ligne
+
 **Ordre d'exécution :**
+
 1. `20251027_courses_system_complete.sql`
    - `courses` → Dépend de `products`
    - `course_sections` → Dépend de `courses`
@@ -124,7 +138,9 @@ Ces tables doivent être créées en premier car elles sont référencées par d
    - `cohort_progress_snapshots` → Dépend de `cohort_enrollments`
 
 #### 3.5. Œuvres d'Artistes
+
 **Ordre d'exécution :**
+
 1. `20250128_artist_portfolios_galleries.sql`
    - `artist_portfolios` → Dépend de `stores`
    - `artist_galleries` → Dépend de `artist_portfolios`
@@ -150,24 +166,29 @@ Ces tables doivent être créées en premier car elles sont référencées par d
 ### Niveau 4 : Tables Transversales
 
 #### 4.1. Marketing et Promotions
+
 - **public.promotions** → Dépend de `products`, `stores`
 - **public.collections** → Dépend de `stores`
 - **public.collection_products** → Dépend de `collections`, `products`
 
 #### 4.2. Analytics
+
 - **public.product_analytics** → Dépend de `products`
 - **public.analytics_events** → Dépend de `products`, `auth.users`
 
 #### 4.3. Email et Notifications
+
 - **public.email_templates** → Table indépendante
 - **public.email_campaigns** → Dépend de `stores`
 - **public.email_logs** → Dépend de `email_campaigns`
 
 #### 4.4. Webhooks
+
 - **public.webhooks** → Dépend de `stores`
 - **public.webhook_deliveries** → Dépend de `webhooks`
 
 #### 4.5. Loyalty Program
+
 - **public.loyalty_tiers** → Dépend de `stores`
 - **public.loyalty_points** → Dépend de `loyalty_tiers`, `auth.users`
 - **public.loyalty_rewards** → Dépend de `stores`
@@ -179,6 +200,7 @@ Ces tables doivent être créées en premier car elles sont référencées par d
 Ces migrations corrigent des problèmes dans les migrations précédentes et doivent être exécutées après les migrations qu'elles corrigent.
 
 ### Corrections RLS
+
 - `20250130_rls_critical_tables_phase1.sql` → Après création des tables de base
 - `20250130_rls_products_marketing_phase2.sql` → Après création des tables de produits
 - `20250130_rls_affiliates_courses_products_phase3.sql` → Après création des tables de cours
@@ -187,12 +209,14 @@ Ces migrations corrigent des problèmes dans les migrations précédentes et doi
 - `20250130_rls_phase4c_complete_policies.sql` → Finalisation des politiques RLS
 
 ### Corrections owner_id → user_id
+
 - `20250201_fix_emailing_owner_id_to_user_id.sql` → Après les migrations email
 - `20250131_fix_warranty_user_id_final_v2.sql` → Après `20250131_warranty_system.sql`
 - `20250131_fix_warranty_user_id_final.sql` → Alternative à la version v2
 - `20250131_fix_warranty_user_id_complete.sql` → Version complète
 
 ### Corrections de Colonnes
+
 - `20250131_fix_calendar_integrations_service_id.sql` → Après `20250131_service_calendar_integrations.sql`
 - `20250131_fix_all_migration_errors.sql` → Corrections générales
 - `20250131_fix_final_all_errors.sql` → Corrections finales
@@ -200,16 +224,19 @@ Ces migrations corrigent des problèmes dans les migrations précédentes et doi
 ## 📊 Ordre d'Exécution Recommandé
 
 ### Phase 1 : Fondations
+
 1. Tables d'authentification (Supabase built-in)
 2. `20250122_fix_profiles_table.sql`
 3. Tables de stores et customers
 4. Tables de products de base
 
 ### Phase 2 : Commandes et Paiements
+
 1. Tables orders et order_items
 2. Tables payments et transactions
 
 ### Phase 3 : Produits Spécifiques (peuvent être exécutés en parallèle)
+
 1. Produits digitaux (toutes les migrations)
 2. Produits physiques (toutes les migrations)
 3. Services (toutes les migrations)
@@ -217,6 +244,7 @@ Ces migrations corrigent des problèmes dans les migrations précédentes et doi
 5. Artistes (toutes les migrations)
 
 ### Phase 4 : Tables Transversales
+
 1. Marketing et promotions
 2. Analytics
 3. Email et notifications
@@ -224,6 +252,7 @@ Ces migrations corrigent des problèmes dans les migrations précédentes et doi
 5. Loyalty program
 
 ### Phase 5 : Corrections et Optimisations
+
 1. Corrections RLS
 2. Corrections owner_id → user_id
 3. Corrections de colonnes
@@ -232,6 +261,7 @@ Ces migrations corrigent des problèmes dans les migrations précédentes et doi
 ## 🔍 Vérification des Dépendances
 
 Pour vérifier qu'une migration peut être exécutée, vérifier que :
+
 1. Toutes les tables référencées dans les `REFERENCES` existent
 2. Toutes les colonnes référencées dans les `JOIN` existent
 3. Toutes les fonctions référencées existent
@@ -252,4 +282,3 @@ Pour vérifier qu'une migration peut être exécutée, vérifier que :
 ## 🚀 Script d'Exécution Automatique
 
 Un script pourrait être créé pour exécuter les migrations dans le bon ordre, mais cela dépasse le cadre de ce document. Supabase gère automatiquement l'ordre d'exécution basé sur les noms de fichiers (ordre lexicographique).
-

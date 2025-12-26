@@ -5,6 +5,7 @@
 ### 1. Modales vers BottomSheet
 
 #### ✅ CreateProductDialog (`src/components/products/CreateProductDialog.tsx`)
+
 - **Avant :** Dialog classique uniquement
 - **Après :** BottomSheet sur mobile, Dialog sur desktop
 - **Changements :**
@@ -14,6 +15,7 @@
   - Structure modulaire avec `formContent` réutilisable
 
 #### ✅ CreateCustomerDialog (`src/components/customers/CreateCustomerDialog.tsx`)
+
 - **Avant :** Dialog classique uniquement
 - **Après :** BottomSheet sur mobile, Dialog sur desktop
 - **Changements :**
@@ -23,6 +25,7 @@
   - Boutons responsive (full-width sur mobile)
 
 #### ✅ CreatePromotionDialog (`src/components/promotions/CreatePromotionDialog.tsx`)
+
 - **Avant :** Dialog classique uniquement
 - **Après :** BottomSheet sur mobile, Dialog sur desktop
 - **Changements :**
@@ -33,6 +36,7 @@
   - Boutons responsive (full-width sur mobile)
 
 #### ✅ WithdrawalRequestDialog (`src/components/store/WithdrawalRequestDialog.tsx`)
+
 - **Avant :** Dialog classique uniquement
 - **Après :** BottomSheet sur mobile, Dialog sur desktop
 - **Changements :**
@@ -43,6 +47,7 @@
   - Boutons responsive (full-width sur mobile)
 
 #### ✅ EditProductDialog (`src/components/products/EditProductDialog.tsx`)
+
 - **Avant :** Dialog classique uniquement
 - **Après :** BottomSheet sur mobile, Dialog sur desktop
 - **Changements :**
@@ -54,6 +59,7 @@
 ### 2. Formulaires vers MobileFormField
 
 #### ✅ CreateProductDialog - Champs migrés
+
 - Nom du produit
 - Prix (XOF)
 - Catégorie
@@ -61,6 +67,7 @@
 - Description (textarea)
 
 #### ✅ CreateCustomerDialog - Champs migrés
+
 - Nom
 - Email
 - Téléphone
@@ -70,6 +77,7 @@
 - Notes (textarea)
 
 #### ✅ EditProductDialog - Champs migrés
+
 - Nom du produit
 - Prix (XOF)
 - Catégorie
@@ -78,6 +86,7 @@
 - Switch produit actif (conservé)
 
 #### ✅ CreatePromotionDialog - Champs migrés
+
 - Code promo (Input standard avec validation spéciale)
 - Description (textarea)
 - Type de réduction (select)
@@ -90,6 +99,7 @@
 - Preview toggle (conservé)
 
 #### ✅ KYC Form - Champs migrés
+
 - Nom complet
 - Date de naissance
 - Adresse complète
@@ -99,12 +109,14 @@
 - Fichiers (conservés en Input standard)
 
 #### ✅ Auth Form - Champs migrés
+
 - Email (login)
 - Email (signup)
 - Nom (signup)
 - Mot de passe (conservés avec show/hide button)
 
 #### ✅ CreatePromotionDialog - Champs migrés
+
 - Description (textarea)
 - Type de réduction (select)
 - Valeur de la réduction (number)
@@ -114,12 +126,14 @@
 - Code promo (conservé en Input standard avec validation)
 
 #### ✅ ContactForm - Champs migrés
+
 - Nom complet
 - Email
 - Sujet
 - Message (textarea)
 
 #### ✅ WithdrawalRequestDialog - Champs migrés
+
 - Montant (number avec validation)
 - Mobile Money: Téléphone, Nom complet
 - Bank Card: Numéro de carte, Nom du titulaire
@@ -129,6 +143,7 @@
 ### 3. Tableaux vers MobileTableCard
 
 #### ✅ AdminProducts (`src/pages/admin/AdminProducts.tsx`)
+
 - **Avant :** Tableau uniquement (non responsive)
 - **Après :** Cartes sur mobile, tableau sur desktop
 - **Changements :**
@@ -138,6 +153,7 @@
   - Affichage conditionnel selon device
 
 #### ✅ AdminShipping (`src/pages/admin/AdminShipping.tsx`)
+
 - **Avant :** Tableau uniquement (non responsive)
 - **Après :** Cartes sur mobile, tableau sur desktop
 - **Changements :**
@@ -146,6 +162,7 @@
   - Rendu conditionnel des données complexes (order, store)
 
 #### ✅ OrdersTable (`src/components/orders/OrdersTable.tsx`)
+
 - **Avant :** Tableau uniquement (non responsive)
 - **Après :** Cartes sur mobile, tableau sur desktop
 - **Changements :**
@@ -155,6 +172,7 @@
   - Actions intégrées dans chaque carte
 
 **Colonnes configurées :**
+
 - Nom (priority: high)
 - Boutique (priority: high)
 - Prix (priority: high) - avec formatage
@@ -164,6 +182,7 @@
 ### 4. Images optimisées
 
 #### ✅ ProductCard (`src/components/storefront/ProductCard.tsx`)
+
 - **Avant :** Image standard
 - **Après :** Lazy loading ajouté
 - **Note :** Utilise déjà `ResponsiveProductImage` (composant optimisé)
@@ -181,6 +200,7 @@
 ### Priorité HAUTE
 
 ✅ **TERMINÉ :**
+
 1. ✅ **EditProductDialog** - Migré vers BottomSheet + MobileFormField
 2. ✅ **KYC Form** - Migré vers MobileFormField
 3. ✅ **Auth Form** - Migré vers MobileFormField (champs principaux)
@@ -188,6 +208,7 @@
 ### Priorité MOYENNE
 
 ✅ **TERMINÉ :**
+
 1. ✅ **AdminShipping** - Migré vers MobileTableCard
 2. ✅ **OrdersTable** - Migré vers MobileTableCard
 3. ✅ **CreatePromotionDialog** - Migré vers BottomSheet + MobileFormField
@@ -229,27 +250,27 @@
 
 ```tsx
 // 1. Importer les composants
-import { BottomSheet, BottomSheetContent } from "@/components/ui/bottom-sheet";
-import { useResponsiveModal } from "@/hooks/use-responsive-modal";
+import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 
 // 2. Utiliser le hook
 const { useBottomSheet } = useResponsiveModal();
 
 // 3. Créer le contenu réutilisable
-const formContent = (
-  <form>...</form>
-);
+const formContent = <form>...</form>;
 
 // 4. Rendre conditionnellement
-{useBottomSheet ? (
-  <BottomSheet>
-    <BottomSheetContent>{formContent}</BottomSheetContent>
-  </BottomSheet>
-) : (
-  <Dialog>
-    <DialogContent>{formContent}</DialogContent>
-  </Dialog>
-)}
+{
+  useBottomSheet ? (
+    <BottomSheet>
+      <BottomSheetContent>{formContent}</BottomSheetContent>
+    </BottomSheet>
+  ) : (
+    <Dialog>
+      <DialogContent>{formContent}</DialogContent>
+    </Dialog>
+  );
+}
 ```
 
 ### Pattern pour formulaires
@@ -299,4 +320,3 @@ const isMobile = useIsMobile();
 3. Transformer les tableaux restants
 4. Optimiser toutes les images
 5. Tests sur vrais devices
-

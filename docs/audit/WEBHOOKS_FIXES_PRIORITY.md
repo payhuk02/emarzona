@@ -1,4 +1,5 @@
 # 🔧 CORRECTIONS PRIORITAIRES - SYSTÈME WEBHOOKS
+
 ## Guide Technique de Correction
 
 ---
@@ -30,7 +31,7 @@ async function signPayload(payload: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
   const messageData = encoder.encode(payload);
-  
+
   const key = await crypto.subtle.importKey(
     'raw',
     keyData,
@@ -38,7 +39,7 @@ async function signPayload(payload: string, secret: string): Promise<string> {
     false,
     ['sign']
   );
-  
+
   const signature = await crypto.subtle.sign('HMAC', key, messageData);
   const hashArray = Array.from(new Uint8Array(signature));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -178,17 +179,18 @@ SELECT cron.schedule(
    - Supprimer `digital_product_webhooks` et `physical_product_webhooks`
 
 2. **Migrer les données:**
+
    ```sql
    -- Migrer webhooks digitaux
    INSERT INTO webhooks (
      store_id, url, secret, events, status, ...
    )
-   SELECT 
-     store_id, url, secret_key, events, 
+   SELECT
+     store_id, url, secret_key, events,
      CASE WHEN is_active THEN 'active' ELSE 'inactive' END,
      ...
    FROM digital_product_webhooks;
-   
+
    -- Migrer webhooks physiques
    INSERT INTO webhooks (...)
    SELECT ... FROM physical_product_webhooks;
@@ -234,13 +236,13 @@ export async function triggerWebhook(
     p_event_type: eventType,
     p_payload: payload,
   });
-  
+
   // Optionnel: Appeler l'Edge Function immédiatement (non bloquant)
   if (!error) {
     fetch(`${SUPABASE_URL}/functions/v1/webhook-delivery`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ delivery_id: null }), // Traiter tous les pending
@@ -265,25 +267,25 @@ export async function triggerWebhook(
 ```typescript
 interface StandardWebhookPayload {
   // Identifiants
-  id: string;                    // delivery_id (unique)
-  event: WebhookEventType;      // Type d'événement
-  event_id: string;             // ID de l'entité (order.id, etc.)
-  
+  id: string; // delivery_id (unique)
+  event: WebhookEventType; // Type d'événement
+  event_id: string; // ID de l'entité (order.id, etc.)
+
   // Timestamps
-  timestamp: string;             // ISO 8601
-  triggered_at: string;          // ISO 8601
-  
+  timestamp: string; // ISO 8601
+  triggered_at: string; // ISO 8601
+
   // Données
   data: {
     // Données spécifiques à l'événement
     [key: string]: any;
   };
-  
+
   // Métadonnées
   metadata?: {
-    version: string;             // Version de l'API (ex: "1.0")
-    store_id?: string;          // ID du store
-    attempt?: number;           // Numéro de tentative
+    version: string; // Version de l'API (ex: "1.0")
+    store_id?: string; // ID du store
+    attempt?: number; // Numéro de tentative
   };
 }
 ```
@@ -304,7 +306,7 @@ interface StandardWebhookPayload {
       "customer_id": "customer-uuid",
       "order_number": "ORD-12345",
       "status": "pending",
-      "total_amount": 100.00,
+      "total_amount": 100.0,
       "currency": "XOF",
       "payment_status": "pending",
       "created_at": "2025-01-28T10:30:00Z"
@@ -315,8 +317,8 @@ interface StandardWebhookPayload {
         "product_id": "product-uuid",
         "product_type": "physical",
         "quantity": 2,
-        "unit_price": 50.00,
-        "total_price": 100.00
+        "unit_price": 50.0,
+        "total_price": 100.0
       }
     ]
   },
@@ -363,7 +365,7 @@ async function checkRateLimit(
   const key = `webhook:${webhookId}`;
   const now = Date.now();
   const state = rateLimitCache.get(key);
-  
+
   if (!state || now > state.resetAt) {
     // Nouvelle fenêtre
     rateLimitCache.set(key, {
@@ -372,11 +374,11 @@ async function checkRateLimit(
     });
     return true;
   }
-  
+
   if (state.count >= rateLimitPerMinute) {
     return false; // Rate limit dépassé
   }
-  
+
   state.count++;
   return true;
 }
@@ -394,7 +396,7 @@ async function processDelivery(...) {
     });
     return;
   }
-  
+
   // Continuer avec l'envoi...
 }
 ```
@@ -408,11 +410,11 @@ async function processDelivery(...) {
 ```sql
 -- Ajouter contrainte unique pour éviter les doublons
 ALTER TABLE webhook_deliveries
-ADD CONSTRAINT unique_event_webhook 
+ADD CONSTRAINT unique_event_webhook
 UNIQUE (event_id, webhook_id, event_type);
 
 -- Index pour performance
-CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_event_webhook 
+CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_event_webhook
 ON webhook_deliveries(event_id, webhook_id, event_type);
 ```
 
@@ -438,17 +440,17 @@ BEGIN
       AND webhook_id = v_webhook.id
       AND event_type = p_event_type
     LIMIT 1;
-    
+
     -- Si existe déjà, skip
     IF v_delivery_id IS NOT NULL THEN
       CONTINUE;
     END IF;
-    
+
     -- Créer nouvelle delivery
     INSERT INTO public.webhook_deliveries (...)
     VALUES (...)
     RETURNING id INTO v_delivery_id;
-    
+
     RETURN QUERY SELECT v_webhook.id, v_delivery_id;
   END LOOP;
 END;
@@ -460,18 +462,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ## 📝 CHECKLIST DE MIGRATION
 
 ### Phase 1: Sécurité (Semaine 1)
+
 - [ ] Corriger HMAC dans `webhook-system.ts`
 - [ ] Tester les signatures
 - [ ] Déployer en staging
 - [ ] Valider en production
 
 ### Phase 2: Infrastructure (Semaine 2)
+
 - [ ] Configurer cron job
 - [ ] Tester traitement automatique
 - [ ] Monitorer les deliveries
 - [ ] Ajuster fréquence si nécessaire
 
 ### Phase 3: Unification (Semaine 3-4)
+
 - [ ] Créer migration de données
 - [ ] Migrer webhooks digitaux
 - [ ] Migrer webhooks physiques
@@ -480,6 +485,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - [ ] Supprimer anciens systèmes
 
 ### Phase 4: Améliorations (Mois 2)
+
 - [ ] Implémenter rate limiting
 - [ ] Ajouter idempotence
 - [ ] Standardiser formats
@@ -491,28 +497,31 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ## 🧪 TESTS À EFFECTUER
 
 ### Test HMAC
+
 ```typescript
 // Tester que les signatures sont correctes
 const payload = JSON.stringify({ test: true });
-const secret = "test-secret";
+const secret = 'test-secret';
 const signature = await signPayload(payload, secret);
 // Vérifier que la signature est un hash hex de 64 caractères
 expect(signature).toMatch(/^[a-f0-9]{64}$/);
 ```
 
 ### Test Cron Job
+
 ```sql
 -- Vérifier que le cron job est actif
 SELECT * FROM cron.job WHERE jobname = 'process-webhook-deliveries';
 
 -- Vérifier les exécutions récentes
-SELECT * FROM cron.job_run_details 
+SELECT * FROM cron.job_run_details
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'process-webhook-deliveries')
 ORDER BY start_time DESC
 LIMIT 10;
 ```
 
 ### Test Idempotence
+
 ```typescript
 // Déclencher le même événement deux fois
 await triggerWebhook(storeId, 'order.created', payload);
@@ -527,4 +536,3 @@ expect(deliveries.filter(d => d.event_id === orderId).length).toBe(1);
 
 **Date:** 2025-01-28  
 **Version:** 1.0
-

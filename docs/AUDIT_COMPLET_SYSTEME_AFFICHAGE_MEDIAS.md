@@ -53,6 +53,7 @@ Le système d'affichage des médias est utilisé dans **5 systèmes de messageri
 ### 1.2 Composant Central
 
 **`MediaAttachment`** (`src/components/media/MediaAttachment.tsx`)
+
 - Composant réutilisable pour tous les types de médias
 - Support : Images, Vidéos, Fichiers génériques
 - Gestion d'erreurs avec fallback vers URL signée
@@ -105,6 +106,7 @@ src/
 ### 3.1 MediaAttachment.tsx
 
 **✅ Points Forts :**
+
 - Détection automatique du type de média (image/video/file)
 - Correction automatique des URLs Supabase
 - Fallback intelligent vers URL signée en cas d'erreur
@@ -114,6 +116,7 @@ src/
 - Gestion d'erreurs robuste avec affichage de lien de secours
 
 **⚠️ Points d'Attention :**
+
 - `useEffect` avec dépendances nombreuses (peut causer des re-renders excessifs)
 - Logs de débogage très verbeux (à désactiver en production)
 - La logique de re-render avec `key={displayUrl}` peut causer des problèmes de performance
@@ -123,8 +126,23 @@ src/
 ```typescript
 // Ligne 78 : useEffect avec trop de dépendances
 useEffect(() => {
-  logger.info('MediaAttachment - Component render', { /* ... */ });
-}, [attachment.id, attachment.file_name, attachment.file_type, attachment.file_url, attachment.storage_path, mediaType, correctedUrl, displayUrl, signedUrl, imageError, triedSignedUrl, size]);
+  logger.info('MediaAttachment - Component render', {
+    /* ... */
+  });
+}, [
+  attachment.id,
+  attachment.file_name,
+  attachment.file_type,
+  attachment.file_url,
+  attachment.storage_path,
+  mediaType,
+  correctedUrl,
+  displayUrl,
+  signedUrl,
+  imageError,
+  triedSignedUrl,
+  size,
+]);
 ```
 
 **Recommandation :** Réduire les dépendances ou utiliser `useMemo` pour les valeurs calculées.
@@ -134,6 +152,7 @@ useEffect(() => {
 #### 3.2.1 media-detection.ts
 
 **✅ Points Forts :**
+
 - Détection robuste par extension (prioritaire) et MIME type (fallback)
 - Support de nombreux formats (images, vidéos)
 - Fonctions utilitaires claires (`isImage`, `isVideo`, `isFile`)
@@ -143,11 +162,13 @@ useEffect(() => {
 #### 3.2.2 storage.ts
 
 **✅ Points Forts :**
+
 - Correction automatique des URLs Supabase
 - Extraction du chemin de stockage depuis différentes URL formats
 - Validation des URLs Supabase Storage
 
 **⚠️ Points d'Attention :**
+
 - La fonction `getCorrectedFileUrl` est complexe avec plusieurs fallbacks
 - Pas de gestion d'erreurs explicite si `VITE_SUPABASE_URL` n'est pas défini
 
@@ -167,6 +188,7 @@ if (!supabaseUrl) {
 #### 3.2.3 media.ts
 
 **✅ Points Forts :**
+
 - Tailles standardisées et réutilisables
 - Types TypeScript stricts
 - Documentation claire
@@ -182,11 +204,13 @@ if (!supabaseUrl) {
 #### 4.1.1 useVendorMessaging.ts
 
 **✅ Points Forts :**
+
 - Extraction correcte du `storage_path` depuis l'URL
 - Gestion d'erreurs lors de l'upload
 - Logs appropriés
 
 **⚠️ Points d'Attention :**
+
 - La logique d'extraction du `storage_path` est dupliquée (lignes 464-473)
 - Pourrait utiliser `extractStoragePath` de `storage.ts`
 
@@ -211,6 +235,7 @@ if (urlMatch) {
 #### 4.1.2 useMessaging.ts
 
 **✅ Points Forts :**
+
 - Upload vers le bon bucket (`attachments`)
 - Validation des types et tailles de fichiers
 - Génération d'URLs publiques
@@ -222,11 +247,13 @@ if (urlMatch) {
 #### 4.2.1 VendorMessaging.tsx
 
 **✅ Points Forts :**
+
 - Utilisation correcte de `MediaAttachment`
 - Passage de toutes les propriétés nécessaires
 - Taille appropriée (`medium`)
 
 **⚠️ Points d'Attention :**
+
 - Upload vers `attachments` bucket ✅
 - Génération d'URL avec fallback manuel (lignes 162-201)
 - Logique complexe pour la construction d'URLs
@@ -247,6 +274,7 @@ if (urlError || !urlData?.publicUrl) {
 #### 4.2.2 OrderMessaging.tsx
 
 **⚠️ PROBLÈME CRITIQUE :**
+
 - Upload vers le bucket `message-attachments` (ligne 159)
 - Mais `MediaAttachment` s'attend à des URLs du bucket `attachments`
 - **INCONSISTANCE** qui peut causer des erreurs d'affichage
@@ -256,7 +284,7 @@ if (urlError || !urlData?.publicUrl) {
 ```typescript
 // Ligne 159 : Bucket incorrect
 const { data, error } = await supabase.storage
-  .from('message-attachments')  // ❌ Devrait être 'attachments'
+  .from('message-attachments') // ❌ Devrait être 'attachments'
   .upload(filePath, file);
 ```
 
@@ -265,6 +293,7 @@ const { data, error } = await supabase.storage
 #### 4.2.3 ConversationComponent.tsx
 
 **✅ Points Forts :**
+
 - Utilisation correcte de `MediaAttachment`
 - Taille appropriée (`thumbnail`)
 - Passage de toutes les propriétés
@@ -274,6 +303,7 @@ const { data, error } = await supabase.storage
 #### 4.2.4 ShippingServiceMessages.tsx
 
 **✅ Points Forts :**
+
 - Utilisation correcte de `MediaAttachment`
 - Taille appropriée (`medium`)
 - Passage de toutes les propriétés
@@ -283,6 +313,7 @@ const { data, error } = await supabase.storage
 #### 4.2.5 DisputeDetail.tsx
 
 **⚠️ Points d'Attention :**
+
 - Gère des URLs simples (pas de structure d'attachment complète)
 - Utilise `extractStoragePath` et `detectMediaType` pour inférer les propriétés
 - `file_size` est toujours `0` (inconnu depuis URL)
@@ -296,11 +327,13 @@ const { data, error } = await supabase.storage
 ### 5.1 Bucket `attachments`
 
 **✅ Configuration :**
+
 - Bucket public : `true`
 - Limite de taille : 10 MB
 - Types MIME autorisés : Images, Vidéos, Documents, Archives, Texte
 
 **✅ Politiques RLS :**
+
 - ✅ "Anyone can view attachments" (SELECT)
 - ✅ "Authenticated users can upload attachments" (INSERT)
 - ✅ "Users can update their own attachments" (UPDATE)
@@ -313,6 +346,7 @@ const { data, error } = await supabase.storage
 **✅ Fichier :** `supabase/migrations/20250230_create_attachments_storage_bucket.sql`
 
 **✅ Points Forts :**
+
 - Création du bucket avec `ON CONFLICT DO UPDATE`
 - Politiques RLS complètes
 - Types MIME exhaustifs
@@ -329,7 +363,7 @@ const { data, error } = await supabase.storage
 ✅ **Utilitaires réutilisables** : `media-detection.ts`, `storage.ts`, `media.ts`  
 ✅ **Types TypeScript stricts** : Interfaces claires et bien définies  
 ✅ **Gestion d'erreurs robuste** : Fallback vers URL signée, liens de secours  
-✅ **Logs de débogage** : Facilitent le diagnostic des problèmes  
+✅ **Logs de débogage** : Facilitent le diagnostic des problèmes
 
 ### 6.2 Fonctionnalités
 
@@ -337,13 +371,13 @@ const { data, error } = await supabase.storage
 ✅ **Tailles standardisées** : `thumbnail`, `medium`, `large`  
 ✅ **Détection automatique** : Par extension et MIME type  
 ✅ **Correction d'URLs** : Normalisation automatique des URLs Supabase  
-✅ **Performance** : Lazy loading, décodage asynchrone  
+✅ **Performance** : Lazy loading, décodage asynchrone
 
 ### 6.3 Intégration
 
 ✅ **5 systèmes de messagerie** utilisent le même composant  
 ✅ **Hooks réutilisables** : `useVendorMessaging`, `useMessaging`  
-✅ **Configuration centralisée** : Bucket `attachments` unique  
+✅ **Configuration centralisée** : Bucket `attachments` unique
 
 ---
 
@@ -360,6 +394,7 @@ const { data, error } = await supabase.storage
 **Priorité :** 🔴 **HAUTE**
 
 **Solution :**
+
 ```typescript
 // Avant
 .from('message-attachments')
@@ -371,6 +406,7 @@ const { data, error } = await supabase.storage
 #### ❌ **CRITIQUE 2 : Logique de Génération d'URL Dupliquée**
 
 **Fichiers :**
+
 - `src/pages/vendor/VendorMessaging.tsx` (lignes 162-201)
 - `src/hooks/useVendorMessaging.ts` (lignes 464-473)
 
@@ -489,7 +525,7 @@ const { data, error } = await supabase.storage
 **Fonctionnalités :** 9/10 ✅  
 **Performance :** 7/10 ⚠️  
 **Maintenabilité :** 8/10 ✅  
-**Robustesse :** 8/10 ✅  
+**Robustesse :** 8/10 ✅
 
 **Score Global :** 8.2/10 ✅
 
@@ -504,4 +540,3 @@ Une fois les corrections critiques appliquées, le système sera **production-re
 **Date de l'audit :** 30 Janvier 2025  
 **Auditeur :** Auto (Cursor AI)  
 **Prochaine révision :** Après application des corrections critiques
-

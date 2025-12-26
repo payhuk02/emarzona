@@ -17,7 +17,7 @@ if (mediaType === 'image') {
   if (!isValidUrl || imageError) {
     return <a href={...}>Lien</a>; // Affiche directement un lien
   }
-  
+
   // Cette partie n'était jamais atteinte si isValidUrl était false
   return <img src={displayUrl} ... />;
 }
@@ -71,11 +71,13 @@ if (mediaType === 'image') {
 ## 📊 Résultats Attendus
 
 ### Avant
+
 - ❌ Images affichées comme liens si URL "invalide"
 - ❌ Pas de tentative de chargement
 - ❌ Fallback non utilisé
 
 ### Après
+
 - ✅ Images toujours tentées d'être chargées
 - ✅ Fallback automatique avec URL signée
 - ✅ Lien de secours uniquement si tout échoue
@@ -103,6 +105,7 @@ if (mediaType === 'image') {
 ### Validation d'URL
 
 La fonction `isValidSupabaseStorageUrl()` reste utile pour :
+
 - Logging et debugging
 - Validation préalable (optionnelle)
 - Mais ne doit plus bloquer l'affichage
@@ -114,4 +117,3 @@ La fonction `isValidSupabaseStorageUrl()` reste utile pour :
 **Correction appliquée** : ✅  
 **Tests nécessaires** : ⏳  
 **Impact** : Les images devraient maintenant s'afficher correctement au lieu d'être des liens
-

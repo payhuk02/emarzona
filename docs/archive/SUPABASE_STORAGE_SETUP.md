@@ -33,7 +33,7 @@ ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  bucket_id = 'store-images' 
+  bucket_id = 'store-images'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 ```
@@ -66,7 +66,7 @@ ON storage.objects
 FOR DELETE
 TO authenticated
 USING (
-  bucket_id = 'store-images' 
+  bucket_id = 'store-images'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 ```
@@ -84,11 +84,11 @@ ON storage.objects
 FOR UPDATE
 TO authenticated
 USING (
-  bucket_id = 'store-images' 
+  bucket_id = 'store-images'
   AND auth.uid()::text = (storage.foldername(name))[1]
 )
 WITH CHECK (
-  bucket_id = 'store-images' 
+  bucket_id = 'store-images'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 ```
@@ -175,15 +175,14 @@ Si vous préférez configurer les politiques via l'interface :
 
 ## ✨ Types d'images supportés
 
-| Type | Utilisation | Format recommandé | Taille max |
-|------|-------------|-------------------|------------|
-| `store-logo` | Logo de la boutique | Carré (500x500px) | 2MB |
-| `store-banner` | Bannière de la boutique | Paysage (1920x640px) | 5MB |
-| `product-image` | Image principale produit | Carré ou portrait | 3MB |
-| `product-gallery` | Galerie produit | Variable | 3MB |
-| `avatar` | Photo de profil | Carré (200x200px) | 1MB |
+| Type              | Utilisation              | Format recommandé    | Taille max |
+| ----------------- | ------------------------ | -------------------- | ---------- |
+| `store-logo`      | Logo de la boutique      | Carré (500x500px)    | 2MB        |
+| `store-banner`    | Bannière de la boutique  | Paysage (1920x640px) | 5MB        |
+| `product-image`   | Image principale produit | Carré ou portrait    | 3MB        |
+| `product-gallery` | Galerie produit          | Variable             | 3MB        |
+| `avatar`          | Photo de profil          | Carré (200x200px)    | 1MB        |
 
 ---
 
 **✅ Configuration terminée !** Votre système d'upload d'images est maintenant opérationnel.
-

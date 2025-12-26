@@ -61,8 +61,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY="NOUVELLE_CLÉ_ICI"
 
 ```sql
 -- Vérifier utilisateurs suspects
-SELECT id, email, created_at 
-FROM auth.users 
+SELECT id, email, created_at
+FROM auth.users
 WHERE created_at > NOW() - INTERVAL '7 days'
 ORDER BY created_at DESC;
 
@@ -82,6 +82,7 @@ DELETE FROM auth.users WHERE id = 'SUSPECT_USER_ID';
 ```
 
 **Le script va :**
+
 - ✅ Créer un backup automatique
 - ✅ Installer git-filter-repo si nécessaire
 - ✅ Supprimer `.env` de tout l'historique
@@ -89,6 +90,7 @@ DELETE FROM auth.users WHERE id = 'SUSPECT_USER_ID';
 - ✅ Proposer force push
 
 **⚠️ Après le nettoyage :**
+
 ```bash
 # Vérifier que ça a fonctionné
 git log --all --full-history -- .env
@@ -118,4 +120,3 @@ git push origin main --force
 **⏱️ Temps total estimé : 1h30**
 
 **🔴 Ne pas reporter - Les clés sont actuellement exposées.**
-

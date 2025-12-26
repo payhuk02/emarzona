@@ -65,14 +65,14 @@ Ce guide vous aide à migrer vos produits créés avec des templates V1 vers les
 
 ### Étape 2 : Trouver l'Équivalent V2
 
-| Template V1 | Template V2 Équivalent |
-|-------------|------------------------|
-| E-book Professionnel | Ebook Minimal V2 |
-| Logiciel / Application | Software Modern V2 |
-| Vêtement Mode | Fashion & Apparel V2 |
-| Appareil Électronique | Electronics & Gadgets V2 |
-| Séance de Coaching | Personal Coaching V2 |
-| Formation Technique | Coding Bootcamp V2 |
+| Template V1            | Template V2 Équivalent   |
+| ---------------------- | ------------------------ |
+| E-book Professionnel   | Ebook Minimal V2         |
+| Logiciel / Application | Software Modern V2       |
+| Vêtement Mode          | Fashion & Apparel V2     |
+| Appareil Électronique  | Electronics & Gadgets V2 |
+| Séance de Coaching     | Personal Coaching V2     |
+| Formation Technique    | Coding Bootcamp V2       |
 
 ### Étape 3 : Préparer les Données
 
@@ -142,24 +142,28 @@ Copiez ces informations de V1 vers V2 :
 #### Données Spécifiques
 
 **Produits Physiques :**
+
 - ✅ Variants (taille, couleur, etc.)
 - ✅ Poids et dimensions
 - ✅ Informations d'inventaire
 - ✅ Informations de livraison
 
 **Produits Digitaux :**
+
 - ✅ Types de fichiers
 - ✅ Paramètres de licence
 - ✅ Protection de téléchargement
 - ✅ Versioning
 
 **Services :**
+
 - ✅ Durée
 - ✅ Type de réservation
 - ✅ Localisation
 - ✅ Politique d'annulation
 
 **Cours :**
+
 - ✅ Niveau
 - ✅ Durée
 - ✅ Structure du curriculum
@@ -170,22 +174,27 @@ Copiez ces informations de V1 vers V2 :
 Les templates V2 incluent des sections supplémentaires à configurer :
 
 #### Trust Badges
+
 - Ajouter des badges de confiance pertinents
 - Exemple : "Garantie 30 jours", "Livraison gratuite"
 
 #### Social Proof
+
 - Configurer les preuves sociales
 - Exemple : Achats récents, stock urgent
 
 #### Reviews
+
 - Activer le système de reviews
 - Importer les reviews existantes si disponibles
 
 #### Guarantees
+
 - Ajouter les garanties spécifiques à votre produit
 - Exemple : "Satisfait ou remboursé", "Garantie qualité"
 
 #### Autres Sections
+
 - Configurer les autres sections selon le type de produit
 - Voir `GUIDE_SECTIONS_TEMPLATES_V2.md` pour les détails
 
@@ -250,12 +259,14 @@ Pour l'instant, la migration se fait manuellement en suivant ce guide.
 ## 📝 Checklist de Migration
 
 ### Préparation
+
 - [ ] Identifier le template V1 utilisé
 - [ ] Trouver l'équivalent V2
 - [ ] Préparer toutes les données à migrer
 - [ ] Sauvegarder une copie de l'ancien produit
 
 ### Migration
+
 - [ ] Créer un nouveau produit avec template V2
 - [ ] Copier les données de base
 - [ ] Copier les données spécifiques au type
@@ -263,12 +274,14 @@ Pour l'instant, la migration se fait manuellement en suivant ce guide.
 - [ ] Personnaliser le design
 
 ### Validation
+
 - [ ] Vérifier toutes les informations
 - [ ] Tester l'affichage
 - [ ] Tester les fonctionnalités
 - [ ] Vérifier le processus d'achat
 
 ### Publication
+
 - [ ] Publier le nouveau produit
 - [ ] Gérer l'ancien produit
 - [ ] Mettre à jour les liens si nécessaire
@@ -294,6 +307,7 @@ R : Répétez le processus pour chaque produit. Un outil de migration en masse e
 ### Support
 
 Pour toute question ou problème :
+
 - Consultez `GUIDE_SECTIONS_TEMPLATES_V2.md`
 - Consultez `AUDIT_TEMPLATES_COMPLET_FINAL_2025.md`
 - Contactez le support technique
@@ -302,18 +316,18 @@ Pour toute question ou problème :
 
 ## 📊 Comparaison V1 vs V2
 
-| Fonctionnalité | V1 | V2 |
-|----------------|----|----|
+| Fonctionnalité            | V1  | V2   |
+| ------------------------- | --- | ---- |
 | Sections professionnelles | 0-2 | 6-13 |
-| Trust badges | ❌ | ✅ |
-| Social proof | ❌ | ✅ |
-| Reviews avancées | ❌ | ✅ |
-| Guarantees | ❌ | ✅ |
-| Video content | ❌ | ✅ |
-| Comparison tools | ❌ | ✅ |
-| Design tokens | ❌ | ✅ |
-| Éditeur visuel | ❌ | ✅ |
-| Sauvegarde DB | ❌ | ✅ |
+| Trust badges              | ❌  | ✅   |
+| Social proof              | ❌  | ✅   |
+| Reviews avancées          | ❌  | ✅   |
+| Guarantees                | ❌  | ✅   |
+| Video content             | ❌  | ✅   |
+| Comparison tools          | ❌  | ✅   |
+| Design tokens             | ❌  | ✅   |
+| Éditeur visuel            | ❌  | ✅   |
+| Sauvegarde DB             | ❌  | ✅   |
 
 ---
 
@@ -333,8 +347,3 @@ La migration vers V2 vous permet de :
 **Date de création** : 30 janvier 2025  
 **Version** : 1.0.0  
 **Statut** : ✅ Guide complet
-
-
-
-
-

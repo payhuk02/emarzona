@@ -29,6 +29,7 @@ npm run issues:create:api
 ```
 
 **Ou directement** :
+
 ```powershell
 $env:GH_TOKEN="votre_token"; .\scripts\create-github-issues-api.ps1
 ```
@@ -44,6 +45,7 @@ gh auth login
 ```
 
 **Suivez les instructions** :
+
 1. Choisir "GitHub.com"
 2. Choisir "HTTPS"
 3. Choisir "Login with a web browser"
@@ -63,6 +65,7 @@ Après création, vérifiez sur :
 https://github.com/payhuk02/payhula/issues
 
 Vous devriez voir **13 issues** créées avec :
+
 - ✅ Titres descriptifs
 - ✅ Descriptions complètes
 - ✅ Tâches checklist
@@ -74,10 +77,12 @@ Vous devriez voir **13 issues** créées avec :
 ## 🎯 Issues qui seront créées
 
 ### 🔴 P0 - Critique (2 issues)
+
 1. API FedEx - Implémenter appels réels
 2. API DHL - Implémenter appels réels
 
 ### 🟡 P1 - Haute (7 issues)
+
 3. Dashboard Analytics Services
 4. Commandes Multi-Stores
 5. Paiement et Inscription Cours
@@ -87,6 +92,7 @@ Vous devriez voir **13 issues** créées avec :
 9. Upload Supabase Storage Retours
 
 ### 🟢 P2 - Moyenne (4 issues)
+
 10. Navigation Cohorts
 11. Mark Cart Recovered
 12. Vérification Disponibilité Staff
@@ -95,4 +101,3 @@ Vous devriez voir **13 issues** créées avec :
 ---
 
 **Bon courage ! 🚀**
-

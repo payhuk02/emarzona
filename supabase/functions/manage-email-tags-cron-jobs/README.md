@@ -36,7 +36,7 @@ const response = await fetch(
   {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
   }
@@ -54,7 +54,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -90,4 +90,3 @@ const result = await response.json();
 - `SUPABASE_URL` : URL de votre projet Supabase
 - `SUPABASE_SERVICE_ROLE_KEY` : Clé service role (automatiquement disponible dans Edge Functions)
 - `SUPABASE_ANON_KEY` : Clé anonyme (automatiquement disponible dans Edge Functions)
-

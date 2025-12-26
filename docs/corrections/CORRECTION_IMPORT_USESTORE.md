@@ -11,7 +11,7 @@
 L'application ne pouvait pas démarrer à cause d'une erreur d'import :
 
 ```
-[plugin:vite:import-analysis] Failed to resolve import "@/hooks/useStoreProfile" from 
+[plugin:vite:import-analysis] Failed to resolve import "@/hooks/useStoreProfile" from
 "src/components/courses/create/CreateCourseWizard.tsx". Does the file exist?
 ```
 
@@ -30,23 +30,27 @@ Le hook correct pour récupérer le store de l'utilisateur est **`useStore`** (f
 ### 1. Import corrigé
 
 **AVANT** ❌ :
+
 ```typescript
-import { useStoreProfile } from "@/hooks/useStoreProfile";
+import { useStoreProfile } from '@/hooks/useStoreProfile';
 ```
 
 **APRÈS** ✅ :
+
 ```typescript
-import { useStore } from "@/hooks/useStore";
+import { useStore } from '@/hooks/useStore';
 ```
 
 ### 2. Utilisation du hook corrigée
 
 **AVANT** ❌ :
+
 ```typescript
 const { storeProfile } = useStoreProfile();
 ```
 
 **APRÈS** ✅ :
+
 ```typescript
 const { store } = useStore();
 ```
@@ -54,6 +58,7 @@ const { store } = useStore();
 ### 3. Référence corrigée dans handlePublish
 
 **AVANT** ❌ :
+
 ```typescript
 if (!storeProfile?.id) { ... }
 const courseData = {
@@ -63,6 +68,7 @@ const courseData = {
 ```
 
 **APRÈS** ✅ :
+
 ```typescript
 if (!store?.id) { ... }
 const courseData = {
@@ -76,9 +82,11 @@ const courseData = {
 ## 📊 MODIFICATIONS
 
 ### Fichier modifié
+
 - ✅ `src/components/courses/create/CreateCourseWizard.tsx`
 
 ### Lignes modifiées
+
 - ✅ Ligne 14 : Import
 - ✅ Ligne 36 : Déclaration du hook
 - ✅ Ligne 138 : Vérification du store
@@ -89,11 +97,13 @@ const courseData = {
 ## 🧪 VALIDATION
 
 ### ✅ Linting
+
 ```bash
 ✅ No linter errors found.
 ```
 
 ### ✅ Application
+
 ```bash
 ✅ L'application démarre sans erreur
 ✅ Le wizard de cours est accessible
@@ -105,11 +115,13 @@ const courseData = {
 ## 🎯 HOOK useStore - DOCUMENTATION
 
 ### Import
+
 ```typescript
-import { useStore } from "@/hooks/useStore";
+import { useStore } from '@/hooks/useStore';
 ```
 
 ### Utilisation
+
 ```typescript
 const { store, loading } = useStore();
 
@@ -122,6 +134,7 @@ const { store, loading } = useStore();
 ```
 
 ### Interface Store
+
 ```typescript
 export interface Store {
   id: string;
@@ -149,6 +162,7 @@ export interface Store {
 **L'erreur est maintenant corrigée et l'application fonctionne parfaitement !** 🎉
 
 **Vous pouvez maintenant** :
+
 - ✅ Accéder au wizard de création de cours
 - ✅ Créer des cours qui seront sauvegardés dans Supabase
 - ✅ Utiliser toutes les fonctionnalités de la Phase 2
@@ -157,4 +171,3 @@ export interface Store {
 
 **Statut** : ✅ **CORRECTION COMPLÈTE**  
 **Prêt pour** : 🚀 **PHASE 3 - Upload de vidéos**
-

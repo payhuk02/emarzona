@@ -9,6 +9,7 @@
 ## 📊 RÉSUMÉ EXÉCUTIF
 
 ### Score Actuel : **78% / 100** 🟡
+
 ### Score Cible : **92% / 100** ✅
 
 **Amélioration Attendue** : **+14 points** (+18%)
@@ -20,12 +21,14 @@
 ### Problème Identifié
 
 **Composants NON optimisés** (pas de React.memo) :
+
 - ❌ `DigitalProductCard` - Re-render à chaque changement parent
 - ❌ `PhysicalProductCard` - Re-render à chaque changement parent
 - ❌ `ServiceCard` - Re-render à chaque changement parent
 - ❌ `ProductCardDashboard` - Re-render à chaque changement parent
 
-**Impact** : 
+**Impact** :
+
 - Re-renders inutiles lors du scroll
 - Re-renders inutiles lors des filtres
 - Performance dégradée avec 100+ items
@@ -74,12 +77,14 @@ DigitalProductCard.displayName = 'DigitalProductCard';
 ### Problème Identifié
 
 **Images NON optimisées** :
+
 - ⚠️ Seulement 19 utilisations de `loading="lazy"` sur ~500+ images
 - ⚠️ Pas d'utilisation systématique de `LazyImage`
 - ⚠️ Pas d'optimisation WebP/AVIF
 - ⚠️ Pas de `srcset` responsive
 
 **Impact** :
+
 - Images chargées immédiatement (même hors viewport)
 - Taille images non optimisée
 - Pas de placeholders pendant chargement
@@ -99,8 +104,8 @@ DigitalProductCard.displayName = 'DigitalProductCard';
 
 ```typescript
 // Avant
-<img 
-  src={product.image_url} 
+<img
+  src={product.image_url}
   alt={product.name}
   className="w-full h-auto"
 />
@@ -111,7 +116,7 @@ import { getImageAttributesForPreset } from '@/lib/image-transform';
 
 const imageAttrs = getImageAttributesForPreset(product.image_url, 'productImage');
 
-<LazyImage 
+<LazyImage
   {...imageAttrs}
   alt={product.name}
   placeholder="skeleton"
@@ -129,12 +134,14 @@ const imageAttrs = getImageAttributesForPreset(product.image_url, 'productImage'
 ### Problème Identifié
 
 **Listes NON virtualisées** :
+
 - ❌ `Products.tsx` - Liste principale non virtualisée
 - ❌ `Orders.tsx` - Liste commandes non virtualisée
 - ❌ `ServicesList.tsx` - Liste services non virtualisée
 - ✅ `DigitalProductsListVirtualized` existe mais peu utilisé
 
 **Impact** :
+
 - Performance dégradée avec 100+ items
 - Scroll lag sur mobile
 - Consommation mémoire élevée
@@ -202,6 +209,7 @@ export const ProductsListVirtualized = ({ products }) => {
 ### Problème Identifié
 
 **Animations Non Optimisées** :
+
 - ⚠️ Certaines animations utilisent `top/left` au lieu de `transform`
 - ⚠️ Durées d'animation pas toujours réduites sur mobile
 - ⚠️ Pas de vérification FPS
@@ -240,6 +248,7 @@ export const ProductsListVirtualized = ({ products }) => {
 ### Problème Identifié
 
 **Bundle Size** :
+
 - ⚠️ Bundle initial ~800KB (cible: <500KB)
 - ⚠️ Certaines dépendances lourdes (Recharts, react-big-calendar)
 
@@ -289,14 +298,14 @@ export const ProductsListVirtualized = ({ products }) => {
 
 ### Métriques Avant/Après
 
-| Métrique | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
-| **FCP Mobile** | ~2.5s | ~1.5s | **-40%** |
-| **LCP Mobile** | ~3.5s | ~2.0s | **-43%** |
-| **TTI Mobile** | ~4.0s | ~2.5s | **-38%** |
-| **Re-renders** | Baseline | -50% | **-50%** |
-| **Bundle Size** | ~800KB | ~500KB | **-38%** |
-| **Images Lazy** | 60% | 100% | **+67%** |
+| Métrique        | Avant    | Après  | Amélioration |
+| --------------- | -------- | ------ | ------------ |
+| **FCP Mobile**  | ~2.5s    | ~1.5s  | **-40%**     |
+| **LCP Mobile**  | ~3.5s    | ~2.0s  | **-43%**     |
+| **TTI Mobile**  | ~4.0s    | ~2.5s  | **-38%**     |
+| **Re-renders**  | Baseline | -50%   | **-50%**     |
+| **Bundle Size** | ~800KB   | ~500KB | **-38%**     |
+| **Images Lazy** | 60%      | 100%   | **+67%**     |
 
 **Score Final Attendu** : **92% / 100** ✅
 
@@ -304,4 +313,3 @@ export const ProductsListVirtualized = ({ products }) => {
 
 **Date** : 28 Janvier 2025  
 **Statut** : ⚠️ **À IMPLÉMENTER**
-

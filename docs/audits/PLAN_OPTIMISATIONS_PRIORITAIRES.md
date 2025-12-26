@@ -9,14 +9,14 @@
 
 ### Chunks Volumineux Identifiés
 
-| Chunk | Taille | Statut | Action |
-|-------|--------|--------|--------|
-| `index-DQf93Smk.js` | 558.91 kB | ⚠️ Trop gros | Optimiser |
-| `charts-zD1hRZJa.js` | 473.12 kB | ✅ Séparé | OK |
-| `pdf-HofKrmaa.js` | 414.97 kB | ✅ Séparé | OK |
-| `qrcode-D9Oqy3-o.js` | 359.31 kB | ✅ Séparé | OK |
-| `calendar-BfhiGfQL.js` | 321.31 kB | ✅ Séparé | OK |
-| `monitoring-Bx2Xr3AA.js` | 254.34 kB | ✅ Séparé | OK |
+| Chunk                    | Taille    | Statut       | Action    |
+| ------------------------ | --------- | ------------ | --------- |
+| `index-DQf93Smk.js`      | 558.91 kB | ⚠️ Trop gros | Optimiser |
+| `charts-zD1hRZJa.js`     | 473.12 kB | ✅ Séparé    | OK        |
+| `pdf-HofKrmaa.js`        | 414.97 kB | ✅ Séparé    | OK        |
+| `qrcode-D9Oqy3-o.js`     | 359.31 kB | ✅ Séparé    | OK        |
+| `calendar-BfhiGfQL.js`   | 321.31 kB | ✅ Séparé    | OK        |
+| `monitoring-Bx2Xr3AA.js` | 254.34 kB | ✅ Séparé    | OK        |
 
 ### Objectifs
 
@@ -34,18 +34,22 @@
 #### 1.1 Lazy Loading des Composants Lourds
 
 **Composants à lazy-load** :
+
 - ✅ `CrispChat` (déjà lazy-loaded dans certains cas)
 - ⚠️ `CurrencyRatesInitializer` (peut être lazy-loaded)
 - ⚠️ `PerformanceOptimizer` (peut être lazy-loaded)
 - ⚠️ `CookieConsentBanner` (peut être lazy-loaded après FCP)
 
 **Action** :
+
 ```typescript
 // App.tsx
-const CrispChat = lazy(() => import("@/components/chat/CrispChat"));
-const CurrencyRatesInitializer = lazy(() => import("@/components/currency/CurrencyRatesInitializer"));
-const PerformanceOptimizer = lazy(() => import("@/components/optimization/PerformanceOptimizer"));
-const CookieConsentBanner = lazy(() => import("@/components/legal/CookieConsentBanner"));
+const CrispChat = lazy(() => import('@/components/chat/CrispChat'));
+const CurrencyRatesInitializer = lazy(
+  () => import('@/components/currency/CurrencyRatesInitializer')
+);
+const PerformanceOptimizer = lazy(() => import('@/components/optimization/PerformanceOptimizer'));
+const CookieConsentBanner = lazy(() => import('@/components/legal/CookieConsentBanner'));
 ```
 
 #### 1.2 Optimisation des Imports d'Icônes
@@ -57,9 +61,11 @@ const CookieConsentBanner = lazy(() => import("@/components/legal/CookieConsentB
 ```typescript
 // src/components/icons/lazy-icons.ts
 export const lazyIcon = (iconName: string) => {
-  return lazy(() => import(`lucide-react`).then(m => ({ 
-    default: m[iconName] 
-  })));
+  return lazy(() =>
+    import(`lucide-react`).then(m => ({
+      default: m[iconName],
+    }))
+  );
 };
 ```
 
@@ -69,9 +75,9 @@ export const lazyIcon = (iconName: string) => {
 
 ```typescript
 // App.tsx - Charger PlatformCustomization après FCP
-const PlatformCustomizationProvider = lazy(() => 
-  import("@/contexts/PlatformCustomizationContext").then(m => ({
-    default: m.PlatformCustomizationProvider
+const PlatformCustomizationProvider = lazy(() =>
+  import('@/contexts/PlatformCustomizationContext').then(m => ({
+    default: m.PlatformCustomizationProvider,
   }))
 );
 ```
@@ -87,6 +93,7 @@ const PlatformCustomizationProvider = lazy(() =>
 **Action** : Utiliser `loading="lazy"` par défaut (sauf pour LCP)
 
 **Fichiers concernés** :
+
 - `src/components/ui/OptimizedImage.tsx` ✅ Déjà optimisé
 - Vérifier tous les `<img>` sans `loading` attribute
 
@@ -103,6 +110,7 @@ const PlatformCustomizationProvider = lazy(() =>
 #### 3.1 ARIA Labels
 
 **Composants améliorés** :
+
 - ✅ `MarketplaceHeader` : ARIA labels ajoutés
 - ⚠️ `AppSidebar` : À améliorer
 - ⚠️ `ProductCard` : À améliorer
@@ -111,6 +119,7 @@ const PlatformCustomizationProvider = lazy(() =>
 #### 3.2 Navigation Clavier
 
 **Actions** :
+
 - ✅ Focus visible sur tous les éléments interactifs
 - ⚠️ Skip links améliorés
 - ⚠️ Raccourcis clavier documentés
@@ -130,6 +139,7 @@ npm run test:a11y
 #### 4.1 Tests Unitaires
 
 **Composants à tester** :
+
 - ⚠️ `ProtectedRoute`
 - ⚠️ `ErrorBoundary`
 - ⚠️ `usePlatformLogo`
@@ -140,6 +150,7 @@ npm run test:a11y
 #### 4.2 Tests E2E
 
 **Flux critiques** :
+
 - ⚠️ Authentification
 - ⚠️ Création de produit
 - ⚠️ Checkout
@@ -152,6 +163,7 @@ npm run test:a11y
 #### 5.1 APIs Internes
 
 **Fichiers à documenter** :
+
 - ⚠️ `src/lib/error-handling.ts`
 - ⚠️ `src/hooks/usePlatformLogo.ts`
 - ⚠️ `src/lib/image-transform.ts`
@@ -190,27 +202,27 @@ npm run test:a11y
 
 ### Performance
 
-| Métrique | Avant | Cible | Après |
-|----------|-------|-------|-------|
-| Bundle principal | 558 KB | < 400 KB | - |
-| FCP | - | < 1.5s | - |
-| LCP | - | < 2.5s | - |
-| TTI | - | < 3.5s | - |
+| Métrique         | Avant  | Cible    | Après |
+| ---------------- | ------ | -------- | ----- |
+| Bundle principal | 558 KB | < 400 KB | -     |
+| FCP              | -      | < 1.5s   | -     |
+| LCP              | -      | < 2.5s   | -     |
+| TTI              | -      | < 3.5s   | -     |
 
 ### Accessibilité
 
-| Métrique | Avant | Cible | Après |
-|----------|-------|-------|-------|
-| Score axe-core | - | 100 | - |
-| ARIA labels | 60% | 100% | - |
-| Navigation clavier | ✅ | ✅ | ✅ |
+| Métrique           | Avant | Cible | Après |
+| ------------------ | ----- | ----- | ----- |
+| Score axe-core     | -     | 100   | -     |
+| ARIA labels        | 60%   | 100%  | -     |
+| Navigation clavier | ✅    | ✅    | ✅    |
 
 ### Tests
 
-| Métrique | Avant | Cible | Après |
-|----------|-------|-------|-------|
-| Couverture unitaires | ~20% | 60% | - |
-| Tests E2E | 5 | 15 | - |
+| Métrique             | Avant | Cible | Après |
+| -------------------- | ----- | ----- | ----- |
+| Couverture unitaires | ~20%  | 60%   | -     |
+| Tests E2E            | 5     | 15    | -     |
 
 ---
 
@@ -224,4 +236,3 @@ npm run test:a11y
 ---
 
 **Dernière mise à jour** : Février 2025
-

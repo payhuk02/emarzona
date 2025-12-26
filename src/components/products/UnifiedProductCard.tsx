@@ -47,6 +47,7 @@ import { PhysicalProductCard } from './PhysicalProductCard';
 import { ServiceProductCard } from './ServiceProductCard';
 import { CourseProductCard } from './CourseProductCard';
 import { useToast } from '@/hooks/use-toast';
+import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import {
   Dialog,
   DialogContent,
@@ -64,7 +65,8 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   className,
 }) => {
   const { toast } = useToast();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { favorites, toggleFavorite } = useMarketplaceFavorites();
+  const isFavorite = favorites.has(product.id);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const isDigital = product.type === 'digital';
 
@@ -87,24 +89,16 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
     [product.store?.slug, product.slug]
   );
 
-  // Gérer les favoris
+  // Gérer les favoris - Utiliser le hook centralisé pour synchronisation
   const handleFavorite = useCallback(
-    (e: React.MouseEvent) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      setIsFavorite(prev => {
-        const newValue = !prev;
-        toast({
-          title: prev ? 'Retiré des favoris' : 'Ajouté aux favoris',
-          description: prev
-            ? `${product.name} a été retiré de vos favoris`
-            : `${product.name} a été ajouté à vos favoris`,
-        });
-        return newValue;
-      });
+      await toggleFavorite(product.id);
+      // Le toast est géré par useMarketplaceFavorites
       onAction?.('favorite', product);
     },
-    [product, toast, onAction]
+    [product.id, product, toggleFavorite, onAction]
   );
 
   // Gérer le zoom

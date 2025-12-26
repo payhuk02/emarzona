@@ -1,6 +1,7 @@
 # Guide : Création du Bucket "attachments" dans Supabase Storage
 
 ## 🔴 Problème
+
 L'erreur **"Bucket not found"** apparaît lors de l'envoi d'images ou de fichiers dans la messagerie.
 
 ## ✅ Solution : Exécuter la Migration SQL
@@ -56,6 +57,7 @@ Si les migrations ne fonctionnent pas :
    - Créez les politiques suivantes pour le bucket "attachments" :
 
    **Politique 1 : Lecture publique**
+
    ```
    Name: Anyone can view attachments
    Policy: SELECT
@@ -64,6 +66,7 @@ Si les migrations ne fonctionnent pas :
    ```
 
    **Politique 2 : Upload pour utilisateurs authentifiés**
+
    ```
    Name: Authenticated users can upload attachments
    Policy: INSERT
@@ -72,6 +75,7 @@ Si les migrations ne fonctionnent pas :
    ```
 
    **Politique 3 : Mise à jour pour utilisateurs authentifiés**
+
    ```
    Name: Users can update their own attachments
    Policy: UPDATE
@@ -81,6 +85,7 @@ Si les migrations ne fonctionnent pas :
    ```
 
    **Politique 4 : Suppression pour utilisateurs authentifiés**
+
    ```
    Name: Users can delete their own attachments
    Policy: DELETE
@@ -91,6 +96,7 @@ Si les migrations ne fonctionnent pas :
 ## 📋 Types de fichiers autorisés
 
 Le bucket accepte les types suivants :
+
 - **Images** : JPEG, JPG, PNG, GIF, WebP, SVG
 - **Vidéos** : MP4, MPEG, QuickTime, AVI, WebM, OGG
 - **Documents** : PDF, Word, Excel, PowerPoint
@@ -107,6 +113,7 @@ Le bucket accepte les types suivants :
 ## ✅ Vérification
 
 Après avoir créé le bucket, testez l'envoi d'une image dans la messagerie :
+
 1. Allez sur la page de messagerie (`/vendor/messaging`)
 2. Sélectionnez une conversation
 3. Cliquez sur l'icône de pièce jointe
@@ -120,11 +127,13 @@ L'erreur "Bucket not found" ne devrait plus apparaître.
 Si l'erreur persiste après avoir créé le bucket :
 
 1. **Vérifiez que le bucket existe** :
+
    ```sql
    SELECT * FROM storage.buckets WHERE id = 'attachments';
    ```
 
 2. **Vérifiez les politiques RLS** :
+
    ```sql
    SELECT * FROM pg_policies WHERE tablename = 'objects' AND policyname LIKE '%attachments%';
    ```
@@ -143,4 +152,3 @@ Si l'erreur persiste après avoir créé le bucket :
 - Les fichiers sont stockés dans le dossier `vendor-message-attachments/` ou `message-attachments/` selon le contexte
 - Les URLs des fichiers sont publiques et accessibles sans authentification
 - Pour plus de sécurité, vous pouvez modifier les politiques RLS pour restreindre l'accès aux fichiers selon vos besoins
-

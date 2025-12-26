@@ -40,12 +40,14 @@ SELECT cron.schedule(
 ```
 
 Ou via l'interface Supabase :
+
 - Interval: `*/15 * * * *` (toutes les 15 minutes)
 - SQL: Voir ci-dessus
 
 ### 3. Variables d'environnement
 
 Les variables suivantes sont automatiquement disponibles dans les Edge Functions Supabase :
+
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -115,4 +117,3 @@ L'historique des vérifications est enregistré dans la table `domain_verificati
 
 Pour les problèmes ou questions, consultez la documentation Supabase Edge Functions :
 https://supabase.com/docs/guides/functions
-

@@ -10,11 +10,11 @@
 
 ### ✅ DÉJÀ IMPLÉMENTÉ (80%)
 
-| Système | Database | Hooks | Components | Pages | Integration |
-|---------|----------|-------|------------|-------|-------------|
-| **Paiements Avancés** | ✅ 100% | ✅ 100% | ✅ 90% | ❌ 0% | ❌ 0% |
-| **Messagerie** | ✅ 100% | ✅ 100% | ✅ 80% | ❌ 0% | ❌ 0% |
-| **Litiges** | ✅ 100% | ✅ 100% | ⚠️ 50% | ❌ 0% | ❌ 0% |
+| Système               | Database | Hooks   | Components | Pages | Integration |
+| --------------------- | -------- | ------- | ---------- | ----- | ----------- |
+| **Paiements Avancés** | ✅ 100%  | ✅ 100% | ✅ 90%     | ❌ 0% | ❌ 0%       |
+| **Messagerie**        | ✅ 100%  | ✅ 100% | ✅ 80%     | ❌ 0% | ❌ 0%       |
+| **Litiges**           | ✅ 100%  | ✅ 100% | ⚠️ 50%     | ❌ 0% | ❌ 0%       |
 
 ### ❌ MANQUANT (20%)
 
@@ -43,9 +43,11 @@
 ### **SPRINT 1 - PAGES CORE** (4-6h)
 
 #### 1.1 - Page Messagerie Universelle (2h)
+
 **Fichier**: `src/pages/orders/OrderMessaging.tsx`
 
 **Fonctionnalités** :
+
 - ✅ Affichage conversation par commande
 - ✅ Thread messages avec avatars
 - ✅ Upload médias (images, vidéos, fichiers)
@@ -55,14 +57,17 @@
 - ✅ Réponse temps réel (Supabase Realtime)
 
 **Intégration** :
+
 - Route: `/orders/:orderId/messaging`
 - Accessible depuis: Détail commande (bouton)
 - RLS: Vendeur + Client + Admin
 
 #### 1.2 - Page Gestion Paiements (1h30)
+
 **Fichier**: `src/pages/payments/PaymentManagement.tsx`
 
 **Fonctionnalités** :
+
 - ✅ Affichage paiements partiels
 - ✅ Affichage paiements sécurisés (escrow)
 - ✅ Bouton "Relâcher paiement" (vendeur)
@@ -71,13 +76,16 @@
 - ✅ Stats montants retenus
 
 **Intégration** :
+
 - Route: `/payments/:paymentId/manage`
 - Accessible depuis: Dashboard paiements
 
 #### 1.3 - Page Litiges (1h30)
+
 **Fichier**: `src/pages/disputes/DisputeDetail.tsx`
 
 **Fonctionnalités** :
+
 - ✅ Formulaire ouverture litige
 - ✅ Timeline litige
 - ✅ Messages litige
@@ -86,6 +94,7 @@
 - ✅ Statuts: open, investigating, resolved, closed
 
 **Intégration** :
+
 - Route: `/disputes/:disputeId`
 - Accessible depuis: Messagerie (bouton "Ouvrir litige")
 
@@ -94,9 +103,11 @@
 ### **SPRINT 2 - INTÉGRATION PRODUITS** (4-6h)
 
 #### 2.1 - Wizard Produits Physiques (1h30)
+
 **Fichier**: `src/components/products/create/physical/CreatePhysicalProductWizard_v2.tsx`
 
 **Ajouts** :
+
 - ✅ Step "Options de paiement"
   - Radio: Paiement complet (défaut)
   - Radio: Paiement par pourcentage (input %)
@@ -105,9 +116,11 @@
 - ✅ Sauvegarde dans `orders.payment_type`
 
 #### 2.2 - Wizard Services (1h30)
+
 **Fichier**: `src/components/products/create/service/CreateServiceWizard_v2.tsx`
 
 **Ajouts** :
+
 - ✅ Step "Options de paiement"
   - Radio: Paiement complet (défaut)
   - Radio: Paiement par pourcentage (input %)
@@ -115,11 +128,14 @@
 - ✅ Validation règles métier
 
 #### 2.3 - Page Détail Commande (1h30)
+
 **Fichiers** :
+
 - `src/pages/orders/OrderDetail.tsx`
 - `src/components/orders/OrderActions.tsx`
 
 **Ajouts** :
+
 - ✅ Bouton "💬 Messagerie" (prominent)
 - ✅ Bouton "🚨 Ouvrir un litige"
 - ✅ Badge type paiement (full/percentage/escrow)
@@ -128,11 +144,14 @@
 - ✅ Bouton "Relâcher paiement" (admin)
 
 #### 2.4 - Processus Achat Modifié (1h30)
+
 **Fichiers** :
+
 - `src/hooks/orders/useCreatePhysicalOrder.ts`
 - `src/hooks/orders/useCreateServiceOrder.ts`
 
 **Modifications** :
+
 - ✅ Créer `secured_payment` si `payment_type = 'delivery_secured'`
 - ✅ Créer `partial_payment` si `payment_type = 'percentage'`
 - ✅ Intégrer Moneroo avec type paiement
@@ -143,9 +162,11 @@
 ### **SPRINT 3 - UX POLISH & NOTIFS** (3-4h)
 
 #### 3.1 - Notifications Temps Réel (1h30)
+
 **Fichier**: `src/hooks/useRealtimeNotifications.ts`
 
 **Fonctionnalités** :
+
 - ✅ Notif nouveau message (Supabase Realtime)
 - ✅ Notif paiement relâché
 - ✅ Notif litige ouvert
@@ -153,9 +174,11 @@
 - ✅ Badge compteur non lus
 
 #### 3.2 - Upload Médias Optimisé (1h)
+
 **Fichier**: `src/utils/mediaUpload.ts`
 
 **Fonctionnalités** :
+
 - ✅ Compression images (avant upload)
 - ✅ Progress bar upload
 - ✅ Validation taille/format
@@ -163,18 +186,22 @@
 - ✅ Support multi-fichiers
 
 #### 3.3 - Mobile Responsive (1h)
+
 **Fichiers**: Tous les composants créés
 
 **Ajouts** :
+
 - ✅ Layout mobile messagerie
 - ✅ Drawer paiements (mobile)
 - ✅ Touch gestures
 - ✅ Bottom navigation
 
 #### 3.4 - États Loading & Error (30min)
+
 **Fichiers**: Tous les composants
 
 **Ajouts** :
+
 - ✅ Skeletons loading
 - ✅ Error boundaries
 - ✅ Retry logic
@@ -284,21 +311,23 @@
 
 ### ✅ Expérience Utilisateur
 
-| Rôle | Actions Disponibles |
-|------|---------------------|
-| **Client** | - Choisir type paiement<br>- Échanger avec vendeur<br>- Confirmer livraison<br>- Ouvrir litige<br>- Voir statut paiement |
-| **Vendeur** | - Configurer options paiement<br>- Répondre messages<br>- Demander release paiement<br>- Gérer litiges |
-| **Admin** | - Voir toutes conversations<br>- Intervenir dans litiges<br>- Relâcher paiements<br>- Modération complète |
+| Rôle        | Actions Disponibles                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Client**  | - Choisir type paiement<br>- Échanger avec vendeur<br>- Confirmer livraison<br>- Ouvrir litige<br>- Voir statut paiement |
+| **Vendeur** | - Configurer options paiement<br>- Répondre messages<br>- Demander release paiement<br>- Gérer litiges                   |
+| **Admin**   | - Voir toutes conversations<br>- Intervenir dans litiges<br>- Relâcher paiements<br>- Modération complète                |
 
 ### ✅ Intégration Complète
 
 **Produits supportés** :
+
 - ✅ Produits Digitaux (paiement immédiat uniquement)
 - ✅ Produits Physiques (tous types paiement)
 - ✅ Services (tous types paiement)
 - ✅ Cours en Ligne (paiement immédiat uniquement)
 
 **Pages intégrées** :
+
 - ✅ Wizard création produit (choix paiement)
 - ✅ Détail commande (messagerie + actions)
 - ✅ Dashboard vendeur (conversations actives)
@@ -334,12 +363,12 @@
 ### Comparaison Plateformes
 
 | Plateforme | Escrow | Messagerie | % Payment | Litiges Admin |
-|------------|--------|------------|-----------|---------------|
-| **Payhuk** | ✅ | ✅ | ✅ | ✅ |
-| Shopify | ❌ | ⚠️ (app) | ❌ | ⚠️ |
-| Etsy | ❌ | ✅ | ❌ | ✅ |
-| Amazon | ✅ | ❌ | ❌ | ✅ |
-| Alibaba | ✅ | ✅ | ⚠️ | ✅ |
+| ---------- | ------ | ---------- | --------- | ------------- |
+| **Payhuk** | ✅     | ✅         | ✅        | ✅            |
+| Shopify    | ❌     | ⚠️ (app)   | ❌        | ⚠️            |
+| Etsy       | ❌     | ✅         | ❌        | ✅            |
+| Amazon     | ✅     | ❌         | ❌        | ✅            |
+| Alibaba    | ✅     | ✅         | ⚠️        | ✅            |
 
 **Score Payhuk**: **5/5** 🏆  
 **Niveau**: **Classe Mondiale** 🌍
@@ -349,14 +378,17 @@
 ## 📅 TIMELINE
 
 ### Phase 1 - Pages Core
+
 **Durée**: 4-6h  
 **Priorité**: 🔴 Critique
 
 ### Phase 2 - Intégration Produits
+
 **Durée**: 4-6h  
 **Priorité**: 🔴 Critique
 
 ### Phase 3 - UX Polish
+
 **Durée**: 3-4h  
 **Priorité**: 🟡 Important
 
@@ -380,4 +412,3 @@
 Les bases DB + hooks sont solides. Il faut juste créer l'UI et intégrer !
 
 **PAYHUK sera la plateforme e-commerce la plus complète et professionnelle !** 🏆🌍
-

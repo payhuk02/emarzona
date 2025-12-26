@@ -50,13 +50,7 @@ const { data, error } = await supabase.functions.invoke('send-sms', {
 ## Format des numéros
 
 Les numéros de téléphone sont automatiquement formatés pour Twilio:
+
 - Si le numéro commence par `0`, il est converti en format international
 - Par défaut, le préfixe `+221` (Sénégal) est ajouté si absent
 - Les caractères non numériques sont supprimés
-
-
-
-
-
-
-

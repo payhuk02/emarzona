@@ -18,12 +18,14 @@ L'anon key (`SUPABASE_ANON_KEY`) était rejetée par Supabase avec `401 Invalid 
 Le code de `process-scheduled-campaigns` utilise maintenant la **service role key** directement pour appeler `send-email-campaign`, au lieu de l'anon key.
 
 **Avant** :
+
 ```typescript
 const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || supabaseServiceKey;
 'Authorization': `Bearer ${anonKey}`
 ```
 
 **Après** :
+
 ```typescript
 const authKey = supabaseServiceKey;
 'Authorization': `Bearer ${authKey}`
@@ -48,6 +50,7 @@ SELECT net.http_post(
 ```
 
 **Vérifications** :
+
 1. Plus d'erreur `401 Invalid JWT`
 2. Plus de warning `SENDGRID_API_KEY is not set` (si configuré)
 3. Campagne traitée avec succès
@@ -64,5 +67,3 @@ Même si l'erreur `401` est résolue, vous devez **toujours configurer `SENDGRID
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

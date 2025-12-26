@@ -8,13 +8,17 @@
 ## 🚨 Problèmes identifiés
 
 ### 1. Colonne `product_type` manquante
+
 **Erreur :**
+
 ```
 ERROR: 42703: column "product_type" of relation "email_templates" does not exist
 ```
 
 ### 2. Colonne `is_default` manquante
+
 **Erreur :**
+
 ```
 ERROR: 42703: column "is_default" does not exist
 QUERY: CREATE UNIQUE INDEX ... WHERE is_default = TRUE
@@ -25,9 +29,11 @@ QUERY: CREATE UNIQUE INDEX ... WHERE is_default = TRUE
 ## ✅ Solution implémentée
 
 ### Migration complète de structure
+
 **Fichier :** `supabase/migrations/20250201_fix_email_templates_complete_structure.sql`
 
 Cette migration :
+
 1. ✅ Vérifie et ajoute **toutes** les colonnes manquantes :
    - `product_type` (TEXT)
    - `is_default` (BOOLEAN DEFAULT FALSE)
@@ -61,7 +67,6 @@ Cette migration :
 1. ✅ `20250201_fix_email_templates_complete_structure.sql`
    - Ajoute toutes les colonnes manquantes
    - Crée les index nécessaires
-   
 2. ✅ `20250201_add_missing_email_templates.sql`
    - Insère les templates manquants (service, course, artist)
    - Utilise les colonnes créées à l'étape 1
@@ -75,29 +80,29 @@ Cette migration :
 
 ### Colonnes dans `email_templates` :
 
-| Colonne | Type | Default | Description |
-|---------|------|---------|-------------|
-| `id` | UUID | `gen_random_uuid()` | Primary key |
-| `slug` | TEXT | NOT NULL | Unique identifier |
-| `name` | TEXT | NOT NULL | Nom descriptif |
-| `category` | TEXT | NOT NULL | 'transactional' \| 'marketing' |
-| **`product_type`** | TEXT | NULL | ✅ **Ajoutée** |
-| `subject` | JSONB | NOT NULL | Sujet multilingue |
-| `html_content` | JSONB | NOT NULL | Contenu HTML multilingue |
-| `text_content` | JSONB | NULL | Version texte |
-| `variables` | JSONB | `'[]'::jsonb` | Liste des variables |
-| `sendgrid_template_id` | TEXT | NULL | ID template SendGrid |
-| `from_email` | TEXT | `'noreply@emarzona.com'` | Email expéditeur |
-| `from_name` | TEXT | `'Emarzona'` | Nom expéditeur |
-| `reply_to` | TEXT | NULL | Email de réponse |
-| `is_active` | BOOLEAN | TRUE | Template actif |
-| **`is_default`** | BOOLEAN | FALSE | ✅ **Ajoutée** |
-| `created_at` | TIMESTAMPTZ | NOW() | Date création |
-| `updated_at` | TIMESTAMPTZ | NOW() | Date mise à jour |
-| `created_by` | UUID | NULL | Auteur |
-| `sent_count` | INTEGER | 0 | Nombre d'envois |
-| `open_rate` | DECIMAL(5,2) | 0.00 | Taux d'ouverture |
-| `click_rate` | DECIMAL(5,2) | 0.00 | Taux de clic |
+| Colonne                | Type         | Default                  | Description                    |
+| ---------------------- | ------------ | ------------------------ | ------------------------------ |
+| `id`                   | UUID         | `gen_random_uuid()`      | Primary key                    |
+| `slug`                 | TEXT         | NOT NULL                 | Unique identifier              |
+| `name`                 | TEXT         | NOT NULL                 | Nom descriptif                 |
+| `category`             | TEXT         | NOT NULL                 | 'transactional' \| 'marketing' |
+| **`product_type`**     | TEXT         | NULL                     | ✅ **Ajoutée**                 |
+| `subject`              | JSONB        | NOT NULL                 | Sujet multilingue              |
+| `html_content`         | JSONB        | NOT NULL                 | Contenu HTML multilingue       |
+| `text_content`         | JSONB        | NULL                     | Version texte                  |
+| `variables`            | JSONB        | `'[]'::jsonb`            | Liste des variables            |
+| `sendgrid_template_id` | TEXT         | NULL                     | ID template SendGrid           |
+| `from_email`           | TEXT         | `'noreply@emarzona.com'` | Email expéditeur               |
+| `from_name`            | TEXT         | `'Emarzona'`             | Nom expéditeur                 |
+| `reply_to`             | TEXT         | NULL                     | Email de réponse               |
+| `is_active`            | BOOLEAN      | TRUE                     | Template actif                 |
+| **`is_default`**       | BOOLEAN      | FALSE                    | ✅ **Ajoutée**                 |
+| `created_at`           | TIMESTAMPTZ  | NOW()                    | Date création                  |
+| `updated_at`           | TIMESTAMPTZ  | NOW()                    | Date mise à jour               |
+| `created_by`           | UUID         | NULL                     | Auteur                         |
+| `sent_count`           | INTEGER      | 0                        | Nombre d'envois                |
+| `open_rate`            | DECIMAL(5,2) | 0.00                     | Taux d'ouverture               |
+| `click_rate`           | DECIMAL(5,2) | 0.00                     | Taux de clic                   |
 
 ### Index créés :
 
@@ -120,4 +125,3 @@ Cette migration :
 ---
 
 **Document créé le 1er Février 2025** ✅
-

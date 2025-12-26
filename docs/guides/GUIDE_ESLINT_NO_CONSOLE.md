@@ -1,4 +1,4 @@
-# 📋 GUIDE : Configuration ESLint pour bloquer console.*
+# 📋 GUIDE : Configuration ESLint pour bloquer console.\*
 
 **Date** : Janvier 2025  
 **Statut** : ✅ **Configuré et activé**
@@ -25,16 +25,19 @@
 ## 🎯 POURQUOI CETTE RÈGLE ?
 
 ### 1. **Sécurité** 🔒
+
 - Les `console.*` peuvent exposer des données sensibles en production
 - Tokens, IDs utilisateurs, structure API visible dans les DevTools
 - Impossible de contrôler ce qui est loggé
 
 ### 2. **Performance** ⚡
+
 - Les `console.*` ralentissent l'exécution en production
 - Polluent les DevTools du navigateur
 - Consomment de la mémoire inutilement
 
 ### 3. **Monitoring** 📊
+
 - Impossible de tracker les erreurs utilisateurs
 - Pas de visibilité sur les problèmes en production
 - Erreurs non capturées par Sentry
@@ -44,12 +47,14 @@
 ## ✅ EXCEPTIONS CONFIGURÉES
 
 ### Fichiers ignorés automatiquement :
+
 - `**/*.config.{js,ts}` - Fichiers de configuration
 - `scripts/**` - Scripts Node.js
 - `supabase/**` - Migrations SQL
 - `dist/`, `build/`, `node_modules/` - Fichiers générés
 
 ### Fichier avec exception explicite :
+
 - `src/lib/console-guard.ts` - **Nécessaire** pour remplacer `console.*` par `logger.*`
 
 ---
@@ -90,11 +95,13 @@ logger.error(error); // Peut prendre un Error directement
 ### Si vous voyez une erreur `no-console` :
 
 1. **Importer le logger**
+
    ```typescript
    import { logger } from '@/lib/logger';
    ```
 
-2. **Remplacer console.* par logger.***
+2. **Remplacer console._ par logger._**
+
    ```typescript
    // console.log → logger.debug (ou logger.info si important)
    // console.error → logger.error
@@ -114,15 +121,17 @@ logger.error(error); // Peut prendre un Error directement
 
 ## 🚨 CAS SPÉCIAUX
 
-### Si vous devez absolument utiliser console.* (rare)
+### Si vous devez absolument utiliser console.\* (rare)
 
 **Option 1 : Désactiver pour une ligne spécifique**
+
 ```typescript
 // eslint-disable-next-line no-console
 console.log('Debug temporaire');
 ```
 
 **Option 2 : Désactiver pour un bloc**
+
 ```typescript
 /* eslint-disable no-console */
 console.log('Debug bloc');
@@ -137,10 +146,12 @@ console.error('Error bloc');
 ## ✅ AVANTAGES DU LOGGER
 
 ### En développement :
+
 - Affiche dans la console avec formatage `[LOG]`, `[INFO]`, `[WARN]`, `[ERROR]`
 - Facile à filtrer dans les DevTools
 
 ### En production :
+
 - **Aucun log** pour `logger.log` et `logger.debug`
 - **Breadcrumbs** pour `logger.info` (si context fourni)
 - **Messages Sentry** pour `logger.warn` et `logger.error`
@@ -150,12 +161,12 @@ console.error('Error bloc');
 
 ## 📊 STATUT
 
-| Élément | Statut |
-|---------|--------|
-| **Règle ESLint activée** | ✅ |
-| **Exceptions configurées** | ✅ |
-| **Logger amélioré** | ✅ |
-| **Documentation** | ✅ |
+| Élément                    | Statut |
+| -------------------------- | ------ |
+| **Règle ESLint activée**   | ✅     |
+| **Exceptions configurées** | ✅     |
+| **Logger amélioré**        | ✅     |
+| **Documentation**          | ✅     |
 
 ---
 
@@ -169,4 +180,3 @@ console.error('Error bloc');
 ---
 
 **Note** : La règle est maintenant **active**. Tous les nouveaux commits avec `console.*` seront bloqués par ESLint.
-

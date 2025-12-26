@@ -15,6 +15,7 @@ X-DNS-Prefetch-Control: on
 **Objectif:** Améliorer les performances en permettant au navigateur de résoudre les DNS à l'avance.
 
 **Impact:**
+
 - ✅ Réduit la latence pour les domaines externes (Google Fonts, Supabase)
 - ✅ Améliore le FCP (First Contentful Paint)
 
@@ -29,16 +30,19 @@ Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 **Objectif:** Forcer HTTPS pour toutes les connexions.
 
 **Paramètres:**
+
 - `max-age=63072000` : 2 ans (recommandé pour preload)
 - `includeSubDomains` : Applique à tous les sous-domaines
 - `preload` : Éligible pour la liste HSTS preload
 
 **Impact:**
+
 - ✅ Protection contre attaques MITM (Man-in-the-Middle)
 - ✅ Empêche downgrade vers HTTP
 - ✅ Score A+ sur SSL Labs
 
 **Prochaine étape:**
+
 ```bash
 # Soumettre à la HSTS Preload List
 https://hstspreload.org/
@@ -55,11 +59,13 @@ X-Frame-Options: SAMEORIGIN
 **Objectif:** Empêcher le clickjacking.
 
 **Options:**
+
 - `DENY` : Aucun iframe autorisé
 - `SAMEORIGIN` : ✅ Iframes du même domaine uniquement
 - `ALLOW-FROM url` : Deprecated
 
 **Impact:**
+
 - ✅ Protection contre clickjacking
 - ✅ Permet embed interne (dashboard → iframe)
 
@@ -74,6 +80,7 @@ X-Content-Type-Options: nosniff
 **Objectif:** Empêcher le MIME sniffing.
 
 **Impact:**
+
 - ✅ Protection contre exécution de scripts non-JavaScript
 - ✅ Forcer respect du Content-Type
 
@@ -90,6 +97,7 @@ X-XSS-Protection: 1; mode=block
 **Note:** Deprecated mais toujours utile pour anciens navigateurs.
 
 **Impact:**
+
 - ✅ Protection additionnelle contre XSS
 - ⚠️ Remplacé par CSP moderne
 
@@ -104,11 +112,13 @@ Referrer-Policy: strict-origin-when-cross-origin
 **Objectif:** Contrôler les informations de referrer envoyées.
 
 **Options:**
+
 - `no-referrer` : Aucun referrer
 - `origin` : Origine uniquement
 - `strict-origin-when-cross-origin` : ✅ Recommandé
 
 **Impact:**
+
 - ✅ Protection vie privée utilisateurs
 - ✅ Pas de fuite d'URLs sensibles
 - ✅ Analytics toujours fonctionnels
@@ -124,11 +134,13 @@ Permissions-Policy: camera=(), microphone=(), geolocation=()
 **Objectif:** Désactiver les APIs non utilisées.
 
 **APIs bloquées:**
+
 - `camera=()` : Pas d'accès caméra
 - `microphone=()` : Pas d'accès micro
 - `geolocation=()` : Pas de géolocalisation
 
 **Impact:**
+
 - ✅ Réduction surface d'attaque
 - ✅ Meilleure confidentialité
 
@@ -152,46 +164,60 @@ Content-Security-Policy:
 **Détails par directive:**
 
 #### `default-src 'self'`
+
 Par défaut, autoriser uniquement le même domaine.
 
 #### `script-src`
+
 Sources autorisées pour JavaScript:
+
 - ✅ `'self'` : Scripts du domaine
 - ⚠️ `'unsafe-inline'` : Inline scripts (à améliorer)
 - ⚠️ `'unsafe-eval'` : eval() (nécessaire pour React dev)
 - ✅ Google Fonts, CDN, Supabase
 
 #### `style-src`
+
 Sources autorisées pour CSS:
+
 - ✅ `'self'` : CSS du domaine
 - ⚠️ `'unsafe-inline'` : Inline styles (Tailwind, styled-components)
 - ✅ Google Fonts
 
 #### `font-src`
+
 Sources autorisées pour polices:
+
 - ✅ `'self'` : Polices locales
 - ✅ Google Fonts
 
 #### `img-src`
+
 Sources autorisées pour images:
+
 - ✅ `'self'` : Images du domaine
 - ✅ `data:` : Data URLs (base64)
 - ✅ `blob:` : Blob URLs (upload)
 - ✅ `https:` `http:` : Toutes images HTTPS/HTTP
 
 #### `connect-src`
+
 Sources autorisées pour fetch/XHR:
+
 - ✅ `'self'` : APIs du domaine
 - ✅ Supabase (HTTP + WebSocket)
 - ✅ Moneroo API
 
 #### `frame-ancestors 'self'`
+
 Empêche embed par autres sites.
 
 #### `base-uri 'self'`
+
 Empêche injection de balise `<base>`.
 
 #### `form-action 'self'`
+
 Formulaires uniquement vers le même domaine.
 
 ---
@@ -201,6 +227,7 @@ Formulaires uniquement vers le même domaine.
 ### Problème actuel: `unsafe-inline` et `unsafe-eval`
 
 **Impact:**
+
 - ⚠️ Réduit la protection contre XSS
 - ⚠️ Nécessaire pour React/Vite en dev
 
@@ -219,13 +246,10 @@ export default defineConfig({
       name: 'csp-nonce',
       transformIndexHtml(html) {
         const nonce = crypto.randomBytes(16).toString('base64');
-        return html.replace(
-          /<script/g,
-          `<script nonce="${nonce}"`
-        );
-      }
-    }
-  ]
+        return html.replace(/<script/g, `<script nonce="${nonce}"`);
+      },
+    },
+  ],
 });
 ```
 
@@ -313,6 +337,7 @@ fetch('/').then(r => {
 ## ✅ CHECKLIST
 
 ### Phase 1 (Actuel) ✅
+
 - [x] HSTS configuré
 - [x] X-Frame-Options
 - [x] X-Content-Type-Options
@@ -322,6 +347,7 @@ fetch('/').then(r => {
 - [x] CSP basique
 
 ### Phase 2 (Améliorations)
+
 - [ ] CSP avec nonces (enlever unsafe-inline)
 - [ ] Soumettre HSTS Preload
 - [ ] SRI (Subresource Integrity)
@@ -358,5 +384,3 @@ curl -I https://payhuk.com | grep -i strict-transport
 **Dernière mise à jour:** 26 Octobre 2025  
 **Responsable:** Équipe Sécurité Payhuk  
 **Score:** A / A+
-
-

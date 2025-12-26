@@ -83,22 +83,27 @@ console.log('[Moneroo Edge Function] Customer name processing:', {
 ## Cas de test
 
 ### Cas 1 : `customer_name` vide
+
 - **Input** : `customer_name: ""`, `customer_email: "john@example.com"`
 - **Output** : `first_name: "john"`, `last_name: "Client"`
 
 ### Cas 2 : `customer_name` avec un seul mot
+
 - **Input** : `customer_name: "john"`, `customer_email: "john@example.com"`
 - **Output** : `first_name: "john"`, `last_name: "Client"`
 
 ### Cas 3 : `customer_name` avec plusieurs mots
+
 - **Input** : `customer_name: "John Doe"`, `customer_email: "john@example.com"`
 - **Output** : `first_name: "John"`, `last_name: "Doe"`
 
 ### Cas 4 : `customer_name` avec plusieurs mots (nom composé)
+
 - **Input** : `customer_name: "John Doe Smith"`, `customer_email: "john@example.com"`
 - **Output** : `first_name: "John"`, `last_name: "Doe Smith"`
 
 ### Cas 5 : `customer_name` et `customer_email` vides
+
 - **Input** : `customer_name: ""`, `customer_email: ""`
 - **Output** : `first_name: "Client"`, `last_name: "Moneroo"`
 
@@ -114,7 +119,3 @@ console.log('[Moneroo Edge Function] Customer name processing:', {
 - Les valeurs par défaut ("Client", "Moneroo") sont utilisées uniquement en dernier recours
 - Les logs détaillés permettent de diagnostiquer facilement les problèmes futurs
 - Le code gère tous les cas limites de manière robuste
-
-
-
-

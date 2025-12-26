@@ -17,6 +17,7 @@
 - ❌ Retiré `appliedCoupon` du retour du hook
 
 **Résultat:**
+
 - `summary.subtotal` = prix après remises items uniquement
 - `summary.discount_amount` = remises items uniquement (pas de coupons)
 
@@ -28,6 +29,7 @@
 - ✅ Simplifié le calcul : `subtotalAfterDiscounts = summary.subtotal - couponDiscount`
 
 **Résultat:**
+
 - Un seul système de coupons (`appliedCouponCode`)
 - Calcul clair et simple
 
@@ -61,4 +63,3 @@ const subtotalAfterDiscounts = summary.subtotal - couponDiscount;
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **TERMINÉ**
-

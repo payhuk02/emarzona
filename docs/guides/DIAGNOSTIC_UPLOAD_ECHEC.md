@@ -8,17 +8,20 @@
 ## ✅ Améliorations Apportées
 
 ### 1. Vérification après Upload
+
 - ✅ Vérification de l'existence du fichier dans le bucket avec `list()`
 - ✅ Test de l'URL publique avec HEAD request
 - ✅ Détection si l'URL retourne du JSON
 - ✅ Erreur explicite si le fichier n'existe pas
 
 ### 2. Messages d'Erreur Améliorés
+
 - ✅ Messages détaillés selon le type d'erreur
 - ✅ Codes d'erreur HTTP affichés (403, 404, etc.)
 - ✅ Suggestions de solutions selon l'erreur
 
 ### 3. Logs Détaillés
+
 - ✅ Logs complets dans la console (F12)
 - ✅ Informations sur le chemin, l'URL, le statut HTTP
 - ✅ Détails de l'erreur originale
@@ -32,23 +35,29 @@
 Ouvrez la console du navigateur (F12) et cherchez :
 
 1. **Erreurs d'upload** :
+
    ```
    Upload error details
    ```
+
    - Notez le `errorCode` et `errorMessage`
    - Vérifiez le `filePath` utilisé
 
 2. **Erreurs de vérification** :
+
    ```
    File not found in bucket after upload
    ```
+
    - Indique que le fichier n'existe pas après l'upload
    - Vérifiez le `path` et `folderPath`
 
 3. **Erreurs d'accès** :
+
    ```
    Uploaded file not accessible via public URL
    ```
+
    - Notez le `status` HTTP (403 = permissions, 404 = fichier introuvable)
 
 ---
@@ -95,7 +104,9 @@ Dans la console du navigateur (F12), testez :
 
 ```javascript
 // 1. Vérifier que vous êtes connecté
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 console.log('User:', user);
 
 // 2. Tester un upload simple
@@ -108,11 +119,9 @@ if (error) {
   console.error('Upload error:', error);
 } else {
   console.log('Upload success:', data);
-  
+
   // 3. Vérifier que le fichier existe
-  const { data: files } = await supabase.storage
-    .from('attachments')
-    .list('test-upload');
+  const { data: files } = await supabase.storage.from('attachments').list('test-upload');
   console.log('Files in test-upload:', files);
 }
 ```
@@ -126,6 +135,7 @@ if (error) {
 **Cause** : Les politiques RLS bloquent l'upload
 
 **Solution** :
+
 1. Vérifiez que vous êtes connecté (`auth.getUser()`)
 2. Vérifiez que la politique INSERT existe pour `authenticated`
 3. Exécutez la migration de fix RLS :
@@ -140,6 +150,7 @@ if (error) {
 **Cause** : Le fichier n'existe pas dans le bucket après l'upload
 
 **Solutions possibles** :
+
 1. **Vérifiez que l'upload a vraiment réussi** :
    - Regardez les logs : `✅ File verified in bucket after upload`
    - Si absent, l'upload a échoué silencieusement
@@ -159,6 +170,7 @@ if (error) {
 **Cause** : Le fichier n'existe pas, Supabase retourne une erreur JSON
 
 **Solution** :
+
 1. Vérifiez que le fichier existe dans le bucket (Supabase Dashboard)
 2. Si absent, l'upload a échoué
 3. Vérifiez les logs pour l'erreur d'upload originale
@@ -170,6 +182,7 @@ if (error) {
 **Cause** : Le fichier dépasse la limite (10MB)
 
 **Solution** :
+
 - Réduisez la taille du fichier
 - Utilisez la compression d'images (activée par défaut)
 
@@ -180,6 +193,7 @@ if (error) {
 **Cause** : Le type MIME n'est pas autorisé
 
 **Solution** :
+
 - Vérifiez que le type de fichier est dans la liste autorisée
 - Types autorisés : images, vidéos, PDF, documents Office, ZIP, etc.
 
@@ -204,7 +218,7 @@ if (error) {
 ### Vérifier l'état du bucket
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   public,
@@ -217,7 +231,7 @@ WHERE id = 'attachments';
 ### Vérifier les politiques RLS
 
 ```sql
-SELECT 
+SELECT
   policyname,
   cmd,
   roles::text,
@@ -236,7 +250,7 @@ WHERE schemaname = 'storage'
 ### Vérifier les fichiers dans le bucket
 
 ```sql
-SELECT 
+SELECT
   name,
   bucket_id,
   owner,
@@ -271,4 +285,3 @@ Si le problème persiste après avoir suivi ce guide :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

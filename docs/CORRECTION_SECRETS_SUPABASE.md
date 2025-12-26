@@ -8,11 +8,13 @@
 ## ✅ Information Importante
 
 **Supabase injecte automatiquement** ces variables d'environnement dans toutes les Edge Functions :
+
 - `SUPABASE_URL` : Disponible automatiquement
 - `SUPABASE_SERVICE_ROLE_KEY` : Disponible automatiquement
 
 **Vous ne pouvez PAS** ajouter ces secrets manuellement car Supabase affiche l'erreur :
-> "Name must not start with the SUPABASE_ prefix"
+
+> "Name must not start with the SUPABASE\_ prefix"
 
 ---
 
@@ -48,21 +50,18 @@ console.log('Supabase configuration:', {
   url: supabaseUrl,
   hasServiceKey: !!supabaseServiceKey,
   serviceKeyLength: supabaseServiceKey?.length || 0,
-  serviceKeyPrefix: supabaseServiceKey?.substring(0, 50) || 'N/A'
+  serviceKeyPrefix: supabaseServiceKey?.substring(0, 50) || 'N/A',
 });
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing Supabase configuration:', {
     hasUrl: !!supabaseUrl,
-    hasServiceKey: !!supabaseServiceKey
+    hasServiceKey: !!supabaseServiceKey,
   });
-  return new Response(
-    JSON.stringify({ error: 'Supabase configuration missing' }),
-    {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
+  return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+    status: 500,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 ```
 
@@ -71,6 +70,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 ## 🧪 Test
 
 Après avoir ajouté les logs, testez à nouveau et vérifiez les logs de `process-scheduled-campaigns` pour voir :
+
 1. Si `SUPABASE_SERVICE_ROLE_KEY` est bien défini
 2. Si la longueur de la clé est correcte
 3. Si le préfixe de la clé correspond à ce qui est attendu
@@ -88,5 +88,3 @@ Après avoir ajouté les logs, testez à nouveau et vérifiez les logs de `proce
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

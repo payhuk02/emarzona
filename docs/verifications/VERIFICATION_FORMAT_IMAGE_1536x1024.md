@@ -237,4 +237,3 @@ Toutes les cartes produits utilisent maintenant le **format identique**:
 
 _Vérification terminée le 2 Février 2025_  
 _Toutes les cartes produits respectent maintenant le format 1536×1024 (ratio 3:2) ✅_
-

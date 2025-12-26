@@ -19,6 +19,7 @@ SELECT * FROM setup_ssl_expiration_check_cron('YOUR_SERVICE_ROLE_KEY');
 ```
 
 **Où trouver votre Service Role Key :**
+
 - Dashboard Supabase → Settings → API
 - Section "Project API keys" → `service_role` (secret)
 - Cliquez sur l'icône 👁️ pour révéler et copier
@@ -26,6 +27,7 @@ SELECT * FROM setup_ssl_expiration_check_cron('YOUR_SERVICE_ROLE_KEY');
 ## ✅ Vérification
 
 Après exécution, vous devriez voir une ligne avec :
+
 - `active: true`
 - `schedule: 0 9 * * *`
 - `jobname: check-ssl-expiration-daily`
@@ -42,9 +44,9 @@ Testez manuellement la fonction Edge Function :
 ## 🔄 Méthode Alternative : Dashboard
 
 Si vous préférez éviter SQL, utilisez le Dashboard :
+
 - Voir : `docs/guides/CONFIGURATION_CRON_SSL_EXPIRATION_VIA_DASHBOARD.md`
 
 ---
 
 **Date :** 2025-02-02
-

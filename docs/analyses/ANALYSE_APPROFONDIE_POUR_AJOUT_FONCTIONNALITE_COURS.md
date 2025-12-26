@@ -12,6 +12,7 @@
 ## 🎯 RÉSUMÉ EXÉCUTIF
 
 ### Vue d'ensemble de l'existant
+
 Payhuk est une **plateforme SaaS e-commerce professionnelle** construite avec une architecture moderne et scalable. L'analyse révèle une base technique solide prête à accueillir une nouvelle fonctionnalité majeure.
 
 ### Score de maturité technique : **87/100** ⭐⭐⭐⭐
@@ -22,12 +23,10 @@ Payhuk est une **plateforme SaaS e-commerce professionnelle** construite avec un
    - Ebooks, formations, logiciels, templates
    - Téléchargement automatique via Supabase Storage
    - Système de fichiers téléchargeables complet
-   
 2. **📦 Produits Physiques**
    - Gestion stock, variantes (couleur, taille)
    - Collecte adresse de livraison
    - Tracking de livraison
-   
 3. **🛠️ Services**
    - Consultations, coaching, développement
    - Prise de rendez-vous
@@ -40,6 +39,7 @@ Payhuk est une **plateforme SaaS e-commerce professionnelle** construite avec un
 ### 1. ARCHITECTURE ACTUELLE
 
 #### 1.1 Stack Technologique
+
 ```
 Frontend:
 - React 18.3.1 + TypeScript 5.8.3
@@ -65,6 +65,7 @@ Analytics & Monitoring:
 ```
 
 #### 1.2 Structure des composants produits
+
 ```
 src/components/products/
 ├── ProductForm.tsx              [Formulaire principal - 800 lignes]
@@ -104,18 +105,18 @@ CREATE TABLE products (
   product_type TEXT, -- 'digital', 'physical', 'service'
   pricing_model pricing_model, -- 'one-time', 'subscription', 'pay-what-you-want', 'free'
   category TEXT,
-  
+
   -- Médias
   image_url TEXT,
   images JSONB DEFAULT '[]',
   video_url TEXT,
-  
+
   -- Fichiers digitaux
   downloadable_files JSONB DEFAULT '[]',
   file_access_type TEXT, -- 'immediate', 'email', 'manual'
   download_limit INTEGER,
   download_expiry_days INTEGER,
-  
+
   -- Visibilité
   is_active BOOLEAN DEFAULT true,
   is_draft BOOLEAN DEFAULT true,
@@ -124,41 +125,41 @@ CREATE TABLE products (
   password_protected BOOLEAN DEFAULT false,
   product_password TEXT,
   access_control TEXT, -- 'public', 'logged_in', 'purchasers'
-  
+
   -- Métadonnées
   features TEXT[],
   specifications JSONB,
   custom_fields JSONB DEFAULT '[]',
   faqs JSONB DEFAULT '[]',
-  
+
   -- SEO
   meta_title TEXT,
   meta_description TEXT,
   meta_keywords TEXT,
   og_image TEXT,
-  
+
   -- Analytics
   analytics_enabled BOOLEAN DEFAULT false,
   track_views BOOLEAN DEFAULT false,
   track_clicks BOOLEAN DEFAULT false,
   track_purchases BOOLEAN DEFAULT false,
-  
+
   -- Stock (pour produits physiques)
   stock_quantity INTEGER,
   low_stock_threshold INTEGER,
   centralized_stock BOOLEAN,
-  
+
   -- Variantes
   variants JSONB DEFAULT '[]',
   color_variants BOOLEAN DEFAULT false,
   size_variants BOOLEAN DEFAULT false,
-  
+
   -- Dates
   sale_start_date TIMESTAMPTZ,
   sale_end_date TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
-  
+
   UNIQUE(store_id, slug)
 );
 
@@ -202,6 +203,7 @@ SERVICE_CATEGORIES:
 ### 3. SYSTÈME DE FICHIERS ET TÉLÉCHARGEMENTS
 
 #### 3.1 Gestion actuelle des fichiers (ProductFilesTab.tsx)
+
 ```typescript
 Interface FileItem {
   id: string;
@@ -233,6 +235,7 @@ download_expiry_days: durée de validité
 ### 4. SYSTÈME DE PAIEMENT
 
 #### 4.1 Flow de paiement Moneroo
+
 ```typescript
 1. Création transaction (table transactions)
 2. Appel API Moneroo via Edge Function
@@ -243,6 +246,7 @@ download_expiry_days: durée de validité
 ```
 
 #### 4.2 Types de paiement supportés
+
 ```
 - Paiement complet (full)
 - Paiement partiel (percentage)
@@ -255,6 +259,7 @@ download_expiry_days: durée de validité
 ### 5. SYSTÈME D'AFFILIATION
 
 **Tables dédiées** :
+
 - affiliates
 - product_affiliate_settings
 - affiliate_links
@@ -263,6 +268,7 @@ download_expiry_days: durée de validité
 - affiliate_withdrawals
 
 **Fonctionnalités** :
+
 - Tracking automatique des clics
 - Calcul automatique des commissions
 - Dashboard affilié complet
@@ -271,6 +277,7 @@ download_expiry_days: durée de validité
 ### 6. TEMPLATES PRODUITS EXISTANTS
 
 **10 templates prédéfinis** dans `src/lib/product-templates.ts`:
+
 - Ebook/PDF
 - **Formation en ligne** (template déjà existant! ⭐)
 - Logiciel/Application
@@ -288,6 +295,7 @@ download_expiry_days: durée de validité
 ### 1. DIFFÉRENCES : Formation (existant) vs COURS (nouveau)
 
 #### Formation (template actuel)
+
 - **Produit digital simple**
 - Vidéos uploadées comme fichiers
 - Accès à vie après achat
@@ -296,6 +304,7 @@ download_expiry_days: durée de validité
 - Certificat mentionné mais non fonctionnel
 
 #### COURS (fonctionnalité à créer) 🎓
+
 - **Système LMS (Learning Management System)**
 - Structure en sections/modules/leçons
 - Vidéos streamées (pas téléchargement)
@@ -312,6 +321,7 @@ download_expiry_days: durée de validité
 #### 2.1 Pour les ENSEIGNANTS (Créateurs de cours)
 
 **A. Création de cours**
+
 ```
 📚 Structure du cours:
   └── Cours
@@ -337,6 +347,7 @@ download_expiry_days: durée de validité
 ```
 
 **B. Gestion des étudiants**
+
 ```
 - Liste des étudiants inscrits
 - Progression de chaque étudiant
@@ -348,6 +359,7 @@ download_expiry_days: durée de validité
 ```
 
 **C. Analytics enseignant**
+
 ```
 - Nombre d'inscrits
 - Taux d'abandon par section
@@ -361,6 +373,7 @@ download_expiry_days: durée de validité
 #### 2.2 Pour les ÉTUDIANTS (Apprenants)
 
 **A. Interface d'apprentissage**
+
 ```
 🎥 Lecteur vidéo:
 - Player HTML5 avec contrôles avancés
@@ -381,6 +394,7 @@ download_expiry_days: durée de validité
 ```
 
 **B. Interactions**
+
 ```
 💬 Communauté:
 - Forum de discussion par cours
@@ -398,6 +412,7 @@ download_expiry_days: durée de validité
 ```
 
 **C. Gamification (optionnel mais recommandé)**
+
 ```
 🏆 Système de badges:
 - "First Lesson" (première leçon complétée)
@@ -416,6 +431,7 @@ download_expiry_days: durée de validité
 ### 3. MARKETPLACE DÉCOUVRABILITÉ
 
 **Filtres spécifiques cours**:
+
 ```
 - Par niveau (débutant/intermédiaire/avancé)
 - Par durée (< 2h, 2-10h, 10-50h, 50h+)
@@ -430,6 +446,7 @@ download_expiry_days: durée de validité
 ```
 
 **Page détail cours**:
+
 ```
 📋 Informations clés:
 - Preview vidéo gratuite (première leçon)
@@ -465,7 +482,7 @@ download_expiry_days: durée de validité
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
-  
+
   -- Métadonnées cours
   level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced', 'all_levels')),
   language TEXT DEFAULT 'fr',
@@ -474,34 +491,34 @@ CREATE TABLE courses (
   total_lessons INTEGER,
   total_quizzes INTEGER,
   total_resources INTEGER,
-  
+
   -- Contenu
   learning_objectives TEXT[],
   prerequisites TEXT[],
   target_audience TEXT[],
   course_outline JSONB, -- Structure complète du cours
-  
+
   -- Certificat
   certificate_enabled BOOLEAN DEFAULT true,
   certificate_template_url TEXT,
   certificate_passing_score INTEGER DEFAULT 80,
-  
+
   -- Drip content
   drip_enabled BOOLEAN DEFAULT false,
   drip_schedule JSONB, -- {type: 'daily', interval: 1, start_after_purchase: true}
-  
+
   -- Settings
   enable_qa BOOLEAN DEFAULT true,
   enable_discussions BOOLEAN DEFAULT true,
   enable_notes BOOLEAN DEFAULT true,
   enable_downloads BOOLEAN DEFAULT true,
   auto_play_next BOOLEAN DEFAULT true,
-  
+
   -- Stats
   total_enrollments INTEGER DEFAULT 0,
   average_completion_rate NUMERIC DEFAULT 0,
   average_rating NUMERIC DEFAULT 0,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -517,19 +534,19 @@ CREATE INDEX idx_courses_language ON courses(language);
 CREATE TABLE course_sections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  
+
   title TEXT NOT NULL,
   description TEXT,
   order_index INTEGER NOT NULL,
-  
+
   -- Drip
   is_locked BOOLEAN DEFAULT false,
   unlock_after_days INTEGER, -- NULL = disponible immédiatement
   unlock_after_section_id UUID REFERENCES course_sections(id),
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
-  
+
   UNIQUE(course_id, order_index)
 );
 
@@ -542,35 +559,35 @@ CREATE TABLE course_lessons (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   section_id UUID NOT NULL REFERENCES course_sections(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  
+
   title TEXT NOT NULL,
   description TEXT,
   order_index INTEGER NOT NULL,
-  
+
   -- Contenu vidéo
   video_type TEXT CHECK (video_type IN ('upload', 'youtube', 'vimeo', 'stream')),
   video_url TEXT NOT NULL,
   video_duration_seconds INTEGER,
   video_thumbnail_url TEXT,
-  
+
   -- Contenu additionnel
   transcript TEXT,
   notes TEXT,
-  
+
   -- Ressources
   downloadable_resources JSONB DEFAULT '[]', -- [{name, url, size, type}]
-  
+
   -- Progression
   is_preview BOOLEAN DEFAULT false, -- Leçon gratuite pour preview
   is_required BOOLEAN DEFAULT true, -- Requis pour certificat
   completion_criteria TEXT CHECK (completion_criteria IN ('video_watched', 'quiz_passed', 'manual')),
-  
+
   -- Quiz attaché (optionnel)
   has_quiz BOOLEAN DEFAULT false,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
-  
+
   UNIQUE(section_id, order_index)
 );
 
@@ -586,7 +603,7 @@ CREATE TABLE course_quizzes (
   lesson_id UUID REFERENCES course_lessons(id) ON DELETE CASCADE,
   section_id UUID REFERENCES course_sections(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  
+
   title TEXT NOT NULL,
   description TEXT,
   passing_score INTEGER DEFAULT 70,
@@ -594,9 +611,9 @@ CREATE TABLE course_quizzes (
   time_limit_minutes INTEGER, -- NULL = pas de limite
   shuffle_questions BOOLEAN DEFAULT true,
   show_correct_answers BOOLEAN DEFAULT true,
-  
+
   questions JSONB NOT NULL, -- Tableau de questions avec options et réponses
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -613,34 +630,34 @@ CREATE TABLE course_enrollments (
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
-  
+
   -- Status
   status TEXT CHECK (status IN ('active', 'completed', 'cancelled', 'expired')),
   enrollment_date TIMESTAMPTZ DEFAULT now(),
   completion_date TIMESTAMPTZ,
-  
+
   -- Progression
   progress_percentage NUMERIC DEFAULT 0,
   completed_lessons INTEGER DEFAULT 0,
   total_lessons INTEGER,
   last_accessed_lesson_id UUID REFERENCES course_lessons(id),
   last_accessed_at TIMESTAMPTZ,
-  
+
   -- Temps
   total_watch_time_minutes INTEGER DEFAULT 0,
-  
+
   -- Certificat
   certificate_earned BOOLEAN DEFAULT false,
   certificate_url TEXT,
   certificate_issued_at TIMESTAMPTZ,
-  
+
   -- Méta
   notes JSONB DEFAULT '[]', -- Notes de l'étudiant
   bookmarks JSONB DEFAULT '[]', -- Favoris
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
-  
+
   UNIQUE(course_id, user_id)
 );
 
@@ -656,20 +673,20 @@ CREATE TABLE course_lesson_progress (
   enrollment_id UUID NOT NULL REFERENCES course_enrollments(id) ON DELETE CASCADE,
   lesson_id UUID NOT NULL REFERENCES course_lessons(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
+
   -- Progression vidéo
   is_completed BOOLEAN DEFAULT false,
   completed_at TIMESTAMPTZ,
   watch_time_seconds INTEGER DEFAULT 0,
   last_position_seconds INTEGER DEFAULT 0,
   times_watched INTEGER DEFAULT 0,
-  
+
   -- Notes
   personal_notes TEXT,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
-  
+
   UNIQUE(enrollment_id, lesson_id)
 );
 
@@ -685,21 +702,21 @@ CREATE TABLE quiz_attempts (
   quiz_id UUID NOT NULL REFERENCES course_quizzes(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   enrollment_id UUID NOT NULL REFERENCES course_enrollments(id) ON DELETE CASCADE,
-  
+
   -- Résultats
   score NUMERIC NOT NULL,
   total_questions INTEGER NOT NULL,
   correct_answers INTEGER NOT NULL,
   passed BOOLEAN NOT NULL,
-  
+
   -- Réponses
   answers JSONB NOT NULL, -- {question_id: selected_option_id}
-  
+
   -- Temps
   started_at TIMESTAMPTZ NOT NULL,
   completed_at TIMESTAMPTZ NOT NULL,
   time_taken_seconds INTEGER,
-  
+
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -715,27 +732,27 @@ CREATE TABLE course_discussions (
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   lesson_id UUID REFERENCES course_lessons(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
+
   -- Contenu
   title TEXT NOT NULL,
   content TEXT NOT NULL,
-  
+
   -- Type
   discussion_type TEXT CHECK (discussion_type IN ('question', 'discussion', 'announcement')),
-  
+
   -- Status
   is_answered BOOLEAN DEFAULT false,
   is_pinned BOOLEAN DEFAULT false,
   answered_by UUID REFERENCES auth.users(id),
   answered_at TIMESTAMPTZ,
-  
+
   -- Engagement
   upvotes INTEGER DEFAULT 0,
   replies_count INTEGER DEFAULT 0,
-  
+
   -- Video timestamp (si lié à un moment précis)
   video_timestamp_seconds INTEGER,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -751,13 +768,13 @@ CREATE TABLE course_discussion_replies (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   discussion_id UUID NOT NULL REFERENCES course_discussions(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
+
   content TEXT NOT NULL,
   is_instructor_reply BOOLEAN DEFAULT false,
   is_solution BOOLEAN DEFAULT false,
-  
+
   upvotes INTEGER DEFAULT 0,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -775,29 +792,29 @@ CREATE TABLE course_reviews (
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   enrollment_id UUID NOT NULL REFERENCES course_enrollments(id) ON DELETE CASCADE,
-  
+
   -- Évaluation
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  
+
   -- Détails spécifiques cours
   content_quality_rating INTEGER CHECK (content_quality_rating >= 1 AND content_quality_rating <= 5),
   instructor_rating INTEGER CHECK (instructor_rating >= 1 AND instructor_rating <= 5),
   value_for_money_rating INTEGER CHECK (value_for_money_rating >= 1 AND value_for_money_rating <= 5),
-  
+
   -- Avis
   title TEXT,
   comment TEXT,
-  
+
   -- Vérification
   is_verified_purchase BOOLEAN DEFAULT true,
   completion_percentage_at_review NUMERIC,
-  
+
   -- Engagement
   helpful_count INTEGER DEFAULT 0,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
-  
+
   UNIQUE(course_id, user_id)
 );
 
@@ -813,29 +830,29 @@ CREATE TABLE course_certificates (
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   enrollment_id UUID NOT NULL REFERENCES course_enrollments(id) ON DELETE CASCADE,
-  
+
   -- Certificat
   certificate_number TEXT NOT NULL UNIQUE, -- Ex: CERT-2025-001234
   certificate_url TEXT NOT NULL,
   certificate_pdf_url TEXT,
-  
+
   -- Détails
   student_name TEXT NOT NULL,
   course_title TEXT NOT NULL,
   instructor_name TEXT NOT NULL,
   completion_date DATE NOT NULL,
   final_score NUMERIC,
-  
+
   -- Validation
   is_valid BOOLEAN DEFAULT true,
   revoked BOOLEAN DEFAULT false,
   revoked_at TIMESTAMPTZ,
   revoked_reason TEXT,
-  
+
   -- Partage
   is_public BOOLEAN DEFAULT true,
   linkedin_share_url TEXT,
-  
+
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -850,33 +867,33 @@ CREATE TABLE instructor_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
-  
+
   -- Profil public
   display_name TEXT NOT NULL,
   headline TEXT, -- Ex: "Expert Marketing Digital"
   bio TEXT,
   avatar_url TEXT,
-  
+
   -- Expertise
   expertise_areas TEXT[], -- ['marketing', 'design', 'dev']
   years_of_experience INTEGER,
-  
+
   -- Réseaux sociaux
   website_url TEXT,
   linkedin_url TEXT,
   twitter_url TEXT,
   youtube_url TEXT,
-  
+
   -- Stats
   total_students INTEGER DEFAULT 0,
   total_courses INTEGER DEFAULT 0,
   average_rating NUMERIC DEFAULT 0,
   total_reviews INTEGER DEFAULT 0,
-  
+
   -- Badges
   is_verified BOOLEAN DEFAULT false,
   is_top_instructor BOOLEAN DEFAULT false,
-  
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -997,21 +1014,21 @@ BEGIN
   FROM course_lessons cl
   JOIN course_enrollments ce ON ce.course_id = cl.course_id
   WHERE ce.id = p_enrollment_id;
-  
+
   -- Compter les leçons complétées
   SELECT COUNT(*)
   INTO v_completed_lessons
   FROM course_lesson_progress clp
   WHERE clp.enrollment_id = p_enrollment_id
   AND clp.is_completed = true;
-  
+
   -- Calculer le pourcentage
   IF v_total_lessons > 0 THEN
     v_progress := (v_completed_lessons::NUMERIC / v_total_lessons) * 100;
   ELSE
     v_progress := 0;
   END IF;
-  
+
   -- Mettre à jour l'enrollment
   UPDATE course_enrollments
   SET progress_percentage = v_progress,
@@ -1019,7 +1036,7 @@ BEGIN
       total_lessons = v_total_lessons,
       updated_at = now()
   WHERE id = p_enrollment_id;
-  
+
   RETURN v_progress;
 END;
 $$;
@@ -1035,15 +1052,15 @@ DECLARE
   v_certificate_number TEXT;
 BEGIN
   v_year := TO_CHAR(CURRENT_DATE, 'YYYY');
-  
+
   -- Compter les certificats de l'année
   SELECT LPAD((COUNT(*) + 1)::TEXT, 6, '0')
   INTO v_number
   FROM course_certificates
   WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE);
-  
+
   v_certificate_number := 'CERT-' || v_year || '-' || v_number;
-  
+
   RETURN v_certificate_number;
 END;
 $$;
@@ -1066,7 +1083,7 @@ BEGIN
   FROM course_lesson_progress
   WHERE enrollment_id = p_enrollment_id
   AND lesson_id = p_lesson_id;
-  
+
   -- Si pas encore de progress, créer
   IF NOT FOUND THEN
     INSERT INTO course_lesson_progress (
@@ -1082,10 +1099,10 @@ BEGIN
     WHERE enrollment_id = p_enrollment_id
     AND lesson_id = p_lesson_id;
   END IF;
-  
+
   -- Recalculer la progression
   PERFORM calculate_course_progress(p_enrollment_id);
-  
+
   RETURN true;
 END;
 $$;
@@ -1109,24 +1126,24 @@ BEGIN
   FROM course_enrollments ce
   JOIN courses c ON c.id = ce.course_id
   WHERE ce.id = p_enrollment_id;
-  
+
   -- Vérifier progression 100%
   IF v_progress < 100 THEN
     RETURN false;
   END IF;
-  
+
   -- Calculer la moyenne des quiz
   SELECT AVG(score)
   INTO v_average_quiz_score
   FROM quiz_attempts qa
   WHERE qa.enrollment_id = p_enrollment_id
   AND qa.passed = true;
-  
+
   -- Vérifier score minimum
   IF v_average_quiz_score IS NULL OR v_average_quiz_score < v_passing_score THEN
     RETURN false;
   END IF;
-  
+
   RETURN true;
 END;
 $$;
@@ -1273,7 +1290,7 @@ export interface Course {
   average_rating: number;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   product?: Product;
   sections?: CourseSection[];
@@ -1291,7 +1308,7 @@ export interface CourseSection {
   unlock_after_section_id?: string;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   lessons?: CourseLesson[];
 }
@@ -1316,7 +1333,7 @@ export interface CourseLesson {
   has_quiz: boolean;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   quiz?: CourseQuiz;
   progress?: LessonProgress;
@@ -1386,7 +1403,7 @@ export interface CourseEnrollment {
   bookmarks: string[];
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   course?: Course;
   certificate?: CourseCertificate;
@@ -1440,7 +1457,7 @@ export interface CourseDiscussion {
   video_timestamp_seconds?: number;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   user?: { id: string; name: string; avatar_url?: string };
   replies?: DiscussionReply[];
@@ -1456,7 +1473,7 @@ export interface DiscussionReply {
   upvotes: number;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   user?: { id: string; name: string; avatar_url?: string };
 }
@@ -1478,7 +1495,7 @@ export interface CourseReview {
   helpful_count: number;
   created_at: string;
   updated_at: string;
-  
+
   // Relations
   user?: { id: string; name: string; avatar_url?: string };
 }
@@ -1575,6 +1592,7 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 1 : FONDATIONS (Semaine 1-2) ⚡
 
 #### Tâches backend
+
 - [ ] Créer toutes les tables SQL (migration complète)
 - [ ] Implémenter RLS policies
 - [ ] Créer fonctions SQL utilitaires
@@ -1582,6 +1600,7 @@ export interface QuizFormData extends CourseQuiz {
 - [ ] Tester requêtes et performances
 
 #### Tâches frontend
+
 - [ ] Créer types TypeScript (courses.ts)
 - [ ] Créer hooks de base (useCourses, useCourseEnrollment)
 - [ ] Setup routes
@@ -1594,6 +1613,7 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 2 : CRÉATION DE COURS (Semaine 3-4) 🎨
 
 #### Composants à créer
+
 - [ ] CourseCreationWizard.tsx (wizard guidé)
 - [ ] CourseForm.tsx (formulaire principal)
 - [ ] CourseCurriculumTab.tsx (gestion sections/leçons)
@@ -1602,6 +1622,7 @@ export interface QuizFormData extends CourseQuiz {
 - [ ] VideoUploader.tsx (upload vidéos avec progress)
 
 #### Fonctionnalités
+
 - [ ] Création cours en plusieurs étapes
 - [ ] Drag & drop pour réorganiser curriculum
 - [ ] Upload vidéos (chunked upload pour gros fichiers)
@@ -1616,6 +1637,7 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 3 : QUIZ & ÉVALUATIONS (Semaine 5) 📝
 
 #### Composants
+
 - [ ] CourseQuizzesTab.tsx (gestion quiz enseignant)
 - [ ] QuizEditor.tsx (création quiz)
 - [ ] QuestionEditor.tsx (création questions)
@@ -1623,6 +1645,7 @@ export interface QuizFormData extends CourseQuiz {
 - [ ] QuizResults.tsx (affichage résultats)
 
 #### Fonctionnalités
+
 - [ ] Questions à choix multiples
 - [ ] Questions vrai/faux
 - [ ] Chronomètre
@@ -1637,6 +1660,7 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 4 : LECTEUR DE COURS (Semaine 6-7) 🎥
 
 #### Composants principaux
+
 - [ ] CoursePlayer.tsx (interface complète)
 - [ ] VideoPlayer.tsx (player HTML5 custom)
 - [ ] LessonSidebar.tsx (curriculum latéral)
@@ -1645,6 +1669,7 @@ export interface QuizFormData extends CourseQuiz {
 - [ ] ProgressTracker.tsx (barre de progression)
 
 #### Fonctionnalités player
+
 - [ ] Lecture/Pause
 - [ ] Vitesse (0.5x à 2x)
 - [ ] Volume
@@ -1663,12 +1688,14 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 5 : DISCUSSIONS & COMMUNAUTÉ (Semaine 8) 💬
 
 #### Composants
+
 - [ ] DiscussionsList.tsx
 - [ ] DiscussionThread.tsx
 - [ ] NewDiscussionForm.tsx
 - [ ] ReplyEditor.tsx
 
 #### Fonctionnalités
+
 - [ ] Poster questions
 - [ ] Répondre aux discussions
 - [ ] Upvote/downvote
@@ -1684,11 +1711,13 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 6 : CERTIFICATS (Semaine 9) 🏆
 
 #### Composants
+
 - [ ] CertificateGenerator (backend function)
 - [ ] CertificateDisplay.tsx
 - [ ] CertificateView.tsx (page publique)
 
 #### Fonctionnalités
+
 - [ ] Génération automatique PDF
 - [ ] Template personnalisable
 - [ ] Numéro unique de certificat
@@ -1703,6 +1732,7 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 7 : DASHBOARDS (Semaine 10) 📊
 
 #### Dashboard Enseignant
+
 - [ ] Vue d'ensemble (revenus, étudiants, ratings)
 - [ ] Analytics par cours
 - [ ] Progression des étudiants
@@ -1710,6 +1740,7 @@ export interface QuizFormData extends CourseQuiz {
 - [ ] Avis récents
 
 #### Dashboard Étudiant
+
 - [ ] Mes cours en cours
 - [ ] Progression globale
 - [ ] Certificats obtenus
@@ -1723,12 +1754,14 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 8 : MARKETPLACE (Semaine 11) 🏪
 
 #### Pages
+
 - [ ] Page catalogue cours (/marketplace/courses)
 - [ ] Page détail cours (public)
 - [ ] Profil instructeur
 - [ ] Page checkout cours
 
 #### Fonctionnalités
+
 - [ ] Filtres avancés (niveau, durée, langue, prix)
 - [ ] Tri (plus récents, bestsellers, mieux notés)
 - [ ] Preview vidéo gratuite
@@ -1745,6 +1778,7 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 9 : OPTIMISATIONS (Semaine 12) ⚡
 
 #### Performance
+
 - [ ] Lazy loading vidéos
 - [ ] Compression vidéos automatique
 - [ ] CDN pour vidéos (Cloudflare Stream ou Bunny.net)
@@ -1753,6 +1787,7 @@ export interface QuizFormData extends CourseQuiz {
 - [ ] Indexation DB optimale
 
 #### UX
+
 - [ ] Skeleton loaders
 - [ ] Animations fluides
 - [ ] Messages de succès/erreur
@@ -1766,18 +1801,21 @@ export interface QuizFormData extends CourseQuiz {
 ### PHASE 10 : TESTS & DÉPLOIEMENT (Semaine 13-14) ✅
 
 #### Tests
+
 - [ ] Tests unitaires composants clés (Vitest)
 - [ ] Tests E2E parcours critiques (Playwright)
 - [ ] Tests de charge (upload vidéos)
 - [ ] Tests cross-browser
 
 #### Documentation
+
 - [ ] Guide utilisateur enseignants
 - [ ] Guide utilisateur étudiants
 - [ ] Documentation technique
 - [ ] Vidéos tutoriels
 
 #### Déploiement
+
 - [ ] Migration DB production
 - [ ] Déploiement Vercel
 - [ ] Configuration CDN vidéos
@@ -1793,36 +1831,42 @@ export interface QuizFormData extends CourseQuiz {
 ### V2 - Fonctionnalités Premium
 
 #### 1. Streaming Vidéo Avancé
+
 - [ ] HLS/DASH streaming adaptatif
 - [ ] Watermarking automatique
 - [ ] DRM protection
 - [ ] Analytics vidéo détaillés
 
 #### 2. Interactivité
+
 - [ ] Live sessions (Zoom/Google Meet integration)
 - [ ] Assignments avec code playground
 - [ ] Peer review système
 - [ ] Breakout rooms
 
 #### 3. Gamification Avancée
+
 - [ ] Leaderboards
 - [ ] Badges personnalisés
 - [ ] Challenges hebdomadaires
 - [ ] Système de points/levels
 
 #### 4. Mobile App
+
 - [ ] Download offline (Progressive Web App)
 - [ ] Push notifications
 - [ ] Mode nuit
 - [ ] Chromecast support
 
 #### 5. AI & Automation
+
 - [ ] Transcription auto (OpenAI Whisper)
 - [ ] Traduction sous-titres auto
 - [ ] Génération quiz depuis contenu
 - [ ] Chatbot assistant cours
 
 #### 6. Monétisation Avancée
+
 - [ ] Payment plans (3, 6, 12 mois)
 - [ ] Subscriptions (accès tous les cours)
 - [ ] Corporate licenses (entreprises)
@@ -1835,6 +1879,7 @@ export interface QuizFormData extends CourseQuiz {
 ### KPIs à tracker
 
 **Pour la plateforme** :
+
 - Nombre de cours créés
 - Nombre d'inscriptions totales
 - Taux de complétion moyen
@@ -1842,6 +1887,7 @@ export interface QuizFormData extends CourseQuiz {
 - Rating moyen cours
 
 **Pour les enseignants** :
+
 - Nombre d'étudiants par cours
 - Taux de complétion cours
 - Rating cours
@@ -1849,6 +1895,7 @@ export interface QuizFormData extends CourseQuiz {
 - Engagement discussions
 
 **Pour les étudiants** :
+
 - Temps d'apprentissage
 - Cours complétés
 - Certificats obtenus
@@ -1859,6 +1906,7 @@ export interface QuizFormData extends CourseQuiz {
 ## 💰 ESTIMATION BUDGET & TEMPS
 
 ### Développement
+
 ```
 Phase 1-10 (Implémentation complète):
 - Développement : 520 heures
@@ -1879,6 +1927,7 @@ TOTAL ESTIMÉ : $37,000
 ```
 
 ### Infrastructure mensuelle (additionnelle)
+
 ```
 Stockage vidéos (Bunny.net) : $50-200/mois
 Streaming bandwidth : $0.01/GB
@@ -1889,6 +1938,7 @@ TOTAL INFRA : $100-300/mois (selon volume)
 ```
 
 ### Timeline
+
 ```
 Développement complet : 14 semaines (3.5 mois)
 Tests & ajustements : 2 semaines
@@ -1902,20 +1952,25 @@ TOTAL : 4 mois pour MVP production-ready
 ## 🎯 ROADMAP SUGGÉRÉE
 
 ### Mois 1 (Semaines 1-4)
+
 ✅ Phases 1-2 : Fondations + Création de cours
 
 ### Mois 2 (Semaines 5-8)
+
 ✅ Phases 3-5 : Quiz + Lecteur + Discussions
 
 ### Mois 3 (Semaines 9-12)
+
 ✅ Phases 6-8 : Certificats + Dashboards + Marketplace
 
 ### Mois 4 (Semaines 13-16)
+
 ✅ Phases 9-10 : Optimisations + Tests + Déploiement
 ✅ Beta testing avec premiers enseignants
 ✅ Ajustements feedback
 
 ### Mois 5+
+
 ✅ Marketing & acquisition
 ✅ Fonctionnalités V2
 ✅ Internationalisation
@@ -1927,32 +1982,39 @@ TOTAL : 4 mois pour MVP production-ready
 ### Risques techniques
 
 **1. Stockage vidéos coûteux**
+
 - **Risque** : Coûts stockage élevés si beaucoup de vidéos
 - **Mitigation** : Utiliser CDN économique (Bunny.net), compression automatique, limites par cours
 
 **2. Bande passante streaming**
+
 - **Risque** : Coûts bandwidth si forte croissance
 - **Mitigation** : Caching agressif, résolution adaptative, CDN optimisé
 
 **3. Performance upload vidéos**
+
 - **Risque** : Uploads lents/timeouts
 - **Mitigation** : Chunked upload, progress bars, reprise auto après erreur
 
 **4. Complexité curriculum builder**
+
 - **Risque** : UX compliquée pour créateurs
 - **Mitigation** : Wizard guidé, templates, drag & drop intuitif, tutoriels
 
 ### Risques produit
 
 **1. Adoption enseignants**
+
 - **Risque** : Pas assez de créateurs de cours
 - **Mitigation** : Onboarding simplifié, support dédié, commission attractive (70-80% pour créateur)
 
 **2. Qualité contenu**
+
 - **Risque** : Cours de mauvaise qualité
 - **Mitigation** : Processus de review (optionnel), guidelines qualité, modération
 
 **3. Piratage contenu**
+
 - **Risque** : Téléchargement/partage illégal vidéos
 - **Mitigation** : Watermarking, DRM (V2), détection partage comptes
 
@@ -1961,6 +2023,7 @@ TOTAL : 4 mois pour MVP production-ready
 ## 📚 RESSOURCES & RÉFÉRENCES
 
 ### Inspirations (benchmarks)
+
 - **Udemy** : Marketplace, ratings, curriculum
 - **Teachable** : Création cours, drip content
 - **Thinkific** : Dashboard enseignant
@@ -1970,22 +2033,26 @@ TOTAL : 4 mois pour MVP production-ready
 ### Technologies recommandées
 
 **Frontend** :
+
 - `react-player` : Player vidéo universel
 - `react-beautiful-dnd` : Drag & drop curriculum
 - `tiptap` : Éditeur riche (déjà utilisé)
 - `recharts` : Graphiques analytics (déjà utilisé)
 
 **Backend** :
+
 - Supabase Storage : Vidéos et ressources
 - Supabase Edge Functions : Transcoding, certificats PDF
 - Supabase Realtime : Progression temps réel
 
 **CDN Vidéo** :
+
 - Bunny.net Stream : Excellent rapport qualité/prix
 - Cloudflare Stream : Alternative premium
 - Mux : Alternative haut de gamme (cher)
 
 **Certificats PDF** :
+
 - jsPDF + jsPDF-autotable : Génération PDF (déjà utilisé)
 - Canva API : Templates professionnels (optionnel)
 
@@ -2006,26 +2073,31 @@ L'application Payhuk possède déjà **une excellente base technique** pour accu
 ### Recommandations stratégiques
 
 **1. Commencer simple (MVP)**
+
 - Se concentrer sur Phases 1-8 pour MVP
 - Lancer avec fonctionnalités essentielles
 - Itérer selon feedback utilisateurs
 
 **2. Prioriser l'expérience enseignant**
+
 - Créer cours doit être simple et rapide
 - Fournir templates et exemples
 - Support et documentation exhaustive
 
 **3. Focus qualité vidéo**
+
 - Investir dans bon CDN dès le début
 - Compression automatique
 - Preview avant publication
 
 **4. Construire la communauté**
+
 - Système de discussions solide
 - Encourager interactions
 - Modération légère
 
 **5. Analytics dès le début**
+
 - Tracker toutes les métriques clés
 - Tableaux de bord enseignant détaillés
 - Optimiser rétention étudiants
@@ -2048,4 +2120,3 @@ L'application Payhuk possède déjà **une excellente base technique** pour accu
 ---
 
 🎯 **Payhuk est prête à devenir la meilleure plateforme de cours en ligne d'Afrique de l'Ouest !**
-

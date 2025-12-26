@@ -11,6 +11,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### Structure Actuelle des Produits Physiques
 
 **Wizard en 9 étapes** :
+
 1. Informations de base (nom, description, prix, images)
 2. Variantes & Options (couleurs, tailles, options)
 3. Inventaire (stock, SKU, tracking)
@@ -22,6 +23,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 9. Aperçu & Validation
 
 **Tables Supabase** :
+
 - `products` (table centrale)
 - `physical_products` (détails produits physiques)
 - `product_variants` (variantes)
@@ -35,6 +37,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 1. ÉCRIVAINS / AUTEURS
 
 **Produits** :
+
 - Livres (papier, reliés, brochés)
 - E-books (version physique)
 - Manuscrits
@@ -42,6 +45,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Collections limitées
 
 **Fonctionnalités nécessaires** :
+
 - ✅ **Informations du livre** : ISBN, nombre de pages, format, langue, date de publication
 - ✅ **Auteur** : Nom, biographie, photo, autres œuvres
 - ✅ **Édition** : Éditeur, collection, numéro d'édition
@@ -54,6 +58,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 2. MUSICIENS / ARTISTES MUSICAUX
 
 **Produits** :
+
 - CDs, Vinyls, Cassettes
 - Partitions musicales
 - Merchandising (t-shirts, posters, accessoires)
@@ -61,6 +66,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Équipements audio
 
 **Fonctionnalités nécessaires** :
+
 - ✅ **Informations musicales** : Genre, durée, nombre de pistes, année de sortie
 - ✅ **Artiste** : Nom, biographie, photo, autres albums
 - ✅ **Format audio** : CD, Vinyl, Cassette, Digital (physique)
@@ -72,6 +78,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 3. ARTISTES VISUELS
 
 **Produits** :
+
 - Tableaux, peintures
 - Photographies imprimées
 - Sculptures
@@ -79,6 +86,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Œuvres numérotées
 
 **Fonctionnalités nécessaires** :
+
 - ✅ **Informations artistiques** : Technique, dimensions, matériaux, support
 - ✅ **Artiste** : Nom, biographie, photo, portfolio
 - ✅ **Édition** : Original, reproduction, tirage limité, numéroté
@@ -91,12 +99,14 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 4. ARTISANS / CRÉATEURS
 
 **Produits** :
+
 - Bijoux artisanaux
 - Vêtements sur mesure
 - Accessoires personnalisés
 - Objets décoratifs
 
 **Fonctionnalités nécessaires** :
+
 - ✅ **Personnalisation** : Options de personnalisation (texte, couleur, taille)
 - ✅ **Matériaux** : Matériaux utilisés, origine
 - ✅ **Fait main** : Certification "fait main", temps de fabrication
@@ -111,6 +121,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 1. Type d'Artiste (Sélection)
 
 **Catégories** :
+
 - Écrivain / Auteur
 - Musicien / Artiste musical
 - Artiste visuel (peintre, photographe, sculpteur)
@@ -120,6 +131,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 2. Informations Artistiques (Communes)
 
 **Champs** :
+
 - Nom de l'artiste / Auteur
 - Biographie de l'artiste
 - Photo de l'artiste
@@ -131,6 +143,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 3. Informations Spécifiques par Type
 
 #### A. ÉCRIVAINS
+
 - ISBN
 - Nombre de pages
 - Format (Broché, Relié, Poche, Grand format)
@@ -146,6 +159,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Certificat d'authenticité
 
 #### B. MUSICIENS
+
 - Genre musical
 - Durée totale
 - Nombre de pistes
@@ -158,6 +172,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Merchandising associé
 
 #### C. ARTISTES VISUELS
+
 - Technique (Huile, Acrylique, Aquarelle, Photographie, Sculpture, etc.)
 - Support (Toile, Papier, Bois, Métal, etc.)
 - Dimensions (largeur, hauteur, profondeur)
@@ -169,6 +184,7 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Type de cadre (si encadré)
 
 #### D. ARTISANS
+
 - Matériaux utilisés
 - Origine des matériaux
 - Technique de fabrication
@@ -181,12 +197,14 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 ### 4. Options Avancées
 
 **Dédicace / Personnalisation** :
+
 - Activer la dédicace
 - Message par défaut
 - Champs personnalisables (nom, message, date)
 - Prévisualisation
 
 **Édition Limitée / Numérotée** :
+
 - Activer l'édition limitée
 - Nombre total d'exemplaires
 - Numérotation automatique
@@ -194,12 +212,14 @@ Ajouter un système spécialisé pour les artistes (écrivains, musiciens, artis
 - Certificat d'authenticité
 
 **Certificat d'Authenticité** :
+
 - Générer automatiquement
 - Template personnalisable
 - Téléchargeable après achat
 - Inclus dans l'emballage
 
 **Aperçu / Preview** :
+
 - Extrait (livre, musique, etc.)
 - Galerie d'images
 - Vidéo de présentation
@@ -216,7 +236,7 @@ CREATE TABLE public.artist_products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL UNIQUE REFERENCES public.products(id) ON DELETE CASCADE,
   physical_product_id UUID REFERENCES public.physical_products(id) ON DELETE CASCADE,
-  
+
   -- === TYPE D'ARTISTE ===
   artist_type TEXT NOT NULL CHECK (artist_type IN (
     'writer',      -- Écrivain / Auteur
@@ -225,7 +245,7 @@ CREATE TABLE public.artist_products (
     'craftsman',   -- Artisan / Créateur
     'other'        -- Autre
   )),
-  
+
   -- === INFORMATIONS ARTISTE (Communes) ===
   artist_name TEXT NOT NULL,
   artist_biography TEXT,
@@ -234,52 +254,52 @@ CREATE TABLE public.artist_products (
   artist_social_media JSONB DEFAULT '{}', -- {instagram, facebook, twitter, etc.}
   artist_website TEXT,
   artist_other_works JSONB DEFAULT '[]', -- Array of product IDs or links
-  
+
   -- === INFORMATIONS SPÉCIFIQUES (JSONB pour flexibilité) ===
   specific_info JSONB DEFAULT '{}',
   -- Pour écrivains: {isbn, pages, format, language, publisher, etc.}
   -- Pour musiciens: {genre, duration, tracks, year, format, etc.}
   -- Pour artistes visuels: {technique, support, dimensions, materials, etc.}
   -- Pour artisans: {materials, origin, technique, handmade, etc.}
-  
+
   -- === OPTIONS AVANCÉES ===
   -- Dédicace
   dedication_enabled BOOLEAN DEFAULT FALSE,
   dedication_default_message TEXT,
   dedication_customizable_fields JSONB DEFAULT '[]', -- ['name', 'message', 'date']
-  
+
   -- Édition limitée
   limited_edition_enabled BOOLEAN DEFAULT FALSE,
   limited_edition_total INTEGER, -- Nombre total d'exemplaires
   limited_edition_numbered BOOLEAN DEFAULT FALSE,
   limited_edition_signed BOOLEAN DEFAULT FALSE,
   limited_edition_certificate BOOLEAN DEFAULT FALSE,
-  
+
   -- Certificat d'authenticité
   authenticity_certificate_enabled BOOLEAN DEFAULT FALSE,
   authenticity_certificate_template TEXT, -- Template personnalisable
   authenticity_certificate_downloadable BOOLEAN DEFAULT TRUE,
   authenticity_certificate_included BOOLEAN DEFAULT TRUE,
-  
+
   -- Preview / Aperçu
   preview_type TEXT CHECK (preview_type IN ('excerpt', 'gallery', 'video', 'audio', 'none')),
   preview_content TEXT, -- Extrait, URL vidéo, etc.
   preview_gallery JSONB DEFAULT '[]', -- Array of image URLs
-  
+
   -- Encadrement (pour artistes visuels)
   framing_enabled BOOLEAN DEFAULT FALSE,
   framing_options JSONB DEFAULT '[]', -- [{type, price}, ...]
   framing_default TEXT,
-  
+
   -- Personnalisation (pour artisans)
   customization_enabled BOOLEAN DEFAULT FALSE,
   customization_options JSONB DEFAULT '[]', -- [{field, type, required}, ...]
-  
+
   -- Sur mesure
   made_to_order_enabled BOOLEAN DEFAULT FALSE,
   made_to_order_fields JSONB DEFAULT '[]', -- [{field, type, unit}, ...]
   made_to_order_lead_time_days INTEGER, -- Délai de fabrication
-  
+
   -- === TIMESTAMPS ===
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -300,20 +320,20 @@ CREATE TABLE public.artist_product_dedications (
   order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
   order_item_id UUID REFERENCES public.order_items(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
-  
+
   -- Dédicace
   dedication_to_name TEXT NOT NULL, -- Nom de la personne à qui dédier
   dedication_message TEXT,
   dedication_date DATE,
   dedication_signature TEXT, -- Signature de l'artiste
-  
+
   -- Statut
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
   completed_at TIMESTAMPTZ,
-  
+
   -- Notes
   notes TEXT,
-  
+
   -- === TIMESTAMPS ===
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -334,22 +354,22 @@ CREATE TABLE public.artist_product_certificates (
   order_item_id UUID REFERENCES public.order_items(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
   artist_product_id UUID NOT NULL REFERENCES public.artist_products(id) ON DELETE CASCADE,
-  
+
   -- Certificat
   certificate_number TEXT UNIQUE NOT NULL, -- Numéro unique du certificat
   certificate_type TEXT DEFAULT 'authenticity' CHECK (certificate_type IN ('authenticity', 'limited_edition', 'handmade')),
-  
+
   -- Informations
   edition_number INTEGER, -- Si édition limitée
   total_edition INTEGER, -- Nombre total d'exemplaires
   signed_by_artist BOOLEAN DEFAULT FALSE,
   signed_date DATE,
-  
+
   -- Fichier
   certificate_pdf_url TEXT, -- URL du PDF généré
   certificate_downloaded_at TIMESTAMPTZ,
   download_count INTEGER DEFAULT 0,
-  
+
   -- === TIMESTAMPS ===
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -366,40 +386,49 @@ CREATE INDEX IF NOT EXISTS idx_artist_product_certificates_certificate_number ON
 ## 🎨 COMPOSANTS UI À CRÉER
 
 ### 1. `ArtistTypeSelector.tsx`
+
 - Sélection du type d'artiste
 - Affichage conditionnel des champs selon le type
 
 ### 2. `ArtistInfoForm.tsx`
+
 - Informations communes de l'artiste
 - Biographie, photo, portfolio, réseaux sociaux
 
 ### 3. `WriterSpecificForm.tsx`
+
 - Champs spécifiques pour écrivains
 - ISBN, pages, format, éditeur, etc.
 
 ### 4. `MusicianSpecificForm.tsx`
+
 - Champs spécifiques pour musiciens
 - Genre, durée, pistes, format audio, etc.
 
 ### 5. `VisualArtistSpecificForm.tsx`
+
 - Champs spécifiques pour artistes visuels
 - Technique, support, dimensions, matériaux, etc.
 
 ### 6. `CraftsmanSpecificForm.tsx`
+
 - Champs spécifiques pour artisans
 - Matériaux, technique, personnalisation, etc.
 
 ### 7. `ArtistAdvancedOptions.tsx`
+
 - Options de dédicace
 - Édition limitée
 - Certificat d'authenticité
 - Preview / Aperçu
 
 ### 8. `DedicationForm.tsx`
+
 - Formulaire de dédicace (côté client lors de la commande)
 - Champs personnalisables
 
 ### 9. `CertificateGenerator.tsx`
+
 - Génération de certificats d'authenticité
 - Templates personnalisables
 - Export PDF
@@ -416,6 +445,7 @@ CREATE INDEX IF NOT EXISTS idx_artist_product_certificates_certificate_number ON
 - Contient tous les formulaires spécialisés selon le type d'artiste
 
 **Ordre proposé** :
+
 1. Informations de base
 2. **Informations Artiste** (NOUVEAU - conditionnel)
 3. Variantes & Options
@@ -513,16 +543,16 @@ export interface CraftsmanSpecificInfo {
 export interface ArtistProductFormData {
   // Type
   artist_type: ArtistType | null;
-  
+
   // Informations artiste
   artist_info: ArtistInfo;
-  
+
   // Informations spécifiques
   writer_info?: WriterSpecificInfo;
   musician_info?: MusicianSpecificInfo;
   visual_artist_info?: VisualArtistSpecificInfo;
   craftsman_info?: CraftsmanSpecificInfo;
-  
+
   // Options avancées
   dedication?: {
     enabled: boolean;
@@ -560,26 +590,31 @@ export interface ArtistProductFormData {
 ## 🎯 PLAN D'IMPLÉMENTATION
 
 ### Phase 1 : Base de données
+
 1. ✅ Créer la migration SQL pour `artist_products`
 2. ✅ Créer la migration SQL pour `artist_product_dedications`
 3. ✅ Créer la migration SQL pour `artist_product_certificates`
 
 ### Phase 2 : Types TypeScript
+
 1. ✅ Créer `src/types/artist-product.ts`
 2. ✅ Étendre `PhysicalProductFormData` avec les champs artistiques
 
 ### Phase 3 : Composants UI
+
 1. ✅ Créer `ArtistTypeSelector.tsx`
 2. ✅ Créer `ArtistInfoForm.tsx`
 3. ✅ Créer les formulaires spécifiques par type
 4. ✅ Créer `ArtistAdvancedOptions.tsx`
 
 ### Phase 4 : Intégration
+
 1. ✅ Intégrer dans `CreatePhysicalProductWizard_v2.tsx`
 2. ✅ Ajouter l'étape conditionnelle "Informations Artiste"
 3. ✅ Mettre à jour la logique de sauvegarde
 
 ### Phase 5 : Fonctionnalités avancées
+
 1. ✅ Créer `DedicationForm.tsx` (côté client)
 2. ✅ Créer `CertificateGenerator.tsx`
 3. ✅ Créer les templates de certificats
@@ -588,4 +623,3 @@ export interface ArtistProductFormData {
 
 **Date** : 28 Janvier 2025  
 **Statut** : 📋 **ANALYSE TERMINÉE** - Prêt pour implémentation
-

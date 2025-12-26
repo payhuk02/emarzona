@@ -14,8 +14,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ## ✅ Sidebars Créées
 
 ### 1. **StoreSidebar** (`src/components/layout/StoreSidebar.tsx`)
+
 **Section:** Boutique  
 **Routes:**
+
 - `/dashboard/store` - Ma Boutique
 - `/dashboard/store/team` - Équipe
 - `/dashboard/store/settings` - Paramètres Boutique
@@ -25,8 +27,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 2. **BookingsSidebar** (`src/components/layout/BookingsSidebar.tsx`)
+
 **Section:** Réservations & Services  
 **Routes:**
+
 - `/dashboard/bookings` - Réservations
 - `/dashboard/advanced-calendar` - Calendrier Avancé
 - `/dashboard/service-management` - Gestion des Services
@@ -39,8 +43,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 3. **InventorySidebar** (`src/components/layout/InventorySidebar.tsx`)
+
 **Section:** Inventaire  
 **Routes:**
+
 - `/dashboard/inventory` - Inventaire Principal
 - `/dashboard/physical-inventory` - Stocks Produits Physiques
 - `/dashboard/physical-lots` - Lots & Expiration
@@ -54,8 +60,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 4. **ShippingSidebar** (`src/components/layout/ShippingSidebar.tsx`)
+
 **Section:** Expéditions  
 **Routes:**
+
 - `/dashboard/shipping` - Expéditions
 - `/dashboard/shipping-services` - Services de Livraison
 - `/dashboard/contact-shipping-service` - Contacter un Service
@@ -66,8 +74,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 5. **PromotionsSidebar** (`src/components/layout/PromotionsSidebar.tsx`)
+
 **Section:** Promotions  
 **Routes:**
+
 - `/dashboard/promotions` - Toutes les Promotions
 - `/promotions` - Codes Promo
 - `/dashboard/promotions/stats` - Statistiques
@@ -77,8 +87,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 6. **CoursesSidebar** (`src/components/layout/CoursesSidebar.tsx`)
+
 **Section:** Cours  
 **Routes:**
+
 - `/account/courses` - Mes Cours
 - `/dashboard/courses/new` - Créer un Cours
 - `/dashboard/my-courses` - Gestion Cours
@@ -89,8 +101,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 7. **AffiliateSidebar** (`src/components/layout/AffiliateSidebar.tsx`)
+
 **Section:** Tableau de bord Affilié  
 **Routes:**
+
 - `/affiliate/dashboard` - Tableau de bord
 - `/affiliate/courses` - Cours Promus
 - `/affiliate/stats` - Statistiques
@@ -101,8 +115,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 8. **DigitalPortalSidebar** (`src/components/layout/DigitalPortalSidebar.tsx`)
+
 **Section:** Portail Digital  
 **Routes:**
+
 - `/account/digital` - Portail Digital
 - `/account/downloads` - Mes Téléchargements
 - `/dashboard/my-licenses` - Mes Licences
@@ -114,8 +130,10 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ---
 
 ### 9. **PhysicalPortalSidebar** (`src/components/layout/PhysicalPortalSidebar.tsx`)
+
 **Section:** Portail Produits Physiques  
 **Routes:**
+
 - `/account/physical` - Portail Physique
 - `/account/orders` - Mes Commandes
 - `/dashboard/physical-inventory` - Inventaire
@@ -129,6 +147,7 @@ Créer des sidebars contextuelles pour tous les éléments du sidebar de tableau
 ## 🔧 Modifications dans MainLayout
 
 ### 1. Imports Ajoutés
+
 ```typescript
 import { StoreSidebar } from './StoreSidebar';
 import { BookingsSidebar } from './BookingsSidebar';
@@ -142,26 +161,47 @@ import { PhysicalPortalSidebar } from './PhysicalPortalSidebar';
 ```
 
 ### 2. Types de Layout Étendus
+
 ```typescript
-export type LayoutType = 
-  | 'default' | 'settings' | 'emails' | 'products' | 'orders' 
-  | 'customers' | 'analytics' | 'account' | 'sales' | 'finance' 
-  | 'marketing' | 'systems' 
-  | 'store' | 'bookings' | 'inventory' | 'shipping' | 'promotions' 
-  | 'courses' | 'affiliate' | 'digital-portal' | 'physical-portal' 
+export type LayoutType =
+  | 'default'
+  | 'settings'
+  | 'emails'
+  | 'products'
+  | 'orders'
+  | 'customers'
+  | 'analytics'
+  | 'account'
+  | 'sales'
+  | 'finance'
+  | 'marketing'
+  | 'systems'
+  | 'store'
+  | 'bookings'
+  | 'inventory'
+  | 'shipping'
+  | 'promotions'
+  | 'courses'
+  | 'affiliate'
+  | 'digital-portal'
+  | 'physical-portal'
   | 'minimal';
 ```
 
 ### 3. Détection Automatique Améliorée
+
 La fonction `detectLayoutType` a été mise à jour pour détecter les nouvelles routes avec priorité :
+
 1. Routes très spécifiques avec sidebars dédiées
 2. Routes avec sidebars existantes
 3. Routes générales (sales, marketing)
 
 ### 4. Rendu des Sidebars
+
 Toutes les nouvelles sidebars sont intégrées dans le `switch` de `renderSidebar()`.
 
 ### 5. Marges Fixes
+
 Toutes les nouvelles sidebars sont ajoutées à `hasFixedSidebar` pour appliquer les marges correctes.
 
 ---
@@ -171,12 +211,13 @@ Toutes les nouvelles sidebars sont ajoutées à `hasFixedSidebar` pour appliquer
 Toutes les sidebars suivent le même pattern que `OrdersSidebar` :
 
 ### Structure
+
 ```typescript
 <aside className="hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)] border-r border-blue-800/30 bg-gradient-to-br from-slate-900 via-blue-950 to-black overflow-y-auto z-40 transition-all duration-300 scrollbar-thin">
   <div className="p-3 sm:p-4 md:p-5 space-y-4">
     {/* Breadcrumb horizontal en haut */}
     <Breadcrumb items={breadcrumbItems} />
-    
+
     {/* Navigation verticale */}
     <nav className="space-y-1">
       {navItems.map((item) => (
@@ -188,6 +229,7 @@ Toutes les sidebars suivent le même pattern que `OrdersSidebar` :
 ```
 
 ### Caractéristiques
+
 - ✅ **Sidebar verticale fixe** (`fixed left-0 top-16`)
 - ✅ **Breadcrumb horizontal en haut** (composant `Breadcrumb`)
 - ✅ **Navigation avec icônes** (style cohérent)
@@ -201,6 +243,7 @@ Toutes les sidebars suivent le même pattern que `OrdersSidebar` :
 ## 📊 Résumé
 
 ### Sidebars Existantes (11)
+
 1. ✅ OrdersSidebar
 2. ✅ ProductsSidebar
 3. ✅ CustomersSidebar
@@ -214,6 +257,7 @@ Toutes les sidebars suivent le même pattern que `OrdersSidebar` :
 11. ✅ SettingsSidebar
 
 ### Nouvelles Sidebars Créées (9)
+
 1. ✅ StoreSidebar
 2. ✅ BookingsSidebar
 3. ✅ InventorySidebar
@@ -231,6 +275,7 @@ Toutes les sidebars suivent le même pattern que `OrdersSidebar` :
 ## ✅ Résultat
 
 Tous les éléments du sidebar de tableau de bord qui ont des sous-composants ont maintenant :
+
 - ✅ Une sidebar verticale contextuelle
 - ✅ Un breadcrumb horizontal en haut
 - ✅ Une navigation stable et statique
@@ -241,4 +286,3 @@ Tous les éléments du sidebar de tableau de bord qui ont des sous-composants on
 
 **Date:** 30 Janvier 2025  
 **Statut:** ✅ **TERMINÉ**
-

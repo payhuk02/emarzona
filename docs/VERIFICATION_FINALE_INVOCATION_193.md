@@ -40,7 +40,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Log
 ### 3. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -53,6 +53,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus si tout fonctionne** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -60,7 +61,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 4. Vérifier les Logs d'Emails
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   status,
   campaign_id
@@ -78,6 +79,7 @@ GROUP BY status, campaign_id;
 ### Scénario 1 : ✅ Invocation 200 OK
 
 **Si l'invocation 193 est `200 OK`** :
+
 - ✅ Le problème d'authentification est **résolu**
 - ✅ Le cron job fonctionne maintenant
 - ⚠️ Si la campagne n'est pas traitée, vérifier :
@@ -88,6 +90,7 @@ GROUP BY status, campaign_id;
 ### Scénario 2 : ❌ Invocation Toujours 401
 
 **Si l'invocation 193 est toujours `401`** :
+
 - ⚠️ Problème plus profond
 - Vérifier les logs de l'Edge Function pour voir les headers reçus
 - Vérifier que la service role key est correcte
@@ -100,7 +103,7 @@ GROUP BY status, campaign_id;
 Vérifier les critères de la campagne :
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -143,5 +146,3 @@ Si l'invocation 193 est `200 OK` et la campagne est traitée :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

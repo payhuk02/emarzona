@@ -10,23 +10,24 @@
 
 ### Améliorations Identifiées
 
-| Catégorie | Nombre | Priorité | Statut |
-|-----------|--------|----------|--------|
-| **console.* restants (non critiques)** | ~191 occurrences | 🟡 MOYENNE | À traiter |
-| **Images sans lazy loading** | ~10+ composants | 🟡 MOYENNE | À optimiser |
-| **Debounce manquants** | 2-3 inputs | 🟢 FAIBLE | Optionnel |
-| **React.memo manquants** | 5-10 composants | 🟢 FAIBLE | Optionnel |
-| **Error Boundaries manquantes** | Quelques pages | 🟢 FAIBLE | Optionnel |
+| Catégorie                               | Nombre           | Priorité   | Statut      |
+| --------------------------------------- | ---------------- | ---------- | ----------- |
+| **console.\* restants (non critiques)** | ~191 occurrences | 🟡 MOYENNE | À traiter   |
+| **Images sans lazy loading**            | ~10+ composants  | 🟡 MOYENNE | À optimiser |
+| **Debounce manquants**                  | 2-3 inputs       | 🟢 FAIBLE  | Optionnel   |
+| **React.memo manquants**                | 5-10 composants  | 🟢 FAIBLE  | Optionnel   |
+| **Error Boundaries manquantes**         | Quelques pages   | 🟢 FAIBLE  | Optionnel   |
 
 ---
 
 ## 🟡 AMÉLIORATIONS MOYENNE PRIORITÉ
 
-### 1. console.* Restants (Non Critiques)
+### 1. console.\* Restants (Non Critiques)
 
 **Statut** : 191 occurrences dans 48 fichiers
 
 **Fichiers à Traiter** (hors fichiers système) :
+
 - ✅ `src/lib/logger.ts` - **NORMAL** (sauvegarde méthodes originales)
 - ✅ `src/lib/error-logger.ts` - **NORMAL** (sauvegarde méthodes originales)
 - ✅ `src/lib/console-guard.ts` - **NORMAL** (garde console)
@@ -37,6 +38,7 @@
 - ✅ `src/data/templates/**` - **NORMAL** (templates statiques)
 
 **Fichiers à Optimiser** :
+
 - 🟡 `src/lib/pwa.ts` - 17 occurrences (logs PWA)
 - 🟡 `src/lib/prefetch.ts` - 6 occurrences
 - 🟡 `src/lib/cache.ts` - 7 occurrences
@@ -71,6 +73,7 @@
 **Statut** : Composants `LazyImage` et `OptimizedImage` existent mais pas utilisés partout
 
 **Composants à Optimiser** :
+
 - 🟡 `src/components/products/ProductCardDashboard.tsx` - Utilise `<img>` au lieu de `LazyImage`
 - 🟡 `src/components/digital/DigitalProductCard.tsx` - Utilise `<img>` au lieu de `LazyImage`
 - 🟡 `src/components/physical/PhysicalProductCard.tsx` - Utilise `<img>` au lieu de `LazyImage`
@@ -86,10 +89,11 @@
 **Priorité** : 🟡 **MOYENNE**
 
 **Exemple de Remplacement** :
+
 ```typescript
 // Avant
-<img 
-  src={product.image_url} 
+<img
+  src={product.image_url}
   alt={product.name}
   className="w-full h-auto"
 />
@@ -97,7 +101,7 @@
 // Après
 import { LazyImage } from '@/components/ui/LazyImage';
 
-<LazyImage 
+<LazyImage
   src={product.image_url}
   alt={product.name}
   placeholder="skeleton"
@@ -115,6 +119,7 @@ import { LazyImage } from '@/components/ui/LazyImage';
 **Statut** : La plupart des inputs de recherche utilisent déjà `useDebounce`
 
 **Inputs à Vérifier** :
+
 - 🟢 `src/components/storefront/ProductFilters.tsx` - Input de recherche (ligne 56-62)
   - **Vérification** : Pas de debounce visible dans le composant
   - **Solution** : Ajouter `useDebounce` si utilisé dans une page parente
@@ -130,6 +135,7 @@ import { LazyImage } from '@/components/ui/LazyImage';
 **Statut** : Beaucoup de composants ont déjà `React.memo`
 
 **Composants Candidats** (listes fréquemment re-rendues) :
+
 - 🟢 `src/components/products/ProductCardDashboard.tsx` - Pas de `React.memo`
 - 🟢 `src/components/physical/PhysicalProductsList.tsx` - Pas de `React.memo`
 - 🟢 `src/components/service/ServicesList.tsx` - Pas de `React.memo`
@@ -145,6 +151,7 @@ import { LazyImage } from '@/components/ui/LazyImage';
 **Priorité** : 🟢 **FAIBLE**
 
 **Exemple d'Optimisation** :
+
 ```typescript
 // Avant
 export const ProductCardDashboard = ({ product, onEdit, onDelete }) => {
@@ -152,17 +159,20 @@ export const ProductCardDashboard = ({ product, onEdit, onDelete }) => {
 };
 
 // Après
-export const ProductCardDashboard = React.memo(({ product, onEdit, onDelete }) => {
-  // ...
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.product.id === nextProps.product.id &&
-    prevProps.product.is_active === nextProps.product.is_active &&
-    prevProps.product.price === nextProps.product.price &&
-    prevProps.onEdit === nextProps.onEdit &&
-    prevProps.onDelete === nextProps.onDelete
-  );
-});
+export const ProductCardDashboard = React.memo(
+  ({ product, onEdit, onDelete }) => {
+    // ...
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.product.id === nextProps.product.id &&
+      prevProps.product.is_active === nextProps.product.is_active &&
+      prevProps.product.price === nextProps.product.price &&
+      prevProps.onEdit === nextProps.onEdit &&
+      prevProps.onDelete === nextProps.onDelete
+    );
+  }
+);
 ```
 
 ---
@@ -172,6 +182,7 @@ export const ProductCardDashboard = React.memo(({ product, onEdit, onDelete }) =
 **Statut** : Error Boundaries existent mais pas partout
 
 **Pages/Composants à Protéger** :
+
 - 🟢 Pages critiques sans Error Boundary visible :
   - `src/pages/Products.tsx` - Pourrait bénéficier d'une Error Boundary
   - `src/pages/Orders.tsx` - Pourrait bénéficier d'une Error Boundary
@@ -183,6 +194,7 @@ export const ProductCardDashboard = React.memo(({ product, onEdit, onDelete }) =
 **Priorité** : 🟢 **FAIBLE**
 
 **Exemple d'Utilisation** :
+
 ```typescript
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 
@@ -197,12 +209,14 @@ import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 
 ### Phase 3C - Optimisations Moyenne Priorité (Optionnel)
 
-#### 1. Remplacer console.* Restants (Non Critiques)
+#### 1. Remplacer console.\* Restants (Non Critiques)
+
 - **Fichiers** : ~20 fichiers identifiés
 - **Durée estimée** : 3-4 heures
 - **Impact attendu** : Logs professionnels, meilleure traçabilité
 
 #### 2. Optimiser Images avec Lazy Loading
+
 - **Fichiers** : ~9 composants ProductCard
 - **Durée estimée** : 2-3 heures
 - **Impact attendu** : -40% à -60% temps de chargement initial, amélioration LCP
@@ -215,16 +229,19 @@ import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 ### Phase 3D - Optimisations Faible Priorité (Optionnel)
 
 #### 1. Ajouter Debounce Manquants
+
 - **Fichiers** : 1-2 composants
 - **Durée estimée** : 30 minutes
 - **Impact attendu** : Réduction appels API
 
 #### 2. Ajouter React.memo sur Composants Restants
+
 - **Fichiers** : ~9 composants
 - **Durée estimée** : 1-2 heures
 - **Impact attendu** : Réduction re-renders, UI plus fluide
 
 #### 3. Ajouter Error Boundaries Manquantes
+
 - **Fichiers** : ~4 pages
 - **Durée estimée** : 1 heure
 - **Impact attendu** : Meilleure gestion d'erreurs UX
@@ -238,7 +255,7 @@ import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 
 ### Phase 1 + Phase 2 + Phase 3A + Phase 3B
 
-- ✅ **195 console.* remplacés** (fichiers critiques)
+- ✅ **195 console.\* remplacés** (fichiers critiques)
 - ✅ **7 hooks paginés** pour scalabilité
 - ✅ **12 composants avec React.memo**
 - ✅ **1 fonction SQL optimisée** pour stats
@@ -246,6 +263,7 @@ import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 - ✅ **1 chaîne .map().map() optimisée**
 
 **Impact Global** :
+
 - ⚡ **-80% à -98%** de données chargées
 - ⚡ **-70% à -95%** de temps de réponse
 - 💾 **-85% à -98%** d'utilisation mémoire
@@ -268,5 +286,3 @@ Les améliorations restantes (Phase 3C et 3D) sont **optionnelles** et peuvent �
 
 **Date de l'analyse** : 3 Février 2025  
 **Statut** : ✅ **Analyse Complète**
-
-

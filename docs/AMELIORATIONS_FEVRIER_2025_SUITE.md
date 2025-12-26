@@ -5,10 +5,12 @@
 ### 1. Réduction des Types `any` (Suite)
 
 #### `src/hooks/useReviews.ts`
+
 - ✅ Remplacé `error: any` par `error: unknown` dans tous les callbacks `onError`
 - ✅ Ajout de vérifications `instanceof Error` pour une gestion d'erreur type-safe
 
 #### `src/hooks/useStoreAffiliates.ts`
+
 - ✅ Création d'interfaces TypeScript pour les données brutes de Supabase :
   - `AffiliateFromDB` : Type pour les affiliés retournés par Supabase
   - `AffiliateLinkFromDB` : Type pour les liens d'affiliation retournés par Supabase
@@ -21,6 +23,7 @@
 ### 2. Configuration Prettier + Pre-commit Hooks
 
 #### Fichiers créés :
+
 - ✅ `.prettierrc.json` : Configuration Prettier avec règles cohérentes
 - ✅ `.prettierignore` : Exclusion des dossiers non pertinents
 - ✅ `.lintstagedrc.json` : Configuration lint-staged pour exécuter ESLint et Prettier sur les fichiers modifiés
@@ -28,6 +31,7 @@
 - ✅ `scripts/setup-husky.js` : Script d'installation et configuration automatique de Husky
 
 #### Scripts npm ajoutés :
+
 ```json
 {
   "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
@@ -38,16 +42,19 @@
 ```
 
 #### Dépendances ajoutées :
+
 - `prettier@^3.4.2` : Formateur de code
 - `husky@^9.1.7` : Gestionnaire de hooks Git
 - `lint-staged@^15.2.11` : Exécution de linters sur fichiers modifiés
 
-**Impact** : 
+**Impact** :
+
 - Formatage automatique et cohérent du code
 - Vérification automatique avant chaque commit
 - Réduction des erreurs de formatage dans les PRs
 
 **Installation** :
+
 ```bash
 npm install
 npm run setup:husky
@@ -60,14 +67,17 @@ npm run setup:husky
 #### Nouveaux fichiers de tests créés :
 
 ##### `src/components/ui/__tests__/button.test.tsx`
+
 - ✅ Tests pour le composant `Button`
 - Couverture : variantes, tailles, accessibilité, états disabled, événements
 
 ##### `src/components/ui/__tests__/input.test.tsx`
+
 - ✅ Tests pour le composant `Input`
 - Couverture : rendu, valeurs, validation, états disabled/readonly, types d'input
 
 ##### `src/hooks/__tests__/useStore.test.tsx`
+
 - ✅ Tests pour le hook `useStore`
 - Couverture : récupération de boutique, gestion d'erreurs, états de chargement
 
@@ -78,15 +88,18 @@ npm run setup:husky
 ## 📊 Statistiques
 
 ### Types `any` restants
+
 - **Avant** : 392 occurrences dans 108 fichiers
 - **Après** : ~388 occurrences (réduction de 4 dans les hooks critiques)
 - **Objectif** : Continuer la réduction progressive
 
 ### Tests
+
 - **Nouveaux tests** : 3 fichiers de tests unitaires
 - **Couverture cible** : 60%+ (en cours)
 
 ### Outils de qualité
+
 - ✅ Prettier configuré
 - ✅ Husky + lint-staged configurés
 - ✅ Pre-commit hooks actifs
@@ -123,4 +136,3 @@ npm run setup:husky
 
 **Date** : Février 2025  
 **Auteur** : Auto (Cursor AI)
-

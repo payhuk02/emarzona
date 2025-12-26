@@ -1,17 +1,19 @@
 # 🚀 PLAN D'OPTIMISATIONS EN COURS - EMARZONA
+
 ## Date : 4 Janvier 2025
+
 ## Statut : En cours d'implémentation
 
 ---
 
 ## 📊 PROGRESSION GLOBALE
 
-| Optimisation | Statut | Progression |
-|--------------|--------|------------|
-| **1. Augmenter couverture tests (70% → 80%)** | 🟡 En cours | 0% |
+| Optimisation                                     | Statut      | Progression     |
+| ------------------------------------------------ | ----------- | --------------- |
+| **1. Augmenter couverture tests (70% → 80%)**    | 🟡 En cours | 0%              |
 | **2. Remplacer types `any` (1,171 occurrences)** | 🟡 En cours | ~0.4% (5/1,171) |
-| **3. Optimiser bundle size (478 KB → < 300 KB)** | ⏳ À faire | 0% |
-| **4. Améliorer Web Vitals (FCP, LCP)** | ⏳ À faire | 0% |
+| **3. Optimiser bundle size (478 KB → < 300 KB)** | ⏳ À faire  | 0%              |
+| **4. Améliorer Web Vitals (FCP, LCP)**           | ⏳ À faire  | 0%              |
 
 ---
 
@@ -22,6 +24,7 @@
 **Fichier** : `src/pages/Checkout.tsx`
 
 **Corrections appliquées** :
+
 - ✅ Import du type `CartItem` depuis `@/types/cart`
 - ✅ Création de l'interface `StoreGroup` pour remplacer `any[]` dans `storeGroups`
 - ✅ Remplacement de `skippedItems: any[]` par `skippedItems: CartItem[]`
@@ -31,6 +34,7 @@
 - ✅ Remplacement de `catch (error: any)` par `catch (error: unknown)` avec gestion appropriée
 
 **Impact** :
+
 - ✅ Type safety améliorée
 - ✅ 5 occurrences de `any` supprimées
 - ✅ Code plus maintenable
@@ -40,10 +44,12 @@
 **Fichier** : `src/pages/digital/DigitalProductsCompare.tsx`
 
 **Corrections appliquées** :
+
 - ✅ Création de l'interface `ProductWithDigital` pour typer les produits retournés par Supabase
 - ✅ Remplacement de `(product: any)` par `(product: ProductWithDigital)`
 
 **Impact** :
+
 - ✅ Type safety améliorée
 - ✅ 1 occurrence de `any` supprimée
 - ✅ Meilleure autocomplétion IDE
@@ -55,6 +61,7 @@
 ### Priorité 1 : Remplacer les Types `any` Restants
 
 **Fichiers à traiter en priorité** (top 20) :
+
 1. `src/hooks/shipping/useFedexShipping.ts` - 5 occurrences
 2. `src/lib/sendgrid.ts` - 2 occurrences
 3. `src/lib/product-transform.ts` - 1 occurrence
@@ -77,6 +84,7 @@
 20. `src/pages/customer/MyCourses.tsx` - 3 occurrences
 
 **Stratégie** :
+
 1. Commencer par les fichiers avec le plus d'occurrences
 2. Créer des interfaces/types appropriés pour chaque cas
 3. Tester après chaque remplacement
@@ -84,6 +92,7 @@
 ### Priorité 2 : Augmenter la Couverture de Tests
 
 **Composants à tester** :
+
 1. ✅ `Checkout.tsx` - Tests en cours de création
 2. `DigitalProductsCompare.tsx` - À créer
 3. `BookingsManagement.tsx` - À créer
@@ -91,6 +100,7 @@
 5. `ShippingDashboard.tsx` - À créer
 
 **Stratégie** :
+
 1. Créer des tests pour les composants critiques
 2. Augmenter progressivement la couverture
 3. Cibler 80% de couverture globale
@@ -98,6 +108,7 @@
 ### Priorité 3 : Optimiser le Bundle Size
 
 **Actions à effectuer** :
+
 1. Analyser le bundle actuel avec `npm run build`
 2. Identifier les chunks les plus volumineux
 3. Lazy load les composants non-critiques
@@ -105,12 +116,14 @@
 5. Séparer les dépendances lourdes
 
 **Cibles** :
+
 - Chunk principal : < 300 KB (actuellement ~478 KB)
 - Réduction de ~37%
 
 ### Priorité 4 : Améliorer les Web Vitals
 
 **Actions à effectuer** :
+
 1. Optimiser le chargement initial
 2. Précharger les ressources critiques
 3. Optimiser les images (lazy loading, formats modernes)
@@ -118,6 +131,7 @@
 5. Optimiser les polices
 
 **Cibles** :
+
 - FCP : < 1.5s
 - LCP : < 2.5s
 
@@ -127,33 +141,33 @@
 
 ### Types `any` Restants
 
-| Fichier | Occurrences | Statut |
-|---------|-------------|--------|
-| `Checkout.tsx` | 0/5 | ✅ Complété |
-| `DigitalProductsCompare.tsx` | 0/1 | ✅ Complété |
-| **Total corrigé** | **6** | **0.5%** |
-| **Total restant** | **1,165** | **99.5%** |
+| Fichier                      | Occurrences | Statut      |
+| ---------------------------- | ----------- | ----------- |
+| `Checkout.tsx`               | 0/5         | ✅ Complété |
+| `DigitalProductsCompare.tsx` | 0/1         | ✅ Complété |
+| **Total corrigé**            | **6**       | **0.5%**    |
+| **Total restant**            | **1,165**   | **99.5%**   |
 
 ### Couverture de Tests
 
-| Composant | Couverture | Statut |
-|-----------|------------|--------|
-| `Checkout.tsx` | En cours | 🟡 |
-| **Couverture globale** | **~70%** | **Cible : 80%** |
+| Composant              | Couverture | Statut          |
+| ---------------------- | ---------- | --------------- |
+| `Checkout.tsx`         | En cours   | 🟡              |
+| **Couverture globale** | **~70%**   | **Cible : 80%** |
 
 ### Bundle Size
 
-| Métrique | Actuel | Cible | Statut |
-|----------|--------|-------|--------|
-| Chunk principal | ~478 KB | < 300 KB | ⏳ |
-| Réduction nécessaire | - | -37% | ⏳ |
+| Métrique             | Actuel  | Cible    | Statut |
+| -------------------- | ------- | -------- | ------ |
+| Chunk principal      | ~478 KB | < 300 KB | ⏳     |
+| Réduction nécessaire | -       | -37%     | ⏳     |
 
 ### Web Vitals
 
-| Métrique | Actuel | Cible | Statut |
-|----------|--------|-------|--------|
-| FCP | Variable | < 1.5s | ⏳ |
-| LCP | Variable | < 2.5s | ⏳ |
+| Métrique | Actuel   | Cible  | Statut |
+| -------- | -------- | ------ | ------ |
+| FCP      | Variable | < 1.5s | ⏳     |
+| LCP      | Variable | < 2.5s | ⏳     |
 
 ---
 
@@ -176,8 +190,3 @@
 
 **Dernière mise à jour** : 4 Janvier 2025  
 **Prochaine révision** : 11 Janvier 2025
-
-
-
-
-

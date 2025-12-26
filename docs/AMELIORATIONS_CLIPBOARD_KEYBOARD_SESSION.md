@@ -17,6 +17,7 @@ Créer des hooks réutilisables pour simplifier la gestion du presse-papier et d
 **Fichier** : `src/hooks/useClipboard.ts`
 
 **Fonctionnalités** :
+
 - ✅ **API simple** : `copy(text)` pour copier du texte
 - ✅ **État de copie** : `copied` indique si le texte a été copié
 - ✅ **Gestion d'erreurs** : `error` pour gérer les erreurs
@@ -26,12 +27,14 @@ Créer des hooks réutilisables pour simplifier la gestion du presse-papier et d
 - ✅ **Hook spécialisé** : `useCopyUrl` pour copier des URLs
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~60-70% pour la copie dans le presse-papier
 - 🟢 Gestion d'erreurs cohérente
 - 🟢 Feedback utilisateur automatique
 - 🟢 Support des navigateurs plus anciens
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 const [copied, setCopied] = useState(false);
@@ -48,15 +51,11 @@ const handleCopy = async () => {
 
 // Nouveau code
 const { copy, copied } = useClipboard();
-<Button onClick={() => copy(text)}>
-  {copied ? 'Copié !' : 'Copier'}
-</Button>
+<Button onClick={() => copy(text)}>{copied ? 'Copié !' : 'Copier'}</Button>;
 
 // Pour les URLs
 const { copyUrl, copied } = useCopyUrl(url);
-<Button onClick={() => copyUrl()}>
-  {copied ? 'URL copiée !' : 'Copier l\'URL'}
-</Button>
+<Button onClick={() => copyUrl()}>{copied ? 'URL copiée !' : "Copier l'URL"}</Button>;
 ```
 
 ---
@@ -66,6 +65,7 @@ const { copyUrl, copied } = useCopyUrl(url);
 **Fichier** : `src/hooks/useKeyboardShortcuts.ts`
 
 **Fonctionnalités** :
+
 - ✅ **API simple** : Définir les raccourcis avec un objet
 - ✅ **Support multi-plateforme** : Support Ctrl (Windows/Linux) et Cmd (Mac)
 - ✅ **Ignorer les inputs** : Ignore automatiquement les inputs, textareas, etc.
@@ -74,12 +74,14 @@ const { copyUrl, copied } = useCopyUrl(url);
 - ✅ **Hook spécialisé** : `useCommonKeyboardShortcuts` pour les raccourcis communs
 
 **Bénéfices** :
+
 - 🟢 Réduction du code répétitif : ~50-60% pour les raccourcis clavier
 - 🟢 API cohérente dans toute l'application
 - 🟢 Support multi-plateforme automatique
 - 🟢 Meilleure accessibilité
 
 **Exemple d'utilisation** :
+
 ```tsx
 // Ancien code
 useEffect(() => {
@@ -102,7 +104,7 @@ useKeyboardShortcuts({
   shortcuts: {
     'Ctrl+K': () => focusSearch(),
     'Meta+K': () => focusSearch(),
-    'Escape': () => closeModal(),
+    Escape: () => closeModal(),
   },
 });
 
@@ -120,11 +122,13 @@ useCommonKeyboardShortcuts({
 ## 📊 IMPACT ATTENDU
 
 ### Code Quality
+
 - **Réduction du code répétitif** : ~50-70% selon le type
 - **Maintenabilité** : Code plus cohérent et réutilisable
 - **DX (Developer Experience)** : API plus simple et intuitive
 
 ### UX
+
 - **Feedback utilisateur** : Toasts automatiques pour la copie
 - **Accessibilité** : Raccourcis clavier cohérents
 - **Performance** : Pas d'impact négatif
@@ -136,6 +140,7 @@ useCommonKeyboardShortcuts({
 ### Pour useClipboard
 
 **Option 1 : Remplacer les patterns manuels**
+
 ```tsx
 // Ancien
 const handleCopy = async () => {
@@ -149,20 +154,22 @@ const handleCopy = () => copy(text);
 ```
 
 **Option 2 : Utiliser l'état copied**
+
 ```tsx
 const { copy, copied } = useClipboard();
-<Button onClick={() => copy(text)}>
-  {copied ? 'Copié !' : 'Copier'}
-</Button>
+<Button onClick={() => copy(text)}>{copied ? 'Copié !' : 'Copier'}</Button>;
 ```
 
 ### Pour useKeyboardShortcuts
 
 **Option 1 : Remplacer les useEffect manuels**
+
 ```tsx
 // Ancien
 useEffect(() => {
-  const handleKeyDown = (e) => { /* ... */ };
+  const handleKeyDown = e => {
+    /* ... */
+  };
   window.addEventListener('keydown', handleKeyDown);
   return () => window.removeEventListener('keydown', handleKeyDown);
 }, []);
@@ -176,6 +183,7 @@ useKeyboardShortcuts({
 ```
 
 **Option 2 : Utiliser useCommonKeyboardShortcuts**
+
 ```tsx
 useCommonKeyboardShortcuts({
   onSearch: () => focusSearch(),
@@ -188,12 +196,14 @@ useCommonKeyboardShortcuts({
 ## 📝 RECOMMANDATIONS
 
 ### Priorité HAUTE
+
 1. ✅ **Hook useClipboard** - COMPLÉTÉ
 2. ✅ **Hook useKeyboardShortcuts** - COMPLÉTÉ
 3. ⏳ **Migrer progressivement** les composants vers useClipboard
 4. ⏳ **Migrer progressivement** les raccourcis vers useKeyboardShortcuts
 
 ### Priorité MOYENNE
+
 5. ⏳ **Créer des hooks spécialisés** pour des cas d'usage spécifiques
 6. ⏳ **Ajouter des tests** pour les nouveaux hooks
 
@@ -202,6 +212,7 @@ useCommonKeyboardShortcuts({
 ## ✅ CONCLUSION
 
 **Améliorations appliquées** :
+
 - ✅ Hook useClipboard créé avec support fallback et toasts automatiques
 - ✅ Hook useCopyUrl spécialisé pour les URLs
 - ✅ Hook useKeyboardShortcuts créé avec support multi-plateforme
@@ -210,6 +221,7 @@ useCommonKeyboardShortcuts({
 **Impact** : 🟢 **MOYEN-ÉLEVÉ** - Réduction significative du code répétitif et amélioration de la cohérence UX.
 
 **Prochaines étapes** :
+
 - ⏳ Migrer les composants vers useClipboard
 - ⏳ Migrer les raccourcis vers useKeyboardShortcuts
 
@@ -220,4 +232,3 @@ useCommonKeyboardShortcuts({
 - [Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API)
 - [Keyboard Events](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent)
 - [Keyboard Shortcuts Best Practices](https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html)
-

@@ -12,6 +12,7 @@
 **Problème**: Documentation JSDoc incomplète ou absente
 
 **Fichiers modifiés**:
+
 - ✅ `src/components/ui/select.tsx`
 - ✅ `src/components/ui/dropdown-menu.tsx`
 - ✅ `src/components/ui/mobile-dropdown.tsx`
@@ -19,19 +20,23 @@
 **Changements**:
 
 #### `select.tsx`
+
 - ✅ Ajout de JSDoc pour `Select`, `SelectGroup`, `SelectValue`
 - ✅ Documentation complète pour `SelectTrigger` avec exemple
 - ✅ Documentation complète pour `SelectContent` avec optimisations mobile
 - ✅ Documentation complète pour `SelectItem` avec guidelines touch targets
 
 #### `dropdown-menu.tsx`
+
 - ✅ Documentation complète pour `DropdownMenuContent` avec props documentées
 - ✅ Documentation complète pour `DropdownMenuItem` avec exemple
 
 #### `mobile-dropdown.tsx`
+
 - ✅ Documentation complète pour `MobileDropdown` avec exemple d'utilisation
 
 **Impact**:
+
 - ✅ Auto-complétion améliorée dans l'IDE
 - ✅ Onboarding facilité pour nouveaux développeurs
 - ✅ Meilleure compréhension des composants
@@ -43,47 +48,60 @@
 **Problème**: Délai artificiel (setTimeout) et pas de feedback visuel
 
 **Fichier modifié**:
+
 - ✅ `src/components/ui/LanguageSwitcher.tsx`
 
 **Changements**:
 
 **Avant**:
+
 ```typescript
-const changeLanguage = useCallback((langCode: LanguageCode) => {
-  setOpen(false);
-  
-  setTimeout(() => {
-    i18n.changeLanguage(langCode);
-    localStorage.setItem('emarzona_language', langCode);
-    document.documentElement.lang = langCode;
-  }, isMobile ? 100 : 50); // ❌ Délai artificiel
-}, [i18n, isMobile]);
+const changeLanguage = useCallback(
+  (langCode: LanguageCode) => {
+    setOpen(false);
+
+    setTimeout(
+      () => {
+        i18n.changeLanguage(langCode);
+        localStorage.setItem('emarzona_language', langCode);
+        document.documentElement.lang = langCode;
+      },
+      isMobile ? 100 : 50
+    ); // ❌ Délai artificiel
+  },
+  [i18n, isMobile]
+);
 ```
 
 **Après**:
+
 ```typescript
 const [isChanging, setIsChanging] = useState(false);
 
-const changeLanguage = useCallback((langCode: LanguageCode) => {
-  // Prévenir les doubles clics
-  if (isChanging) return;
-  
-  setIsChanging(true);
-  handleOpenChange(false);
-  
-  // Changement immédiat (pas de délai artificiel)
-  i18n.changeLanguage(langCode);
-  localStorage.setItem('emarzona_language', langCode);
-  document.documentElement.lang = langCode;
-  
-  // Réactiver après un court délai pour le feedback visuel
-  setTimeout(() => {
-    setIsChanging(false);
-  }, 150);
-}, [i18n, isChanging, handleOpenChange]);
+const changeLanguage = useCallback(
+  (langCode: LanguageCode) => {
+    // Prévenir les doubles clics
+    if (isChanging) return;
+
+    setIsChanging(true);
+    handleOpenChange(false);
+
+    // Changement immédiat (pas de délai artificiel)
+    i18n.changeLanguage(langCode);
+    localStorage.setItem('emarzona_language', langCode);
+    document.documentElement.lang = langCode;
+
+    // Réactiver après un court délai pour le feedback visuel
+    setTimeout(() => {
+      setIsChanging(false);
+    }, 150);
+  },
+  [i18n, isChanging, handleOpenChange]
+);
 ```
 
 **Améliorations UI**:
+
 ```typescript
 <Button
   disabled={isChanging}
@@ -101,6 +119,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 ```
 
 **Impact**:
+
 - ✅ Changement de langue immédiat (pas de délai artificiel)
 - ✅ Feedback visuel avec spinner pendant le changement
 - ✅ Prévention des doubles clics
@@ -113,6 +132,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 **Problème**: Attributs ARIA manquants
 
 **Fichiers modifiés**:
+
 - ✅ `src/components/ui/select.tsx`
 - ✅ `src/components/ui/dropdown-menu.tsx`
 - ✅ `src/components/ui/LanguageSwitcher.tsx`
@@ -120,6 +140,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 **Changements**:
 
 #### `select.tsx` - SelectTrigger
+
 ```typescript
 // ✅ Ajout des attributs ARIA
 <SelectPrimitive.Trigger
@@ -131,6 +152,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 ```
 
 #### `select.tsx` - SelectItem
+
 ```typescript
 // ✅ Ajout du rôle
 <SelectPrimitive.Item
@@ -140,6 +162,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 ```
 
 #### `dropdown-menu.tsx` - DropdownMenuItem
+
 ```typescript
 // ✅ Ajout du rôle
 <DropdownMenuPrimitive.Item
@@ -149,6 +172,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 ```
 
 #### `LanguageSwitcher.tsx` - Button
+
 ```typescript
 // ✅ Attributs ARIA complets
 <Button
@@ -164,6 +188,7 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 ```
 
 **Impact**:
+
 - ✅ Meilleure accessibilité pour les lecteurs d'écran
 - ✅ Conformité WCAG améliorée
 - ✅ Expérience utilisateur améliorée pour tous
@@ -172,13 +197,13 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 
 ## 📊 Statistiques
 
-| Métrique | Avant | Après | Amélioration |
-|---------|-------|-------|--------------|
-| **Composants documentés** | 0/6 | 6/6 | ✅ +100% |
-| **Exemples JSDoc** | 0 | 6 | ✅ +6 |
-| **Attributs ARIA** | 2 | 8+ | ✅ +300% |
-| **Feedback visuel** | 0 | 1 | ✅ +1 |
-| **Délai artificiel** | 50-100ms | 0ms | ✅ -100% |
+| Métrique                  | Avant    | Après | Amélioration |
+| ------------------------- | -------- | ----- | ------------ |
+| **Composants documentés** | 0/6      | 6/6   | ✅ +100%     |
+| **Exemples JSDoc**        | 0        | 6     | ✅ +6        |
+| **Attributs ARIA**        | 2        | 8+    | ✅ +300%     |
+| **Feedback visuel**       | 0        | 1     | ✅ +1        |
+| **Délai artificiel**      | 50-100ms | 0ms   | ✅ -100%     |
 
 ---
 
@@ -241,5 +266,4 @@ const changeLanguage = useCallback((langCode: LanguageCode) => {
 
 ---
 
-*Corrections appliquées le 2025-01-30* ✅
-
+_Corrections appliquées le 2025-01-30_ ✅

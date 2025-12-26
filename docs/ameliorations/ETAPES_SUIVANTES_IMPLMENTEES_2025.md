@@ -10,17 +10,21 @@
 ### 1. ✅ Système de Notifications Emails pour Tracking
 
 #### Fichiers Modifiés
+
 - ✅ `src/lib/sendgrid.ts` - Ajout de `sendTrackingUpdateEmail()`
 - ✅ `src/lib/shipping/automatic-tracking.ts` - Intégration de l'envoi d'emails
 
 #### Fonctionnalités
+
 - ✅ Envoi automatique d'emails lors des mises à jour de tracking
 - ✅ Templates différents selon le statut (delivered, out_for_delivery, update)
 - ✅ Variables dynamiques (tracking number, URL, statut, événements)
 - ✅ Gestion d'erreurs (ne bloque pas le tracking si l'email échoue)
 
 #### Templates Email Requis
+
 Les templates suivants doivent être créés dans la base de données :
+
 - `shipment-tracking-update` - Mise à jour générale
 - `shipment-delivered` - Livraison effectuée
 - `shipment-out-for-delivery` - En cours de livraison
@@ -30,15 +34,18 @@ Les templates suivants doivent être créés dans la base de données :
 ### 2. ✅ Intégration Calcul Shipping Art dans Checkout
 
 #### Fichiers Modifiés
+
 - ✅ `src/pages/Checkout.tsx` - Intégration du hook `useArtistShipping`
 
 #### Fonctionnalités
+
 - ✅ Détection automatique des œuvres d'artiste dans le panier
 - ✅ Calcul spécialisé via `useArtistShipping` hook
 - ✅ Fallback sur estimation si calcul non disponible
 - ✅ Support multi-produits (mélange art + standard)
 
 #### Logique
+
 1. Détecte les produits `product_type === 'artist'`
 2. Calcule la valeur totale des œuvres
 3. Utilise `useArtistShipping` avec options spécialisées
@@ -49,15 +56,18 @@ Les templates suivants doivent être créés dans la base de données :
 ### 3. 🔄 Amélioration Adaptateurs Transporteurs
 
 #### Fichiers Modifiés
+
 - ✅ `src/lib/shipping/automatic-tracking.ts` - Structure améliorée pour FedEx
 
 #### Améliorations
+
 - ✅ Support des credentials API (API Key, Secret, Account Number)
 - ✅ Fallback sur simulation si credentials non configurés
 - ✅ Documentation API ajoutée
 - ✅ Structure prête pour implémentation réelle
 
 #### À Compléter
+
 - ⏳ Implémentation API FedEx réelle
 - ⏳ Implémentation API DHL réelle
 - ⏳ Implémentation API UPS réelle
@@ -68,10 +78,12 @@ Les templates suivants doivent être créés dans la base de données :
 ### 4. ✅ Système de Cron Job pour Tracking Automatique
 
 #### Fichiers Créés
+
 - ✅ `supabase/functions/track-shipments/index.ts` - Edge Function
 - ✅ `supabase/functions/track-shipments/README.md` - Documentation
 
 #### Fonctionnalités
+
 - ✅ Edge Function Supabase pour tracking batch
 - ✅ Récupération automatique des shipments en attente
 - ✅ Traitement séquentiel avec pause entre appels
@@ -79,11 +91,13 @@ Les templates suivants doivent être créés dans la base de données :
 - ✅ Support CORS pour appels externes
 
 #### Configuration Requise
+
 1. Déployer la fonction : `supabase functions deploy track-shipments`
 2. Configurer le cron job dans Supabase Dashboard
 3. Planifier l'exécution (ex: toutes les 5 minutes)
 
 #### Exemple Cron Job SQL
+
 ```sql
 SELECT cron.schedule(
   'track-pending-shipments',
@@ -105,13 +119,13 @@ SELECT cron.schedule(
 
 ## 📊 STATUT GLOBAL
 
-| Étape | Statut | Complétion |
-|-------|--------|------------|
-| **1. Notifications Emails** | ✅ Complété | 100% |
-| **2. Shipping Art Checkout** | ✅ Complété | 100% |
-| **3. Adaptateurs Transporteurs** | 🔄 En cours | 40% |
-| **4. Cron Job Tracking** | ✅ Complété | 100% |
-| **5. Webhooks Temps Réel** | ⏳ À faire | 0% |
+| Étape                            | Statut      | Complétion |
+| -------------------------------- | ----------- | ---------- |
+| **1. Notifications Emails**      | ✅ Complété | 100%       |
+| **2. Shipping Art Checkout**     | ✅ Complété | 100%       |
+| **3. Adaptateurs Transporteurs** | 🔄 En cours | 40%        |
+| **4. Cron Job Tracking**         | ✅ Complété | 100%       |
+| **5. Webhooks Temps Réel**       | ⏳ À faire  | 0%         |
 
 ---
 
@@ -154,6 +168,7 @@ SELECT cron.schedule(
 ### Variables d'Environnement Requises
 
 Pour les adaptateurs transporteurs :
+
 ```env
 VITE_FEDEX_API_KEY=your_fedex_api_key
 VITE_FEDEX_API_SECRET=your_fedex_api_secret
@@ -167,9 +182,10 @@ VITE_CHRONOPOST_API_KEY=your_chronopost_api_key
 ### Base de Données
 
 Créer les templates email dans `email_templates` :
+
 ```sql
 INSERT INTO email_templates (slug, name, subject, html_content, product_type, is_active)
-VALUES 
+VALUES
   ('shipment-tracking-update', 'Mise à jour tracking', '{"fr": "Mise à jour de votre colis"}', '...', 'physical', true),
   ('shipment-delivered', 'Colis livré', '{"fr": "Votre colis a été livré"}', '...', 'physical', true),
   ('shipment-out-for-delivery', 'En cours de livraison', '{"fr": "Votre colis est en cours de livraison"}', '...', 'physical', true);
@@ -179,4 +195,3 @@ VALUES
 
 **Date de dernière mise à jour** : 31 Janvier 2025  
 **Statut Global** : ✅ 60% Complété
-

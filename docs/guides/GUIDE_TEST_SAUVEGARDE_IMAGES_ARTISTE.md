@@ -38,7 +38,7 @@ Après avoir uploadé les images, vérifier dans la console :
 
 ```sql
 -- Vérifier le dernier produit artiste créé
-SELECT 
+SELECT
   p.id as product_id,
   p.name as product_name,
   p.image_url as product_image_url,
@@ -48,12 +48,12 @@ SELECT
   ap.artist_name,
   ap.artwork_title,
   ap.artist_photo_url,
-  CASE 
+  CASE
     WHEN ap.artist_photo_url IS NOT NULL THEN '✅ Photo présente'
     ELSE '❌ Photo manquante'
   END as photo_status,
-  CASE 
-    WHEN p.images IS NOT NULL AND jsonb_array_length(p.images::jsonb) > 0 THEN 
+  CASE
+    WHEN p.images IS NOT NULL AND jsonb_array_length(p.images::jsonb) > 0 THEN
       '✅ Images présentes (' || jsonb_array_length(p.images::jsonb) || ')'
     ELSE '❌ Images manquantes'
   END as images_status,
@@ -70,10 +70,12 @@ LIMIT 1;
 #### ✅ Si tout fonctionne correctement :
 
 **Table `products`** :
+
 - `image_url` : URL de la première image (ex: `https://...supabase.co/.../artist/artwork_...jpeg`)
 - `images` : Tableau JSON avec toutes les URLs (ex: `["url1", "url2"]`)
 
 **Table `artist_products`** :
+
 - `artist_photo_url` : URL de la photo artiste (ex: `https://...supabase.co/.../artist/artist-photo_...jpeg`)
 
 #### ❌ Si problème :
@@ -89,23 +91,25 @@ LIMIT 1;
 ### Vérification 1 : Format des URLs
 
 Les URLs doivent être au format Supabase Storage :
+
 ```
 https://[project].supabase.co/storage/v1/object/public/product-images/artist/...
 ```
 
 **Requête SQL** :
+
 ```sql
-SELECT 
+SELECT
   ap.artist_photo_url,
-  CASE 
+  CASE
     WHEN ap.artist_photo_url LIKE '%supabase.co/storage/v1/object/public/product-images/%' THEN '✅ Format valide'
     WHEN ap.artist_photo_url LIKE '%supabase.co/storage/v1/object/sign/product-images/%' THEN '✅ Format signé'
     WHEN ap.artist_photo_url IS NULL THEN '⚠️ NULL'
     ELSE '❌ Format suspect'
   END as photo_url_status,
   p.images,
-  CASE 
-    WHEN p.images IS NOT NULL THEN 
+  CASE
+    WHEN p.images IS NOT NULL THEN
       jsonb_array_length(p.images::jsonb) || ' image(s)'
     ELSE '0 image'
   END as images_count
@@ -126,6 +130,7 @@ LIMIT 5;
 ### Vérification 3 : Accessibilité des URLs
 
 Tester les URLs directement dans le navigateur :
+
 - Ouvrir l'URL de `artist_photo_url` → Doit afficher l'image
 - Ouvrir les URLs de `images` → Doivent afficher les images
 
@@ -136,11 +141,13 @@ Tester les URLs directement dans le navigateur :
 ### Problème : Images uploadées mais non sauvegardées
 
 **Causes possibles** :
+
 1. ❌ Produit non sauvegardé (brouillon seulement)
 2. ❌ Erreur lors de la sauvegarde (vérifier console)
 3. ❌ `formData` non mis à jour correctement
 
 **Solution** :
+
 1. Vérifier les logs console pour erreurs
 2. Vérifier que le produit est bien publié (pas en brouillon)
 3. Vérifier que `onUpdate` est bien appelé après upload
@@ -148,10 +155,12 @@ Tester les URLs directement dans le navigateur :
 ### Problème : URLs NULL en base
 
 **Causes possibles** :
+
 1. ❌ `formData.images` ou `formData.artist_photo_url` est vide
 2. ❌ Erreur lors de l'insertion en base
 
 **Solution** :
+
 1. Vérifier `formData` dans les logs console
 2. Vérifier les erreurs SQL lors de l'insertion
 3. Vérifier que les colonnes existent bien
@@ -178,8 +187,9 @@ Tester les URLs directement dans le navigateur :
 ### Après création d'un produit avec images :
 
 **Requête SQL** :
+
 ```sql
-SELECT 
+SELECT
   p.name,
   ap.artist_name,
   ap.artwork_title,
@@ -194,6 +204,7 @@ LIMIT 1;
 ```
 
 **Résultat attendu** :
+
 ```
 name: "Test Artwork"
 artist_name: "Test Artist"
@@ -207,4 +218,3 @@ created_at: [date récente]
 
 **Document créé par** : Auto (Cursor AI)  
 **Date** : 28 Janvier 2025
-

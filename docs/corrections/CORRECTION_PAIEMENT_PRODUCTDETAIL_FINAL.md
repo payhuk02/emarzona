@@ -5,6 +5,7 @@
 ## 🔍 Analyse des Logs
 
 D'après les logs de la console :
+
 - ✅ `[LOG] Initiating Moneroo payment from ProductDetail:` - Le paiement est initié
 - ✅ `[LOG] initiateMonerooPayment Paramètres validés:` - Les paramètres sont validés
 - ✅ `[LOG] Transaction created: afc81b73-8128-40ff-81be-459a0c594596` - La transaction est créée
@@ -20,29 +21,35 @@ L'erreur se produit probablement lors de l'insertion dans `transaction_logs` (li
 ### 1. Insertion de Log Non-Bloquante
 
 **Avant :**
+
 ```typescript
 // 2. Log de création de transaction
-await supabase.from("transaction_logs").insert([{
-  transaction_id: transaction.id,
-  event_type: "created",
-  status: "pending",
-  request_data: JSON.parse(JSON.stringify(options)),
-}]);
+await supabase.from('transaction_logs').insert([
+  {
+    transaction_id: transaction.id,
+    event_type: 'created',
+    status: 'pending',
+    request_data: JSON.parse(JSON.stringify(options)),
+  },
+]);
 ```
 
 **Après :**
+
 ```typescript
 // 2. Log de création de transaction (non-bloquant)
 try {
-  await supabase.from("transaction_logs").insert([{
-    transaction_id: transaction.id,
-    event_type: "created",
-    status: "pending",
-    request_data: JSON.parse(JSON.stringify(options)),
-  }]);
+  await supabase.from('transaction_logs').insert([
+    {
+      transaction_id: transaction.id,
+      event_type: 'created',
+      status: 'pending',
+      request_data: JSON.parse(JSON.stringify(options)),
+    },
+  ]);
 } catch (logError: any) {
   // Ne pas bloquer le processus si le log échoue
-  logger.warn("Failed to insert transaction log (non-critical):", logError);
+  logger.warn('Failed to insert transaction log (non-critical):', logError);
 }
 ```
 
@@ -63,6 +70,7 @@ try {
 ## 🎯 Résultat Attendu
 
 Avec ces corrections :
+
 1. L'insertion dans `transaction_logs` ne bloquera plus le processus
 2. Les logs détaillés permettront de voir exactement où l'erreur se produit
 3. L'erreur Edge Function sera capturée et affichée correctement
@@ -77,4 +85,3 @@ Avec ces corrections :
 3. **Comparer avec Marketplace/Storefront** pour identifier les différences
 
 Les logs détaillés permettront maintenant de diagnostiquer précisément le problème.
-

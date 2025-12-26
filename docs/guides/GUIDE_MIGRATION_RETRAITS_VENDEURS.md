@@ -52,12 +52,14 @@ supabase migration up
 Après avoir exécuté la migration, vérifiez que :
 
 1. **Les tables existent :**
+
    ```sql
    SELECT * FROM store_earnings LIMIT 1;
    SELECT * FROM store_withdrawals LIMIT 1;
    ```
 
 2. **Les fonctions existent :**
+
    ```sql
    SELECT proname FROM pg_proc WHERE proname = 'calculate_store_earnings';
    SELECT proname FROM pg_proc WHERE proname = 'update_store_earnings';
@@ -71,28 +73,34 @@ Après avoir exécuté la migration, vérifiez que :
 ## 🔧 En cas d'erreur
 
 ### Erreur : "relation already exists"
+
 - Les tables existent déjà, c'est normal si vous avez déjà exécuté la migration
 - La migration utilise `CREATE TABLE IF NOT EXISTS`, donc elle est idempotente
 
 ### Erreur : "permission denied"
+
 - Vérifiez que vous êtes connecté avec un compte administrateur
 - Vérifiez les permissions RLS (Row Level Security)
 
 ### Erreur : "function does not exist"
+
 - Assurez-vous d'avoir exécuté toute la migration, pas seulement une partie
 - Vérifiez que les fonctions sont créées dans le bon schéma (`public`)
 
 ### Erreur : "null value in column available_balance"
+
 - **Solution :** Exécutez la migration de correction `20250131_fix_store_earnings_null_constraint.sql`
 - Cette erreur se produit si la fonction `update_store_earnings` n'a pas été corrigée pour gérer les valeurs NULL
 
 ## 📊 Tables créées
 
 ### `store_earnings`
+
 - Stocke les revenus totaux, retraits et solde disponible par store
 - Mis à jour automatiquement via des triggers
 
 ### `store_withdrawals`
+
 - Stocke toutes les demandes de retrait des vendeurs
 - Gère les statuts : pending, processing, completed, failed, cancelled
 
@@ -112,7 +120,7 @@ Après avoir exécuté la migration, vérifiez que :
 ## 🆘 Support
 
 Si vous rencontrez des problèmes :
+
 1. Vérifiez les logs dans la console du navigateur
 2. Vérifiez les logs Supabase dans la section "Logs"
 3. Consultez le fichier `ANALYSE_SYSTEME_RETRAIT_VENDEURS.md` pour plus de détails
-

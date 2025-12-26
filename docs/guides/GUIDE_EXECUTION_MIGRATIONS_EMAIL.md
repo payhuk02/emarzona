@@ -22,6 +22,7 @@ Trois migrations SQL à exécuter dans l'ordre :
 **Fichier :** `supabase/migrations/20250201_fix_email_templates_complete_structure.sql`
 
 **Ce que fait cette migration :**
+
 - ✅ Ajoute la colonne `product_type` si elle n'existe pas
 - ✅ Ajoute la colonne `is_default` si elle n'existe pas
 - ✅ Ajoute toutes les autres colonnes manquantes
@@ -29,6 +30,7 @@ Trois migrations SQL à exécuter dans l'ordre :
 - ✅ Met à jour les commentaires
 
 **Comment exécuter :**
+
 1. Ouvrir Supabase Dashboard → SQL Editor
 2. Copier le contenu du fichier `20250201_fix_email_templates_complete_structure.sql`
 3. Coller dans l'éditeur SQL
@@ -36,12 +38,14 @@ Trois migrations SQL à exécuter dans l'ordre :
 5. Vérifier qu'il n'y a pas d'erreur
 
 **Vérification :**
+
 ```sql
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'email_templates' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'email_templates'
 AND column_name IN ('product_type', 'is_default');
 ```
+
 Doit retourner 2 lignes.
 
 ---
@@ -51,12 +55,14 @@ Doit retourner 2 lignes.
 **Fichier :** `supabase/migrations/20250201_add_missing_email_templates.sql`
 
 **Ce que fait cette migration :**
+
 - ✅ Insère le template `order-confirmation-service`
 - ✅ Insère le template `course-enrollment-confirmation`
 - ✅ Insère le template `order-confirmation-artist`
 - ✅ Utilise `ON CONFLICT` pour éviter les doublons
 
 **Comment exécuter :**
+
 1. Toujours dans SQL Editor
 2. Copier le contenu du fichier `20250201_add_missing_email_templates.sql`
 3. Coller dans l'éditeur SQL
@@ -64,15 +70,17 @@ Doit retourner 2 lignes.
 5. Vérifier qu'il n'y a pas d'erreur
 
 **Vérification :**
+
 ```sql
-SELECT slug, name, product_type 
-FROM email_templates 
+SELECT slug, name, product_type
+FROM email_templates
 WHERE slug IN (
   'order-confirmation-service',
   'course-enrollment-confirmation',
   'order-confirmation-artist'
 );
 ```
+
 Doit retourner 3 lignes.
 
 ---
@@ -82,10 +90,12 @@ Doit retourner 3 lignes.
 **Fichier :** `supabase/migrations/20250201_auto_send_order_confirmation_emails.sql`
 
 **Ce que fait cette migration :**
+
 - ✅ Crée un trigger SQL pour détecter les paiements complétés
 - ✅ Prépare le système pour l'envoi automatique d'emails
 
 **Comment exécuter :**
+
 1. Toujours dans SQL Editor
 2. Copier le contenu du fichier `20250201_auto_send_order_confirmation_emails.sql`
 3. Coller dans l'éditeur SQL
@@ -100,7 +110,7 @@ Après avoir exécuté toutes les migrations, exécuter cette requête :
 
 ```sql
 -- Vérifier toutes les colonnes
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable,
@@ -111,7 +121,7 @@ AND table_name = 'email_templates'
 ORDER BY ordinal_position;
 
 -- Vérifier les templates
-SELECT 
+SELECT
   slug,
   name,
   category,
@@ -127,12 +137,15 @@ ORDER BY slug;
 ## ⚠️ En cas d'erreur
 
 ### Erreur : "column already exists"
+
 ✅ **C'est normal !** La migration vérifie l'existence avant d'ajouter. C'est sans danger.
 
 ### Erreur : "index already exists"
+
 ✅ **C'est normal !** L'utilisation de `IF NOT EXISTS` évite les erreurs. C'est sans danger.
 
 ### Erreur : "template already exists"
+
 ✅ **C'est normal !** Le `ON CONFLICT` met à jour le template existant. C'est sans danger.
 
 ---
@@ -151,6 +164,7 @@ Après exécution complète :
 ## 📞 Support
 
 Si des erreurs persistent :
+
 1. Vérifier les logs dans Supabase Dashboard → Logs
 2. Vérifier que les migrations sont exécutées dans l'ordre
 3. Vérifier que la table `email_templates` existe bien
@@ -158,4 +172,3 @@ Si des erreurs persistent :
 ---
 
 **Guide créé le 1er Février 2025** ✅
-

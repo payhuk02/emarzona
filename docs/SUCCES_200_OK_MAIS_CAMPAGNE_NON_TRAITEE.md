@@ -35,7 +35,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Log
 L'Edge Function ne traite que les campagnes qui répondent à ces critères :
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -50,6 +50,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Vérifications** :
+
 - `status` doit être `'scheduled'` ✅
 - `is_due` doit être `true` (scheduled_at <= NOW()) ⚠️
 - `has_template` doit être `true` (template_id IS NOT NULL) ⚠️
@@ -74,9 +75,9 @@ Si `template_id` est `NULL`, la campagne ne sera pas traitée.
 
 ```sql
 -- Vérifier si un template existe
-SELECT id, name, is_active 
-FROM public.email_templates 
-WHERE is_active = true 
+SELECT id, name, is_active
+FROM public.email_templates
+WHERE is_active = true
 LIMIT 5;
 
 -- Si un template existe, mettre à jour la campagne
@@ -104,6 +105,7 @@ SELECT net.http_post(
 ```
 
 Puis vérifiez :
+
 1. L'invocation est `200 OK`
 2. La campagne passe à `sending` ou `completed`
 3. `emails_sent` > 0
@@ -133,5 +135,3 @@ Puis vérifiez :
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

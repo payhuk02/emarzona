@@ -17,7 +17,8 @@ Failed to load resource: the server responded with a status of 504 (Outdated Req
 - react-refresh:1
 ```
 
-**Cause** : 
+**Cause** :
+
 - Le serveur Vite a été redémarré mais le navigateur essaie toujours de charger d'anciennes ressources
 - Conflit de ports (serveur configuré sur 8080 mais accès sur 8082)
 - Cache du navigateur ou du serveur Vite obsolète
@@ -29,6 +30,7 @@ Failed to load resource: the server responded with a status of 504 (Outdated Req
 ### 1. Arrêt des processus en conflit
 
 **Actions** :
+
 ```powershell
 # Arrêter le processus sur le port 8080
 Stop-Process -Id 13132 -Force
@@ -44,6 +46,7 @@ Stop-Process -Id 5620 -Force
 ### 2. Nettoyage du cache Vite
 
 **Action** :
+
 ```powershell
 Remove-Item -Path node_modules\.vite -Recurse -Force
 ```
@@ -55,6 +58,7 @@ Remove-Item -Path node_modules\.vite -Recurse -Force
 ### 3. Redémarrage propre du serveur
 
 **Action** :
+
 ```bash
 npm run dev
 ```
@@ -70,6 +74,7 @@ npm run dev
 **Configuration Vite** : Port `8080` (défini dans `vite.config.ts`)
 
 **Accès correct** :
+
 - ✅ `http://localhost:8080`
 - ❌ `http://localhost:8082` (ancien port, peut causer des erreurs)
 
@@ -78,6 +83,7 @@ npm run dev
 ### 2. Rafraîchir le navigateur
 
 **Actions** :
+
 1. **Hard Refresh** : `Ctrl + Shift + R` (Windows/Linux) ou `Cmd + Shift + R` (Mac)
 2. **Vider le cache** : Ouvrir les DevTools → Network → Cocher "Disable cache"
 3. **Fermer et rouvrir l'onglet** : Fermer complètement l'onglet et en ouvrir un nouveau
@@ -89,6 +95,7 @@ npm run dev
 ### 3. Vérifier la console
 
 **Après le redémarrage** :
+
 - ✅ Aucune erreur 504
 - ✅ Les ressources se chargent correctement
 - ✅ L'application fonctionne
@@ -100,10 +107,12 @@ npm run dev
 ### Ports utilisés
 
 **Avant correction** :
+
 - Port 8080 : Processus 13132 (serveur Vite)
 - Port 8082 : Processus 5620 (ancien serveur ou conflit)
 
 **Après correction** :
+
 - Port 8080 : Nouveau serveur Vite propre
 - Port 8082 : Libéré
 
@@ -114,9 +123,11 @@ npm run dev
 ### Tests à effectuer
 
 1. **Vérifier que le serveur démarre** :
+
    ```bash
    npm run dev
    ```
+
    - ✅ Le serveur démarre sur le port 8080
    - ✅ Aucune erreur dans le terminal
 
@@ -194,6 +205,7 @@ server: {
 ## ✅ RÉSULTAT ATTENDU
 
 Après ces corrections :
+
 - ✅ Aucune erreur 504 dans la console
 - ✅ Le serveur démarre proprement sur le port 8080
 - ✅ L'application se charge correctement
@@ -220,6 +232,3 @@ Après ces corrections :
 **Document généré le** : Janvier 2025  
 **Version** : 1.0  
 **Statut** : ✅ Corrigé
-
-
-

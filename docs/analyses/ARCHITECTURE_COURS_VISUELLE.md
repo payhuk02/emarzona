@@ -319,26 +319,31 @@ instructor_profiles ────────────────────
 ## 📈 ÉVOLUTION PRÉVUE
 
 ### Phase 1 (✅ 85% fait)
+
 - Migration SQL
 - Types + Hooks
 - Routes basiques
 
 ### Phase 2 (Semaine prochaine)
+
 - Formulaire création cours
 - Upload vidéos
 - Curriculum builder
 
 ### Phase 3 (Dans 2 semaines)
+
 - Player vidéo custom
 - Système quiz
 - Tracking progression
 
 ### Phase 4 (Dans 1 mois)
+
 - Certificats PDF
 - Q&A système
 - Marketplace complet
 
 ### Phase 5 (Dans 2 mois)
+
 - Analytics avancés
 - Recommandations IA
 - Gamification
@@ -348,6 +353,7 @@ instructor_profiles ────────────────────
 ## 🏆 AVANTAGES COMPÉTITIFS
 
 ### vs Udemy
+
 ```
 ✅ Commissions plus basses (Payhuk: 5-10% vs Udemy: 37-50%)
 ✅ Paiements locaux (Mobile Money, Moneroo)
@@ -355,6 +361,7 @@ instructor_profiles ────────────────────
 ```
 
 ### vs Teachable
+
 ```
 ✅ Pas de frais mensuels fixes
 ✅ Marketplace intégré
@@ -362,6 +369,7 @@ instructor_profiles ────────────────────
 ```
 
 ### vs Thinkific
+
 ```
 ✅ Plus simple à utiliser
 ✅ Déploiement plus rapide
@@ -373,4 +381,3 @@ instructor_profiles ────────────────────
 **Document créé le** : 27 Octobre 2025  
 **Version** : 1.0  
 **Statut** : Architecture validée et opérationnelle
-

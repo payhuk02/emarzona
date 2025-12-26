@@ -70,6 +70,7 @@ SELECT net.http_post(
 ```
 
 **Vérifiez les logs** :
+
 - ✅ Plus de warning `SENDGRID_API_KEY is not set`
 - ⚠️ Si toujours `401 Invalid JWT`, voir Action 2
 
@@ -77,10 +78,10 @@ SELECT net.http_post(
 
 ## 📊 État Actuel
 
-| Problème | Statut | Solution |
-|----------|--------|----------|
-| `SENDGRID_API_KEY is not set` | ❌ **NON RÉSOLU** | Configurer dans Supabase Dashboard |
-| `401 Invalid JWT` | ❌ **NON RÉSOLU** | Vérifier l'utilisation de l'anon key |
+| Problème                      | Statut            | Solution                             |
+| ----------------------------- | ----------------- | ------------------------------------ |
+| `SENDGRID_API_KEY is not set` | ❌ **NON RÉSOLU** | Configurer dans Supabase Dashboard   |
+| `401 Invalid JWT`             | ❌ **NON RÉSOLU** | Vérifier l'utilisation de l'anon key |
 
 ---
 
@@ -92,5 +93,3 @@ SELECT net.http_post(
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

@@ -30,6 +30,7 @@ Le diagnostic automatique confirme que **le bucket "attachments" n'existe pas** 
 **Fichier** : `supabase/migrations/20250201_create_and_configure_attachments_bucket.sql`
 
 Cette migration :
+
 1. ✅ **Crée le bucket** "attachments" s'il n'existe pas
 2. ✅ **Configure le bucket** comme PUBLIC
 3. ✅ **Supprime les restrictions MIME** (pour éviter l'erreur "mime type application/json is not supported")
@@ -151,4 +152,3 @@ Si vous voyez des ⚠️ ou ❌, suivez les instructions affichées.
 
 **Dernière mise à jour** : 1 Février 2025  
 **Fichier créé** : `supabase/migrations/20250201_create_and_configure_attachments_bucket.sql`
-

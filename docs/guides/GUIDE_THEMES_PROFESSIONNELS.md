@@ -1,4 +1,5 @@
 # Guide des Thèmes Professionnels - Emarzona
+
 **Date:** 2 Décembre 2025  
 **Version:** 1.0
 
@@ -24,6 +25,7 @@ Emarzona dispose maintenant de **6 thèmes professionnels** :
 **Style:** Professionnel, clair, moderne
 
 **Caractéristiques:**
+
 - ✅ Fond blanc pur (#FFFFFF)
 - ✅ Texte noir bleuté (#0A2540)
 - ✅ Bleu professionnel (#635BFF)
@@ -32,12 +34,14 @@ Emarzona dispose maintenant de **6 thèmes professionnels** :
 - ✅ Ombres subtiles
 
 **Idéal pour:**
+
 - Applications professionnelles
 - Dashboards d'entreprise
 - Interfaces de paiement
 - Sites corporate
 
 **Code:**
+
 ```typescript
 import { useTheme } from '@/hooks/useTheme';
 
@@ -52,6 +56,7 @@ changeTheme('professional');
 **Style:** Minimaliste, moderne, épuré
 
 **Caractéristiques:**
+
 - ✅ Fond blanc pur (#FFFFFF)
 - ✅ Texte noir doux (#1D1D1F)
 - ✅ Bleu Linear (#0066FF)
@@ -60,12 +65,14 @@ changeTheme('professional');
 - ✅ Ombres très légères
 
 **Idéal pour:**
+
 - Applications de productivité
 - Gestion de projets
 - Interfaces minimalistes
 - Apps modernes
 
 **Code:**
+
 ```typescript
 changeTheme('minimal');
 ```
@@ -77,6 +84,7 @@ changeTheme('minimal');
 **Style:** Sombre élégant, premium
 
 **Caractéristiques:**
+
 - ✅ Fond noir pur (#000000)
 - ✅ Texte blanc doux (#FAFAFA)
 - ✅ Accents blancs
@@ -85,12 +93,14 @@ changeTheme('minimal');
 - ✅ Ombres profondes
 
 **Idéal pour:**
+
 - Applications premium
 - Portfolios développeurs
 - Sites tech modernes
 - Interfaces sombres élégantes
 
 **Code:**
+
 ```typescript
 changeTheme('dark');
 ```
@@ -102,6 +112,7 @@ changeTheme('dark');
 **Style:** Clair, spacieux, confortable
 
 **Caractéristiques:**
+
 - ✅ Fond blanc pur (#FFFFFF)
 - ✅ Texte gris foncé (#37352F)
 - ✅ Sidebar gris clair
@@ -110,12 +121,14 @@ changeTheme('dark');
 - ✅ Ombres très légères
 
 **Idéal pour:**
+
 - Applications de documentation
 - Wikis et bases de connaissances
 - Interfaces spacieuses
 - Apps de prise de notes
 
 **Code:**
+
 ```typescript
 changeTheme('spacious');
 ```
@@ -127,6 +140,7 @@ changeTheme('spacious');
 **Style:** Clair, fonctionnel, pratique
 
 **Caractéristiques:**
+
 - ✅ Fond blanc pur (#FFFFFF)
 - ✅ Texte noir bleuté (#24292F)
 - ✅ Bleu GitHub (#0969DA)
@@ -135,12 +149,14 @@ changeTheme('spacious');
 - ✅ Ombres modérées
 
 **Idéal pour:**
+
 - Applications de développement
 - Outils techniques
 - Interfaces fonctionnelles
 - Apps pour développeurs
 
 **Code:**
+
 ```typescript
 changeTheme('classic');
 ```
@@ -151,6 +167,7 @@ changeTheme('classic');
 
 **Style:** Sombre actuel  
 **Caractéristiques:**
+
 - ✅ Fond sombre bleu-gris
 - ✅ Texte blanc
 - ✅ Accents colorés (bleu, jaune)
@@ -159,6 +176,7 @@ changeTheme('classic');
 - ✅ Ombres colorées
 
 **Code:**
+
 ```typescript
 changeTheme('default');
 ```
@@ -231,14 +249,14 @@ Le thème sélectionné est **automatiquement sauvegardé** dans le `localStorag
 
 ## 📊 Comparaison des Thèmes
 
-| Thème | Fond | Texte | Primary | Police | Style |
-|-------|------|-------|---------|--------|-------|
-| Professionnel | Blanc | Noir bleuté | Bleu (#635BFF) | Inter | Professionnel |
-| Minimaliste | Blanc | Noir doux | Bleu (#0066FF) | Inter | Minimaliste |
-| Sombre | Noir | Blanc doux | Blanc | Inter | Élégant |
-| Spacieux | Blanc | Gris foncé | Gris foncé | System UI | Spacieux |
-| Classique | Blanc | Noir bleuté | Bleu (#0969DA) | System UI | Fonctionnel |
-| Défaut | Sombre | Blanc | Bleu vif | Poppins | Coloré |
+| Thème         | Fond   | Texte       | Primary        | Police    | Style         |
+| ------------- | ------ | ----------- | -------------- | --------- | ------------- |
+| Professionnel | Blanc  | Noir bleuté | Bleu (#635BFF) | Inter     | Professionnel |
+| Minimaliste   | Blanc  | Noir doux   | Bleu (#0066FF) | Inter     | Minimaliste   |
+| Sombre        | Noir   | Blanc doux  | Blanc          | Inter     | Élégant       |
+| Spacieux      | Blanc  | Gris foncé  | Gris foncé     | System UI | Spacieux      |
+| Classique     | Blanc  | Noir bleuté | Bleu (#0969DA) | System UI | Fonctionnel   |
+| Défaut        | Sombre | Blanc       | Bleu vif       | Poppins   | Coloré        |
 
 ---
 
@@ -274,7 +292,14 @@ export const themes: Record<ThemeName, ThemeConfig> = {
 3. **Mettre à jour le type:**
 
 ```typescript
-export type ThemeName = 'stripe' | 'linear' | 'vercel' | 'notion' | 'github' | 'default' | 'mytheme';
+export type ThemeName =
+  | 'stripe'
+  | 'linear'
+  | 'vercel'
+  | 'notion'
+  | 'github'
+  | 'default'
+  | 'mytheme';
 ```
 
 ---
@@ -334,6 +359,7 @@ Tous les thèmes sont **100% responsives** et s'adaptent automatiquement à tous
 ## ♿ Accessibilité
 
 Tous les thèmes respectent les **standards WCAG AA** :
+
 - ✅ Contraste minimum 4.5:1
 - ✅ Focus visible amélioré
 - ✅ Navigation clavier optimisée
@@ -379,4 +405,3 @@ Tous les thèmes respectent les **standards WCAG AA** :
 
 **Date de création:** 2 Décembre 2025  
 **Dernière mise à jour:** 2 Décembre 2025
-

@@ -408,4 +408,3 @@ PROMO2025,"Promotion de test",percentage,20,Oui,01/02/2025 10:00,31/12/2025 23:5
 
 **Date de complétion:** 30 Janvier 2025  
 **Prochaine phase:** Phase 4 - Unification Complète (Optionnelle)
-

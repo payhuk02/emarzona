@@ -69,6 +69,7 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 ### 1. Auth Service
 
 **Responsabilités** :
+
 - Authentification utilisateurs
 - Gestion des sessions
 - Gestion des tokens JWT
@@ -76,10 +77,12 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 - OAuth providers
 
 **Technologies** :
+
 - Supabase Auth (actuel)
 - Migration vers service dédié (futur)
 
 **Endpoints** :
+
 - `POST /auth/signup`
 - `POST /auth/login`
 - `POST /auth/logout`
@@ -92,6 +95,7 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 ### 2. Payment Service
 
 **Responsabilités** :
+
 - Traitement des paiements
 - Intégration PayDunya/Moneroo
 - Gestion des transactions
@@ -99,10 +103,12 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 - Gestion des remboursements
 
 **Technologies** :
+
 - Supabase Edge Functions (actuel)
 - Migration vers service dédié (futur)
 
 **Endpoints** :
+
 - `POST /payments/create`
 - `POST /payments/process`
 - `GET /payments/:id`
@@ -114,16 +120,19 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 ### 3. Shipping Service
 
 **Responsabilités** :
+
 - Calcul des frais d'expédition
 - Intégration FedEx/DHL/UPS
 - Suivi des expéditions
 - Gestion des retours
 
 **Technologies** :
+
 - Supabase Edge Functions (actuel)
 - Migration vers service dédié (futur)
 
 **Endpoints** :
+
 - `POST /shipping/calculate`
 - `POST /shipping/create`
 - `GET /shipping/:id/track`
@@ -134,6 +143,7 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 ### 4. Product Service
 
 **Responsabilités** :
+
 - Gestion des produits
 - Catalogue produits
 - Recherche produits
@@ -141,10 +151,12 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 - Analytics produits
 
 **Technologies** :
+
 - Supabase PostgreSQL (actuel)
 - Migration vers service dédié (futur)
 
 **Endpoints** :
+
 - `GET /products`
 - `GET /products/:id`
 - `POST /products`
@@ -157,6 +169,7 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 ### 5. Analytics Service
 
 **Responsabilités** :
+
 - Collecte des analytics
 - Reporting
 - Dashboards
@@ -164,10 +177,12 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 - Insights
 
 **Technologies** :
+
 - Supabase PostgreSQL (actuel)
 - Migration vers service dédié (futur)
 
 **Endpoints** :
+
 - `POST /analytics/track`
 - `GET /analytics/dashboard`
 - `GET /analytics/reports`
@@ -178,6 +193,7 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 ### 6. Notification Service
 
 **Responsabilités** :
+
 - Envoi de notifications
 - Email notifications
 - SMS notifications
@@ -185,10 +201,12 @@ La plateforme Payhuk est actuellement monolithique mais architecturée de maniè
 - In-app notifications
 
 **Technologies** :
+
 - Supabase Realtime (actuel)
 - Migration vers service dédié (futur)
 
 **Endpoints** :
+
 - `POST /notifications/send`
 - `GET /notifications`
 - `PUT /notifications/:id/read`
@@ -305,5 +323,3 @@ L'architecture microservices est une évolution naturelle de la plateforme Payhu
 ---
 
 **Date de mise à jour** : 28 janvier 2025
-
-

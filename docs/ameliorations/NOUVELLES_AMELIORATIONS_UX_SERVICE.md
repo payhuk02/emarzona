@@ -223,4 +223,3 @@ const isUnavailable = events.some(event =>
 
 _Document créé le 2 Février 2025_  
 _Améliorations UX terminées ✅_
-

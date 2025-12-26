@@ -50,11 +50,13 @@ Une fonction `generateLinkCodeClientSide()` a été ajoutée dans `src/hooks/use
 Une fois Supabase de nouveau disponible, vous **DEVEZ** :
 
 1. **Exécuter la migration SQL** :
+
    ```
    supabase/migrations/20250131_fix_affiliate_link_code_function.sql
    ```
 
 2. **Vérifier que la fonction RPC fonctionne** :
+
    ```sql
    SELECT public.generate_affiliate_link_code('TEST123', 'test-product');
    ```
@@ -76,7 +78,7 @@ Création de lien → Appel RPC → Fonction SQL → Code généré
 ### Flux Temporaire (pendant maintenance)
 
 ```
-Création de lien → Appel RPC → ❌ Erreur 404/42883 → 
+Création de lien → Appel RPC → ❌ Erreur 404/42883 →
 Fallback client → Web Crypto API → Code généré
 ```
 
@@ -123,4 +125,3 @@ Si vous rencontrez des problèmes :
 - Vérifiez la console du navigateur pour les erreurs
 - Vérifiez que `crypto.randomUUID()` est disponible (navigateurs modernes)
 - Vérifiez que le contexte est HTTPS (requis pour Web Crypto API)
-

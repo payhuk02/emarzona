@@ -28,6 +28,7 @@
 #### AdminDashboard
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques : Valeurs réduites de `text-base` à `text-sm` sur mobile
 - ✅ Labels : `text-[10px]` → `text-[9px]` sur mobile
@@ -38,6 +39,7 @@
 #### AdminOrders
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques : Valeurs réduites
 - ✅ Labels : `text-[10px]` → `text-[9px]` sur mobile
@@ -47,6 +49,7 @@
 #### AdminProducts
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ CardTitles : `text-xs` → `text-sm` → `text-base` → `text-lg`
 - ✅ CardDescriptions : `text-[10px]` → `text-xs` → `text-sm`
@@ -59,6 +62,7 @@
 #### CustomerPortal
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques : Valeurs réduites de `text-base` à `text-sm` sur mobile
 - ✅ Labels : `text-[10px]` → `text-[9px]` sur mobile
@@ -66,6 +70,7 @@
 #### MyOrders
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques : Valeurs réduites
 - ✅ Labels : `text-[10px]` → `text-[9px]` sur mobile
@@ -78,6 +83,7 @@
 #### Cart
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Icônes : `h-5 w-5` → `h-4 w-4` → `h-5 w-5` → `h-6 w-6` → `h-7 w-7`
 - ✅ Descriptions : `text-sm` → `text-xs` → `text-sm` → `text-base`
@@ -87,6 +93,7 @@
 #### Checkout
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ CardTitles : Tailles réduites
 - ✅ Descriptions : Marges réduites
@@ -94,6 +101,7 @@
 #### Storefront
 
 **Modifications** :
+
 - ✅ Titres : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl`
 - ✅ Descriptions : `text-sm` → `text-xs` → `text-sm` → `text-base`
 - ✅ Marges : Réduites sur mobile
@@ -101,6 +109,7 @@
 #### Marketplace
 
 **Modifications** :
+
 - ✅ Hero titre : `text-2xl` → `text-xl` → `text-2xl` → `text-3xl` → `text-4xl` → `text-5xl`
 - ✅ Hero description : `text-sm` → `text-xs` → `text-sm` → `text-base` → `text-lg` → `text-xl`
 - ✅ Badges : Tailles réduites
@@ -111,23 +120,23 @@
 
 ### Tailles de Texte
 
-| Élément | Mobile | Tablet | Desktop | Large |
-|---------|--------|--------|---------|-------|
-| **H1 (Admin/Customer)** | `text-base` | `text-lg` | `text-xl` → `text-2xl` | `text-3xl` |
-| **H1 (Marketplace Hero)** | `text-xl` | `text-2xl` | `text-3xl` → `text-4xl` | `text-5xl` |
-| **Valeurs Stats** | `text-sm` | `text-base` | `text-lg` | `text-xl` → `text-2xl` |
-| **Labels** | `text-[9px]` | `text-[10px]` | `text-xs` | `text-sm` |
-| **CardTitles** | `text-xs` | `text-sm` | `text-base` | `text-lg` |
-| **Descriptions** | `text-[10px]` | `text-xs` | `text-sm` | `text-base` |
+| Élément                   | Mobile        | Tablet        | Desktop                 | Large                  |
+| ------------------------- | ------------- | ------------- | ----------------------- | ---------------------- |
+| **H1 (Admin/Customer)**   | `text-base`   | `text-lg`     | `text-xl` → `text-2xl`  | `text-3xl`             |
+| **H1 (Marketplace Hero)** | `text-xl`     | `text-2xl`    | `text-3xl` → `text-4xl` | `text-5xl`             |
+| **Valeurs Stats**         | `text-sm`     | `text-base`   | `text-lg`               | `text-xl` → `text-2xl` |
+| **Labels**                | `text-[9px]`  | `text-[10px]` | `text-xs`               | `text-sm`              |
+| **CardTitles**            | `text-xs`     | `text-sm`     | `text-base`             | `text-lg`              |
+| **Descriptions**          | `text-[10px]` | `text-xs`     | `text-sm`               | `text-base`            |
 
 ### Espacements
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Card padding** | `p-2.5` | `p-3` | `p-4` → `p-6` |
-| **CardHeader padding** | `p-2.5` | `p-3` | `p-4` → `p-6` |
-| **Gaps** | `gap-3` | `gap-4` | `gap-6` |
-| **Marges** | `mb-0.5` | `mb-1` | `mb-1.5` → `mb-2` |
+| Élément                | Mobile   | Tablet  | Desktop           |
+| ---------------------- | -------- | ------- | ----------------- |
+| **Card padding**       | `p-2.5`  | `p-3`   | `p-4` → `p-6`     |
+| **CardHeader padding** | `p-2.5`  | `p-3`   | `p-4` → `p-6`     |
+| **Gaps**               | `gap-3`  | `gap-4` | `gap-6`           |
+| **Marges**             | `mb-0.5` | `mb-1`  | `mb-1.5` → `mb-2` |
 
 ---
 
@@ -218,4 +227,3 @@
 
 **Date de validation** : 1 Février 2025  
 **Statut** : ✅ **COMPLÉTÉ**
-

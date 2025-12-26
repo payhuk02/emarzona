@@ -7,21 +7,25 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
 ### 1. ❌ "MONEROO_API_KEY is not configured"
 
 **Observations :**
+
 - Cette erreur apparaît dans les logs plus anciens (avant la configuration du secret)
 - Le secret `MONEROO_API_KEY` est maintenant configuré dans Supabase Dashboard
 
 **Solution :**
+
 - ✅ Secret configuré
 - ⚠️ **Redéployer l'Edge Function** pour que le secret soit pris en compte
 
 ### 2. ❌ "The route v1/checkout/initialize could not be found"
 
 **Observations :**
+
 - Cette erreur apparaît lors des tentatives de paiement récentes
 - L'endpoint `/checkout/initialize` n'existe pas dans l'API Moneroo
 - L'API Moneroo retourne une erreur 404
 
 **Solution appliquée :**
+
 - ✅ Endpoint modifié de `/checkout/initialize` à `/checkout`
 - ✅ Format des données ajusté selon le format attendu par Moneroo
 - ✅ Logs détaillés ajoutés pour diagnostic
@@ -31,6 +35,7 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
 ### Action 1: Redéployer l'Edge Function Moneroo
 
 **Pourquoi :**
+
 - Le secret `MONEROO_API_KEY` a été configuré après le déploiement initial
 - Les Edge Functions doivent être redéployées pour accéder aux nouveaux secrets
 - Les corrections de code (endpoint) doivent être déployées
@@ -38,16 +43,17 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
 **Comment :**
 
 1. **Via Supabase CLI (recommandé) :**
+
    ```bash
    # Installer Supabase CLI si nécessaire
    npm install -g supabase
-   
+
    # Se connecter à Supabase
    supabase login
-   
+
    # Lier le projet
    supabase link --project-ref votre-project-ref
-   
+
    # Déployer l'Edge Function
    supabase functions deploy moneroo
    ```
@@ -60,6 +66,7 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
 ### Action 2: Vérifier la Documentation Moneroo
 
 **Pourquoi :**
+
 - L'endpoint `/checkout` pourrait ne pas être correct non plus
 - Il faut vérifier la documentation officielle Moneroo pour trouver le bon endpoint
 
@@ -71,6 +78,7 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
    - Vérifier le format des données attendu
 
 2. **Tester avec Postman ou curl :**
+
    ```bash
    curl -X POST https://api.moneroo.io/v1/checkout \
      -H "Authorization: Bearer YOUR_API_KEY" \
@@ -92,6 +100,7 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
 ### Action 3: Vérifier le Format des Données
 
 **Pourquoi :**
+
 - Même avec le bon endpoint, le format des données pourrait être incorrect
 - L'API Moneroo pourrait attendre un format spécifique
 
@@ -159,9 +168,3 @@ D'après les logs Supabase Edge Functions, deux erreurs principales :
 - ⚠️ **En attente** : Redéploiement de l'Edge Function
 - ⚠️ **En attente** : Vérification de la documentation Moneroo
 - ⚠️ **En attente** : Test de l'endpoint
-
-
-
-
-
-

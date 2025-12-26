@@ -26,6 +26,7 @@
 #### MyLicenses
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Icône Shield : `h-5 w-5` → `h-4 w-4` → `h-5 w-5` → `h-6 w-6` → `h-7 w-7`
 - ✅ Cards de statistiques : Valeurs réduites de `text-xl` à `text-sm` sur mobile
@@ -38,9 +39,10 @@
 #### MyDownloads
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Container : Paddings réduits (`p-6` → `p-3` → `p-4` → `p-6`)
-- ✅ Cards de statistiques : 
+- ✅ Cards de statistiques :
   - CardHeaders : Paddings réduits
   - CardTitles : `text-sm` → `text-[9px]` → `text-[10px]` → `text-xs` → `text-sm`
   - Valeurs : `text-base` → `text-sm` → `text-base` → `text-lg` → `text-xl` → `text-2xl`
@@ -52,6 +54,7 @@
 #### DigitalProductsList
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques : Valeurs et labels réduits
 - ✅ CardHeaders : Paddings réduits
@@ -63,6 +66,7 @@
 #### MyProfile
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ CardTitles : `text-base` → `text-xs` → `text-sm` → `text-base` → `text-lg`
 - ✅ CardDescriptions : `text-xs` → `text-[10px]` → `text-xs` → `text-sm`
@@ -70,6 +74,7 @@
 #### CustomerMyWishlist
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques : Valeurs et labels réduits
 - ✅ CardHeaders : Paddings réduits
@@ -77,6 +82,7 @@
 #### CustomerMyInvoices
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Stats cards : Labels et valeurs réduits
   - Labels : `text-xs` → `text-[9px]` → `text-[10px]` → `text-xs` → `text-sm`
@@ -86,6 +92,7 @@
 #### MyFavorites
 
 **Modifications** :
+
 - ✅ Titre principal : `text-lg` → `text-base` → `text-lg` → `text-xl` → `text-2xl` → `text-3xl`
 - ✅ Cards de statistiques :
   - CardHeaders : Paddings réduits (`pb-2` → `pb-1.5` → `pb-2`)
@@ -100,30 +107,30 @@
 
 ### Tailles de Texte
 
-| Élément | Mobile | Tablet | Desktop | Large |
-|---------|--------|--------|---------|-------|
-| **H1** | `text-base` | `text-lg` | `text-xl` → `text-2xl` | `text-3xl` |
-| **Valeurs Stats** | `text-sm` | `text-base` | `text-lg` | `text-xl` → `text-2xl` |
-| **Labels** | `text-[9px]` | `text-[10px]` | `text-xs` | `text-sm` |
-| **CardTitles** | `text-xs` | `text-sm` | `text-base` | `text-lg` |
-| **Descriptions** | `text-[9px]` | `text-[10px]` | `text-xs` | `text-sm` |
+| Élément           | Mobile       | Tablet        | Desktop                | Large                  |
+| ----------------- | ------------ | ------------- | ---------------------- | ---------------------- |
+| **H1**            | `text-base`  | `text-lg`     | `text-xl` → `text-2xl` | `text-3xl`             |
+| **Valeurs Stats** | `text-sm`    | `text-base`   | `text-lg`              | `text-xl` → `text-2xl` |
+| **Labels**        | `text-[9px]` | `text-[10px]` | `text-xs`              | `text-sm`              |
+| **CardTitles**    | `text-xs`    | `text-sm`     | `text-base`            | `text-lg`              |
+| **Descriptions**  | `text-[9px]` | `text-[10px]` | `text-xs`              | `text-sm`              |
 
 ### Espacements
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Card padding** | `p-2.5` | `p-3` | `p-4` → `p-6` |
+| Élément                | Mobile          | Tablet        | Desktop       |
+| ---------------------- | --------------- | ------------- | ------------- |
+| **Card padding**       | `p-2.5`         | `p-3`         | `p-4` → `p-6` |
 | **CardHeader padding** | `p-2.5` → `p-3` | `p-3` → `p-4` | `p-4` → `p-6` |
-| **CardHeader pb** | `pb-1.5` | `pb-2` | `pb-3` |
-| **Container padding** | `p-3` | `p-4` | `p-6` |
-| **Gaps** | `gap-2` | `gap-3` | `gap-4` |
+| **CardHeader pb**      | `pb-1.5`        | `pb-2`        | `pb-3`        |
+| **Container padding**  | `p-3`           | `p-4`         | `p-6`         |
+| **Gaps**               | `gap-2`         | `gap-3`       | `gap-4`       |
 
 ### Icônes
 
-| Élément | Mobile | Tablet | Desktop |
-|---------|--------|--------|---------|
-| **Icônes stats** | `h-3 w-3` | `h-3.5 w-3.5` | `h-4 w-4` |
-| **Icônes titres** | `h-4 w-4` | `h-5 w-5` | `h-6 w-6` → `h-7 w-7` |
+| Élément           | Mobile    | Tablet        | Desktop               |
+| ----------------- | --------- | ------------- | --------------------- |
+| **Icônes stats**  | `h-3 w-3` | `h-3.5 w-3.5` | `h-4 w-4`             |
+| **Icônes titres** | `h-4 w-4` | `h-5 w-5`     | `h-6 w-6` → `h-7 w-7` |
 
 ---
 
@@ -210,4 +217,3 @@
 
 **Date de validation** : 1 Février 2025  
 **Statut** : ✅ **COMPLÉTÉ**
-

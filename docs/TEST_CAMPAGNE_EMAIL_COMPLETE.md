@@ -53,6 +53,7 @@ Ce guide vous permet de créer une campagne email de test qui sera automatiqueme
 ## ⏱️ Étape 2 : Attendre l'Exécution du Cron Job
 
 Le cron job s'exécute **toutes les 5 minutes** aux heures suivantes :
+
 - `:00`, `:05`, `:10`, `:15`, `:20`, `:25`, `:30`, `:35`, `:40`, `:45`, `:50`, `:55`
 
 **Exemple** : Si vous créez la campagne à `14:23`, elle sera traitée à `14:25` ou `14:30`.
@@ -66,7 +67,7 @@ Le cron job s'exécute **toutes les 5 minutes** aux heures suivantes :
 Exécutez cette requête dans SQL Editor :
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -82,6 +83,7 @@ LIMIT 1;
 ```
 
 **Résultats attendus :**
+
 - `status` : `sending` ou `completed`
 - `emails_sent` : > 0
 - `updated_at` : Mis à jour après l'exécution du cron
@@ -89,7 +91,7 @@ LIMIT 1;
 ### 3.2 Vérifier les Logs du Cron Job
 
 ```sql
-SELECT 
+SELECT
   jobid,
   runid,
   status,
@@ -98,7 +100,7 @@ SELECT
   end_time
 FROM cron.job_run_details
 WHERE jobid = (
-  SELECT jobid FROM cron.job 
+  SELECT jobid FROM cron.job
   WHERE jobname = 'process-scheduled-email-campaigns'
 )
 ORDER BY start_time DESC
@@ -106,6 +108,7 @@ LIMIT 5;
 ```
 
 **Résultats attendus :**
+
 - `status` : `succeeded`
 - `return_message` : Contient des informations sur les campagnes traitées
 
@@ -122,7 +125,7 @@ LIMIT 5;
 ### 3.4 Vérifier les Emails Logs
 
 ```sql
-SELECT 
+SELECT
   id,
   recipient_email,
   subject,
@@ -133,15 +136,16 @@ SELECT
   clicked_at
 FROM public.email_logs
 WHERE campaign_id = (
-  SELECT id FROM public.email_campaigns 
-  WHERE name LIKE 'TEST - %' 
-  ORDER BY created_at DESC 
+  SELECT id FROM public.email_campaigns
+  WHERE name LIKE 'TEST - %'
+  ORDER BY created_at DESC
   LIMIT 1
 )
 ORDER BY sent_at DESC;
 ```
 
 **Résultats attendus :**
+
 - Des logs d'emails créés
 - `sendgrid_status` : `queued`, `delivered`, etc.
 - `sent_at` : Timestamp de l'envoi
@@ -149,6 +153,7 @@ ORDER BY sent_at DESC;
 ### 3.5 Vérifier l'Email Reçu
 
 Si vous avez configuré votre email dans les filtres d'audience :
+
 - ✅ Vérifiez votre boîte de réception
 - ✅ Vérifiez les spams
 - ✅ Vérifiez que le contenu est correct
@@ -160,14 +165,17 @@ Si vous avez configuré votre email dans les filtres d'audience :
 ### Problème : La campagne reste en `scheduled`
 
 **Solutions :**
+
 1. Vérifier que le cron job est actif :
+
    ```sql
    SELECT * FROM cron.job WHERE jobname = 'process-scheduled-email-campaigns';
    ```
 
 2. Vérifier que `scheduled_at` est dans le passé :
+
    ```sql
-   SELECT 
+   SELECT
      name,
      scheduled_at,
      NOW() as current_time,
@@ -181,7 +189,9 @@ Si vous avez configuré votre email dans les filtres d'audience :
 ### Problème : Le statut passe à `sending` mais aucun email n'est envoyé
 
 **Solutions :**
+
 1. Vérifier que le template existe et est actif :
+
    ```sql
    SELECT id, name, is_active FROM email_templates WHERE id = 'template-id';
    ```
@@ -195,6 +205,7 @@ Si vous avez configuré votre email dans les filtres d'audience :
 ### Problème : Erreurs dans les logs
 
 **Solutions :**
+
 1. Vérifier les permissions RLS sur `email_campaigns`
 2. Vérifier que `SUPABASE_SERVICE_ROLE_KEY` est configuré
 3. Vérifier la structure des données (template, audience, etc.)
@@ -256,4 +267,3 @@ Une fois le test validé :
 
 **Dernière mise à jour** : 30 Janvier 2025  
 **Statut** : ✅ **PRÊT POUR TEST**
-

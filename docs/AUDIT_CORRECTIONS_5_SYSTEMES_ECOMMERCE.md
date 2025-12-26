@@ -1,4 +1,5 @@
 # Audit et Corrections - Cinq Systèmes E-commerce
+
 **Date:** 1 Février 2025  
 **Statut:** En cours
 
@@ -7,28 +8,34 @@
 ### ✅ 1. Références à `owner_id` au lieu de `user_id`
 
 #### Problème
+
 Plusieurs migrations utilisent encore `s.owner_id` ou `stores.owner_id` alors que la table `stores` utilise uniquement `user_id`.
 
 #### Corrections Appliquées
 
 **1.1. `20250201_digital_product_versions.sql`**
+
 - **Ligne 261** : `AND (s.user_id = auth.uid() OR s.owner_id = auth.uid())`
 - **Correction** : Supprimé `OR s.owner_id = auth.uid()` pour utiliser uniquement `s.user_id = auth.uid()`
 
 **1.2. `20250131_warranty_system.sql`**
+
 - **Lignes 340, 367, 385** : Utilisation de `stores.owner_id`
 - **Statut** : ⚠️ Nécessite correction (migration ancienne, peut-être déjà corrigée dans les versions finales)
 
 **1.3. `20250131_demand_forecasting_system.sql`**
+
 - **Lignes 530, 540, 551, 561, 571** : Utilisation de `stores.owner_id`
 - **Note** : Cette migration gère les deux cas (user_id et owner_id) pour compatibilité, ce qui est acceptable
 
 ### ✅ 2. Gestion des Colonnes Générées
 
 #### Problème
+
 La colonne `total_credits` dans `service_packages` est une colonne générée (`GENERATED ALWAYS AS`). On ne peut pas l'ajouter directement avec `ALTER TABLE` si la table existe déjà.
 
 #### Correction Appliquée
+
 - **Fichier** : `20250201_service_packages.sql`
 - **Solution** : Ajout d'un commentaire expliquant que la colonne générée sera créée lors de la création de la table
 - **Recommandation** : Si la table existe déjà sans cette colonne, il faudrait recréer la table (non recommandé en production sans migration de données)
@@ -36,9 +43,11 @@ La colonne `total_credits` dans `service_packages` est une colonne générée (`
 ### ✅ 3. Références `customer_id` vs `user_id` dans `orders`
 
 #### Problème
+
 La table `orders` utilise `customer_id` et non `user_id`. Certaines politiques RLS peuvent référencer incorrectement `user_id`.
 
 #### Corrections Appliquées
+
 - **Fichier** : `20250201_artist_dedications.sql`
 - **Correction** : Politique `dedications_select_own` corrigée pour utiliser `customer_id` avec plusieurs cas de vérification :
   - `customer_id` correspond directement à `auth.uid()`
@@ -48,9 +57,11 @@ La table `orders` utilise `customer_id` et non `user_id`. Certaines politiques R
 ### ✅ 4. Gestion des Duplications (Policies et Triggers)
 
 #### Problème
+
 Certaines migrations ne gèrent pas les duplications de policies et triggers, causant des erreurs lors de ré-exécution.
 
 #### Corrections Appliquées
+
 - **Fichier** : `20250201_service_packages.sql`
   - Ajout de `DROP POLICY IF EXISTS` avant chaque `CREATE POLICY`
   - Ajout de `DROP TRIGGER IF EXISTS` avant chaque `CREATE TRIGGER`
@@ -62,28 +73,33 @@ Certaines migrations ne gèrent pas les duplications de policies et triggers, ca
 ## 📊 État des Systèmes E-commerce
 
 ### 1. Produits Digitaux ✅
+
 - **Versions produits** : ✅ Corrigé (owner_id → user_id)
 - **Notifications mises à jour** : ✅ Fonctionnel
 - **Téléchargements** : ✅ Fonctionnel
 
 ### 2. Produits Physiques ✅
+
 - **Images avancées (360°, zoom, vidéos)** : ✅ Fonctionnel
 - **Lots et expiration** : ✅ Fonctionnel
 - **Numéros de série** : ✅ Fonctionnel
 - **Garanties** : ⚠️ Vérifier les politiques RLS (owner_id)
 
 ### 3. Services ✅
+
 - **Packages services** : ✅ Corrigé (service_id → service_product_id, colonnes manquantes)
 - **Calendriers externes** : ✅ Fonctionnel
 - **Waitlist** : ✅ Fonctionnel
 - **Rappels automatiques** : ✅ Fonctionnel
 
 ### 4. Cours en Ligne ✅
+
 - **Cohorts avancés** : ✅ Fonctionnel
 - **Assignments & Soumissions** : ✅ Fonctionnel
 - **Analytics** : ✅ Fonctionnel
 
 ### 5. Œuvres d'Artistes ✅
+
 - **Dédicaces** : ✅ Corrigé (customer_id dans orders)
 - **3D Gallery** : ✅ Fonctionnel
 - **Provenance** : ✅ Fonctionnel
@@ -151,4 +167,3 @@ Certaines migrations ne gèrent pas les duplications de policies et triggers, ca
 2. Vérifier les migrations warranty pour s'assurer qu'elles utilisent user_id
 3. Créer un script de validation pour vérifier l'intégrité de toutes les tables
 4. Documenter les dépendances entre les migrations
-

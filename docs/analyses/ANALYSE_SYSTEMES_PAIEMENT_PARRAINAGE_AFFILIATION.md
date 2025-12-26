@@ -54,11 +54,13 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 #### 1.1 Moneroo (Principal)
 
 **Fichiers clés**:
+
 - `src/lib/moneroo-client.ts` : Client API Moneroo
 - `src/lib/moneroo-payment.ts` : Logique de paiement Moneroo
 - `supabase/migrations/20251010154605_*.sql` : Table `transactions`
 
 **Fonctionnalités**:
+
 - ✅ Création de paiements via Supabase Edge Functions
 - ✅ Vérification du statut des paiements
 - ✅ Tracking complet dans `transactions` et `transaction_logs`
@@ -66,6 +68,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 - ✅ Gestion des métadonnées personnalisées
 
 **Flux de Paiement**:
+
 ```
 1. initiateMonerooPayment() → Crée transaction en DB
 2. monerooClient.createCheckout() → Appelle Edge Function
@@ -77,16 +80,19 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 #### 1.2 Paiements Avancés
 
 **Fichiers clés**:
+
 - `src/hooks/useAdvancedPayments.ts` : Hook pour paiements avancés
 - `src/pages/payments/PaymentManagement.tsx` : Interface de gestion
 - `supabase/migrations/20250122_advanced_payment_and_messaging.sql` : Tables `payments`, `partial_payments`, `secured_payments`
 
 **Types de Paiements**:
+
 1. **Full Payment** : Paiement complet immédiat
 2. **Percentage Payment** : Paiement partiel par pourcentage
 3. **Delivery Secured** : Paiement sécurisé à la livraison (escrow)
 
 **Fonctionnalités**:
+
 - ✅ Paiements par pourcentage avec calcul automatique
 - ✅ Paiements sécurisés avec retenue (held)
 - ✅ Conditions de libération configurables
@@ -132,6 +138,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 #### 🟢 Mineur
 
 7. **Types `any` dans les métadonnées**
+
    ```typescript
    // src/lib/moneroo-client.ts:12
    metadata?: Record<string, any>; // Devrait être unknown
@@ -185,12 +192,14 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 ### 1. Architecture Actuelle
 
 **Fichiers clés**:
+
 - `src/hooks/useReferral.ts` : Hook principal
 - `src/lib/referral-helpers.ts` : Fonctions utilitaires
 - `src/pages/Referrals.tsx` : Interface utilisateur
 - `supabase/migrations/20251007154432_*.sql` : Tables `referrals`, `referral_commissions`
 
 **Fonctionnalités**:
+
 - ✅ Génération automatique de codes de parrainage
 - ✅ Création de relations de parrainage
 - ✅ Calcul automatique de commissions (2% par défaut)
@@ -198,6 +207,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 - ✅ Statistiques de parrainage
 
 **Flux de Parrainage**:
+
 ```
 1. Utilisateur s'inscrit avec code de parrainage
 2. createReferralRelation() → Crée relation dans referrals
@@ -211,10 +221,12 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 #### 🔴 Critique
 
 1. **Commission Hardcodée à 2%**
+
    ```sql
    -- supabase/migrations/20251007154432_*.sql:115
    v_commission_amount := NEW.amount * 0.02; -- Hardcodé !
    ```
+
    - Pas de configuration par plateforme
    - Pas de taux différenciés par type de produit
 
@@ -245,10 +257,12 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 #### 🟢 Mineur
 
 7. **Génération de Code Non Optimale**
+
    ```typescript
    // src/hooks/useReferral.ts:102
    const fallbackCode = `REF${user.id.substring(0, 8).toUpperCase()}`;
    ```
+
    - Code peu lisible et mémorisable
    - Pas de personnalisation
 
@@ -301,12 +315,14 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 ### 1. Architecture Actuelle
 
 **Fichiers clés**:
+
 - `src/types/affiliate.ts` : Types TypeScript complets
 - `src/pages/AffiliateDashboard.tsx` : Interface affilié
 - `src/components/affiliate/*` : Composants UI
 - `supabase/migrations/20251025_affiliate_system_complete.sql` : Tables complètes
 
 **Fichiers clés**:
+
 - `affiliates` : Table des affiliés
 - `product_affiliate_settings` : Configuration par produit
 - `affiliate_links` : Liens d'affiliation
@@ -315,6 +331,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 - `affiliate_withdrawals` : Retraits
 
 **Fonctionnalités**:
+
 - ✅ Système complet et bien structuré
 - ✅ Tracking par cookies (durée configurable)
 - ✅ Commissions personnalisables par produit
@@ -322,6 +339,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 - ✅ Gestion des retraits
 
 **Flux d'Affiliation**:
+
 ```
 1. Affilié crée un lien → affiliate_links
 2. Visiteur clique → affiliate_clicks (cookie créé)
@@ -365,6 +383,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 #### 🟢 Mineur
 
 7. **Types `any` dans payment_details**
+
    ```typescript
    // src/types/affiliate.ts:38
    payment_details?: Record<string, any>; // Devrait être unknown
@@ -489,11 +508,13 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 **Problème**: 3 systèmes séparés sans synchronisation
 
 **Solution**: Créer un service unifié `PaymentService` qui gère:
+
 - Tous les gateways (Moneroo, PayDunya)
 - Toutes les commissions (parrainage, affiliation)
 - Tous les webhooks
 
 **Avantages**:
+
 - Code centralisé
 - Maintenance facilitée
 - Cohérence garantie
@@ -503,12 +524,14 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 **Problème**: Pas de webhooks pour événements critiques
 
 **Solution**: Créer un système de webhooks avec:
+
 - Endpoints dédiés pour chaque événement
 - Queue pour traitement asynchrone
 - Retry automatique
 - Logging complet
 
 **Événements à supporter**:
+
 - `payment.completed`
 - `payment.failed`
 - `order.completed`
@@ -520,6 +543,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 **Problème**: Taux hardcodés, pas de flexibilité
 
 **Solution**: Table `platform_settings` avec:
+
 - Taux de commission parrainage (global et par type)
 - Taux de commission affiliation (par défaut)
 - Seuils minimum pour paiements
@@ -531,6 +555,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 **Problème**: Pas d'interface pour gérer les 3 systèmes
 
 **Solution**: Dashboard admin avec:
+
 - Vue d'ensemble des paiements
 - Gestion des commissions (parrainage + affiliation)
 - Configuration des taux
@@ -542,6 +567,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 **Problème**: Pas de notifications pour événements importants
 
 **Solution**: Système de notifications avec:
+
 - Email pour événements critiques
 - Notifications in-app
 - Webhooks personnalisés
@@ -552,6 +578,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 **Problème**: Pas de tests pour les flux critiques
 
 **Solution**: Suite de tests avec:
+
 - Tests unitaires pour calculs de commissions
 - Tests d'intégration pour flux de paiement
 - Tests E2E pour parcours utilisateur
@@ -613,16 +640,19 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 ## 📊 Métriques de Succès
 
 ### Paiements
+
 - ✅ Taux de succès > 95%
 - ✅ Temps de traitement < 5s
 - ✅ Taux d'erreur < 1%
 
 ### Parrainage
+
 - ✅ Taux de conversion parrainage → commande > 10%
 - ✅ Temps moyen de conversion < 30 jours
 - ✅ Satisfaction utilisateur > 4/5
 
 ### Affiliation
+
 - ✅ Taux de conversion clic → commande > 3%
 - ✅ Temps de traitement commission < 24h
 - ✅ Nombre d'affiliés actifs > 100
@@ -634,17 +664,20 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 ### Fichiers Clés
 
 **Paiements**:
+
 - `src/lib/moneroo-client.ts`
 - `src/lib/moneroo-payment.ts`
 - `src/hooks/useAdvancedPayments.ts`
 - `src/pages/Checkout.tsx`
 
 **Parrainage**:
+
 - `src/hooks/useReferral.ts`
 - `src/lib/referral-helpers.ts`
 - `src/pages/Referrals.tsx`
 
 **Affiliation**:
+
 - `src/types/affiliate.ts`
 - `src/pages/AffiliateDashboard.tsx`
 - `src/components/affiliate/*`
@@ -660,7 +693,7 @@ L'application Payhula dispose de **3 systèmes distincts** pour gérer les paiem
 
 ## 📝 Notes Finales
 
-Cette analyse a identifié **11 problèmes critiques/importants** et **21 fonctionnalités manquantes**. 
+Cette analyse a identifié **11 problèmes critiques/importants** et **21 fonctionnalités manquantes**.
 
 **Priorité absolue**: Intégration PayDunya et finalisation de l'intégration affiliation dans le checkout.
 
@@ -669,10 +702,3 @@ Cette analyse a identifié **11 problèmes critiques/importants** et **21 foncti
 ---
 
 **Fin du Document**
-
-
-
-
-
-
-

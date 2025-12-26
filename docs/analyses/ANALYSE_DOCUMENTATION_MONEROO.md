@@ -18,34 +18,35 @@ D'après la [documentation Moneroo](https://docs.moneroo.io/) et les exemples de
 
 D'après la documentation, les champs **obligatoires** sont :
 
-| Champ | Type | Description |
-|-------|------|-------------|
-| `amount` | integer | Montant en centimes (ex: 1000 = 10.00 XOF) |
-| `currency` | string | Code devise (ex: "XOF", "XAF", "USD") |
-| `description` | string | Description du paiement |
-| `customer_email` | string | Email du client |
-| `customer_name` | string | Nom complet du client |
-| `return_url` | string | URL de retour après paiement réussi |
-| `cancel_url` | string | URL de retour si paiement annulé |
+| Champ            | Type    | Description                                |
+| ---------------- | ------- | ------------------------------------------ |
+| `amount`         | integer | Montant en centimes (ex: 1000 = 10.00 XOF) |
+| `currency`       | string  | Code devise (ex: "XOF", "XAF", "USD")      |
+| `description`    | string  | Description du paiement                    |
+| `customer_email` | string  | Email du client                            |
+| `customer_name`  | string  | Nom complet du client                      |
+| `return_url`     | string  | URL de retour après paiement réussi        |
+| `cancel_url`     | string  | URL de retour si paiement annulé           |
 
 ✅ **Notre implémentation inclut tous ces champs**
 
 ### 3. Champs Optionnels
 
-| Champ | Type | Description |
-|-------|------|-------------|
-| `customer_address` | string | Adresse du client |
-| `customer_city` | string | Ville du client |
-| `customer_state` | string | État/Région du client |
-| `customer_zip` | string | Code postal |
-| `metadata` | object | **Données supplémentaires (product_id, order_id, user_id, etc.)** |
-| `methods` | array | Méthodes de paiement autorisées |
+| Champ              | Type   | Description                                                       |
+| ------------------ | ------ | ----------------------------------------------------------------- |
+| `customer_address` | string | Adresse du client                                                 |
+| `customer_city`    | string | Ville du client                                                   |
+| `customer_state`   | string | État/Région du client                                             |
+| `customer_zip`     | string | Code postal                                                       |
+| `metadata`         | object | **Données supplémentaires (product_id, order_id, user_id, etc.)** |
+| `methods`          | array  | Méthodes de paiement autorisées                                   |
 
 ### 4. ⚠️ IMPORTANT : Format du Customer
 
 D'après la documentation et les exemples :
 
 **Format attendu par Moneroo :**
+
 ```json
 {
   "customer": {
@@ -71,6 +72,7 @@ D'après les exemples de la documentation PHP SDK :
 ```
 
 **Format attendu :**
+
 - `metadata` est un **objet** (pas un array)
 - Les clés peuvent être en `snake_case` ou `camelCase`
 - **`product_id` est requis** selon les erreurs 422 que nous recevons
@@ -78,6 +80,7 @@ D'après les exemples de la documentation PHP SDK :
 ### 6. Réponse de l'API Moneroo
 
 **Succès (200) :**
+
 ```json
 {
   "message": "Payment initialized successfully",
@@ -90,6 +93,7 @@ D'après les exemples de la documentation PHP SDK :
 ```
 
 **Erreur (422) :**
+
 ```json
 {
   "message": "The metadata.product_id field is required.",
@@ -160,6 +164,7 @@ D'après la documentation, la requête complète devrait ressembler à :
 ### Routes Configurées
 
 D'après `src/App.tsx` :
+
 - ✅ `/checkout/success` → `CheckoutSuccess`
 - ✅ `/checkout/cancel` → `CheckoutCancel`
 - ✅ `/payment/success` → `PaymentSuccess`
@@ -170,6 +175,7 @@ D'après `src/App.tsx` :
 ### 1. Edge Function (`supabase/functions/moneroo/index.ts`)
 
 **Corrections :**
+
 - ✅ Extraction de `productId` depuis `data` et ajout à `metadata.product_id`
 - ✅ Extraction de `storeId` depuis `data` et ajout à `metadata.store_id`
 - ✅ Logs détaillés pour diagnostic
@@ -179,6 +185,7 @@ D'après `src/App.tsx` :
 ### 2. Format de la Requête
 
 **Avant (❌ Erreur 422) :**
+
 ```json
 {
   "metadata": {
@@ -190,12 +197,13 @@ D'après `src/App.tsx` :
 ```
 
 **Après (✅ Correct) :**
+
 ```json
 {
   "metadata": {
     "transaction_id": "...",
     "store_id": "...",
-    "product_id": "a6dbf752-22ca-4931-abdc-0aee713dbd99"  // ✅ Ajouté
+    "product_id": "a6dbf752-22ca-4931-abdc-0aee713dbd99" // ✅ Ajouté
   }
 }
 ```
@@ -212,4 +220,3 @@ D'après `src/App.tsx` :
 - [Documentation Moneroo](https://docs.moneroo.io/)
 - [Moneroo PHP SDK - Exemple d'initialisation](https://docs.moneroo.io/sdks/php-sdk)
 - [Moneroo Laravel SDK - Exemple d'utilisation](https://docs.moneroo.io/sdks/laravel-sdk)
-

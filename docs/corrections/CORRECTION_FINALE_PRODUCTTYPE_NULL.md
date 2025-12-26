@@ -6,7 +6,8 @@
 
 **Erreur 422 :** `"The metadata.productType must be a string, boolean or integer."`
 
-**Cause :** 
+**Cause :**
+
 - `productType: null` était inclus dans `metadata` dans `ProductDetail.tsx`
 - L'API Moneroo n'accepte **que** `string`, `boolean` ou `integer` dans `metadata`
 - Les valeurs `null`, `undefined` et objets complexes ne sont pas acceptées
@@ -16,11 +17,13 @@
 ### 1. Client Moneroo (`src/lib/moneroo-payment.ts`)
 
 **Ajout d'un nettoyage automatique de metadata :**
+
 - ✅ Filtrage des valeurs `null`, `undefined` et chaînes vides
 - ✅ Conversion des objets en JSON string si nécessaire
 - ✅ Conservation uniquement des valeurs valides (string, number, boolean)
 
 **Code ajouté :**
+
 ```typescript
 // Nettoyer metadata : supprimer les valeurs null, undefined, et vides
 // L'API Moneroo n'accepte que string, boolean ou integer dans metadata
@@ -47,9 +50,10 @@ Object.entries(metadata || {}).forEach(([key, value]) => {
 ### 2. ProductDetail (`src/pages/ProductDetail.tsx`)
 
 **Correction pour ne pas inclure productType si null :**
+
 ```typescript
-metadata: { 
-  productName: product.name, 
+metadata: {
+  productName: product.name,
   storeSlug: store.slug || '',
   userId: user.id,
   // Ne pas inclure productType si c'est null (l'API Moneroo n'accepte pas null)
@@ -60,11 +64,13 @@ metadata: {
 ### 3. Edge Function (`supabase/functions/moneroo/index.ts`)
 
 **Nettoyage supplémentaire dans l'Edge Function :**
+
 - ✅ Filtrage des valeurs null/undefined
 - ✅ Conversion des objets en JSON string
 - ✅ Type strict : `Record<string, string | number | boolean>`
 
 **Code ajouté :**
+
 ```typescript
 // IMPORTANT: L'API Moneroo n'accepte que string, boolean ou integer dans metadata
 // Il faut filtrer les valeurs null, undefined, et objets vides
@@ -93,11 +99,13 @@ Object.entries(rawMetadata).forEach(([key, value]) => {
 D'après la documentation Moneroo et l'erreur reçue :
 
 **✅ Accepté :**
+
 - `string` : `"digital"`, `"physical"`, etc.
 - `number` : `123`, `456.78`
 - `boolean` : `true`, `false`
 
 **❌ Rejeté :**
+
 - `null` : ❌
 - `undefined` : ❌
 - Objets complexes (sauf conversion en JSON string) : ❌
@@ -106,6 +114,7 @@ D'après la documentation Moneroo et l'erreur reçue :
 ## 🎯 Résultat Attendu
 
 Après le redéploiement de l'Edge Function :
+
 1. ✅ `productType: null` ne sera plus inclus dans metadata
 2. ✅ Toutes les valeurs null/undefined seront filtrées
 3. ✅ L'API Moneroo acceptera la requête (plus d'erreur 422)
@@ -121,4 +130,3 @@ Après le redéploiement de l'Edge Function :
 
 - [Documentation Moneroo - Erreurs](https://docs.moneroo.io/introduction/errors)
 - Erreur 422 : "Vous avez fourni tous les paramètres requis, mais ils ne sont pas appropriés pour la requête."
-

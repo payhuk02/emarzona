@@ -206,16 +206,7 @@ Après avoir appliqué la correction :
 ---
 
 **Fichiers modifiés** :
+
 - ✅ `supabase/migrations/20250131_fix_product_images_permissions.sql` - Migration SQL pour corriger les permissions
 - ✅ `src/components/products/create/artist/ArtistBasicInfoForm.tsx` - Message d'erreur amélioré
 - ✅ `GUIDE_CORRECTION_PERMISSIONS_IMAGES.md` - Ce guide
-
-
-
-
-
-
-
-
-
-

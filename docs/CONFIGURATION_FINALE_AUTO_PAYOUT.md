@@ -9,17 +9,17 @@
 
 ### ✅ Cron Jobs Configurés
 
-| Cron Job | Schedule | Statut | Description |
-|----------|----------|--------|-------------|
-| `auto-payout-vendors-daily` | `0 3 * * *` | ✅ Actif | Reversement automatique des fonds vendeurs (3h du matin) |
+| Cron Job                              | Schedule    | Statut   | Description                                                   |
+| ------------------------------------- | ----------- | -------- | ------------------------------------------------------------- |
+| `auto-payout-vendors-daily`           | `0 3 * * *` | ✅ Actif | Reversement automatique des fonds vendeurs (3h du matin)      |
 | `auto-pay-referral-commissions-daily` | `0 4 * * *` | ✅ Actif | Paiement automatique des commissions parrainage (4h du matin) |
 
 ### ✅ Configuration Activée
 
-| Fonctionnalité | Enabled | Paramètres |
-|----------------|---------|------------|
-| Auto-Payout Vendors | ✅ `true` | `delay_days: 7`, `min_amount: 50000` |
-| Auto-Pay Referral Commissions | ✅ `true` | `min_amount: 50000` |
+| Fonctionnalité                | Enabled   | Paramètres                           |
+| ----------------------------- | --------- | ------------------------------------ |
+| Auto-Payout Vendors           | ✅ `true` | `delay_days: 7`, `min_amount: 50000` |
+| Auto-Pay Referral Commissions | ✅ `true` | `min_amount: 50000`                  |
 
 ---
 
@@ -28,7 +28,7 @@
 ### 1. Cron Jobs Configurés ✅
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -38,13 +38,14 @@ WHERE jobname IN ('auto-payout-vendors-daily', 'auto-pay-referral-commissions-da
 ```
 
 **Résultat** :
+
 - ✅ `auto-payout-vendors-daily` : schedule `0 3 * * *`, active `true`
 - ✅ `auto-pay-referral-commissions-daily` : schedule `0 4 * * *`, active `true`
 
 ### 2. Configuration Activée ✅
 
 ```sql
-SELECT 
+SELECT
   settings->'auto_payout_vendors'->>'enabled' as auto_payout_enabled,
   settings->'auto_payout_vendors'->>'delay_days' as delay_days,
   settings->'auto_payout_vendors'->>'min_amount' as min_amount,
@@ -55,6 +56,7 @@ WHERE key = 'admin';
 ```
 
 **Résultat** :
+
 - ✅ `auto_payout_enabled`: `true`
 - ✅ `delay_days`: `7`
 - ✅ `min_amount`: `50000`
@@ -64,7 +66,7 @@ WHERE key = 'admin';
 ### 3. Historique d'Exécution
 
 ```sql
-SELECT 
+SELECT
   jrd.runid,
   j.jobname,
   jrd.status,
@@ -85,6 +87,7 @@ LIMIT 20;
 ## ⏰ Quand les Cron Jobs S'Exécutent
 
 ### Auto-Payout Vendors
+
 - **Heure** : Tous les jours à **3h du matin** (UTC)
 - **Action** : Vérifie les stores éligibles et crée des retraits automatiques
 - **Conditions** :
@@ -93,6 +96,7 @@ LIMIT 20;
   - Méthode de paiement par défaut configurée
 
 ### Auto-Pay Referral Commissions
+
 - **Heure** : Tous les jours à **4h du matin** (UTC)
 - **Action** : Marque les commissions parrainage comme payées
 - **Conditions** :
@@ -134,6 +138,7 @@ SELECT net.http_post(
 ```
 
 **Après le test**, vérifiez les logs dans :
+
 - **Supabase Dashboard** > **Edge Functions** > **Logs** > Sélectionnez la fonction
 - Ou vérifiez les résultats dans les tables :
   - `store_withdrawals` (pour auto-payout-vendors)
@@ -146,15 +151,15 @@ SELECT net.http_post(
 ### Vérifier les Exécutions Récentes
 
 ```sql
-SELECT 
+SELECT
   jrd.runid,
   j.jobname,
   jrd.status,
   jrd.return_message,
   jrd.start_time,
   jrd.end_time,
-  CASE 
-    WHEN jrd.end_time IS NOT NULL 
+  CASE
+    WHEN jrd.end_time IS NOT NULL
     THEN EXTRACT(EPOCH FROM (jrd.end_time - jrd.start_time))
     ELSE NULL
   END as duration_seconds
@@ -168,7 +173,7 @@ LIMIT 20;
 ### Statistiques d'Exécution
 
 ```sql
-SELECT 
+SELECT
   j.jobname,
   COUNT(*) as total_runs,
   COUNT(*) FILTER (WHERE jrd.status = 'succeeded') as succeeded,
@@ -258,5 +263,3 @@ SELECT cron.alter_job(
 **Configuration terminée le** : 30 Janvier 2025  
 **Prochaine exécution** : 3h et 4h du matin (UTC)  
 **Statut** : ✅ **OPÉRATIONNEL**
-
-

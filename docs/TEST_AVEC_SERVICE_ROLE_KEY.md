@@ -18,11 +18,13 @@ J'ai créé une migration SQL qui utilise la service role key directement dans l
 ### Étape 1 : Exécuter la Migration
 
 Dans Supabase Dashboard > SQL Editor, exécutez le contenu de :
+
 ```
 supabase/migrations/20250230_fix_cron_job_with_service_role_key.sql
 ```
 
 Cette migration :
+
 1. Supprime l'ancien cron job
 2. Recrée le cron job avec la service role key directement dans le header `Authorization`
 
@@ -31,7 +33,7 @@ Cette migration :
 Vérifiez que le cron job contient bien la service role key :
 
 ```sql
-SELECT 
+SELECT
   jobid,
   jobname,
   schedule,
@@ -73,7 +75,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 ### 2. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -86,6 +88,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -93,7 +96,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 3. Vérifier les Logs d'Emails
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   status,
   campaign_id
@@ -131,5 +134,3 @@ GROUP BY status, campaign_id;
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

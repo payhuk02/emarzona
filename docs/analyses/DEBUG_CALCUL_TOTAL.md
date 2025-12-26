@@ -6,6 +6,7 @@
 ## 🔍 Analyse du Problème
 
 D'après l'image fournie :
+
 - **Sous-total** : 4000 XOF
 - **Code promo (PROMO10)** : -400 XOF (affiché comme appliqué)
 - **Total affiché** : 4000 XOF ❌
@@ -28,6 +29,7 @@ Le `couponDiscountAmount` était calculé avec un `useMemo` qui dépendait de l'
 ### 3. Ordre des Calculs
 
 Le calcul doit suivre cet ordre :
+
 1. Sous-total (4000 XOF)
 2. Réduction du coupon (-400 XOF)
 3. Taxes (calculées sur montant après réduction)
@@ -39,6 +41,7 @@ Le calcul doit suivre cet ordre :
 ### Modification 1 : Simplification de `couponDiscountAmount`
 
 **Avant:**
+
 ```typescript
 const couponDiscountAmount = useMemo(() => {
   if (!appliedCouponCode || !appliedCouponCode.discountAmount) return 0;
@@ -47,27 +50,49 @@ const couponDiscountAmount = useMemo(() => {
 ```
 
 **Après:**
+
 ```typescript
-const couponDiscountAmount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+const couponDiscountAmount = appliedCouponCode?.discountAmount
+  ? Number(appliedCouponCode.discountAmount)
+  : 0;
 ```
 
 ### Modification 2 : Calcul direct dans `finalTotal`
 
 **Avant:**
+
 ```typescript
 const finalTotal = useMemo(() => {
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscountAmount;
   // ...
-}, [summary.subtotal, summary.discount_amount, taxAmount, shippingAmount, couponDiscountAmount, giftCardAmount]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  taxAmount,
+  shippingAmount,
+  couponDiscountAmount,
+  giftCardAmount,
+]);
 ```
 
 **Après:**
+
 ```typescript
 const finalTotal = useMemo(() => {
-  const couponDiscount = appliedCouponCode?.discountAmount ? Number(appliedCouponCode.discountAmount) : 0;
+  const couponDiscount = appliedCouponCode?.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
   const subtotalAfterDiscounts = summary.subtotal - summary.discount_amount - couponDiscount;
   // ...
-}, [summary.subtotal, summary.discount_amount, taxAmount, shippingAmount, appliedCouponCode?.discountAmount, appliedCouponCode?.id, giftCardAmount]);
+}, [
+  summary.subtotal,
+  summary.discount_amount,
+  taxAmount,
+  shippingAmount,
+  appliedCouponCode?.discountAmount,
+  appliedCouponCode?.id,
+  giftCardAmount,
+]);
 ```
 
 ## 📊 Exemple de Calcul
@@ -104,4 +129,3 @@ Pour vérifier que la correction fonctionne :
 - La simplification de `couponDiscountAmount` garantit que la valeur est toujours à jour
 - L'utilisation directe de `appliedCouponCode?.discountAmount` dans `finalTotal` force le recalcul
 - Les dépendances incluent `appliedCouponCode?.discountAmount` et `appliedCouponCode?.id` pour garantir la réactivité
-

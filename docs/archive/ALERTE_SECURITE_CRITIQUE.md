@@ -37,6 +37,7 @@
 ### 2. Mettre à Jour Toutes les Instances
 
 #### Vercel (Production)
+
 1. Aller sur [Vercel Dashboard](https://vercel.com/dashboard)
 2. Sélectionner le projet **payhula**
 3. **Settings** → **Environment Variables**
@@ -45,12 +46,14 @@
    - Redéployer l'application
 
 #### Développement Local
+
 1. Mettre à jour le fichier `.env` avec la nouvelle clé
 2. Redémarrer le serveur de développement
 
 ### 3. Nettoyer la Documentation
 
 ✅ **DÉJÀ FAIT** : Les fichiers suivants ont été nettoyés :
+
 - `CONFIGURATION_VARIABLES_ENV.md`
 - `GUIDE_CONFIGURATION_VERCEL.md`
 
@@ -102,6 +105,7 @@ Un script PowerShell est disponible pour nettoyer automatiquement tous les fichi
 **Total** : 49 fichiers contenant des références aux clés
 
 **Nettoyés** : 2 fichiers
+
 - ✅ `CONFIGURATION_VARIABLES_ENV.md`
 - ✅ `GUIDE_CONFIGURATION_VERCEL.md`
 
@@ -134,6 +138,5 @@ Si vous avez des questions ou besoin d'aide :
 
 ---
 
-*Document créé le : Janvier 2025*  
-*Statut : 🔴 URGENT - Action requise immédiatement*
-
+_Document créé le : Janvier 2025_  
+_Statut : 🔴 URGENT - Action requise immédiatement_

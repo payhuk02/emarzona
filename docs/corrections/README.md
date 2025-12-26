@@ -50,15 +50,19 @@ Cette section contient la documentation de toutes les corrections appliquées au
 ## 🔍 Recherche par Sujet
 
 ### Moneroo
+
 - Rechercher "MONEROO" dans les fichiers
 
 ### Vercel
+
 - Rechercher "VERCEL" dans les fichiers
 
 ### Build
+
 - Rechercher "BUILD" dans les fichiers
 
 ### Erreurs
+
 - Rechercher "ERREUR" dans les fichiers
 
 ---
@@ -72,4 +76,3 @@ Cette section contient la documentation de toutes les corrections appliquées au
 ---
 
 **Dernière mise à jour** : Janvier 2025
-

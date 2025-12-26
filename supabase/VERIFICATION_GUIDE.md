@@ -25,12 +25,12 @@ Vérifier que les 4 systèmes e-commerce ont leurs bases de données complètes 
 
 ### Tableau 1: Comptage des tables
 
-| System | Tables Count | Status |
-|--------|--------------|--------|
-| 💻 Digital Products | 15 | ✅ Complet |
-| 🏭 Physical Products | 11+ | ✅ Complet |
-| 🛎️ Services | 8+ | ✅ Complet |
-| 🎓 Courses | 7+ | ✅ Complet |
+| System               | Tables Count | Status     |
+| -------------------- | ------------ | ---------- |
+| 💻 Digital Products  | 15           | ✅ Complet |
+| 🏭 Physical Products | 11+          | ✅ Complet |
+| 🛎️ Services          | 8+           | ✅ Complet |
+| 🎓 Courses           | 7+           | ✅ Complet |
 
 ### Tableau 2: Détail des tables
 
@@ -43,6 +43,7 @@ Comptage des enregistrements dans chaque système.
 ### Tests de création
 
 Le script testera automatiquement :
+
 - ✅ Création d'un Physical Product
 - ✅ Création d'un Service
 - ✅ Création d'un Course
@@ -60,18 +61,21 @@ Le script testera automatiquement :
 Certaines tables manquent. Il faut exécuter les migrations correspondantes :
 
 **Physical Products:**
+
 ```sql
 -- Exécuter cette migration
 \i supabase/migrations/20251029_physical_advanced_features.sql
 ```
 
 **Services:**
+
 ```sql
 -- Pas de migration séparée, tables créées avec le système de base
 -- Vérifier: 20251027_service_bookings_system.sql
 ```
 
 **Courses:**
+
 ```sql
 -- Pas de migration séparée, tables créées avec le système de base
 -- Vérifier: 20251027_courses_system_complete.sql
@@ -90,6 +94,7 @@ Le système n'a pas de base de données. Contactez le support.
 **Fichier:** `20251029_physical_advanced_features.sql`
 
 **Tables créées:**
+
 - pre_orders
 - pre_order_customers
 - backorders
@@ -109,6 +114,7 @@ Le système n'a pas de base de données. Contactez le support.
 **Fichier:** `20251027_service_bookings_system.sql`
 
 **Tables créées:**
+
 - service_products
 - service_bookings
 - service_availability
@@ -125,6 +131,7 @@ Le système n'a pas de base de données. Contactez le support.
 **Fichier:** `20251027_courses_system_complete.sql`
 
 **Tables créées:**
+
 - courses
 - course_modules
 - course_lessons
@@ -142,12 +149,14 @@ Le système n'a pas de base de données. Contactez le support.
 Après avoir exécuté le script de vérification :
 
 ### Digital Products
+
 - [ ] 15 tables présentes
 - [ ] Vue `digital_bundles_with_stats` existe
 - [ ] Fonctions `generate_license_key()` etc. existent
 - [ ] Test de création réussi
 
 ### Physical Products
+
 - [ ] 11+ tables présentes
 - [ ] Table `physical_products` existe
 - [ ] Table `product_variants` existe
@@ -155,6 +164,7 @@ Après avoir exécuté le script de vérification :
 - [ ] Test de création réussi
 
 ### Services
+
 - [ ] 8+ tables présentes
 - [ ] Table `service_products` existe
 - [ ] Table `service_bookings` existe
@@ -162,6 +172,7 @@ Après avoir exécuté le script de vérification :
 - [ ] Test de création réussi
 
 ### Courses
+
 - [ ] 7+ tables présentes
 - [ ] Table `courses` existe
 - [ ] Table `course_modules` existe
@@ -194,6 +205,7 @@ Après avoir exécuté le script de vérification :
 ### Scénario 1: Tous les systèmes ✅
 
 **Actions:**
+
 1. Passer aux tests fonctionnels
 2. Tester les composants React
 3. Créer des données de démonstration
@@ -202,6 +214,7 @@ Après avoir exécuté le script de vérification :
 ### Scénario 2: Digital ✅, autres ⚠️
 
 **Actions:**
+
 1. Identifier les tables manquantes
 2. Exécuter les migrations Physical/Services/Courses
 3. Re-tester avec `CHECK_ALL_SYSTEMS.sql`
@@ -209,6 +222,7 @@ Après avoir exécuté le script de vérification :
 ### Scénario 3: Plusieurs systèmes ❌
 
 **Actions:**
+
 1. Vérifier que les migrations de base ont été exécutées
 2. Consulter `supabase/migrations/README_DIGITAL_PRODUCTS.md`
 3. Exécuter les migrations dans l'ordre
@@ -260,4 +274,3 @@ Une fois que tous les systèmes montrent ✅ :
 **Fichier:** `supabase/CHECK_ALL_SYSTEMS.sql`  
 **Durée:** ~10 secondes  
 **Prérequis:** Accès Supabase Dashboard
-

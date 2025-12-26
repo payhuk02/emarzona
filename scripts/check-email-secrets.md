@@ -10,6 +10,7 @@
 ### 1. Accéder aux Secrets
 
 **URL directe** :
+
 ```
 https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/secrets
 ```
@@ -22,6 +23,7 @@ https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/secrets
 - [ ] Pas d'espaces avant/après la valeur
 
 **Si absent** :
+
 1. Cliquez sur "Add new secret"
 2. Name : `SENDGRID_API_KEY`
 3. Value : Votre clé API SendGrid
@@ -53,11 +55,10 @@ SELECT net.http_post(
 ```
 
 **Vérifiez les logs** :
+
 - Plus de warning `SENDGRID_API_KEY is not set`
 - Plus d'erreur `401 Invalid JWT` dans `send-email-campaign`
 
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

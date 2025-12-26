@@ -14,17 +14,21 @@
 **Fichier** : `src/components/marketplace/MarketplaceHeader.tsx`
 
 **Logo Header Principal** (ligne 22) :
+
 ```typescript
 <img src={platformLogo} alt="Emarzona" className="h-7 w-7 sm:h-8 sm:w-8" />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 14)
 - ✅ Responsive : `h-7 w-7` sur mobile, `sm:h-8 sm:w-8` sur desktop
 - ✅ Classe `flex-shrink-0` pour éviter la déformation
 
 **Logo Menu Mobile (Sheet)** (ligne 79) :
+
 ```typescript
 <img src={platformLogo} alt="Emarzona" className="h-7 w-7" />
 ```
+
 - ✅ Utilise la même variable `platformLogo` (définie ligne 14)
 - ✅ Taille adaptée pour mobile : `h-7 w-7`
 - ✅ Dans le Sheet mobile (`SheetContent`)
@@ -38,14 +42,16 @@
 **Fichier** : `src/components/AppSidebar.tsx`
 
 **Logo Sidebar** (ligne 880) :
+
 ```typescript
-<img 
-  src={platformLogo} 
-  alt="Emarzona" 
+<img
+  src={platformLogo}
+  alt="Emarzona"
   className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 object-contain"
-  loading="eager" 
+  loading="eager"
 />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 846)
 - ✅ Responsive : `h-8 w-8` sur mobile, `sm:h-10 sm:w-10` sur desktop
 - ✅ `flex-shrink-0` pour éviter la déformation
@@ -61,6 +67,7 @@
 **Fichier** : `src/pages/Landing.tsx`
 
 **Logo Header** (ligne 126) :
+
 ```typescript
 <img
   src={platformLogo}
@@ -71,11 +78,13 @@
   loading="eager"
 />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 47)
 - ✅ Responsive : `opacity-60` sur mobile, `sm:opacity-100` sur desktop
 - ✅ `loading="eager"` pour chargement immédiat
 
 **Logo Footer** (ligne 884) :
+
 ```typescript
 <img
   src={platformLogo}
@@ -86,6 +95,7 @@
   loading="eager"
 />
 ```
+
 - ✅ Utilise la même variable `platformLogo`
 - ✅ Taille fixe : `h-8 w-8`
 - ✅ `loading="eager"` pour chargement immédiat
@@ -99,6 +109,7 @@
 **Fichier** : `src/pages/Auth.tsx`
 
 **Logo** (ligne 290) :
+
 ```typescript
 <img
   src={platformLogo}
@@ -109,6 +120,7 @@
   loading="eager"
 />
 ```
+
 - ✅ Utilise `usePlatformLogo()` (ligne 26)
 - ✅ Responsive : `opacity-60` sur mobile, `sm:opacity-100` sur desktop
 - ✅ `loading="eager"` pour chargement immédiat
@@ -124,6 +136,7 @@
 **Fichier** : `src/hooks/usePlatformLogo.ts`
 
 **Fonctionnalités** :
+
 - ✅ Utilise `usePlatformCustomizationContext()` pour récupérer les données
 - ✅ `useMemo` pour optimiser les recalculs
 - ✅ Préchargement du logo personnalisé pour éviter les flashs
@@ -131,6 +144,7 @@
 - ✅ Fallback vers logo par défaut si nécessaire
 
 **Dépendances** :
+
 ```typescript
 const logo = useMemo(() => {
   // ... logique de sélection du logo
@@ -146,17 +160,19 @@ const logo = useMemo(() => {
 **Fichier** : `src/contexts/PlatformCustomizationContext.tsx`
 
 **Mécanisme de mise à jour** :
+
 1. ✅ Écoute l'événement `platform-customization-updated` (ligne 78)
 2. ✅ Applique les changements de design immédiatement (ligne 67)
 3. ✅ Le contexte se met à jour via `usePlatformCustomization` (ligne 34)
 4. ✅ Tous les composants utilisant `usePlatformLogo()` se re-rendent automatiquement
 
 **Code** :
+
 ```typescript
 useEffect(() => {
   const handleCustomizationUpdate = (event: CustomEvent) => {
     const updatedData = event.detail?.customizationData;
-    
+
     // Appliquer les changements de design immédiatement
     if (updatedData?.design) {
       applyDesignCustomization(updatedData.design);
@@ -164,7 +180,7 @@ useEffect(() => {
   };
 
   window.addEventListener('platform-customization-updated', handleCustomizationUpdate);
-  
+
   return () => {
     window.removeEventListener('platform-customization-updated', handleCustomizationUpdate);
   };
@@ -179,14 +195,14 @@ useEffect(() => {
 
 #### 3.1 Tailles de Logo ✅
 
-| Composant | Mobile | Desktop | Statut |
-|-----------|--------|---------|--------|
-| MarketplaceHeader (header) | `h-7 w-7` | `sm:h-8 sm:w-8` | ✅ |
-| MarketplaceHeader (menu) | `h-7 w-7` | - | ✅ |
-| AppSidebar | `h-8 w-8` | `sm:h-10 sm:w-10` | ✅ |
-| Landing (header) | `h-6 w-6` (32px) | `sm:h-8 sm:w-8` (32px) | ✅ |
-| Landing (footer) | `h-8 w-8` | `h-8 w-8` | ✅ |
-| Auth | `h-8 w-8` (40px) | `sm:h-10 sm:w-10` (40px) | ✅ |
+| Composant                  | Mobile           | Desktop                  | Statut |
+| -------------------------- | ---------------- | ------------------------ | ------ |
+| MarketplaceHeader (header) | `h-7 w-7`        | `sm:h-8 sm:w-8`          | ✅     |
+| MarketplaceHeader (menu)   | `h-7 w-7`        | -                        | ✅     |
+| AppSidebar                 | `h-8 w-8`        | `sm:h-10 sm:w-10`        | ✅     |
+| Landing (header)           | `h-6 w-6` (32px) | `sm:h-8 sm:w-8` (32px)   | ✅     |
+| Landing (footer)           | `h-8 w-8`        | `h-8 w-8`                | ✅     |
+| Auth                       | `h-8 w-8` (40px) | `sm:h-10 sm:w-10` (40px) | ✅     |
 
 **Statut** : ✅ **TOUTES LES TAILLES SONT RESPONSIVES**
 
@@ -195,6 +211,7 @@ useEffect(() => {
 #### 3.2 Classes Responsive ✅
 
 **Classes utilisées** :
+
 - ✅ `h-7 w-7 sm:h-8 sm:w-8` : Taille adaptative
 - ✅ `opacity-60 sm:opacity-100` : Opacité adaptative
 - ✅ `flex-shrink-0` : Empêche la déformation
@@ -209,6 +226,7 @@ useEffect(() => {
 #### 4.1 Chargement ✅
 
 **Stratégies** :
+
 - ✅ `loading="eager"` sur tous les logos (chargement immédiat)
 - ✅ Préchargement du logo personnalisé dans `usePlatformLogo`
 - ✅ Fallback vers logo par défaut si le logo personnalisé ne charge pas
@@ -220,6 +238,7 @@ useEffect(() => {
 #### 4.2 Cache et Re-render ✅
 
 **Mécanisme** :
+
 - ✅ `useMemo` dans `usePlatformLogo` pour éviter les recalculs inutiles
 - ✅ Dépendance uniquement sur `customizationData`
 - ✅ Re-render uniquement quand le logo change réellement
@@ -232,14 +251,14 @@ useEffect(() => {
 
 ### ✅ Tous les Composants Mobile Utilisent `usePlatformLogo()`
 
-| Composant | Fichier | Ligne | Statut |
-|-----------|---------|-------|--------|
-| MarketplaceHeader (header) | `MarketplaceHeader.tsx` | 22 | ✅ |
-| MarketplaceHeader (menu mobile) | `MarketplaceHeader.tsx` | 79 | ✅ |
-| AppSidebar | `AppSidebar.tsx` | 880 | ✅ |
-| Landing (header) | `Landing.tsx` | 126 | ✅ |
-| Landing (footer) | `Landing.tsx` | 884 | ✅ |
-| Auth | `Auth.tsx` | 290 | ✅ |
+| Composant                       | Fichier                 | Ligne | Statut |
+| ------------------------------- | ----------------------- | ----- | ------ |
+| MarketplaceHeader (header)      | `MarketplaceHeader.tsx` | 22    | ✅     |
+| MarketplaceHeader (menu mobile) | `MarketplaceHeader.tsx` | 79    | ✅     |
+| AppSidebar                      | `AppSidebar.tsx`        | 880   | ✅     |
+| Landing (header)                | `Landing.tsx`           | 126   | ✅     |
+| Landing (footer)                | `Landing.tsx`           | 884   | ✅     |
+| Auth                            | `Auth.tsx`              | 290   | ✅     |
 
 ### ✅ Mécanisme de Mise à Jour
 
@@ -294,4 +313,3 @@ useEffect(() => {
 ---
 
 **Prochaine révision** : Après tests sur appareil mobile réel
-

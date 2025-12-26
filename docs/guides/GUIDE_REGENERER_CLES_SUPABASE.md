@@ -49,6 +49,7 @@ git log -p --all -S "VITE_SUPABASE_ANON_KEY" | head -50
 ### 2.3 Mettre à jour les Variables d'Environnement
 
 1. **Local** :
+
    ```bash
    # Éditer .env
    VITE_SUPABASE_URL=votre_nouvelle_url
@@ -125,9 +126,9 @@ git push --force --all
 
 ```sql
 -- Vérifier que RLS est activé sur toutes les tables sensibles
-SELECT tablename, rowsecurity 
-FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
 AND rowsecurity = false;
 ```
 
@@ -142,14 +143,14 @@ AND rowsecurity = false;
 
 ```sql
 -- Vérifier les utilisateurs récemment créés
-SELECT id, email, created_at 
-FROM auth.users 
-ORDER BY created_at DESC 
+SELECT id, email, created_at
+FROM auth.users
+ORDER BY created_at DESC
 LIMIT 10;
 
 -- Vérifier les rôles admin
-SELECT id, email, raw_user_meta_data 
-FROM auth.users 
+SELECT id, email, raw_user_meta_data
+FROM auth.users
 WHERE raw_user_meta_data->>'role' = 'admin';
 ```
 
@@ -239,10 +240,3 @@ Si vous avez des questions ou des problèmes :
 
 **Date de création** : 31 Janvier 2025  
 **Dernière mise à jour** : 31 Janvier 2025
-
-
-
-
-
-
-

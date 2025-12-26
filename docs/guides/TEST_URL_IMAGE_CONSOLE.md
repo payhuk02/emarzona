@@ -18,7 +18,10 @@ const url2 = `${supabaseUrl}/storage/v1/object/public/attachments/${encodeURICom
 console.log('URL 2 (encodage complet):', url2);
 
 // Test 3 : URL avec encodage par segment
-const url3 = `${supabaseUrl}/storage/v1/object/public/attachments/${filePath.split('/').map(s => encodeURIComponent(s)).join('/')}`;
+const url3 = `${supabaseUrl}/storage/v1/object/public/attachments/${filePath
+  .split('/')
+  .map(s => encodeURIComponent(s))
+  .join('/')}`;
 console.log('URL 3 (encodage par segment):', url3);
 
 // Tester chaque URL
@@ -42,22 +45,19 @@ console.log('URL 3 (encodage par segment):', url3);
 // Dans la console du navigateur
 import('@/integrations/supabase/client').then(({ supabase }) => {
   const filePath = 'vendor-message-attachments/1765207968982-y0xu1n9lneq.png';
-  
+
   // Test 1 : getPublicUrl
-  const { data: urlData } = supabase.storage
-    .from('attachments')
-    .getPublicUrl(filePath);
+  const { data: urlData } = supabase.storage.from('attachments').getPublicUrl(filePath);
   console.log('getPublicUrl result:', urlData);
-  
+
   // Test 2 : Vérifier si le fichier existe
   supabase.storage
     .from('attachments')
     .list('vendor-message-attachments', {
-      search: '1765207968982-y0xu1n9lneq.png'
+      search: '1765207968982-y0xu1n9lneq.png',
     })
     .then(({ data, error }) => {
       console.log('File exists check:', { data, error });
     });
 });
 ```
-

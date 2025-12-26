@@ -232,4 +232,3 @@ const goToPage = useCallback(
 - Audit détaillé: `AUDIT_CHARGEMENT_MARKETPLACE.md`
 - Hook créé: `src/hooks/useMarketplaceProducts.ts`
 - Page modifiée: `src/pages/Marketplace.tsx`
-

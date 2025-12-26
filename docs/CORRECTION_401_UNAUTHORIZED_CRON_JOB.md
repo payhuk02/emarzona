@@ -18,6 +18,7 @@ Toutes les invocations de l'Edge Function `process-scheduled-campaigns` depuis l
 ### 1. Modification de l'Edge Function
 
 L'Edge Function `process-scheduled-campaigns` a été modifiée pour accepter :
+
 - ✅ Header `Authorization` avec Bearer token (pour appels externes)
 - ✅ Header `x-cron-secret` avec un secret partagé (pour appels depuis cron job)
 - ✅ Appels sans authentification (pour compatibilité avec appels internes Supabase)
@@ -77,7 +78,7 @@ Pour mettre à jour le cron job existant, exécutez cette requête :
 
 ```sql
 -- Supprimer l'ancien cron job
-SELECT cron.unschedule('process-scheduled-email-campaigns') 
+SELECT cron.unschedule('process-scheduled-email-campaigns')
 WHERE EXISTS (
   SELECT 1 FROM cron.job WHERE jobname = 'process-scheduled-email-campaigns'
 );
@@ -111,4 +112,3 @@ SELECT cron.schedule(
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-

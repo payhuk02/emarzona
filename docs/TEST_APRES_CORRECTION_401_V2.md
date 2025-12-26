@@ -40,6 +40,7 @@ SELECT net.http_post(
 Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Logs** :
 
 Recherchez les messages comme :
+
 ```
 Auth check: {
   hasAuthHeader: false,
@@ -64,7 +65,7 @@ Dans Supabase Dashboard > Edge Functions > `process-scheduled-campaigns` > **Inv
 ### 3. Vérifier le Statut de la Campagne
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   status,
@@ -77,6 +78,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ```
 
 **Résultats attendus** :
+
 - `status` : `sending` ou `completed` (plus `scheduled`)
 - `emails_sent` : > 0
 - `updated_at` : mis à jour
@@ -84,7 +86,7 @@ WHERE id = '4f3d3b29-7643-4696-8139-3b49feed4d36';
 ### 4. Vérifier les Logs d'Emails
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_logs,
   status,
   campaign_id
@@ -104,6 +106,7 @@ GROUP BY status, campaign_id;
 **Cause** : Le secret ne correspond pas exactement
 
 **Solution** :
+
 - Vérifiez qu'il n'y a pas d'espaces avant/après dans le cron job
 - Vérifiez la casse (minuscules/majuscules)
 - Vérifiez que le secret dans le cron job correspond exactement à celui dans l'Edge Function
@@ -113,6 +116,7 @@ GROUP BY status, campaign_id;
 **Cause** : Le header `x-cron-secret` n'est pas reçu
 
 **Solution** :
+
 - Vérifiez la configuration du cron job
 - Vérifiez que `pg_net` peut envoyer des headers personnalisés
 - Essayez d'utiliser `Authorization` header à la place
@@ -122,6 +126,7 @@ GROUP BY status, campaign_id;
 **Cause** : Problème dans la logique d'authentification
 
 **Solution** :
+
 - Vérifiez les logs complets de l'Edge Function
 - Vérifiez qu'il n'y a pas d'autres conditions qui bloquent
 
@@ -138,5 +143,3 @@ GROUP BY status, campaign_id;
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025, 11:00 UTC
-
-

@@ -9,6 +9,7 @@
 **Problème** : Utilisation de `selectedStoreIdState` (le setter) au lieu de `selectedStoreId` (la valeur) dans le callback `setSelectedStoreId`
 
 **Correction** :
+
 ```typescript
 // ❌ Avant (ligne 58)
 oldStoreId: selectedStoreIdState,  // Erreur : selectedStoreIdState est le setter, pas la valeur
@@ -28,20 +29,21 @@ oldStoreId: selectedStoreId,  // Utilise la valeur du state
 **Problème** : Utilisation de `require()` (CommonJS) dans un environnement ES modules
 
 **Correction** :
+
 ```typescript
 // ❌ Avant (ligne 276)
-const { 
-  startMemoryMonitoring, 
+const {
+  startMemoryMonitoring,
   startErrorRateMonitoring,
-  recordMetric 
-} = require('./monitoring-enhanced');  // Erreur : require n'existe pas en ES modules
+  recordMetric,
+} = require('./monitoring-enhanced'); // Erreur : require n'existe pas en ES modules
 
 // ✅ Après (ligne 9-13)
-import { 
-  startMemoryMonitoring, 
+import {
+  startMemoryMonitoring,
   startErrorRateMonitoring,
-  recordMetric 
-} from './monitoring-enhanced';  // Import ES6 correct
+  recordMetric,
+} from './monitoring-enhanced'; // Import ES6 correct
 ```
 
 **Impact** : ✅ Warning corrigé - Le monitoring amélioré devrait maintenant s'initialiser correctement
@@ -62,7 +64,8 @@ import {
 
 **Type** : Erreur d'authentification Supabase  
 **Cause** : Token de rafraîchissement invalide ou expiré  
-**Action** : 
+**Action** :
+
 - Se déconnecter et se reconnecter
 - Vérifier la configuration Supabase
 - Vérifier que les tokens sont correctement gérés
@@ -119,5 +122,3 @@ import {
 
 **Document créé le** : 31 Janvier 2025  
 **Statut** : ✅ Corrections appliquées
-
-

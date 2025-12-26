@@ -1,4 +1,5 @@
 # Audit des Sous-Composants sur Mobile
+
 **Date**: 28 janvier 2025
 **Objectif**: Vérifier que tous les sous-composants (formulaires, inputs, selects, dialogs) s'affichent correctement sur mobile
 
@@ -13,6 +14,7 @@ Cet audit examine tous les sous-composants (formulaires, inputs, selects, textar
 ## 1. Composants UI de Base
 
 ### ✅ Input (src/components/ui/input.tsx)
+
 **Statut**: ✅ **CORRECT**
 
 ```tsx
@@ -23,6 +25,7 @@ className={cn(
 ```
 
 **Analyse**:
+
 - ✅ `w-full max-w-full` - Prend toute la largeur disponible
 - ✅ `text-sm sm:text-base` - Taille de texte responsive
 - ✅ `touch-manipulation` - Optimisé pour mobile
@@ -31,6 +34,7 @@ className={cn(
 ---
 
 ### ✅ Select (src/components/ui/select.tsx)
+
 **Statut**: ✅ **CORRECT**
 
 ```tsx
@@ -41,6 +45,7 @@ className={cn(
 ```
 
 **Analyse**:
+
 - ✅ `w-full max-w-full` - Prend toute la largeur disponible
 - ✅ `text-xs sm:text-sm` - Taille de texte responsive
 - ✅ `touch-manipulation` - Optimisé pour mobile
@@ -49,6 +54,7 @@ className={cn(
 ---
 
 ### ✅ Textarea (src/components/ui/textarea.tsx)
+
 **Statut**: ✅ **CORRECT**
 
 ```tsx
@@ -59,6 +65,7 @@ className={cn(
 ```
 
 **Analyse**:
+
 - ✅ `w-full max-w-full` - Prend toute la largeur disponible
 - ✅ `resize-y` - Permet le redimensionnement vertical
 - ✅ `touch-manipulation` - Optimisé pour mobile
@@ -66,6 +73,7 @@ className={cn(
 ---
 
 ### ⚠️ Dialog (src/components/ui/dialog.tsx)
+
 **Statut**: ⚠️ **ATTENTION REQUISE**
 
 ```tsx
@@ -76,11 +84,13 @@ className={cn(
 ```
 
 **Problème Potentiel**:
+
 - `max-w-lg` (32rem = 512px) peut être trop petit pour certains contenus
 - La plupart des dialogs surchargent avec `max-w-2xl`, `max-w-4xl`, etc.
 - Mais certains dialogs n'ont pas de surcharge responsive
 
 **Recommandation**:
+
 - Vérifier que tous les dialogs ont une largeur max responsive
 - Ajouter `max-w-[95vw] sm:max-w-lg` par défaut
 
@@ -89,46 +99,56 @@ className={cn(
 ## 2. Formulaires
 
 ### ⚠️ WebhookForm (src/components/digital/webhooks/WebhookForm.tsx)
+
 **Statut**: ⚠️ **PROBLÈMES IDENTIFIÉS**
 
 #### Problème 1: Grille d'événements
+
 ```tsx
 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-4 border rounded-lg">
 ```
 
 **Problème**:
+
 - `grid-cols-2` sur mobile peut être trop serré pour les labels d'événements
 - Les labels peuvent être tronqués ou difficiles à lire
 
 **Recommandation**:
+
 ```tsx
 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 p-4 border rounded-lg">
 ```
 
 #### Problème 2: Grille de configuration
+
 ```tsx
 <div className="grid grid-cols-2 gap-4">
 ```
 
 **Problème**:
+
 - `grid-cols-2` sur mobile peut être trop serré
 - Les selects peuvent être difficiles à utiliser
 
 **Recommandation**:
+
 ```tsx
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 ```
 
 #### Problème 3: Boutons footer
+
 ```tsx
 <div className="flex justify-end gap-2 pt-4 border-t">
 ```
 
 **Problème**:
+
 - Boutons non full-width sur mobile
 - Peuvent être difficiles à cliquer
 
 **Recommandation**:
+
 ```tsx
 <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
   <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
@@ -138,6 +158,7 @@ className={cn(
 ---
 
 ### ✅ CreateCustomerDialog
+
 **Statut**: ⚠️ **AMÉLIORATION RECOMMANDÉE**
 
 ```tsx
@@ -145,14 +166,17 @@ className={cn(
 ```
 
 **Problème Potentiel**:
+
 - `max-w-2xl` sans breakpoint mobile peut être trop large sur très petits écrans
 
 **Recommandation**:
+
 ```tsx
 <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
 ```
 
 **Grilles**:
+
 - ✅ `grid grid-cols-1 md:grid-cols-2` - Correct
 - ✅ Boutons: Pourraient être full-width sur mobile
 
@@ -161,11 +185,13 @@ className={cn(
 ## 3. Dialogs - Analyse Complète
 
 ### Dialogs avec Largeur Responsive ✅
+
 - `CreatePixelDialog`: `max-w-[90vw] sm:max-w-2xl` ✅
 - `EditPixelDialog`: `max-w-[90vw] sm:max-w-2xl` ✅
 - `SEODetailDialog`: `max-w-[90vw] sm:max-w-3xl` ✅
 
 ### Dialogs SANS Largeur Responsive ⚠️
+
 - `DeleteStoreDialog`: `max-w-2xl` (pas de breakpoint mobile)
 - `CreatePaymentDialog`: `max-w-2xl` (pas de breakpoint mobile)
 - `ImportCSVDialog`: `max-w-4xl` (pas de breakpoint mobile)
@@ -182,6 +208,7 @@ className={cn(
 ## 4. Problèmes Identifiés
 
 ### Priorité HAUTE
+
 1. **WebhookForm - Grilles trop serrées sur mobile**
    - **Fichier**: `src/components/digital/webhooks/WebhookForm.tsx`
    - **Lignes**: 175, 208
@@ -195,6 +222,7 @@ className={cn(
    - **Impact**: Mauvaise UX mobile
 
 ### Priorité MOYENNE
+
 1. **Dialogs - Largeurs max non responsives**
    - **Fichiers**: Multiple dialogs
    - **Problème**: `max-w-2xl` ou `max-w-4xl` sans breakpoint mobile
@@ -202,6 +230,7 @@ className={cn(
    - **Recommandation**: Ajouter `max-w-[95vw] sm:max-w-*`
 
 ### Priorité BASSE
+
 1. **Dialog de base - max-w-lg peut être trop petit**
    - **Fichier**: `src/components/ui/dialog.tsx`
    - **Ligne**: 39
@@ -213,6 +242,7 @@ className={cn(
 ## Actions Recommandées
 
 ### 1. Corriger WebhookForm
+
 ```tsx
 // Grille d'événements
 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 p-4 border rounded-lg">
@@ -227,6 +257,7 @@ className={cn(
 ```
 
 ### 2. Ajouter Largeurs Responsives aux Dialogs
+
 ```tsx
 // Avant
 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -236,12 +267,13 @@ className={cn(
 ```
 
 ### 3. Améliorer Dialog de Base (Optionnel)
+
 ```tsx
 // Avant
-"w-[calc(100%-2rem)] max-w-lg"
+'w-[calc(100%-2rem)] max-w-lg';
 
 // Après
-"w-[calc(100%-2rem)] max-w-[95vw] sm:max-w-lg"
+'w-[calc(100%-2rem)] max-w-[95vw] sm:max-w-lg';
 ```
 
 ---
@@ -249,17 +281,20 @@ className={cn(
 ## Vérifications Effectuées
 
 ### ✅ Input Components
+
 - Input: `w-full max-w-full` ✅
 - Select: `w-full max-w-full` ✅
 - Textarea: `w-full max-w-full` ✅
 - Tous ont `touch-manipulation` ✅
 
 ### ⚠️ Dialog Components
+
 - Base Dialog: `max-w-lg` (peut être amélioré)
 - La plupart des dialogs surchargent avec des largeurs max
 - Certains dialogs n'ont pas de breakpoint mobile
 
 ### ⚠️ Form Components
+
 - WebhookForm: Grilles trop serrées sur mobile
 - CreateCustomerDialog: Largeur max non responsive
 - Autres formulaires: À vérifier individuellement
@@ -271,6 +306,7 @@ className={cn(
 **Score**: 82/100
 
 ### Détails
+
 - ✅ **Input Components**: 100/100 - Tous responsives
 - ✅ **Select Components**: 100/100 - Tous responsives
 - ✅ **Textarea Components**: 100/100 - Tous responsives
@@ -289,12 +325,15 @@ Les composants UI de base (Input, Select, Textarea) sont **parfaitement responsi
 ## Corrections Appliquées
 
 ### ✅ WebhookForm
+
 - **Grille d'événements**: `grid-cols-1 sm:grid-cols-2 md:grid-cols-3` ✅
 - **Grille de configuration**: `grid-cols-1 sm:grid-cols-2` ✅
 - **Boutons footer**: `flex-col sm:flex-row` + `w-full sm:w-auto` ✅
 
 ### ✅ Dialogs - Largeurs Responsives
+
 Tous les dialogs principaux ont maintenant `max-w-[95vw] sm:max-w-*`:
+
 - `CreateCustomerDialog` ✅
 - `DeleteStoreDialog` ✅
 - `CreatePaymentDialog` ✅
@@ -315,6 +354,7 @@ Tous les dialogs principaux ont maintenant `max-w-[95vw] sm:max-w-*`:
 ### ✅ Tous les Dialogs Restants (33 fichiers corrigés)
 
 **Dialogs Templates & Digital**:
+
 - `TemplateExporterDialog` ✅
 - `CreateUpdateDialog` ✅
 - `DigitalFilePreview` ✅
@@ -323,6 +363,7 @@ Tous les dialogs principaux ont maintenant `max-w-[95vw] sm:max-w-*`:
 - `WebhookLogs` (digital) ✅
 
 **Dialogs Service**:
+
 - `ServiceBundleBuilder` ✅
 - `RecurringBookingManager` ✅
 - `ServicePackageManager` ✅
@@ -331,11 +372,13 @@ Tous les dialogs principaux ont maintenant `max-w-[95vw] sm:max-w-*`:
 - `StaffAvailabilityManager` ✅
 
 **Dialogs Products & Shipping**:
+
 - `AIContentGenerator` ✅
 - `CreateShipmentDialog` ✅
 - `PhysicalSizeChartSelector` ✅
 
 **Dialogs Physical Inventory**:
+
 - `ExpirationAlerts` ✅
 - `BundlesManager` (2 dialogs) ✅
 - `BackordersManager` (3 dialogs) ✅
@@ -352,6 +395,7 @@ Tous les dialogs principaux ont maintenant `max-w-[95vw] sm:max-w-*`:
 - `WarrantiesManagement` ✅
 
 **Dialogs Other**:
+
 - `WishlistShareDialog` ✅
 - `OneClickUpsell` ✅
 - `MultiDomainManager` ✅
@@ -364,15 +408,17 @@ Tous les dialogs principaux ont maintenant `max-w-[95vw] sm:max-w-*`:
 ## Statut Final
 
 ### ✅ Tous les Dialogs Principaux
+
 - **10 dialogs principaux** (Phase 1) ✅
 - **33 dialogs supplémentaires** (Phase 2) ✅
 - **Total: 43+ dialogs** optimisés pour mobile ✅
 
 ### ✅ Tous les Composants UI de Base
+
 - Input, Select, Textarea: 100% responsive ✅
 
 ### ✅ Tous les Formulaires
+
 - WebhookForm: Grilles et boutons optimisés ✅
 
 **Conclusion**: Tous les sous-composants et dialogs de la plateforme sont maintenant optimisés pour mobile avec des largeurs responsives.
-

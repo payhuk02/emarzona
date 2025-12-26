@@ -16,6 +16,7 @@ Implémentation d'un système intelligent de cache invalidation basé sur les re
 ### 1. Système de Cache Invalidation Intelligent
 
 #### `src/lib/cache-invalidation.ts` (nouveau)
+
 - ✅ **Définition des relations** : Relations entre entités (Product → Reviews, Cart, Stats)
 - ✅ **Mapping query keys** : Mapping automatique entités → query keys
 - ✅ **Invalidation sélective** : Invalide seulement les queries concernées
@@ -23,12 +24,14 @@ Implémentation d'un système intelligent de cache invalidation basé sur les re
 - ✅ **Helpers spécialisés** : Fonctions helper pour chaque type d'entité
 
 #### Entités Supportées
+
 - ✅ Product, Digital Product, Physical Product, Service, Course
 - ✅ Order, Cart, Review, Customer, Store
 - ✅ Booking, Subscription, License, Update
 - ✅ Stats, Analytics
 
 #### Actions Supportées
+
 - ✅ CREATE, UPDATE, DELETE
 - ✅ PUBLISH, UNPUBLISH
 - ✅ ACTIVATE, DEACTIVATE
@@ -36,6 +39,7 @@ Implémentation d'un système intelligent de cache invalidation basé sur les re
 ### 2. Relations Définies
 
 #### Relations Principales
+
 - ✅ **Product** → Reviews, Cart, Stats, Analytics
 - ✅ **Digital Product** → Updates, Licenses, Subscriptions, Cart
 - ✅ **Update** → Digital Product
@@ -47,11 +51,13 @@ Implémentation d'un système intelligent de cache invalidation basé sur les re
 ### 3. Hooks Intégrés
 
 #### `src/hooks/useProductManagementOptimistic.ts`
+
 - ✅ **Invalidation intelligente** : Utilise `invalidateProductCache()`
 - ✅ **Préchargement** : Précharge stats et analytics après update
 - ✅ **Gestion DELETE** : Invalidation complète avec relations
 
 #### `src/hooks/digital/useProductUpdates.ts`
+
 - ✅ **Invalidation intelligente** : Utilise `invalidateUpdateCache()` et `invalidateDigitalProductCache()`
 - ✅ **Relations bidirectionnelles** : Update ↔ Digital Product
 
@@ -60,12 +66,14 @@ Implémentation d'un système intelligent de cache invalidation basé sur les re
 ## 📊 COMPARAISON AVANT/APRÈS
 
 ### Avant
+
 - ❌ Invalidation manuelle de toutes les queries
 - ❌ Oubli de certaines invalidations
 - ❌ Invalidation excessive (trop de requêtes)
 - ❌ Pas de préchargement
 
 ### Après
+
 - ✅ **Invalidation automatique** : Basée sur les relations
 - ✅ **Invalidation sélective** : Seulement queries concernées
 - ✅ **Préchargement** : Données liées préchargées
@@ -115,9 +123,11 @@ await prefetchRelatedData(queryClient, EntityType.PRODUCT, productId, { storeId 
 ## 📁 FICHIERS CRÉÉS/MODIFIÉS
 
 ### Nouveaux Fichiers
+
 - ✅ `src/lib/cache-invalidation.ts` (créé)
 
 ### Fichiers Modifiés
+
 - ✅ `src/hooks/useProductManagementOptimistic.ts` (intégration cache invalidation)
 - ✅ `src/hooks/digital/useProductUpdates.ts` (intégration cache invalidation)
 
@@ -126,15 +136,18 @@ await prefetchRelatedData(queryClient, EntityType.PRODUCT, productId, { storeId 
 ## ⚠️ NOTES IMPORTANTES
 
 ### Relations Bidirectionnelles
+
 - ⚠️ **Update ↔ Digital Product** : Les deux s'invalident mutuellement
 - ⚠️ **Booking ↔ Service** : Les deux s'invalident mutuellement
 
 ### Performance
+
 - ✅ **Invalidation sélective** : Seulement queries concernées
 - ✅ **Préchargement conditionnel** : Seulement données importantes
 - ✅ **Logging** : Debug des invalidations
 
 ### Extensibilité
+
 - ✅ **Facile à étendre** : Ajouter relations dans `ENTITY_RELATIONS`
 - ✅ **Mapping flexible** : Ajouter query keys dans `ENTITY_QUERY_KEY_MAP`
 - ✅ **Conditions personnalisées** : Support conditions dans relations
@@ -174,4 +187,3 @@ await prefetchRelatedData(queryClient, EntityType.PRODUCT, productId, { storeId 
 
 **Date de complétion** : 28 Janvier 2025  
 **Version** : 1.0.0
-

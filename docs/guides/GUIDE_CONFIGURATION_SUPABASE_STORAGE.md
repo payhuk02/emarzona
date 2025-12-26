@@ -43,12 +43,12 @@ Configurer le bucket Supabase Storage "videos" pour permettre aux enseignants d'
 1. Dans le bucket "videos", cliquer sur **"Policies"**
 2. Vous devriez voir 4 politiques :
 
-| Politique | Type | Description |
-|-----------|------|-------------|
+| Politique                               | Type   | Description                                  |
+| --------------------------------------- | ------ | -------------------------------------------- |
 | `Authenticated users can upload videos` | INSERT | Permet aux utilisateurs connectés d'uploader |
-| `Anyone can view videos` | SELECT | Permet à tous de voir les vidéos |
-| `Users can update their own videos` | UPDATE | Permet de modifier ses propres vidéos |
-| `Users can delete their own videos` | DELETE | Permet de supprimer ses propres vidéos |
+| `Anyone can view videos`                | SELECT | Permet à tous de voir les vidéos             |
+| `Users can update their own videos`     | UPDATE | Permet de modifier ses propres vidéos        |
+| `Users can delete their own videos`     | DELETE | Permet de supprimer ses propres vidéos       |
 
 ---
 
@@ -90,13 +90,15 @@ Configurer le bucket Supabase Storage "videos" pour permettre aux enseignants d'
 
 ### Problème 3 : "Insufficient permissions"
 
-**Solution** : 
+**Solution** :
+
 1. Vérifier que vous êtes bien connecté avec un compte admin
 2. Vérifier que vous avez sélectionné le bon projet
 
 ### Problème 4 : Upload échoue depuis l'application
 
 **Solution** :
+
 1. Vérifier que l'utilisateur est bien authentifié
 2. Vérifier que le fichier est bien une vidéo
 3. Vérifier que le fichier ne dépasse pas 500 MB
@@ -166,7 +168,7 @@ WHERE bucket_id = 'videos'
 ### Obtenir la taille totale utilisée (SQL)
 
 ```sql
-SELECT 
+SELECT
   bucket_id,
   COUNT(*) as total_files,
   SUM((metadata->>'size')::bigint) as total_size_bytes,
@@ -195,4 +197,3 @@ GROUP BY bucket_id;
 **Projet** : Payhuk SaaS Platform  
 **Module** : Cours en ligne - Storage  
 **Statut** : ✅ **PRÊT POUR L'UPLOAD**
-

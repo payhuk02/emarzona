@@ -26,12 +26,12 @@
 
 ### Score Global de la Plateforme : **94% / 100** ✅
 
-| Système | Score | Complétude | Fonctionnel | Maturité | Priorité Amélioration |
-|---------|-------|------------|-------------|----------|----------------------|
-| **🎓 Cours en Ligne** | **98%** | 98% | ✅ Oui | ⭐⭐⭐⭐⭐ | Basse |
-| **💾 Produits Digitaux** | **95%** | 95% | ✅ Oui | ⭐⭐⭐⭐⭐ | Moyenne |
-| **📦 Produits Physiques** | **92%** | 92% | ✅ Oui | ⭐⭐⭐⭐ | Moyenne |
-| **🛠️ Services** | **90%** | 90% | ✅ Oui | ⭐⭐⭐⭐ | Haute |
+| Système                   | Score   | Complétude | Fonctionnel | Maturité   | Priorité Amélioration |
+| ------------------------- | ------- | ---------- | ----------- | ---------- | --------------------- |
+| **🎓 Cours en Ligne**     | **98%** | 98%        | ✅ Oui      | ⭐⭐⭐⭐⭐ | Basse                 |
+| **💾 Produits Digitaux**  | **95%** | 95%        | ✅ Oui      | ⭐⭐⭐⭐⭐ | Moyenne               |
+| **📦 Produits Physiques** | **92%** | 92%        | ✅ Oui      | ⭐⭐⭐⭐   | Moyenne               |
+| **🛠️ Services**           | **90%** | 90%        | ✅ Oui      | ⭐⭐⭐⭐   | Haute                 |
 
 ### Verdict Global
 
@@ -113,22 +113,23 @@ Chaque système a été analysé selon 8 dimensions :
 
 ### 📈 Score Global : **95% / 100**
 
-| Dimension | Score | Détails |
-|-----------|-------|---------|
-| Architecture DB | 10/10 | ✅ Excellent |
-| Wizard Création | 9/10 | ⚠️ Sauvegarde incorrecte |
-| Fonctionnalités Core | 10/10 | ✅ Complet |
-| Fonctionnalités Avancées | 9/10 | ⚠️ Manque UI updates |
-| UI/UX | 9.5/10 | ✅ Très bon |
-| Intégrations | 10/10 | ✅ Complet |
-| Sécurité | 9/10 | ✅ Bon |
-| Documentation | 9.5/10 | ✅ Très bon |
+| Dimension                | Score  | Détails                  |
+| ------------------------ | ------ | ------------------------ |
+| Architecture DB          | 10/10  | ✅ Excellent             |
+| Wizard Création          | 9/10   | ⚠️ Sauvegarde incorrecte |
+| Fonctionnalités Core     | 10/10  | ✅ Complet               |
+| Fonctionnalités Avancées | 9/10   | ⚠️ Manque UI updates     |
+| UI/UX                    | 9.5/10 | ✅ Très bon              |
+| Intégrations             | 10/10  | ✅ Complet               |
+| Sécurité                 | 9/10   | ✅ Bon                   |
+| Documentation            | 9.5/10 | ✅ Très bon              |
 
 ### 🗄️ ARCHITECTURE BASE DE DONNÉES
 
 #### Tables Principales (6 tables)
 
 **1. `digital_products`** ✅
+
 ```sql
 - product_id (FK → products)
 - digital_type (software, ebook, template, plugin, music, video, graphic, game, app)
@@ -142,6 +143,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **2. `digital_product_files`** ✅
+
 ```sql
 - digital_product_id (FK)
 - name, file_url, file_type, file_size_mb
@@ -150,6 +152,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **3. `digital_product_downloads`** ✅
+
 ```sql
 - digital_product_id, user_id, file_id
 - download_date, ip_address, user_agent
@@ -158,6 +161,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **4. `digital_licenses`** ✅
+
 ```sql
 - digital_product_id, user_id, order_id
 - license_key (format: XXXX-XXXX-XXXX-XXXX)
@@ -166,12 +170,14 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **5. `digital_license_activations`** ✅
+
 ```sql
 - license_id, device_id, device_name
 - ip_address, activated_at, last_used_at
 ```
 
 **6. `digital_product_updates`** ✅
+
 ```sql
 - digital_product_id, version, changelog
 - file_url, release_date
@@ -179,12 +185,14 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 #### Indexes & Performance ✅
+
 - ✅ 15+ indexes optimisés
 - ✅ Indexes sur clés étrangères
 - ✅ Indexes sur colonnes fréquemment queryées (digital_type, license_type)
 - ✅ Indexes composites pour requêtes complexes
 
 #### RLS Policies ✅
+
 - ✅ 20+ policies (vendeurs, clients, public)
 - ✅ Sécurité download files
 - ✅ Sécurité licenses
@@ -196,7 +204,9 @@ Chaque système a été analysé selon 8 dimensions :
 **Étapes** : 6 étapes complètes
 
 #### Étape 1 : Informations de Base ✅
+
 **Composant** : `DigitalBasicInfoForm`
+
 - ✅ Nom, slug (auto-généré), description
 - ✅ Catégorie digitale (13 types)
 - ✅ Prix, prix promotionnel
@@ -206,7 +216,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Sélection explicite `pricing_model='free'`
 
 #### Étape 2 : Fichiers ✅
+
 **Composant** : `DigitalFilesUploader`
+
 - ✅ Upload fichier principal (Supabase Storage)
 - ✅ Fichiers additionnels (multiple)
 - ✅ Taille, format, version
@@ -215,7 +227,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Option pour marquer fichier comme "gratuit/preview"
 
 #### Étape 3 : Configuration Licence ✅
+
 **Composant** : `DigitalLicenseConfig`
+
 - ✅ Type licence (single, multi, unlimited, subscription, lifetime)
 - ✅ Durée (jours ou lifetime)
 - ✅ Max activations
@@ -224,6 +238,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Auto-génération clés
 
 #### Étape 4 : Download Settings ✅
+
 - ✅ Limit téléchargements (1-100 ou unlimited)
 - ✅ Expiration (jours ou permanent)
 - ✅ Watermark activable
@@ -231,26 +246,33 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Require registration
 
 #### Étape 5 : SEO & FAQs ✅
+
 **Composants** : `ProductSEOForm`, `ProductFAQForm`
+
 - ✅ Meta title, meta description
 - ✅ OG image
 - ✅ Keywords
 - ✅ FAQs structurées (JSONB)
 
 #### Étape 6 : Affiliation ✅
+
 **Composant** : `DigitalAffiliateSettings`
+
 - ✅ Activation par produit
 - ✅ Taux commission (% ou fixe)
 - ✅ Durée cookie (jours)
 - ✅ Conditions personnalisées
 
 #### Étape 7 : Prévisualisation ✅
+
 **Composant** : `DigitalPreview`
+
 - ✅ Aperçu complet produit
 - ✅ Validation finale
 - ✅ Publication ou sauvegarde brouillon
 
 **⚠️ PROBLÈME CRITIQUE IDENTIFIÉ** :
+
 - Wizard sauvegarde dans `products` table au lieu de `digital_products`
 - **Impact** : Données digitales spécifiques non sauvegardées
 - **Solution** : Corriger mapping wizard → tables dédiées
@@ -258,13 +280,16 @@ Chaque système a été analysé selon 8 dimensions :
 ### ⚙️ FONCTIONNALITÉS CORE
 
 #### A. CRUD Produits ✅
+
 **Hooks** :
+
 - ✅ `useDigitalProducts` : Liste, création, mise à jour, suppression
 - ✅ `useDigitalProduct` : Détail produit
 - ✅ `useCreateDigitalProduct` : Création complète
 - ✅ `useUpdateDigitalProduct` : Mise à jour
 
 **Features** :
+
 - ✅ Création via wizard
 - ✅ Édition inline
 - ✅ Suppression (soft delete)
@@ -272,12 +297,15 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Import CSV (optionnel)
 
 #### B. Gestion Fichiers ✅
+
 **Composants** :
+
 - ✅ `DigitalFilesUploader` : Upload multi-fichiers
 - ✅ `FileUploadAdvanced` : Upload avancé avec progress
 - ✅ `FileCategoryManager` : Catégorisation fichiers
 
 **Features** :
+
 - ✅ Upload Supabase Storage
 - ✅ Compression automatique
 - ✅ Hash intégrité
@@ -285,13 +313,16 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Gestion versions
 
 #### C. Système de Licences ✅
+
 **Composants** :
+
 - ✅ `LicenseManagementDashboard` : Dashboard vendeur
 - ✅ `LicenseTable` : Tableau licences actives
 - ✅ `LicenseGenerator` : Génération clés auto
 - ✅ `DigitalLicenseCard` : Affichage licence client
 
 **Features** :
+
 - ✅ Génération auto clés (format configurable)
 - ✅ Activation/désactivation appareils
 - ✅ Limite appareils configurable
@@ -300,14 +331,17 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Transfert licences
 
 **⚠️ BUG IDENTIFIÉ** :
+
 - Licence créée au wizard au lieu de post-achat
 - **Impact** : Licences créées même sans achat
 - **Solution** : Déplacer création licence vers `useCreateDigitalOrder`
 
 #### D. Protection Téléchargements ✅
+
 **Fichier** : `src/utils/digital/downloadProtection.ts`
 
 **Features** :
+
 - ✅ Signed URLs (expiration configurable)
 - ✅ IP tracking
 - ✅ Device fingerprinting
@@ -316,8 +350,10 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Watermarking (optionnel)
 
 #### E. Versioning & Updates ⚠️
+
 **Table** : `digital_product_updates` ✅
 **Features** :
+
 - ✅ Table créée
 - ✅ Changelog
 - ✅ Versioning sémantique
@@ -327,10 +363,12 @@ Chaque système a été analysé selon 8 dimensions :
 ### 🚀 FONCTIONNALITÉS AVANCÉES
 
 #### A. Analytics Digital ✅
+
 **Hook** : `useDigitalAnalytics`  
 **Composant** : `DigitalAnalyticsDashboard`
 
 **Metrics** :
+
 - ✅ Téléchargements totaux
 - ✅ Téléchargements uniques
 - ✅ Licences actives
@@ -340,13 +378,16 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Taux conversion
 
 #### B. Affiliation ✅
+
 **Composant** : `DigitalAffiliateSettings`
+
 - ✅ Commission par produit digital
 - ✅ Intégration complète système affiliation
 - ✅ Tracking clicks/conversions
 - ✅ Dashboard affiliés
 
 #### C. Reviews & Ratings ✅
+
 - ✅ Intégration complète système reviews
 - ✅ Avis clients (1-5 étoiles)
 - ✅ Photos/vidéos
@@ -355,12 +396,14 @@ Chaque système a été analysé selon 8 dimensions :
 ### 📱 PAGES & COMPOSANTS
 
 #### Pages Vendeur ✅
+
 - ✅ `DigitalProductsDashboard` : Dashboard produits digitaux
 - ✅ `DigitalProductsList` : Liste produits avec filtres
 - ✅ `CreateDigitalProduct` : Page création (wizard)
 - ✅ `EditDigitalProduct` : Page édition
 
 #### Pages Client ✅
+
 - ✅ `MyDownloads` : Liste téléchargements client
 - ✅ `MyLicences` : Licences actives client
 - ✅ `DigitalProductDetail` : Page détail produit (marketplace)
@@ -400,22 +443,23 @@ Chaque système a été analysé selon 8 dimensions :
 
 ### 📈 Score Global : **92% / 100**
 
-| Dimension | Score | Détails |
-|-----------|-------|---------|
-| Architecture DB | 10/10 | ✅ Excellent |
-| Wizard Création | 9.5/10 | ✅ Très bon |
-| Fonctionnalités Core | 9/10 | ⚠️ Manque page detail |
+| Dimension                | Score  | Détails                |
+| ------------------------ | ------ | ---------------------- |
+| Architecture DB          | 10/10  | ✅ Excellent           |
+| Wizard Création          | 9.5/10 | ✅ Très bon            |
+| Fonctionnalités Core     | 9/10   | ⚠️ Manque page detail  |
 | Fonctionnalités Avancées | 8.5/10 | ⚠️ Manque shipping API |
-| UI/UX | 9/10 | ✅ Bon |
-| Intégrations | 10/10 | ✅ Complet |
-| Sécurité | 9/10 | ✅ Bon |
-| Documentation | 8/10 | ⚠️ À améliorer |
+| UI/UX                    | 9/10   | ✅ Bon                 |
+| Intégrations             | 10/10  | ✅ Complet             |
+| Sécurité                 | 9/10   | ✅ Bon                 |
+| Documentation            | 8/10   | ⚠️ À améliorer         |
 
 ### 🗄️ ARCHITECTURE BASE DE DONNÉES
 
 #### Tables Principales (6 tables)
 
 **1. `physical_products`** ✅
+
 ```sql
 - product_id (FK → products)
 - track_inventory, inventory_policy (deny/continue)
@@ -429,6 +473,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **2. `product_variants`** ✅
+
 ```sql
 - physical_product_id (FK)
 - option1_value, option2_value, option3_value
@@ -439,6 +484,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **3. `inventory_items`** ✅
+
 ```sql
 - physical_product_id, variant_id
 - quantity_available, quantity_reserved, quantity_committed
@@ -448,6 +494,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **4. `stock_movements`** ✅
+
 ```sql
 - inventory_item_id
 - movement_type (purchase, sale, adjustment, return, damage, transfer, recount)
@@ -457,6 +504,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **5. `shipping_zones`** ✅
+
 ```sql
 - store_id
 - name, countries, states, zip_codes
@@ -464,6 +512,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **6. `shipping_rates`** ✅
+
 ```sql
 - shipping_zone_id, physical_product_id
 - rate_type (flat, weight-based, price-based)
@@ -473,12 +522,14 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 #### Indexes & Performance ✅
+
 - ✅ 20+ indexes optimisés
 - ✅ Indexes sur SKU, barcode
 - ✅ Indexes sur stock status
 - ✅ Indexes composites pour variants
 
 #### RLS Policies ✅
+
 - ✅ 25+ policies (vendeurs, clients, public)
 - ✅ Sécurité inventory
 - ✅ Sécurité variants
@@ -490,7 +541,9 @@ Chaque système a été analysé selon 8 dimensions :
 **Étapes** : 8 étapes complètes
 
 #### Étape 1 : Informations de Base ✅
+
 **Composant** : `PhysicalBasicInfoForm`
+
 - ✅ Nom, slug, description
 - ✅ Catégorie physique (9 types)
 - ✅ Prix, prix promotionnel
@@ -499,7 +552,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Barcode (optionnel)
 
 #### Étape 2 : Variantes & Options ✅
+
 **Composant** : `PhysicalVariantsBuilder`
+
 - ✅ Attributs illimités (couleur, taille, matériau, etc.)
 - ✅ Combinaisons auto (toutes combinaisons possibles)
 - ✅ Prix par variant
@@ -508,7 +563,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ SKU par variant
 
 #### Étape 3 : Inventaire ✅
+
 **Composant** : `PhysicalInventoryConfig`
+
 - ✅ Stock par variant
 - ✅ Seuil alerte stock bas
 - ✅ Tracking activé/désactivé
@@ -516,7 +573,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Warehouse locations (optionnel)
 
 #### Étape 4 : Expédition ✅
+
 **Composant** : `PhysicalShippingConfig`
+
 - ✅ Poids, dimensions
 - ✅ Zones livraison (local, national, international)
 - ✅ Tarifs par zone
@@ -525,42 +584,55 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Intégration API transporteurs (Fedex, UPS, DHL)
 
 #### Étape 5 : Guide des Tailles ✅
+
 **Composant** : `PhysicalSizeChartSelector`
+
 - ✅ Templates size charts
 - ✅ Custom size charts
 - ✅ Upload image size chart
 
 #### Étape 6 : Affiliation ✅
+
 **Composant** : `PhysicalAffiliateSettings`
+
 - ✅ Commission par produit
 - ✅ Conditions
 
 #### Étape 7 : SEO & FAQs ✅
+
 **Composant** : `PhysicalSEOAndFAQs`
+
 - ✅ Meta tags
 - ✅ FAQs
 
 #### Étape 8 : Options de Paiement ✅
+
 **Composant** : `PaymentOptionsForm`
+
 - ✅ Paiement complet (100%)
 - ✅ Paiement partiel (acompte 10-90%)
 - ✅ Paiement sécurisé (escrow)
 
 #### Étape 9 : Prévisualisation ✅
+
 **Composant** : `PhysicalPreview`
+
 - ✅ Aperçu complet produit
 - ✅ Validation finale
 
 ### ⚙️ FONCTIONNALITÉS CORE
 
 #### A. CRUD Produits ✅
+
 **Hooks** :
+
 - ✅ `usePhysicalProducts` : Liste, création, mise à jour
 - ✅ `usePhysicalProduct` : Détail produit
 - ✅ `useCreatePhysicalProduct` : Création complète
 - ✅ `useUpdatePhysicalProduct` : Mise à jour
 
 **Features** :
+
 - ✅ Création via wizard
 - ✅ Édition inline
 - ✅ Suppression (soft delete)
@@ -568,10 +640,12 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Page `PhysicalProductDetail` dédiée
 
 #### B. Système de Variants ✅
+
 **Composant** : `PhysicalVariantsBuilder`
 **Table** : `product_variants`
 
 **Features** :
+
 - ✅ Attributs illimités (couleur, taille, matériau, etc.)
 - ✅ Combinaisons auto
 - ✅ Prix par variant
@@ -580,15 +654,18 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ SKU par variant
 
 **UI Client** :
+
 - ✅ `VariantSelector` : Sélecteur variants
 - ⚠️ **Manque** : Preview image variant en temps réel
 
 #### C. Gestion Inventaire ✅
+
 **Composant** : `PhysicalInventoryConfig`
 **Hooks** : `useInventory`
 **Table** : `inventory_items`, `stock_movements`
 
 **Features** :
+
 - ✅ Stock par variant
 - ✅ Tracking temps réel
 - ✅ Réservation stock (lors commande)
@@ -598,15 +675,18 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Dashboard gestion stock global
 
 **UI** :
+
 - ✅ `InventoryStockIndicator` : Indicateur stock (en stock, stock bas, rupture)
 - ✅ `StockAlertBanner` : Alerte stock bas
 
 #### D. Shipping Management ✅
+
 **Composant** : `PhysicalShippingConfig`
 **Hook** : `useShipping`
 **Tables** : `shipping_zones`, `shipping_rates`
 
 **Features** :
+
 - ✅ Zones multiples (local, national, international)
 - ✅ Tarifs par zone
 - ✅ Calcul auto frais livraison
@@ -615,13 +695,16 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Calcul temps réel avec adresse client
 
 **UI** :
+
 - ✅ `ShippingInfoDisplay` : Affichage infos livraison
 - ✅ `ShippingCalculator` : Calculateur frais livraison
 
 #### E. Advanced Payments ✅
+
 **Fichier** : `src/hooks/orders/useCreatePhysicalOrder.ts`
 
 **Features** :
+
 - ✅ Paiement complet (100%)
 - ✅ Paiement partiel (acompte 10-90%)
 - ✅ Paiement sécurisé (escrow)
@@ -629,6 +712,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Metadata Moneroo
 
 **⚠️ PROBLÈME IDENTIFIÉ** :
+
 - Pas de page "Payer le solde" pour paiements partiels
 - **Impact** : Clients ne peuvent pas payer le solde
 - **Solution** : Créer page dédiée `/dashboard/payments/balance/:orderId`
@@ -636,7 +720,9 @@ Chaque système a été analysé selon 8 dimensions :
 ### 🚀 FONCTIONNALITÉS AVANCÉES
 
 #### A. Analytics Physical ✅
+
 **Composant** : `PhysicalAnalyticsDashboard`
+
 - ✅ Ventes totales
 - ✅ Stock restant
 - ✅ Produits populaires
@@ -645,6 +731,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Revenue par variant
 
 #### B. Stock Alerts ✅
+
 - ✅ Notifications automatiques stock bas
 - ✅ Email vendeur
 - ✅ Dashboard alerts
@@ -652,6 +739,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### 📱 PAGES & COMPOSANTS
 
 #### Pages Vendeur ✅
+
 - ✅ `PhysicalProductsList` : Liste produits physiques
 - ✅ `PhysicalProductCard` : Card produit avec stock
 - ✅ `CreatePhysicalProduct` : Page création (wizard)
@@ -659,6 +747,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : `PhysicalProductDetail` page dédiée
 
 #### Pages Client ✅
+
 - ✅ `CustomerPhysicalPortal` : Portail client physique
 - ✅ `MyOrders` : Commandes physiques
 - ✅ Marketplace : Affichage produits physiques
@@ -700,22 +789,23 @@ Chaque système a été analysé selon 8 dimensions :
 
 ### 📈 Score Global : **90% / 100**
 
-| Dimension | Score | Détails |
-|-----------|-------|---------|
-| Architecture DB | 9.5/10 | ✅ Très bon |
-| Wizard Création | 9/10 | ✅ Bon |
-| Fonctionnalités Core | 8.5/10 | ⚠️ Manque page detail, calendrier basique |
-| Fonctionnalités Avancées | 8/10 | ⚠️ Manque staff dispo, resource conflicts |
-| UI/UX | 8.5/10 | ⚠️ Calendrier à améliorer |
-| Intégrations | 10/10 | ✅ Complet |
-| Sécurité | 9/10 | ✅ Bon |
-| Documentation | 8/10 | ⚠️ À améliorer |
+| Dimension                | Score  | Détails                                   |
+| ------------------------ | ------ | ----------------------------------------- |
+| Architecture DB          | 9.5/10 | ✅ Très bon                               |
+| Wizard Création          | 9/10   | ✅ Bon                                    |
+| Fonctionnalités Core     | 8.5/10 | ⚠️ Manque page detail, calendrier basique |
+| Fonctionnalités Avancées | 8/10   | ⚠️ Manque staff dispo, resource conflicts |
+| UI/UX                    | 8.5/10 | ⚠️ Calendrier à améliorer                 |
+| Intégrations             | 10/10  | ✅ Complet                                |
+| Sécurité                 | 9/10   | ✅ Bon                                    |
+| Documentation            | 8/10   | ⚠️ À améliorer                            |
 
 ### 🗄️ ARCHITECTURE BASE DE DONNÉES
 
 #### Tables Principales (5 tables)
 
 **1. `service_products`** ✅
+
 ```sql
 - product_id (FK → products)
 - service_type (appointment, course, event, consultation)
@@ -733,6 +823,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **2. `service_staff_members`** ✅
+
 ```sql
 - service_product_id (FK)
 - store_id (FK)
@@ -743,6 +834,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **3. `service_availability_slots`** ✅
+
 ```sql
 - service_product_id (FK)
 - staff_member_id (FK, nullable)
@@ -752,6 +844,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **4. `service_resources`** ✅
+
 ```sql
 - service_product_id (FK)
 - name, type (room, equipment, tool)
@@ -760,6 +853,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **5. `service_bookings`** ✅
+
 ```sql
 - product_id (FK), user_id (FK), provider_id (FK)
 - scheduled_date, scheduled_start_time, scheduled_end_time
@@ -775,12 +869,14 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 #### Indexes & Performance ✅
+
 - ✅ 15+ indexes optimisés
 - ✅ Indexes sur dates/heures
 - ✅ Indexes sur statuts
 - ✅ Indexes composites pour disponibilités
 
 #### RLS Policies ✅
+
 - ✅ 20+ policies (vendeurs, clients, public)
 - ✅ Sécurité bookings
 - ✅ Sécurité staff
@@ -792,7 +888,9 @@ Chaque système a été analysé selon 8 dimensions :
 **Étapes** : 8 étapes complètes
 
 #### Étape 1 : Informations de Base ✅
+
 **Composant** : `ServiceBasicInfoForm`
+
 - ✅ Nom, slug, description
 - ✅ Catégorie service (12 types)
 - ✅ Image
@@ -800,7 +898,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Location type (on_site, online, home, flexible)
 
 #### Étape 2 : Durée & Disponibilité ✅
+
 **Composant** : `ServiceDurationAvailabilityForm`
+
 - ✅ Durée prestation (minutes)
 - ✅ Type booking (individuel, groupe)
 - ✅ Capacité min/max
@@ -810,14 +910,18 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Créneaux spécifiques (9h-10h, 14h-15h)
 
 #### Étape 3 : Personnel & Ressources ✅
+
 **Composant** : `ServiceStaffResourcesForm`
+
 - ✅ Staff assigné (nom, email, spécialité)
 - ✅ Ressources nécessaires (salle, équipement)
 - ⚠️ **Manque** : Disponibilités staff (calendrier)
 - ⚠️ **Manque** : Conflit horaires staff
 
 #### Étape 4 : Tarification ✅
+
 **Composant** : `ServicePricingOptionsForm`
+
 - ✅ Prix de base
 - ✅ Prix par personne (groupe)
 - ✅ Prix par heure/jour
@@ -825,42 +929,54 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Montant dépôt
 
 #### Étape 5 : Affiliation ✅
+
 **Composant** : `ServiceAffiliateSettings`
+
 - ✅ Commission
 
 #### Étape 6 : SEO & FAQs ✅
+
 **Composant** : `ServiceSEOAndFAQs`
+
 - ✅ Meta tags, FAQs
 
 #### Étape 7 : Options de Paiement ✅
+
 **Composant** : `PaymentOptionsForm`
+
 - ✅ Paiement complet
 - ✅ Paiement partiel (acompte)
 - ✅ Paiement sécurisé (escrow service_completion)
 
 #### Étape 8 : Prévisualisation ✅
+
 **Composant** : `ServicePreview`
 
 ### ⚙️ FONCTIONNALITÉS CORE
 
 #### A. CRUD Services ✅
+
 **Hooks** :
+
 - ✅ `useServices` : Liste, création, mise à jour
 - ✅ `useService` : Détail service
 - ✅ `useCreateService` : Création complète
 - ✅ `useUpdateService` : Mise à jour
 
 **Features** :
+
 - ✅ Création via wizard
 - ✅ Édition inline
 - ✅ Suppression (soft delete)
 - ⚠️ **Manque** : Page `ServiceDetail` dédiée
 
 #### B. Booking System ✅
+
 **Hook** : `useBookings`
 **Table** : `service_bookings`
 
 **Features** :
+
 - ✅ Réservation créneaux
 - ✅ Vérification capacité
 - ✅ Assignment staff
@@ -869,39 +985,47 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Problème** : Pas de calendrier visuel (UI) pour sélection créneau
 
 **Composants** :
+
 - ✅ `ServiceCalendar` : Calendrier basique
 - ✅ `TimeSlotPicker` : Sélecteur créneaux
 - ⚠️ **Problème** : UI très basique, pas interactive
 
 **Amélioration requise** :
+
 - 🔧 Calendrier visuel moderne (type Google Calendar)
 - 🔧 Drag & drop créneaux
 - 🔧 Codes couleur (disponible, réservé, bloqué)
 - 🔧 Vue semaine/mois
 
 #### C. Staff Management ✅
+
 **Table** : `service_staff_members`
 
 **Features** :
+
 - ✅ Personnel assigné par service
 - ✅ Nom, email, spécialité
 - ⚠️ **Manque** : Disponibilités staff (calendrier)
 - ⚠️ **Manque** : Conflit horaires staff
 
 #### D. Resources Management ✅
+
 **Table** : `service_resources`
 
 **Features** :
+
 - ✅ Ressources (salles, équipements)
 - ✅ Nom, type, capacité
 - ⚠️ **Manque** : Gestion disponibilités ressources
 - ⚠️ **Manque** : Conflit réservations ressources
 
 #### E. Availability System ⚠️
+
 **Composant** : `ServiceDurationAvailabilityForm`
 **Table** : `service_availability_slots`
 
 **Features** :
+
 - ✅ Jours disponibles (lundi-dimanche)
 - ✅ Heures ouverture/fermeture
 - ⚠️ **Manque** : Exceptions (jours fériés, vacances)
@@ -909,9 +1033,11 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : Calendrier visuel gestion
 
 #### F. Advanced Payments ✅
+
 **Fichier** : `src/hooks/orders/useCreateServiceOrder.ts`
 
 **Features** :
+
 - ✅ Paiement complet
 - ✅ Paiement partiel (acompte)
 - ✅ Paiement escrow (service_completion)
@@ -920,7 +1046,9 @@ Chaque système a été analysé selon 8 dimensions :
 ### 🚀 FONCTIONNALITÉS AVANCÉES
 
 #### A. Analytics Service ✅
+
 **Composant** : `ServiceAnalyticsDashboard`
+
 - ✅ Réservations totales
 - ✅ Revenue
 - ✅ Taux occupation
@@ -929,6 +1057,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### 📱 PAGES & COMPOSANTS
 
 #### Pages Vendeur ✅
+
 - ✅ `ServicesList` : Liste services vendeur
 - ✅ `ServiceCard` : Card service
 - ✅ `CreateService` : Page création (wizard)
@@ -936,6 +1065,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ⚠️ **Manque** : `ServiceDetail` page détail service
 
 #### Pages Client ✅
+
 - ✅ `BookingCard` : Card réservation client
 - ✅ `MyBookings` : Liste réservations client
 - ✅ Marketplace : Affichage services
@@ -978,22 +1108,23 @@ Chaque système a été analysé selon 8 dimensions :
 
 ### 📈 Score Global : **98% / 100**
 
-| Dimension | Score | Détails |
-|-----------|-------|---------|
-| Architecture DB | 10/10 | ✅ Excellent |
-| Wizard Création | 10/10 | ✅ Parfait |
-| Fonctionnalités Core | 10/10 | ✅ Complet |
+| Dimension                | Score  | Détails                             |
+| ------------------------ | ------ | ----------------------------------- |
+| Architecture DB          | 10/10  | ✅ Excellent                        |
+| Wizard Création          | 10/10  | ✅ Parfait                          |
+| Fonctionnalités Core     | 10/10  | ✅ Complet                          |
 | Fonctionnalités Avancées | 9.5/10 | ⚠️ Manque live streaming, tests E2E |
-| UI/UX | 10/10 | ✅ Excellent |
-| Intégrations | 10/10 | ✅ Complet |
-| Sécurité | 9/10 | ✅ Bon |
-| Documentation | 9.5/10 | ✅ Très bon |
+| UI/UX                    | 10/10  | ✅ Excellent                        |
+| Intégrations             | 10/10  | ✅ Complet                          |
+| Sécurité                 | 9/10   | ✅ Bon                              |
+| Documentation            | 9.5/10 | ✅ Très bon                         |
 
 ### 🗄️ ARCHITECTURE BASE DE DONNÉES
 
 #### Tables Principales (12 tables)
 
 **1. `courses`** ✅
+
 ```sql
 - product_id (FK → products)
 - level (beginner, intermediate, advanced, all_levels)
@@ -1008,6 +1139,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **2. `course_sections`** ✅
+
 ```sql
 - course_id (FK)
 - title, description, order_index
@@ -1015,6 +1147,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **3. `course_lessons`** ✅
+
 ```sql
 - section_id (FK)
 - title, description, order_index
@@ -1027,6 +1160,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **4. `course_quizzes`** ✅
+
 ```sql
 - course_id (FK), section_id (FK)
 - title, description, order_index
@@ -1036,6 +1170,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **5. `quiz_questions`** ✅
+
 ```sql
 - quiz_id (FK)
 - question_type (multiple_choice, true_false, short_answer, essay)
@@ -1044,12 +1179,14 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **6. `quiz_options`** ✅
+
 ```sql
 - question_id (FK)
 - option_text, is_correct, order_index
 ```
 
 **7. `course_enrollments`** ✅
+
 ```sql
 - course_id (FK), user_id (FK)
 - enrolled_at, completed_at
@@ -1058,6 +1195,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **8. `course_lesson_progress`** ✅
+
 ```sql
 - enrollment_id (FK), lesson_id (FK)
 - completed_at, watch_time_seconds
@@ -1066,6 +1204,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **9. `quiz_attempts`** ✅
+
 ```sql
 - quiz_id (FK), enrollment_id (FK)
 - started_at, completed_at
@@ -1074,6 +1213,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **10. `course_certificates`** ✅
+
 ```sql
 - enrollment_id (FK)
 - certificate_url (PDF)
@@ -1081,6 +1221,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **11. `course_discussions`** ✅
+
 ```sql
 - course_id (FK), user_id (FK)
 - title, content
@@ -1089,6 +1230,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **12. `course_discussion_replies`** ✅
+
 ```sql
 - discussion_id (FK), user_id (FK)
 - content, is_instructor_reply
@@ -1096,6 +1238,7 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 **13. `instructor_profiles`** ✅
+
 ```sql
 - user_id (FK)
 - bio, avatar_url, expertise[]
@@ -1103,12 +1246,14 @@ Chaque système a été analysé selon 8 dimensions :
 ```
 
 #### Indexes & Performance ✅
+
 - ✅ 25+ indexes optimisés
 - ✅ Indexes sur clés étrangères
 - ✅ Indexes sur colonnes fréquemment queryées
 - ✅ Indexes composites pour progression
 
 #### RLS Policies ✅
+
 - ✅ 30+ policies (instructeurs, étudiants, public)
 - ✅ Sécurité cours
 - ✅ Sécurité progression
@@ -1120,7 +1265,9 @@ Chaque système a été analysé selon 8 dimensions :
 **Étapes** : 7 étapes complètes
 
 #### Étape 1 : Informations de Base ✅
+
 **Composant** : `CourseBasicInfoForm`
+
 - ✅ Titre, description, catégorie
 - ✅ Niveau (débutant, intermédiaire, avancé, expert)
 - ✅ Langue
@@ -1128,7 +1275,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Vidéo intro
 
 #### Étape 2 : Curriculum ✅
+
 **Composant** : `CourseCurriculumBuilder`
+
 - ✅ Sections (drag & drop)
 - ✅ Leçons par section
 - ✅ Vidéos (upload multi-source: Supabase, YouTube, Vimeo, Google Drive)
@@ -1137,7 +1286,9 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Quizzes intégrés
 
 #### Étape 3 : Configuration Avancée ✅
+
 **Composant** : `CourseAdvancedConfig`
+
 - ✅ Durée du cours
 - ✅ Quizzes
 - ✅ Certificat (activation, template, score passage)
@@ -1146,27 +1297,34 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Drip content (optionnel)
 
 #### Étape 4 : SEO & FAQs ✅
+
 **Composants** : `CourseSEOForm`, `CourseFAQForm`
+
 - ✅ Meta title, meta description
 - ✅ OG image
 - ✅ Schema.org markup
 - ✅ FAQs structurées
 
 #### Étape 5 : Programme d'Affiliation ✅
+
 **Composant** : `CourseAffiliateSettings`
+
 - ✅ Activation par cours
 - ✅ Taux de commission (%, fixe)
 - ✅ Durée cookie
 - ✅ Conditions
 
 #### Étape 6 : Pixels & Analytics ✅
+
 **Composant** : `CoursePixelsConfig`
+
 - ✅ Google Analytics
 - ✅ Facebook Pixel
 - ✅ TikTok Pixel
 - ✅ Custom events
 
 #### Étape 7 : Révision ✅
+
 - ✅ Aperçu complet cours
 - ✅ Validation finale
 - ✅ Publication ou sauvegarde brouillon
@@ -1174,22 +1332,27 @@ Chaque système a été analysé selon 8 dimensions :
 ### ⚙️ FONCTIONNALITÉS CORE
 
 #### A. CRUD Cours ✅
+
 **Hooks** :
+
 - ✅ `useCourses` : Liste, création, mise à jour
 - ✅ `useCourse` : Détail cours
 - ✅ `useCreateFullCourse` : Création complète
 - ✅ `useUpdateCourse` : Mise à jour
 
 **Features** :
+
 - ✅ Création via wizard
 - ✅ Édition inline
 - ✅ Suppression (soft delete)
 - ✅ Duplication cours
 
 #### B. Curriculum Builder ✅
+
 **Composant** : `CourseCurriculumBuilder`
 
 **Features** :
+
 - ✅ Drag & drop sections/lessons
 - ✅ Sections hiérarchiques
 - ✅ Leçons multiples types (vidéo, article, quiz)
@@ -1198,12 +1361,15 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Preview lessons
 
 #### C. Progression & Tracking ✅
+
 **Hooks** :
+
 - ✅ `useCourseProgress` : Tracking temps réel
 - ✅ `useVideoTracking` : Watch time, last position
 - ✅ `useCourseDetail` : Récupération cours + progression
 
 **Features** :
+
 - ✅ Sauvegarde position vidéo
 - ✅ Calcul % progression
 - ✅ Marqueur leçon complétée
@@ -1211,12 +1377,15 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Statistiques instructeur
 
 #### D. Quiz System ✅
+
 **Composants** :
+
 - ✅ `QuizBuilder` : Création questions (multi-choix, vrai/faux, texte)
 - ✅ `QuizTaker` : Interface prise de quiz
 - ✅ `QuizResults` : Correction auto + score
 
 **Features** :
+
 - ✅ Notes de passage configurables
 - ✅ Tentatives multiples
 - ✅ Feedback auto
@@ -1224,18 +1393,23 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Questions randomisées (optionnel)
 
 #### E. Certificats ✅
+
 **Composants** :
+
 - ✅ `CertificateTemplate` : Design professionnel
 - ✅ `CertificateGenerator` : Génération PDF auto
 
 **Features** :
+
 - ✅ Délivrance auto (si >= note passage)
 - ✅ Nom étudiant, cours, date
 - ✅ Téléchargement PDF
 - ✅ Vérification authenticité (ID unique)
 
 #### F. Player Vidéo ✅
+
 **Composant** : `VideoPlayer`
+
 - ✅ Player HTML5 custom
 - ✅ Support YouTube, Vimeo, Google Drive
 - ✅ Contrôles avancés
@@ -1246,11 +1420,14 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Sous-titres (optionnel)
 
 #### G. Discussions ✅
+
 **Tables** :
+
 - ✅ `course_discussions` : Questions
 - ✅ `course_discussion_replies` : Réponses
 
 **Features** :
+
 - ✅ Forum par cours
 - ✅ Threads de discussion
 - ✅ Réponses instructeur/étudiants
@@ -1260,48 +1437,62 @@ Chaque système a été analysé selon 8 dimensions :
 ### 🚀 FONCTIONNALITÉS AVANCÉES
 
 #### A. Affiliation Courses ✅
+
 **Hooks** :
+
 - ✅ `useCourseAffiliates` : Gestion affiliés par cours
 - ✅ `useAffiliateLinks` : Génération liens
 - ✅ `useGlobalAffiliateStats` : Dashboard global
 
 **Features** :
+
 - ✅ Commission par cours
 - ✅ Lien affilié unique
 - ✅ Tracking clicks/conversions
 - ✅ Tableau de bord gains
 
 #### B. SEO & Analytics ✅
+
 **Hooks** :
+
 - ✅ `useCourseAnalytics` : Views, clicks, purchases, time spent
 - ✅ `useProductPixels` : Facebook, Google, TikTok pixels
 
 **Features** :
+
 - ✅ Schema.org Course markup
 - ✅ OG tags
 - ✅ FAQs accordéon
 - ✅ Dashboard analytics instructeur
 
 #### C. Drip Content ✅
+
 **Features** :
+
 - ✅ Drip daily/weekly
 - ✅ Drip après achat
 - ✅ Drip après complétion prérequis
 
 #### D. Learning Paths ✅
+
 **Features** :
+
 - ✅ Parcours d'apprentissage
 - ✅ Prérequis entre cours
 - ✅ Recommandations
 
 #### E. Cohorts ✅
+
 **Features** :
+
 - ✅ Groupes étudiants
 - ✅ Dates début/fin
 - ✅ Progression groupe
 
 #### F. Assignments ✅
+
 **Features** :
+
 - ✅ Devoirs étudiants
 - ✅ Upload fichiers
 - ✅ Correction instructeur
@@ -1310,6 +1501,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### 📱 PAGES & COMPOSANTS
 
 #### Pages Vendeur ✅
+
 - ✅ `CoursesDashboard` : Dashboard cours
 - ✅ `CoursesList` : Liste cours avec filtres
 - ✅ `CreateCourse` : Page création (wizard)
@@ -1317,6 +1509,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ `CourseAnalytics` : Analytics détaillés
 
 #### Pages Client ✅
+
 - ✅ `MyCourses` : Liste cours inscrits
 - ✅ `CourseDetail` : Page détail cours
 - ✅ `CoursePlayer` : Player vidéo cours
@@ -1356,36 +1549,40 @@ Chaque système a été analysé selon 8 dimensions :
 
 ### Tableau Comparatif Global
 
-| Critère | Digital | Physical | Services | Courses | Meilleur |
-|---------|---------|----------|----------|---------|----------|
-| **Score Global** | 95% | 92% | 90% | 98% | Courses |
-| **Architecture DB** | 10/10 | 10/10 | 9.5/10 | 10/10 | Digital, Physical, Courses |
-| **Wizard** | 9/10 | 9.5/10 | 9/10 | 10/10 | Courses |
-| **Fonctionnalités Core** | 10/10 | 9/10 | 8.5/10 | 10/10 | Digital, Courses |
-| **Fonctionnalités Avancées** | 9/10 | 8.5/10 | 8/10 | 9.5/10 | Courses |
-| **UI/UX** | 9.5/10 | 9/10 | 8.5/10 | 10/10 | Courses |
-| **Intégrations** | 10/10 | 10/10 | 10/10 | 10/10 | Tous égaux |
-| **Sécurité** | 9/10 | 9/10 | 9/10 | 9/10 | Tous égaux |
-| **Documentation** | 9.5/10 | 8/10 | 8/10 | 9.5/10 | Digital, Courses |
+| Critère                      | Digital | Physical | Services | Courses | Meilleur                   |
+| ---------------------------- | ------- | -------- | -------- | ------- | -------------------------- |
+| **Score Global**             | 95%     | 92%      | 90%      | 98%     | Courses                    |
+| **Architecture DB**          | 10/10   | 10/10    | 9.5/10   | 10/10   | Digital, Physical, Courses |
+| **Wizard**                   | 9/10    | 9.5/10   | 9/10     | 10/10   | Courses                    |
+| **Fonctionnalités Core**     | 10/10   | 9/10     | 8.5/10   | 10/10   | Digital, Courses           |
+| **Fonctionnalités Avancées** | 9/10    | 8.5/10   | 8/10     | 9.5/10  | Courses                    |
+| **UI/UX**                    | 9.5/10  | 9/10     | 8.5/10   | 10/10   | Courses                    |
+| **Intégrations**             | 10/10   | 10/10    | 10/10    | 10/10   | Tous égaux                 |
+| **Sécurité**                 | 9/10    | 9/10     | 9/10     | 9/10    | Tous égaux                 |
+| **Documentation**            | 9.5/10  | 8/10     | 8/10     | 9.5/10  | Digital, Courses           |
 
 ### Forces par Système
 
 **Digital Products** :
+
 - ✅ Système licence professionnel
 - ✅ Protection téléchargements avancée
 - ✅ Versioning complet
 
 **Physical Products** :
+
 - ✅ Variants système illimité
 - ✅ Inventory tracking temps réel
 - ✅ Advanced payments (escrow)
 
 **Services** :
+
 - ✅ Booking system complet
 - ✅ Staff & Resources management
 - ✅ Escrow service completion
 
 **Courses** :
+
 - ✅ Architecture la plus aboutie
 - ✅ Fonctionnalités LMS complètes
 - ✅ Player vidéo custom
@@ -1394,18 +1591,22 @@ Chaque système a été analysé selon 8 dimensions :
 ### Faiblesses par Système
 
 **Digital Products** :
+
 - ⚠️ Wizard sauvegarde incorrecte
 - ⚠️ UI updates manquante
 
 **Physical Products** :
+
 - ⚠️ Page detail manquante
 - ⚠️ Shipping API manquante
 
 **Services** :
+
 - ⚠️ Calendrier UI basique
 - ⚠️ Staff availability manquante
 
 **Courses** :
+
 - ⚠️ Live streaming manquant
 - ⚠️ Tests E2E manquants
 
@@ -1416,6 +1617,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### A. Affiliation System ✅ (100%)
 
 **Tables** :
+
 - ✅ `affiliates`
 - ✅ `product_affiliate_settings`
 - ✅ `affiliate_links`
@@ -1424,6 +1626,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ `affiliate_withdrawals`
 
 **Features** :
+
 - ✅ Commission par produit (%, fixe)
 - ✅ Génération liens affiliés
 - ✅ Tracking clicks/conversions
@@ -1431,6 +1634,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Demandes retrait
 
 **Intégration** :
+
 - ✅ Courses : 100%
 - ✅ Digital : 100%
 - ✅ Physical : 100%
@@ -1439,6 +1643,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### B. Reviews & Ratings ✅ (95%)
 
 **Tables** :
+
 - ✅ `reviews`
 - ✅ `review_replies`
 - ✅ `review_votes`
@@ -1446,6 +1651,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ `product_review_stats`
 
 **Features** :
+
 - ✅ Avis clients (1-5 étoiles)
 - ✅ Commentaires
 - ✅ Photos/vidéos
@@ -1454,6 +1660,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Modération admin
 
 **Intégration** :
+
 - ✅ Courses : 100%
 - ✅ Digital : 100%
 - ✅ Physical : 90% (manque page detail)
@@ -1462,18 +1669,21 @@ Chaque système a été analysé selon 8 dimensions :
 ### C. SEO & FAQs ✅ (100%)
 
 **Colonnes `products` table** :
+
 - ✅ `meta_title`
 - ✅ `meta_description`
 - ✅ `og_image`
 - ✅ `faqs` (JSONB)
 
 **Composants** :
+
 - ✅ `ProductSEOForm`
 - ✅ `ProductFAQForm`
 - ✅ `CourseSEOForm`
 - ✅ `CourseFAQForm`
 
 **Intégration** :
+
 - ✅ Courses : 100% (Schema.org markup)
 - ✅ Digital : 100%
 - ✅ Physical : 100%
@@ -1482,6 +1692,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### D. Analytics & Pixels ✅ (97%)
 
 **Tables** :
+
 - ✅ `product_analytics`
 - ✅ `product_views`
 - ✅ `product_clicks`
@@ -1489,15 +1700,18 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ `product_time_spent`
 
 **Pixels** :
+
 - ✅ Google Analytics
 - ✅ Facebook Pixel
 - ✅ TikTok Pixel
 
 **Hooks** :
+
 - ✅ `useAnalyticsTracking`
 - ✅ `useTrackAnalyticsEvent`
 
 **Intégration** :
+
 - ✅ Courses : 100%
 - ✅ Digital : 100%
 - ✅ Physical : 95%
@@ -1506,6 +1720,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### E. Advanced Payments ✅ (75%)
 
 **Tables** :
+
 - ✅ `orders.payment_type`
 - ✅ `orders.percentage_paid`
 - ✅ `orders.remaining_amount`
@@ -1513,11 +1728,13 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ `partial_payments`
 
 **Types** :
+
 - ✅ Full payment (100%)
 - ✅ Percentage payment (10-90% acompte)
 - ✅ Delivery secured (escrow)
 
 **Intégration** :
+
 - ❌ Courses : 0% (pas de paiements avancés)
 - ✅ Digital : 100% (full only, normal)
 - ✅ Physical : 100%
@@ -1526,12 +1743,14 @@ Chaque système a été analysé selon 8 dimensions :
 ### F. Messaging & Disputes ✅ (100%)
 
 **Tables** :
+
 - ✅ `conversations`
 - ✅ `messages`
 - ✅ `message_attachments`
 - ✅ `disputes`
 
 **Features** :
+
 - ✅ Messagerie vendeur-client
 - ✅ Upload médias
 - ✅ Temps réel (Supabase Realtime)
@@ -1539,11 +1758,13 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Unread count
 
 **Pages** :
+
 - ✅ `OrderMessaging`
 - ✅ `PaymentManagement`
 - ✅ `DisputeDetail`
 
 **Intégration** :
+
 - ✅ Courses : 100%
 - ✅ Digital : 100%
 - ✅ Physical : 100%
@@ -1552,10 +1773,12 @@ Chaque système a été analysé selon 8 dimensions :
 ### G. Notifications ✅ (92%)
 
 **Tables** :
+
 - ✅ `notifications`
 - ✅ `notification_preferences`
 
 **Features** :
+
 - ✅ Notifications temps réel (Supabase Realtime)
 - ✅ Types variés (enrollment, download, booking, etc.)
 - ✅ Bell icon + dropdown
@@ -1563,11 +1786,13 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Préférences utilisateur
 
 **Hooks** :
+
 - ✅ `useNotifications`
 - ✅ `useCreateNotification`
 - ✅ `useNotificationPreferences`
 
 **Intégration** :
+
 - ✅ Courses : 100%
 - ✅ Digital : 90%
 - ✅ Physical : 90%
@@ -1576,6 +1801,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### H. Email Marketing ✅ (100%)
 
 **Tables** :
+
 - ✅ `email_templates`
 - ✅ `email_logs`
 - ✅ `email_preferences`
@@ -1583,12 +1809,14 @@ Chaque système a été analysé selon 8 dimensions :
 **Provider** : SendGrid
 
 **Features** :
+
 - ✅ Templates personnalisés
 - ✅ Envoi transactionnel
 - ✅ Logs envois
 - ✅ Préférences clients
 
 **Intégration** :
+
 - ✅ Courses : 100%
 - ✅ Digital : 100%
 - ✅ Physical : 100%
@@ -1600,40 +1828,40 @@ Chaque système a été analysé selon 8 dimensions :
 
 ### 🔴 CRITIQUES (À corriger immédiatement)
 
-| # | Problème | Système | Sévérité | Impact | Solution | Temps |
-|---|----------|---------|----------|--------|----------|-------|
-| 1 | Wizard Digital sauvegarde dans `products` au lieu de `digital_products` | Digital | 🔴 Haute | Données digitales non sauvegardées | Corriger wizard mapping | 2h |
-| 2 | Licence créée au wizard au lieu de post-achat | Digital | 🔴 Haute | Licences créées sans achat | Déplacer vers hook order | 1h |
-| 3 | Pas de page `PhysicalProductDetail` | Physical | 🔴 Haute | UX incomplète | Créer page détail | 4h |
-| 4 | Pas de page `ServiceDetail` | Services | 🔴 Haute | UX incomplète | Créer page détail | 4h |
-| 5 | Pas de page "Payer le solde" | Physical/Services | 🔴 Haute | Clients ne peuvent pas payer solde | Créer page paiement solde | 3h |
+| #   | Problème                                                                | Système           | Sévérité | Impact                             | Solution                  | Temps |
+| --- | ----------------------------------------------------------------------- | ----------------- | -------- | ---------------------------------- | ------------------------- | ----- |
+| 1   | Wizard Digital sauvegarde dans `products` au lieu de `digital_products` | Digital           | 🔴 Haute | Données digitales non sauvegardées | Corriger wizard mapping   | 2h    |
+| 2   | Licence créée au wizard au lieu de post-achat                           | Digital           | 🔴 Haute | Licences créées sans achat         | Déplacer vers hook order  | 1h    |
+| 3   | Pas de page `PhysicalProductDetail`                                     | Physical          | 🔴 Haute | UX incomplète                      | Créer page détail         | 4h    |
+| 4   | Pas de page `ServiceDetail`                                             | Services          | 🔴 Haute | UX incomplète                      | Créer page détail         | 4h    |
+| 5   | Pas de page "Payer le solde"                                            | Physical/Services | 🔴 Haute | Clients ne peuvent pas payer solde | Créer page paiement solde | 3h    |
 
 **Total temps corrections critiques** : **14 heures**
 
 ### 🟠 IMPORTANTS (À corriger avant production)
 
-| # | Problème | Système | Sévérité | Impact | Solution | Temps |
-|---|----------|---------|----------|--------|----------|-------|
-| 6 | Calendrier services très basique | Services | 🟠 Moyenne | UX médiocre | Refonte UI calendrier | 8h |
-| 7 | Pas d'intégration API transporteurs | Physical | 🟠 Moyenne | Calcul frais manuel | Intégrer Fedex/UPS | 12h |
-| 8 | Pas de gestion updates UI | Digital | 🟠 Moyenne | Vendeurs ne peuvent pas gérer updates | Dashboard updates | 6h |
-| 9 | Pas de disponibilités staff | Services | 🟠 Moyenne | Conflits horaires | Calendrier staff | 6h |
-| 10 | Pas de gestion conflits ressources | Services | 🟠 Moyenne | Double réservation | Système vérification | 4h |
+| #   | Problème                            | Système  | Sévérité   | Impact                                | Solution              | Temps |
+| --- | ----------------------------------- | -------- | ---------- | ------------------------------------- | --------------------- | ----- |
+| 6   | Calendrier services très basique    | Services | 🟠 Moyenne | UX médiocre                           | Refonte UI calendrier | 8h    |
+| 7   | Pas d'intégration API transporteurs | Physical | 🟠 Moyenne | Calcul frais manuel                   | Intégrer Fedex/UPS    | 12h   |
+| 8   | Pas de gestion updates UI           | Digital  | 🟠 Moyenne | Vendeurs ne peuvent pas gérer updates | Dashboard updates     | 6h    |
+| 9   | Pas de disponibilités staff         | Services | 🟠 Moyenne | Conflits horaires                     | Calendrier staff      | 6h    |
+| 10  | Pas de gestion conflits ressources  | Services | 🟠 Moyenne | Double réservation                    | Système vérification  | 4h    |
 
 **Total temps améliorations importantes** : **36 heures**
 
 ### 💡 MINEURS (Nice to have)
 
-| # | Feature | Système | Priorité | Effort | Impact |
-|---|---------|---------|----------|--------|--------|
-| 11 | Live streaming cours | Courses | 💡 Basse | 🔧🔧🔧 Élevé | Moyen |
-| 12 | Mobile app | Tous | 💡 Basse | 🔧🔧🔧🔧 Très élevé | Élevé |
-| 13 | AI transcription sous-titres | Courses | 💡 Basse | 🔧🔧 Moyen | Moyen |
-| 14 | Gamification badges/points | Courses | 💡 Basse | 🔧🔧 Moyen | Faible |
-| 15 | Product bundles | Physical | 💡 Basse | 🔧🔧 Moyen | Moyen |
-| 16 | Barcode Scanner | Physical | 💡 Basse | 🔧🔧 Moyen | Faible |
-| 17 | Video conferencing | Services | 💡 Basse | 🔧🔧 Moyen | Moyen |
-| 18 | Recurring bookings | Services | 💡 Basse | 🔧🔧 Moyen | Faible |
+| #   | Feature                      | Système  | Priorité | Effort              | Impact |
+| --- | ---------------------------- | -------- | -------- | ------------------- | ------ |
+| 11  | Live streaming cours         | Courses  | 💡 Basse | 🔧🔧🔧 Élevé        | Moyen  |
+| 12  | Mobile app                   | Tous     | 💡 Basse | 🔧🔧🔧🔧 Très élevé | Élevé  |
+| 13  | AI transcription sous-titres | Courses  | 💡 Basse | 🔧🔧 Moyen          | Moyen  |
+| 14  | Gamification badges/points   | Courses  | 💡 Basse | 🔧🔧 Moyen          | Faible |
+| 15  | Product bundles              | Physical | 💡 Basse | 🔧🔧 Moyen          | Moyen  |
+| 16  | Barcode Scanner              | Physical | 💡 Basse | 🔧🔧 Moyen          | Faible |
+| 17  | Video conferencing           | Services | 💡 Basse | 🔧🔧 Moyen          | Moyen  |
+| 18  | Recurring bookings           | Services | 💡 Basse | 🔧🔧 Moyen          | Faible |
 
 ---
 
@@ -1682,6 +1910,7 @@ Chaque système a été analysé selon 8 dimensions :
 ### Statut Global : **94% FONCTIONNEL** ✅
 
 **Points Forts Généraux** :
+
 - ✅ Architecture DB professionnelle (50+ tables)
 - ✅ Wizards complets (4-8 étapes)
 - ✅ Intégrations avancées (Affiliation, Reviews, SEO, Analytics, Payments)
@@ -1691,6 +1920,7 @@ Chaque système a été analysé selon 8 dimensions :
 - ✅ Multi-payment gateways (Moneroo, escrow)
 
 **Points Faibles Généraux** :
+
 - ⚠️ 5 bugs critiques à corriger
 - ⚠️ 10 améliorations importantes
 - ⚠️ Tests E2E manquants
@@ -1723,4 +1953,3 @@ Chaque système a été analysé selon 8 dimensions :
 **Fin de l'analyse approfondie et structurée**  
 **Version** : 2.0 Complète  
 **Statut** : ✅ **APPROUVÉ POUR PRODUCTION (après corrections critiques)**
-

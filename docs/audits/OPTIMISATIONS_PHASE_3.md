@@ -12,6 +12,7 @@
 **Fichier** : `public/sw.js`
 
 **Améliorations** :
+
 - ✅ Mise à jour du nom de cache : `payhula` → `emarzona`
 - ✅ Ajout d'un cache dédié pour les images (`IMAGE_CACHE_NAME`)
 - ✅ Stratégie optimisée : Cache First pour assets, Network First pour API
@@ -19,6 +20,7 @@
 - ✅ Fallback vers placeholder en cas d'erreur
 
 **Stratégies de cache** :
+
 - **Assets statiques** (JS, CSS, fonts) : Cache First
 - **Images** : Cache First avec cache dédié
 - **Pages/API** : Network First avec fallback cache
@@ -32,12 +34,14 @@
 **Fichier** : `src/components/ui/OptimizedImage.tsx`
 
 **Améliorations** :
+
 - ✅ Suppression du chargement eager forcé sur mobile
 - ✅ Lazy loading par défaut (sauf si `priority={true}`)
 - ✅ Meilleure gestion du LCP (Largest Contentful Paint)
 - ✅ Support WebP avec fallback automatique
 
 **Impact** :
+
 - Réduction du temps de chargement initial
 - Moins de données téléchargées inutilement
 - Meilleure expérience utilisateur
@@ -51,6 +55,7 @@
 **Fichier** : `src/components/dashboard/AdvancedDashboardComponents.tsx`
 
 **Améliorations** :
+
 - ✅ Ajout de `React.memo` avec comparaison personnalisée
 - ✅ Réduction des re-renders inutiles
 
@@ -59,6 +64,7 @@
 #### 3.2 PerformanceMetrics
 
 **Améliorations** :
+
 - ✅ `useMemo` pour `metricsData`
 - ✅ `React.memo` avec comparaison des métriques
 - ✅ Optimisation des calculs
@@ -72,12 +78,14 @@
 **Fichier** : `src/hooks/usePrefetch.ts`
 
 **Améliorations** :
+
 - ✅ Utilisation de `requestIdleCallback` pour prefetch non-bloquant
 - ✅ Délai progressif entre les prefetches (200ms)
 - ✅ Ajout de routes supplémentaires (`/cart`, `/account`)
 - ✅ Meilleure gestion des ressources réseau
 
 **Stratégie** :
+
 - Prefetch au chargement de la page (idle time)
 - Prefetch au hover des liens (délai 100ms)
 - Préchargement progressif pour ne pas surcharger
@@ -90,20 +98,20 @@
 
 ### Performance
 
-| Métrique | Avant | Cible | Statut |
-|----------|-------|-------|--------|
-| Service Worker | Basique | Optimisé | ✅ |
-| Cache images | Non | Oui | ✅ |
-| Lazy loading images | Partiel | Complet | ✅ |
-| Re-renders Dashboard | Élevés | Réduits | ✅ |
+| Métrique             | Avant   | Cible    | Statut |
+| -------------------- | ------- | -------- | ------ |
+| Service Worker       | Basique | Optimisé | ✅     |
+| Cache images         | Non     | Oui      | ✅     |
+| Lazy loading images  | Partiel | Complet  | ✅     |
+| Re-renders Dashboard | Élevés  | Réduits  | ✅     |
 
 ### Bundle & Chargement
 
-| Métrique | Avant | Après | Gain |
-|----------|-------|-------|------|
+| Métrique                     | Avant  | Après          | Gain |
+| ---------------------------- | ------ | -------------- | ---- |
 | Images chargées initialement | Toutes | LCP uniquement | ~60% |
-| Routes prefetchées | 5 | 7 | +40% |
-| Cache hit rate | ~40% | ~70% | +75% |
+| Routes prefetchées           | 5      | 7              | +40% |
+| Cache hit rate               | ~40%   | ~70%           | +75% |
 
 ---
 
@@ -130,4 +138,3 @@
 ---
 
 **Dernière mise à jour** : Février 2025
-

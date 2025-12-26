@@ -8,6 +8,7 @@
 ## 📊 Observations
 
 ### 1. Symptômes
+
 - ✅ Le bucket "attachments" existe maintenant
 - ✅ Le bucket est PUBLIC
 - ❌ Les fichiers sont enregistrés comme "application/json - 44.68 KB"
@@ -15,6 +16,7 @@
 - ❌ Les URLs publiques retournent du JSON (erreur Supabase)
 
 ### 2. Comportement Actuel
+
 - L'upload semble réussir (pas d'erreur `uploadError`)
 - Le fichier est créé dans le bucket
 - Mais le contenu est du JSON (réponse d'erreur Supabase)
@@ -25,6 +27,7 @@
 ## 🔍 Analyse du Code
 
 ### Point 1 : Upload Supabase
+
 ```typescript
 const { data: uploadData, error: uploadError } = await supabase.storage
   .from(bucket)
@@ -37,29 +40,35 @@ const { data: uploadData, error: uploadError } = await supabase.storage
 ```
 
 **Problème potentiel** :
+
 - Si `uploadError` est `null` mais que `uploadData` contient une erreur JSON
 - Si Supabase accepte l'upload mais retourne une erreur dans le body
 - Si le fichier est uploadé mais les RLS bloquent ensuite l'accès
 
 ### Point 2 : Vérification Post-Upload
+
 ```typescript
-const testResponse = await fetch(urlData.publicUrl, { 
+const testResponse = await fetch(urlData.publicUrl, {
   method: 'HEAD',
   cache: 'no-cache',
 });
 ```
 
 **Problème identifié** :
+
 - La vérification se fait APRÈS l'upload
 - Si les RLS bloquent, on obtient du JSON
 - Mais le fichier est déjà créé avec le contenu JSON de l'erreur
 
 ### Point 3 : Politiques RLS
+
 Les politiques créées sont :
+
 - `"Anyone can view attachments"` (SELECT, TO public)
 - `"Authenticated users can upload attachments"` (INSERT, TO authenticated)
 
 **Problème potentiel** :
+
 - Les politiques peuvent ne pas être appliquées correctement
 - Il peut y avoir un conflit avec d'autres politiques
 - Le bucket peut ne pas être vraiment PUBLIC malgré la configuration
@@ -69,36 +78,45 @@ Les politiques créées sont :
 ## 🎯 Hypothèses
 
 ### Hypothèse 1 : Upload Silencieux avec Erreur JSON
+
 **Scénario** :
+
 1. L'upload est accepté par Supabase
 2. Mais les RLS bloquent l'écriture
 3. Supabase retourne une erreur JSON
 4. Cette erreur JSON est enregistrée comme fichier
 
 **Vérification** :
+
 - Vérifier si `uploadError` est vraiment `null`
 - Vérifier le contenu de `uploadData`
 - Logger la réponse complète de Supabase
 
 ### Hypothèse 2 : Problème de Content-Type
+
 **Scénario** :
+
 1. Le fichier est uploadé avec le bon Content-Type
 2. Mais Supabase le rejette et retourne du JSON
 3. Le JSON est enregistré avec Content-Type "application/json"
 
 **Vérification** :
+
 - Vérifier que `contentType` est correct
 - Vérifier que `fileToUpload` est bien un File/Blob
 - Logger le type MIME détecté
 
 ### Hypothèse 3 : Problème de Politiques RLS
+
 **Scénario** :
+
 1. Les politiques RLS sont créées
 2. Mais elles ne sont pas appliquées correctement
 3. L'upload réussit mais l'accès est bloqué
 4. Quand on essaie de lire, on obtient une erreur JSON
 
 **Vérification** :
+
 - Vérifier les politiques dans Supabase Dashboard
 - Tester l'accès direct via l'API
 - Vérifier les logs Supabase
@@ -108,6 +126,7 @@ Les politiques créées sont :
 ## 🔧 Solutions Proposées
 
 ### Solution 1 : Vérifier la Réponse Complète de l'Upload
+
 Ajouter un logging détaillé pour voir exactement ce que Supabase retourne :
 
 ```typescript
@@ -127,6 +146,7 @@ logger.info('Upload response', {
 ```
 
 ### Solution 2 : Vérifier le Fichier Avant Upload
+
 S'assurer que `fileToUpload` est bien un File/Blob valide :
 
 ```typescript
@@ -147,6 +167,7 @@ if (!fileToUpload.type && !contentType) {
 ```
 
 ### Solution 3 : Vérifier les Politiques RLS Immédiatement
+
 Tester l'accès immédiatement après l'upload :
 
 ```typescript
@@ -175,6 +196,7 @@ if (uploadedFile.metadata?.mimetype !== contentType) {
 ```
 
 ### Solution 4 : Utiliser une URL Signée Immédiatement
+
 Si l'URL publique ne fonctionne pas, utiliser une URL signée :
 
 ```typescript
@@ -202,6 +224,7 @@ En regardant l'image du dashboard Supabase, je vois que les fichiers sont enregi
 **Le fichier uploadé EST du JSON, pas une image.**
 
 Cela peut arriver si :
+
 1. Supabase retourne une erreur JSON lors de l'upload
 2. Cette erreur JSON est enregistrée comme fichier
 3. Le code ne détecte pas l'erreur car `uploadError` est `null`
@@ -222,4 +245,3 @@ Vérifier si `uploadData` contient une erreur même si `uploadError` est `null`.
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

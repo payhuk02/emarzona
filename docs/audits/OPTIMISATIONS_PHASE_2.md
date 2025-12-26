@@ -10,10 +10,12 @@
 ### 1. Optimisation des Imports d'Icônes ✅
 
 **Fichiers modifiés** :
+
 - ✅ `src/components/AppSidebar.tsx` : Migration vers l'index centralisé
 - ✅ `src/components/marketplace/ProductCard.tsx` : Migration vers l'index centralisé
 
 **Changements** :
+
 - ✅ Remplacement des imports directs `lucide-react` par `@/components/icons`
 - ✅ Utilisation de l'index centralisé pour meilleur tree-shaking
 - ✅ Réduction de la duplication des imports
@@ -27,6 +29,7 @@
 #### 2.1 AppSidebar
 
 **Améliorations** :
+
 - ✅ Ajout de `Link` avec `aria-label` sur le logo
 - ✅ Ajout de `aria-hidden="true"` sur les icônes décoratives
 - ✅ Ajout de `aria-label` sur les sections de menu
@@ -38,6 +41,7 @@
 #### 2.2 ProductCard
 
 **Améliorations** :
+
 - ✅ Ajout de `tabIndex={0}` pour navigation clavier
 - ✅ Ajout de `aria-hidden="true"` sur toutes les icônes décoratives
 - ✅ Amélioration des `aria-label` existants
@@ -46,6 +50,7 @@
 **Fichier** : `src/components/marketplace/ProductCard.tsx`
 
 **Impact** :
+
 - ✅ Meilleure accessibilité pour les lecteurs d'écran
 - ✅ Navigation clavier améliorée
 - ✅ Conformité WCAG améliorée
@@ -56,20 +61,20 @@
 
 ### Bundle Size
 
-| Métrique | Avant | Après | Gain |
-|----------|-------|-------|------|
+| Métrique       | Avant   | Après       | Gain     |
+| -------------- | ------- | ----------- | -------- |
 | Imports icônes | Directs | Centralisés | ~5-10 KB |
-| Duplication | Élevée | Réduite | - |
+| Duplication    | Élevée  | Réduite     | -        |
 
 ### Accessibilité
 
-| Composant | ARIA Labels | Avant | Après |
-|-----------|-------------|-------|-------|
-| AppSidebar | Logo | 0 | 1 |
-| AppSidebar | Sections | 0 | 3+ |
-| AppSidebar | Menus | 0 | 2+ |
-| ProductCard | Icônes | 0 | 8+ |
-| ProductCard | Actions | 3 | 5+ |
+| Composant   | ARIA Labels | Avant | Après |
+| ----------- | ----------- | ----- | ----- |
+| AppSidebar  | Logo        | 0     | 1     |
+| AppSidebar  | Sections    | 0     | 3+    |
+| AppSidebar  | Menus       | 0     | 2+    |
+| ProductCard | Icônes      | 0     | 8+    |
+| ProductCard | Actions     | 3     | 5+    |
 
 ---
 
@@ -96,4 +101,3 @@
 ---
 
 **Dernière mise à jour** : Février 2025
-

@@ -11,6 +11,7 @@
 Le total ne se mettait pas à jour immédiatement après l'application d'un code promo. Le code promo s'affichait comme appliqué, mais le total final restait inchangé.
 
 **Symptômes:**
+
 - Code promo affiché comme appliqué ✅
 - Montant de réduction affiché ✅
 - **Total final ne se met pas à jour** ❌
@@ -26,10 +27,12 @@ Le total ne se mettait pas à jour immédiatement après l'application d'un code
 **Solution:** Utilisation de `useMemo` avec des dépendances explicites pour chaque étape du calcul.
 
 #### Avant (Calcul Direct)
+
 ```typescript
-const couponDiscount = appliedCouponCode && appliedCouponCode.discountAmount 
-  ? Number(appliedCouponCode.discountAmount) 
-  : 0;
+const couponDiscount =
+  appliedCouponCode && appliedCouponCode.discountAmount
+    ? Number(appliedCouponCode.discountAmount)
+    : 0;
 
 const totalDiscounts = itemDiscounts + couponDiscount;
 const subtotalAfterDiscounts = summary.subtotal - totalDiscounts;
@@ -38,10 +41,11 @@ const finalTotal = Math.max(0, subtotalWithShipping - giftCardAmount);
 ```
 
 #### Après (Avec useMemo)
+
 ```typescript
 // 1. Remises sur items
 const itemDiscounts = useMemo(() => {
-  return items.reduce((total, item) => total + ((item.discount_amount || 0) * item.quantity), 0);
+  return items.reduce((total, item) => total + (item.discount_amount || 0) * item.quantity, 0);
 }, [items]);
 
 // 2. Montant du coupon avec dépendances individuelles
@@ -94,6 +98,7 @@ const finalTotal = useMemo(() => {
 **Solution:** Conversion explicite en nombre lors de la création de l'objet coupon.
 
 #### Avant
+
 ```typescript
 onApply={(promotionId, discountAmount, code) => {
   setAppliedCouponCode({
@@ -106,6 +111,7 @@ onApply={(promotionId, discountAmount, code) => {
 ```
 
 #### Après
+
 ```typescript
 onApply={(promotionId, discountAmount, code) => {
   // Forcer la mise à jour en créant un nouvel objet avec discountAmount converti en nombre
@@ -138,12 +144,12 @@ useEffect(() => {
         taxAmount,
         subtotalWithShipping,
         giftCardAmount,
-        finalTotal
+        finalTotal,
       });
     }
   }
 }, [
-  appliedCouponCode?.id, 
+  appliedCouponCode?.id,
   appliedCouponCode?.discountAmount,
   appliedCouponCode?.code,
   summary.subtotal,
@@ -154,7 +160,7 @@ useEffect(() => {
   taxAmount,
   subtotalWithShipping,
   giftCardAmount,
-  finalTotal
+  finalTotal,
 ]);
 ```
 
@@ -204,16 +210,19 @@ useEffect(() => {
 ## 🧪 Tests Recommandés
 
 ### Test 1: Application Simple
+
 1. Aller au checkout avec un produit à 4000 XOF
 2. Appliquer un code promo de -400 XOF
 3. **Vérifier:** Total = 9248 XOF (3600 + 648 taxes + 5000 shipping) ✅
 
 ### Test 2: Retrait du Coupon
+
 1. Après avoir appliqué le coupon
 2. Retirer le coupon
 3. **Vérifier:** Total revient à 9720 XOF (4000 + 720 taxes + 5000 shipping) ✅
 
 ### Test 3: Changement de Coupon
+
 1. Appliquer un coupon de -400 XOF
 2. Retirer et appliquer un coupon de -500 XOF
 3. **Vérifier:** Total se met à jour correctement ✅
@@ -257,4 +266,3 @@ Le total se met maintenant à jour **immédiatement** après l'application ou le
 
 **Date de correction:** 30 Janvier 2025  
 **Statut:** ✅ **CORRIGÉ ET TESTÉ**
-

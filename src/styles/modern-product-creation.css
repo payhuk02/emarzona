@@ -88,10 +88,18 @@ body {
   background: var(--primary);
 }
 
-.modern-stats-card.views::before { background: var(--primary); }
-.modern-stats-card.clicks::before { background: var(--accent); }
-.modern-stats-card.conversions::before { background: #ec4899; }
-.modern-stats-card.rate::before { background: var(--warning); }
+.modern-stats-card.views::before {
+  background: var(--primary);
+}
+.modern-stats-card.clicks::before {
+  background: var(--accent);
+}
+.modern-stats-card.conversions::before {
+  background: #ec4899;
+}
+.modern-stats-card.rate::before {
+  background: var(--warning);
+}
 
 .modern-stats-card:hover {
   box-shadow: var(--shadow-lg);
@@ -216,7 +224,7 @@ body {
 
 .modern-switch-slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 18px;
   width: 18px;
   left: 3px;
@@ -261,7 +269,7 @@ body {
   color: var(--text-primary);
 }
 
-.modern-tab-trigger[data-state="active"] {
+.modern-tab-trigger[data-state='active'] {
   background: var(--primary);
   color: var(--text-inverse);
   box-shadow: var(--shadow);
@@ -427,15 +435,15 @@ body {
   .modern-title-xl {
     font-size: 1.5rem;
   }
-  
+
   .modern-title-lg {
     font-size: 1.25rem;
   }
-  
+
   .modern-section {
     padding: 1rem;
   }
-  
+
   .modern-stat-value {
     font-size: 1.5rem;
   }

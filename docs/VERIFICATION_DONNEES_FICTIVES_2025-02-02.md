@@ -17,64 +17,73 @@
 ## 🔴 PROBLÈME CRITIQUE : StoreAnalytics.tsx
 
 ### Localisation
+
 **Fichier :** `src/components/store/StoreAnalytics.tsx`
 
 ### Données Fictives Détectées
 
 #### 1. **Vues Total (ligne 102)**
+
 ```typescript
 const totalViews = Math.floor(Math.random() * 10000) + 1000; // Simulation
 ```
+
 **Problème :** Génère un nombre aléatoire entre 1000 et 11000 au lieu d'utiliser des données réelles.
 
 **Impact :** Les statistiques de vues sont complètement fictives.
 
 #### 2. **Croissance Simulée (lignes 108-111)**
+
 ```typescript
 const viewsGrowth = Math.floor(Math.random() * 50) + 10;
 const ordersGrowth = Math.floor(Math.random() * 30) + 5;
 const revenueGrowth = Math.floor(Math.random() * 40) + 8;
 const customersGrowth = Math.floor(Math.random() * 25) + 3;
 ```
+
 **Problème :** Tous les pourcentages de croissance sont générés aléatoirement.
 
 **Impact :** Les indicateurs de croissance sont fictifs.
 
 #### 3. **Top Produits - Sales Count (ligne 116)**
+
 ```typescript
-sales_count: Math.floor(Math.random() * 100) + 1
+sales_count: Math.floor(Math.random() * 100) + 1;
 ```
+
 **Problème :** Remplace le `sales_count` réel par une valeur aléatoire.
 
 **Impact :** Les produits les plus vendus sont incorrects.
 
 #### 4. **Statistiques Mensuelles (lignes 120-125)**
+
 ```typescript
 const monthlyStats = Array.from({ length: 12 }, (_, i) => ({
   month: new Date(2024, i).toLocaleDateString('fr-FR', { month: 'short' }),
   views: Math.floor(Math.random() * 1000) + 100,
   orders: Math.floor(Math.random() * 50) + 5,
-  revenue: Math.floor(Math.random() * 50000) + 5000
+  revenue: Math.floor(Math.random() * 50000) + 5000,
 }));
 ```
+
 **Problème :** Toutes les statistiques mensuelles sont complètement simulées.
 
 **Impact :** **CRITIQUE** - Le tableau mensuel affiché dans l'UI montre des données fictives.
 
 ### Données Réelles vs Fictives
 
-| Métrique | Source Réelle | Source Fictive |
-|----------|---------------|----------------|
-| `totalOrders` | ✅ Base de données | - |
-| `totalRevenue` | ✅ Base de données | - |
-| `totalCustomers` | ✅ Base de données | - |
-| `totalViews` | ❌ **ALÉATOIRE** | Math.random() |
-| `viewsGrowth` | ❌ **ALÉATOIRE** | Math.random() |
-| `ordersGrowth` | ❌ **ALÉATOIRE** | Math.random() |
-| `revenueGrowth` | ❌ **ALÉATOIRE** | Math.random() |
-| `customersGrowth` | ❌ **ALÉATOIRE** | Math.random() |
-| `topProducts.sales_count` | ❌ **ALÉATOIRE** | Math.random() |
-| `monthlyStats` | ❌ **ALÉATOIRE** | Math.random() |
+| Métrique                  | Source Réelle      | Source Fictive |
+| ------------------------- | ------------------ | -------------- |
+| `totalOrders`             | ✅ Base de données | -              |
+| `totalRevenue`            | ✅ Base de données | -              |
+| `totalCustomers`          | ✅ Base de données | -              |
+| `totalViews`              | ❌ **ALÉATOIRE**   | Math.random()  |
+| `viewsGrowth`             | ❌ **ALÉATOIRE**   | Math.random()  |
+| `ordersGrowth`            | ❌ **ALÉATOIRE**   | Math.random()  |
+| `revenueGrowth`           | ❌ **ALÉATOIRE**   | Math.random()  |
+| `customersGrowth`         | ❌ **ALÉATOIRE**   | Math.random()  |
+| `topProducts.sales_count` | ❌ **ALÉATOIRE**   | Math.random()  |
+| `monthlyStats`            | ❌ **ALÉATOIRE**   | Math.random()  |
 
 ---
 
@@ -120,6 +129,7 @@ user_email: 'marie@example.com',
 ### Attributs HTML `placeholder`
 
 Tous les attributs HTML `<Input placeholder="..." />` sont **LÉGITIMES** :
+
 - `placeholder="contact@votreboutique.com"` ✅
 - `placeholder="https://example.com"` ✅
 - `placeholder="Ex: Ouagadougou"` ✅
@@ -129,6 +139,7 @@ Ces placeholders servent uniquement de guide visuel pour l'utilisateur.
 ### Tests Unitaire
 
 Les fichiers dans `__tests__` ou `__tests__` contiennent des données de test - **NORMAL** :
+
 - `src/components/__tests__/AppSidebar.test.tsx` : `email: 'test@example.com'` ✅
 - `src/pages/__tests__/Checkout.test.tsx` : `email: 'test@example.com'` ✅
 
@@ -172,6 +183,7 @@ Les fichiers dans `__tests__` ou `__tests__` contiennent des données de test - 
 ### Données Affichées dans l'UI (d'après l'image)
 
 Le tableau "Évolution mensuelle" affiche des données qui correspondent exactement au pattern de `Math.random()` :
+
 - Vues : Entre 100 et 1000 (ligne 122 : `Math.floor(Math.random() * 1000) + 100`)
 - Commandes : Entre 5 et 50 (ligne 123 : `Math.floor(Math.random() * 50) + 5`)
 - Revenus : Entre 5000 et 50000 (ligne 124 : `Math.floor(Math.random() * 50000) + 5000`)
@@ -195,8 +207,8 @@ const totalViews = views?.length || 0;
 
 // Calculer la croissance depuis les données historiques
 const previousPeriodViews = /* requête pour période précédente */;
-const viewsGrowth = previousPeriodViews > 0 
-  ? ((totalViews - previousPeriodViews) / previousPeriodViews) * 100 
+const viewsGrowth = previousPeriodViews > 0
+  ? ((totalViews - previousPeriodViews) / previousPeriodViews) * 100
   : 0;
 
 // Statistiques mensuelles depuis la DB
@@ -263,6 +275,7 @@ const viewsGrowth = null;
 **Statut Final :** ⚠️ **DONNÉES FICTIVES DÉTECTÉES ET À CORRIGER**
 
 **Fichiers Concernés :**
+
 1. 🔴 **StoreAnalytics.tsx** - Données critiques fictives (priorité HAUTE)
 2. ⚠️ **PreOrderManager.tsx** - Emails d'exemple (priorité MOYENNE)
 3. ⚠️ **AdminSupport.tsx** - Emails d'exemple (priorité MOYENNE)
@@ -273,4 +286,3 @@ const viewsGrowth = null;
 
 **Date du Rapport :** 2025-02-02  
 **Prochaine Vérification :** Après correction de StoreAnalytics.tsx
-

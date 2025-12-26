@@ -8,6 +8,7 @@
 ## 🎯 Objectif
 
 Configurer les cron jobs pour exécuter automatiquement :
+
 1. **Reversement automatique des fonds vendeurs** (3h du matin)
 2. **Paiement automatique des commissions parrainage** (4h du matin)
 
@@ -20,6 +21,7 @@ Configurer les cron jobs pour exécuter automatiquement :
 **Fichier** : `supabase/migrations/20250230_setup_auto_payout_cron_jobs.sql`
 
 Cette migration :
+
 - ✅ Vérifie que `pg_cron` et `pg_net` sont activés
 - ✅ Crée le cron job `auto-payout-vendors-daily` (3h du matin)
 - ✅ Crée le cron job `auto-pay-referral-commissions-daily` (4h du matin)
@@ -29,6 +31,7 @@ Cette migration :
 **Fichier** : `supabase/migrations/20250230_activate_auto_payout_features.sql`
 
 Cette migration :
+
 - ✅ Active `auto_payout_vendors.enabled = true`
 - ✅ Active `auto_pay_referral_commissions.enabled = true`
 - ✅ Configure les valeurs par défaut si elles n'existent pas
@@ -73,7 +76,7 @@ WHERE jobname IN ('auto-payout-vendors-daily', 'auto-pay-referral-commissions-da
 
 ```sql
 -- Vérifier que les fonctionnalités sont activées
-SELECT 
+SELECT
   settings->'auto_payout_vendors'->>'enabled' as auto_payout_enabled,
   settings->'auto_payout_vendors'->>'delay_days' as delay_days,
   settings->'auto_payout_vendors'->>'min_amount' as min_amount,
@@ -84,6 +87,7 @@ WHERE key = 'admin';
 ```
 
 **Résultat attendu** :
+
 - `auto_payout_enabled`: `true`
 - `delay_days`: `7`
 - `min_amount`: `50000`
@@ -132,7 +136,7 @@ SELECT net.http_post(
 
 ```sql
 -- Voir les dernières exécutions des cron jobs
-SELECT 
+SELECT
   jobid,
   jobname,
   runid,
@@ -211,19 +215,22 @@ WHERE key = 'admin';
 ### Problème : Cron job ne s'exécute pas
 
 1. Vérifier que `pg_cron` est activé :
+
 ```sql
 SELECT * FROM pg_extension WHERE extname = 'pg_cron';
 ```
 
 2. Vérifier que le job est actif :
+
 ```sql
 SELECT jobid, jobname, active FROM cron.job WHERE jobname LIKE 'auto-%';
 ```
 
 3. Vérifier les logs d'erreur :
+
 ```sql
-SELECT * FROM cron.job_run_details 
-WHERE jobname LIKE 'auto-%' 
+SELECT * FROM cron.job_run_details
+WHERE jobname LIKE 'auto-%'
 AND status = 'failed'
 ORDER BY start_time DESC;
 ```
@@ -244,5 +251,3 @@ Vérifier que le `service_role_key` dans la migration correspond à votre clé a
 ---
 
 **Dernière mise à jour** : 30 Janvier 2025
-
-

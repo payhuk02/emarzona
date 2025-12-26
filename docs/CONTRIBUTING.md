@@ -9,6 +9,7 @@ Ce document décrit les conventions et outils utilisés dans le projet Payhuk.
 Le projet utilise Prettier pour garantir un formatage cohérent du code.
 
 #### Commandes disponibles :
+
 ```bash
 # Formater tous les fichiers
 npm run format
@@ -18,7 +19,9 @@ npm run format:check
 ```
 
 #### Configuration
+
 Le fichier `.prettierrc.json` contient les règles de formatage :
+
 - Indentation : 2 espaces
 - Guillemets : simples pour JS/TS, doubles pour JSX
 - Largeur de ligne : 100 caractères
@@ -29,6 +32,7 @@ Le fichier `.prettierrc.json` contient les règles de formatage :
 ESLint est utilisé pour détecter les erreurs et problèmes de code.
 
 #### Commandes disponibles :
+
 ```bash
 # Linter tous les fichiers
 npm run lint
@@ -42,13 +46,16 @@ npm run lint:fix
 Husky exécute automatiquement des vérifications avant chaque commit.
 
 #### Installation initiale :
+
 ```bash
 npm install
 npm run setup:husky
 ```
 
 #### Fonctionnement
+
 Avant chaque commit, `lint-staged` exécute :
+
 - ESLint sur les fichiers `.ts` et `.tsx` modifiés
 - Prettier sur tous les fichiers modifiés
 
@@ -59,10 +66,12 @@ Si des erreurs sont détectées, le commit est bloqué jusqu'à correction.
 ### TypeScript
 
 #### Types `any` à éviter
+
 - Utiliser des interfaces ou types spécifiques
 - Préférer `unknown` pour les erreurs, puis vérifier avec `instanceof Error`
 
 **Exemple :**
+
 ```typescript
 // ❌ Mauvais
 catch (error: any) {
@@ -79,11 +88,13 @@ catch (error: unknown) {
 ### React
 
 #### Composants
+
 - Utiliser des composants fonctionnels avec hooks
 - Préférer `React.memo` pour les composants lourds
 - Utiliser `useCallback` et `useMemo` pour optimiser les performances
 
 #### Accessibilité
+
 - Toujours fournir `aria-label` pour les boutons sans texte visible
 - Utiliser les balises sémantiques appropriées
 - Gérer le focus clavier
@@ -108,6 +119,7 @@ logger.warn('Deprecated feature used', { feature });
 Les tests unitaires utilisent Vitest et Testing Library.
 
 #### Structure
+
 ```
 src/
   components/
@@ -121,6 +133,7 @@ src/
 ```
 
 #### Commandes
+
 ```bash
 # Exécuter tous les tests
 npm run test:unit
@@ -137,6 +150,7 @@ npm run test:coverage
 Les tests E2E utilisent Playwright.
 
 #### Commandes
+
 ```bash
 # Tous les tests E2E
 npm run test:e2e
@@ -151,6 +165,7 @@ npm run test:e2e:products
 ### Upload de Fichiers
 
 Tous les uploads de fichiers doivent :
+
 1. Valider le type MIME côté client
 2. Vérifier les magic bytes via Edge Function
 3. Bloquer les extensions dangereuses
@@ -165,6 +180,7 @@ Voir `src/lib/file-security.ts` et `supabase/functions/validate-file-upload/` po
 Les migrations Supabase sont dans `supabase/migrations/`.
 
 #### Bonnes pratiques :
+
 - Nommer les migrations avec la date : `YYYYMMDD_description.sql`
 - Utiliser des transactions quand possible
 - Ajouter des commentaires pour les changements complexes
@@ -173,6 +189,7 @@ Les migrations Supabase sont dans `supabase/migrations/`.
 ### Requêtes N+1
 
 Éviter les requêtes N+1 en :
+
 - Utilisant des jointures SQL
 - Créant des fonctions SQL pour les statistiques complexes
 - Utilisant `Promise.all()` pour les requêtes parallèles
@@ -187,6 +204,7 @@ Les migrations Supabase sont dans `supabase/migrations/`.
 ### Messages de Commit
 
 Utiliser des messages clairs et descriptifs :
+
 ```
 feat: ajouter la gestion des messages informatifs
 fix: corriger l'affichage du logo sur mobile
@@ -205,4 +223,3 @@ test: ajouter des tests pour le composant Button
 ---
 
 **Questions ?** Ouvrez une issue ou contactez l'équipe de développement.
-

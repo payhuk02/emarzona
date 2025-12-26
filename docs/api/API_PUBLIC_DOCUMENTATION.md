@@ -32,6 +32,7 @@ GET /products
 ```
 
 **Paramètres de requête** :
+
 - `store_id` (string, requis) : ID de la boutique
 - `type` (string, optionnel) : Type de produit (`digital`, `physical`, `service`, `course`, `artist`)
 - `category` (string, optionnel) : Catégorie
@@ -40,6 +41,7 @@ GET /products
 - `search` (string, optionnel) : Recherche par nom/description
 
 **Réponse** :
+
 ```json
 {
   "data": [
@@ -70,6 +72,7 @@ GET /products/:id
 ```
 
 **Réponse** :
+
 ```json
 {
   "id": "uuid",
@@ -95,6 +98,7 @@ POST /products
 ```
 
 **Body** :
+
 ```json
 {
   "store_id": "uuid",
@@ -109,6 +113,7 @@ POST /products
 ```
 
 **Réponse** :
+
 ```json
 {
   "id": "uuid",
@@ -142,6 +147,7 @@ GET /orders
 ```
 
 **Paramètres** :
+
 - `store_id` (string, requis)
 - `status` (string, optionnel) : `pending`, `completed`, `cancelled`
 - `customer_id` (string, optionnel)
@@ -151,6 +157,7 @@ GET /orders
 - `end_date` (string, optionnel) : Format ISO
 
 **Réponse** :
+
 ```json
 {
   "data": [
@@ -193,6 +200,7 @@ POST /orders
 ```
 
 **Body** :
+
 ```json
 {
   "store_id": "uuid",
@@ -223,6 +231,7 @@ GET /customers
 ```
 
 **Paramètres** :
+
 - `store_id` (string, requis)
 - `page` (number, optionnel)
 - `limit` (number, optionnel)
@@ -241,6 +250,7 @@ POST /customers
 ```
 
 **Body** :
+
 ```json
 {
   "store_id": "uuid",
@@ -261,10 +271,12 @@ GET /analytics
 ```
 
 **Paramètres** :
+
 - `store_id` (string, requis)
 - `time_range` (string, optionnel) : `7d`, `30d`, `90d`, `1y`, `all` (défaut: `30d`)
 
 **Réponse** :
+
 ```json
 {
   "overview": {
@@ -328,6 +340,7 @@ POST /webhooks
 ```
 
 **Body** :
+
 ```json
 {
   "store_id": "uuid",
@@ -372,6 +385,7 @@ GET /export
 ```
 
 **Paramètres** :
+
 - `store_id` (string, requis)
 - `type` (string, requis) : `products`, `orders`, `customers`
 - `format` (string, optionnel) : `csv`, `json` (défaut: `csv`)
@@ -387,11 +401,13 @@ POST /import
 ```
 
 **Body** (multipart/form-data) :
+
 - `file` : Fichier CSV ou JSON
 - `type` : `products`, `orders`, `customers`
 - `store_id` : ID de la boutique
 
 **Réponse** :
+
 ```json
 {
   "success": true,
@@ -410,15 +426,15 @@ POST /import
 
 ## ⚠️ Codes d'erreur
 
-| Code | Description |
-|------|-------------|
-| 200 | Succès |
-| 400 | Requête invalide |
-| 401 | Non authentifié |
-| 403 | Accès refusé |
-| 404 | Ressource non trouvée |
-| 429 | Trop de requêtes (rate limit) |
-| 500 | Erreur serveur |
+| Code | Description                   |
+| ---- | ----------------------------- |
+| 200  | Succès                        |
+| 400  | Requête invalide              |
+| 401  | Non authentifié               |
+| 403  | Accès refusé                  |
+| 404  | Ressource non trouvée         |
+| 429  | Trop de requêtes (rate limit) |
+| 500  | Erreur serveur                |
 
 ---
 
@@ -443,11 +459,11 @@ const BASE_URL = 'https://api.payhuk.com/v1';
 async function getProducts(storeId) {
   const response = await fetch(`${BASE_URL}/products?store_id=${storeId}`, {
     headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
   });
-  
+
   return await response.json();
 }
 ```
@@ -481,4 +497,3 @@ def get_products(store_id):
 ---
 
 **Dernière mise à jour** : 28 Janvier 2025
-

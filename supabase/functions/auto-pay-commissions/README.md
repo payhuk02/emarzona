@@ -9,6 +9,7 @@ Cette Edge Function effectue le paiement automatique des commissions d'affiliati
 ### Variables d'environnement
 
 Aucune variable d'environnement spécifique requise. La fonction utilise :
+
 - `SUPABASE_URL` (automatique)
 - `SUPABASE_SERVICE_ROLE_KEY` (automatique)
 
@@ -20,12 +21,13 @@ Vous pouvez configurer le comportement via `platform_settings` :
 {
   "auto_pay_commissions": {
     "enabled": true,
-    "minCommissionAmount": 50000  // En XOF
+    "minCommissionAmount": 50000 // En XOF
   }
 }
 ```
 
 **Paramètres par défaut :**
+
 - `enabled`: false (désactivé par défaut pour validation manuelle)
 - `minCommissionAmount`: 50000 XOF
 
@@ -79,7 +81,7 @@ Pour surveiller les paiements automatiques :
 
 ```sql
 -- Retraits créés automatiquement
-SELECT 
+SELECT
   aw.*,
   a.user_id,
   p.full_name as affiliate_name
@@ -90,4 +92,3 @@ WHERE aw.metadata->>'auto_paid' = 'true'
 ORDER BY aw.created_at DESC
 LIMIT 50;
 ```
-

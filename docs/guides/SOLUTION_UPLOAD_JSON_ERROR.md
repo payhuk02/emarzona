@@ -8,6 +8,7 @@
 ## 🔍 Diagnostic
 
 D'après les logs :
+
 - ✅ **Image compressée** : La compression fonctionne
 - ✅ **Fichier vérifié dans le bucket** : `✅ File verified in bucket after upload`
 - ❌ **URL publique retourne du JSON** : `Public URL returns JSON instead of file`
@@ -34,6 +35,7 @@ D'après les logs :
 ### Étape 3 : Vérifier les Résultats
 
 La migration affichera :
+
 - ✅ Bucket attachments public: ✅ OUI
 - ✅ Politique lecture publique: ✅ EXISTE
 - ✅ Politique upload authentifié: ✅ EXISTE
@@ -47,6 +49,7 @@ Si vous voyez des ❌, la migration indiquera ce qui manque.
 ### 1. Vérifier que le bucket est public
 
 Dans Supabase Dashboard :
+
 1. **Storage** > **Buckets**
 2. Cliquez sur **"attachments"**
 3. Vérifiez que **"Public bucket"** est activé (icône de globe 🌐)
@@ -54,6 +57,7 @@ Dans Supabase Dashboard :
 ### 2. Vérifier les politiques RLS
 
 Dans Supabase Dashboard :
+
 1. **Storage** > **Policies**
 2. Filtrez par bucket **"attachments"**
 3. Vérifiez que ces politiques existent :
@@ -97,6 +101,7 @@ fetch(testUrl)
 ```
 
 **Résultat attendu** :
+
 - Status: `200`
 - Content-Type: `image/png` ou `image/jpeg` (pas `application/json`)
 - Blob size > 0
@@ -141,7 +146,7 @@ Exécutez cette requête SQL dans Supabase :
 
 ```sql
 -- Vérifier toutes les politiques pour attachments
-SELECT 
+SELECT
   policyname,
   cmd,
   roles::text,
@@ -160,7 +165,7 @@ WHERE schemaname = 'storage'
 ### Vérifier le Statut du Bucket
 
 ```sql
-SELECT 
+SELECT
   id,
   name,
   public,
@@ -191,4 +196,3 @@ Si le problème persiste après avoir suivi ce guide :
 ---
 
 **Dernière mise à jour** : 1 Février 2025
-

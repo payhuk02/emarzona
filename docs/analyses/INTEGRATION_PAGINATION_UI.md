@@ -22,18 +22,15 @@ Intégration complète du composant `PaginationControls` dans les pages UI du sy
   - `commissionsPage`, `commissionsPageSize` pour les commissions
 
 - **Hooks mis à jour** :
+
   ```typescript
-  const { 
-    links, 
+  const {
+    links,
     loading: linksLoading,
     pagination: linksPagination,
     goToPage: goToLinksPage,
-    setPageSize: setLinksPageSize
-  } = useAffiliateLinks(
-    affiliate?.id, 
-    undefined,
-    { page: linksPage, pageSize: linksPageSize }
-  );
+    setPageSize: setLinksPageSize,
+  } = useAffiliateLinks(affiliate?.id, undefined, { page: linksPage, pageSize: linksPageSize });
   ```
 
 - **Composant PaginationControls intégré** :
@@ -62,19 +59,20 @@ Intégration complète du composant `PaginationControls` dans les pages UI du sy
   - `commissionsPage`, `commissionsPageSize` pour les commissions
 
 - **Hooks mis à jour** :
+
   ```typescript
-  const { 
-    affiliates, 
-    loading: affiliatesLoading, 
-    suspendAffiliate, 
+  const {
+    affiliates,
+    loading: affiliatesLoading,
+    suspendAffiliate,
     activateAffiliate,
     pagination: affiliatesPagination,
     goToPage: goToAffiliatesPage,
-    setPageSize: setAffiliatesPageSize
+    setPageSize: setAffiliatesPageSize,
   } = useAffiliates(
-    { 
-      status: statusFilter !== 'all' ? statusFilter as any : undefined,
-      search: searchTerm 
+    {
+      status: statusFilter !== 'all' ? (statusFilter as any) : undefined,
+      search: searchTerm,
     },
     { page: affiliatesPage, pageSize: affiliatesPageSize }
   );
@@ -104,6 +102,7 @@ Intégration complète du composant `PaginationControls` dans les pages UI du sy
 **Problème** : Dans les callbacks `onPageSizeChange`, `setPageSize` était appelé deux fois.
 
 **Avant** :
+
 ```typescript
 onPageSizeChange={(size) => {
   setLinksPageSize(size);
@@ -113,6 +112,7 @@ onPageSizeChange={(size) => {
 ```
 
 **Après** :
+
 ```typescript
 onPageSizeChange={(size) => {
   setLinksPageSize(size); // ✅ Appel unique
@@ -217,4 +217,3 @@ Les filtres (recherche, statut) sont pris en compte dans les requêtes paginées
 **Date** : Janvier 2025  
 **Commit** : `5a2e5da6`  
 **Statut** : ✅ Complété
-

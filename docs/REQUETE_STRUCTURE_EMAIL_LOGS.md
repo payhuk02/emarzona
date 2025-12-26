@@ -9,7 +9,7 @@
 Exécutez cette requête pour voir **toutes les colonnes** de la table `email_logs` :
 
 ```sql
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable,
@@ -43,6 +43,7 @@ Cette requête utilisera `*` pour sélectionner toutes les colonnes disponibles,
 D'après les erreurs rencontrées, voici ce qui existe et ce qui n'existe pas :
 
 ### ✅ Colonnes qui EXISTENT :
+
 - `id`
 - `to_email` (pas `recipient_email`)
 - `subject`
@@ -54,6 +55,7 @@ D'après les erreurs rencontrées, voici ce qui existe et ce qui n'existe pas :
 - `metadata` (jsonb)
 
 ### ❌ Colonnes qui N'EXISTENT PAS :
+
 - `recipient_email` (utiliser `to_email`)
 - `sendgrid_status`
 - `sent_at` (utiliser `created_at`)
@@ -66,7 +68,7 @@ D'après les erreurs rencontrées, voici ce qui existe et ce qui n'existe pas :
 ## 🎯 Requête Corrigée (Sans Colonnes Manquantes)
 
 ```sql
-SELECT 
+SELECT
   id,
   to_email,
   subject,
@@ -87,9 +89,9 @@ LIMIT 10;
 ## 💡 Note Importante
 
 La structure réelle de `email_logs` est différente de celle documentée dans les migrations. Cela peut indiquer que :
+
 1. Les migrations n'ont pas toutes été exécutées
 2. La table a été modifiée manuellement
 3. Il y a plusieurs versions de la table dans différents environnements
 
 **Solution** : Utilisez `SELECT *` pour voir toutes les colonnes disponibles, puis adaptez vos requêtes en conséquence.
-

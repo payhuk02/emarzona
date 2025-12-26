@@ -12,13 +12,16 @@
 #### 1. `digital_product_downloads_partitioned` ✅
 
 **Avant**:
+
 - ❌ RLS désactivé
 
 **Après**:
+
 - ✅ RLS activé
 - ✅ 3 politiques créées
 
 **Politiques créées**:
+
 1. **"Users can view their own downloads"** (SELECT)
    - Les utilisateurs peuvent voir leurs propres téléchargements
    - Condition: `auth.uid() = user_id`
@@ -36,13 +39,16 @@
 #### 2. `orders_partitioned` ✅
 
 **Avant**:
+
 - ⚠️ RLS activé mais **AUCUNE politique** (accès bloqué pour tous)
 
 **Après**:
+
 - ✅ RLS activé
 - ✅ 5 politiques créées
 
 **Politiques créées**:
+
 1. **"Customers can view their own orders"** (SELECT)
    - Les clients peuvent voir leurs propres commandes
    - Condition: `auth.uid() = customer_id`
@@ -86,10 +92,10 @@
 
 **Total de politiques créées**: 8
 
-| Table | Politiques | Statut |
-|-------|-----------|--------|
-| `digital_product_downloads_partitioned` | 3 | ✅ |
-| `orders_partitioned` | 5 | ✅ |
+| Table                                   | Politiques | Statut |
+| --------------------------------------- | ---------- | ------ |
+| `digital_product_downloads_partitioned` | 3          | ✅     |
+| `orders_partitioned`                    | 5          | ✅     |
 
 ### Requêtes de Vérification
 
@@ -97,7 +103,7 @@ Les requêtes suivantes ont été exécutées avec succès:
 
 ```sql
 -- Vérification RLS activé
-SELECT 
+SELECT
   tablename,
   rowsecurity as rls_enabled
 FROM pg_tables
@@ -105,7 +111,7 @@ WHERE schemaname = 'public'
   AND tablename IN ('digital_product_downloads_partitioned', 'orders_partitioned');
 
 -- Vérification politiques créées
-SELECT 
+SELECT
   tablename,
   policyname,
   cmd as command
@@ -121,6 +127,7 @@ WHERE schemaname = 'public'
 ## 🧪 Tests Recommandés
 
 ### Test 1: Utilisateur Standard
+
 ```sql
 -- Tester l'accès aux téléchargements
 SET ROLE authenticated;
@@ -130,11 +137,12 @@ RESET ROLE;
 ```
 
 ### Test 2: Vendeur
+
 ```sql
 -- Tester l'accès aux commandes de ses produits
 SET ROLE authenticated;
 SET request.jwt.claim.sub = 'vendor-user-id';
-SELECT * FROM orders_partitioned 
+SELECT * FROM orders_partitioned
 WHERE id IN (
   SELECT oi.order_id FROM order_items oi
   JOIN products p ON oi.product_id = p.id
@@ -145,6 +153,7 @@ RESET ROLE;
 ```
 
 ### Test 3: Admin
+
 ```sql
 -- Tester l'accès admin à toutes les commandes
 SET ROLE authenticated;
@@ -154,6 +163,7 @@ RESET ROLE;
 ```
 
 ### Test 4: Client
+
 ```sql
 -- Tester l'accès client à ses propres commandes
 SET ROLE authenticated;
@@ -198,5 +208,4 @@ RESET ROLE;
 
 ---
 
-*Corrections appliquées avec succès le 2025-01-30* ✅
-
+_Corrections appliquées avec succès le 2025-01-30_ ✅
