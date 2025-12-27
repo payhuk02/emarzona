@@ -54,6 +54,7 @@ COMMENT ON COLUMN public.affiliate_short_links.custom_alias IS 'Alias personnali
 ALTER TABLE public.affiliate_short_links ENABLE ROW LEVEL SECURITY;
 
 -- Les affiliés peuvent voir leurs propres liens courts
+DROP POLICY IF EXISTS "Affiliates can view their own short links" ON public.affiliate_short_links;
 CREATE POLICY "Affiliates can view their own short links"
   ON public.affiliate_short_links FOR SELECT
   USING (
@@ -65,6 +66,7 @@ CREATE POLICY "Affiliates can view their own short links"
   );
 
 -- Les affiliés peuvent créer des liens courts pour leurs liens
+DROP POLICY IF EXISTS "Affiliates can create short links for their affiliate links" ON public.affiliate_short_links;
 CREATE POLICY "Affiliates can create short links for their affiliate links"
   ON public.affiliate_short_links FOR INSERT
   WITH CHECK (
@@ -83,6 +85,7 @@ CREATE POLICY "Affiliates can create short links for their affiliate links"
   );
 
 -- Les affiliés peuvent mettre à jour leurs liens courts
+DROP POLICY IF EXISTS "Affiliates can update their own short links" ON public.affiliate_short_links;
 CREATE POLICY "Affiliates can update their own short links"
   ON public.affiliate_short_links FOR UPDATE
   USING (
@@ -94,6 +97,7 @@ CREATE POLICY "Affiliates can update their own short links"
   );
 
 -- Les affiliés peuvent supprimer leurs liens courts
+DROP POLICY IF EXISTS "Affiliates can delete their own short links" ON public.affiliate_short_links;
 CREATE POLICY "Affiliates can delete their own short links"
   ON public.affiliate_short_links FOR DELETE
   USING (
@@ -105,11 +109,13 @@ CREATE POLICY "Affiliates can delete their own short links"
   );
 
 -- Les admins peuvent tout voir
+DROP POLICY IF EXISTS "Admins can view all short links" ON public.affiliate_short_links;
 CREATE POLICY "Admins can view all short links"
   ON public.affiliate_short_links FOR SELECT
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- Public peut accéder aux liens courts actifs (pour la redirection)
+DROP POLICY IF EXISTS "Public can view active short links for redirection" ON public.affiliate_short_links;
 CREATE POLICY "Public can view active short links for redirection"
   ON public.affiliate_short_links FOR SELECT
   USING (
@@ -118,6 +124,7 @@ CREATE POLICY "Public can view active short links for redirection"
   );
 
 -- Trigger pour updated_at
+DROP TRIGGER IF EXISTS update_affiliate_short_links_updated_at ON public.affiliate_short_links;
 CREATE TRIGGER update_affiliate_short_links_updated_at
 BEFORE UPDATE ON public.affiliate_short_links
 FOR EACH ROW
@@ -232,6 +239,7 @@ COMMENT ON FUNCTION public.track_short_link_click IS 'Traque un clic sur un lien
 -- VUE : Statistiques des liens courts
 -- =========================================================
 
+DROP VIEW IF EXISTS public.affiliate_short_links_stats;
 CREATE OR REPLACE VIEW public.affiliate_short_links_stats AS
 SELECT 
   asl.id,
