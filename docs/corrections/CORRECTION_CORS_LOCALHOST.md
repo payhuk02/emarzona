@@ -8,7 +8,7 @@ L'erreur CORS suivante apparaît lors du développement local :
 Access to fetch at 'https://your-project-id.supabase.co/functions/v1/moneroo'
 from origin 'http://localhost:8080' has been blocked by CORS policy:
 Response to preflight request doesn't pass access control check:
-The 'Access-Control-Allow-Origin' header has a value 'https://payhula.vercel.app/'
+The 'Access-Control-Allow-Origin' header has a value 'https://emarzona.com/'
 that is not equal to the supplied origin.
 ```
 
@@ -20,7 +20,7 @@ L'Edge Function Moneroo a été modifiée pour :
 
 - ✅ Détecter automatiquement l'origine de la requête
 - ✅ Autoriser `localhost` et `127.0.0.1` pour le développement
-- ✅ Autoriser le domaine de production (`https://payhula.vercel.app`)
+- ✅ Autoriser le domaine de production (`https://emarzona.com`)
 - ✅ Retourner l'origine exacte pour les requêtes localhost (nécessaire pour CORS avec credentials)
 
 ### 2. Modifications Apportées
@@ -96,7 +96,7 @@ Après le redéploiement :
 ### Configuration
 
 - La variable `SITE_URL` dans Supabase Edge Functions Secrets contrôle le domaine de production
-- Si `SITE_URL` n'est pas configuré, `https://payhula.vercel.app` est utilisé par défaut
+- Si `SITE_URL` n'est pas configuré, `https://emarzona.com` est utilisé par défaut
 - Les ports localhost sont autorisés automatiquement (8080, 3000, 5173, etc.)
 
 ### Dépannage

@@ -53,7 +53,7 @@ Le code complet se trouve dans :
 
 ### 2. Tester le Paiement
 
-- Allez sur : https://payhula.vercel.app/marketplace
+- Allez sur : https://emarzona.com/marketplace
 - Essayez d'acheter un produit
 - Ouvrez la console (F12) pour voir les logs
 
@@ -70,7 +70,7 @@ Le code complet se trouve dans :
 
 2. **Vérifiez les Secrets**
    - `MONEROO_API_KEY` doit être configuré
-   - `SITE_URL` est optionnel (défaut : `https://payhula.vercel.app`)
+   - `SITE_URL` est optionnel (défaut : `https://emarzona.com`)
 
 3. **Réessayez**
    - Déployez à nouveau

@@ -12,7 +12,7 @@ import * as path from 'path';
 // Configuration Supabase
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
 const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'your-anon-key';
-const SITE_URL = 'https://payhuk.com'; // À modifier selon votre domaine
+const SITE_URL = 'https://emarzona.com'; // Domaine principal de la plateforme
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 

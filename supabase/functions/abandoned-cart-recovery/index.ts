@@ -1,19 +1,19 @@
 /**
  * Edge Function: Abandoned Cart Recovery
  * Date: 26 Janvier 2025
- * 
+ *
  * Description:
  * Envoie des emails automatiques de récupération pour paniers abandonnés
  * S'exécute via cron (toutes les heures)
- * 
+ *
  * Emails:
  * - Après 1h: Premier rappel
  * - Après 24h: Deuxième rappel avec code promo
  * - Après 72h: Dernier rappel
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,7 +32,7 @@ interface AbandonedCart {
   created_at: string;
 }
 
-serve(async (req) => {
+serve(async req => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -70,9 +70,7 @@ serve(async (req) => {
     ] as AbandonedCart[];
 
     // Dédupliquer (un panier peut correspondre à plusieurs fenêtres)
-    const uniqueCarts = Array.from(
-      new Map(allCarts.map(cart => [cart.id, cart])).values()
-    );
+    const uniqueCarts = Array.from(new Map(allCarts.map(cart => [cart.id, cart])).values());
 
     const results = [];
 
@@ -113,7 +111,7 @@ serve(async (req) => {
       }
 
       // Générer le lien de retour au panier
-      const siteUrl = Deno.env.get('SITE_URL') || 'https://payhula.vercel.app';
+      const siteUrl = Deno.env.get('SITE_URL') || 'https://emarzona.com';
       const returnUrl = cart.user_id
         ? `${siteUrl}/cart`
         : `${siteUrl}/cart?session=${cart.session_id}`;
@@ -123,26 +121,30 @@ serve(async (req) => {
       // Envoyer l'email via SendGrid (ou autre service)
       // TODO: Intégrer avec SendGrid API
       const sendGridApiKey = Deno.env.get('SENDGRID_API_KEY');
-      const sendGridFromEmail = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@payhula.com';
+      const sendGridFromEmail = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@emarzona.com';
 
       if (sendGridApiKey && cart.customer_email) {
         try {
           const emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${sendGridApiKey}`,
+              Authorization: `Bearer ${sendGridApiKey}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              personalizations: [{
-                to: [{ email: cart.customer_email }],
-                subject: emailSubject,
-              }],
+              personalizations: [
+                {
+                  to: [{ email: cart.customer_email }],
+                  subject: emailSubject,
+                },
+              ],
               from: { email: sendGridFromEmail },
-              content: [{
-                type: 'text/plain',
-                value: emailBody,
-              }],
+              content: [
+                {
+                  type: 'text/plain',
+                  value: emailBody,
+                },
+              ],
             }),
           });
 
@@ -210,4 +212,3 @@ serve(async (req) => {
     );
   }
 });
-

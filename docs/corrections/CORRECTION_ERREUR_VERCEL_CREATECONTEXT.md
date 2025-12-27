@@ -245,7 +245,7 @@ To https://github.com/payhuk02/payhula.git
 ## 🎯 PROCHAINES ÉTAPES
 
 1. ⏳ Attendre le rebuild Vercel
-2. ✅ Tester l'application sur `payhula.vercel.app`
+2. ✅ Tester l'application sur `emarzona.com`
 3. ✅ Vérifier la console pour d'éventuelles erreurs
 4. ✅ Tester les fonctionnalités principales
 5. ✅ Vérifier que tous les contextes fonctionnent

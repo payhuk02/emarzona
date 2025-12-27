@@ -23,7 +23,7 @@ L'erreur **"Failed to fetch"** apparaît lors de la tentative de paiement sur le
 **Solution** :
 
 1. Vérifier que `SITE_URL` est configuré dans Supabase Dashboard → Edge Functions → Secrets
-2. Vérifier que la valeur est `https://payhula.vercel.app` (sans slash final)
+2. Vérifier que la valeur est `https://emarzona.com` (sans slash final)
 3. Redéployer l'Edge Function après configuration
 
 ### 3. Problème de Réseau ❌
@@ -101,7 +101,7 @@ L'erreur **"Failed to fetch"** apparaît lors de la tentative de paiement sur le
 
 - [ ] **Configuration CORS** :
   - [ ] `SITE_URL` est configuré dans Supabase Dashboard → Edge Functions → Secrets
-  - [ ] La valeur est `https://payhula.vercel.app` (sans slash final)
+  - [ ] La valeur est `https://emarzona.com` (sans slash final)
   - [ ] Les headers CORS sont corrects dans le code
 
 - [ ] **Connexion réseau** :

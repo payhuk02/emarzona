@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base, Page } from '@playwright/test';
 
 /**
  * Authentication Fixtures
@@ -10,17 +10,17 @@ export const test = base.extend({
   authenticatedPage: async ({ page }, useFn) => {
     // Navigate to login page
     await page.goto('/auth');
-    
+
     // Fill in test credentials
-    await page.fill('input[type="email"]', 'test@payhula.com');
+    await page.fill('input[type="email"]', 'test@emarzona.com');
     await page.fill('input[type="password"]', 'TestPassword123!');
-    
+
     // Submit login form
     await page.click('button[type="submit"]');
-    
+
     // Wait for redirect to dashboard
     await page.waitForURL('/dashboard');
-    
+
     // Use the authenticated page (Playwright fixture pattern, not React Hook)
     // The parameter name 'useFn' avoids React Hook naming conflict
     await useFn(page);
@@ -28,12 +28,12 @@ export const test = base.extend({
 });
 
 // Helper function for vendor login
-export async function loginAsVendor(page: any) {
+export async function loginAsVendor(page: Page) {
   // Navigate to login page
   await page.goto('/auth');
 
   // Fill in vendor test credentials
-  await page.fill('input[type="email"]', 'vendor@payhula.com');
+  await page.fill('input[type="email"]', 'vendor@emarzona.com');
   await page.fill('input[type="password"]', 'VendorPassword123!');
 
   // Submit login form
@@ -44,4 +44,3 @@ export async function loginAsVendor(page: any) {
 }
 
 export { expect } from '@playwright/test';
-

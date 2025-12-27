@@ -149,7 +149,7 @@ const canCreateStore = () => {
 
 2. **URL de la boutique** (`slug`)
    - ⚠️ Optionnel (généré automatiquement depuis le nom)
-   - ✅ Format : `payhula.com/stores/{slug}`
+   - ✅ Format : `emarzona.com/stores/{slug}`
 
 3. **Description** (`description`)
    - ⚠️ Optionnel
@@ -442,7 +442,7 @@ CREATE TRIGGER enforce_store_limit
    - Afficher un indicateur visuel (✓ ou ✗)
 
 2. **Prévisualisation** :
-   - Afficher l'URL complète : `payhula.com/stores/{slug}`
+   - Afficher l'URL complète : `emarzona.com/stores/{slug}`
    - Indiquer si le slug est disponible
 
 3. **Validation Avancée** :

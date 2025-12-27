@@ -32,7 +32,7 @@
 
 ### Étape 5 : Tester le Paiement ✅
 
-1. Aller sur : https://payhula.vercel.app/marketplace
+1. Aller sur : https://emarzona.com/marketplace
 2. Sélectionner un produit
 3. Cliquer sur **"Acheter"**
 4. **Vérifier** :

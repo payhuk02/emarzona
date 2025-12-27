@@ -384,7 +384,7 @@ test.describe('2FA Flow', () => {
   test('should enable 2FA successfully', async ({ page }) => {
     // Login
     await page.goto('/login');
-    await page.fill('[name="email"]', 'admin@payhula.com');
+    await page.fill('[name="email"]', 'admin@emarzona.com');
     await page.fill('[name="password"]', 'password123');
     await page.click('button[type="submit"]');
 

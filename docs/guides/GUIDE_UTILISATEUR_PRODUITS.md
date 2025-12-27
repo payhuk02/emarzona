@@ -707,9 +707,9 @@ _(À venir)_
 
 Besoin d'aide ?
 
-- 📧 Email : support@payhula.com
+- 📧 Email : support@emarzona.com
 - 💬 Chat en direct (9h-18h GMT)
-- 📚 Centre d'aide : https://aide.payhula.com
+- 📚 Centre d'aide : https://aide.emarzona.com
 
 ---
 

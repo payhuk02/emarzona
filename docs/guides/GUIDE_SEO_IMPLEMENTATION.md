@@ -27,9 +27,9 @@ import { SEOMeta } from '@/components/seo';
   title="Titre de la page"
   description="Description de 120-160 caractères"
   keywords="mot-clé1, mot-clé2, mot-clé3"
-  url="https://payhula.com/page"
-  canonical="https://payhula.com/page"  // Optionnel
-  image="https://payhula.com/og-image.jpg"
+  url="https://emarzona.com/page"
+  canonical="https://emarzona.com/page"  // Optionnel
+  image="https://emarzona.com/og-image.jpg"
   imageAlt="Description de l'image"
   type="website"  // 'website', 'article', 'product'
 
@@ -135,9 +135,9 @@ import { BreadcrumbSchema } from '@/components/seo';
 
 <BreadcrumbSchema
   items={[
-    { name: "Accueil", url: "https://payhula.com" },
-    { name: "Marketplace", url: "https://payhula.com/marketplace" },
-    { name: "Produit", url: "https://payhula.com/stores/.../products/..." }
+    { name: "Accueil", url: "https://emarzona.com" },
+    { name: "Marketplace", url: "https://emarzona.com/marketplace" },
+    { name: "Produit", url: "https://emarzona.com/stores/.../products/..." }
   ]}
 />
 ```
@@ -401,14 +401,14 @@ marketing, cours, formation
 
 **Configuration:**
 
-1. Ajouter propriété: `https://payhula.vercel.app`
+1. Ajouter propriété: `https://emarzona.com`
 2. Vérification: Balise meta dans `index.html`
 
 ```html
 <meta name="google-site-verification" content="VOTRE_CODE" />
 ```
 
-3. Soumettre sitemap: `https://payhula.vercel.app/sitemap.xml`
+3. Soumettre sitemap: `https://emarzona.com/sitemap.xml`
 4. Activer indexation mobile-first
 
 **Vérifier:**

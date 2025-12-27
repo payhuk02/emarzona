@@ -19,7 +19,7 @@ const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'Y
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // Configuration site
-const SITE_URL = process.env.VITE_SITE_URL || 'https://payhula.vercel.app';
+const SITE_URL = process.env.VITE_SITE_URL || 'https://emarzona.com';
 
 /**
  * Génère l'URL complète

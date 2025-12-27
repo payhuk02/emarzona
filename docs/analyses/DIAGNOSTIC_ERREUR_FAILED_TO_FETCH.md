@@ -79,7 +79,7 @@ D'après les logs de l'Edge Function `moneroo`, on observe :
 
 2. **Vérifier SITE_URL (optionnel) :**
    - Ajouter `SITE_URL` dans les Secrets si vous voulez un domaine personnalisé
-   - Valeur par défaut : `https://payhula.vercel.app`
+   - Valeur par défaut : `https://emarzona.com`
 
 ### Solution 3 : Vérifier l'Authentification
 

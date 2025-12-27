@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // Fonction pour déterminer l'origine autorisée pour CORS
 function getCorsOrigin(req: Request): string {
   const origin = req.headers.get('origin');
-  const siteUrl = Deno.env.get('SITE_URL') || 'https://payhula.vercel.app';
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://emarzona.com';
   
   // Autoriser localhost pour le développement
   if (origin && (

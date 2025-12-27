@@ -10,7 +10,7 @@ Ajoutez ces variables dans Supabase Dashboard → Project Settings → Edge Func
 
 ```
 RESEND_API_KEY=re_xxxxxxxxxxxxx
-RESEND_FROM_EMAIL=noreply@payhula.com
+RESEND_FROM_EMAIL=noreply@emarzona.com
 RESEND_FROM_NAME=Payhula
 ```
 
