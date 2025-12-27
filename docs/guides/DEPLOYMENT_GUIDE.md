@@ -260,7 +260,7 @@ Dans **Authentication > Policies**, vérifiez que toutes les tables ont des poli
 
 1. Dans **Project Settings > Domains**
 2. Cliquez sur **"Add"**
-3. Entrez votre domaine : `payhuk.com`
+3. Entrez votre domaine : `emarzona.com`
 4. Cliquez sur **"Add"**
 
 ### 2️⃣ **Configurer les DNS**
@@ -284,10 +284,10 @@ Vercel vous donnera des instructions pour configurer vos DNS :
 
 ```bash
 # Vérifier la propagation DNS
-dig payhuk.com
+dig emarzona.com
 
 # Ou utilisez
-nslookup payhuk.com
+nslookup emarzona.com
 ```
 
 ### 4️⃣ **Activer HTTPS**
@@ -312,7 +312,7 @@ Attendez quelques minutes après la configuration DNS.
 
 ```bash
 # Landing Page
-✓ Ouvrir https://payhuk.com
+✓ Ouvrir https://emarzona.com
 ✓ Changer de langue via le sélecteur 🌐
 ✓ Vérifier que les traductions fonctionnent
 
@@ -349,7 +349,7 @@ Attendez quelques minutes après la configuration DNS.
 Utilisez [PageSpeed Insights](https://pagespeed.web.dev/) :
 
 ```
-https://pagespeed.web.dev/?url=https://payhuk.com
+https://pagespeed.web.dev/?url=https://emarzona.com
 ```
 
 **Objectifs :**
@@ -361,8 +361,8 @@ https://pagespeed.web.dev/?url=https://payhuk.com
 
 ### 4️⃣ **Vérifier le SEO**
 
-- [ ] `robots.txt` accessible : `https://payhuk.com/robots.txt`
-- [ ] `sitemap.xml` accessible : `https://payhuk.com/sitemap.xml`
+- [ ] `robots.txt` accessible : `https://emarzona.com/robots.txt`
+- [ ] `sitemap.xml` accessible : `https://emarzona.com/sitemap.xml`
 - [ ] Meta tags présents sur toutes les pages
 - [ ] Schema.org visible dans Google Search Console
 
@@ -371,7 +371,7 @@ https://pagespeed.web.dev/?url=https://payhuk.com
 Utilisez [Security Headers](https://securityheaders.com/) :
 
 ```
-https://securityheaders.com/?q=https://payhuk.com
+https://securityheaders.com/?q=https://emarzona.com
 ```
 
 **Headers attendus :**

@@ -68,7 +68,7 @@
 
 1. Après inscription, cliquer "Add Website"
 2. **Website name :** Payhuk
-3. **Website domain :** payhuk.com (ou votre domaine)
+3. **Website domain :** emarzona.com (ou votre domaine)
 4. **Language :** Français
 5. Copier le **Website ID**
 

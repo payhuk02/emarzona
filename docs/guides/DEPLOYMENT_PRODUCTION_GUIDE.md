@@ -59,7 +59,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # App Configuration
 VITE_APP_NAME=Payhuk
-VITE_APP_URL=https://payhuk.com
+VITE_APP_URL=https://emarzona.com
 VITE_APP_ENV=production
 
 # Features Flags
@@ -174,8 +174,8 @@ VITE_MONEROO_PUBLIC_KEY=pk_live_xxx
 **Vercel → Settings → Domains**
 
 1. **Add Domain**
-   - Entrer : `payhuk.com`
-   - Entrer : `www.payhuk.com`
+   - Entrer : `emarzona.com`
+   - Entrer : `www.emarzona.com`
 
 2. **Configure DNS**
 
@@ -199,7 +199,7 @@ CNAME   www     cname.vercel-dns.com        3600
 
 ```bash
 # Tester HTTPS
-curl -I https://payhuk.com
+curl -I https://emarzona.com
 
 # Devrait retourner:
 # HTTP/2 200
@@ -215,16 +215,16 @@ curl -I https://payhuk.com
 **Supabase Dashboard → Settings**
 
 1. **Auth Settings**
-   - Site URL: `https://payhuk.com`
+   - Site URL: `https://emarzona.com`
    - Redirect URLs:
-     - `https://payhuk.com/auth/callback`
-     - `https://payhuk.com`
+     - `https://emarzona.com/auth/callback`
+     - `https://emarzona.com`
 
 2. **CORS Configuration**
 
    ```
-   https://payhuk.com
-   https://www.payhuk.com
+   https://emarzona.com
+   https://www.emarzona.com
    ```
 
 3. **Email Templates**
@@ -284,7 +284,7 @@ npm install @sentry/react
 
 ```bash
 # 1. Homepage
-✅ https://payhuk.com charge en < 2s
+✅ https://emarzona.com charge en < 2s
 ✅ Responsive mobile/tablet/desktop
 ✅ SEO meta tags présents
 
@@ -398,7 +398,7 @@ WHERE schemaname = 'public'
 
 ```
 Monitor Type: HTTPS
-URL: https://payhuk.com
+URL: https://emarzona.com
 Interval: 5 minutes
 Email alerts: ON
 ```
@@ -456,7 +456,7 @@ Vercel → Deployments → ... → Redeploy
 
 ```bash
 # Vérifier DNS :
-nslookup payhuk.com
+nslookup emarzona.com
 
 # Forcer flush DNS local :
 ipconfig /flushdns (Windows)
@@ -469,7 +469,7 @@ ipconfig /flushdns (Windows)
 ```bash
 # Ajouter domaine dans Supabase :
 # Dashboard → Settings → API → CORS
-# Ajouter : https://payhuk.com
+# Ajouter : https://emarzona.com
 ```
 
 ---

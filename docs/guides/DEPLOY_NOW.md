@@ -150,7 +150,7 @@ npm run build
 
 ## 🌐 DOMAINE PERSONNALISÉ (Optionnel)
 
-### Avoir votre propre domaine : `payhuk.com`
+### Avoir votre propre domaine : `emarzona.com`
 
 **1. Acheter domaine** (~$10/an)
 
@@ -173,7 +173,7 @@ CNAME   www     cname.vercel-dns.com
 Vercel → Settings → Domains → Add :
 
 ```
-payhuk.com
+emarzona.com
 ```
 
 **4. Attendre** (5min - 48h)
@@ -185,7 +185,7 @@ payhuk.com
 **5. Mettre à jour Supabase**
 
 ```
-Site URL: https://payhuk.com
+Site URL: https://emarzona.com
 ```
 
 ---

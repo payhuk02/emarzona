@@ -139,13 +139,13 @@ Recommandations :
 - **GoDaddy** : ~$15/an
 - **OVH** : ~$10/an
 
-Suggestion : `payhuk.com`, `monpayhuk.com`, `learn-payhuk.com`
+Suggestion : `emarzona.com`, `monemarzona.com`, `learn-emarzona.com`
 
 ### B. Configurer DNS
 
 1. **Dans Vercel**
    - Settings → Domains
-   - Add Domain : `payhuk.com`
+   - Add Domain : `emarzona.com`
    - Copier les valeurs DNS affichées
 
 2. **Chez votre registrar**
@@ -163,12 +163,12 @@ Suggestion : `payhuk.com`, `monpayhuk.com`, `learn-payhuk.com`
 ### C. Mettre à jour Supabase
 
 ```
-Site URL: https://payhuk.com
+Site URL: https://emarzona.com
 
 Redirect URLs:
-https://payhuk.com
-https://payhuk.com/auth/callback
-https://payhuk.com/**
+https://emarzona.com
+https://emarzona.com/auth/callback
+https://emarzona.com/**
 ```
 
 ---
@@ -206,7 +206,7 @@ Automatiquement activé :
 2. **Add New Monitor**
    ```
    Monitor Type: HTTPS
-   URL: https://payhuk.com
+   URL: https://emarzona.com
    Interval: 5 minutes
    ```
 3. ✅ Recevoir alerts si down
@@ -214,7 +214,7 @@ Automatiquement activé :
 ### Google Search Console (Gratuit)
 
 1. https://search.google.com/search-console
-2. **Add Property** : `https://payhuk.com`
+2. **Add Property** : `https://emarzona.com`
 3. Vérifier avec meta tag
 4. Submit sitemap : `/sitemap.xml`
 
@@ -314,7 +314,7 @@ npm run build
 **Payhuk est maintenant en ligne !** 🎉
 
 ```
-🌐 Production: https://payhuk.com
+🌐 Production: https://emarzona.com
 📊 Dashboard Vercel: https://vercel.com/dashboard
 🗄️ Database: https://supabase.com/dashboard
 ```
