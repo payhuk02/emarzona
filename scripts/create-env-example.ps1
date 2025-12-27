@@ -82,7 +82,7 @@ VITE_APP_VERSION=1.0.0
 # PRODUCTION
 # ==============================================
 # NODE_ENV=production
-# VITE_APP_URL=https://payhula.vercel.app
+# VITE_APP_URL=https://emarzona.com
 "@
 
 try {

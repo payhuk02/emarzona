@@ -106,12 +106,12 @@ async function testAnalyticsSystem() {
       product_id: testProductId,
       event_type: 'view',
       event_data: {
-        page_url: 'https://test.payhuk.com/product/test',
+        page_url: 'https://test.emarzona.com/product/test',
         referrer: 'https://google.com',
         timestamp: Date.now()
       },
       session_id: `test_session_${Date.now()}`,
-      page_url: 'https://test.payhuk.com/product/test',
+      page_url: 'https://test.emarzona.com/product/test',
       referrer: 'https://google.com',
       user_agent: 'Mozilla/5.0 (Test Browser)',
       device_type: 'desktop',

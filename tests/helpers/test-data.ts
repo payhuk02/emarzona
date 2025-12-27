@@ -5,17 +5,17 @@
 
 export const TEST_USERS = {
   vendor: {
-    email: 'test@payhula.com',
+    email: 'test@emarzona.com',
     password: 'TestPassword123!',
     name: 'Test Vendor',
   },
   customer: {
-    email: 'customer@payhula.com',
+    email: 'customer@emarzona.com',
     password: 'CustomerPass123!',
     name: 'Test Customer',
   },
   admin: {
-    email: 'admin@payhula.com',
+    email: 'admin@emarzona.com',
     password: 'AdminPass123!',
     name: 'Test Admin',
   },
@@ -42,7 +42,7 @@ export const TEST_PRODUCTS = {
   service: {
     title: 'Test Service E2E',
     description: 'Professional consulting service',
-    price: 150.00,
+    price: 150.0,
     duration: 60,
     serviceType: 'consultation',
     metaTitle: 'Test Service SEO',
@@ -97,7 +97,7 @@ export function generateTestSKU(): string {
 }
 
 export function generateTestEmail(): string {
-  return `test-${Date.now()}@payhula.com`;
+  return `test-${Date.now()}@emarzona.com`;
 }
 
 export function generateTestTitle(type: string): string {
@@ -122,28 +122,28 @@ export const SELECTORS = {
   emailInput: 'input[type="email"]',
   passwordInput: 'input[type="password"]',
   submitButton: 'button[type="submit"]',
-  
+
   // Navigation
   dashboardLink: 'text=/tableau de bord|dashboard/i',
   productsLink: 'text=/produits|products/i',
   ordersLink: 'text=/commandes|orders/i',
-  
+
   // Products
   productCard: '[data-testid="product-card"], .product-card',
   createProductButton: 'text=/créer|create|ajouter/i',
   nextButton: 'button:has-text("Suivant"), button:has-text("Next")',
   publishButton: 'button:has-text("Publier"), button:has-text("Publish")',
-  
+
   // Cart & Checkout
   buyButton: 'button:has-text("Acheter"), button:has-text("Buy")',
   addToCartButton: 'button:has-text("Ajouter au panier"), button:has-text("Add to cart")',
   checkoutButton: 'button:has-text("Passer commande"), button:has-text("Checkout")',
-  
+
   // Orders
   orderItem: '[data-testid="order-item"]',
   messagingButton: 'button:has-text("Messagerie"), button:has-text("Messages")',
   paymentButton: 'button:has-text("Gérer Paiements"), button:has-text("Manage Payments")',
-  
+
   // Messages
   successMessage: 'text=/succès|success|créé/i',
   errorMessage: 'text=/erreur|error|échec/i',
@@ -198,7 +198,6 @@ trailer
 startxref
 398
 %%EOF`;
-  
+
   return Buffer.from(pdfContent);
 }
-
