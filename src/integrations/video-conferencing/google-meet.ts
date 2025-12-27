@@ -131,13 +131,13 @@ class GoogleMeetService {
     );
 
     if (!response.ok) {
-      const error: GoogleMeetError = await response.json();
+      const  error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to create Google Meet: ${error.error?.message || response.statusText}`
       );
     }
 
-    const meeting: GoogleMeetEvent = await response.json();
+    const  meeting: GoogleMeetEvent = await response.json();
     return meeting;
   }
 
@@ -157,13 +157,13 @@ class GoogleMeetService {
     );
 
     if (!response.ok) {
-      const error: GoogleMeetError = await response.json();
+      const  error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to get Google Meet: ${error.error?.message || response.statusText}`
       );
     }
 
-    const meeting: GoogleMeetEvent = await response.json();
+    const  meeting: GoogleMeetEvent = await response.json();
     return meeting;
   }
 
@@ -209,13 +209,13 @@ class GoogleMeetService {
     );
 
     if (!response.ok) {
-      const error: GoogleMeetError = await response.json();
+      const  error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to update Google Meet: ${error.error?.message || response.statusText}`
       );
     }
 
-    const meeting: GoogleMeetEvent = await response.json();
+    const  meeting: GoogleMeetEvent = await response.json();
     return meeting;
   }
 
@@ -234,7 +234,7 @@ class GoogleMeetService {
     );
 
     if (!response.ok && response.status !== 404) {
-      const error: GoogleMeetError = await response.json();
+      const  error: GoogleMeetError = await response.json();
       throw new Error(
         `Failed to delete Google Meet: ${error.error?.message || response.statusText}`
       );
@@ -264,4 +264,10 @@ class GoogleMeetService {
 }
 
 export default GoogleMeetService;
+
+
+
+
+
+
 

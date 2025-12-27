@@ -23,7 +23,7 @@ export interface MobileMoneyOperatorInfo {
 /**
  * Opérateurs disponibles par pays (code ISO)
  */
-export const MOBILE_MONEY_OPERATORS_BY_COUNTRY: Record<string, MobileMoneyOperatorInfo[]> = {
+export const MOBILE_MONEY_OPERATORS_BY_COUNTRY : Record<string, MobileMoneyOperatorInfo[]> = {
   // Burkina Faso
   'BF': [
     { value: 'orange_money', label: 'Orange Money' },
@@ -151,7 +151,7 @@ export const MOBILE_MONEY_OPERATORS_BY_COUNTRY: Record<string, MobileMoneyOperat
 /**
  * Opérateurs par défaut (si le pays n'est pas dans la liste)
  */
-export const DEFAULT_MOBILE_MONEY_OPERATORS: MobileMoneyOperatorInfo[] = [
+export const DEFAULT_MOBILE_MONEY_OPERATORS : MobileMoneyOperatorInfo[] = [
   { value: 'orange_money', label: 'Orange Money' },
   { value: 'mtn_mobile_money', label: 'MTN Mobile Money' },
   { value: 'moov_money', label: 'Moov Money' },
@@ -173,4 +173,11 @@ export const getDefaultOperatorForCountry = (countryCode: string): MobileMoneyOp
   const operators = getMobileMoneyOperatorsForCountry(countryCode);
   return operators[0]?.value || 'orange_money';
 };
+
+
+
+
+
+
+
 

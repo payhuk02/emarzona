@@ -103,7 +103,7 @@ export const AIContentGenerator = ({
         title: 'Contenu généré !',
         description: `Score qualité: ${analysis.score}/100`,
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Generation error', { error, type: selectedType });
       toast({
         title: 'Erreur de génération',
@@ -406,4 +406,10 @@ export const AIContentGenerator = ({
     </Dialog>
   );
 };
+
+
+
+
+
+
 

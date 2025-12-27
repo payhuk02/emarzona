@@ -94,7 +94,7 @@ export class AffiliateError extends Error {
       return this.message;
     }
     
-    const messages: Record<AffiliateErrorCode, string> = {
+    const  messages: Record<AffiliateErrorCode, string> = {
       [AffiliateErrorCode.AFFILIATE_NOT_FOUND]: 'Affilié introuvable',
       [AffiliateErrorCode.AFFILIATE_ALREADY_EXISTS]: 'Cet affilié existe déjà',
       [AffiliateErrorCode.AFFILIATE_SUSPENDED]: 'Cet affilié est suspendu',
@@ -366,4 +366,10 @@ export function handleSupabaseError(error: unknown): AffiliateError {
 export function isAffiliateError(error: unknown): error is AffiliateError {
   return error instanceof AffiliateError;
 }
+
+
+
+
+
+
 

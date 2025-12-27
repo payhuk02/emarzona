@@ -51,7 +51,7 @@ export function useStockMovements(filters?: {
   return useQuery({
     queryKey: ['stock-movements', filters],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('stock_movements')
         .select('*')
         .order('created_at', { ascending: false });
@@ -97,7 +97,7 @@ export function useStockMovementStats(productId?: string, dateRange?: {
   return useQuery({
     queryKey: ['stock-movement-stats', productId, dateRange],
     queryFn: async () => {
-      let query = supabase.from('stock_movements').select('*');
+      let  query= supabase.from('stock_movements').select('*');
 
       if (productId) {
         query = query.eq('product_id', productId);
@@ -124,7 +124,7 @@ export function useStockMovementStats(productId?: string, dateRange?: {
         .filter((m) => m.direction === 'out')
         .reduce((sum, m) => sum + m.quantity, 0);
 
-      const by_type: Record<MovementType, number> = {
+      const  by_type: Record<MovementType, number> = {
         purchase: 0,
         sale: 0,
         return: 0,
@@ -144,7 +144,7 @@ export function useStockMovementStats(productId?: string, dateRange?: {
         (m) => m.created_at >= oneDayAgo
       ).length;
 
-      const stats: StockMovementStats = {
+      const  stats: StockMovementStats = {
         total_movements: movements.length,
         total_in,
         total_out,
@@ -275,9 +275,9 @@ export function useAdjustStock() {
       user_name?: string;
     }) => {
       const quantity = Math.abs(new_quantity - current_quantity);
-      const direction: MovementDirection = new_quantity > current_quantity ? 'in' : 'out';
+      const  direction: MovementDirection = new_quantity > current_quantity ? 'in' : 'out';
 
-      const movement: CreateStockMovementInput = {
+      const  movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -328,7 +328,7 @@ export function useProcessSale() {
       order_id: string;
       customer_name?: string;
     }) => {
-      const movement: CreateStockMovementInput = {
+      const  movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -379,7 +379,7 @@ export function useProcessReturn() {
       order_id: string;
       reason?: string;
     }) => {
-      const movement: CreateStockMovementInput = {
+      const  movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -431,7 +431,7 @@ export function useProcessPurchase() {
       supplier_name?: string;
       location?: string;
     }) => {
-      const movement: CreateStockMovementInput = {
+      const  movement: CreateStockMovementInput = {
         product_id,
         product_name,
         variant_id,
@@ -475,4 +475,10 @@ export function useDeleteStockMovement() {
     },
   });
 }
+
+
+
+
+
+
 

@@ -79,7 +79,7 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('shipping_service_conversations')
         .select(`
           *,
@@ -209,7 +209,7 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
         .eq('id', conversationId)
         .single();
 
-      let senderType: 'store' | 'shipping_service' | 'admin' = 'store';
+      let  senderType: 'store' | 'shipping_service' | 'admin' = 'store';
       if (user.id === conversation?.store_user_id) {
         senderType = 'store';
       } else {
@@ -323,4 +323,10 @@ export const useShippingServiceMessaging = (storeId?: string, shippingServiceId?
     isSending: sendMessageMutation.isPending,
   };
 };
+
+
+
+
+
+
 

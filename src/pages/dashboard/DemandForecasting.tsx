@@ -147,7 +147,7 @@ export default function DemandForecasting() {
     queryFn: async (): Promise<ReorderSuggestion[]> => {
       if (!store?.id) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('reorder_suggestions')
         .select(`
           *,
@@ -269,7 +269,7 @@ export default function DemandForecasting() {
 
   // Get urgency badge
   const getUrgencyBadge = (urgency: string) => {
-    const config: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }> = {
+    const  config: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }> = {
       critical: { label: 'Critique', variant: 'destructive', className: 'bg-red-600 text-white' },
       high: { label: 'Élevée', variant: 'destructive', className: 'bg-orange-600 text-white' },
       medium: { label: 'Moyenne', variant: 'secondary', className: 'bg-yellow-600 text-white' },
@@ -359,7 +359,7 @@ export default function DemandForecasting() {
                         title: '✅ Export réussi',
                         description: `${suggestions.length} suggestion(s) exportée(s) en CSV`,
                       });
-                    } catch (error: unknown) {
+                    } catch ( _error: unknown) {
                       const errorMessage = error instanceof Error ? error.message : String(error);
                       toast({
                         title: '❌ Erreur',
@@ -661,7 +661,7 @@ export default function DemandForecasting() {
                               title: '✅ Export réussi',
                               description: `${forecasts.length} prévision(s) exportée(s) en CSV`,
                             });
-                          } catch (error: unknown) {
+                          } catch ( _error: unknown) {
                       const errorMessage = error instanceof Error ? error.message : String(error);
                             toast({
                               title: '❌ Erreur',
@@ -802,4 +802,10 @@ export default function DemandForecasting() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

@@ -67,3 +67,9 @@ export const LearningPathsGrid = React.memo(LearningPathsGridComponent, (prevPro
 
 LearningPathsGrid.displayName = 'LearningPathsGrid';
 
+
+
+
+
+
+

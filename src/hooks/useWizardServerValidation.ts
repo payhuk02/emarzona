@@ -229,7 +229,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
         });
 
         if (!result.valid && result.errors) {
-          const errors: Record<string, string> = {};
+          const  errors: Record<string, string> = {};
           // Filtrer les erreurs de prix si le prix est 0 (produit gratuit)
           const filteredErrors =
             data.price === 0
@@ -314,7 +314,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
         });
 
         if (!result.valid && result.errors) {
-          const errors: Record<string, string> = {};
+          const  errors: Record<string, string> = {};
           result.errors.forEach(err => {
             errors[err.field] = err.message;
           });
@@ -391,7 +391,7 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
         });
 
         if (!result.valid && result.errors) {
-          const errors: Record<string, string> = {};
+          const  errors: Record<string, string> = {};
           result.errors.forEach(err => {
             errors[err.field] = err.message;
           });
@@ -451,3 +451,9 @@ export function useWizardServerValidation(options: ServerValidationOptions = {})
     clearServerErrors,
   };
 }
+
+
+
+
+
+

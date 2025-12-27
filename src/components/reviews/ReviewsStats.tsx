@@ -15,7 +15,7 @@ interface ReviewsStatsProps {
   onFilterByRating?: (rating: number) => void;
 }
 
-export const ReviewsStats: React.FC<ReviewsStatsProps> = ({
+export const ReviewsStats : React.FC<ReviewsStatsProps> = ({
   stats,
   onFilterByRating,
 }) => {
@@ -109,4 +109,11 @@ export const ReviewsStats: React.FC<ReviewsStatsProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 

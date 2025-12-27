@@ -84,7 +84,7 @@ export const CampaignBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: CreateCampaignPayload = {
+    const  payload: CreateCampaignPayload = {
       store_id: storeId,
       name,
       description,
@@ -267,4 +267,10 @@ export const CampaignBuilder = ({
     </>
   );
 };
+
+
+
+
+
+
 

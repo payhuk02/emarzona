@@ -14,7 +14,6 @@ const bind = (fn: ConsoleMethod): ConsoleMethod => fn.bind(null);
 export function installConsoleGuard(): void {
   // Preserve original methods just in case debugging is needed in dev tools
   const original = {
-    log: console.log,
     info: console.info,
     warn: console.warn,
     error: console.error,
@@ -22,7 +21,6 @@ export function installConsoleGuard(): void {
   };
 
   // Map all to logger which is environment-aware
-  console.log = bind(logger.log as ConsoleMethod);
   console.info = bind(logger.info as ConsoleMethod);
   console.warn = bind(logger.warn as ConsoleMethod);
   console.error = bind(logger.error as ConsoleMethod);
@@ -33,13 +31,18 @@ export function installConsoleGuard(): void {
   interface WindowWithRestoreConsole extends Window {
     __restoreConsole?: () => void;
   }
-  (window as WindowWithRestoreConsole).__restoreConsole = () => {
-    console.log = original.log;
+  (window as WindowWithRestoreConsole)._restoreConsole = () => {
     console.info = original.info;
     console.warn = original.warn;
     console.error = original.error;
     console.debug = original.debug;
   };
 }
+
+
+
+
+
+
 
 

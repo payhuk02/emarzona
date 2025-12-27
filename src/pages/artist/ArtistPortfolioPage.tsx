@@ -391,3 +391,9 @@ export default function ArtistPortfolioPage() {
   );
 }
 
+
+
+
+
+
+

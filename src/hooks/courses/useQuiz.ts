@@ -192,9 +192,9 @@ export const useSubmitQuiz = () => {
       if (questionsError) throw questionsError;
 
       // 2. Calculer le score
-      let score = 0;
-      let totalPoints = 0;
-      const detailedResults: any[] = [];
+      let  score= 0;
+      let  totalPoints= 0;
+      const  detailedResults: any[] = [];
 
       questions?.forEach((question) => {
         const userAnswer = answers[question.id];
@@ -366,4 +366,10 @@ export const useBestQuizAttempt = (quizId: string | undefined, enrollmentId: str
     current.score > best.score ? current : best
   );
 };
+
+
+
+
+
+
 

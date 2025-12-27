@@ -68,33 +68,52 @@ export default function PayBalance() {
   // Mutation pour initier le paiement Moneroo
   const payBalanceMutation = useMutation({
     mutationFn: async () => {
-      // TODO: Implement Moneroo payment initiation
-      const paymentData = {
-        amount: order?.remaining_amount,
-        order_id: orderId,
-        description: `Solde commande #${order?.order_number}`,
-        customer_email: order?.customers?.email || order?.customer_email,
-        return_url: `${window.location.origin}/payments/success?order_id=${orderId}`,
-        cancel_url: `${window.location.origin}/payments/cancel?order_id=${orderId}`,
+      if (!order || !orderId) {
+        throw new Error('Commande non trouvée');
+      }
+
+      if (!order.remaining_amount || order.remaining_amount <= 0) {
+        throw new Error('Aucun solde à payer');
+      }
+
+      // Récupérer les informations nécessaires
+      const storeId = order.store_id;
+      const customerEmail = order.customers?.email || order.customer_email;
+      const customerId = order.customer_id;
+
+      if (!storeId || !customerEmail) {
+        throw new Error('Informations de commande incomplètes');
+      }
+
+      // Utiliser initiateMonerooPayment pour initier le paiement
+      const { initiateMonerooPayment } = await import('@/lib/moneroo-payment');
+      
+      const paymentResult = await initiateMonerooPayment({
+        storeId,
+        orderId,
+        customerId,
+        amount: order.remaining_amount,
+        currency: order.currency || 'XOF',
+        description: `Solde commande #${order.order_number}`,
+        customerEmail,
+        customerName: order.customers?.name || customerEmail.split('@')[0] || '',
         metadata: {
           order_id: orderId,
           payment_type: 'balance',
-          initial_amount: order?.total_amount,
-          percentage_paid: order?.percentage_paid,
-          remaining_amount: order?.remaining_amount,
+          initial_amount: order.total_amount,
+          percentage_paid: order.percentage_paid,
+          remaining_amount: order.remaining_amount,
         },
-      };
-
-      // Call Moneroo API (placeholder)
-      const response = await fetch('/api/payments/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentData),
       });
 
-      if (!response.ok) throw new Error('Payment initiation failed');
+      if (!paymentResult.success || !paymentResult.checkout_url) {
+        throw new Error('Erreur lors de l\'initialisation du paiement');
+      }
 
-      return await response.json();
+      return {
+        payment_url: paymentResult.checkout_url,
+        transaction_id: paymentResult.transaction_id,
+      };
     },
     onSuccess: (data) => {
       if (data.payment_url) {
@@ -336,4 +355,10 @@ export default function PayBalance() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

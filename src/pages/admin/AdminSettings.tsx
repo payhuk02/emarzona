@@ -51,7 +51,7 @@ const AdminSettings = () => {
   const normalizePermissions = (input: unknown): Record<string, boolean> => {
     if (!input || typeof input !== 'object') return {};
     const obj = input as Record<string, unknown>;
-    const out: Record<string, boolean> = {};
+    const  out: Record<string, boolean> = {};
     for (const [k, v] of Object.entries(obj)) out[k] = Boolean(v);
     return out;
   };
@@ -625,3 +625,9 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
+
+
+
+
+
+

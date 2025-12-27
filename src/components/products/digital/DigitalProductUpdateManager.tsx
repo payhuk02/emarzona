@@ -65,7 +65,7 @@ export const DigitalProductUpdateManager = ({
 
       if (error) throw error;
       setUpdateHistory(data || []);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error loading update history', { error: error.message });
     } finally {
       setLoading(false);
@@ -96,7 +96,7 @@ export const DigitalProductUpdateManager = ({
           description: 'Le nouveau fichier a été uploadé avec succès',
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur d\'upload',
         description: error.message || 'Une erreur est survenue',
@@ -145,7 +145,7 @@ export const DigitalProductUpdateManager = ({
       } else {
         throw new Error(result.error);
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -182,7 +182,7 @@ export const DigitalProductUpdateManager = ({
       } else {
         throw new Error(result.error);
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -396,4 +396,10 @@ export const DigitalProductUpdateManager = ({
     </div>
   );
 };
+
+
+
+
+
+
 

@@ -131,7 +131,7 @@ export function serializeBase64<T>(value: T): string {
  * Désérialise depuis Base64
  */
 export function deserializeBase64<T>(base64: string): T {
-  let json: string;
+  let  json: string;
   if (typeof atob === 'function') {
     json = atob(base64);
   } else {
@@ -168,7 +168,7 @@ export function serializeWithDates<T>(value: T): string {
 export function deserializeWithDates<T>(json: string): T {
   return deserialize<T>(json, {
     reviver: (key, val) => {
-      if (val && typeof val === 'object' && val.__type === 'Date') {
+      if (val && typeof val === 'object' && val._type === 'Date') {
         return new Date(val.__value);
       }
       return val;
@@ -199,10 +199,10 @@ export function serializeWithMapsAndSets<T>(value: T): string {
 export function deserializeWithMapsAndSets<T>(json: string): T {
   return deserialize<T>(json, {
     reviver: (key, val) => {
-      if (val && typeof val === 'object' && val.__type === 'Map') {
+      if (val && typeof val === 'object' && val._type === 'Map') {
         return new Map(val.__value);
       }
-      if (val && typeof val === 'object' && val.__type === 'Set') {
+      if (val && typeof val === 'object' && val._type === 'Set') {
         return new Set(val.__value);
       }
       return val;
@@ -224,3 +224,9 @@ export function getSerializedSize<T>(value: T): number {
   const json = serialize(value);
   return new Blob([json]).size;
 }
+
+
+
+
+
+

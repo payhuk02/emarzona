@@ -311,7 +311,7 @@ export const CreateDigitalProductWizard = ({
       } else {
         navigate(`/${storeSlug}/products/${slug}`);
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating digital product', { error: errorMessage });
       toast({
@@ -483,5 +483,11 @@ export const CreateDigitalProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+
 
 

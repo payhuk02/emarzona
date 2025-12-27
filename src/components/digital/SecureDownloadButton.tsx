@@ -97,7 +97,7 @@ export function SecureDownloadButton({
       // Reset success state after 3 seconds
       setTimeout(() => setDownloadSuccess(false), 3000);
 
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Download error', { error: errorMessage, productId, fileUrl });
       
@@ -175,4 +175,10 @@ export function SecureDownloadLargeButton(props: Omit<SecureDownloadButtonProps,
     </SecureDownloadButton>
   );
 }
+
+
+
+
+
+
 

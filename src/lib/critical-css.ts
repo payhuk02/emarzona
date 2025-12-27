@@ -7,8 +7,13 @@
  * CSS critique pour le rendu initial
  * Contient uniquement les styles nécessaires pour le First Contentful Paint
  */
+/**
+ * CSS critique optimisé pour FCP (First Contentful Paint)
+ * Contient uniquement les styles nécessaires pour le rendu above-the-fold
+ * Taille cible : < 50KB (actuellement ~2KB)
+ */
 export const criticalCSS = `
-/* Variables CSS critiques */
+/* Variables CSS critiques - Minimales pour FCP */
 :root {
   --background: 0 0% 100%;
   --foreground: 220 40% 10%;
@@ -18,66 +23,56 @@ export const criticalCSS = `
   --radius: 0.5rem;
 }
 
-/* Reset de base */
-* {
+/* Reset minimal */
+*,::before,::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   font-size: 1rem;
   line-height: 1.625;
+  margin: 0;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  overscroll-behavior: none;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
   overflow-x: hidden;
-  max-width: 100vw;
 }
 
 #root {
   min-height: 100vh;
-  overflow-x: hidden;
-  max-width: 100vw;
 }
 
-/* Container de base */
+/* Container minimal */
 .container {
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
-/* Typographie de base */
-h1, h2, h3, h4, h5, h6 {
+/* Typographie critique */
+h1,h2,h3 {
   font-weight: 600;
   line-height: 1.2;
+  margin: 0;
 }
 
-/* Images */
+/* Images critiques */
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
-/* Boutons de base */
+/* Boutons critiques */
 button {
   min-height: 44px;
   min-width: 44px;
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* Focus visible */
@@ -146,3 +141,9 @@ export function loadNonCriticalCSS(): void {
   marker.style.display = 'none';
   document.body.appendChild(marker);
 }
+
+
+
+
+
+

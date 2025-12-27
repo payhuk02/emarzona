@@ -102,7 +102,7 @@ export default function MyFavorites() {
     queryFn: async (): Promise<FavoriteProduct[]> => {
       if (!user?.id || favorites.size === 0) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('user_favorites')
         .select(
           `
@@ -630,3 +630,9 @@ export default function MyFavorites() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

@@ -92,7 +92,7 @@ interface SelectVirtualizedProps {
 /**
  * Composant Select virtualisé pour longues listes
  */
-export const SelectVirtualized: React.FC<SelectVirtualizedProps> = ({
+export const SelectVirtualized : React.FC<SelectVirtualizedProps> = ({
   value,
   onValueChange,
   options,
@@ -225,3 +225,10 @@ export const SelectVirtualized: React.FC<SelectVirtualizedProps> = ({
     </SelectPrimitive.Root>
   );
 };
+
+
+
+
+
+
+

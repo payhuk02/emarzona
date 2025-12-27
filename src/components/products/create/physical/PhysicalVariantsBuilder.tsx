@@ -40,7 +40,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
   const handleAddOption = () => {
     if (!newOptionName.trim()) return;
 
-    const newOption: PhysicalProductOption = {
+    const  newOption: PhysicalProductOption = {
       name: newOptionName.trim(),
       values: [],
     };
@@ -82,7 +82,7 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
       return;
     }
 
-    const combinations: PhysicalProductVariant[] = [];
+    const  combinations: PhysicalProductVariant[] = [];
 
     const generateCombinations = (
       optionIndex: number,
@@ -302,3 +302,9 @@ export const PhysicalVariantsBuilder = ({ data, onUpdate }: PhysicalVariantsBuil
     </div>
   );
 };
+
+
+
+
+
+

@@ -205,7 +205,7 @@ export function LazyImage({
   };
 
   // Styles pour le container
-  const containerStyle: React.CSSProperties = {
+  const  containerStyle: React.CSSProperties = {
     width: width ? `${width}px` : '100%',
     height: height ? `${height}px` : undefined,
     aspectRatio: aspectRatio,
@@ -305,7 +305,7 @@ export function useBlurDataURL(imageUrl: string): string | undefined {
           };
           reader.readAsDataURL(blob);
         })
-        .catch(error => {
+        .catch( error => {
           logger.warn('[LazyImage] Failed to generate blur data URL', { error });
         });
     }
@@ -334,3 +334,9 @@ export function LazyImageWithBlur(props: LazyImageProps) {
     />
   );
 }
+
+
+
+
+
+

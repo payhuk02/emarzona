@@ -34,8 +34,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useStore', () => {
-  let queryClient: QueryClient;
-  let mockQuery: ReturnType<typeof vi.fn>;
+  let  queryClient: QueryClient;
+  let  mockQuery: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -102,3 +102,9 @@ describe('useStore', () => {
     expect(result.current.isLoading).toBe(false);
   });
 });
+
+
+
+
+
+

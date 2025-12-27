@@ -266,7 +266,7 @@ export const useStore = () => {
     try {
       // Nettoyer le payload pour ne garder que les colonnes réellement supportées
       const sanitizedUpdates = sanitizeStorePayload(updates as Record<string, unknown>);
-      const updateData: Partial<Store> = { ...(sanitizedUpdates as Partial<Store>) };
+      const  updateData: Partial<Store> = { ...(sanitizedUpdates as Partial<Store>) };
 
       // Si le nom change, regénérer le slug
       if (updates.name && updates.name !== store.name) {
@@ -315,7 +315,6 @@ export const useStore = () => {
     if (!authLoading && !contextLoading) {
       fetchStore();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, contextLoading, user?.id, selectedStoreId, contextStore?.id]); // ✅ Réagir aux changements de boutique sélectionnée
 
   return {
@@ -330,3 +329,9 @@ export const useStore = () => {
     checkSlugAvailability,
   };
 };
+
+
+
+
+
+

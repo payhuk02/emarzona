@@ -74,7 +74,7 @@ export function LotsManager({ physicalProductId, variantId, warehouseId }: LotsM
   };
 
   const getRotationMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       FIFO: 'Premier entré, premier sorti',
       LIFO: 'Dernier entré, premier sorti',
       FEFO: 'Premier expiré, premier sorti',
@@ -486,3 +486,9 @@ function LotCard({ lot, onEdit, onDelete, getStatusBadge, getRotationMethodLabel
     </Card>
   );
 }
+
+
+
+
+
+

@@ -94,7 +94,7 @@ export default function PhysicalProductsLotsManagement() {
     queryFn: async (): Promise<ProductLot[]> => {
       if (!store?.id) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('product_lots')
         .select(`
           *,
@@ -261,7 +261,7 @@ export default function PhysicalProductsLotsManagement() {
 
   // Filtered lots
   const filteredLots = useMemo(() => {
-    let filtered = lots;
+    let  filtered= lots;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -297,7 +297,7 @@ export default function PhysicalProductsLotsManagement() {
   // Get status badge
   const getStatusBadge = (lot: ProductLot) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
+    const  statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: IconComponent }> = {
       active: { label: 'Actif', variant: 'default', icon: CheckCircle2 },
       expired: { label: 'Expiré', variant: 'destructive', icon: XCircle },
       expiring_soon: { label: 'Expire bientôt', variant: 'secondary', icon: AlertTriangle },
@@ -868,4 +868,10 @@ export default function PhysicalProductsLotsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

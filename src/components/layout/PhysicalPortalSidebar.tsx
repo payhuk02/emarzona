@@ -57,7 +57,7 @@ export const PhysicalPortalSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Portail Physique', path: '/account/physical' },
     { label: activeSection },
   ];
@@ -91,4 +91,10 @@ export const PhysicalPortalSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

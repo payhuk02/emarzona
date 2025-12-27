@@ -113,7 +113,7 @@ export default function ShippingDashboard() {
         description: 'Les informations de suivi ont été actualisées.',
       });
       logger.info('Tracking refreshed', { shipmentId });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error refreshing tracking', { shipmentId, error: errorMessage });
       toast({
@@ -144,7 +144,7 @@ export default function ShippingDashboard() {
         description: `${filteredShipments.length} expédition(s) actualisée(s).`,
       });
       logger.info('All tracking refreshed', { count: filteredShipments.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error refreshing all tracking', { error: errorMessage });
       toast({
@@ -200,7 +200,7 @@ export default function ShippingDashboard() {
         description: `${filteredShipments.length} expédition(s) exportée(s) en CSV.`,
       });
       logger.info('Shipments exported to CSV', { count: filteredShipments.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error exporting shipments', { error: errorMessage });
       toast({
@@ -526,3 +526,9 @@ export default function ShippingDashboard() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

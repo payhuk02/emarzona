@@ -387,7 +387,7 @@ export const EditServiceProductWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<boolean> => {
-      const errors: string[] = [];
+      const  errors: string[] = [];
       clearServerErrors();
 
       switch (step) {
@@ -454,7 +454,7 @@ export const EditServiceProductWizard = ({
     setIsSaving(true);
     try {
       // Generate slug if not provided
-      let slug =
+      let  slug=
         formData.slug?.trim() ||
         formData.name
           ?.toLowerCase()
@@ -463,7 +463,7 @@ export const EditServiceProductWizard = ({
         'service';
 
       // Check slug uniqueness (excluding current product)
-      let attempts = 0;
+      let  attempts= 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -945,3 +945,9 @@ export const EditServiceProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

@@ -24,7 +24,7 @@ export interface BucketDiagnosticResult {
  * Diagnostique la configuration du bucket "attachments"
  */
 export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResult> {
-  const result: BucketDiagnosticResult = {
+  const  result: BucketDiagnosticResult = {
     bucketExists: false,
     bucketIsPublic: false,
     publicReadPolicyExists: false,
@@ -82,7 +82,7 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
         result.solutions.push('Exécutez la migration SQL: supabase/migrations/20250201_create_and_configure_attachments_bucket.sql');
         result.solutions.push('Dans Supabase Dashboard > SQL Editor, exécutez cette migration');
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       result.issues.push(`Erreur lors de la vérification des politiques: ${errorMessage}`);
     }
@@ -119,7 +119,7 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
     logger.info('Bucket diagnostic completed', result);
 
     return result;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error diagnosing bucket configuration', { error });
     result.issues.push(`Erreur lors du diagnostic: ${errorMessage}`);
@@ -131,7 +131,7 @@ export async function diagnoseAttachmentsBucket(): Promise<BucketDiagnosticResul
  * Formate le résultat du diagnostic pour affichage
  */
 export function formatDiagnosticResult(result: BucketDiagnosticResult): string {
-  const lines: string[] = [];
+  const  lines: string[] = [];
 
   lines.push('🔍 DIAGNOSTIC DE LA CONFIGURATION DU BUCKET "attachments"');
   lines.push('');
@@ -167,4 +167,10 @@ export function formatDiagnosticResult(result: BucketDiagnosticResult): string {
 
   return lines.join('\n');
 }
+
+
+
+
+
+
 

@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { PromotionCard, Promotion } from '../PromotionCard';
 
 describe('PromotionCard', () => {
-  const mockPromotion: Promotion = {
+  const  mockPromotion: Promotion = {
     id: 'promo-1',
     name: 'Réduction de lancement',
     type: 'percentage',
@@ -277,4 +277,10 @@ describe('PromotionCard', () => {
     expect(screen.getByText('500 €')).toBeInTheDocument();
   });
 });
+
+
+
+
+
+
 

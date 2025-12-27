@@ -37,7 +37,7 @@ vi.mock('@/hooks/use-toast', () => ({
   })),
 }));
 
-const mockSummary: CartSummaryType = {
+const  mockSummary: CartSummaryType = {
   subtotal: 50000,
   discount_amount: 5000,
   tax_amount: 5000,
@@ -97,7 +97,7 @@ describe('CartSummary', () => {
   });
 
   it('should display singular form for 1 item', () => {
-    const singleItemSummary: CartSummaryType = {
+    const  singleItemSummary: CartSummaryType = {
       ...mockSummary,
       item_count: 1,
     };
@@ -115,7 +115,7 @@ describe('CartSummary', () => {
   });
 
   it('should disable checkout button when cart is empty', () => {
-    const emptySummary: CartSummaryType = {
+    const  emptySummary: CartSummaryType = {
       ...mockSummary,
       item_count: 0,
       total: 0,
@@ -210,7 +210,7 @@ describe('CartSummary', () => {
   });
 
   it('should not display discount section when discount_amount is 0', () => {
-    const noDiscountSummary: CartSummaryType = {
+    const  noDiscountSummary: CartSummaryType = {
       ...mockSummary,
       discount_amount: 0,
     };
@@ -221,7 +221,7 @@ describe('CartSummary', () => {
   });
 
   it('should not display shipping section when shipping_amount is 0', () => {
-    const noShippingSummary: CartSummaryType = {
+    const  noShippingSummary: CartSummaryType = {
       ...mockSummary,
       shipping_amount: 0,
     };
@@ -232,7 +232,7 @@ describe('CartSummary', () => {
   });
 
   it('should not display tax section when tax_amount is 0', () => {
-    const noTaxSummary: CartSummaryType = {
+    const  noTaxSummary: CartSummaryType = {
       ...mockSummary,
       tax_amount: 0,
     };
@@ -242,6 +242,12 @@ describe('CartSummary', () => {
     expect(screen.queryByText('Taxes')).not.toBeInTheDocument();
   });
 });
+
+
+
+
+
+
 
 
 

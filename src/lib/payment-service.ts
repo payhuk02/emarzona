@@ -52,7 +52,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
     };
 
     return result;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Erreur inconnue lors de l'initiation du paiement";
     logger.error('Payment initiation error:', error);
@@ -87,3 +87,9 @@ export const verifyTransactionStatus = async (
 
   return verifyMonerooTransaction(transactionId);
 };
+
+
+
+
+
+

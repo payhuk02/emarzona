@@ -272,7 +272,7 @@ export const useAnalyticsTracking = () => {
   ) => {
     try {
       // Générer un session_id unique si pas déjà présent
-      let sessionId = eventData.session_id;
+      let  sessionId= eventData.session_id;
       if (!sessionId) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       }
@@ -570,7 +570,7 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
 
   // Grouper les données par jour pour les graphiques
   const dailyData = useMemo(() => {
-    const grouped: Record<string, {
+    const  grouped: Record<string, {
       date: string;
       views: number;
       clicks: number;
@@ -619,3 +619,9 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
     loadHistory
   };
 };
+
+
+
+
+
+

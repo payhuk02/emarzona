@@ -58,7 +58,7 @@ export const ProgressionAnalyticsDashboard = ({ courseId }: ProgressionAnalytics
         title: 'Snapshot créé',
         description: 'Le snapshot de progression a été créé avec succès.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -75,7 +75,7 @@ export const ProgressionAnalyticsDashboard = ({ courseId }: ProgressionAnalytics
         title: 'Analytics calculées',
         description: 'Les analytics de progression ont été calculées avec succès.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -555,3 +555,9 @@ export const ProgressionAnalyticsDashboard = ({ courseId }: ProgressionAnalytics
     </div>
   );
 };
+
+
+
+
+
+

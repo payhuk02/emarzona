@@ -106,7 +106,7 @@ export const AccountSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Mon compte', path: '/account' },
     { label: activeSection },
   ];
@@ -140,4 +140,10 @@ export const AccountSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

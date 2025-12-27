@@ -203,7 +203,7 @@ export const useLowStockAlerts = (storeId: string) => {
       if (!items) return [];
 
       // Filter for low stock
-      const alerts: StockAlert[] = [];
+      const  alerts: StockAlert[] = [];
 
       items.forEach((item: any) => {
         const storeMatches =
@@ -503,4 +503,10 @@ export const useTransferStock = () => {
     },
   });
 };
+
+
+
+
+
+
 

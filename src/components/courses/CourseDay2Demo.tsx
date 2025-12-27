@@ -16,7 +16,7 @@ import { CoursesList, type CourseListItem } from './CoursesList';
 import { CoursePackageManager, type CoursePackage } from './CoursePackageManager';
 
 // Données de test - Cours
-const sampleCourses: CourseListItem[] = [
+const  sampleCourses: CourseListItem[] = [
   {
     id: 'CRS-001',
     name: 'React & TypeScript Avancé',
@@ -156,7 +156,7 @@ const sampleCourses: CourseListItem[] = [
 ];
 
 // Données de test - Packages
-const samplePackages: CoursePackage[] = [
+const  samplePackages: CoursePackage[] = [
   {
     id: 'PKG-001',
     name: 'Pack Full-Stack Developer',
@@ -304,7 +304,7 @@ const samplePackages: CoursePackage[] = [
 /**
  * Composant de démonstration principale
  */
-export const CourseDay2Demo: React.FC = () => {
+export const CourseDay2Demo : React.FC = () => {
   const [courses] = useState<CourseListItem[]>(sampleCourses);
   const [packages, setPackages] = useState<CoursePackage[]>(samplePackages);
 
@@ -334,7 +334,7 @@ export const CourseDay2Demo: React.FC = () => {
   // Handlers pour CoursePackageManager
   const handleCreatePackage = (packageData: Partial<CoursePackage>) => {
     logger.info('Create package', { packageName: packageData.name });
-    const newPackage: CoursePackage = {
+    const  newPackage: CoursePackage = {
       id: `PKG-${Date.now()}`,
       name: packageData.name || '',
       description: packageData.description || '',
@@ -371,7 +371,7 @@ export const CourseDay2Demo: React.FC = () => {
     logger.info('Duplicate package', { packageId });
     const pkg = packages.find(p => p.id === packageId);
     if (pkg) {
-      const newPackage: CoursePackage = {
+      const  newPackage: CoursePackage = {
         ...pkg,
         id: `PKG-${Date.now()}`,
         name: `${pkg.name} (Copie)`,
@@ -449,4 +449,11 @@ export const CourseDay2Demo: React.FC = () => {
 };
 
 export default CourseDay2Demo;
+
+
+
+
+
+
+
 

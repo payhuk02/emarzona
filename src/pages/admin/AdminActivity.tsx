@@ -40,7 +40,7 @@ const getActionLabel = (actionType: string | undefined | null) => {
   if (!actionType) {
     return 'Action inconnue';
   }
-  const labels: Record<string, string> = {
+  const  labels: Record<string, string> = {
     SUSPEND_USER: 'Suspension utilisateur',
     UNSUSPEND_USER: 'Réactivation utilisateur',
     DELETE_USER: 'Suppression utilisateur',
@@ -206,3 +206,9 @@ const AdminActivity = () => {
 };
 
 export default AdminActivity;
+
+
+
+
+
+

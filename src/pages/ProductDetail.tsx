@@ -205,7 +205,7 @@ const ProductDetails = () => {
         const paidProduct = paidResult?.data ?? null;
 
         // S'assurer que store_id est présent (utiliser foundStore.id si manquant)
-        const productWithStore: ExtendedProduct = {
+        const  productWithStore: ExtendedProduct = {
           ...product,
           store_id: product.store_id || foundStore.id,
           free_product: freeProduct as Product | null,
@@ -222,7 +222,7 @@ const ProductDetails = () => {
           promotional_price: product.promotional_price ?? null,
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors du chargement du produit:', error);
       const finalErrorMessage =
@@ -318,7 +318,7 @@ const ProductDetails = () => {
       }
 
       navigate(`/checkout?${checkoutParams.toString()}`);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Erreur lors de la redirection vers checkout:', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -550,7 +550,7 @@ const ProductDetails = () => {
               >
                 {/* Collection de toutes les images */}
                 {(() => {
-                  const allImages: string[] = [];
+                  const  allImages: string[] = [];
 
                   // Ajouter l'image principale
                   if (product.image_url) {
@@ -1323,3 +1323,9 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
+
+
+
+
+
+

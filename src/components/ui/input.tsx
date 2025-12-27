@@ -32,7 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     
     // Construire aria-describedby avec l'erreur si présente
     const describedBy = React.useMemo(() => {
-      const ids: string[] = [];
+      const  ids: string[] = [];
       if (ariaDescribedBy) ids.push(ariaDescribedBy);
       if (finalErrorId && error) ids.push(finalErrorId);
       return ids.length > 0 ? ids.join(' ') : undefined;
@@ -72,3 +72,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 export { Input };
+
+
+
+
+
+

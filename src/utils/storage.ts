@@ -122,3 +122,9 @@ export function isValidSupabaseStorageUrl(url: string): boolean {
     url.includes('/storage/v1/object/sign/attachments/')
   );
 }
+
+
+
+
+
+

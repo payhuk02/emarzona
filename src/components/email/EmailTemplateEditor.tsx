@@ -83,7 +83,7 @@ export const EmailTemplateEditor = ({
   }, [htmlContent, subject, onChange]);
 
   const handleSave = async () => {
-    const templateData: Partial<EmailTemplate> = {
+    const  templateData: Partial<EmailTemplate> = {
       name,
       slug,
       category,
@@ -360,3 +360,9 @@ export const EmailTemplateEditor = ({
     </div>
   );
 };
+
+
+
+
+
+

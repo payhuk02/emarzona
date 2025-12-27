@@ -147,7 +147,7 @@ export function useQueryParams(): UseQueryParamsReturn {
   }, [setSearchParams]);
 
   const getAllParams = useCallback((): Record<string, string> => {
-    const params: Record<string, string> = {};
+    const  params: Record<string, string> = {};
     searchParams.forEach((value, key) => {
       params[key] = value;
     });
@@ -194,4 +194,10 @@ export function useQueryParam<T extends string | number = string>(
 
   return [value, setValue];
 }
+
+
+
+
+
+
 

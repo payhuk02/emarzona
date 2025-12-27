@@ -47,7 +47,7 @@ export async function triggerWebhook(
       // Note: Ceci peut être fait via un trigger PostgreSQL ou un cron job
       // Pour l'instant, on laisse l'Edge Function être appelée par un cron ou manuellement
     }
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Webhook trigger exception', { error, eventType, eventId, storeId });
     // Ne pas throw pour éviter de bloquer le flux principal
   }
@@ -239,4 +239,10 @@ export async function triggerReturnCreatedWebhook(
     returnData.store_id
   );
 }
+
+
+
+
+
+
 

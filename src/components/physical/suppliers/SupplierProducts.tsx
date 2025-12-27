@@ -204,7 +204,7 @@ export default function SupplierProducts() {
         });
       }
       handleCloseDialog();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -237,7 +237,7 @@ export default function SupplierProducts() {
       });
       setDeleteDialogOpen(false);
       setProductToDelete(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -795,3 +795,9 @@ export default function SupplierProducts() {
     </div>
   );
 }
+
+
+
+
+
+

@@ -44,7 +44,7 @@ export function PaymentProviderSelector({
       value: 'moneroo',
       label: 'Moneroo',
       description: 'Paiement sécurisé par Moneroo',
-      icon: <Wallet className="h-5 w-5" />,
+      icon: <Wallet  className ="h-5 w-5" />,
       available: true,
       features: ['Multi-devises', 'Remboursements', 'Notifications'],
     },
@@ -222,3 +222,9 @@ export function PaymentProviderSelector({
     </Card>
   );
 }
+
+
+
+
+
+

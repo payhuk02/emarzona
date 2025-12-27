@@ -134,8 +134,8 @@ class Cache<T> {
    * Trouve la clé de l'entrée la plus ancienne
    */
   private findOldestKey(): string | null {
-    let oldestKey: string | null = null;
-    let oldestTimestamp = Infinity;
+    let  oldestKey: string | null = null;
+    let  oldestTimestamp= Infinity;
     
     for (const [key, entry] of this.cache.entries()) {
       if (entry.timestamp < oldestTimestamp) {
@@ -152,7 +152,7 @@ class Cache<T> {
    */
   private cleanup(): void {
     const now = Date.now();
-    let cleaned = 0;
+    let  cleaned= 0;
     
     for (const [key, entry] of this.cache.entries()) {
       if (now > entry.expiresAt) {
@@ -216,5 +216,11 @@ export function generateStatsCacheKey(
   
   return parts.join(':');
 }
+
+
+
+
+
+
 
 

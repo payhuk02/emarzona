@@ -85,7 +85,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
     };
 
     const apply = async () => {
-      const valids: string[] = [];
+      const  valids: string[] = [];
       for (const u of toArray) {
         if (await validateImage(u)) {
           valids.push(u);
@@ -181,7 +181,7 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
             aria-label="Aperçu tablette"
             aria-pressed={activePreview === 'tablet'}
           >
-            <Tablet className="h-4 w-4" aria-hidden="true" />
+            <Tablet  className ="h-4 w-4" aria-hidden="true" />
           </Button>
           <Button
             variant={activePreview === 'mobile' ? 'default' : 'outline'}
@@ -668,3 +668,9 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
     </div>
   );
 };
+
+
+
+
+
+

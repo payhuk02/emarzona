@@ -147,7 +147,7 @@ export class FlutterwaveProvider extends BasePaymentProvider {
 
       const transaction = data.data;
 
-      let status: PaymentStatus = PaymentStatus.PENDING;
+      let  status: PaymentStatus = PaymentStatus.PENDING;
       if (transaction.status === 'successful') {
         status = PaymentStatus.COMPLETED;
       } else if (transaction.status === 'failed') {
@@ -242,5 +242,11 @@ export class FlutterwaveProvider extends BasePaymentProvider {
     };
   }
 }
+
+
+
+
+
+
 
 

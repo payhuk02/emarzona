@@ -159,8 +159,8 @@ export function ResourceAvailabilityChecker({
 
       if (serviceError) throw serviceError;
 
-      const conflicts: AvailabilityCheckResult['conflicts'] = [];
-      const suggestions: AvailabilityCheckResult['suggestions'] = [];
+      const  conflicts: AvailabilityCheckResult['conflicts'] = [];
+      const  suggestions: AvailabilityCheckResult['suggestions'] = [];
 
       // 1. Check staff availability
       if (staffId) {
@@ -514,4 +514,10 @@ export function ResourceAvailabilityChecker({
     </div>
   );
 }
+
+
+
+
+
+
 

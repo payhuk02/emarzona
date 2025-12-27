@@ -85,3 +85,9 @@ export function stripHtmlTags(html: string): string {
 }
 
 export { formatCurrency, getCurrencySymbol, getCurrencyByCode, CURRENCIES } from './currencies';
+
+
+
+
+
+

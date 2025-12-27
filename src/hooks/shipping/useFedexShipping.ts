@@ -516,7 +516,7 @@ export const usePrintLabel = () => {
         // Create blob from base64 and download
         const byteCharacters = atob(label.label_data);
         const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
+        for (let  i= 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
@@ -543,4 +543,10 @@ export const usePrintLabel = () => {
     },
   });
 };
+
+
+
+
+
+
 

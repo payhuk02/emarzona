@@ -36,7 +36,7 @@ export const useAffiliateCommissions = (
       setLoading(true);
 
       // Compter le total
-      let countQuery = supabase
+      let  countQuery= supabase
         .from('affiliate_commissions')
         .select('*', { count: 'exact', head: true });
 
@@ -80,7 +80,7 @@ export const useAffiliateCommissions = (
       const from = (currentPage - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
+      let  query= supabase
         .from('affiliate_commissions')
         .select(`
           *,
@@ -173,7 +173,7 @@ export const useAffiliateCommissions = (
           average_commission_per_sale: 0,
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching commissions:', affiliateError);
       toast({
@@ -215,7 +215,7 @@ export const useAffiliateCommissions = (
       
       await fetchCommissions(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error approving commission:', affiliateError);
       toast({
@@ -257,7 +257,7 @@ export const useAffiliateCommissions = (
       
       await fetchCommissions(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error rejecting commission:', affiliateError);
       toast({
@@ -324,7 +324,7 @@ export const useAffiliateCommissions = (
       
       await fetchCommissions(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error marking commission as paid:', affiliateError);
       toast({
@@ -361,7 +361,7 @@ export const useAffiliateCommissions = (
       
       await fetchCommissions(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error cancelling commission:', affiliateError);
       toast({
@@ -437,7 +437,7 @@ export const usePendingCommissions = (storeId?: string) => {
   useEffect(() => {
     const fetchPending = async () => {
       try {
-        let query = supabase
+        let  query= supabase
           .from('affiliate_commissions')
           .select(`
             *,
@@ -469,4 +469,10 @@ export const usePendingCommissions = (storeId?: string) => {
 
   return { pending, loading };
 };
+
+
+
+
+
+
 

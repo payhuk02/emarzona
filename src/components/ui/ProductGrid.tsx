@@ -22,7 +22,7 @@ const ProductGridComponent = ({
       role="region"
       aria-label="Grille de produits"
       className={cn(
-        "products-grid-mobile md:products-grid-tablet lg:products-grid-desktop",
+        "products-grid-mobile md:products-grid-tablet  _lg:products-grid-desktop",
         // Responsive exact: 1 mobile (<640px), 2 tablette (≥640px <1024px), 3 desktop (≥1024px)
         // Si store-product-grid, les colonnes seront gérées par CSS variables
         isCustomGrid 
@@ -58,3 +58,9 @@ export const LazyProductCard = ({
     </div>
   );
 };
+
+
+
+
+
+

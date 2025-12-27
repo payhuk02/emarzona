@@ -119,7 +119,7 @@ export function formatDuration(
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  const parts: string[] = [];
+  const  parts: string[] = [];
 
   if (showHours && hours > 0) {
     parts.push(`${hours}h`);
@@ -201,7 +201,7 @@ export function formatOrdinal(
   const formatter = new Intl.PluralRules(locale, { type: 'ordinal' });
   const rule = formatter.select(value);
 
-  const suffixes: Record<string, Record<string, string>> = {
+  const  suffixes: Record<string, Record<string, string>> = {
     'fr-FR': {
       one: 'er',
       two: 'ème',
@@ -221,4 +221,10 @@ export function formatOrdinal(
   const suffix = suffixes[locale]?.[rule] || suffixes['en-US'][rule] || '';
   return `${value}${suffix}`;
 }
+
+
+
+
+
+
 

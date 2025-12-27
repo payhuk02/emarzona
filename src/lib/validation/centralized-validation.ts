@@ -355,7 +355,7 @@ export async function validateWithSchema<T extends z.ZodTypeAny>(
   const clientResult = schema.safeParse(data);
 
   if (!clientResult.success) {
-    const errors: Record<string, string> = {};
+    const  errors: Record<string, string> = {};
     clientResult.error.errors.forEach(err => {
       const path = err.path.join('.');
       errors[path] = err.message;
@@ -613,3 +613,9 @@ export const centralizedValidation = {
   validateCourse,
   validateArtistProduct,
 };
+
+
+
+
+
+

@@ -93,7 +93,7 @@ export const CreateAffiliateLinkDialog = memo(({
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {};
+        const  newErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
           const path = err.path[0] as string;
           if (path) {
@@ -114,7 +114,7 @@ export const CreateAffiliateLinkDialog = memo(({
 
     setIsCreating(true);
     try {
-      const formData: CreateAffiliateLinkForm = {
+      const  formData: CreateAffiliateLinkForm = {
         product_id: selectedProductId,
         utm_source: utmSource || undefined,
         utm_medium: utmMedium || undefined,
@@ -344,4 +344,10 @@ export const CreateAffiliateLinkDialog = memo(({
 });
 
 CreateAffiliateLinkDialog.displayName = 'CreateAffiliateLinkDialog';
+
+
+
+
+
+
 

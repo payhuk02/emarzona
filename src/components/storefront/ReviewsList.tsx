@@ -117,3 +117,9 @@ const ReviewsList = ({ reviews, loading, storeSlug }: ReviewsListProps) => {
 };
 
 export default ReviewsList;
+
+
+
+
+
+

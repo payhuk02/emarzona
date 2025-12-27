@@ -96,7 +96,7 @@ export const ProfileDebug = () => {
           status: 'success',
           result,
         });
-      } catch (error: any) {
+      } catch ( _error: any) {
         results.push({
           name: test.name,
           status: 'error',
@@ -210,3 +210,9 @@ export const ProfileDebug = () => {
     </div>
   );
 };
+
+
+
+
+
+

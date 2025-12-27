@@ -145,7 +145,7 @@ export function validateFile(
   }
 
   // 4. Vérifier le type MIME
-  let detectedMimeType = file.type;
+  let  detectedMimeType= file.type;
   
   // Si le type MIME est vide ou incorrect, essayer de le détecter depuis l'extension
   if (!detectedMimeType || detectedMimeType === 'application/octet-stream' || detectedMimeType === '') {
@@ -231,7 +231,7 @@ export function getFileExtension(fileName: string): string {
 function detectMimeTypeFromExtension(extension: string): string {
   const ext = extension.toLowerCase();
   
-  const mimeTypes: Record<string, string> = {
+  const  mimeTypes: Record<string, string> = {
     // Images
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
@@ -267,4 +267,10 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+
+
+
+
+
 

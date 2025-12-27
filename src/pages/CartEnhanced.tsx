@@ -45,7 +45,7 @@ export default function CartEnhanced() {
     async (itemId: string, quantity: number) => {
       try {
         await updateItem({ item_id: itemId, quantity });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -65,7 +65,7 @@ export default function CartEnhanced() {
           title: 'Article supprimé',
           description: "L'article a été retiré de votre panier",
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -86,7 +86,7 @@ export default function CartEnhanced() {
         title: 'Panier vidé',
         description: 'Tous les articles ont été retirés de votre panier',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -264,3 +264,9 @@ export default function CartEnhanced() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

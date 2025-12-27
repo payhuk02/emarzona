@@ -61,7 +61,7 @@ export function StockAdjustmentDialog({
       setReason('');
       setNotes('');
       onOpenChange(false);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible d\'ajuster le stock',
@@ -220,4 +220,10 @@ export function StockAdjustmentDialog({
     </Dialog>
   );
 }
+
+
+
+
+
+
 

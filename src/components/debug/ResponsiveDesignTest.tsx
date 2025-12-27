@@ -85,7 +85,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
       case 'mobile':
         return <Smartphone className="h-4 w-4" />;
       case 'tablet':
-        return <Tablet className="h-4 w-4" />;
+        return <Tablet  className ="h-4 w-4" />;
       case 'desktop':
         return <Monitor className="h-4 w-4" />;
     }
@@ -147,7 +147,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="products-grid-mobile sm:products-grid-tablet lg:products-grid-desktop gap-4">
+          <div className="products-grid-mobile sm:products-grid-tablet  _lg:products-grid-desktop gap-4">
             {testProducts.map((product) => {
               const hasPromo = product.promo_price && product.promo_price < product.price;
               const discountPercent = hasPromo
@@ -157,7 +157,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
               return (
                 <div
                   key={product.id}
-                  className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop"
+                  className="group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 product-card product-card-mobile sm:product-card-tablet  _lg:product-card-desktop"
                 >
                   {/* Bannière produit avec ratio 16:9 */}
                   <div className="product-card-container">
@@ -178,7 +178,7 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
                     />
                   </div>
 
-                  <div className="flex-1 flex flex-col p-4 space-y-2 product-card-content-mobile sm:product-card-content-tablet lg:product-card-content-desktop">
+                  <div className="flex-1 flex flex-col p-4 space-y-2 product-card-content-mobile sm:product-card-content-tablet  _lg:product-card-content-desktop">
                     <span className="text-xs font-medium text-primary uppercase tracking-wide">
                       {product.category}
                     </span>
@@ -266,3 +266,9 @@ export const ResponsiveDesignTest = ({ className }: ResponsiveTestProps) => {
     </div>
   );
 };
+
+
+
+
+
+

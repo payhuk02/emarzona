@@ -95,7 +95,7 @@ export const AdvancedProductImageGallery = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Combine all media items
-  const mediaItems: MediaItem[] = [
+  const  mediaItems: MediaItem[] = [
     ...images.map((url) => ({ type: 'image' as const, url, alt: productName })),
     ...videos.map((video) => ({
       type: 'video' as const,
@@ -119,10 +119,10 @@ export const AdvancedProductImageGallery = ({
   useEffect(() => {
     if (!is360View || !is360) return;
 
-    let animationFrame: number;
-    let isDragging360 = false;
-    let startX = 0;
-    let currentFrame = current360Frame;
+    let  animationFrame: number;
+    let  isDragging360= false;
+    let  startX= 0;
+    let  currentFrame= current360Frame;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging360) return;
@@ -525,4 +525,10 @@ export const AdvancedProductImageGallery = ({
     </div>
   );
 };
+
+
+
+
+
+
 

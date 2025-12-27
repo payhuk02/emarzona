@@ -18,7 +18,7 @@ interface BundlesSectionProps {
   bundles: Bundle[];
 }
 
-export const BundlesSection: React.FC<BundlesSectionProps> = ({ bundles }) => {
+export const BundlesSection : React.FC<BundlesSectionProps> = ({ bundles }) => {
   if (!bundles || bundles.length === 0) {
     return null;
   }
@@ -62,4 +62,11 @@ export const BundlesSection: React.FC<BundlesSectionProps> = ({ bundles }) => {
     </section>
   );
 };
+
+
+
+
+
+
+
 

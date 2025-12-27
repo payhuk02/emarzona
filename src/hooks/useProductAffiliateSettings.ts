@@ -39,7 +39,7 @@ export const useProductAffiliateSettings = (productId?: string) => {
       if (error && error.code !== 'PGRST116') throw error;
 
       setSettings(data || null);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error fetching product affiliate settings:', error);
       toast({
         title: 'Erreur',
@@ -77,7 +77,7 @@ export const useProductAffiliateSettings = (productId?: string) => {
 
       await fetchSettings();
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error creating/updating affiliate settings:', error);
       toast({
         title: 'Erreur',
@@ -106,7 +106,7 @@ export const useProductAffiliateSettings = (productId?: string) => {
 
       await fetchSettings();
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error toggling affiliate enabled:', error);
       toast({
         title: 'Erreur',
@@ -133,7 +133,7 @@ export const useProductAffiliateSettings = (productId?: string) => {
 
       await fetchSettings();
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error deleting affiliate settings:', error);
       toast({
         title: 'Erreur',
@@ -191,7 +191,7 @@ export const useStoreAffiliateProducts = (storeId?: string) => {
       if (error) throw error;
 
       setProducts(data || []);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error fetching store affiliate products:', error);
       toast({
         title: 'Erreur',
@@ -213,4 +213,10 @@ export const useStoreAffiliateProducts = (storeId?: string) => {
     refetch: fetchProducts,
   };
 };
+
+
+
+
+
+
 

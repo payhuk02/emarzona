@@ -181,3 +181,9 @@ export const TopProductsCard = React.memo(TopProductsCardComponent, (prevProps, 
 });
 
 TopProductsCard.displayName = 'TopProductsCard';
+
+
+
+
+
+

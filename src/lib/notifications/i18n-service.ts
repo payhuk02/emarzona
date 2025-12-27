@@ -89,7 +89,7 @@ export class NotificationI18nService {
         .maybeSingle();
 
       if (!translationError && translation) {
-        const trans: NotificationTranslation = {
+        const  trans: NotificationTranslation = {
           title: translation.title || '',
           message: translation.message || '',
           actionLabel: translation.action_label || undefined,
@@ -131,7 +131,7 @@ export class NotificationI18nService {
    * Remplacer les variables dans un texte
    */
   private replaceVariablesInText(text: string, data: TranslationData): string {
-    let result = text;
+    let  result= text;
 
     for (const [key, value] of Object.entries(data)) {
       const regex = new RegExp(`\\{\\{${key}\\}\\}|\\{${key}\\}`, 'g');
@@ -149,7 +149,7 @@ export class NotificationI18nService {
     data: TranslationData,
     language: SupportedLanguage
   ): NotificationTranslation {
-    const defaults: Record<
+    const  defaults: Record<
       SupportedLanguage,
       Record<NotificationType, { title: string; message: string }>
     > = {
@@ -201,3 +201,9 @@ export class NotificationI18nService {
 
 // Instance singleton
 export const notificationI18nService = new NotificationI18nService();
+
+
+
+
+
+

@@ -52,7 +52,7 @@ export default function BundleDetail() {
         title: 'Bundle ajouté au panier',
         description: `${bundle.name} a été ajouté à votre panier`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -288,4 +288,10 @@ export default function BundleDetail() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

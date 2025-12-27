@@ -24,7 +24,7 @@ export interface CDNConfig {
  * Configuration CDN par défaut
  * Peut être surchargée via variables d'environnement
  */
-const defaultCDNConfig: CDNConfig = {
+const  defaultCDNConfig: CDNConfig = {
   baseUrl: import.meta.env.VITE_CDN_URL || '',
   enabled: import.meta.env.VITE_CDN_ENABLED === 'true',
   allowedImageDomains: [
@@ -35,7 +35,7 @@ const defaultCDNConfig: CDNConfig = {
   ],
 };
 
-let cdnConfig: CDNConfig = defaultCDNConfig;
+let  cdnConfig: CDNConfig = defaultCDNConfig;
 
 /**
  * Configure le CDN
@@ -158,3 +158,9 @@ export function initCDNConnections(): void {
     }
   }
 }
+
+
+
+
+
+

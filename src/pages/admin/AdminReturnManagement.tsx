@@ -164,7 +164,7 @@ export default function AdminReturnManagement() {
   const getStatusBadge = (status: string) => {
     type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<
+    const  statusConfig: Record<
       string,
       { label: string; variant: BadgeVariant; icon: IconComponent }
     > = {
@@ -836,3 +836,9 @@ function ReturnDetailView({
     </div>
   );
 }
+
+
+
+
+
+

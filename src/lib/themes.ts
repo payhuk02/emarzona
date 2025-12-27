@@ -70,7 +70,7 @@ export interface ThemeConfig {
  * - Bleu professionnel (#635BFF)
  * - Police: Inter
  */
-export const professionalTheme: ThemeConfig = {
+export const professionalTheme : ThemeConfig = {
   name: 'professional',
   displayName: 'Professionnel',
   description: 'Thème clair et professionnel, idéal pour les applications d\'entreprise',
@@ -141,7 +141,7 @@ export const professionalTheme: ThemeConfig = {
  * - Accents colorés subtils
  * - Police: Inter
  */
-export const minimalTheme: ThemeConfig = {
+export const minimalTheme : ThemeConfig = {
   name: 'minimal',
   displayName: 'Minimaliste',
   description: 'Thème minimaliste et épuré, parfait pour les applications modernes',
@@ -212,7 +212,7 @@ export const minimalTheme: ThemeConfig = {
  * - Accents blancs
  * - Police: Inter
  */
-export const darkTheme: ThemeConfig = {
+export const darkTheme : ThemeConfig = {
   name: 'dark',
   displayName: 'Sombre',
   description: 'Thème sombre élégant et premium, idéal pour un usage prolongé',
@@ -283,7 +283,7 @@ export const darkTheme: ThemeConfig = {
  * - Espacement large
  * - Police: System UI
  */
-export const spaciousTheme: ThemeConfig = {
+export const spaciousTheme : ThemeConfig = {
   name: 'spacious',
   displayName: 'Spacieux',
   description: 'Thème clair et spacieux, confortable pour la lecture et la productivité',
@@ -340,7 +340,7 @@ export const spaciousTheme: ThemeConfig = {
  * - Bleu classique (#0969DA)
  * - Police: System UI
  */
-export const classicTheme: ThemeConfig = {
+export const classicTheme : ThemeConfig = {
   name: 'classic',
   displayName: 'Classique',
   description: 'Thème clair et fonctionnel, parfait pour un usage quotidien',
@@ -393,7 +393,7 @@ export const classicTheme: ThemeConfig = {
  * 🎨 THÈME DEFAULT (Actuel)
  * Thème sombre actuel d'Emarzona
  */
-export const defaultTheme: ThemeConfig = {
+export const defaultTheme : ThemeConfig = {
   name: 'default',
   displayName: 'Emarzona (Défaut)',
   description: 'Thème sombre actuel d\'Emarzona',
@@ -459,7 +459,7 @@ export const defaultTheme: ThemeConfig = {
 /**
  * Tous les thèmes disponibles
  */
-export const themes: Record<ThemeName, ThemeConfig> = {
+export const themes : Record<ThemeName, ThemeConfig> = {
   professional: professionalTheme,
   minimal: minimalTheme,
   dark: darkTheme,
@@ -479,5 +479,12 @@ export const getTheme = (name: ThemeName): ThemeConfig => {
 /**
  * Liste des noms de thèmes
  */
-export const themeNames: ThemeName[] = ['professional', 'minimal', 'dark', 'spacious', 'classic', 'default'];
+export const themeNames : ThemeName[] = ['professional', 'minimal', 'dark', 'spacious', 'classic', 'default'];
+
+
+
+
+
+
+
 

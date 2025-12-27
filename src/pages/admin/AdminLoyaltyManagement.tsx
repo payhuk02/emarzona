@@ -68,14 +68,14 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
-const TIER_TYPES: { value: LoyaltyTierType; label: string; color: string }[] = [
+const  TIER_TYPES: { value: LoyaltyTierType; label: string; color: string }[] = [
   { value: 'bronze', label: 'Bronze', color: '#CD7F32' },
   { value: 'silver', label: 'Silver', color: '#C0C0C0' },
   { value: 'gold', label: 'Gold', color: '#FFD700' },
   { value: 'platinum', label: 'Platinum', color: '#E5E4E2' },
 ];
 
-const REWARD_TYPES: { value: LoyaltyRewardType; label: string }[] = [
+const  REWARD_TYPES: { value: LoyaltyRewardType; label: string }[] = [
   { value: 'discount', label: 'Réduction' },
   { value: 'free_product', label: 'Produit gratuit' },
   { value: 'free_shipping', label: 'Livraison gratuite' },
@@ -1121,3 +1121,9 @@ export default function AdminLoyaltyManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

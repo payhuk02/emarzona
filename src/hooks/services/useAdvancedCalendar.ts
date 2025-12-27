@@ -82,7 +82,7 @@ export const useCalendarBookings = (
       }
 
       // Récupérer les réservations
-      let query = supabase
+      let  query= supabase
         .from('service_bookings')
         .select(`
           *,
@@ -127,7 +127,7 @@ export const useCalendarBookings = (
         : { data: [] };
 
       // Transformer en format calendrier
-      const bookings: CalendarBooking[] = (data || []).map((booking) => {
+      const  bookings: CalendarBooking[] = (data || []).map((booking) => {
         const scheduledDate = new Date(booking.scheduled_date);
         const startTime = booking.scheduled_start_time?.split(':') || ['9', '0'];
         const endTime = booking.scheduled_end_time?.split(':') || ['10', '0'];
@@ -177,7 +177,7 @@ export const useCalendarStaff = (storeId?: string, serviceId?: string) => {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('service_staff_members')
         .select('*')
         .eq('store_id', storeId)
@@ -206,7 +206,7 @@ export const useCalendarStaff = (storeId?: string, serviceId?: string) => {
         '#84cc16', // lime
       ];
 
-      const staff: CalendarStaff[] = (data || []).map((member, index) => ({
+      const  staff: CalendarStaff[] = (data || []).map((member, index) => ({
         id: member.id,
         name: member.name,
         email: member.email,
@@ -360,4 +360,10 @@ export const useUpdateBookingStaff = () => {
     },
   });
 };
+
+
+
+
+
+
 

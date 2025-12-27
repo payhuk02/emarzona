@@ -31,7 +31,7 @@ interface ErrorFallbackProps {
   level: 'app' | 'page' | 'section' | 'component';
 }
 
-export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
+export const ErrorFallback : React.FC<ErrorFallbackProps> = ({
   error,
   resetError,
   level,
@@ -201,7 +201,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
 /**
  * Composant pour les erreurs 404
  */
-export const NotFoundFallback: React.FC = () => {
+export const NotFoundFallback : React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="max-w-md w-full p-8 space-y-6 text-center">
@@ -243,7 +243,7 @@ export const NotFoundFallback: React.FC = () => {
 /**
  * Composant pour les erreurs réseau
  */
-export const NetworkErrorFallback: React.FC<{ retry?: () => void }> = ({ retry }) => {
+export const NetworkErrorFallback : React.FC<{ retry?: () => void }> = ({ retry }) => {
   return (
     <Card className="p-6 m-4 border-orange-200 dark:border-orange-800">
       <div className="flex items-start gap-4">
@@ -270,4 +270,11 @@ export const NetworkErrorFallback: React.FC<{ retry?: () => void }> = ({ retry }
     </Card>
   );
 };
+
+
+
+
+
+
+
 

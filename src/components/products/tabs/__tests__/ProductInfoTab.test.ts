@@ -377,7 +377,7 @@ describe('ProductInfoTab - LocalStorage pour historique des prix', () => {
     const storageKey = `priceHistory_${slug}`;
     localStorage.setItem(storageKey, 'invalid-json');
     
-    let history = [];
+    let  history= [];
     try {
       const stored = localStorage.getItem(storageKey);
       history = stored ? JSON.parse(stored) : [];
@@ -393,7 +393,7 @@ describe('ProductInfoTab - Historique des prix', () => {
   const MAX_PRICE_HISTORY_ENTRIES = 5;
 
   it('devrait ajouter une entrée à l\'historique', () => {
-    const priceHistory: Array<{date: string, price: number, promotional_price?: number}> = [];
+    const  priceHistory: Array<{date: string, price: number, promotional_price?: number}> = [];
     const newEntry = {
       date: new Date().toISOString(),
       price: 100,
@@ -407,10 +407,10 @@ describe('ProductInfoTab - Historique des prix', () => {
   });
 
   it('ne devrait conserver que les 5 dernières entrées', () => {
-    let priceHistory: Array<{date: string, price: number}> = [];
+    let  priceHistory: Array<{date: string, price: number}> = [];
     
     // Ajouter 10 entrées
-    for (let i = 0; i < 10; i++) {
+    for (let  i= 0; i < 10; i++) {
       const newEntry = {
         date: new Date().toISOString(),
         price: 100 + i
@@ -433,4 +433,10 @@ describe('ProductInfoTab - Historique des prix', () => {
     expect(new Date(priceHistory[1].date) > new Date(priceHistory[2].date)).toBe(true);
   });
 });
+
+
+
+
+
+
 

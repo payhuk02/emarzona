@@ -39,7 +39,7 @@ interface IntelligentPrefetchOptions {
 /**
  * Routes probables basées sur la route actuelle
  */
-const ROUTE_PATTERNS: Record<string, string[]> = {
+const  ROUTE_PATTERNS: Record<string, string[]> = {
   '/dashboard': [
     '/dashboard/products',
     '/dashboard/orders',
@@ -168,4 +168,10 @@ export function useIntelligentPrefetch(options: IntelligentPrefetchOptions = {})
     routesToPrefetch,
   };
 }
+
+
+
+
+
+
 

@@ -152,7 +152,7 @@ export interface CoursePackageManagerProps {
 /**
  * Mapping des types de packages
  */
-const PACKAGE_TYPE_LABELS: Record<PackageType, { label: string; icon: React.ElementType }> = {
+const  PACKAGE_TYPE_LABELS: Record<PackageType, { label: string; icon: React.ElementType }> = {
   bundle: { label: 'Bundle', icon: Package },
   learning_path: { label: 'Parcours d\'apprentissage', icon: Target },
   subscription: { label: 'Abonnement', icon: Calendar },
@@ -171,7 +171,7 @@ const PACKAGE_TYPE_LABELS: Record<PackageType, { label: string; icon: React.Elem
  * />
  * ```
  */
-export const CoursePackageManager: React.FC<CoursePackageManagerProps> = ({
+export const CoursePackageManager : React.FC<CoursePackageManagerProps> = ({
   packages,
   availableCourses,
   onCreate,
@@ -235,7 +235,7 @@ export const CoursePackageManager: React.FC<CoursePackageManagerProps> = ({
     const course = availableCourses.find((c) => c.id === courseId);
     if (!course) return;
 
-    const newCourse: PackageCourse = {
+    const  newCourse: PackageCourse = {
       id: course.id,
       name: course.name,
       price: course.price,
@@ -261,7 +261,7 @@ export const CoursePackageManager: React.FC<CoursePackageManagerProps> = ({
 
   // Ajouter un tier
   const addTier = () => {
-    const newTier: PackageTier = {
+    const  newTier: PackageTier = {
       id: `tier-${Date.now()}`,
       name: '',
       description: '',
@@ -760,4 +760,11 @@ export const CoursePackageManager: React.FC<CoursePackageManagerProps> = ({
 CoursePackageManager.displayName = 'CoursePackageManager';
 
 export default CoursePackageManager;
+
+
+
+
+
+
+
 

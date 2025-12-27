@@ -115,7 +115,7 @@ export const useEnrollments = () => {
   const { data: enrollments, isLoading, error, refetch } = useQuery({
     queryKey: ['enrollments', filters],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('enrollments')
         .select(`
           *,
@@ -240,7 +240,7 @@ export const useEnrollments = () => {
       const enrollments = (allEnrollments || []) as Enrollment[];
 
       // Calculer les statistiques
-      const stats: EnrollmentStats = {
+      const  stats: EnrollmentStats = {
         total_enrollments: enrollments.length,
         active_enrollments: enrollments.filter(e => e.status === 'active').length,
         completed_enrollments: enrollments.filter(e => e.status === 'completed').length,
@@ -561,4 +561,10 @@ export const useEnrollments = () => {
 };
 
 export default useEnrollments;
+
+
+
+
+
+
 

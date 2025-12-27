@@ -100,7 +100,7 @@ export default function InventoryAnalytics() {
       }
 
       // Pour chaque produit, calculer les statistiques
-      const analyticsData: InventoryAnalytics[] = [];
+      const  analyticsData: InventoryAnalytics[] = [];
 
       for (const product of products || []) {
         // Récupérer le stock actuel
@@ -139,11 +139,11 @@ export default function InventoryAnalytics() {
         const daysInStock = totalSold > 0 ? Math.floor((currentStock / totalSold) * days) : days;
 
         // Classification ABC (basée sur le revenu)
-        const abcCategory: 'A' | 'B' | 'C' = 'C';
+        const  abcCategory: 'A' | 'B' | 'C' = 'C';
         // Sera calculé après avoir tous les produits
 
         // Type de mouvement
-        let movementType: 'fast' | 'medium' | 'slow' | 'dead' = 'dead';
+        let  movementType: 'fast' | 'medium' | 'slow' | 'dead' = 'dead';
         if (turnoverRate > 0.5) {
           movementType = 'fast';
         } else if (turnoverRate > 0.2) {
@@ -171,7 +171,7 @@ export default function InventoryAnalytics() {
       const sortedByRevenue = [...analyticsData].sort((a, b) => b.total_revenue - a.total_revenue);
       const totalRevenue = sortedByRevenue.reduce((sum, p) => sum + p.total_revenue, 0);
       
-      let cumulativeRevenue = 0;
+      let  cumulativeRevenue= 0;
       sortedByRevenue.forEach((product, index) => {
         cumulativeRevenue += product.total_revenue;
         const percentage = totalRevenue > 0 ? (cumulativeRevenue / totalRevenue) * 100 : 0;
@@ -192,7 +192,7 @@ export default function InventoryAnalytics() {
 
   // Filtered analytics
   const filteredAnalytics = useMemo(() => {
-    let filtered = analytics;
+    let  filtered= analytics;
 
     if (categoryFilter !== 'all') {
       filtered = filtered.filter((a) => a.abc_category === categoryFilter);
@@ -235,7 +235,7 @@ export default function InventoryAnalytics() {
 
   // Get ABC badge
   const getABCBadge = (category: string) => {
-    const config: Record<string, { label: string; className: string }> = {
+    const  config: Record<string, { label: string; className: string }> = {
       A: { label: 'A (80%)', className: 'bg-green-600 text-white' },
       B: { label: 'B (15%)', className: 'bg-yellow-600 text-white' },
       C: { label: 'C (5%)', className: 'bg-gray-600 text-white' },
@@ -252,7 +252,7 @@ export default function InventoryAnalytics() {
 
   // Get movement badge
   const getMovementBadge = (movement: string) => {
-    const config: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }> = {
+    const  config: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }> = {
       fast: { label: 'Rapide', variant: 'default', className: 'bg-green-600 text-white' },
       medium: { label: 'Moyen', variant: 'secondary', className: 'bg-yellow-600 text-white' },
       slow: { label: 'Lent', variant: 'secondary', className: 'bg-orange-600 text-white' },
@@ -326,7 +326,7 @@ export default function InventoryAnalytics() {
                       title: '✅ Export réussi',
                       description: `${filteredAnalytics.length} produit(s) exporté(s) en CSV`,
                     });
-                  } catch (error: unknown) {
+                  } catch ( _error: unknown) {
                     const errorMessage = error instanceof Error ? error.message : String(error);
                     toast({
                       title: '❌ Erreur',
@@ -722,4 +722,10 @@ export default function InventoryAnalytics() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

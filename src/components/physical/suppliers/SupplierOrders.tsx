@@ -72,7 +72,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const ORDER_STATUSES: {
+const  ORDER_STATUSES: {
   value: SupplierOrder['status'] | 'all';
   label: string;
   shortLabel: string;
@@ -210,7 +210,7 @@ export default function SupplierOrders() {
   const filteredOrders = useMemo(() => {
     if (!orders) return [];
 
-    let filtered = orders;
+    let  filtered= orders;
 
     // Filtrer par statut
     if (statusFilter !== 'all') {
@@ -362,7 +362,7 @@ export default function SupplierOrders() {
         setOrderItems([{ quantity: 1, unit_cost: 0 }]);
         setNotes('');
         setSelectedSupplier('');
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Impossible de créer la commande';
         toast({
@@ -393,7 +393,7 @@ export default function SupplierOrders() {
           title: '✅ Statut mis à jour',
           description: 'Le statut de la commande a été mis à jour',
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Impossible de mettre à jour le statut';
         toast({
@@ -1154,3 +1154,9 @@ export default function SupplierOrders() {
     </div>
   );
 }
+
+
+
+
+
+

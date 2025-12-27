@@ -26,7 +26,7 @@ interface FormFieldWithValidationProps {
   validationRules?: Array<(value: string) => string | null>;
 }
 
-export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = ({
+export const FormFieldWithValidation : React.FC<FormFieldWithValidationProps> = ({
   label,
   name,
   value,
@@ -51,7 +51,7 @@ export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = (
 
     setIsValidating(true);
     const timer = setTimeout(() => {
-      let validationError: string | null = null;
+      let  validationError: string | null = null;
 
       // Validation required
       if (required && !value.trim()) {
@@ -127,4 +127,11 @@ export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = (
     </div>
   );
 };
+
+
+
+
+
+
+
 

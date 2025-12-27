@@ -49,7 +49,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
-export const StockAlerts: React.FC = () => {
+export const StockAlerts : React.FC = () => {
   const { store } = useStore();
   const { data: alerts = [], isLoading } = useStockAlerts(store?.id, false);
   const { data: unresolvedAlerts = [] } = useStockAlerts(store?.id, false);
@@ -543,3 +543,10 @@ function AlertCard({ alert, getSeverityColor, getAlertTypeLabel, onResolve, anim
     </Card>
   );
 }
+
+
+
+
+
+
+

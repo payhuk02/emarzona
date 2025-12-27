@@ -156,7 +156,7 @@ export const useCouponCustomerUsage = (couponId?: string, customerId?: string) =
         return [];
       }
 
-      let query = supabase
+      let  query= supabase
         .from('coupon_customer_usage')
         .select('*')
         .order('used_at', { ascending: false });
@@ -223,7 +223,7 @@ export const useValidateCombinedCoupons = () => {
       }
 
       // Vérifier l'usage unique pour chaque coupon si customerId fourni
-      const coupons: Array<{
+      const  coupons: Array<{
         id: string;
         code: string;
         discount: number;
@@ -283,4 +283,10 @@ export const useValidateCombinedCoupons = () => {
     },
   });
 };
+
+
+
+
+
+
 

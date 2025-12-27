@@ -82,7 +82,7 @@ export default function WarrantiesManagement() {
 
       if (error) throw error;
       setWarranties(data || []);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -166,7 +166,7 @@ export default function WarrantiesManagement() {
       }
       handleCloseDialog();
       loadWarranties();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -192,7 +192,7 @@ export default function WarrantiesManagement() {
         description: 'La garantie a été supprimée avec succès',
       });
       loadWarranties();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -511,4 +511,10 @@ export default function WarrantiesManagement() {
     </div>
   );
 }
+
+
+
+
+
+
 

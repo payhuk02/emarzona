@@ -898,7 +898,7 @@ const AdminAffiliates = () => {
                                     }}
                                     className="gap-1 min-h-[44px] w-full sm:w-auto"
                                   >
-                                    <Wallet className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    <Wallet  className ="h-3 w-3 sm:h-4 sm:w-4" />
                                     <span className="hidden sm:inline">Marquer payé</span>
                                     <span className="sm:hidden">Payé</span>
                                   </Button>
@@ -943,7 +943,7 @@ const AdminAffiliates = () => {
               <CardContent>
                 {pendingWithdrawals.length > 0 && (
                   <Alert className="mb-6">
-                    <Wallet className="h-4 w-4" />
+                    <Wallet  className ="h-4 w-4" />
                     <AlertTitle>Retraits en attente</AlertTitle>
                     <AlertDescription>
                       {pendingWithdrawals.length} demande(s) pour un total de{' '}
@@ -1281,3 +1281,9 @@ const AdminAffiliates = () => {
 };
 
 export default AdminAffiliates;
+
+
+
+
+
+

@@ -61,19 +61,19 @@ interface EmailWorkflowManagerProps {
   onEditWorkflow?: (workflow: EmailWorkflow) => void;
 }
 
-const STATUS_LABELS: Record<WorkflowStatus, string> = {
+const  STATUS_LABELS: Record<WorkflowStatus, string> = {
   active: 'Actif',
   paused: 'En pause',
   archived: 'Archivé',
 };
 
-const STATUS_COLORS: Record<WorkflowStatus, string> = {
+const  STATUS_COLORS: Record<WorkflowStatus, string> = {
   active: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
   paused: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
   archived: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const TRIGGER_TYPE_LABELS: Record<string, string> = {
+const  TRIGGER_TYPE_LABELS: Record<string, string> = {
   event: 'Événement',
   time: 'Temps',
   condition: 'Condition',
@@ -121,7 +121,7 @@ export const EmailWorkflowManager = ({
   };
 
   const handleToggleStatus = async (workflow: EmailWorkflow) => {
-    const newStatus: WorkflowStatus = workflow.status === 'active' ? 'paused' : 'active';
+    const  newStatus: WorkflowStatus = workflow.status === 'active' ? 'paused' : 'active';
     await updateWorkflow.mutateAsync({
       workflowId: workflow.id,
       payload: { status: newStatus, is_active: newStatus === 'active' },
@@ -325,3 +325,9 @@ export const EmailWorkflowManager = ({
     </>
   );
 };
+
+
+
+
+
+

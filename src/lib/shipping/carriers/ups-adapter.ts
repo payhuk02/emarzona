@@ -102,7 +102,7 @@ export class UPSAdapter implements CarrierAdapter {
       return this.simulateTracking(trackingNumber);
     }
 
-    const events: TrackingUpdate[] = [];
+    const  events: TrackingUpdate[] = [];
     const activities = trackResponse.Package?.[0]?.Activity || [];
 
     for (const activity of activities) {
@@ -136,7 +136,7 @@ export class UPSAdapter implements CarrierAdapter {
    * Mappe les statuts UPS vers nos statuts standard
    */
   private mapUPSStatus(upsStatus: string): string {
-    const statusMap: Record<string, string> = {
+    const  statusMap: Record<string, string> = {
       'I': 'in_transit', // In Transit
       'D': 'delivered', // Delivered
       'X': 'cancelled', // Cancelled
@@ -160,4 +160,10 @@ export class UPSAdapter implements CarrierAdapter {
     };
   }
 }
+
+
+
+
+
+
 

@@ -718,3 +718,9 @@ export type StoreLegalFormData = z.infer<typeof storeLegalSchema>;
 export type StoreAnalyticsFormData = z.infer<typeof storeAnalyticsSchema>;
 export type CustomerFormData = z.infer<typeof customerSchema>;
 export type AuthFormData = z.infer<typeof authSchema>;
+
+
+
+
+
+

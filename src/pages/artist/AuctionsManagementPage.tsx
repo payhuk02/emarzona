@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { _Tabs, _TabsContent, _TabsList, _TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Dialog,
@@ -37,20 +37,20 @@ import {
   Edit,
   Trash2,
   Eye,
-  Clock,
+  _Clock,
   TrendingUp,
   Users,
   DollarSign,
-  Calendar,
-  Settings,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
+  _Calendar,
+  _Settings,
+  _CheckCircle2,
+  _XCircle,
+  _AlertCircle,
 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { useToast } from '@/hooks/use-toast';
 import {
-  useActiveAuctions,
+  _useActiveAuctions,
   useStoreAuctions,
   useCreateAuction,
   useUpdateAuction,
@@ -63,7 +63,7 @@ import { fr } from 'date-fns/locale';
 export default function AuctionsManagementPage() {
   const { store } = useStore();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { _toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedAuction, setSelectedAuction] = useState<ArtistProductAuction | null>(null);
 
@@ -79,7 +79,7 @@ export default function AuctionsManagementPage() {
       await createAuction.mutateAsync({
         ...formData,
         store_id: store.id,
-      } as any);
+      } as Partial<ArtistProductAuction> & { store_id: string });
       setIsCreateDialogOpen(false);
     } catch (error) {
       // Error handled by mutation
@@ -87,7 +87,7 @@ export default function AuctionsManagementPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       draft: 'secondary',
       scheduled: 'outline',
       active: 'default',
@@ -97,7 +97,7 @@ export default function AuctionsManagementPage() {
       sold: 'default',
     };
 
-    const colors: Record<string, string> = {
+    const  colors: Record<string, string> = {
       active: 'bg-green-500',
       sold: 'bg-blue-500',
     };
@@ -470,10 +470,10 @@ function EditAuctionDialog({
 }: {
   auction: ArtistProductAuction;
   onClose: () => void;
-  onUpdate: (data: Partial<ArtistProductAuction> & { id: string }) => Promise<any>;
+  onUpdate: (data: Partial<ArtistProductAuction> & { id: string }) => Promise<void>;
 }) {
   const [formData, setFormData] = useState(auction);
-  const { toast } = useToast();
+  const { _toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -501,7 +501,7 @@ function EditAuctionDialog({
             <Label htmlFor="status">Statut</Label>
             <Select
               value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value as any })}
+              onValueChange={(value) => setFormData({ ...formData, status: value as ArtistProductAuction['status'] })}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -537,4 +537,10 @@ function EditAuctionDialog({
     </Dialog>
   );
 }
+
+
+
+
+
+
 

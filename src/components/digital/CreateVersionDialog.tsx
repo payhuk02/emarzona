@@ -118,7 +118,7 @@ export function CreateVersionDialog({
       if (files.length === 0) return;
 
       // Valider les fichiers
-      const validFiles: UploadedFile[] = files.map((file) => ({
+      const  validFiles: UploadedFile[] = files.map((file) => ({
         file,
         progress: 0,
         status: 'pending' as const,
@@ -192,9 +192,9 @@ export function CreateVersionDialog({
       // Mettre à jour les fichiers avec les résultats
       setSelectedFiles((prev) => {
         const updated = [...prev];
-        let resultIndex = 0;
+        let  resultIndex= 0;
 
-        for (let i = 0; i < updated.length; i++) {
+        for (let  i= 0; i < updated.length; i++) {
           if (updated[i].status === 'uploading') {
             if (resultIndex < uploadResults.length) {
               updated[i] = {
@@ -218,7 +218,7 @@ export function CreateVersionDialog({
       });
 
       return uploadResults;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading files', { error: errorMessage });
 
@@ -275,7 +275,7 @@ export function CreateVersionDialog({
         .map(Number);
 
       // Créer la version
-      const versionInput: CreateDigitalProductVersionInput = {
+      const  versionInput: CreateDigitalProductVersionInput = {
         digital_product_id: digitalProductId,
         product_id: productId,
         version_number: data.version_number,
@@ -303,7 +303,7 @@ export function CreateVersionDialog({
       setUploadProgress(0);
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating version', { error: errorMessage });
       toast({
@@ -557,4 +557,10 @@ export function CreateVersionDialog({
     </Dialog>
   );
 }
+
+
+
+
+
+
 

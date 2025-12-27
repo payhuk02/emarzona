@@ -25,7 +25,7 @@ interface StoreMarketingSectionsProps {
   store: Store | null;
 }
 
-export const StoreMarketingSections: React.FC<StoreMarketingSectionsProps> = ({
+export const StoreMarketingSections : React.FC<StoreMarketingSectionsProps> = ({
   marketingContent,
   store,
 }) => {
@@ -536,4 +536,11 @@ export const StoreMarketingSections: React.FC<StoreMarketingSectionsProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+
 

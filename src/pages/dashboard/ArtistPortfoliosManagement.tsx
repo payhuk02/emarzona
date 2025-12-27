@@ -124,7 +124,7 @@ export default function ArtistPortfoliosManagement() {
 
       refetch();
       setDeletingPortfolio(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error deleting portfolio', { error });
       toast({
@@ -444,4 +444,10 @@ export default function ArtistPortfoliosManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

@@ -45,7 +45,7 @@ export const useCustomers = (
       }
 
       try {
-        let query = supabase
+        let  query= supabase
           .from('customers')
           .select('*', { count: 'exact' })
           .eq('store_id', storeId);
@@ -71,7 +71,7 @@ export const useCustomers = (
         }
 
         return { data: (data as Customer[]) || [], count: count || 0 };
-      } catch (error: any) {
+      } catch ( _error: any) {
         logger.error('Error in useCustomers', { error, storeId });
         throw error;
       }
@@ -102,3 +102,9 @@ export const useCustomersLegacy = (storeId?: string) => {
     },
   };
 };
+
+
+
+
+
+

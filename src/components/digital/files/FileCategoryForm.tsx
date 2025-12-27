@@ -109,7 +109,7 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
         parent_category_id: formData.parent_category_id || undefined,
       });
       onSuccess();
-    } catch (error: any) {
+    } catch ( _error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -223,4 +223,10 @@ export const FileCategoryForm = ({ category, onSuccess, onCancel }: FileCategory
     </form>
   );
 };
+
+
+
+
+
+
 

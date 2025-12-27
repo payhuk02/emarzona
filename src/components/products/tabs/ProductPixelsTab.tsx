@@ -83,7 +83,7 @@ interface PixelPlatform {
 /**
  * Plateformes de pixels supportées avec leur configuration
  */
-const PIXEL_PLATFORMS: PixelPlatform[] = [
+const  PIXEL_PLATFORMS: PixelPlatform[] = [
   {
     id: 'facebook',
     name: 'Facebook',
@@ -663,3 +663,9 @@ export const ProductPixelsTab = ({ formData, updateFormData }: ProductPixelsTabP
     </div>
   );
 };
+
+
+
+
+
+

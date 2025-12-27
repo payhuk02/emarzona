@@ -377,3 +377,9 @@ function AlertCard({ alert, getAlertTypeBadge, onResolve, animationDelay = 0 }: 
     </Card>
   );
 }
+
+
+
+
+
+

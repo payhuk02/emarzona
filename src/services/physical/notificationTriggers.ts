@@ -57,7 +57,7 @@ export async function triggerPriceChangeNotifications(
     }
 
     // Récupérer les informations des variants si nécessaire
-    let variantName: string | undefined;
+    let  variantName: string | undefined;
     if (variantId) {
       const { data: variant } = await supabase
         .from('physical_product_variants')
@@ -132,7 +132,7 @@ export async function triggerPriceChangeNotifications(
         priceDropPercentage,
       });
     }
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     logger.error('Error triggering price change notifications', { error, productId, variantId });
   }
 }
@@ -148,14 +148,14 @@ export async function triggerStockChangeNotifications(
 ): Promise<void> {
   try {
     // Déterminer le statut précédent et actuel
-    const previousStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
+    const  previousStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
       previousQuantity === 0
         ? 'out_of_stock'
         : previousQuantity < 10
           ? 'low_stock'
           : 'in_stock';
 
-    const currentStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
+    const  currentStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
       currentQuantity === 0
         ? 'out_of_stock'
         : currentQuantity < 10
@@ -201,7 +201,7 @@ export async function triggerStockChangeNotifications(
     }
 
     // Récupérer les informations des variants si nécessaire
-    let variantName: string | undefined;
+    let  variantName: string | undefined;
     if (variantId) {
       const { data: variant } = await supabase
         .from('physical_product_variants')
@@ -274,7 +274,7 @@ export async function triggerStockChangeNotifications(
         currentStatus,
       });
     }
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     logger.error('Error triggering stock change notifications', { error, productId, variantId });
   }
 }
@@ -382,7 +382,7 @@ export async function triggerShipmentNotification(
       orderId,
       shipmentStatus,
     });
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     logger.error('Error triggering shipment notification', { error, orderId });
   }
 }
@@ -481,8 +481,14 @@ export async function triggerReturnNotification(
       returnId,
       returnStatus,
     });
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     logger.error('Error triggering return notification', { error, returnId });
   }
 }
+
+
+
+
+
+
 

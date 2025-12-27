@@ -48,7 +48,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
       return [];
     }
 
-    const schedule: Array<{
+    const  schedule: Array<{
       sectionId: string;
       sectionTitle: string;
       orderIndex: number;
@@ -58,7 +58,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
     }> = [];
 
     sections.forEach((section, index) => {
-      let unlockAfterDays = 0;
+      let  unlockAfterDays= 0;
       
       if (dripType === 'daily') {
         unlockAfterDays = dripInterval * (index + 1);
@@ -134,7 +134,7 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
       });
 
       onSuccess?.();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error saving drip content config', { error, courseId });
       const errorMessage = error instanceof Error ? error.message : 'Impossible de sauvegarder la configuration';
       toast({
@@ -287,4 +287,10 @@ export const DripContentConfig = ({ courseId, onSuccess }: DripContentConfigProp
     </Card>
   );
 };
+
+
+
+
+
+
 

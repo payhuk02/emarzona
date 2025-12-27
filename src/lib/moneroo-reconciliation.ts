@@ -65,7 +65,7 @@ export async function reconcileTransaction(
     }
 
     // Récupérer les détails depuis Moneroo
-    let monerooPayment;
+    let  _monerooPayment;
     try {
       monerooPayment = await monerooClient.getPayment(transaction.moneroo_transaction_id);
     } catch (monerooError) {
@@ -77,8 +77,8 @@ export async function reconcileTransaction(
     }
 
     // Comparer les données
-    const discrepancies: ReconciliationResult['discrepancies'] = {};
-    let hasDiscrepancy = false;
+    const  discrepancies: ReconciliationResult['discrepancies'] = {};
+    let  hasDiscrepancy= false;
 
     // Comparer le montant
     const dbAmount = parseFloat(transaction.amount.toString());
@@ -164,7 +164,7 @@ export async function reconcileTransactions(
 ): Promise<ReconciliationReport> {
   try {
     // Construire la requête
-    let query = supabase
+    let  query= supabase
       .from('transactions')
       .select('id, moneroo_transaction_id, status, amount, currency')
       .eq('payment_provider', 'moneroo')
@@ -199,12 +199,12 @@ export async function reconcileTransactions(
     }
 
     // Réconcilier chaque transaction
-    const results: ReconciliationResult[] = [];
-    let matched = 0;
-    let mismatched = 0;
-    let missingInDb = 0;
-    let missingInMoneroo = 0;
-    let errors = 0;
+    const  results: ReconciliationResult[] = [];
+    let  matched= 0;
+    let  mismatched= 0;
+    let  missingInDb= 0;
+    let  missingInMoneroo= 0;
+    let  errors= 0;
 
     for (const transaction of transactions) {
       const result = await reconcileTransaction(transaction.id);
@@ -256,7 +256,7 @@ export async function reconcileTransactions(
  * Mappe le statut Moneroo vers le statut interne
  */
 function mapMonerooStatus(monerooStatus: string): string {
-  const statusMap: Record<string, string> = {
+  const  statusMap: Record<string, string> = {
     'completed': 'completed',
     'success': 'completed',
     'failed': 'failed',
@@ -288,6 +288,12 @@ export async function generateReconciliationReport(
 
   return report;
 }
+
+
+
+
+
+
 
 
 

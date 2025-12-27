@@ -117,7 +117,7 @@ export const useProductWarranties = (productId?: string, variantId?: string) => 
     queryFn: async () => {
       if (!productId) throw new Error('Product ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('product_warranties')
         .select('*')
         .eq('product_id', productId)
@@ -161,7 +161,7 @@ export const useWarrantyRegistrations = (
     queryFn: async () => {
       if (!userId) throw new Error('User ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('warranty_registrations')
         .select(
           `
@@ -218,7 +218,7 @@ export const useWarrantyClaims = (
     queryFn: async () => {
       if (!userId) throw new Error('User ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('warranty_claims')
         .select(
           `
@@ -457,3 +457,9 @@ export const useCreateWarrantyClaim = () => {
     },
   });
 };
+
+
+
+
+
+

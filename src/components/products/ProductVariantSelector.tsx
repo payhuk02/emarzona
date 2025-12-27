@@ -95,7 +95,7 @@ export const ProductVariantSelector = ({
 
   // Affichage des labels selon le type d'attribut
   const getAttributeLabel = (type: string): string => {
-    const labels: { [key: string]: string } = {
+    const  labels: { [key: string]: string } = {
       color: 'Couleur',
       colour: 'Couleur',
       size: 'Taille',
@@ -226,3 +226,9 @@ export const ProductVariantSelector = ({
     </div>
   );
 };
+
+
+
+
+
+

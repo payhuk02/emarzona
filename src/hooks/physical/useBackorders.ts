@@ -79,7 +79,7 @@ export function useBackorders(storeId: string | null, filters?: {
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('backorders')
         .select(`
           *,
@@ -316,7 +316,7 @@ export function useReceiveBackorderStock() {
       const newPendingQuantity = Math.max(0, backorder.pending_quantity - quantity);
 
       // Déterminer le nouveau statut
-      let newStatus: BackorderStatus = backorder.status;
+      let  newStatus: BackorderStatus = backorder.status;
       if (newReceivedQuantity >= backorder.ordered_quantity) {
         newStatus = 'received';
       } else if (newReceivedQuantity > 0) {
@@ -488,4 +488,10 @@ export function useMarkBackorderOrdered() {
     },
   });
 }
+
+
+
+
+
+
 

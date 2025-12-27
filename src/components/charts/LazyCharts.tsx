@@ -72,14 +72,14 @@ export const useRechartsLoader = () => {
   React.useEffect(() => {
     import('recharts')
       .then(() => setIsLoaded(true))
-      .catch(setError);
+      .catch (setError);
   }, []);
 
   return { isLoaded, error };
 };
 
 // Wrapper pour ResponsiveContainer avec lazy loading
-export const LazyResponsiveContainer: React.FC<{
+export const LazyResponsiveContainer : React.FC<{
   width?: string | number;
   height?: string | number;
   children: React.ReactNode;
@@ -106,4 +106,11 @@ export const LazyResponsiveContainer: React.FC<{
     </RespContainer>
   );
 };
+
+
+
+
+
+
+
 

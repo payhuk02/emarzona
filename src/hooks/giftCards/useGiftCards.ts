@@ -26,7 +26,7 @@ export const useGiftCards = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('gift_cards')
         .select(`
           *,
@@ -415,4 +415,10 @@ export const useCustomerGiftCardTransactions = (customerId?: string) => {
     enabled: !!customerId && !!user?.email
   });
 };
+
+
+
+
+
+
 

@@ -38,3 +38,9 @@ export const DEFAULT_MEDIA_SIZES = {
   /** Aperçu dans les notifications */
   notification: 'thumbnail' as MediaSize,
 } as const;
+
+
+
+
+
+

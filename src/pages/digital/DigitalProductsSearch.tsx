@@ -113,7 +113,7 @@ export const DigitalProductsSearch = () => {
 
   // Charger l'historique depuis localStorage
   useEffect(() => {
-    let saved: string | null = null;
+    let  saved: string | null = null;
     try {
       saved = localStorage.getItem('digital-products-search-history');
     } catch {
@@ -190,7 +190,7 @@ export const DigitalProductsSearch = () => {
             .filter(tag => tag?.toLowerCase().includes(debouncedQuery.toLowerCase()))
             .slice(0, 5) || [];
 
-        const suggestions: SearchSuggestion[] = [
+        const  suggestions: SearchSuggestion[] = [
           ...(products?.map(p => ({
             id: p.id,
             text: p.name,
@@ -209,7 +209,7 @@ export const DigitalProductsSearch = () => {
         ];
 
         return suggestions.slice(0, 10);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Error fetching search suggestions', { error });
         return [];
       }
@@ -222,7 +222,7 @@ export const DigitalProductsSearch = () => {
     queryKey: ['digitalProductsSearch', filters],
     queryFn: async () => {
       try {
-        let query = supabase
+        let  query= supabase
           .from('products')
           .select(
             `
@@ -280,7 +280,7 @@ export const DigitalProductsSearch = () => {
 
         if (error) throw error;
         return data || [];
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Error searching digital products', { error });
         throw error;
       }
@@ -420,7 +420,7 @@ export const DigitalProductsSearch = () => {
 
   // Compteur de filtres actifs
   const activeFiltersCount = useMemo(() => {
-    let count = 0;
+    let  count= 0;
     if (filters.query) count++;
     if (filters.category !== 'all') count++;
     if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) count++;
@@ -815,3 +815,9 @@ export const DigitalProductsSearch = () => {
     </div>
   );
 };
+
+
+
+
+
+

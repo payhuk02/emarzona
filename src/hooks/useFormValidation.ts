@@ -65,7 +65,7 @@ export function useFormValidation<T extends Record<string, any>>(
 
   // Valider tous les champs
   const validateAll = useCallback((): boolean => {
-    const newErrors: Partial<Record<keyof T, string>> = {};
+    const  newErrors: Partial<Record<keyof T, string>> = {};
 
     Object.keys(values).forEach((key) => {
       const fieldName = key as keyof T;
@@ -275,4 +275,10 @@ export const commonRules = {
     message,
   }),
 };
+
+
+
+
+
+
 

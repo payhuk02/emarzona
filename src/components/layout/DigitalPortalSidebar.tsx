@@ -57,7 +57,7 @@ export const DigitalPortalSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Portail Digital', path: '/account/digital' },
     { label: activeSection },
   ];
@@ -91,4 +91,10 @@ export const DigitalPortalSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

@@ -30,7 +30,7 @@ interface ArtistPreviewProps {
   data: Partial<ArtistProductFormData>;
 }
 
-const ARTIST_TYPE_LABELS: Record<string, string> = {
+const  ARTIST_TYPE_LABELS: Record<string, string> = {
   writer: 'Écrivain / Auteur',
   musician: 'Musicien / Compositeur',
   visual_artist: 'Artiste Visuel',
@@ -39,7 +39,7 @@ const ARTIST_TYPE_LABELS: Record<string, string> = {
   other: 'Autre',
 };
 
-const EDITION_TYPE_LABELS: Record<string, string> = {
+const  EDITION_TYPE_LABELS: Record<string, string> = {
   original: 'Original',
   limited_edition: 'Édition Limitée',
   print: 'Tirage',
@@ -459,4 +459,10 @@ export const ArtistPreview = ({ data }: ArtistPreviewProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

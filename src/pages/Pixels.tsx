@@ -215,3 +215,9 @@ const Pixels = () => {
 };
 
 export default Pixels;
+
+
+
+
+
+

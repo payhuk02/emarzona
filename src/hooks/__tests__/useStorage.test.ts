@@ -4,7 +4,7 @@ import { useStorage, useLocalStorage, useSessionStorage } from '../useStorage';
 
 // Mock localStorage and sessionStorage
 const localStorageMock = (() => {
-  let store: Record<string, string> = {};
+  let  store: Record<string, string> = {};
 
   return {
     getItem: (key: string) => store[key] || null,
@@ -21,7 +21,7 @@ const localStorageMock = (() => {
 })();
 
 const sessionStorageMock = (() => {
-  let store: Record<string, string> = {};
+  let  store: Record<string, string> = {};
 
   return {
     getItem: (key: string) => store[key] || null,
@@ -244,4 +244,10 @@ describe('useSessionStorage', () => {
     expect(localStorageMock.getItem('test-key')).toBeNull();
   });
 });
+
+
+
+
+
+
 

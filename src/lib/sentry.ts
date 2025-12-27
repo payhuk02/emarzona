@@ -104,7 +104,7 @@ export const initSentry = () => {
       profilesSampleRate: ENV === 'production' ? 0.05 : 0.5, // Réduit pour éviter le rate limiting
 
       // Options avancées
-      beforeSend(event, _hint) {
+      beforeSend(event, hint) {
         // Filtrer certains types d'erreurs en production
         if (ENV === 'production') {
           // Ignorer les erreurs réseau mineures
@@ -191,7 +191,7 @@ export const initSentry = () => {
       // Rate limiting - Limiter le nombre d'événements par seconde
       // Cela aide à éviter les erreurs 429 de Sentry
       maxQueueSize: 30, // Limiter la taille de la queue
-      beforeBreadcrumb(breadcrumb, _hint) {
+      beforeBreadcrumb(breadcrumb, hint) {
         // Filtrer les breadcrumbs qui peuvent causer des problèmes
         // Ignorer les breadcrumbs de fetch pour les requêtes Sentry
         if (breadcrumb.category === 'fetch' && breadcrumb.data) {
@@ -348,3 +348,9 @@ export const withSentry = async <T>(
     }
   );
 };
+
+
+
+
+
+

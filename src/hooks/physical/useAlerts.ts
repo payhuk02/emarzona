@@ -79,7 +79,7 @@ export const useAlerts = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('physical_product_alerts')
         .select(`
           *,
@@ -346,4 +346,10 @@ export const useUpdateNotificationPreferences = () => {
     },
   });
 };
+
+
+
+
+
+
 

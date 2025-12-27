@@ -120,7 +120,7 @@ export interface WaitlistManagerProps {
 /**
  * Configuration des statuts
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   WaitlistStatus,
   { label: string; color: string; icon: React.ElementType }
 > = {
@@ -151,7 +151,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-const PRIORITY_CONFIG: Record<WaitlistPriority, { label: string; color: string }> = {
+const  PRIORITY_CONFIG: Record<WaitlistPriority, { label: string; color: string }> = {
   normal: { label: 'Normal', color: 'bg-gray-100 text-gray-700' },
   high: { label: 'Élevée', color: 'bg-orange-100 text-orange-700' },
   urgent: { label: 'Urgente', color: 'bg-red-100 text-red-700' },
@@ -160,7 +160,7 @@ const PRIORITY_CONFIG: Record<WaitlistPriority, { label: string; color: string }
 /**
  * WaitlistManager - Gestion de la liste d'attente
  */
-export const WaitlistManager: React.FC<WaitlistManagerProps> = ({
+export const WaitlistManager : React.FC<WaitlistManagerProps> = ({
   entries,
   onNotify,
   onNotifyAll,
@@ -180,7 +180,7 @@ export const WaitlistManager: React.FC<WaitlistManagerProps> = ({
 
   // Filtrer et trier
   const filteredEntries = useMemo(() => {
-    let result = [...entries];
+    let  result= [...entries];
 
     // Filtre service
     if (filterService && filterService !== 'all') {
@@ -205,8 +205,8 @@ export const WaitlistManager: React.FC<WaitlistManagerProps> = ({
 
     // Tri
     result.sort((a, b) => {
-      let aValue: any = a[sortBy];
-      let bValue: any = b[sortBy];
+      let  aValue: any = a[sortBy];
+      let  bValue: any = b[sortBy];
 
       if (sortBy === 'createdAt') {
         aValue = new Date(aValue).getTime();
@@ -561,4 +561,11 @@ export const WaitlistManager: React.FC<WaitlistManagerProps> = ({
 WaitlistManager.displayName = 'WaitlistManager';
 
 export default WaitlistManager;
+
+
+
+
+
+
+
 

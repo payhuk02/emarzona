@@ -93,7 +93,7 @@ export default function CohortsManagementPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       draft: 'secondary',
       open: 'default',
       full: 'outline',
@@ -102,7 +102,7 @@ export default function CohortsManagementPage() {
       cancelled: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       draft: 'Brouillon',
       open: 'Inscriptions ouvertes',
       full: 'Complet',
@@ -622,4 +622,10 @@ function EditCohortDialog({
     </Dialog>
   );
 }
+
+
+
+
+
+
 

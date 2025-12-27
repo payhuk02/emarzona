@@ -228,3 +228,9 @@ const ArtistCertificateDisplayComponent = ({
 };
 
 export const ArtistCertificateDisplay = React.memo(ArtistCertificateDisplayComponent);
+
+
+
+
+
+

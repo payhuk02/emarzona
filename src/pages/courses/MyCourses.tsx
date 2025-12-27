@@ -320,7 +320,7 @@ const MyCourses = () => {
   const filteredAndSortedCourses = useMemo(() => {
     if (!enrollments) return [];
 
-    let filtered = [...enrollments];
+    let  filtered= [...enrollments];
 
     // Filtre de recherche
     if (searchQuery) {
@@ -935,7 +935,7 @@ const MyCourses = () => {
 
                                 <div className="flex items-center gap-1 px-1 sm:px-2">
                                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                    let pageNumber;
+                                    let  _pageNumber;
                                     if (totalPages <= 5) {
                                       pageNumber = i + 1;
                                     } else if (currentPage <= 3) {
@@ -1008,3 +1008,9 @@ const MyCourses = () => {
 };
 
 export default MyCourses;
+
+
+
+
+
+

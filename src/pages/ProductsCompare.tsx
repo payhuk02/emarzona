@@ -99,7 +99,7 @@ export default function ProductsCompare() {
     const urlIds = searchParams.get('ids')?.split(',').filter(Boolean) || [];
     if (urlIds.length > 0) return urlIds.slice(0, MAX_COMPARISON);
 
-    let saved: string | null = null;
+    let  saved: string | null = null;
     try {
       saved = localStorage.getItem('products-comparison');
     } catch {
@@ -279,7 +279,7 @@ export default function ProductsCompare() {
 
   // Filtrer et trier les produits
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products || [];
+    let  filtered= products || [];
 
     if (typeFilter !== 'all') {
       filtered = filtered.filter(p => p.product_type === typeFilter);
@@ -326,7 +326,7 @@ export default function ProductsCompare() {
       { key: 'reviews_count', label: 'Avis', type: 'number' },
     ];
 
-    const typeSpecificFields: Record<
+    const  typeSpecificFields: Record<
       string,
       Array<{ key: string; label: string; type: string }>
     > = {
@@ -396,7 +396,7 @@ export default function ProductsCompare() {
 
   // Grouper par type pour l'affichage (doit être avant les early returns)
   const productsByType = useMemo(() => {
-    const groups: Record<string, ComparisonProduct[]> = {};
+    const  groups: Record<string, ComparisonProduct[]> = {};
     filteredAndSortedProducts.forEach(product => {
       if (!groups[product.product_type]) {
         groups[product.product_type] = [];
@@ -722,3 +722,9 @@ export default function ProductsCompare() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

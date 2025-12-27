@@ -87,7 +87,7 @@ const Landing = () => {
 
     const duration = 2000;
     const startTime = Date.now();
-    let animationFrameId: number;
+    let  animationFrameId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -1575,10 +1575,10 @@ const Landing = () => {
                           <OptimizedImage
                             src={testimonial.avatar}
                             alt={`Photo de ${testimonial.name}`}
+                            priority={index === 0}
                             width={56}
                             height={56}
                             className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 flex-shrink-0 transition-all duration-300"
-                            priority={index === 0}
                             showPlaceholder={false}
                           />
                           <div className="min-w-0 flex-1">
@@ -2126,3 +2126,18 @@ const Landing = () => {
 };
 
 export default Landing;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

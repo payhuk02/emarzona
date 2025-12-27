@@ -175,7 +175,7 @@ export default function DisputeDetail() {
       setUploadingFiles(true);
 
       // Upload files if any
-      let fileUrls: string[] = [];
+      let  fileUrls: string[] = [];
       if (selectedFiles.length > 0) {
         fileUrls = await uploadFiles(selectedFiles);
       }
@@ -196,7 +196,7 @@ export default function DisputeDetail() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Send dispute message error', { error, disputeId });
       toast({
@@ -235,7 +235,7 @@ export default function DisputeDetail() {
       setShowResolveDialog(false);
       setResolution('');
       setAdminNotes('');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Resolve dispute error', { error, disputeId });
       toast({
@@ -252,7 +252,7 @@ export default function DisputeDetail() {
    * Get status badge
    */
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const  variants: Record<string, any> = {
       open: { variant: 'destructive', icon: AlertTriangle, label: 'Ouvert' },
       investigating: { variant: 'secondary', icon: Clock, label: 'En cours d\'investigation' },
       resolved: { variant: 'default', icon: CheckCircle, label: 'Résolu' },
@@ -497,7 +497,7 @@ export default function DisputeDetail() {
                                         const storagePath = extractStoragePath(url);
                                         
                                         // Déterminer le type MIME approximatif depuis l'extension
-                                        let fileType = 'application/octet-stream';
+                                        let  fileType= 'application/octet-stream';
                                         if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(fileExtension)) {
                                           fileType = `image/${fileExtension === 'jpg' ? 'jpeg' : fileExtension}`;
                                         } else if (['mp4', 'webm', 'ogg', 'mov', 'avi'].includes(fileExtension)) {
@@ -764,4 +764,10 @@ export default function DisputeDetail() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

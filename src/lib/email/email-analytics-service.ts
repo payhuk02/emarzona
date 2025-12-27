@@ -73,7 +73,7 @@ export class EmailAnalyticsService {
   ): Promise<EmailAnalytics> {
     try {
       // Récupérer les campagnes du store pour obtenir les campaign_ids
-      let campaignsQuery = supabase
+      let  campaignsQuery= supabase
         .from('email_campaigns')
         .select('id')
         .eq('store_id', storeId);
@@ -125,7 +125,7 @@ export class EmailAnalyticsService {
       }
 
       // Filtrer par dates si nécessaire
-      let filteredCampaigns = (campaignsWithMetrics || []).filter((campaign: any) => {
+      const filteredCampaigns = (campaignsWithMetrics || []).filter((campaign: any) => {
         if (!startDate && !endDate) return true;
         const campaignDate = campaign.created_at;
         if (!campaignDate) return false;
@@ -168,7 +168,7 @@ export class EmailAnalyticsService {
         bounce_rate: total_sent > 0 ? (total_bounced / total_sent) * 100 : 0,
         unsubscribe_rate: total_sent > 0 ? (total_unsubscribed / total_sent) * 100 : 0,
       };
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getStoreAnalytics error', {
         error: errorMessage,
@@ -201,7 +201,7 @@ export class EmailAnalyticsService {
         last_used_at: item.last_used_at,
         created_at: item.last_used_at, // Approximation
       }));
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getTagAnalytics error', {
         error: errorMessage,
@@ -227,7 +227,7 @@ export class EmailAnalyticsService {
       }
 
       // Pour chaque segment, calculer les performances des campagnes
-      const analytics: SegmentAnalytics[] = [];
+      const  analytics: SegmentAnalytics[] = [];
 
       for (const segment of segments || []) {
         const { data: campaigns } = await supabase
@@ -255,7 +255,7 @@ export class EmailAnalyticsService {
       }
 
       return analytics;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getSegmentAnalytics error', {
         error: errorMessage,
@@ -274,7 +274,7 @@ export class EmailAnalyticsService {
     endDate?: string
   ): Promise<CampaignPerformance[]> {
     try {
-      let query = supabase
+      let  query= supabase
         .from('email_campaigns')
         .select('id, name, metrics')
         .eq('store_id', storeId);
@@ -318,7 +318,7 @@ export class EmailAnalyticsService {
           revenue: metrics.revenue || 0,
         };
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getCampaignPerformance error', {
         error: errorMessage,
@@ -361,7 +361,7 @@ export class EmailAnalyticsService {
         expires_at: string;
         days_until_expiry: number;
       }>;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getExpiringTags error', {
         error: errorMessage,
@@ -375,3 +375,9 @@ export class EmailAnalyticsService {
 
 // Export instance singleton
 export const emailAnalyticsService = EmailAnalyticsService;
+
+
+
+
+
+

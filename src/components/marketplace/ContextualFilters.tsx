@@ -453,7 +453,7 @@ export function ContextualFilters({
   }, [productType, filters, onFiltersChange]);
 
   const getProductTypeLabel = (type: string): string => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       digital: 'Produits Digitaux',
       physical: 'Produits Physiques',
       service: 'Services',
@@ -464,7 +464,7 @@ export function ContextualFilters({
   };
 
   const getProductTypeIcon = (type: string) => {
-    const icons: Record<string, React.ComponentType<{ className?: string }>> = {
+    const  icons: Record<string, React.ComponentType<{ className?: string }>> = {
       digital: Download,
       physical: Package,
       service: Calendar,
@@ -492,3 +492,9 @@ export function ContextualFilters({
     </Card>
   );
 }
+
+
+
+
+
+

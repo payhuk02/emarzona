@@ -110,7 +110,7 @@ export const useProductLots = (
   return useQuery({
     queryKey: ['product-lots', physicalProductId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('product_lots')
         .select('*')
         .eq('physical_product_id', physicalProductId)
@@ -300,7 +300,7 @@ export const useExpirationAlerts = (options?: {
   return useQuery({
     queryKey: ['expiration-alerts', options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('expiration_alerts')
         .select('*, lot:product_lots(*)')
         .order('created_at', { ascending: false });
@@ -371,7 +371,7 @@ export const useLotTransfers = (lotId?: string) => {
   return useQuery({
     queryKey: ['lot-transfers', lotId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('lot_transfers')
         .select('*')
         .order('created_at', { ascending: false });
@@ -435,7 +435,7 @@ export const useUpdateLotTransfer = () => {
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
 
-      const updates: any = {
+      const  updates: any = {
         status,
       };
 
@@ -531,4 +531,10 @@ export const useAllocateLotForOrder = () => {
     },
   });
 };
+
+
+
+
+
+
 

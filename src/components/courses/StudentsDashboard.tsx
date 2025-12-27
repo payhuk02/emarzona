@@ -147,7 +147,7 @@ export interface StudentsDashboardProps {
  * />
  * ```
  */
-export const StudentsDashboard: React.FC<StudentsDashboardProps> = ({
+export const StudentsDashboard : React.FC<StudentsDashboardProps> = ({
   stats,
   topStudents,
   atRiskStudents,
@@ -169,7 +169,7 @@ export const StudentsDashboard: React.FC<StudentsDashboardProps> = ({
   };
 
   // Labels du cycle de vie
-  const lifecycleLabels: Record<string, string> = {
+  const  lifecycleLabels: Record<string, string> = {
     new: 'Nouveaux',
     active: 'Actifs',
     engaged: 'Engagés',
@@ -178,7 +178,7 @@ export const StudentsDashboard: React.FC<StudentsDashboardProps> = ({
   };
 
   // Couleurs du cycle de vie
-  const lifecycleColors: Record<string, string> = {
+  const  lifecycleColors: Record<string, string> = {
     new: 'bg-blue-500',
     active: 'bg-green-500',
     engaged: 'bg-purple-500',
@@ -525,4 +525,11 @@ export const StudentsDashboard: React.FC<StudentsDashboardProps> = ({
 StudentsDashboard.displayName = 'StudentsDashboard';
 
 export default StudentsDashboard;
+
+
+
+
+
+
+
 

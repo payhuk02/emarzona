@@ -26,7 +26,7 @@ interface NavItem {
   badge?: number;
 }
 
-const navItems: NavItem[] = [
+const  navItems: NavItem[] = [
   {
     label: 'Accueil',
     icon: Home,
@@ -142,3 +142,9 @@ export const BottomNavigation = React.memo<BottomNavigationProps>(({ position = 
 });
 
 BottomNavigation.displayName = 'BottomNavigation';
+
+
+
+
+
+

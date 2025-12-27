@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 
 // Instance du service Zoom (sera initialisé avec les credentials du store)
-let zoomServiceInstance: ZoomService | null = null;
+let  zoomServiceInstance: ZoomService | null = null;
 
 /**
  * Initialise le service Zoom avec les credentials du store
@@ -211,4 +211,10 @@ export const useZoomMeetingRecordings = (meetingId: string, storeId?: string) =>
     enabled: !!meetingId && !!storeId,
   });
 };
+
+
+
+
+
+
 

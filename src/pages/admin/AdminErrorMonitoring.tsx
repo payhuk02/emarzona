@@ -67,7 +67,7 @@ export default function AdminErrorMonitoring() {
 
   // Filtrer les logs
   useEffect(() => {
-    let filtered = [...errorLogs];
+    let  filtered= [...errorLogs];
 
     // Filtre par recherche
     if (searchQuery) {
@@ -116,7 +116,7 @@ export default function AdminErrorMonitoring() {
     }, {} as Record<string, number>);
 
     const byType = errorLogs.reduce((acc, log) => {
-      let type = 'other';
+      let  type= 'other';
       if (log.error.name === 'NetworkError') type = 'network';
       else if (log.error.message.includes('validation') || log.error.message.includes('Validation')) type = 'validation';
       else if (log.error.message.includes('API') || log.error.message.includes('api')) type = 'api';
@@ -471,6 +471,12 @@ export default function AdminErrorMonitoring() {
     </div>
   );
 }
+
+
+
+
+
+
 
 
 

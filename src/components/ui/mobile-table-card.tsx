@@ -50,7 +50,7 @@ interface MobileTableCardProps<Row extends RowData = RowData> {
 /**
  * Composant qui transforme un tableau en cartes sur mobile
  */
-export const MobileTableCard: React.FC<MobileTableCardProps> = ({
+export const MobileTableCard : React.FC<MobileTableCardProps> = ({
   data,
   columns,
   renderCard,
@@ -125,3 +125,10 @@ export const useTableDisplayMode = () => {
     showTable: !isMobile,
   };
 };
+
+
+
+
+
+
+

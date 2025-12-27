@@ -105,7 +105,7 @@ export const useOrdersOptimized = (
           pageSize,
           totalPages,
         };
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Erreur dans useOrdersOptimized', {
           error: error instanceof Error ? error.message : String(error),
           storeId,
@@ -133,4 +133,10 @@ export const useOrdersOptimized = (
     refetch: query.refetch,
   };
 };
+
+
+
+
+
+
 

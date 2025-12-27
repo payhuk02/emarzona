@@ -98,7 +98,7 @@ interface PageElement {
 }
 
 // Configuration des pages
-const PAGES_CONFIG: PageConfig[] = [
+const  PAGES_CONFIG: PageConfig[] = [
   {
     id: 'landing',
     name: 'Page d\'accueil',
@@ -2113,7 +2113,7 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
         title: 'Image uploadée',
         description: 'L\'image a été uploadée avec succès.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -2404,4 +2404,10 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
     </div>
   );
 };
+
+
+
+
+
+
 

@@ -46,7 +46,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
       }
 
       setShortLinks(data || []);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching short links:', affiliateError);
       // Ne pas afficher de toast si c'est juste que la table n'existe pas
@@ -109,7 +109,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
       }
 
       // Générer le code court
-      let shortCode: string;
+      let  shortCode: string;
       
       if (formData.custom_alias) {
         // Utiliser l'alias personnalisé comme code
@@ -123,7 +123,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
 
         if (codeError) {
           // Fallback côté client si RPC échoue
-          logger.warn('RPC function unavailable, using client-side code generation:', codeError);
+          logger.warn('RPC function  _unavailable, using client-side code generation:', codeError);
           shortCode = await generateShortCodeClientSide(codeLength);
         } else {
           shortCode = Array.isArray(codeData) ? codeData[0] : (codeData as string);
@@ -167,7 +167,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
       await fetchShortLinks();
 
       return data;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error creating short link:', affiliateError);
       toast({
@@ -198,7 +198,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
 
       await fetchShortLinks();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error deleting short link:', affiliateError);
       toast({
@@ -229,7 +229,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
 
       await fetchShortLinks();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error toggling short link:', affiliateError);
       toast({
@@ -256,12 +256,18 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
  */
 async function generateShortCodeClientSide(length: number = 6): Promise<string> {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclut 0, O, I, 1
-  let code = '';
+  let  code= '';
   
-  for (let i = 0; i < length; i++) {
+  for (let  i= 0; i < length; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   
   return code;
 }
+
+
+
+
+
+
 

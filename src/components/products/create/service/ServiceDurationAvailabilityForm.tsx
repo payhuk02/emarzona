@@ -47,7 +47,7 @@ export const ServiceDurationAvailabilityForm = ({
   onUpdate,
 }: ServiceDurationAvailabilityFormProps) => {
   const handleAddSlot = () => {
-    const newSlot: ServiceAvailabilitySlot = {
+    const  newSlot: ServiceAvailabilitySlot = {
       day: 1, // Lundi par défaut
       start_time: '09:00',
       end_time: '17:00',
@@ -296,3 +296,9 @@ export const ServiceDurationAvailabilityForm = ({
     </div>
   );
 };
+
+
+
+
+
+

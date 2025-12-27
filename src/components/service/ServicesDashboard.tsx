@@ -80,7 +80,7 @@ export interface ServicesDashboardProps {
 /**
  * ServicesDashboard - Vue d'ensemble complète des services
  */
-export const ServicesDashboard: React.FC<ServicesDashboardProps> = ({
+export const ServicesDashboard : React.FC<ServicesDashboardProps> = ({
   stats,
   services = [],
   period = '30days',
@@ -430,4 +430,11 @@ export const ServicesDashboard: React.FC<ServicesDashboardProps> = ({
 ServicesDashboard.displayName = 'ServicesDashboard';
 
 export default ServicesDashboard;
+
+
+
+
+
+
+
 

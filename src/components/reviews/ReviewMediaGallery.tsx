@@ -18,7 +18,7 @@ interface ReviewMediaGalleryProps {
   className?: string;
 }
 
-export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
+export const ReviewMediaGallery : React.FC<ReviewMediaGalleryProps> = ({
   media,
   maxVisible = 3,
   className = '',
@@ -205,4 +205,11 @@ export const ReviewMediaGallery: React.FC<ReviewMediaGalleryProps> = ({
     </>
   );
 };
+
+
+
+
+
+
+
 

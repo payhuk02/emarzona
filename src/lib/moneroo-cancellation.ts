@@ -186,7 +186,7 @@ export const cancelMonerooPayment = async (
       success: true,
       cancelled_at: cancelledAt,
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const monerooError = parseMonerooError(error);
     
     // Log de l'erreur
@@ -240,4 +240,10 @@ export const canCancelPayment = async (transactionId: string): Promise<boolean> 
     return false;
   }
 };
+
+
+
+
+
+
 

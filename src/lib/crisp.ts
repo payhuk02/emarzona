@@ -175,7 +175,7 @@ export const setCrispProductContext = (
   storeName?: string
 ) => {
   // Segment basé sur le type de produit
-  const segmentMap: Record<ProductType, string> = {
+  const  segmentMap: Record<ProductType, string> = {
     digital: 'digital-product-visitor',
     physical: 'physical-product-visitor',
     service: 'service-visitor',
@@ -271,7 +271,7 @@ export const configureCrispForRole = (role: 'seller' | 'buyer' | 'admin' | 'visi
 export const setupCrispInactivityTrigger = (delayMs: number = 30000) => {
   if (typeof window === 'undefined') return;
 
-  let inactivityTimer: NodeJS.Timeout;
+  let  inactivityTimer: NodeJS.Timeout;
 
   const resetTimer = () => {
     clearTimeout(inactivityTimer);
@@ -287,4 +287,10 @@ export const setupCrispInactivityTrigger = (delayMs: number = 30000) => {
 
   resetTimer();
 };
+
+
+
+
+
+
 

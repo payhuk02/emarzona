@@ -26,7 +26,7 @@ interface EmailBlock {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const EMAIL_BLOCKS: EmailBlock[] = [
+const  EMAIL_BLOCKS: EmailBlock[] = [
   {
     id: 'header',
     name: 'En-tête',
@@ -167,14 +167,14 @@ interface TemplateBlockLibraryProps {
   onInsertBlock: (html: string) => void;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
+const  CATEGORY_LABELS: Record<string, string> = {
   header: 'En-tête',
   content: 'Contenu',
   footer: 'Pied de page',
   cta: 'Appel à l\'action',
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
+const  CATEGORY_COLORS: Record<string, string> = {
   header: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
   content: 'bg-green-500/10 text-green-700 dark:text-green-400',
   footer: 'bg-gray-500/10 text-gray-700 dark:text-gray-400',
@@ -242,4 +242,10 @@ export const TemplateBlockLibrary = ({ onInsertBlock }: TemplateBlockLibraryProp
     </Card>
   );
 };
+
+
+
+
+
+
 

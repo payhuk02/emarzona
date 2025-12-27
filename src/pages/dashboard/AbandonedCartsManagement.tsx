@@ -148,7 +148,7 @@ export default function AbandonedCartsManagement() {
 
   // Filtered carts
   const filteredCarts = useMemo(() => {
-    let filtered = abandonedCarts;
+    let  filtered= abandonedCarts;
 
     // Filter by status
     if (statusFilter === 'recovered') {
@@ -601,3 +601,9 @@ export default function AbandonedCartsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

@@ -186,7 +186,7 @@ export class PayPalProvider extends BasePaymentProvider {
 
       const order = await response.json();
 
-      let status: PaymentStatus = PaymentStatus.PENDING;
+      let  status: PaymentStatus = PaymentStatus.PENDING;
       if (order.status === 'COMPLETED') {
         status = PaymentStatus.COMPLETED;
       } else if (order.status === 'APPROVED') {
@@ -288,5 +288,11 @@ export class PayPalProvider extends BasePaymentProvider {
     };
   }
 }
+
+
+
+
+
+
 
 

@@ -43,7 +43,7 @@ export const StoreSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Boutique', path: '/dashboard/store' },
     { label: activeSection },
   ];
@@ -77,4 +77,10 @@ export const StoreSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

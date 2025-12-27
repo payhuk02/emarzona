@@ -287,7 +287,7 @@ const Marketplace = () => {
       const endIndex = startIndex + pagination.itemsPerPage - 1;
 
       // Construire la requête avec les jointures nécessaires selon le type
-      let selectQuery = `
+      let  selectQuery= `
         *,
         stores!inner (
           id,
@@ -341,7 +341,7 @@ const Marketplace = () => {
           )`;
       }
 
-      let query = supabase
+      let  query= supabase
         .from('products')
         .select(selectQuery, { count: 'exact' }) // Obtenir le count total
         .eq('is_active', true)
@@ -434,7 +434,7 @@ const Marketplace = () => {
       // Ne charger les produits que si pas de recherche active
       if (!hasSearchQuery) {
         // Appliquer les filtres côté client pour les relations
-        let filteredData = (data || []) as unknown as Product[];
+        let  filteredData= (data || []) as unknown as Product[];
 
         if (filters.productType === 'digital' && filters.digitalSubType) {
           filteredData = filteredData.filter(
@@ -547,7 +547,7 @@ const Marketplace = () => {
         setError(null); // Réinitialiser l'erreur en cas de succès
         setHasLoadedOnce(true); // Marquer qu'on a chargé au moins une fois
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('❌ Erreur lors du chargement des produits :', { error: errorMessage });
       setError(errorMessage);
@@ -712,7 +712,6 @@ const Marketplace = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, pagination.currentPage, pagination.itemsPerPage, hasSearchQuery]); // ✅ Dépendances stables au lieu de fetchProducts
 
   // Utiliser les résultats de recherche full-text si une recherche est active
@@ -756,7 +755,7 @@ const Marketplace = () => {
 
     // Sinon, utiliser les produits chargés normalement
     // Filtrage par tags côté client (complexe avec arrays)
-    let filtered = products;
+    let  filtered= products;
     if (filters.tags.length > 0) {
       filtered = filtered.filter(product => filters.tags.some(tag => product.tags?.includes(tag)));
     }
@@ -1781,7 +1780,7 @@ const Marketplace = () => {
                     </Button>
 
                     {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                      const page: number = (() => {
+                      const  page: number = (() => {
                         if (totalPages <= 7) {
                           return i + 1;
                         } else if (pagination.currentPage <= 4) {
@@ -1920,3 +1919,9 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
+
+
+
+
+
+

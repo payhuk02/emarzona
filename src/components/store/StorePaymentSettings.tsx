@@ -53,7 +53,7 @@ const AVAILABLE_CURRENCIES = [
 
 const AVAILABLE_PAYMENT_PROVIDERS = [{ value: 'moneroo', label: 'Moneroo' }];
 
-export const StorePaymentSettings: React.FC<StorePaymentSettingsProps> = ({
+export const StorePaymentSettings : React.FC<StorePaymentSettingsProps> = ({
   storeId,
   store,
   onUpdate,
@@ -89,7 +89,7 @@ export const StorePaymentSettings: React.FC<StorePaymentSettingsProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const updates: Record<string, unknown> = {
+      const  updates: Record<string, unknown> = {
         minimum_order_amount: minimumOrderAmount ? parseFloat(minimumOrderAmount) : 0,
         maximum_order_amount: maximumOrderAmount ? parseFloat(maximumOrderAmount) : null,
         accepted_currencies: acceptedCurrencies.length > 0 ? acceptedCurrencies : ['XOF'],
@@ -405,3 +405,10 @@ export const StorePaymentSettings: React.FC<StorePaymentSettingsProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

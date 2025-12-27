@@ -130,7 +130,7 @@ export interface CoursesDashboardProps {
  * />
  * ```
  */
-export const CoursesDashboard: React.FC<CoursesDashboardProps> = ({
+export const CoursesDashboard : React.FC<CoursesDashboardProps> = ({
   stats,
   popularCourses,
   recentActivities,
@@ -475,4 +475,11 @@ export const CoursesDashboard: React.FC<CoursesDashboardProps> = ({
 CoursesDashboard.displayName = 'CoursesDashboard';
 
 export default CoursesDashboard;
+
+
+
+
+
+
+
 

@@ -44,7 +44,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
-const TRANSFER_STATUSES: { value: TransferStatus; label: string; color: string }[] = [
+const  TRANSFER_STATUSES: { value: TransferStatus; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'approved', label: 'Approuvé', color: 'bg-blue-500' },
   { value: 'in_transit', label: 'En transit', color: 'bg-purple-500' },
@@ -154,7 +154,7 @@ export default function WarehouseTransfers() {
       setNotes('');
       setFromWarehouse('');
       setToWarehouse('');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -642,3 +642,9 @@ function TransferCard({ transfer, status, onStatusUpdate, animationDelay = 0 }: 
     </Card>
   );
 }
+
+
+
+
+
+

@@ -28,7 +28,7 @@ export const useAdminMFA = () => {
       setIsPrincipalAdmin(false);
       const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       setIsAAL2(aal.data?.currentLevel === 'aal2');
-    } catch (e: any) {
+    } catch ( _e: any) {
       setError(e.message);
       setIsAAL2(false);
     } finally {
@@ -42,5 +42,11 @@ export const useAdminMFA = () => {
 
   return { loading, error, isAAL2, isPrincipalAdmin, refresh };
 };
+
+
+
+
+
+
 
 

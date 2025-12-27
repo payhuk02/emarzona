@@ -122,3 +122,9 @@ export const CourseDetailSkeleton = ({ showSidebar = true }: CourseDetailSkeleto
   );
 };
 
+
+
+
+
+
+

@@ -58,7 +58,7 @@ interface ProductFormData {
 /**
  * Templates prédéfinis par catégorie
  */
-export const PRODUCT_TEMPLATES: ProductTemplate[] = [
+export const PRODUCT_TEMPLATES : ProductTemplate[] = [
   // ===== PRODUITS DIGITAUX =====
   {
     id: 'ebook-template',
@@ -413,7 +413,7 @@ export const importTemplate = (json: string): ProductTemplate => {
       throw new Error('Template invalide: structure manquante');
     }
     return template;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     throw new Error(`Erreur d'import: ${errorMessage}`);
   }
@@ -437,4 +437,11 @@ export const applyTemplate = (
     image_url: currentData.image_url || '',
   };
 };
+
+
+
+
+
+
+
 

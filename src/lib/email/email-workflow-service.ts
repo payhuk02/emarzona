@@ -80,7 +80,7 @@ export class EmailWorkflowService {
         throw error;
       }
       return data as EmailWorkflow;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailWorkflowService.createWorkflow error', { error, payload });
       throw error;
     }
@@ -103,7 +103,7 @@ export class EmailWorkflowService {
         throw error;
       }
       return data as EmailWorkflow;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailWorkflowService.getWorkflow error', { error, workflowId });
       throw error;
     }
@@ -117,7 +117,7 @@ export class EmailWorkflowService {
     filters?: { status?: WorkflowStatus; limit?: number; offset?: number }
   ): Promise<EmailWorkflow[]> {
     try {
-      let query = (supabase
+      let  query= (supabase
         .from('email_workflows' as any)
         .select('*')
         .eq('store_id', storeId)
@@ -144,7 +144,7 @@ export class EmailWorkflowService {
         throw error;
       }
       return (data || []) as EmailWorkflow[];
-    } catch (error: any) {
+    } catch ( _error: any) {
       // Si la table n'existe pas, retourner un tableau vide au lieu de throw
       if (error?.code === 'PGRST116' || error?.message?.includes('404') || error?.message?.includes('does not exist') || error?.code === '42P01') {
         logger.warn('Table email_workflows does not exist. Returning empty array.', { storeId });
@@ -175,7 +175,7 @@ export class EmailWorkflowService {
         throw error;
       }
       return data as EmailWorkflow;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailWorkflowService.updateWorkflow error', { error, workflowId, payload });
       throw error;
     }
@@ -196,7 +196,7 @@ export class EmailWorkflowService {
         throw error;
       }
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailWorkflowService.deleteWorkflow error', { error, workflowId });
       throw error;
     }
@@ -215,7 +215,7 @@ export class EmailWorkflowService {
         email: context?.email || context?.user?.email,
       };
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+       
       // @ts-expect-error - execute_email_workflow function not in generated types
       const { data, error } = await supabase.rpc('execute_email_workflow', {
         p_workflow_id: workflowId,
@@ -235,7 +235,7 @@ export class EmailWorkflowService {
       }
 
       return success;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailWorkflowService.executeWorkflow error', { 
         error: errorMessage, 
@@ -249,4 +249,10 @@ export class EmailWorkflowService {
 
 // Export instance singleton
 export const emailWorkflowService = EmailWorkflowService;
+
+
+
+
+
+
 

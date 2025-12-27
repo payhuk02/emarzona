@@ -187,10 +187,10 @@ export const useCalculateShipping = (storeId: string) => {
       }
 
       // 3. Calculate shipping cost for each rate
-      const calculations: ShippingCalculation[] = rates
+      const  calculations: ShippingCalculation[] = rates
         .map((rate: ShippingRate) => {
-          let calculatedPrice = rate.base_price;
-          let isEligible = true;
+          let  calculatedPrice= rate.base_price;
+          let  isEligible= true;
 
           switch (rate.rate_type) {
             case 'free':
@@ -436,4 +436,10 @@ export const useToggleShippingRateStatus = () => {
     },
   });
 };
+
+
+
+
+
+
 

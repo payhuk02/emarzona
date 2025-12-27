@@ -85,7 +85,7 @@ export function useActiveAuctions(storeId?: string) {
   return useQuery({
     queryKey: ['auctions', 'active', storeId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('artist_product_auctions')
         .select(`
           *,
@@ -770,4 +770,10 @@ export function useEndAuction() {
     },
   });
 }
+
+
+
+
+
+
 

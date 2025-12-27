@@ -42,7 +42,7 @@ export function useHapticFeedback(options: HapticFeedbackOptions = {}) {
       }
 
       // Patterns de vibration selon le type
-      const patterns: Record<HapticFeedbackType, number | number[]> = {
+      const  patterns: Record<HapticFeedbackType, number | number[]> = {
         light: 10, // Vibration légère (10ms)
         medium: 20, // Vibration moyenne (20ms)
         heavy: 40, // Vibration forte (40ms)
@@ -96,3 +96,9 @@ export function useHapticOnClick() {
 
   return { onClickWithHaptic };
 }
+
+
+
+
+
+

@@ -151,7 +151,7 @@ export const useCreateCourseOrder = () => {
       }
 
       // 4. Créer/récupérer customer
-      let customerId: string;
+      let  customerId: string;
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
@@ -185,9 +185,9 @@ export const useCreateCourseOrder = () => {
       const totalPrice = basePrice * quantity;
 
       // Calculer le montant à payer selon le type de paiement
-      let amountToPay = totalPrice;
-      let percentagePaid = 0;
-      let remainingAmount = 0;
+      let  amountToPay= totalPrice;
+      let  percentagePaid= 0;
+      let  remainingAmount= 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -294,7 +294,7 @@ export const useCreateCourseOrder = () => {
           currency: order.currency || product.currency || 'XOF',
           payment_status: order.payment_status || 'pending',
           created_at: order.created_at || new Date().toISOString(),
-        }).catch(err => {
+        }).catch( err => {
           logger.error('Error triggering order created webhook', { error: err, orderId: order.id });
         });
       });
@@ -303,7 +303,7 @@ export const useCreateCourseOrder = () => {
       // Convertir currency en type Currency
       const { isSupportedCurrency } = await import('@/lib/currency-converter');
       type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';
-      const paymentCurrency: Currency = isSupportedCurrency(product.currency)
+      const  paymentCurrency: Currency = isSupportedCurrency(product.currency)
         ? (product.currency as Currency)
         : 'XOF';
 
@@ -357,3 +357,9 @@ export const useCreateCourseOrder = () => {
     },
   });
 };
+
+
+
+
+
+

@@ -251,3 +251,9 @@ export function useSmartSearchQuery<TData = unknown>(
     dataType: 'search',
   });
 }
+
+
+
+
+
+

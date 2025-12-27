@@ -48,7 +48,7 @@ export interface StoreThemeTemplate {
   };
 }
 
-export const STORE_THEME_TEMPLATES: StoreThemeTemplate[] = [
+export const STORE_THEME_TEMPLATES : StoreThemeTemplate[] = [
   {
     id: 'modern-blue',
     name: 'Bleu Moderne',
@@ -325,5 +325,12 @@ export function applyThemeTemplate(template: StoreThemeTemplate) {
     ...template.layout,
   };
 }
+
+
+
+
+
+
+
 
 

@@ -185,3 +185,9 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
   );
 }
 
+
+
+
+
+
+

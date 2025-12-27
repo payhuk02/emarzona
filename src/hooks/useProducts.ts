@@ -45,7 +45,7 @@ export const useProducts = (storeId?: string | null) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        let query = supabase
+        let  query= supabase
           .from('products')
           .select(`
             *,
@@ -65,7 +65,7 @@ export const useProducts = (storeId?: string | null) => {
         if (error) throw error;
         
         setProducts(data || []);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
         toast({
           title: "Erreur",
@@ -78,7 +78,6 @@ export const useProducts = (storeId?: string | null) => {
     };
 
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId]); // toast intentionnellement omis pour éviter re-renders
 
   const refetch = useCallback(async () => {
@@ -86,7 +85,7 @@ export const useProducts = (storeId?: string | null) => {
     
     try {
       setLoading(true);
-      let query = supabase
+      let  query= supabase
         .from('products')
         .select(`
           *,
@@ -106,7 +105,7 @@ export const useProducts = (storeId?: string | null) => {
       if (error) throw error;
       
       setProducts(data || []);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
       toast({
         title: "Erreur",
@@ -120,3 +119,9 @@ export const useProducts = (storeId?: string | null) => {
 
   return { products, loading, refetch };
 };
+
+
+
+
+
+

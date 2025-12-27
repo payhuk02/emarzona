@@ -80,7 +80,7 @@ export function useExportInventoryCSV() {
             item.variant?.physical_product?.product?.name ||
             'N/A';
 
-          let status = 'Disponible';
+          let  status= 'Disponible';
           if (item.quantity_available === 0) {
             status = 'Rupture';
           } else if (item.quantity_available <= (item.reorder_point || 0)) {
@@ -127,7 +127,7 @@ export function useExportInventoryCSV() {
           title: 'Export réussi',
           description: `${inventoryItems.length} article(s) exporté(s)`,
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Impossible d\'exporter le CSV';
         toast({
           title: 'Erreur export',
@@ -165,7 +165,7 @@ export function useImportInventoryCSV() {
       } = options || {};
 
       return new Promise((resolve, reject) => {
-        const result: CSVImportResult = {
+        const  result: CSVImportResult = {
           success: 0,
           failed: 0,
           errors: [],
@@ -179,11 +179,11 @@ export function useImportInventoryCSV() {
             try {
               type CSVRow = Record<string, string>;
               const rows = results.data as CSVRow[];
-              const errors: Array<{ row: number; sku: string; error: string }> = [];
-              const warnings: Array<{ row: number; sku: string; warning: string }> = [];
+              const  errors: Array<{ row: number; sku: string; error: string }> = [];
+              const  warnings: Array<{ row: number; sku: string; warning: string }> = [];
 
               // Validation et traitement de chaque ligne
-              for (let i = 0; i < rows.length; i++) {
+              for (let  i= 0; i < rows.length; i++) {
                 const row = rows[i];
                 const rowNumber = i + 2; // +2 car ligne 1 = header, index 0-based
 
@@ -264,7 +264,7 @@ export function useImportInventoryCSV() {
                   }
 
                   // Mise à jour de la quantité
-                  const updates: {
+                  const  updates: {
                     quantity_available: number;
                     updated_at: string;
                     warehouse_location?: string;
@@ -305,7 +305,7 @@ export function useImportInventoryCSV() {
                   } else {
                     result.success++;
                   }
-                } catch (error: unknown) {
+                } catch ( _error: unknown) {
                   const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
                   errors.push({
                     row: rowNumber,
@@ -317,7 +317,7 @@ export function useImportInventoryCSV() {
               }
 
               resolve(result);
-            } catch (error: unknown) {
+            } catch ( _error: unknown) {
               reject(error);
             }
           },
@@ -332,4 +332,10 @@ export function useImportInventoryCSV() {
 
   return { importFromCSV };
 }
+
+
+
+
+
+
 

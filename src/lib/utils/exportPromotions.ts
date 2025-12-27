@@ -75,7 +75,7 @@ export const exportPromotionsToCSV = (
     'Utilisations max',
   ];
 
-  const rows: string[] = [];
+  const  rows: string[] = [];
 
   // Ajouter les en-têtes si demandé
   if (options.includeHeaders) {
@@ -124,8 +124,8 @@ export const exportAndDownloadPromotions = (
   const timestamp = new Date().toISOString().slice(0, 10);
   const filename = `promotions_${timestamp}.${options.format}`;
 
-  let content: string;
-  let mimeType: string;
+  let  content: string;
+  let  mimeType: string;
 
   if (options.format === 'csv') {
     content = exportPromotionsToCSV(promotions, options);
@@ -142,4 +142,10 @@ export const exportAndDownloadPromotions = (
 
   downloadFile(content, filename, mimeType);
 };
+
+
+
+
+
+
 

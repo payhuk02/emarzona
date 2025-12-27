@@ -284,7 +284,7 @@ const Customers = () => {
                       </Button>
                       <div className="flex items-center gap-1">
                         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNum;
+                          let  _pageNum;
                           if (totalPages <= 5) {
                             pageNum = i + 1;
                           } else if (currentPage <= 3) {
@@ -364,3 +364,9 @@ const Customers = () => {
 };
 
 export default Customers;
+
+
+
+
+
+

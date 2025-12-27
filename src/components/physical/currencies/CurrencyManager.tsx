@@ -467,3 +467,9 @@ function RateCard({ rate, animationDelay = 0 }: RateCardProps) {
     </Card>
   );
 }
+
+
+
+
+
+

@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { VariantCard, ProductVariant } from '../VariantCard';
 
 describe('VariantCard', () => {
-  const mockVariant: ProductVariant = {
+  const  mockVariant: ProductVariant = {
     id: 'variant-1',
     name: 'Rouge - Taille L',
     sku: 'PROD-RED-L',
@@ -237,4 +237,10 @@ describe('VariantCard', () => {
     expect(screen.getByText('2 500 $')).toBeInTheDocument();
   });
 });
+
+
+
+
+
+
 

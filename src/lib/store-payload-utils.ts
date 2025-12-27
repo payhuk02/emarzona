@@ -8,7 +8,7 @@ import type { Store as FrontendStore } from '@/hooks/useStores';
  * Envoyer ces colonnes provoque des erreurs du type :
  * `column "meta_title" of relation "stores" does not exist`
  */
-const UNSUPPORTED_STORE_FIELDS: (keyof FrontendStore | string)[] = [
+const  UNSUPPORTED_STORE_FIELDS: (keyof FrontendStore | string)[] = [
   // SEO avancé – stocké dans d'autres tables (ex: store_seo_settings)
   'meta_title',
   'meta_description',
@@ -43,7 +43,7 @@ type AnyObject = Record<string, unknown>;
  * - Ignore aussi les valeurs `undefined` qui ne doivent pas être envoyées.
  */
 export function sanitizeStorePayload<T extends AnyObject>(payload: T): T {
-  const cleaned: AnyObject = {};
+  const  cleaned: AnyObject = {};
 
   Object.entries(payload as AnyObject).forEach(([key, value]) => {
     if (value === undefined) {
@@ -59,3 +59,9 @@ export function sanitizeStorePayload<T extends AnyObject>(payload: T): T {
 
   return cleaned as T;
 }
+
+
+
+
+
+

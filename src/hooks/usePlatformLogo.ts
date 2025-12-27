@@ -56,7 +56,7 @@ export const usePlatformLogo = () => {
       const isDark = document.documentElement.classList.contains('dark') || 
                     window.matchMedia('(prefers-color-scheme: dark)').matches;
       
-      let shouldUseDark = false;
+      let  shouldUseDark= false;
       if (theme === 'dark') {
         shouldUseDark = true;
       } else if (theme === 'light') {
@@ -76,7 +76,7 @@ export const usePlatformLogo = () => {
 
   // Charger le logo depuis le cache ou les données réelles
   useEffect(() => {
-    let isMounted = true;
+    let  isMounted= true;
 
     // Nettoyer le cache si il contient l'ancien logo Payhuk
     try {
@@ -325,4 +325,10 @@ export const usePlatformFavicon = () => {
   const { customizationData } = usePlatformCustomizationContext();
   return customizationData?.design?.logo?.favicon || null;
 };
+
+
+
+
+
+
 

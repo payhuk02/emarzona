@@ -8,7 +8,7 @@
 project:
   name: Emarzona SaaS Platform
   description: >
-    Application web SaaS haut de gamme de E-commerce de Produits digitaux, physiques et services et aussi pour la gestion des paiements,
+    Application web SaaS haut de gamme de E-commerce de Produits digitaux, physiques, services, cours en ligne et oeuvre d'artiste, et aussi pour la gestion des paiements,
     des transactions et des utilisateurs, avec intégration Supabase, Moneroo/PayDunya,
     et un design professionnel fluide et réactif.
   stack:

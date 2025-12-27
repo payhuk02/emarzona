@@ -158,7 +158,7 @@ export function useUpdateStockByBarcode() {
       }
 
       // Calculer la nouvelle quantité
-      let newQuantity = inventory.quantity_available;
+      let  newQuantity= inventory.quantity_available;
       if (movementType === 'receipt') {
         newQuantity += quantity;
       } else if (movementType === 'sale') {
@@ -209,5 +209,11 @@ export function useUpdateStockByBarcode() {
     },
   });
 }
+
+
+
+
+
+
 
 

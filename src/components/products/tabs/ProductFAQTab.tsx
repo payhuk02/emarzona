@@ -97,7 +97,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
   const [viewMode, setViewMode] = useState<'list' | 'preview'>('list');
 
   const addFAQ = useCallback((faq: Omit<FAQItem, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'helpful' | 'notHelpful'>) => {
-    const newFAQ: FAQItem = {
+    const  newFAQ: FAQItem = {
       ...faq,
       id: `faq_${Date.now()}_${Math.random().toString(36).substring(2)}`,
       views: 0,
@@ -144,7 +144,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
   }, [formData.faqs, updateFormData, toast]);
 
   const duplicateFAQ = useCallback((faq: FAQItem) => {
-    const duplicatedFAQ: FAQItem = {
+    const  duplicatedFAQ: FAQItem = {
       ...faq,
       id: `faq_${Date.now()}_${Math.random().toString(36).substring(2)}`,
       question: `${faq.question} (copie)`,
@@ -297,7 +297,7 @@ export const ProductFAQTab = ({ formData, updateFormData }: ProductFAQTabProps) 
         return matchesSearch && matchesCategory;
       })
       .sort((a: FAQItem, b: FAQItem) => {
-        let comparison = 0;
+        let  comparison= 0;
         
         switch (sortBy) {
           case 'order':
@@ -946,7 +946,7 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
-    const newErrors: Record<string, string> = {};
+    const  newErrors: Record<string, string> = {};
     
     if (!formData.question.trim()) {
       newErrors.question = "La question est requise";
@@ -1094,3 +1094,9 @@ const FAQForm = ({ faq, onSave, onCancel }: FAQFormProps) => {
 
 // Imports manquants pour les icônes
 import { Package, Smartphone, Wrench } from "lucide-react";
+
+
+
+
+
+

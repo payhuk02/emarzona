@@ -41,7 +41,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
       });
 
       onUpdate();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -65,7 +65,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
       });
 
       onUpdate();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -92,7 +92,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
 
       onUpdate();
       setDeleteDialogOpen(false);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -104,7 +104,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
   };
 
   const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
+    const  colors: Record<string, string> = {
       pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
       processing: "bg-blue-500/10 text-blue-500 border-blue-500/20",
       completed: "bg-green-500/10 text-green-500 border-green-500/20",
@@ -114,7 +114,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
   };
 
   const getPaymentStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
+    const  colors: Record<string, string> = {
       pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
       paid: "bg-green-500/10 text-green-500 border-green-500/20",
       failed: "bg-red-500/10 text-red-500 border-red-500/20",
@@ -123,7 +123,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
   };
 
   const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: "En attente",
       processing: "En cours",
       completed: "Terminée",
@@ -133,7 +133,7 @@ const OrderCardComponent = ({ order, onUpdate, storeId }: OrderCardProps) => {
   };
 
   const getPaymentStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: "En attente",
       paid: "Payée",
       failed: "Échouée",
@@ -301,4 +301,10 @@ export const OrderCard = React.memo(OrderCardComponent, (prevProps, nextProps) =
 });
 
 OrderCard.displayName = 'OrderCard';
+
+
+
+
+
+
 

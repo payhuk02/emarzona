@@ -33,7 +33,7 @@ interface ShipmentCardProps {
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 const getStatusConfig = (status: string, t: ReturnType<typeof useTranslation>['t']) => {
-  const configs: Record<string, { labelKey: string; color: string; variant: BadgeVariant }> = {
+  const  configs: Record<string, { labelKey: string; color: string; variant: BadgeVariant }> = {
     pending: { labelKey: 'shipping.status.pending', color: 'bg-gray-500', variant: 'secondary' },
     label_created: { labelKey: 'shipping.status.labelCreated', color: 'bg-blue-500', variant: 'default' },
     picked_up: { labelKey: 'shipping.status.pickedUp', color: 'bg-purple-500', variant: 'default' },
@@ -250,4 +250,10 @@ export const ShipmentCard = React.memo(ShipmentCardComponent, (prevProps, nextPr
 });
 
 ShipmentCard.displayName = 'ShipmentCard';
+
+
+
+
+
+
 

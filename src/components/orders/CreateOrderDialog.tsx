@@ -193,7 +193,7 @@ const CreateOrderDialogComponent = ({
               status: order.status,
               payment_status: order.payment_status,
               created_at: order.created_at,
-            }).catch(err => {
+            }).catch( err => {
               logger.error('Error triggering webhook', { error: err, orderId: order.id });
             });
           });
@@ -207,7 +207,7 @@ const CreateOrderDialogComponent = ({
         onSuccess();
         onOpenChange(false);
         resetForm();
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
         toast({
           title: 'Erreur',
@@ -441,3 +441,9 @@ export const CreateOrderDialog = React.memo(CreateOrderDialogComponent, (prevPro
 });
 
 CreateOrderDialog.displayName = 'CreateOrderDialog';
+
+
+
+
+
+

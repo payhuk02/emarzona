@@ -11,7 +11,7 @@ export interface QueryParams {
  * Parse une query string en objet
  */
 export function parseQueryString(queryString: string): QueryParams {
-  const params: QueryParams = {};
+  const  params: QueryParams = {};
 
   if (!queryString || queryString.length === 0) {
     return params;
@@ -51,7 +51,7 @@ export function parseQueryString(queryString: string): QueryParams {
  * Construit une query string depuis un objet
  */
 export function buildQueryString(params: QueryParams): string {
-  const pairs: string[] = [];
+  const  pairs: string[] = [];
 
   for (const [key, value] of Object.entries(params)) {
     if (value === null || value === undefined) {
@@ -304,4 +304,10 @@ export function parseUrl(url: string): {
     };
   }
 }
+
+
+
+
+
+
 

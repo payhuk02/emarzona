@@ -123,7 +123,7 @@ export const useLearningPaths = (storeId?: string) => {
   return useQuery({
     queryKey: ['learning-paths', storeId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('learning_paths')
         .select('*')
         .eq('is_active', true)
@@ -463,4 +463,10 @@ export const useUpdatePathProgress = () => {
     },
   });
 };
+
+
+
+
+
+
 

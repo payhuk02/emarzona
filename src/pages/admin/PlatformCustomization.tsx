@@ -89,7 +89,7 @@ interface SectionConfig {
   badge?: string;
 }
 
-const sections: SectionConfig[] = [
+const  sections: SectionConfig[] = [
   {
     id: 'design',
     label: 'Design & Branding',
@@ -215,7 +215,7 @@ export const PlatformCustomization = () => {
         title: '✅ Sauvegarde réussie',
         description: 'Toutes les modifications ont été enregistrées.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -240,7 +240,7 @@ export const PlatformCustomization = () => {
         title: '✅ Export réussi',
         description: 'Les personnalisations ont été exportées avec succès.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "❌ Erreur d'export",
@@ -276,7 +276,7 @@ export const PlatformCustomization = () => {
           setShowImportDialog(false);
           setImportFile(null);
         }
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: "❌ Erreur d'import",
@@ -556,3 +556,9 @@ export const PlatformCustomization = () => {
     </AdminLayout>
   );
 };
+
+
+
+
+
+

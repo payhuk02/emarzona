@@ -56,10 +56,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
+const  UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   product,
   variant = 'marketplace',
-  showAffiliate: _showAffiliate = true,
+  showAffiliate: showAffiliate = true,
   showActions = true,
   onAction,
   className,
@@ -389,7 +389,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
           (keyInfo.length > 0 ||
             (() => {
               // Vérifier si on doit afficher le badge d'affiliation
-              let affiliateSettings = null;
+              let  affiliateSettings= null;
               if (product.product_affiliate_settings) {
                 if (Array.isArray(product.product_affiliate_settings)) {
                   affiliateSettings =
@@ -422,7 +422,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
               {/* Badge taux d'affiliation - Aligné avec "En préparation" et "Instantanée" */}
               {(() => {
                 // Gérer le cas où Supabase retourne un objet, un tableau, ou null
-                let affiliateSettings = null;
+                let  affiliateSettings= null;
 
                 if (product.product_affiliate_settings) {
                   if (Array.isArray(product.product_affiliate_settings)) {
@@ -610,3 +610,9 @@ export const UnifiedProductCard = React.memo(
 UnifiedProductCard.displayName = 'UnifiedProductCard';
 
 export default UnifiedProductCard;
+
+
+
+
+
+

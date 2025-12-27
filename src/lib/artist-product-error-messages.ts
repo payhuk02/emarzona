@@ -284,7 +284,7 @@ export function formatErrorMessage(errorData: ErrorMessageWithSuggestion): {
 /**
  * Liste des champs avec leurs noms d'affichage
  */
-export const FIELD_DISPLAY_NAMES: Record<string, string> = {
+export const FIELD_DISPLAY_NAMES : Record<string, string> = {
   artist_name: "Nom de l'artiste",
   artist_bio: "Biographie de l'artiste",
   artist_website: "Site web de l'artiste",
@@ -317,3 +317,10 @@ export const FIELD_DISPLAY_NAMES: Record<string, string> = {
 export function getFieldDisplayName(fieldKey: string): string {
   return FIELD_DISPLAY_NAMES[fieldKey] || fieldKey;
 }
+
+
+
+
+
+
+

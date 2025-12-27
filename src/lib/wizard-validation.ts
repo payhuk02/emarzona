@@ -221,7 +221,7 @@ export function validateWithZod<T>(schema: z.ZodSchema<T>, data: unknown): Valid
     return { valid: true, errors: [] };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors: ValidationError[] = error.errors.map(err => ({
+      const  errors: ValidationError[] = error.errors.map(err => ({
         field: err.path.join('.'),
         message: err.message,
         type: err.code === 'invalid_type' ? 'format' : 'custom',
@@ -384,3 +384,9 @@ export function getFieldError(errors: ValidationError[], field: string): string 
 export function hasFieldError(errors: ValidationError[], field: string): boolean {
   return errors.some(err => err.field === field);
 }
+
+
+
+
+
+

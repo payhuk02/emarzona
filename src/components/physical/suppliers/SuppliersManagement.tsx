@@ -191,7 +191,7 @@ export default function SuppliersManagement() {
         });
       }
       handleCloseDialog();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -224,7 +224,7 @@ export default function SuppliersManagement() {
       });
       setDeleteDialogOpen(false);
       setSupplierToDelete(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -783,3 +783,9 @@ export default function SuppliersManagement() {
     </div>
   );
 }
+
+
+
+
+
+

@@ -289,7 +289,7 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
 
         if (!viewError && viewData && viewData.length > 0) {
           // Transformer les données de la vue
-          const leaderboard: LeaderboardEntry[] = viewData.map((entry: any, index: number) => ({
+          const  leaderboard: LeaderboardEntry[] = viewData.map((entry: any, index: number) => ({
             user_id: entry.user_id,
             user_name: entry.user_name || 'Utilisateur',
             user_avatar: entry.avatar_url || undefined,
@@ -345,7 +345,7 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
       // Récupérer les profils séparément pour les user_id trouvés
       const userIds = gamificationData.map(entry => entry.user_id).filter(Boolean) as string[];
       
-      let profilesMap = new Map();
+      let  profilesMap= new Map();
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
@@ -361,7 +361,7 @@ export const useGlobalLeaderboard = (limit: number = 10, period: 'all' | 'monthl
       }
 
       // Transformer les données en combinant gamification et profils
-      const leaderboard: LeaderboardEntry[] = gamificationData.map((entry, index) => {
+      const  leaderboard: LeaderboardEntry[] = gamificationData.map((entry, index) => {
         const profile = profilesMap.get(entry.user_id);
         return {
           user_id: entry.user_id,
@@ -486,4 +486,10 @@ export const useAwardGlobalPoints = () => {
     },
   });
 };
+
+
+
+
+
+
 

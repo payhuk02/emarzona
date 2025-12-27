@@ -47,7 +47,7 @@ export const notifyPaymentSuccess = async (data: PaymentNotificationData): Promi
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch(err => {
+      }).catch( err => {
         logger.warn('Error sending unified payment success notification:', err);
       });
     }
@@ -63,7 +63,7 @@ export const notifyPaymentSuccess = async (data: PaymentNotificationData): Promi
           currency: data.currency,
           payment_method: data.paymentMethod,
           customer_id: data.userId,
-        }).catch(err => {
+        }).catch( err => {
           logger.error('Error triggering payment webhook', {
             error: err,
             transactionId: data.transactionId,
@@ -107,7 +107,7 @@ export const notifyPaymentFailed = async (data: PaymentNotificationData): Promis
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Réessayer le paiement',
         order_id: data.orderId,
-      }).catch(err => {
+      }).catch( err => {
         logger.warn('Error sending unified payment failed notification:', err);
       });
     }
@@ -147,7 +147,7 @@ export const notifyPaymentCancelled = async (data: PaymentNotificationData): Pro
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch(err => {
+      }).catch( err => {
         logger.warn('Error sending unified payment cancelled notification:', err);
       });
     }
@@ -186,7 +186,7 @@ export const notifyPaymentRefunded = async (data: PaymentNotificationData): Prom
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch(err => {
+      }).catch( err => {
         logger.warn('Error sending unified payment refunded notification:', err);
       });
     }
@@ -225,7 +225,7 @@ export const notifyPaymentPending = async (data: PaymentNotificationData): Promi
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch(err => {
+      }).catch( err => {
         logger.warn('Error sending unified payment pending notification:', err);
       });
     }
@@ -270,7 +270,7 @@ async function _sendPaymentEmail(params: {
       template: params.template,
       messageId: data?.messageId,
     });
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending payment email:', {
       error: errorMessage,
@@ -309,7 +309,7 @@ export async function sendPaymentSMS(params: {
       template: params.template,
       messageId: data?.messageId,
     });
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending payment SMS:', {
       error: errorMessage,
@@ -403,3 +403,9 @@ export const sendPaymentRefundedSMS = async (data: PaymentNotificationData): Pro
     },
   });
 };
+
+
+
+
+
+

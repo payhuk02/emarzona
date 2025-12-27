@@ -63,7 +63,7 @@ export const BookingsSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Réservations', path: '/dashboard/bookings' },
     { label: activeSection },
   ];
@@ -97,4 +97,10 @@ export const BookingsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

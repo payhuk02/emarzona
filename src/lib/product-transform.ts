@@ -58,7 +58,7 @@ type DatabaseProduct = {
  * Transforme un produit de la base de données vers UnifiedProduct
  */
 export function transformToUnifiedProduct(product: DatabaseProduct): UnifiedProduct {
-  const base: Partial<BaseProduct> = {
+  const  base: Partial<BaseProduct> = {
     id: product.id,
     name: product.name,
     slug: product.slug,
@@ -226,3 +226,9 @@ function extractFormatsFromFiles(files: FileItem[] | unknown[]): string[] {
 export function transformProducts(products: DatabaseProduct[]): UnifiedProduct[] {
   return products.map(transformToUnifiedProduct);
 }
+
+
+
+
+
+

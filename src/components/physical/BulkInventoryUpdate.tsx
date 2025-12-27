@@ -87,7 +87,7 @@ export interface BulkInventoryUpdateProps {
 // MOCK DATA
 // ============================================================================
 
-const MOCK_PRODUCTS: Omit<BulkUpdateItem, 'is_selected' | 'new_quantity' | 'adjustment'>[] = [
+const  MOCK_PRODUCTS: Omit<BulkUpdateItem, 'is_selected' | 'new_quantity' | 'adjustment'>[] = [
   {
     id: '1',
     product_id: 'prod_1',
@@ -243,11 +243,11 @@ export function BulkInventoryUpdate({
     setProgress(0);
 
     const itemsToUpdate = items.filter((i) => i.is_selected && !i.error);
-    let successCount = 0;
-    const errors: string[] = [];
+    let  successCount= 0;
+    const  errors: string[] = [];
 
     // Simulate processing
-    for (let i = 0; i < itemsToUpdate.length; i++) {
+    for (let  i= 0; i < itemsToUpdate.length; i++) {
       await new Promise((resolve) => setTimeout(resolve, 200));
       setProgress(((i + 1) / itemsToUpdate.length) * 100);
 
@@ -677,4 +677,10 @@ export function BulkInventoryUpdate({
     </div>
   );
 }
+
+
+
+
+
+
 

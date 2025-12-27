@@ -57,7 +57,7 @@ const settingsNavItems = [
 ];
 
 // Mapping des tabs vers les labels
-const tabToLabel: Record<string, string> = {
+const  tabToLabel: Record<string, string> = {
   profile: 'Profil',
   store: 'Boutique',
   domain: 'Domaines',
@@ -71,7 +71,7 @@ export const SettingsSidebar = () => {
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'profile';
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Paramètres', path: '/dashboard/settings' },
     { label: tabToLabel[activeTab] || 'Paramètres' },
   ];
@@ -105,4 +105,10 @@ export const SettingsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

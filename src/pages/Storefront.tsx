@@ -53,7 +53,7 @@ const Storefront = () => {
     itemsPerPage: isMobile ? 24 : 100,
   });
   // Store-wide reviews not implemented yet; keep placeholders to avoid runtime errors
-  const reviews: unknown[] = [];
+  const  reviews: unknown[] = [];
   const reviewsLoading = false;
 
   const fetchStore = useCallback(async () => {
@@ -86,7 +86,7 @@ const Storefront = () => {
 
       if (data) {
         // Convertir domain_status null en undefined pour correspondre au type Store
-        const storeData: Store = {
+        const  storeData: Store = {
           ...data,
           domain_status: data.domain_status || undefined,
         } as Store;
@@ -116,7 +116,7 @@ const Storefront = () => {
         setError('Boutique introuvable');
         setHasLoadedOnce(true); // Même en cas d'erreur, on a tenté de charger
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -636,3 +636,9 @@ const Storefront = () => {
 };
 
 export default Storefront;
+
+
+
+
+
+

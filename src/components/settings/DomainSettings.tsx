@@ -318,7 +318,7 @@ export const DomainSettings = () => {
 
   const checkDNSPropagation = async (domain: string) => {
     const startTime = Date.now();
-    const errors: string[] = [];
+    const  errors: string[] = [];
     const details = {
       aRecord: false,
       wwwRecord: false,
@@ -1401,3 +1401,9 @@ export const DomainSettings = () => {
     </div>
   );
 };
+
+
+
+
+
+

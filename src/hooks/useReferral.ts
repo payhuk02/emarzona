@@ -169,7 +169,7 @@ export const useReferral = () => {
         paidEarnings,
         commissionRate,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error in fetchReferralData', { error: errorMessage });
       toast({
@@ -234,7 +234,7 @@ export const useReferral = () => {
 
       // Combiner les données : utiliser referredProfilesData comme source principale
       // car elle contient directement les profils parrainés
-      const referralsList: ReferralUser[] = [];
+      const  referralsList: ReferralUser[] = [];
 
       // Récupérer les emails via RPC si disponible
       const referredIds = referredProfilesData && referredProfilesData.length > 0
@@ -256,7 +256,7 @@ export const useReferral = () => {
             });
             logger.info('Emails fetched via RPC', { count: emailsMap.size });
           }
-        } catch (rpcError: unknown) {
+        } catch ( _rpcError: unknown) {
           const errorMessage = rpcError instanceof Error ? rpcError.message : 'Erreur inconnue';
           logger.debug('RPC get_users_emails not available or failed', { error: errorMessage });
         }
@@ -328,7 +328,7 @@ export const useReferral = () => {
               }
             }
           }
-        } catch (ordersError: unknown) {
+        } catch ( _ordersError: unknown) {
           const errorMessage = ordersError instanceof Error ? ordersError.message : 'Erreur inconnue';
           logger.debug('Could not fetch orders stats', { error: errorMessage });
         }
@@ -400,7 +400,7 @@ export const useReferral = () => {
 
       logger.info('Referrals list prepared', { count: referralsList.length });
       setReferrals(referralsList);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       const errorStack = error instanceof Error ? error.stack : undefined;
       logger.error('Error fetching referrals', { 
@@ -494,7 +494,7 @@ export const useReferral = () => {
               ordersMap.set(order.id, order);
             });
           }
-        } catch (ordersError: unknown) {
+        } catch ( _ordersError: unknown) {
           // Erreur silencieuse - on continue sans les numéros de commande
           const errorMessage = ordersError instanceof Error ? ordersError.message : String(ordersError);
           logger.debug('Could not fetch orders for commissions', { error: errorMessage });
@@ -522,7 +522,7 @@ export const useReferral = () => {
               }
             });
           }
-        } catch (rpcError: unknown) {
+        } catch ( _rpcError: unknown) {
           // Erreur silencieuse - on continue sans les emails
           const errorMessage = rpcError instanceof Error ? rpcError.message : String(rpcError);
           logger.debug('RPC get_users_emails exception for commissions', { error: errorMessage });
@@ -563,7 +563,7 @@ export const useReferral = () => {
 
       logger.info('Commissions fetched and enriched', { count: enrichedCommissions.length });
       setCommissions(enrichedCommissions);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorCode = error && typeof error === 'object' && 'code' in error ? String(error.code) : undefined;
       const errorStack = error instanceof Error ? error.stack : undefined;
@@ -601,3 +601,9 @@ export const useReferral = () => {
     refetchCommissions: fetchCommissions,
   };
 };
+
+
+
+
+
+

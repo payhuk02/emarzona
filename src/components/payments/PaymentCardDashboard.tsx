@@ -55,21 +55,21 @@ const PaymentCardDashboardComponent = ({
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    const  variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
       completed: "default",
       failed: "destructive",
       refunded: "outline",
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: "En attente",
       completed: "Complété",
       failed: "Échoué",
       refunded: "Remboursé",
     };
 
-    const icons: Record<string, React.ReactNode> = {
+    const  icons: Record<string, React.ReactNode> = {
       pending: <Clock className="h-3 w-3" />,
       completed: <CheckCircle className="h-3 w-3" />,
       failed: <XCircle className="h-3 w-3" />,
@@ -85,7 +85,7 @@ const PaymentCardDashboardComponent = ({
   };
 
   const getMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       cash: "Espèces",
       card: "Carte bancaire",
       mobile_money: "Mobile Money",
@@ -97,7 +97,7 @@ const PaymentCardDashboardComponent = ({
   };
 
   const getMethodIcon = (method: string) => {
-    const icons: Record<string, React.ReactNode> = {
+    const  icons: Record<string, React.ReactNode> = {
       cash: <DollarSign className="h-4 w-4" />,
       card: <CreditCard className="h-4 w-4" />,
       mobile_money: <CreditCard className="h-4 w-4" />,
@@ -235,3 +235,9 @@ const PaymentCardDashboard = React.memo(PaymentCardDashboardComponent, (prevProp
 PaymentCardDashboard.displayName = 'PaymentCardDashboard';
 
 export default PaymentCardDashboard;
+
+
+
+
+
+

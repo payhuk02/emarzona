@@ -16,14 +16,14 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const SEVERITY_COLORS: Record<PhysicalProductAlert['severity'], string> = {
+const  SEVERITY_COLORS: Record<PhysicalProductAlert['severity'], string> = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
   medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
   critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
 };
 
-const ALERT_TYPE_LABELS: Record<PhysicalProductAlert['alert_type'], string> = {
+const  ALERT_TYPE_LABELS: Record<PhysicalProductAlert['alert_type'], string> = {
   low_stock: 'Stock faible',
   out_of_stock: 'Stock épuisé',
   reorder_needed: 'Réapprovisionnement nécessaire',
@@ -238,4 +238,9 @@ export const AlertsDashboard = ({ storeId }: AlertsDashboardProps) => {
     </div>
   );
 };
+
+
+
+
+
 

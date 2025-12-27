@@ -63,7 +63,7 @@ const TIMEZONES = [
   { value: 'America/Los_Angeles', label: 'Los Angeles (GMT-8)' },
 ];
 
-export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
+export const StoreLocationSettings : React.FC<StoreLocationSettingsProps> = ({
   addressLine1,
   addressLine2,
   city,
@@ -83,7 +83,7 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
   const { toast } = useToast();
   const [geocoding, setGeocoding] = useState(false);
 
-  const defaultHours: StoreOpeningHours = openingHours || {
+  const  defaultHours: StoreOpeningHours = openingHours || {
     monday: { open: '09:00', close: '18:00', closed: false },
     tuesday: { open: '09:00', close: '18:00', closed: false },
     wednesday: { open: '09:00', close: '18:00', closed: false },
@@ -186,7 +186,7 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
           variant: 'destructive',
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       toast({
         title: 'Erreur',
         description: 'Une erreur est survenue lors du géocodage',
@@ -572,3 +572,10 @@ export const StoreLocationSettings: React.FC<StoreLocationSettingsProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+

@@ -40,7 +40,7 @@ export async function sendVendorMessageNotification(
     }
 
     // Récupérer les informations du produit si disponible
-    let productName = '';
+    let  productName= '';
     if (conversation.product_id) {
       const { data: product } = await supabase
         .from('products')
@@ -51,7 +51,7 @@ export async function sendVendorMessageNotification(
     }
 
     // Récupérer les informations du store
-    let storeName = '';
+    let  storeName= '';
     if (conversation.store_id) {
       const { data: store } = await supabase
         .from('stores')
@@ -62,9 +62,9 @@ export async function sendVendorMessageNotification(
     }
 
     // Déterminer le type de notification et le contenu
-    let notificationType: 'vendor_message_received' | 'customer_message_received';
-    let title: string;
-    let message: string;
+    let  notificationType: 'vendor_message_received' | 'customer_message_received';
+    let  title: string;
+    let  message: string;
 
     if (data.recipientType === 'store') {
       // Notification pour le vendeur
@@ -151,7 +151,7 @@ export async function sendVendorConversationStartedNotification(
     }
 
     // Récupérer le nom du produit
-    let productName = '';
+    let  productName= '';
     if (conversation.product_id || productId) {
       const { data: product } = await supabase
         .from('products')
@@ -199,3 +199,9 @@ export async function sendVendorConversationStartedNotification(
     return { success: false, error: errorMessage };
   }
 }
+
+
+
+
+
+

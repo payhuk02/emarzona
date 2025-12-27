@@ -441,7 +441,7 @@ export const useUpcomingBookings = (productId?: string) => {
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
 
-      let query = supabase
+      let  query= supabase
         .from('service_bookings')
         .select(`
           *,
@@ -474,7 +474,7 @@ export const useBookingStats = (productId: string, startDate?: string, endDate?:
   return useQuery({
     queryKey: ['booking-stats', productId, startDate, endDate],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('service_bookings')
         .select('status, total_price')
         .eq('product_id', productId);
@@ -507,4 +507,10 @@ export const useBookingStats = (productId: string, startDate?: string, endDate?:
     enabled: !!productId,
   });
 };
+
+
+
+
+
+
 

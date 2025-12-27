@@ -29,7 +29,7 @@ interface ReviewFormProps {
   isLoading?: boolean;
 }
 
-export const ReviewForm: React.FC<ReviewFormProps> = ({
+export const ReviewForm : React.FC<ReviewFormProps> = ({
   productId,
   productType,
   orderId,
@@ -65,7 +65,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
   };
 
   const onFormSubmit = (data: any) => {
-    const payload: CreateReviewPayload = {
+    const  payload: CreateReviewPayload = {
       product_id: productId,
       product_type: productType,
       order_id: orderId,
@@ -87,7 +87,7 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
       delivery_rating?: number;
       [key: string]: unknown;
     }
-    const reviewPayload: ReviewPayload = {
+    const  reviewPayload: ReviewPayload = {
       product_id: data.product_id,
       rating: data.rating,
       comment: data.comment,
@@ -249,4 +249,11 @@ export const ReviewForm: React.FC<ReviewFormProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 

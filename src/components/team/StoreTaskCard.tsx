@@ -35,21 +35,21 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-const PRIORITY_COLORS: Record<StoreTask['priority'], string> = {
+const  PRIORITY_COLORS: Record<StoreTask['priority'], string> = {
   low: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
   medium: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   high: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
   urgent: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
 };
 
-const PRIORITY_LABELS: Record<StoreTask['priority'], string> = {
+const  PRIORITY_LABELS: Record<StoreTask['priority'], string> = {
   low: 'Basse',
   medium: 'Moyenne',
   high: 'Haute',
   urgent: 'Urgente',
 };
 
-const STATUS_COLORS: Record<StoreTask['status'], string> = {
+const  STATUS_COLORS: Record<StoreTask['status'], string> = {
   pending: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
   in_progress: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   review: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
@@ -58,7 +58,7 @@ const STATUS_COLORS: Record<StoreTask['status'], string> = {
   on_hold: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
 };
 
-const STATUS_LABELS: Record<StoreTask['status'], string> = {
+const  STATUS_LABELS: Record<StoreTask['status'], string> = {
   pending: 'En attente',
   in_progress: 'En cours',
   review: 'En révision',
@@ -67,7 +67,7 @@ const STATUS_LABELS: Record<StoreTask['status'], string> = {
   on_hold: 'En pause',
 };
 
-const CATEGORY_LABELS: Record<StoreTask['category'], string> = {
+const  CATEGORY_LABELS: Record<StoreTask['category'], string> = {
   product: 'Produit',
   order: 'Commande',
   customer: 'Client',
@@ -310,4 +310,10 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
     prevProps.task.comments_count === nextProps.task.comments_count
   );
 });
+
+
+
+
+
+
 

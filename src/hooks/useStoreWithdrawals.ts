@@ -28,7 +28,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
     try {
       setLoading(true);
 
-      let query = supabase
+      let  query= supabase
         .from('store_withdrawals')
         .select(`
           *,
@@ -69,7 +69,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
       if (error) throw error;
 
       setWithdrawals(data || []);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching withdrawals', { error });
       toast({
@@ -80,7 +80,6 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters?.store_id, filters?.status, filters?.payment_method, filters?.date_from, filters?.date_to, filters?.min_amount, filters?.max_amount]);
 
   const requestWithdrawal = async (
@@ -169,7 +168,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       await fetchWithdrawals();
       return data;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error requesting withdrawal', { error });
       toast({
@@ -198,7 +197,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error cancelling withdrawal', { error });
       toast({
@@ -212,7 +211,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
   const getWithdrawalStats = useCallback(async (): Promise<StoreWithdrawalStats | null> => {
     try {
-      let query = supabase
+      let  query= supabase
         .from('store_withdrawals')
         .select('amount, status');
 
@@ -224,7 +223,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
       if (error) throw error;
 
-      const stats: StoreWithdrawalStats = {
+      const  stats: StoreWithdrawalStats = {
         total_withdrawals: data?.length || 0,
         total_amount: data?.reduce((sum, w) => sum + parseFloat(w.amount.toString()), 0) || 0,
         pending_count: data?.filter(w => w.status === 'pending').length || 0,
@@ -236,7 +235,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
       };
 
       return stats;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting withdrawal stats', { error });
       return null;
@@ -245,7 +244,6 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
   useEffect(() => {
     fetchWithdrawals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters?.store_id, filters?.status, filters?.payment_method, filters?.date_from, filters?.date_to, filters?.min_amount, filters?.max_amount]);
 
   // Synchronisation en temps réel avec Supabase Realtime
@@ -256,7 +254,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
     }
 
     // Construire le filtre pour le channel
-    let filter = '';
+    let  filter= '';
     if (filters?.store_id) {
       filter = `store_id=eq.${filters.store_id}`;
     }
@@ -323,7 +321,7 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
 
             // Notifier l'utilisateur si le statut a changé
             if (oldStatus && oldStatus !== newStatus) {
-              const statusMessages: Record<StoreWithdrawalStatus, { title: string; description: string }> = {
+              const  statusMessages: Record<StoreWithdrawalStatus, { title: string; description: string }> = {
                 pending: { title: 'Retrait en attente', description: 'Votre demande de retrait est en attente d\'approbation' },
                 processing: { 
                   title: 'Retrait approuvé ✅', 
@@ -384,4 +382,10 @@ export const useStoreWithdrawals = (filters?: StoreWithdrawalFilters) => {
     refetch: fetchWithdrawals,
   };
 };
+
+
+
+
+
+
 

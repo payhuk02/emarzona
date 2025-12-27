@@ -81,7 +81,7 @@ export async function generateArtistCertificatePDF(
     // EN-TÊTE
     // ================================================================
     
-    let yPosition = margin + 15;
+    let  yPosition= margin + 15;
     
     // Titre principal
     doc.setFontSize(32);
@@ -329,4 +329,10 @@ export async function generateAndUploadCertificate(
     throw error;
   }
 }
+
+
+
+
+
+
 

@@ -145,7 +145,7 @@ export interface CoursesListProps {
 /**
  * Mapping des catégories
  */
-const CATEGORY_LABELS: Record<CourseCategory, string> = {
+const  CATEGORY_LABELS: Record<CourseCategory, string> = {
   development: 'Développement',
   design: 'Design',
   business: 'Business',
@@ -168,7 +168,7 @@ const CATEGORY_LABELS: Record<CourseCategory, string> = {
  * />
  * ```
  */
-export const CoursesList: React.FC<CoursesListProps> = ({
+export const CoursesList : React.FC<CoursesListProps> = ({
   courses,
   onCourseSelect,
   onEdit,
@@ -195,7 +195,7 @@ export const CoursesList: React.FC<CoursesListProps> = ({
 
   // Filtrer et trier les cours
   const filteredAndSortedCourses = useMemo(() => {
-    let result = [...courses];
+    let  result= [...courses];
 
     // Recherche
     if (searchQuery) {
@@ -219,8 +219,8 @@ export const CoursesList: React.FC<CoursesListProps> = ({
 
     // Trier
     result.sort((a, b) => {
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      let  aValue: any = a[sortField];
+      let  bValue: any = b[sortField];
 
       // Conversion dates
       if (sortField === 'created_at') {
@@ -715,4 +715,11 @@ export const CoursesList: React.FC<CoursesListProps> = ({
 CoursesList.displayName = 'CoursesList';
 
 export default CoursesList;
+
+
+
+
+
+
+
 

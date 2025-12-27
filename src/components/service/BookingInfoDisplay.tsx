@@ -134,7 +134,7 @@ export interface BookingInfoDisplayProps {
 /**
  * Configuration des statuts
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   BookingStatus,
   {
     label: string;
@@ -230,7 +230,7 @@ const STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const BookingInfoDisplay: React.FC<BookingInfoDisplayProps> = ({
+export const BookingInfoDisplay : React.FC<BookingInfoDisplayProps> = ({
   bookingId,
   status,
   scheduledDate,
@@ -757,4 +757,11 @@ export const BookingInfoDisplay: React.FC<BookingInfoDisplayProps> = ({
 BookingInfoDisplay.displayName = 'BookingInfoDisplay';
 
 export default BookingInfoDisplay;
+
+
+
+
+
+
+
 

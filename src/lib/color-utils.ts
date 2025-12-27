@@ -46,8 +46,8 @@ export function rgbToHsl(r: number, g: number, b: number): HSL {
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
+  let  h= 0;
+  let  s= 0;
   const l = (max + min) / 2;
 
   if (max !== min) {
@@ -85,9 +85,9 @@ export function hslToRgb(h: number, s: number, l: number): RGB {
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;
 
-  let r = 0;
-  let g = 0;
-  let b = 0;
+  let  r= 0;
+  let  g= 0;
+  let  b= 0;
 
   if (0 <= h && h < 60) {
     r = c;
@@ -267,4 +267,10 @@ export function parseColor(color: string): RGB | null {
 
   return null;
 }
+
+
+
+
+
+
 

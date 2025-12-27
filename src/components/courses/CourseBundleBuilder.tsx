@@ -121,7 +121,7 @@ export interface CourseBundleBuilderProps {
  * />
  * ```
  */
-export const CourseBundleBuilder: React.FC<CourseBundleBuilderProps> = ({
+export const CourseBundleBuilder : React.FC<CourseBundleBuilderProps> = ({
   availableCourses,
   editingBundle,
   onSave,
@@ -172,7 +172,7 @@ export const CourseBundleBuilder: React.FC<CourseBundleBuilderProps> = ({
     const course = availableCourses.find((c) => c.id === courseId);
     if (!course) return;
 
-    const bundleCourse: BundleCourse = {
+    const  bundleCourse: BundleCourse = {
       id: course.id,
       name: course.name,
       price: course.price,
@@ -201,7 +201,7 @@ export const CourseBundleBuilder: React.FC<CourseBundleBuilderProps> = ({
 
   // Sauvegarder le bundle
   const handleSave = () => {
-    const bundle: CourseBundle = {
+    const  bundle: CourseBundle = {
       id: editingBundle?.id,
       name: bundleName,
       description,
@@ -565,4 +565,11 @@ export const CourseBundleBuilder: React.FC<CourseBundleBuilderProps> = ({
 CourseBundleBuilder.displayName = 'CourseBundleBuilder';
 
 export default CourseBundleBuilder;
+
+
+
+
+
+
+
 

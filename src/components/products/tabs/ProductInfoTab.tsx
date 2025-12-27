@@ -1410,3 +1410,9 @@ export const ProductInfoTab = ({
     </TooltipProvider>
   );
 };
+
+
+
+
+
+

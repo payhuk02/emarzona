@@ -31,7 +31,7 @@ export const formatDuration = (
       return `${secs}s`;
 
     case 'long': {
-      const parts: string[] = [];
+      const  parts: string[] = [];
       if (hours > 0) parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
       if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
       if (secs > 0 || parts.length === 0) parts.push(`${secs} seconde${secs > 1 ? 's' : ''}`);
@@ -80,7 +80,7 @@ export const calculateProgress = (completed: number, total: number): number => {
  * @returns Label et couleur
  */
 export const getLevelInfo = (level: string): { label: string; color: string } => {
-  const levels: Record<string, { label: string; color: string }> = {
+  const  levels: Record<string, { label: string; color: string }> = {
     beginner: { label: 'Débutant', color: 'bg-green-100 text-green-800' },
     intermediate: { label: 'Intermédiaire', color: 'bg-blue-100 text-blue-800' },
     advanced: { label: 'Avancé', color: 'bg-purple-100 text-purple-800' },
@@ -178,4 +178,10 @@ export const formatCourseDate = (
     year: 'numeric',
   });
 };
+
+
+
+
+
+
 

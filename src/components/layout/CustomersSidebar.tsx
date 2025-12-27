@@ -57,7 +57,7 @@ export const CustomersSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Clients', path: '/dashboard/customers' },
     { label: activeSection },
   ];
@@ -91,4 +91,10 @@ export const CustomersSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

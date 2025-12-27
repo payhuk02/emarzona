@@ -142,7 +142,7 @@ export default function InventoryDashboard() {
     try {
       await exportInventoryCSV(filteredItems);
       logger.info('Inventory exported to CSV', { count: filteredItems.length });
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error exporting inventory', { error: error.message });
     } finally {
       setIsExporting(false);
@@ -491,3 +491,9 @@ export default function InventoryDashboard() {
   </SidebarProvider>
   );
 }
+
+
+
+
+
+

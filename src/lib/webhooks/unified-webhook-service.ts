@@ -16,7 +16,7 @@ import type { RecordString } from '@/types/common';
 /**
  * Mappe les anciens types d'événements vers les nouveaux types standardisés
  */
-const EVENT_TYPE_MAPPING: Record<string, WebhookEventType> = {
+const  EVENT_TYPE_MAPPING: Record<string, WebhookEventType> = {
   // Produits digitaux
   'purchase': 'order.created',
   'download': 'digital_product.downloaded',
@@ -123,7 +123,7 @@ export async function triggerUnifiedWebhook(
         eventType: normalizedEventType 
       });
     }
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Exception triggering unified webhook', { 
       error: error.message, 
       storeId, 
@@ -268,4 +268,10 @@ export async function triggerWebhooks(
   );
   return triggerUnifiedWebhook(storeId, eventType, eventData, eventId);
 }
+
+
+
+
+
+
 

@@ -47,7 +47,7 @@ interface SizeChartComparatorProps {
 }
 
 // Conversion entre systèmes de tailles (approximatif)
-const SIZE_CONVERSIONS: Record<SizeSystem, Record<string, string[]>> = {
+const  SIZE_CONVERSIONS: Record<SizeSystem, Record<string, string[]>> = {
   eu: {
     XS: ['XS', 'XS', '4'],
     S: ['S', 'S', '6'],
@@ -109,11 +109,11 @@ export function SizeChartComparator({
   const recommendedSize = useMemo<{ size: string; score: number } | null>(() => {
     if (!currentChart || Object.keys(userMeasurements).length === 0) return null;
 
-    let bestMatch: { size: string; score: number } | null = null;
+    let  bestMatch: { size: string; score: number } | null = null;
 
     currentChart.sizes.forEach(size => {
-      let score = 0;
-      let totalWeight = 0;
+      let  score= 0;
+      let  totalWeight= 0;
 
       currentChart.measurements.forEach(measurement => {
         const userValue = userMeasurements[measurement.label];
@@ -152,7 +152,7 @@ export function SizeChartComparator({
       };
     }
 
-    const conversions: Record<SizeSystem, string | null> = {
+    const  conversions: Record<SizeSystem, string | null> = {
       eu: null,
       us: null,
       uk: null,
@@ -189,7 +189,7 @@ export function SizeChartComparator({
   };
 
   const getSystemLabel = (system: SizeSystem) => {
-    const labels: Record<SizeSystem, string> = {
+    const  labels: Record<SizeSystem, string> = {
       eu: 'Europe (EU)',
       us: 'États-Unis (US)',
       uk: 'Royaume-Uni (UK)',
@@ -385,3 +385,9 @@ export function SizeChartComparator({
     </div>
   );
 }
+
+
+
+
+
+

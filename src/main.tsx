@@ -97,7 +97,6 @@ if (typeof window !== 'undefined') {
         })
         .catch(() => {
           // Fallback si logger n'est pas disponible
-          // eslint-disable-next-line no-console
           console.error('Error initializing non-critical modules:', error);
         });
     });
@@ -110,7 +109,7 @@ if (typeof window !== 'undefined') {
             scope: '/',
             updateViaCache: 'none', // Toujours récupérer la dernière version du SW
           })
-          .catch(error => {
+          .catch( error => {
             // Logger silencieusement
             import('./lib/logger').then(({ logger }) => {
               logger.warn('Service Worker registration failed', { error });
@@ -120,3 +119,9 @@ if (typeof window !== 'undefined') {
     }
   });
 }
+
+
+
+
+
+

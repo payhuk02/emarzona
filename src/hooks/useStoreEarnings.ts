@@ -82,7 +82,7 @@ export const useStoreEarnings = (storeId: string | undefined) => {
           }
         }
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error fetching store earnings', { error });
       
       // Vérifier si c'est une erreur de table/fonction manquante
@@ -120,7 +120,7 @@ export const useStoreEarnings = (storeId: string | undefined) => {
 
       // Récupérer les revenus mis à jour
       await fetchEarnings();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error refreshing store earnings', { error });
       toast({
         title: 'Erreur',
@@ -180,4 +180,10 @@ export const useStoreEarnings = (storeId: string | undefined) => {
     refetch: fetchEarnings,
   };
 };
+
+
+
+
+
+
 

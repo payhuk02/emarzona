@@ -13,7 +13,7 @@ interface StoreLocationSectionProps {
   store: Store | null;
 }
 
-const DAYS_LABELS: Record<string, string> = {
+const  DAYS_LABELS: Record<string, string> = {
   monday: 'Lundi',
   tuesday: 'Mardi',
   wednesday: 'Mercredi',
@@ -25,7 +25,7 @@ const DAYS_LABELS: Record<string, string> = {
 
 const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
-export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ store }) => {
+export const StoreLocationSection : React.FC<StoreLocationSectionProps> = ({ store }) => {
   const theme = useStoreTheme(store);
 
   if (!store) return null;
@@ -47,7 +47,7 @@ export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ stor
 
   // Formater l'adresse complète
   const formatAddress = () => {
-    const parts: string[] = [];
+    const  parts: string[] = [];
     if (store.address_line1) parts.push(store.address_line1);
     if (store.address_line2) parts.push(store.address_line2);
     if (store.city) parts.push(store.city);
@@ -282,5 +282,12 @@ export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ stor
     </div>
   );
 };
+
+
+
+
+
+
+
 
 

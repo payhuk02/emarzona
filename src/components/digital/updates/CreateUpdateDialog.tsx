@@ -144,7 +144,7 @@ export function CreateUpdateDialog({
         .getPublicUrl(filePath);
 
       return urlData.publicUrl;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading update file', { error, digitalProductId });
       toast({
@@ -304,7 +304,7 @@ export function CreateUpdateDialog({
       setIsForced(false);
       setPublishImmediately(true);
       onOpenChange(false);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating update', { error, digitalProductId });
       toast({
@@ -565,4 +565,10 @@ export function CreateUpdateDialog({
     </Dialog>
   );
 }
+
+
+
+
+
+
 

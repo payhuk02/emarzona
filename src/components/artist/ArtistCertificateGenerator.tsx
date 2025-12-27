@@ -270,3 +270,9 @@ export const ArtistCertificateGenerator = ({
   );
 };
 
+
+
+
+
+
+

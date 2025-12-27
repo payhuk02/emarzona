@@ -121,7 +121,7 @@ const OrdersTableComponent = ({
         });
 
         onUpdate();
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -149,7 +149,7 @@ const OrdersTableComponent = ({
         });
 
         onUpdate();
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -177,7 +177,7 @@ const OrdersTableComponent = ({
 
       onUpdate();
       setDeleteId(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -190,14 +190,14 @@ const OrdersTableComponent = ({
   }, [deleteId, onUpdate]); // Note: toast est stable
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       completed: 'outline',
       cancelled: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En cours',
       completed: 'Terminée',
@@ -208,13 +208,13 @@ const OrdersTableComponent = ({
   };
 
   const getPaymentBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       paid: 'outline',
       failed: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       paid: 'Payée',
       failed: 'Échouée',
@@ -502,3 +502,9 @@ export const OrdersTable = React.memo(OrdersTableComponent, (prevProps, nextProp
 });
 
 OrdersTable.displayName = 'OrdersTable';
+
+
+
+
+
+

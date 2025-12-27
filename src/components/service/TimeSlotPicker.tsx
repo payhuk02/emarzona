@@ -50,7 +50,7 @@ export const TimeSlotPicker = ({
       if (!normalizedServiceProductId) return [];
 
       // Récupérer le service_product_id si on a seulement serviceId
-      let productId = normalizedServiceProductId;
+      let  productId= normalizedServiceProductId;
       if (serviceId && !serviceProductId) {
         const { data: product } = await supabase
           .from('products')
@@ -83,7 +83,7 @@ export const TimeSlotPicker = ({
       if (error) throw error;
 
       // Générer les créneaux disponibles
-      const timeSlots: TimeSlot[] = [];
+      const  timeSlots: TimeSlot[] = [];
       availabilitySlots?.forEach(slot => {
         const start = new Date(`2000-01-01T${slot.start_time}`);
         const end = new Date(`2000-01-01T${slot.end_time}`);
@@ -122,7 +122,7 @@ export const TimeSlotPicker = ({
 
       // Note: productId attendu est le product_id, pas service_product_id
       // Si on a serviceProductId, il faut récupérer le product_id correspondant
-      let productIdForValidation = normalizedServiceProductId;
+      let  productIdForValidation= normalizedServiceProductId;
 
       // Si c'est un serviceProductId, récupérer le product_id
       if (serviceProductId && !serviceId) {
@@ -212,3 +212,9 @@ export const TimeSlotPicker = ({
     </div>
   );
 };
+
+
+
+
+
+

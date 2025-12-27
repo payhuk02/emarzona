@@ -40,7 +40,7 @@ interface StoreTasksKanbanProps {
   filters?: TaskFilters;
 }
 
-const STATUS_COLUMNS: Array<{
+const  STATUS_COLUMNS: Array<{
   id: StoreTask['status'];
   label: string;
   color: string;
@@ -169,7 +169,7 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
       } as Record<StoreTask['status'], StoreTask[]>;
     }
     
-    const grouped: Record<StoreTask['status'], StoreTask[]> = {
+    const  grouped: Record<StoreTask['status'], StoreTask[]> = {
       pending: [],
       in_progress: [],
       review: [],
@@ -297,4 +297,10 @@ export const StoreTasksKanban = ({ storeId, filters }: StoreTasksKanbanProps) =>
     </>
   );
 };
+
+
+
+
+
+
 

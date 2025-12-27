@@ -199,7 +199,7 @@ export default function Payments() {
       await refetch();
       setEditDialogOpen(false);
       setSelectedPayment(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la mise à jour du paiement', error);
       toast({
@@ -230,7 +230,7 @@ export default function Payments() {
       await refetch();
       setDeleteDialogOpen(false);
       setSelectedPayment(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la suppression du paiement', error);
       toast({
@@ -252,7 +252,7 @@ export default function Payments() {
         description: 'La liste des paiements a été mise à jour.',
       });
       logger.info('Payments refreshed');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error refreshing payments', { error: errorMessage });
       toast({
@@ -323,7 +323,7 @@ export default function Payments() {
         description: `${filteredPayments.length} paiement(s) exporté(s) en CSV.`,
       });
       logger.info('Payments exported to CSV', { count: filteredPayments.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error exporting payments to CSV', { error: errorMessage });
       toast({
@@ -1024,3 +1024,9 @@ export default function Payments() {
     </MainLayout>
   );
 }
+
+
+
+
+
+

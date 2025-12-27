@@ -220,3 +220,9 @@ function formatAnswer(question: QuizQuestion, answer: string | number | boolean 
   }
 }
 
+
+
+
+
+
+

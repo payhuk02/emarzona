@@ -11,7 +11,7 @@ interface AlertCircleIconProps {
   strokeWidth?: number;
 }
 
-export const AlertCircleIcon: React.FC<AlertCircleIconProps> = ({ 
+export const AlertCircleIcon : React.FC<AlertCircleIconProps> = ({ 
   className = '', 
   size = 24,
   strokeWidth = 2 
@@ -36,4 +36,11 @@ export const AlertCircleIcon: React.FC<AlertCircleIconProps> = ({
     </svg>
   );
 };
+
+
+
+
+
+
+
 

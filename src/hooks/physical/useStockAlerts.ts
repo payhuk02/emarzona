@@ -70,7 +70,7 @@ export function useStockAlerts(storeId: string, filters?: {
   return useQuery({
     queryKey: ['stock-alerts', storeId, filters],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('stock_alerts')
         .select('*')
         .eq('store_id', storeId)
@@ -117,7 +117,7 @@ export function useAlertStats(storeId: string) {
 
       const alerts = (data || []) as StockAlert[];
 
-      const stats: AlertStats = {
+      const  stats: AlertStats = {
         total: alerts.length,
         unread: alerts.filter((a) => !a.is_read).length,
         critical: alerts.filter((a) => a.severity === 'critical').length,
@@ -342,7 +342,7 @@ export function useGenerateProductAlerts() {
 
       if (productsError) throw productsError;
 
-      const alerts: CreateAlertInput[] = [];
+      const  alerts: CreateAlertInput[] = [];
 
       for (const product of products || []) {
         const qty = product.total_quantity || 0;
@@ -403,4 +403,10 @@ export function useGenerateProductAlerts() {
     },
   });
 }
+
+
+
+
+
+
 

@@ -118,7 +118,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         setSelectedStoreIdState(null);
         saveStoreIdToStorage(null);
       }
-    } catch (err: any) {
+    } catch ( _err: any) {
       logger.error('Error fetching stores', err);
       setError(err.message || 'Erreur lors du chargement des boutiques');
       setStores([]);
@@ -221,4 +221,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     </StoreContext.Provider>
   );
 };
+
+
+
+
+
+
 

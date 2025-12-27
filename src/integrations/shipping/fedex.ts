@@ -388,7 +388,7 @@ class FedExService {
       const data = await response.json();
 
       // Parser les événements de suivi
-      const events: any[] = [];
+      const  events: any[] = [];
       const output = data.output || {};
       const completeTrackResults = output.completeTrackResults || [];
 
@@ -418,4 +418,10 @@ class FedExService {
 }
 
 export default FedExService;
+
+
+
+
+
+
 

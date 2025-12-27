@@ -139,7 +139,7 @@ export default function MyOrders() {
     queryFn: async (): Promise<Order[]> => {
       if (!user?.id) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('orders')
         .select('*')
         .eq('customer_id', user.id)
@@ -157,7 +157,7 @@ export default function MyOrders() {
       // Fetch order items for each order
       const ordersWithItems = await Promise.all(
         (ordersData || []).map(async order => {
-          let itemsQuery = supabase.from('order_items').select('*').eq('order_id', order.id);
+          let  itemsQuery= supabase.from('order_items').select('*').eq('order_id', order.id);
 
           // Filter by product type
           if (typeFilter !== 'all') {
@@ -282,7 +282,7 @@ export default function MyOrders() {
   );
 
   const getStatusBadge = (status: string, paymentStatus: string) => {
-    const statusMap: Record<
+    const  statusMap: Record<
       string,
       { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
     > = {
@@ -774,3 +774,9 @@ export default function MyOrders() {
     </MainLayout>
   );
 }
+
+
+
+
+
+

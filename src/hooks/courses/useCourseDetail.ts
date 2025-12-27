@@ -20,8 +20,8 @@ export const useCourseDetail = (slug: string) => {
         .single();
 
       // Récupérer les produits preview/paid si ils existent
-      let freeProduct = null;
-      let paidProduct = null;
+      let  freeProduct= null;
+      let  paidProduct= null;
       
       if (product?.free_product_id) {
         const { data: freeData } = await supabase
@@ -92,9 +92,9 @@ export const useCourseDetail = (slug: string) => {
         .single();
 
       // 7. Vérifier si l'utilisateur est inscrit et récupérer la progression
-      let isEnrolled = false;
-      let enrollment = null;
-      let lastViewedLesson = null;
+      let  isEnrolled= false;
+      let  enrollment= null;
+      let  lastViewedLesson= null;
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
@@ -150,4 +150,10 @@ export const useCourseDetail = (slug: string) => {
     enabled: !!slug,
   });
 };
+
+
+
+
+
+
 

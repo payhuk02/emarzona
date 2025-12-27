@@ -48,7 +48,7 @@ class SimpleErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch( _error: Error, errorInfo: ErrorInfo) {
     logger.error(`Error in ${this.props.componentName || 'component'}`, {
       error: error.message,
       stack: error.stack,
@@ -154,4 +154,10 @@ export function withErrorBoundary<P extends object>(
 
   return WrappedComponent;
 }
+
+
+
+
+
+
 

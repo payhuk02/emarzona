@@ -65,7 +65,6 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
       }
     };
     initialize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Appliquer les changements de design au chargement initial
@@ -129,13 +128,13 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
       Object.entries(design.colors).forEach(([key, value]) => {
         if (typeof value === 'string') {
           // Convertir HSL en format CSS variable (sans hsl())
-          let hslValue = value;
+          let  hslValue= value;
           if (value.startsWith('hsl(')) {
             hslValue = value.replace('hsl(', '').replace(')', '');
           }
 
           // Mapper les clés aux variables CSS
-          const cssVarMap: Record<string, string> = {
+          const  cssVarMap: Record<string, string> = {
             primary: '--primary',
             secondary: '--secondary',
             accent: '--accent',
@@ -185,7 +184,7 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
 
       // Spacing (base spacing unit)
       if (design.tokens.spacing) {
-        const spacingMap: Record<string, string> = {
+        const  spacingMap: Record<string, string> = {
           '0': '0',
           '1': '0.25rem',
           '2': '0.5rem',
@@ -283,3 +282,9 @@ export const usePlatformCustomizationContext = () => {
   }
   return context;
 };
+
+
+
+
+
+

@@ -24,7 +24,7 @@ interface TrackingTimelineProps {
 
 type EventIcon = typeof Package | typeof Truck | typeof Home | typeof Circle;
 
-const eventIcons: Record<string, EventIcon> = {
+const  eventIcons: Record<string, EventIcon> = {
   LABEL_CREATED: Package,
   PICKED_UP: Package,
   IN_TRANSIT: Truck,
@@ -174,4 +174,10 @@ export function TrackingTimeline({ trackingNumber }: TrackingTimelineProps) {
     </div>
   );
 }
+
+
+
+
+
+
 

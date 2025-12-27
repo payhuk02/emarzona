@@ -67,7 +67,7 @@ interface MobileFormFieldProps {
 /**
  * Composant de champ de formulaire mobile-first
  */
-export const MobileFormField: React.FC<MobileFormFieldProps> = ({
+export const MobileFormField : React.FC<MobileFormFieldProps> = ({
   label,
   name,
   error,
@@ -189,7 +189,7 @@ interface MobileFormSectionProps {
   className?: string;
 }
 
-export const MobileFormSection: React.FC<MobileFormSectionProps> = ({
+export const MobileFormSection : React.FC<MobileFormSectionProps> = ({
   title,
   description,
   children,
@@ -207,3 +207,10 @@ export const MobileFormSection: React.FC<MobileFormSectionProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

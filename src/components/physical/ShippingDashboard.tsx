@@ -98,7 +98,7 @@ const MOCK_RECENT_SHIPMENTS = [
 // ============================================================================
 
 function ShippingStatusBadge({ status }: { status: ShippingStatus }) {
-  const config: Record<
+  const  config: Record<
     ShippingStatus,
     { label: string; className: string; icon: typeof Package }
   > = {
@@ -478,4 +478,10 @@ export function ShippingDashboard({ storeId, className }: ShippingDashboardProps
     </div>
   );
 }
+
+
+
+
+
+
 

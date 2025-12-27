@@ -128,7 +128,7 @@ export const CreatePhysicalProductWizard = () => {
    * Validate current step
    */
   const validateStep = (step: number): boolean => {
-    const errors: string[] = [];
+    const  errors: string[] = [];
 
     switch (step) {
       case 1:
@@ -308,7 +308,7 @@ export const CreatePhysicalProductWizard = () => {
 
       // 7. Create shipping rates for each zone
       if (formData.shipping_rates && zones) {
-        const ratesData: any[] = [];
+        const  ratesData: any[] = [];
         zones.forEach((zone, zoneIndex) => {
           const zoneRates = formData.shipping_rates?.filter(
             (_, rateIndex) => rateIndex === zoneIndex
@@ -369,8 +369,8 @@ export const CreatePhysicalProductWizard = () => {
    */
   const handlePublish = async () => {
     // Validate all steps
-    let allValid = true;
-    for (let step = 1; step <= 4; step++) {
+    let  allValid= true;
+    for (let  step= 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -548,3 +548,9 @@ export const CreatePhysicalProductWizard = () => {
     </div>
   );
 };
+
+
+
+
+
+

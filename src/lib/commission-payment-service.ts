@@ -64,7 +64,7 @@ export const createCommissionPaymentRequest = async (
     }
 
     // Vérifier que les commissions appartiennent à l'utilisateur
-    let commissionIds: string[] = [];
+    let  commissionIds: string[] = [];
     
     if (type === 'affiliate') {
       const { data: commissions, error: commError } = await supabase
@@ -114,7 +114,7 @@ export const createCommissionPaymentRequest = async (
     }
 
     // Créer la demande de paiement
-    const paymentData: Record<string, unknown> = {
+    const  paymentData: Record<string, unknown> = {
       commission_ids: commissionIds,
       amount: request.amount,
       currency: request.currency || 'XOF',
@@ -184,7 +184,7 @@ export const createCommissionPaymentRequest = async (
       success: true,
       payment_id: payment.id,
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in createCommissionPaymentRequest', { error: errorMessage });
     return {
@@ -256,7 +256,7 @@ export const approveCommissionPayment = async (
 
     logger.log('Commission payment approved', { payment_id: paymentId, admin_id: adminId });
     return { success: true };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in approveCommissionPayment', { error: errorMessage });
     return {
@@ -337,7 +337,7 @@ export const processCommissionPayment = async (
       transaction_reference: transactionReference,
     });
     return { success: true };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in processCommissionPayment', { error: errorMessage });
     return {
@@ -378,7 +378,7 @@ export const getCommissionPaymentHistory = async (
       success: true,
       payments: payments as CommissionPayment[],
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in getCommissionPaymentHistory', { error: errorMessage });
     return {
@@ -387,4 +387,10 @@ export const getCommissionPaymentHistory = async (
     };
   }
 };
+
+
+
+
+
+
 

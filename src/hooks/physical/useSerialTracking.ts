@@ -129,7 +129,7 @@ export const useProductSerialNumbers = (
   return useQuery({
     queryKey: ['product-serial-numbers', physicalProductId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('serial_numbers')
         .select('*')
         .eq('physical_product_id', physicalProductId)
@@ -365,7 +365,7 @@ export const useWarrantyClaims = (options?: {
   return useQuery({
     queryKey: ['warranty-claims', options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('warranty_claims')
         .select('*')
         .order('claim_date', { ascending: false });
@@ -475,7 +475,7 @@ export const useRepairs = (options?: {
   return useQuery({
     queryKey: ['repairs', options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('repairs')
         .select('*')
         .order('received_date', { ascending: false });
@@ -581,6 +581,12 @@ export const useCheckSerialAvailability = (serialNumber: string) => {
     enabled: !!serialNumber,
   });
 };
+
+
+
+
+
+
 
 
 

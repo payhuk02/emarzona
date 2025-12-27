@@ -53,7 +53,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
 
   // Ajouter une nouvelle section
   const addSection = () => {
-    const newSection: Section = {
+    const  newSection: Section = {
       id: `section-${Date.now()}`,
       title: '',
       description: '',
@@ -89,7 +89,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     const section = sections.find(s => s.id === sectionId);
     if (!section) return;
 
-    const newLesson: Lesson = {
+    const  newLesson: Lesson = {
       id: `lesson-${Date.now()}`,
       title: '',
       description: '',
@@ -127,7 +127,7 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
 
   // Calculer la durée totale
   const getTotalDuration = () => {
-    let total = 0;
+    let  total= 0;
     sections.forEach(section => {
       section.lessons.forEach(lesson => {
         total += lesson.video_duration_seconds || 0;
@@ -478,4 +478,10 @@ export const CourseCurriculumBuilder = ({ sections, onSectionsChange }: CourseCu
     </div>
   );
 };
+
+
+
+
+
+
 

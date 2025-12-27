@@ -25,7 +25,7 @@ export const ReferralTracker = () => {
         
         // Nettoyer l'URL pour ne pas laisser le paramètre visible
         // (On garde le paramètre pour que l'utilisateur puisse le voir s'il le souhaite)
-      } catch (error: any) {
+      } catch ( _error: any) {
         logger.error('Error tracking referral code', { error: error.message });
       }
     } else if (referralCode === '') {
@@ -56,4 +56,10 @@ export const clearStoredReferralCode = (): void => {
   localStorage.removeItem('referral_code');
   sessionStorage.removeItem('referral_code');
 };
+
+
+
+
+
+
 

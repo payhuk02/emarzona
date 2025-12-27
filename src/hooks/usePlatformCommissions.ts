@@ -43,7 +43,7 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
     try {
       setLoading(true);
 
-      let query = supabase
+      let  query= supabase
         .from("platform_commissions")
         .select(`
           *,
@@ -93,7 +93,7 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
           salesCount: 0,
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -168,3 +168,9 @@ export const usePlatformCommissions = (startDate?: string, endDate?: string) => 
     exportToCSV,
   };
 };
+
+
+
+
+
+

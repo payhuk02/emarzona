@@ -194,7 +194,7 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: enrollmentReport, isLoading: isLoadingEnrollment } = useQuery({
     queryKey: ['enrollment-report', period, course_id, dates],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('enrollments')
         .select(`
           *,
@@ -214,7 +214,7 @@ export const useCourseReports = (config: ReportConfig) => {
       const enrollments = data || [];
 
       // Calculer les métriques
-      const report: EnrollmentReport = {
+      const  report: EnrollmentReport = {
         period,
         total_enrollments: enrollments.length,
         new_enrollments: enrollments.filter((e) => e.status === 'active' || e.status === 'pending')
@@ -289,7 +289,7 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: revenueReport, isLoading: isLoadingRevenue } = useQuery({
     queryKey: ['revenue-report', period, course_id, dates],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('enrollments')
         .select(`
           *,
@@ -317,7 +317,7 @@ export const useCourseReports = (config: ReportConfig) => {
         .filter((e) => e.status === 'refunded')
         .reduce((sum, e) => sum + (e.amount_paid || 0), 0);
 
-      const report: RevenueReport = {
+      const  report: RevenueReport = {
         period,
         total_revenue: totalRevenue,
         revenue_growth: (() => {
@@ -393,7 +393,7 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: studentReport, isLoading: isLoadingStudent } = useQuery({
     queryKey: ['student-report', period, student_id, dates],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('enrollments')
         .select(`
           *,
@@ -415,7 +415,7 @@ export const useCourseReports = (config: ReportConfig) => {
       // Compter les étudiants uniques
       const uniqueStudents = new Set(enrollments.map((e) => e.student_id));
 
-      const report: StudentReport = {
+      const  report: StudentReport = {
         period,
         total_students: uniqueStudents.size,
         active_students: enrollments.filter((e) => e.status === 'active').length,
@@ -499,7 +499,7 @@ export const useCourseReports = (config: ReportConfig) => {
   const { data: completionReport, isLoading: isLoadingCompletion } = useQuery({
     queryKey: ['completion-report', period, course_id, dates],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('enrollments')
         .select(`
           *,
@@ -520,7 +520,7 @@ export const useCourseReports = (config: ReportConfig) => {
 
       const completions = enrollments.filter((e) => e.status === 'completed');
 
-      const report: CompletionReport = {
+      const  report: CompletionReport = {
         period,
         total_completions: completions.length,
         avg_completion_rate:
@@ -612,8 +612,8 @@ export const useCourseReports = (config: ReportConfig) => {
    * Exporter un rapport
    */
   const exportReport = (type: ReportType, format: ExportFormat = 'csv') => {
-    let data: any;
-    let filename: string;
+    let  data: any;
+    let  filename: string;
 
     switch (type) {
       case 'enrollment':
@@ -680,4 +680,10 @@ export const useCourseReports = (config: ReportConfig) => {
 };
 
 export default useCourseReports;
+
+
+
+
+
+
 

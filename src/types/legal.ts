@@ -63,3 +63,9 @@ export interface LegalPageProps {
   language?: 'fr' | 'en' | 'es' | 'pt';
 }
 
+
+
+
+
+
+

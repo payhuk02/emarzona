@@ -68,7 +68,7 @@ export const MultiDomainManager = ({
       const success = await onAddSecondaryDomain(newDomain.trim(), newDomainType);
       
       if (success) {
-        const newSecondaryDomain: SecondaryDomain = {
+        const  newSecondaryDomain: SecondaryDomain = {
           id: `domain-${Date.now()}`,
           domain: newDomain.trim(),
           type: newDomainType,
@@ -358,3 +358,9 @@ export const MultiDomainManager = ({
     </div>
   );
 };
+
+
+
+
+
+

@@ -79,7 +79,7 @@ export const useCalculateCommission = (
     if (settings.commission_type === 'percentage') {
       // Commission sur le montant vendeur (après commission plateforme 10%)
       const sellerAmount = productPrice * 0.90;
-      let commission = (sellerAmount * settings.commission_rate) / 100;
+      let  commission= (sellerAmount * settings.commission_rate) / 100;
 
       // Appliquer la limite max si définie
       if (settings.max_commission_per_sale && commission > settings.max_commission_per_sale) {
@@ -149,4 +149,10 @@ export const useCourseAffiliateStats = (productId: string) => {
     enabled: !!productId,
   });
 };
+
+
+
+
+
+
 

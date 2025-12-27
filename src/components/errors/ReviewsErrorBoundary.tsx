@@ -37,7 +37,7 @@ export class ReviewsErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch( _error: Error, errorInfo: ErrorInfo) {
     // Log vers Sentry
     Sentry.captureException(error, {
       contexts: {
@@ -117,4 +117,10 @@ export const ReviewsPlaceholder = () => (
     </div>
   </div>
 );
+
+
+
+
+
+
 

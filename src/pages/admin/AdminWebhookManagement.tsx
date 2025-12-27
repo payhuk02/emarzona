@@ -96,7 +96,7 @@ import {
 import { MoreVertical, X } from 'lucide-react';
 
 // Événements webhook disponibles, groupés par catégorie
-const WEBHOOK_EVENTS: { category: string; events: { value: WebhookEventType; label: string }[] }[] =
+const  WEBHOOK_EVENTS: { category: string; events: { value: WebhookEventType; label: string }[] }[] =
   [
     {
       category: 'Commandes',
@@ -1356,3 +1356,9 @@ export default function AdminWebhookManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

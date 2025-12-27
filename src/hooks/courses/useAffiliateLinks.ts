@@ -261,3 +261,9 @@ export const generateAffiliateUrl = (productSlug: string, affiliateCode: string)
   return `${baseUrl}/courses/${productSlug}?ref=${affiliateCode}`;
 };
 
+
+
+
+
+
+

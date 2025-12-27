@@ -103,7 +103,7 @@ export interface DownloadHistoryProps {
 /**
  * Configuration des types d'événements
  */
-const EVENT_CONFIG: Record<
+const  EVENT_CONFIG: Record<
   DownloadEventType,
   {
     label: string;
@@ -178,7 +178,7 @@ const EVENT_CONFIG: Record<
  * />
  * ```
  */
-export const DownloadHistory: React.FC<DownloadHistoryProps> = ({
+export const DownloadHistory : React.FC<DownloadHistoryProps> = ({
   events,
   onEventClick,
   showFilters = true,
@@ -260,7 +260,7 @@ export const DownloadHistory: React.FC<DownloadHistoryProps> = ({
 
   // Filtrer et trier les événements
   const filteredEvents = useMemo(() => {
-    let result = [...events];
+    let  result= [...events];
 
     // Recherche
     if (searchQuery) {
@@ -624,4 +624,11 @@ export const DownloadHistory: React.FC<DownloadHistoryProps> = ({
 DownloadHistory.displayName = 'DownloadHistory';
 
 export default DownloadHistory;
+
+
+
+
+
+
+
 

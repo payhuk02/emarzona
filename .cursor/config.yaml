@@ -7,8 +7,8 @@
 project:
   name: Emarzona
   description: >
-    Application web SaaS haut de gamme de E-commerce de produits digitaux, physiques et services et aussi pour la gestion des paiements,
-    des transactions et des utilisateurs, avec intégration Supabase, Moneroo/PayDunya,
+    Application web SaaS haut de gamme de E-commerce de produits digitaux, physiques, services, cours en ligne et oeuvre d'artiste, et aussi pour la gestion des paiements,
+    des transactions et des utilisateurs, avec intégration Supabase, Moneroo,
     et un design professionnel, fluide et réactif.
   tech_stack:
     - Vite + React + TypeScript

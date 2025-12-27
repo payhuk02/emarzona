@@ -71,7 +71,7 @@ export interface BookingsDashboardProps {
 /**
  * Configuration des statuts
  */
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+const  STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
   confirmed: { label: 'Confirmée', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
   in_progress: { label: 'En cours', color: 'bg-blue-100 text-blue-700', icon: Package },
@@ -83,7 +83,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
 /**
  * BookingsDashboard - Dashboard complet des réservations
  */
-export const BookingsDashboard: React.FC<BookingsDashboardProps> = ({
+export const BookingsDashboard : React.FC<BookingsDashboardProps> = ({
   stats,
   recentBookings = [],
   period = 'month',
@@ -503,4 +503,11 @@ export const BookingsDashboard: React.FC<BookingsDashboardProps> = ({
 BookingsDashboard.displayName = 'BookingsDashboard';
 
 export default BookingsDashboard;
+
+
+
+
+
+
+
 

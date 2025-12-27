@@ -33,7 +33,7 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useReviews', () => {
-  let queryClient: QueryClient;
+  let  queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -326,4 +326,10 @@ describe('useReviews', () => {
     });
   });
 });
+
+
+
+
+
+
 

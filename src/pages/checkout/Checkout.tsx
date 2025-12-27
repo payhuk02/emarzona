@@ -268,7 +268,7 @@ const Checkout = () => {
           country: currentUser.user_metadata?.country || 'Burkina Faso',
           postalCode: currentUser.user_metadata?.postal_code || '',
         });
-      } catch (err: unknown) {
+      } catch ( _err: unknown) {
         logger.error(
           'Error loading checkout data:',
           err instanceof Error ? err : new Error(String(err))
@@ -284,7 +284,7 @@ const Checkout = () => {
 
   // Validation du formulaire
   const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof CheckoutFormData, string>> = {};
+    const  errors: Partial<Record<keyof CheckoutFormData, string>> = {};
 
     if (!formData.firstName.trim()) {
       errors.firstName = 'Le prénom est requis';
@@ -325,7 +325,7 @@ const Checkout = () => {
     const basePrice = Number(product.price) || 0;
 
     // Déterminer le prix de base (promo ou normal)
-    let finalBasePrice: number;
+    let  finalBasePrice: number;
     if (promoPrice && Number(promoPrice) < basePrice && Number(promoPrice) > 0) {
       finalBasePrice = Number(promoPrice);
     } else {
@@ -463,8 +463,8 @@ const Checkout = () => {
         } else {
           throw new Error('URL de paiement non reçue');
         }
-      } catch (error: unknown) {
-        const errorObj = error instanceof Error ? error : new Error(String(error));
+      } catch (_error: unknown) {
+        const errorObj = _error instanceof Error ? _error : new Error(String(_error));
         logger.error('Payment initiation error:', errorObj);
 
         // Extraire le message d'erreur de manière plus lisible
@@ -943,3 +943,9 @@ const Checkout = () => {
 };
 
 export default Checkout;
+
+
+
+
+
+

@@ -63,7 +63,7 @@ export function formatDuration(minutes: number, unit?: 'minute' | 'hour' | 'day'
  * Récupère les informations clés à afficher selon le type de produit
  */
 export function getProductKeyInfo(product: UnifiedProduct): ProductKeyInfo[] {
-  const keyInfo: ProductKeyInfo[] = [];
+  const  keyInfo: ProductKeyInfo[] = [];
 
   switch (product.type) {
     case 'digital':
@@ -183,7 +183,7 @@ export function getProductKeyInfo(product: UnifiedProduct): ProductKeyInfo[] {
 
       // Modalités
       if (product.location_type) {
-        const locationLabels: Record<string, string> = {
+        const  locationLabels: Record<string, string> = {
           online: 'En ligne',
           on_site: 'Sur site',
           customer_location: 'Chez vous',
@@ -244,7 +244,7 @@ export function getProductKeyInfo(product: UnifiedProduct): ProductKeyInfo[] {
 
       // Accès
       if (product.access_type) {
-        const accessLabels: Record<string, string> = {
+        const  accessLabels: Record<string, string> = {
           lifetime: 'Accès à vie',
           subscription: 'Abonnement',
         };
@@ -280,7 +280,7 @@ export function getProductKeyInfo(product: UnifiedProduct): ProductKeyInfo[] {
     case 'artist':
       // Type d'artiste
       if (product.artist_type) {
-        const artistTypeLabels: Record<string, string> = {
+        const  artistTypeLabels: Record<string, string> = {
           writer: 'Écrivain',
           musician: 'Musicien',
           visual_artist: 'Artiste visuel',
@@ -306,7 +306,7 @@ export function getProductKeyInfo(product: UnifiedProduct): ProductKeyInfo[] {
 
       // Type d'édition
       if (product.edition_type) {
-        const editionLabels: Record<string, string> = {
+        const  editionLabels: Record<string, string> = {
           original: 'Original',
           limited_edition: 'Édition limitée',
           print: 'Tirage',
@@ -365,7 +365,7 @@ export function getProductTypeBadge(product: UnifiedProduct): {
 } {
   switch (product.type) {
     case 'digital': {
-      const digitalTypes: Record<string, string> = {
+      const  digitalTypes: Record<string, string> = {
         software: 'Logiciel',
         ebook: 'E-book',
         template: 'Template',
@@ -394,7 +394,7 @@ export function getProductTypeBadge(product: UnifiedProduct): {
       };
 
     case 'service': {
-      const serviceTypes: Record<string, string> = {
+      const  serviceTypes: Record<string, string> = {
         appointment: 'Rendez-vous',
         class: 'Cours',
         event: 'Événement',
@@ -416,7 +416,7 @@ export function getProductTypeBadge(product: UnifiedProduct): {
       };
 
     case 'artist': {
-      const artistTypeLabels: Record<string, string> = {
+      const  artistTypeLabels: Record<string, string> = {
         writer: 'Écrivain',
         musician: 'Musicien',
         visual_artist: 'Artiste visuel',
@@ -443,7 +443,7 @@ export function getProductTypeBadge(product: UnifiedProduct): {
  * Récupère le label de licence pour produits digitaux
  */
 export function getLicenseLabel(licenseType?: string): string {
-  const labels: Record<string, string> = {
+  const  labels: Record<string, string> = {
     single: 'License Unique',
     multi: 'Multi-Devices',
     unlimited: 'Illimitée',
@@ -509,5 +509,11 @@ export function getRatingDisplay(rating?: number, reviewCount?: number): {
     hasRating: true,
   };
 }
+
+
+
+
+
+
 
 

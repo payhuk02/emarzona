@@ -117,7 +117,7 @@ export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
       .filter(Boolean);
   })() : undefined;
 
-  const storeSchema: Record<string, unknown> = {
+  const  storeSchema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': schemaType,
     name: store.name,
@@ -195,3 +195,9 @@ export const StoreSchema = ({ store, url }: StoreSchemaProps) => {
     </Helmet>
   );
 };
+
+
+
+
+
+

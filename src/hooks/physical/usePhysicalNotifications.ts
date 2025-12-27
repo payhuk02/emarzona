@@ -234,7 +234,7 @@ export const useCreatePriceAlert = () => {
 
       if (!product) throw new Error('Produit non trouvé');
 
-      let variantPrice = product.price;
+      let  variantPrice= product.price;
       if (data.variant_id) {
         const { data: variant } = await supabase
           .from('physical_product_variants')
@@ -361,7 +361,7 @@ export const useUpdateNotificationPreferences = () => {
         .eq('user_id', user.id)
         .single();
 
-      let result;
+      let  _result;
       if (existing) {
         // Mise à jour
         const { data, error } = await supabase
@@ -555,4 +555,10 @@ export const useDeleteStockAlert = () => {
     },
   });
 };
+
+
+
+
+
+
 

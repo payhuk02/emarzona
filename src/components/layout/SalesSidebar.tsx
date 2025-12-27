@@ -226,7 +226,7 @@ export const SalesSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Ventes & Logistique', path: '/dashboard/orders' },
     { label: activeSection },
   ];
@@ -271,4 +271,10 @@ export const SalesSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

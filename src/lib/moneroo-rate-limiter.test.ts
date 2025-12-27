@@ -20,7 +20,7 @@ describe('MonerooRateLimiter', () => {
         windowMs: 60000,
       });
 
-      for (let i = 0; i < 5; i++) {
+      for (let  i= 0; i < 5; i++) {
         expect(limiter.canMakeRequest()).toBe(true);
         limiter.recordRequest();
       }
@@ -33,7 +33,7 @@ describe('MonerooRateLimiter', () => {
       });
 
       // Faire 3 requêtes
-      for (let i = 0; i < 3; i++) {
+      for (let  i= 0; i < 3; i++) {
         expect(limiter.canMakeRequest()).toBe(true);
         limiter.recordRequest();
       }
@@ -63,7 +63,7 @@ describe('MonerooRateLimiter', () => {
       });
 
       // Utilisateur 1
-      for (let i = 0; i < 5; i++) {
+      for (let  i= 0; i < 5; i++) {
         expect(limiter.canMakeRequest('user1')).toBe(true);
         limiter.recordRequest('user1');
       }
@@ -77,7 +77,7 @@ describe('MonerooRateLimiter', () => {
   describe('checkRateLimit', () => {
     it('devrait lancer une erreur si la limite est dépassée', () => {
       // Remplir la limite
-      for (let i = 0; i < 100; i++) {
+      for (let  i= 0; i < 100; i++) {
         monerooRateLimiter.canMakeRequest();
         monerooRateLimiter.recordRequest();
       }
@@ -90,5 +90,11 @@ describe('MonerooRateLimiter', () => {
     });
   });
 });
+
+
+
+
+
+
 
 

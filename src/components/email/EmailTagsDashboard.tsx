@@ -90,10 +90,10 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
         } else if (cronData) {
           setCronJobs(cronData as CronJobStatus[]);
         }
-      } catch (error: any) {
+      } catch ( _error: any) {
         logger.error('Error fetching cron jobs status', { error });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors du chargement des données',
@@ -118,7 +118,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
         description: `${result.deleted_count} tags expirés ont été supprimés`,
       });
       await loadData();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors du nettoyage',
@@ -139,7 +139,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
         description: `${result.deleted_count} tags non utilisés ont été supprimés`,
       });
       await loadData();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors du nettoyage',
@@ -168,7 +168,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
       });
 
       await loadData();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error toggling cron job', { error, jobName });
       toast({
         title: 'Erreur',
@@ -178,7 +178,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
     }
   };
 
-  const categoryColors: Record<TagCategory, string> = {
+  const  categoryColors: Record<TagCategory, string> = {
     behavior: 'bg-blue-100 text-blue-800',
     segment: 'bg-purple-100 text-purple-800',
     custom: 'bg-gray-100 text-gray-800',
@@ -511,4 +511,10 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
     </>
   );
 }
+
+
+
+
+
+
 

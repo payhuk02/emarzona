@@ -78,7 +78,7 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
         ...formData,
       });
       onSuccess();
-    } catch (error: any) {
+    } catch ( _error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -234,4 +234,10 @@ export const FileVersionForm = ({ fileId, onSuccess, onCancel }: FileVersionForm
     </form>
   );
 };
+
+
+
+
+
+
 

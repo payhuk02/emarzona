@@ -81,7 +81,7 @@ export const useDigitalBundles = (storeId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      let query = supabase
+      let  query= supabase
         .from('digital_product_bundles')
         .select('*')
         .eq('is_draft', false)
@@ -171,7 +171,7 @@ export const useActiveBundles = (limit: number = 6, storeId?: string) => {
   return useQuery({
     queryKey: ['activeBundles', storeId, limit],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('digital_product_bundles')
         .select('*')
         .eq('is_active', true)
@@ -203,7 +203,7 @@ export const useFeaturedBundles = (storeId?: string, limit: number = 6) => {
   return useQuery({
     queryKey: ['featuredBundles', storeId, limit],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('digital_product_bundles')
         .select('*')
         .eq('is_active', true)
@@ -420,7 +420,7 @@ export const useUpdateBundle = () => {
 
       // Mettre à jour le produit associé si nécessaire
       if (updates.name || updates.description || updates.bundle_price) {
-        const updateProduct: { name?: string; description?: string; price?: number } = {};
+        const  updateProduct: { name?: string; description?: string; price?: number } = {};
         if (updates.name) updateProduct.name = updates.name;
         if (updates.description) updateProduct.description = updates.description;
         if (updates.bundle_price) updateProduct.price = updates.bundle_price;
@@ -569,3 +569,9 @@ export const useCreateBundleOrder = () => {
     },
   });
 };
+
+
+
+
+
+

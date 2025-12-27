@@ -121,7 +121,7 @@ export class FedExAdapter implements CarrierAdapter {
       return this.simulateTracking(trackingNumber);
     }
 
-    const events: TrackingUpdate[] = [];
+    const  events: TrackingUpdate[] = [];
     const scanEvents = output.scanEvents || [];
 
     for (const event of scanEvents) {
@@ -156,7 +156,7 @@ export class FedExAdapter implements CarrierAdapter {
    * Mappe les statuts FedEx vers nos statuts standard
    */
   private mapFedExStatus(fedExStatus: string): string {
-    const statusMap: Record<string, string> = {
+    const  statusMap: Record<string, string> = {
       'OC': 'label_created', // Order Created
       'PU': 'picked_up', // Picked Up
       'IT': 'in_transit', // In Transit
@@ -193,4 +193,10 @@ export class FedExAdapter implements CarrierAdapter {
     };
   }
 }
+
+
+
+
+
+
 

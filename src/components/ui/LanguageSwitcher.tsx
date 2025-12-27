@@ -179,7 +179,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 /**
  * Version compacte avec juste le flag
  */
-export const LanguageSwitcherCompact: React.FC<{ className?: string }> = ({ className }) => {
+export const LanguageSwitcherCompact : React.FC<{ className?: string }> = ({ className }) => {
   const { i18n } = useTranslation();
 
   const currentLanguage =
@@ -209,3 +209,10 @@ export const LanguageSwitcherCompact: React.FC<{ className?: string }> = ({ clas
     </Button>
   );
 };
+
+
+
+
+
+
+

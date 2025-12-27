@@ -24,7 +24,7 @@ interface PreviewPromotionProps {
   isActive?: boolean;
 }
 
-export const PreviewPromotion: React.FC<PreviewPromotionProps> = ({
+export const PreviewPromotion : React.FC<PreviewPromotionProps> = ({
   code,
   description,
   discountType,
@@ -137,4 +137,11 @@ export const PreviewPromotion: React.FC<PreviewPromotionProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 

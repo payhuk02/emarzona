@@ -64,7 +64,7 @@ const AVAILABLE_FONTS = [
   { value: 'Playfair Display', label: 'Playfair Display' },
 ];
 
-export const StoreThemeSettings: React.FC<StoreThemeSettingsProps> = ({
+export const StoreThemeSettings : React.FC<StoreThemeSettingsProps> = ({
   primaryColor,
   secondaryColor,
   accentColor,
@@ -652,4 +652,11 @@ export const StoreThemeSettings: React.FC<StoreThemeSettingsProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 

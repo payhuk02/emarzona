@@ -115,7 +115,7 @@ export interface ServicePackageManagerProps {
 /**
  * Configuration des tiers avec leurs couleurs et icônes
  */
-const TIER_CONFIG: Record<
+const  TIER_CONFIG: Record<
   PackageTier,
   {
     label: string;
@@ -173,7 +173,7 @@ const TIER_CONFIG: Record<
  * />
  * ```
  */
-export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
+export const ServicePackageManager : React.FC<ServicePackageManagerProps> = ({
   packages: initialPackages,
   onSave,
   availableOptions = [],
@@ -188,7 +188,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
 
   // Auto-générer des packages
   const autoGeneratePackages = () => {
-    const baseOptions: PackageOption[] = availableOptions.length > 0
+    const  baseOptions: PackageOption[] = availableOptions.length > 0
       ? availableOptions
       : [
           { id: '1', name: 'Support email', description: '24h response', included: true },
@@ -199,7 +199,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
           { id: '6', name: 'Manager dédié', included: false },
         ];
 
-    const generated: ServicePackage[] = [
+    const  generated: ServicePackage[] = [
       {
         id: `pkg-basic-${Date.now()}`,
         name: 'Basic',
@@ -263,7 +263,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
     if (!editingPackage) return;
 
     const existingIndex = packages.findIndex((p) => p.id === editingPackage.id);
-    let updated: ServicePackage[];
+    let  updated: ServicePackage[];
 
     if (existingIndex >= 0) {
       // Modifier existant
@@ -287,7 +287,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
 
   // Dupliquer un package
   const handleDuplicate = (pkg: ServicePackage) => {
-    const duplicated: ServicePackage = {
+    const  duplicated: ServicePackage = {
       ...pkg,
       id: `pkg-${Date.now()}`,
       name: `${pkg.name} (copie)`,
@@ -298,7 +298,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
 
   // Ouvrir le dialog pour nouveau package
   const handleNew = () => {
-    const newPackage: ServicePackage = {
+    const  newPackage: ServicePackage = {
       id: `pkg-${Date.now()}`,
       name: '',
       tier: 'basic',
@@ -334,7 +334,7 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
   const addCustomOption = () => {
     if (!editingPackage) return;
 
-    const newOption: PackageOption = {
+    const  newOption: PackageOption = {
       id: `opt-${Date.now()}`,
       name: 'Nouvelle option',
       included: true,
@@ -828,4 +828,11 @@ export const ServicePackageManager: React.FC<ServicePackageManagerProps> = ({
 ServicePackageManager.displayName = 'ServicePackageManager';
 
 export default ServicePackageManager;
+
+
+
+
+
+
+
 

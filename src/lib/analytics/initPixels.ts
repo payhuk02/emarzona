@@ -70,7 +70,7 @@ export const initFacebookPixel = (pixelId: string) => {
         ? n.callMethod(...args)
         : n.queue.push(args);
     };
-    if (!f._fbq) f._fbq = n;
+    if (!f._fbq) f.fbq = n;
     n.push = n;
     n.loaded = !0;
     n.version = '2.0';
@@ -157,22 +157,22 @@ export const initTikTokPixel = (pixelId: string) => {
         t.push([e, ...args]);
       };
     };
-    for (let i = 0; i < ttq.methods.length; i++)
+    for (let  i= 0; i < ttq.methods.length; i++)
       ttq.setAndDefer(ttq, ttq.methods[i]);
     ttq.instance = function (t: any) {
       const e = ttq._i[t] || [];
-      for (let n = 0; n < ttq.methods.length; n++)
+      for (let  n= 0; n < ttq.methods.length; n++)
         ttq.setAndDefer(e, ttq.methods[n]);
       return e;
     };
     ttq.load = function (e: any, n: any) {
       const i = 'https://analytics.tiktok.com/i18n/pixel/events.js';
-      ttq._i = ttq._i || {};
+      ttq.i = ttq._i || {};
       ttq._i[e] = [];
-      ttq._i[e]._u = i;
-      ttq._t = ttq._t || {};
+      ttq._i[e].u = i;
+      ttq.t = ttq._t || {};
       ttq._t[e] = +new Date();
-      ttq._o = ttq._o || {};
+      ttq.o = ttq._o || {};
       ttq._o[e] = n || {};
       const o = document.createElement('script');
       o.type = 'text/javascript';
@@ -237,4 +237,10 @@ export const trackClick = (element: string, metadata?: Record<string, any>) => {
     ...metadata,
   });
 };
+
+
+
+
+
+
 

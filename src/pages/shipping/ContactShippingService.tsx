@@ -207,7 +207,7 @@ export default function ContactShippingService() {
       if (conversation) {
         navigate(`/dashboard/shipping-service-messages/${conversation.id}`);
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error starting conversation', error);
     }
   };
@@ -589,4 +589,10 @@ export default function ContactShippingService() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

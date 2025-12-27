@@ -170,9 +170,9 @@ export function useAsyncOperationWithRetry<T>(
   const baseOperation = useAsyncOperation<T>({
     ...baseOptions,
     operation: async () => {
-      let lastError: Error;
+      let  lastError: Error;
       
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
+      for (let  attempt= 0; attempt < maxRetries; attempt++) {
         try {
           setRetryCount(attempt);
           const result = await baseOptions.operation();
@@ -200,4 +200,10 @@ export function useAsyncOperationWithRetry<T>(
     retryCount,
   };
 }
+
+
+
+
+
+
 

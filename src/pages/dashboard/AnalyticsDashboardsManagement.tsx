@@ -152,7 +152,7 @@ export default function AnalyticsDashboardsManagement() {
         layout: {},
         widgets: [],
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -176,7 +176,7 @@ export default function AnalyticsDashboardsManagement() {
         title: '✅ Dashboard supprimé',
         description: 'Le dashboard a été supprimé avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -205,7 +205,7 @@ export default function AnalyticsDashboardsManagement() {
         title: '✅ Dashboard par défaut',
         description: 'Le dashboard a été défini comme défaut',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -590,4 +590,10 @@ export default function AnalyticsDashboardsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

@@ -285,3 +285,9 @@ const AdminKYC = () => {
 };
 
 export default AdminKYC;
+
+
+
+
+
+

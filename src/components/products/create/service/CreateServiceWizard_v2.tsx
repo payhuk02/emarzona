@@ -332,7 +332,7 @@ export const CreateServiceWizard = ({
    * Load draft from localStorage
    */
   useEffect(() => {
-    let savedDraft: string | null = null;
+    let  savedDraft: string | null = null;
     try {
       savedDraft = localStorage.getItem('service-product-draft');
     } catch {
@@ -361,7 +361,7 @@ export const CreateServiceWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<boolean> => {
-      const errors: string[] = [];
+      const  errors: string[] = [];
 
       // Réinitialiser les erreurs serveur
       clearServerErrors();
@@ -607,7 +607,7 @@ export const CreateServiceWizard = ({
       }
 
       // 1. Generate slug from name and ensure uniqueness
-      let slug =
+      let  slug=
         formData.slug ||
         formData.name
           ?.toLowerCase()
@@ -616,7 +616,7 @@ export const CreateServiceWizard = ({
         'service';
 
       // Vérifier l'unicité du slug et générer un nouveau si nécessaire
-      let attempts = 0;
+      let  attempts= 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -860,7 +860,7 @@ export const CreateServiceWizard = ({
           } else {
             logger.info('Free preview service created', { previewServiceId });
           }
-        } catch (error: unknown) {
+        } catch ( _error: unknown) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           logger.error('Exception creating preview service', { error: errorMessage });
           // Ne pas faire échouer la création du service principal
@@ -884,7 +884,7 @@ export const CreateServiceWizard = ({
             price: product.price,
             currency: product.currency,
             created_at: product.created_at,
-          }).catch(err => {
+          }).catch( err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
         });
@@ -939,8 +939,8 @@ export const CreateServiceWizard = ({
    */
   const handlePublish = useCallback(async () => {
     // Validate required steps (1-4 are required, 5-7 are optional)
-    let allValid = true;
-    for (let step = 1; step <= 4; step++) {
+    let  allValid= true;
+    for (let  step= 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -959,9 +959,9 @@ export const CreateServiceWizard = ({
     }
 
     setIsSaving(true);
-    let publicationSuccess = false;
-    let publishedProductId: string | undefined;
-    let publishedProductName: string | undefined;
+    let  publicationSuccess= false;
+    let  publishedProductId: string | undefined;
+    let  publishedProductName: string | undefined;
 
     try {
       const product = await saveServiceProduct(false);
@@ -1027,7 +1027,7 @@ export const CreateServiceWizard = ({
       logger.error('Erreur lors de la publication', error);
 
       // Extraire le message d'erreur de manière sûre
-      let errorMessage: string;
+      let  errorMessage: string;
 
       if (error instanceof Error) {
         errorMessage = error.message || error.toString();
@@ -1471,3 +1471,9 @@ export const CreateServiceWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

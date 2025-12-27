@@ -23,11 +23,11 @@ export function highlightText(text: string, query: string): Array<string | React
     return [text];
   }
 
-  const parts: Array<string | React.ReactElement> = [];
+  const  parts: Array<string | React.ReactElement> = [];
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  let lastIndex = 0;
-  let match;
-  let keyCounter = 0;
+  let  lastIndex= 0;
+  let  _match;
+  let  keyCounter= 0;
 
   while ((match = regex.exec(text)) !== null) {
     // Ajouter le texte avant le match
@@ -75,4 +75,10 @@ export function highlightTextHTML(text: string, query: string): string {
   
   return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900 px-1 rounded">$1</mark>');
 }
+
+
+
+
+
+
 

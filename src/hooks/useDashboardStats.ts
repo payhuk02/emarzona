@@ -246,8 +246,8 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
 
       // Calculer les dates selon la période sélectionnée
       const now = new Date();
-      let startDate: Date;
-      let endDate: Date = now;
+      let  startDate: Date;
+      let  endDate: Date = now;
 
       if (options?.period === 'custom' && options?.customStartDate && options?.customEndDate) {
         startDate = options.customStartDate;
@@ -451,7 +451,7 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
       }));
 
       // Calculer les top produits avec les vraies données
-      const productStats: Record<
+      const  productStats: Record<
         string,
         { orderCount: number; revenue: number; quantity: number }
       > = {};
@@ -698,7 +698,7 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
       // OPTIMISATION: Créer un Map pour O(1) lookup au lieu de O(n) avec find()
       const ordersMap = new Map(orders.map((o: { id: string; created_at: string }) => [o.id, o]));
 
-      const revenueByTypeAndMonthMap: Record<
+      const  revenueByTypeAndMonthMap: Record<
         string,
         {
           digital: number;
@@ -836,7 +836,7 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
         totalRevenue,
         recentOrders: recentOrders.map(order => {
           // Gérer le cas où customers peut être un objet ou un tableau
-          let customerData: { name: string; email: string } | null = null;
+          let  customerData: { name: string; email: string } | null = null;
           if (order.customers) {
             if (Array.isArray(order.customers) && order.customers.length > 0) {
               customerData = {
@@ -852,7 +852,7 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
           }
 
           // Extraire les types de produits depuis order_items
-          const productTypes: string[] = [];
+          const  productTypes: string[] = [];
           if (order.order_items && Array.isArray(order.order_items)) {
             order.order_items.forEach(
               (item: { product_type?: string; products?: { product_type?: string } | null }) => {
@@ -888,7 +888,7 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
       });
 
       logger.info('✅ Dashboard stats loaded successfully');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('❌ Error fetching dashboard stats:', {
         error: errorMessage,
@@ -920,3 +920,9 @@ export const useDashboardStats = (options?: UseDashboardStatsOptions) => {
     refetch: fetchStats,
   };
 };
+
+
+
+
+
+

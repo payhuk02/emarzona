@@ -56,7 +56,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   type StatusIcon = typeof Clock | typeof Loader2 | typeof CheckCircle2 | typeof XCircle | typeof X;
 
   const getStatusBadge = (status: StoreWithdrawalStatus) => {
-    const variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: StatusIcon, label: string }> = {
+    const  variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: StatusIcon, label: string }> = {
       pending: { variant: 'secondary', icon: Clock, label: 'En attente' },
       processing: { variant: 'default', icon: Loader2, label: 'En cours' },
       completed: { variant: 'default', icon: CheckCircle2, label: 'Complété' },
@@ -76,7 +76,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   };
 
   const getPaymentMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       mobile_money: 'Mobile Money',
       bank_card: 'Carte bancaire',
       bank_transfer: 'Virement bancaire',
@@ -104,7 +104,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         title: 'Export réussi',
         description: `${filteredWithdrawals.length} retrait(s) exporté(s) en CSV`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error exporting withdrawals CSV', { error: errorMessage });
       toast({
@@ -122,7 +122,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         title: 'Export réussi',
         description: `${filteredWithdrawals.length} retrait(s) exporté(s) en JSON`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       toast({
         title: 'Erreur',
         description: 'Impossible d\'exporter les retraits',
@@ -240,7 +240,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
       <CardContent>
         {filteredWithdrawals.length === 0 ? (
           <div className="text-center py-8 sm:py-12 text-muted-foreground">
-            <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
+            <Wallet  className ="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
             <p className="text-xs sm:text-sm md:text-base">Aucun retrait</p>
             <p className="text-[10px] sm:text-xs md:text-sm mt-2 px-4">
               {statusFilter === 'all' 
@@ -337,7 +337,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                   />
                 </PaginationItem>
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  let pageNum: number;
+                  let  pageNum: number;
                   if (totalPages <= 5) {
                     pageNum = i + 1;
                   } else if (currentPage <= 3) {
@@ -386,4 +386,10 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
     </Card>
   );
 };
+
+
+
+
+
+
 

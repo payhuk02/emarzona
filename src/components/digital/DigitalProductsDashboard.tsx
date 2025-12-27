@@ -124,7 +124,7 @@ export interface DigitalProductsDashboardProps {
  * />
  * ```
  */
-export const DigitalProductsDashboard: React.FC<DigitalProductsDashboardProps> = ({
+export const DigitalProductsDashboard : React.FC<DigitalProductsDashboardProps> = ({
   stats,
   popularProducts,
   recentActivities,
@@ -512,4 +512,11 @@ export const DigitalProductsDashboard: React.FC<DigitalProductsDashboardProps> =
 DigitalProductsDashboard.displayName = 'DigitalProductsDashboard';
 
 export default DigitalProductsDashboard;
+
+
+
+
+
+
+
 

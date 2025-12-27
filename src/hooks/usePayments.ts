@@ -81,7 +81,7 @@ export const usePayments = (
       // Priorité aux transactions car elles contiennent plus d'informations
 
       // 1. Récupérer les transactions (Moneroo)
-      let transactionsQuery = supabase
+      let  transactionsQuery= supabase
         .from('transactions')
         .select('*')
         .eq('store_id', storeId)
@@ -94,7 +94,7 @@ export const usePayments = (
       const { data: transactions, error: transactionsError } = await transactionsQuery;
 
       // 2. Récupérer les payments (système générique)
-      let paymentsQuery = supabase
+      let  paymentsQuery= supabase
         .from('payments')
         .select('*')
         .eq('store_id', storeId)
@@ -132,7 +132,7 @@ export const usePayments = (
             return null;
           }
           // Extraire shipping_address depuis metadata
-          let shippingAddress: ShippingAddress = null;
+          let  shippingAddress: ShippingAddress = null;
           if (
             transaction.metadata &&
             typeof transaction.metadata === 'object' &&
@@ -142,7 +142,7 @@ export const usePayments = (
             shippingAddress = (metadata.shipping_address as ShippingAddress) || null;
           }
 
-          const payment: Payment = {
+          const  payment: Payment = {
             id: transaction.id,
             store_id: transaction.store_id,
             order_id: transaction.order_id,
@@ -259,7 +259,7 @@ export const usePayments = (
                   country: shippingAddress?.country || null,
                 };
               }
-            } catch (customerError: unknown) {
+            } catch ( _customerError: unknown) {
               // Utiliser les données de la transaction en fallback
               const errorMessage =
                 customerError instanceof Error ? customerError.message : String(customerError);
@@ -337,7 +337,7 @@ export const usePayments = (
                   order_number: orderData.order_number,
                 };
               }
-            } catch (orderError: unknown) {
+            } catch ( _orderError: unknown) {
               // Catch pour les exceptions non-Supabase
               const errorMessage =
                 orderError instanceof Error ? orderError.message : String(orderError);
@@ -391,7 +391,7 @@ export const usePayments = (
               return null;
             }
 
-            const enrichedPayment: Payment = {
+            const  enrichedPayment: Payment = {
               ...payment,
               customers: null,
               orders: null,
@@ -454,7 +454,7 @@ export const usePayments = (
                     country: (customerData as { country?: string | null }).country || null,
                   };
                 }
-              } catch (customerError: unknown) {
+              } catch ( _customerError: unknown) {
                 const errorMessage =
                   customerError instanceof Error ? customerError.message : String(customerError);
                 logger.warn('Exception fetching customer for payment', {
@@ -511,7 +511,7 @@ export const usePayments = (
                     order_number: orderData.order_number,
                   };
                 }
-              } catch (orderError: unknown) {
+              } catch ( _orderError: unknown) {
                 const errorMessage =
                   orderError instanceof Error ? orderError.message : String(orderError);
                 logger.warn('Exception fetching order for payment', {
@@ -528,7 +528,7 @@ export const usePayments = (
       );
 
       // 5. Combiner et filtrer par searchTerm si nécessaire
-      let allPayments = [
+      let  allPayments= [
         ...validTransactionsAsPayments,
         ...paymentsEnriched.filter((p): p is Payment => p !== null),
       ];
@@ -555,7 +555,7 @@ export const usePayments = (
       );
 
       setPayments(allPayments);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -569,8 +569,13 @@ export const usePayments = (
 
   useEffect(() => {
     fetchPayments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId, searchTerm, statusFilter, methodFilter]);
 
   return { payments, loading, refetch: fetchPayments };
 };
+
+
+
+
+
+

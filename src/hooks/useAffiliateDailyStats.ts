@@ -53,18 +53,18 @@ export const useAffiliateDailyStats = (
         const stats = data as DailyStatsRow[];
 
         // Créer des tableaux séparés pour chaque type de données
-        const clicksData: AffiliateChartDataPoint[] = stats.map((stat) => ({
+        const  clicksData: AffiliateChartDataPoint[] = stats.map((stat) => ({
           date: format(new Date(stat.date), 'yyyy-MM-dd'),
           clicks: Number(stat.clicks_count),
         }));
 
-        const salesData: AffiliateChartDataPoint[] = stats.map((stat) => ({
+        const  salesData: AffiliateChartDataPoint[] = stats.map((stat) => ({
           date: format(new Date(stat.date), 'yyyy-MM-dd'),
           sales: Number(stat.sales_count),
           revenue: Number(stat.revenue),
         }));
 
-        const commissionsData: AffiliateChartDataPoint[] = stats.map((stat) => ({
+        const  commissionsData: AffiliateChartDataPoint[] = stats.map((stat) => ({
           date: format(new Date(stat.date), 'yyyy-MM-dd'),
           commission: Number(stat.commission_earned),
         }));
@@ -76,7 +76,7 @@ export const useAffiliateDailyStats = (
           ...commissionsData.map((d) => d.date),
         ]);
 
-        const mergedData: AffiliateChartDataPoint[] = Array.from(allDates).map((date) => {
+        const  mergedData: AffiliateChartDataPoint[] = Array.from(allDates).map((date) => {
           const clicks = clicksData.find((d) => d.date === date);
           const sales = salesData.find((d) => d.date === date);
           const commissions = commissionsData.find((d) => d.date === date);
@@ -137,4 +137,10 @@ export const useAffiliateDailyStatsSeparated = (
     ...rest,
   };
 };
+
+
+
+
+
+
 

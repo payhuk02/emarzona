@@ -146,7 +146,7 @@ export default function SuppliersManagement() {
     queryFn: async (): Promise<Supplier[]> => {
       if (!store?.id) return [];
 
-      let query = supabase.from('suppliers').select('*').eq('store_id', store.id);
+      let  query= supabase.from('suppliers').select('*').eq('store_id', store.id);
 
       if (statusFilter === 'active') {
         query = query.eq('is_active', true);
@@ -324,7 +324,7 @@ export default function SuppliersManagement() {
 
   // Filtered suppliers
   const filteredSuppliers = useMemo(() => {
-    let filtered = suppliers;
+    let  filtered= suppliers;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -1003,3 +1003,9 @@ export default function SuppliersManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

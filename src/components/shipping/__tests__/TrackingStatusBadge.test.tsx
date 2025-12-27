@@ -11,7 +11,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 describe('TrackingStatusBadge', () => {
-  const statuses: TrackingStatus[] = [
+  const  statuses: TrackingStatus[] = [
     'pending',
     'label_created',
     'picked_up',
@@ -76,6 +76,12 @@ describe('TrackingStatusBadge', () => {
     expect(screen.getByText(/pending/i)).toBeInTheDocument();
   });
 });
+
+
+
+
+
+
 
 
 

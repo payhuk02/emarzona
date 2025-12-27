@@ -77,7 +77,7 @@ export const useDisputesOptimized = (options: UseDisputesOptions = {}) => {
         const from = (page - 1) * pageSize;
         const to = from + pageSize - 1;
 
-        let query = supabase
+        let  query= supabase
           .from('disputes')
           .select('*', { count: 'exact' })
           .order(sortBy, { ascending: sortDirection === 'asc' });
@@ -141,7 +141,7 @@ export const useDisputesOptimized = (options: UseDisputesOptions = {}) => {
           pageSize,
           totalPages,
         };
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Erreur dans useDisputesOptimized', {
           error: error instanceof Error ? error.message : String(error),
           filters,
@@ -232,7 +232,7 @@ function calculateStatsFromDisputes(disputes: any[]): DisputeStats {
 
   // Calculer le temps moyen de résolution
   const resolvedDisputes = disputes.filter((d) => d.resolved_at);
-  let avgResolutionTime: number | undefined;
+  let  avgResolutionTime: number | undefined;
 
   if (resolvedDisputes.length > 0) {
     const totalHours = resolvedDisputes.reduce((sum, dispute) => {
@@ -256,4 +256,10 @@ function calculateStatsFromDisputes(disputes: any[]): DisputeStats {
     avgResolutionTime,
   };
 }
+
+
+
+
+
+
 

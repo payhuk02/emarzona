@@ -21,14 +21,14 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { GiftCardStatus } from '@/types/giftCards';
 
-const STATUS_COLORS: Record<GiftCardStatus, string> = {
+const  STATUS_COLORS: Record<GiftCardStatus, string> = {
   active: 'bg-green-500/10 text-green-600 border-green-500/20',
   used: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   expired: 'bg-red-500/10 text-red-600 border-red-500/20',
   cancelled: 'bg-gray-500/10 text-gray-600 border-gray-500/20',
 };
 
-const STATUS_LABELS: Record<GiftCardStatus, string> = {
+const  STATUS_LABELS: Record<GiftCardStatus, string> = {
   active: 'Active',
   used: 'Utilisée',
   expired: 'Expirée',
@@ -324,4 +324,10 @@ export default function CustomerMyGiftCards() {
     </div>
   );
 }
+
+
+
+
+
+
 

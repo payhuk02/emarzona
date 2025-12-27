@@ -52,7 +52,7 @@ export function useWindowSize(options: UseWindowSizeOptions = {}) {
     };
 
     // Throttler la fonction
-    let timeoutId: NodeJS.Timeout;
+    let  timeoutId: NodeJS.Timeout;
     const throttledHandleResize = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(handleResize, throttleMs);
@@ -105,7 +105,7 @@ export function useWindowScroll(options: UseWindowScrollOptions = {}) {
     };
 
     // Throttler la fonction
-    let timeoutId: NodeJS.Timeout;
+    let  timeoutId: NodeJS.Timeout;
     const throttledHandleScroll = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(handleScroll, throttleMs);
@@ -213,4 +213,10 @@ export function useWindowEvents(options: {
     isFocused,
   };
 }
+
+
+
+
+
+
 

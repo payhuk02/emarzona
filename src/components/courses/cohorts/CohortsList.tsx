@@ -111,3 +111,9 @@ export const CohortsList = React.memo(CohortsListComponent, (prevProps, nextProp
 
 CohortsList.displayName = 'CohortsList';
 
+
+
+
+
+
+

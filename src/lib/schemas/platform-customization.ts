@@ -177,7 +177,7 @@ export function validateSection(section: string, data: unknown): {
   valid: boolean;
   errors: Array<{ path: string; message: string }>;
 } {
-  const sectionSchemas: Record<string, z.ZodSchema> = {
+  const  sectionSchemas: Record<string, z.ZodSchema> = {
     design: designSchema,
     settings: settingsSchema,
     content: contentSchema,
@@ -213,4 +213,10 @@ export function validateSection(section: string, data: unknown): {
     };
   }
 }
+
+
+
+
+
+
 

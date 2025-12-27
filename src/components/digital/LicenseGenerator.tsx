@@ -138,7 +138,7 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
       setQuantity(1);
       
       onSuccess?.();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Save licenses error', { error, productId, quantity });
       toast({
         title: '❌ Erreur',
@@ -286,4 +286,10 @@ export const LicenseGenerator = ({ onSuccess }: LicenseGeneratorProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

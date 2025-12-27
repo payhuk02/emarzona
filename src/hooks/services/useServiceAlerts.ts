@@ -298,7 +298,7 @@ export const useCheckLowCapacity = () => {
 
       if (servicesError) throw servicesError;
 
-      const alerts: Partial<ServiceAlert>[] = [];
+      const  alerts: Partial<ServiceAlert>[] = [];
 
       for (const service of services || []) {
         // Count bookings for this service
@@ -386,7 +386,7 @@ export const useCheckUpcomingBookings = () => {
 
       if (error) throw error;
 
-      const alerts: Partial<ServiceAlert>[] = (bookings || []).map((booking) => ({
+      const  alerts: Partial<ServiceAlert>[] = (bookings || []).map((booking) => ({
         user_id: userId,
         type: 'upcoming',
         priority: 'medium',
@@ -422,4 +422,10 @@ export const useCheckUpcomingBookings = () => {
 };
 
 export default useServiceAlerts;
+
+
+
+
+
+
 

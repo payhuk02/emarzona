@@ -51,10 +51,9 @@ function Loader() {
 
 // Composant pour charger et afficher le modèle GLTF/GLB
 function Model({ url, type }: { url: string; type: string }) {
-  let model: any = null;
+  let  model: any = null;
 
   if (type === 'glb' || type === 'gltf') {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     model = useGLTF(url);
   } else {
     // Pour d'autres formats, on utiliserait des loaders spécifiques
@@ -224,4 +223,10 @@ export const preload3DModel = (url: string) => {
     useGLTF.preload(url);
   }
 };
+
+
+
+
+
+
 

@@ -236,7 +236,7 @@ export function VariantManager({
       const [first, ...rest] = opts;
       const restCombinations = generateCombinations(rest);
       
-      const combinations: Record<string, string>[] = [];
+      const  combinations: Record<string, string>[] = [];
       for (const value of first.values) {
         for (const combo of restCombinations) {
           combinations.push({ [first.name]: value, ...combo });
@@ -247,7 +247,7 @@ export function VariantManager({
     };
 
     const combinations = generateCombinations(options);
-    const newVariants: ProductVariant[] = combinations.map((combo, index) => ({
+    const  newVariants: ProductVariant[] = combinations.map((combo, index) => ({
       id: `var_${Date.now()}_${index}`,
       sku: '',
       barcode: '',
@@ -745,4 +745,10 @@ export function VariantManager({
     </div>
   );
 }
+
+
+
+
+
+
 

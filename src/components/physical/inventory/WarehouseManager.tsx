@@ -58,7 +58,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
-export const WarehouseManager: React.FC = () => {
+export const WarehouseManager : React.FC = () => {
   const { store } = useStore();
   const { data: warehouses = [], isLoading } = useWarehouses(store?.id);
   const createMutation = useCreateWarehouse();
@@ -724,3 +724,10 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
     </Card>
   );
 }
+
+
+
+
+
+
+

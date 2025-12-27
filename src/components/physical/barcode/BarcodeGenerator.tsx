@@ -97,7 +97,7 @@ export function BarcodeGenerator({
           description: `Le code-barres ${format} a été généré avec succès`,
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de la génération',
@@ -255,3 +255,8 @@ export function BarcodeGenerator({
     </Card>
   );
 }
+
+
+
+
+

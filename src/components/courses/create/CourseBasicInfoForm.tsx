@@ -125,7 +125,7 @@ export const CourseBasicInfoForm = ({
     // Validation taille et type pour tous les fichiers
     const maxSize = 10 * 1024 * 1024; // 10MB
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    const invalidFiles: string[] = [];
+    const  invalidFiles: string[] = [];
 
     for (const file of Array.from(files)) {
       if (file.size > maxSize) {
@@ -860,3 +860,9 @@ export const CourseBasicInfoForm = ({
     </div>
   );
 };
+
+
+
+
+
+

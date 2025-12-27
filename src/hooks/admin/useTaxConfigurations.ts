@@ -18,7 +18,7 @@ export function useTaxConfigurations(storeId?: string) {
   return useQuery({
     queryKey: [...TAX_CONFIG_QUERY_KEY, storeId],
     queryFn: async (): Promise<TaxConfiguration[]> => {
-      let query = supabase
+      let  query= supabase
         .from('tax_configurations')
         .select('*')
         .order('country_code', { ascending: true })
@@ -212,4 +212,10 @@ export function useDeleteTaxConfiguration() {
     },
   });
 }
+
+
+
+
+
+
 

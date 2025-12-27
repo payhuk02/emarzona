@@ -50,7 +50,7 @@ export const AffiliateSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Affiliation', path: '/affiliate/dashboard' },
     { label: activeSection },
   ];
@@ -84,4 +84,10 @@ export const AffiliateSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

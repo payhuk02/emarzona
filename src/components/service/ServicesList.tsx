@@ -152,7 +152,7 @@ export interface ServicesListProps {
  * />
  * ```
  */
-const ServicesListComponent: React.FC<ServicesListProps> = ({
+const  ServicesListComponent: React.FC<ServicesListProps> = ({
   services,
   onServiceSelect,
   onEdit,
@@ -184,7 +184,7 @@ const ServicesListComponent: React.FC<ServicesListProps> = ({
 
   // Filtrage et tri
   const filteredServices = useMemo(() => {
-    let result = [...services];
+    let  result= [...services];
 
     // Search
     if (filters.search) {
@@ -226,8 +226,8 @@ const ServicesListComponent: React.FC<ServicesListProps> = ({
     // Sorting
     if (filters.sortBy) {
       result.sort((a, b) => {
-        let aValue: string | number | Date | undefined = a[filters.sortBy as keyof typeof a];
-        let bValue: string | number | Date | undefined = b[filters.sortBy as keyof typeof b];
+        let  aValue: string | number | Date | undefined = a[filters.sortBy as keyof typeof a];
+        let  bValue: string | number | Date | undefined = b[filters.sortBy as keyof typeof b];
 
         // Handle dates
         if (filters.sortBy === 'createdAt' || filters.sortBy === 'updatedAt') {
@@ -679,4 +679,10 @@ export const ServicesList = React.memo(ServicesListComponent, (prevProps, nextPr
 ServicesList.displayName = 'ServicesList';
 
 export default ServicesList;
+
+
+
+
+
+
 

@@ -15,7 +15,7 @@ import DOMPurify from 'dompurify';
  * Configuration pour les descriptions de produits
  * Permet un formatage riche mais sécurisé
  */
-const PRODUCT_DESCRIPTION_CONFIG: DOMPurify.Config = {
+const  PRODUCT_DESCRIPTION_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: [
     'p',
     'br',
@@ -54,7 +54,7 @@ const PRODUCT_DESCRIPTION_CONFIG: DOMPurify.Config = {
  * Configuration pour les commentaires/avis
  * Plus restrictif que les descriptions
  */
-const REVIEW_CONFIG: DOMPurify.Config = {
+const  REVIEW_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: ['p', 'br', 'strong', 'em'],
   ALLOWED_ATTR: [],
   ALLOW_DATA_ATTR: false,
@@ -64,7 +64,7 @@ const REVIEW_CONFIG: DOMPurify.Config = {
  * Configuration pour le texte simple
  * Très restrictif, convertit en texte brut
  */
-const PLAIN_TEXT_CONFIG: DOMPurify.Config = {
+const  PLAIN_TEXT_CONFIG: DOMPurify.Config = {
   ALLOWED_TAGS: [],
   ALLOWED_ATTR: [],
   KEEP_CONTENT: true,
@@ -340,3 +340,9 @@ export function createSafeInnerHTML(
     },
   };
 }
+
+
+
+
+
+

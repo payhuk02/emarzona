@@ -66,7 +66,7 @@ interface VirtualizedListProps {
  * Composant de liste virtualisée
  * Active automatiquement le virtual scrolling pour les listes de 20+ éléments
  */
-const VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
+const  VirtualizedListComponent: React.FC<VirtualizedListProps> = ({
   count,
   renderItem,
   estimateSize,
@@ -199,4 +199,10 @@ export const VirtualizedList = React.memo(VirtualizedListComponent, (prevProps, 
 });
 
 VirtualizedList.displayName = 'VirtualizedList';
+
+
+
+
+
+
 

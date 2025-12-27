@@ -56,7 +56,7 @@ export const ProductSEOForm = ({
 
   // Calculer le score SEO
   useEffect(() => {
-    let score = 0;
+    let  score= 0;
     const maxScore = 100;
 
     // Meta Title (25 points)
@@ -112,7 +112,7 @@ export const ProductSEOForm = ({
   };
 
   const autoFillFromProduct = () => {
-    const updates: Partial<SEOData> = {};
+    const  updates: Partial<SEOData> = {};
 
     if (!data.meta_title && productName) {
       updates.meta_title = `${productName} - Achetez maintenant`;
@@ -411,3 +411,9 @@ export const ProductSEOForm = ({
     </div>
   );
 };
+
+
+
+
+
+

@@ -100,7 +100,7 @@ export default function CustomerMyInvoices() {
   const filteredInvoices = useMemo(() => {
     if (!invoices) return [];
 
-    let filtered = invoices;
+    let  filtered= invoices;
 
     // Filtre par statut
     if (activeTab !== 'all') {
@@ -146,7 +146,7 @@ export default function CustomerMyInvoices() {
           description: `Facture ${invoice.invoice_number} téléchargée avec succès`,
         });
         logger.info('Invoice PDF downloaded:', invoice.id);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error('Error downloading invoice PDF:', { error: errorMessage });
         toast({
@@ -183,7 +183,7 @@ export default function CustomerMyInvoices() {
   // Obtenir le badge de statut
   const getStatusBadge = (status: string) => {
     type StatusIcon = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<
+    const  statusConfig: Record<
       string,
       {
         label: string;
@@ -632,3 +632,9 @@ export default function CustomerMyInvoices() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

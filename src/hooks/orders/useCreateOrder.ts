@@ -253,7 +253,7 @@ export const useCreateOrder = () => {
           });
 
           // Créer customer
-          let customerId: string;
+          let  customerId: string;
           const { data: existingCustomer } = await supabase
             .from('customers')
             .select('id')
@@ -389,4 +389,10 @@ export const useCreateOrder = () => {
     },
   });
 };
+
+
+
+
+
+
 

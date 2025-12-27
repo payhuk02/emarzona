@@ -145,3 +145,9 @@ export const PrerequisitesList = ({ courseId, enrollmentId, className }: Prerequ
   );
 };
 
+
+
+
+
+
+

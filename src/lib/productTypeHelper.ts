@@ -11,7 +11,7 @@ export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artis
  * Traduit le type de produit
  */
 export const getProductTypeLabel = (type: string, t: TFunction): string => {
-  const typeMap: Record<string, string> = {
+  const  typeMap: Record<string, string> = {
     digital: t('courses.productTypes.digital', 'Produit digital'),
     physical: t('courses.productTypes.physical', 'Produit physique'),
     service: t('courses.productTypes.service', 'Service'),
@@ -26,7 +26,7 @@ export const getProductTypeLabel = (type: string, t: TFunction): string => {
  * Retourne la couleur associée à un type de produit (pour badges)
  */
 export const getProductTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
+  const  colorMap: Record<string, string> = {
     digital: 'bg-blue-500',
     physical: 'bg-green-500',
     service: 'bg-purple-500',
@@ -41,7 +41,7 @@ export const getProductTypeColor = (type: string): string => {
  * Retourne l'icône associée à un type de produit
  */
 export const getProductTypeIcon = (type: string): string => {
-  const iconMap: Record<string, string> = {
+  const  iconMap: Record<string, string> = {
     digital: 'Download',
     physical: 'Package',
     service: 'Briefcase',
@@ -65,3 +65,9 @@ export const getAllProductTypes = (): ProductType[] => {
 export const isValidProductType = (type: string): type is ProductType => {
   return getAllProductTypes().includes(type as ProductType);
 };
+
+
+
+
+
+

@@ -8,7 +8,7 @@ import { logger } from './logger';
 /**
  * Configuration Moneroo avec valeurs par défaut
  */
-export const MONEROO_CONFIG: MonerooConfig = {
+export const MONEROO_CONFIG : MonerooConfig = {
   timeout: parseInt(import.meta.env.VITE_MONEROO_TIMEOUT_MS || '30000', 10),
   maxRetries: parseInt(import.meta.env.VITE_MONEROO_MAX_RETRIES || '3', 10),
   retryBackoff: parseInt(import.meta.env.VITE_MONEROO_RETRY_BACKOFF_MS || '1000', 10),
@@ -45,5 +45,12 @@ try {
     config: MONEROO_CONFIG 
   });
 }
+
+
+
+
+
+
+
 
 

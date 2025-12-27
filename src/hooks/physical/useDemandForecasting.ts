@@ -78,9 +78,9 @@ function calculateExponentialSmoothing(
   if (sales.length === 0) return 0;
   if (sales.length === 1) return sales[0].quantity;
   
-  let forecast = sales[0].quantity;
+  let  forecast= sales[0].quantity;
   
-  for (let i = 1; i < sales.length; i++) {
+  for (let  i= 1; i < sales.length; i++) {
     forecast = alpha * sales[i].quantity + (1 - alpha) * forecast;
   }
   
@@ -287,7 +287,7 @@ export function useDemandForecast(
       recommendedReorderDate.setDate(recommendedReorderDate.getDate() + daysUntilReorder);
       
       // Risque de rupture
-      let stockoutRisk: 'high' | 'medium' | 'low' = 'low';
+      let  stockoutRisk: 'high' | 'medium' | 'low' = 'low';
       if (daysOfInventory < leadTime) {
         stockoutRisk = 'high';
       } else if (daysOfInventory < leadTime * 2) {
@@ -347,7 +347,7 @@ export function useStoreDemandForecasts(
       if (productsError) throw productsError;
       
       // Calculer les prévisions pour chaque produit
-      const forecasts: DemandForecast[] = [];
+      const  forecasts: DemandForecast[] = [];
       
       // Extraire la logique de prévision dans une fonction réutilisable
       const calculateForecast = async (productId: string, variantId?: string): Promise<DemandForecast | null> => {
@@ -436,7 +436,7 @@ export function useStoreDemandForecasts(
         const recommendedReorderDate = new Date();
         recommendedReorderDate.setDate(recommendedReorderDate.getDate() + daysUntilReorder);
         
-        let stockoutRisk: 'high' | 'medium' | 'low' = 'low';
+        let  stockoutRisk: 'high' | 'medium' | 'low' = 'low';
         if (daysOfInventory < leadTime) {
           stockoutRisk = 'high';
         } else if (daysOfInventory < leadTime * 2) {
@@ -552,3 +552,9 @@ export function useUpdateRecommendationStatus() {
     },
   };
 }
+
+
+
+
+
+

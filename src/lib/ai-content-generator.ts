@@ -405,9 +405,9 @@ export const analyzeDescriptionQuality = (description: string): {
   issues: string[];
   suggestions: string[];
 } => {
-  const issues: string[] = [];
-  const suggestions: string[] = [];
-  let score = 100;
+  const  issues: string[] = [];
+  const  suggestions: string[] = [];
+  let  score= 100;
 
   // Longueur
   if (description.length < 200) {
@@ -444,4 +444,10 @@ export const analyzeDescriptionQuality = (description: string): {
     suggestions,
   };
 };
+
+
+
+
+
+
 

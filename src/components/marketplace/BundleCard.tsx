@@ -42,7 +42,7 @@ const BundleCardComponent = ({ bundle, storeSlug: _storeSlug }: BundleCardProps)
         title: 'Bundle ajouté au panier',
         description: `${bundle.name} a été ajouté à votre panier`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'ajouter au panier";
       toast({
@@ -201,3 +201,9 @@ export const BundleCard = React.memo(BundleCardComponent, (prevProps, nextProps)
 });
 
 BundleCard.displayName = 'BundleCard';
+
+
+
+
+
+

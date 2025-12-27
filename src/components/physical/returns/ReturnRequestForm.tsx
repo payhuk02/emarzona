@@ -101,7 +101,7 @@ export const ReturnRequestForm = ({
           description: `${validUrls.length} photo(s) ajoutée(s) avec succès`,
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Erreur upload photos retour', error);
       toast({
         title: '❌ Erreur d\'upload',
@@ -345,4 +345,10 @@ export const ReturnRequestForm = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

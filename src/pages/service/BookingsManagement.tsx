@@ -285,7 +285,7 @@ export default function BookingsManagement() {
 
   // Transform bookings to calendar events
   const events = useMemo((): ExtendedBookingEvent[] => {
-    const bookingEvents: ExtendedBookingEvent[] = [];
+    const  bookingEvents: ExtendedBookingEvent[] = [];
 
     if (bookings) {
       bookings.forEach((booking) => {
@@ -293,7 +293,7 @@ export default function BookingsManagement() {
           const start = parseISO(`${booking.booking_date}T${booking.start_time || booking.booking_time || '00:00:00'}`);
           const end = parseISO(`${booking.booking_date}T${booking.end_time || booking.booking_time || '00:00:00'}`);
 
-          const eventResource: ExtendedBookingEventResource = {
+          const  eventResource: ExtendedBookingEventResource = {
             customerId: booking.customer_id,
             customerName: booking.customer?.full_name,
             customerEmail: booking.customer?.email,
@@ -325,7 +325,7 @@ export default function BookingsManagement() {
       const now = new Date();
       const daysToShow = 30;
 
-      for (let i = 0; i < daysToShow; i++) {
+      for (let  i= 0; i < daysToShow; i++) {
         const currentDate = new Date(now);
         currentDate.setDate(now.getDate() + i);
         const dayOfWeek = currentDate.getDay();
@@ -384,7 +384,7 @@ export default function BookingsManagement() {
       const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
 
       // Date filter
-      let matchesDate = true;
+      let  matchesDate= true;
       if (dateFilter === 'today') {
         const today = format(new Date(), 'yyyy-MM-dd');
         matchesDate = booking.booking_date === today;
@@ -446,7 +446,7 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking confirmed', { bookingId });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Impossible de confirmer la réservation';
       logger.error('Error confirming booking', { bookingId, error: errorMessage });
       toast({
@@ -469,7 +469,7 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking cancelled', { bookingId });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Impossible d\'annuler la réservation';
       logger.error('Error cancelling booking', { bookingId, error: errorMessage });
       toast({
@@ -490,7 +490,7 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.info('Booking completed', { bookingId });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Impossible de terminer la réservation';
       logger.error('Error completing booking', { bookingId, error: errorMessage });
       toast({
@@ -511,7 +511,7 @@ export default function BookingsManagement() {
       });
       setIsDialogOpen(false);
       logger.warn('Booking marked as no-show', { bookingId });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Impossible de marquer comme absent';
       logger.error('Error marking no-show', { bookingId, error: errorMessage });
       toast({
@@ -569,7 +569,7 @@ export default function BookingsManagement() {
         description: `${filteredBookings.length} réservation(s) exportée(s) en CSV.`,
       });
       logger.info('Bookings exported to CSV', { count: filteredBookings.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error exporting bookings', { error: errorMessage });
       toast({
@@ -1122,3 +1122,9 @@ export default function BookingsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

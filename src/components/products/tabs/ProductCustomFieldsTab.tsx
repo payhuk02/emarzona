@@ -78,7 +78,7 @@ export const ProductCustomFieldsTab = ({ formData, updateFormData }: ProductCust
   ];
 
   const addCustomField = (field: Omit<CustomField, 'id'>) => {
-    const newField: CustomField = {
+    const  newField: CustomField = {
       ...field,
       id: `field_${Date.now()}_${Math.random().toString(36).substring(2)}`,
     };
@@ -104,7 +104,7 @@ export const ProductCustomFieldsTab = ({ formData, updateFormData }: ProductCust
   };
 
   const duplicateField = (field: CustomField) => {
-    const duplicatedField: CustomField = {
+    const  duplicatedField: CustomField = {
       ...field,
       id: `field_${Date.now()}_${Math.random().toString(36).substring(2)}`,
       name: `${field.name}_copy`,
@@ -593,3 +593,9 @@ const CustomFieldForm = ({ field, onSave, onCancel }: CustomFieldFormProps) => {
     </div>
   );
 };
+
+
+
+
+
+

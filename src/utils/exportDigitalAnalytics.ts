@@ -73,7 +73,7 @@ export const exportAnalyticsToPDF = async (
   );
   
   // Overview Stats
-  let yPos = 55;
+  let  yPos= 55;
   doc.setFontSize(14);
   doc.text('Vue d\'ensemble', 14, yPos);
   yPos += 10;
@@ -191,7 +191,7 @@ export const exportAnalyticsToPDF = async (
   
   // Footer
   const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
+  for (let  i= 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.text(
@@ -214,7 +214,7 @@ export const exportAnalyticsToCSV = (
   data: DigitalAnalyticsData,
   options: ExportOptions = { format: 'csv' }
 ): void => {
-  const rows: string[] = [];
+  const  rows: string[] = [];
   
   // Header
   rows.push('Rapport Analytics Produits Digitaux');
@@ -294,4 +294,10 @@ export const exportAnalyticsToExcel = (
   // Excel can read CSV files, so we use CSV format with UTF-8 BOM
   exportAnalyticsToCSV(data, { ...options, format: 'csv' });
 };
+
+
+
+
+
+
 

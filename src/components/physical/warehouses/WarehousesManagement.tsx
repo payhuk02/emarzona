@@ -157,7 +157,7 @@ export default function WarehousesManagement() {
         });
       }
       handleCloseDialog();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -183,7 +183,7 @@ export default function WarehousesManagement() {
         title: '✅ Entrepôt supprimé',
         description: 'L\'entrepôt a été supprimé avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -768,3 +768,9 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
     </Card>
   );
 }
+
+
+
+
+
+

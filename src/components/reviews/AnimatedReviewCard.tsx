@@ -80,3 +80,9 @@ export const AnimatedStar = ({ children, index = 0, ...props }: any) => {
   );
 };
 
+
+
+
+
+
+

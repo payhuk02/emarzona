@@ -29,8 +29,8 @@ export const checkStoreDeleteProtection = async (
   storeId: string
 ): Promise<DeleteProtectionResult> => {
   try {
-    const warnings: string[] = [];
-    const errors: string[] = [];
+    const  warnings: string[] = [];
+    const  errors: string[] = [];
 
     // 1. Vérifier les produits
     const { data: productsData, error: productsError } = await supabase
@@ -121,7 +121,7 @@ export const checkStoreDeleteProtection = async (
       warnings,
       errors: errors.length > 0 ? errors : undefined
     };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error checking delete protection', { error });
     return {
       canDelete: false,
@@ -176,7 +176,7 @@ export const deleteStoreWithDependencies = async (
     }
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Unexpected delete error', { error });
     return {
       success: false,
@@ -209,11 +209,17 @@ export const archiveStore = async (
     }
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     return {
       success: false,
       error: error.message || 'Une erreur est survenue lors de l\'archivage'
     };
   }
 };
+
+
+
+
+
+
 

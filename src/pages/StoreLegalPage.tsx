@@ -17,7 +17,7 @@ import { useStoreTheme } from '@/hooks/useStoreTheme';
 import type { Store, StoreLegalPages } from '@/hooks/useStores';
 import { logger } from '@/lib/logger';
 
-const LEGAL_PAGE_TITLES: Record<string, string> = {
+const  LEGAL_PAGE_TITLES: Record<string, string> = {
   terms: 'Conditions générales de vente',
   privacy: 'Politique de confidentialité',
   returns: 'Politique de retour',
@@ -27,7 +27,7 @@ const LEGAL_PAGE_TITLES: Record<string, string> = {
   faq: 'FAQ',
 };
 
-const LEGAL_PAGE_KEYS: Record<string, keyof StoreLegalPages> = {
+const  LEGAL_PAGE_KEYS: Record<string, keyof StoreLegalPages> = {
   terms: 'terms_of_service',
   privacy: 'privacy_policy',
   returns: 'return_policy',
@@ -80,7 +80,7 @@ export const StoreLegalPage = () => {
         }
 
         if (data) {
-          const storeData: Store = {
+          const  storeData: Store = {
             ...data,
             domain_status: data.domain_status || undefined,
           } as Store;
@@ -97,7 +97,7 @@ export const StoreLegalPage = () => {
         } else {
           setError('Boutique introuvable');
         }
-      } catch (err: unknown) {
+      } catch ( _err: unknown) {
         const errorMessage =
           err instanceof Error
             ? err.message
@@ -241,4 +241,10 @@ export const StoreLegalPage = () => {
 };
 
 export default StoreLegalPage;
+
+
+
+
+
+
 

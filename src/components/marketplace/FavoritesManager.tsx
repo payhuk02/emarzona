@@ -82,8 +82,8 @@ const FavoritesManager = ({
         product.category?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
+      let  aValue: string | number;
+      let  bValue: string | number;
 
       switch (sortBy) {
         case 'name':
@@ -467,3 +467,9 @@ const FavoritesManager = ({
 };
 
 export default FavoritesManager;
+
+
+
+
+
+

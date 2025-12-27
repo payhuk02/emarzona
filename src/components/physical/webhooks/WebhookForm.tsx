@@ -96,7 +96,7 @@ export const WebhookForm = ({ webhookId, storeId, onSuccess, onCancel }: Webhook
         });
       }
       onSuccess();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       // L'erreur est déjà gérée par le hook
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Webhook form error', { error: errorMessage });
@@ -182,3 +182,9 @@ export const WebhookForm = ({ webhookId, storeId, onSuccess, onCancel }: Webhook
     </form>
   );
 };
+
+
+
+
+
+

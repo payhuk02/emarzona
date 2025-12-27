@@ -29,6 +29,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
+import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
 interface OrderDetailDialogProps {
@@ -47,6 +48,7 @@ interface OrderItem {
 
 const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDialogProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [items, setItems] = useState<OrderItem[]>([]);
   const [transactions, setTransactions] = useState<OrderTransaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -120,14 +122,14 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
   if (!order) return null;
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       completed: 'outline',
       cancelled: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En cours',
       completed: 'Terminée',
@@ -138,13 +140,13 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
   };
 
   const getPaymentBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       paid: 'outline',
       failed: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       paid: 'Payée',
       failed: 'Échouée',
@@ -527,7 +529,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
               <div className="space-y-2">
                 {transactions.map(transaction => {
                   const getTransactionStatusBadge = (status: string) => {
-                    const variants: Record<
+                    const  variants: Record<
                       string,
                       'default' | 'secondary' | 'destructive' | 'outline'
                     > = {
@@ -538,7 +540,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                       cancelled: 'destructive',
                     };
 
-                    const labels: Record<string, string> = {
+                    const  labels: Record<string, string> = {
                       completed: 'Complété',
                       processing: 'En traitement',
                       pending: 'En attente',
@@ -652,9 +654,30 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                 variant="outline"
                 size="sm"
                 className="border-red-500 text-red-700 hover:bg-red-50"
-                onClick={() => {
-                  // TODO: Implement dispute creation logic
-                  // For now, just show a toast or navigate to dispute creation
+                onClick={async () => {
+                  // Vérifier que l'utilisateur est connecté
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (!user) {
+                    toast({
+                      title: 'Connexion requise',
+                      description: 'Veuillez vous connecter pour ouvrir un litige.',
+                      variant: 'destructive',
+                    });
+                    navigate('/auth');
+                    return;
+                  }
+
+                  // Vérifier que la commande peut avoir un litige
+                  if (order.payment_status === 'pending' || order.status === 'cancelled') {
+                    toast({
+                      title: 'Action impossible',
+                      description: 'Vous ne pouvez pas ouvrir un litige pour cette commande.',
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+
+                  // Rediriger vers la page de création de litige avec les paramètres
                   navigate(`/disputes/create?order_id=${order.id}`);
                   onOpenChange(false);
                 }}
@@ -693,3 +716,27 @@ export const OrderDetailDialog = React.memo(OrderDetailDialogComponent, (prevPro
 });
 
 OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+OrderDetailDialog.displayName = 'OrderDetailDialog';
+
+
+
+
+
+

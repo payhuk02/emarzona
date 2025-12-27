@@ -32,10 +32,10 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number,
   options?: { leading?: boolean; trailing?: boolean; maxWait?: number }
 ): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout | null = null;
-  let maxTimeoutId: NodeJS.Timeout | null = null;
-  let lastCallTime: number | null = null;
-  let lastInvokeTime = 0;
+  let  timeoutId: NodeJS.Timeout | null = null;
+  let  maxTimeoutId: NodeJS.Timeout | null = null;
+  let  lastCallTime: number | null = null;
+  let  lastInvokeTime= 0;
   const leading = options?.leading ?? false;
   const trailing = options?.trailing ?? true;
   const maxWait = options?.maxWait;
@@ -147,8 +147,8 @@ export function throttle<T extends (...args: any[]) => any>(
   wait: number,
   options?: { leading?: boolean; trailing?: boolean }
 ): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout | null = null;
-  let lastCallTime = 0;
+  let  timeoutId: NodeJS.Timeout | null = null;
+  let  lastCallTime= 0;
   const leading = options?.leading ?? true;
   const trailing = options?.trailing ?? true;
 
@@ -307,8 +307,8 @@ export function prefetchResource(url: string, type: 'script' | 'style' | 'image'
  */
 export function batchUpdates<T>(updates: (() => T)[], batchSize: number = 10): Promise<T[]> {
   return new Promise((resolve) => {
-    const results: T[] = [];
-    let index = 0;
+    const  results: T[] = [];
+    let  index= 0;
 
     const processBatch = () => {
       const batch = updates.slice(index, index + batchSize);
@@ -380,4 +380,10 @@ export class PerformanceMonitor {
 }
 
 export const performanceMonitor = new PerformanceMonitor();
+
+
+
+
+
+
 

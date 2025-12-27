@@ -93,7 +93,7 @@ export interface StockMovementHistoryProps {
 // HELPERS
 // ============================================================================
 
-const MOVEMENT_CONFIG: Record<
+const  MOVEMENT_CONFIG: Record<
   MovementType,
   {
     label: string;
@@ -150,7 +150,7 @@ const MOVEMENT_CONFIG: Record<
 // MOCK DATA (Replace with actual hook/API call)
 // ============================================================================
 
-const MOCK_MOVEMENTS: StockMovement[] = [
+const  MOCK_MOVEMENTS: StockMovement[] = [
   {
     id: 'mov_1',
     product_id: 'prod_1',
@@ -256,7 +256,7 @@ export function StockMovementHistory({
 
   // Filter movements
   const filteredMovements = React.useMemo(() => {
-    let filtered = [...movements];
+    let  filtered= [...movements];
 
     // Product/Variant filter
     if (productId) {
@@ -719,4 +719,10 @@ export function StockMovementHistory({
 function Label({ className, children }: { className?: string; children: React.ReactNode }) {
   return <div className={cn('text-sm font-medium', className)}>{children}</div>;
 }
+
+
+
+
+
+
 

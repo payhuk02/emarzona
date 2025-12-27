@@ -169,7 +169,7 @@ export function optimizeLocalStorageCache(): void {
   try {
     const keys = Object.keys(localStorage);
     const maxSize = 5 * 1024 * 1024; // 5MB
-    let totalSize = 0;
+    let  totalSize= 0;
     
     // Calculer la taille totale
     keys.forEach(key => {
@@ -208,5 +208,11 @@ export function optimizeLocalStorageCache(): void {
     logger.error('Erreur lors de l\'optimisation du cache localStorage', { error });
   }
 }
+
+
+
+
+
+
 
 

@@ -39,7 +39,7 @@ interface ReviewModerationTableProps {
   loading?: boolean;
 }
 
-export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
+export const ReviewModerationTable : React.FC<ReviewModerationTableProps> = ({
   reviews = [],
   onApprove,
   onReject,
@@ -499,4 +499,11 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+
 

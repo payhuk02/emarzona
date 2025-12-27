@@ -48,7 +48,7 @@ export function TypeSpecificSection({
         setLoading(true);
         setError(null);
 
-        let query = supabase
+        let  query= supabase
           .from('products')
           .select(
             `
@@ -140,7 +140,7 @@ export function TypeSpecificSection({
   }
 
   // Couleurs et styles selon le type
-  const typeStyles: Record<ProductType, { bg: string; iconColor: string; buttonGradient: string }> =
+  const  typeStyles: Record<ProductType, { bg: string; iconColor: string; buttonGradient: string }> =
     {
       digital: {
         bg: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20',
@@ -242,3 +242,9 @@ export function TypeSpecificSection({
     </section>
   );
 }
+
+
+
+
+
+

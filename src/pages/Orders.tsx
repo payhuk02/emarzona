@@ -151,7 +151,7 @@ const Orders = () => {
         paymentStatusFilter === 'all' || order.payment_status === paymentStatusFilter;
 
       // Date range filter
-      let matchesDateRange = true;
+      let  matchesDateRange= true;
       if (dateRange?.from && dateRange?.to) {
         const orderDate = new Date(order.created_at);
         matchesDateRange = isWithinInterval(orderDate, {
@@ -204,7 +204,7 @@ const Orders = () => {
           count: filteredOrders.length,
         }),
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error("Erreur lors de l'export CSV", error);
       toast({
         title: t('orders.toast.error', '❌ Erreur'),
@@ -760,3 +760,9 @@ const Orders = () => {
 };
 
 export default Orders;
+
+
+
+
+
+

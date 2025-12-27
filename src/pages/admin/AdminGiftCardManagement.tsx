@@ -83,7 +83,7 @@ export default function AdminGiftCardManagement() {
   };
 
   const getStatusBadge = (status: GiftCardStatus) => {
-    const variants: Record<GiftCardStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<GiftCardStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       active: 'default',
       redeemed: 'secondary',
       expired: 'destructive',
@@ -91,7 +91,7 @@ export default function AdminGiftCardManagement() {
       pending: 'outline',
     };
 
-    const labels: Record<GiftCardStatus, string> = {
+    const  labels: Record<GiftCardStatus, string> = {
       active: 'Active',
       redeemed: 'Utilisée',
       expired: 'Expirée',
@@ -690,7 +690,7 @@ function CreateGiftCardDialog({
         auto_activate: true,
         notes: '',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -839,3 +839,9 @@ function CreateGiftCardDialog({
     </Dialog>
   );
 }
+
+
+
+
+
+

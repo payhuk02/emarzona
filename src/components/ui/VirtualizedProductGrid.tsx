@@ -62,7 +62,7 @@ interface VirtualizedProductGridProps {
  * Composant de grille virtualisée pour produits
  * Active automatiquement le virtual scrolling pour les listes de 20+ éléments
  */
-export const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
+export const VirtualizedProductGrid : React.FC<VirtualizedProductGridProps> = ({
   count,
   renderItem,
   estimateSize,
@@ -180,4 +180,11 @@ export const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
 };
 
 VirtualizedProductGrid.displayName = 'VirtualizedProductGrid';
+
+
+
+
+
+
+
 

@@ -58,7 +58,7 @@ async function compressImageIfNeeded(
     }
 
     return compressedFile;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     // Si la compression échoue, retourner le fichier original
     logger.warn('Image compression failed, using original', {
       fileName: file.name,
@@ -84,7 +84,7 @@ export async function uploadFileToStorage(file: File, config: UploadConfig): Pro
   }
 
   // Compresser l'image si nécessaire (avant validation de taille finale)
-  let fileToUpload = file;
+  let  fileToUpload= file;
   if (config.compressImages !== false) {
     fileToUpload = await compressImageIfNeeded(file, {
       maxSizeMB: 1, // Compresser à max 1MB
@@ -104,8 +104,8 @@ export async function uploadFileToStorage(file: File, config: UploadConfig): Pro
     validation.detectedMimeType || fileToUpload.type || file.type || 'application/octet-stream';
 
   // Upload avec retry et progress tracking
-  let lastError: Error | null = null;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  let  lastError: Error | null = null;
+  for (let  attempt= 0; attempt <= maxRetries; attempt++) {
     try {
       // Mettre à jour la progression avant upload
       if (config.onProgress && attempt === 0) {
@@ -212,7 +212,7 @@ export async function uploadFileToStorage(file: File, config: UploadConfig): Pro
             );
           }
         }
-      } catch (fetchError: unknown) {
+      } catch ( _fetchError: unknown) {
         // Ne pas bloquer si c'est une erreur réseau (CORS, etc.)
         logger.warn('Could not test public URL after upload', {
           path: uploadData.path,
@@ -233,7 +233,7 @@ export async function uploadFileToStorage(file: File, config: UploadConfig): Pro
         mimeType: contentType,
         size: fileToUpload.size, // Taille après compression
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt < maxRetries) {
         await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
@@ -314,7 +314,6 @@ export interface UploadState {
  * const handleUpload = async () => {
  *   const results = await uploadFiles(selectedFiles, {
  *     folder: 'messages/order-123',
- *     onProgress: (progress) => console.log(`${progress}%`),
  *   });
  * };
  */
@@ -362,7 +361,7 @@ export function useFileUpload() {
         }
 
         // Compresser l'image si nécessaire
-        let fileToUpload = file;
+        let  fileToUpload= file;
         if (config.compressImages !== false) {
           const compressionOpts = config.compressionOptions || {};
           fileToUpload = await compressImageIfNeeded(file, {
@@ -462,12 +461,12 @@ export function useFileUpload() {
 
         // Upload vers Supabase Storage
         // CRITIQUE : Toujours passer contentType pour éviter les erreurs MIME type
-        let uploadData: { path: string; id?: string; fullPath?: string } | null = null;
-        let uploadError: Error | null = null;
+        let  uploadData: { path: string; id?: string; fullPath?: string } | null = null;
+        let  uploadError: Error | null = null;
 
         // CRITIQUE : S'assurer que fileToUpload est bien un File ou Blob, pas un FormData
         // Si c'est un FormData, extraire le fichier
-        let fileToUploadFinal: File | Blob = fileToUpload;
+        let  fileToUploadFinal: File | Blob = fileToUpload;
 
         // Vérifier que ce n'est pas un FormData (ce qui causerait le problème multipart)
         if (fileToUpload instanceof FormData) {
@@ -682,7 +681,7 @@ export function useFileUpload() {
           }
 
           // Créer un message d'erreur plus détaillé
-          let errorMessage = uploadError.message || "Erreur lors de l'upload";
+          let  errorMessage= uploadError.message || "Erreur lors de l'upload";
 
           // Améliorer le message selon le type d'erreur
           if (uploadError.message?.includes('new row violates row-level security')) {
@@ -724,11 +723,11 @@ export function useFileUpload() {
         const uploadedFileName = filePath.split('/').pop() || fileName;
 
         // Retry la vérification list() jusqu'à 3 fois avec délai si nécessaire
-        let fileList = null;
-        let listError = null;
-        let foundFile = null;
+        let  fileList= null;
+        let  listError= null;
+        let  foundFile= null;
 
-        for (let listRetry = 0; listRetry < 3; listRetry++) {
+        for (let  listRetry= 0; listRetry < 3; listRetry++) {
           const listResult = await supabase.storage.from(bucket).list(folderPath, {
             limit: 1000,
             search: uploadedFileName,
@@ -750,8 +749,8 @@ export function useFileUpload() {
           }
         }
 
-        let fileIsJson = false;
-        let actualContentType: string | null = null;
+        let  fileIsJson= false;
+        let  actualContentType: string | null = null;
 
         if (listError) {
           logger.error('Cannot list file after upload (RLS issue?)', {
@@ -890,8 +889,8 @@ export function useFileUpload() {
               fileIsJson = true;
 
               // Lire le JSON pour voir l'erreur exacte
-              let jsonError = 'Erreur inconnue';
-              let rawErrorContent = '';
+              let  jsonError= 'Erreur inconnue';
+              let  rawErrorContent= '';
               try {
                 const jsonResponse = await fetch(urlData.publicUrl, {
                   method: 'GET',
@@ -1025,7 +1024,7 @@ export function useFileUpload() {
             const permissionCheck = await checkStoragePermissions();
             const report = formatPermissionCheckReport(permissionCheck);
 
-            let errorMessage = `Le fichier a été uploadé comme JSON au lieu de ${contentType}.\n`;
+            let  errorMessage= `Le fichier a été uploadé comme JSON au lieu de ${contentType}.\n`;
             errorMessage += "Cela indique que les politiques RLS bloquent l'accès au fichier.\n\n";
             errorMessage += 'CORRECTIONS NÉCESSAIRES:\n';
             errorMessage +=
@@ -1042,13 +1041,13 @@ export function useFileUpload() {
         }
 
         // Initialiser fileVerified et verificationError basés sur fileIsJson
-        let fileVerified = !fileIsJson;
-        const verificationError: string | null = fileIsJson
+        let  fileVerified= !fileIsJson;
+        const  verificationError: string | null = fileIsJson
           ? 'Le fichier a été uploadé comme JSON au lieu du type attendu'
           : null;
 
         // Si fileIsJson est false mais que l'URL publique n'a pas été vérifiée, on vérifie avec une URL signée comme fallback
-        let signedUrl: string | null = null;
+        let  signedUrl: string | null = null;
         if (!fileVerified && !verificationError) {
           // Si on arrive ici, c'est que fileIsJson est true mais les métadonnées sont correctes
           // On essaie une URL signée comme fallback
@@ -1084,7 +1083,7 @@ export function useFileUpload() {
                 }
               }
             }
-          } catch (signedUrlError: unknown) {
+          } catch ( _signedUrlError: unknown) {
             logger.warn('Could not generate or test signed URL as fallback', {
               path: uploadData.path,
               error: signedUrlError,
@@ -1098,7 +1097,7 @@ export function useFileUpload() {
           const { diagnoseAttachmentsBucket, formatDiagnosticResult } =
             await import('@/utils/diagnoseBucketConfig');
 
-          let diagnosticInfo = '';
+          let  diagnosticInfo= '';
           try {
             const diagnostic = await diagnoseAttachmentsBucket();
             diagnosticInfo = '\n\n' + formatDiagnosticResult(diagnostic);
@@ -1139,7 +1138,7 @@ export function useFileUpload() {
           mimeType: contentType,
           size: fileToUploadFinal.size, // Taille après compression
         };
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         // Si c'est une erreur RLS (fichier uploadé comme JSON), ne pas retry
         const err = error as { isRLSError?: boolean; skipRetry?: boolean };
         if (err?.isRLSError || err?.skipRetry) {
@@ -1172,12 +1171,12 @@ export function useFileUpload() {
         failed: [],
       });
 
-      const results: UploadResult[] = [];
-      const failed: Array<{ file: File; error: string }> = [];
+      const  results: UploadResult[] = [];
+      const  failed: Array<{ file: File; error: string }> = [];
 
       try {
         // Valider tous les fichiers d'abord
-        const invalidFiles: File[] = [];
+        const  invalidFiles: File[] = [];
         for (const file of files) {
           const validation = validateFile(file, {
             maxSize: config.maxSize,
@@ -1204,7 +1203,7 @@ export function useFileUpload() {
         // Uploader les fichiers valides
         const validFiles = files.filter(file => !invalidFiles.includes(file));
 
-        for (let i = 0; i < validFiles.length; i++) {
+        for (let  i= 0; i < validFiles.length; i++) {
           const file = validFiles[i];
 
           try {
@@ -1225,7 +1224,7 @@ export function useFileUpload() {
               ...prev,
               uploaded: [...prev.uploaded, result],
             }));
-          } catch (error: unknown) {
+          } catch ( _error: unknown) {
             const err = error instanceof Error ? error : new Error(String(error));
             const errorMessage = err.message || "Erreur inconnue lors de l'upload";
 
@@ -1294,7 +1293,7 @@ export function useFileUpload() {
         }));
 
         return results;
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Upload batch failed', error);
 
         // Si l'erreur contient des détails sur les fichiers échoués, les utiliser
@@ -1348,3 +1347,9 @@ export function useFileUpload() {
     reset,
   };
 }
+
+
+
+
+
+

@@ -53,7 +53,7 @@ export const useAdminActivity = () => {
       );
 
       setActions(actionsWithNames);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -70,3 +70,9 @@ export const useAdminActivity = () => {
 
   return { actions, loading, refetch: fetchActions };
 };
+
+
+
+
+
+

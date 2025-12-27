@@ -198,7 +198,7 @@ const AdminStoreWithdrawals = () => {
         await refetch();
         setShowApproveDialog(false);
         setSelectedWithdrawal(null);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error approving withdrawal', { error });
         toast({
@@ -235,7 +235,7 @@ const AdminStoreWithdrawals = () => {
       setShowRejectDialog(false);
       setRejectReason('');
       setSelectedWithdrawal(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error rejecting withdrawal', { error });
       toast({
@@ -273,7 +273,7 @@ const AdminStoreWithdrawals = () => {
       setTransactionReference('');
       setProofUrl('');
       setSelectedWithdrawal(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error completing withdrawal', { error });
       toast({
@@ -286,7 +286,7 @@ const AdminStoreWithdrawals = () => {
 
   const getStatusBadge = (status: StoreWithdrawalStatus) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const variants: Record<
+    const  variants: Record<
       StoreWithdrawalStatus,
       {
         variant: 'default' | 'secondary' | 'destructive' | 'outline';
@@ -313,7 +313,7 @@ const AdminStoreWithdrawals = () => {
   };
 
   const getPaymentMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       mobile_money: 'Mobile Money',
       bank_card: 'Carte bancaire',
       bank_transfer: 'Virement bancaire',
@@ -330,7 +330,7 @@ const AdminStoreWithdrawals = () => {
   }>({});
 
   const filteredWithdrawals = useMemo(() => {
-    let filtered = [...withdrawals];
+    let  filtered= [...withdrawals];
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -367,7 +367,7 @@ const AdminStoreWithdrawals = () => {
 
   const handleQuickFilter = useCallback((period: 'week' | 'month' | 'year' | 'all') => {
     const now = new Date();
-    let dateFrom: Date | undefined;
+    let  dateFrom: Date | undefined;
 
     switch (period) {
       case 'week':
@@ -515,7 +515,7 @@ const AdminStoreWithdrawals = () => {
                 </div>
               ) : filteredWithdrawals.length === 0 ? (
                 <div className="text-center py-8 sm:py-12 text-muted-foreground">
-                  <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
+                  <Wallet  className ="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
                   <p className="text-sm sm:text-base">Aucun retrait trouvé</p>
                 </div>
               ) : isMobile ? (
@@ -963,3 +963,9 @@ const AdminStoreWithdrawals = () => {
 };
 
 export default AdminStoreWithdrawals;
+
+
+
+
+
+

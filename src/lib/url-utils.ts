@@ -99,7 +99,7 @@ export function getQueryParam(url: string, key: string): string | null {
 export function getAllQueryParams(url: string): Record<string, string> {
   try {
     const urlObj = new URL(url, window.location.origin);
-    const params: Record<string, string> = {};
+    const  params: Record<string, string> = {};
     
     urlObj.searchParams.forEach((value, key) => {
       params[key] = value;
@@ -263,4 +263,10 @@ export function createSafeRedirectUrl(url: string, allowedDomains?: string[]): s
     return null;
   }
 }
+
+
+
+
+
+
 

@@ -182,3 +182,9 @@ export function ArtGallerySection() {
     </section>
   );
 }
+
+
+
+
+
+

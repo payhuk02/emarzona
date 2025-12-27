@@ -55,7 +55,7 @@ export function usePhysicalProducts(storeId: string) {
           });
 
           // Merge stats with products
-          const productsWithStats: PhysicalProduct[] = (data || []).map((product) => {
+          const  productsWithStats: PhysicalProduct[] = (data || []).map((product) => {
             const sales = salesMap.get(product.id) || { quantity: 0, revenue: 0 };
             return {
               ...product,
@@ -69,7 +69,7 @@ export function usePhysicalProducts(storeId: string) {
       }
 
       // Fallback if no orders found
-      const productsWithStats: PhysicalProduct[] = (data || []).map((product) => ({
+      const  productsWithStats: PhysicalProduct[] = (data || []).map((product) => ({
         ...product,
         total_quantity_sold: 0,
         total_revenue: 0,
@@ -179,3 +179,9 @@ export function useDeletePhysicalProduct() {
     },
   });
 }
+
+
+
+
+
+

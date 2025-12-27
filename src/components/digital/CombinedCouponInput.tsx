@@ -104,7 +104,7 @@ export const CombinedCouponInput = ({
           variant: 'destructive',
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error validating coupons', { error });
       toast({
         title: 'Erreur',
@@ -234,4 +234,10 @@ export const CombinedCouponInput = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

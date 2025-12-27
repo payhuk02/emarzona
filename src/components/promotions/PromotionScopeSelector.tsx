@@ -50,7 +50,7 @@ interface PromotionScopeSelectorProps {
   storeId: string;
 }
 
-export const PromotionScopeSelector: React.FC<PromotionScopeSelectorProps> = ({
+export const PromotionScopeSelector : React.FC<PromotionScopeSelectorProps> = ({
   appliesTo,
   selectedProductIds,
   selectedCategoryIds,
@@ -149,7 +149,7 @@ export const PromotionScopeSelector: React.FC<PromotionScopeSelectorProps> = ({
             setCollections(data || []);
           }
         }
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
         toast({
           title: 'Erreur',
@@ -531,3 +531,10 @@ export const PromotionScopeSelector: React.FC<PromotionScopeSelectorProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

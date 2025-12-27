@@ -24,7 +24,7 @@ export const useWebhooks = (storeId: string | undefined, filters?: WebhookFilter
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('webhooks')
         .select('*')
         .eq('store_id', storeId)
@@ -85,7 +85,7 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: async (form: CreateWebhookForm & { store_id: string }) => {
       // Générer un secret si non fourni
-      let secret = form.secret;
+      let  secret= form.secret;
       if (!secret) {
         const { data: secretData, error: secretError } = await supabase.rpc('generate_webhook_secret');
         if (secretError) throw secretError;
@@ -142,7 +142,7 @@ export const useUpdateWebhook = () => {
 
   return useMutation({
     mutationFn: async (form: UpdateWebhookForm) => {
-      const updates: any = {};
+      const  updates: any = {};
 
       if (form.name !== undefined) updates.name = form.name;
       if (form.description !== undefined) updates.description = form.description;
@@ -278,7 +278,7 @@ export const useWebhookDeliveries = (
     queryFn: async () => {
       if (!webhookId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('webhook_deliveries')
         .select('*')
         .eq('webhook_id', webhookId)
@@ -373,4 +373,10 @@ export const useWebhookStats = (storeId: string | undefined) => {
     enabled: !!storeId,
   });
 };
+
+
+
+
+
+
 

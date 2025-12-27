@@ -32,7 +32,7 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useAdvancedAnalytics', () => {
-  let queryClient: QueryClient;
+  let  queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -166,4 +166,10 @@ describe('useAdvancedAnalytics', () => {
     });
   });
 });
+
+
+
+
+
+
 

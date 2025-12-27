@@ -136,7 +136,7 @@ export default function ShippingServiceMessages() {
       }));
 
       setMessages(messagesWithSenders as ShippingServiceMessage[]);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error loading messages', error);
       toast({
         title: '❌ Erreur',
@@ -199,7 +199,7 @@ export default function ShippingServiceMessages() {
 
       setMessageContent('');
       await loadMessages();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error sending message', error);
     }
   };
@@ -471,4 +471,10 @@ export default function ShippingServiceMessages() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

@@ -95,7 +95,7 @@ export const TwoFactorAuth = () => {
           description: 'Scannez le QR code avec votre app authentificator',
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Erreur activation 2FA', { error });
       toast({
         title: 'Erreur',
@@ -148,7 +148,7 @@ export const TwoFactorAuth = () => {
         setFactorId(null);
         await loadFactors();
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Erreur vérification 2FA', { error, factorId });
       toast({
         title: 'Code incorrect',
@@ -172,7 +172,7 @@ export const TwoFactorAuth = () => {
       });
 
       await loadFactors();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de désactiver le 2FA',
@@ -391,4 +391,10 @@ export const TwoFactorAuth = () => {
     </div>
   );
 };
+
+
+
+
+
+
 

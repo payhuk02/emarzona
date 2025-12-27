@@ -97,7 +97,7 @@ export class EmailTagService {
 
       logger.info('Tag added successfully', { userId, storeId, tag: normalizedTag, category });
       return data as string;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.addTag error', { error: errorMessage, userId, storeId, tag, category });
       throw new Error(`Failed to add tag: ${errorMessage}`);
@@ -136,7 +136,7 @@ export class EmailTagService {
       }
 
       return removed;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.removeTag error', { error: errorMessage, userId, storeId, tag });
       throw new Error(`Failed to remove tag: ${errorMessage}`);
@@ -164,7 +164,7 @@ export class EmailTagService {
       }
 
       // Convertir les résultats en format EmailUserTag
-      const tags: EmailUserTag[] = (data || []).map((item: any) => ({
+      const  tags: EmailUserTag[] = (data || []).map((item: any) => ({
         id: '', // Non retourné par la fonction, mais nécessaire pour l'interface
         user_id: userId,
         store_id: storeId,
@@ -176,7 +176,7 @@ export class EmailTagService {
       }));
 
       return tags;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.getUserTags error', { error: errorMessage, userId, storeId, category });
       throw new Error(`Failed to get user tags: ${errorMessage}`);
@@ -205,7 +205,7 @@ export class EmailTagService {
       }
 
       return (data || []) as Array<{ user_id: string; email: string; added_at: string }>;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.getUsersByTag error', { error: errorMessage, storeId, tag });
       throw new Error(`Failed to get users by tag: ${errorMessage}`);
@@ -224,7 +224,7 @@ export class EmailTagService {
       const tags = await this.getUserTags(userId, storeId);
       const normalizedTag = this.validateAndNormalizeTag(tag);
       return tags.some((t) => t.tag === normalizedTag);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailTagService.hasTag error', { error, userId, storeId, tag });
       return false;
     }
@@ -241,7 +241,7 @@ export class EmailTagService {
     category: TagCategory = 'custom'
   ): Promise<string[]> {
     try {
-      const results: string[] = [];
+      const  results: string[] = [];
       
       for (const tag of tags) {
         try {
@@ -254,7 +254,7 @@ export class EmailTagService {
       }
 
       return results;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.addTags error', { error: errorMessage, userId, storeId, tags, category });
       throw new Error(`Failed to add tags: ${errorMessage}`);
@@ -270,7 +270,7 @@ export class EmailTagService {
     tags: string[]
   ): Promise<number> {
     try {
-      let removedCount = 0;
+      let  removedCount= 0;
       
       for (const tag of tags) {
         try {
@@ -285,7 +285,7 @@ export class EmailTagService {
       }
 
       return removedCount;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.removeTags error', { error: errorMessage, userId, storeId, tags });
       throw new Error(`Failed to remove tags: ${errorMessage}`);
@@ -318,7 +318,7 @@ export class EmailTagService {
         user_count: item.user_count || 0,
         last_used_at: item.last_used_at,
       }));
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.getStoreTags error', { error: errorMessage, storeId, category });
       throw new Error(`Failed to get store tags: ${errorMessage}`);
@@ -362,7 +362,7 @@ export class EmailTagService {
           category: string;
         }>,
       };
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.cleanupExpiredTags error', { error: errorMessage });
       throw new Error(`Failed to cleanup expired tags: ${errorMessage}`);
@@ -416,7 +416,7 @@ export class EmailTagService {
           added_at: string;
         }>,
       };
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.cleanupUnusedTags error', {
         error: errorMessage,
@@ -460,7 +460,7 @@ export class EmailTagService {
         expires_at: string;
         days_until_expiry: number;
       }>;
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       logger.error('EmailTagService.getExpiringTags error', {
         error: errorMessage,
@@ -474,4 +474,10 @@ export class EmailTagService {
 
 // Export instance singleton
 export const emailTagService = EmailTagService;
+
+
+
+
+
+
 

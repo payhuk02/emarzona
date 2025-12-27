@@ -234,7 +234,7 @@ export async function uploadToSupabaseStorage(
       } else if (validationResult && !validationResult.isValid) {
         throw new Error(validationResult.error || 'Validation backend échouée');
       }
-    } catch (backendError: unknown) {
+    } catch ( _backendError: unknown) {
       // Si la validation backend échoue (Edge Function non disponible, CORS, timeout, etc.),
       // on continue avec la validation côté client uniquement
       const errorMessage =
@@ -288,7 +288,7 @@ export async function uploadToSupabaseStorage(
 
     // Déterminer le Content-Type selon l'extension (plus fiable que file.type)
     const fileExt = file.name.split('.').pop()?.toLowerCase();
-    let contentType: string;
+    let  contentType: string;
     if (fileExt === 'png') {
       contentType = 'image/png';
     } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
@@ -398,7 +398,7 @@ export async function uploadToSupabaseStorage(
 
     // 8. Récupérer l'URL publique en utilisant getPublicUrl() de Supabase
     // Supabase gère automatiquement l'encodage et le format correct de l'URL
-    let publicUrl: string;
+    let  publicUrl: string;
 
     try {
       const { data } = supabase.storage.from(bucket).getPublicUrl(actualPath);
@@ -489,7 +489,7 @@ export async function uploadToSupabaseStorage(
 
     // Essayer de créer une URL signée comme fallback
     // Les URLs signées fonctionnent même si les politiques RLS ont des problèmes
-    let signedUrl: string | null = null;
+    let  signedUrl: string | null = null;
     try {
       // Attendre un peu avant de créer l'URL signée
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -625,3 +625,9 @@ export async function checkBucketAccess(bucket: string): Promise<boolean> {
     return false;
   }
 }
+
+
+
+
+
+

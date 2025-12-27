@@ -33,7 +33,7 @@ export function DigitalTypeBadge({
   };
 
   // Icônes et labels pour les types digitaux
-  const digitalTypeLabels: Record<string, string> = {
+  const  digitalTypeLabels: Record<string, string> = {
     ebook: '📚 Ebook',
     software: '💻 Logiciel',
     template: '🎨 Template',
@@ -140,4 +140,10 @@ export function DigitalVersionBadge({
     </Badge>
   );
 }
+
+
+
+
+
+
 

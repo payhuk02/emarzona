@@ -89,7 +89,7 @@ const OrderEditDialogComponent = ({
 
         if (error) throw error;
 
-        const loadedItems: OrderItem[] = (data || []).map(item => ({
+        const  loadedItems: OrderItem[] = (data || []).map(item => ({
           id: item.id,
           productId: item.product_id,
           productName: item.product_name,
@@ -99,7 +99,7 @@ const OrderEditDialogComponent = ({
         }));
 
         setItems(loadedItems);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Une erreur est survenue lors du chargement';
         toast({
@@ -239,7 +239,7 @@ const OrderEditDialogComponent = ({
 
         onSuccess();
         onOpenChange(false);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
         toast({
           title: 'Erreur',
@@ -482,3 +482,9 @@ export const OrderEditDialog = React.memo(OrderEditDialogComponent, (prevProps, 
 });
 
 OrderEditDialog.displayName = 'OrderEditDialog';
+
+
+
+
+
+

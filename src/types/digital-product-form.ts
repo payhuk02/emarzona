@@ -123,3 +123,9 @@ export type DigitalProductFormDataUpdate = Partial<DigitalProductFormData> & {
   faqs?: DigitalProductFAQ[];
   downloadable_files?: DigitalProductDownloadableFile[];
 };
+
+
+
+
+
+

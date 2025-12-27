@@ -116,7 +116,7 @@ class ChronopostAdapter implements CarrierAdapter {
  * Factory pour obtenir l'adaptateur approprié
  */
 function getCarrierAdapter(carrierName: string, config?: Record<string, unknown>): CarrierAdapter | null {
-  const adapters: Record<string, (config?: Record<string, unknown>) => CarrierAdapter> = {
+  const  adapters: Record<string, (config?: Record<string, unknown>) => CarrierAdapter> = {
     FedEx: (cfg) => new FedExAdapter(cfg),
     DHL: (cfg) => new DHLAdapter(cfg),
     UPS: (cfg) => new UPSAdapter(cfg),
@@ -138,7 +138,7 @@ async function updateShipmentStatus(
 ): Promise<void> {
   try {
     // Mettre à jour le shipment
-    const updateData: Record<string, unknown> = {
+    const  updateData: Record<string, unknown> = {
       status,
       last_tracking_update: new Date().toISOString(),
     };
@@ -297,8 +297,8 @@ export async function trackPendingShipments(): Promise<{ success: number; failed
       return { success: 0, failed: 0 };
     }
 
-    let successCount = 0;
-    let failedCount = 0;
+    let  successCount= 0;
+    let  failedCount= 0;
 
     // Tracker chaque shipment
     for (const shipment of shipments) {
@@ -409,4 +409,10 @@ export async function sendTrackingNotifications(shipmentId: string): Promise<voi
     logger.error('Error sending tracking notifications', { error, shipmentId });
   }
 }
+
+
+
+
+
+
 

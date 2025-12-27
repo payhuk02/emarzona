@@ -78,7 +78,7 @@ export const EmailSequenceBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: CreateSequencePayload = {
+    const  payload: CreateSequencePayload = {
       store_id: storeId,
       name,
       description,
@@ -247,4 +247,10 @@ export const EmailSequenceBuilder = ({
     </>
   );
 };
+
+
+
+
+
+
 

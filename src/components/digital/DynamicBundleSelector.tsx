@@ -104,7 +104,7 @@ export const DynamicBundleSelector = ({
       return config.baseDiscount;
     } else if (config.discountType === 'progressive' && config.progressiveDiscounts) {
       // Trouver la remise progressive la plus élevée applicable
-      let maxDiscount = 0;
+      let  maxDiscount= 0;
       for (const progDiscount of config.progressiveDiscounts.sort(
         (a, b) => b.minProducts - a.minProducts
       )) {
@@ -341,4 +341,10 @@ export const DynamicBundleSelector = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

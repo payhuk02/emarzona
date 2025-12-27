@@ -45,7 +45,7 @@ export interface StoreTheme {
   navigationStyle: 'horizontal' | 'vertical' | 'mega';
 }
 
-const DEFAULT_THEME: StoreTheme = {
+const  DEFAULT_THEME: StoreTheme = {
   primaryColor: '#3b82f6',
   secondaryColor: '#8b5cf6',
   accentColor: '#f59e0b',
@@ -128,7 +128,7 @@ export const useStoreTheme = (store: Store | null): StoreTheme => {
  * Convertit la valeur de borderRadius en valeur CSS
  */
 export const getBorderRadiusValue = (borderRadius: StoreTheme['borderRadius']): string => {
-  const map: Record<StoreTheme['borderRadius'], string> = {
+  const  map: Record<StoreTheme['borderRadius'], string> = {
     none: '0',
     sm: '0.125rem',
     md: '0.375rem',
@@ -143,7 +143,7 @@ export const getBorderRadiusValue = (borderRadius: StoreTheme['borderRadius']): 
  * Convertit la valeur de shadowIntensity en valeur CSS
  */
 export const getShadowValue = (shadowIntensity: StoreTheme['shadowIntensity']): string => {
-  const map: Record<StoreTheme['shadowIntensity'], string> = {
+  const  map: Record<StoreTheme['shadowIntensity'], string> = {
     none: 'none',
     sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
     md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
@@ -152,4 +152,10 @@ export const getShadowValue = (shadowIntensity: StoreTheme['shadowIntensity']): 
   };
   return map[shadowIntensity];
 };
+
+
+
+
+
+
 

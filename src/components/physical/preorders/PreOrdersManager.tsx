@@ -109,7 +109,7 @@ export function PreOrdersManager() {
   }, [preOrders, debouncedSearch]);
 
   const getStatusBadge = (status: PreOrder['status']) => {
-    const variants: Record<PreOrder['status'], { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
+    const  variants: Record<PreOrder['status'], { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
       active: { variant: 'default', label: 'Active', className: 'bg-green-500' },
       pending_arrival: { variant: 'secondary', label: 'En attente' },
       arrived: { variant: 'outline', label: 'Arrivée', className: 'bg-blue-500' },
@@ -600,3 +600,9 @@ function PreOrderCard({ preOrder, getStatusBadge, onViewCustomers, onNotify, onC
     </Card>
   );
 }
+
+
+
+
+
+

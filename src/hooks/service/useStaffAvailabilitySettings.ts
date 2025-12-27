@@ -23,7 +23,7 @@ export interface StaffAvailabilitySettings {
   updated_at: string;
 }
 
-const defaultSettings: Omit<StaffAvailabilitySettings, 'id' | 'store_id' | 'service_id' | 'created_at' | 'updated_at'> = {
+const  defaultSettings: Omit<StaffAvailabilitySettings, 'id' | 'store_id' | 'service_id' | 'created_at' | 'updated_at'> = {
   auto_block_on_time_off: true,
   max_bookings_per_day: 8,
   booking_density_warning_threshold: 70,
@@ -47,7 +47,7 @@ export const useStaffAvailabilitySettings = (
         throw new Error('Store ID is required');
       }
 
-      let query = supabase
+      let  query= supabase
         .from('staff_availability_settings')
         .select('*')
         .eq('store_id', storeId);
@@ -105,7 +105,7 @@ export const useUpdateStaffAvailabilitySettings = () => {
       }
 
       // Vérifier si les paramètres existent déjà
-      let query = supabase
+      let  query= supabase
         .from('staff_availability_settings')
         .select('id')
         .eq('store_id', settings.store_id);
@@ -179,4 +179,10 @@ export const useUpdateStaffAvailabilitySettings = () => {
     },
   });
 };
+
+
+
+
+
+
 

@@ -96,7 +96,7 @@ export const useProductKits = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('product_kits')
         .select(`
           *,
@@ -185,7 +185,7 @@ export const useKitAssemblies = (kitId?: string, filters?: {
     queryFn: async () => {
       if (!kitId) throw new Error('Kit ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('kit_assemblies')
         .select(`
           *,
@@ -353,7 +353,7 @@ export const useUpdateAssemblyStatus = () => {
       qualityCheckNotes?: string;
       componentsUsed?: Array<{ component_id: string; quantity: number; serial_number?: string }>;
     }) => {
-      const updateData: any = {
+      const  updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -447,4 +447,10 @@ export const useCalculateKitPrice = () => {
     },
   });
 };
+
+
+
+
+
+
 

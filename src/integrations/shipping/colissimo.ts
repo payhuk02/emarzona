@@ -168,7 +168,7 @@ class ColissimoService {
       const data = await response.json();
 
       // Parser la réponse Colissimo
-      const rates: ColissimoRate[] = data.products?.map((product: any) => ({
+      const  rates: ColissimoRate[] = data.products?.map((product: any) => ({
         serviceType: product.productCode || '',
         serviceName: product.productName || '',
         shippingCost: parseFloat(product.price || '0') * 100, // Convertir en centimes
@@ -324,5 +324,11 @@ class ColissimoService {
 }
 
 export default ColissimoService;
+
+
+
+
+
+
 
 

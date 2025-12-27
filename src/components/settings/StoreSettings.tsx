@@ -126,7 +126,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           variant: "destructive"
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la suppression', { error: errorMessage, storeId: storeToDelete.id });
       toast({
@@ -158,7 +158,7 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
           variant: "destructive"
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de l\'archivage', { error: errorMessage, storeId });
       toast({
@@ -422,3 +422,9 @@ export const StoreSettings = ({ action }: { action?: string | null }) => {
     </div>
   );
 };
+
+
+
+
+
+

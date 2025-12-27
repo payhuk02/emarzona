@@ -52,7 +52,7 @@ export const useAdvancedPayments = (
       storeId: string
     ): Promise<AdvancedPayment> => {
       // Déterminer le payment_type depuis metadata ou par défaut 'full'
-      let paymentType: PaymentType = 'full';
+      let  paymentType: PaymentType = 'full';
       if (transaction.metadata && typeof transaction.metadata === 'object') {
         const metadata = transaction.metadata as Record<string, unknown>;
         if (metadata.payment_type) {
@@ -61,7 +61,7 @@ export const useAdvancedPayments = (
       }
 
       // Déterminer le statut (mapper les statuts transactions vers PaymentStatus)
-      let status: PaymentStatus = 'pending';
+      let  status: PaymentStatus = 'pending';
       const transactionStatus = transaction.status?.toLowerCase();
       if (transactionStatus === 'completed' || transactionStatus === 'success') {
         status = 'completed';
@@ -72,7 +72,7 @@ export const useAdvancedPayments = (
       }
 
       // Récupérer les informations customer si customer_id existe
-      let customerData = null;
+      let  customerData= null;
       if (transaction.customer_id) {
         try {
           const { data } = await supabase
@@ -105,7 +105,7 @@ export const useAdvancedPayments = (
       }
 
       // Récupérer order_number si order_id existe
-      let orderData = null;
+      let  orderData= null;
       if (transaction.order_id) {
         try {
           const { data, error: orderError } = await supabase
@@ -152,7 +152,7 @@ export const useAdvancedPayments = (
             };
           }
           // Si pas de data, orderData reste null (sera converti en undefined plus tard)
-        } catch (orderError: unknown) {
+        } catch ( _orderError: unknown) {
           // Catch pour les exceptions non-Supabase
           const errorMessage =
             orderError instanceof Error ? orderError.message : String(orderError);
@@ -194,7 +194,7 @@ export const useAdvancedPayments = (
     try {
       // 🔧 CORRECTION: Récupérer depuis payments ET transactions (Moneroo)
       // 1. Récupérer les payments (système avancé)
-      let paymentsQuery = supabase
+      let  paymentsQuery= supabase
         .from('payments')
         .select(
           `
@@ -234,7 +234,7 @@ export const useAdvancedPayments = (
       const { data: paymentsData, error: paymentsError } = await paymentsQuery;
 
       // 2. Récupérer les transactions (Moneroo)
-      let transactionsQuery = supabase
+      let  transactionsQuery= supabase
         .from('transactions')
         .select('*')
         .eq('store_id', storeId)
@@ -243,7 +243,7 @@ export const useAdvancedPayments = (
       // Appliquer les filtres pour transactions (mapping des statuts)
       if (filters?.status) {
         // Mapper PaymentStatus vers transaction status
-        const statusMap: Record<PaymentStatus, string[]> = {
+        const  statusMap: Record<PaymentStatus, string[]> = {
           pending: ['pending', 'processing'],
           completed: ['completed', 'success'],
           failed: ['failed', 'error'],
@@ -283,12 +283,12 @@ export const useAdvancedPayments = (
 
       // 4. Fusionner payments et transactions normalisées
       // Éviter les doublons (si un payment a le même order_id qu'une transaction)
-      const allPayments: AdvancedPayment[] = [];
+      const  allPayments: AdvancedPayment[] = [];
       const processedOrderIds = new Set<string>();
 
       // D'abord ajouter les payments (convertir null en undefined et s'assurer que status est PaymentStatus)
       (paymentsData || []).forEach(payment => {
-        const normalizedPayment: AdvancedPayment = {
+        const  normalizedPayment: AdvancedPayment = {
           ...payment,
           order_id: payment.order_id ? payment.order_id : undefined,
           customer_id: payment.customer_id ? payment.customer_id : undefined,
@@ -330,7 +330,7 @@ export const useAdvancedPayments = (
 
       setPayments(paginatedPayments);
       setError(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       setError(err);
       logger.error('Error fetching advanced payments:', { error: err.message, storeId });
@@ -557,7 +557,7 @@ export const useAdvancedPayments = (
         secured_payments: securedPayments,
       });
       setError(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       setError(err);
       logger.error('Error fetching payment stats:', { error: err.message, storeId });
@@ -603,7 +603,7 @@ export const useAdvancedPayments = (
               } as AdvancedPayment)
             : undefined,
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating payment:', { error: errorMessage });
       return {
@@ -683,7 +683,7 @@ export const useAdvancedPayments = (
               } as AdvancedPayment)
             : undefined,
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating percentage payment:', { error: errorMessage });
       return {
@@ -696,7 +696,7 @@ export const useAdvancedPayments = (
   // Créer un paiement sécurisé (à la livraison)
   const createSecuredPayment = async (options: SecuredPaymentOptions): Promise<PaymentResponse> => {
     try {
-      const paymentData: Record<string, unknown> = {
+      const  paymentData: Record<string, unknown> = {
         store_id: options.storeId,
         order_id: options.orderId || null,
         customer_id: options.customerId || null,
@@ -760,7 +760,7 @@ export const useAdvancedPayments = (
               } as AdvancedPayment)
             : undefined,
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating secured payment:', { error: errorMessage });
       return {
@@ -819,7 +819,7 @@ export const useAdvancedPayments = (
               } as AdvancedPayment)
             : undefined,
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error releasing payment:', { error: errorMessage });
       return {
@@ -886,7 +886,7 @@ export const useAdvancedPayments = (
               } as AdvancedPayment)
             : undefined,
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error opening dispute:', { error: errorMessage });
       return {
@@ -903,7 +903,7 @@ export const useAdvancedPayments = (
   ): Promise<PaymentResponse> => {
     try {
       // Convertir les types pour Supabase (null -> undefined, Record -> Json)
-      const supabaseUpdates: Record<string, unknown> = {
+      const  supabaseUpdates: Record<string, unknown> = {
         ...updates,
         order_id: updates.order_id !== undefined ? updates.order_id || null : undefined,
         customer_id: updates.customer_id !== undefined ? updates.customer_id || null : undefined,
@@ -935,7 +935,7 @@ export const useAdvancedPayments = (
               } as AdvancedPayment)
             : undefined,
       };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating payment:', { error: errorMessage });
       return {
@@ -961,7 +961,7 @@ export const useAdvancedPayments = (
       });
 
       return { success: true };
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error deleting payment:', { error: errorMessage });
       return {
@@ -1032,3 +1032,9 @@ export const useAdvancedPayments = (
     deletePayment,
   };
 };
+
+
+
+
+
+

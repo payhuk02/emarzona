@@ -73,7 +73,7 @@ export const sanitizeEmail = (email: string): string => {
  * Nettoie une URL
  */
 export const sanitizeURL = (url: string): string => {
-  let cleaned = url.trim();
+  let  cleaned= url.trim();
   
   // Ajouter https:// si pas de protocole
   if (!/^https?:\/\//i.test(cleaned)) {
@@ -319,7 +319,7 @@ export const validateSocialURLs = (urls: {
   twitter?: string;
   linkedin?: string;
 }): { valid: boolean; errors: Record<string, string> } => {
-  const errors: Record<string, string> = {};
+  const  errors: Record<string, string> = {};
 
   // Facebook
   if (urls.facebook) {
@@ -393,7 +393,7 @@ export interface StoreFormData {
 export const validateStoreForm = (
   data: StoreFormData
 ): { valid: boolean; errors: Record<string, string> } => {
-  const errors: Record<string, string> = {};
+  const  errors: Record<string, string> = {};
 
   // Nom requis
   if (!data.name || !data.name.trim()) {
@@ -435,4 +435,10 @@ export const validateStoreForm = (
     errors
   };
 };
+
+
+
+
+
+
 

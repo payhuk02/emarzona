@@ -24,7 +24,7 @@ interface WorkflowActionEditorProps {
   onRemove: () => void;
 }
 
-const ACTION_TYPE_LABELS: Record<WorkflowActionType, string> = {
+const  ACTION_TYPE_LABELS: Record<WorkflowActionType, string> = {
   send_email: 'Envoyer un email',
   wait: 'Attendre',
   add_tag: 'Ajouter un tag',
@@ -178,4 +178,10 @@ export const WorkflowActionEditor = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

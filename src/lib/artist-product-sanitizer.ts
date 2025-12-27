@@ -20,7 +20,7 @@ import type { ArtistProductFormData } from '@/types/artist-product';
 export function sanitizeArtistProductFormData(
   formData: Partial<ArtistProductFormData>
 ): Partial<ArtistProductFormData> {
-  const sanitized: Partial<ArtistProductFormData> = { ...formData };
+  const  sanitized: Partial<ArtistProductFormData> = { ...formData };
 
   // 1. Nom de l'artiste (texte simple)
   if (sanitized.artist_name) {
@@ -316,3 +316,9 @@ export function validateAndSanitizeArtistProduct(
 
   return sanitized;
 }
+
+
+
+
+
+

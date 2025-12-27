@@ -185,7 +185,7 @@ export const useAnalyticsMetrics = (
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('analytics_metrics')
         .select('*')
         .eq('store_id', storeId)
@@ -229,7 +229,7 @@ export const usePerformanceMonitoring = (
   return useQuery({
     queryKey: ['performance-monitoring', storeId, productId, metricName, limit],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('performance_monitoring')
         .select('*')
         .order('recorded_at', { ascending: false })
@@ -434,4 +434,10 @@ export const useCreateAnalyticsGoal = () => {
     },
   });
 };
+
+
+
+
+
+
 

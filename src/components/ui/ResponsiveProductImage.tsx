@@ -42,8 +42,8 @@ export const ResponsiveProductImage = ({
   fallbackIcon,
   priority = false,
   sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1920px) 33vw, 25vw',
-  quality: _quality = 85,
-  placeholder: _placeholder = 'empty',
+  quality: quality = 85,
+  placeholder: placeholder = 'empty',
   blurDataURL: _blurDataURL,
   context = 'grid',
   fit = 'cover',
@@ -284,3 +284,9 @@ export const ProductBanner = ({
     </div>
   );
 };
+
+
+
+
+
+

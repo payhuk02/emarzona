@@ -19,7 +19,7 @@ interface ServiceStaffResourcesFormProps {
 
 export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResourcesFormProps) => {
   const handleAddStaffMember = () => {
-    const newMember: ServiceStaffMember = {
+    const  newMember: ServiceStaffMember = {
       name: '',
       email: '',
       role: '',
@@ -228,4 +228,10 @@ export const ServiceStaffResourcesForm = ({ data, onUpdate }: ServiceStaffResour
     </div>
   );
 };
+
+
+
+
+
+
 

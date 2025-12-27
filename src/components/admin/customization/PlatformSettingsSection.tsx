@@ -104,7 +104,7 @@ export const PlatformSettingsSection = ({ onChange }: PlatformSettingsSectionPro
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5" />
+            <Wallet  className ="h-5 w-5" />
             Retraits
           </CardTitle>
           <CardDescription>
@@ -446,4 +446,10 @@ export const PlatformSettingsSection = ({ onChange }: PlatformSettingsSectionPro
     </div>
   );
 };
+
+
+
+
+
+
 

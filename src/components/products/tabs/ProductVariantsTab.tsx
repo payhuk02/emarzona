@@ -63,7 +63,7 @@ export const ProductVariantsTab = ({ formData, updateFormData }: ProductVariants
    * Ajoute une nouvelle variante avec des valeurs par défaut
    */
   const addVariant = () => {
-    const newVariant: ProductVariant = {
+    const  newVariant: ProductVariant = {
       id: Date.now().toString(),
       name: "",
       sku: "",
@@ -564,3 +564,9 @@ export const ProductVariantsTab = ({ formData, updateFormData }: ProductVariants
     </div>
   );
 };
+
+
+
+
+
+

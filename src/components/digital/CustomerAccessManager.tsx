@@ -123,7 +123,7 @@ export interface CustomerAccessManagerProps {
  * />
  * ```
  */
-export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
+export const CustomerAccessManager : React.FC<CustomerAccessManagerProps> = ({
   customerAccess,
   onRevokeAccess,
   onRestoreAccess,
@@ -164,7 +164,7 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
 
   // Filtrer les accès
   const filteredAccess = useMemo(() => {
-    let result = [...customerAccess];
+    let  result= [...customerAccess];
 
     // Recherche
     if (searchQuery) {
@@ -603,4 +603,11 @@ export const CustomerAccessManager: React.FC<CustomerAccessManagerProps> = ({
 CustomerAccessManager.displayName = 'CustomerAccessManager';
 
 export default CustomerAccessManager;
+
+
+
+
+
+
+
 

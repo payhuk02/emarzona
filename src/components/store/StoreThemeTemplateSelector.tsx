@@ -16,7 +16,7 @@ interface StoreThemeTemplateSelectorProps {
   currentTemplateId?: string;
 }
 
-export const StoreThemeTemplateSelector: React.FC<StoreThemeTemplateSelectorProps> = ({
+export const StoreThemeTemplateSelector : React.FC<StoreThemeTemplateSelectorProps> = ({
   onSelectTemplate,
   currentTemplateId,
 }) => {
@@ -107,5 +107,12 @@ export const StoreThemeTemplateSelector: React.FC<StoreThemeTemplateSelectorProp
     </Card>
   );
 };
+
+
+
+
+
+
+
 
 

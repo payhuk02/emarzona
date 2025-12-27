@@ -220,7 +220,7 @@ export interface CourseReview extends Review {
 // HELPERS
 // ============================================================
 
-export const RATING_LABELS: Record<number, string> = {
+export const RATING_LABELS : Record<number, string> = {
   5: 'Excellent',
   4: 'Très bon',
   3: 'Moyen',
@@ -244,7 +244,7 @@ export const getDetailedRatingFields = (productType: ProductType): string[] => {
 };
 
 export const getDetailedRatingLabel = (field: string): string => {
-  const labels: Record<string, string> = {
+  const  labels: Record<string, string> = {
     quality_rating: 'Qualité',
     value_rating: 'Rapport qualité/prix',
     service_rating: 'Service',
@@ -254,4 +254,11 @@ export const getDetailedRatingLabel = (field: string): string => {
   };
   return labels[field] || field;
 };
+
+
+
+
+
+
+
 

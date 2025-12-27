@@ -33,7 +33,7 @@ export async function generateBundleLicenses(
   config: BundleLicenseConfig
 ): Promise<GeneratedLicense[]> {
   try {
-    const licenses: GeneratedLicense[] = [];
+    const  licenses: GeneratedLicense[] = [];
 
     // Récupérer les informations de chaque produit digital
     const { data: digitalProducts, error: productsError } = await supabase
@@ -190,4 +190,10 @@ export async function getBundleLicenses(
     throw error;
   }
 }
+
+
+
+
+
+
 

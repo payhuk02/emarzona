@@ -126,7 +126,7 @@ export default function AdvancedServiceCalendar({
 
   // Filtrer les bookings selon les sélections
   const filteredBookings = useMemo(() => {
-    let filtered = bookings;
+    let  filtered= bookings;
 
     if (selectedStaff.length > 0) {
       filtered = filtered.filter(b => b.staffId && selectedStaff.includes(b.staffId));
@@ -141,7 +141,7 @@ export default function AdvancedServiceCalendar({
 
   // Event style getter avec code couleur par statut
   const eventStyleGetter = useCallback((event: CalendarBooking) => {
-    const baseStyle: React.CSSProperties = {
+    const  baseStyle: React.CSSProperties = {
       borderRadius: '6px',
       border: 'none',
       display: 'block',
@@ -152,7 +152,7 @@ export default function AdvancedServiceCalendar({
     };
 
     // Couleurs par statut
-    const statusColors: Record<string, { bg: string; text: string }> = {
+    const  statusColors: Record<string, { bg: string; text: string }> = {
       pending: { bg: '#f59e0b', text: '#ffffff' }, // amber
       confirmed: { bg: '#10b981', text: '#ffffff' }, // green
       in_progress: { bg: '#3b82f6', text: '#ffffff' }, // blue
@@ -227,7 +227,7 @@ export default function AdvancedServiceCalendar({
     if (!timelineView) return null;
 
     const timeSlots = [];
-    for (let hour = 8; hour <= 20; hour++) {
+    for (let  hour= 8; hour <= 20; hour++) {
       timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
     }
 
@@ -782,4 +782,10 @@ export default function AdvancedServiceCalendar({
     </div>
   );
 }
+
+
+
+
+
+
 

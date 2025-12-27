@@ -109,7 +109,7 @@ export const TemplateSelector = ({
           title: 'Template importé !',
           description: 'Le template a été chargé avec succès',
         });
-      } catch (error: any) {
+      } catch ( _error: any) {
         toast({
           title: 'Erreur d\'import',
           description: error.message,
@@ -419,4 +419,10 @@ export const TemplateSelector = ({
     </Dialog>
   );
 };
+
+
+
+
+
+
 

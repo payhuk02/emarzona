@@ -45,9 +45,9 @@ vi.mock('../AuthContext', () => ({
 }));
 
 describe('StoreContext Isolation', () => {
-  let queryClient: QueryClient;
-  let mockQuery: ReturnType<typeof vi.fn>;
-  let localStorageMock: Storage;
+  let  queryClient: QueryClient;
+  let  mockQuery: ReturnType<typeof vi.fn>;
+  let  localStorageMock: Storage;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -319,4 +319,10 @@ describe('StoreContext Isolation', () => {
     });
   });
 });
+
+
+
+
+
+
 

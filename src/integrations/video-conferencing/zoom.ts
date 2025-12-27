@@ -183,7 +183,7 @@ class ZoomService {
   async createMeeting(config: ZoomMeetingConfig): Promise<ZoomMeeting> {
     const token = await this.getAccessToken();
     
-    const headers: HeadersInit = {
+    const  headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
@@ -223,11 +223,11 @@ class ZoomService {
     });
 
     if (!response.ok) {
-      const error: ZoomError = await response.json();
+      const  error: ZoomError = await response.json();
       throw new Error(`Failed to create Zoom meeting: ${error.message || response.statusText}`);
     }
 
-    const meeting: ZoomMeeting = await response.json();
+    const  meeting: ZoomMeeting = await response.json();
     return meeting;
   }
 
@@ -237,7 +237,7 @@ class ZoomService {
   async getMeeting(meetingId: string): Promise<ZoomMeeting> {
     const token = await this.getAccessToken();
     
-    const headers: HeadersInit = {
+    const  headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
@@ -253,11 +253,11 @@ class ZoomService {
     });
 
     if (!response.ok) {
-      const error: ZoomError = await response.json();
+      const  error: ZoomError = await response.json();
       throw new Error(`Failed to get Zoom meeting: ${error.message || response.statusText}`);
     }
 
-    const meeting: ZoomMeeting = await response.json();
+    const  meeting: ZoomMeeting = await response.json();
     return meeting;
   }
 
@@ -267,7 +267,7 @@ class ZoomService {
   async updateMeeting(meetingId: string, config: Partial<ZoomMeetingConfig>): Promise<ZoomMeeting> {
     const token = await this.getAccessToken();
     
-    const headers: HeadersInit = {
+    const  headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
@@ -284,11 +284,11 @@ class ZoomService {
     });
 
     if (!response.ok) {
-      const error: ZoomError = await response.json();
+      const  error: ZoomError = await response.json();
       throw new Error(`Failed to update Zoom meeting: ${error.message || response.statusText}`);
     }
 
-    const meeting: ZoomMeeting = await response.json();
+    const  meeting: ZoomMeeting = await response.json();
     return meeting;
   }
 
@@ -298,7 +298,7 @@ class ZoomService {
   async deleteMeeting(meetingId: string): Promise<void> {
     const token = await this.getAccessToken();
     
-    const headers: HeadersInit = {};
+    const  headers: HeadersInit = {};
 
     if (this.accountId) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -312,7 +312,7 @@ class ZoomService {
     });
 
     if (!response.ok) {
-      const error: ZoomError = await response.json();
+      const  error: ZoomError = await response.json();
       throw new Error(`Failed to delete Zoom meeting: ${error.message || response.statusText}`);
     }
   }
@@ -323,7 +323,7 @@ class ZoomService {
   async getMeetingRecordings(meetingId: string): Promise<any> {
     const token = await this.getAccessToken();
     
-    const headers: HeadersInit = {
+    const  headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
@@ -339,7 +339,7 @@ class ZoomService {
     });
 
     if (!response.ok) {
-      const error: ZoomError = await response.json();
+      const  error: ZoomError = await response.json();
       throw new Error(`Failed to get recordings: ${error.message || response.statusText}`);
     }
 
@@ -348,4 +348,10 @@ class ZoomService {
 }
 
 export default ZoomService;
+
+
+
+
+
+
 

@@ -75,7 +75,7 @@ export function CameraCapture({
           );
         }
 
-        const constraints: MediaStreamConstraints = {
+        const  constraints: MediaStreamConstraints = {
           video: {
             facingMode: mode,
             width: { ideal: 1920 },
@@ -105,7 +105,7 @@ export function CameraCapture({
                 logger.info('Video stream playing successfully', { facingMode: mode });
                 setHasPermission(true);
               })
-              .catch(playError => {
+              .catch( playError => {
                 logger.warn('Video play error', { error: playError, facingMode: mode });
                 // Essayer de jouer quand les métadonnées sont chargées
                 videoRef.current!.onloadedmetadata = () => {
@@ -117,7 +117,7 @@ export function CameraCapture({
                       });
                       setHasPermission(true);
                     })
-                    .catch(err => {
+                    .catch( err => {
                       logger.error('Error playing video stream after loadedmetadata', {
                         error: err,
                       });
@@ -134,10 +134,10 @@ export function CameraCapture({
           // Ne pas définir d'erreur ici, le useEffect va réessayer
           // setError('Référence vidéo non disponible');
         }
-      } catch (err: unknown) {
+      } catch ( _err: unknown) {
         logger.error('Error accessing camera', { error: err, facingMode: mode });
 
-        let errorMessage = "Impossible d'accéder à la caméra";
+        let  errorMessage= "Impossible d'accéder à la caméra";
 
         const error = err as Error;
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
@@ -194,7 +194,7 @@ export function CameraCapture({
 
   // Basculer entre caméras
   const toggleCamera = useCallback(async () => {
-    const newMode: FacingMode = facingMode === 'user' ? 'environment' : 'user';
+    const  newMode: FacingMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(newMode);
     await startStream(newMode);
   }, [facingMode, startStream]);
@@ -245,7 +245,7 @@ export function CameraCapture({
         'image/jpeg',
         0.92 // Qualité JPEG (92%)
       );
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       logger.error('Error capturing photo', { error: err });
       const error = err as Error;
       toast({
@@ -268,8 +268,8 @@ export function CameraCapture({
     }
 
     // Utiliser requestAnimationFrame pour s'assurer que le DOM est complètement rendu
-    let mounted = true;
-    let retryCount = 0;
+    let  mounted= true;
+    let  retryCount= 0;
     const maxRetries = 10; // Augmenter le nombre de tentatives
 
     const tryStartStream = () => {
@@ -277,7 +277,7 @@ export function CameraCapture({
 
       if (videoRef.current) {
         logger.info('videoRef is ready, starting stream', { facingMode, retryCount });
-        startStream(facingMode).catch(err => {
+        startStream(facingMode).catch( err => {
           if (mounted) {
             logger.error('Failed to start stream', { error: err });
           }
@@ -459,3 +459,9 @@ export function CameraCapture({
     </Dialog>
   );
 }
+
+
+
+
+
+

@@ -178,7 +178,7 @@ export async function saveDraftHybrid(
   saveDraftLocal(data);
 
   // Sauvegarde serveur asynchrone (ne bloque pas)
-  saveDraftServer(data, storeId, step).catch(error => {
+  saveDraftServer(data, storeId, step).catch( error => {
     logger.warn('Échec sauvegarde serveur brouillon (non bloquant)', { error });
   });
 }
@@ -232,3 +232,9 @@ export async function clearDraft(storeId: string): Promise<void> {
     }
   }
 }
+
+
+
+
+
+

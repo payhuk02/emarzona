@@ -3,7 +3,7 @@
  * Charge Recharts de manière asynchrone pour réduire le bundle initial
  */
 
-let rechartsModule: typeof import('recharts') | null = null;
+let  rechartsModule: typeof import('recharts') | null = null;
 
 /**
  * Charge Recharts de manière asynchrone
@@ -24,4 +24,10 @@ export const loadRechartsComponent = async <T extends keyof typeof import('recha
   const recharts = await loadRecharts();
   return recharts[componentName];
 };
+
+
+
+
+
+
 

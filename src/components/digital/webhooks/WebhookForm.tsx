@@ -127,7 +127,7 @@ export const WebhookForm = ({ webhookId, onSuccess, onCancel }: WebhookFormProps
         });
       }
       onSuccess();
-    } catch (error: any) {
+    } catch ( _error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -282,4 +282,10 @@ export const WebhookForm = ({ webhookId, onSuccess, onCancel }: WebhookFormProps
     </form>
   );
 };
+
+
+
+
+
+
 

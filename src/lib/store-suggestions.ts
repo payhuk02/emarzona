@@ -8,7 +8,7 @@ import { generateSlug } from './store-utils';
  * Suggère des alternatives de slug si le slug initial n'est pas disponible
  */
 export function suggestSlugAlternatives(baseSlug: string, maxSuggestions: number = 5): string[] {
-  const suggestions: string[] = [];
+  const  suggestions: string[] = [];
   const cleanSlug = generateSlug(baseSlug);
 
   // Suggestions basées sur des variations
@@ -22,7 +22,7 @@ export function suggestSlugAlternatives(baseSlug: string, maxSuggestions: number
     `${cleanSlug}-${new Date().getFullYear()}`,
   ];
 
-  for (let i = 0; i < Math.min(maxSuggestions, variations.length); i++) {
+  for (let  i= 0; i < Math.min(maxSuggestions, variations.length); i++) {
     suggestions.push(variations[i]);
   }
 
@@ -147,7 +147,7 @@ export function suggestColorPalette(baseColor: string): {
  * Suggère un nom de domaine personnalisé basé sur le slug
  */
 export function suggestCustomDomain(slug: string): string[] {
-  const suggestions: string[] = [];
+  const  suggestions: string[] = [];
 
   suggestions.push(`${slug}.com`);
   suggestions.push(`${slug}.shop`);
@@ -166,7 +166,7 @@ export function suggestCustomDomain(slug: string): string[] {
  * Suggère des mots-clés SEO basés sur le nom et la description
  */
 export function suggestKeywords(name: string, description?: string): string[] {
-  const keywords: Set<string> = new Set();
+  const  keywords: Set<string> = new Set();
 
   // Extraire les mots importants du nom
   const nameWords = name
@@ -196,3 +196,9 @@ export function suggestKeywords(name: string, description?: string): string[] {
 
   return Array.from(keywords).slice(0, 10);
 }
+
+
+
+
+
+

@@ -79,7 +79,7 @@ export function useKeyboardNavigation(
       const elements = getFocusableElements();
       if (elements.length === 0) return;
 
-      let targetIndex = index;
+      let  targetIndex= index;
       if (circular) {
         targetIndex = ((index % elements.length) + elements.length) % elements.length;
       } else {
@@ -107,7 +107,7 @@ export function useKeyboardNavigation(
       e.preventDefault();
       e.stopPropagation();
 
-      let newIndex = currentIndexRef.current;
+      let  newIndex= currentIndexRef.current;
 
       if (orientation === 'horizontal' || orientation === 'both') {
         if (direction === 'left') {
@@ -202,3 +202,9 @@ export function useKeyboardNavigation(
     currentIndex: currentIndexRef.current,
   };
 }
+
+
+
+
+
+

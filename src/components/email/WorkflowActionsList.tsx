@@ -24,7 +24,7 @@ interface WorkflowActionsListProps {
   onActionsChange: (actions: WorkflowAction[]) => void;
 }
 
-const ACTION_OPTIONS: { value: WorkflowActionType; label: string; icon: React.ReactNode }[] = [
+const  ACTION_OPTIONS: { value: WorkflowActionType; label: string; icon: React.ReactNode }[] = [
   { value: 'send_email', label: 'Envoyer un email', icon: <Mail className="h-4 w-4" /> },
   { value: 'wait', label: 'Attendre', icon: <Clock className="h-4 w-4" /> },
   { value: 'add_tag', label: 'Ajouter un tag', icon: <Tag className="h-4 w-4" /> },
@@ -37,7 +37,7 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const handleAddAction = (type?: WorkflowActionType) => {
-    const newAction: WorkflowAction = {
+    const  newAction: WorkflowAction = {
       type: type || 'send_email',
       config: {},
       order: actions.length + 1,
@@ -234,4 +234,10 @@ export const WorkflowActionsList = ({ actions, onActionsChange }: WorkflowAction
     </div>
   );
 };
+
+
+
+
+
+
 

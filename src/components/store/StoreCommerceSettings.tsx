@@ -61,7 +61,7 @@ const COUNTRIES = [
   { code: 'US', name: 'États-Unis' },
 ];
 
-const TAX_TYPES: { value: TaxType; label: string }[] = [
+const  TAX_TYPES: { value: TaxType; label: string }[] = [
   { value: 'VAT', label: 'TVA (Value Added Tax)' },
   { value: 'GST', label: 'GST (Goods and Services Tax)' },
   { value: 'SALES_TAX', label: 'Taxe sur les ventes' },
@@ -579,4 +579,10 @@ export const StoreCommerceSettings = ({ storeId }: StoreCommerceSettingsProps) =
     </div>
   );
 };
+
+
+
+
+
+
 

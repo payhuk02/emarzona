@@ -44,7 +44,7 @@ interface Feature {
   route?: string;
 }
 
-const ALL_FEATURES: Feature[] = [
+const  ALL_FEATURES: Feature[] = [
   // Commerce
   {
     id: 'affiliation',
@@ -454,7 +454,7 @@ export const FeaturesSection = ({ onChange }: FeaturesSectionProps) => {
         save('features', {
           enabled: enabledFeatures,
           disabled: disabledFeatures,
-        }).catch(error => {
+        }).catch( error => {
           logger.error('Error saving feature customization', { error, featureId, enabled });
         });
 
@@ -584,3 +584,9 @@ export const FeaturesSection = ({ onChange }: FeaturesSectionProps) => {
     </div>
   );
 };
+
+
+
+
+
+

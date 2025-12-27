@@ -137,7 +137,7 @@ class MonerooClient {
         const errorMessage = supabaseError.message || 'Erreur inconnue';
         
         // Logger l'erreur complète pour debugging
-        logger.error('[MonerooClient] Supabase function error:', {
+        logger.error('[MonerooClient] Supabase function  _error:', {
           error,
           errorMessage,
           errorType: typeof error,
@@ -301,3 +301,9 @@ class MonerooClient {
 }
 
 export const monerooClient = new MonerooClient();
+
+
+
+
+
+

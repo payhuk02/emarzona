@@ -151,7 +151,7 @@ export const useCreateDigitalOrder = () => {
       }
 
       // 2. Récupérer ou créer le customer
-      let customerId: string;
+      let  customerId: string;
       
       const { data: existingCustomer } = await supabase
         .from('customers')
@@ -182,7 +182,7 @@ export const useCreateDigitalOrder = () => {
       }
 
       // 3. Générer une licence si nécessaire (AFTER purchase, with correct columns)
-      let licenseId: string | undefined;
+      let  licenseId: string | undefined;
 
       if (generateLicense) {
         // Get authenticated user ID for license
@@ -416,4 +416,10 @@ export const useHasPurchasedDigitalProduct = (
     },
   });
 };
+
+
+
+
+
+
 

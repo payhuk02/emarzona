@@ -122,3 +122,9 @@ export const ProductTypeQuickFilters = React.memo<ProductTypeQuickFiltersProps>(
 );
 
 ProductTypeQuickFilters.displayName = 'ProductTypeQuickFilters';
+
+
+
+
+
+

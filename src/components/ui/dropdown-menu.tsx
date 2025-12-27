@@ -138,7 +138,7 @@ const DropdownMenuContent = React.forwardRef<
       if (isMobileSheet) return;
 
       const menuElement = contentRef.current;
-      let lockedPosition: { top: number; left: number; width: number } | null = null;
+      let  lockedPosition: { top: number; left: number; width: number } | null = null;
 
       // Fonction pour verrouiller la position
       const lockPosition = () => {
@@ -274,7 +274,6 @@ DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
  *
  * @example
  * ```tsx
- * <DropdownMenuItem onSelect={() => console.log('Selected')}>
  *   Option 1
  * </DropdownMenuItem>
  * ```
@@ -409,3 +408,9 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
 };
+
+
+
+
+
+

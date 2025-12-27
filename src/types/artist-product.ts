@@ -171,3 +171,9 @@ export interface ArtistProduct extends ArtistProductFormData {
 }
 
 }
+
+
+
+
+
+

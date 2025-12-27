@@ -11,7 +11,7 @@ interface AnalyticsTrackerProps {
   customEvents?: string[];
 }
 
-export const AnalyticsTracker: React.FC<AnalyticsTrackerProps> = ({
+export const AnalyticsTracker : React.FC<AnalyticsTrackerProps> = ({
   productId,
   enabled = true,
   trackViews = true,
@@ -300,3 +300,10 @@ export const useAnalyticsTracker = () => {
     trackConversion
   };
 };
+
+
+
+
+
+
+

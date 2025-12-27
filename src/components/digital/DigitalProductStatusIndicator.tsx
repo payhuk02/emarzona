@@ -84,7 +84,7 @@ export interface DigitalProductStatusIndicatorProps {
 /**
  * Configuration des statuts avec leurs propriétés visuelles
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   DigitalProductStatus,
   {
     label: string;
@@ -146,7 +146,7 @@ const STATUS_CONFIG: Record<
 /**
  * Configuration des niveaux de protection
  */
-const PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
+const  PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
   basic: { label: 'Basique', color: 'text-gray-600' },
   standard: { label: 'Standard', color: 'text-blue-600' },
   advanced: { label: 'Avancé', color: 'text-green-600' },
@@ -187,7 +187,7 @@ const PROTECTION_LEVELS: Record<string, { label: string; color: string }> = {
  * />
  * ```
  */
-export const DigitalProductStatusIndicator: React.FC<DigitalProductStatusIndicatorProps> = ({
+export const DigitalProductStatusIndicator : React.FC<DigitalProductStatusIndicatorProps> = ({
   status,
   totalDownloads,
   recentDownloads,
@@ -499,4 +499,11 @@ export const DigitalProductStatusIndicator: React.FC<DigitalProductStatusIndicat
 DigitalProductStatusIndicator.displayName = 'DigitalProductStatusIndicator';
 
 export default DigitalProductStatusIndicator;
+
+
+
+
+
+
+
 

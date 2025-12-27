@@ -142,3 +142,8 @@ export default function BatchShipmentDetails({ batchId }: BatchShipmentDetailsPr
   );
 }
 
+
+
+
+
+

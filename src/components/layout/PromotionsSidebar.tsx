@@ -39,7 +39,7 @@ export const PromotionsSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Promotions', path: '/dashboard/promotions' },
     { label: activeSection },
   ];
@@ -73,3 +73,9 @@ export const PromotionsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+

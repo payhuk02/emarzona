@@ -75,7 +75,7 @@ export const DomainMonitoringDashboard = ({
   };
 
   const handleSendTestAlert = async (alert: DomainAlert) => {
-    const testIncident: DomainIncident = {
+    const  testIncident: DomainIncident = {
       id: `test-${Date.now()}`,
       domain,
       type: 'downtime',
@@ -313,3 +313,9 @@ export const DomainMonitoringDashboard = ({
     </div>
   );
 };
+
+
+
+
+
+

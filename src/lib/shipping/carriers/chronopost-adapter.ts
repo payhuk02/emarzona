@@ -72,7 +72,7 @@ export class ChronopostAdapter implements CarrierAdapter {
       return this.simulateTracking(trackingNumber);
     }
 
-    const events: TrackingUpdate[] = [];
+    const  events: TrackingUpdate[] = [];
 
     for (const event of listEvents) {
       events.push({
@@ -103,7 +103,7 @@ export class ChronopostAdapter implements CarrierAdapter {
    */
   private mapChronopostStatus(chronopostCode: string): string {
     // Codes Chronopost (exemples, à adapter selon la vraie documentation)
-    const statusMap: Record<string, string> = {
+    const  statusMap: Record<string, string> = {
       'D1': 'label_created', // Colis déposé
       'D2': 'picked_up', // Colis ramassé
       'D3': 'in_transit', // En transit
@@ -127,4 +127,10 @@ export class ChronopostAdapter implements CarrierAdapter {
     };
   }
 }
+
+
+
+
+
+
 

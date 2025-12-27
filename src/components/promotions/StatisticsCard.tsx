@@ -28,7 +28,7 @@ interface StatisticsCardProps {
   className?: string;
 }
 
-export const StatisticsCard: React.FC<StatisticsCardProps> = ({
+export const StatisticsCard : React.FC<StatisticsCardProps> = ({
   title,
   description,
   statistics,
@@ -180,11 +180,11 @@ export const usePromotionStatistics = (promotions: PromotionForStats[]) => {
 /**
  * Composant pour afficher les statistiques des promotions
  */
-export const PromotionStatistics: React.FC<{ promotions: PromotionForStats[] }> = ({ promotions }) => {
+export const PromotionStatistics : React.FC<{ promotions: PromotionForStats[] }> = ({ promotions }) => {
   const { t } = useTranslation();
   const stats = usePromotionStatistics(promotions);
 
-  const statistics: Statistic[] = [
+  const  statistics: Statistic[] = [
     {
       label: t('promotions.statistics.total', 'Total'),
       value: stats.total,
@@ -216,4 +216,11 @@ export const PromotionStatistics: React.FC<{ promotions: PromotionForStats[] }> 
 
   return <StatisticsCard statistics={statistics} />;
 };
+
+
+
+
+
+
+
 

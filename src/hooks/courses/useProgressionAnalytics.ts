@@ -198,7 +198,7 @@ export const useCourseProgressionSnapshots = (courseId: string | undefined, date
     queryFn: async (): Promise<ProgressionSnapshot[]> => {
       if (!courseId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('course_progression_snapshots')
         .select('*')
         .eq('course_id', courseId);
@@ -282,3 +282,9 @@ export const useCalculateCourseProgressionAnalytics = () => {
     },
   });
 };
+
+
+
+
+
+

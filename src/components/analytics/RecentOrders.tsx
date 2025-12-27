@@ -27,14 +27,14 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    const  variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
       processing: "default",
       completed: "outline",
       cancelled: "destructive",
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: "En attente",
       processing: "En cours",
       completed: "Terminée",
@@ -135,3 +135,9 @@ export const RecentOrders = ({ orders, loading }: RecentOrdersProps) => {
     </Card>
   );
 };
+
+
+
+
+
+

@@ -135,7 +135,7 @@ export const useAdminStats = () => {
         recentUsers: recentUsers.slice(0, 5),
         topStores: topStores.slice(0, 5),
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -152,3 +152,9 @@ export const useAdminStats = () => {
 
   return { stats, loading, refetch: fetchStats };
 };
+
+
+
+
+
+

@@ -150,7 +150,7 @@ export default function Checkout() {
           if (hasMultipleStores) {
             // Grouper les items par boutique (fonction simplifiée pour l'instant)
             const groups = new Map<string, StoreGroup>();
-            const skippedItems: CartItem[] = [];
+            const  skippedItems: CartItem[] = [];
 
             for (const item of items) {
               const product = products.find(p => p.id === item.product_id);
@@ -191,7 +191,7 @@ export default function Checkout() {
             setStoreGroups(new Map());
           }
         }
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error in checkMultiStore:', { error: errorMessage });
       } finally {
@@ -251,7 +251,7 @@ export default function Checkout() {
           });
         }
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
       logger.warn('Error loading coupon from localStorage:', errorObj);
       try {
@@ -294,7 +294,7 @@ export default function Checkout() {
 
   // Charger la carte cadeau depuis localStorage si disponible
   useEffect(() => {
-    let savedGiftCard: string | null = null;
+    let  savedGiftCard: string | null = null;
     try {
       savedGiftCard = localStorage.getItem('applied_gift_card');
     } catch {
@@ -553,13 +553,13 @@ export default function Checkout() {
     appliedGiftCard: { id: string; balance: number; code: string } | null;
     selectedPaymentProvider: 'moneroo';
   }) => {
-    const createdOrders: Array<{
+    const  createdOrders: Array<{
       orderId: string;
       storeId: string;
       orderNumber: string;
       checkoutUrl?: string;
     }> = [];
-    const errors: Array<{ storeId: string; error: string }> = [];
+    const  errors: Array<{ storeId: string; error: string }> = [];
 
     // Récupérer les infos d'affiliation si disponible
     const affiliateInfo = await getAffiliateInfo();
@@ -608,7 +608,7 @@ export default function Checkout() {
           groupGiftCardAmount;
 
         // Créer ou mettre à jour le client pour cette boutique
-        let finalCustomerId: string | null = null;
+        let  finalCustomerId: string | null = null;
         try {
           const { data: existingCustomer } = await supabase
             .from('customers')
@@ -837,7 +837,7 @@ export default function Checkout() {
           orderId: order.id,
           orderNumber,
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(`Error processing checkout for store ${storeId}:`, { error: errorMessage });
         errors.push({ storeId, error: errorMessage });
@@ -885,7 +885,7 @@ export default function Checkout() {
 
   // Validation formulaire améliorée
   const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof ShippingAddress, string>> = {};
+    const  errors: Partial<Record<keyof ShippingAddress, string>> = {};
 
     if (!formData.full_name.trim()) {
       errors.full_name = 'Le nom complet est requis';
@@ -1058,7 +1058,7 @@ export default function Checkout() {
       }
 
       // 🆕 Créer ou mettre à jour le client dans la table customers
-      let finalCustomerId: string | null = null;
+      let  finalCustomerId: string | null = null;
       try {
         // Vérifier si le client existe déjà
         const { data: existingCustomer } = await supabase
@@ -1187,7 +1187,7 @@ export default function Checkout() {
       if (appliedCouponCode && appliedCouponCode.id && couponDiscount > 0) {
         try {
           // Récupérer le customer_id si pas encore chargé
-          let finalCustomerId = customerId;
+          let  finalCustomerId= customerId;
           if (!finalCustomerId && user?.email && storeId) {
             const { data: customer } = await supabase
               .from('customers')
@@ -1233,7 +1233,7 @@ export default function Checkout() {
                   error: rpcError,
                 });
               }
-            } catch (err: unknown) {
+            } catch ( _err: unknown) {
               const errorMessage = err instanceof Error ? err.message : String(err);
               logger.warn('Error incrementing promotion usage counter:', { error: errorMessage });
             }
@@ -1346,7 +1346,7 @@ export default function Checkout() {
           logger.warn('Failed to mark cart as recovered', { error: recoveryError });
           // Ne pas bloquer le processus si l'erreur survient
         }
-      } catch (recoveryError: unknown) {
+      } catch ( _recoveryError: unknown) {
         const errorMessage =
           recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
         logger.warn('Error marking cart as recovered', { error: errorMessage });
@@ -1361,7 +1361,7 @@ export default function Checkout() {
           variant: 'destructive',
         });
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de finaliser la commande';
       logger.error('Erreur lors du checkout:', { error: errorMessage });
@@ -2146,3 +2146,9 @@ export default function Checkout() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

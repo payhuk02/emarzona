@@ -96,15 +96,15 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
     setUploadProgress(0);
 
     try {
-      const uploadedFiles: FileItem[] = [];
+      const  uploadedFiles: FileItem[] = [];
       
-      for (let i = 0; i < fileArray.length; i++) {
+      for (let  i= 0; i < fileArray.length; i++) {
         const file = fileArray[i];
         const url = await uploadFile(file);
         
         setUploadProgress(((i + 1) / fileArray.length) * 100);
         
-        const fileItem: FileItem = {
+        const  fileItem: FileItem = {
           id: `${Date.now()}-${i}`,
           name: file.name,
           url,
@@ -128,7 +128,7 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
         description: `${fileArray.length} fichier(s) téléchargé(s) avec succès.`,
       });
 
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Upload error', { error, productId });
       toast({
         title: "Erreur de téléchargement",
@@ -525,3 +525,9 @@ export const ProductFilesTab = ({ formData, updateFormData, storeId }: ProductFi
     </div>
   );
 };
+
+
+
+
+
+

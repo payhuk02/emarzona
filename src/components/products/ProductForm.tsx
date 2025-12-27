@@ -372,7 +372,7 @@ export const ProductForm = ({
   };
 
   // Mapping des champs vers les onglets
-  const fieldToTab: Record<string, string> = {
+  const  fieldToTab: Record<string, string> = {
     name: 'info',
     slug: 'info',
     category: 'info',
@@ -405,7 +405,7 @@ export const ProductForm = ({
 
   // Calculer les erreurs par onglet (optimisé avec useMemo)
   const tabErrors = useMemo((): Record<string, number> => {
-    const errors: Record<string, number> = {};
+    const  errors: Record<string, number> = {};
     Object.keys(validationErrors).forEach(field => {
       const tab = fieldToTab[field] || 'info';
       errors[tab] = (errors[tab] || 0) + 1;
@@ -415,7 +415,7 @@ export const ProductForm = ({
 
   // Validation des champs requis
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const  errors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       errors.name = 'Le nom du produit est requis';
@@ -487,7 +487,7 @@ export const ProductForm = ({
         updated_at: new Date().toISOString(),
       };
 
-      let result;
+      let  _result;
       if (productId) {
         // Mise à jour
         const { data, error } = await supabase
@@ -510,7 +510,7 @@ export const ProductForm = ({
               price: result.price,
               currency: result.currency,
               updated_at: result.updated_at,
-            }).catch(err => {
+            }).catch( err => {
               logger.error('Error triggering webhook', { error: err, productId: result.id });
             });
           });
@@ -960,3 +960,9 @@ export const ProductForm = ({
     </div>
   );
 };
+
+
+
+
+
+

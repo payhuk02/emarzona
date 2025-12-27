@@ -170,7 +170,7 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
       if (files.length === 0) return;
 
       // Validation
-      const validFiles: File[] = [];
+      const  validFiles: File[] = [];
 
       for (const file of files) {
         // Vérifier le type
@@ -242,3 +242,9 @@ export function useDragAndDrop(options: UseDragAndDropOptions): UseDragAndDropRe
     reset,
   };
 }
+
+
+
+
+
+

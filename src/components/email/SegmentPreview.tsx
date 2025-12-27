@@ -239,3 +239,9 @@ export const SegmentPreview = ({ segment, onClose }: SegmentPreviewProps) => {
   );
 };
 
+
+
+
+
+
+

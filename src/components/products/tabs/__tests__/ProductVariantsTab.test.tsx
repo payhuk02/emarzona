@@ -10,7 +10,7 @@ const renderWithTooltip = (ui: React.ReactElement) => {
 };
 
 describe('ProductVariantsTab', () => {
-  const mockVariant: ProductVariant = {
+  const  mockVariant: ProductVariant = {
     id: '1',
     name: 'Rouge - Taille L',
     sku: 'PROD-RED-L',
@@ -303,4 +303,10 @@ describe('ProductVariantsTab', () => {
     ]);
   });
 });
+
+
+
+
+
+
 

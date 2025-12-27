@@ -162,7 +162,7 @@ export default function CouponsManagement() {
 
   // Filtrer les promotions
   const filteredPromotions = useMemo(() => {
-    let filtered = promotions;
+    let  filtered= promotions;
 
     // Filtre par statut
     if (statusFilter !== 'all') {
@@ -226,7 +226,7 @@ export default function CouponsManagement() {
         title: '✅ Coupon supprimé',
         description: 'Le coupon a été supprimé avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -268,7 +268,7 @@ export default function CouponsManagement() {
   };
 
   const getDiscountTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       percentage: 'Pourcentage',
       fixed_amount: 'Montant fixe',
       buy_x_get_y: 'Acheter X obtenir Y',
@@ -778,3 +778,9 @@ export default function CouponsManagement() {
     </MainLayout>
   );
 }
+
+
+
+
+
+

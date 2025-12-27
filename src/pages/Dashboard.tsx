@@ -117,7 +117,7 @@ const Dashboard = () => {
       logger.info('Actualisation du dashboard...', {});
       await refetch();
       logger.info('Dashboard actualisé avec succès', {});
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       const error =
         err instanceof Error ? err : new Error("Erreur lors de l'actualisation du dashboard");
@@ -938,3 +938,9 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+

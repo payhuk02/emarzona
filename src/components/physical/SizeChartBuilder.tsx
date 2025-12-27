@@ -144,7 +144,7 @@ export function SizeChartBuilder({
   const handleAddMeasurement = () => {
     if (!newMeasurementLabel.trim()) return;
 
-    const newMeasurement: SizeChartMeasurement = {
+    const  newMeasurement: SizeChartMeasurement = {
       label: newMeasurementLabel.trim(),
       unit: 'cm',
       values: {},
@@ -240,7 +240,7 @@ export function SizeChartBuilder({
       return;
     }
 
-    const finalChart: SizeChart = {
+    const  finalChart: SizeChart = {
       id: chart.id || `chart_${Date.now()}`,
       name: chart.name,
       system: chart.system || 'universal',
@@ -570,4 +570,10 @@ export function SizeChartBuilder({
     </div>
   );
 }
+
+
+
+
+
+
 

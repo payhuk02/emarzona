@@ -134,9 +134,9 @@ export const ImageUpload = ({
 
     // Optimiser les images d'abord
     setOptimizing(true);
-    let totalOriginalSize = 0;
-    let totalOptimizedSize = 0;
-    const optimizedFiles: File[] = [];
+    let  totalOriginalSize= 0;
+    let  totalOptimizedSize= 0;
+    const  optimizedFiles: File[] = [];
 
     try {
       for (const file of fileArray) {
@@ -158,9 +158,9 @@ export const ImageUpload = ({
       setUploadProgress(0);
 
       // Uploader les fichiers optimisés
-      const uploadedUrls: string[] = [];
+      const  uploadedUrls: string[] = [];
       
-      for (let i = 0; i < optimizedFiles.length; i++) {
+      for (let  i= 0; i < optimizedFiles.length; i++) {
         const file = optimizedFiles[i];
         const url = await uploadFile(file);
         uploadedUrls.push(url);
@@ -169,7 +169,7 @@ export const ImageUpload = ({
         setUploadProgress(((i + 1) / optimizedFiles.length) * 100);
         
         // Ajouter à la prévisualisation
-        const uploadedFile: UploadedFile = {
+        const  uploadedFile: UploadedFile = {
           id: `${Date.now()}-${i}`,
           name: file.name,
           url,
@@ -195,7 +195,7 @@ export const ImageUpload = ({
         duration: 5000,
       });
 
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Upload error', { error: errorMessage, fileCount: fileArray.length });
       toast({
@@ -491,3 +491,9 @@ export const ImageUpload = ({
     </div>
   );
 };
+
+
+
+
+
+

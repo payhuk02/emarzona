@@ -221,3 +221,9 @@ export function StockBadge({ quantity, lowStockThreshold = 10, className }: Stoc
     </Badge>
   );
 }
+
+
+
+
+
+

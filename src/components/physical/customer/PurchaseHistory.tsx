@@ -71,7 +71,7 @@ export const PurchaseHistory = () => {
 
       if (!customer) throw new Error('Client non trouvé');
 
-      let query = supabase
+      let  query= supabase
         .from('orders')
         .select(`
           *,
@@ -99,7 +99,7 @@ export const PurchaseHistory = () => {
       // Filtrer par date
       if (dateFilter !== 'all') {
         const now = new Date();
-        let startDate: Date;
+        let  startDate: Date;
 
         switch (dateFilter) {
           case 'week':
@@ -166,7 +166,7 @@ export const PurchaseHistory = () => {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       confirmed: 'default',
@@ -176,7 +176,7 @@ export const PurchaseHistory = () => {
       cancelled: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En traitement',
       confirmed: 'Confirmée',
@@ -380,4 +380,10 @@ export const PurchaseHistory = () => {
     </div>
   );
 };
+
+
+
+
+
+
 

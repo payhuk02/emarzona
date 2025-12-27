@@ -38,7 +38,7 @@ export const DownloadsTab = () => {
       } else {
         throw new Error('URL de téléchargement non disponible');
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error generating download link', { error, fileId });
       toast({
         title: '❌ Erreur',
@@ -154,4 +154,10 @@ export const DownloadsTab = () => {
     </div>
   );
 };
+
+
+
+
+
+
 

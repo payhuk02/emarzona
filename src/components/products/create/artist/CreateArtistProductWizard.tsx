@@ -126,7 +126,7 @@ const CreateArtistProductWizardComponent = ({
   const { toast } = useToast();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
-  const storeSlug = _storeSlug || hookStore?.slug;
+  const storeSlugValue = storeSlug || hookStore?.slug;
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -441,8 +441,8 @@ const CreateArtistProductWizardComponent = ({
       const sanitizedData = validateAndSanitizeArtistProduct(formData);
 
       // Generate slug (après sanitization, AVANT validation serveur)
-      let slug = generateSlug(sanitizedData.artwork_title || sanitizedData.name || 'artwork');
-      let attempts = 0;
+      let  slug= generateSlug(sanitizedData.artwork_title || sanitizedData.name || 'artwork');
+      let  attempts= 0;
       while (attempts < 10) {
         const { data: existing } = await supabase
           .from('products')
@@ -481,7 +481,7 @@ const CreateArtistProductWizardComponent = ({
 
       // Create product (utiliser données sanitizées)
       // Préparer les données d'insertion (exclure les colonnes qui pourraient ne pas exister)
-      const productData: Record<string, unknown> = {
+      const  productData: Record<string, unknown> = {
         store_id: store.id,
         name: sanitizedData.artwork_title || sanitizedData.name,
         slug,
@@ -611,7 +611,7 @@ const CreateArtistProductWizardComponent = ({
             price: product.price,
             currency: product.currency,
             created_at: product.created_at,
-          }).catch(err => {
+          }).catch( err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
         });
@@ -1008,3 +1008,9 @@ const CreateArtistProductWizardComponent = ({
 
 // Optimisation avec React.memo
 export const CreateArtistProductWizard = React.memo(CreateArtistProductWizardComponent);
+
+
+
+
+
+

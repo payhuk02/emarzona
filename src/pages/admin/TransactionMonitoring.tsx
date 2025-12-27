@@ -58,7 +58,7 @@ export default function TransactionMonitoring() {
         .select('status, amount');
 
       if (transactions) {
-        const statsData: TransactionStats = {
+        const  statsData: TransactionStats = {
           total: transactions.length,
           completed: transactions.filter(t => t.status === 'completed').length,
           failed: transactions.filter(t => t.status === 'failed').length,
@@ -411,4 +411,10 @@ export default function TransactionMonitoring() {
     </AdminLayout>
   );
 }
+
+
+
+
+
+
 

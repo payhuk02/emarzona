@@ -86,7 +86,7 @@ const Auth = () => {
   // Calculate password strength
   const calculatePasswordStrength = (password: string): number => {
     if (!password) return 0;
-    let strength = 0;
+    let  strength= 0;
     if (password.length >= 6) strength += 1;
     if (password.length >= 8) strength += 1;
     if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
@@ -131,7 +131,7 @@ const Auth = () => {
           `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`
         ),
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Reset password error', {
         error: errorMessage,
@@ -214,7 +214,7 @@ const Auth = () => {
                 referredId: data.user.id,
               });
             }
-          } catch (referralError: unknown) {
+          } catch ( _referralError: unknown) {
             // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
             const referralErrorMessage =
               referralError instanceof Error ? referralError.message : String(referralError);
@@ -231,7 +231,7 @@ const Auth = () => {
         });
         navigate('/dashboard');
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Signup error', {
         error: errorMessage,
@@ -272,7 +272,7 @@ const Auth = () => {
         });
         navigate('/dashboard');
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Login error', {
         error: errorMessage,
@@ -696,3 +696,9 @@ const Auth = () => {
 };
 
 export default Auth;
+
+
+
+
+
+

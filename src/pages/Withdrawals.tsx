@@ -48,7 +48,7 @@ const Withdrawals = () => {
 
   // Appliquer les filtres avancés
   const filteredWithdrawals = useMemo(() => {
-    let filtered = [...withdrawals];
+    let  filtered= [...withdrawals];
 
     if (advancedFilters.search) {
       const query = advancedFilters.search.toLowerCase();
@@ -88,7 +88,7 @@ const Withdrawals = () => {
 
   const handleQuickFilter = useCallback((period: 'week' | 'month' | 'year' | 'all') => {
     const now = new Date();
-    let dateFrom: Date | undefined;
+    let  dateFrom: Date | undefined;
 
     switch (period) {
       case 'week':
@@ -238,4 +238,10 @@ const Withdrawals = () => {
 };
 
 export default Withdrawals;
+
+
+
+
+
+
 

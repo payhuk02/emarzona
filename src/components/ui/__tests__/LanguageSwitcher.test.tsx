@@ -25,7 +25,7 @@ vi.mock('@/hooks/use-mobile', () => ({
 
 // Mock de localStorage
 const localStorageMock = (() => {
-  let store: Record<string, string> = {};
+  let  store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
     setItem: (key: string, value: string) => {
@@ -187,7 +187,7 @@ describe('LanguageSwitcher', () => {
       <LanguageSwitcher variant="default" />
     );
     
-    let button = screen.getByRole('button', { name: /change language/i });
+    let  button= screen.getByRole('button', { name: /change language/i });
     expect(button).toBeInTheDocument();
     
     rerender(
@@ -243,4 +243,10 @@ describe('LanguageSwitcher', () => {
     });
   });
 });
+
+
+
+
+
+
 

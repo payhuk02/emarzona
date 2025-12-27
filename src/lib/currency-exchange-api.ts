@@ -21,7 +21,7 @@ interface CachedRates {
 
 // Cache en mémoire (durée de vie : 1 heure)
 const CACHE_DURATION = 60 * 60 * 1000; // 1 heure en millisecondes
-let cachedRates: CachedRates | null = null;
+let  cachedRates: CachedRates | null = null;
 
 /**
  * Récupère les taux de change depuis ExchangeRate-API
@@ -60,14 +60,14 @@ export async function fetchExchangeRates(
       throw new Error(`API returned ${response.status}: ${response.statusText}`);
     }
 
-    const data: ExchangeRateResponse = await response.json();
+    const  data: ExchangeRateResponse = await response.json();
 
     if (!data.rates || typeof data.rates !== 'object') {
       throw new Error('Invalid API response format');
     }
 
     // Convertir les taux en format attendu
-    const rates: Record<string, number> = {
+    const  rates: Record<string, number> = {
       ...data.rates,
       // Ajouter le taux de base (1:1)
       [baseCurrency]: 1,
@@ -87,7 +87,7 @@ export async function fetchExchangeRates(
     });
 
     return rates;
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Failed to fetch exchange rates from API', {
       error: error.message,
       baseCurrency,
@@ -113,7 +113,7 @@ export function convertRatesToXOF(
   const eurToXofRate = 1 / xofToEurRate; // ~655.957 XOF pour 1 EUR
   
   // Taux de base : 1 XOF = 1 XOF
-  const baseRates: Record<string, number> = {
+  const  baseRates: Record<string, number> = {
     XOF: 1,
   };
 
@@ -132,9 +132,9 @@ export function convertRatesToXOF(
   }
 
   // Générer tous les taux de conversion entre les devises supportées
-  const supportedCurrencies: Currency[] = ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'];
+  const  supportedCurrencies: Currency[] = ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'];
   
-  const conversionRates: Record<string, number> = {};
+  const  conversionRates: Record<string, number> = {};
   
   for (const from of supportedCurrencies) {
     for (const to of supportedCurrencies) {
@@ -178,7 +178,7 @@ export async function updateExchangeRates(): Promise<Record<string, number> | nu
     const xofRates = convertRatesToXOF(eurRates);
     
     return xofRates;
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error updating exchange rates', { error: error.message });
     return null;
   }
@@ -235,4 +235,10 @@ export function getCacheInfo(): { cached: boolean; age?: number; base?: string }
     base: cachedRates.base,
   };
 }
+
+
+
+
+
+
 

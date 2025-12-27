@@ -368,3 +368,9 @@ export function useFilteredProducts(options: FilteredProductsOptions) {
       return { data: [], isLoading: false, isError: false, error: null };
   }
 }
+
+
+
+
+
+

@@ -62,13 +62,13 @@ const PaymentMethods = () => {
   const getPaymentMethodIcon = (method: StorePaymentMethod) => {
     switch (method) {
       case 'mobile_money':
-        return <Wallet className="h-full w-full" />;
+        return <Wallet  className ="h-full w-full" />;
       case 'bank_card':
         return <CreditCard className="h-full w-full" />;
       case 'bank_transfer':
         return <Building2 className="h-full w-full" />;
       default:
-        return <Wallet className="h-full w-full" />;
+        return <Wallet  className ="h-full w-full" />;
     }
   };
 
@@ -187,7 +187,7 @@ const PaymentMethods = () => {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
               <CardContent className="pt-6 sm:pt-8 md:pt-12">
                 <div className="text-center py-8 sm:py-12 text-muted-foreground">
-                  <Wallet className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 opacity-20 animate-in zoom-in-95 duration-500" />
+                  <Wallet  className ="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 opacity-20 animate-in zoom-in-95 duration-500" />
                   <p className="text-xs sm:text-sm md:text-base lg:text-lg font-medium mb-1.5 sm:mb-2">Aucune méthode de paiement</p>
                   <p className="text-[10px] sm:text-xs md:text-sm mb-3 sm:mb-4">
                     Ajoutez vos numéros de mobile money ou cartes bancaires pour faciliter vos retraits
@@ -307,4 +307,10 @@ const PaymentMethods = () => {
 };
 
 export default PaymentMethods;
+
+
+
+
+
+
 

@@ -93,12 +93,36 @@ const generateFileName = (userId: string, type: ImageType, originalName: string)
 };
 
 /**
- * Compresse une image (optionnel, pour optimisation future)
+ * Compresse une image avec browser-image-compression
+ * Réduit la taille du fichier pour améliorer les performances
  */
 const compressImage = async (file: File): Promise<File> => {
-  // TODO: Implémenter la compression avec canvas ou une librairie
-  // Pour l'instant, on retourne le fichier tel quel
-  return file;
+  // Ne pas compresser si le fichier est déjà petit (< 500KB)
+  if (file.size < 500 * 1024) {
+    return file;
+  }
+
+  try {
+    // Importer dynamiquement pour réduire le bundle initial
+    const imageCompression = (await import('browser-image-compression')).default;
+    
+    const options = {
+      maxSizeMB: 1, // Taille maximale 1MB
+      maxWidthOrHeight: 1920, // Largeur/hauteur maximale
+      useWebWorker: true, // Utiliser Web Worker pour ne pas bloquer le thread principal
+      fileType: file.type, // Conserver le type de fichier original
+    };
+
+    const compressedFile = await imageCompression(file, options);
+    return compressedFile;
+  } catch (error) {
+    // En cas d'erreur, retourner le fichier original
+    // Importer logger dynamiquement pour ne pas bloquer le bundle initial
+    import('@/lib/logger').then(({ logger }) => {
+      logger.warn('Erreur lors de la compression de l\'image', { error });
+    });
+    return file;
+  }
 };
 
 /**
@@ -123,7 +147,7 @@ export const uploadImage = async ({
     }
 
     // 2. Compression (optionnel)
-    let fileToUpload = file;
+    let  fileToUpload= file;
     if (compress) {
       fileToUpload = await compressImage(file);
     }
@@ -154,7 +178,7 @@ export const uploadImage = async ({
       success: true,
       url: urlData.publicUrl,
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : 'Une erreur inattendue est survenue';
     logger.error('Unexpected image upload error', { error, fileName, type, userId });
@@ -222,7 +246,7 @@ export const replaceImage = async (
     }
 
     return uploadResult;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Erreur lors du remplacement de l'image";
     return {
@@ -256,7 +280,7 @@ export const checkStorageBucket = async (): Promise<{ exists: boolean; error?: s
     }
 
     return { exists: true };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur de connexion au Storage';
     return {
       exists: false,
@@ -264,3 +288,9 @@ export const checkStorageBucket = async (): Promise<{ exists: boolean; error?: s
     };
   }
 };
+
+
+
+
+
+

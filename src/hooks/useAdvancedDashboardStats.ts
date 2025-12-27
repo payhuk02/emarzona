@@ -211,7 +211,7 @@ export const useAdvancedDashboardStats = () => {
         price: number;
         image_url?: string | null;
       }
-      let topProducts: TopProductData[] = [];
+      let  topProducts: TopProductData[] = [];
       if (topProductIds.length > 0) {
         const { data: topProductsData, error: topProductsError } = await supabase
           .from("products")
@@ -375,7 +375,7 @@ export const useAdvancedDashboardStats = () => {
 
       logger.info('Advanced dashboard stats loaded successfully');
 
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching advanced dashboard stats:', error);
       toast({
@@ -398,3 +398,9 @@ export const useAdvancedDashboardStats = () => {
     refetch: fetchAdvancedStats 
   };
 };
+
+
+
+
+
+

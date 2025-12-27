@@ -45,7 +45,7 @@ interface ArtistFormFieldProps {
   validateOnChange?: boolean; // ✅ Nouvelle prop : désactive la validation en temps réel si false
 }
 
-export const ArtistFormField: React.FC<ArtistFormFieldProps> = ({
+export const ArtistFormField : React.FC<ArtistFormFieldProps> = ({
   id,
   label,
   value,
@@ -97,7 +97,6 @@ export const ArtistFormField: React.FC<ArtistFormFieldProps> = ({
     if (newValue !== localValue) {
       setLocalValue(newValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]); // Note: on ne met pas localValue dans les dépendances pour éviter les boucles
 
   // ✅ Validation en temps réel désactivée par défaut - validation uniquement au clic sur "Suivant"
@@ -272,3 +271,10 @@ export const ArtistFormField: React.FC<ArtistFormFieldProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

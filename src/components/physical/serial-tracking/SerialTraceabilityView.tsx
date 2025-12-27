@@ -139,3 +139,9 @@ export function SerialTraceabilityView({ serialNumberId }: SerialTraceabilityVie
   );
 }
 
+
+
+
+
+
+

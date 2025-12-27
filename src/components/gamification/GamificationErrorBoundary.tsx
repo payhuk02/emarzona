@@ -40,7 +40,7 @@ export class GamificationErrorBoundary extends Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch( _error: Error, errorInfo: React.ErrorInfo): void {
     // Log avec logger
     if (process.env.NODE_ENV === 'development') {
       logger.error('Gamification Error', { error, errorInfo });
@@ -108,4 +108,10 @@ export class GamificationErrorBoundary extends Component<
     return this.props.children;
   }
 }
+
+
+
+
+
+
 

@@ -121,10 +121,10 @@ export const RichTextEditor = ({
     const cols = prompt('Nombre de colonnes:', '3');
 
     if (rows && cols) {
-      let table = '<table border="1" style="border-collapse: collapse; width: 100%;">';
-      for (let i = 0; i < parseInt(rows); i++) {
+      let  table= '<table border="1" style="border-collapse: collapse; width: 100%;">';
+      for (let  i= 0; i < parseInt(rows); i++) {
         table += '<tr>';
-        for (let j = 0; j < parseInt(cols); j++) {
+        for (let  j= 0; j < parseInt(cols); j++) {
           table += '<td style="padding: 8px;">Cellule</td>';
         }
         table += '</tr>';
@@ -360,3 +360,9 @@ export const RichTextEditor = ({
     </Card>
   );
 };
+
+
+
+
+
+

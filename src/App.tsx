@@ -177,7 +177,7 @@ const Auth = lazy(() => import('./pages/Auth'));
 const Dashboard = lazy(() =>
   import('./pages/Dashboard')
     .then(m => ({ default: m.default }))
-    .catch(error => {
+    .catch( error => {
       logger.error('Erreur lors du chargement du Dashboard', { error });
       // Retourner un composant de fallback en cas d'erreur
       return {
@@ -200,7 +200,7 @@ const Dashboard = lazy(() =>
     })
 );
 const Products = lazy(() =>
-  import('./pages/Products').catch(error => {
+  import('./pages/Products').catch( error => {
     logger.error('Erreur lors du chargement de Products:', error);
     // Retourner un composant de fallback en cas d'erreur
     return {
@@ -628,6 +628,8 @@ const AppContent = () => {
               {/* --- Routes publiques --- */}
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Navigate to="/auth" replace />} />
+              <Route path="/auth/login" element={<Navigate to="/auth" replace />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/cart" element={<CartEnhanced />} />
@@ -2284,3 +2286,9 @@ const App = () => (
 );
 
 export default App;
+
+
+
+
+
+

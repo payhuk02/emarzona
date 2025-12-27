@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch( _error: Error, errorInfo: ErrorInfo) {
     // Logger l'erreur
     const normalized = logError(error, {
       componentStack: errorInfo.componentStack,
@@ -181,4 +181,10 @@ export function useErrorHandler() {
     });
   };
 }
+
+
+
+
+
+
 

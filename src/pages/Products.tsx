@@ -257,7 +257,7 @@ const Products = () => {
           title: 'Produit supprimé',
           description: 'Le produit a été supprimé avec succès',
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(error instanceof Error ? error : 'Erreur lors de la suppression du produit', {
           error,
@@ -284,7 +284,7 @@ const Products = () => {
           title: 'Produits supprimés',
           description: `${productIds.length} produit(s) supprimé(s) avec succès`,
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(error instanceof Error ? error : 'Erreur lors de la suppression en lot', {
           error,
@@ -313,7 +313,7 @@ const Products = () => {
           title: 'Action appliquée',
           description: `${productIds.length} produit(s) ${action === 'activate' ? 'activé(s)' : 'désactivé(s)'}`,
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(error instanceof Error ? error : `Erreur lors de l'action en lot ${action}`, {
           error,
@@ -350,7 +350,7 @@ const Products = () => {
             title: product.is_active ? 'Produit désactivé' : 'Produit activé',
             description: `Le produit a été ${product.is_active ? 'désactivé' : 'activé'} avec succès`,
           });
-        } catch (error: unknown) {
+        } catch ( _error: unknown) {
           const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
           logger.error(error instanceof Error ? error : 'Erreur lors du changement de statut', {
             error,
@@ -519,10 +519,10 @@ const Products = () => {
       ];
 
       // OPTIMISATION: Éviter .map().map() en utilisant une seule boucle
-      const csvRows: string[] = [headers.join(',')];
+      const  csvRows: string[] = [headers.join(',')];
 
       for (const product of filteredProducts) {
-        const row: string[] = [];
+        const  row: string[] = [];
         for (const header of headers) {
           const value = product[header as keyof Product];
           // Échapper les virgules et guillemets
@@ -557,7 +557,7 @@ const Products = () => {
           count: filteredProducts.length,
         }),
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error(error instanceof Error ? error : "Erreur lors de l'export CSV", {
         error,
@@ -1089,7 +1089,7 @@ const Products = () => {
 
                           <div className="flex items-center gap-1 px-1 sm:px-2">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                              let pageNumber;
+                              let  _pageNumber;
                               if (totalPages <= 5) {
                                 pageNumber = i + 1;
                               } else if (currentPage <= 3) {
@@ -1317,3 +1317,9 @@ const Products = () => {
 };
 
 export default Products;
+
+
+
+
+
+

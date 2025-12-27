@@ -64,7 +64,7 @@ export default function DigitalProductVersionsManagement() {
         title: 'Version supprimée',
         description: 'La version a été supprimée avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -329,4 +329,10 @@ export default function DigitalProductVersionsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

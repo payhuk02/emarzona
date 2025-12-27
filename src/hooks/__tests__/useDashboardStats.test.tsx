@@ -38,7 +38,7 @@ vi.mock('@/hooks/use-store', () => ({
 }));
 
 describe('useDashboardStats', () => {
-  let queryClient: QueryClient;
+  let  queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -86,4 +86,10 @@ describe('useDashboardStats', () => {
     }, { timeout: 3000 });
   });
 });
+
+
+
+
+
+
 

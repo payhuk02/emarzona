@@ -41,7 +41,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
     }
 
     try {
-      let query = supabase
+      let  query= supabase
         .from("transactions")
         .select("*")
         .eq("store_id", storeId)
@@ -55,7 +55,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
 
       if (error) throw error;
       setTransactions(data || []);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error("Error fetching transactions:", error);
       toast({
         title: "Erreur",
@@ -79,7 +79,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
       
       await fetchTransactions();
       return data && data.length > 0 ? data[0] : null;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -102,7 +102,7 @@ export const useTransactions = (storeId?: string, status?: string) => {
       
       await fetchTransactions();
       return data && data.length > 0 ? data[0] : null;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -145,3 +145,9 @@ export const useTransactions = (storeId?: string, status?: string) => {
     updateTransaction
   };
 };
+
+
+
+
+
+

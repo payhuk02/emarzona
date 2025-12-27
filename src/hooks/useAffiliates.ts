@@ -31,7 +31,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
       setLoading(true);
       
       // Compter le total pour la pagination
-      let countQuery = supabase
+      let  countQuery= supabase
         .from('affiliates')
         .select('*', { count: 'exact', head: true });
 
@@ -67,7 +67,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
       const from = (currentPage - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
+      let  query= supabase
         .from('affiliates')
         .select('*')
         .order('created_at', { ascending: false })
@@ -106,7 +106,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
 
       setAffiliates(data || []);
       setPage(currentPage);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching affiliates:', affiliateError);
       toast({
@@ -165,7 +165,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
 
       await fetchAffiliates();
       return data;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error registering affiliate:', affiliateError);
       toast({
@@ -199,7 +199,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
 
       await fetchAffiliates(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error updating affiliate:', affiliateError);
       toast({
@@ -241,7 +241,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
 
       await fetchAffiliates(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error suspending affiliate:', affiliateError);
       toast({
@@ -279,7 +279,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
 
       await fetchAffiliates(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error activating affiliate:', affiliateError);
       toast({
@@ -323,7 +323,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
         ? affiliate.total_commission_earned / affiliate.total_sales 
         : 0;
 
-      const stats: AffiliateStats = {
+      const  stats: AffiliateStats = {
         total_clicks: affiliate.total_clicks,
         total_sales: affiliate.total_sales,
         total_revenue: affiliate.total_revenue,
@@ -337,7 +337,7 @@ export const useAffiliates = (filters?: AffiliateFilters, pagination?: Paginatio
       };
 
       return stats;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error getting affiliate stats:', affiliateError);
       toast({
@@ -454,7 +454,7 @@ export const useCurrentAffiliate = () => {
       }
 
       setAffiliate(data || null);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error fetching current affiliate:', {
         error,
         message: error?.message,
@@ -491,4 +491,10 @@ export const useCurrentAffiliate = () => {
     refetch: fetchCurrentAffiliate,
   };
 };
+
+
+
+
+
+
 

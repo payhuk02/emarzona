@@ -147,9 +147,9 @@ export async function retryWithBackoff<T>(
     shouldRetry,
   } = config;
 
-  let lastError: Error | null = null;
+  let  lastError: Error | null = null;
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  for (let  attempt= 0; attempt <= maxRetries; attempt++) {
     try {
       const result = await fn();
       
@@ -163,7 +163,7 @@ export async function retryWithBackoff<T>(
       }
 
       return result;
-    } catch (error: any) {
+    } catch ( _error: any) {
       lastError = error;
 
       // Vérifier si on doit retry
@@ -340,4 +340,10 @@ export async function executeWithResilience<T>(
   // Sinon, juste retry
   return retryWithBackoff(fn, retryConfig);
 }
+
+
+
+
+
+
 

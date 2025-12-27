@@ -227,7 +227,7 @@ export const RichTextEditorPro = ({
       if (existingButton) return;
 
       // Vérifier si l'image est déjà dans un conteneur avec la classe editor-image-wrapper
-      let container = img.parentElement;
+      let  container= img.parentElement;
       if (!container || !container.classList.contains('editor-image-wrapper')) {
         // Créer un nouveau conteneur si nécessaire
         container = document.createElement('div');
@@ -402,7 +402,7 @@ export const RichTextEditorPro = ({
 
   const updateContent = () => {
     if (editorRef.current) {
-      let html = editorRef.current.innerHTML;
+      let  html= editorRef.current.innerHTML;
       // Nettoyer les couleurs blanches lors de la mise à jour
       html = cleanWhiteColors(html);
       // Appliquer le HTML nettoyé si nécessaire
@@ -426,13 +426,12 @@ export const RichTextEditorPro = ({
    */
   const getPlainText = (element: HTMLElement): string => {
     // innerText ignore automatiquement les balises HTML et le texte caché
-    let text = element.innerText || element.textContent || '';
+    let  text= element.innerText || element.textContent || '';
 
     // Normaliser les espaces multiples et les retours à la ligne
     text = text.replace(/\s+/g, ' ').trim();
 
     // Supprimer les caractères de contrôle (sauf espaces et retours à la ligne)
-    // eslint-disable-next-line no-control-regex
     text = text.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
 
     return text;
@@ -583,8 +582,8 @@ export const RichTextEditorPro = ({
 
       // Vérifier que l'éditeur est disponible avant d'insérer
       // Essayer plusieurs fois avec des délais croissants
-      let editorAvailable = false;
-      for (let attempt = 0; attempt < 5; attempt++) {
+      let  editorAvailable= false;
+      for (let  attempt= 0; attempt < 5; attempt++) {
         if (editorRef.current) {
           editorAvailable = true;
           break;
@@ -678,7 +677,7 @@ export const RichTextEditorPro = ({
 
     // Obtenir la sélection actuelle
     const selection = window.getSelection();
-    let range: Range | null = null;
+    let  range: Range | null = null;
 
     if (selection && selection.rangeCount > 0) {
       range = selection.getRangeAt(0);
@@ -990,7 +989,7 @@ export const RichTextEditorPro = ({
             `img[data-editor-image="true"][src="${url}"]`
           );
           if (images && images.length > 1) {
-            for (let i = 1; i < images.length; i++) {
+            for (let  i= 1; i < images.length; i++) {
               const imgToRemove = images[i];
               const parentContainer = imgToRemove.closest('div[data-image-container="true"]');
               if (parentContainer) {
@@ -1011,7 +1010,7 @@ export const RichTextEditorPro = ({
         }
 
         // Nettoyer tous les parents du conteneur
-        let parent = container;
+        let  parent= container;
         while (parent && parent !== editorRef.current) {
           const computedStyle = window.getComputedStyle(parent);
           if (
@@ -1176,13 +1175,13 @@ export const RichTextEditorPro = ({
     const url = prompt("Entrez l'URL de la vidéo (YouTube ou Vimeo):", 'https://');
     if (!url || !url.trim()) return;
 
-    let embedUrl: string | null = null;
+    let  embedUrl: string | null = null;
     const trimmedUrl = url.trim();
 
     try {
       // Convertir URL YouTube
       if (trimmedUrl.includes('youtube.com') || trimmedUrl.includes('youtu.be')) {
-        let videoId: string | null = null;
+        let  videoId: string | null = null;
 
         if (trimmedUrl.includes('youtu.be')) {
           videoId = trimmedUrl.split('/').pop()?.split('?')[0] || null;
@@ -1257,10 +1256,10 @@ export const RichTextEditorPro = ({
     const cols = Math.max(1, Math.min(10, parseInt(colsInput) || 3));
 
     if (rows && cols) {
-      let table =
+      let  table=
         '<table style="border-collapse: collapse; width: 100%; margin: 10px 0; border: 1px solid #e5e7eb;">';
       table += '<thead><tr>';
-      for (let j = 0; j < cols; j++) {
+      for (let  j= 0; j < cols; j++) {
         table +=
           '<th style="padding: 12px; background: #f3f4f6; font-weight: bold; text-align: left; border: 1px solid #e5e7eb;">En-tête ' +
           (j + 1) +
@@ -1268,9 +1267,9 @@ export const RichTextEditorPro = ({
       }
       table += '</tr></thead><tbody>';
 
-      for (let i = 0; i < rows; i++) {
+      for (let  i= 0; i < rows; i++) {
         table += '<tr>';
-        for (let j = 0; j < cols; j++) {
+        for (let  j= 0; j < cols; j++) {
           table += '<td style="padding: 12px; border: 1px solid #e5e7eb;">Cellule</td>';
         }
         table += '</tr>';
@@ -2189,3 +2188,9 @@ export const RichTextEditorPro = ({
     </Card>
   );
 };
+
+
+
+
+
+

@@ -14,7 +14,7 @@ export function useCommunityMembers(filter?: CommunityMembersFilter) {
   return useQuery({
     queryKey: ['community-members', filter],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('community_members')
         .select('*')
         .order('created_at', { ascending: false });
@@ -260,4 +260,10 @@ export function useDeleteCommunityMember() {
     },
   });
 }
+
+
+
+
+
+
 

@@ -59,7 +59,7 @@ export type ValidatedEnv = z.infer<typeof envSchema>;
  * Variables d'environnement validées
  * Accessible dans toute l'application
  */
-let validatedEnv: ValidatedEnv | null = null;
+let  validatedEnv: ValidatedEnv | null = null;
 
 /**
  * Valide les variables d'environnement
@@ -133,3 +133,9 @@ if (import.meta.env.DEV) {
   // En production, on ne peut pas continuer sans les variables requises
   validateEnv();
 }
+
+
+
+
+
+

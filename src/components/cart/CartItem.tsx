@@ -137,3 +137,9 @@ export const CartItem = React.memo(CartItemComponent, (prevProps, nextProps) => 
 
 CartItem.displayName = 'CartItem';
 
+
+
+
+
+
+

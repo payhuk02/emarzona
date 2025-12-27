@@ -18,7 +18,7 @@ interface ProductRecommendationsProps {
 /**
  * Composant pour afficher les recommandations de produits similaires
  */
-const ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = ({
+const  ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = ({
   productId,
   limit = 6,
   title = "Produits similaires",
@@ -129,7 +129,7 @@ ProductRecommendations.displayName = 'ProductRecommendations';
 /**
  * Composant pour afficher les produits fréquemment achetés ensemble
  */
-const FrequentlyBoughtTogetherComponent: React.FC<ProductRecommendationsProps> = ({
+const  FrequentlyBoughtTogetherComponent: React.FC<ProductRecommendationsProps> = ({
   productId,
   limit = 4,
   className = "",
@@ -249,7 +249,7 @@ interface PersonalizedRecommendationsProps {
 /**
  * Composant pour afficher les recommandations personnalisées pour l'utilisateur
  */
-const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendationsProps> = ({
+const  PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendationsProps> = ({
   userId,
   limit = 6,
   className = "",
@@ -360,4 +360,10 @@ export const PersonalizedRecommendations = React.memo(PersonalizedRecommendation
 });
 
 PersonalizedRecommendations.displayName = 'PersonalizedRecommendations';
+
+
+
+
+
+
 

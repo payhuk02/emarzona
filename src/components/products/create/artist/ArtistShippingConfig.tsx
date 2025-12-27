@@ -186,3 +186,9 @@ const ArtistShippingConfigComponent = ({ data, onUpdate }: ArtistShippingConfigP
 // Optimisation avec React.memo
 export const ArtistShippingConfig = React.memo(ArtistShippingConfigComponent);
 
+
+
+
+
+
+

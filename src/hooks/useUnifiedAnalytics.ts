@@ -142,7 +142,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
 
   const getDateRange = useCallback((range: TimeRange) => {
     const now = new Date();
-    const ranges: Record<TimeRange, Date> = {
+    const  ranges: Record<TimeRange, Date> = {
       '7d': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
       '30d': new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
       '90d': new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000),
@@ -216,7 +216,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
       // Revenus par type de produit
-      const byProductType: Record<ProductType, any> = {
+      const  byProductType: Record<ProductType, any> = {
         digital: { revenue: 0, orders: 0, units: 0, products: new Set() },
         physical: { revenue: 0, orders: 0, units: 0, products: new Set() },
         service: { revenue: 0, orders: 0, units: 0, products: new Set() },
@@ -241,7 +241,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       });
 
       // Convertir en format final
-      const byProductTypeFinal: Record<ProductType, any> = {
+      const  byProductTypeFinal: Record<ProductType, any> = {
         digital: {
           revenue: byProductType.digital.revenue,
           orders: byProductType.digital.orders,
@@ -289,7 +289,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         course: number;
         artist: number;
       }
-      const revenueByDate: Record<string, RevenueByDateData> = {};
+      const  revenueByDate: Record<string, RevenueByDateData> = {};
       completedOrders.forEach((order: any) => {
         const date = new Date(order.created_at).toISOString().split('T')[0];
         if (!revenueByDate[date]) {
@@ -325,7 +325,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         orders: number;
         units: number;
       }
-      const productRevenue: Record<string, ProductRevenueData> = {};
+      const  productRevenue: Record<string, ProductRevenueData> = {};
       completedOrders.forEach((order: any) => {
         const items = order.order_items || [];
         items.forEach((item: any) => {
@@ -360,7 +360,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
         orders: number;
         lastOrderDate: string;
       }
-      const customerStats: Record<string, CustomerStatsData> = {};
+      const  customerStats: Record<string, CustomerStatsData> = {};
       completedOrders.forEach((order: any) => {
         if (order.customer_id) {
           if (!customerStats[order.customer_id]) {
@@ -430,7 +430,7 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
       });
 
       logger.info('Unified analytics loaded', { storeId: store.id, timeRange });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching unified analytics', { error: errorMessage });
       setError(errorMessage);
@@ -446,4 +446,10 @@ export const useUnifiedAnalytics = (timeRange: TimeRange = '30d') => {
 
   return { analytics, loading, error, refetch: fetchAnalytics };
 };
+
+
+
+
+
+
 

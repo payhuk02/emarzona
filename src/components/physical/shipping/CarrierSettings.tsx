@@ -84,7 +84,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
         is_default: false,
       });
       refetch();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error saving carrier', { error });
       toast({
         title: '❌ Erreur',
@@ -128,7 +128,7 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
       });
 
       refetch();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error deleting carrier', { error });
       toast({
         title: '❌ Erreur',
@@ -338,4 +338,10 @@ export const CarrierSettings = ({ storeId }: CarrierSettingsProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

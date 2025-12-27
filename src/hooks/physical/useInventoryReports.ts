@@ -124,7 +124,7 @@ export function useInventoryReport(storeId: string, dateRange?: {
       if (productsError) throw productsError;
 
       // Mock data for now (replace with actual calculations from database)
-      const report: InventoryReportData = {
+      const  report: InventoryReportData = {
         // Overview
         total_products: products?.length || 0,
         total_variants: 0, // TODO: Count from variants table
@@ -223,7 +223,7 @@ export function useStockValuationReport(storeId: string) {
 
       if (error) throw error;
 
-      const items: StockValuationReport['items'] = (products || []).map((p) => {
+      const  items: StockValuationReport['items'] = (products || []).map((p) => {
         const quantity = p.total_quantity || 0;
         const unit_cost = p.cost_price || 0;
         const unit_price = p.price || 0;
@@ -244,7 +244,7 @@ export function useStockValuationReport(storeId: string) {
         };
       });
 
-      const report: StockValuationReport = {
+      const  report: StockValuationReport = {
         total_value: items.reduce((sum, i) => sum + i.total_value, 0),
         total_cost: items.reduce((sum, i) => sum + i.total_cost, 0),
         potential_profit: items.reduce((sum, i) => sum + i.potential_profit, 0),
@@ -295,13 +295,13 @@ export function useTurnoverReport(storeId: string, periodDays: number = 30) {
         salesMap.set(item.product_id, existing + (item.quantity || 0));
       });
 
-      const reportProducts: TurnoverReport['products'] = (products || []).map((p) => {
+      const  reportProducts: TurnoverReport['products'] = (products || []).map((p) => {
         const avg_stock = p.total_quantity || 0;
         const total_sold = salesMap.get(p.id) || 0;
         const turnover_ratio = avg_stock > 0 ? total_sold / avg_stock : 0;
         const turnover_days = turnover_ratio > 0 ? periodDays / turnover_ratio : 0;
 
-        let status: 'fast' | 'normal' | 'slow' | 'dead' = 'normal';
+        let  status: 'fast' | 'normal' | 'slow' | 'dead' = 'normal';
         if (turnover_ratio === 0) status = 'dead';
         else if (turnover_days < 7) status = 'fast';
         else if (turnover_days > 90) status = 'slow';
@@ -318,7 +318,7 @@ export function useTurnoverReport(storeId: string, periodDays: number = 30) {
         };
       });
 
-      const report: TurnoverReport = {
+      const  report: TurnoverReport = {
         period_days: periodDays,
         products: reportProducts.sort((a, b) => b.turnover_ratio - a.turnover_ratio),
       };
@@ -365,7 +365,7 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
         salesMap.set(item.product_id, existing + (item.quantity || 0));
       });
 
-      const forecastProducts: LowStockForecast['products'] = (products || [])
+      const  forecastProducts: LowStockForecast['products'] = (products || [])
         .filter((p) => (p.total_quantity || 0) > 0)
         .map((p) => {
           const current_quantity = p.total_quantity || 0;
@@ -395,7 +395,7 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
         .filter((p) => p.estimated_days_remaining < forecastDays)
         .sort((a, b) => a.estimated_days_remaining - b.estimated_days_remaining);
 
-      const report: LowStockForecast = {
+      const  report: LowStockForecast = {
         products: forecastProducts,
       };
 
@@ -411,7 +411,7 @@ export function useLowStockForecast(storeId: string, forecastDays: number = 30) 
 // ============================================================================
 
 export function exportInventoryReportToCSV(report: InventoryReportData, filename?: string) {
-  const rows: string[][] = [
+  const  rows: string[][] = [
     ['Rapport d\'Inventaire'],
     [],
     ['Vue d\'Ensemble'],
@@ -448,4 +448,10 @@ export function exportInventoryReportToCSV(report: InventoryReportData, filename
   link.click();
   window.URL.revokeObjectURL(url);
 }
+
+
+
+
+
+
 

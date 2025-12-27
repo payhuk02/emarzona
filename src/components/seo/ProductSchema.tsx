@@ -178,3 +178,9 @@ export const ProductSchema = ({ product, store, url }: ProductSchemaProps) => {
     </Helmet>
   );
 };
+
+
+
+
+
+

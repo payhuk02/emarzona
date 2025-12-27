@@ -273,3 +273,9 @@ export interface SendGridWebhookEvent {
   reason?: string; // Pour les bounces
 }
 
+
+
+
+
+
+

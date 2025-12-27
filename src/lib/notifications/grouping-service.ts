@@ -75,7 +75,7 @@ export class NotificationGroupingService {
     }
 
     // Créer les groupes
-    const grouped: GroupedNotification[] = [];
+    const  grouped: GroupedNotification[] = [];
 
     for (const [groupKey, items] of groups.entries()) {
       // Limiter la taille du groupe
@@ -111,7 +111,7 @@ export class NotificationGroupingService {
    * Obtenir le titre du groupe
    */
   private getGroupTitle(type: NotificationType, count: number): string {
-    const typeLabels: Record<string, string> = {
+    const  typeLabels: Record<string, string> = {
       order_payment_received: 'Paiements reçus',
       order_payment_failed: 'Paiements échoués',
       product_review_received: 'Avis produits',
@@ -146,7 +146,7 @@ export class NotificationGroupingService {
     }
   ): Promise<GroupedNotification[]> {
     try {
-      let query = supabase
+      let  query= supabase
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
@@ -172,7 +172,7 @@ export class NotificationGroupingService {
         return [];
       }
 
-      const notifications: Notification[] = data.map(item => ({
+      const  notifications: Notification[] = data.map(item => ({
         id: item.id,
         user_id: item.user_id,
         type: item.type,
@@ -196,3 +196,9 @@ export class NotificationGroupingService {
 
 // Instance singleton
 export const notificationGroupingService = new NotificationGroupingService();
+
+
+
+
+
+

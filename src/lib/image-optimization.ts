@@ -65,7 +65,7 @@ export const optimizeImage = async (
     const compressionRatio = ((originalSize - optimizedSize) / originalSize) * 100;
 
     // Génération du thumbnail
-    let thumbnail: File | undefined;
+    let  thumbnail: File | undefined;
     try {
       thumbnail = await imageCompression(file, THUMBNAIL_OPTIONS);
     } catch (thumbnailError) {
@@ -112,9 +112,9 @@ export const optimizeImages = async (
   files: File[],
   onProgress?: (current: number, total: number) => void
 ): Promise<OptimizationResult[]> => {
-  const results: OptimizationResult[] = [];
+  const  results: OptimizationResult[] = [];
   
-  for (let i = 0; i < files.length; i++) {
+  for (let  i= 0; i < files.length; i++) {
     const result = await optimizeImage(files[i]);
     results.push(result);
     
@@ -163,4 +163,10 @@ export const generatePreview = (file: File): Promise<string> => {
     reader.readAsDataURL(file);
   });
 };
+
+
+
+
+
+
 

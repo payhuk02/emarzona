@@ -8,7 +8,7 @@ export interface Country {
   name: string; // Nom en français
 }
 
-export const COUNTRIES: Country[] = [
+export const COUNTRIES : Country[] = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'ZA', name: 'Afrique du Sud' },
   { code: 'AL', name: 'Albanie' },
@@ -256,4 +256,11 @@ export const getCountryName = (code: string): string => {
   const country = getCountryByCode(code);
   return country?.name || code;
 };
+
+
+
+
+
+
+
 

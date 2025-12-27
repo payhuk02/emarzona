@@ -326,7 +326,7 @@ const AffiliateDashboard = () => {
         setShowRegisterDialog(false);
         await refetchAffiliate();
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur d\'inscription',
@@ -434,7 +434,7 @@ const AffiliateDashboard = () => {
                         </Card>
                         <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                           <CardContent className="pt-4 sm:pt-6 text-center p-4 sm:p-6">
-                            <Wallet className="h-8 w-8 sm:h-10 sm:w-10 text-orange-600 mx-auto mb-2 sm:mb-3" />
+                            <Wallet  className ="h-8 w-8 sm:h-10 sm:w-10 text-orange-600 mx-auto mb-2 sm:mb-3" />
                             <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Paiements rapides</h3>
                             <p className="text-xs sm:text-sm text-muted-foreground">
                               Retraits dès 10 000 XOF via Mobile Money
@@ -609,7 +609,7 @@ const AffiliateDashboard = () => {
                       </p>
                       {stat.highlight && !balanceLoading && balance.available >= 10000 && (
                         <Button size="sm" className="w-full mt-2 text-xs" variant="outline">
-                          <Wallet className="h-3 w-3 mr-1.5" />
+                          <Wallet  className ="h-3 w-3 mr-1.5" />
                           Retirer
                         </Button>
                       )}
@@ -678,7 +678,7 @@ const AffiliateDashboard = () => {
                     value="withdrawals"
                     className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
                   >
-                    <Wallet className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <Wallet  className ="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden xs:inline">Retraits</span>
                     <span className="xs:hidden">Ret.</span>
                     <Badge variant="secondary" className="ml-1.5 sm:ml-2 text-xs px-1.5 py-0">
@@ -723,7 +723,7 @@ const AffiliateDashboard = () => {
                                     title: "Export réussi",
                                     description: `${links.length} lien(s) exporté(s) en CSV`,
                                   });
-                                } catch (error: unknown) {
+                                } catch ( _error: unknown) {
                                   const errorMessage = error instanceof Error ? error.message : String(error);
                                   toast({
                                     title: "Erreur d'export",
@@ -813,7 +813,7 @@ const AffiliateDashboard = () => {
                                   title: "Export réussi",
                                   description: `${commissions.length} commission(s) exportée(s) en CSV`,
                                 });
-                              } catch (error: unknown) {
+                              } catch ( _error: unknown) {
                                 const errorMessage = error instanceof Error ? error.message : String(error);
                                 toast({
                                   title: "Erreur d'export",
@@ -898,7 +898,7 @@ const AffiliateDashboard = () => {
                         </div>
                       ) : withdrawals.length === 0 ? (
                         <div className="text-center py-8 sm:py-12 text-muted-foreground p-3 sm:p-4">
-                          <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
+                          <Wallet  className ="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
                           <p className="text-sm sm:text-base">Aucun retrait demandé</p>
                         </div>
                       ) : (
@@ -993,4 +993,10 @@ const AffiliateDashboard = () => {
 };
 
 export default AffiliateDashboard;
+
+
+
+
+
+
 

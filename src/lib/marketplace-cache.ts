@@ -50,7 +50,7 @@ export async function setCache<T>(
 ): Promise<void> {
   if (typeof window === 'undefined') return;
 
-  const entry: CacheEntry<T> = {
+  const  entry: CacheEntry<T> = {
     data,
     timestamp: Date.now(),
     expiresAt: Date.now() + ttl,
@@ -89,7 +89,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
     // Essayer localStorage d'abord
     const cached = localStorage.getItem(key);
     if (cached) {
-      const entry: CacheEntry<T> = JSON.parse(cached);
+      const  entry: CacheEntry<T> = JSON.parse(cached);
       if (Date.now() < entry.expiresAt) {
         return entry.data;
       } else {
@@ -143,7 +143,7 @@ export function cleanExpiredCache(): void {
         try {
           const cached = localStorage.getItem(key);
           if (cached) {
-            const entry: CacheEntry<unknown> = JSON.parse(cached);
+            const  entry: CacheEntry<unknown> = JSON.parse(cached);
             if (now >= entry.expiresAt) {
               localStorage.removeItem(key);
             }
@@ -161,7 +161,7 @@ export function cleanExpiredCache(): void {
 /**
  * IndexedDB helpers
  */
-let db: IDBDatabase | null = null;
+let  db: IDBDatabase | null = null;
 
 async function openDB(): Promise<IDBDatabase> {
   if (db) return db;
@@ -262,4 +262,10 @@ if (typeof window !== 'undefined') {
   // Nettoyer le cache toutes les 5 minutes
   setInterval(cleanExpiredCache, 5 * 60 * 1000);
 }
+
+
+
+
+
+
 

@@ -22,7 +22,7 @@ export function useI18n() {
 
   const isRTL = useCallback(() => {
     // Ajouter les langues RTL si nécessaire (arabe, hébreu, etc.)
-    const rtlLanguages: LanguageCode[] = [];
+    const  rtlLanguages: LanguageCode[] = [];
     return rtlLanguages.includes(currentLanguage);
   }, [currentLanguage]);
 
@@ -70,7 +70,7 @@ export function useDateFormat() {
     const locale = currentLanguage === 'fr' ? 'fr-FR' : 'en-US';
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     
-    const defaultOptions: Intl.DateTimeFormatOptions = {
+    const  defaultOptions: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -136,4 +136,10 @@ export function useNumberFormat() {
 
   return { formatNumber, formatPercentage, formatCompact };
 }
+
+
+
+
+
+
 

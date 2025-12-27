@@ -364,3 +364,9 @@ export const PromotionCard = React.memo(PromotionCardComponent, (prevProps, next
 
 PromotionCard.displayName = 'PromotionCard';
 
+
+
+
+
+
+

@@ -115,7 +115,7 @@ export interface BookingHistoryProps {
 /**
  * Configuration des types d'événements
  */
-const EVENT_CONFIG: Record<
+const  EVENT_CONFIG: Record<
   BookingEventType,
   {
     label: string;
@@ -183,7 +183,7 @@ const EVENT_CONFIG: Record<
  * />
  * ```
  */
-export const BookingHistory: React.FC<BookingHistoryProps> = ({
+export const BookingHistory : React.FC<BookingHistoryProps> = ({
   events,
   title = 'Historique des Réservations',
   description = 'Suivi complet de toutes les activités',
@@ -203,7 +203,7 @@ export const BookingHistory: React.FC<BookingHistoryProps> = ({
 
   // Filtrer les événements
   const filteredEvents = useMemo(() => {
-    let result = [...events];
+    let  result= [...events];
 
     // Search
     if (filters.search) {
@@ -536,4 +536,11 @@ export const BookingHistory: React.FC<BookingHistoryProps> = ({
 BookingHistory.displayName = 'BookingHistory';
 
 export default BookingHistory;
+
+
+
+
+
+
+
 

@@ -64,7 +64,7 @@ describe('useThrottle', () => {
 });
 
 describe('useThrottledCallback', () => {
-  let time = 0;
+  let  time= 0;
   
   beforeEach(() => {
     vi.useFakeTimers();
@@ -165,7 +165,7 @@ describe('useThrottledCallback', () => {
 });
 
 describe('useThrottledCallbackAdvanced', () => {
-  let time = 0;
+  let  time= 0;
   
   beforeEach(() => {
     vi.useFakeTimers();
@@ -289,4 +289,10 @@ describe('useThrottledCallbackAdvanced', () => {
     expect(mockFn).toHaveBeenCalledWith('third'); // Last arguments
   });
 });
+
+
+
+
+
+
 

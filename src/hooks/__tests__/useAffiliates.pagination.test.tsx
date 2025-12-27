@@ -37,8 +37,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useAffiliates - Pagination', () => {
-  let queryClient: QueryClient;
-  let wrapper: React.FC<{ children: React.ReactNode }>;
+  let  queryClient: QueryClient;
+  let  wrapper: React.FC<{ children: React.ReactNode }>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -286,4 +286,10 @@ describe('useAffiliates - Pagination', () => {
     expect(result.current.pagination.hasPreviousPage).toBe(false);
   });
 });
+
+
+
+
+
+
 

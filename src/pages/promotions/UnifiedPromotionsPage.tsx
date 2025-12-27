@@ -15,7 +15,7 @@ import { Info, Tag, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MainLayout } from '@/components/layout';
 
-export const UnifiedPromotionsPage: React.FC = () => {
+export const UnifiedPromotionsPage : React.FC = () => {
   const { t } = useTranslation();
 
   return (
@@ -118,3 +118,10 @@ export const UnifiedPromotionsPage: React.FC = () => {
     </MainLayout>
   );
 };
+
+
+
+
+
+
+

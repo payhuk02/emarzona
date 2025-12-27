@@ -119,7 +119,7 @@ export function RecurringBookingForm({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de créer la série',
@@ -343,4 +343,10 @@ export function RecurringBookingForm({
     </Card>
   );
 }
+
+
+
+
+
+
 

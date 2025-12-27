@@ -43,3 +43,9 @@ export const useCrispCheckout = (product: ProductInfo | null) => {
   }, [product]);
 };
 
+
+
+
+
+
+

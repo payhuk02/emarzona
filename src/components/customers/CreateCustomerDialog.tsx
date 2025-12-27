@@ -84,7 +84,7 @@ const CreateCustomerDialogComponent = ({ open, onOpenChange, onSuccess, storeId 
       onSuccess();
       onOpenChange(false);
       resetForm();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -236,3 +236,9 @@ export const CreateCustomerDialog = React.memo(CreateCustomerDialogComponent, (p
 });
 
 CreateCustomerDialog.displayName = 'CreateCustomerDialog';
+
+
+
+
+
+

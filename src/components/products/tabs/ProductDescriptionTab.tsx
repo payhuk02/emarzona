@@ -110,7 +110,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     const cleaned = word.toLowerCase().normalize("NFD").replace(/[^a-zàâçéèêëîïôûùüÿñæœ]/g, "");
     if (!cleaned) return 0;
     const groups = cleaned.match(/[aeiouyàâäéèêëîïôöûüùœ]+/g);
-    let syllables = groups ? groups.length : 1;
+    let  syllables= groups ? groups.length : 1;
     // Silent 'e' at end of word (rough approximation)
     if (/e$/.test(cleaned) && syllables > 1) syllables -= 1;
     return Math.max(1, syllables);
@@ -164,7 +164,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
       .split(/\s+/)
       .filter(word => word.length > 3 && !["avec", "pour", "dans", "sur", "sous", "avec", "sans", "plus", "tout", "tous", "toute", "toutes"].includes(word));
     
-    const wordCount: Record<string, number> = {};
+    const  wordCount: Record<string, number> = {};
     words.forEach(word => {
       wordCount[word] = (wordCount[word] || 0) + 1;
     });
@@ -178,8 +178,8 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
   const analyzeKeywordDensity = (text: string, metaKeywords: string) => {
     const totalWords = text.split(/\s+/).length;
     const keywords = metaKeywords ? metaKeywords.split(",").map(k => k.trim().toLowerCase()) : [];
-    const density: Record<string, number> = {};
-    const suggestions: string[] = [];
+    const  density: Record<string, number> = {};
+    const  suggestions: string[] = [];
     
     keywords.forEach(keyword => {
       const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
@@ -210,7 +210,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
       }))
       .filter(h => h.text.length > 0);
     
-    const suggestions: string[] = [];
+    const  suggestions: string[] = [];
     
     // Check for proper heading hierarchy
     if (headings.length > 0) {
@@ -221,7 +221,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
       if (!hasH2 && headings.length > 1) suggestions.push("Utiliser des titres H2 pour structurer le contenu");
       
       // Check for heading order
-      for (let i = 1; i < headings.length; i++) {
+      for (let  i= 1; i < headings.length; i++) {
         if (headings[i].level > headings[i-1].level + 1) {
           suggestions.push("Éviter de sauter des niveaux de titres (ex: H1 → H3)");
           break;
@@ -240,13 +240,13 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
 
   // --- Duplicate Content Detection ---
   const detectDuplicateContent = (text: string, metaTitle: string, metaDescription: string) => {
-    const warnings: string[] = [];
+    const  warnings: string[] = [];
     
     if (!text) return warnings;
     
     // Check for repeated sentences
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    const sentenceCount: Record<string, number> = {};
+    const  sentenceCount: Record<string, number> = {};
     
     sentences.forEach(sentence => {
       const normalized = sentence.trim().toLowerCase();
@@ -286,8 +286,8 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     ];
     
     const text = doc.textContent || "";
-    let ctaCount = 0;
-    const suggestions: string[] = [];
+    let  ctaCount= 0;
+    const  suggestions: string[] = [];
     
     ctaPatterns.forEach(pattern => {
       const matches = text.match(pattern);
@@ -364,13 +364,13 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     const base = (formData.short_description || "").trim();
     if (!base) return;
     // Very light paraphrase heuristics (no external API)
-    const replacements: Array<[RegExp, string]> = [
+    const  replacements: Array<[RegExp, string]> = [
       [/\bproduit\b/gi, "article"],
       [/\bsuper\b/gi, "excellent"],
       [/\bpas cher\b/gi, "abordable"],
       [/\bmeilleur\b/gi, "idéal"],
     ];
-    let text = base;
+    let  text= base;
     for (const [pattern, repl] of replacements) {
       text = text.replace(pattern, repl);
     }
@@ -380,7 +380,7 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
 
   // Calculer le score SEO
   const calculateSeoScore = () => {
-    let score = 0;
+    let  score= 0;
     const maxScore = 100;
 
     // Titre SEO (20 points)
@@ -946,3 +946,9 @@ export const ProductDescriptionTab = ({ formData, updateFormData }: ProductDescr
     </div>
   );
 };
+
+
+
+
+
+

@@ -103,3 +103,9 @@ export async function checkTermsConsent(userId: string): Promise<boolean> {
   }
 }
 
+
+
+
+
+
+

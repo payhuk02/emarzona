@@ -31,7 +31,7 @@ interface SearchAutocompleteProps {
   autoFocus?: boolean;
 }
 
-export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
+export const SearchAutocomplete : React.FC<SearchAutocompleteProps> = ({
   value,
   onChange,
   onSearch,
@@ -280,3 +280,10 @@ export const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

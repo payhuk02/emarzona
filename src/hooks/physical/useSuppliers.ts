@@ -188,7 +188,7 @@ export const useSupplierOrders = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('supplier_orders')
         .select(`
           *,
@@ -395,4 +395,10 @@ export const useCreateSupplierOrder = () => {
     },
   });
 };
+
+
+
+
+
+
 

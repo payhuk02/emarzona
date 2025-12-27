@@ -176,3 +176,9 @@ export const PixelConfigCard = React.memo(PixelConfigCardComponent, (prevProps, 
 
 PixelConfigCard.displayName = 'PixelConfigCard';
 
+
+
+
+
+
+

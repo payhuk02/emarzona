@@ -474,3 +474,9 @@ export interface SecurityConfig {
   max_message_length: number;
   rate_limit_messages_per_minute: number;
 }
+
+
+
+
+
+

@@ -130,7 +130,7 @@ export const useLoyaltyRewards = (storeId: string | undefined, customerTier?: st
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('loyalty_rewards')
         .select('*')
         .eq('store_id', storeId)
@@ -168,7 +168,7 @@ export const useLoyaltyTransactions = (
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('loyalty_transactions')
         .select('*')
         .eq('store_id', storeId)
@@ -216,7 +216,7 @@ export const useLoyaltyRewardRedemptions = (
       const userId = customerId || user?.id;
       if (!userId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('loyalty_reward_redemptions')
         .select(`
           *,
@@ -472,4 +472,10 @@ export const useLoyaltyStats = (storeId: string | undefined) => {
     enabled: !!storeId,
   });
 };
+
+
+
+
+
+
 

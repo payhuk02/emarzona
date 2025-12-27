@@ -246,7 +246,7 @@ export default function CustomerWarranties() {
       endDate.setMonth(endDate.getMonth() + durationMonths);
 
       // Récupérer user_id depuis customer_id si nécessaire
-      let userId = user.id;
+      let  userId= user.id;
       if (!userId && order.customer_id) {
         // Essayer de récupérer user_id depuis customers table
         const { data: customer } = await supabase
@@ -398,7 +398,7 @@ export default function CustomerWarranties() {
   // Get claim status badge
   const getClaimStatusBadge = (status: string) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<
+    const  statusConfig: Record<
       string,
       {
         label: string;
@@ -1002,3 +1002,9 @@ export default function CustomerWarranties() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

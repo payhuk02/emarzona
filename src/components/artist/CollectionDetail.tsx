@@ -122,7 +122,7 @@ export const CollectionDetail = () => {
     );
   }
 
-  const collectionTypeLabels: Record<string, string> = {
+  const  collectionTypeLabels: Record<string, string> = {
     thematic: 'Thématique',
     chronological: 'Chronologique',
     series: 'Série',
@@ -218,4 +218,10 @@ export const CollectionDetail = () => {
     </div>
   );
 };
+
+
+
+
+
+
 

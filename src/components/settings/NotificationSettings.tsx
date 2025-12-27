@@ -118,7 +118,7 @@ export const NotificationSettings = () => {
       if (data) {
         setSettings(prev => ({ ...prev, ...data.settings }));
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error loading notification settings', { error, userId: user?.id });
       toast({
         title: "Erreur",
@@ -149,7 +149,7 @@ export const NotificationSettings = () => {
         title: "Succès",
         description: "Paramètres de notifications sauvegardés",
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error saving notification settings', { error, userId: user?.id });
       toast({
         title: "Erreur",
@@ -615,3 +615,9 @@ export const NotificationSettings = () => {
     </div>
   );
 };
+
+
+
+
+
+

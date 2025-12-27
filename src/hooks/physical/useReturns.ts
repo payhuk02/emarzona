@@ -176,7 +176,7 @@ export const useStoreReturns = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('product_returns')
         .select(`
           *,
@@ -623,7 +623,7 @@ export const useUpdateReturnStatus = () => {
       carrier?: string;
       adminNotes?: string;
     }) => {
-      const updateData: any = {
+      const  updateData: any = {
         status,
         admin_notes: adminNotes,
       };
@@ -678,7 +678,7 @@ export const useUpdateReturnStatus = () => {
       if (data.store_id) {
         import('@/lib/webhooks/unified-webhook-service')
           .then(({ triggerUnifiedWebhook }) => {
-            const eventTypeMap: Record<string, string> = {
+            const  eventTypeMap: Record<string, string> = {
               'approved': 'return.approved',
               'rejected': 'return.rejected',
               'return_received': 'return.received',
@@ -830,7 +830,7 @@ export const useGenerateReturnLabel = () => {
       const { data: labelNumber } = await supabase.rpc('generate_shipping_label_number');
 
       // 7. Générer l'étiquette via l'API du transporteur
-      let labelResponse: any;
+      let  labelResponse: any;
 
       if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
         const dhlService = new DHLService({
@@ -995,4 +995,10 @@ export const useGenerateReturnLabel = () => {
     },
   });
 };
+
+
+
+
+
+
 

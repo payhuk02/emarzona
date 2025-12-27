@@ -18,7 +18,7 @@ interface ReviewStarsProps {
   className?: string;
 }
 
-export const ReviewStars: React.FC<ReviewStarsProps> = ({
+export const ReviewStars : React.FC<ReviewStarsProps> = ({
   rating,
   maxRating = 5,
   size = 'md',
@@ -111,4 +111,11 @@ export const ReviewStars: React.FC<ReviewStarsProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+
 

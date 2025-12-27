@@ -245,11 +245,10 @@ export default function CustomerPortal() {
       }
 
       // Active subscriptions (si la table existe)
-      let subscriptionsCount = 0;
+      let  subscriptionsCount= 0;
       try {
         // La table subscriptions peut ne pas être dans les types Supabase générés
         // mais elle peut exister dans la base de données. Le try-catch gère le cas où elle n'existe pas.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { count } = await (supabase as any)
           .from('subscriptions')
           .select('*', { count: 'exact', head: true })
@@ -779,3 +778,9 @@ export default function CustomerPortal() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

@@ -59,7 +59,7 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
   const [editingPromotion, setEditingPromotion] = useState<number | null>(null);
 
   const addPromotion = () => {
-    const newPromotion: Promotion = {
+    const  newPromotion: Promotion = {
       id: Date.now().toString(),
       name: "",
       type: "percentage",
@@ -482,3 +482,9 @@ export const ProductPromotionsTab = ({ formData, updateFormData }: ProductPromot
     </div>
   );
 };
+
+
+
+
+
+

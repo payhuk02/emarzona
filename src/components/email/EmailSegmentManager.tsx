@@ -39,12 +39,12 @@ interface EmailSegmentManagerProps {
   onPreviewSegment?: (segment: EmailSegment) => void;
 }
 
-const TYPE_COLORS: Record<SegmentType, string> = {
+const  TYPE_COLORS: Record<SegmentType, string> = {
   static: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   dynamic: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
 };
 
-const TYPE_LABELS: Record<SegmentType, string> = {
+const  TYPE_LABELS: Record<SegmentType, string> = {
   static: 'Statique',
   dynamic: 'Dynamique',
 };
@@ -243,4 +243,10 @@ export const EmailSegmentManager = ({
     </>
   );
 };
+
+
+
+
+
+
 

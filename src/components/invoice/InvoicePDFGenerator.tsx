@@ -26,7 +26,7 @@ export async function generateInvoicePDF(invoice: Invoice): Promise<Blob> {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
-  let yPosition = margin;
+  let  yPosition= margin;
 
   // ================================================================
   // EN-TÊTE (Header)
@@ -67,14 +67,14 @@ export async function generateInvoicePDF(invoice: Invoice): Promise<Blob> {
   }
 
   // Statut
-  const statusColors: Record<string, [number, number, number]> = {
+  const  statusColors: Record<string, [number, number, number]> = {
     paid: [34, 197, 94],
     sent: [59, 130, 246],
     overdue: [239, 68, 68],
     draft: [156, 163, 175],
     cancelled: [107, 114, 128],
   };
-  const statusLabels: Record<string, string> = {
+  const  statusLabels: Record<string, string> = {
     paid: 'Payée',
     sent: 'Envoyée',
     overdue: 'Échue',
@@ -367,4 +367,10 @@ export async function downloadInvoicePDF(invoice: Invoice): Promise<void> {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+
+
+
+
+
 

@@ -42,8 +42,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useDigitalProducts', () => {
-  let queryClient: QueryClient;
-  let mockQuery: ReturnType<typeof vi.fn>;
+  let  queryClient: QueryClient;
+  let  mockQuery: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -170,4 +170,10 @@ describe('useDigitalProducts', () => {
     expect(mockQuery.range).toHaveBeenCalledWith(20, 39); // (page-1) * itemsPerPage, from + itemsPerPage - 1
   });
 });
+
+
+
+
+
+
 

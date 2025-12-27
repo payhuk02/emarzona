@@ -125,3 +125,9 @@ export const PhysicalProductsListVirtualized = React.memo(
 );
 
 PhysicalProductsListVirtualized.displayName = 'PhysicalProductsListVirtualized';
+
+
+
+
+
+

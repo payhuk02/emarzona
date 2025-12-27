@@ -78,7 +78,7 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
   );
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       confirmed: 'default',
@@ -88,7 +88,7 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
       cancelled: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En traitement',
       confirmed: 'Confirmée',
@@ -220,4 +220,10 @@ export const OrderDetailView = ({ orderId }: OrderDetailViewProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

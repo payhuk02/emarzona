@@ -60,7 +60,7 @@ export const useCurrentAdminPermissions = () => {
       if (rErr) throw rErr;
 
       setPermissions((roleRow?.permissions as EffectivePermissions) || {});
-    } catch (e: unknown) {
+    } catch ( _e: unknown) {
       setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setLoading(false);
@@ -78,5 +78,11 @@ export const useCurrentAdminPermissions = () => {
 
   return { loading, error, role, isSuperAdmin, permissions, can, refresh };
 };
+
+
+
+
+
+
 
 

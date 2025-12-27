@@ -27,5 +27,21 @@ export const test = base.extend({
   },
 });
 
+// Helper function for vendor login
+export async function loginAsVendor(page: any) {
+  // Navigate to login page
+  await page.goto('/auth');
+
+  // Fill in vendor test credentials
+  await page.fill('input[type="email"]', 'vendor@payhula.com');
+  await page.fill('input[type="password"]', 'VendorPassword123!');
+
+  // Submit login form
+  await page.click('button[type="submit"]');
+
+  // Wait for redirect to dashboard
+  await page.waitForURL('/dashboard');
+}
+
 export { expect } from '@playwright/test';
 

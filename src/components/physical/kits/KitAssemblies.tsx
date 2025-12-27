@@ -29,7 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
-const ASSEMBLY_STATUSES: { value: KitAssembly['status']; label: string; color: string }[] = [
+const  ASSEMBLY_STATUSES: { value: KitAssembly['status']; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'in_progress', label: 'En cours', color: 'bg-blue-500' },
   { value: 'completed', label: 'Terminé', color: 'bg-green-500' },
@@ -229,4 +229,10 @@ export default function KitAssemblies() {
     </div>
   );
 }
+
+
+
+
+
+
 

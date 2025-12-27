@@ -62,7 +62,7 @@ interface PageSection {
 }
 
 // Configuration complète de la page d'accueil
-const LANDING_SECTIONS: PageSection[] = [
+const  LANDING_SECTIONS: PageSection[] = [
   {
     id: 'hero',
     name: 'Section Hero',
@@ -594,4 +594,10 @@ export const LandingPageCustomizationSection = ({ onChange }: LandingPageCustomi
     </div>
   );
 };
+
+
+
+
+
+
 

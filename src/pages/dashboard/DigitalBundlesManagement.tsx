@@ -131,7 +131,7 @@ export default function DigitalBundlesManagement() {
 
   // Filtrer les bundles
   const filteredBundles = useMemo(() => {
-    let filtered = bundles;
+    let  filtered= bundles;
 
     // Filtre par statut
     if (statusFilter !== 'all') {
@@ -187,7 +187,7 @@ export default function DigitalBundlesManagement() {
         title: '✅ Bundle supprimé',
         description: 'Le bundle a été supprimé avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -250,7 +250,7 @@ export default function DigitalBundlesManagement() {
 
       setIsCreateDialogOpen(false);
       setEditingBundleId(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       // Les erreurs sont gérées par les hooks
       logger.error('Error saving bundle', { error, bundleData });
@@ -615,4 +615,10 @@ export default function DigitalBundlesManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

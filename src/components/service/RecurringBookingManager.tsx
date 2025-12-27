@@ -102,7 +102,7 @@ export interface RecurringBookingManagerProps {
 /**
  * Configuration des patterns avec labels
  */
-const PATTERN_CONFIG: Record<RecurrencePattern, { label: string; description: string }> = {
+const  PATTERN_CONFIG: Record<RecurrencePattern, { label: string; description: string }> = {
   daily: {
     label: 'Quotidien',
     description: 'Tous les jours',
@@ -125,7 +125,7 @@ const PATTERN_CONFIG: Record<RecurrencePattern, { label: string; description: st
   },
 };
 
-const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
+const  DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
   { value: 'monday', label: 'Lundi' },
   { value: 'tuesday', label: 'Mardi' },
   { value: 'wednesday', label: 'Mercredi' },
@@ -138,7 +138,7 @@ const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
 /**
  * RecurringBookingManager - Gestion des réservations récurrentes
  */
-export const RecurringBookingManager: React.FC<RecurringBookingManagerProps> = ({
+export const RecurringBookingManager : React.FC<RecurringBookingManagerProps> = ({
   recurringBookings,
   onSave,
   onDelete,
@@ -611,4 +611,11 @@ export const RecurringBookingManager: React.FC<RecurringBookingManagerProps> = (
 RecurringBookingManager.displayName = 'RecurringBookingManager';
 
 export default RecurringBookingManager;
+
+
+
+
+
+
+
 

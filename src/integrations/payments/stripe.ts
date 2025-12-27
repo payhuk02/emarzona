@@ -138,7 +138,7 @@ export class StripeProvider extends BasePaymentProvider {
 
       const session = await response.json();
 
-      let status: PaymentStatus = PaymentStatus.PENDING;
+      let  status: PaymentStatus = PaymentStatus.PENDING;
       if (session.payment_status === 'paid') {
         status = PaymentStatus.COMPLETED;
       } else if (session.payment_status === 'unpaid') {
@@ -227,5 +227,11 @@ export class StripeProvider extends BasePaymentProvider {
     };
   }
 }
+
+
+
+
+
+
 
 

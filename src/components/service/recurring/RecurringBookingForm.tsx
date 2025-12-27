@@ -68,7 +68,7 @@ export default function RecurringBookingForm({
       return;
     }
 
-    const config: RecurringBookingConfig = {
+    const  config: RecurringBookingConfig = {
       recurrence_pattern: pattern,
       recurrence_interval: interval,
       recurrence_end_date: endType === 'date' && endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
@@ -250,4 +250,10 @@ export default function RecurringBookingForm({
     </Card>
   );
 }
+
+
+
+
+
+
 

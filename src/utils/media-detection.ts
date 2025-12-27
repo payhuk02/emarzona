@@ -130,3 +130,9 @@ export function isVideo(fileName: string, fileType: string): boolean {
 export function isFile(fileName: string, fileType: string): boolean {
   return detectMediaType(fileName, fileType) === 'file';
 }
+
+
+
+
+
+

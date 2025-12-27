@@ -72,3 +72,9 @@ export function useQueryWithErrorHandling<TData = unknown, TError = Error>(
   });
 }
 
+
+
+
+
+
+

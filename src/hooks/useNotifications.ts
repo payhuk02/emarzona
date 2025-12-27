@@ -32,7 +32,7 @@ export const useNotifications = (options?: {
   return useQuery({
     queryKey: ['notifications', page, pageSize, includeArchived],
     queryFn: async (): Promise<{ data: Notification[]; count: number }> => {
-      let query = supabase.from('notifications').select('*', { count: 'exact' });
+      let  query= supabase.from('notifications').select('*', { count: 'exact' });
 
       // Si on n'inclut pas les archivées, filtrer
       if (!includeArchived) {
@@ -277,8 +277,8 @@ export const useRealtimeNotifications = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    let isMounted = true;
+    let  channel: ReturnType<typeof supabase.channel> | null = null;
+    let  isMounted= true;
 
     const setupSubscription = async () => {
       const {
@@ -381,3 +381,9 @@ export const useRequestNotificationPermission = () => {
 
   return { permission, requestPermission };
 };
+
+
+
+
+
+

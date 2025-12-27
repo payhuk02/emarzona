@@ -10,7 +10,7 @@ import { initCrisp, setCrispUser, setCrispSessionData, configureCrispForRole, re
 import { useLocation } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 
-export const CrispChat: React.FC = () => {
+export const CrispChat : React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const CRISP_WEBSITE_ID = import.meta.env.VITE_CRISP_WEBSITE_ID;
@@ -76,4 +76,11 @@ export const CrispChat: React.FC = () => {
   // Composant invisible (Crisp se charge tout seul)
   return null;
 };
+
+
+
+
+
+
+
 

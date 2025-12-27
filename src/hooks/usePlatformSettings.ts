@@ -22,7 +22,7 @@ export const usePlatformSettings = (key: string = 'admin') => {
         .maybeSingle();
       if (error) throw error;
       setSettings((data?.settings as PlatformSettings) || {});
-    } catch (e: any) {
+    } catch ( _e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
@@ -44,3 +44,9 @@ export const usePlatformSettings = (key: string = 'admin') => {
 
   return { loading, error, settings, refresh, updateSettings };
 };
+
+
+
+
+
+

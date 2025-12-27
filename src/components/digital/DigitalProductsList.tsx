@@ -150,7 +150,7 @@ export interface DigitalProductsListProps {
 /**
  * Configuration des catégories
  */
-const CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }> = {
+const  CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }> = {
   ebook: { label: 'Ebook', color: 'text-blue-600' },
   template: { label: 'Template', color: 'text-purple-600' },
   software: { label: 'Logiciel', color: 'text-green-600' },
@@ -179,7 +179,7 @@ const CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }>
  * />
  * ```
  */
-const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
+const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
   products,
   onSelect,
   onEdit,
@@ -217,7 +217,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 
   // Filtrer et trier les produits
   const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
+    let  result= [...products];
 
     // Recherche
     if (searchQuery) {
@@ -242,8 +242,8 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 
     // Tri
     result.sort((a, b) => {
-      let aValue: string | number | Date | undefined = a[sortField as keyof DigitalProductListItem];
-      let bValue: string | number | Date | undefined = b[sortField as keyof DigitalProductListItem];
+      let  aValue: string | number | Date | undefined = a[sortField as keyof DigitalProductListItem];
+      let  bValue: string | number | Date | undefined = b[sortField as keyof DigitalProductListItem];
 
       // Convertir les dates en timestamps
       if (sortField === 'created_at' || sortField === 'updated_at') {
@@ -787,4 +787,10 @@ export const DigitalProductsList = React.memo(DigitalProductsListComponent, (pre
 DigitalProductsList.displayName = 'DigitalProductsList';
 
 export default DigitalProductsList;
+
+
+
+
+
+
 

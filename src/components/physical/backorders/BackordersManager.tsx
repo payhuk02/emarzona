@@ -102,7 +102,7 @@ export function BackordersManager() {
   const backordersRef = useScrollAnimation<HTMLDivElement>();
 
   const filters = useMemo(() => {
-    const f: any = {};
+    const  f: any = {};
     if (statusFilter !== 'all') f.status = statusFilter;
     if (priorityFilter !== 'all') f.priority = priorityFilter;
     return f;
@@ -132,7 +132,7 @@ export function BackordersManager() {
     const sorted = [...backorders];
     switch (sortBy) {
       case 'priority': {
-        const priorityOrder: Record<BackorderPriority, number> = {
+        const  priorityOrder: Record<BackorderPriority, number> = {
           urgent: 0,
           high: 1,
           medium: 2,
@@ -152,7 +152,7 @@ export function BackordersManager() {
   }, [backorders, sortBy]);
 
   const getStatusBadge = (status: BackorderStatus) => {
-    const config: Record<BackorderStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; icon: any; className?: string }> = {
+    const  config: Record<BackorderStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; icon: any; className?: string }> = {
       pending: { variant: 'secondary', label: 'En attente', icon: Clock },
       ordered: { variant: 'outline', label: 'Commandé', icon: Package, className: 'bg-blue-500' },
       in_transit: { variant: 'outline', label: 'En transit', icon: Truck, className: 'bg-purple-500' },
@@ -170,7 +170,7 @@ export function BackordersManager() {
   };
 
   const getPriorityBadge = (priority: BackorderPriority) => {
-    const config: Record<BackorderPriority, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
+    const  config: Record<BackorderPriority, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
       low: { variant: 'outline', label: 'Basse' },
       medium: { variant: 'default', label: 'Moyenne', className: 'bg-yellow-500' },
       high: { variant: 'default', label: 'Haute', className: 'bg-orange-500' },
@@ -836,3 +836,8 @@ function BackorderCard({
     </Card>
   );
 }
+
+
+
+
+

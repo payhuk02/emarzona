@@ -133,7 +133,7 @@ export default function AdminVendorConversations() {
   } = useQuery({
     queryKey: ['admin-vendor-conversations', statusFilter, searchQuery],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('vendor_conversations')
         .select(
           `
@@ -668,3 +668,9 @@ export default function AdminVendorConversations() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

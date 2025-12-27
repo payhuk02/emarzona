@@ -39,7 +39,7 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
     if (!members || !tasks) return [];
 
     const activeMembers = members.filter((m) => m.status === 'active');
-    const performance: MemberPerformance[] = [];
+    const  performance: MemberPerformance[] = [];
 
     activeMembers.forEach((member) => {
       const memberTasks = tasks.filter((task) => task.assigned_to.includes(member.user_id));
@@ -280,4 +280,10 @@ export const StoreTeamAnalytics = ({ storeId }: StoreTeamAnalyticsProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

@@ -223,8 +223,8 @@ export default function OrderMessaging() {
       setUploadProgress(0);
 
       // Upload files if any (utilise le hook avec progress tracking)
-      let fileUrls: string[] = [];
-      let storagePaths: string[] = [];
+      let  fileUrls: string[] = [];
+      let  storagePaths: string[] = [];
       if (selectedFiles.length > 0 && currentConversation) {
         const uploadResults = await uploadFilesWithProgress(selectedFiles, {
           folder: `message-attachments/${currentConversation.id}`,
@@ -240,7 +240,7 @@ export default function OrderMessaging() {
       }
 
       // Determine message type
-      let messageType: MessageType = 'text';
+      let  messageType: MessageType = 'text';
       if (selectedFiles.length > 0) {
         const firstFile = selectedFiles[0];
         if (firstFile.type.startsWith('image/')) {
@@ -278,7 +278,7 @@ export default function OrderMessaging() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'envoyer le message";
       logger.error('Send order message error', { error, orderId, conversationId });
@@ -305,7 +305,7 @@ export default function OrderMessaging() {
         description: 'Un administrateur a été notifié',
       });
       setShowAdminPanel(false);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
@@ -932,3 +932,9 @@ export default function OrderMessaging() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

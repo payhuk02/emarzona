@@ -20,7 +20,7 @@ interface NavItem {
   ariaLabel: string;
 }
 
-const navItems: NavItem[] = [
+const  navItems: NavItem[] = [
   {
     label: "Accueil",
     icon: Home,
@@ -94,6 +94,12 @@ export function MobileBottomNav() {
     </nav>
   );
 }
+
+
+
+
+
+
 
 
 

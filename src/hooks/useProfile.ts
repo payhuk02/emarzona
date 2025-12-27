@@ -132,7 +132,7 @@ export const useProfile = () => {
         logger.info('Profile found', { profile: data });
         setProfile(data[0]);
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching profile', { error });
       toast({
@@ -214,7 +214,7 @@ export const useProfile = () => {
       });
 
       return publicUrl;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading avatar', { error });
       toast({
@@ -256,7 +256,7 @@ export const useProfile = () => {
         title: 'Succès',
         description: 'Photo de profil supprimée',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error removing avatar', { error });
       toast({
@@ -288,7 +288,7 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating display name', { error });
       toast({
@@ -313,7 +313,7 @@ export const useProfile = () => {
 
     try {
       // Mettre à jour tous les champs disponibles
-      const safeUpdates: Record<string, unknown> = {};
+      const  safeUpdates: Record<string, unknown> = {};
       
       if (updates.first_name !== undefined) safeUpdates.first_name = updates.first_name;
       if (updates.last_name !== undefined) safeUpdates.last_name = updates.last_name;
@@ -338,7 +338,7 @@ export const useProfile = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating profile', { error });
       toast({
@@ -360,7 +360,7 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting profile stats', { error });
       return null;
@@ -399,7 +399,7 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data && data.length > 0 ? data[0] : null;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting referral info', { error });
       return null;
@@ -419,7 +419,7 @@ export const useProfile = () => {
 
       if (error) throw error;
       return data || [];
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error getting referred profiles', { error });
       return [];
@@ -441,3 +441,9 @@ export const useProfile = () => {
     refetch: fetchProfile,
   };
 };
+
+
+
+
+
+

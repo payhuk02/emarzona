@@ -154,8 +154,8 @@ export async function validateImage(
   file: File,
   targetFormat: keyof typeof IMAGE_FORMATS = 'product'
 ): Promise<ImageValidationResult> {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+  const  errors: string[] = [];
+  const  warnings: string[] = [];
 
   const targetDimensions = IMAGE_FORMATS[targetFormat];
 
@@ -271,3 +271,9 @@ export default {
   ImageSpecsQuick,
   validateImage,
 };
+
+
+
+
+
+

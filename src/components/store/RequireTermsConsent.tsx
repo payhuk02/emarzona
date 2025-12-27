@@ -84,7 +84,7 @@ export const RequireTermsConsent = ({
       if (onAction) {
         await onAction();
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error accepting terms', { error });
       toast({
         title: "Erreur",
@@ -196,4 +196,10 @@ export const RequireTermsConsent = ({
     </>
   );
 };
+
+
+
+
+
+
 

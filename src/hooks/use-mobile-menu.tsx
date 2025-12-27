@@ -79,8 +79,8 @@ export function useMobileMenu({
     // Vérifier que le menu est rendu
     if (rect.width === 0 || rect.height === 0) return null;
 
-    let finalTop = rect.top;
-    let finalLeft = rect.left;
+    let  finalTop= rect.top;
+    let  finalLeft= rect.left;
     const savedWidth = rect.width;
     const savedHeight = rect.height;
 
@@ -169,7 +169,7 @@ export function useMobileMenu({
   // Si nécessaire, on peut ajouter un scroll lock optionnel plus tard
 
   // Ne plus retourner de styles de verrouillage pour éviter de bloquer l'application
-  const lockStyles: React.CSSProperties | undefined = undefined;
+  const  lockStyles: React.CSSProperties | undefined = undefined;
 
   return {
     lockStyles,
@@ -178,4 +178,10 @@ export function useMobileMenu({
     isLocked,
   };
 }
+
+
+
+
+
+
 

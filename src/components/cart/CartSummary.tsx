@@ -209,3 +209,9 @@ export const CartSummary = React.memo(CartSummaryComponent, (prevProps, nextProp
 
 CartSummary.displayName = 'CartSummary';
 
+
+
+
+
+
+

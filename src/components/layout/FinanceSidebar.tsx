@@ -45,7 +45,7 @@ export const FinanceSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Finance & Paiements', path: '/dashboard/payments' },
     { label: activeSection },
   ];
@@ -80,4 +80,10 @@ export const FinanceSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

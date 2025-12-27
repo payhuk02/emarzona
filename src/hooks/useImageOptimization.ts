@@ -44,7 +44,7 @@ export const useImageOptimization = () => {
       const originalSize = (file.size / 1024).toFixed(2);
       
       // Optimiser avec les bonnes options selon le type
-      let result;
+      let  _result;
       switch (type) {
         case 'thumbnail':
           result = await optimizeImage(file, {
@@ -95,3 +95,9 @@ export const useImageOptimization = () => {
     isOptimizing
   };
 };
+
+
+
+
+
+

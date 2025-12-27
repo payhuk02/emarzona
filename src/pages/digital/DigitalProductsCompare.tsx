@@ -63,7 +63,7 @@ export const DigitalProductsCompare = () => {
     const urlIds = searchParams.get('ids')?.split(',').filter(Boolean) || [];
     if (urlIds.length > 0) return urlIds.slice(0, MAX_COMPARISON);
 
-    let saved: string | null = null;
+    let  saved: string | null = null;
     try {
       saved = localStorage.getItem('digital-products-comparison');
     } catch {
@@ -466,13 +466,13 @@ export const useAddToComparison = () => {
 
   return useCallback(
     (productId: string) => {
-      let saved: string | null = null;
+      let  saved: string | null = null;
       try {
         saved = localStorage.getItem('digital-products-comparison');
       } catch {
         saved = null;
       }
-      let currentIds: string[] = [];
+      let  currentIds: string[] = [];
       try {
         const parsed = saved ? (JSON.parse(saved) as unknown) : [];
         currentIds = Array.isArray(parsed) ? (parsed as string[]) : [];
@@ -518,3 +518,9 @@ export const useAddToComparison = () => {
     [navigate, toast]
   );
 };
+
+
+
+
+
+

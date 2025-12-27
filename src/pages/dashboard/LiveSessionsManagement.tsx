@@ -129,7 +129,7 @@ export default function LiveSessionsManagement() {
 
   // Filtrer les sessions
   const filteredSessions = useMemo(() => {
-    let filtered = sessions;
+    let  filtered= sessions;
 
     // Filtre par statut
     if (statusFilter !== 'all') {
@@ -217,7 +217,7 @@ export default function LiveSessionsManagement() {
         title: '✅ Session supprimée',
         description: 'La session a été supprimée avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -282,7 +282,7 @@ export default function LiveSessionsManagement() {
 
       setIsCreateDialogOpen(false);
       setEditingSessionId(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error saving session', { error: errorMessage, formData });
       // Les erreurs sont gérées par les hooks
@@ -290,7 +290,7 @@ export default function LiveSessionsManagement() {
   };
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
       scheduled: { label: 'Programmée', variant: 'secondary' },
       live: { label: 'En direct', variant: 'default', className: 'bg-green-600 animate-pulse' },
       ended: { label: 'Terminée', variant: 'outline' },
@@ -307,7 +307,7 @@ export default function LiveSessionsManagement() {
   };
 
   const getPlatformBadge = (platform: string) => {
-    const badges: Record<string, { label: string; className?: string }> = {
+    const  badges: Record<string, { label: string; className?: string }> = {
       zoom: { label: 'Zoom', className: 'bg-blue-600' },
       google_meet: { label: 'Google Meet', className: 'bg-green-600' },
       teams: { label: 'Teams', className: 'bg-purple-600' },
@@ -795,4 +795,10 @@ export default function LiveSessionsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

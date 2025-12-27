@@ -187,3 +187,9 @@ const StoreHeader = ({ store, infoMessage }: StoreHeaderProps) => {
 };
 
 export default StoreHeader;
+
+
+
+
+
+

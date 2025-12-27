@@ -186,3 +186,9 @@ export function getStockBadgeColor(status: StockStatus): string {
   }
 }
 
+
+
+
+
+
+

@@ -73,7 +73,7 @@ export interface ServiceStatusIndicatorProps {
 /**
  * Configuration des statuts avec leurs propriétés visuelles
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   ServiceStatus,
   {
     label: string;
@@ -172,7 +172,7 @@ const STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const ServiceStatusIndicator: React.FC<ServiceStatusIndicatorProps> = ({
+export const ServiceStatusIndicator : React.FC<ServiceStatusIndicatorProps> = ({
   status,
   availableSlots,
   totalSlots,
@@ -438,4 +438,11 @@ export const ServiceStatusIndicator: React.FC<ServiceStatusIndicatorProps> = ({
 ServiceStatusIndicator.displayName = 'ServiceStatusIndicator';
 
 export default ServiceStatusIndicator;
+
+
+
+
+
+
+
 

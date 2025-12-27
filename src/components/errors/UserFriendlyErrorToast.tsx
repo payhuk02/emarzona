@@ -21,7 +21,7 @@ interface UserFriendlyErrorToastProps {
 /**
  * Mapping des icônes
  */
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const  ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   WifiOff,
   Clock: RefreshCw,
   ShieldAlert,
@@ -130,4 +130,10 @@ export function UserFriendlyErrorToast({
     </Alert>
   );
 }
+
+
+
+
+
+
 

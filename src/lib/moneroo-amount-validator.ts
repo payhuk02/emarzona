@@ -11,7 +11,7 @@ import { logger } from './logger';
  * Limites de montants par devise selon Moneroo
  * Source: Documentation Moneroo (à vérifier avec la documentation officielle)
  */
-const AMOUNT_LIMITS: Record<Currency, { min: number; max: number }> = {
+const  AMOUNT_LIMITS: Record<Currency, { min: number; max: number }> = {
   XOF: { min: 100, max: 10000000 },      // 100 XOF à 10,000,000 XOF (10M)
   NGN: { min: 100, max: 10000000 },      // 100 NGN à 10,000,000 NGN
   GHS: { min: 1, max: 100000 },          // 1 GHS à 100,000 GHS
@@ -144,5 +144,11 @@ export function isAmountValid(amount: number, currency: Currency = 'XOF'): boole
     return false;
   }
 }
+
+
+
+
+
+
 
 

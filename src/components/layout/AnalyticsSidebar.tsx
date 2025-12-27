@@ -45,7 +45,7 @@ export const AnalyticsSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Analytics & SEO', path: '/dashboard/analytics' },
     { label: activeSection },
   ];
@@ -80,3 +80,9 @@ export const AnalyticsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+

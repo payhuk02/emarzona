@@ -69,7 +69,7 @@ export async function validateFileFormat(file: File): Promise<{
   mimeType: string;
   errors?: string[];
 }> {
-  const errors: string[] = [];
+  const  errors: string[] = [];
   const detectedMimeType = file.type;
   const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
@@ -78,8 +78,8 @@ export async function validateFileFormat(file: File): Promise<{
   const bytes = new Uint8Array(arrayBuffer);
 
   // Vérifier les magic bytes selon le type
-  let isValid = false;
-  let detectedFormat = 'unknown';
+  let  isValid= false;
+  let  detectedFormat= 'unknown';
 
   // JPEG: FF D8 FF
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
@@ -156,8 +156,8 @@ export async function compressImage(
 
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+        let  width= img.width;
+        let  height= img.height;
 
         // Redimensionner si nécessaire
         if (maxWidth && width > maxWidth) {
@@ -372,7 +372,7 @@ export async function processDigitalFile(
     }
 
     // 4. Scan antivirus
-    let antivirusResult;
+    let  _antivirusResult;
     if (scanAntivirus) {
       antivirusResult = await scanFileAntivirus(file);
 
@@ -388,9 +388,9 @@ export async function processDigitalFile(
     }
 
     // 5. Compression si activée et format compressible
-    let processedFile = file;
-    let processedSize = originalSize;
-    let compressionRatio: number | undefined;
+    let  processedFile= file;
+    let  processedSize= originalSize;
+    let  compressionRatio: number | undefined;
 
     if (compress && COMPRESSIBLE_FORMATS.includes(validationResult.mimeType)) {
       try {
@@ -443,4 +443,10 @@ export const digitalFileProcessing = {
   scanFileAntivirus,
   processDigitalFile,
 };
+
+
+
+
+
+
 

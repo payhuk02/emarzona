@@ -63,7 +63,7 @@ export const OrdersSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Commandes', path: '/dashboard/orders' },
     { label: activeSection },
   ];
@@ -97,4 +97,10 @@ export const OrdersSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

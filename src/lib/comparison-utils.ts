@@ -17,7 +17,7 @@ export function deepEqual(a: any, b: any): boolean {
   // Comparer les tableaux
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
+    for (let  i= 0; i < a.length; i++) {
       if (!deepEqual(a[i], b[i])) return false;
     }
     return true;
@@ -114,7 +114,7 @@ export function deepEqualOnlyKeys(
  * Trouve les différences entre deux objets
  */
 export function getObjectDiff(a: any, b: any): Record<string, { old: any; new: any }> {
-  const diff: Record<string, { old: any; new: any }> = {};
+  const  diff: Record<string, { old: any; new: any }> = {};
 
   if (a == null || b == null) return diff;
   if (typeof a !== 'object' || typeof b !== 'object') return diff;
@@ -181,4 +181,10 @@ export function arrayOfObjectsEqualIgnoreOrder(
 
   return true;
 }
+
+
+
+
+
+
 

@@ -154,7 +154,7 @@ export default function CreateBundle() {
       });
 
       navigate(`/dashboard/digital-products/bundles`);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const err = error instanceof Error ? error : new Error('Erreur lors de la création du bundle');
       logger.error(err, {
         error,
@@ -298,4 +298,10 @@ export default function CreateBundle() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

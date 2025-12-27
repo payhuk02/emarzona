@@ -113,7 +113,7 @@ export default function PaymentManagementList() {
       if (!authUser) throw new Error('Not authenticated');
 
       // Get user profile and store
-      let storeId = store?.id;
+      let  storeId= store?.id;
 
       if (!storeId && authUser?.id) {
         const { data: profile } = await supabase
@@ -133,7 +133,7 @@ export default function PaymentManagementList() {
         }
       }
 
-      let query = supabase
+      let  query= supabase
         .from('orders')
         .select(
           `
@@ -356,7 +356,7 @@ export default function PaymentManagementList() {
         description: `${filteredOrders.length} commande(s) exportée(s) en CSV.`,
       });
       logger.info('Payment management orders exported to CSV', { count: filteredOrders.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error exporting orders to CSV', { error: errorMessage });
       toast({
@@ -378,7 +378,7 @@ export default function PaymentManagementList() {
         description: 'La liste des paiements a été mise à jour.',
       });
       logger.info('Payment management orders refreshed');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error refreshing orders', { error: errorMessage });
       toast({
@@ -740,3 +740,9 @@ export default function PaymentManagementList() {
     </MainLayout>
   );
 }
+
+
+
+
+
+

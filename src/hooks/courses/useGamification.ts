@@ -316,7 +316,7 @@ export const useCourseLeaderboard = (courseId: string | undefined, limit: number
           avatar_url?: string;
         };
       };
-      const leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => {
+      const  leaderboard: LeaderboardEntry[] = (data || []).map((entry, index) => {
         const user = entry.user as UserWithMetadata | null;
         return {
           user_id: entry.user_id,
@@ -546,4 +546,10 @@ export const useCreateAchievement = () => {
     },
   });
 };
+
+
+
+
+
+
 

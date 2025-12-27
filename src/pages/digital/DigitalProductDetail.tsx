@@ -218,7 +218,7 @@ export default function DigitalProductDetail() {
       } else {
         throw new Error('URL de paiement non disponible');
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error initiating purchase', {
         error: errorMessage,
@@ -738,3 +738,9 @@ export default function DigitalProductDetail() {
     </div>
   );
 }
+
+
+
+
+
+

@@ -103,7 +103,7 @@ export const MarketingSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Marketing & Croissance', path: '/dashboard/marketing' },
     { label: activeSection },
   ];
@@ -147,4 +147,10 @@ export const MarketingSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

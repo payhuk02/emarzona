@@ -141,7 +141,7 @@ export const useCustomerPurchasedProducts = () => {
         .order('download_date', { ascending: false });
 
       // Organiser les données
-      const purchasedProducts: PurchasedDigitalProduct[] = [];
+      const  purchasedProducts: PurchasedDigitalProduct[] = [];
 
       type OrderWithItems = {
         id: string;
@@ -179,7 +179,7 @@ export const useCustomerPurchasedProducts = () => {
           ) || [];
 
           // Calculer la date d'expiration
-          let expiryDate: string | null = null;
+          let  expiryDate: string | null = null;
           if (digitalProduct.download_expiry_days && digitalProduct.download_expiry_days > 0) {
             const expiry = new Date(order.created_at);
             expiry.setDate(expiry.getDate() + digitalProduct.download_expiry_days);
@@ -189,7 +189,7 @@ export const useCustomerPurchasedProducts = () => {
           }
 
           // Déterminer le statut
-          let status: 'active' | 'expired' | 'suspended' = 'active';
+          let  status: 'active' | 'expired' | 'suspended' = 'active';
           if (expiryDate && new Date(expiryDate) < new Date()) {
             status = 'expired';
           } else if (license?.status === 'suspended' || license?.status === 'revoked') {
@@ -228,4 +228,10 @@ export const useCustomerPurchasedProducts = () => {
     enabled: true,
   });
 };
+
+
+
+
+
+
 

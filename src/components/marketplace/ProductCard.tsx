@@ -160,7 +160,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           });
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'initialiser le paiement";
       logger.error('Erreur Moneroo', { error, productId: product.id });
@@ -176,7 +176,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
   return (
     <article
-      className="group relative flex flex-col rounded-xl bg-transparent border border-gray-200 dark:border-gray-700 overflow-hidden product-card product-card-mobile sm:product-card-tablet lg:product-card-desktop min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+      className="group relative flex flex-col rounded-xl bg-transparent border border-gray-200 dark:border-gray-700 overflow-hidden product-card product-card-mobile sm:product-card-tablet  _lg:product-card-desktop min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
       role="article"
       aria-labelledby={`product-title-${product.id}`}
       aria-describedby={`product-description-${product.id}`}
@@ -604,3 +604,9 @@ const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
 ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
+
+
+
+
+
+

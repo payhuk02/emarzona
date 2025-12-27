@@ -30,7 +30,7 @@ const COLORS = {
   revenue: '#f59e0b' // orange
 };
 
-export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
+export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
   data,
   chartType,
   onChartTypeChange,
@@ -310,7 +310,7 @@ interface TrafficSourceChartProps {
   loading?: boolean;
 }
 
-export const TrafficSourceChart: React.FC<TrafficSourceChartProps> = ({
+export const TrafficSourceChart : React.FC<TrafficSourceChartProps> = ({
   data,
   loading = false
 }) => {
@@ -427,7 +427,7 @@ interface RealtimeMetricsProps {
   onToggleRealTime: () => void;
 }
 
-export const RealtimeMetrics: React.FC<RealtimeMetricsProps> = ({
+export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
   analytics,
   changePercentages,
   isRealTimeActive,
@@ -563,3 +563,10 @@ export const RealtimeMetrics: React.FC<RealtimeMetricsProps> = ({
 // Import des icônes nécessaires
 import { Eye, MousePointer, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+
+
+
+
+
+

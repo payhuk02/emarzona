@@ -64,7 +64,7 @@ export function CategoryNavigationBar({
 
   // Définition complète des catégories avec leurs icônes et labels (style comeup.com)
   // Utilise maintenant les catégories centralisées avec i18n
-  const CATEGORY_CONFIG_BASE: CategoryOption[] = useMemo(
+  const  CATEGORY_CONFIG_BASE: CategoryOption[] = useMemo(
     () => [
       {
         value: 'all',
@@ -454,3 +454,9 @@ export function CategoryNavigationBar({
     </div>
   );
 }
+
+
+
+
+
+

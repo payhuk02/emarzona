@@ -29,7 +29,7 @@ interface ArtistTypeOption {
   gradient: string;
 }
 
-const ARTIST_TYPES: ArtistTypeOption[] = [
+const  ARTIST_TYPES: ArtistTypeOption[] = [
   {
     value: 'writer',
     label: 'Écrivain / Auteur',
@@ -146,4 +146,10 @@ const ArtistTypeSelectorComponent = ({ selectedType, onSelect }: ArtistTypeSelec
 
 // Optimisation avec React.memo
 export const ArtistTypeSelector = React.memo(ArtistTypeSelectorComponent);
+
+
+
+
+
+
 

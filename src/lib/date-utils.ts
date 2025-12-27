@@ -135,7 +135,7 @@ export function formatDuration(
       return `${secs}s`;
 
     case 'long': {
-      const parts: string[] = [];
+      const  parts: string[] = [];
       if (hours > 0) parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
       if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
       if (secs > 0 || parts.length === 0) parts.push(`${secs} seconde${secs > 1 ? 's' : ''}`);
@@ -158,7 +158,7 @@ export function getPeriodDates(period: 'today' | 'week' | 'month' | 'year' | 'al
   endDate: Date;
 } {
   const now = new Date();
-  let startDate: Date;
+  let  startDate: Date;
 
   switch (period) {
     case 'today':
@@ -270,4 +270,10 @@ export function endOfDay(date: Date | string): Date {
   result.setHours(23, 59, 59, 999);
   return result;
 }
+
+
+
+
+
+
 

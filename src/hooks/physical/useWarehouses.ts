@@ -206,7 +206,7 @@ export const useWarehouseInventory = (warehouseId?: string, filters?: {
     queryFn: async () => {
       if (!warehouseId) throw new Error('Warehouse ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('warehouse_inventory')
         .select(`
           *,
@@ -253,7 +253,7 @@ export const useWarehouseTransfers = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('warehouse_transfers')
         .select(`
           *,
@@ -296,7 +296,7 @@ export const useWarehouseAllocations = (warehouseId?: string, filters?: {
     queryFn: async () => {
       if (!warehouseId) throw new Error('Warehouse ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('warehouse_allocations')
         .select(`
           *,
@@ -484,7 +484,7 @@ export const useUpdateTransferStatus = () => {
       status: WarehouseTransfer['status'];
       userId?: string;
     }) => {
-      const updateData: any = {
+      const  updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -574,4 +574,10 @@ export const useUpdateTransferStatus = () => {
     },
   });
 };
+
+
+
+
+
+
 

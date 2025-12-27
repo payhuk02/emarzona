@@ -151,7 +151,7 @@ export function SizeChartDisplay({
   }
 
   const getSystemLabel = (system: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       eu: 'EU',
       us: 'US',
       uk: 'UK',
@@ -300,3 +300,9 @@ export function SizeChartDisplay({
     </Card>
   );
 }
+
+
+
+
+
+

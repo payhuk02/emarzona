@@ -110,7 +110,7 @@ export const useVendorMessaging = (
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
+      let  query= supabase
         .from('vendor_conversations')
         .select(
           `
@@ -189,7 +189,7 @@ export const useVendorMessaging = (
       }));
 
       setConversations(conversationsWithLastMessage as VendorConversation[]);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error fetching vendor conversations:', error);
       toast({
@@ -254,7 +254,7 @@ export const useVendorMessaging = (
           display_name?: string | null;
           avatar_url?: string | null;
         }
-        let profilesData: ProfileData[] = [];
+        let  profilesData: ProfileData[] = [];
         if (validSenderIds.length > 0) {
           try {
             // Utiliser une requête correcte avec .in() pour les UUIDs
@@ -290,7 +290,7 @@ export const useVendorMessaging = (
                 profilesData = data || [];
               }
             }
-          } catch (err: unknown) {
+          } catch ( _err: unknown) {
             const errorMessage = err instanceof Error ? err.message : String(err);
             logger.error('Exception fetching profiles', {
               error: err,
@@ -335,7 +335,7 @@ export const useVendorMessaging = (
             ? messagesWithSenders.length
             : (messagePage - 1) * 50 + messagesWithSenders.length; // 50 est la pageSize utilisée dans fetchMessages
         setHasMoreMessages(loadedCount < actualTotal);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error('Error fetching vendor messages:', error);
         toast({
@@ -457,7 +457,7 @@ export const useVendorMessaging = (
             user.id,
             storeId,
             productId
-          ).catch(err => {
+          ).catch( err => {
             logger.warn('Failed to send conversation started notification', err);
           });
         } catch (err) {
@@ -467,7 +467,7 @@ export const useVendorMessaging = (
       }
 
       return newConv as VendorConversation | null;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error creating vendor conversation:', error);
       toast({
@@ -498,7 +498,7 @@ export const useVendorMessaging = (
 
       if (error) throw error;
       return data as VendorConversation | null;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error fetching vendor conversation:', error);
       return null;
@@ -524,7 +524,7 @@ export const useVendorMessaging = (
         .eq('id', conversationId)
         .maybeSingle();
 
-      let senderType: 'customer' | 'store' | 'admin' = 'customer';
+      let  senderType: 'customer' | 'store' | 'admin' = 'customer';
       if (conversation) {
         if (user.id === conversation.store_user_id) {
           senderType = 'store';
@@ -592,7 +592,7 @@ export const useVendorMessaging = (
             storeId: conversation.store_id,
             productId: conversation.product_id,
             messagePreview: formData.content,
-          }).catch(err => {
+          }).catch( err => {
             // Ne pas bloquer l'envoi du message si la notification échoue
             logger.warn('Failed to send vendor message notification', err);
           });
@@ -608,7 +608,7 @@ export const useVendorMessaging = (
       });
 
       return message as VendorMessage | null;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error sending vendor message:', error);
       toast({
@@ -636,7 +636,7 @@ export const useVendorMessaging = (
     for (const attachment of attachments) {
       try {
         // Utiliser storage_path si fourni, sinon extraire depuis l'URL
-        let storagePath = attachment.storage_path;
+        let  storagePath= attachment.storage_path;
 
         if (!storagePath) {
           // Extraire le chemin de stockage depuis l'URL
@@ -662,7 +662,7 @@ export const useVendorMessaging = (
         }
 
         // S'assurer que storage_path est valide et nettoyé
-        let cleanStoragePath = storagePath;
+        let  cleanStoragePath= storagePath;
 
         if (storagePath) {
           // Nettoyer le chemin pour s'assurer qu'il est relatif au bucket
@@ -727,7 +727,7 @@ export const useVendorMessaging = (
         }
 
         if (error) throw error;
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error('Error uploading vendor attachment:', error);
       }
@@ -746,7 +746,7 @@ export const useVendorMessaging = (
         .eq('conversation_id', conversationId)
         .neq('sender_id', userId)
         .eq('is_read', false);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error marking vendor messages as read:', error);
     }
@@ -764,7 +764,7 @@ export const useVendorMessaging = (
   // Ouvrir une conversation
   const openConversation = useCallback(
     async (conversationId: string) => {
-      let conv = conversations.find(c => c.id === conversationId);
+      let  conv= conversations.find(c => c.id === conversationId);
       if (!conv) {
         // Récupérer la conversation depuis la base de données
         const { data: convData, error: convError } = await supabase
@@ -866,3 +866,9 @@ export const useVendorMessaging = (
     totalMessagesCount,
   };
 };
+
+
+
+
+
+

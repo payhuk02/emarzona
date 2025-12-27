@@ -113,7 +113,7 @@ export interface BulkDigitalUpdateProps {
 /**
  * Configuration des champs
  */
-const FIELD_CONFIG: Record<
+const  FIELD_CONFIG: Record<
   BulkUpdateField,
   {
     label: string;
@@ -169,7 +169,7 @@ const FIELD_CONFIG: Record<
  * />
  * ```
  */
-export const BulkDigitalUpdate: React.FC<BulkDigitalUpdateProps> = ({
+export const BulkDigitalUpdate : React.FC<BulkDigitalUpdateProps> = ({
   products,
   onSave,
   onCancel,
@@ -208,7 +208,7 @@ export const BulkDigitalUpdate: React.FC<BulkDigitalUpdateProps> = ({
   const addChange = () => {
     if (!updateValue.trim()) return;
 
-    const newChange: BulkUpdateChange = {
+    const  newChange: BulkUpdateChange = {
       field: updateField,
       mode: updateMode,
       value: updateField === 'price' || updateField === 'maxLicenses'
@@ -235,7 +235,7 @@ export const BulkDigitalUpdate: React.FC<BulkDigitalUpdateProps> = ({
     if (selected.length === 0) return [];
 
     return selected.map((product) => {
-      const preview: Record<string, any> = { ...product };
+      const  preview: Record<string, any> = { ...product };
 
       changes.forEach((change) => {
         switch (change.field) {
@@ -682,4 +682,11 @@ export const BulkDigitalUpdate: React.FC<BulkDigitalUpdateProps> = ({
 BulkDigitalUpdate.displayName = 'BulkDigitalUpdate';
 
 export default BulkDigitalUpdate;
+
+
+
+
+
+
+
 

@@ -272,7 +272,7 @@ export const DigitalProductsList = () => {
     }
 
     // Calculer les revenus réels depuis les commandes payées
-    let totalRevenue = 0;
+    let  totalRevenue= 0;
     if (revenueMap) {
       products.forEach(p => {
         const product = 'product' in p ? p.product : p;
@@ -1740,3 +1740,9 @@ export const DigitalProductsList = () => {
 };
 
 export default DigitalProductsList;
+
+
+
+
+
+

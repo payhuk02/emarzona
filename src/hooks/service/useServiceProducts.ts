@@ -54,7 +54,7 @@ export const useServiceProducts = (storeId?: string) => {
   return useQuery({
     queryKey: ['service-products', storeId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('service_products')
         .select(`
           *,
@@ -238,4 +238,10 @@ export const useTopRatedServices = (storeId: string, limit = 5) => {
     enabled: !!storeId,
   });
 };
+
+
+
+
+
+
 

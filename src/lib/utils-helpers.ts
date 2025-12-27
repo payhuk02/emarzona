@@ -10,7 +10,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let  timeout: NodeJS.Timeout | null = null;
   
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
@@ -32,7 +32,7 @@ export function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
+  let  inThrottle: boolean;
   
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
@@ -341,9 +341,9 @@ export async function retry<T>(
   maxRetries: number = 3,
   delayMs: number = 1000
 ): Promise<T> {
-  let lastError: Error;
+  let  lastError: Error;
   
-  for (let i = 0; i < maxRetries; i++) {
+  for (let  i= 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
@@ -357,4 +357,10 @@ export async function retry<T>(
   
   throw lastError!;
 }
+
+
+
+
+
+
 

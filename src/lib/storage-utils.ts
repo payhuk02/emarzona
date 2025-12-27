@@ -149,8 +149,8 @@ export function getStorageKeys(type: StorageType = 'localStorage'): string[] {
     return [];
   }
 
-  const keys: string[] = [];
-  for (let i = 0; i < storage.length; i++) {
+  const  keys: string[] = [];
+  for (let  i= 0; i < storage.length; i++) {
     const key = storage.key(i);
     if (key) {
       keys.push(key);
@@ -168,8 +168,8 @@ export function getAllStorageItems(type: StorageType = 'localStorage'): Record<s
     return {};
   }
 
-  const items: Record<string, unknown> = {};
-  for (let i = 0; i < storage.length; i++) {
+  const  items: Record<string, unknown> = {};
+  for (let  i= 0; i < storage.length; i++) {
     const key = storage.key(i);
     if (key) {
       try {
@@ -217,8 +217,8 @@ export function getStorageSize(type: StorageType = 'localStorage'): number {
     return 0;
   }
 
-  let size = 0;
-  for (let i = 0; i < storage.length; i++) {
+  let  size= 0;
+  for (let  i= 0; i < storage.length; i++) {
     const key = storage.key(i);
     if (key) {
       const value = storage.getItem(key);
@@ -251,7 +251,7 @@ export function getOrSetStorageItem<T>(
  * Supprime plusieurs clés du stockage
  */
 export function removeStorageItems(keys: string[], type: StorageType = 'localStorage'): number {
-  let removed = 0;
+  let  removed= 0;
   for (const key of keys) {
     if (removeStorageItem(key, type)) {
       removed++;
@@ -287,3 +287,9 @@ export function migrateStorageItem(key: string, from: StorageType, to: StorageTy
   }
   return success;
 }
+
+
+
+
+
+

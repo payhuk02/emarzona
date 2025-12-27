@@ -130,7 +130,7 @@ export interface DigitalBundleManagerProps {
  * />
  * ```
  */
-export const DigitalBundleManager: React.FC<DigitalBundleManagerProps> = ({
+export const DigitalBundleManager : React.FC<DigitalBundleManagerProps> = ({
   bundle,
   availableProducts,
   onSave,
@@ -202,7 +202,7 @@ export const DigitalBundleManager: React.FC<DigitalBundleManagerProps> = ({
 
   // Valider le formulaire
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const  newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
       newErrors.name = 'Le nom du bundle est requis';
@@ -232,7 +232,7 @@ export const DigitalBundleManager: React.FC<DigitalBundleManagerProps> = ({
   const handleSave = () => {
     if (!validate()) return;
 
-    const bundleData: DigitalBundle = {
+    const  bundleData: DigitalBundle = {
       ...(bundle?.id && { id: bundle.id }),
       name,
       description,
@@ -714,4 +714,11 @@ export const DigitalBundleManager: React.FC<DigitalBundleManagerProps> = ({
 DigitalBundleManager.displayName = 'DigitalBundleManager';
 
 export default DigitalBundleManager;
+
+
+
+
+
+
+
 

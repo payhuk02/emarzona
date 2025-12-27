@@ -19,7 +19,7 @@ interface CheckoutProgressProps {
   currentStep: number;
 }
 
-export const CheckoutProgress: React.FC<CheckoutProgressProps> = ({ steps, currentStep }) => {
+export const CheckoutProgress : React.FC<CheckoutProgressProps> = ({ steps, currentStep }) => {
   return (
     <div className="w-full mb-6">
       <div className="flex items-center justify-between">
@@ -74,4 +74,11 @@ export const CheckoutProgress: React.FC<CheckoutProgressProps> = ({ steps, curre
     </div>
   );
 };
+
+
+
+
+
+
+
 

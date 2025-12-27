@@ -114,7 +114,7 @@ export async function sendTeamInvitationNotification(
     }
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error sending team invitation notification', { error, data });
     return { success: false, error: error.message };
   }
@@ -171,7 +171,7 @@ export async function sendTaskAssignedNotification(
     await Promise.all(notifications);
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error sending task assigned notification', { error, data });
     return { success: false, error: error.message };
   }
@@ -220,7 +220,7 @@ export async function sendTaskUpdateNotification(
     await Promise.all(notifications);
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error sending task update notification', { error, taskId });
     return { success: false, error: error.message };
   }
@@ -258,9 +258,15 @@ export async function sendTaskOverdueNotification(
     await Promise.all(notifications);
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error sending task overdue notification', { error, taskId });
     return { success: false, error: error.message };
   }
 }
+
+
+
+
+
+
 

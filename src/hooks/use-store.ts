@@ -48,7 +48,7 @@ export const useStore = () => {
       
       // Prendre le premier résultat s'il y en a un
       setStore(data && data.length > 0 ? data[0] : null);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -65,3 +65,9 @@ export const useStore = () => {
 
   return { store, loading, refetch: fetchStore };
 };
+
+
+
+
+
+

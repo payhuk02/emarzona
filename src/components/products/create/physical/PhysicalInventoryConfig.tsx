@@ -126,3 +126,9 @@ export const PhysicalInventoryConfig = ({ data, onUpdate }: PhysicalInventoryCon
   );
 };
 
+
+
+
+
+
+

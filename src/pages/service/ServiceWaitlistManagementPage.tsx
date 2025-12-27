@@ -25,10 +25,13 @@ import {
 import { WaitlistManager, type WaitlistEntry } from '@/components/service/WaitlistManager';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export default function ServiceWaitlistManagementPage() {
   const { store } = useStore();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { data: waitlist, isLoading } = useStoreWaitlist(store?.id || '');
   const notifyEntry = useNotifyWaitlistEntry();
   const convertToBooking = useConvertWaitlistToBooking();
@@ -54,7 +57,7 @@ export default function ServiceWaitlistManagementPage() {
   });
 
   // Convertir les entrées waitlist au format du composant
-  const waitlistEntries: WaitlistEntry[] = (waitlist || []).map((entry) => ({
+  const  waitlistEntries: WaitlistEntry[] = (waitlist || []).map((entry) => ({
     id: entry.id,
     serviceId: entry.service_id,
     serviceName: entry.products?.name || 'Service',
@@ -102,12 +105,44 @@ export default function ServiceWaitlistManagementPage() {
   };
 
   const handleConvert = async (entryId: string) => {
-    // TODO: Créer une réservation et convertir
-    // Pour l'instant, on met juste à jour le statut
     const entry = waitlistEntries.find((e) => e.id === entryId);
-    if (entry) {
-      // Naviguer vers la page de création de réservation avec pré-remplissage
-      navigate(`/service/${entry.serviceId}/book?waitlist=${entryId}`);
+    if (!entry) {
+      toast({
+        title: 'Erreur',
+        description: 'Entrée waitlist non trouvée',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Option 1: Si une réservation existe déjà (depuis la page de booking)
+      // On peut utiliser convertToBooking directement
+      // Option 2: Naviguer vers la page de booking avec pré-remplissage
+      // La page de booking créera la réservation et appellera convertToBooking
+      
+      // Pour l'instant, naviguer vers la page de booking avec les paramètres waitlist
+      // La page ServiceBooking créera la réservation et appellera automatiquement convertToBooking
+      navigate(`/service/${entry.serviceId}/book?waitlist=${entryId}`, {
+        state: {
+          waitlistEntry: entry,
+          prefillData: {
+            customerName: entry.customerName,
+            customerEmail: entry.customerEmail,
+            customerPhone: entry.customerPhone,
+            preferredDate: entry.preferredDate,
+            preferredTime: entry.preferredTime,
+            notes: entry.notes,
+          },
+        },
+      });
+    } catch (error) {
+      logger.error('Erreur lors de la conversion waitlist', { entryId, error });
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de convertir en réservation',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -159,4 +194,10 @@ export default function ServiceWaitlistManagementPage() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

@@ -67,6 +67,7 @@ import { useProductPixels } from '@/hooks/courses/useProductPixels';
 import { ProductReviewsSummary } from '@/components/reviews';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
+import { useCreateCourseOrder } from '@/hooks/orders/useCreateCourseOrder';
 
 const CourseDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -78,6 +79,10 @@ const CourseDetail = () => {
 
   const [currentLesson, setCurrentLesson] = useState<CourseLesson | null>(null);
   const [hasTrackedView, setHasTrackedView] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  
+  // Hook pour créer commande cours
+  const createCourseOrder = useCreateCourseOrder();
 
   // Récupérer les infos d'affiliation
   const { isEnabled: affiliateEnabled, settings: affiliateSettings } = useIsAffiliateEnabled(
@@ -169,13 +174,36 @@ const CourseDetail = () => {
     setCurrentLesson(lesson);
   };
 
-  const handleEnroll = () => {
-    if (!isEnrolled) {
+  const handleEnroll = async () => {
+    if (!isEnrolled && !isEnrolling) {
+      // Vérifier que l'utilisateur est connecté
+      if (!user) {
+        toast({
+          title: 'Connexion requise',
+          description: 'Veuillez vous connecter pour vous inscrire au cours.',
+          variant: 'destructive',
+        });
+        navigate('/auth');
+        return;
+      }
+
+      // Vérifier que les données nécessaires sont disponibles
+      if (!product?.store_id || !course?.id || !product?.id) {
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de récupérer les informations du cours.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setIsEnrolling(true);
+
       // Tracker le clic sur "S'inscrire"
       trackEvent.mutate({
         product_id: product.id,
         event_type: 'click',
-        user_id: user?.id,
+        user_id: user.id,
         session_id: getSessionId(),
         metadata: {
           source: 'enroll_button',
@@ -183,11 +211,33 @@ const CourseDetail = () => {
         },
       });
 
-      toast({
-        title: 'Inscription au cours',
-        description: 'Fonctionnalité en cours de développement...',
-      });
-      // TODO: Implémenter le paiement et l'inscription
+      try {
+        // Créer la commande et initier le paiement
+        const result = await createCourseOrder.mutateAsync({
+          courseId: course.id,
+          productId: product.id,
+          storeId: product.store_id,
+          customerEmail: user.email || '',
+          customerName: user.user_metadata?.name || user.email?.split('@')[0] || '',
+        });
+
+        // Rediriger vers la page de paiement Moneroo
+        if (result.checkoutUrl) {
+          window.location.href = result.checkoutUrl;
+        } else {
+          throw new Error('URL de paiement non disponible');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erreur lors de l\'inscription';
+        logger.error('Erreur lors de l\'inscription au cours', { error, courseId: course.id });
+        toast({
+          title: 'Erreur',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsEnrolling(false);
+      }
     }
   };
 
@@ -537,8 +587,8 @@ const CourseDetail = () => {
                   <CohortsList
                     courseId={course.id}
                     onCohortClick={cohort => {
-                      // TODO: Naviguer vers la page du cohort
-                      logger.debug('Navigate to cohort', { cohortId: cohort.id });
+                      // Naviguer vers la page de détail du cohort
+                      navigate(`/dashboard/cohorts/${cohort.id}`);
                     }}
                   />
                 </CardContent>
@@ -746,9 +796,10 @@ const CourseDetail = () => {
                     className="w-full bg-orange-600 hover:bg-orange-700"
                     size="lg"
                     onClick={handleEnroll}
+                    disabled={isEnrolling}
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    S'inscrire maintenant
+                    {isEnrolling ? 'Inscription en cours...' : "S'inscrire maintenant"}
                   </Button>
                 )}
 
@@ -884,3 +935,9 @@ const CourseDetail = () => {
 };
 
 export default CourseDetail;
+
+
+
+
+
+

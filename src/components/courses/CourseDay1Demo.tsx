@@ -25,12 +25,12 @@ import {
 /**
  * Composant de démonstration principale
  */
-export const CourseDay1Demo: React.FC = () => {
+export const CourseDay1Demo : React.FC = () => {
   const [courseStatus, setCourseStatus] = useState<CourseStatus>('published');
   const [enrollmentStatus, setEnrollmentStatus] = useState<EnrollmentStatus>('active');
 
   // Données de test - Étudiant
-  const sampleStudent: EnrollmentStudent = {
+  const  sampleStudent: EnrollmentStudent = {
     id: 'STU-001',
     name: 'Amadou Diallo',
     email: 'amadou.diallo@example.com',
@@ -38,7 +38,7 @@ export const CourseDay1Demo: React.FC = () => {
   };
 
   // Données de test - Cours
-  const sampleCourse: EnrollmentCourse = {
+  const  sampleCourse: EnrollmentCourse = {
     id: 'CRS-001',
     name: 'React & TypeScript Avancé',
     instructor: 'Sarah Martin',
@@ -432,4 +432,11 @@ export const CourseDay1Demo: React.FC = () => {
 };
 
 export default CourseDay1Demo;
+
+
+
+
+
+
+
 

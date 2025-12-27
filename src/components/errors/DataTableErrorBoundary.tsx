@@ -42,7 +42,7 @@ export class DataTableErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch( _error: Error, errorInfo: ErrorInfo) {
     // Incrémenter le compteur d'erreurs
     this.setState((prev) => ({
       errorCount: prev.errorCount + 1,
@@ -170,4 +170,10 @@ export const DataTablePlaceholder = ({ message = 'Chargement des données...' }:
     </div>
   );
 };
+
+
+
+
+
+
 

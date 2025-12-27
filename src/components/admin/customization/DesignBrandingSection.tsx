@@ -134,7 +134,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
   const applyColorInRealTime = (colorKey: string, value: string) => {
     const root = document.documentElement;
-    let hslValue = value;
+    let  hslValue= value;
     
     // Convertir HSL si nécessaire
     if (value.startsWith('hsl(')) {
@@ -142,7 +142,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     }
     
     // Mapper les clés aux variables CSS
-    const cssVarMap: Record<string, string> = {
+    const  cssVarMap: Record<string, string> = {
       primary: '--primary',
       secondary: '--secondary',
       accent: '--accent',
@@ -214,7 +214,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     if (!file.type || !allowedTypes.includes(file.type)) {
       // Si le type MIME n'est pas détecté, essayer de le déterminer depuis l'extension
       const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const extToMime: Record<string, string> = {
+      const  extToMime: Record<string, string> = {
         'png': 'image/png',
         'jpg': 'image/jpeg',
         'jpeg': 'image/jpeg',
@@ -262,11 +262,11 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
       // Vérifier que le type MIME est valide ou le déterminer depuis l'extension
       const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp', 'image/x-icon', 'image/vnd.microsoft.icon'];
-      let fileType = file.type;
+      let  fileType= file.type;
       
       // Si le type MIME n'est pas valide, le déterminer depuis l'extension
       if (!fileType || !allowedMimeTypes.includes(fileType)) {
-        const extToMime: Record<string, string> = {
+        const  extToMime: Record<string, string> = {
           'png': 'image/png',
           'jpg': 'image/jpeg',
           'jpeg': 'image/jpeg',
@@ -998,7 +998,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                       key={key}
                       onClick={() => {
                         setLocalDesignTokens(prev => ({ ...prev, spacing: key }));
-                        const spacingMap: Record<string, string> = {
+                        const  spacingMap: Record<string, string> = {
                           '0': '0',
                           '1': '0.25rem',
                           '2': '0.5rem',
@@ -1102,4 +1102,10 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     </div>
   );
 };
+
+
+
+
+
+
 

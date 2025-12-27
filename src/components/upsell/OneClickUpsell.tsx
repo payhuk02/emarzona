@@ -114,7 +114,7 @@ export function OneClickUpsell({
         .limit(2);
 
       // Mapper les résultats
-      const mappedProducts: UpsellProduct[] = [];
+      const  mappedProducts: UpsellProduct[] = [];
 
       if (categoryProducts) {
         categoryProducts.forEach((product: any) => {
@@ -194,7 +194,7 @@ export function OneClickUpsell({
 
       onClose();
       navigate('/cart');
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible d\'ajouter au panier',
@@ -309,4 +309,10 @@ export function OneClickUpsell({
     </Dialog>
   );
 }
+
+
+
+
+
+
 

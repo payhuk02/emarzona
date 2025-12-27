@@ -188,7 +188,7 @@ export default function AutoReorderRules() {
         });
       }
       handleCloseDialog();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -221,7 +221,7 @@ export default function AutoReorderRules() {
       });
       setDeleteDialogOpen(false);
       setRuleToDelete(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -673,3 +673,9 @@ export default function AutoReorderRules() {
     </div>
   );
 }
+
+
+
+
+
+

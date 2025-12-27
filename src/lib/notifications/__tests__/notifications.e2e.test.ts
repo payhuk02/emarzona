@@ -58,7 +58,7 @@ describe('Système de Notifications - Tests End-to-End', () => {
 
     it('devrait bloquer après dépassement des limites', async () => {
       // Envoyer plusieurs notifications pour atteindre la limite
-      for (let i = 0; i < 25; i++) {
+      for (let  i= 0; i < 25; i++) {
         await notificationRateLimiter.recordNotification(TEST_USER_ID, 'email');
       }
 
@@ -71,7 +71,7 @@ describe('Système de Notifications - Tests End-to-End', () => {
 
   describe('2. Retry Service', () => {
     it("devrait retry en cas d'erreur retryable", async () => {
-      let attempts = 0;
+      let  attempts= 0;
       const fn = async () => {
         attempts++;
         if (attempts < 3) {
@@ -87,7 +87,7 @@ describe('Système de Notifications - Tests End-to-End', () => {
     });
 
     it('devrait ne pas retry pour erreurs non retryables', async () => {
-      let attempts = 0;
+      let  attempts= 0;
       const fn = async () => {
         attempts++;
         throw new Error('Invalid user');
@@ -323,3 +323,9 @@ describe('Système de Notifications - Tests End-to-End', () => {
     });
   });
 });
+
+
+
+
+
+

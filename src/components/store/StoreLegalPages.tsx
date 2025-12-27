@@ -77,7 +77,7 @@ const LEGAL_PAGES = [
   },
 ];
 
-export const StoreLegalPagesComponent: React.FC<StoreLegalPagesProps> = ({
+export const StoreLegalPagesComponent : React.FC<StoreLegalPagesProps> = ({
   legalPages,
   onChange,
 }) => {
@@ -164,4 +164,11 @@ export const StoreLegalPagesComponent: React.FC<StoreLegalPagesProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 

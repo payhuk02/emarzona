@@ -121,7 +121,7 @@ export function ReturnRequestForm({
 
     try {
       // Upload photos si disponibles
-      let photoUrls: string[] = [];
+      let  photoUrls: string[] = [];
       if (photos.length > 0) {
         // TODO: Upload vers Supabase Storage
         // Pour l'instant, on garde un tableau vide
@@ -150,7 +150,7 @@ export function ReturnRequestForm({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de créer la demande de retour',
@@ -301,4 +301,10 @@ export function ReturnRequestForm({
     </Card>
   );
 }
+
+
+
+
+
+
 

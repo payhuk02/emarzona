@@ -219,7 +219,7 @@ export default function TaxManagement() {
 
   // Filtered tax configs
   const filteredTaxConfigs = useMemo(() => {
-    let filtered = taxConfigs;
+    let  filtered= taxConfigs;
 
     if (countryFilter !== 'all') {
       filtered = filtered.filter((t) => t.country_code === countryFilter);
@@ -303,7 +303,7 @@ export default function TaxManagement() {
   };
 
   const getTaxTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       VAT: 'TVA',
       GST: 'GST',
       SALES_TAX: 'Taxe sur les ventes',
@@ -825,4 +825,10 @@ export default function TaxManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+
 

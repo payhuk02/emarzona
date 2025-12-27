@@ -72,7 +72,7 @@ export function validateRedirectUrl(url: string): ValidationResult {
   }
 
   // 2. Parser l'URL
-  let parsedUrl: URL;
+  let  parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
   } catch (error) {
@@ -219,3 +219,9 @@ export function addAllowedDomain(domain: string): void {
 export function getAllowedDomains(): readonly string[] {
   return Object.freeze([...ALLOWED_PAYMENT_DOMAINS]);
 }
+
+
+
+
+
+

@@ -97,7 +97,7 @@ export function SerialNumbersManager({ physicalProductId, variantId }: SerialNum
   }, [serials]);
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
       manufactured: { label: 'Fabriqué', variant: 'secondary' },
       in_stock: { label: 'En Stock', variant: 'default', className: 'bg-green-500' },
       reserved: { label: 'Réservé', variant: 'default', className: 'bg-yellow-500' },
@@ -472,3 +472,9 @@ function useDeleteSerialNumber() {
     },
   });
 }
+
+
+
+
+
+

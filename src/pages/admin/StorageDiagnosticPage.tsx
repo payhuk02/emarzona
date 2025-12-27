@@ -81,7 +81,7 @@ export default function StorageDiagnosticPage() {
   const filteredFiles = useMemo(() => {
     if (!report) return [];
 
-    let filtered = report.files;
+    let  filtered= report.files;
 
     // Filtre par statut
     if (statusFilter === 'exists') {
@@ -138,7 +138,7 @@ export default function StorageDiagnosticPage() {
         title: 'Diagnostic terminé',
         description: `${diagnosticReport.existingFiles} fichiers existants, ${diagnosticReport.missingFiles} fichiers manquants`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -189,7 +189,7 @@ export default function StorageDiagnosticPage() {
       // Re-run diagnostic pour mettre à jour le rapport
       await handleRunDiagnostic();
       setShowDeleteDialog(false);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -523,3 +523,9 @@ export default function StorageDiagnosticPage() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

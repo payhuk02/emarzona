@@ -27,7 +27,7 @@ interface RateLimitCache {
 }
 
 // Cache local pour éviter les appels répétés
-const rateLimitCache: RateLimitCache = {};
+const  rateLimitCache: RateLimitCache = {};
 const CACHE_TTL = 1000; // 1 seconde de cache
 
 /**
@@ -125,7 +125,7 @@ export async function checkRateLimit(
       });
 
       // En cas d'erreur, autoriser par défaut (fail open) mais avec limite réduite
-      const fallbackResponse: RateLimitResponse = {
+      const  fallbackResponse: RateLimitResponse = {
         allowed: true,
         remaining: 10, // Limite réduite en cas d'erreur
         limit: 10,
@@ -141,7 +141,7 @@ export async function checkRateLimit(
       return fallbackResponse;
     }
 
-    const response: RateLimitResponse = {
+    const  response: RateLimitResponse = {
       ...data,
       limit: data.limit || 100,
     };
@@ -177,7 +177,7 @@ export async function checkRateLimit(
     }
 
     return response;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorObj = error instanceof Error ? error : new Error('Unknown error');
     logger.error('[RateLimiter] Exception:', errorObj);
     
@@ -193,7 +193,7 @@ export async function checkRateLimit(
     });
 
     // En cas d'exception, autoriser par défaut mais avec limite réduite
-    const fallbackResponse: RateLimitResponse = {
+    const  fallbackResponse: RateLimitResponse = {
       allowed: true,
       remaining: 10,
       limit: 10,
@@ -281,7 +281,7 @@ export async function withRateLimit<T>(
     retryDelay = 1000,
   } = options || {};
 
-  let attempts = 0;
+  let  attempts= 0;
 
   while (attempts < maxRetries) {
     const result = await checkRateLimit(endpoint, userId, attempts > 0);
@@ -342,4 +342,10 @@ export function rateLimited(
     return descriptor;
   };
 }
+
+
+
+
+
+
 

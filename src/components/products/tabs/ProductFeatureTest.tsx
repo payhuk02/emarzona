@@ -42,7 +42,7 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
 
   const runTests = async () => {
     setIsRunning(true);
-    const testResults: TestResults = {
+    const  testResults: TestResults = {
       total: 0,
       passed: 0,
       failed: 0,
@@ -460,3 +460,9 @@ export const ProductFeatureTest = ({ onTestComplete }: FeatureTestProps) => {
     </div>
   );
 };
+
+
+
+
+
+

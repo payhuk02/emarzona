@@ -84,7 +84,7 @@ const WEST_AFRICA_COUNTRIES = [
   { code: 'GN', name: 'Guinée' },
 ];
 
-const TAX_TYPES: { value: TaxType; label: string }[] = [
+const  TAX_TYPES: { value: TaxType; label: string }[] = [
   { value: 'VAT', label: 'TVA (Value Added Tax)' },
   { value: 'GST', label: 'GST (Goods and Services Tax)' },
   { value: 'SALES_TAX', label: 'Taxe sur les ventes' },
@@ -692,3 +692,9 @@ export default function AdminTaxManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

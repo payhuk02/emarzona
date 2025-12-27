@@ -67,7 +67,7 @@ const PaymentFiltersDashboard = ({
   };
 
   const getActiveFiltersCount = () => {
-    let count = 0;
+    let  count= 0;
     if (statusFilter !== "all") count++;
     if (methodFilter !== "all") count++;
     if (dateFilter !== "all") count++;
@@ -84,7 +84,7 @@ const PaymentFiltersDashboard = ({
   ];
 
   const getMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       cash: "Espèces",
       card: "Carte bancaire",
       mobile_money: "Mobile Money",
@@ -96,7 +96,7 @@ const PaymentFiltersDashboard = ({
   };
 
   const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: "En attente",
       completed: "Complété",
       failed: "Échoué",
@@ -341,3 +341,9 @@ const PaymentFiltersDashboard = ({
 };
 
 export default PaymentFiltersDashboard;
+
+
+
+
+
+

@@ -71,3 +71,9 @@ export type CourseFormDataUpdate = Partial<CourseFormData> & {
   [key: string]: unknown; // Pour permettre les mises à jour dynamiques
 };
 
+
+
+
+
+
+

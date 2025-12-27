@@ -31,7 +31,7 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
           <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground">
             Solde disponible
           </CardTitle>
-          <Wallet className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
+          <Wallet  className ="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary flex-shrink-0" />
         </CardHeader>
         <CardContent className="p-2.5 sm:p-3 md:p-4">
           <div className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-primary mb-2 sm:mb-3 md:mb-4">
@@ -43,7 +43,7 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
             onClick={onWithdrawClick}
             disabled={!canWithdraw || loading}
           >
-            <Wallet className="h-3 w-3 mr-1 sm:mr-2" />
+            <Wallet  className ="h-3 w-3 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Demander un retrait</span>
             <span className="sm:hidden">Retirer</span>
           </Button>
@@ -120,4 +120,10 @@ export const EarningsBalance = ({ earnings, loading, onWithdrawClick }: Earnings
     </div>
   );
 };
+
+
+
+
+
+
 

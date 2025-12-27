@@ -67,7 +67,7 @@ export class EmailSegmentService {
       }
 
       return data as EmailSegment;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.createSegment error', { error, payload });
       throw error;
     }
@@ -93,7 +93,7 @@ export class EmailSegmentService {
       }
 
       return data as EmailSegment;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.getSegment error', { error, segmentId });
       throw error;
     }
@@ -111,7 +111,7 @@ export class EmailSegmentService {
     }
   ): Promise<EmailSegment[]> {
     try {
-      let query = supabase
+      let  query= supabase
         .from('email_segments')
         .select('*')
         .eq('store_id', storeId)
@@ -140,7 +140,7 @@ export class EmailSegmentService {
       }
 
       return (data || []) as EmailSegment[];
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.getSegments error', { error, storeId, filters });
       throw error;
     }
@@ -167,7 +167,7 @@ export class EmailSegmentService {
       }
 
       return data as EmailSegment;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.updateSegment error', { error, segmentId, payload });
       throw error;
     }
@@ -189,7 +189,7 @@ export class EmailSegmentService {
       }
 
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.deleteSegment error', { error, segmentId });
       throw error;
     }
@@ -210,7 +210,7 @@ export class EmailSegmentService {
       }
 
       return (data || []) as SegmentMember[];
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.calculateSegmentMembers error', { error, segmentId });
       throw error;
     }
@@ -231,7 +231,7 @@ export class EmailSegmentService {
       }
 
       return data as number;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailSegmentService.updateMemberCount error', { error, segmentId });
       throw error;
     }
@@ -240,4 +240,10 @@ export class EmailSegmentService {
 
 // Export instance singleton
 export const emailSegmentService = EmailSegmentService;
+
+
+
+
+
+
 

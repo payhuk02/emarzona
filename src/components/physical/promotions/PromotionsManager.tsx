@@ -78,7 +78,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
-export const PromotionsManager: React.FC = () => {
+export const PromotionsManager : React.FC = () => {
   const { store } = useStore();
   const { toast } = useToast();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -304,7 +304,7 @@ export const PromotionsManager: React.FC = () => {
       setEditingPromotion(null);
       setValidationErrors([]);
       setCodeValidation(null);
-    } catch (error: any) {
+    } catch ( _error: any) {
       const errorMessage = getErrorMessage(error);
       setValidationErrors([errorMessage]);
       toast({
@@ -1007,6 +1007,13 @@ export const PromotionsManager: React.FC = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
 
 
 

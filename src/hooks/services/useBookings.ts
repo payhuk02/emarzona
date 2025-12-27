@@ -226,11 +226,11 @@ export const useCheckAvailability = () => {
       if (error) throw error;
 
       // Generate all possible slots (every 30 minutes)
-      const slots: AvailabilitySlot[] = [];
+      const  slots: AvailabilitySlot[] = [];
       const start = new Date(startDate);
       const end = new Date(endDate);
 
-      for (let time = new Date(start); time < end; time.setMinutes(time.getMinutes() + 30)) {
+      for (let  time= new Date(start); time < end; time.setMinutes(time.getMinutes() + 30)) {
         const slotStart = new Date(time);
         const slotEnd = new Date(time.getTime() + duration * 60000);
 
@@ -265,4 +265,10 @@ export const useCheckAvailability = () => {
 };
 
 export default useServiceBookings;
+
+
+
+
+
+
 

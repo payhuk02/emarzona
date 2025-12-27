@@ -213,3 +213,9 @@ export const CourseCard = React.memo(CourseCardComponent, (prevProps, nextProps)
 
 CourseCard.displayName = 'CourseCard';
 
+
+
+
+
+
+

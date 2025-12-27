@@ -79,7 +79,7 @@ export const useKYC = () => {
 
       // Upload documents
       const frontUrl = await uploadDocument(formData.document_front, user.id, 'front');
-      let backUrl = null;
+      let  backUrl= null;
       if (formData.document_back) {
         backUrl = await uploadDocument(formData.document_back, user.id, 'back');
       }
@@ -196,3 +196,9 @@ export const useAdminKYC = () => {
     isUpdating: updateStatus.isPending,
   };
 };
+
+
+
+
+
+

@@ -42,7 +42,7 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
         : undefined;
 
       // Pages additionnelles à inclure
-      const includePages: string[] = [];
+      const  includePages: string[] = [];
       
       // Ajouter les pages légales si disponibles
       if (store.legal_pages) {
@@ -71,7 +71,7 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
         title: 'Sitemap généré',
         description: `Le sitemap a été téléchargé avec ${(products?.length || 0) + 1 + includePages.length} URLs.`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error generating sitemap', { error, storeId: store.id });
       toast({
         title: 'Erreur',
@@ -128,4 +128,10 @@ export const StoreSitemapGenerator = ({ store }: StoreSitemapGeneratorProps) => 
     </Card>
   );
 };
+
+
+
+
+
+
 

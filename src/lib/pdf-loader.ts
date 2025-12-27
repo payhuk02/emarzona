@@ -3,8 +3,8 @@
  * Charge seulement quand nécessaire pour réduire le bundle initial
  */
 
-let jsPDFModule: typeof import('jspdf') | null = null;
-let autoTableModule: typeof import('jspdf-autotable') | null = null;
+let  jsPDFModule: typeof import('jspdf') | null = null;
+let  autoTableModule: typeof import('jspdf-autotable') | null = null;
 
 /**
  * Charge jspdf de manière asynchrone
@@ -51,4 +51,10 @@ export const loadPDFModules = async () => {
     autoTableModule: autoTable,
   };
 };
+
+
+
+
+
+
 

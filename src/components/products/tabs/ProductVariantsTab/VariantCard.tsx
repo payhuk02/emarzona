@@ -281,3 +281,9 @@ export const VariantCard = React.memo(VariantCardComponent, (prevProps, nextProp
 
 VariantCard.displayName = 'VariantCard';
 
+
+
+
+
+
+

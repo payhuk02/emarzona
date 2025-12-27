@@ -90,7 +90,7 @@ export const EmailWorkflowBuilder = ({
       return;
     }
 
-    const payload: CreateWorkflowPayload = {
+    const  payload: CreateWorkflowPayload = {
       store_id: storeId,
       name,
       description,
@@ -130,7 +130,7 @@ export const EmailWorkflowBuilder = ({
   };
 
   const validateWorkflow = (): boolean => {
-    const errors: Record<string, string> = {};
+    const  errors: Record<string, string> = {};
 
     if (!name.trim()) {
       errors.name = 'Le nom est requis';
@@ -161,7 +161,7 @@ export const EmailWorkflowBuilder = ({
     return Object.keys(errors).length === 0;
   };
 
-  const currentWorkflow: EmailWorkflow | null = workflow || {
+  const  currentWorkflow: EmailWorkflow | null = workflow || {
     id: '',
     store_id: storeId,
     name,
@@ -366,3 +366,9 @@ export const EmailWorkflowBuilder = ({
     </>
   );
 };
+
+
+
+
+
+

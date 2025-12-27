@@ -32,12 +32,12 @@ export const analyzeSEO = (data: {
   images?: any[];
   slug?: string;
 }): SEOAnalysis => {
-  const issues: SEOIssue[] = [];
-  const strengths: string[] = [];
-  const keywords: string[] = [];
+  const  issues: SEOIssue[] = [];
+  const  strengths: string[] = [];
+  const  keywords: string[] = [];
 
   // Structure Analysis
-  let structureScore = 0;
+  let  structureScore= 0;
   
   // Title
   if (data.meta_title) {
@@ -140,7 +140,7 @@ export const analyzeSEO = (data: {
   }
 
   // Content Analysis
-  let contentScore = 0;
+  let  contentScore= 0;
   
   if (data.description && data.description.length > 300) {
     contentScore += 50;
@@ -187,7 +187,7 @@ export const analyzeSEO = (data: {
   }
 
   // Images Analysis
-  let imagesScore = 0;
+  let  imagesScore= 0;
   const imagesList = data.images || [];
   const totalImages = imagesList.length + (data.image_url ? 1 : 0);
 
@@ -221,7 +221,7 @@ export const analyzeSEO = (data: {
   }
 
   // Performance (basic check)
-  let performanceScore = 70; // Base score
+  let  performanceScore= 70; // Base score
   if (totalImages > 5) {
     performanceScore -= 20;
     issues.push({
@@ -237,7 +237,7 @@ export const analyzeSEO = (data: {
   }
 
   // Readability
-  let readabilityScore = 70; // Base score
+  let  readabilityScore= 70; // Base score
   if (data.description) {
     const sentences = data.description.split(/[.!?]+/).length;
     const words = data.description.split(/\s+/).length;
@@ -257,7 +257,7 @@ export const analyzeSEO = (data: {
     }
   }
 
-  const score: SEOScore = {
+  const  score: SEOScore = {
     structure: Math.min(100, structureScore),
     content: Math.min(100, contentScore),
     images: Math.min(100, imagesScore),
@@ -289,3 +289,9 @@ export const getScoreBadgeVariant = (score: number): 'default' | 'secondary' | '
   if (score >= 60) return 'secondary';
   return 'destructive';
 };
+
+
+
+
+
+

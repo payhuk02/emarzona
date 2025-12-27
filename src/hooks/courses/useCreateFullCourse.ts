@@ -297,7 +297,7 @@ export const useCreateFullCourse = () => {
                 paidProductId: product.id,
               });
             }
-          } catch (error: unknown) {
+          } catch ( _error: unknown) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             logger.error('Exception creating free preview course', {
               error: errorMessage,
@@ -313,7 +313,7 @@ export const useCreateFullCourse = () => {
           sectionsCount: typedResult.sections_count || 0,
           lessonsCount: typedResult.lessons_count || 0,
         };
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Global error creating course', {
           error: errorMessage,
@@ -346,3 +346,9 @@ export const useCreateFullCourse = () => {
     },
   });
 };
+
+
+
+
+
+

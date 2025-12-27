@@ -136,7 +136,7 @@ export class EmailRateLimiter {
 
       // Résoudre la promesse
       item.resolve(result);
-    } catch (error: any) {
+    } catch ( _error: any) {
       // Si erreur récupérable et retries disponibles, réessayer
       if (this.isRecoverableError(error) && item.retryCount < item.maxRetries) {
         item.retryCount++;
@@ -340,4 +340,10 @@ export class EmailRateLimiter {
 
 // Export instance singleton
 export const emailRateLimiter = EmailRateLimiter;
+
+
+
+
+
+
 

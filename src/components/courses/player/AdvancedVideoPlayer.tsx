@@ -118,7 +118,7 @@ export const AdvancedVideoPlayer = ({
   const watchTime = useWatchTime(enrollmentId, lessonId);
 
   // Qualités par défaut si non fournies
-  const defaultQualities: VideoQuality[] =
+  const  defaultQualities: VideoQuality[] =
     qualities.length > 0
       ? qualities
       : [
@@ -186,7 +186,7 @@ export const AdvancedVideoPlayer = ({
         }
         watchTime.startWatching();
       })
-      .catch(err => {
+      .catch( err => {
         setError('Impossible de lire la vidéo');
         // ✅ PHASE 2: Remplacer console.error par logger
         logger.error('Error loading video', { error: err });
@@ -223,7 +223,7 @@ export const AdvancedVideoPlayer = ({
     }
   }, [onTimeUpdate, videoTracking]);
 
-  const _handleSeek = useCallback((value: number[]) => {
+  const handleSeek= useCallback((value: number[]) => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -663,3 +663,9 @@ export const AdvancedVideoPlayer = ({
     </Card>
   );
 };
+
+
+
+
+
+

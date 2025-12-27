@@ -96,7 +96,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
 
   const handle2FAChange = async (type: 'admins' | 'vendors', enabled: boolean) => {
     const currentRequireAAL2 = customizationData?.security?.requireAAL2 || [];
-    let updatedRequireAAL2: string[];
+    let  updatedRequireAAL2: string[];
     
     if (enabled) {
       updatedRequireAAL2 = [...currentRequireAAL2, type];
@@ -304,4 +304,10 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

@@ -80,7 +80,7 @@ export class EmailABTestService {
         throw error;
       }
       return data as EmailABTest;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailABTestService.createABTest error', { error, payload });
       throw error;
     }
@@ -103,7 +103,7 @@ export class EmailABTestService {
         throw error;
       }
       return data as EmailABTest;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailABTestService.getABTest error', { error, abTestId });
       throw error;
     }
@@ -125,7 +125,7 @@ export class EmailABTestService {
         throw error;
       }
       return (data || []) as EmailABTest[];
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailABTestService.getABTestsByCampaign error', { error, campaignId });
       throw error;
     }
@@ -161,7 +161,7 @@ export class EmailABTestService {
         throw error;
       }
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailABTestService.updateABTestResults error', { error, abTestId, variant, results });
       throw error;
     }
@@ -181,7 +181,7 @@ export class EmailABTestService {
         throw error;
       }
       return data as 'variant_a' | 'variant_b' | null;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailABTestService.calculateWinner error', { error, abTestId });
       throw error;
     }
@@ -202,7 +202,7 @@ export class EmailABTestService {
         throw error;
       }
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('EmailABTestService.deleteABTest error', { error, abTestId });
       throw error;
     }
@@ -211,4 +211,10 @@ export class EmailABTestService {
 
 // Export instance singleton
 export const emailABTestService = EmailABTestService;
+
+
+
+
+
+
 

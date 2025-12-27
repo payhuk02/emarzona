@@ -76,7 +76,7 @@ export interface UserFriendlyError {
 /**
  * Mapping des types d'erreurs vers messages user-friendly
  */
-const ERROR_MESSAGES: Record<ErrorType, (error: NormalizedError, context?: Record<string, unknown>) => UserFriendlyError> = {
+const  ERROR_MESSAGES: Record<ErrorType, (error: NormalizedError, context?: Record<string, unknown>) => UserFriendlyError> = {
   [ErrorType.NETWORK_ERROR]: (error, context) => ({
     title: 'Problème de connexion',
     description: 'Impossible de se connecter au serveur. Vérifiez votre connexion internet et réessayez.',
@@ -244,7 +244,7 @@ const ERROR_MESSAGES: Record<ErrorType, (error: NormalizedError, context?: Recor
 /**
  * Messages spécifiques par contexte d'opération
  */
-const CONTEXT_MESSAGES: Record<string, (error: NormalizedError, context?: Record<string, unknown>) => Partial<UserFriendlyError>> = {
+const  CONTEXT_MESSAGES: Record<string, (error: NormalizedError, context?: Record<string, unknown>) => Partial<UserFriendlyError>> = {
   'product.create': (error, context) => ({
     title: 'Impossible de créer le produit',
     description: 'Une erreur s\'est produite lors de la création du produit. Vérifiez les informations saisies.',
@@ -340,7 +340,7 @@ export function getUserFriendlyError(
  * Génère le texte d'action suggérée
  */
 export function getActionText(action: SuggestedAction): string {
-  const actions: Record<SuggestedAction, string> = {
+  const  actions: Record<SuggestedAction, string> = {
     retry: 'Réessayer',
     refresh: 'Rafraîchir la page',
     'check-connection': 'Vérifier la connexion',
@@ -370,4 +370,10 @@ export function getShortErrorTitle(error: NormalizedError, context?: Record<stri
   const friendly = getUserFriendlyError(error, context);
   return friendly.title;
 }
+
+
+
+
+
+
 

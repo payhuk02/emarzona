@@ -238,3 +238,9 @@ export const CoursePromotionList = ({ courses }: CoursePromotionListProps) => {
   );
 };
 
+
+
+
+
+
+

@@ -338,3 +338,9 @@ export const CoursePixelsConfig = ({ data, onChange }: CoursePixelsConfigProps) 
   );
 };
 
+
+
+
+
+
+

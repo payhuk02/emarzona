@@ -147,7 +147,7 @@ export function generateProductSchemaData(product: {
     count: number;
   };
 }): Record<string, any> {
-  const schema: Record<string, any> = {
+  const  schema: Record<string, any> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
@@ -197,4 +197,10 @@ export function generateBreadcrumbSchemaData(items: Array<{ name: string; url: s
     })),
   };
 }
+
+
+
+
+
+
 

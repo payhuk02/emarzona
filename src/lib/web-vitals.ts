@@ -101,7 +101,7 @@ export const initWebVitals = () => {
  * Obtenir un résumé des métriques (pour affichage)
  */
 export const getVitalsRating = (value: number, metricName: string): 'good' | 'needs-improvement' | 'poor' => {
-  const thresholds: Record<string, [number, number]> = {
+  const  thresholds: Record<string, [number, number]> = {
     CLS: [0.1, 0.25],
     INP: [200, 500],
     LCP: [2500, 4000],
@@ -115,4 +115,10 @@ export const getVitalsRating = (value: number, metricName: string): 'good' | 'ne
   if (value <= needsImprovement) return 'needs-improvement';
   return 'poor';
 };
+
+
+
+
+
+
 

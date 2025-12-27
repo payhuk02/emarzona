@@ -263,7 +263,7 @@ export const ResourceConflictDetector = ({
     }
   }, [autoDetect, storeId]);
 
-  const conflictTypeLabels: Record<ResourceConflict['conflict_type'], string> = {
+  const  conflictTypeLabels: Record<ResourceConflict['conflict_type'], string> = {
     staff_double_booking: 'Double réservation staff',
     resource_unavailable: 'Ressource indisponible',
     time_overlap: 'Chevauchement temporel',
@@ -271,7 +271,7 @@ export const ResourceConflictDetector = ({
     location_conflict: 'Conflit de localisation',
   };
 
-  const conflictTypeColors: Record<ResourceConflict['conflict_type'], string> = {
+  const  conflictTypeColors: Record<ResourceConflict['conflict_type'], string> = {
     staff_double_booking: 'bg-red-100 text-red-800',
     resource_unavailable: 'bg-orange-100 text-orange-800',
     time_overlap: 'bg-yellow-100 text-yellow-800',
@@ -552,4 +552,10 @@ export const ResourceConflictDetector = ({
     </div>
   );
 };
+
+
+
+
+
+
 

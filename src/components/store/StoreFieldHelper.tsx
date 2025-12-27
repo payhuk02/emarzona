@@ -15,7 +15,7 @@ interface StoreFieldHelperProps {
   className?: string;
 }
 
-const HELP_MESSAGES: Record<string, { title?: string; message: string; variant?: 'info' | 'warning' }> = {
+const  HELP_MESSAGES: Record<string, { title?: string; message: string; variant?: 'info' | 'warning' }> = {
   name: {
     message: 'Choisissez un nom mémorable et descriptif pour votre boutique. Il apparaîtra sur votre page d\'accueil.',
   },
@@ -127,4 +127,10 @@ export const StoreFieldAlert = ({ field, variant = 'info', className = '' }: Sto
     </Alert>
   );
 };
+
+
+
+
+
+
 

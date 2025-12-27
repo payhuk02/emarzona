@@ -30,7 +30,7 @@ interface ProductReviewsSummaryProps {
   productType: ProductType;
 }
 
-export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
+export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
   productId,
   productType,
 }) => {
@@ -196,4 +196,11 @@ export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+
 

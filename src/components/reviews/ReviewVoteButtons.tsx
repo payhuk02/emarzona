@@ -18,7 +18,7 @@ interface ReviewVoteButtonsProps {
   className?: string;
 }
 
-export const ReviewVoteButtons: React.FC<ReviewVoteButtonsProps> = ({
+export const ReviewVoteButtons : React.FC<ReviewVoteButtonsProps> = ({
   helpfulCount,
   notHelpfulCount,
   currentUserVote,
@@ -118,6 +118,13 @@ export const ReviewVoteButtons: React.FC<ReviewVoteButtonsProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+
 
 
 

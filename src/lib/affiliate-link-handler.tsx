@@ -32,7 +32,7 @@ export const AffiliateLinkHandler = ({ productId }: AffiliateLinkHandlerProps) =
     // Track le clic d'affiliation
     const trackClick = async () => {
       try {
-        const metadata: Record<string, unknown> = {
+        const  metadata: Record<string, unknown> = {
           referer_url: document.referrer || window.location.href,
           user_agent: navigator.userAgent,
         };
@@ -67,6 +67,12 @@ export const AffiliateLinkHandler = ({ productId }: AffiliateLinkHandlerProps) =
   // Ce composant ne rend rien
   return null;
 };
+
+
+
+
+
+
 
 
 

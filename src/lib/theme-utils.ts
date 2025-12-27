@@ -14,7 +14,7 @@ const THEME_STORAGE_KEY = 'emarzona-theme';
 export const applyThemeImmediate = () => {
   // Récupérer le thème sauvegardé ou utiliser 'professional' par défaut
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeName;
-  const themeName: ThemeName = savedTheme && ['professional', 'minimal', 'dark', 'spacious', 'classic', 'default'].includes(savedTheme)
+  const  themeName: ThemeName = savedTheme && ['professional', 'minimal', 'dark', 'spacious', 'classic', 'default'].includes(savedTheme)
     ? savedTheme
     : 'professional'; // Thème clair par défaut
 
@@ -50,5 +50,11 @@ export const applyThemeImmediate = () => {
     root.classList.remove('dark');
   }
 };
+
+
+
+
+
+
 
 

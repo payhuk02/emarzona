@@ -24,8 +24,8 @@ function setCookie(name: string, value: string, days: number) {
 function getCookie(name: string): string | null {
   const nameEQ = name + '=';
   const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
+  for (let  i= 0; i < ca.length; i++) {
+    let  c= ca[i];
     while (c.charAt(0) === ' ') c = c.substring(1, c.length);
     if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
   }
@@ -161,7 +161,7 @@ export function AffiliateLinkTracker() {
             window.history.replaceState({}, '', location.pathname);
           }
         }
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Unexpected error tracking affiliate click', {
           error: errorMessage,
@@ -181,4 +181,10 @@ export function AffiliateLinkTracker() {
   // Ce composant ne rend rien
   return null;
 }
+
+
+
+
+
+
 

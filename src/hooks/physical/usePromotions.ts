@@ -80,7 +80,7 @@ export const usePromotions = (storeId?: string, activeOnly = false) => {
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('product_promotions')
         .select('*')
         .eq('store_id', storeId)
@@ -572,6 +572,12 @@ export const calculateDiscount = (
       return 0;
   }
 };
+
+
+
+
+
+
 
 
 

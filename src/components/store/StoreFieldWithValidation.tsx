@@ -29,7 +29,7 @@ interface StoreFieldWithValidationProps {
   className?: string;
 }
 
-export const StoreFieldWithValidation: React.FC<StoreFieldWithValidationProps> = ({
+export const StoreFieldWithValidation : React.FC<StoreFieldWithValidationProps> = ({
   id,
   label,
   value,
@@ -137,4 +137,11 @@ export const StoreFieldWithValidation: React.FC<StoreFieldWithValidationProps> =
     </div>
   );
 };
+
+
+
+
+
+
+
 

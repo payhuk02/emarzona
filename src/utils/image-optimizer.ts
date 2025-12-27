@@ -55,7 +55,7 @@ export function generateSizes(breakpoints: {
   tablet?: string;
   desktop?: string;
 }): string {
-  const parts: string[] = [];
+  const  parts: string[] = [];
 
   if (breakpoints.mobile) {
     parts.push(`(max-width: 768px) ${breakpoints.mobile}`);
@@ -112,7 +112,7 @@ export function getOptimizedImageUrl(
       ?.replace(/\.(jpg|jpeg|png)$/i, '') || '';
 
   // Déterminer le format optimal
-  let targetFormat = 'webp';
+  let  targetFormat= 'webp';
   if (format === 'avif' && supportsAVIF()) {
     targetFormat = 'avif';
   } else if (format === 'auto') {
@@ -186,3 +186,9 @@ export function useOptimizedImage(
     supportsAVIF: supportsAVIF(),
   };
 }
+
+
+
+
+
+

@@ -56,3 +56,9 @@ export const LazyRechartsWrapper = ({ children }: LazyRechartsWrapperProps) => {
   return <>{children(recharts)}</>;
 };
 
+
+
+
+
+
+

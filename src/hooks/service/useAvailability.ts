@@ -360,10 +360,10 @@ export const useAvailableTimeSlots = (serviceProductId: string, date: string) =>
       // Generate time slots
       const duration = service?.duration_minutes || 60;
       const maxParticipants = service?.max_participants || 1;
-      const availableSlots: AvailableTimeSlot[] = [];
+      const  availableSlots: AvailableTimeSlot[] = [];
 
       slots.forEach((slot) => {
-        let currentTime = slot.start_time;
+        let  currentTime= slot.start_time;
         const endTime = slot.end_time;
 
         while (currentTime < endTime) {
@@ -396,4 +396,10 @@ export const useAvailableTimeSlots = (serviceProductId: string, date: string) =>
     enabled: !!serviceProductId && !!date,
   });
 };
+
+
+
+
+
+
 

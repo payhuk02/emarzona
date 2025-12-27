@@ -109,8 +109,8 @@ export async function callWithRetry<T>(
     retryableErrors = RETRYABLE_ERRORS,
   } = options;
 
-  let lastError: unknown;
-  let attempt = 0;
+  let  lastError: unknown;
+  let  attempt= 0;
 
   while (attempt <= maxRetries) {
     try {
@@ -160,5 +160,11 @@ export async function callWithRetry<T>(
   // Ne devrait jamais arriver, mais TypeScript l'exige
   throw lastError;
 }
+
+
+
+
+
+
 
 

@@ -103,7 +103,7 @@ export const useArtistPortfolioBySlug = (slug: string | undefined, storeId?: str
     queryFn: async () => {
       if (!slug) return null;
 
-      let query = supabase
+      let  query= supabase
         .from('artist_portfolios')
         .select(`
           *,
@@ -153,7 +153,7 @@ export const useStorePortfolios = (storeId: string | undefined, options?: {
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('artist_portfolios')
         .select('*')
         .eq('store_id', storeId)
@@ -193,7 +193,7 @@ export const usePortfolioGalleries = (portfolioId: string | undefined, options?:
     queryFn: async () => {
       if (!portfolioId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('artist_galleries')
         .select('*')
         .eq('portfolio_id', portfolioId)
@@ -232,7 +232,7 @@ export const useGalleryArtworks = (galleryId: string | undefined, options?: {
     queryFn: async () => {
       if (!galleryId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('artist_gallery_artworks')
         .select(`
           *,
@@ -466,7 +466,7 @@ export const useTrackPortfolioView = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       // Générer un session ID si utilisateur anonyme
-      let sessionId: string | null = null;
+      let  sessionId: string | null = null;
       if (!user) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       }
@@ -566,4 +566,10 @@ export const usePortfolioLikeStatus = (portfolioId: string | undefined) => {
     enabled: !!portfolioId,
   });
 };
+
+
+
+
+
+
 

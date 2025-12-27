@@ -80,7 +80,7 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
 
       setAnalytics(analyticsData);
       setCampaigns(campaignsData);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors du chargement des analytics',
@@ -301,3 +301,9 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
+
+
+
+
+
+

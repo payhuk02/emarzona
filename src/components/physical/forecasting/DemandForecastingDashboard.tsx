@@ -83,7 +83,7 @@ export default function DemandForecastingDashboard() {
       });
       setIsForecastDialogOpen(false);
       setSelectedProductId('');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -98,7 +98,7 @@ export default function DemandForecastingDashboard() {
 
     try {
       await generateRecommendations.mutateAsync(store.id);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -475,4 +475,10 @@ export default function DemandForecastingDashboard() {
     </div>
   );
 }
+
+
+
+
+
+
 

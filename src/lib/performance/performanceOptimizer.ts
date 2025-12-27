@@ -19,7 +19,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let  timeout: NodeJS.Timeout | null = null;
 
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
@@ -41,7 +41,7 @@ export function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
+  let  inThrottle: boolean;
 
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
@@ -295,4 +295,10 @@ export class SimpleCache<K, V> {
     return this.cache.has(key) && this.get(key) !== undefined;
   }
 }
+
+
+
+
+
+
 

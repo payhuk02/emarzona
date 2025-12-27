@@ -71,8 +71,8 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
       const currentPeriodEnd = now;
       
       // Période précédente (même durée)
-      let previousPeriodStart: Date;
-      let previousPeriodEnd: Date;
+      let  previousPeriodStart: Date;
+      let  previousPeriodEnd: Date;
       
       if (timeRange === '7d') {
         currentPeriodStart.setDate(now.getDate() - 7);
@@ -261,7 +261,7 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
         monthlyStats
       });
 
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Impossible de charger les statistiques";
       logger.error("Error fetching analytics", { error: err, storeId });
       setError(errorMessage);
@@ -634,3 +634,9 @@ const StoreAnalytics = ({ storeId }: StoreAnalyticsProps) => {
 };
 
 export default StoreAnalytics;
+
+
+
+
+
+

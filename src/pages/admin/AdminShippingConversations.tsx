@@ -112,7 +112,7 @@ export default function AdminShippingConversations() {
   const { data: conversations, isLoading } = useQuery({
     queryKey: ['admin-shipping-conversations', statusFilter, disputedFilter],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('shipping_service_conversations')
         .select(
           `
@@ -804,7 +804,7 @@ function ConversationMessagesView({
       );
 
       setMessages(messagesWithSenders);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error loading messages', error);
       toast({
         title: '❌ Erreur',
@@ -851,7 +851,7 @@ function ConversationMessagesView({
         title: '✅ Message envoyé',
         description: 'Votre intervention a été envoyée.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error sending intervention', error);
       toast({
@@ -997,3 +997,9 @@ function ConversationMessagesView({
     </div>
   );
 }
+
+
+
+
+
+

@@ -198,7 +198,7 @@ class ChronopostService {
       const data = await response.json();
 
       // Parser la réponse Chronopost
-      const rates: ChronopostRate[] = [];
+      const  rates: ChronopostRate[] = [];
 
       // Chronopost retourne différents services
       const services = [
@@ -403,7 +403,7 @@ class ChronopostService {
         listEvents?: ChronopostEvent[];
       }
       const data = (await response.json()) as ChronopostTrackingData;
-      const events: TrackingEvent[] = [];
+      const  events: TrackingEvent[] = [];
 
       if (data.listEvents) {
         data.listEvents.forEach((event: ChronopostEvent) => {
@@ -425,3 +425,9 @@ class ChronopostService {
 }
 
 export default ChronopostService;
+
+
+
+
+
+

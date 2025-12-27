@@ -279,7 +279,7 @@ export const CreatePhysicalProductWizard = ({
       // Handle affiliate updates
       if (data.affiliate !== undefined) {
         // Si prev.affiliate existe, l'utiliser comme base, sinon utiliser les valeurs par défaut
-        const defaultAffiliate: PhysicalProductAffiliateSettings = {
+        const  defaultAffiliate: PhysicalProductAffiliateSettings = {
           enabled: false,
           commission_rate: 10,
           commission_type: 'percentage',
@@ -357,7 +357,7 @@ export const CreatePhysicalProductWizard = ({
    * Load draft from localStorage
    */
   useEffect(() => {
-    let savedDraft: string | null = null;
+    let  savedDraft: string | null = null;
     try {
       savedDraft = localStorage.getItem('physical-product-draft');
     } catch {
@@ -386,7 +386,7 @@ export const CreatePhysicalProductWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<boolean> => {
-      const errors: string[] = [];
+      const  errors: string[] = [];
 
       // Réinitialiser les erreurs serveur
       clearServerErrors();
@@ -635,7 +635,7 @@ export const CreatePhysicalProductWizard = ({
 
       // 1. Generate slug from name and ensure uniqueness
       // Utiliser le slug du formulaire s'il est fourni, sinon générer depuis le nom
-      let slug =
+      let  slug=
         formData.slug?.trim() ||
         formData.name
           ?.toLowerCase()
@@ -644,7 +644,7 @@ export const CreatePhysicalProductWizard = ({
         'product';
 
       // Vérifier l'unicité du slug et générer un nouveau si nécessaire
-      let attempts = 0;
+      let  attempts= 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -827,7 +827,7 @@ export const CreatePhysicalProductWizard = ({
             price: product.price,
             currency: product.currency,
             created_at: product.created_at,
-          }).catch(err => {
+          }).catch( err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
         });
@@ -882,8 +882,8 @@ export const CreatePhysicalProductWizard = ({
    */
   const handlePublish = useCallback(async () => {
     // Validate required steps (1-4 are required, 5-7 are optional)
-    let allValid = true;
-    for (let step = 1; step <= 4; step++) {
+    let  allValid= true;
+    for (let  step= 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -1365,3 +1365,9 @@ export const CreatePhysicalProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

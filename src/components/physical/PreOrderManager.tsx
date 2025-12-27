@@ -103,7 +103,7 @@ export interface PreOrderManagerProps {
 // MOCK DATA
 // ============================================================================
 
-const MOCK_PRE_ORDERS: PreOrder[] = [
+const  MOCK_PRE_ORDERS: PreOrder[] = [
   {
     id: 'po_1',
     product_id: 'prod_1',
@@ -163,7 +163,7 @@ const MOCK_PRE_ORDERS: PreOrder[] = [
   },
 ];
 
-const MOCK_CUSTOMERS: PreOrderCustomer[] = [
+const  MOCK_CUSTOMERS: PreOrderCustomer[] = [
   {
     id: 'poc_1',
     pre_order_id: 'po_1',
@@ -206,7 +206,7 @@ const MOCK_CUSTOMERS: PreOrderCustomer[] = [
 // ============================================================================
 
 function PreOrderStatusBadge({ status }: { status: PreOrderStatus }) {
-  const config: Record<
+  const  config: Record<
     PreOrderStatus,
     { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }
   > = {
@@ -663,4 +663,10 @@ export function PreOrderManager({ productId, storeId, className }: PreOrderManag
     </div>
   );
 }
+
+
+
+
+
+
 

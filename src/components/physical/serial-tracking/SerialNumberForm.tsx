@@ -294,3 +294,9 @@ export function SerialNumberForm({ serialNumberId, physicalProductId, variantId,
 
 
 
+
+
+
+
+
+

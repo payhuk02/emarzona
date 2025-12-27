@@ -6,7 +6,6 @@
  * ```tsx
  * const { timeLeft, isFinished, start, pause, reset } = useCountdown({
  *   initialTime: 60, // 60 secondes
- *   onFinish: () => console.log('Terminé!'),
  * });
  * ```
  */
@@ -140,4 +139,10 @@ export function useCountdown(
     formattedTime: formattedTime(),
   };
 }
+
+
+
+
+
+
 

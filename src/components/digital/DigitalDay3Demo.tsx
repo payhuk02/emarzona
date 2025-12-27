@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 /**
  * Données de démonstration - Événements de téléchargement
  */
-const mockEvents: DownloadEvent[] = [
+const  mockEvents: DownloadEvent[] = [
   // Aujourd'hui
   {
     id: 'evt-001',
@@ -181,7 +181,7 @@ const mockEvents: DownloadEvent[] = [
 /**
  * Données de démonstration - Produits pour mise à jour groupée
  */
-const mockProducts: BulkUpdateDigitalProduct[] = [
+const  mockProducts: BulkUpdateDigitalProduct[] = [
   {
     id: 'prod-001',
     name: 'Ebook React Avancé',
@@ -285,7 +285,7 @@ const mockProducts: BulkUpdateDigitalProduct[] = [
  * - DownloadHistory
  * - BulkDigitalUpdate
  */
-export const DigitalDay3Demo: React.FC = () => {
+export const DigitalDay3Demo : React.FC = () => {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
@@ -434,4 +434,11 @@ export const DigitalDay3Demo: React.FC = () => {
 };
 
 export default DigitalDay3Demo;
+
+
+
+
+
+
+
 

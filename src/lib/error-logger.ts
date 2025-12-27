@@ -8,7 +8,6 @@ import { captureException, captureMessage } from '@sentry/react';
 // Sauvegarder les méthodes originales de la console pour éviter les boucles infinies
 // avec console-guard.ts
 const originalConsole = {
-  log: console.log.bind(console),
   info: console.info.bind(console),
   warn: console.warn.bind(console),
   error: console.error.bind(console),
@@ -77,8 +76,6 @@ export function logError(error: Error, context: ErrorLogContext = {}): void {
   if (process.env.NODE_ENV === 'development') {
     originalConsole.group('🔴 Error Logged');
     originalConsole.error('Error:', error);
-    originalConsole.log('Context:', context);
-    originalConsole.log('Full Log:', errorLog);
     originalConsole.groupEnd();
   }
 
@@ -169,7 +166,7 @@ function saveErrorToLocalStorage(errorLog: ErrorLog): void {
 
     // Récupérer les logs existants
     const existingLogsStr = localStorage.getItem(storageKey);
-    const existingLogs: ErrorLog[] = existingLogsStr
+    const  existingLogs: ErrorLog[] = existingLogsStr
       ? JSON.parse(existingLogsStr)
       : [];
 
@@ -232,7 +229,7 @@ export function setupGlobalErrorHandlers(): void {
   // Promesses rejetées non gérées
   window.addEventListener('unhandledrejection', (event) => {
     let error: Error;
-    
+
     if (event.reason instanceof Error) {
       error = event.reason;
     } else if (typeof event.reason === 'string') {
@@ -315,4 +312,10 @@ export function withErrorHandlingSync<T extends (...args: any[]) => any>(
     }
   }) as T;
 }
+
+
+
+
+
+
 

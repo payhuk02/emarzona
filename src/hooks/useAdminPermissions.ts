@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export type RolePermissions = Record<string, boolean>;
 
-export const DEFAULT_PERMISSION_KEYS: string[] = [
+export const DEFAULT_PERMISSION_KEYS : string[] = [
   'users.manage',
   'users.roles',
   'products.manage',
@@ -22,7 +22,7 @@ export const useAdminPermissions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const DEFAULT_ROLES: Array<{ role: string; permissions: RolePermissions }> = [
+  const  DEFAULT_ROLES: Array<{ role: string; permissions: RolePermissions }> = [
     {
       role: 'admin',
       permissions: Object.fromEntries(DEFAULT_PERMISSION_KEYS.map((k) => [k, true])) as RolePermissions,
@@ -95,7 +95,7 @@ export const useAdminPermissions = () => {
         .order('role');
       if (error) throw error;
       setRoles((data || []) as Array<{ role: string; permissions: RolePermissions }>);
-    } catch (e: unknown) {
+    } catch ( _e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur inconnue');
       // Fallback: table absente en production → utiliser des rôles par défaut côté client
       setRoles(DEFAULT_ROLES);
@@ -119,7 +119,7 @@ export const useAdminPermissions = () => {
       toast({ title: 'Permissions enregistrées', description: role });
       await fetchRoles();
       return true;
-    } catch (e: unknown) {
+    } catch ( _e: unknown) {
       const errorMessage = e instanceof Error ? e.message : 'Erreur inconnue';
       toast({ title: 'Erreur', description: errorMessage, variant: 'destructive' });
       return false;
@@ -128,5 +128,12 @@ export const useAdminPermissions = () => {
 
   return { roles, loading, error, refresh: fetchRoles, updateRolePermissions };
 };
+
+
+
+
+
+
+
 
 

@@ -17,7 +17,7 @@ export const useSEOAnalysis = (userId?: string) => {
     queryFn: async () => {
       if (!userId) throw new Error("User ID required");
 
-      const results: SEOPageData[] = [];
+      const  results: SEOPageData[] = [];
 
       // Fetch user's stores
       const { data: stores, error: storesError } = await supabase
@@ -133,3 +133,9 @@ export const usePagesToFixCount = (data: SEOPageData[] | undefined) => {
   if (!data) return 0;
   return data.filter(page => page.analysis.score.overall < 70).length;
 };
+
+
+
+
+
+

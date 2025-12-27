@@ -150,3 +150,9 @@ const MarketplaceFooter = () => {
 };
 
 export default MarketplaceFooter;
+
+
+
+
+
+

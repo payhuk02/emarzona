@@ -25,7 +25,7 @@ describe('Button', () => {
   it('should apply variant classes', () => {
     const { rerender } = render(<Button variant="destructive">Delete</Button>);
     
-    let button = screen.getByRole('button');
+    let  button= screen.getByRole('button');
     expect(button).toHaveClass('bg-destructive');
     
     rerender(<Button variant="outline">Cancel</Button>);
@@ -36,7 +36,7 @@ describe('Button', () => {
   it('should apply size classes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
     
-    let button = screen.getByRole('button');
+    let  button= screen.getByRole('button');
     expect(button).toHaveClass('h-9');
     
     rerender(<Button size="lg">Large</Button>);
@@ -89,4 +89,10 @@ describe('Button', () => {
     expect(button).toHaveAttribute('aria-label', 'Custom label');
   });
 });
+
+
+
+
+
+
 

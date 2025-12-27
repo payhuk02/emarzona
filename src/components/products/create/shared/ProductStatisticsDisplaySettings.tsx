@@ -27,7 +27,7 @@ interface ProductStatisticsDisplaySettingsProps {
   variant?: 'default' | 'compact';
 }
 
-export const ProductStatisticsDisplaySettings: React.FC<ProductStatisticsDisplaySettingsProps> = ({
+export const ProductStatisticsDisplaySettings : React.FC<ProductStatisticsDisplaySettingsProps> = ({
   formData,
   updateFormData,
   productType,
@@ -213,4 +213,11 @@ export const ProductStatisticsDisplaySettings: React.FC<ProductStatisticsDisplay
     </Card>
   );
 };
+
+
+
+
+
+
+
 

@@ -474,7 +474,7 @@ export const useCreateServiceOrder = () => {
       }
 
       // 5. Récupérer ou créer le customer
-      let customerId: string;
+      let  customerId: string;
 
       const { data: existingCustomer } = await supabase
         .from('customers')
@@ -552,7 +552,7 @@ export const useCreateServiceOrder = () => {
             created_at: booking.created_at || new Date().toISOString(),
           },
           storeId
-        ).catch(err => {
+        ).catch( err => {
           logger.error('Error in analytics tracking for booking', {
             error: err,
             bookingId: booking.id,
@@ -561,7 +561,7 @@ export const useCreateServiceOrder = () => {
       });
 
       // 7. Calculer le prix (peut dépendre du nombre de participants ou de la durée)
-      let totalPrice = product.promotional_price || product.price;
+      let  totalPrice= product.promotional_price || product.price;
 
       // Si pricing_type est 'per_participant', multiplier par le nombre de participants
       if (serviceProduct.pricing_type === 'per_participant') {
@@ -575,9 +575,9 @@ export const useCreateServiceOrder = () => {
       }
 
       // Calculer le montant à payer selon le type de paiement
-      let amountToPay = totalPrice;
-      let percentagePaid = 0;
-      let remainingAmount = 0;
+      let  amountToPay= totalPrice;
+      let  percentagePaid= 0;
+      let  remainingAmount= 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -685,7 +685,7 @@ export const useCreateServiceOrder = () => {
           currency: order.currency,
           payment_status: order.payment_status,
           created_at: order.created_at,
-        }).catch(err => {
+        }).catch( err => {
           logger.error('Error in analytics tracking for order', { error: err, orderId: order.id });
         });
       });
@@ -874,7 +874,7 @@ export const useCheckTimeSlotAvailability = () => {
       const checkEndTime = endDateTime.toTimeString().slice(0, 8);
 
       // Chercher les bookings qui se chevauchent
-      let query = supabase
+      let  query= supabase
         .from('service_bookings')
         .select('id, scheduled_date, scheduled_start_time, scheduled_end_time')
         .eq('product_id', serviceProductId)
@@ -914,3 +914,9 @@ export const useCheckTimeSlotAvailability = () => {
     },
   });
 };
+
+
+
+
+
+

@@ -14,7 +14,7 @@ export function useCommunityPosts(filter?: CommunityPostsFilter) {
   return useQuery({
     queryKey: ['community-posts', filter],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('community_posts')
         .select(`
           *,
@@ -320,4 +320,10 @@ export function useTogglePostFeatured() {
     },
   });
 }
+
+
+
+
+
+
 

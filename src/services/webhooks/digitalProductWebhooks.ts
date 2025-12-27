@@ -90,7 +90,7 @@ export async function sendWebhook(
     }
 
     // Construire le payload
-    const payload: WebhookPayload = {
+    const  payload: WebhookPayload = {
       event: eventType,
       event_id: eventId,
       timestamp: new Date().toISOString(),
@@ -101,7 +101,7 @@ export async function sendWebhook(
     const signature = await generateHMACSignature(payloadString, webhook.secret_key);
 
     // Headers
-    const headers: Record<string, string> = {
+    const  headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-Webhook-Signature': signature,
       'X-Webhook-Event': eventType,
@@ -110,10 +110,10 @@ export async function sendWebhook(
     };
 
     // Envoyer avec retry
-    let lastError: Error | null = null;
-    let lastResponse: Response | null = null;
+    let  lastError: Error | null = null;
+    let  lastResponse: Response | null = null;
 
-    for (let attempt = 1; attempt <= webhook.retry_count + 1; attempt++) {
+    for (let  attempt= 1; attempt <= webhook.retry_count + 1; attempt++) {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), webhook.timeout_seconds * 1000);
@@ -128,7 +128,7 @@ export async function sendWebhook(
         clearTimeout(timeoutId);
 
         const responseBody = await response.text().catch(() => '');
-        const responseHeaders: Record<string, string> = {};
+        const  responseHeaders: Record<string, string> = {};
         response.headers.forEach((value, key) => {
           responseHeaders[key] = value;
         });
@@ -165,7 +165,7 @@ export async function sendWebhook(
         }
 
         lastResponse = response;
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         // Si c'est la dernière tentative, enregistrer l'erreur
@@ -204,7 +204,7 @@ export async function sendWebhook(
       error: lastError?.message || 'Échec après toutes les tentatives',
       durationMs: Date.now() - startTime,
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending webhook', { error, webhookId, eventType });
     return {
@@ -286,7 +286,7 @@ export async function triggerWebhooks(
 
     // Envoyer les webhooks en parallèle (mais limiter à 10 simultanés)
     const batchSize = 10;
-    for (let i = 0; i < webhooks.length; i += batchSize) {
+    for (let  i= 0; i < webhooks.length; i += batchSize) {
       const batch = webhooks.slice(i, i + batchSize);
       await Promise.all(
         batch.map(webhook => sendWebhook(webhook.id, eventType, eventData, eventId))
@@ -296,4 +296,10 @@ export async function triggerWebhooks(
     logger.error('Error triggering webhooks', { error, storeId, eventType });
   }
 }
+
+
+
+
+
+
 

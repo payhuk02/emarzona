@@ -36,7 +36,7 @@ interface ProductFAQFormProps {
 }
 
 // Templates FAQ par type de produit
-const FAQ_TEMPLATES: Record<string, Array<{ question: string; answer: string }>> = {
+const  FAQ_TEMPLATES: Record<string, Array<{ question: string; answer: string }>> = {
   digital: [
     {
       question: 'Comment télécharger ce produit ?',
@@ -98,7 +98,7 @@ export const ProductFAQForm = ({ data, onUpdate }: ProductFAQFormProps) => {
   const addFAQ = () => {
     if (!newFAQ.question.trim() || !newFAQ.answer.trim()) return;
 
-    const faq: FAQ = {
+    const  faq: FAQ = {
       id: `faq-${Date.now()}`,
       question: newFAQ.question,
       answer: newFAQ.answer,
@@ -409,3 +409,9 @@ export const ProductFAQForm = ({ data, onUpdate }: ProductFAQFormProps) => {
     </div>
   );
 };
+
+
+
+
+
+

@@ -119,7 +119,6 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         onUpdate({ artwork_link_url: generatedUrl });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.artwork_title, isManuallyEdited, data.artwork_link_url]);
 
   /**
@@ -161,7 +160,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
 
       // Validation préventive : vérifier tous les fichiers AVANT upload
       const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-      const invalidFiles: string[] = [];
+      const  invalidFiles: string[] = [];
 
       // Validation synchrone (type MIME et extension)
       for (const file of Array.from(files)) {
@@ -204,7 +203,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
 
         // Forcer le Content-Type selon l'extension (plus fiable que file.type qui peut être incorrect)
         // Cela garantit que Supabase Storage reçoit toujours un type MIME valide
-        let contentType: string;
+        let  contentType: string;
         if (fileExt === 'png') {
           contentType = 'image/png';
         } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
@@ -318,7 +317,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         title: '✅ Images uploadées',
         description: `${uploadedUrls.length} image(s) uploadée(s) avec succès`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur upload images œuvre', {
         error: errorMessage,
@@ -369,7 +368,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
       }
 
       const fileExt = file.name.split('.').pop()?.toLowerCase();
-      let contentType: string;
+      let  contentType: string;
       if (fileExt === 'png') {
         contentType = 'image/png';
       } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
@@ -436,7 +435,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         title: '✅ Photo uploadée',
         description: "La photo de l'artiste a été uploadée avec succès",
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur upload photo artiste', { error: errorMessage });
       toast({
@@ -1179,3 +1178,9 @@ export const ArtistBasicInfoForm = React.memo(
     );
   }
 );
+
+
+
+
+
+

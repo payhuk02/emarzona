@@ -84,7 +84,7 @@ export default function PayBalanceList() {
   } = useQuery({
     queryKey: ['pay-balance-orders', user?.id, store?.id],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('orders')
         .select(
           `
@@ -248,7 +248,7 @@ export default function PayBalanceList() {
         description: `${filteredOrders.length} solde(s) exporté(s) en CSV.`,
       });
       logger.info('Balances exported to CSV', { count: filteredOrders.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error exporting balances to CSV', { error: errorMessage });
       toast({
@@ -270,7 +270,7 @@ export default function PayBalanceList() {
         description: 'La liste des soldes a été mise à jour.',
       });
       logger.info('Balances refreshed');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error refreshing balances', { error: errorMessage });
       toast({
@@ -649,3 +649,9 @@ export default function PayBalanceList() {
     </MainLayout>
   );
 }
+
+
+
+
+
+

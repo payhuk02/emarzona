@@ -233,7 +233,7 @@ export function PhysicalSizeChartSelector({
 
       setIsBuilderOpen(false);
       refetch();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -333,3 +333,9 @@ export function PhysicalSizeChartSelector({
     </Card>
   );
 }
+
+
+
+
+
+

@@ -77,7 +77,7 @@ const useServiceRecommendations = (
           recommendationScore?: number;
         }
         // 1. Recommandations basées sur la catégorie
-        let categoryRecommendations: ServiceWithStore[] = [];
+        let  categoryRecommendations: ServiceWithStore[] = [];
         if (category) {
           const { data: categoryServices } = await supabase
             .from('products')
@@ -104,7 +104,7 @@ const useServiceRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let tagRecommendations: ServiceWithStore[] = [];
+        let  tagRecommendations: ServiceWithStore[] = [];
         if (tags && tags.length > 0) {
           // Rechercher services avec tags similaires
           const { data: tagServices } = await supabase
@@ -139,7 +139,7 @@ const useServiceRecommendations = (
         }
 
         // 3. Recommandations basées sur les réservations précédentes (si utilisateur connecté)
-        let bookingBasedRecommendations: ServiceWithStore[] = [];
+        let  bookingBasedRecommendations: ServiceWithStore[] = [];
         if (user) {
           // Récupérer les services réservés par l'utilisateur
           const { data: bookedServices } = await supabase
@@ -239,7 +239,7 @@ const useServiceRecommendations = (
 
         // Trier par score de recommandation
         const scored = uniqueRecommendations.map((service) => {
-          let score = 0;
+          let  score= 0;
 
           // Score basé sur la catégorie
           if (category && service.category === category) score += 10;
@@ -261,7 +261,7 @@ const useServiceRecommendations = (
         return scored
           .sort((a, b) => b.recommendationScore - a.recommendationScore)
           .slice(0, limit);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching service recommendations', { error });
         return [];
@@ -471,7 +471,7 @@ export const BookedTogetherRecommendations = ({
           .eq('is_active', true);
 
         return services || [];
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching booked together recommendations', { error });
         return [];
@@ -552,4 +552,10 @@ export const BookedTogetherRecommendations = ({
     </div>
   );
 };
+
+
+
+
+
+
 

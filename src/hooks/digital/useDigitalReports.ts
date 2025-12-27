@@ -101,7 +101,7 @@ export interface CustomersReport {
  */
 const getPeriodDates = (period: ReportPeriod) => {
   const now = new Date();
-  let startDate: Date;
+  let  startDate: Date;
 
   switch (period) {
     case 'today':
@@ -214,7 +214,7 @@ export const useSalesReport = (period: ReportPeriod = 'month') => {
         }));
 
       // Revenue par jour
-      const revenueByDay: Array<{ date: string; revenue: number; orders: number }> = [];
+      const  revenueByDay: Array<{ date: string; revenue: number; orders: number }> = [];
       const dayGroups = new Map();
 
       sales.forEach((sale) => {
@@ -333,7 +333,7 @@ export const useDownloadsReport = (period: ReportPeriod = 'month') => {
         }));
 
       // Téléchargements par jour
-      const downloadsByDay: Array<{ date: string; downloads: number; customers: number }> = [];
+      const  downloadsByDay: Array<{ date: string; downloads: number; customers: number }> = [];
       const dayGroups = new Map();
 
       logs.forEach((log) => {
@@ -593,4 +593,10 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
     },
   });
 };
+
+
+
+
+
+
 

@@ -64,7 +64,7 @@ export function useAddToCartOptimistic() {
 
       // Vérifier si le produit existe déjà
       const { data: { user } } = await supabase.auth.getUser();
-      let query = supabase
+      let  query= supabase
         .from('cart_items')
         .select('*')
         .eq('product_id', options.product_id);
@@ -192,7 +192,7 @@ export function useUpdateCartItemOptimistic() {
     baseDelay: 1000,
     errorToastTitle: 'Erreur panier',
     mutationFn: async (options: UpdateCartItemOptions) => {
-      const updates: Partial<CartItem> = {};
+      const  updates: Partial<CartItem> = {};
       if (options.quantity !== undefined) updates.quantity = options.quantity;
       if (options.unit_price !== undefined) updates.unit_price = options.unit_price;
 
@@ -303,4 +303,10 @@ export function useRemoveFromCartOptimistic() {
     },
   });
 }
+
+
+
+
+
+
 

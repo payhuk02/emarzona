@@ -306,7 +306,7 @@ export function useCreateCohort() {
   return useMutation({
     mutationFn: async (cohortData: Partial<CourseCohort>) => {
       // Générer le slug si non fourni
-      let slug = cohortData.cohort_slug;
+      let  slug= cohortData.cohort_slug;
       if (!slug && cohortData.cohort_name) {
         slug = cohortData.cohort_name
           .toLowerCase()
@@ -494,7 +494,7 @@ export function useUpdateEnrollmentStatus() {
       completed_at?: string;
       dropped_at?: string;
     }) => {
-      const updateData: any = { enrollment_status: status };
+      const  updateData: any = { enrollment_status: status };
       
       if (status === 'active' && !updates.started_at) {
         updateData.started_at = new Date().toISOString();
@@ -545,7 +545,7 @@ export function useCohortProgressSnapshots(cohortId: string, enrollmentId?: stri
   return useQuery({
     queryKey: ['cohort-snapshots', cohortId, enrollmentId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('cohort_progress_snapshots')
         .select('*')
         .eq('cohort_id', cohortId);
@@ -566,4 +566,10 @@ export function useCohortProgressSnapshots(cohortId: string, enrollmentId?: stri
     enabled: !!cohortId,
   });
 }
+
+
+
+
+
+
 

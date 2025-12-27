@@ -56,7 +56,7 @@ function calculateRetryDelay(
   multiplier: number,
   jitter: boolean
 ): number {
-  let delay: number;
+  let  delay: number;
 
   switch (strategy) {
     case 'exponential':
@@ -122,8 +122,8 @@ export async function retry<T>(
     onMaxRetries,
   } = options;
 
-  let lastError: unknown;
-  let attempt = 0;
+  let  lastError: unknown;
+  let  attempt= 0;
 
   while (attempt < maxRetries) {
     try {
@@ -207,4 +207,10 @@ export async function retryWithFixedDelay<T>(
 ): Promise<T> {
   return retry(fn, { ...options, strategy: 'fixed' });
 }
+
+
+
+
+
+
 

@@ -54,7 +54,7 @@ export function sanitizeString(
   input: string,
   options: SanitizeOptions = {}
 ): string {
-  let result = input;
+  let  result= input;
 
   const {
     trim = true,
@@ -240,8 +240,8 @@ export function validateFields<T extends Record<string, any>>(
   fields: T,
   validators: Partial<Record<keyof T, (value: any) => ValidationResult>>
 ): ValidationResult<T> {
-  const errors: Record<string, string> = {};
-  const values: Partial<T> = {};
+  const  errors: Record<string, string> = {};
+  const  values: Partial<T> = {};
 
   for (const [key, value] of Object.entries(fields)) {
     const validator = validators[key as keyof T];
@@ -313,4 +313,10 @@ export function validatePassword(
 
   return { valid: true, value: password };
 }
+
+
+
+
+
+
 

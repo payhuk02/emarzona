@@ -8,7 +8,7 @@ export const Admin2FABanner = () => {
   const [requires2FA, setRequires2FA] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
+    let  mounted= true;
     (async () => {
       try {
         const aal = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -34,5 +34,11 @@ export const Admin2FABanner = () => {
     </Alert>
   );
 };
+
+
+
+
+
+
 
 

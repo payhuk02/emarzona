@@ -144,7 +144,7 @@ export default function MultiStoreCheckoutTracking() {
         return {};
       }
 
-      const urls: Record<string, string> = {};
+      const  urls: Record<string, string> = {};
       interface TransactionData {
         order_id: string;
         checkout_url?: string;
@@ -459,3 +459,9 @@ export default function MultiStoreCheckoutTracking() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

@@ -328,3 +328,9 @@ const AffiliateCoursesDashboard = () => {
 
 export default AffiliateCoursesDashboard;
 
+
+
+
+
+
+

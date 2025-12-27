@@ -70,7 +70,7 @@ export async function getPaymentStats(
   
   return monerooStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let query = supabase
+      let  query= supabase
         .from('transactions')
         .select('status')
         .eq('payment_provider', 'moneroo');
@@ -143,7 +143,7 @@ export async function getRevenueStats(
   
   return monerooStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let query = supabase
+      let  query= supabase
         .from('transactions')
         .select('amount, currency, status')
         .eq('payment_provider', 'moneroo')
@@ -178,10 +178,10 @@ export async function getRevenueStats(
       };
     }
 
-    let total = 0;
-    let successful = 0;
-    let refunded = 0;
-    const byCurrency: Record<string, number> = {};
+    let  total= 0;
+    let  successful= 0;
+    let  refunded= 0;
+    const  byCurrency: Record<string, number> = {};
 
     for (const transaction of transactions) {
       const amount = parseFloat(transaction.amount.toString());
@@ -225,7 +225,7 @@ export async function getTimeStats(
   
   return monerooStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let query = supabase
+      let  query= supabase
         .from('transactions')
         .select('created_at, completed_at, failed_at')
         .eq('payment_provider', 'moneroo')
@@ -259,7 +259,7 @@ export async function getTimeStats(
       };
     }
 
-    const processingTimes: number[] = [];
+    const  processingTimes: number[] = [];
 
     for (const transaction of transactions) {
       const startTime = new Date(transaction.created_at).getTime();
@@ -316,7 +316,7 @@ export async function getPaymentMethodStats(
   
   return monerooStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let query = supabase
+      let  query= supabase
         .from('transactions')
         .select('moneroo_payment_method, status, amount')
         .eq('payment_provider', 'moneroo')
@@ -344,7 +344,7 @@ export async function getPaymentMethodStats(
       return [];
     }
 
-    const methodStats: Record<string, {
+    const  methodStats: Record<string, {
       count: number;
       successful: number;
       totalAmount: number;
@@ -395,7 +395,7 @@ export async function getStatsByDate(
   
   return monerooStatsCache.getOrSet(cacheKey, async () => {
     try {
-      let query = supabase
+      let  query= supabase
         .from('transactions')
         .select('created_at, amount, status')
         .eq('payment_provider', 'moneroo')
@@ -423,7 +423,7 @@ export async function getStatsByDate(
       return [];
     }
 
-    const statsByDate: Record<string, { count: number; amount: number }> = {};
+    const  statsByDate: Record<string, { count: number; amount: number }> = {};
 
     for (const transaction of transactions) {
       const date = new Date(transaction.created_at).toISOString().split('T')[0];
@@ -488,6 +488,12 @@ export async function getAllMonerooStats(
     }
   });
 }
+
+
+
+
+
+
 
 
 

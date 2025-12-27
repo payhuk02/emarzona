@@ -54,7 +54,7 @@ export const usePixels = () => {
 
       if (error) throw error;
       setPixels((data || []) as Pixel[]);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching pixels', { error, userId: user.id });
       toast({
@@ -93,7 +93,7 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error creating pixel', { error, pixelData });
       toast({
@@ -124,7 +124,7 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating pixel', { error, pixelId, updates });
       toast({
@@ -155,7 +155,7 @@ export const usePixels = () => {
 
       await fetchPixels();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error deleting pixel', { error, pixelId });
       toast({
@@ -198,7 +198,7 @@ export const usePixels = () => {
 
       if (error) throw error;
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error tracking pixel event', { error, pixelId, eventType });
       return false;
@@ -216,3 +216,9 @@ export const usePixels = () => {
     refetch: fetchPixels,
   };
 };
+
+
+
+
+
+

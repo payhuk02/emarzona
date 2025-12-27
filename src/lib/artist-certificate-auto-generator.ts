@@ -15,8 +15,8 @@ import type { ArtistCertificateData } from '@/lib/artist-certificate-generator';
  */
 function generateVerificationCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclut les caractères ambigus
-  let code = '';
-  for (let i = 0; i < 8; i++) {
+  let  code= '';
+  for (let  i= 0; i < 8; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
@@ -113,7 +113,7 @@ export async function autoGenerateArtistCertificate(
     const verificationCode = generateVerificationCode();
 
     // 7. Préparer les données du certificat
-    const certificateData: ArtistCertificateData = {
+    const  certificateData: ArtistCertificateData = {
       certificateNumber,
       artworkTitle: artistProduct.artwork_title,
       artistName: artistProduct.artist_name,
@@ -231,4 +231,10 @@ export async function shouldGenerateCertificate(
     return false;
   }
 }
+
+
+
+
+
+
 

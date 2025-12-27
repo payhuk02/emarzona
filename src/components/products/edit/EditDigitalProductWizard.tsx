@@ -137,7 +137,7 @@ const convertToFormData = async (productId: string): Promise<Partial<DigitalProd
     .maybeSingle();
 
   // Convert files to downloadable_files format
-  const downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(
+  const  downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(
     (file: {
       id: string;
       name: string;
@@ -345,7 +345,7 @@ export const EditDigitalProductWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<boolean> => {
-      const errors: string[] = [];
+      const  errors: string[] = [];
       clearServerErrors();
 
       switch (step) {
@@ -436,7 +436,7 @@ export const EditDigitalProductWizard = ({
     setIsSaving(true);
     try {
       // Generate slug if not provided
-      let slug =
+      let  slug=
         formData.slug?.trim() ||
         formData.name
           ?.toLowerCase()
@@ -445,7 +445,7 @@ export const EditDigitalProductWizard = ({
         'product';
 
       // Check slug uniqueness (excluding current product)
-      let attempts = 0;
+      let  attempts= 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -998,3 +998,9 @@ export const EditDigitalProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

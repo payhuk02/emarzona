@@ -387,3 +387,9 @@ export function validateCourseData(
   }
   return { success: false, errors: result.error };
 }
+
+
+
+
+
+

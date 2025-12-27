@@ -228,7 +228,7 @@ export async function createServiceRefund(
     policy?.auto_refund_enabled &&
     calculation.hours_before_service >= policy.auto_refund_minimum_hours
   ) {
-    await processServiceRefund(refund.id).catch(err => {
+    await processServiceRefund(refund.id).catch( err => {
       logger.warn('Error processing auto-refund', { error: err, refundId: refund.id });
     });
   }
@@ -362,7 +362,7 @@ export async function getStoreServiceRefunds(
   storeId: string,
   status?: string
 ): Promise<ServiceCancellationRefund[]> {
-  let query = supabase
+  let  query= supabase
     .from('service_cancellation_refunds')
     .select(
       `
@@ -388,3 +388,9 @@ export async function getStoreServiceRefunds(
 
   return (data || []) as ServiceCancellationRefund[];
 }
+
+
+
+
+
+

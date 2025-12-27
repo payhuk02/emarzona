@@ -78,7 +78,7 @@ const ServiceCardComponent = ({
   };
 
   const getServiceTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       appointment: 'Rendez-vous',
       class: 'Cours',
       event: 'Événement',
@@ -345,3 +345,9 @@ const ServicesGrid = ({
 };
 
 export { ServicesGrid };
+
+
+
+
+
+

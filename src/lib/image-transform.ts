@@ -164,7 +164,7 @@ export const getResponsiveSrcSet = (
     return imageUrl || undefined;
   }
 
-  const srcSetParts: string[] = [];
+  const  srcSetParts: string[] = [];
 
   // Mobile
   if (sizes.mobile) {
@@ -283,7 +283,7 @@ export const getImageAttributesForPreset = (
 
   // Générer l'attribut sizes basé sur les breakpoints
   // Optimisé pour mobile : utiliser 100vw sur mobile pour meilleure qualité
-  const sizesArray: string[] = [];
+  const  sizesArray: string[] = [];
   if (preset.sizes.mobile) {
     // Sur mobile, utiliser 100vw pour charger l'image pleine largeur
     sizesArray.push(`(max-width: 640px) 100vw`);
@@ -368,7 +368,7 @@ export const supportsWebP = (): boolean => {
 /**
  * Détecte le support WebP du navigateur (asynchrone avec cache)
  */
-let webpSupportCache: boolean | null = null;
+let  webpSupportCache: boolean | null = null;
 export const supportsWebPAsync = async (): Promise<boolean> => {
   if (webpSupportCache !== null) return webpSupportCache;
 
@@ -385,3 +385,9 @@ export const formatFileSize = (sizeInKB: number): string => {
   }
   return `${(sizeInKB / 1024).toFixed(2)} MB`;
 };
+
+
+
+
+
+

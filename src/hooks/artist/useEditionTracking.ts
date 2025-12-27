@@ -84,7 +84,7 @@ export const useEditionTracking = (productId: string | undefined) => {
       const totalSold = soldItems?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 
       // Récupérer les numéros d'éditions vendus depuis les métadonnées
-      const soldEditionNumbers: number[] = [];
+      const  soldEditionNumbers: number[] = [];
       soldItems?.forEach(item => {
         if (item.metadata?.edition_number) {
           const editionNum =
@@ -190,4 +190,10 @@ export const useMultipleEditionTracking = (productIds: string[]) => {
     staleTime: 30000,
   });
 };
+
+
+
+
+
+
 

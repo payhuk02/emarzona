@@ -69,7 +69,7 @@ export class DHLAdapter implements CarrierAdapter {
       return this.simulateTracking(trackingNumber);
     }
 
-    const events: TrackingUpdate[] = [];
+    const  events: TrackingUpdate[] = [];
     const eventsData = shipment.events || [];
 
     for (const event of eventsData) {
@@ -103,7 +103,7 @@ export class DHLAdapter implements CarrierAdapter {
    * Mappe les statuts DHL vers nos statuts standard
    */
   private mapDHLStatus(dhlStatus: string): string {
-    const statusMap: Record<string, string> = {
+    const  statusMap: Record<string, string> = {
       'pre-transit': 'label_created',
       'transit': 'in_transit',
       'delivered': 'delivered',
@@ -136,4 +136,10 @@ export class DHLAdapter implements CarrierAdapter {
     };
   }
 }
+
+
+
+
+
+
 

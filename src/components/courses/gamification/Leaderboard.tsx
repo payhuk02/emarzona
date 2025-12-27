@@ -156,3 +156,9 @@ export const Leaderboard = ({ courseId, className, limit = 10 }: LeaderboardProp
   );
 };
 
+
+
+
+
+
+

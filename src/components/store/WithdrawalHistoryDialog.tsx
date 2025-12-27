@@ -27,7 +27,7 @@ interface WithdrawalHistoryDialogProps {
 }
 
 const getStatusLabel = (status: StoreWithdrawalStatus | null): string => {
-  const labels: Record<StoreWithdrawalStatus, string> = {
+  const  labels: Record<StoreWithdrawalStatus, string> = {
     pending: 'En attente',
     processing: 'En cours',
     completed: 'Complété',
@@ -39,7 +39,7 @@ const getStatusLabel = (status: StoreWithdrawalStatus | null): string => {
 
 const getStatusIcon = (status: StoreWithdrawalStatus | null) => {
   if (!status) return Clock;
-  const icons: Record<StoreWithdrawalStatus, any> = {
+  const  icons: Record<StoreWithdrawalStatus, any> = {
     pending: Clock,
     processing: AlertCircle,
     completed: CheckCircle2,
@@ -51,7 +51,7 @@ const getStatusIcon = (status: StoreWithdrawalStatus | null) => {
 
 const getStatusVariant = (status: StoreWithdrawalStatus | null): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (!status) return 'outline';
-  const variants: Record<StoreWithdrawalStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  const  variants: Record<StoreWithdrawalStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     pending: 'secondary',
     processing: 'default',
     completed: 'default',
@@ -148,4 +148,10 @@ export const WithdrawalHistoryDialog = ({
     </Dialog>
   );
 };
+
+
+
+
+
+
 

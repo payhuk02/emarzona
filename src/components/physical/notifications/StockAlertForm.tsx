@@ -106,7 +106,7 @@ export const StockAlertForm = ({
         notify_on_low_stock: formData.notify_on_low_stock,
       });
       onSuccess();
-    } catch (error: any) {
+    } catch ( _error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -215,4 +215,10 @@ export const StockAlertForm = ({
     </form>
   );
 };
+
+
+
+
+
+
 

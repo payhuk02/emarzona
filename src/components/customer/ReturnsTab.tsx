@@ -100,7 +100,7 @@ export const ReturnsTab = () => {
   const filteredReturns = useMemo(() => {
     if (!returns) return [];
 
-    let filtered = returns;
+    let  filtered= returns;
 
     // Filtre par statut
     if (activeTab !== 'all') {
@@ -135,7 +135,7 @@ export const ReturnsTab = () => {
 
   const getStatusBadge = useCallback((status: string) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<
+    const  statusConfig: Record<
       string,
       {
         label: string;
@@ -613,3 +613,9 @@ export const ReturnsTab = () => {
     </div>
   );
 };
+
+
+
+
+
+

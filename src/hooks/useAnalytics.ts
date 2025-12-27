@@ -47,7 +47,7 @@ const getOrCreateSession = (): AnalyticsSession => {
   
   if (stored) {
     try {
-      const session: AnalyticsSession = JSON.parse(stored);
+      const  session: AnalyticsSession = JSON.parse(stored);
       const now = Date.now();
       
       // Si la session n'a pas expiré, la retourner
@@ -60,7 +60,7 @@ const getOrCreateSession = (): AnalyticsSession => {
   }
   
   // Créer une nouvelle session
-  const newSession: AnalyticsSession = {
+  const  newSession: AnalyticsSession = {
     sessionId: generateSessionId(),
     startTime: Date.now()
   };
@@ -328,4 +328,10 @@ export const usePageView = (storeId?: string) => {
     }
   }, [storeId, trackPageView]);
 };
+
+
+
+
+
+
 

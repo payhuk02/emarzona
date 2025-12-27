@@ -184,8 +184,8 @@ export default function PaymentsCustomers() {
     async (type: 'payments' | 'customers' | 'all') => {
       setIsExporting(true);
       try {
-        let csvContent = '';
-        let filename = '';
+        let  csvContent= '';
+        let  filename= '';
 
         if (type === 'payments' || type === 'all') {
           const paymentHeaders = [
@@ -276,7 +276,7 @@ export default function PaymentsCustomers() {
           title: '✅ Export réussi',
           description: `Données exportées en CSV`,
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Error exporting to CSV', { error });
         toast({
           title: '❌ Erreur',
@@ -292,7 +292,7 @@ export default function PaymentsCustomers() {
 
   // Get status badge
   const getStatusBadge = useCallback((status: string) => {
-    const variants: Record<string, { label: string; className: string }> = {
+    const  variants: Record<string, { label: string; className: string }> = {
       completed: {
         label: 'Complété',
         className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
@@ -340,7 +340,7 @@ export default function PaymentsCustomers() {
         title: '✅ Actualisation réussie',
         description: 'Les données ont été mises à jour',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       toast({
         title: '❌ Erreur',
         description: "Impossible d'actualiser les données",
@@ -1369,3 +1369,9 @@ export default function PaymentsCustomers() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

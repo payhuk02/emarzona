@@ -142,3 +142,9 @@ export const PointsDisplay = ({ enrollmentId, className, compact = false }: Poin
   );
 };
 
+
+
+
+
+
+

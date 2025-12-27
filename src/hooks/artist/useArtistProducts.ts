@@ -39,7 +39,7 @@ export const useArtistProducts = (storeId?: string) => {
     queryKey: ['artist-products', storeId],
     queryFn: async () => {
       try {
-        let query = supabase
+        let  query= supabase
           .from('artist_products')
           .select(`
             *,
@@ -391,4 +391,10 @@ export const usePopularArtistProducts = (storeId: string, limit = 5) => {
     enabled: !!storeId,
   });
 };
+
+
+
+
+
+
 

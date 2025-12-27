@@ -33,7 +33,7 @@ function addResourceHint(rel: string, href: string, attributes?: Record<string, 
  * Preconnect : Établir une connexion précoce à un domaine
  */
 export function preconnect(href: string, crossorigin?: boolean): HTMLLinkElement {
-  const attributes: Record<string, string> = {};
+  const  attributes: Record<string, string> = {};
   if (crossorigin) {
     attributes.crossorigin = 'anonymous';
   }
@@ -178,4 +178,10 @@ export function cleanupResourceHints(): void {
   });
   logger.info('[Resource Hints] Cleaned up unused hints');
 }
+
+
+
+
+
+
 

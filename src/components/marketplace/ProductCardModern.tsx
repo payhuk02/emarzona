@@ -219,7 +219,7 @@ const ProductCardModernComponent = ({
           });
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'initialiser le paiement";
       logger.error("Erreur lors de l'achat", {
@@ -244,7 +244,7 @@ const ProductCardModernComponent = ({
     toast,
   ]);
 
-  const _handleAddToCart = useCallback(async () => {
+  const handleAddToCart= useCallback(async () => {
     if (!product.store_id) {
       toast({
         title: 'Erreur',
@@ -265,7 +265,7 @@ const ProductCardModernComponent = ({
           | 'artist',
         quantity: 1,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error("Erreur lors de l'ajout au panier", {
         error: error instanceof Error ? error : new Error(String(error)),
       });
@@ -771,3 +771,9 @@ ProductCardModern.displayName = 'ProductCardModern';
 
 export default ProductCardModern;
 export { ProductCardModern };
+
+
+
+
+
+

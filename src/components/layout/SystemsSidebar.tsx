@@ -67,7 +67,7 @@ export const SystemsSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Systèmes & Intégrations', path: '/dashboard/integrations' },
     { label: activeSection },
   ];
@@ -111,4 +111,10 @@ export const SystemsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

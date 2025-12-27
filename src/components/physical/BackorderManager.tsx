@@ -122,7 +122,7 @@ export interface BackorderManagerProps {
 // MOCK DATA
 // ============================================================================
 
-const MOCK_BACKORDERS: Backorder[] = [
+const  MOCK_BACKORDERS: Backorder[] = [
   {
     id: 'bo_1',
     product_id: 'prod_1',
@@ -204,7 +204,7 @@ const MOCK_BACKORDERS: Backorder[] = [
 // ============================================================================
 
 function BackorderStatusBadge({ status }: { status: BackorderStatus }) {
-  const config: Record<
+  const  config: Record<
     BackorderStatus,
     { label: string; icon: typeof Clock; className: string }
   > = {
@@ -227,7 +227,7 @@ function BackorderStatusBadge({ status }: { status: BackorderStatus }) {
 }
 
 function PriorityBadge({ priority }: { priority: BackorderPriority }) {
-  const config: Record<BackorderPriority, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  const  config: Record<BackorderPriority, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     low: { label: 'Basse', variant: 'secondary' },
     medium: { label: 'Moyenne', variant: 'default' },
     high: { label: 'Haute', variant: 'default' },
@@ -274,7 +274,7 @@ export function BackorderManager({ productId, storeId, className }: BackorderMan
 
         const newReceived = bo.received_quantity + quantity;
         const newPending = Math.max(0, bo.customer_demand - newReceived);
-        const newStatus: BackorderStatus =
+        const  newStatus: BackorderStatus =
           newPending === 0
             ? 'received'
             : newReceived > 0
@@ -669,4 +669,10 @@ export function BackorderManager({ productId, storeId, className }: BackorderMan
     </div>
   );
 }
+
+
+
+
+
+
 

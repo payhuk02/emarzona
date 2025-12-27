@@ -30,7 +30,7 @@ interface SequenceStepsListProps {
   onEditStep?: (step: EmailSequenceStep) => void;
 }
 
-const DELAY_LABELS: Record<SequenceStepDelayType, string> = {
+const  DELAY_LABELS: Record<SequenceStepDelayType, string> = {
   immediate: 'Immédiat',
   minutes: 'Minutes',
   hours: 'Heures',
@@ -207,4 +207,10 @@ export const SequenceStepsList = ({
     </>
   );
 };
+
+
+
+
+
+
 

@@ -30,17 +30,17 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('useCart', () => {
-  let queryClient: QueryClient;
-  let mockFrom: ReturnType<typeof vi.fn>;
-  let mockQuery: ReturnType<typeof vi.fn>;
-  let mockSelect: ReturnType<typeof vi.fn>;
-  let mockEq: ReturnType<typeof vi.fn>;
-  let mockOrder: ReturnType<typeof vi.fn>;
-  let mockInsert: ReturnType<typeof vi.fn>;
-  let mockUpdate: ReturnType<typeof vi.fn>;
-  let mockDelete: ReturnType<typeof vi.fn>;
-  let mockSingle: ReturnType<typeof vi.fn>;
-  let mockIs: ReturnType<typeof vi.fn>;
+  let  queryClient: QueryClient;
+  let  mockFrom: ReturnType<typeof vi.fn>;
+  let  mockQuery: ReturnType<typeof vi.fn>;
+  let  mockSelect: ReturnType<typeof vi.fn>;
+  let  mockEq: ReturnType<typeof vi.fn>;
+  let  mockOrder: ReturnType<typeof vi.fn>;
+  let  mockInsert: ReturnType<typeof vi.fn>;
+  let  mockUpdate: ReturnType<typeof vi.fn>;
+  let  mockDelete: ReturnType<typeof vi.fn>;
+  let  mockSingle: ReturnType<typeof vi.fn>;
+  let  mockIs: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -431,4 +431,10 @@ describe('useCart', () => {
     });
   });
 });
+
+
+
+
+
+
 

@@ -132,14 +132,14 @@ export function ServiceProductCard({
   );
 
   // Labels de localisation
-  const locationLabels: Record<string, string> = {
+  const  locationLabels: Record<string, string> = {
     online: 'En ligne',
     on_site: 'Sur site',
     customer_location: 'Chez vous',
   };
 
   // Labels de type de service
-  const serviceTypeLabels: Record<string, string> = {
+  const  serviceTypeLabels: Record<string, string> = {
     appointment: 'Rendez-vous',
     class: 'Cours',
     event: 'Événement',
@@ -633,3 +633,9 @@ export const ServiceProductCardSkeleton = () => {
 };
 
 export default ServiceProductCard;
+
+
+
+
+
+

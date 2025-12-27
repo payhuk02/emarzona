@@ -118,7 +118,7 @@ export const CarrierShippingOptions = ({
             rates: rates || [],
             isLoading: false,
           } as CarrierRate;
-        } catch (error: any) {
+        } catch ( _error: any) {
           logger.error(`Error calculating rates for ${carrier.display_name}`, { error, carrierId: carrier.id });
           return {
             carrierId: carrier.id,
@@ -347,4 +347,10 @@ export const CarrierShippingOptions = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

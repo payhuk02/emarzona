@@ -108,7 +108,7 @@ export function ShippingZonesManager({ storeId }: ShippingZonesManagerProps) {
       });
       setDialogOpen(false);
       resetForm();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error saving zone', error);
       toast({
         title: '❌ Erreur',
@@ -126,7 +126,7 @@ export function ShippingZonesManager({ storeId }: ShippingZonesManagerProps) {
         title: '✅ Zone supprimée',
         description: 'La zone a été supprimée avec succès.',
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error deleting zone', error);
       toast({
         title: '❌ Erreur',
@@ -427,4 +427,10 @@ export function ShippingZonesManager({ storeId }: ShippingZonesManagerProps) {
     </div>
   );
 }
+
+
+
+
+
+
 

@@ -211,9 +211,9 @@ export default function VendorMessaging() {
       setUploadProgress(0);
 
       // Upload files if any (utilise le hook avec progress tracking)
-      const fileUrls: string[] = [];
-      const storagePaths: string[] = [];
-      let uploadResults: Array<{
+      const  fileUrls: string[] = [];
+      const  storagePaths: string[] = [];
+      let  uploadResults: Array<{
         path: string;
         publicUrl: string;
         fileName: string;
@@ -240,7 +240,7 @@ export default function VendorMessaging() {
               .map(f => `• ${f.file.name}: ${f.error}`)
               .join('\n');
 
-            let errorMessage = `${uploadState.failed.length} fichier(s) n'ont pas pu être uploadés`;
+            let  errorMessage= `${uploadState.failed.length} fichier(s) n'ont pas pu être uploadés`;
             if (failedFilesDetails) {
               errorMessage += `:\n${failedFilesDetails}`;
             } else {
@@ -329,7 +329,7 @@ export default function VendorMessaging() {
               }
 
               return { success: true, result };
-            } catch (verifyError: unknown) {
+            } catch ( _verifyError: unknown) {
               // Si c'est une erreur d'abort (timeout), essayer avec signedUrl si disponible
               const verifyErr = verifyError as Error;
               if (verifyErr.name === 'AbortError') {
@@ -390,7 +390,7 @@ export default function VendorMessaging() {
 
           fileUrls.push(...successfulResults.map(r => r.publicUrl));
           storagePaths.push(...successfulResults.map(r => r.path));
-        } catch (uploadError: unknown) {
+        } catch ( _uploadError: unknown) {
           // Si l'upload échoue complètement, on peut quand même envoyer le message sans fichiers
           logger.error('File upload failed, attempting to send message without attachments', {
             error: uploadError,
@@ -443,7 +443,7 @@ Le message sera envoyé sans pièces jointes.`;
       }
 
       // Determine message type
-      let messageType: 'text' | 'image' | 'video' | 'file' = 'text';
+      let  messageType: 'text' | 'image' | 'video' | 'file' = 'text';
       if (selectedFiles.length > 0) {
         const firstFile = selectedFiles[0];
         if (firstFile.type.startsWith('image/')) {
@@ -522,12 +522,12 @@ Le message sera envoyé sans pièces jointes.`;
             ? `Votre message a été envoyé avec ${fileUrls.length} pièce(s) jointe(s)`
             : 'Votre message a été envoyé avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Send vendor message error', { error, storeId, productId });
 
       // Message d'erreur détaillé
       const err = error instanceof Error ? error : new Error(String(error));
-      let errorMessage = err.message || "Impossible d'envoyer le message";
+      let  errorMessage= err.message || "Impossible d'envoyer le message";
 
       // Améliorer le message selon le type d'erreur
       if (err.message?.includes("n'a pas pu être uploadé") || err.message?.includes('uploadé')) {
@@ -944,9 +944,13 @@ Le message sera envoyé sans pièces jointes.`;
                   onScrollCapture={e => {
                     // Infinite scroll: charger plus de messages quand on scroll en haut
                     const target = e.target as HTMLElement;
-                    if (target.scrollTop === 0 && !messagesLoading && currentConversation) {
-                      // TODO: Implémenter loadMoreMessages pour VendorMessaging
-                      // loadMoreMessages();
+                    if (
+                      target.scrollTop === 0 &&
+                      !messagesLoading &&
+                      currentConversation &&
+                      hasMoreMessages
+                    ) {
+                      loadMoreMessages();
                     }
                   }}
                 >
@@ -1294,3 +1298,9 @@ Le message sera envoyé sans pièces jointes.`;
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

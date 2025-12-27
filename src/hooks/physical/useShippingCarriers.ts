@@ -149,7 +149,7 @@ export const useCalculateCarrierRates = () => {
       }
 
       // Initialiser service selon transporteur
-      let rates: any[] = [];
+      let  rates: any[] = [];
       
       if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
         const dhlService = new DHLService({
@@ -280,7 +280,7 @@ export const useGenerateShippingLabel = () => {
       const { data: labelNumber } = await supabase.rpc('generate_shipping_label_number');
 
       // Générer étiquette via API transporteur
-      let labelResponse: any;
+      let  labelResponse: any;
       
       if (carrier.carrier_name === 'DHL' || carrier.carrier_name === 'DHL_Express') {
         const dhlService = new DHLService({
@@ -607,4 +607,10 @@ export const useTrackShipment = (trackingNumber?: string, carrierId?: string) =>
     refetchInterval: 300000, // Refetch toutes les 5 minutes
   });
 };
+
+
+
+
+
+
 

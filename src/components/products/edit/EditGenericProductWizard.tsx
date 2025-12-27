@@ -499,7 +499,7 @@ export const EditGenericProductWizard = ({
   const handleNext = useCallback(() => {
     // Validate current step
     if (currentStep === 1) {
-      const errors: string[] = [];
+      const  errors: string[] = [];
       if (!formData.name?.trim()) errors.push('Le nom est requis');
       if (!formData.slug?.trim()) errors.push('Le slug est requis');
       if (!formData.price || formData.price < 0) errors.push('Le prix doit être positif');
@@ -527,7 +527,7 @@ export const EditGenericProductWizard = ({
     setSaving(true);
     try {
       // Prepare update data
-      const updateData: {
+      const  updateData: {
         name?: string;
         slug?: string;
         description?: string;
@@ -799,3 +799,9 @@ export const EditGenericProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

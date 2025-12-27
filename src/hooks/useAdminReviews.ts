@@ -27,7 +27,7 @@ export function useAdminReviews(filters?: {
   return useQuery({
     queryKey: ['admin-reviews', filters, page, pageSize],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('reviews')
         .select(`
           *,
@@ -234,4 +234,10 @@ export function useAdminReviewStats() {
     },
   });
 }
+
+
+
+
+
+
 

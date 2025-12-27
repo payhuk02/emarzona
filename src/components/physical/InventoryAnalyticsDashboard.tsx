@@ -576,3 +576,9 @@ export function InventoryAnalyticsDashboard({
     </div>
   );
 }
+
+
+
+
+
+

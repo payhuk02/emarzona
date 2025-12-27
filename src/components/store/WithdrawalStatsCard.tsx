@@ -143,7 +143,7 @@ export const WithdrawalStatsCard = ({ storeId, startDate, endDate }: WithdrawalS
         {/* Par méthode de paiement */}
         <div className="space-y-3 sm:space-y-4">
           <h4 className="text-sm sm:text-base font-semibold flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
+            <Wallet  className ="h-4 w-4" />
             Par méthode de paiement
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -211,4 +211,10 @@ export const WithdrawalStatsCard = ({ storeId, startDate, endDate }: WithdrawalS
     </Card>
   );
 };
+
+
+
+
+
+
 

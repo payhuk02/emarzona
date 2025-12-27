@@ -24,7 +24,7 @@ export interface AlertThresholds {
 /**
  * Seuils par défaut
  */
-const DEFAULT_THRESHOLDS: AlertThresholds = {
+const  DEFAULT_THRESHOLDS: AlertThresholds = {
   errorRate: 10, // 10 erreurs par minute
   errorCount: 50, // 50 erreurs en 5 minutes
   performanceThreshold: 3000, // 3 secondes
@@ -142,7 +142,7 @@ export function sendAlert(
     [key: string]: any;
   }
 ): void {
-  const level: Sentry.SeverityLevel = 
+  const  level: Sentry.SeverityLevel = 
     severity === 'critical' ? 'error' :
     severity === 'error' ? 'error' :
     severity === 'warning' ? 'warning' :
@@ -181,7 +181,7 @@ export function trackError(type: string, severity: AlertSeverity = 'error'): voi
  * Enregistrer une erreur API
  */
 export function trackApiError(endpoint: string, statusCode?: number): void {
-  const severity: AlertSeverity = 
+  const  severity: AlertSeverity = 
     statusCode && statusCode >= 500 ? 'critical' :
     statusCode && statusCode >= 400 ? 'error' :
     'warning';
@@ -246,5 +246,11 @@ export function getErrorStats(): {
     apiErrorRate: errorTracker.getErrorRateByType('api', 1),
   };
 }
+
+
+
+
+
+
 
 

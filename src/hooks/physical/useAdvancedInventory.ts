@@ -380,7 +380,7 @@ export const useStockAlerts = (storeId?: string, resolved?: boolean) => {
       const inventoryIds = inventory.map((i) => i.id);
 
       // Get alerts
-      let query = supabase
+      let  query= supabase
         .from('stock_alerts')
         .select(`
           *,
@@ -467,7 +467,7 @@ export const useStockMovements = (inventoryItemId?: string, limit = 50) => {
   return useQuery({
     queryKey: ['stock-movements', inventoryItemId, limit],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('stock_movements')
         .select('*')
         .order('movement_date', { ascending: false })
@@ -529,6 +529,12 @@ export const useCreateStockMovement = () => {
     },
   });
 };
+
+
+
+
+
+
 
 
 

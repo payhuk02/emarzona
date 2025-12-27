@@ -33,7 +33,7 @@ export const useProductReviews = (productId?: string, filters?: ReviewFilters) =
     queryFn: async (): Promise<Review[]> => {
       if (!productId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('reviews')
         .select(
           `
@@ -407,7 +407,7 @@ export const useCreateReview = () => {
 
       // Upload media si présent
       if (payload.media_files && payload.media_files.length > 0) {
-        for (let i = 0; i < payload.media_files.length; i++) {
+        for (let  i= 0; i < payload.media_files.length; i++) {
           const file = payload.media_files[i];
           const fileExt = file.name.split('.').pop();
           const fileName = `${data.id}/${Date.now()}.${fileExt}`;
@@ -699,3 +699,9 @@ export const useUserReviews = (userId?: string, limit: number = 50) => {
     staleTime: 1000 * 60 * 5,
   });
 };
+
+
+
+
+
+

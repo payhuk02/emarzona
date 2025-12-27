@@ -374,3 +374,9 @@ export const PhysicalProductCardSkeleton = () => (
     </CardFooter>
   </Card>
 );
+
+
+
+
+
+

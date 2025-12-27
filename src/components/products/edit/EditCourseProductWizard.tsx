@@ -154,7 +154,7 @@ const convertToFormData = async (
     .order('order_index', { ascending: true });
 
   // Organize lessons by section
-  const sections: Section[] = (sectionsData || []).map((section: Record<string, unknown>) => ({
+  const  sections: Section[] = (sectionsData || []).map((section: Record<string, unknown>) => ({
     id: section.id as string,
     title: (section.title as string) || '',
     description: (section.description as string) || undefined,
@@ -367,7 +367,7 @@ export const EditCourseProductWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<boolean> => {
-      const newErrors: Record<string, string> = {};
+      const  newErrors: Record<string, string> = {};
 
       switch (step) {
         case 1: {
@@ -401,7 +401,7 @@ export const EditCourseProductWizard = ({
     setIsSaving(true);
     try {
       // Generate slug if not provided
-      let slug =
+      let  slug=
         formData.slug?.trim() ||
         formData.title
           ?.toLowerCase()
@@ -410,7 +410,7 @@ export const EditCourseProductWizard = ({
         'course';
 
       // Check slug uniqueness (excluding current product)
-      let attempts = 0;
+      let  attempts= 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -485,7 +485,7 @@ export const EditCourseProductWizard = ({
         target_audience: formData.target_audience || [],
       };
 
-      let courseId: string;
+      let  courseId: string;
       if (existingCourse) {
         const { error: courseError } = await supabase
           .from('courses')
@@ -908,3 +908,9 @@ export const EditCourseProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

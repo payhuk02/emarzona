@@ -58,7 +58,7 @@ export interface EntityRelation {
  * Définition des relations entre entités
  * Quand une entité est modifiée, quelles autres entités doivent être invalidées ?
  */
-const ENTITY_RELATIONS: EntityRelation[] = [
+const  ENTITY_RELATIONS: EntityRelation[] = [
   // Produit → Reviews, Cart, Stats, Analytics
   {
     source: EntityType.PRODUCT,
@@ -172,15 +172,15 @@ const ENTITY_RELATIONS: EntityRelation[] = [
 /**
  * Mapping des entités vers les query keys
  */
-const ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<string, unknown>) => unknown[][]> = {
+const  ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<string, unknown>) => unknown[][]> = {
   [EntityType.PRODUCT]: (id, context) => {
-    const keys: unknown[][] = [['products']];
+    const  keys: unknown[][] = [['products']];
     if (id) keys.push(['product', id]);
     if (context?.storeId) keys.push(['products', context.storeId]);
     return keys;
   },
   [EntityType.DIGITAL_PRODUCT]: (id, context) => {
-    const keys: unknown[][] = [['digitalProducts']];
+    const  keys: unknown[][] = [['digitalProducts']];
     if (id) {
       keys.push(['digitalProduct', id]);
       keys.push(['productUpdates', id]);
@@ -189,13 +189,13 @@ const ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<st
     return keys;
   },
   [EntityType.PHYSICAL_PRODUCT]: (id, context) => {
-    const keys: unknown[][] = [['physicalProducts']];
+    const  keys: unknown[][] = [['physicalProducts']];
     if (id) keys.push(['physicalProduct', id]);
     if (context?.storeId) keys.push(['physicalProducts', context.storeId]);
     return keys;
   },
   [EntityType.SERVICE]: (id, context) => {
-    const keys: unknown[][] = [['services']];
+    const  keys: unknown[][] = [['services']];
     if (id) {
       keys.push(['service', id]);
       keys.push(['service-bookings', id]);
@@ -204,7 +204,7 @@ const ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<st
     return keys;
   },
   [EntityType.COURSE]: (id) => {
-    const keys: unknown[][] = [['courses'], ['course-stats']];
+    const  keys: unknown[][] = [['courses'], ['course-stats']];
     if (id) {
       keys.push(['course', id]);
       keys.push(['enrollments', id]);
@@ -212,14 +212,14 @@ const ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<st
     return keys;
   },
   [EntityType.ORDER]: (id, context) => {
-    const keys: unknown[][] = [['orders']];
+    const  keys: unknown[][] = [['orders']];
     if (id) keys.push(['order', id]);
     if (context?.storeId) keys.push(['orders', context.storeId]);
     return keys;
   },
   [EntityType.CART]: () => [['cart']],
   [EntityType.REVIEW]: (id, context) => {
-    const keys: unknown[][] = [];
+    const  keys: unknown[][] = [];
     if (context?.productId) {
       keys.push(['product-reviews', context.productId]);
       keys.push(['product-review-stats', context.productId]);
@@ -227,35 +227,35 @@ const ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<st
     return keys;
   },
   [EntityType.CUSTOMER]: (id) => {
-    const keys: unknown[][] = [['customers']];
+    const  keys: unknown[][] = [['customers']];
     if (id) keys.push(['customer', id]);
     return keys;
   },
   [EntityType.STORE]: (id) => {
-    const keys: unknown[][] = [['stores']];
+    const  keys: unknown[][] = [['stores']];
     if (id) keys.push(['store', id]);
     return keys;
   },
   [EntityType.BOOKING]: (id, context) => {
-    const keys: unknown[][] = [['bookings'], ['service-bookings']];
+    const  keys: unknown[][] = [['bookings'], ['service-bookings']];
     if (id) keys.push(['booking', id]);
     if (context?.serviceId) keys.push(['service-bookings', context.serviceId]);
     return keys;
   },
   [EntityType.SUBSCRIPTION]: (id, context) => {
-    const keys: unknown[][] = [['subscriptions'], ['customerSubscriptions']];
+    const  keys: unknown[][] = [['subscriptions'], ['customerSubscriptions']];
     if (id) keys.push(['subscription', id]);
     if (context?.productId) keys.push(['subscriptions', context.productId]);
     return keys;
   },
   [EntityType.LICENSE]: (id, context) => {
-    const keys: unknown[][] = [['licenses']];
+    const  keys: unknown[][] = [['licenses']];
     if (id) keys.push(['license', id]);
     if (context?.productId) keys.push(['licenses', context.productId]);
     return keys;
   },
   [EntityType.UPDATE]: (id, context) => {
-    const keys: unknown[][] = [];
+    const  keys: unknown[][] = [];
     if (context?.digitalProductId) {
       keys.push(['productUpdates', context.digitalProductId]);
       keys.push(['digitalProduct', context.digitalProductId]);
@@ -264,13 +264,13 @@ const ENTITY_QUERY_KEY_MAP: Record<EntityType, (id?: string, context?: Record<st
     return keys;
   },
   [EntityType.STATS]: (context) => {
-    const keys: unknown[][] = [];
+    const  keys: unknown[][] = [];
     if (context?.storeId) keys.push(['dashboard-stats', context.storeId]);
     if (context?.productId) keys.push(['product-stats', context.productId]);
     return keys;
   },
   [EntityType.ANALYTICS]: (context) => {
-    const keys: unknown[][] = [];
+    const  keys: unknown[][] = [];
     if (context?.storeId) keys.push(['analytics', context.storeId]);
     if (context?.productId) keys.push(['product-analytics', context.productId]);
     return keys;
@@ -325,7 +325,7 @@ export function invalidateRelatedCache(
  * Obtenir la clé d'ID pour une entité
  */
 function getEntityIdKey(entityType: EntityType): string {
-  const mapping: Record<EntityType, string> = {
+  const  mapping: Record<EntityType, string> = {
     [EntityType.PRODUCT]: 'productId',
     [EntityType.DIGITAL_PRODUCT]: 'digitalProductId',
     [EntityType.PHYSICAL_PRODUCT]: 'physicalProductId',
@@ -473,4 +473,10 @@ export async function prefetchRelatedData(
     }
   }
 }
+
+
+
+
+
+
 

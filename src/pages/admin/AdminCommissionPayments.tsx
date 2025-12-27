@@ -112,7 +112,7 @@ export default function AdminCommissionPayments() {
   const { data: affiliatePayments = [], isLoading: loadingAffiliate } = useQuery({
     queryKey: ['affiliate-payments', statusFilter],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('affiliate_withdrawals')
         .select(
           `
@@ -149,7 +149,7 @@ export default function AdminCommissionPayments() {
   const { data: referralPayments = [], isLoading: loadingReferral } = useQuery({
     queryKey: ['referral-payments', statusFilter],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('commission_payments')
         .select(
           `
@@ -285,7 +285,7 @@ export default function AdminCommissionPayments() {
   });
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<
+    const  variants: Record<
       string,
       {
         variant: 'default' | 'secondary' | 'destructive' | 'outline';
@@ -761,3 +761,9 @@ export default function AdminCommissionPayments() {
     </AdminLayout>
   );
 }
+
+
+
+
+
+

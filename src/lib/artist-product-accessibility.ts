@@ -36,13 +36,13 @@ export function createAriaFieldAttributes(options: {
 }): AriaFieldAttributes {
   const { id, label, required = false, error, hint, errorId, hintId, describedBy } = options;
 
-  const attributes: AriaFieldAttributes = {};
+  const  attributes: AriaFieldAttributes = {};
 
   // aria-labelledby: Référence au label
   attributes['aria-labelledby'] = `${id}-label`;
 
   // aria-describedby: Combine hint et error
-  const describedByParts: string[] = [];
+  const  describedByParts: string[] = [];
   if (hint && hintId) {
     describedByParts.push(hintId);
   }
@@ -132,7 +132,7 @@ export function createAriaFieldsetAttributes(options: { legend: string; describe
   const { legend, describedBy } = options;
   const legendId = `legend-${Date.now()}`;
 
-  const attributes: {
+  const  attributes: {
     role: 'group';
     'aria-labelledby': string;
     'aria-describedby'?: string;
@@ -166,7 +166,7 @@ export function createAriaButtonAttributes(options: {
 } {
   const { label, pressed, expanded, controls, describedBy } = options;
 
-  const attributes: {
+  const  attributes: {
     'aria-label': string;
     'aria-pressed'?: boolean | 'false' | 'true' | 'mixed';
     'aria-expanded'?: boolean;
@@ -262,7 +262,7 @@ export function createAriaTabPanelAttributes(options: {
 } {
   const { id, labelledBy, hidden = false } = options;
 
-  const attributes: {
+  const  attributes: {
     id: string;
     role: 'tabpanel';
     'aria-labelledby': string;
@@ -335,3 +335,9 @@ export const srOnly =
  * Classe CSS pour masquer visuellement mais garder accessible
  */
 export const screenReaderOnly = srOnly;
+
+
+
+
+
+

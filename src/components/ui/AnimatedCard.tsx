@@ -14,7 +14,7 @@ interface AnimatedCardProps {
   onClick?: () => void;
 }
 
-const AnimatedCardComponent: React.FC<AnimatedCardProps> = ({
+const  AnimatedCardComponent: React.FC<AnimatedCardProps> = ({
   children,
   className,
   hoverEffect = 'lift',
@@ -65,7 +65,7 @@ interface AnimatedButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
+export const AnimatedButton : React.FC<AnimatedButtonProps> = ({
   children,
   className,
   variant = 'primary',
@@ -106,7 +106,7 @@ interface AnimatedImageProps {
   zoom?: boolean;
 }
 
-export const AnimatedImage: React.FC<AnimatedImageProps> = ({
+export const AnimatedImage : React.FC<AnimatedImageProps> = ({
   src,
   alt,
   className,
@@ -129,7 +129,7 @@ interface SkeletonProps {
   dark?: boolean;
 }
 
-export const Skeleton: React.FC<SkeletonProps> = ({ className, dark = false }) => {
+export const Skeleton : React.FC<SkeletonProps> = ({ className, dark = false }) => {
   return (
     <div className={cn(dark ? 'skeleton-dark' : 'skeleton', className)} />
   );
@@ -141,7 +141,7 @@ interface FadeInProps {
   delay?: number;
 }
 
-export const FadeIn: React.FC<FadeInProps> = ({ children, className, delay = 0 }) => {
+export const FadeIn : React.FC<FadeInProps> = ({ children, className, delay = 0 }) => {
   return (
     <div
       className={cn('animate-fade-in', className)}
@@ -159,7 +159,7 @@ interface SlideInProps {
   delay?: number;
 }
 
-export const SlideIn: React.FC<SlideInProps> = ({
+export const SlideIn : React.FC<SlideInProps> = ({
   children,
   className,
   direction = 'up',
@@ -188,7 +188,7 @@ interface ScaleInProps {
   delay?: number;
 }
 
-export const ScaleIn: React.FC<ScaleInProps> = ({ children, className, delay = 0 }) => {
+export const ScaleIn : React.FC<ScaleInProps> = ({ children, className, delay = 0 }) => {
   return (
     <div
       className={cn('animate-scale-in', className)}
@@ -198,4 +198,11 @@ export const ScaleIn: React.FC<ScaleInProps> = ({ children, className, delay = 0
     </div>
   );
 };
+
+
+
+
+
+
+
 

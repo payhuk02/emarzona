@@ -26,7 +26,7 @@ interface StoreSEOSettingsProps {
   onChange: (field: string, value: string) => void;
 }
 
-export const StoreSEOSettings: React.FC<StoreSEOSettingsProps> = ({
+export const StoreSEOSettings : React.FC<StoreSEOSettingsProps> = ({
   metaTitle,
   metaDescription,
   metaKeywords,
@@ -222,4 +222,11 @@ export const StoreSEOSettings: React.FC<StoreSEOSettingsProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 

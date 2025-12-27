@@ -141,7 +141,7 @@ export const useStoreTasks = (storeId: string | null, filters?: TaskFilters) => 
         throw new Error('Store ID is required');
       }
 
-      let query = supabase.from('store_tasks').select('*').eq('store_id', storeId);
+      let  query= supabase.from('store_tasks').select('*').eq('store_id', storeId);
 
       // Appliquer les filtres
       if (filters?.status) {
@@ -475,7 +475,7 @@ export const useStoreTaskUpdate = () => {
       }
 
       // Gérer les changements de statut
-      const updatePayload: any = { ...updateData };
+      const  updatePayload: any = { ...updateData };
 
       if (updateData.status === 'in_progress' && !updateData.started_at) {
         updatePayload.started_at = new Date().toISOString();
@@ -635,4 +635,10 @@ export const useMyStoreTasks = (storeId: string | null) => {
     assigned_to: currentUser?.id,
   });
 };
+
+
+
+
+
+
 

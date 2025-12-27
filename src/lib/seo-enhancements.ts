@@ -22,7 +22,7 @@ export interface SEOMetadata {
 /**
  * Métadonnées par défaut
  */
-const DEFAULT_METADATA: SEOMetadata = {
+const  DEFAULT_METADATA: SEOMetadata = {
   title: 'Emarzona - Plateforme de ecommerce et marketing',
   description: 'Créez et gérez votre boutique en ligne avec Emarzona. Support pour produits digitaux, physiques, services, cours en ligne et œuvres d\'artistes.',
   keywords: ['e-commerce', 'boutique en ligne', 'vente en ligne', 'plateforme e-commerce', 'multi-boutiques'],
@@ -95,7 +95,7 @@ export function updateSEOMetadata(metadata: Partial<SEOMetadata>): void {
  */
 function updateMetaTag(property: string, content: string): void {
   // Essayer par name d'abord
-  let element = document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
+  let  element= document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
   
   // Si pas trouvé, essayer par property (pour Open Graph)
   if (!element) {
@@ -123,7 +123,7 @@ function updateMetaTag(property: string, content: string): void {
  * Mettre à jour une balise link
  */
 function updateLinkTag(rel: string, href: string): void {
-  let element = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement;
+  let  element= document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement;
   
   if (!element) {
     element = document.createElement('link');
@@ -274,5 +274,11 @@ export function generateReviewSchema(reviews: Array<{
     })),
   });
 }
+
+
+
+
+
+
 
 

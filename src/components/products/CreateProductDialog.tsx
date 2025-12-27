@@ -262,3 +262,9 @@ const CreateProductDialog = React.memo(CreateProductDialogComponent, (prevProps,
 CreateProductDialog.displayName = 'CreateProductDialog';
 
 export default CreateProductDialog;
+
+
+
+
+
+

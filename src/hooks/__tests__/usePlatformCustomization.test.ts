@@ -42,8 +42,8 @@ vi.mock('@/lib/schemas/platform-customization', () => ({
 }));
 
 describe('usePlatformCustomization', () => {
-  let queryClient: QueryClient;
-  let mockQuery: ReturnType<typeof vi.fn>;
+  let  queryClient: QueryClient;
+  let  mockQuery: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -140,4 +140,10 @@ describe('usePlatformCustomization', () => {
     expect(saveResult).toBe(false);
   });
 });
+
+
+
+
+
+
 

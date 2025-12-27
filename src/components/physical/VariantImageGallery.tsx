@@ -161,7 +161,7 @@ export function VariantImageGallery({
   const handleAddUrl = (url: string) => {
     if (!selectedVariant || !url.trim()) return;
 
-    const newImage: VariantImage = {
+    const  newImage: VariantImage = {
       id: `img_${Date.now()}`,
       url: url.trim(),
       is_primary: selectedVariant.images.length === 0,
@@ -181,7 +181,7 @@ export function VariantImageGallery({
 
     setIsUploading(true);
 
-    const newImages: VariantImage[] = validUrls.map((url, index) => ({
+    const  newImages: VariantImage[] = validUrls.map((url, index) => ({
       id: `img_${Date.now()}_${index}`,
       url: url.trim(),
       is_primary: selectedVariant.images.length === 0 && index === 0,
@@ -575,4 +575,10 @@ export function VariantImageGallery({
     </div>
   );
 }
+
+
+
+
+
+
 

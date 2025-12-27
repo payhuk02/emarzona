@@ -79,7 +79,6 @@ const Referrals = () => {
       refetchCommissions();
       setHasLoadedCommissions(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]); // Seulement dépendre de activeTab pour éviter les boucles
 
   const copyToClipboard = async () => {
@@ -111,7 +110,7 @@ const Referrals = () => {
     );
     const url = encodeURIComponent(data.referralLink);
 
-    const shareUrls: { [key: string]: string } = {
+    const  shareUrls: { [key: string]: string } = {
       twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       whatsapp: `https://wa.me/?text=${text}%20${url}`,
@@ -125,8 +124,8 @@ const Referrals = () => {
 
   const exportToCSV = (type: "referrals" | "commissions") => {
     try {
-      let csvContent = "";
-      let filename = "";
+      let  csvContent= "";
+      let  filename= "";
 
       if (type === "referrals") {
         filename = `filleuls_${new Date().toISOString().split("T")[0]}.csv`;
@@ -988,3 +987,9 @@ const Referrals = () => {
 };
 
 export default Referrals;
+
+
+
+
+
+

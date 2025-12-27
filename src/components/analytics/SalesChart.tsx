@@ -23,7 +23,7 @@ export const SalesChart = ({ orders, loading }: SalesChartProps) => {
   }
 
   // Group orders by month
-  const salesByMonth: Record<string, number> = {};
+  const  salesByMonth: Record<string, number> = {};
   orders.forEach((order) => {
     const date = new Date(order.created_at);
     const monthKey = date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
@@ -77,3 +77,9 @@ export const SalesChart = ({ orders, loading }: SalesChartProps) => {
     </Card>
   );
 };
+
+
+
+
+
+

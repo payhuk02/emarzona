@@ -24,7 +24,7 @@ export interface ResourceConflictSettings {
   updated_at: string;
 }
 
-const defaultSettings: Omit<ResourceConflictSettings, 'id' | 'store_id' | 'created_at' | 'updated_at'> = {
+const  defaultSettings: Omit<ResourceConflictSettings, 'id' | 'store_id' | 'created_at' | 'updated_at'> = {
   auto_detect_conflicts: true,
   detect_interval_minutes: 30,
   prevent_double_booking: true,
@@ -160,4 +160,10 @@ export const useUpdateResourceConflictSettings = () => {
     },
   });
 };
+
+
+
+
+
+
 

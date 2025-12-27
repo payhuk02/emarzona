@@ -24,7 +24,7 @@ export function useInvoices(customerId?: string) {
   return useQuery({
     queryKey: [...INVOICE_QUERY_KEY, customerId],
     queryFn: async (): Promise<Invoice[]> => {
-      let query = supabase
+      let  query= supabase
         .from('invoices')
         .select(`
           *,
@@ -276,4 +276,10 @@ export function useMarkInvoicePaid() {
     },
   });
 }
+
+
+
+
+
+
 

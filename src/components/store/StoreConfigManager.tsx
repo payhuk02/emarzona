@@ -19,7 +19,7 @@ interface StoreConfigManagerProps {
   onImportConfig: (config: Partial<Store>) => void;
 }
 
-export const StoreConfigManager: React.FC<StoreConfigManagerProps> = ({
+export const StoreConfigManager : React.FC<StoreConfigManagerProps> = ({
   store,
   onImportConfig,
 }) => {
@@ -193,5 +193,12 @@ export const StoreConfigManager: React.FC<StoreConfigManagerProps> = ({
     </Card>
   );
 };
+
+
+
+
+
+
+
 
 

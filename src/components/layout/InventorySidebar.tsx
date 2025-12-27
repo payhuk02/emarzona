@@ -70,7 +70,7 @@ export const InventorySidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Inventaire', path: '/dashboard/inventory' },
     { label: activeSection },
   ];
@@ -104,4 +104,10 @@ export const InventorySidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

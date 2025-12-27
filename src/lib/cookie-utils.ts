@@ -62,7 +62,7 @@ export function setCookie(name: string, value: string, options: CookieOptions = 
     sameSite = 'Lax',
   } = options;
 
-  let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+  let  cookieString= `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
 
   // Gérer l'expiration
   if (expiresDate) {
@@ -107,8 +107,8 @@ export function getCookie(name: string): string | null {
   const nameEQ = `${encodeURIComponent(name)}=`;
   const cookies = document.cookie.split(';');
 
-  for (let i = 0; i < cookies.length; i++) {
-    let cookie = cookies[i];
+  for (let  i= 0; i < cookies.length; i++) {
+    let  cookie= cookies[i];
     while (cookie.charAt(0) === ' ') {
       cookie = cookie.substring(1, cookie.length);
     }
@@ -150,7 +150,7 @@ export function getAllCookies(): Record<string, string> {
     return {};
   }
 
-  const cookies: Record<string, string> = {};
+  const  cookies: Record<string, string> = {};
   const cookieStrings = document.cookie.split(';');
 
   for (const cookieString of cookieStrings) {
@@ -256,3 +256,9 @@ export function areCookiesSupported(): boolean {
     return false;
   }
 }
+
+
+
+
+
+

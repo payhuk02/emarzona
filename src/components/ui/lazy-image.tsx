@@ -45,7 +45,7 @@ interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 /**
  * Composant d'image optimisé mobile-first
  */
-export const LazyImage: React.FC<LazyImageProps> = ({
+export const LazyImage : React.FC<LazyImageProps> = ({
   src,
   fallbackSrc,
   aspectRatio,
@@ -167,7 +167,7 @@ interface ProductImageProps extends Omit<LazyImageProps, 'aspectRatio'> {
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export const ProductImage: React.FC<ProductImageProps> = ({
+export const ProductImage : React.FC<ProductImageProps> = ({
   size = 'md',
   ...props
 }) => {
@@ -187,4 +187,11 @@ export const ProductImage: React.FC<ProductImageProps> = ({
     />
   );
 };
+
+
+
+
+
+
+
 

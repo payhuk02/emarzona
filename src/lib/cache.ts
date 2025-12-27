@@ -23,7 +23,7 @@ class CacheManager {
    */
   set<T>(key: string, data: T, ttl: number = 60 * 60 * 1000): void {
     try {
-      const item: CacheItem<T> = {
+      const  item: CacheItem<T> = {
         data,
         timestamp: Date.now(),
         expiresAt: Date.now() + ttl,
@@ -52,7 +52,7 @@ class CacheManager {
       const itemStr = localStorage.getItem(`${this.prefix}${key}`);
       if (!itemStr) return null;
 
-      const item: CacheItem<T> = JSON.parse(itemStr);
+      const  item: CacheItem<T> = JSON.parse(itemStr);
 
       // Vérifier si le cache est expiré
       if (Date.now() > item.expiresAt) {
@@ -90,15 +90,15 @@ class CacheManager {
    */
   clearExpired(): void {
     try {
-      const keysToRemove: string[] = [];
+      const  keysToRemove: string[] = [];
 
-      for (let i = 0; i < localStorage.length; i++) {
+      for (let  i= 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith(this.prefix)) {
           const itemStr = localStorage.getItem(key);
           if (itemStr) {
             try {
-              const item: CacheItem<unknown> = JSON.parse(itemStr);
+              const  item: CacheItem<unknown> = JSON.parse(itemStr);
               if (Date.now() > item.expiresAt) {
                 keysToRemove.push(key);
               }
@@ -123,9 +123,9 @@ class CacheManager {
    */
   clearAll(): void {
     try {
-      const keysToRemove: string[] = [];
+      const  keysToRemove: string[] = [];
 
-      for (let i = 0; i < localStorage.length; i++) {
+      for (let  i= 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith(this.prefix)) {
           keysToRemove.push(key);
@@ -144,9 +144,9 @@ class CacheManager {
    * Obtient la taille totale du cache en bytes
    */
   getSize(): number {
-    let totalSize = 0;
+    let  totalSize= 0;
 
-    for (let i = 0; i < localStorage.length; i++) {
+    for (let  i= 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key?.startsWith(this.prefix)) {
         const value = localStorage.getItem(key);
@@ -192,4 +192,10 @@ export const useCacheKey = (key: string) => ({
   remove: () => cache.remove(key),
   has: () => cache.has(key),
 });
+
+
+
+
+
+
 

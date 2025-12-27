@@ -57,7 +57,7 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
         fileId,
         data: formData,
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -482,4 +482,10 @@ export const FileMetadataEditor = ({ fileId, fileType, fileName }: FileMetadataE
     </Card>
   );
 };
+
+
+
+
+
+
 

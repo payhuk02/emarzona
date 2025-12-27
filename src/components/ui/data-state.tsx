@@ -68,7 +68,7 @@ export interface DataStateProps {
 /**
  * Composant DataState
  */
-export const DataState: React.FC<DataStateProps> = ({
+export const DataState : React.FC<DataStateProps> = ({
   loading = false,
   error = null,
   empty = false,
@@ -206,4 +206,11 @@ export function useDataState<T>(
     hasData: !loading && !error && !empty,
   };
 }
+
+
+
+
+
+
+
 

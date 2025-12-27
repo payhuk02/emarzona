@@ -23,7 +23,7 @@ interface BaseContextSidebarProps {
  * Détecte les items par leurs props (label, path, icon)
  */
 const extractNavItems = (children: ReactNode): ReactNode[] => {
-  const items: ReactNode[] = [];
+  const  items: ReactNode[] = [];
   
   Children.forEach(children, (child) => {
     if (isValidElement(child)) {
@@ -161,4 +161,10 @@ export const BaseContextSidebar = ({
     </>
   );
 };
+
+
+
+
+
+
 

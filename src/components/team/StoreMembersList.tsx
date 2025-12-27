@@ -35,7 +35,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-const ROLE_LABELS: Record<StoreMember['role'], string> = {
+const  ROLE_LABELS: Record<StoreMember['role'], string> = {
   owner: 'Propriétaire',
   manager: 'Gestionnaire',
   staff: 'Employé',
@@ -43,7 +43,7 @@ const ROLE_LABELS: Record<StoreMember['role'], string> = {
   viewer: 'Observateur',
 };
 
-const ROLE_COLORS: Record<StoreMember['role'], string> = {
+const  ROLE_COLORS: Record<StoreMember['role'], string> = {
   owner: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
   manager: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   staff: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
@@ -51,7 +51,7 @@ const ROLE_COLORS: Record<StoreMember['role'], string> = {
   viewer: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const STATUS_LABELS: Record<StoreMember['status'], string> = {
+const  STATUS_LABELS: Record<StoreMember['status'], string> = {
   pending: 'En attente',
   active: 'Actif',
   inactive: 'Inactif',
@@ -362,4 +362,10 @@ export const StoreMembersList = () => {
     </>
   );
 };
+
+
+
+
+
+
 

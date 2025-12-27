@@ -99,7 +99,7 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
 
     try {
       // Essayer plusieurs variantes de chemins possibles
-      const possiblePaths: string[] = [];
+      const  possiblePaths: string[] = [];
       
       if (storagePath) {
         // Nettoyer le storage_path pour s'assurer qu'il n'a pas de préfixe
@@ -154,8 +154,8 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
       }
 
       // Essayer chaque chemin possible jusqu'à ce qu'on trouve un qui fonctionne
-      let path: string | null = null;
-      let lastError: any = null;
+      let  path: string | null = null;
+      let  lastError: any = null;
       
       for (const testPath of possiblePaths) {
         try {
@@ -334,7 +334,7 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
           onError?.(new Error(`Fichier inaccessible: HTTP ${testResponse.status}`));
           return null;
         }
-      } catch (testError: any) {
+      } catch ( _testError: any) {
         // Si le test échoue, on accepte quand même l'URL signée (peut être un problème CORS)
         if (import.meta.env.DEV) {
           logger.warn('⚠️ Could not test signed URL (may be CORS issue)', {
@@ -363,7 +363,7 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
       }));
 
       return signedUrlData.signedUrl;
-    } catch (error: any) {
+    } catch ( _error: any) {
       if (import.meta.env.DEV) {
         logger.error('❌ Exception generating signed URL', {
           attachmentId,
@@ -446,7 +446,7 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
    */
   const analyzeErrorResponse = useCallback(async (url: string) => {
     try {
-      let response: Response;
+      let  response: Response;
       try {
         response = await fetch(url, { method: 'HEAD' });
       } catch {
@@ -543,4 +543,10 @@ export function useMediaErrorHandler(options: UseMediaErrorHandlerOptions) {
     reset,
   };
 }
+
+
+
+
+
+
 

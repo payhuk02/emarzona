@@ -30,7 +30,7 @@ export interface RetryResult<T> {
 // CONFIGURATION PAR DÉFAUT
 // ============================================================
 
-const DEFAULT_CONFIG: Required<RetryConfig> = {
+const  DEFAULT_CONFIG: Required<RetryConfig> = {
   maxRetries: 3,
   initialDelay: 1000, // 1 seconde
   maxDelay: 30000, // 30 secondes
@@ -52,10 +52,10 @@ export class EmailRetryService {
   ): Promise<RetryResult<T>> {
     const finalConfig = { ...DEFAULT_CONFIG, ...config };
     const startTime = Date.now();
-    let lastError: Error | undefined;
-    let attempts = 0;
+    let  lastError: Error | undefined;
+    let  attempts= 0;
 
-    for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
+    for (let  attempt= 0; attempt <= finalConfig.maxRetries; attempt++) {
       attempts = attempt + 1;
 
       try {
@@ -76,7 +76,7 @@ export class EmailRetryService {
           attempts,
           totalTime,
         };
-      } catch (error: any) {
+      } catch ( _error: any) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         // Vérifier si l'erreur est récupérable
@@ -130,7 +130,7 @@ export class EmailRetryService {
     config: Required<RetryConfig>
   ): number {
     // Calculer le délai de base (backoff exponentiel)
-    let delay =
+    let  delay=
       config.initialDelay * Math.pow(config.multiplier, attempt);
 
     // Appliquer le délai maximum
@@ -225,4 +225,10 @@ export class EmailRetryService {
 
 // Export instance singleton
 export const emailRetryService = EmailRetryService;
+
+
+
+
+
+
 

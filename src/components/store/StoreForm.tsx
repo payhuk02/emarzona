@@ -347,7 +347,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
 
         if (error) throw error;
         setSlugAvailable(data);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error('Error checking slug', { error: errorMessage, slug: slugToCheck });
         setSlugAvailable(null);
@@ -562,7 +562,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
             custom_scripts_enabled?: boolean;
             [key: string]: unknown;
           }
-          const rawUpdateData: StoreUpdateData = {
+          const  rawUpdateData: StoreUpdateData = {
             name,
             slug,
             description: description || null,
@@ -787,7 +787,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
             twitch_url?: string | null;
             [key: string]: unknown;
           }
-          const rawInsertData: StoreInsertData = {
+          const  rawInsertData: StoreInsertData = {
             user_id: user.id,
             name,
             slug,
@@ -909,7 +909,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
         }
 
         onSuccess();
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         toast({
           title: 'Erreur',
@@ -1761,7 +1761,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                   type BorderRadius = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
                   type ShadowIntensity = 'none' | 'sm' | 'md' | 'lg' | 'xl';
 
-                  const setters: Record<string, (v: string) => void> = {
+                  const  setters: Record<string, (v: string) => void> = {
                     primary_color: setPrimaryColor,
                     secondary_color: setSecondaryColor,
                     accent_color: setAccentColor,
@@ -1780,7 +1780,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                   setters[field]?.(value);
                 }}
                 onTypographyChange={(field, value) => {
-                  const setters: Record<string, (v: string) => void> = {
+                  const  setters: Record<string, (v: string) => void> = {
                     heading_font: setHeadingFont,
                     body_font: setBodyFont,
                     font_size_base: setFontSizeBase,
@@ -1798,7 +1798,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                   type ProductCardStyle = 'minimal' | 'standard' | 'detailed';
                   type NavigationStyle = 'horizontal' | 'vertical' | 'mega';
 
-                  const setters: Record<string, (v: string | number | boolean) => void> = {
+                  const  setters: Record<string, (v: string | number | boolean) => void> = {
                     header_style: v => setHeaderStyle(v as HeaderFooterStyle),
                     footer_style: v => setFooterStyle(v as HeaderFooterStyle),
                     sidebar_enabled: v => setSidebarEnabled(Boolean(v)),
@@ -1824,7 +1824,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                 storeUrl={slug ? generateStoreUrl(slug) : undefined}
                 faviconUrl={initialData?.favicon_url || undefined}
                 onChange={(field, value) => {
-                  const setters: Record<string, (v: string) => void> = {
+                  const  setters: Record<string, (v: string) => void> = {
                     meta_title: setMetaTitle,
                     meta_description: setMetaDescription,
                     meta_keywords: setMetaKeywords,
@@ -1851,7 +1851,7 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
                 timezone={timezone}
                 openingHours={openingHours}
                 onAddressChange={(field, value) => {
-                  const setters: Record<string, (v: string) => void> = {
+                  const  setters: Record<string, (v: string) => void> = {
                     address_line1: setAddressLine1,
                     address_line2: setAddressLine2,
                     city: setCity,
@@ -2052,3 +2052,9 @@ const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
 };
 
 export default StoreForm;
+
+
+
+
+
+

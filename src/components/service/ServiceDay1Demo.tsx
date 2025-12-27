@@ -10,7 +10,7 @@ import { ServiceStatusIndicator } from './ServiceStatusIndicator';
 import { BookingInfoDisplay } from './BookingInfoDisplay';
 import { logger } from '@/lib/logger';
 
-export const ServiceDay1Demo: React.FC = () => {
+export const ServiceDay1Demo : React.FC = () => {
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
       <div>
@@ -311,4 +311,11 @@ export const ServiceDay1Demo: React.FC = () => {
 };
 
 export default ServiceDay1Demo;
+
+
+
+
+
+
+
 

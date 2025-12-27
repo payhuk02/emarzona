@@ -29,7 +29,7 @@ export function RepairsManager({ storeId }: RepairsManagerProps) {
   const repairsRef = useScrollAnimation<HTMLDivElement>();
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
       received: { label: 'Reçu', variant: 'secondary' },
       diagnosed: { label: 'Diagnostiqué', variant: 'default', className: 'bg-blue-500' },
       in_progress: { label: 'En Cours', variant: 'default', className: 'bg-yellow-500' },
@@ -265,3 +265,9 @@ function RepairCard({ repair, getStatusBadge, animationDelay = 0 }: RepairCardPr
     </Card>
   );
 }
+
+
+
+
+
+

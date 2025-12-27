@@ -14,7 +14,7 @@ export interface WorkflowTemplate {
   workflow: Omit<CreateWorkflowPayload, 'store_id'>;
 }
 
-export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
+export const WORKFLOW_TEMPLATES : WorkflowTemplate[] = [
   {
     id: 'welcome-series',
     name: 'Série de bienvenue',
@@ -309,4 +309,11 @@ export const getTemplateById = (id: string): WorkflowTemplate | undefined => {
 export const getTemplatesByCategory = (category: WorkflowTemplate['category']): WorkflowTemplate[] => {
   return WORKFLOW_TEMPLATES.filter(template => template.category === category);
 };
+
+
+
+
+
+
+
 

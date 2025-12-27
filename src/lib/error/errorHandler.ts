@@ -138,7 +138,7 @@ export function createServerError(
  * Handle error and log it
  */
 export function handleError(error: unknown, context?: string): AppError {
-  let appError: AppError;
+  let  appError: AppError;
 
   if (isAppError(error)) {
     appError = error;
@@ -214,4 +214,10 @@ export function resetErrorBoundary(): ErrorBoundaryState {
     error: null,
   };
 }
+
+
+
+
+
+
 

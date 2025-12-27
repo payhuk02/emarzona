@@ -43,7 +43,7 @@ export class BatchNotificationService {
       onProgress,
     } = options;
 
-    const result: BatchResult = {
+    const  result: BatchResult = {
       total: notifications.length,
       succeeded: 0,
       failed: 0,
@@ -51,7 +51,7 @@ export class BatchNotificationService {
     };
 
     // Traiter par batches
-    for (let i = 0; i < notifications.length; i += batchSize) {
+    for (let  i= 0; i < notifications.length; i += batchSize) {
       const batch = notifications.slice(i, i + batchSize);
 
       // Traiter le batch en parallèle
@@ -60,7 +60,7 @@ export class BatchNotificationService {
       );
 
       // Analyser les résultats
-      for (let j = 0; j < batchResults.length; j++) {
+      for (let  j= 0; j < batchResults.length; j++) {
         const batchResult = batchResults[j];
         const notification = batch[j];
 
@@ -139,7 +139,7 @@ export class BatchNotificationService {
     notificationTemplate: Omit<UnifiedNotification, 'user_id'>,
     options: BatchNotificationOptions = {}
   ): Promise<BatchResult> {
-    const notifications: UnifiedNotification[] = userIds.map(userId => ({
+    const  notifications: UnifiedNotification[] = userIds.map(userId => ({
       ...notificationTemplate,
       user_id: userId,
     }));
@@ -150,3 +150,9 @@ export class BatchNotificationService {
 
 // Instance singleton
 export const batchNotificationService = new BatchNotificationService();
+
+
+
+
+
+

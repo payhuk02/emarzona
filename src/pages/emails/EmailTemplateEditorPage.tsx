@@ -63,7 +63,7 @@ export const EmailTemplateEditorPage = () => {
         const subj = templateData.subject['fr'] || Object.values(templateData.subject)[0] || '';
         setSubject(subj);
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Failed to save template', { error });
       toast({
         title: t('emails.templateEditor.toast.error'),
@@ -187,3 +187,9 @@ export const EmailTemplateEditorPage = () => {
     </SidebarProvider>
   );
 };
+
+
+
+
+
+

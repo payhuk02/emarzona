@@ -72,7 +72,7 @@ const SEODetailDialogComponent = ({ page, open, onOpenChange }: SEODetailDialogP
             {Object.entries(page.analysis.score).map(([key, value]) => {
               if (key === 'overall') return null;
 
-              const labels: Record<string, string> = {
+              const  labels: Record<string, string> = {
                 structure: 'Structure',
                 content: 'Contenu',
                 images: 'Images',
@@ -222,3 +222,9 @@ export const SEODetailDialog = React.memo(SEODetailDialogComponent, (prevProps, 
 });
 
 SEODetailDialog.displayName = 'SEODetailDialog';
+
+
+
+
+
+

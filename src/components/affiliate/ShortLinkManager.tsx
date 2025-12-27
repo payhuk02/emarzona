@@ -32,7 +32,7 @@ export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerP
   const handleCreateShortLink = useCallback(async () => {
     setIsCreating(true);
     try {
-      const formData: CreateShortLinkForm = {
+      const  formData: CreateShortLinkForm = {
         affiliate_link_id: affiliateLinkId,
         custom_alias: customAlias.trim() || undefined,
         short_code_length: codeLength,
@@ -239,4 +239,10 @@ export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerP
     </div>
   );
 };
+
+
+
+
+
+
 

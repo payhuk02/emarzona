@@ -137,7 +137,7 @@ const CreatePromotionDialogComponent = ({ open, onOpenChange, onSuccess, storeId
       onSuccess();
       onOpenChange(false);
       resetForm();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = getErrorMessage(error);
       setValidationErrors([errorMessage]);
       toast({
@@ -474,3 +474,9 @@ export const CreatePromotionDialog = React.memo(CreatePromotionDialogComponent, 
 });
 
 CreatePromotionDialog.displayName = 'CreatePromotionDialog';
+
+
+
+
+
+

@@ -54,8 +54,8 @@ export interface BookingValidationOptions {
 export const useValidateServiceBooking = () => {
   return useMutation({
     mutationFn: async (options: BookingValidationOptions): Promise<BookingValidationResult> => {
-      const errors: string[] = [];
-      const warnings: string[] = [];
+      const  errors: string[] = [];
+      const  warnings: string[] = [];
 
       try {
         // 1. Vérifier advance_booking_days
@@ -178,4 +178,10 @@ export const useQuickAvailabilityCheck = () => {
     },
   });
 };
+
+
+
+
+
+
 

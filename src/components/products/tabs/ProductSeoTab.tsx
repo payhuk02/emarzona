@@ -87,10 +87,10 @@ export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSe
 
   // Analyser le SEO
   const analyzeSEO = useCallback(() => {
-    let score = 0;
-    const issues: string[] = [];
-    const suggestions: string[] = [];
-    const keywords: string[] = [];
+    let  score= 0;
+    const  issues: string[] = [];
+    const  suggestions: string[] = [];
+    const  keywords: string[] = [];
 
     // Titre SEO (20 points)
     if (formData.meta_title && (formData.meta_title as string).length > 0) {
@@ -284,7 +284,7 @@ export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSe
               size="sm"
               onClick={() => setActivePreview('tablet')}
             >
-              <Tablet className="h-4 w-4" />
+              <Tablet  className ="h-4 w-4" />
             </Button>
             <Button
               variant={activePreview === 'mobile' ? 'default' : 'outline'}
@@ -723,3 +723,9 @@ export const ProductSeoTab = ({ formData, updateFormData, storeSlug }: ProductSe
     </div>
   );
 };
+
+
+
+
+
+

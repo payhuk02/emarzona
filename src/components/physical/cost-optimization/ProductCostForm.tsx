@@ -66,7 +66,7 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
         variant_id: variantId,
       });
       onClose?.();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -291,4 +291,9 @@ export default function ProductCostForm({ productId, variantId, existingCost, on
     </form>
   );
 }
+
+
+
+
+
 

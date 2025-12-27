@@ -30,7 +30,7 @@ export const FunnelAnalysis = () => {
       if (error) throw error;
 
       // Calculer le funnel
-      const steps: FunnelStep[] = [
+      const  steps: FunnelStep[] = [
         {
           name: 'Visiteurs',
           count: data?.find(d => d.event_type === 'page_view')?.count || 0,
@@ -159,4 +159,10 @@ export const FunnelAnalysis = () => {
     </Card>
   );
 };
+
+
+
+
+
+
 

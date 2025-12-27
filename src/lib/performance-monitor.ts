@@ -91,7 +91,7 @@ class PerformanceMonitor {
 
     // Cumulative Layout Shift (CLS)
     try {
-      let clsValue = 0;
+      let  clsValue= 0;
       const clsObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries() as any[]) {
           if (!entry.hadRecentInput) {
@@ -144,7 +144,7 @@ class PerformanceMonitor {
    * Obtenir le rating d'une métrique
    */
   private getRating(metric: string, value: number): 'good' | 'needs-improvement' | 'poor' {
-    const thresholds: Record<string, { good: number; poor: number }> = {
+    const  thresholds: Record<string, { good: number; poor: number }> = {
       FCP: { good: 1800, poor: 3000 },
       LCP: { good: 2500, poor: 4000 },
       FID: { good: 100, poor: 300 },
@@ -165,7 +165,7 @@ class PerformanceMonitor {
    * Logger une métrique
    */
   private logMetric(name: string, value: number, rating: string) {
-    const metric: PerformanceMetric = {
+    const  metric: PerformanceMetric = {
       name,
       value: Math.round(value),
       rating: rating as 'good' | 'needs-improvement' | 'poor',
@@ -265,7 +265,7 @@ class PerformanceMonitor {
 }
 
 // Instance singleton
-let performanceMonitorInstance: PerformanceMonitor | null = null;
+let  performanceMonitorInstance: PerformanceMonitor | null = null;
 
 /**
  * Obtenir l'instance du monitor de performance
@@ -290,3 +290,9 @@ export function measurePerformance(name: string, fn: () => void | Promise<void>)
 export function getPerformanceReport() {
   return getPerformanceMonitor().getReport();
 }
+
+
+
+
+
+

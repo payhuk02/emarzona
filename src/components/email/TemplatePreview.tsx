@@ -26,8 +26,8 @@ export const TemplatePreview = ({
 
   // Remplacer les variables par les données de prévisualisation
   const processHtml = (html: string) => {
-    let processed = html;
-    const defaultData: Record<string, string> = {
+    let  processed= html;
+    const  defaultData: Record<string, string> = {
       user_name: 'Jean Dupont',
       user_email: 'jean@example.com',
       order_id: 'ORD-12345',
@@ -56,7 +56,7 @@ export const TemplatePreview = ({
 
   const processedHtml = processHtml(htmlContent);
   const processedSubject = subject.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    const defaultData: Record<string, string> = {
+    const  defaultData: Record<string, string> = {
       user_name: 'Jean Dupont',
       order_id: 'ORD-12345',
       product_name: 'Produit Exemple',
@@ -148,3 +148,9 @@ export const TemplatePreview = ({
     </Card>
   );
 };
+
+
+
+
+
+

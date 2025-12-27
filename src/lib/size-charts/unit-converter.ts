@@ -11,7 +11,7 @@ export type MeasurementUnit = 'cm' | 'inch' | 'mm';
 // FACTEURS DE CONVERSION
 // =====================================================
 
-const CONVERSION_FACTORS: Record<MeasurementUnit, Record<MeasurementUnit, number>> = {
+const  CONVERSION_FACTORS: Record<MeasurementUnit, Record<MeasurementUnit, number>> = {
   cm: {
     cm: 1,
     inch: 0.393701,
@@ -57,7 +57,7 @@ export function convertMeasurementValues(
 ): Record<string, number | string> {
   if (fromUnit === toUnit) return values;
 
-  const converted: Record<string, number | string> = {};
+  const  converted: Record<string, number | string> = {};
 
   for (const [key, val] of Object.entries(values)) {
     if (typeof val === 'number') {
@@ -173,7 +173,7 @@ export function autoConvertUnits(chart: {
  * Récupère le symbole d'unité
  */
 export function getUnitSymbol(unit: MeasurementUnit): string {
-  const symbols: Record<MeasurementUnit, string> = {
+  const  symbols: Record<MeasurementUnit, string> = {
     cm: 'cm',
     inch: '"',
     mm: 'mm',
@@ -185,7 +185,7 @@ export function getUnitSymbol(unit: MeasurementUnit): string {
  * Récupère le label complet de l'unité
  */
 export function getUnitLabel(unit: MeasurementUnit): string {
-  const labels: Record<MeasurementUnit, string> = {
+  const  labels: Record<MeasurementUnit, string> = {
     cm: 'Centimètres',
     inch: 'Pouces',
     mm: 'Millimètres',
@@ -203,4 +203,10 @@ export function formatValueWithSymbol(
 ): string {
   return `${value.toFixed(decimals)} ${getUnitSymbol(unit)}`;
 }
+
+
+
+
+
+
 

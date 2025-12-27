@@ -62,7 +62,7 @@ describe('MediaAttachment', () => {
 
     it('should apply size classes correctly', () => {
       const { rerender } = render(<MediaAttachment attachment={mockAttachment} size="thumbnail" />);
-      let img = screen.getByRole('img');
+      let  img= screen.getByRole('img');
       expect(img.className).toContain('max-w-32');
 
       rerender(<MediaAttachment attachment={mockAttachment} size="medium" />);
@@ -258,4 +258,9 @@ describe('MediaAttachment', () => {
     });
   });
 });
+
+
+
+
+
 

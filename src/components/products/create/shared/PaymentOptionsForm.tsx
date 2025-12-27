@@ -31,7 +31,7 @@ interface PaymentOptionsFormProps {
   onUpdate: (data: PaymentOptionsData) => void;
 }
 
-export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
+export const PaymentOptionsForm : React.FC<PaymentOptionsFormProps> = ({
   productPrice,
   productType,
   data,
@@ -285,3 +285,10 @@ export const PaymentOptionsForm: React.FC<PaymentOptionsFormProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

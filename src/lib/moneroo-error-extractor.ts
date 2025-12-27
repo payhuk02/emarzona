@@ -51,7 +51,7 @@ export async function extractErrorDetails(
 ): Promise<ExtractedErrorDetails> {
   const supabaseError = error as SupabaseError;
   const errorBody = await extractErrorBody(error);
-  let errorDetails: ExtractedErrorDetails = {
+  let  errorDetails: ExtractedErrorDetails = {
     message: errorMessage,
   };
 
@@ -143,5 +143,11 @@ export function extractDetailedMessage(
   
   return defaultMessage;
 }
+
+
+
+
+
+
 
 

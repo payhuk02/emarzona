@@ -93,7 +93,7 @@ export const useProductsOptimized = (
         const endIndex = startIndex + itemsPerPage - 1;
 
         // Construire la requête de base
-        let queryBuilder = supabase
+        let  queryBuilder= supabase
           .from('products')
           .select(`
             *,
@@ -173,7 +173,7 @@ export const useProductsOptimized = (
         }
 
         // Filtrer par stockStatus côté client (trop complexe pour SQL)
-        let filteredData = (data || []) as Product[];
+        let  filteredData= (data || []) as Product[];
         if (stockStatus !== 'all') {
           filteredData = filteredData.filter((product) => {
             if (product.track_inventory === false || product.product_type === 'digital') {
@@ -208,9 +208,9 @@ export const useProductsOptimized = (
           itemsPerPage,
           totalPages,
         };
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         logger.error('Erreur dans useProductsOptimized', {
-          error: error instanceof Error ? error.message : String(error),
+          error: _error instanceof Error ? _error.message : String(_error),
           storeId,
           page,
           itemsPerPage,
@@ -236,4 +236,10 @@ export const useProductsOptimized = (
     refetch: query.refetch,
   };
 };
+
+
+
+
+
+
 

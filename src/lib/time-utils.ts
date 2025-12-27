@@ -68,7 +68,7 @@ export function formatDuration(
       return `${secs}s`;
 
     case 'long': {
-      const parts: string[] = [];
+      const  parts: string[] = [];
       if (hours > 0) {
         parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
       }
@@ -119,7 +119,7 @@ export function formatDurationMinutes(
     return `${mins}m`;
   }
 
-  const parts: string[] = [];
+  const  parts: string[] = [];
   if (hours > 0) {
     parts.push(`${hours} heure${hours > 1 ? 's' : ''}`);
   }
@@ -152,7 +152,7 @@ export function parseDuration(duration: string): number {
 
   const partsMatch = duration.match(/(\d+)([hms])/g);
   if (partsMatch) {
-    let totalSeconds = 0;
+    let  totalSeconds= 0;
     partsMatch.forEach((part) => {
       const match = part.match(/(\d+)([hms])/);
       if (match) {
@@ -263,4 +263,10 @@ export function parseTime(time: string): number {
   }
   return 0;
 }
+
+
+
+
+
+
 

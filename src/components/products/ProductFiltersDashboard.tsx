@@ -80,7 +80,7 @@ const ProductFiltersDashboardComponent = ({
   }, [onCategoryChange, onProductTypeChange, onStatusChange, onStockStatusChange, onSearchChange]);
 
   const activeFiltersCount = useMemo(() => {
-    let count = 0;
+    let  count= 0;
     if (category !== 'all') count++;
     if (productType !== 'all') count++;
     if (status !== 'all') count++;
@@ -390,3 +390,9 @@ const ProductFiltersDashboard = React.memo(
 ProductFiltersDashboard.displayName = 'ProductFiltersDashboard';
 
 export default ProductFiltersDashboard;
+
+
+
+
+
+

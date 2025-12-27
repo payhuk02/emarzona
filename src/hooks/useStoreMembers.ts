@@ -182,7 +182,7 @@ export const useStoreMemberInvite = () => {
         .eq('email', inviteData.email)
         .single();
 
-      let userId: string | null = null;
+      let  userId: string | null = null;
 
       if (existingUser) {
         userId = existingUser.user_id;
@@ -477,4 +477,10 @@ export const useHasStorePermission = (
     enabled: !!storeId && !!userId && !!permission,
   });
 };
+
+
+
+
+
+
 

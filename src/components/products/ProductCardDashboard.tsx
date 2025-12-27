@@ -104,7 +104,7 @@ const ProductCardDashboardComponent = ({
   };
 
   const getCategoryColor = (category: string | null) => {
-    const colors: Record<string, string> = {
+    const  colors: Record<string, string> = {
       Formation: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
       Digital: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
       Service: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
@@ -417,3 +417,9 @@ export default React.memo(ProductCardDashboard, (prevProps, nextProps) => {
     prevProps.storeId === nextProps.storeId
   );
 });
+
+
+
+
+
+

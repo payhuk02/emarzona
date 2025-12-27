@@ -145,7 +145,7 @@ export function mapValues<T, U>(
   obj: Record<string, T>,
   fn: (value: T, key: string) => U
 ): Record<string, U> {
-  const result: Record<string, U> = {};
+  const  result: Record<string, U> = {};
   Object.keys(obj).forEach((key) => {
     result[key] = fn(obj[key], key);
   });
@@ -159,7 +159,7 @@ export function mapKeys<T>(
   obj: Record<string, T>,
   fn: (key: string, value: T) => string
 ): Record<string, T> {
-  const result: Record<string, T> = {};
+  const  result: Record<string, T> = {};
   Object.keys(obj).forEach((key) => {
     result[fn(key, obj[key])] = obj[key];
   });
@@ -173,7 +173,7 @@ export function filterObject<T extends Record<string, any>>(
   obj: T,
   predicate: (value: T[keyof T], key: keyof T) => boolean
 ): Partial<T> {
-  const result: Partial<T> = {};
+  const  result: Partial<T> = {};
   Object.keys(obj).forEach((key) => {
     const typedKey = key as keyof T;
     if (predicate(obj[typedKey], typedKey)) {
@@ -189,7 +189,7 @@ export function filterObject<T extends Record<string, any>>(
 export function invert<T extends Record<string, string | number>>(
   obj: T
 ): Record<string, keyof T> {
-  const result: Record<string, keyof T> = {};
+  const  result: Record<string, keyof T> = {};
   Object.keys(obj).forEach((key) => {
     result[String(obj[key])] = key as keyof T;
   });
@@ -205,7 +205,7 @@ export function get<T>(
   defaultValue?: T
 ): T | undefined {
   const keys = Array.isArray(path) ? path : path.split('.');
-  let result: any = obj;
+  let  result: any = obj;
 
   for (const key of keys) {
     if (result == null || !(key in result)) {
@@ -227,9 +227,9 @@ export function set<T extends object>(
 ): T {
   const keys = Array.isArray(path) ? path : path.split('.');
   const cloned = deepClone(obj);
-  let current: any = cloned;
+  let  current: any = cloned;
 
-  for (let i = 0; i < keys.length - 1; i++) {
+  for (let  i= 0; i < keys.length - 1; i++) {
     const key = keys[i];
     if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
       current[key] = {};
@@ -246,7 +246,7 @@ export function set<T extends object>(
  */
 export function has(obj: any, path: string | string[]): boolean {
   const keys = Array.isArray(path) ? path : path.split('.');
-  let current = obj;
+  let  current= obj;
 
   for (const key of keys) {
     if (current == null || !(key in current)) {
@@ -264,4 +264,10 @@ export function has(obj: any, path: string | string[]): boolean {
 export function compactObject<T extends Record<string, any>>(obj: T): Partial<T> {
   return filterObject(obj, (value) => value != null);
 }
+
+
+
+
+
+
 

@@ -23,7 +23,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
     try {
       setLoading(true);
 
-      let query = supabase
+      let  query= supabase
         .from('affiliate_withdrawals')
         .select(`
           *,
@@ -60,7 +60,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
       if (error) throw error;
 
       setWithdrawals(data || []);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error fetching withdrawals:', error);
       toast({
@@ -126,7 +126,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return data;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error requesting withdrawal:', error);
       toast({
@@ -160,7 +160,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error approving withdrawal:', error);
       toast({
@@ -195,7 +195,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error rejecting withdrawal:', error);
       toast({
@@ -255,7 +255,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error completing withdrawal:', error);
       toast({
@@ -291,7 +291,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error marking withdrawal as failed:', error);
       toast({
@@ -321,7 +321,7 @@ export const useAffiliateWithdrawals = (filters?: WithdrawalFilters) => {
 
       await fetchWithdrawals();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error cancelling withdrawal:', error);
       toast({
@@ -437,4 +437,10 @@ export const useAffiliateBalance = (affiliateId?: string) => {
 
   return { balance, loading };
 };
+
+
+
+
+
+
 

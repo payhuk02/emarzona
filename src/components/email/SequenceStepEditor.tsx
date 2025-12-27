@@ -78,7 +78,7 @@ export const SequenceStepEditor = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: CreateSequenceStepPayload = {
+    const  payload: CreateSequenceStepPayload = {
       sequence_id: sequenceId,
       step_order: order,
       template_id: templateId || undefined,
@@ -218,4 +218,10 @@ export const SequenceStepEditor = ({
     </Dialog>
   );
 };
+
+
+
+
+
+
 

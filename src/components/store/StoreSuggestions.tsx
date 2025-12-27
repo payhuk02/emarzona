@@ -47,7 +47,7 @@ export const StoreSuggestions = ({
 
   if (!showSuggestions || !name) return null;
 
-  const suggestions: Array<{
+  const  suggestions: Array<{
     id: string;
     type: 'slug' | 'meta' | 'colors' | 'domain' | 'keywords';
     title: string;
@@ -254,4 +254,10 @@ export const StoreSuggestions = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

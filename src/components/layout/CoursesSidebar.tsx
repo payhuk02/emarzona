@@ -50,7 +50,7 @@ export const CoursesSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Cours', path: '/account/courses' },
     { label: activeSection },
   ];
@@ -84,4 +84,10 @@ export const CoursesSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

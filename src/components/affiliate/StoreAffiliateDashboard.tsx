@@ -109,7 +109,7 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof CheckCircle; label: string }> = {
+    const  variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof CheckCircle; label: string }> = {
       pending: { variant: 'outline', icon: Clock, label: 'En attente' },
       active: { variant: 'default', icon: CheckCircle, label: 'Actif' },
       suspended: { variant: 'destructive', icon: XCircle, label: 'Suspendu' },
@@ -404,6 +404,12 @@ export function StoreAffiliateDashboard({ storeId }: StoreAffiliateDashboardProp
     </div>
   );
 }
+
+
+
+
+
+
 
 
 

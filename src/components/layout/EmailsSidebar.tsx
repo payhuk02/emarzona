@@ -57,7 +57,7 @@ const emailsNavItems = [
 ];
 
 // Mapping des paths vers les labels
-const pathToLabel: Record<string, string> = {
+const  pathToLabel: Record<string, string> = {
   campaigns: 'Campagnes',
   sequences: 'Séquences',
   segments: 'Segments',
@@ -84,7 +84,7 @@ export const EmailsSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Emails', path: '/dashboard/emails/campaigns' },
     { label: pathToLabel[activeSection] || 'Emails' },
   ];
@@ -118,4 +118,10 @@ export const EmailsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

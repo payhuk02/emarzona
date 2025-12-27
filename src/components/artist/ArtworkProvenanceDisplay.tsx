@@ -16,7 +16,7 @@ interface ArtworkProvenanceDisplayProps {
   className?: string;
 }
 
-const provenanceTypeLabels: Record<string, string> = {
+const  provenanceTypeLabels: Record<string, string> = {
   creation: 'Création',
   ownership: 'Propriété',
   exhibition: 'Exposition',
@@ -27,7 +27,7 @@ const provenanceTypeLabels: Record<string, string> = {
   other: 'Autre',
 };
 
-const provenanceTypeColors: Record<string, string> = {
+const  provenanceTypeColors: Record<string, string> = {
   creation: 'bg-blue-500',
   ownership: 'bg-green-500',
   exhibition: 'bg-purple-500',
@@ -158,4 +158,10 @@ export const ArtworkProvenanceDisplay = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

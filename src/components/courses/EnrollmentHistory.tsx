@@ -104,7 +104,7 @@ export interface EnrollmentHistoryProps {
 /**
  * Configuration des types d'événements
  */
-const EVENT_CONFIG: Record<
+const  EVENT_CONFIG: Record<
   EnrollmentEventType,
   {
     label: string;
@@ -176,7 +176,7 @@ const EVENT_CONFIG: Record<
  * />
  * ```
  */
-export const EnrollmentHistory: React.FC<EnrollmentHistoryProps> = ({
+export const EnrollmentHistory : React.FC<EnrollmentHistoryProps> = ({
   events,
   onRefresh,
   onViewDetails,
@@ -191,7 +191,7 @@ export const EnrollmentHistory: React.FC<EnrollmentHistoryProps> = ({
 
   // Filtrer les événements
   const filteredEvents = useMemo(() => {
-    let result = [...events];
+    let  result= [...events];
 
     // Recherche
     if (searchQuery) {
@@ -558,4 +558,11 @@ export const EnrollmentHistory: React.FC<EnrollmentHistoryProps> = ({
 EnrollmentHistory.displayName = 'EnrollmentHistory';
 
 export default EnrollmentHistory;
+
+
+
+
+
+
+
 

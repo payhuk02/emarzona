@@ -84,7 +84,7 @@ export interface ProductTemplate {
 /**
  * Templates prédéfinis
  */
-export const PREDEFINED_TEMPLATES: Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>[] = [
+export const PREDEFINED_TEMPLATES : Omit<ProductTemplate, 'id' | 'created_at' | 'updated_at'>[] = [
   // Digital
   {
     name: 'Ebook Standard',
@@ -301,7 +301,7 @@ export async function getProductTemplates(
   includePrivate: boolean = false
 ): Promise<ProductTemplate[]> {
   try {
-    let query = supabase
+    let  query= supabase
       .from('product_templates')
       .select('*')
       .order('usage_count', { ascending: false });
@@ -329,7 +329,7 @@ export async function getProductTemplates(
     }
 
     return data as ProductTemplate[];
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error fetching product templates', { error: error.message });
     // En cas d'erreur, retourner les templates prédéfinis
     return PREDEFINED_TEMPLATES.map((template, index) => ({
@@ -367,7 +367,7 @@ export async function createProductFromTemplate(
     };
 
     // Créer le produit selon le type
-    let productId: string;
+    let  productId: string;
 
     switch (template.product_type) {
       case 'digital':
@@ -489,7 +489,7 @@ export async function createProductFromTemplate(
     logger.info('Product created from template', { templateId, productId, productType: template.product_type });
 
     return { success: true, productId };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error creating product from template', { error: error.message, templateId });
     return { success: false, error: error.message };
   }
@@ -532,9 +532,16 @@ export async function saveProductTemplate(
     if (error) throw error;
 
     return { success: true, templateId: data.id };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error saving product template', { error: error.message });
     return { success: false, error: error.message };
   }
 }
+
+
+
+
+
+
+
 

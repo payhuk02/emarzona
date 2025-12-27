@@ -640,3 +640,9 @@ export const PhysicalProductCardSkeleton = () => {
 };
 
 export default PhysicalProductCard;
+
+
+
+
+
+

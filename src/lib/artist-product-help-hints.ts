@@ -14,7 +14,7 @@ export interface HelpHint {
 /**
  * Messages d'aide par champ
  */
-export const FIELD_HELP_HINTS: Record<string, HelpHint> = {
+export const FIELD_HELP_HINTS : Record<string, HelpHint> = {
   artist_name: {
     hint: "Nom complet de l'artiste tel qu'il apparaîtra sur la fiche produit",
     examples: ['Jean Dupont', 'Marie Martin', 'Collectif Artiste'],
@@ -242,7 +242,7 @@ export function getFieldHelpHint(fieldKey: string): HelpHint | null {
  * Formate un message d'aide pour affichage
  */
 export function formatHelpHint(hint: HelpHint): string {
-  let formatted = hint.hint;
+  let  formatted= hint.hint;
 
   if (hint.examples && hint.examples.length > 0) {
     formatted += `\n\nExemples: ${hint.examples.join(', ')}`;
@@ -254,3 +254,10 @@ export function formatHelpHint(hint: HelpHint): string {
 
   return formatted;
 }
+
+
+
+
+
+
+

@@ -139,14 +139,14 @@ export function CourseProductCard({
   );
 
   // Labels de niveau
-  const difficultyLabels: Record<string, string> = {
+  const  difficultyLabels: Record<string, string> = {
     beginner: 'Débutant',
     intermediate: 'Intermédiaire',
     advanced: 'Avancé',
   };
 
   // Labels de type d'accès
-  const accessLabels: Record<string, string> = {
+  const  accessLabels: Record<string, string> = {
     lifetime: 'Accès à vie',
     subscription: 'Abonnement',
   };
@@ -625,3 +625,9 @@ export const CourseProductCardSkeleton = () => {
 };
 
 export default CourseProductCard;
+
+
+
+
+
+

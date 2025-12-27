@@ -39,7 +39,7 @@ interface SSLCertificateManagerProps {
   onUpdateSSLConfiguration: (domain: string, config: Partial<SSLConfiguration>) => Promise<boolean>;
 }
 
-export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
+export const SSLCertificateManager : React.FC<SSLCertificateManagerProps> = ({
   domain,
   sslConfiguration,
   onGetSSLCertificates,
@@ -532,3 +532,10 @@ export const SSLCertificateManager: React.FC<SSLCertificateManagerProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

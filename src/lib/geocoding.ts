@@ -119,7 +119,7 @@ export async function geocodeAddress(
         place_id: result.place_id,
       },
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     logger.error('Geocoding error', { error, address });
     return {
       success: false,
@@ -142,7 +142,7 @@ export function buildFullAddress(
   postalCode: string,
   country: string
 ): string {
-  const parts: string[] = [];
+  const  parts: string[] = [];
 
   if (addressLine1) parts.push(addressLine1);
   if (addressLine2) parts.push(addressLine2);
@@ -153,4 +153,10 @@ export function buildFullAddress(
 
   return parts.join(', ');
 }
+
+
+
+
+
+
 

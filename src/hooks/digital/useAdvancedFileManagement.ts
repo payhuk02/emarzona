@@ -367,7 +367,7 @@ export const useUpdateFileMetadata = () => {
         .eq('file_id', fileId)
         .single();
 
-      let result;
+      let  _result;
       if (existing) {
         // Mise à jour
         const { data: updated, error } = await supabase
@@ -513,4 +513,10 @@ export const useUpdateFile = () => {
     },
   });
 };
+
+
+
+
+
+
 

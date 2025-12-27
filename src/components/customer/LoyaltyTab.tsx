@@ -47,14 +47,14 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { LoyaltyTierType, LoyaltyRewardType } from '@/types/loyalty';
 
-const TIER_COLORS: Record<LoyaltyTierType, string> = {
+const  TIER_COLORS: Record<LoyaltyTierType, string> = {
   bronze: '#CD7F32',
   silver: '#C0C0C0',
   gold: '#FFD700',
   platinum: '#E5E4E2',
 };
 
-const REWARD_TYPE_LABELS: Record<LoyaltyRewardType, string> = {
+const  REWARD_TYPE_LABELS: Record<LoyaltyRewardType, string> = {
   discount: 'Réduction',
   free_product: 'Produit gratuit',
   free_shipping: 'Livraison gratuite',
@@ -565,3 +565,9 @@ export const LoyaltyTab = () => {
     </div>
   );
 };
+
+
+
+
+
+

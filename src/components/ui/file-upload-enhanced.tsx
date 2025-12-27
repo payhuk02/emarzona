@@ -55,7 +55,7 @@ interface FilePreview {
   url?: string;
 }
 
-export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
+export const FileUploadEnhanced : React.FC<FileUploadEnhancedProps> = ({
   value,
   onChange,
   multiple = false,
@@ -112,8 +112,8 @@ export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
           // Redimensionner si trop grand (max 1920px)
           const maxWidth = 1920;
           const maxHeight = 1920;
-          let width = img.width;
-          let height = img.height;
+          let  width= img.width;
+          let  height= img.height;
 
           if (width > maxWidth || height > maxHeight) {
             if (width > height) {
@@ -205,7 +205,7 @@ export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
     }
 
     // Créer previews
-    const newPreviews: FilePreview[] = [];
+    const  newPreviews: FilePreview[] = [];
     for (const file of fileArray) {
       const preview = await generatePreview(file);
       newPreviews.push({
@@ -227,10 +227,10 @@ export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
     setUploading(true);
     setGlobalProgress(0);
 
-    const uploadedUrls: string[] = [];
+    const  uploadedUrls: string[] = [];
 
     try {
-      for (let i = 0; i < previews.length; i++) {
+      for (let  i= 0; i < previews.length; i++) {
         const preview = previews[i];
         
         // Mettre à jour statut
@@ -504,4 +504,11 @@ export const FileUploadEnhanced: React.FC<FileUploadEnhancedProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+
 

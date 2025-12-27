@@ -73,7 +73,7 @@ export function handleKeyboardNavigation(
   items: HTMLElement[],
   onSelect: (index: number) => void
 ): (e: KeyboardEvent) => void {
-  let currentIndex = -1;
+  let  currentIndex= -1;
 
   return (e: KeyboardEvent) => {
     switch (e.key) {
@@ -119,7 +119,6 @@ export function checkColorContrast(foreground: string, background: string): {
 } {
   // Utiliser la fonction améliorée si disponible
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { checkColorContrast: enhancedCheck } = require('./accessibility-enhanced');
     return enhancedCheck(foreground, background);
   } catch {
@@ -256,7 +255,6 @@ export function initAccessibility(): void {
   
   // Initialiser les raccourcis clavier améliorés
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { setupKeyboardShortcuts } = require('./accessibility-enhanced');
     setupKeyboardShortcuts();
   } catch {
@@ -265,6 +263,12 @@ export function initAccessibility(): void {
   
   logger.info('✅ Accessibilité initialisée');
 }
+
+
+
+
+
+
 
 
 

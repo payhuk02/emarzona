@@ -39,19 +39,19 @@ interface EmailSequenceManagerProps {
   onViewSteps?: (sequence: EmailSequence) => void;
 }
 
-const STATUS_COLORS: Record<SequenceStatus, string> = {
+const  STATUS_COLORS: Record<SequenceStatus, string> = {
   active: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
   paused: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
   archived: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const STATUS_LABELS: Record<SequenceStatus, string> = {
+const  STATUS_LABELS: Record<SequenceStatus, string> = {
   active: 'Active',
   paused: 'En pause',
   archived: 'Archivée',
 };
 
-const TRIGGER_LABELS: Record<SequenceTriggerType, string> = {
+const  TRIGGER_LABELS: Record<SequenceTriggerType, string> = {
   event: 'Événement',
   time: 'Temps',
   behavior: 'Comportement',
@@ -232,4 +232,10 @@ export const EmailSequenceManager = ({
     </>
   );
 };
+
+
+
+
+
+
 

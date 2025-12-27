@@ -49,7 +49,7 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
   };
 
   const getServiceTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       appointment: 'Rendez-vous',
       class: 'Cours / Formation',
       event: 'Événement',
@@ -337,4 +337,10 @@ export const ServicePreview = ({ data }: ServicePreviewProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

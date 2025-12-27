@@ -70,7 +70,7 @@ export const useMarketplaceFavorites = () => {
    * Charger les favoris depuis localStorage
    */
   const loadFromLocalStorage = () => {
-    let saved: string | null = null;
+    let  saved: string | null = null;
     try {
       saved = localStorage.getItem('marketplace-favorites');
     } catch {
@@ -98,7 +98,7 @@ export const useMarketplaceFavorites = () => {
     userId: string,
     existingFavorites: Set<string>
   ) => {
-    let saved: string | null = null;
+    let  saved: string | null = null;
     try {
       saved = localStorage.getItem('marketplace-favorites');
     } catch {
@@ -293,3 +293,9 @@ export const useMarketplaceFavorites = () => {
     refreshFavorites: loadFavorites,
   };
 };
+
+
+
+
+
+

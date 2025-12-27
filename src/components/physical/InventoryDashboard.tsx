@@ -319,3 +319,9 @@ export function InventoryDashboard({ storeId, className }: InventoryDashboardPro
   );
 }
 
+
+
+
+
+
+

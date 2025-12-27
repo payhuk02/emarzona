@@ -251,7 +251,7 @@ const ConversationItem = memo<ConversationItemProps>(({ conversation, isActive, 
 ConversationItem.displayName = 'ConversationItem';
 
 // Composant principal optimisé
-const ConversationComponent: React.FC<ConversationComponentProps> = ({
+const  ConversationComponent: React.FC<ConversationComponentProps> = ({
   orderId,
   storeId,
   customerId,
@@ -332,7 +332,7 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
     if (!messageContent.trim() && selectedFiles.length === 0) return;
     if (!currentConversation) return;
 
-    const messageType: MessageType = selectedFiles.length > 0 ? 'file' : 'text';
+    const  messageType: MessageType = selectedFiles.length > 0 ? 'file' : 'text';
 
     const formData = {
       content: messageContent,
@@ -685,3 +685,9 @@ const ConversationComponent: React.FC<ConversationComponentProps> = ({
 };
 
 export default memo(ConversationComponent);
+
+
+
+
+
+

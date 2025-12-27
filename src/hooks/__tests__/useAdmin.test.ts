@@ -1,5 +1,6 @@
 /**
- * Tests unitaires pour useAdmin hook
+ * Tests unitaires pour useAdmin
+ * Hook critique pour la vérification des permissions admin
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -13,14 +14,15 @@ vi.mock('@/integrations/supabase/client', () => ({
     auth: {
       getUser: vi.fn(),
     },
-  },
-}));
-
-// Mock logger
-vi.mock('@/lib/logger', () => ({
-  logger: {
-    info: vi.fn(),
-    error: vi.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          })),
+        })),
+      })),
+    })),
   },
 }));
 
@@ -29,8 +31,8 @@ describe('useAdmin', () => {
     vi.clearAllMocks();
   });
 
-  it('devrait retourner isAdmin: false si pas d\'utilisateur', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({
+  it('devrait retourner false si aucun utilisateur connecté', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: { user: null },
       error: null,
     });
@@ -38,15 +40,17 @@ describe('useAdmin', () => {
     const { result } = renderHook(() => useAdmin());
 
     await waitFor(() => {
-      expect(result.current.isAdmin).toBe(false);
+      expect(result.current.isLoading).toBe(false);
     });
+
+    expect(result.current.isAdmin).toBe(false);
   });
 
-  it('devrait retourner isAdmin: true pour principal admin', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({
+  it('devrait retourner true pour l\'administrateur principal', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
       data: {
         user: {
-          id: 'test-id',
+          id: 'admin-123',
           email: 'contact@edigit-agence.com',
         },
       },
@@ -56,21 +60,1003 @@ describe('useAdmin', () => {
     const { result } = renderHook(() => useAdmin());
 
     await waitFor(() => {
-      expect(result.current.isAdmin).toBe(true);
+      expect(result.current.isLoading).toBe(false);
     });
+
+    expect(result.current.isAdmin).toBe(true);
   });
 
-  it('devrait gérer les erreurs correctement', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({
-      data: { user: null },
-      error: { message: 'Erreur de connexion' },
+  it('devrait retourner true si l\'utilisateur a le rôle admin dans user_roles', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
     });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
 
     const { result } = renderHook(() => useAdmin());
 
     await waitFor(() => {
-      expect(result.current.isAdmin).toBe(false);
+      expect(result.current.isLoading).toBe(false);
     });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
   });
 });
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [{ role: 'admin' }],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('devrait retourner false si l\'utilisateur n\'a pas le rôle admin', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: [],
+              error: null,
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isAdmin).toBe(false);
+  });
+
+  it('devrait gérer les erreurs de requête', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+          email: 'user@example.com',
+        },
+      },
+      error: null,
+    });
+
+    const mockFrom = vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve({
+              data: null,
+              error: new Error('Database error'),
+            })),
+          })),
+        })),
+      })),
+    }));
+
+    vi.mocked(supabase.from).mockImplementation(mockFrom as any);
+
+    const { result } = renderHook(() => useAdmin());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Devrait retourner false en cas d'erreur
+    expect(result.current.isAdmin).toBe(false);
+  });
+});
+
+
+
+
+
 

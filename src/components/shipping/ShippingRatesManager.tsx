@@ -82,7 +82,7 @@ export function ShippingRatesManager({ storeId }: ShippingRatesManagerProps) {
     queryFn: async () => {
       if (!zones || zones.length === 0) return [];
       
-      const allRates: (ShippingRate & { zone_name: string })[] = [];
+      const  allRates: (ShippingRate & { zone_name: string })[] = [];
       
       for (const zone of zones) {
         const { data: zoneRates } = await supabase
@@ -168,7 +168,7 @@ export function ShippingRatesManager({ storeId }: ShippingRatesManagerProps) {
       });
       setDialogOpen(false);
       resetForm();
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error saving rate', error);
       toast({
         title: '❌ Erreur',
@@ -186,7 +186,7 @@ export function ShippingRatesManager({ storeId }: ShippingRatesManagerProps) {
         title: '✅ Tarif supprimé',
         description: 'Le tarif a été supprimé avec succès.',
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error deleting rate', error);
       toast({
         title: '❌ Erreur',
@@ -633,4 +633,10 @@ export function ShippingRatesManager({ storeId }: ShippingRatesManagerProps) {
     </div>
   );
 }
+
+
+
+
+
+
 

@@ -126,7 +126,7 @@ export interface EnrollmentInfoDisplayProps {
 /**
  * Configuration des statuts
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   EnrollmentStatus,
   {
     label: string;
@@ -196,7 +196,7 @@ const STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const EnrollmentInfoDisplay: React.FC<EnrollmentInfoDisplayProps> = ({
+export const EnrollmentInfoDisplay : React.FC<EnrollmentInfoDisplayProps> = ({
   enrollmentId,
   status,
   enrolledDate,
@@ -613,4 +613,11 @@ export const EnrollmentInfoDisplay: React.FC<EnrollmentInfoDisplayProps> = ({
 EnrollmentInfoDisplay.displayName = 'EnrollmentInfoDisplay';
 
 export default EnrollmentInfoDisplay;
+
+
+
+
+
+
+
 

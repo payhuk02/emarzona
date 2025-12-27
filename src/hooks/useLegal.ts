@@ -123,7 +123,7 @@ export const useCookiePreferences = (userId: string | undefined) => {
         }
         
         return data || null;
-      } catch (err: unknown) {
+      } catch ( _err: unknown) {
         const errorObj = err as { code?: string; message?: string };
         // Gérer les erreurs inattendues (table n'existe pas, etc.)
         if (errorObj?.code === '42P01' || errorObj?.message?.includes('does not exist') || errorObj?.message?.includes('404')) {
@@ -183,7 +183,7 @@ export const useUpdateCookiePreferences = () => {
         }
         
         return data || preferences as Partial<CookiePreferences>;
-      } catch (err: unknown) {
+      } catch ( _err: unknown) {
         const errorObj = err as { code?: string; message?: string };
         // Fallback: sauvegarder en localStorage si erreur Supabase
         if (errorObj?.code === '42P01' || errorObj?.message?.includes('does not exist') || errorObj?.message?.includes('404')) {
@@ -255,4 +255,10 @@ export const useGDPRRequests = (userId: string | undefined) => {
     enabled: !!userId,
   });
 };
+
+
+
+
+
+
 

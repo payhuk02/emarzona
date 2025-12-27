@@ -96,7 +96,7 @@ export const useCourses = () => {
   const { data: courses, isLoading, error, refetch } = useQuery({
     queryKey: ['courses', filters],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('courses')
         .select('*')
         .order('created_at', { ascending: false });
@@ -157,7 +157,7 @@ export const useCourses = () => {
       const courses = allCourses as Course[];
 
       // Calculer les statistiques
-      const stats: CourseStats = {
+      const  stats: CourseStats = {
         total_courses: courses.length,
         active_courses: courses.filter(c => c.is_active).length,
         total_students: courses.reduce((sum, c) => sum + c.enrolled_students, 0),
@@ -443,3 +443,9 @@ export const useCourses = () => {
 };
 
 export default useCourses;
+
+
+
+
+
+

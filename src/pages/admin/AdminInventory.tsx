@@ -436,3 +436,9 @@ export default function AdminInventory() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

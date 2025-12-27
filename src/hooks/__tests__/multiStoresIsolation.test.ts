@@ -74,13 +74,13 @@ vi.mock('@/contexts/AuthContext', () => ({
 }));
 
 describe('Multi-Stores Isolation Tests', () => {
-  let queryClient: QueryClient;
-  let mockQuery: ReturnType<typeof vi.fn>;
-  let mockSelect: ReturnType<typeof vi.fn>;
-  let mockEq: ReturnType<typeof vi.fn>;
-  let mockOrder: ReturnType<typeof vi.fn>;
-  let mockRange: ReturnType<typeof vi.fn>;
-  let mockSingle: ReturnType<typeof vi.fn>;
+  let  queryClient: QueryClient;
+  let  mockQuery: ReturnType<typeof vi.fn>;
+  let  mockSelect: ReturnType<typeof vi.fn>;
+  let  mockEq: ReturnType<typeof vi.fn>;
+  let  mockOrder: ReturnType<typeof vi.fn>;
+  let  mockRange: ReturnType<typeof vi.fn>;
+  let  mockSingle: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -321,7 +321,7 @@ describe('Multi-Stores Isolation Tests', () => {
       ];
 
       // Mock multiple queries
-      let callCount = 0;
+      let  callCount= 0;
       mockSelect.mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
@@ -544,4 +544,10 @@ describe('Multi-Stores Isolation Tests', () => {
     });
   });
 });
+
+
+
+
+
+
 

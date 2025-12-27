@@ -252,3 +252,9 @@ ${report.recommendations.map(r => `- ${r}`).join('\n')}
   );
 }
 
+
+
+
+
+
+

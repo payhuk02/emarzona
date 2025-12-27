@@ -100,7 +100,7 @@ export const RegistrationDialog = memo(({
         });
       } catch (error) {
         if (error instanceof z.ZodError) {
-          const errors: Record<string, string> = {};
+          const  errors: Record<string, string> = {};
           error.errors.forEach((err) => {
             const path = err.path[0] as string;
             if (path && (path === 'email' || path === 'first_name' || path === 'last_name')) {
@@ -133,7 +133,7 @@ export const RegistrationDialog = memo(({
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors: Record<string, string> = {};
+        const  errors: Record<string, string> = {};
         error.errors.forEach((err) => {
           const path = err.path[0] as string;
           if (path) {
@@ -304,4 +304,10 @@ export const RegistrationDialog = memo(({
 });
 
 RegistrationDialog.displayName = 'RegistrationDialog';
+
+
+
+
+
+
 

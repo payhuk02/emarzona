@@ -124,7 +124,7 @@ export const useProductPricing = (
    */
   const addPriceToHistory = useCallback(
     (price: number, promotionalPrice?: number) => {
-      const newEntry: PriceHistoryEntry = {
+      const  newEntry: PriceHistoryEntry = {
         date: new Date().toISOString(),
         price,
         promotional_price: promotionalPrice,
@@ -172,4 +172,10 @@ export const useProductPricing = (
     calculateSavings,
   };
 };
+
+
+
+
+
+
 

@@ -132,7 +132,7 @@ export interface StudentProgressManagerProps {
  * />
  * ```
  */
-export const StudentProgressManager: React.FC<StudentProgressManagerProps> = ({
+export const StudentProgressManager : React.FC<StudentProgressManagerProps> = ({
   enrollmentId,
   studentName,
   courseName,
@@ -504,4 +504,11 @@ export const StudentProgressManager: React.FC<StudentProgressManagerProps> = ({
 StudentProgressManager.displayName = 'StudentProgressManager';
 
 export default StudentProgressManager;
+
+
+
+
+
+
+
 

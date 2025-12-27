@@ -67,7 +67,7 @@ export function useBundles(storeId: string | null, filters?: {
     queryFn: async () => {
       if (!storeId) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('product_bundles')
         .select('*')
         .eq('store_id', storeId)
@@ -152,7 +152,7 @@ export function useCalculateBundlePrice() {
       if (error) throw error;
 
       // Calculer le prix total
-      let totalPrice = 0;
+      let  totalPrice= 0;
       for (const item of items) {
         const product = products?.find((p) => p.id === item.product_id);
         if (product) {
@@ -406,9 +406,9 @@ export function useApplyBundlePromotion() {
 
       if (fetchError) throw fetchError;
 
-      let newBundlePrice = bundle.bundle_price;
-      let newDiscountAmount = bundle.original_price - bundle.bundle_price;
-      let newDiscountPercentage = bundle.original_price > 0
+      let  newBundlePrice= bundle.bundle_price;
+      let  newDiscountAmount= bundle.original_price - bundle.bundle_price;
+      let  newDiscountPercentage= bundle.original_price > 0
         ? ((bundle.original_price - bundle.bundle_price) / bundle.original_price) * 100
         : 0;
 
@@ -460,4 +460,10 @@ export function useApplyBundlePromotion() {
     },
   });
 }
+
+
+
+
+
+
 

@@ -99,7 +99,7 @@ function PhysicalProductsListComponent({
   const filteredProducts = React.useMemo(() => {
     if (!products) return [];
 
-    let filtered = [...products];
+    let  filtered= [...products];
 
     // Search filter
     if (searchQuery) {
@@ -476,4 +476,10 @@ export const PhysicalProductsList = React.memo(PhysicalProductsListComponent, (p
 });
 
 PhysicalProductsList.displayName = 'PhysicalProductsList';
+
+
+
+
+
+
 

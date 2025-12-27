@@ -47,8 +47,8 @@ export const AffiliatePerformanceCharts = ({
     const startDate = startOfDay(subDays(new Date(), daysCount - 1));
     
     // Créer un tableau de dates
-    const dates: string[] = [];
-    for (let i = 0; i < daysCount; i++) {
+    const  dates: string[] = [];
+    for (let  i= 0; i < daysCount; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       dates.push(format(date, 'yyyy-MM-dd'));
@@ -426,5 +426,11 @@ export const AffiliatePerformanceCharts = ({
     </div>
   );
 };
+
+
+
+
+
+
 
 

@@ -24,7 +24,7 @@ import { logger } from './logger';
  * Formatte les erreurs Zod en un objet lisible
  */
 export function formatZodErrors(errors: z.ZodError): Record<string, string> {
-  const formattedErrors: Record<string, string> = {};
+  const  formattedErrors: Record<string, string> = {};
   
   errors.errors.forEach((error) => {
     const path = error.path.join('.');
@@ -138,7 +138,7 @@ export function validateStoreStep(
   errors: Record<string, string>; 
   data?: unknown;
 } {
-  let schema: z.ZodSchema;
+  let  schema: z.ZodSchema;
   
   switch (step) {
     case 'basic':
@@ -232,7 +232,7 @@ export async function validateStoreField(
  * Obtient les messages d'aide pour un champ
  */
 export function getFieldHelp(field: string): string | undefined {
-  const helpMessages: Record<string, string> = {
+  const  helpMessages: Record<string, string> = {
     slug: 'Utilisez uniquement des lettres minuscules, des chiffres et des tirets. Ex: ma-boutique-123',
     contact_email: 'Cette adresse sera utilisée pour les communications importantes',
     meta_title: 'Recommandé : 50-60 caractères pour un affichage optimal dans les résultats de recherche',
@@ -249,4 +249,10 @@ export function getFieldHelp(field: string): string | undefined {
   
   return helpMessages[field];
 }
+
+
+
+
+
+
 

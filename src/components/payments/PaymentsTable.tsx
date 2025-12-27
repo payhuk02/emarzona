@@ -37,7 +37,7 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
       });
 
       onPaymentUpdated();
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -50,14 +50,14 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
   }, [deleteId, onPaymentUpdated]); // Note: toast est stable, pas besoin de le mettre dans les dépendances
 
   const getStatusBadge = useCallback((status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    const  variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       pending: "secondary",
       completed: "default",
       failed: "destructive",
       refunded: "outline",
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: "En attente",
       completed: "Complété",
       failed: "Échoué",
@@ -72,7 +72,7 @@ const PaymentsTableComponent = ({ payments, loading, onPaymentUpdated }: Payment
   }, []);
 
   const getMethodLabel = useCallback((method: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       cash: "Espèces",
       card: "Carte bancaire",
       mobile_money: "Mobile Money",
@@ -186,3 +186,9 @@ export const PaymentsTable = React.memo(PaymentsTableComponent, (prevProps, next
 });
 
 PaymentsTable.displayName = 'PaymentsTable';
+
+
+
+
+
+

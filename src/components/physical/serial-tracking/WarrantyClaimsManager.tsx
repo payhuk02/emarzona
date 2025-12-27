@@ -29,7 +29,7 @@ export function WarrantyClaimsManager({ storeId }: WarrantyClaimsManagerProps) {
   const claimsRef = useScrollAnimation<HTMLDivElement>();
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
       pending: { label: 'En Attente', variant: 'secondary' },
       under_review: { label: 'En Examen', variant: 'default', className: 'bg-yellow-500' },
       approved: { label: 'Approuvée', variant: 'default', className: 'bg-green-500' },
@@ -254,3 +254,9 @@ function ClaimCard({ claim, getStatusBadge, animationDelay = 0 }: ClaimCardProps
     </Card>
   );
 }
+
+
+
+
+
+

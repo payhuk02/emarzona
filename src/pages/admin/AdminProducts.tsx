@@ -86,7 +86,7 @@ const AdminProducts = () => {
 
       setProducts(productsWithStore);
       logger.info(`${productsWithStore.length} produits chargés`);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Erreur lors du chargement des produits:', error);
     } finally {
       setLoading(false);
@@ -429,3 +429,9 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
+
+
+
+
+
+

@@ -110,7 +110,7 @@ export const useProductCosts = (storeId?: string, productId?: string) => {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('product_costs')
         .select(`
           *,
@@ -150,7 +150,7 @@ export const useMarginAnalysis = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('margin_analysis')
         .select(`
           *,
@@ -195,7 +195,7 @@ export const usePriceOptimizationRecommendations = (storeId?: string, filters?: 
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('price_optimization_recommendations')
         .select(`
           *,
@@ -408,7 +408,7 @@ export const useUpdateRecommendationStatus = () => {
       recommendationId: string;
       status: PriceOptimizationRecommendation['status'];
     }) => {
-      const updateData: any = {
+      const  updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -450,4 +450,10 @@ export const useUpdateRecommendationStatus = () => {
     },
   });
 };
+
+
+
+
+
+
 

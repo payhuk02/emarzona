@@ -90,7 +90,7 @@ interface AdvancedPaymentsComponentProps {
   className?: string;
 }
 
-const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
+const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
   storeId,
   orderId,
   customerId,
@@ -151,7 +151,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
   // Filtrage et tri des paiements (maintenant fait côté serveur avec pagination)
   // On garde juste le tri local pour les résultats paginés
   const filteredAndSortedPayments = useMemo(() => {
-    let filtered = [...(payments || [])];
+    let  filtered= [...(payments || [])];
 
     // 🔧 RECHERCHE ÉTENDUE: Recherche dans plus de champs (fallback si pas fait côté serveur)
     // Note: La recherche est maintenant principalement gérée côté serveur via PaymentFilters
@@ -331,7 +331,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
 
   const getStatusBadge = useCallback(
     (status: PaymentStatus) => {
-      const variants: Record<PaymentStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      const  variants: Record<PaymentStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
         pending: 'secondary',
         completed: 'default',
         failed: 'destructive',
@@ -341,7 +341,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
         disputed: 'destructive',
       };
 
-      const labels: Record<PaymentStatus, string> = {
+      const  labels: Record<PaymentStatus, string> = {
         pending: t('payments.status.pending', 'En attente'),
         completed: t('payments.status.completed', 'Complété'),
         failed: t('payments.status.failed', 'Échoué'),
@@ -351,7 +351,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
         disputed: t('payments.status.disputed', 'En litige'),
       };
 
-      const icons: Record<PaymentStatus, React.ReactNode> = {
+      const  icons: Record<PaymentStatus, React.ReactNode> = {
         pending: <Clock className="h-3 w-3" aria-hidden="true" />,
         completed: <CheckCircle className="h-3 w-3" aria-hidden="true" />,
         failed: <XCircle className="h-3 w-3" aria-hidden="true" />,
@@ -373,19 +373,19 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
 
   const getPaymentTypeBadge = useCallback(
     (type: PaymentType) => {
-      const variants: Record<PaymentType, 'default' | 'secondary' | 'outline'> = {
+      const  variants: Record<PaymentType, 'default' | 'secondary' | 'outline'> = {
         full: 'default',
         percentage: 'secondary',
         delivery_secured: 'outline',
       };
 
-      const labels: Record<PaymentType, string> = {
+      const  labels: Record<PaymentType, string> = {
         full: t('payments.type.full', 'Paiement complet'),
         percentage: t('payments.type.percentage', 'Paiement partiel'),
         delivery_secured: t('payments.type.secured', 'Paiement sécurisé'),
       };
 
-      const icons: Record<PaymentType, React.ReactNode> = {
+      const  icons: Record<PaymentType, React.ReactNode> = {
         full: <CreditCard className="h-3 w-3" aria-hidden="true" />,
         percentage: <Percent className="h-3 w-3" aria-hidden="true" />,
         delivery_secured: <Shield className="h-3 w-3" aria-hidden="true" />,
@@ -403,7 +403,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
 
   const getMethodLabel = useCallback(
     (method: string) => {
-      const labels: Record<string, string> = {
+      const  labels: Record<string, string> = {
         cash: t('payments.method.cash', 'Espèces'),
         card: t('payments.method.card', 'Carte bancaire'),
         mobile_money: t('payments.method.mobileMoney', 'Mobile Money'),
@@ -587,7 +587,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
                   title: t('success.title', 'Succès'),
                   description: t('payments.exported', 'Paiements exportés avec succès'),
                 });
-              } catch (error: unknown) {
+              } catch ( _error: unknown) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 toast({
                   title: t('errors.title', 'Erreur'),
@@ -882,7 +882,7 @@ const AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
                 {Array.from({ length: Math.min(5, Math.ceil(totalCount / pageSize)) }, (_, i) => {
                   const page = i + 1;
                   const totalPages = Math.ceil(totalCount / pageSize);
-                  let displayPage: number | null = null;
+                  let  displayPage: number | null = null;
 
                   if (totalPages <= 5) {
                     displayPage = page;
@@ -1001,7 +1001,7 @@ interface PaymentCardProps {
   viewMode: 'grid' | 'list';
 }
 
-const PaymentCard: React.FC<PaymentCardProps> = ({
+const  PaymentCard: React.FC<PaymentCardProps> = ({
   payment,
   index,
   getStatusBadge,
@@ -1191,7 +1191,7 @@ interface PaymentDetailsDialogProps {
   t: ReturnType<typeof useTranslation>['t'];
 }
 
-const PaymentDetailsDialog: React.FC<PaymentDetailsDialogProps> = ({
+const  PaymentDetailsDialog: React.FC<PaymentDetailsDialogProps> = ({
   open,
   onOpenChange,
   payment,
@@ -1404,7 +1404,7 @@ interface DisputeDialogProps {
   t: ReturnType<typeof useTranslation>['t'];
 }
 
-const DisputeDialog: React.FC<DisputeDialogProps> = ({
+const  DisputeDialog: React.FC<DisputeDialogProps> = ({
   open,
   onOpenChange,
   payment: _payment,
@@ -1487,7 +1487,7 @@ interface PaymentFormProps {
   onCreatePayment: (result: PaymentResponse) => void;
 }
 
-const PaymentForm: React.FC<PaymentFormProps> = ({
+const  PaymentForm: React.FC<PaymentFormProps> = ({
   storeId,
   orderId,
   customerId,
@@ -1529,7 +1529,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         notes: formData.notes,
       };
 
-      let result;
+      let  _result;
       switch (paymentType) {
         case 'percentage':
           result = await createPercentagePayment({
@@ -1708,3 +1708,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 };
 
 export default AdvancedPaymentsComponent;
+
+
+
+
+
+

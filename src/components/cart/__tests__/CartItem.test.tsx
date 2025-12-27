@@ -17,7 +17,7 @@ import userEvent from '@testing-library/user-event';
 import { CartItem } from '../CartItem';
 import type { CartItem as CartItemType } from '@/types/cart';
 
-const mockItem: CartItemType = {
+const  mockItem: CartItemType = {
   id: '1',
   product_id: 'prod-1',
   product_name: 'Produit Test',
@@ -114,7 +114,7 @@ describe('CartItem', () => {
 
   it('should call onRemove when quantity becomes 0', async () => {
     const user = userEvent.setup();
-    const itemWithQuantity1: CartItemType = {
+    const  itemWithQuantity1: CartItemType = {
       ...mockItem,
       quantity: 1,
     };
@@ -150,7 +150,7 @@ describe('CartItem', () => {
   });
 
   it('should display discount when discount_amount is greater than 0', () => {
-    const itemWithDiscount: CartItemType = {
+    const  itemWithDiscount: CartItemType = {
       ...mockItem,
       discount_amount: 2000,
     };
@@ -230,4 +230,10 @@ describe('CartItem', () => {
     expect(screen.getByLabelText(/supprimer produit test du panier/i)).toBeInTheDocument();
   });
 });
+
+
+
+
+
+
 

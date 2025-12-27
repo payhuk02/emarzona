@@ -132,7 +132,7 @@ export interface BulkServiceUpdateProps {
  * />
  * ```
  */
-export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
+export const BulkServiceUpdate : React.FC<BulkServiceUpdateProps> = ({
   services,
   selectedIds: initialSelectedIds = [],
   onUpdate,
@@ -174,7 +174,7 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
   const calculateChanges = () => {
     return Array.from(selectedIds).map((id) => {
       const service = services.find((s) => s.id === id)!;
-      const changes: Partial<BulkServiceItem> = {};
+      const  changes: Partial<BulkServiceItem> = {};
 
       switch (updateField) {
         case 'price':
@@ -237,7 +237,7 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
     
     try {
       // Simuler un progress (en production, utiliser un vrai callback de progression)
-      for (let i = 0; i <= 100; i += 10) {
+      for (let  i= 0; i <= 100; i += 10) {
         setUpdateProgress(i);
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
@@ -618,4 +618,11 @@ export const BulkServiceUpdate: React.FC<BulkServiceUpdateProps> = ({
 BulkServiceUpdate.displayName = 'BulkServiceUpdate';
 
 export default BulkServiceUpdate;
+
+
+
+
+
+
+
 

@@ -22,7 +22,7 @@ import type { ShippingInfo } from './ShippingInfoDisplay';
 
 export function PhysicalComponentsDemo() {
   // Sample shipping data
-  const sampleShipping: ShippingInfo = {
+  const  sampleShipping: ShippingInfo = {
     status: 'in_transit',
     trackingNumber: 'TRK123456789',
     carrier: 'DHL Express',
@@ -179,4 +179,10 @@ export function PhysicalComponentsDemo() {
     </div>
   );
 }
+
+
+
+
+
+
 

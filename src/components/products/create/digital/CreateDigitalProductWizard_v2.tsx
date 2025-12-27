@@ -343,8 +343,8 @@ export const CreateDigitalProductWizard = ({
    * Load draft from localStorage
    */
   useEffect(() => {
-    let savedDraft: string | null = null;
-    let savedStep: string | null = null;
+    let  savedDraft: string | null = null;
+    let  savedStep: string | null = null;
     try {
       savedDraft = localStorage.getItem('digital-product-draft');
       savedStep = localStorage.getItem('digital-product-current-step');
@@ -453,7 +453,7 @@ export const CreateDigitalProductWizard = ({
             }
 
             // Ne pas inclure le prix dans la validation si le modèle est "free"
-            const validationData: Partial<DigitalProductFormData> = {
+            const  validationData: Partial<DigitalProductFormData> = {
               name: nameValue,
             };
 
@@ -532,7 +532,7 @@ export const CreateDigitalProductWizard = ({
               const versionError = getFieldError(result.errors, 'version');
 
               // Construire un message d'erreur détaillé avec tous les champs en erreur
-              const errorMessages: string[] = [];
+              const  errorMessages: string[] = [];
               if (nameError) errorMessages.push(`Nom: ${nameError}`);
               if (priceError) errorMessages.push(`Prix: ${priceError}`);
               if (slugError) errorMessages.push(`Slug: ${slugError}`);
@@ -672,7 +672,7 @@ export const CreateDigitalProductWizard = ({
             // Les étapes 3-6 sont déjà gérées en haut de la fonction
             return true;
         }
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Erreur lors du chargement des modules de validation', {
           error,
@@ -727,7 +727,7 @@ export const CreateDigitalProductWizard = ({
         logger.warn('Validation échouée, navigation bloquée', { step: currentStep });
         // Le toast est déjà affiché par validateStep
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la validation/navigation', {
         error,
@@ -788,10 +788,10 @@ export const CreateDigitalProductWizard = ({
         }
 
         // Générer un slug unique
-        let slug = formData.slug || generateSlug(formData.name);
+        let  slug= formData.slug || generateSlug(formData.name);
 
         // Vérifier l'unicité du slug et générer un nouveau si nécessaire
-        let attempts = 0;
+        let  attempts= 0;
         const maxAttempts = 10;
         while (attempts < maxAttempts) {
           const { data: existing } = await supabase
@@ -1021,7 +1021,7 @@ export const CreateDigitalProductWizard = ({
             } else {
               logger.info('Free preview product created', { previewProductId });
             }
-          } catch (error: unknown) {
+          } catch ( _error: unknown) {
             const errorMessage = error instanceof Error ? error.message : String(error);
             logger.error('Exception creating preview product', { error: errorMessage });
             // Ne pas faire échouer la création du produit principal
@@ -1046,14 +1046,14 @@ export const CreateDigitalProductWizard = ({
               price: product.price,
               currency: product.currency,
               created_at: product.created_at,
-            }).catch(err => {
+            }).catch( err => {
               logger.error('Error triggering webhook', { error: err, productId: product.id });
             });
           });
         }
 
         return product;
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         logger.error('Erreur lors de la sauvegarde du produit', {
           error: error instanceof Error ? error.message : String(error),
         });
@@ -1085,7 +1085,7 @@ export const CreateDigitalProductWizard = ({
         // Rediriger vers la liste des produits digitaux
         navigate('/dashboard/digital-products', { replace: true });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la sauvegarde du brouillon', { error: errorMessage });
       toast({
@@ -1124,7 +1124,7 @@ export const CreateDigitalProductWizard = ({
         // Fallback vers la liste des produits digitaux si storeSlug n'est pas disponible
         navigate('/dashboard/digital-products', { replace: true });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la publication', { error: errorMessage });
       toast({
@@ -1264,7 +1264,6 @@ export const CreateDigitalProductWizard = ({
    */
   useEffect(() => {
     logger.info('Wizard Produit Digital ouvert', { step: currentStep, storeId });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -1569,3 +1568,9 @@ export const CreateDigitalProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

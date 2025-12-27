@@ -61,7 +61,7 @@ interface ProductType {
   checkIconClass: string;
 }
 
-const PRODUCT_TYPES: ProductType[] = [
+const  PRODUCT_TYPES: ProductType[] = [
   {
     value: 'digital',
     label: 'Produit Digital',
@@ -226,7 +226,7 @@ export const EnhancedProductTypeSelector = ({
 
         if (error) throw error;
 
-        const newStats: ProductStats = {
+        const  newStats: ProductStats = {
           digital: 0,
           course: 0,
           physical: 0,
@@ -260,7 +260,7 @@ export const EnhancedProductTypeSelector = ({
    * Filter products based on search and filter
    */
   const filteredTypes = useMemo(() => {
-    let filtered = PRODUCT_TYPES;
+    let  filtered= PRODUCT_TYPES;
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -710,3 +710,9 @@ export const EnhancedProductTypeSelector = ({
     </div>
   );
 };
+
+
+
+
+
+

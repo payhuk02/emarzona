@@ -246,7 +246,7 @@ export const useSubscriptionStats = (storeId?: string) => {
   return useQuery({
     queryKey: ['subscriptionStats', storeId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('digital_product_subscriptions')
         .select('status, subscription_price, total_amount_paid');
 
@@ -367,7 +367,7 @@ export const useCancelSubscription = () => {
       cancelAtPeriodEnd?: boolean;
       reason?: string;
     }) => {
-      const updateData: any = {
+      const  updateData: any = {
         cancel_at_period_end: cancelAtPeriodEnd,
         cancelled_at: cancelAtPeriodEnd ? null : new Date().toISOString(),
         cancellation_reason: reason || null,
@@ -506,4 +506,10 @@ export const useReactivateSubscription = () => {
     },
   });
 };
+
+
+
+
+
+
 

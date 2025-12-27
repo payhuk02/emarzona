@@ -165,7 +165,7 @@ export default function AssignmentsManagement() {
 
   // Filtrer les assignments
   const filteredAssignments = useMemo(() => {
-    let filtered = assignments;
+    let  filtered= assignments;
 
     // Filtre par recherche
     if (searchQuery) {
@@ -180,7 +180,7 @@ export default function AssignmentsManagement() {
 
   // Filtrer les soumissions
   const filteredSubmissions = useMemo(() => {
-    let filtered = submissions;
+    let  filtered= submissions;
 
     // Filtre par statut
     if (statusFilter !== 'all') {
@@ -264,7 +264,7 @@ export default function AssignmentsManagement() {
         title: '✅ Assignment supprimé',
         description: 'Le devoir a été supprimé avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -320,7 +320,7 @@ export default function AssignmentsManagement() {
 
       setIsCreateDialogOpen(false);
       setEditingAssignmentId(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error saving assignment', { error, formData });
       // Les erreurs sont gérées par les hooks
@@ -333,7 +333,7 @@ export default function AssignmentsManagement() {
   };
 
   const getStatusBadge = (status: string) => {
-    const badges: Record<
+    const  badges: Record<
       string,
       {
         label: string;
@@ -1029,3 +1029,9 @@ export default function AssignmentsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

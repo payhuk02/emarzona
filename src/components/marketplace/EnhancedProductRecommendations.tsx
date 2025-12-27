@@ -27,7 +27,7 @@ interface EnhancedProductRecommendationsProps {
 /**
  * Composant amélioré pour afficher les recommandations ML
  */
-export const EnhancedProductRecommendations: React.FC<EnhancedProductRecommendationsProps> = ({
+export const EnhancedProductRecommendations : React.FC<EnhancedProductRecommendationsProps> = ({
   productId,
   limit = 6,
   showAllTypes = false,
@@ -71,7 +71,7 @@ export const EnhancedProductRecommendations: React.FC<EnhancedProductRecommendat
   const viewBasedList = useMemo(() => transformRecommendations(viewBased || []), [viewBased]);
 
   const getRecommendationBadge = (type: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+    const  badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
       similar: { label: 'Similaire', variant: 'default' },
       category: { label: 'Même catégorie', variant: 'secondary' },
       tags: { label: 'Tags similaires', variant: 'outline' },
@@ -310,4 +310,11 @@ export const EnhancedProductRecommendations: React.FC<EnhancedProductRecommendat
 };
 
 export default EnhancedProductRecommendations;
+
+
+
+
+
+
+
 

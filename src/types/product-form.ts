@@ -158,3 +158,9 @@ export type ProductFormDataUpdate = Partial<ProductFormData> & {
   [key: string]: unknown; // Pour permettre les mises à jour dynamiques
 };
 
+
+
+
+
+
+

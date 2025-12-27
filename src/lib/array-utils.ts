@@ -84,7 +84,7 @@ export function union<T>(array1: T[], array2: T[]): T[] {
  */
 export function shuffle<T>(array: T[]): T[] {
   const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
+  for (let  i= shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
@@ -110,8 +110,8 @@ export function randomSample<T>(array: T[], count: number): T[] {
  * Chunk un tableau en groupes de taille spécifiée
  */
 export function chunk<T>(array: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
+  const  chunks: T[][] = [];
+  for (let  i= 0; i < array.length; i += size) {
     chunks.push(array.slice(i, i + size));
   }
   return chunks;
@@ -244,4 +244,10 @@ export function max<T>(array: T[], compareFn?: (a: T, b: T) => number): T | unde
     return max > current ? max : current;
   });
 }
+
+
+
+
+
+
 

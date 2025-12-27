@@ -54,7 +54,7 @@ export class RecommendationEngine {
       }
 
       const limit = request.limit || 10;
-      let recommendations: ProductRecommendation[] = [];
+      let  recommendations: ProductRecommendation[] = [];
 
       // Stratégie de recommandation basée sur le contexte
       switch (request.context) {
@@ -79,7 +79,7 @@ export class RecommendationEngine {
       // Mélanger et trier par score
       recommendations = this.shuffleAndSort(recommendations);
 
-      const result: RecommendationResult = {
+      const  result: RecommendationResult = {
         recommendations: recommendations.slice(0, limit),
         total: recommendations.length,
         context: request.context || 'home',
@@ -134,7 +134,7 @@ export class RecommendationEngine {
       }
 
       // 3. Calculer les scores de similarité
-      const recommendations: ProductRecommendation[] = similarProducts.map((p) => {
+      const  recommendations: ProductRecommendation[] = similarProducts.map((p) => {
         const score = this.calculateSimilarityScore(product, p);
         return {
           productId: p.id,
@@ -181,7 +181,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const recommendations: ProductRecommendation[] = products.map((p) => {
+      const  recommendations: ProductRecommendation[] = products.map((p) => {
         const score = this.calculatePopularityScore(p);
         return {
           productId: p.id,
@@ -265,7 +265,7 @@ export class RecommendationEngine {
         return [];
       }
 
-      const recommendations: ProductRecommendation[] = products.map((p) => ({
+      const  recommendations: ProductRecommendation[] = products.map((p) => ({
         productId: p.id,
         productName: p.name,
         productImage: Array.isArray(p.images) ? p.images[0] : p.images,
@@ -291,7 +291,7 @@ export class RecommendationEngine {
     limit: number
   ): Promise<ProductRecommendation[]> {
     try {
-      const recommendations: ProductRecommendation[] = [];
+      const  recommendations: ProductRecommendation[] = [];
 
       // 1. Produits tendance (basés sur les vues et ventes récentes)
       const { data: trendingProducts, error: trendingError } = await supabase
@@ -432,7 +432,7 @@ export class RecommendationEngine {
    * Calculer le score de similarité entre deux produits
    */
   private calculateSimilarityScore(product1: any, product2: any): number {
-    let score = 0;
+    let  score= 0;
 
     // Même catégorie = +0.5
     if (product1.category_id === product2.category_id) {
@@ -533,7 +533,7 @@ export class RecommendationEngine {
    * Obtenir le nom de l'algorithme utilisé
    */
   private getAlgorithmName(context: string): string {
-    const algorithms: Record<string, string> = {
+    const  algorithms: Record<string, string> = {
       product: 'content-based-filtering',
       category: 'category-popularity',
       cart: 'association-rules',
@@ -547,5 +547,11 @@ export class RecommendationEngine {
 
 // Instance singleton
 export const recommendationEngine = new RecommendationEngine();
+
+
+
+
+
+
 
 

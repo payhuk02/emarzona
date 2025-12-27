@@ -105,7 +105,7 @@ export const PriceAlertForm = ({
           : undefined,
       });
       onSuccess();
-    } catch (error: any) {
+    } catch ( _error: any) {
       // L'erreur est déjà gérée par le hook
     }
   };
@@ -202,4 +202,10 @@ export const PriceAlertForm = ({
     </form>
   );
 };
+
+
+
+
+
+
 

@@ -20,7 +20,7 @@ export const useProductManagement = (storeId: string) => {
 
       if (error) throw error;
       return data;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -74,7 +74,7 @@ export const useProductManagement = (storeId: string) => {
         description: "Produit créé avec succès",
       });
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -130,7 +130,7 @@ export const useProductManagement = (storeId: string) => {
         description: "Produit mis à jour",
       });
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -157,7 +157,7 @@ export const useProductManagement = (storeId: string) => {
         description: "Produit supprimé",
       });
       return true;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -177,3 +177,9 @@ export const useProductManagement = (storeId: string) => {
     deleteProduct,
   };
 };
+
+
+
+
+
+

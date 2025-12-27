@@ -428,3 +428,9 @@ function InventoryCard({ item, isLowStock, animationDelay = 0 }: InventoryCardPr
     </Card>
   );
 }
+
+
+
+
+
+

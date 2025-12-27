@@ -48,7 +48,7 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
 
   // Mock data - À remplacer par les vrais hooks
-  const licenses: License[] = [];
+  const  licenses: License[] = [];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -199,4 +199,10 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
     </Card>
   );
 };
+
+
+
+
+
+
 

@@ -50,7 +50,7 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       approved: 'default',
       rejected: 'destructive',
@@ -62,7 +62,7 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
       cancelled: 'destructive',
     };
 
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       pending: 'En attente',
       approved: 'Approuvé',
       rejected: 'Rejeté',
@@ -225,4 +225,10 @@ export const ReturnDetailView = ({ returnId }: ReturnDetailViewProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

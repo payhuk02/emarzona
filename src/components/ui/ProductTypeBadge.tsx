@@ -16,7 +16,7 @@ interface ProductTypeBadgeProps {
   className?: string;
 }
 
-const iconComponents: Record<string, LucideIcon> = {
+const  iconComponents: Record<string, LucideIcon> = {
   'Download': Download,
   'Package': Package,
   'Briefcase': Briefcase,
@@ -60,4 +60,10 @@ export const ProductTypeBadge = React.memo(ProductTypeBadgeComponent, (prevProps
 });
 
 ProductTypeBadge.displayName = 'ProductTypeBadge';
+
+
+
+
+
+
 

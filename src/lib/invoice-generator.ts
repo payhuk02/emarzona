@@ -44,9 +44,9 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     const doc = new jsPDF();
 
     // Configuration des couleurs
-    const primaryColor: [number, number, number] = [124, 58, 237]; // Purple
-    const textColor: [number, number, number] = [55, 65, 81]; // Gray-700
-    const lightGray: [number, number, number] = [243, 244, 246]; // Gray-100
+    const  primaryColor: [number, number, number] = [124, 58, 237]; // Purple
+    const  textColor: [number, number, number] = [55, 65, 81]; // Gray-700
+    const  lightGray: [number, number, number] = [243, 244, 246]; // Gray-100
 
     // En-tête
     doc.setFillColor(...primaryColor);
@@ -159,7 +159,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     const statusText = data.paymentStatus === 'completed' ? 'PAYÉ' : 
                        data.paymentStatus === 'pending' ? 'EN ATTENTE' : 
                        data.paymentStatus;
-    const statusColor: [number, number, number] = data.paymentStatus === 'completed' ? [34, 197, 94] : [234, 179, 8];
+    const  statusColor: [number, number, number] = data.paymentStatus === 'completed' ? [34, 197, 94] : [234, 179, 8];
     doc.setTextColor(...statusColor);
     doc.setFont('helvetica', 'bold');
     doc.text(statusText, 65, statusY);
@@ -187,4 +187,10 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<void> {
     throw new Error('Impossible de générer la facture. Veuillez réessayer.');
   }
 }
+
+
+
+
+
+
 

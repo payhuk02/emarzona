@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from '@/lib/logger';
@@ -58,7 +58,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
+      let  query= supabase
         .from("disputes")
         .select("*", { count: "exact" })
         .order(sortBy, { ascending: sortDirection === 'asc' });
@@ -100,7 +100,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       
       setDisputes(data || []);
       setTotalCount(count || 0);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching disputes:", error);
       setError(errorMessage || "Erreur lors du chargement des litiges");
@@ -138,7 +138,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       // Calculer le temps moyen de résolution
       const resolvedDisputes = disputes.filter(d => d.resolved_at);
-      let avgResolutionTime: number | undefined;
+      let  avgResolutionTime: number | undefined;
       
       if (resolvedDisputes.length > 0) {
         const totalHours = resolvedDisputes.reduce((sum, dispute) => {
@@ -161,7 +161,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
         unassigned,
         avgResolutionTime,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error fetching dispute stats:", error);
     }
@@ -171,11 +171,113 @@ export const useDisputes = (options?: UseDisputesOptions) => {
   useEffect(() => {
     fetchDisputes();
     fetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, page, pageSize, sortBy, sortDirection]);
 
-  // TODO: Implémenter les notifications en temps réel de manière stable
-  // Désactivé temporairement pour éviter les boucles de re-render
+  // Notifications en temps réel pour les disputes
+  // Utiliser useRef pour éviter les dépendances dans useEffect
+  const fetchDisputesRef = useRef(fetchDisputes);
+  const fetchStatsRef = useRef(fetchStats);
+  
+  // Mettre à jour les refs quand les fonctions changent
+  useEffect(() => {
+    fetchDisputesRef.current = fetchDisputes;
+    fetchStatsRef.current = fetchStats;
+  }, [fetchDisputes, fetchStats]);
+
+  useEffect(() => {
+    let  channel: ReturnType<typeof supabase.channel> | null = null;
+    let  isMounted= true;
+
+    const setupRealtimeSubscription = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || !isMounted) return;
+
+      // S'abonner aux changements sur la table disputes
+      channel = supabase
+        .channel('disputes_realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'disputes',
+          },
+          payload => {
+            if (!isMounted) return;
+
+            const newDispute = payload.new as Dispute;
+            logger.info('Nouveau litige créé', { disputeId: newDispute.id });
+
+            // Rafraîchir les données via les refs
+            fetchDisputesRef.current();
+            fetchStatsRef.current();
+
+            // Afficher une notification toast
+            toast({
+              title: '🆕 Nouveau litige',
+              description: `Un nouveau litige a été créé : ${newDispute.subject || 'Sans sujet'}`,
+              duration: 5000,
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'disputes',
+          },
+          payload => {
+            if (!isMounted) return;
+
+            const updatedDispute = payload.new as Dispute;
+            const oldDispute = payload.old as Dispute;
+
+            // Rafraîchir seulement si le statut a changé
+            if (updatedDispute.status !== oldDispute.status) {
+              logger.info('Statut du litige mis à jour', {
+                disputeId: updatedDispute.id,
+                oldStatus: oldDispute.status,
+                newStatus: updatedDispute.status,
+              });
+
+              // Rafraîchir les données via les refs
+              fetchDisputesRef.current();
+              fetchStatsRef.current();
+
+              // Afficher une notification si changement important
+              if (updatedDispute.status === 'resolved' || updatedDispute.status === 'closed') {
+                toast({
+                  title: '✅ Litige résolu',
+                  description: `Le litige "${updatedDispute.subject || 'Sans sujet'}" a été ${updatedDispute.status === 'resolved' ? 'résolu' : 'fermé'}`,
+                  duration: 5000,
+                });
+              }
+            }
+          }
+        )
+        .subscribe(status => {
+          if (status === 'SUBSCRIBED') {
+            logger.info('Abonnement Realtime disputes activé');
+          } else if (status === 'CHANNEL_ERROR') {
+            logger.error('Erreur abonnement Realtime disputes');
+          }
+        });
+    };
+
+    setupRealtimeSubscription();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [toast]);
 
   // Assigner un litige à un admin
   const assignDispute = async (disputeId: string, adminId: string): Promise<boolean> => {
@@ -199,7 +301,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error assigning dispute:", error);
       toast({
@@ -231,7 +333,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       await fetchDisputes();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating admin notes:", error);
       toast({
@@ -266,7 +368,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error resolving dispute:", error);
       toast({
@@ -299,7 +401,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error closing dispute:", error);
       toast({
@@ -314,7 +416,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
   // Changer le statut d'un litige
   const updateDisputeStatus = async (disputeId: string, status: DisputeStatus): Promise<boolean> => {
     try {
-      const updateData: Record<string, unknown> = {
+      const  updateData: Record<string, unknown> = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -339,7 +441,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating dispute status:", error);
       toast({
@@ -374,7 +476,7 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       await fetchDisputes();
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Error updating dispute priority:", error);
       toast({
@@ -409,4 +511,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
 // Export types
 export type { DisputesFilters, DisputeStats, UseDisputesOptions, SortColumn, SortDirection };
+
+
+
+
+
 

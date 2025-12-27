@@ -14,7 +14,7 @@ interface WorkflowVisualizerProps {
   className?: string;
 }
 
-const ACTION_ICONS: Record<string, React.ReactNode> = {
+const  ACTION_ICONS: Record<string, React.ReactNode> = {
   send_email: <Mail className="h-4 w-4" />,
   wait: <Clock className="h-4 w-4" />,
   add_tag: <Tag className="h-4 w-4" />,
@@ -22,7 +22,7 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
   update_segment: <Users className="h-4 w-4" />,
 };
 
-const ACTION_LABELS: Record<string, string> = {
+const  ACTION_LABELS: Record<string, string> = {
   send_email: 'Envoyer email',
   wait: 'Attendre',
   add_tag: 'Ajouter tag',
@@ -30,7 +30,7 @@ const ACTION_LABELS: Record<string, string> = {
   update_segment: 'Mettre à jour segment',
 };
 
-const TRIGGER_LABELS: Record<string, string> = {
+const  TRIGGER_LABELS: Record<string, string> = {
   event: 'Événement',
   time: 'Temps',
   condition: 'Condition',
@@ -143,4 +143,10 @@ export const WorkflowVisualizer = ({ workflow, className }: WorkflowVisualizerPr
     </Card>
   );
 };
+
+
+
+
+
+
 

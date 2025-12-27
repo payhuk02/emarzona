@@ -318,7 +318,7 @@ export const useCapacityReport = (storeId: string, dateRange: ReportDateRange) =
 
       if (servicesError) throw servicesError;
 
-      const capacityReports: CapacityReport[] = [];
+      const  capacityReports: CapacityReport[] = [];
 
       for (const service of services || []) {
         // Count bookings for this service in the date range
@@ -387,4 +387,10 @@ export const useCompleteReport = (storeId: string, dateRange: ReportDateRange) =
 };
 
 export default useBookingReport;
+
+
+
+
+
+
 

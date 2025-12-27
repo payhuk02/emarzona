@@ -30,7 +30,7 @@ export interface NotificationLog {
  */
 export async function logNotification(log: NotificationLog): Promise<void> {
   try {
-    const logData: Record<string, unknown> = {
+    const  logData: Record<string, unknown> = {
       user_id: log.userId,
       notification_id: log.notificationId || null,
       notification_type: log.type,
@@ -97,7 +97,7 @@ export async function updateNotificationLogStatus(
   metadata?: Record<string, unknown>
 ): Promise<void> {
   try {
-    const updateData: Record<string, unknown> = {
+    const  updateData: Record<string, unknown> = {
       status,
       metadata: metadata || {},
     };
@@ -206,3 +206,9 @@ export async function getNotificationStats(options?: {
     throw error;
   }
 }
+
+
+
+
+
+

@@ -56,7 +56,7 @@ export default function AdminSecurity() {
       if (data.totp?.uri) {
         setUri(data.totp.uri);
       }
-    } catch (e: unknown) {
+    } catch ( _e: unknown) {
       const errorMsg = e instanceof Error ? e.message : String(e) || 'Erreur lors de l\'enrollment 2FA';
       setError(errorMsg);
       toast({
@@ -124,7 +124,7 @@ export default function AdminSecurity() {
       setSecret(null);
       setUri(null);
       setVerifyCode('');
-    } catch (e: unknown) {
+    } catch ( _e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       toast({
         title: 'Erreur',
@@ -264,5 +264,11 @@ export default function AdminSecurity() {
     </AdminLayout>
   );
 }
+
+
+
+
+
+
 
 

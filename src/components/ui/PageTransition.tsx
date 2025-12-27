@@ -9,7 +9,7 @@ interface PageTransitionProps {
   children: React.ReactNode;
 }
 
-export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
+export const PageTransition : React.FC<PageTransitionProps> = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
@@ -23,4 +23,11 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     </div>
   );
 };
+
+
+
+
+
+
+
 

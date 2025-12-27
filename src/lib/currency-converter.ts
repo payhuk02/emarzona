@@ -20,7 +20,7 @@ export interface CurrencyRate {
  * Taux de change de base (fallback si l'API n'est pas disponible)
  * Ces taux sont utilisés en cas d'erreur API ou lors du premier chargement
  */
-const FALLBACK_RATES: Record<string, number> = {
+const  FALLBACK_RATES: Record<string, number> = {
   // XOF (Franc CFA) comme devise de base
   'XOF_EUR': 0.00152, // 1 XOF = 0.00152 EUR
   'XOF_USD': 0.00167, // 1 XOF = 0.00167 USD
@@ -52,12 +52,12 @@ const FALLBACK_RATES: Record<string, number> = {
  * Taux de change dynamiques (mis à jour depuis l'API)
  * Sera mis à jour automatiquement lors du premier appel
  */
-let DYNAMIC_RATES: Record<string, number> | null = null;
+let  DYNAMIC_RATES: Record<string, number> | null = null;
 
 /**
  * Indique si les taux ont été initialisés
  */
-let ratesInitialized = false;
+let  ratesInitialized= false;
 
 /**
  * Initialise les taux de change depuis l'API (appelé automatiquement au premier usage)
@@ -80,7 +80,7 @@ async function initializeRates(): Promise<void> {
       logger.warn('Failed to fetch rates from API, using fallback rates');
       DYNAMIC_RATES = FALLBACK_RATES;
     }
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error initializing exchange rates', { error: error.message });
     DYNAMIC_RATES = FALLBACK_RATES;
   } finally {
@@ -109,8 +109,8 @@ function getRate(from: Currency, to: Currency): number {
     const fromToEurKey = `${from}_EUR`;
     const eurToToKey = `EUR_${to}`;
     
-    let fromToEur: number | undefined;
-    let eurToTo: number | undefined;
+    let  fromToEur: number | undefined;
+    let  eurToTo: number | undefined;
     
     // Essayer depuis les taux dynamiques
     if (DYNAMIC_RATES) {
@@ -175,7 +175,7 @@ export function formatCurrency(amount: number, currency: Currency): string {
  * Récupère le symbole de devise
  */
 export function getCurrencySymbol(currency: Currency): string {
-  const symbols: Record<Currency, string> = {
+  const  symbols: Record<Currency, string> = {
     XOF: 'CFA',
     EUR: '€',
     USD: '$',
@@ -242,7 +242,7 @@ export async function updateExchangeRates(): Promise<void> {
     } else {
       logger.warn('Failed to update rates from API, keeping existing rates');
     }
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error updating exchange rates', { error: error.message });
     throw error;
   }
@@ -261,4 +261,10 @@ export function getCurrentRates(): Record<string, number> {
 export function areRatesFromAPI(): boolean {
   return DYNAMIC_RATES !== null && DYNAMIC_RATES !== FALLBACK_RATES;
 }
+
+
+
+
+
+
 

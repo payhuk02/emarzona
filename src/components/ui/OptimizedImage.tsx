@@ -45,7 +45,8 @@ interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> 
    */
   imageClassName?: string;
   /**
-   * Priorité de chargement (high = pas de lazy loading)
+   * Priorité de chargement (high = pas de lazy loading + preload)
+   * Si true, l'image sera préchargée pour améliorer LCP
    * @default false
    */
   priority?: boolean;
@@ -100,7 +101,7 @@ function getOptimizedImageUrl(
         ?.replace(/\.(jpg|jpeg|png)$/i, '') || '';
 
     // Déterminer le format optimal
-    let targetFormat = 'webp';
+    let  targetFormat= 'webp';
     if (format === 'avif' && supportsAVIF()) {
       targetFormat = 'avif';
     } else if (format === 'auto') {
@@ -238,6 +239,31 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
       return '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
     }, [sizes, width]);
 
+    // Preload pour images prioritaires (améliore LCP)
+    useEffect(() => {
+      if (!priority || typeof document === 'undefined') return;
+
+      // Créer un link preload pour améliorer LCP
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = optimizedSrc;
+      link.setAttribute('fetchpriority', 'high');
+      
+      // Ajouter srcset si disponible
+      if (srcsetWidths.length > 1) {
+        link.setAttribute('imagesrcset', srcset);
+        link.setAttribute('imagesizes', defaultSizes);
+      }
+
+      document.head.appendChild(link);
+
+      return () => {
+        // Nettoyer le preload si le composant est démonté
+        document.head.removeChild(link);
+      };
+    }, [priority, optimizedSrc, srcset, defaultSizes, srcsetWidths.length]);
+
     // IntersectionObserver pour lazy loading
     useEffect(() => {
       if (priority || isInView) return;
@@ -277,7 +303,7 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
     };
 
     // Styles du placeholder blur
-    const placeholderStyle: React.CSSProperties = useMemo(() => {
+    const  placeholderStyle: React.CSSProperties = useMemo(() => {
       if (!showPlaceholder || isLoaded) return {};
       return {
         filter: 'blur(20px)',
@@ -326,6 +352,7 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
               imageClassName
             )}
             loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
             decoding="async"
             onLoad={handleLoad}
             onError={handleError}
@@ -371,3 +398,9 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
 );
 
 OptimizedImage.displayName = 'OptimizedImage';
+
+
+
+
+
+

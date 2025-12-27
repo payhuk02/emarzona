@@ -113,7 +113,7 @@ export interface BulkCourseUpdateProps {
 /**
  * Configuration des champs modifiables
  */
-const FIELD_CONFIG: Record<
+const  FIELD_CONFIG: Record<
   BulkUpdateField,
   {
     label: string;
@@ -154,7 +154,7 @@ const FIELD_CONFIG: Record<
 /**
  * Catégories de cours
  */
-const CATEGORY_LABELS: Record<CourseCategory, string> = {
+const  CATEGORY_LABELS: Record<CourseCategory, string> = {
   development: 'Développement',
   design: 'Design',
   business: 'Business',
@@ -176,7 +176,7 @@ const CATEGORY_LABELS: Record<CourseCategory, string> = {
  * />
  * ```
  */
-export const BulkCourseUpdate: React.FC<BulkCourseUpdateProps> = ({
+export const BulkCourseUpdate : React.FC<BulkCourseUpdateProps> = ({
   courses,
   onBulkUpdate,
   isLoading = false,
@@ -215,7 +215,7 @@ export const BulkCourseUpdate: React.FC<BulkCourseUpdateProps> = ({
     return courses
       .filter((course) => selectedCourses.has(course.id))
       .map((course) => {
-        let newValue: any;
+        let  newValue: any;
 
         switch (updateField) {
           case 'price':
@@ -265,7 +265,7 @@ export const BulkCourseUpdate: React.FC<BulkCourseUpdateProps> = ({
       return;
     }
 
-    const change: BulkUpdateChange = {
+    const  change: BulkUpdateChange = {
       field: updateField,
       mode: updateMode,
       value: updateValue.includes('%') ? updateValue : (updateField === 'isActive' ? updateValue === 'true' : updateField === 'price' || updateField === 'maxStudents' ? parseFloat(updateValue) : updateValue),
@@ -640,4 +640,11 @@ export const BulkCourseUpdate: React.FC<BulkCourseUpdateProps> = ({
 BulkCourseUpdate.displayName = 'BulkCourseUpdate';
 
 export default BulkCourseUpdate;
+
+
+
+
+
+
+
 

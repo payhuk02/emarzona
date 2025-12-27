@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 /**
  * Données de démonstration - Produits digitaux
  */
-const mockProducts: DigitalProductListItem[] = [
+const  mockProducts: DigitalProductListItem[] = [
   {
     id: 'prod-001',
     name: 'Ebook React Avancé',
@@ -174,7 +174,7 @@ const mockProducts: DigitalProductListItem[] = [
 /**
  * Produits disponibles pour les bundles
  */
-const availableProductsForBundles: BundleDigitalProduct[] = mockProducts.map((p) => ({
+const  availableProductsForBundles: BundleDigitalProduct[] = mockProducts.map((p) => ({
   id: p.id,
   name: p.name,
   description: p.description,
@@ -188,7 +188,7 @@ const availableProductsForBundles: BundleDigitalProduct[] = mockProducts.map((p)
 /**
  * Bundle exemple pour le mode édition
  */
-const existingBundle: Partial<DigitalBundle> = {
+const  existingBundle: Partial<DigitalBundle> = {
   id: 'bundle-001',
   name: 'Pack Développeur Full-Stack',
   description: 'Tout ce qu\'il faut pour devenir développeur full-stack',
@@ -206,7 +206,7 @@ const existingBundle: Partial<DigitalBundle> = {
  * - DigitalProductsList
  * - DigitalBundleManager
  */
-export const DigitalDay2Demo: React.FC = () => {
+export const DigitalDay2Demo : React.FC = () => {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="space-y-2">
@@ -383,4 +383,11 @@ export const DigitalDay2Demo: React.FC = () => {
 };
 
 export default DigitalDay2Demo;
+
+
+
+
+
+
+
 

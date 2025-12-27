@@ -81,7 +81,7 @@ export interface AlertFilters {
 /**
  * Configuration par défaut
  */
-const DEFAULT_CONFIG: AlertConfig = {
+const  DEFAULT_CONFIG: AlertConfig = {
   lowCapacityThreshold: 10, // 10% restant
   deadlineWarningDays: 7, // 7 jours
   inactivityDays: 14, // 14 jours
@@ -109,14 +109,14 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       if (error) throw error;
 
-      const alerts: CourseAlert[] = [];
+      const  alerts: CourseAlert[] = [];
 
       data?.forEach((course) => {
         const remainingSpots = course.max_students - course.enrolled_students;
         const capacityPercentage = (remainingSpots / course.max_students) * 100;
 
         if (capacityPercentage <= alertConfig.lowCapacityThreshold && capacityPercentage > 0) {
-          const severity: AlertSeverity =
+          const  severity: AlertSeverity =
             capacityPercentage <= 5 ? 'critical' : capacityPercentage <= 10 ? 'warning' : 'info';
 
           alerts.push({
@@ -161,7 +161,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       if (error) throw error;
 
-      const alerts: CourseAlert[] = [];
+      const  alerts: CourseAlert[] = [];
 
       data?.forEach((enrollment) => {
         const daysSinceActivity = Math.floor(
@@ -169,7 +169,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
             (1000 * 60 * 60 * 24)
         );
 
-        const severity: AlertSeverity = daysSinceActivity >= 30 ? 'critical' : 'warning';
+        const  severity: AlertSeverity = daysSinceActivity >= 30 ? 'critical' : 'warning';
 
         alerts.push({
           id: `inactive-${enrollment.id}`,
@@ -211,7 +211,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       if (error) throw error;
 
-      const alerts: CourseAlert[] = [];
+      const  alerts: CourseAlert[] = [];
 
       data?.forEach((enrollment) => {
         // Seulement alerter si inscrit depuis plus de 7 jours
@@ -221,7 +221,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
         );
 
         if (enrolledDaysAgo >= 7) {
-          const severity: AlertSeverity = enrollment.progress < 10 ? 'critical' : 'warning';
+          const  severity: AlertSeverity = enrollment.progress < 10 ? 'critical' : 'warning';
 
           alerts.push({
             id: `low-completion-${enrollment.id}`,
@@ -263,10 +263,10 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       if (error) throw error;
 
-      const alerts: CourseAlert[] = [];
+      const  alerts: CourseAlert[] = [];
 
       data?.forEach((enrollment) => {
-        const severity: AlertSeverity = 'warning';
+        const  severity: AlertSeverity = 'warning';
 
         alerts.push({
           id: `pending-payment-${enrollment.id}`,
@@ -312,7 +312,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 
       if (error) throw error;
 
-      const alerts: CourseAlert[] = [];
+      const  alerts: CourseAlert[] = [];
 
       data?.forEach((enrollment) => {
         if (!enrollment.expiry_date) return;
@@ -323,7 +323,7 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
         );
 
         if (daysUntilExpiry >= 0) {
-          const severity: AlertSeverity = daysUntilExpiry <= 2 ? 'critical' : 'warning';
+          const  severity: AlertSeverity = daysUntilExpiry <= 2 ? 'critical' : 'warning';
 
           alerts.push({
             id: `expiring-access-${enrollment.id}`,
@@ -429,4 +429,10 @@ export const useCourseAlerts = (config: Partial<AlertConfig> = {}) => {
 };
 
 export default useCourseAlerts;
+
+
+
+
+
+
 

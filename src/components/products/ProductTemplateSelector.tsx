@@ -34,7 +34,7 @@ interface ProductTemplateSelectorProps {
   onSkip?: () => void;
 }
 
-const TYPE_ICONS: Record<ProductType, any> = {
+const  TYPE_ICONS: Record<ProductType, any> = {
   digital: FileText,
   physical: Package,
   service: Wrench,
@@ -204,4 +204,10 @@ export const ProductTemplateSelector = ({
     </div>
   );
 };
+
+
+
+
+
+
 

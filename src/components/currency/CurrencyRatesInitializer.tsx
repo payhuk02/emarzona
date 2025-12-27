@@ -15,7 +15,7 @@ export function CurrencyRatesInitializer() {
         logger.info('Initializing exchange rates on app startup...');
         await updateExchangeRates();
         logger.info('Exchange rates initialized successfully');
-      } catch (error: any) {
+      } catch ( _error: any) {
         logger.error('Failed to initialize exchange rates on startup', {
           error: error.message,
           fallback: 'using static rates',
@@ -40,6 +40,12 @@ export function CurrencyRatesInitializer() {
   // Ce composant ne rend rien
   return null;
 }
+
+
+
+
+
+
 
 
 

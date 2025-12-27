@@ -31,7 +31,7 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
     try {
       setLoading(true);
 
-      let query = supabase
+      let  query= supabase
         .from('store_withdrawal_status_history')
         .select('*')
         .order('created_at', { ascending: false });
@@ -64,7 +64,7 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
       if (error) throw error;
 
       setHistory(data || []);
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error fetching withdrawal history', { error });
       toast({
         title: 'Erreur',
@@ -86,4 +86,10 @@ export const useWithdrawalHistory = (options: UseWithdrawalHistoryOptions = {}) 
     refetch: fetchHistory,
   };
 };
+
+
+
+
+
+
 

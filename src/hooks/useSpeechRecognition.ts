@@ -5,7 +5,6 @@
  * @example
  * ```tsx
  * const { transcript, isListening, startListening, stopListening } = useSpeechRecognition({
- *   onResult: (text) => console.log(text),
  * });
  * ```
  */
@@ -113,10 +112,10 @@ export function useSpeechRecognition(
       };
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
+        let  finalTranscript= '';
+        let  interimTranscript= '';
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        for (let  i= event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
             finalTranscript += transcript + ' ';
@@ -184,4 +183,10 @@ export function useSpeechRecognition(
     reset,
   };
 }
+
+
+
+
+
+
 

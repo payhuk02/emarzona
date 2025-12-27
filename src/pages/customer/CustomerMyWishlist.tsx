@@ -138,7 +138,7 @@ export default function CustomerMyWishlist() {
 
   // Récupérer les baisses de prix
   const { data: priceDropsData } = usePriceDrops();
-  const priceDrops: Array<{
+  const  priceDrops: Array<{
     product_id: string;
     old_price: number;
     new_price: number;
@@ -285,7 +285,7 @@ export default function CustomerMyWishlist() {
   const filteredAndSortedProducts = useMemo(() => {
     if (!favoriteProducts) return [];
 
-    let filtered = [...favoriteProducts];
+    let  filtered= [...favoriteProducts];
 
     // Filtre par type (tab)
     if (activeTab !== 'all') {
@@ -356,7 +356,7 @@ export default function CustomerMyWishlist() {
       return { total: 0, byType: {} };
     }
 
-    const byType: Record<string, number> = {};
+    const  byType: Record<string, number> = {};
     favoriteProducts.forEach(p => {
       byType[p.product_type] = (byType[p.product_type] || 0) + 1;
     });
@@ -384,7 +384,7 @@ export default function CustomerMyWishlist() {
           description: `${htmlToPlainText(product.name)} a été ajouté à votre panier`,
         });
         logger.info('Produit ajouté au panier depuis wishlist', { productId: product.id });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -440,7 +440,7 @@ export default function CustomerMyWishlist() {
           productId: product.id,
           storeId: product.store_id,
         });
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -498,7 +498,7 @@ export default function CustomerMyWishlist() {
       });
       setSelectedProducts(new Set());
       logger.info('Produits ajoutés au panier en masse', { count: selectedProducts.size });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -523,7 +523,7 @@ export default function CustomerMyWishlist() {
       });
       setSelectedProducts(new Set());
       logger.info('Produits retirés de la wishlist en masse', { count: selectedProducts.size });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -548,7 +548,7 @@ export default function CustomerMyWishlist() {
         'Description',
         "Date d'ajout",
       ];
-      const csvRows: string[] = [headers.join(',')];
+      const  csvRows: string[] = [headers.join(',')];
 
       const productsToExport =
         selectedProducts.size > 0
@@ -587,7 +587,7 @@ export default function CustomerMyWishlist() {
         description: `${productsToExport.length} produit(s) exporté(s) en CSV`,
       });
       logger.info('Wishlist exportée en CSV', { count: productsToExport.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error("Erreur lors de l'export CSV", { error });
       toast({
         title: 'Erreur',
@@ -1536,7 +1536,7 @@ export default function CustomerMyWishlist() {
                       </Button>
                       <div className="flex items-center gap-1">
                         {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                          let pageNum: number;
+                          let  pageNum: number;
                           if (pagination.totalPages <= 5) {
                             pageNum = i + 1;
                           } else if (pagination.page <= 3) {
@@ -1587,3 +1587,9 @@ export default function CustomerMyWishlist() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

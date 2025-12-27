@@ -18,7 +18,6 @@ interface LogContext {
 // Sauvegarder les méthodes originales de la console AVANT qu'elles ne soient remplacées
 // par console-guard.ts pour éviter les boucles infinies
 const originalConsole = {
-  log: console.log.bind(console),
   info: console.info.bind(console),
   warn: console.warn.bind(console),
   error: console.error.bind(console),
@@ -34,7 +33,7 @@ export const logger = {
    */
   log: (message: string, ...args: any[]) => {
     if (isDevelopment) {
-      originalConsole.log(`[LOG] ${message}`, ...args);
+      originalConsole.info(`[LOG] ${message}`, ...args);
     }
     // En production, on n'envoie pas les logs normaux à Sentry pour éviter le spam
   },
@@ -105,3 +104,9 @@ export const logger = {
     // Jamais en production
   },
 };
+
+
+
+
+
+

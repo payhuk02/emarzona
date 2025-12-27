@@ -111,3 +111,9 @@ export function useErrorHandler<T extends (...args: unknown[]) => unknown>(
     [fn, onError, showToast]
   );
 }
+
+
+
+
+
+

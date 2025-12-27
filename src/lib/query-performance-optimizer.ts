@@ -41,7 +41,7 @@ export class QueryPerformanceAnalyzer {
     cacheHit: boolean = false
   ): void {
     const key = JSON.stringify(queryKey);
-    const metrics: QueryMetrics = {
+    const  metrics: QueryMetrics = {
       queryKey,
       duration,
       dataSize,
@@ -136,7 +136,7 @@ export class QueryPerformanceAnalyzer {
     const stats = this.getQueryStats(queryKey);
     if (!stats) return [];
 
-    const suggestions: string[] = [];
+    const  suggestions: string[] = [];
 
     // Suggestion de cache si la requête est lente et appelée fréquemment
     if (stats.avgDuration > 500 && stats.totalCalls > 10) {
@@ -176,7 +176,7 @@ export async function measureQueryPerformance<T>(
   options: { cacheHit?: boolean } = {}
 ): Promise<T> {
   const startTime = performance.now();
-  let dataSize = 0;
+  let  dataSize= 0;
 
   try {
     const result = await queryFn();
@@ -235,7 +235,7 @@ export function optimizeSelectColumns(
   columns: string[],
   includeRelations: Record<string, string[]> = {}
 ): string {
-  let select = columns.join(', ');
+  let  select= columns.join(', ');
 
   // Ajouter les relations si nécessaire
   Object.entries(includeRelations).forEach(([relation, relationColumns]) => {
@@ -248,7 +248,7 @@ export function optimizeSelectColumns(
 /**
  * Suggestions d'optimisation pour requêtes fréquentes
  */
-export const queryOptimizationSuggestions: Record<string, string[]> = {
+export const queryOptimizationSuggestions : Record<string, string[]> = {
   'digitalProducts': [
     'Utiliser pagination côté serveur',
     'Sélectionner uniquement les colonnes nécessaires',
@@ -304,4 +304,11 @@ export function applyQueryOptimizations(
     });
   };
 }
+
+
+
+
+
+
+
 

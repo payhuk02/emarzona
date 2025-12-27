@@ -9,7 +9,7 @@
  * Génère des suggestions de codes promo basées sur différents patterns
  */
 export const generateCodeSuggestions = (count: number = 3): string[] => {
-  const suggestions: string[] = [];
+  const  suggestions: string[] = [];
   const year = new Date().getFullYear();
   const month = String(new Date().getMonth() + 1).padStart(2, '0');
   const day = String(new Date().getDate()).padStart(2, '0');
@@ -50,4 +50,10 @@ export const generateUniqueCode = (pattern: string = 'PROMO'): string => {
   const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
   return `${pattern}${year}${random}`;
 };
+
+
+
+
+
+
 

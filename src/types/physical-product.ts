@@ -131,3 +131,9 @@ export type PhysicalProductFormDataUpdate = Partial<PhysicalProductFormData> & {
   variants?: PhysicalProductVariant[];
 };
 
+
+
+
+
+
+

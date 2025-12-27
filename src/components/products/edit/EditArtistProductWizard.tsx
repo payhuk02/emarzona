@@ -608,3 +608,9 @@ export const EditArtistProductWizard = ({
     </div>
   );
 };
+
+
+
+
+
+

@@ -92,7 +92,7 @@ const AdminStores = () => {
 
       setStores(storesWithDetails);
       logger.info(`${storesWithDetails.length} boutiques chargées`);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Erreur lors du chargement des boutiques:', error);
     } finally {
       setLoading(false);
@@ -317,3 +317,9 @@ const AdminStores = () => {
 };
 
 export default AdminStores;
+
+
+
+
+
+

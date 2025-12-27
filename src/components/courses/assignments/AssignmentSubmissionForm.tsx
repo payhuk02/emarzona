@@ -63,7 +63,7 @@ export const AssignmentSubmissionForm = ({
     setIsUploading(true);
 
     try {
-      const uploaded: typeof uploadedFiles = [];
+      const  uploaded: typeof uploadedFiles = [];
 
       for (const file of Array.from(files)) {
         // Vérifier type
@@ -109,7 +109,7 @@ export const AssignmentSubmissionForm = ({
       }
 
       setUploadedFiles([...uploadedFiles, ...uploaded]);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de l\'upload',
@@ -344,4 +344,10 @@ export const AssignmentSubmissionForm = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

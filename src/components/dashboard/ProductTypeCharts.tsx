@@ -257,3 +257,9 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
 );
 
 ProductTypeCharts.displayName = 'ProductTypeCharts';
+
+
+
+
+
+

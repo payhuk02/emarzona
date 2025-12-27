@@ -66,7 +66,7 @@ export function useVariantImages(physicalProductId: string | undefined) {
       }
 
       // Grouper les images par variant
-      const variantsWithImages: VariantWithImages[] = (variants || []).map(variant => {
+      const  variantsWithImages: VariantWithImages[] = (variants || []).map(variant => {
         const variantImages = (images || []).filter(img => img.variant_id === variant.id);
 
         return {
@@ -130,4 +130,10 @@ export function useVariantImagesByVariant(variantId: string | undefined) {
     enabled: !!variantId,
   });
 }
+
+
+
+
+
+
 

@@ -74,7 +74,7 @@ const useProductRecommendations = (
         const { data: { user } } = await supabase.auth.getUser();
 
         // 1. Recommandations basées sur la catégorie
-        let categoryRecommendations: RecommendedProduct[] = [];
+        let  categoryRecommendations: RecommendedProduct[] = [];
         if (category) {
           const { data: categoryProducts } = await supabase
             .from('products')
@@ -101,7 +101,7 @@ const useProductRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let tagRecommendations: RecommendedProduct[] = [];
+        let  tagRecommendations: RecommendedProduct[] = [];
         if (tags && tags.length > 0) {
           // Rechercher produits avec tags similaires
           const { data: tagProducts } = await supabase
@@ -136,7 +136,7 @@ const useProductRecommendations = (
         }
 
         // 3. Recommandations basées sur les achats précédents (si utilisateur connecté)
-        let purchaseBasedRecommendations: RecommendedProduct[] = [];
+        let  purchaseBasedRecommendations: RecommendedProduct[] = [];
         if (user) {
           // Récupérer les produits achetés par l'utilisateur
           const { data: purchasedProducts } = await supabase
@@ -236,7 +236,7 @@ const useProductRecommendations = (
 
         // Trier par score de recommandation
         const scored = uniqueRecommendations.map((product) => {
-          let score = 0;
+          let  score= 0;
 
           // Score basé sur la catégorie
           if (category && product.category === category) score += 10;
@@ -258,7 +258,7 @@ const useProductRecommendations = (
         return scored
           .sort((a, b) => b.recommendationScore - a.recommendationScore)
           .slice(0, limit);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error('Error fetching physical product recommendations', { error: errorMessage });
         return [];
@@ -468,7 +468,7 @@ export const BoughtTogetherPhysicalRecommendations = ({
           .eq('is_active', true);
 
         return products || [];
-      } catch (error: any) {
+      } catch ( _error: any) {
         logger.error('Error fetching bought together physical recommendations', { error });
         return [];
       }
@@ -548,4 +548,10 @@ export const BoughtTogetherPhysicalRecommendations = ({
     </div>
   );
 };
+
+
+
+
+
+
 

@@ -93,7 +93,7 @@ export default function PaymentManagement() {
 
       setShowReleaseDialog(false);
       setSelectedPayment(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Release payment error', { error, paymentId: selectedPayment.id });
       toast({
@@ -125,7 +125,7 @@ export default function PaymentManagement() {
 
       setShowConfirmDialog(false);
       setSelectedPayment(null);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Confirm delivery error', { error, paymentId: selectedPayment.id });
       toast({
@@ -149,7 +149,7 @@ export default function PaymentManagement() {
    * Get payment status badge
    */
   const getStatusBadge = (status: string) => {
-    const variants: Record<
+    const  variants: Record<
       string,
       {
         variant: 'default' | 'secondary' | 'destructive' | 'outline';
@@ -717,3 +717,9 @@ export default function PaymentManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

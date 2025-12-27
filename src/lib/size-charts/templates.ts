@@ -32,7 +32,7 @@ export interface SizeChartTemplate {
 // TEMPLATES VÊTEMENTS
 // =====================================================
 
-const clothingTemplates: SizeChartTemplate[] = [
+const  clothingTemplates: SizeChartTemplate[] = [
   {
     id: 'tshirt_eu',
     name: 'T-Shirt Standard (EU)',
@@ -211,7 +211,7 @@ const clothingTemplates: SizeChartTemplate[] = [
 // TEMPLATES CHAUSSURES
 // =====================================================
 
-const shoesTemplates: SizeChartTemplate[] = [
+const  shoesTemplates: SizeChartTemplate[] = [
   {
     id: 'shoes_eu',
     name: 'Chaussures Standard (EU)',
@@ -317,7 +317,7 @@ const shoesTemplates: SizeChartTemplate[] = [
 // TEMPLATES ACCESSOIRES
 // =====================================================
 
-const accessoriesTemplates: SizeChartTemplate[] = [
+const  accessoriesTemplates: SizeChartTemplate[] = [
   {
     id: 'hat_universal',
     name: 'Chapeaux/Casquettes',
@@ -367,7 +367,7 @@ const accessoriesTemplates: SizeChartTemplate[] = [
 // TEMPLATES SACS
 // =====================================================
 
-const bagsTemplates: SizeChartTemplate[] = [
+const  bagsTemplates: SizeChartTemplate[] = [
   {
     id: 'bag_universal',
     name: 'Sac à main/Sac à dos',
@@ -403,7 +403,7 @@ const bagsTemplates: SizeChartTemplate[] = [
 // TEMPLATES BIJOUX
 // =====================================================
 
-const jewelryTemplates: SizeChartTemplate[] = [
+const  jewelryTemplates: SizeChartTemplate[] = [
   {
     id: 'ring_universal',
     name: 'Bagues',
@@ -473,7 +473,7 @@ const jewelryTemplates: SizeChartTemplate[] = [
 // TEMPLATES SPORT
 // =====================================================
 
-const sportswearTemplates: SizeChartTemplate[] = [
+const  sportswearTemplates: SizeChartTemplate[] = [
   {
     id: 'sportswear_eu',
     name: 'Vêtements de Sport (EU)',
@@ -509,7 +509,7 @@ const sportswearTemplates: SizeChartTemplate[] = [
 // TEMPLATES ENFANTS
 // =====================================================
 
-const kidsTemplates: SizeChartTemplate[] = [
+const  kidsTemplates: SizeChartTemplate[] = [
   {
     id: 'kids_clothing_eu',
     name: 'Vêtements Enfants (EU)',
@@ -569,7 +569,7 @@ const kidsTemplates: SizeChartTemplate[] = [
 // EXPORT UNIFIÉ
 // =====================================================
 
-export const SIZE_CHART_TEMPLATES: SizeChartTemplate[] = [
+export const SIZE_CHART_TEMPLATES : SizeChartTemplate[] = [
   ...clothingTemplates,
   ...shoesTemplates,
   ...accessoriesTemplates,
@@ -579,7 +579,7 @@ export const SIZE_CHART_TEMPLATES: SizeChartTemplate[] = [
   ...kidsTemplates,
 ];
 
-export const TEMPLATES_BY_CATEGORY: Record<ProductCategory, SizeChartTemplate[]> = {
+export const TEMPLATES_BY_CATEGORY : Record<ProductCategory, SizeChartTemplate[]> = {
   clothing: clothingTemplates,
   shoes: shoesTemplates,
   accessories: accessoriesTemplates,
@@ -612,4 +612,11 @@ export function getTemplateById(id: string): SizeChartTemplate | undefined {
 export function getAllTemplates(): SizeChartTemplate[] {
   return SIZE_CHART_TEMPLATES;
 }
+
+
+
+
+
+
+
 

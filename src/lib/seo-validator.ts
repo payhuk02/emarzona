@@ -52,10 +52,10 @@ export interface StoreSEOData {
  * Valide les données SEO d'une boutique et calcule un score
  */
 export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
-  const issues: SEOIssue[] = [];
-  const strengths: string[] = [];
-  const recommendations: string[] = [];
-  let score = 100;
+  const  issues: SEOIssue[] = [];
+  const  strengths: string[] = [];
+  const  recommendations: string[] = [];
+  let  score= 100;
 
   // 1. Vérifier le nom de la boutique
   if (!store.name || store.name.trim().length === 0) {
@@ -356,4 +356,10 @@ export function validateStoreSEO(store: StoreSEOData): SEOValidationResult {
     hasStructuredData: true // Toujours true car on génère du JSON-LD
   };
 }
+
+
+
+
+
+
 

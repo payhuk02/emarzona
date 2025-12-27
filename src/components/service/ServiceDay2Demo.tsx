@@ -11,7 +11,7 @@ import { ServicePackageManager, ServicePackage } from './ServicePackageManager';
 import { logger } from '@/lib/logger';
 
 // Sample data
-const sampleServices: Service[] = [
+const  sampleServices: Service[] = [
   {
     id: '1',
     name: 'Coaching Business 1h',
@@ -121,7 +121,7 @@ const sampleServices: Service[] = [
   },
 ];
 
-const samplePackages: ServicePackage[] = [
+const  samplePackages: ServicePackage[] = [
   {
     id: 'pkg-1',
     name: 'Basic',
@@ -185,7 +185,7 @@ const samplePackages: ServicePackage[] = [
   },
 ];
 
-export const ServiceDay2Demo: React.FC = () => {
+export const ServiceDay2Demo : React.FC = () => {
   const handleServiceEdit = (service: Service) => {
     logger.info('Edit service', { serviceId: service.id });
   };
@@ -302,4 +302,11 @@ export const ServiceDay2Demo: React.FC = () => {
 };
 
 export default ServiceDay2Demo;
+
+
+
+
+
+
+
 

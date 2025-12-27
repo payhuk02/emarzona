@@ -46,7 +46,7 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 // Composant séparé pour éviter les erreurs de hooks conditionnels
-const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
+const  AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('payments');
@@ -107,7 +107,7 @@ const AdvancedOrderContent: React.FC<{ store: Store }> = ({ store }) => {
         title: t('common.refreshed', 'Actualisé'),
         description: t('common.refreshedDesc', 'Les données ont été actualisées'),
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const isConnectionError =
         errorMessage.includes('upstream connect error') ||
@@ -789,3 +789,9 @@ const AdvancedOrderManagement = () => {
 };
 
 export default AdvancedOrderManagement;
+
+
+
+
+
+

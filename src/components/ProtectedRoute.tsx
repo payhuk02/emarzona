@@ -38,3 +38,9 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   // Afficher le contenu protégé
   return <>{children}</>;
 };
+
+
+
+
+
+

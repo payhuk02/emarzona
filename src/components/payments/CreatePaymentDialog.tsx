@@ -127,7 +127,7 @@ const CreatePaymentDialogComponent = ({
         transaction_id: "",
         notes: "",
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -293,3 +293,9 @@ export const CreatePaymentDialog = React.memo(CreatePaymentDialogComponent, (pre
 CreatePaymentDialog.displayName = 'CreatePaymentDialog';
 
 export default CreatePaymentDialog;
+
+
+
+
+
+

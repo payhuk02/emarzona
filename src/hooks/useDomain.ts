@@ -116,7 +116,7 @@ export const useDomain = (storeId: string | null) => {
 
     try {
       // Simulation de démarrage du monitoring
-      const monitoringData: DomainMonitoring = {
+      const  monitoringData: DomainMonitoring = {
         id: `monitoring-${Date.now()}`,
         domain,
         status: 'up',
@@ -170,7 +170,7 @@ export const useDomain = (storeId: string | null) => {
       const responseTime = Math.floor(Math.random() * 300) + 50; // 50-350ms
       const uptime = Math.max(95, 99.5 + Math.random() * 0.4); // 95-99.9%
 
-      const healthData: DomainMonitoring = {
+      const  healthData: DomainMonitoring = {
         id: `health-${Date.now()}`,
         domain,
         status: isHealthy ? 'up' : 'down',
@@ -396,7 +396,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error connecting domain', { error });
       toast({
@@ -490,7 +490,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error verifying domain', { error });
       toast({
@@ -532,7 +532,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error disconnecting domain', { error });
       toast({
@@ -563,7 +563,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating SSL', { error });
       toast({
@@ -579,7 +579,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
     if (!storeId) return false;
 
     try {
-      const updateData: Record<string, unknown> = {};
+      const  updateData: Record<string, unknown> = {};
       if (redirects.www !== undefined) updateData.redirect_www = redirects.www;
       if (redirects.https !== undefined) updateData.redirect_https = redirects.https;
 
@@ -596,7 +596,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error updating redirects', { error });
       toast({
@@ -662,7 +662,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
         cnameRecord: Math.random() > 0.3 // 70% de succès
       };
       
-      const errors: string[] = [];
+      const  errors: string[] = [];
       if (!details.aRecord) errors.push("Enregistrement A principal non propagé");
       if (!details.wwwRecord) errors.push("Enregistrement A www non propagé");
       if (!details.txtRecord) errors.push("Enregistrement TXT de vérification non propagé");
@@ -695,7 +695,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       // Simulation d'analytics (en production, utiliser une API d'analytics)
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const mockAnalytics: DomainAnalytics = {
+      const  mockAnalytics: DomainAnalytics = {
         visitors: Math.floor(Math.random() * 2000) + 500,
         pageViews: Math.floor(Math.random() * 5000) + 1000,
         bounceRate: Math.floor(Math.random() * 30) + 20,
@@ -755,8 +755,8 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const isValid = Math.random() > 0.3; // 70% de chance d'être valide
-      const errors: string[] = [];
-      const warnings: string[] = [];
+      const  errors: string[] = [];
+      const  warnings: string[] = [];
       
       if (!isValid) {
         errors.push("Configuration DNS invalide détectée");
@@ -788,7 +788,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
       // Simulation de récupération des certificats SSL
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const certificates: SSLCertificate[] = [
+      const  certificates: SSLCertificate[] = [
         {
           id: 'cert-1',
           domain,
@@ -820,7 +820,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
       // Simulation d'upload de certificat personnalisé
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const customCert: SSLCertificate = {
+      const  customCert: SSLCertificate = {
         id: `cert-custom-${Date.now()}`,
         domain,
         type: 'custom',
@@ -902,7 +902,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
       // Simulation d'analyse SSL
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      const sslConfig: SSLConfiguration = {
+      const  sslConfig: SSLConfiguration = {
         certificates: await getSSLCertificates(domain),
         autoRenewal: true,
         hstsEnabled: true,
@@ -998,3 +998,9 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
     updateSSLConfiguration
   };
 };
+
+
+
+
+
+

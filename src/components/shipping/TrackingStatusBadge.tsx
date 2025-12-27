@@ -34,7 +34,7 @@ interface TrackingStatusBadgeProps {
 }
 
 const getStatusConfig = (status: TrackingStatus, t: (key: string, defaultValue?: string) => string) => {
-  const configs: Record<TrackingStatus, {
+  const  configs: Record<TrackingStatus, {
     labelKey: string;
     variant: 'default' | 'secondary' | 'destructive' | 'outline';
     icon: React.ComponentType<{ className?: string }>;
@@ -122,4 +122,10 @@ export function TrackingStatusBadge({
     </Badge>
   );
 }
+
+
+
+
+
+
 

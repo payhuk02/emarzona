@@ -291,7 +291,7 @@ export class PushNotificationService {
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
 
-    for (let i = 0; i < rawData.length; ++i) {
+    for (let  i= 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
     return outputArray;
@@ -302,8 +302,8 @@ export class PushNotificationService {
    */
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
     const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
+    let  binary= '';
+    for (let  i= 0; i < bytes.byteLength; i++) {
       binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
@@ -312,3 +312,9 @@ export class PushNotificationService {
 
 // Instance singleton
 export const pushNotificationService = new PushNotificationService();
+
+
+
+
+
+

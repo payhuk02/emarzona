@@ -129,7 +129,7 @@ export function ArtistProductCard({
     return null;
   }, [product.product_affiliate_settings]);
 
-  const artistTypeLabels: Record<string, string> = {
+  const  artistTypeLabels: Record<string, string> = {
     writer: 'Écrivain',
     musician: 'Musicien',
     visual_artist: 'Artiste visuel',
@@ -138,7 +138,7 @@ export function ArtistProductCard({
     other: 'Artiste',
   };
 
-  const editionLabels: Record<string, string> = {
+  const  editionLabels: Record<string, string> = {
     original: 'Original',
     limited_edition: 'Édition limitée',
     print: 'Tirage',
@@ -173,7 +173,7 @@ export function ArtistProductCard({
   const dimensionsDisplay = useMemo(() => {
     if (!product.artwork_dimensions) return null;
     const { width, height, depth, unit = 'cm' } = product.artwork_dimensions;
-    const parts: string[] = [];
+    const  parts: string[] = [];
     if (width) parts.push(`${width}`);
     if (height) parts.push(`${height}`);
     if (depth) parts.push(`${depth}`);
@@ -730,3 +730,9 @@ export const ArtistProductCardSkeleton = () => {
 };
 
 export default ArtistProductCard;
+
+
+
+
+
+

@@ -62,7 +62,7 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
 
   const addFAQ = () => {
-    const newFAQ: FAQ = {
+    const  newFAQ: FAQ = {
       id: Math.random().toString(36).substring(7),
       question: '',
       answer: ''
@@ -82,7 +82,7 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
   };
 
   const addSuggestedFAQ = (suggested: { question: string; answer: string }) => {
-    const newFAQ: FAQ = {
+    const  newFAQ: FAQ = {
       id: Math.random().toString(36).substring(7),
       question: suggested.question,
       answer: suggested.answer
@@ -270,4 +270,10 @@ export const CourseFAQForm = ({ data, onChange }: CourseFAQFormProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

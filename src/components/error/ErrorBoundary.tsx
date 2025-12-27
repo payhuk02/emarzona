@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch( _error: Error, errorInfo: React.ErrorInfo): void {
     // Log l'erreur
     logError(error, {
       componentStack: errorInfo.componentStack,
@@ -133,4 +133,10 @@ export function withErrorBoundary<P extends object>(
     </ErrorBoundary>
   );
 }
+
+
+
+
+
+
 

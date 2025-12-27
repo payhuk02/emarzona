@@ -89,7 +89,7 @@ export function BarcodeScanner({
         { facingMode: 'environment' }, // Caméra arrière sur mobile
         config,
         (decodedText, decodedResult) => {
-          const result: BarcodeScanResult = {
+          const  result: BarcodeScanResult = {
             code: decodedText,
             format: decodedResult.result.format?.formatName || 'UNKNOWN',
             timestamp: new Date(),
@@ -109,7 +109,7 @@ export function BarcodeScanner({
 
       setIsScanning(true);
       setIsInitializing(false);
-    } catch (err: any) {
+    } catch ( _err: any) {
       setError(err.message || 'Erreur lors du démarrage du scanner');
       setIsInitializing(false);
       setIsScanning(false);
@@ -231,4 +231,9 @@ export function BarcodeScanner({
     </Card>
   );
 }
+
+
+
+
+
 

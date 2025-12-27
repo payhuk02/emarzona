@@ -137,7 +137,7 @@ export const StaffAvailabilityManager = ({
   const { data: timeOffs = [] } = useQuery({
     queryKey: ['staff-time-off', storeId, staffMemberId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('staff_time_off')
         .select('*')
         .eq('store_id', storeId)
@@ -159,7 +159,7 @@ export const StaffAvailabilityManager = ({
   const { data: customHours = [] } = useQuery({
     queryKey: ['staff-custom-hours', storeId, staffMemberId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('staff_custom_hours')
         .select('*')
         .eq('store_id', storeId)
@@ -181,7 +181,7 @@ export const StaffAvailabilityManager = ({
   const { data: workloadAlerts = [] } = useQuery({
     queryKey: ['staff-workload-alerts', storeId, staffMemberId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('staff_workload_alerts')
         .select('*')
         .eq('store_id', storeId)
@@ -340,7 +340,7 @@ export const StaffAvailabilityManager = ({
     },
   });
 
-  const timeOffTypeLabels: Record<TimeOff['time_off_type'], string> = {
+  const  timeOffTypeLabels: Record<TimeOff['time_off_type'], string> = {
     vacation: 'Vacances',
     sick: 'Maladie',
     personal: 'Personnel',
@@ -349,14 +349,14 @@ export const StaffAvailabilityManager = ({
     other: 'Autre',
   };
 
-  const statusColors: Record<TimeOff['status'], string> = {
+  const  statusColors: Record<TimeOff['status'], string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     approved: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
     cancelled: 'bg-gray-100 text-gray-800',
   };
 
-  const alertLevelColors: Record<WorkloadAlert['alert_level'], string> = {
+  const  alertLevelColors: Record<WorkloadAlert['alert_level'], string> = {
     info: 'bg-blue-100 text-blue-800',
     warning: 'bg-yellow-100 text-yellow-800',
     critical: 'bg-red-100 text-red-800',
@@ -948,4 +948,10 @@ const CustomHoursForm = ({
     </div>
   );
 };
+
+
+
+
+
+
 

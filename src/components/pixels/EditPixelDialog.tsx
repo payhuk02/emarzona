@@ -145,3 +145,9 @@ export const EditPixelDialog = React.memo(EditPixelDialogComponent, (prevProps, 
 });
 
 EditPixelDialog.displayName = 'EditPixelDialog';
+
+
+
+
+
+

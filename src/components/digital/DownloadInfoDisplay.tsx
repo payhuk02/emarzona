@@ -125,7 +125,7 @@ export interface DownloadInfoDisplayProps {
 /**
  * Configuration des statuts
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   DownloadStatus,
   {
     label: string;
@@ -196,7 +196,7 @@ const STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const DownloadInfoDisplay: React.FC<DownloadInfoDisplayProps> = ({
+export const DownloadInfoDisplay : React.FC<DownloadInfoDisplayProps> = ({
   downloadId,
   status,
   purchaseDate,
@@ -650,4 +650,11 @@ export const DownloadInfoDisplay: React.FC<DownloadInfoDisplayProps> = ({
 DownloadInfoDisplay.displayName = 'DownloadInfoDisplay';
 
 export default DownloadInfoDisplay;
+
+
+
+
+
+
+
 

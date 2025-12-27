@@ -91,7 +91,7 @@ export const ProductsSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Produits & Cours', path: '/dashboard/products' },
     { label: activeSection },
   ];
@@ -139,4 +139,10 @@ export const ProductsSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

@@ -250,3 +250,9 @@ export default function PrivacyPolicy() {
   );
 }
 
+
+
+
+
+
+

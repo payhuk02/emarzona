@@ -221,3 +221,9 @@ export function useSearchHistory(limit: number = 10) {
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
+
+
+
+
+
+

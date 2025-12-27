@@ -68,9 +68,15 @@ export const createReferralRelation = async (
 
     logger.info('Referral relation created successfully', { referrerId, referredId, referralCode });
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Unexpected error creating referral relation', { error: error.message });
     return { success: false, error: error.message };
   }
 };
+
+
+
+
+
+
 

@@ -49,7 +49,7 @@ async function checkTable(supabase, tableName) {
       logger.info(`${tableName} - OK`, { tableName, rowCount: count || 0 });
       return { exists: true, accessible: true, rowCount: count || 0 };
     }
-  } catch (err: any) {
+  } catch ( _err: any) {
     logger.error(`${tableName} - Erreur`, { tableName, error: err.message });
     return { exists: false, accessible: false, error: err.message };
   }
@@ -71,7 +71,7 @@ async function checkCustomFunctions(supabase) {
   for (const funcName of functions) {
     try {
       // Test avec des paramètres par défaut
-      let params = {};
+      let  params= {};
       if (funcName === 'generate_slug') {
         params = { input_text: 'test' };
       } else if (funcName === 'has_role') {
@@ -88,7 +88,7 @@ async function checkCustomFunctions(supabase) {
       } else {
         logger.info(`${funcName} - OK`, { funcName });
       }
-    } catch (err: any) {
+    } catch ( _err: any) {
       logger.error(`${funcName} - Erreur`, { funcName, error: err.message });
     }
   }
@@ -135,7 +135,7 @@ export async function checkSupabaseTables(supabase) {
     } else {
       logger.info('✅ Connexion Supabase OK');
     }
-  } catch (err: any) {
+  } catch ( _err: any) {
     logger.error('Erreur de connexion', { error: err.message });
   }
   
@@ -149,3 +149,9 @@ export async function checkSupabaseTables(supabase) {
 
 // Export pour utilisation dans d'autres modules
 export { REQUIRED_TABLES };
+
+
+
+
+
+

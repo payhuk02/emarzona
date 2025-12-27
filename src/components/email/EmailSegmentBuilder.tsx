@@ -78,7 +78,7 @@ export const EmailSegmentBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: CreateSegmentPayload = {
+    const  payload: CreateSegmentPayload = {
       store_id: storeId,
       name,
       description,
@@ -252,4 +252,10 @@ export const EmailSegmentBuilder = ({
     </>
   );
 };
+
+
+
+
+
+
 

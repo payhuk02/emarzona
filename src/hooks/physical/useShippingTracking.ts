@@ -108,7 +108,7 @@ export function useShipments(storeId: string, filters?: {
   return useQuery({
     queryKey: ['shipments', storeId, filters],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('shipments')
         .select('*')
         .eq('store_id', storeId)
@@ -189,7 +189,7 @@ export function useShippingStats(storeId: string, dateRange?: {
   return useQuery({
     queryKey: ['shipping-stats', storeId, dateRange],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('shipments')
         .select('*')
         .eq('store_id', storeId);
@@ -207,7 +207,7 @@ export function useShippingStats(storeId: string, dateRange?: {
 
       const shipments = (data || []) as ShippingInfo[];
 
-      const stats: ShippingStats = {
+      const  stats: ShippingStats = {
         total: shipments.length,
         pending: shipments.filter((s) => s.status === 'pending').length,
         processing: shipments.filter((s) => s.status === 'processing').length,
@@ -302,7 +302,7 @@ export function useUpdateShipmentStatus() {
       status: ShippingStatus;
       notes?: string;
     }) => {
-      const updates: Partial<ShippingInfo> = {
+      const  updates: Partial<ShippingInfo> = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -364,7 +364,7 @@ export function useUpdateShipmentStatus() {
 
       // Déclencher webhook pour expédition
       if (data.order_id && data.store_id) {
-        const eventTypeMap: Record<string, string> = {
+        const  eventTypeMap: Record<string, string> = {
           'label_created': 'shipment_created',
           'picked_up': 'shipment_updated',
           'in_transit': 'shipment_updated',
@@ -409,7 +409,7 @@ export function useUpdateShipmentStatus() {
             if (order) {
               import('@/lib/webhooks/unified-webhook-service')
                 .then(({ triggerUnifiedWebhook }) => {
-                  const eventTypeMap: Record<string, string> = {
+                  const  eventTypeMap: Record<string, string> = {
                     'shipped': 'shipment.created',
                     'in_transit': 'shipment.updated',
                     'delivered': 'shipment.delivered',
@@ -545,7 +545,7 @@ export function useDeleteShipment() {
 // ============================================================================
 
 export function generateTrackingUrl(carrier: ShippingCarrier, trackingNumber: string): string {
-  const urls: Record<ShippingCarrier, string> = {
+  const  urls: Record<ShippingCarrier, string> = {
     dhl: `https://www.dhl.com/en/express/tracking.html?AWB=${trackingNumber}`,
     fedex: `https://www.fedex.com/fedextrack/?trknbr=${trackingNumber}`,
     ups: `https://www.ups.com/track?tracknum=${trackingNumber}`,
@@ -558,4 +558,10 @@ export function generateTrackingUrl(carrier: ShippingCarrier, trackingNumber: st
 
   return urls[carrier] || '';
 }
+
+
+
+
+
+
 

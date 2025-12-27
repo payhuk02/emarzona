@@ -160,7 +160,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // 3. Récupérer la variante si spécifiée
-      let variantPrice = 0;
+      let  variantPrice= 0;
       if (variantId) {
         const { data: variant, error: variantError } = await supabase
           .from('physical_product_variants')
@@ -192,7 +192,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // Trouver l'inventaire avec stock suffisant
-      let selectedInventory = inventories?.find(inv => 
+      let  selectedInventory= inventories?.find(inv => 
         (inv.quantity_available || 0) >= quantity
       );
 
@@ -218,7 +218,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // 5. Récupérer ou créer le customer
-      let customerId: string;
+      let  customerId: string;
       
       const { data: existingCustomer } = await supabase
         .from('customers')
@@ -274,9 +274,9 @@ export const useCreatePhysicalOrder = () => {
       const totalPrice = unitPrice * quantity;
 
       // Calculer le montant à payer selon le type de paiement
-      let amountToPay = totalPrice;
-      let percentagePaid = 0;
-      let remainingAmount = 0;
+      let  amountToPay= totalPrice;
+      let  percentagePaid= 0;
+      let  remainingAmount= 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -585,4 +585,10 @@ export const useCheckStockAvailability = () => {
     },
   });
 };
+
+
+
+
+
+
 

@@ -35,7 +35,7 @@ export function generateStoreSitemap(options: SitemapOptions): string {
     includePages = []
   } = options;
 
-  const urls: SitemapUrl[] = [];
+  const  urls: SitemapUrl[] = [];
   const storeBaseUrl = storeUrl || `${baseUrl}/stores/${storeSlug}`;
 
   // URL principale de la boutique
@@ -136,4 +136,10 @@ ${sitemaps.map(sitemap => `  <sitemap>
 
   return xml;
 }
+
+
+
+
+
+
 

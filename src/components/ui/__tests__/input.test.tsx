@@ -58,7 +58,7 @@ describe('Input', () => {
   it('should support different input types', () => {
     const { rerender } = render(<Input type="email" />);
     
-    let input = screen.getByRole('textbox') as HTMLInputElement;
+    let  input= screen.getByRole('textbox') as HTMLInputElement;
     expect(input.type).toBe('email');
     
     rerender(<Input type="password" />);
@@ -73,4 +73,10 @@ describe('Input', () => {
     expect(input).toHaveClass('custom-class');
   });
 });
+
+
+
+
+
+
 

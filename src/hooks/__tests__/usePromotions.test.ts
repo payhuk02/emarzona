@@ -27,15 +27,15 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('usePromotions', () => {
-  let queryClient: QueryClient;
-  let mockFrom: ReturnType<typeof vi.fn>;
-  let mockQuery: ReturnType<typeof vi.fn>;
-  let mockSelect: ReturnType<typeof vi.fn>;
-  let mockEq: ReturnType<typeof vi.fn>;
-  let mockOrder: ReturnType<typeof vi.fn>;
-  let mockOr: ReturnType<typeof vi.fn>;
-  let mockRange: ReturnType<typeof vi.fn>;
-  let mockIlike: ReturnType<typeof vi.fn>;
+  let  queryClient: QueryClient;
+  let  mockFrom: ReturnType<typeof vi.fn>;
+  let  mockQuery: ReturnType<typeof vi.fn>;
+  let  mockSelect: ReturnType<typeof vi.fn>;
+  let  mockEq: ReturnType<typeof vi.fn>;
+  let  mockOrder: ReturnType<typeof vi.fn>;
+  let  mockOr: ReturnType<typeof vi.fn>;
+  let  mockRange: ReturnType<typeof vi.fn>;
+  let  mockIlike: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -263,4 +263,10 @@ describe('usePromotions', () => {
     });
   });
 });
+
+
+
+
+
+
 

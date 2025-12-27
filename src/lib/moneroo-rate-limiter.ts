@@ -44,7 +44,7 @@ class RateLimiter {
     const windowStart = now - this.config.windowMs;
     
     // Récupérer ou créer l'enregistrement
-    let records = this.requests.get(key);
+    let  records= this.requests.get(key);
     
     if (!records) {
       records = [];
@@ -247,5 +247,11 @@ export function checkRateLimit(identifier?: string): void {
     );
   }
 }
+
+
+
+
+
+
 
 

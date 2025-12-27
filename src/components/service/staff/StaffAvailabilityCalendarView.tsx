@@ -96,7 +96,7 @@ export function StaffAvailabilityCalendarView({
   const { data: staffMembers = [], isLoading: isLoadingStaff } = useQuery({
     queryKey: ['staff-members-calendar', storeId, serviceId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('service_staff_members')
         .select('*')
         .eq('store_id', storeId)
@@ -136,7 +136,7 @@ export function StaffAvailabilityCalendarView({
   const { data: timeOffs = [] } = useQuery({
     queryKey: ['staff-time-off-calendar', storeId, selectedStaffId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('staff_time_off')
         .select('*')
         .eq('store_id', storeId)
@@ -158,7 +158,7 @@ export function StaffAvailabilityCalendarView({
   const { data: customHours = [] } = useQuery({
     queryKey: ['staff-custom-hours-calendar', storeId, selectedStaffId],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('staff_custom_hours')
         .select('*')
         .eq('store_id', storeId)
@@ -590,4 +590,10 @@ export function StaffAvailabilityCalendarView({
     </div>
   );
 }
+
+
+
+
+
+
 

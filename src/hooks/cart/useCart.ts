@@ -24,7 +24,7 @@ const CART_QUERY_KEY = ['cart'];
  * Génère ou récupère un session ID pour paniers anonymes
  */
 function getSessionId(): string {
-  let sessionId = localStorage.getItem('cart_session_id');
+  let  sessionId= localStorage.getItem('cart_session_id');
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     localStorage.setItem('cart_session_id', sessionId);
@@ -52,7 +52,7 @@ export function useCart() {
   const { data: items = [], isLoading, error } = useQuery({
     queryKey: CART_QUERY_KEY,
     queryFn: async (): Promise<CartItem[]> => {
-      let query = supabase
+      let  query= supabase
         .from('cart_items')
         .select('*')
         .order('added_at', { ascending: false });
@@ -87,7 +87,7 @@ export function useCart() {
   // Calculer uniquement les remises sur items (sans coupons)
   const itemDiscounts = items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0);
 
-  const summary: CartSummary = {
+  const  summary: CartSummary = {
     subtotal,
     discount_amount: itemDiscounts, // Uniquement les remises sur items, pas les coupons
     tax_amount: 0, // Calculé côté checkout selon pays
@@ -118,7 +118,7 @@ export function useCart() {
       const finalPrice = product.promotional_price || product.price;
 
       // Vérifier si le produit existe déjà dans le panier
-      let query = supabase
+      let  query= supabase
         .from('cart_items')
         .select('*')
         .eq('product_id', options.product_id);
@@ -154,7 +154,7 @@ export function useCart() {
       }
 
       // Sinon, créer un nouvel item
-      const newItem: Partial<CartItem> = {
+      const  newItem: Partial<CartItem> = {
         user_id: user?.id || null,
         session_id: user ? null : sessionId,
         product_id: options.product_id,
@@ -203,7 +203,7 @@ export function useCart() {
    */
   const updateItem = useMutation({
     mutationFn: async (options: UpdateCartItemOptions) => {
-      const updates: Partial<CartItem> = {};
+      const  updates: Partial<CartItem> = {};
 
       if (options.quantity !== undefined) {
         if (options.quantity <= 0) {
@@ -274,7 +274,7 @@ export function useCart() {
    */
   const clearCart = useMutation({
     mutationFn: async () => {
-      let query = supabase.from('cart_items').delete();
+      let  query= supabase.from('cart_items').delete();
 
       if (user) {
         query = query.eq('user_id', user.id);
@@ -319,4 +319,10 @@ export function useCart() {
     isEmpty: items.length === 0,
   };
 }
+
+
+
+
+
+
 

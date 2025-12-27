@@ -239,12 +239,12 @@ class MockFedexService {
 
     // Generate mock tracking events
     const now = new Date();
-    const events: FedexTrackingEvent[] = [];
+    const  events: FedexTrackingEvent[] = [];
 
     // Simulate progression through statuses
     const statusIndex = Math.floor(Math.random() * MOCK_TRACKING_STATUSES.length);
 
-    for (let i = 0; i <= statusIndex; i++) {
+    for (let  i= 0; i <= statusIndex; i++) {
       const status = MOCK_TRACKING_STATUSES[i];
       const eventDate = new Date(now);
       eventDate.setHours(eventDate.getHours() - (statusIndex - i) * 12);
@@ -284,7 +284,7 @@ class MockFedexService {
   async getRates(request: FedexRateRequest): Promise<FedexRate[]> {
     await this.simulateDelay();
 
-    const rates: FedexRate[] = Object.entries(MOCK_SERVICE_TYPES).map(
+    const  rates: FedexRate[] = Object.entries(MOCK_SERVICE_TYPES).map(
       ([code, service]) => ({
         service_type: code,
         service_name: service.name,
@@ -349,7 +349,7 @@ class MockFedexService {
   }
 
   private getStatusDescription(status: string): string {
-    const descriptions: Record<string, string> = {
+    const  descriptions: Record<string, string> = {
       LABEL_CREATED: 'Étiquette d\'expédition créée',
       PICKED_UP: 'Colis ramassé par FedEx',
       IN_TRANSIT: 'En transit vers la destination',
@@ -367,4 +367,10 @@ class MockFedexService {
 
 export const mockFedexService = new MockFedexService();
 export default mockFedexService;
+
+
+
+
+
+
 

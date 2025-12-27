@@ -68,7 +68,7 @@ export function useMessageSearch() {
     setIsSearching(true);
 
     try {
-      let searchQuery = supabase
+      let  searchQuery= supabase
         .from('messages')
         .select(`
           *,
@@ -102,7 +102,7 @@ export function useMessageSearch() {
 
       if (error) throw error;
 
-      const result: MessageSearchResult = {
+      const  result: MessageSearchResult = {
         messages: (data || []) as Message[],
         total: count || 0,
         query,
@@ -120,7 +120,7 @@ export function useMessageSearch() {
       }
 
       return result;
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error searching messages', {
         error: error.message,
         query,
@@ -153,4 +153,10 @@ export function useMessageSearch() {
     clearSearch,
   };
 }
+
+
+
+
+
+
 

@@ -78,7 +78,7 @@ export interface CategoryOption {
 /**
  * Catégories pour produits DIGITAUX
  */
-export const DIGITAL_CATEGORIES: CategoryOption[] = [
+export const DIGITAL_CATEGORIES : CategoryOption[] = [
   { value: "formation", label: "Formation", icon: GraduationCap, popular: true },
   { value: "ebook", label: "Ebook", icon: BookOpen, popular: true },
   { value: "template", label: "Template", icon: Layout, popular: true },
@@ -107,7 +107,7 @@ export const DIGITAL_CATEGORIES: CategoryOption[] = [
 /**
  * Catégories pour produits PHYSIQUES
  */
-export const PHYSICAL_CATEGORIES: CategoryOption[] = [
+export const PHYSICAL_CATEGORIES : CategoryOption[] = [
   { value: "vetements", label: "Vêtements", icon: Shirt, popular: true },
   { value: "accessoires", label: "Accessoires", icon: Watch, popular: true },
   { value: "artisanat", label: "Artisanat", icon: Hammer, popular: true },
@@ -133,7 +133,7 @@ export const PHYSICAL_CATEGORIES: CategoryOption[] = [
 /**
  * Catégories pour SERVICES
  */
-export const SERVICE_CATEGORIES: CategoryOption[] = [
+export const SERVICE_CATEGORIES : CategoryOption[] = [
   { value: "consultation", label: "Consultation", icon: Users, popular: true },
   { value: "coaching", label: "Coaching", icon: Target, popular: true },
   { value: "design", label: "Design", icon: Palette, popular: true },
@@ -165,7 +165,7 @@ export const SERVICE_CATEGORIES: CategoryOption[] = [
 /**
  * Catégories pour COURS EN LIGNE
  */
-export const COURSE_CATEGORIES: CategoryOption[] = [
+export const COURSE_CATEGORIES : CategoryOption[] = [
   { value: "programmation", label: "Programmation", icon: Code, popular: true },
   { value: "design", label: "Design", icon: Palette, popular: true },
   { value: "marketing", label: "Marketing Digital", icon: TrendingUp, popular: true },
@@ -194,7 +194,7 @@ export const COURSE_CATEGORIES: CategoryOption[] = [
 /**
  * Catégories pour ŒUVRES D'ARTISTE
  */
-export const ARTIST_CATEGORIES: CategoryOption[] = [
+export const ARTIST_CATEGORIES : CategoryOption[] = [
   { value: "peinture", label: "Peinture", icon: Paintbrush, popular: true },
   { value: "dessin", label: "Dessin", icon: PenTool, popular: true },
   { value: "sculpture", label: "Sculpture", icon: Hammer, popular: true },
@@ -253,4 +253,11 @@ export function getAllMarketplaceCategories(): CategoryOption[] {
     return a.label.localeCompare(b.label);
   });
 }
+
+
+
+
+
+
+
 

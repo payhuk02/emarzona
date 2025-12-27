@@ -26,7 +26,7 @@ interface PeriodFilterProps {
   className?: string;
 }
 
-export const PeriodFilter: React.FC<PeriodFilterProps> = ({
+export const PeriodFilter : React.FC<PeriodFilterProps> = ({
   period,
   onPeriodChange,
   customStartDate,
@@ -210,3 +210,10 @@ export const PeriodFilter: React.FC<PeriodFilterProps> = ({
     </div>
   );
 };
+
+
+
+
+
+
+

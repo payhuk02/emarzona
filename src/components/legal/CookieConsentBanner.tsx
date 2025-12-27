@@ -49,7 +49,7 @@ export const CookieConsentBanner = () => {
   }, [currentPreferences]);
 
   const handleAcceptAll = async () => {
-    const allAccepted: Partial<CookiePreferences> = {
+    const  allAccepted: Partial<CookiePreferences> = {
       necessary: true,
       functional: true,
       analytics: true,
@@ -66,7 +66,7 @@ export const CookieConsentBanner = () => {
   };
 
   const handleRejectAll = async () => {
-    const allRejected: Partial<CookiePreferences> = {
+    const  allRejected: Partial<CookiePreferences> = {
       necessary: true, // Obligatoire
       functional: false,
       analytics: false,
@@ -255,4 +255,10 @@ export const CookieConsentBanner = () => {
     </>
   );
 };
+
+
+
+
+
+
 

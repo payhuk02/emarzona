@@ -60,7 +60,7 @@ export function useCurrencies(activeOnly: boolean = true) {
   return useQuery({
     queryKey: ['currencies', activeOnly],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('currencies')
         .select('*')
         .order('is_base_currency', { ascending: false })
@@ -85,7 +85,7 @@ export function useExchangeRates(fromCurrency?: string, toCurrency?: string) {
   return useQuery({
     queryKey: ['exchange-rates', fromCurrency, toCurrency],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('exchange_rates')
         .select('*')
         .eq('is_active', true)
@@ -320,4 +320,10 @@ export function useFormatCurrency() {
 
   return { formatCurrency };
 }
+
+
+
+
+
+
 

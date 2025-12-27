@@ -185,3 +185,9 @@ describe('ShipmentCard', () => {
     expect(screen.queryByText(/suivre/i)).not.toBeInTheDocument();
   });
 });
+
+
+
+
+
+

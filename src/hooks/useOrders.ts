@@ -191,7 +191,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
       setOrders(data || []);
       setTotalCount(count || 0);
       setError(null);
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       const error = err instanceof Error ? err : new Error('Erreur inconnue');
       const errorCode =
         err && typeof err === 'object' && 'code' in err ? String(err.code) : undefined;
@@ -287,3 +287,9 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
     fetchOrderTransactions,
   };
 };
+
+
+
+
+
+

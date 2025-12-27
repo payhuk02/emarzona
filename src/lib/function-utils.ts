@@ -13,7 +13,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let  timeout: NodeJS.Timeout | null = null;
 
   return function (this: unknown, ...args: Parameters<T>) {
     if (timeout) {
@@ -32,9 +32,9 @@ export function debounceAsync<T extends (...args: unknown[]) => Promise<unknown>
   func: T,
   wait: number
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
-  let timeout: NodeJS.Timeout | null = null;
-  let resolve: ((value: ReturnType<T>) => void) | null = null;
-  let reject: ((error: unknown) => void) | null = null;
+  let  timeout: NodeJS.Timeout | null = null;
+  let  resolve: ((value: ReturnType<T>) => void) | null = null;
+  let  reject: ((error: unknown) => void) | null = null;
 
   return function (this: unknown, ...args: Parameters<T>): Promise<ReturnType<T>> {
     return new Promise<ReturnType<T>>((res, rej) => {
@@ -70,7 +70,7 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean = false;
+  let  inThrottle: boolean = false;
 
   return function (this: unknown, ...args: Parameters<T>) {
     if (!inThrottle) {
@@ -90,8 +90,8 @@ export function throttleAsync<T extends (...args: unknown[]) => Promise<unknown>
   func: T,
   limit: number
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
-  let inThrottle: boolean = false;
-  let lastResult: Promise<ReturnType<T>> | null = null;
+  let  inThrottle: boolean = false;
+  let  lastResult: Promise<ReturnType<T>> | null = null;
 
   return function (this: unknown, ...args: Parameters<T>): Promise<ReturnType<T>> {
     if (!inThrottle) {
@@ -132,8 +132,8 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
  * Crée une fonction qui ne peut être appelée qu'une fois
  */
 export function once<T extends (...args: unknown[]) => unknown>(func: T): T {
-  let called = false;
-  let result: ReturnType<T>;
+  let  called= false;
+  let  result: ReturnType<T>;
 
   return ((...args: Parameters<T>): ReturnType<T> => {
     if (!called) {
@@ -148,8 +148,8 @@ export function once<T extends (...args: unknown[]) => unknown>(func: T): T {
  * Crée une fonction qui ignore les appels multiples rapides
  */
 export function ignoreConcurrent<T extends (...args: unknown[]) => Promise<unknown>>(func: T): T {
-  let inProgress = false;
-  let lastPromise: Promise<ReturnType<T>> | null = null;
+  let  inProgress= false;
+  let  lastPromise: Promise<ReturnType<T>> | null = null;
 
   return ((...args: Parameters<T>): Promise<ReturnType<T>> => {
     if (inProgress && lastPromise) {
@@ -174,14 +174,14 @@ export function withRetry<T extends (...args: unknown[]) => Promise<unknown>>(
   delay: number = 1000
 ): T {
   return ((...args: Parameters<T>): Promise<ReturnType<T>> => {
-    let _lastError: unknown;
-    let attempt = 0;
+    let  _lastError: unknown;
+    let  attempt= 0;
 
     const execute = async (): Promise<ReturnType<T>> => {
       try {
         return await func(...args);
       } catch (error) {
-        _lastError = error;
+        lastError = error;
         attempt++;
 
         if (attempt < maxRetries) {
@@ -224,7 +224,6 @@ export function withLogging<T extends (...args: unknown[]) => unknown>(func: T, 
   const funcName = name || func.name || 'anonymous';
 
   return ((...args: Parameters<T>): ReturnType<T> => {
-    // ✅ PHASE 2: Remplacer console.log par logger (debug level)
     logger.debug(`[${funcName}] Called with:`, { args, funcName });
     const result = func(...args);
     logger.debug(`[${funcName}] Returned:`, { result, funcName });
@@ -253,3 +252,9 @@ export function pipe<T extends (...args: unknown[]) => unknown>(
     return funcs.reduce((acc, func) => func(acc), funcs[0](...args));
   }) as T;
 }
+
+
+
+
+
+

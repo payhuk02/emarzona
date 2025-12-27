@@ -241,9 +241,9 @@ export class GamificationSystem {
         throw new Error(`Failed to get leaderboard: ${error.message}`);
       }
 
-      const leaderboard: LeaderboardEntry[] = [];
+      const  leaderboard: LeaderboardEntry[] = [];
 
-      for (let i = 0; i < (users || []).length; i++) {
+      for (let  i= 0; i < (users || []).length; i++) {
         const user = users[i];
         const points = user.total_points || 0;
         const level = this.calculateLevel(points);
@@ -357,5 +357,11 @@ export class GamificationSystem {
 
 // Instance singleton
 export const gamificationSystem = new GamificationSystem();
+
+
+
+
+
+
 
 

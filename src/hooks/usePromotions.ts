@@ -40,7 +40,7 @@ export const usePromotions = (options: PromotionsQueryOptions = {}) => {
     queryFn: async () => {
       if (!storeId) return { data: [], total: 0, page, limit };
 
-      let query = supabase
+      let  query= supabase
         .from('promotions')
         .select('*', { count: 'exact' })
         .eq('store_id', storeId)
@@ -137,7 +137,7 @@ export const useUpdatePromotion = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Promotion> & { id: string }) => {
-      const updateData: any = { ...updates };
+      const  updateData: any = { ...updates };
       if (updates.code) {
         updateData.code = updates.code.toUpperCase().trim();
       }
@@ -209,3 +209,9 @@ export const useDeletePromotion = () => {
     },
   });
 };
+
+
+
+
+
+

@@ -204,7 +204,7 @@ export const StoreDomainSettings = ({ store, onUpdateStore: onUpdate }: StoreDom
           description: `Propagation DNS complète (${propagationTimeMinutes}min ${propagationTimeSeconds}s). SSL activé automatiquement.`,
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Impossible de vérifier le domaine.';
       logger.error('Error verifying domain', { error, domain: store.custom_domain });
       
@@ -622,4 +622,10 @@ export const StoreDomainSettings = ({ store, onUpdateStore: onUpdate }: StoreDom
     </div>
   );
 };
+
+
+
+
+
+
 

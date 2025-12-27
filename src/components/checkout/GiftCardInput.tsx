@@ -82,7 +82,7 @@ export default function GiftCardInput({
         title: 'Carte cadeau appliquée',
         description: `Solde disponible : ${formatCurrency(validation.current_balance)}`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Impossible de valider la carte cadeau';
       toast({
         title: 'Erreur',
@@ -171,4 +171,10 @@ export default function GiftCardInput({
     </div>
   );
 }
+
+
+
+
+
+
 

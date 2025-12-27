@@ -37,8 +37,8 @@ const SUSPICIOUS_PATTERNS = [
  * Detect spam in review content
  */
 export function detectSpam(content: string, title?: string): SpamDetectionResult {
-  const reasons: string[] = [];
-  let spamScore = 0;
+  const  reasons: string[] = [];
+  let  spamScore= 0;
 
   const fullText = `${title || ''} ${content}`.toLowerCase();
 
@@ -132,10 +132,10 @@ export function getSpamReportSummary(
   clean: number;
   autoFlagged: number;
 } {
-  let spam = 0;
-  let suspicious = 0;
-  let clean = 0;
-  let autoFlagged = 0;
+  let  spam= 0;
+  let  suspicious= 0;
+  let  clean= 0;
+  let  autoFlagged= 0;
 
   results.forEach((result) => {
     if (result.isSpam) {
@@ -158,4 +158,10 @@ export function getSpamReportSummary(
     autoFlagged,
   };
 }
+
+
+
+
+
+
 

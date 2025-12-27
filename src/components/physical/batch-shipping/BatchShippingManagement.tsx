@@ -32,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import BatchShipmentDetails from './BatchShipmentDetails';
 
-const BATCH_STATUSES: { value: BatchShipment['status']; label: string; color: string }[] = [
+const  BATCH_STATUSES: { value: BatchShipment['status']; label: string; color: string }[] = [
   { value: 'pending', label: 'En attente', color: 'bg-yellow-500' },
   { value: 'processing', label: 'En traitement', color: 'bg-blue-500' },
   { value: 'label_generated', label: 'Étiquettes générées', color: 'bg-purple-500' },
@@ -70,7 +70,7 @@ export default function BatchShippingManagement() {
       setIsCreateDialogOpen(false);
       setSelectedOrderIds([]);
       setBatchName('');
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -84,7 +84,7 @@ export default function BatchShippingManagement() {
       await processBatch.mutateAsync({
         batchId,
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de traiter le lot',
@@ -489,4 +489,9 @@ export default function BatchShippingManagement() {
     </div>
   );
 }
+
+
+
+
+
 

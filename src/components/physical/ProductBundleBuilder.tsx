@@ -195,7 +195,7 @@ export function ProductBundleBuilder({
 
   // Add product to bundle
   const handleAddProduct = (product: typeof MOCK_PRODUCTS[0]) => {
-    const newBundleProduct: BundleProduct = {
+    const  newBundleProduct: BundleProduct = {
       product_id: product.id,
       product_name: product.name,
       variant_label: product.variant_label,
@@ -277,7 +277,7 @@ export function ProductBundleBuilder({
       return;
     }
 
-    const finalBundle: ProductBundle = {
+    const  finalBundle: ProductBundle = {
       id: bundle.id || `bundle_${Date.now()}`,
       name: bundle.name,
       description: bundle.description,
@@ -844,4 +844,10 @@ export function ProductBundleBuilder({
     </div>
   );
 }
+
+
+
+
+
+
 

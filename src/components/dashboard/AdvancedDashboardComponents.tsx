@@ -619,3 +619,9 @@ export const CustomersTrendChart = ({ data }: CustomersTrendChartProps) => {
     </Card>
   );
 };
+
+
+
+
+
+

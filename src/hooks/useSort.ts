@@ -76,7 +76,7 @@ function defaultCompare<T>(
   if (bValue == null) return sortOrder === 'asc' ? -1 : 1;
 
   // Comparer les valeurs
-  let comparison = 0;
+  let  comparison= 0;
   if (typeof aValue === 'string' && typeof bValue === 'string') {
     comparison = aValue.localeCompare(bValue);
   } else if (typeof aValue === 'number' && typeof bValue === 'number') {
@@ -147,4 +147,10 @@ export function useSort<T>(
     resetSort,
   };
 }
+
+
+
+
+
+
 

@@ -131,7 +131,7 @@ export function validateForm<T extends z.ZodTypeAny>(
     return { success: true, data: result };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors: Record<string, string> = {};
+      const  errors: Record<string, string> = {};
       error.errors.forEach((err) => {
         const path = err.path.join('.');
         errors[path] = err.message;
@@ -237,6 +237,12 @@ export function clearFormErrors(
   }
   return {};
 }
+
+
+
+
+
+
 
 
 

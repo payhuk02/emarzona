@@ -30,7 +30,7 @@ interface StorePreviewProps {
   onClose?: () => void;
 }
 
-export const StorePreview: React.FC<StorePreviewProps> = ({
+export const StorePreview : React.FC<StorePreviewProps> = ({
   store,
   previewData,
   onClose,
@@ -244,7 +244,6 @@ export const StorePreview: React.FC<StorePreviewProps> = ({
         doc.close();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, previewData, store]);
 
   return (
@@ -293,5 +292,12 @@ export const StorePreview: React.FC<StorePreviewProps> = ({
     </>
   );
 };
+
+
+
+
+
+
+
 
 

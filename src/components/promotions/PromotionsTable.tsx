@@ -136,7 +136,7 @@ const PromotionsTableComponent = ({ promotions, onUpdate }: PromotionsTableProps
 
       onUpdate();
       setDeleteId(null);
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -287,3 +287,9 @@ export const PromotionsTable = React.memo(PromotionsTableComponent, (prevProps, 
 });
 
 PromotionsTable.displayName = 'PromotionsTable';
+
+
+
+
+
+

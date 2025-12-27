@@ -79,7 +79,7 @@ const createNotification = async (
     });
 
     return { success: true, notification_id: notification.id };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in createNotification', { error: errorMessage });
     return { success: false, error: errorMessage };
@@ -284,4 +284,10 @@ export const sendBulkNotifications = async (
     errors: errors.length > 0 ? errors : undefined,
   };
 };
+
+
+
+
+
+
 

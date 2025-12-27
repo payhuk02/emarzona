@@ -209,7 +209,7 @@ export const useStores = () => {
 
       setStores(data || []);
       setError(null);
-    } catch (err: any) {
+    } catch ( _err: any) {
       logger.error('Erreur lors du chargement des boutiques:', err);
       setError(err.message);
       toast({
@@ -266,7 +266,7 @@ export const useStores = () => {
       });
 
       return data;
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Impossible de créer la boutique";
       logger.error('Erreur lors de la création de la boutique:', err);
       toast({
@@ -300,7 +300,7 @@ export const useStores = () => {
       });
 
       return data;
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       logger.error('Erreur lors de la mise à jour de la boutique:', err);
       toast({
         title: "Erreur",
@@ -329,7 +329,7 @@ export const useStores = () => {
         title: "Boutique supprimée",
         description: "La boutique a été supprimée avec succès"
       });
-    } catch (err: unknown) {
+    } catch ( _err: unknown) {
       logger.error('Erreur lors de la suppression de la boutique:', err);
       toast({
         title: "Erreur",
@@ -342,7 +342,6 @@ export const useStores = () => {
 
   useEffect(() => {
     fetchStores();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
@@ -357,3 +356,9 @@ export const useStores = () => {
     getRemainingStores
   };
 };
+
+
+
+
+
+

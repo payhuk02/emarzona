@@ -277,3 +277,9 @@ export const PixelsTable = React.memo(PixelsTableComponent, (prevProps, nextProp
 });
 
 PixelsTable.displayName = 'PixelsTable';
+
+
+
+
+
+

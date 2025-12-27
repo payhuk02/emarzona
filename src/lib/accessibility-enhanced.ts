@@ -84,9 +84,9 @@ export function checkColorContrast(
   const passesAA = ratio >= aaThreshold;
   const passesAAA = ratio >= aaaThreshold;
 
-  const level: 'AA' | 'AAA' | 'fail' = passesAAA ? 'AAA' : passesAA ? 'AA' : 'fail';
+  const  level: 'AA' | 'AAA' | 'fail' = passesAAA ? 'AAA' : passesAA ? 'AA' : 'fail';
 
-  const recommendations: string[] = [];
+  const  recommendations: string[] = [];
   if (!passesAA) {
     recommendations.push(
       `Le contraste actuel (${ratio.toFixed(2)}:1) ne respecte pas WCAG AA.`
@@ -149,8 +149,8 @@ export function checkElementContrast(element: HTMLElement): {
   const isBold = parseInt(fontWeight) >= 600 || fontWeight === 'bold';
 
   // Trouver l'arrière-plan effectif
-  let background: string | null = null;
-  let current: HTMLElement | null = element;
+  let  background: string | null = null;
+  let  current: HTMLElement | null = element;
 
   while (current && !background) {
     const bgColor = window.getComputedStyle(current).backgroundColor;
@@ -208,9 +208,9 @@ export interface AccessibilityReport {
 }
 
 export function validatePageAccessibility(): AccessibilityReport {
-  const violations: AccessibilityReport['violations'] = [];
-  const warnings: AccessibilityReport['warnings'] = [];
-  const recommendations: string[] = [];
+  const  violations: AccessibilityReport['violations'] = [];
+  const  warnings: AccessibilityReport['warnings'] = [];
+  const  recommendations: string[] = [];
 
   // Vérifier les images sans alt
   const images = document.querySelectorAll('img');
@@ -280,7 +280,7 @@ export function validatePageAccessibility(): AccessibilityReport {
 
   // Vérifier le contraste des textes
   const textElements = document.querySelectorAll('p, span, div, h1, h2, h3, h4, h5, h6, a, button, label');
-  let contrastIssues = 0;
+  let  contrastIssues= 0;
   textElements.forEach((el) => {
     if (el instanceof HTMLElement && el.textContent?.trim()) {
       const contrast = checkElementContrast(el);
@@ -394,4 +394,10 @@ export function setupKeyboardShortcuts(): () => void {
     document.removeEventListener('keydown', handleKeyDown);
   };
 }
+
+
+
+
+
+
 

@@ -208,7 +208,7 @@ class DHLService {
       const data = await response.json();
 
       // Parser la réponse DHL selon le format de leur API
-      const rates: DHLRate[] = [];
+      const  rates: DHLRate[] = [];
 
       if (data.products && Array.isArray(data.products)) {
         interface DHLProduct {
@@ -477,7 +477,7 @@ class DHLService {
           timestamp?: string;
         }>;
       }
-      const events: TrackingEvent[] = [];
+      const  events: TrackingEvent[] = [];
       const shipments = (data.shipments || []) as DHLShipment[];
 
       shipments.forEach((shipment: DHLShipment) => {
@@ -501,3 +501,9 @@ class DHLService {
 }
 
 export default DHLService;
+
+
+
+
+
+

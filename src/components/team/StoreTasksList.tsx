@@ -28,14 +28,14 @@ interface StoreTasksListProps {
   storeId: string;
 }
 
-const PRIORITY_LABELS: Record<StoreTask['priority'], string> = {
+const  PRIORITY_LABELS: Record<StoreTask['priority'], string> = {
   low: 'Basse',
   medium: 'Moyenne',
   high: 'Haute',
   urgent: 'Urgente',
 };
 
-const STATUS_LABELS: Record<StoreTask['status'], string> = {
+const  STATUS_LABELS: Record<StoreTask['status'], string> = {
   pending: 'En attente',
   in_progress: 'En cours',
   review: 'En révision',
@@ -222,4 +222,10 @@ export const StoreTasksList = ({ storeId }: StoreTasksListProps) => {
     </>
   );
 };
+
+
+
+
+
+
 

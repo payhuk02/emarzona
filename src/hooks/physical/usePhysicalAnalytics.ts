@@ -146,7 +146,7 @@ export const useProductAnalytics = (
   return useQuery({
     queryKey: ['physical-product-analytics', physicalProductId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('physical_product_analytics')
         .select('*')
         .eq('physical_product_id', physicalProductId)
@@ -214,7 +214,7 @@ export const useStorePhysicalAnalytics = (
         };
       }
 
-      let query = supabase
+      let  query= supabase
         .from('physical_product_analytics')
         .select('*')
         .in('physical_product_id', productIds)
@@ -278,7 +278,7 @@ export const useSalesForecasts = (
   return useQuery({
     queryKey: ['sales-forecasts', physicalProductId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('sales_forecasts')
         .select('*')
         .eq('physical_product_id', physicalProductId)
@@ -354,7 +354,7 @@ export const useWarehousePerformance = (
   return useQuery({
     queryKey: ['warehouse-performance', warehouseId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('warehouse_performance')
         .select('*')
         .eq('warehouse_id', warehouseId)
@@ -408,7 +408,7 @@ export const useStoreWarehousePerformance = (
         return [];
       }
 
-      let query = supabase
+      let  query= supabase
         .from('warehouse_performance')
         .select('*')
         .in('warehouse_id', warehouseIds)
@@ -453,7 +453,7 @@ export const useGeographicSalesPerformance = (
   return useQuery({
     queryKey: ['geographic-sales', storeId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('geographic_sales_performance')
         .select('*')
         .eq('store_id', storeId)
@@ -503,7 +503,7 @@ export const useStockRotationReports = (
   return useQuery({
     queryKey: ['stock-rotation-reports', physicalProductId, options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('stock_rotation_reports')
         .select('*')
         .order('period_start', { ascending: false });
@@ -616,3 +616,9 @@ export const useCalculateStockRotation = () => {
     },
   });
 };
+
+
+
+
+
+

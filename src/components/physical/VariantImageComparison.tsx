@@ -90,8 +90,8 @@ export function VariantImageComparison({ variants, className }: VariantImageComp
     if (!variant || variant.images.length === 0) return;
 
     const currentIndex = viewingImage.imageIndex;
-    let newIndex: number;
-    let newVariantId = viewingImage.variantId;
+    let  newIndex: number;
+    let  newVariantId= viewingImage.variantId;
 
     if (direction === 'next') {
       if (currentIndex < variant.images.length - 1) {
@@ -468,3 +468,9 @@ export function VariantImageComparison({ variants, className }: VariantImageComp
     </div>
   );
 }
+
+
+
+
+
+

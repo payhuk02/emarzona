@@ -94,3 +94,9 @@ export function LowStockAlerts({ alerts, className }: LowStockAlertsProps) {
   );
 }
 
+
+
+
+
+
+

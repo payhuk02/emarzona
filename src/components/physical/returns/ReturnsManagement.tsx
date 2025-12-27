@@ -27,7 +27,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ReturnWorkflowWizard } from './ReturnWorkflowWizard';
 
-const STATUS_COLORS: Record<ProductReturn['status'], string> = {
+const  STATUS_COLORS: Record<ProductReturn['status'], string> = {
   pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
   approved: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
   rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
@@ -42,7 +42,7 @@ const STATUS_COLORS: Record<ProductReturn['status'], string> = {
   cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
 };
 
-const STATUS_LABELS: Record<ProductReturn['status'], string> = {
+const  STATUS_LABELS: Record<ProductReturn['status'], string> = {
   pending: 'En attente',
   approved: 'Approuvé',
   rejected: 'Rejeté',
@@ -342,3 +342,9 @@ export const ReturnsManagement = ({ storeId }: ReturnsManagementProps) => {
     </div>
   );
 };
+
+
+
+
+
+

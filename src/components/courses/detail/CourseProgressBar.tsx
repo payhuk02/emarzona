@@ -66,3 +66,9 @@ export const CourseProgressBar = ({ enrollmentId, totalLessons }: CourseProgress
   );
 };
 
+
+
+
+
+
+

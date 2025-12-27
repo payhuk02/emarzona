@@ -110,7 +110,7 @@ export const useDigitalProductAnalytics = (productId: string, dateRange: { from:
         .reduce((sum, d) => sum + (d.file_size_mb || 0), 0);
       const bandwidthGB = bandwidthMB / 1024;
 
-      const analytics: DigitalProductAnalytics = {
+      const  analytics: DigitalProductAnalytics = {
         product_id: productId,
         product_name: product.product.name,
         total_downloads: totalDownloads,
@@ -375,7 +375,7 @@ export const useDigitalRevenueAnalytics = (storeId?: string, dateRange?: { from:
       if (productsError) throw productsError;
 
       // Get orders for these products
-      let query = supabase
+      let  query= supabase
         .from('order_items')
         .select(`
           id,
@@ -431,7 +431,7 @@ export const useGeographicAnalytics = (digitalProductId: string, dateRange?: { f
   return useQuery({
     queryKey: ['geographic-analytics', digitalProductId, dateRange],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('digital_product_downloads')
         .select('download_country, user_id, download_success')
         .eq('digital_product_id', digitalProductId)
@@ -466,7 +466,7 @@ export const useGeographicAnalytics = (digitalProductId: string, dateRange?: { f
 
       const totalDownloads = data.length;
 
-      const analytics: GeographicAnalytics[] = Array.from(countryMap.entries())
+      const  analytics: GeographicAnalytics[] = Array.from(countryMap.entries())
         .map(([country, stats]) => ({
           country,
           downloads: stats.downloads,
@@ -496,7 +496,7 @@ export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from
   return useQuery({
     queryKey: ['version-analytics', digitalProductId, dateRange],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('digital_product_downloads')
         .select('file_version, user_id, download_success')
         .eq('digital_product_id', digitalProductId);
@@ -533,7 +533,7 @@ export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from
 
       const totalDownloads = data.length;
 
-      const analytics: VersionAnalytics[] = Array.from(versionMap.entries())
+      const  analytics: VersionAnalytics[] = Array.from(versionMap.entries())
         .map(([version, stats]) => ({
           version,
           downloads: stats.downloads,
@@ -548,4 +548,10 @@ export const useVersionAnalytics = (digitalProductId: string, dateRange?: { from
     enabled: !!digitalProductId,
   });
 };
+
+
+
+
+
+
 

@@ -105,7 +105,7 @@ export interface ServiceBundleBuilderProps {
 /**
  * ServiceBundleBuilder - Création de packs de services
  */
-export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
+export const ServiceBundleBuilder : React.FC<ServiceBundleBuilderProps> = ({
   bundles,
   availableServices,
   onSave,
@@ -154,7 +154,7 @@ export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
       setEditingBundle({ ...editingBundle, items: updatedItems });
     } else {
       // Ajouter nouveau
-      const newItem: BundleItem = {
+      const  newItem: BundleItem = {
         serviceId: service.id,
         serviceName: service.name,
         quantity: 1,
@@ -201,7 +201,7 @@ export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
       return sum + (service?.duration || 0) * item.quantity;
     }, 0);
 
-    let finalPrice = originalPrice;
+    let  finalPrice= originalPrice;
     if (editingBundle.discountType === 'fixed') {
       finalPrice = Math.max(0, originalPrice - (editingBundle.discountValue || 0));
     } else {
@@ -961,4 +961,11 @@ export const ServiceBundleBuilder: React.FC<ServiceBundleBuilderProps> = ({
 ServiceBundleBuilder.displayName = 'ServiceBundleBuilder';
 
 export default ServiceBundleBuilder;
+
+
+
+
+
+
+
 

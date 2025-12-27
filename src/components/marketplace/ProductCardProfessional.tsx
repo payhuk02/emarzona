@@ -191,7 +191,7 @@ const ProductCardProfessionalComponent = ({
           });
         });
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       logger.error("Erreur lors de l'achat:", { error: errorMessage, productId: product.id });
       toast({
@@ -224,7 +224,7 @@ const ProductCardProfessionalComponent = ({
           | 'course',
         quantity: 1,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       logger.error("Erreur lors de l'ajout au panier:", {
         error: errorMessage,
@@ -245,7 +245,7 @@ const ProductCardProfessionalComponent = ({
   };
 
   const getCategoryColor = (category: string) => {
-    const colors: { [key: string]: string } = {
+    const  colors: { [key: string]: string } = {
       SEO: 'bg-blue-100 text-blue-800',
       Marketing: 'bg-green-100 text-green-800',
       Design: 'bg-purple-100 text-purple-800',
@@ -685,3 +685,9 @@ const ProductCardProfessional = React.memo(
 ProductCardProfessional.displayName = 'ProductCardProfessional';
 
 export default ProductCardProfessional;
+
+
+
+
+
+

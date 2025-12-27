@@ -70,7 +70,7 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
         title: 'Succès',
         description: 'Image 1536×1024 téléchargée avec succès',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error uploading image', { error: errorMessage });
       toast({
@@ -150,3 +150,9 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
 };
 
 export default ImageUpload;
+
+
+
+
+
+

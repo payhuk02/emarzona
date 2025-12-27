@@ -104,7 +104,7 @@ export const trackAffiliateClick = async (
     logger.log('Affiliate click tracked', { affiliateLinkId, trackingCookie });
 
     return { success: true, tracking_cookie: trackingCookie };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in trackAffiliateClick', { error: errorMessage });
     return { success: false, error: errorMessage };
@@ -159,7 +159,7 @@ export const getAffiliateInfo = async (): Promise<{
       product_id: click.product_id,
       tracking_cookie: trackingCookie,
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     logger.error('Error getting affiliate info', { error });
     return {
       affiliate_link_id: null,
@@ -245,7 +245,7 @@ export const createAffiliateCommission = async (
     }
 
     // Calculer la commission
-    let commissionAmount = 0;
+    let  commissionAmount= 0;
     if (settings.commission_type === 'percentage') {
       commissionAmount = orderTotal * (settings.commission_rate / 100);
     } else if (settings.commission_type === 'fixed') {
@@ -297,12 +297,18 @@ export const createAffiliateCommission = async (
     logger.log('Affiliate commission created', { commissionId: commission.id, orderId });
 
     return { success: true, commission_id: commission.id };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in createAffiliateCommission', { error: errorMessage });
     return { success: false, error: errorMessage };
   }
 };
+
+
+
+
+
+
 
 
 

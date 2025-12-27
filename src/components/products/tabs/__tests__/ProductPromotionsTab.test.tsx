@@ -10,7 +10,7 @@ const renderWithTooltip = (ui: React.ReactElement) => {
 };
 
 describe('ProductPromotionsTab', () => {
-  const mockPromotion: Promotion = {
+  const  mockPromotion: Promotion = {
     id: '1',
     name: 'Réduction de lancement',
     type: 'percentage',
@@ -341,4 +341,10 @@ describe('ProductPromotionsTab', () => {
     expect(bodyText).toContain('Promotions configurées');
   });
 });
+
+
+
+
+
+
 

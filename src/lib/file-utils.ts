@@ -31,7 +31,7 @@ export function formatFileSize(
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes: FileSizeUnit[] = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const  sizes: FileSizeUnit[] = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   const value = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
@@ -56,7 +56,7 @@ export function parseFileSize(size: string): number {
   const value = parseFloat(match[1]);
   const unit = match[2].toUpperCase() as FileSizeUnit;
 
-  const multipliers: Record<FileSizeUnit, number> = {
+  const  multipliers: Record<FileSizeUnit, number> = {
     B: 1,
     KB: 1024,
     MB: 1024 * 1024,
@@ -145,8 +145,8 @@ export async function downloadFile(
   source: string | Blob,
   filename: string
 ): Promise<void> {
-  let url: string;
-  let shouldRevoke = false;
+  let  url: string;
+  let  shouldRevoke= false;
 
   if (typeof source === 'string') {
     url = source;
@@ -289,4 +289,10 @@ export function generateUniqueFileName(
 
   return `${prefixPart}${nameWithoutExt}-${timestamp}-${random}${extPart}`;
 }
+
+
+
+
+
+
 

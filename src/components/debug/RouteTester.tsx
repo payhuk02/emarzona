@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
  * Composant de test pour vérifier le routing SPA
  * Affiche des informations sur la route actuelle et permet de tester la navigation
  */
-export const RouteTester: React.FC = () => {
+export const RouteTester : React.FC = () => {
   const location = useLocation();
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isTesting, setIsTesting] = useState(false);
@@ -150,3 +150,10 @@ export const RouteTester: React.FC = () => {
     </div>
   );
 };
+
+
+
+
+
+
+

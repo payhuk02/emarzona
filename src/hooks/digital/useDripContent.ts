@@ -140,7 +140,7 @@ export const useCustomerDripReleases = (
         customerId = customer[0].id;
       }
 
-      let query = supabase
+      let  query= supabase
         .from('drip_content_releases')
         .select(`
           *,
@@ -472,4 +472,10 @@ export const useTrackDripContentAccess = () => {
     },
   });
 };
+
+
+
+
+
+
 

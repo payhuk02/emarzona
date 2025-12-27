@@ -129,3 +129,9 @@ export function InventoryTable({ items, onAdjust }: InventoryTableProps) {
   );
 }
 
+
+
+
+
+
+

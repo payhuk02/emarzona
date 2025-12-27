@@ -93,7 +93,7 @@ const AdminDisputes = () => {
       logger.info('Début de l\'export CSV de tous les litiges filtrés');
       
       // Récupérer TOUS les litiges avec les filtres appliqués (sans pagination)
-      let query = supabase
+      let  query= supabase
         .from("disputes")
         .select("*")
         .order(sortByColumn, { ascending: sortDir === 'asc' });
@@ -138,7 +138,7 @@ const AdminDisputes = () => {
         title: "Export réussi",
         description: `${allDisputes.length} litige(s) exporté(s) en CSV`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de l\'export CSV:', error);
       toast({
@@ -174,7 +174,7 @@ const AdminDisputes = () => {
     if (!selectedDispute) return;
     logger.info(`Action sur litige ${selectedDispute.id}: ${actionType}`);
 
-    let success = false;
+    let  success= false;
 
     if (actionType === "assign") {
       const { data: { user } } = await supabase.auth.getUser();
@@ -207,7 +207,7 @@ const AdminDisputes = () => {
 
   const getStatusBadge = (status: DisputeStatus) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const config: Record<DisputeStatus, { color: string; icon: IconComponent; label: string }> = {
+    const  config: Record<DisputeStatus, { color: string; icon: IconComponent; label: string }> = {
       open: { color: "bg-yellow-100 text-yellow-800 border-yellow-300", icon: AlertTriangle, label: "Ouvert" },
       investigating: { color: "bg-blue-100 text-blue-800 border-blue-300", icon: Clock, label: "En investigation" },
       waiting_customer: { color: "bg-orange-100 text-orange-800 border-orange-300", icon: Clock, label: "Attente client" },
@@ -228,7 +228,7 @@ const AdminDisputes = () => {
 
   const getInitiatorBadge = (type: InitiatorType) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const config: Record<InitiatorType, { color: string; icon: IconComponent; label: string }> = {
+    const  config: Record<InitiatorType, { color: string; icon: IconComponent; label: string }> = {
       customer: { color: "bg-blue-50 text-blue-700 border-blue-200", icon: User, label: "Client" },
       seller: { color: "bg-green-50 text-green-700 border-green-200", icon: Store, label: "Vendeur" },
       admin: { color: "bg-red-50 text-red-700 border-red-200", icon: Shield, label: "Admin" },
@@ -252,7 +252,7 @@ const AdminDisputes = () => {
 
   // Badge de priorité coloré
   const getPriorityBadge = (priority?: string) => {
-    const config: Record<string, { color: string; label: string; emoji: string }> = {
+    const  config: Record<string, { color: string; label: string; emoji: string }> = {
       urgent: { color: "bg-red-100 text-red-800 border-red-300", label: "Urgente", emoji: "🔴" },
       high: { color: "bg-orange-100 text-orange-800 border-orange-300", label: "Élevée", emoji: "🟠" },
       normal: { color: "bg-blue-100 text-blue-800 border-blue-300", label: "Normale", emoji: "🔵" },
@@ -1248,4 +1248,10 @@ ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
 };
 
 export default AdminDisputes;
+
+
+
+
+
+
 

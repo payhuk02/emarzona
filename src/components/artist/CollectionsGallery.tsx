@@ -47,7 +47,7 @@ export const CollectionsGallery = ({
 
   const displayCollections = limit ? collections.slice(0, limit) : collections;
 
-  const collectionTypeLabels: Record<string, string> = {
+  const  collectionTypeLabels: Record<string, string> = {
     thematic: 'Thématique',
     chronological: 'Chronologique',
     series: 'Série',
@@ -106,4 +106,10 @@ export const CollectionsGallery = ({
     </div>
   );
 };
+
+
+
+
+
+
 

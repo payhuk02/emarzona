@@ -179,3 +179,9 @@ const PaymentStats = ({ payments, filteredPayments, transactions }: PaymentStats
 };
 
 export default PaymentStats;
+
+
+
+
+
+

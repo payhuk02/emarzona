@@ -56,7 +56,7 @@ export async function calculateArtistShipping(
       throw new Error('Artwork not found');
     }
 
-    const config: ArtistShippingConfig = {
+    const  config: ArtistShippingConfig = {
       requires_shipping: artistProduct.requires_shipping ?? true,
       shipping_fragile: artistProduct.shipping_fragile ?? false,
       shipping_insurance_required: artistProduct.shipping_insurance_required ?? false,
@@ -121,7 +121,7 @@ function calculateBaseShipping(
   handlingTime: number
 ): number {
   // Logique simplifiée - à améliorer avec vraies données transporteurs
-  const baseRates: Record<string, number> = {
+  const  baseRates: Record<string, number> = {
     // Afrique de l'Ouest
     'SN': 15000, // Sénégal
     'CI': 15000, // Côte d'Ivoire
@@ -155,7 +155,7 @@ function calculateInsuranceCost(artworkValue: number, customAmount?: number): nu
  * Calcule le coût d'emballage spécialisé
  */
 function calculatePackagingCost(packagingType: string, artworkValue: number): number {
-  const packagingRates: Record<string, number> = {
+  const  packagingRates: Record<string, number> = {
     standard: 5000,
     art_specialized: 15000, // Emballage spécialisé pour art
     museum_grade: 30000, // Emballage musée (très sécurisé)
@@ -175,7 +175,7 @@ function calculatePackagingCost(packagingType: string, artworkValue: number): nu
  * Calcule le coût de manutention spéciale
  */
 function calculateSpecialHandlingCost(config: ArtistShippingConfig): number {
-  let cost = 0;
+  let  cost= 0;
 
   if (config.shipping_fragile) {
     cost += 5000; // Frais fragile
@@ -203,7 +203,7 @@ function getRecommendedCarriers(
   config: ArtistShippingConfig,
   destination: { country: string }
 ): string[] {
-  const carriers: string[] = [];
+  const  carriers: string[] = [];
 
   // Pour les œuvres fragiles ou de valeur, recommander des transporteurs spécialisés
   if (config.shipping_fragile || config.shipping_insurance_required) {
@@ -225,7 +225,7 @@ function getRecommendedCarriers(
  * Obtient le nombre de jours de livraison estimé
  */
 function getDeliveryDays(destination: { country: string }): number {
-  const deliveryDays: Record<string, number> = {
+  const  deliveryDays: Record<string, number> = {
     'SN': 2, // Sénégal (domestique)
     'CI': 3,
     'ML': 4,
@@ -246,7 +246,7 @@ export function validateArtistShippingConfig(config: Partial<ArtistShippingConfi
   valid: boolean;
   errors: string[];
 } {
-  const errors: string[] = [];
+  const  errors: string[] = [];
 
   if (config.requires_shipping === true) {
     if (config.shipping_insurance_required && !config.shipping_insurance_amount && !config.shipping_insurance_amount) {
@@ -263,4 +263,10 @@ export function validateArtistShippingConfig(config: Partial<ArtistShippingConfi
     errors,
   };
 }
+
+
+
+
+
+
 

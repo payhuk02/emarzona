@@ -74,7 +74,7 @@ const useProductRecommendations = (
           recommendationScore?: number;
         }
         // 1. Recommandations basées sur la catégorie
-        let categoryRecommendations: ProductWithStore[] = [];
+        let  categoryRecommendations: ProductWithStore[] = [];
         if (category) {
           const { data: categoryProducts } = await supabase
             .from('products')
@@ -98,7 +98,7 @@ const useProductRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let tagRecommendations: ProductWithStore[] = [];
+        let  tagRecommendations: ProductWithStore[] = [];
         if (tags && tags.length > 0) {
           // Rechercher produits avec tags similaires
           const { data: tagProducts } = await supabase
@@ -130,7 +130,7 @@ const useProductRecommendations = (
         }
 
         // 3. Recommandations basées sur les achats précédents (si utilisateur connecté)
-        let purchaseBasedRecommendations: ProductWithStore[] = [];
+        let  purchaseBasedRecommendations: ProductWithStore[] = [];
         if (user) {
           // Récupérer les produits achetés par l'utilisateur
           const { data: purchasedProducts } = await supabase
@@ -221,7 +221,7 @@ const useProductRecommendations = (
 
         // Trier par score de recommandation
         const scored = uniqueRecommendations.map((product) => {
-          let score = 0;
+          let  score= 0;
 
           // Score basé sur la catégorie
           if (category && product.category === category) score += 10;
@@ -243,7 +243,7 @@ const useProductRecommendations = (
         return scored
           .sort((a, b) => b.recommendationScore - a.recommendationScore)
           .slice(0, limit);
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching product recommendations', { error });
         return [];
@@ -423,7 +423,7 @@ export const BoughtTogetherRecommendations = ({
           .eq('is_active', true);
 
         return products || [];
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching bought together recommendations', { error });
         return [];
@@ -610,7 +610,7 @@ export const YouMightLikeRecommendations = ({
           .limit(limit);
 
         return popular || [];
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching you might like', { error });
         return [];
@@ -668,4 +668,10 @@ export const YouMightLikeRecommendations = ({
     </div>
   );
 };
+
+
+
+
+
+
 

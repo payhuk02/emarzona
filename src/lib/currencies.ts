@@ -6,7 +6,7 @@ export interface Currency {
   flag: string;
 }
 
-export const CURRENCIES: Currency[] = [
+export const CURRENCIES : Currency[] = [
   // Devises africaines
   { code: 'XOF', name: 'Franc CFA (BCEAO)', symbol: 'FCFA', locale: 'fr-BF', flag: '🇧🇫' },
   { code: 'XAF', name: 'Franc CFA (BEAC)', symbol: 'FCFA', locale: 'fr-CM', flag: '🇨🇲' },
@@ -59,3 +59,10 @@ export const getCurrencySymbol = (currencyCode: string): string => {
   const currency = getCurrencyByCode(currencyCode);
   return currency?.symbol || currencyCode;
 };
+
+
+
+
+
+
+

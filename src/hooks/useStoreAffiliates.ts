@@ -219,7 +219,7 @@ export const useStoreAffiliates = (
 
       if (!affiliatesData) return null;
 
-      const stats: StoreAffiliateStats = {
+      const  stats: StoreAffiliateStats = {
         total_affiliates: affiliatesData.length,
         active_affiliates: affiliatesData.filter((a) => a.status === 'active').length,
         pending_affiliates: affiliatesData.filter((a) => a.status === 'pending').length,
@@ -632,4 +632,10 @@ export const useStoreAffiliates = (
     rejectCommission,
   };
 };
+
+
+
+
+
+
 

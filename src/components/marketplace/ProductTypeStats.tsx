@@ -70,7 +70,7 @@ export function ProductTypeStats({ products, className }: ProductTypeStatsProps)
     });
 
     // Convertir en tableau avec labels et icônes
-    const typeConfig: Record<
+    const  typeConfig: Record<
       string,
       { label: string; icon: React.ComponentType<{ className?: string }>; color: string }
     > = {
@@ -101,7 +101,7 @@ export function ProductTypeStats({ products, className }: ProductTypeStatsProps)
       },
     };
 
-    const statsArray: TypeStats[] = [];
+    const  statsArray: TypeStats[] = [];
 
     typeStatsMap.forEach((data, type) => {
       const config = typeConfig[type] || {
@@ -246,3 +246,9 @@ export function ProductTypeStats({ products, className }: ProductTypeStatsProps)
     </div>
   );
 }
+
+
+
+
+
+

@@ -18,7 +18,7 @@ import { logger } from '@/lib/logger';
 const iconCache = new Map<string, ComponentType<Record<string, never>>>();
 
 // Mapping des noms d'icônes vers leurs imports
-const iconImports: Record<
+const  iconImports: Record<
   string,
   () => Promise<{ default: ComponentType<Record<string, never>> }>
 > = {
@@ -174,7 +174,7 @@ function _loadIcon(name: keyof typeof iconImports): ComponentType<Record<string,
 /**
  * Composant LazyIcon avec chargement dynamique
  */
-export const LazyIcon: React.FC<LazyIconProps> = ({
+export const LazyIcon : React.FC<LazyIconProps> = ({
   name,
   size = '1em',
   className,
@@ -231,3 +231,10 @@ export function usePreloadIcon(name: keyof typeof iconImports) {
     }
   }, [name]);
 }
+
+
+
+
+
+
+

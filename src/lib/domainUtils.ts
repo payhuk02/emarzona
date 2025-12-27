@@ -85,7 +85,7 @@ export const checkDNSPropagation = async (
   verificationToken: string
 ) => {
   const startTime = Date.now();
-  const errors: string[] = [];
+  const  errors: string[] = [];
   const details = {
     aRecord: false,
     wwwRecord: false,
@@ -195,4 +195,10 @@ export const formatPropagationTime = (milliseconds: number): string => {
   
   return `${seconds} seconde${seconds > 1 ? 's' : ''}`;
 };
+
+
+
+
+
+
 

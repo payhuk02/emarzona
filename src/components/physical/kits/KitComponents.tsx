@@ -126,7 +126,7 @@ export default function KitComponents() {
         });
       }
       handleCloseDialog();
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Une erreur est survenue',
@@ -151,7 +151,7 @@ export default function KitComponents() {
         title: '✅ Composant supprimé',
         description: 'Le composant a été supprimé',
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de supprimer le composant',
@@ -406,4 +406,10 @@ export default function KitComponents() {
     </div>
   );
 }
+
+
+
+
+
+
 

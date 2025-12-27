@@ -33,7 +33,7 @@ export const useEmailTemplates = (options?: {
   return useQuery({
     queryKey: ['email-templates', options?.category, options?.productType],
     queryFn: async (): Promise<EmailTemplate[]> => {
-      let query = supabase
+      let  query= supabase
         .from('email_templates')
         .select('*')
         .eq('is_active', true)
@@ -67,7 +67,7 @@ export const useEmailTemplate = (slug: string, productType?: ProductType) => {
   return useQuery({
     queryKey: ['email-template', slug, productType],
     queryFn: async (): Promise<EmailTemplate | null> => {
-      let query = supabase
+      let  query= supabase
         .from('email_templates')
         .select('*')
         .eq('slug', slug)
@@ -326,7 +326,7 @@ export const useEmailAnalytics = (options?: {
   return useQuery({
     queryKey: ['email-analytics', options],
     queryFn: async () => {
-      let query = supabase
+      let  query= supabase
         .from('email_logs')
         .select('*');
 
@@ -400,4 +400,10 @@ export const useEmailAnalytics = (options?: {
     staleTime: 1000 * 60 * 5,
   });
 };
+
+
+
+
+
+
 

@@ -97,9 +97,9 @@ export class ScheduledNotificationService {
     sent: number;
     failed: number;
   }> {
-    let processed = 0;
-    let sent = 0;
-    let failed = 0;
+    let  processed= 0;
+    let  sent= 0;
+    let  failed= 0;
 
     try {
       // Récupérer les notifications à envoyer
@@ -186,7 +186,7 @@ export class ScheduledNotificationService {
     }
   ): Promise<ScheduledNotification[]> {
     try {
-      let query = supabase
+      let  query= supabase
         .from('scheduled_notifications')
         .select('*')
         .eq('user_id', userId)
@@ -228,3 +228,9 @@ export class ScheduledNotificationService {
 
 // Instance singleton
 export const scheduledNotificationService = new ScheduledNotificationService();
+
+
+
+
+
+

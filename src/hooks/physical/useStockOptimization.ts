@@ -194,8 +194,8 @@ export function useStockOptimization(
       const recommendedReorderQuantity = calculateOptimalReorderQuantity(annualDemand);
       
       // Déterminer l'action recommandée
-      let recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
-      let actionPriority: 'high' | 'medium' | 'low' = 'low';
+      let  recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
+      let  actionPriority: 'high' | 'medium' | 'low' = 'low';
       
       if (stockStatus === 'critical') {
         recommendedAction = 'urgent_reorder';
@@ -261,7 +261,7 @@ export function useStoreStockOptimization(storeId: string) {
       
       if (productsError) throw productsError;
       
-      const optimizations: StockOptimization[] = [];
+      const  optimizations: StockOptimization[] = [];
       
       // Calculer l'optimisation pour chaque produit
       const calculateOptimization = async (productId: string, variantId?: string): Promise<StockOptimization | null> => {
@@ -308,8 +308,8 @@ export function useStoreStockOptimization(storeId: string) {
         const recommendedReorderQuantity = calculateOptimalReorderQuantity(annualDemand);
         
         // Déterminer l'action recommandée
-        let recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
-        let actionPriority: 'high' | 'medium' | 'low' = 'low';
+        let  recommendedAction: 'increase' | 'decrease' | 'maintain' | 'urgent_reorder' = 'maintain';
+        let  actionPriority: 'high' | 'medium' | 'low' = 'low';
         
         if (stockStatus === 'critical') {
           recommendedAction = 'urgent_reorder';
@@ -449,4 +449,10 @@ export function useApplyStockOptimization() {
     },
   });
 }
+
+
+
+
+
+
 

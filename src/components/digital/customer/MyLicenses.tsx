@@ -629,6 +629,11 @@ function LicenseDetailsDialog({
 // Fonction pour gérer le transfert de licence
 function handleTransferLicense(license: CustomerLicense) {
   // TODO: Implémenter le transfert de licence
-  console.log('Transfer license', license);
 }
+
+
+
+
+
+
 

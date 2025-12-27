@@ -144,10 +144,10 @@ export function maskPhone(phone: string | null | undefined, countryCode: string 
 export function formatPhone(phone: string | null | undefined, format: string = 'XX XX XX XX XX'): string {
   if (!phone) return '';
   const digits = phone.replace(/\D/g, '');
-  let formatted = format;
-  let digitIndex = 0;
+  let  formatted= format;
+  let  digitIndex= 0;
 
-  for (let i = 0; i < formatted.length && digitIndex < digits.length; i++) {
+  for (let  i= 0; i < formatted.length && digitIndex < digits.length; i++) {
     if (formatted[i] === 'X') {
       formatted = formatted.substring(0, i) + digits[digitIndex] + formatted.substring(i + 1);
       digitIndex++;
@@ -196,8 +196,8 @@ export function charCount(str: string | null | undefined, includeSpaces: boolean
  */
 export function simpleHash(str: string | null | undefined): string {
   if (!str) return '';
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
+  let  hash= 0;
+  for (let  i= 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
@@ -249,7 +249,7 @@ export function stripHtml(html: string | null | undefined): string {
  */
 export function escapeHtml(str: string | null | undefined): string {
   if (!str) return '';
-  const map: Record<string, string> = {
+  const  map: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
@@ -264,7 +264,7 @@ export function escapeHtml(str: string | null | undefined): string {
  */
 export function unescapeHtml(str: string | null | undefined): string {
   if (!str) return '';
-  const map: Record<string, string> = {
+  const  map: Record<string, string> = {
     '&amp;': '&',
     '&lt;': '<',
     '&gt;': '>',
@@ -273,4 +273,10 @@ export function unescapeHtml(str: string | null | undefined): string {
   };
   return str.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, (m) => map[m]);
 }
+
+
+
+
+
+
 

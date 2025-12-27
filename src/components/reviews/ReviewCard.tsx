@@ -26,7 +26,7 @@ interface ReviewCardProps {
   currentUserVote?: { is_helpful: boolean } | null;
 }
 
-const ReviewCardComponent: React.FC<ReviewCardProps> = ({
+const  ReviewCardComponent: React.FC<ReviewCardProps> = ({
   review,
   onVote,
   onReply,
@@ -164,4 +164,10 @@ export const ReviewCard = React.memo(ReviewCardComponent, (prevProps, nextProps)
 });
 
 ReviewCard.displayName = 'ReviewCard';
+
+
+
+
+
+
 

@@ -95,7 +95,7 @@ export const ServiceCalendarEnhanced = ({
     queryFn: async () => {
       if (!serviceProduct?.id) return [];
 
-      const events: CalendarEvent[] = [];
+      const  events: CalendarEvent[] = [];
 
       // Get availability slots
       const { data: slots } = await supabase
@@ -127,7 +127,7 @@ export const ServiceCalendarEnhanced = ({
       // Create events for available slots
       slots.forEach((slot) => {
         // For each day of the week that matches this slot
-        for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        for (let  dayOffset= 0; dayOffset < 7; dayOffset++) {
           const slotDate = new Date(monthStart);
           slotDate.setDate(monthStart.getDate() + dayOffset);
 
@@ -145,7 +145,7 @@ export const ServiceCalendarEnhanced = ({
             const availableSpots = (serviceProduct?.max_participants || 1) - bookingsAtThisTime.length;
             const totalSlots = serviceProduct?.max_participants || 1;
 
-            let status: 'available' | 'limited' | 'full' | 'unavailable' = 'unavailable';
+            let  status: 'available' | 'limited' | 'full' | 'unavailable' = 'unavailable';
             if (availableSpots > 0) {
               if (availableSpots <= totalSlots * 0.3) {
                 status = 'limited';
@@ -192,7 +192,7 @@ export const ServiceCalendarEnhanced = ({
   const eventStyleGetter = useCallback((event: CalendarEvent) => {
     const status = event.resource?.status || 'unavailable';
     
-    const statusColors: Record<string, { bg: string; text: string; border: string }> = {
+    const  statusColors: Record<string, { bg: string; text: string; border: string }> = {
       available: { bg: '#10b981', text: '#ffffff', border: '#059669' },
       limited: { bg: '#f59e0b', text: '#ffffff', border: '#d97706' },
       full: { bg: '#ef4444', text: '#ffffff', border: '#dc2626' },
@@ -342,4 +342,10 @@ export const ServiceCalendarEnhanced = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

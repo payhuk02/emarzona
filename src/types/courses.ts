@@ -530,3 +530,9 @@ export interface CertificateGenerationResponse {
   error?: string;
 }
 
+
+
+
+
+
+

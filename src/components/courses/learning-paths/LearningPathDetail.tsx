@@ -212,3 +212,9 @@ export const LearningPathDetail = ({ pathId }: LearningPathDetailProps) => {
   );
 };
 
+
+
+
+
+
+

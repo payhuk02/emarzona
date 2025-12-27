@@ -44,7 +44,6 @@ export const usePageCustomization = (pageId: string) => {
     return localCustomization && Object.keys(localCustomization).length > 0
       ? localCustomization
       : customizationData?.pages?.[pageId] || {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localCustomization, customizationData, pageId, updateTrigger]);
 
   /**
@@ -137,4 +136,10 @@ export const usePageCustomization = (pageId: string) => {
     getImage,
   };
 };
+
+
+
+
+
+
 

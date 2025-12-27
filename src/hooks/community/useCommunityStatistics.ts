@@ -162,7 +162,7 @@ export function useCommunityStatistics() {
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 10);
 
-      const statistics: CommunityStatistics = {
+      const  statistics: CommunityStatistics = {
         total_members: membersResult.count || 0,
         active_members: activeMembersResult.count || 0,
         pending_members: pendingMembersResult.count || 0,
@@ -180,4 +180,10 @@ export function useCommunityStatistics() {
     },
   });
 }
+
+
+
+
+
+
 

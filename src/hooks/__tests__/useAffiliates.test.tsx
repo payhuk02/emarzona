@@ -37,8 +37,8 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 describe('useAffiliates', () => {
-  let queryClient: QueryClient;
-  let wrapper: React.FC<{ children: React.ReactNode }>;
+  let  queryClient: QueryClient;
+  let  wrapper: React.FC<{ children: React.ReactNode }>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -174,4 +174,10 @@ describe('useAffiliates', () => {
     expect(registered?.affiliate_code).toBe('NEW001');
   });
 });
+
+
+
+
+
+
 

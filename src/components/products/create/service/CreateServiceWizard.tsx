@@ -124,7 +124,7 @@ export const CreateServiceWizard = () => {
    * Validate current step
    */
   const validateStep = (step: number): boolean => {
-    const errors: string[] = [];
+    const  errors: string[] = [];
 
     switch (step) {
       case 1:
@@ -353,8 +353,8 @@ export const CreateServiceWizard = () => {
    */
   const handlePublish = async () => {
     // Validate all steps
-    let allValid = true;
-    for (let step = 1; step <= 4; step++) {
+    let  allValid= true;
+    for (let  step= 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -532,3 +532,9 @@ export const CreateServiceWizard = () => {
     </div>
   );
 };
+
+
+
+
+
+

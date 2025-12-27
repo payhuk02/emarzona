@@ -150,10 +150,10 @@ export async function uploadMultipleFilesWithProgress(
   options: UploadProgressOptions,
   onFileProgress?: (fileIndex: number, progress: number) => void
 ): Promise<UploadProgressResult[]> {
-  const results: UploadProgressResult[] = [];
+  const  results: UploadProgressResult[] = [];
   const totalFiles = files.length;
 
-  for (let i = 0; i < files.length; i++) {
+  for (let  i= 0; i < files.length; i++) {
     const file = files[i];
     
     try {
@@ -182,4 +182,10 @@ export async function uploadMultipleFilesWithProgress(
 
   return results;
 }
+
+
+
+
+
+
 

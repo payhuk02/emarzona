@@ -42,7 +42,7 @@ export const MobileResponsiveTest = () => {
       case 'mobile':
         return <Smartphone className="h-5 w-5" />;
       case 'tablet':
-        return <Tablet className="h-5 w-5" />;
+        return <Tablet  className ="h-5 w-5" />;
       default:
         return <Monitor className="h-5 w-5" />;
     }
@@ -291,3 +291,9 @@ export const MobileResponsiveTest = () => {
     </div>
   );
 };
+
+
+
+
+
+

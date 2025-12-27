@@ -153,7 +153,7 @@ export const WithdrawalRequestDialog = ({
       return;
     }
 
-    let paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
+    let  paymentDetails: MobileMoneyDetails | BankCardDetails | BankTransferDetails;
 
     if (paymentMethod === 'mobile_money') {
       if (!mobilePhone || !mobileOperator || !mobileCountry) return;
@@ -561,4 +561,10 @@ export const WithdrawalRequestDialog = ({
     </>
   );
 };
+
+
+
+
+
+
 

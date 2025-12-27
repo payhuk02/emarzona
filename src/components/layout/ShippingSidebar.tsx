@@ -50,7 +50,7 @@ export const ShippingSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const breadcrumbItems: BreadcrumbItem[] = [
+  const  breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Expéditions', path: '/dashboard/shipping' },
     { label: activeSection },
   ];
@@ -84,4 +84,10 @@ export const ShippingSidebar = () => {
     </BaseContextSidebar>
   );
 };
+
+
+
+
+
+
 

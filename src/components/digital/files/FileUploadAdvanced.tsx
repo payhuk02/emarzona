@@ -227,7 +227,7 @@ export const FileUploadAdvanced = ({
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error uploading file', { error });
       toast({
         title: 'Erreur d\'upload',
@@ -432,4 +432,10 @@ export const FileUploadAdvanced = ({
     </Card>
   );
 };
+
+
+
+
+
+
 

@@ -56,7 +56,7 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       logger.log('Fetching users with options:', { page, pageSize, sortBy, sortDirection, filters });
 
       // Construire la requête de base
-      let query = supabase
+      let  query= supabase
         .from('profiles')
         .select('*', { count: 'exact' });
 
@@ -144,7 +144,7 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       );
 
       // Appliquer filtre par rôle (côté client car user_roles est une table séparée)
-      let filteredUsers = usersWithDetails;
+      let  filteredUsers= usersWithDetails;
       if (filters.role && filters.role !== 'all') {
         filteredUsers = usersWithDetails.filter(user => user.role === filters.role);
       }
@@ -152,7 +152,7 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       setUsers(filteredUsers);
       logger.log('Users loaded:', filteredUsers.length);
 
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Failed to fetch users:', error);
       toast({
         title: "Erreur",
@@ -168,7 +168,6 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, sortBy, sortDirection, filters.role, filters.status, filters.searchTerm]);
 
   return {
@@ -178,3 +177,9 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
     refetch: fetchUsers,
   };
 };
+
+
+
+
+
+

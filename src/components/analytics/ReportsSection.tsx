@@ -28,7 +28,7 @@ interface ReportsSectionProps {
   productId: string;
 }
 
-export const ReportsSection: React.FC<ReportsSectionProps> = ({ productId }) => {
+export const ReportsSection : React.FC<ReportsSectionProps> = ({ productId }) => {
   const { toast } = useToast();
   const { reports, loading, generateReport } = useAnalyticsReports(productId);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -423,3 +423,10 @@ export const ReportsSection: React.FC<ReportsSectionProps> = ({ productId }) => 
     </div>
   );
 };
+
+
+
+
+
+
+

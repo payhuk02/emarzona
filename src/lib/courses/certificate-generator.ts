@@ -206,7 +206,7 @@ export async function generateCertificatePDF(
     .replace('{course_name}', data.course_name);
 
   const splitBody = doc.splitTextToSize(bodyText, contentWidth - 40);
-  let yPos = margin + 100;
+  let  yPos= margin + 100;
 
   splitBody.forEach((line: string) => {
     doc.text(line, pageWidth / 2, yPos, { align: 'center' });
@@ -377,4 +377,10 @@ export async function generateAndUploadCertificate(
 
   return { pdfUrl };
 }
+
+
+
+
+
+
 

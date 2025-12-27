@@ -52,21 +52,21 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
       return;
     }
 
-    const variantA: ABTestVariant = {
+    const  variantA: ABTestVariant = {
       name: variantAName,
       subject: variantASubject,
       template_id: variantATemplateId || undefined,
       send_percentage: variantAPercentage,
     };
 
-    const variantB: ABTestVariant = {
+    const  variantB: ABTestVariant = {
       name: variantBName,
       subject: variantBSubject,
       template_id: variantBTemplateId || undefined,
       send_percentage: variantBPercentage,
     };
 
-    const payload: CreateABTestPayload = {
+    const  payload: CreateABTestPayload = {
       campaign_id: campaignId,
       variant_a: variantA,
       variant_b: variantB,
@@ -256,4 +256,10 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
     </Card>
   );
 };
+
+
+
+
+
+
 

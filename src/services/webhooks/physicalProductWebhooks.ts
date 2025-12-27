@@ -89,16 +89,16 @@ export async function sendWebhook(
   attempt: number = 1
 ): Promise<SendWebhookResult> {
   const startTime = Date.now();
-  let success = false;
-  let statusCode: number | undefined;
-  let responseBody: string | undefined;
-  let error: string | undefined;
+  let  success= false;
+  let  statusCode: number | undefined;
+  let  responseBody: string | undefined;
+  let  error: string | undefined;
 
   try {
     const payloadString = JSON.stringify(payload);
     const signature = await generateHMACSignature(payloadString, webhook.secret_key);
 
-    const headers: Record<string, string> = {
+    const  headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-Webhook-Signature': signature,
       'User-Agent': 'Emarzona-Webhook-Client',
@@ -120,7 +120,7 @@ export async function sendWebhook(
       throw new Error(`HTTP error! status: ${statusCode}, body: ${responseBody}`);
     }
     success = true;
-  } catch (e: unknown) {
+  } catch ( _e: unknown) {
     error = e instanceof Error ? e.message : String(e);
     logger.error(`Webhook send failed for ${webhook.id} (attempt ${attempt}): ${error}`, {
       webhookId: webhook.id,
@@ -199,7 +199,7 @@ export async function triggerWebhooks(
 
   const results = await Promise.all(
     webhooks.map(async (webhook) => {
-      const payload: WebhookPayload = {
+      const  payload: WebhookPayload = {
         event: eventType,
         event_id: eventId,
         timestamp: new Date().toISOString(),
@@ -232,4 +232,10 @@ export async function triggerWebhooks(
 
   return { success: results.every(r => r.success), results };
 }
+
+
+
+
+
+
 

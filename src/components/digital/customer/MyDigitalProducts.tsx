@@ -65,7 +65,7 @@ export const MyDigitalProducts = () => {
           description: 'Le téléchargement a été lancé dans un nouvel onglet',
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur',
         description: error.message || 'Impossible de générer le lien de téléchargement',
@@ -352,4 +352,10 @@ export const MyDigitalProducts = () => {
     </div>
   );
 };
+
+
+
+
+
+
 

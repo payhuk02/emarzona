@@ -57,7 +57,7 @@ export const usePortfolioComments = (
       const { data: { user } } = await supabase.auth.getUser();
 
       // Récupérer les commentaires principaux (sans parent)
-      let query = supabase
+      let  query= supabase
         .from('portfolio_comments')
         .select(`
           *,
@@ -398,4 +398,10 @@ export const useDeleteComment = () => {
     },
   });
 };
+
+
+
+
+
+
 

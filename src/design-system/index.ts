@@ -183,8 +183,7 @@ export const spacing = {
 
 export const breakpoints = {
   sm: '640px',   // Mobile landscape
-  md: '768px',   // Tablet
-  lg: '1024px',  // Desktop
+  md: '768px',   // Tablet _lg: '1024px',  // Desktop
   xl: '1280px',  // Large desktop
   '2xl': '1536px', // Extra large
 } as const;
@@ -254,6 +253,12 @@ export const designSystem = {
 } as const;
 
 export default designSystem;
+
+
+
+
+
+
 
 
 

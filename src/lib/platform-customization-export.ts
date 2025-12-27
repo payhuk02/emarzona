@@ -33,7 +33,7 @@ export function exportCustomization(
     URL.revokeObjectURL(url);
 
     logger.debug('Personnalisations exportées', { filename, level: 'section' });
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Erreur lors de l\'export', {
       error: error.message || String(error),
       level: 'section',
@@ -79,7 +79,7 @@ export async function importCustomization(
       valid: true,
       data: validation.data || parsed.data,
     };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Erreur lors de l\'import', {
       error: error.message || String(error),
       level: 'section',
@@ -124,7 +124,7 @@ export function importCustomizationFromString(
       valid: true,
       data: validation.data || data,
     };
-  } catch (error: any) {
+  } catch ( _error: any) {
     if (error instanceof SyntaxError) {
       return {
         valid: false,
@@ -138,4 +138,10 @@ export function importCustomizationFromString(
     };
   }
 }
+
+
+
+
+
+
 

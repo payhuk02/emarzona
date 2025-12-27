@@ -85,8 +85,8 @@ export function createDebouncedQuery<T>(
   queryFn: () => Promise<T>,
   delay: number = 300
 ): () => Promise<T> {
-  let timeoutId: NodeJS.Timeout | null = null;
-  let cachedPromise: Promise<T> | null = null;
+  let  timeoutId: NodeJS.Timeout | null = null;
+  let  cachedPromise: Promise<T> | null = null;
 
   return () => {
     return new Promise((resolve, reject) => {
@@ -118,9 +118,9 @@ export async function batchQueries<T>(
   queries: Array<() => Promise<T>>,
   batchSize: number = 5
 ): Promise<T[]> {
-  const results: T[] = [];
+  const  results: T[] = [];
   
-  for (let i = 0; i < queries.length; i += batchSize) {
+  for (let  i= 0; i < queries.length; i += batchSize) {
     const batch = queries.slice(i, i + batchSize);
     const batchResults = await Promise.all(batch.map(query => query()));
     results.push(...batchResults);
@@ -181,7 +181,7 @@ export function cleanupStaleCache(queryClient: QueryClient) {
   if (!cache) return;
   
   const queries = cache.getAll();
-  let cleaned = 0;
+  let  cleaned= 0;
   
   queries.forEach((query: any) => {
     const cacheTime = query.meta?.cacheTime || 0;
@@ -229,7 +229,7 @@ export async function prefetchRouteData(
   route: string,
   params?: Record<string, string>
 ) {
-  const prefetchMap: Record<string, () => Promise<any>> = {
+  const  prefetchMap: Record<string, () => Promise<any>> = {
     '/dashboard/products': async () => {
       // Précharger la liste des produits
       // Implémentation spécifique selon vos hooks
@@ -255,4 +255,10 @@ export async function prefetchRouteData(
     }
   }
 }
+
+
+
+
+
+
 

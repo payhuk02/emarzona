@@ -16,7 +16,7 @@ export const useMoneroo = () => {
         description: "Le paiement a été initialisé avec succès",
       });
       return result;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de créer le paiement",
@@ -45,7 +45,7 @@ export const useMoneroo = () => {
       }
       
       return result;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de créer la session de paiement",
@@ -62,7 +62,7 @@ export const useMoneroo = () => {
     try {
       const result = await monerooClient.verifyPayment(paymentId);
       return result;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de vérifier le paiement",
@@ -79,7 +79,7 @@ export const useMoneroo = () => {
     try {
       const result = await monerooClient.getPayment(paymentId);
       return result;
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message || "Impossible de récupérer le paiement",
@@ -99,3 +99,9 @@ export const useMoneroo = () => {
     getPayment,
   };
 };
+
+
+
+
+
+

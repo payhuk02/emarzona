@@ -46,7 +46,7 @@ async function fetchMarketplaceProducts({
   if (shouldUseRPCFiltering && filters.productType !== 'all') {
     try {
       const rpcFunctionName = `filter_${filters.productType}_products`;
-      const rpcParams: Record<string, unknown> = {
+      const  rpcParams: Record<string, unknown> = {
         p_limit: pagination.itemsPerPage,
         p_offset: startIndex,
         p_category: filters.category !== 'all' && filters.category !== 'featured' ? filters.category : null,
@@ -145,7 +145,7 @@ async function fetchMarketplaceProducts({
   ].join(',');
 
   // Construire la requête avec les jointures nécessaires selon le type
-  let selectQuery = `${baseColumns},stores!inner(id,name,slug,logo_url,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
+  let  selectQuery= `${baseColumns},stores!inner(id,name,slug,logo_url,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
 
   // Ajouter les jointures selon le type de produit et les filtres
   if (filters.productType === 'digital' && filters.digitalSubType) {
@@ -167,7 +167,7 @@ async function fetchMarketplaceProducts({
     selectQuery += `,artist_products!left(artist_type,artwork_edition_type,certificate_of_authenticity)`;
   }
 
-  let query = supabase
+  let  query= supabase
     .from('products')
     .select(selectQuery, { count: 'exact' }) // Obtenir le count total
     .eq('is_active', true)
@@ -271,7 +271,7 @@ async function fetchMarketplaceProducts({
   }
 
   // Appliquer les filtres côté client pour les relations
-  let filteredData = (data || []) as unknown as Product[];
+  let  filteredData= (data || []) as unknown as Product[];
 
   if (filters.productType === 'digital' && filters.digitalSubType) {
     filteredData = filteredData.filter(
@@ -556,4 +556,10 @@ export function useMarketplaceProducts({
     prefetchPreviousPage,
   };
 }
+
+
+
+
+
+
 

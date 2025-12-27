@@ -138,8 +138,8 @@ export default function PhysicalProductDetail() {
       const physicalId = physicalData?.id;
 
       // If variants/inventory need physical_product_id, refetch with correct ID
-      let variants = variantsResult.data || [];
-      let inventory = inventoryResult.data || [];
+      let  variants= variantsResult.data || [];
+      let  inventory= inventoryResult.data || [];
 
       if (physicalId && (!variants.length || !inventory.length)) {
         // Refetch with physical_product_id if initial query didn't work
@@ -320,7 +320,7 @@ export default function PhysicalProductDetail() {
 
       // Optionnel : Rediriger vers le panier ou réinitialiser la quantité
       setQuantity(1);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Erreur lors de l'ajout au panier", error);
       toast({
@@ -738,3 +738,9 @@ export default function PhysicalProductDetail() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

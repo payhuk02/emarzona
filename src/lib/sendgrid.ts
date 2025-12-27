@@ -55,7 +55,7 @@ const sendEmailInternal = async (payload: SendEmailPayload): Promise<{
   const htmlContent = replaceVariables(template.html_content[language] || template.html_content['fr'], payload.variables);
 
   // 4. Préparer la requête SendGrid
-  const sendGridRequest: SendGridEmailRequest = {
+  const  sendGridRequest: SendGridEmailRequest = {
     personalizations: [
       {
         to: [{ email: payload.to, name: payload.toName }],
@@ -170,7 +170,7 @@ export const sendEmail = async (payload: SendEmailPayload): Promise<{
     );
 
     return result;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors de l\'envoi de l\'email';
     logger.error('Error sending email', {
       error: errorMessage,
@@ -299,7 +299,7 @@ const logEmail = async (logData: EmailLogData) => {
  * Remplacer les variables dans le contenu
  */
 const replaceVariables = (content: string, variables: Record<string, string | number | boolean | null | undefined>): string => {
-  let result = content;
+  let  result= content;
 
   Object.entries(variables).forEach(([key, value]) => {
     const placeholder = `{{${key}}}`;
@@ -568,7 +568,7 @@ export const sendTrackingUpdateEmail = async (params: {
   };
 }) => {
   // Déterminer le template selon le statut
-  let templateSlug = 'shipment-tracking-update';
+  let  templateSlug= 'shipment-tracking-update';
   
   if (params.status === 'delivered') {
     templateSlug = 'shipment-delivered';
@@ -599,4 +599,10 @@ export const sendTrackingUpdateEmail = async (params: {
     },
   });
 };
+
+
+
+
+
+
 

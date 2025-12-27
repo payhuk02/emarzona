@@ -68,7 +68,7 @@ export const useUnreadCounts = (orderIds: string[]) => {
       if (convError || !conversations) return {};
 
       // Compter les messages non lus pour chaque conversation
-      const counts: Record<string, number> = {};
+      const  counts: Record<string, number> = {};
 
       for (const conv of conversations) {
         const { data } = await supabase
@@ -87,4 +87,10 @@ export const useUnreadCounts = (orderIds: string[]) => {
     staleTime: 5000,
   });
 };
+
+
+
+
+
+
 

@@ -127,7 +127,7 @@ export function InventoryCSVManager() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: 'Erreur import',
         description: error.message || 'Impossible d\'importer le fichier',
@@ -360,4 +360,10 @@ export function InventoryCSVManager() {
     </Card>
   );
 }
+
+
+
+
+
+
 

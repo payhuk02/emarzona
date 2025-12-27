@@ -90,10 +90,9 @@ export function usePrefersHighContrast(): boolean {
  * Hook pour obtenir plusieurs media queries à la fois
  */
 export function useMediaQueries(queries: Record<string, string>): Record<string, boolean> {
-  const results: Record<string, boolean> = {};
+  const  results: Record<string, boolean> = {};
 
   for (const [key, query] of Object.entries(queries)) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     results[key] = useMediaQuery(query);
   }
 
@@ -138,4 +137,10 @@ export function useBreakpoint(breakpoints: Record<string, number> = {
 
   return breakpoint;
 }
+
+
+
+
+
+
 

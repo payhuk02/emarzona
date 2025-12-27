@@ -65,7 +65,7 @@ export const useAffiliateLinks = (
       setLoading(true);
 
       // Compter le total
-      let countQuery = supabase
+      let  countQuery= supabase
         .from('affiliate_links')
         .select('*', { count: 'exact', head: true });
 
@@ -97,7 +97,7 @@ export const useAffiliateLinks = (
       const from = (currentPage - 1) * pageSize;
       const to = from + pageSize - 1;
 
-      let query = supabase
+      let  query= supabase
         .from('affiliate_links')
         .select(`
           *,
@@ -143,7 +143,7 @@ export const useAffiliateLinks = (
 
       setLinks(data || []);
       setPage(currentPage);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching affiliate links:', affiliateError);
       toast({
@@ -216,7 +216,7 @@ export const useAffiliateLinks = (
 
       // Générer le code du lien
       // Solution temporaire : génération côté client si la fonction RPC échoue
-      let linkCode: string;
+      let  linkCode: string;
       
       try {
         const { data: codeData, error: codeError } = await supabase.rpc('generate_affiliate_link_code', {
@@ -228,7 +228,7 @@ export const useAffiliateLinks = (
           // Si l'erreur est liée à la fonction manquante (404) ou à pgcrypto (42883),
           // utiliser la génération côté client comme fallback
           if (codeError.code === '42883' || codeError.code === 'PGRST301' || codeError.message?.includes('digest')) {
-            logger.warn('RPC function unavailable, using client-side code generation as fallback:', codeError);
+            logger.warn('RPC function  _unavailable, using client-side code generation as fallback:', codeError);
             linkCode = await generateLinkCodeClientSide(affiliateData.affiliate_code, settingsData.product.slug);
           } else {
             logger.error('Error generating affiliate link code:', codeError);
@@ -251,7 +251,7 @@ export const useAffiliateLinks = (
             throw AffiliateErrors.databaseError(new Error('Le code du lien généré est vide'));
           }
         }
-      } catch (error: unknown) {
+      } catch ( _error: unknown) {
         // Fallback vers génération côté client en cas d'erreur réseau ou autre
         if (error instanceof Error && (error.message.includes('404') || error.message.includes('digest'))) {
           logger.warn('Using client-side code generation as fallback due to error:', error);
@@ -298,7 +298,7 @@ export const useAffiliateLinks = (
 
       await fetchLinks(page);
       return data;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error creating affiliate link:', affiliateError);
       toast({
@@ -328,7 +328,7 @@ export const useAffiliateLinks = (
       
       await fetchLinks(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error pausing link:', affiliateError);
       toast({
@@ -358,7 +358,7 @@ export const useAffiliateLinks = (
       
       await fetchLinks(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error activating link:', affiliateError);
       toast({
@@ -388,7 +388,7 @@ export const useAffiliateLinks = (
       
       await fetchLinks(page);
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error deleting link:', affiliateError);
       toast({
@@ -525,4 +525,10 @@ export const useLinkStats = (linkId?: string) => {
 
   return { stats, loading };
 };
+
+
+
+
+
+
 

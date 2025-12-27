@@ -137,7 +137,7 @@ export default function ReviewsManagement() {
     queryFn: async () => {
       if (!store?.id) return [];
 
-      let query = supabase
+      let  query= supabase
         .from('reviews')
         .select(
           `
@@ -301,7 +301,7 @@ export default function ReviewsManagement() {
   const handleDeleteReview = async (reviewId: string) => {
     try {
       await deleteReview.mutateAsync(reviewId);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -741,3 +741,9 @@ export default function ReviewsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

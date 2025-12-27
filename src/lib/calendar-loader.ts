@@ -3,7 +3,7 @@
  * Charge react-big-calendar de manière asynchrone pour réduire le bundle initial
  */
 
-let calendarModule: typeof import('react-big-calendar') | null = null;
+let  calendarModule: typeof import('react-big-calendar') | null = null;
 
 /**
  * Charge react-big-calendar de manière asynchrone
@@ -24,4 +24,10 @@ export const loadDateFnsLocalizer = async () => {
   const calendar = await loadCalendar();
   return calendar.dateFnsLocalizer;
 };
+
+
+
+
+
+
 

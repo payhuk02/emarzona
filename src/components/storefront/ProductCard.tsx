@@ -131,8 +131,8 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   }, []);
 
   // Générer une description courte - mémorisé
-  const _shortDescription = useMemo((): string | undefined => {
-    let rawText = '';
+  const shortDescription= useMemo((): string | undefined => {
+    let  rawText= '';
 
     const extendedProduct = product as Product & Partial<UnifiedProduct>;
     if (extendedProduct.short_description && extendedProduct.short_description.trim()) {
@@ -225,7 +225,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       } else {
         throw new Error("Échec de l'initialisation du paiement");
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
@@ -491,7 +491,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             {/* Badge taux d'affiliation */}
             {(() => {
               // Gérer le cas où Supabase retourne un objet, un tableau, ou null
-              let affiliateSettings = null;
+              let  affiliateSettings= null;
 
               if (product.product_affiliate_settings) {
                 if (Array.isArray(product.product_affiliate_settings)) {
@@ -740,3 +740,9 @@ const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
 ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
+
+
+
+
+
+

@@ -257,12 +257,12 @@ export const useGenerateDownloadLink = () => {
     maxRetries: number = 3,
     baseDelay: number = 1000
   ): Promise<T> => {
-    let lastError: Error | null = null;
+    let  lastError: Error | null = null;
     
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
+    for (let  attempt= 0; attempt < maxRetries; attempt++) {
       try {
         return await fn();
-      } catch (error: any) {
+      } catch ( _error: any) {
         lastError = error;
         
         // Ne pas réessayer pour les erreurs d'authentification ou d'autorisation
@@ -334,7 +334,7 @@ export const useGenerateDownloadLink = () => {
         .limit(1);
 
       // Vérification alternative par customer_id pour plus de sécurité
-      let hasAccessByCustomer = null;
+      let  hasAccessByCustomer= null;
       const { data: customer } = await supabase
         .from('customers')
         .select('id')
@@ -400,9 +400,9 @@ export const useGenerateDownloadLink = () => {
       }
 
       // Generate signed URL with retry
-      let signedUrl = null;
-      let signError = null;
-      let attempts = 0;
+      let  signedUrl= null;
+      let  signError= null;
+      let  attempts= 0;
       const maxSignRetries = 3;
 
       while (attempts < maxSignRetries && !signedUrl) {
@@ -465,7 +465,7 @@ export const useGenerateDownloadLink = () => {
       });
       
       // Message d'erreur plus spécifique selon le type d'erreur
-      let errorMessage = error.message;
+      let  errorMessage= error.message;
       if (error.message.includes('non autorisé') || error.message.includes('Accès non autorisé')) {
         errorMessage = 'Vous n\'avez pas accès à ce fichier. Veuillez d\'abord acheter ce produit.';
       } else if (error.message.includes('network') || error.message.includes('fetch')) {
@@ -511,4 +511,10 @@ export const useUpdateDownloadStatus = () => {
     },
   });
 };
+
+
+
+
+
+
 

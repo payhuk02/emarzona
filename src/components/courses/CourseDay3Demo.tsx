@@ -16,7 +16,7 @@ import { EnrollmentHistory, type EnrollmentEvent } from './EnrollmentHistory';
 import { BulkCourseUpdate, type BulkUpdateCourse, type BulkUpdateChange } from './BulkCourseUpdate';
 
 // Données de test - Événements
-const sampleEvents: EnrollmentEvent[] = [
+const  sampleEvents: EnrollmentEvent[] = [
   {
     id: 'EVT-001',
     enrollmentId: 'ENR-12345',
@@ -156,7 +156,7 @@ const sampleEvents: EnrollmentEvent[] = [
 ];
 
 // Données de test - Cours pour bulk update
-const sampleCoursesForUpdate: BulkUpdateCourse[] = [
+const  sampleCoursesForUpdate: BulkUpdateCourse[] = [
   {
     id: 'CRS-001',
     name: 'React & TypeScript Avancé',
@@ -242,7 +242,7 @@ const sampleCoursesForUpdate: BulkUpdateCourse[] = [
 /**
  * Composant de démonstration principale
  */
-export const CourseDay3Demo: React.FC = () => {
+export const CourseDay3Demo : React.FC = () => {
   const [events] = useState<EnrollmentEvent[]>(sampleEvents);
   const [courses, setCourses] = useState<BulkUpdateCourse[]>(sampleCoursesForUpdate);
 
@@ -352,4 +352,11 @@ export const CourseDay3Demo: React.FC = () => {
 };
 
 export default CourseDay3Demo;
+
+
+
+
+
+
+
 

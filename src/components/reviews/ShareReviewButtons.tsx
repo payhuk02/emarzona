@@ -24,7 +24,7 @@ interface ShareReviewButtonsProps {
   productUrl?: string;
 }
 
-export const ShareReviewButtons: React.FC<ShareReviewButtonsProps> = ({
+export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
   review,
   productName,
   productUrl = window.location.href,
@@ -175,7 +175,7 @@ export const ShareReviewButtons: React.FC<ShareReviewButtonsProps> = ({
 /**
  * Compact share button for smaller spaces
  */
-export const CompactShareButton: React.FC<ShareReviewButtonsProps> = (props) => {
+export const CompactShareButton : React.FC<ShareReviewButtonsProps> = (props) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -190,4 +190,11 @@ export const CompactShareButton: React.FC<ShareReviewButtonsProps> = (props) => 
     </DropdownMenu>
   );
 };
+
+
+
+
+
+
+
 

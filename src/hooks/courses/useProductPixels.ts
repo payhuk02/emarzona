@@ -40,3 +40,9 @@ export const useProductPixels = (productId: string) => {
   });
 };
 
+
+
+
+
+
+

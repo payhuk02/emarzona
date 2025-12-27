@@ -11,7 +11,7 @@ import { useStore } from '@/hooks/useStore';
 import { usePromotions } from '@/hooks/usePromotions';
 import { useTranslation } from 'react-i18next';
 
-export const PromotionsStatsPage: React.FC = () => {
+export const PromotionsStatsPage : React.FC = () => {
   const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
   const { data: promotionsData, isLoading: promotionsLoading } = usePromotions({
@@ -199,3 +199,10 @@ export const PromotionsStatsPage: React.FC = () => {
     </MainLayout>
   );
 };
+
+
+
+
+
+
+

@@ -11,7 +11,7 @@ interface SafeHTMLProps {
  * Composant pour afficher du HTML sécurisé
  * Utilise DOMPurify pour nettoyer le contenu HTML
  */
-export const SafeHTML: React.FC<SafeHTMLProps> = ({ 
+export const SafeHTML : React.FC<SafeHTMLProps> = ({ 
   content, 
   className, 
   tag: Tag = 'div' 
@@ -42,3 +42,10 @@ export const useSanitizedInput = (initialValue: string = '') => {
     setValue,
   };
 };
+
+
+
+
+
+
+

@@ -34,7 +34,7 @@ declare module 'react-big-calendar' {
 
   export type View = 'month' | 'week' | 'work_week' | 'day' | 'agenda';
 
-  export const Views: {
+  export const Views : {
     MONTH: 'month';
     WEEK: 'week';
     WORK_WEEK: 'work_week';
@@ -116,4 +116,11 @@ declare module 'react-big-calendar' {
 
   export class Calendar<TEvent extends Event = Event, TResource = any> extends Component<CalendarProps<TEvent, TResource>> {}
 }
+
+
+
+
+
+
+
 

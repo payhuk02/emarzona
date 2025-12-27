@@ -115,7 +115,7 @@ export const SecuritySettings = () => {
         allowDataCollection: privacyData?.allow_data_collection ?? false,
         marketingEmails: privacyData?.marketing_emails ?? false,
       }));
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error loading security settings', { error });
       // Don't show error toast if tables don't exist yet (graceful degradation)
     } finally {
@@ -164,7 +164,7 @@ export const SecuritySettings = () => {
         newPassword: "",
         confirmPassword: "",
       }));
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: error.message,
@@ -194,7 +194,7 @@ export const SecuritySettings = () => {
         title: "Succès",
         description: "Session terminée",
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       toast({
         title: "Erreur",
         description: "Impossible de terminer la session",
@@ -204,7 +204,7 @@ export const SecuritySettings = () => {
   };
 
   const getPasswordStrength = (password: string) => {
-    let strength = 0;
+    let  strength= 0;
     if (password.length >= 8) strength += 20;
     if (password.match(/[a-z]/)) strength += 20;
     if (password.match(/[A-Z]/)) strength += 20;
@@ -521,3 +521,9 @@ export const SecuritySettings = () => {
     </div>
   );
 };
+
+
+
+
+
+

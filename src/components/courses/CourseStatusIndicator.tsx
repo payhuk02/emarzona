@@ -80,7 +80,7 @@ export interface CourseStatusIndicatorProps {
 /**
  * Configuration des statuts avec leurs propriétés visuelles
  */
-const STATUS_CONFIG: Record<
+const  STATUS_CONFIG: Record<
   CourseStatus,
   {
     label: string;
@@ -172,7 +172,7 @@ const STATUS_CONFIG: Record<
  * />
  * ```
  */
-export const CourseStatusIndicator: React.FC<CourseStatusIndicatorProps> = ({
+export const CourseStatusIndicator : React.FC<CourseStatusIndicatorProps> = ({
   status,
   enrolledStudents,
   maxStudents,
@@ -471,4 +471,11 @@ export const CourseStatusIndicator: React.FC<CourseStatusIndicatorProps> = ({
 CourseStatusIndicator.displayName = 'CourseStatusIndicator';
 
 export default CourseStatusIndicator;
+
+
+
+
+
+
+
 

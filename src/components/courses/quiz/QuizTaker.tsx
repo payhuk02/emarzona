@@ -275,3 +275,9 @@ export const QuizTaker = ({ quizId, enrollmentId, onComplete }: QuizTakerProps) 
   );
 };
 
+
+
+
+
+
+

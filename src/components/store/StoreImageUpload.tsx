@@ -128,7 +128,7 @@ const StoreImageUpload = ({
           description: "L'image a été uploadée avec succès."
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error("Upload error", { error });
       const errorMessage = error.message || "Impossible d'uploader l'image. Réessayez.";
       setError(errorMessage);
@@ -315,3 +315,9 @@ const StoreImageUpload = ({
 };
 
 export default StoreImageUpload;
+
+
+
+
+
+

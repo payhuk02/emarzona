@@ -28,11 +28,16 @@ import {
   User,
   Award,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ProductReviewsSummary } from '@/components/reviews/ProductReviewsSummary';
-import { ReviewsList } from '@/components/reviews/ReviewsList';
-import { ReviewForm } from '@/components/reviews/ReviewForm';
+// Lazy load composants lourds pour optimiser le bundle
+const ProductReviewsSummary = lazy(() => import('@/components/reviews/ProductReviewsSummary').then(m => ({ default: m.ProductReviewsSummary })));
+const ReviewsList = lazy(() => import('@/components/reviews/ReviewsList').then(m => ({ default: m.ReviewsList })));
+const ReviewForm = lazy(() => import('@/components/reviews/ReviewForm').then(m => ({ default: m.ReviewForm })));
+const Artwork3DViewer = lazy(() => import('@/components/artist/Artwork3DViewer').then(m => ({ default: m.Artwork3DViewer })));
+const ArtistShippingCalculator = lazy(() => import('@/components/artist/ArtistShippingCalculator').then(m => ({ default: m.ArtistShippingCalculator })));
+const ArtworkProvenanceDisplay = lazy(() => import('@/components/artist/ArtworkProvenanceDisplay').then(m => ({ default: m.ArtworkProvenanceDisplay })));
+
 import { ProductImages } from '@/components/shared';
 import { useCart } from '@/hooks/cart/useCart';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,18 +46,16 @@ import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { useWishlistToggle } from '@/hooks/wishlist/useWishlistToggle';
 import { SEOMeta, ProductSchema } from '@/components/seo';
 import { ArtistCertificateDisplay } from '@/components/artist/ArtistCertificateDisplay';
-import { Artwork3DViewer } from '@/components/artist/Artwork3DViewer';
-import { ArtworkProvenanceDisplay } from '@/components/artist/ArtworkProvenanceDisplay';
 import {
   useArtwork3DModel,
   useArtworkProvenanceHistory,
   useArtworkCertificates,
   useIncrement3DModelViews,
 } from '@/hooks/artist/useArtworkProvenance';
+// Optimiser import date-fns - utiliser seulement format (tree-shaking)
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { FileText } from 'lucide-react';
-import { ArtistShippingCalculator } from '@/components/artist/ArtistShippingCalculator';
 
 const ArtistProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -373,6 +376,7 @@ const ArtistProductDetail = () => {
             {/* Left: Images / 3D Viewer */}
             {artwork3D ? (
               <div className="space-y-4">
+                <Suspense fallback={<Skeleton className="h-96 w-full" />}>
                 <Artwork3DViewer
                   modelUrl={artwork3D.model_url}
                   modelType={artwork3D.model_type}
@@ -389,6 +393,7 @@ const ArtistProductDetail = () => {
                     }
                   }}
                 />
+                </Suspense>
                 <div className="text-sm text-muted-foreground text-center">
                   {artwork3D.views_count} vue{artwork3D.views_count > 1 ? 's' : ''}
                 </div>
@@ -624,12 +629,12 @@ const ArtistProductDetail = () => {
 
               {/* Shipping Info */}
               {product?.artist?.requires_shipping && (
-                <>
+                <Suspense fallback={<Skeleton className="h-32 w-full" />}>
                   <ArtistShippingCalculator
                     productId={productId!}
                     artworkValue={product?.price || 0}
                   />
-                </>
+                </Suspense>
               )}
 
               {/* Certificate Display */}
@@ -686,15 +691,19 @@ const ArtistProductDetail = () => {
             <TabsContent value="details" className="space-y-6">
               {/* Shipping Calculator - Only show if shipping required */}
               {product?.artist?.requires_shipping && (
+                <Suspense fallback={<Skeleton className="h-32 w-full" />}>
                 <ArtistShippingCalculator
                   productId={productId!}
                   artworkValue={product?.price || 0}
                 />
+                </Suspense>
               )}
 
               {/* Provenance Display */}
               {provenanceHistory && provenanceHistory.length > 0 && (
+                <Suspense fallback={<Skeleton className="h-48 w-full" />}>
                 <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
+                </Suspense>
               )}
 
               {/* Certificates Display */}
@@ -821,7 +830,9 @@ const ArtistProductDetail = () => {
             (certificates && certificates.length > 0) ? (
               <TabsContent value="provenance" className="space-y-6">
                 {provenanceHistory && provenanceHistory.length > 0 && (
+                  <Suspense fallback={<Skeleton className="h-48 w-full" />}>
                   <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
+                  </Suspense>
                 )}
                 {certificates && certificates.length > 0 && (
                   <Card>
@@ -939,14 +950,18 @@ const ArtistProductDetail = () => {
 
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="space-y-6">
+              <Suspense fallback={<Skeleton className="h-24 w-full" />}>
               <ProductReviewsSummary productId={productId!} productType="artist" />
+              </Suspense>
 
               <Card>
                 <CardHeader>
                   <CardTitle>Avis des utilisateurs</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <Suspense fallback={<Skeleton className="h-48 w-full" />}>
                   <ReviewsList productId={productId!} />
+                  </Suspense>
                 </CardContent>
               </Card>
 
@@ -956,6 +971,7 @@ const ArtistProductDetail = () => {
                     <CardTitle>Donner votre avis</CardTitle>
                   </CardHeader>
                   <CardContent>
+                    <Suspense fallback={<Skeleton className="h-64 w-full" />}>
                     <ReviewForm
                       productId={productId!}
                       productType="artist"
@@ -964,6 +980,7 @@ const ArtistProductDetail = () => {
                         window.location.reload();
                       }}
                     />
+                    </Suspense>
                   </CardContent>
                 </Card>
               )}
@@ -971,7 +988,9 @@ const ArtistProductDetail = () => {
           </Tabs>
 
           {/* Reviews Summary (outside tabs for visibility) */}
+          <Suspense fallback={<Skeleton className="h-24 w-full" />}>
           <ProductReviewsSummary productId={productId!} productType="artist" />
+          </Suspense>
         </main>
       </div>
     </SidebarProvider>
@@ -980,3 +999,9 @@ const ArtistProductDetail = () => {
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
 export default React.memo(ArtistProductDetail);
+
+
+
+
+
+

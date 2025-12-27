@@ -19,7 +19,7 @@ export interface ValidationResult {
  * - Pas d'espaces ni caractères spéciaux
  */
 export const validateCodeFormat = (code: string): ValidationResult => {
-  const errors: string[] = [];
+  const  errors: string[] = [];
   const normalizedCode = code.trim().toUpperCase();
 
   if (!normalizedCode) {
@@ -52,7 +52,7 @@ export const validateDiscountValue = (
   discountType: string,
   discountValue: number | string
 ): ValidationResult => {
-  const errors: string[] = [];
+  const  errors: string[] = [];
   const value = typeof discountValue === "string" ? parseFloat(discountValue) : discountValue;
 
   if (isNaN(value) || value <= 0) {
@@ -79,7 +79,7 @@ export const validateDates = (
   startDate: string | null,
   endDate: string | null
 ): ValidationResult => {
-  const errors: string[] = [];
+  const  errors: string[] = [];
 
   if (!startDate && !endDate) {
     return { valid: true, errors: [] };
@@ -125,7 +125,7 @@ export const validatePromotionData = (data: {
   min_purchase_amount?: number | string;
   max_uses?: number | string;
 }): ValidationResult => {
-  const allErrors: string[] = [];
+  const  allErrors: string[] = [];
 
   // Validation du code
   const codeValidation = validateCodeFormat(data.code);
@@ -183,7 +183,7 @@ export const checkCodeUniqueness = async (
     const normalizedCode = code.trim().toUpperCase();
     
     // Vérifier dans la table spécifiée
-    let query = supabase
+    let  query= supabase
       .from(tableName)
       .select("id")
       .eq("code", normalizedCode)
@@ -222,7 +222,7 @@ export const checkCodeUniqueness = async (
     }
 
     return { unique: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     return { unique: false, error: "Erreur lors de la vérification de l'unicité" };
   }
 };
@@ -261,4 +261,10 @@ export const getErrorMessage = (error: any): string => {
   // Erreur par défaut
   return error?.message || "Une erreur est survenue lors de la création de la promotion";
 };
+
+
+
+
+
+
 

@@ -180,8 +180,8 @@ export default function StoreAffiliates() {
   const handleExportCSV = useCallback(async () => {
     setIsExporting(true);
     try {
-      let headers: string[] = [];
-      let rows: Array<Array<string | number>> = [];
+      let  headers: string[] = [];
+      let  rows: Array<Array<string | number>> = [];
 
       if (activeTab === 'affiliates') {
         headers = ['Rang', 'Affilié', 'Email', 'Code', 'Clics', 'Ventes', 'CA Généré', 'Commissions', 'Conversion %'];
@@ -265,7 +265,7 @@ export default function StoreAffiliates() {
         description: `${rows.length} ligne(s) exportée(s) en CSV.`,
       });
       logger.info(`Affiliation ${activeTab} exported to CSV`, { count: rows.length });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error exporting to CSV', { error: errorMessage });
       toast({
@@ -287,7 +287,7 @@ export default function StoreAffiliates() {
         description: 'Les données ont été mises à jour.',
       });
       logger.info('Affiliation data refreshed');
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error refreshing data', { error: errorMessage });
       toast({
@@ -1204,3 +1204,9 @@ export default function StoreAffiliates() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

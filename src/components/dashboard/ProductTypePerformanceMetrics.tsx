@@ -171,3 +171,9 @@ export const ProductTypePerformanceMetrics = React.memo<ProductTypePerformanceMe
 );
 
 ProductTypePerformanceMetrics.displayName = 'ProductTypePerformanceMetrics';
+
+
+
+
+
+

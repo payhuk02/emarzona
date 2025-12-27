@@ -64,7 +64,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
   } = options;
 
   // Valider la devise
-  const currency: Currency = isSupportedCurrency(requestedCurrency) 
+  const  currency: Currency = isSupportedCurrency(requestedCurrency) 
     ? requestedCurrency 
     : "XOF";
 
@@ -103,7 +103,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     const currentUserId = customerId || user?.id;
 
     // 1. Créer la transaction dans la base de données
-    const transactionData: Record<string, unknown> = {
+    const  transactionData: Record<string, unknown> = {
       store_id: storeId,
       product_id: productId,
       order_id: orderId,
@@ -161,7 +161,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       const isPermissionError = errorMessage.includes("permission denied") || 
                                 errorMessage.includes("permission denied for table");
       
-      let userFriendlyMessage = `Impossible de créer la transaction: ${errorMessage}`;
+      let  userFriendlyMessage= `Impossible de créer la transaction: ${errorMessage}`;
       
       if (isColumnMissingError) {
         userFriendlyMessage += "\n\n💡 SOLUTION COMPLÈTE:\n";
@@ -224,7 +224,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         status: "pending",
         request_data: JSON.parse(JSON.stringify(options)),
       }]);
-    } catch (logError: unknown) {
+    } catch ( _logError: unknown) {
       // Ne pas bloquer le processus si le log échoue
       logger.warn("Failed to insert transaction log (non-critical):", logError);
     }
@@ -235,7 +235,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     
     // Nettoyer metadata : supprimer les valeurs null, undefined, et vides
     // L'API Moneroo n'accepte que string, boolean ou integer dans metadata
-    const cleanMetadata: Record<string, unknown> = {
+    const  cleanMetadata: Record<string, unknown> = {
       transaction_id: transaction.id,
       store_id: storeId,
       ...(productId && { product_id: productId }), // Ajouter product_id dans metadata aussi
@@ -257,7 +257,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       }
     });
     
-    const checkoutData: MonerooCheckoutData = {
+    const  checkoutData: MonerooCheckoutData = {
       amount,
       currency,
       description,
@@ -298,23 +298,23 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         responseKeys: monerooResponse ? Object.keys(monerooResponse) : [],
         fullResponse: monerooResponse,
       });
-    } catch (checkoutError: unknown) {
-      const error = checkoutError instanceof Error ? checkoutError : new Error(String(checkoutError));
+    } catch (_checkoutError: unknown) {
+      const error = _checkoutError instanceof Error ? _checkoutError : new Error(String(_checkoutError));
       logger.error("Error in monerooClient.createCheckout:", {
-        error: checkoutError,
+        error: _checkoutError,
         errorMessage: error.message,
         errorName: error.name,
         errorStack: error.stack,
         checkoutData,
       });
       // Relancer l'erreur pour qu'elle soit gérée par le catch principal
-      throw checkoutError;
+      throw _checkoutError;
     }
 
     // 4. Extraire les données de la réponse Moneroo
     // Selon la documentation Moneroo : https://docs.moneroo.io/
     // La réponse Moneroo est : { message: "...", data: { id: "...", checkout_url: "..." } }
-    // L'Edge Function retourne : { success: true, data: { message: "...", data: { id: "...", checkout_url: "..." } } }
+    // L'Edge Function  _retourne: { success: true, data: { message: "...", data: { id: "...", checkout_url: "..." } } }
     // Dans moneroo-client.ts, on retourne response.data, donc monerooResponse est : { message: "...", data: { id: "...", checkout_url: "..." } }
     // Il faut donc accéder à monerooResponse.data.checkout_url et monerooResponse.data.id
     const typedResponse = monerooResponse as MonerooCheckoutResponse;
@@ -364,9 +364,9 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         status: "processing",
         response_data: monerooResponse,
       }]);
-    } catch (logError: unknown) {
+    } catch (_logError: unknown) {
       // Ne pas bloquer le processus si le log échoue
-      logger.warn("Failed to insert payment initiated log (non-critical):", logError);
+      logger.warn("Failed to insert payment initiated log (non-critical):", _logError);
     }
 
     // 7. Retourner les données pour redirection
@@ -376,8 +376,8 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       checkout_url: checkoutUrl,
       moneroo_transaction_id: transactionId,
     };
-    } catch (error: unknown) {
-      const monerooError = parseMonerooError(error);
+    } catch (_error: unknown) {
+      const monerooError = parseMonerooError(_error);
       logger.error("Payment initiation error:", {
         error: monerooError.message,
         code: monerooError.code,
@@ -445,7 +445,7 @@ export const verifyTransactionStatus = async (transactionId: string) => {
         );
 
         // Mettre à jour selon le statut Moneroo
-        const statusMap: Record<string, string> = {
+        const  statusMap: Record<string, string> = {
           completed: "completed",
           success: "completed",
           failed: "failed",
@@ -455,7 +455,7 @@ export const verifyTransactionStatus = async (transactionId: string) => {
 
         const newStatus = statusMap[monerooStatus.status] || "processing";
 
-        const updates: any = {
+        const  updates: any = {
           status: newStatus,
           moneroo_payment_method: monerooStatus.payment_method,
           moneroo_response: monerooStatus,
@@ -519,7 +519,7 @@ export const verifyTransactionStatus = async (transactionId: string) => {
     }
 
     return transaction;
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const monerooError = parseMonerooError(error);
     logger.error("Transaction verification error:", {
       error: monerooError.message,
@@ -669,7 +669,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       currency: refundResponse.currency,
       status: refundResponse.status,
     };
-  } catch (error: unknown) {
+  } catch ( _error: unknown) {
     const monerooError = parseMonerooError(error);
     
     // Log de l'erreur
@@ -695,3 +695,9 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
     };
   }
 };
+
+
+
+
+
+

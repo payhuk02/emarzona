@@ -215,7 +215,7 @@ export default function CustomerReturns() {
   // Get status badge
   const getStatusBadge = (status: string) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const statusConfig: Record<
+    const  statusConfig: Record<
       string,
       {
         label: string;
@@ -254,7 +254,7 @@ export default function CustomerReturns() {
 
   // Get return reason label
   const getReturnReasonLabel = (reason: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       defective: 'Produit défectueux',
       wrong_item: 'Mauvais article',
       not_as_described: 'Ne correspond pas à la description',
@@ -697,3 +697,9 @@ export default function CustomerReturns() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

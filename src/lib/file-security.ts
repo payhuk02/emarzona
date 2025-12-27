@@ -16,7 +16,7 @@ import { logger } from './logger';
  * Signatures magiques (magic bytes) pour validation de type réel
  * Les 4-8 premiers bytes identifient de manière fiable le type de fichier
  */
-const FILE_SIGNATURES: Record<string, { signature: number[]; offset: number }> = {
+const  FILE_SIGNATURES: Record<string, { signature: number[]; offset: number }> = {
   // Images
   'image/jpeg': { signature: [0xFF, 0xD8, 0xFF], offset: 0 },
   'image/png': { signature: [0x89, 0x50, 0x4E, 0x47], offset: 0 },
@@ -153,7 +153,7 @@ function isDangerousExtension(filename: string): boolean {
 function validateExtensionMimeType(filename: string, mimeType: string): boolean {
   const extension = getFileExtension(filename);
   
-  const extensionMap: Record<string, string[]> = {
+  const  extensionMap: Record<string, string[]> = {
     'jpg': ['image/jpeg', 'image/jpg'],
     'jpeg': ['image/jpeg', 'image/jpg'],
     'png': ['image/png'],
@@ -205,7 +205,7 @@ export async function validateFileSecurity(
   file: File,
   allowedTypes: string[] = SAFE_MIME_TYPES.images
 ): Promise<SecurityValidationResult> {
-  const warnings: string[] = [];
+  const  warnings: string[] = [];
   
   try {
     // 1. VÉRIFICATION EXTENSION DANGEREUSE
@@ -264,7 +264,6 @@ export async function validateFileSecurity(
     }
     
     // Caractères suspects dans le nom
-    // eslint-disable-next-line no-control-regex
     if (/[<>:"|?*\x00-\x1F]/.test(file.name)) {
       return {
         isValid: false,
@@ -316,7 +315,7 @@ export function sanitizeFilename(filename: string): string {
   const nameWithoutExt = filename.slice(0, -(extension.length + 1));
   
   // Nettoyer le nom
-  let sanitized = nameWithoutExt
+  let  sanitized= nameWithoutExt
     .normalize('NFD') // Décomposer accents
     .replace(/[\u0300-\u036f]/g, '') // Supprimer accents
     .replace(/[^a-zA-Z0-9_-]/g, '_') // Remplacer caractères spéciaux par _
@@ -367,4 +366,10 @@ export function useFileSecurityValidation() {
 
 // Import useState pour le hook
 import { useState } from 'react';
+
+
+
+
+
+
 

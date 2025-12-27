@@ -47,7 +47,7 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
   const createQuiz = useCreateQuiz();
 
   const addQuestion = () => {
-    const newQuestion: Question = {
+    const  newQuestion: Question = {
       id: `temp-${Date.now()}`,
       text: '',
       type: 'multiple_choice',
@@ -339,4 +339,10 @@ export const QuizBuilder = ({ courseId, onSuccess }: QuizBuilderProps) => {
     </div>
   );
 };
+
+
+
+
+
+
 

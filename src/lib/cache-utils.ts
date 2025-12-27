@@ -102,7 +102,7 @@ export class MemoryCache<K, V> {
    * Nettoie les entrées expirées
    */
   clearExpired(): number {
-    let cleared = 0;
+    let  cleared= 0;
     const now = Date.now();
 
     for (const [key, entry] of this.cache.entries()) {
@@ -277,4 +277,10 @@ export class FactoryCache<K, V> {
     this.cache.clear();
   }
 }
+
+
+
+
+
+
 

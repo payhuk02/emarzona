@@ -90,7 +90,7 @@ export const ShortLinkRedirect = () => {
           setError(data?.error || 'Lien court introuvable ou expiré');
           setLoading(false);
         }
-      } catch (err: unknown) {
+      } catch ( _err: unknown) {
         logger.error('Error in short link redirect:', err);
         setError('Une erreur est survenue lors de la redirection');
         setLoading(false);
@@ -139,4 +139,10 @@ export const ShortLinkRedirect = () => {
 
   return null;
 };
+
+
+
+
+
+
 

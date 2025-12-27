@@ -32,7 +32,7 @@ export async function exportToCSV(
   endDate?: string
 ): Promise<{ success: boolean; data?: string; error?: string }> {
   try {
-    let data: any[] = [];
+    let  data: any[] = [];
 
     switch (type) {
       case 'products':
@@ -44,7 +44,7 @@ export async function exportToCSV(
         break;
 
       case 'orders':
-        let ordersQuery = supabase
+        let  ordersQuery= supabase
           .from('orders')
           .select('*')
           .eq('store_id', storeId);
@@ -73,7 +73,7 @@ export async function exportToCSV(
     const csv = convertToCSV(data);
 
     return { success: true, data: csv };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error exporting to CSV', { error: error.message });
     return { success: false, error: error.message };
   }
@@ -89,7 +89,7 @@ export async function exportToJSON(
   endDate?: string
 ): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
-    let data: any[] = [];
+    let  data: any[] = [];
 
     switch (type) {
       case 'products':
@@ -101,7 +101,7 @@ export async function exportToJSON(
         break;
 
       case 'orders':
-        let ordersQuery = supabase
+        let  ordersQuery= supabase
           .from('orders')
           .select('*')
           .eq('store_id', storeId);
@@ -127,7 +127,7 @@ export async function exportToJSON(
     }
 
     return { success: true, data };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error exporting to JSON', { error: error.message });
     return { success: false, error: error.message };
   }
@@ -143,10 +143,10 @@ export async function importFromCSV(
 ): Promise<ImportResult> {
   try {
     const rows = parseCSV(csvContent);
-    const errors: ImportResult['errors'] = [];
-    let imported = 0;
+    const  errors: ImportResult['errors'] = [];
+    let  imported= 0;
 
-    for (let i = 0; i < rows.length; i++) {
+    for (let  i= 0; i < rows.length; i++) {
       const row = rows[i];
       try {
         const result = await importRow(storeId, type, row);
@@ -158,7 +158,7 @@ export async function importFromCSV(
             error: result.error || 'Unknown error',
           });
         }
-      } catch (error: any) {
+      } catch ( _error: any) {
         errors.push({
           row: i + 2,
           error: error.message || 'Unknown error',
@@ -172,7 +172,7 @@ export async function importFromCSV(
       failed: errors.length,
       errors,
     };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error importing from CSV', { error: error.message });
     return {
       success: false,
@@ -192,10 +192,10 @@ export async function importFromJSON(
   jsonData: any[]
 ): Promise<ImportResult> {
   try {
-    const errors: ImportResult['errors'] = [];
-    let imported = 0;
+    const  errors: ImportResult['errors'] = [];
+    let  imported= 0;
 
-    for (let i = 0; i < jsonData.length; i++) {
+    for (let  i= 0; i < jsonData.length; i++) {
       const row = jsonData[i];
       try {
         const result = await importRow(storeId, type, row);
@@ -207,7 +207,7 @@ export async function importFromJSON(
             error: result.error || 'Unknown error',
           });
         }
-      } catch (error: any) {
+      } catch ( _error: any) {
         errors.push({
           row: i + 1,
           error: error.message || 'Unknown error',
@@ -221,7 +221,7 @@ export async function importFromJSON(
       failed: errors.length,
       errors,
     };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error importing from JSON', { error: error.message });
     return {
       success: false,
@@ -280,7 +280,7 @@ async function importRow(
     }
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     return { success: false, error: error.message };
   }
 }
@@ -312,11 +312,11 @@ function parseCSV(csv: string): Record<string, any>[] {
   if (lines.length === 0) return [];
 
   const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
-  const rows: Record<string, any>[] = [];
+  const  rows: Record<string, any>[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
+  for (let  i= 1; i < lines.length; i++) {
     const values = lines[i].split(',').map(v => v.replace(/^"|"$/g, '').trim());
-    const row: Record<string, any> = {};
+    const  row: Record<string, any> = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
     });
@@ -325,4 +325,10 @@ function parseCSV(csv: string): Record<string, any>[] {
 
   return rows;
 }
+
+
+
+
+
+
 

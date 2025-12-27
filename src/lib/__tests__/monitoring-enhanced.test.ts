@@ -65,7 +65,7 @@ describe('Monitoring Enhanced', () => {
     });
 
     it('devrait respecter la limite', () => {
-      for (let i = 0; i < 5; i++) {
+      for (let  i= 0; i < 5; i++) {
         recordMetric({
           name: `Metric ${i}`,
           type: 'page_load',
@@ -239,4 +239,10 @@ describe('Monitoring Enhanced', () => {
     });
   });
 });
+
+
+
+
+
+
 

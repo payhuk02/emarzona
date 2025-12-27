@@ -76,7 +76,7 @@ const NOTIFICATION_TYPES = [
   { key: 'email_ssl_expired', label: 'SSL expiré', icon: AlertTriangle },
 ] as const;
 
-export const StoreNotificationSettings: React.FC<StoreNotificationSettingsProps> = ({ storeId }) => {
+export const StoreNotificationSettings : React.FC<StoreNotificationSettingsProps> = ({ storeId }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -84,7 +84,6 @@ export const StoreNotificationSettings: React.FC<StoreNotificationSettingsProps>
 
   useEffect(() => {
     loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId]);
 
   const loadSettings = async () => {
@@ -142,7 +141,7 @@ export const StoreNotificationSettings: React.FC<StoreNotificationSettingsProps>
       } else {
         setSettings(data as NotificationSettings);
       }
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error loading notification settings', { error, storeId });
       toast({
         title: 'Erreur',
@@ -172,7 +171,7 @@ export const StoreNotificationSettings: React.FC<StoreNotificationSettingsProps>
         title: 'Paramètres enregistrés',
         description: 'Vos paramètres de notifications ont été mis à jour avec succès.',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       logger.error('Error saving notification settings', { error });
       toast({
         title: 'Erreur',
@@ -388,4 +387,11 @@ export const StoreNotificationSettings: React.FC<StoreNotificationSettingsProps>
     </Card>
   );
 };
+
+
+
+
+
+
+
 

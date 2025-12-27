@@ -134,7 +134,7 @@ export default function NotificationsManagement() {
 
   // Filtered and sorted notifications
   const filteredNotifications = useMemo(() => {
-    let filtered = notifications;
+    let  filtered= notifications;
 
     // Filter by type
     if (typeFilter !== 'all') {
@@ -171,7 +171,7 @@ export default function NotificationsManagement() {
         const dateB = new Date(b.created_at).getTime();
         return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
       } else if (sortBy === 'priority') {
-        const priorityOrder: Record<string, number> = { urgent: 4, high: 3, normal: 2, low: 1 };
+        const  priorityOrder: Record<string, number> = { urgent: 4, high: 3, normal: 2, low: 1 };
         const priorityA = priorityOrder[a.priority] || 2;
         const priorityB = priorityOrder[b.priority] || 2;
         return sortOrder === 'desc' ? priorityB - priorityA : priorityA - priorityB;
@@ -195,7 +195,7 @@ export default function NotificationsManagement() {
 
   // Get notification type label
   const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
+    const  labels: Record<string, string> = {
       // Produits digitaux
       digital_product_purchased: 'Produit digital acheté',
       digital_product_download_ready: 'Téléchargement prêt',
@@ -317,7 +317,7 @@ export default function NotificationsManagement() {
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await markAsRead.mutateAsync(notificationId);
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de marquer comme lu';
       toast({
@@ -335,7 +335,7 @@ export default function NotificationsManagement() {
         title: '✅ Toutes marquées comme lues',
         description: 'Toutes les notifications ont été marquées comme lues',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de marquer toutes comme lues';
       toast({
@@ -353,7 +353,7 @@ export default function NotificationsManagement() {
         title: '✅ Notification archivée',
         description: 'La notification a été archivée',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'archiver la notification";
       toast({
@@ -371,7 +371,7 @@ export default function NotificationsManagement() {
         title: '✅ Notification supprimée',
         description: 'La notification a été supprimée',
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de supprimer la notification';
       toast({
@@ -424,7 +424,7 @@ export default function NotificationsManagement() {
         title: '✅ Notifications marquées comme lues',
         description: `${selectedNotifications.length} notification(s) marquée(s) comme lue(s)`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de marquer comme lues';
       toast({
@@ -445,7 +445,7 @@ export default function NotificationsManagement() {
         title: '✅ Notifications archivées',
         description: `${selectedNotifications.length} notification(s) archivée(s)`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'archiver les notifications";
       toast({
@@ -466,7 +466,7 @@ export default function NotificationsManagement() {
         title: '✅ Notifications supprimées',
         description: `${selectedNotifications.length} notification(s) supprimée(s)`,
       });
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de supprimer les notifications';
       toast({
@@ -860,7 +860,7 @@ export default function NotificationsManagement() {
                       />
                     </PaginationItem>
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum: number;
+                      let  pageNum: number;
                       if (totalPages <= 5) {
                         pageNum = i + 1;
                       } else if (page <= 3) {
@@ -972,3 +972,9 @@ export default function NotificationsManagement() {
     </SidebarProvider>
   );
 }
+
+
+
+
+
+

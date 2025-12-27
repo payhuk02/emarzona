@@ -40,7 +40,7 @@ export interface RateLimitResult {
 }
 
 // Configuration par défaut
-const DEFAULT_CONFIG: RateLimitConfig = {
+const  DEFAULT_CONFIG: RateLimitConfig = {
   in_app: { maxPerHour: 100, maxPerDay: 500 },
   email: { maxPerHour: 20, maxPerDay: 100 },
   sms: { maxPerHour: 10, maxPerDay: 50 },
@@ -80,7 +80,7 @@ export class NotificationRateLimiter {
     const cacheKey = `${userId}:${channel}${type ? `:${type}` : ''}`;
 
     // Récupérer ou créer les enregistrements
-    let records = this.cache.get(cacheKey);
+    let  records= this.cache.get(cacheKey);
     if (!records) {
       records = { hourly: [], daily: [] };
       this.cache.set(cacheKey, records);
@@ -112,7 +112,7 @@ export class NotificationRateLimiter {
     const resetDaily = new Date(now + (24 * 60 * 60 * 1000 - (now % (24 * 60 * 60 * 1000))));
 
     // Raison si refusé
-    let reason: string | undefined;
+    let  reason: string | undefined;
     if (!allowed) {
       if (!hourlyAllowed) {
         reason = `Limite horaire atteinte pour ${channel} (${hourlyCount}/${limits.maxPerHour})`;
@@ -151,7 +151,7 @@ export class NotificationRateLimiter {
     const cacheKey = `${userId}:${channel}${type ? `:${type}` : ''}`;
 
     // Ajouter aux enregistrements
-    let records = this.cache.get(cacheKey);
+    let  records= this.cache.get(cacheKey);
     if (!records) {
       records = { hourly: [], daily: [] };
       this.cache.set(cacheKey, records);
@@ -237,7 +237,7 @@ export class NotificationRateLimiter {
 
     // Supprimer de la base de données
     try {
-      let query = supabase.from('notification_rate_limits').delete().eq('user_id', userId);
+      let  query= supabase.from('notification_rate_limits').delete().eq('user_id', userId);
       if (channel) {
         query = query.eq('channel', channel);
       }
@@ -260,3 +260,9 @@ if (typeof window !== 'undefined') {
     60 * 60 * 1000
   );
 }
+
+
+
+
+
+

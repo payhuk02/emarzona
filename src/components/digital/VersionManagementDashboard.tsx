@@ -58,7 +58,7 @@ interface VersionManagementDashboardProps {
 // ============================================================================
 
 function VersionStatusBadge({ status }: { status: VersionStatus }) {
-  const variants: Record<
+  const  variants: Record<
     VersionStatus,
     { variant: 'secondary' | 'default' | 'destructive'; label: string; icon: React.ReactNode }
   > = {
@@ -346,3 +346,9 @@ export function VersionManagementDashboard({
     </div>
   );
 }
+
+
+
+
+
+

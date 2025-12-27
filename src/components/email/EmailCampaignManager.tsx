@@ -45,7 +45,7 @@ interface EmailCampaignManagerProps {
   onEditCampaign?: (campaign: EmailCampaign) => void;
 }
 
-const STATUS_COLORS: Record<CampaignStatus, string> = {
+const  STATUS_COLORS: Record<CampaignStatus, string> = {
   draft: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
   scheduled: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   sending: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
@@ -54,7 +54,7 @@ const STATUS_COLORS: Record<CampaignStatus, string> = {
   cancelled: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
 };
 
-const STATUS_LABELS: Record<CampaignStatus, string> = {
+const  STATUS_LABELS: Record<CampaignStatus, string> = {
   draft: 'Brouillon',
   scheduled: 'Programmée',
   sending: 'Envoi en cours',
@@ -63,7 +63,7 @@ const STATUS_LABELS: Record<CampaignStatus, string> = {
   cancelled: 'Annulée',
 };
 
-const TYPE_LABELS: Record<string, string> = {
+const  TYPE_LABELS: Record<string, string> = {
   newsletter: 'Newsletter',
   promotional: 'Promotionnelle',
   transactional: 'Transactionnelle',
@@ -351,4 +351,10 @@ export const EmailCampaignManager = ({
     </>
   );
 };
+
+
+
+
+
+
 

@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Gavel,
   Search,
-  Clock,
+  _Clock,
   DollarSign,
   Users,
   Eye,
@@ -26,7 +26,7 @@ import {
   useActiveAuctions,
   useToggleWatchlist,
   useUserWatchlist,
-  type ArtistProductAuction,
+  type _ArtistProductAuction,
 } from '@/hooks/artist/useArtistAuctions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -261,4 +261,10 @@ export default function AuctionsListPage() {
     </div>
   );
 }
+
+
+
+
+
+
 

@@ -107,7 +107,7 @@ export async function notifyAllCustomersOfUpdate(
     });
 
     return { success: true, notified_count: successCount };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error notifying customers of product update', {
       error: error.message,
       update,
@@ -159,9 +159,15 @@ export async function createProductVersion(
     });
 
     return { success: true };
-  } catch (error: any) {
+  } catch ( _error: any) {
     logger.error('Error creating product version', { error: error.message, productId });
     return { success: false, error: error.message };
   }
 }
+
+
+
+
+
+
 

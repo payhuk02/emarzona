@@ -27,7 +27,7 @@ interface NotificationItemProps {
 
 // Mapping type → icône + couleur
 const getNotificationMeta = (type: NotificationType) => {
-  const meta: Record<NotificationType, { icon: any; color: string; bgColor: string }> = {
+  const  meta: Record<NotificationType, { icon: any; color: string; bgColor: string }> = {
     course_enrollment: {
       icon: GraduationCap,
       color: 'text-blue-600',
@@ -166,4 +166,10 @@ export const NotificationItem = React.memo(NotificationItemComponent, (prevProps
 });
 
 NotificationItem.displayName = 'NotificationItem';
+
+
+
+
+
+
 

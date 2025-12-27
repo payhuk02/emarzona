@@ -138,7 +138,7 @@ export interface CourseAccessManagerProps {
  * />
  * ```
  */
-export const CourseAccessManager: React.FC<CourseAccessManagerProps> = ({
+export const CourseAccessManager : React.FC<CourseAccessManagerProps> = ({
   courseId,
   currentConfig,
   lessons,
@@ -592,4 +592,11 @@ export const CourseAccessManager: React.FC<CourseAccessManagerProps> = ({
 CourseAccessManager.displayName = 'CourseAccessManager';
 
 export default CourseAccessManager;
+
+
+
+
+
+
+
 

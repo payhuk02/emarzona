@@ -175,9 +175,26 @@ export async function sendBookingEmail(
     const subject = getEmailSubject(type, data);
     const template = getEmailTemplate(type, data);
     
+    // Récupérer le user_id depuis le booking
+    const { data: booking, error: bookingError } = await supabase
+      .from('service_bookings')
+      .select('user_id, customer_id')
+      .eq('id', data.booking_id)
+      .single();
+
+    if (bookingError || !booking) {
+      throw new Error(`Booking not found: ${data.booking_id}`);
+    }
+
+    // Utiliser user_id ou customer_id selon disponibilité
+    const userId = booking.user_id || booking.customer_id;
+    if (!userId) {
+      throw new Error(`No user_id or customer_id found for booking ${data.booking_id}`);
+    }
+
     // Utiliser le système de notifications unifié
     await sendUnifiedNotification({
-      user_id: data.booking_id, // TODO: Récupérer le user_id depuis le booking
+      user_id: userId,
       type: `service_booking_${type}` as any,
       title: subject,
       message: template,
@@ -215,7 +232,7 @@ export async function sendBookingNotifications(
   type: 'confirmation' | 'reminder' | 'cancellation' | 'reschedule',
   channels: ('email' | 'sms' | 'push' | 'in_app')[] = ['email', 'sms', 'push', 'in_app']
 ): Promise<NotificationResult[]> {
-  const results: NotificationResult[] = [];
+  const  results: NotificationResult[] = [];
   
   // Email
   if (channels.includes('email') && preferences.email_enabled) {
@@ -610,4 +627,10 @@ function formatDate(dateString: string): string {
     day: 'numeric',
   });
 }
+
+
+
+
+
+
 

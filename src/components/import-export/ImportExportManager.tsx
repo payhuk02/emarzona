@@ -61,7 +61,7 @@ export const ImportExportManager = () => {
 
     setExporting(true);
     try {
-      let result;
+      let  _result;
       if (format === 'csv') {
         result = await exportToCSV(store.id, type, startDate || undefined, endDate || undefined);
       } else {
@@ -90,7 +90,7 @@ export const ImportExportManager = () => {
       } else {
         throw new Error(result.error || 'Erreur lors de l\'export');
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error exporting data', { error: error.message });
       toast({
         title: '❌ Erreur',
@@ -126,7 +126,7 @@ export const ImportExportManager = () => {
 
     try {
       const fileContent = await importFile.text();
-      let result;
+      let  _result;
 
       if (format === 'csv') {
         result = await importFromCSV(store.id, type, fileContent);
@@ -149,7 +149,7 @@ export const ImportExportManager = () => {
           variant: 'default',
         });
       }
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error importing data', { error: error.message });
       toast({
         title: '❌ Erreur',
@@ -412,4 +412,10 @@ export const ImportExportManager = () => {
     </div>
   );
 };
+
+
+
+
+
+
 

@@ -80,7 +80,7 @@ export const useBatchShipments = (storeId?: string, filters?: {
     queryFn: async () => {
       if (!storeId) throw new Error('Store ID manquant');
 
-      let query = supabase
+      let  query= supabase
         .from('batch_shipments')
         .select(`
           *,
@@ -305,7 +305,7 @@ export const useProcessBatchShipment = () => {
       if (ordersError) throw ordersError;
 
       // Traiter chaque commande (simplifié - à adapter selon votre système de génération d'étiquettes)
-      const errors: Array<{ order_id: string; error: string; timestamp: string }> = [];
+      const  errors: Array<{ order_id: string; error: string; timestamp: string }> = [];
       
       for (const batchOrder of batchOrders || []) {
         try {
@@ -328,7 +328,7 @@ export const useProcessBatchShipment = () => {
               processed_at: new Date().toISOString(),
             })
             .eq('id', batchOrder.id);
-        } catch (error: any) {
+        } catch ( _error: any) {
           errors.push({
             order_id: batchOrder.order_id,
             error: error.message || 'Erreur inconnue',
@@ -446,7 +446,7 @@ export const useUpdateBatchStatus = () => {
       batchId: string;
       status: BatchShipment['status'];
     }) => {
-      const updateData: any = {
+      const  updateData: any = {
         status,
         updated_at: new Date().toISOString(),
       };
@@ -486,4 +486,10 @@ export const useUpdateBatchStatus = () => {
     },
   });
 };
+
+
+
+
+
+
 

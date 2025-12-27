@@ -33,7 +33,7 @@ interface StoreMarketingContentProps {
   onChange: (content: StoreMarketingContent) => void;
 }
 
-export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps> = ({
+export const StoreMarketingContentComponent : React.FC<StoreMarketingContentProps> = ({
   marketingContent,
   onChange,
 }) => {
@@ -81,7 +81,7 @@ export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps
 
   // Sauvegarder les changements
   const handleSave = () => {
-    const updatedContent: StoreMarketingContent = {
+    const  updatedContent: StoreMarketingContent = {
       welcome_message: welcomeMessage || undefined,
       mission_statement: missionStatement || undefined,
       vision_statement: visionStatement || undefined,
@@ -774,4 +774,11 @@ export const StoreMarketingContentComponent: React.FC<StoreMarketingContentProps
     </Card>
   );
 };
+
+
+
+
+
+
+
 

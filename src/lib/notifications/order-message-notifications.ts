@@ -40,7 +40,7 @@ export async function sendOrderMessageNotification(
     }
 
     // Récupérer les informations du store
-    let storeName = '';
+    let  storeName= '';
     if (order.store_id || data.storeId) {
       const { data: store } = await supabase
         .from('stores')
@@ -52,8 +52,8 @@ export async function sendOrderMessageNotification(
 
     // Déterminer le type de notification et le contenu
     const notificationType = 'order_message_received';
-    let title: string;
-    let message: string;
+    let  title: string;
+    let  message: string;
 
     if (data.recipientType === 'store') {
       // Notification pour le vendeur
@@ -116,3 +116,9 @@ export async function sendOrderMessageNotification(
     return { success: false, error: errorMessage };
   }
 }
+
+
+
+
+
+

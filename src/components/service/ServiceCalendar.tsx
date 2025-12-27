@@ -71,7 +71,7 @@ export const ServiceCalendar = ({
     queryFn: async () => {
       if (!serviceProduct?.id) return {};
 
-      const availabilityMap: Record<string, DayAvailability> = {};
+      const  availabilityMap: Record<string, DayAvailability> = {};
 
       // Get all availability slots for this service
       const { data: slots, error: slotsError } = await supabase
@@ -130,18 +130,18 @@ export const ServiceCalendar = ({
           .select('booking_id')
           .in('booking_id', bookingIds) : { data: [] };
         
-        const participantCounts: Record<string, number> = {};
+        const  participantCounts: Record<string, number> = {};
         participants?.forEach(p => {
           participantCounts[p.booking_id] = (participantCounts[p.booking_id] || 0) + 1;
         });
 
         // Calculate total available slots
-        let totalSlots = 0;
-        let availableSlots = 0;
+        let  totalSlots= 0;
+        let  availableSlots= 0;
 
         daySlots.forEach((slot) => {
           const duration = service?.duration_minutes || 60;
-          let currentTime = slot.start_time;
+          let  currentTime= slot.start_time;
           const endTime = slot.end_time;
 
           while (currentTime < endTime) {
@@ -171,7 +171,7 @@ export const ServiceCalendar = ({
         });
 
         // Determine status
-        let status: DayAvailability['status'] = 'unavailable';
+        let  status: DayAvailability['status'] = 'unavailable';
         if (availableSlots === 0) {
           status = 'full';
         } else if (availableSlots <= totalSlots * 0.3) {
@@ -395,4 +395,10 @@ export const ServiceCalendar = ({
 };
 
 export default ServiceCalendar;
+
+
+
+
+
+
 

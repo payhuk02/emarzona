@@ -19,7 +19,7 @@ vi.mock('@/lib/logger', () => ({
 const mockToast = vi.fn();
 (useToast as any).mockReturnValue({ toast: mockToast });
 
-const mockWithdrawals: StoreWithdrawal[] = [
+const  mockWithdrawals: StoreWithdrawal[] = [
   {
     id: '1',
     store_id: 'store-1',
@@ -213,6 +213,12 @@ describe('WithdrawalsList', () => {
     expect(screen.getByText(/historique des retraits/i)).toBeInTheDocument();
   });
 });
+
+
+
+
+
+
 
 
 

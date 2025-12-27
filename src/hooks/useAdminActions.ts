@@ -44,7 +44,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -77,7 +77,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -105,7 +105,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -133,7 +133,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -167,7 +167,7 @@ export const useAdminActions = () => {
 
       toast({ title: 'Rôle mis à jour', description: `Nouveau rôle: ${role}` });
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       return false;
@@ -205,7 +205,7 @@ export const useAdminActions = () => {
 
       toast({ title: 'Administrateur ajouté', description: `${email} → ${role}` });
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       return false;
@@ -229,7 +229,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -261,7 +261,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -289,7 +289,7 @@ export const useAdminActions = () => {
       });
 
       return true;
-    } catch (error: unknown) {
+    } catch ( _error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erreur",
@@ -312,3 +312,9 @@ export const useAdminActions = () => {
     promoteToAdmin,
   };
 };
+
+
+
+
+
+

@@ -31,7 +31,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
       setLoading(true);
 
       // Récupérer tous les retraits
-      let query = supabase
+      let  query= supabase
         .from('store_withdrawals')
         .select('id, amount, status, payment_method, created_at, processed_at, approved_at');
 
@@ -82,8 +82,8 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
       const average_amount = total_withdrawals > 0 ? total_amount / total_withdrawals : 0;
 
       // Calculer les statistiques de temps
-      const processingTimes: number[] = [];
-      const completionTimes: number[] = [];
+      const  processingTimes: number[] = [];
+      const  completionTimes: number[] = [];
 
       withdrawals.forEach((w) => {
         if (w.approved_at && w.processed_at) {
@@ -101,7 +101,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         }
       });
 
-      const time_stats: WithdrawalTimeStats = {
+      const  time_stats: WithdrawalTimeStats = {
         average_processing_time_hours: processingTimes.length > 0
           ? processingTimes.reduce((sum, t) => sum + t, 0) / processingTimes.length
           : 0,
@@ -150,7 +150,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         }
       });
 
-      const period_stats: WithdrawalPeriodStats[] = Array.from(periodMap.entries())
+      const  period_stats: WithdrawalPeriodStats[] = Array.from(periodMap.entries())
         .map(([period, data]) => ({
           period,
           ...data,
@@ -209,7 +209,7 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
         period_stats,
         by_payment_method,
       });
-    } catch (error: any) {
+    } catch ( _error: any) {
       logger.error('Error fetching withdrawal stats', { error });
       toast({
         title: 'Erreur',
@@ -231,4 +231,10 @@ export const useWithdrawalStats = (options: UseWithdrawalStatsOptions = {}) => {
     refetch: fetchStats,
   };
 };
+
+
+
+
+
+
 
