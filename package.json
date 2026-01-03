@@ -2,7 +2,7 @@
   "name": "emarzona",
   "private": true,
   "version": "1.0.0",
-  "description": "Plateforme de ecommerce et marketing - Application SaaS E-commerce de produits digitaux, physiques et services",
+  "description": "Plateforme de ecommerce et marketing - Application SaaS E-commerce de produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste",
   "author": "Emarzona Team",
   "type": "module",
   "scripts": {
