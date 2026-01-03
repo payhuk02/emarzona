@@ -6,16 +6,17 @@ Allow: /
 Allow: /marketplace
 Allow: /storefront
 Allow: /product/
-Allow: /cart
-Allow: /checkout
+Allow: /static
+Allow: /_next/static
 
 # Bloquer les pages privées et admin
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /account
 Disallow: /api
-Disallow: /_next
-Disallow: /static
+Disallow: /cart
+Disallow: /checkout
+Disallow: /auth
 
 # Sitemap
 Sitemap: https://emarzona.com/sitemap.xml
