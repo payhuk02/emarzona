@@ -37,17 +37,23 @@ export const AdminReviews = () => {
 
   // Data hooks
   const { data: stats, refetch: refetchStats } = useAdminReviewStats();
-  const { data: reviewsResult, isLoading, refetch } = useAdminReviews({ 
+  const {
+    data: reviewsResult,
+    isLoading,
+    refetch,
+  } = useAdminReviews({
     status: activeTab,
     page: currentPage,
-    pageSize 
+    pageSize,
   });
   const reviews = reviewsResult?.data || [];
   // const totalCount = reviewsResult?.count || 0; // Utilisé pour pagination future
 
   useEffect(() => {
     if (!isLoading && reviews) {
-      logger.info(`Admin Reviews: ${reviews.length} avis chargés (tab: ${activeTab}, page: ${currentPage})`);
+      logger.info(
+        `Admin Reviews: ${reviews.length} avis chargés (tab: ${activeTab}, page: ${currentPage})`
+      );
     }
   }, [isLoading, reviews, activeTab, currentPage]);
 
@@ -77,11 +83,17 @@ export const AdminReviews = () => {
     <AdminLayout>
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style Inventory */}
-        <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                <FileText
+                  className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                  aria-hidden="true"
+                />
               </div>
               <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Modération des Avis
@@ -104,40 +116,40 @@ export const AdminReviews = () => {
         </div>
 
         {/* Stats Cards - Style Inventory (Purple-Pink Gradient) */}
-        <div 
+        <div
           ref={statsRef}
           className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-          role="region" 
+          role="region"
           aria-label="Statistiques des avis"
         >
           {[
-            { 
-              label: 'En attente', 
-              value: (stats && typeof stats === 'object' && 'pending' in stats) ? stats.pending : 0, 
-              icon: Clock, 
-              color: "from-orange-600 to-amber-600",
-              description: "Avis à modérer"
+            {
+              label: 'En attente',
+              value: stats && typeof stats === 'object' && 'pending' in stats ? stats.pending : 0,
+              icon: Clock,
+              color: 'from-orange-600 to-amber-600',
+              description: 'Avis à modérer',
             },
-            { 
-              label: 'Signalés', 
-              value: (stats && typeof stats === 'object' && 'flagged' in stats) ? stats.flagged : 0, 
-              icon: Flag, 
-              color: "from-red-600 to-rose-600",
-              description: "Signalements actifs"
+            {
+              label: 'Signalés',
+              value: stats && typeof stats === 'object' && 'flagged' in stats ? stats.flagged : 0,
+              icon: Flag,
+              color: 'from-red-600 to-rose-600',
+              description: 'Signalements actifs',
             },
-            { 
-              label: 'Approuvés', 
-              value: (stats && typeof stats === 'object' && 'approved' in stats) ? stats.approved : 0, 
-              icon: CheckCircle2, 
-              color: "from-green-600 to-emerald-600",
-              description: "Total approuvés"
+            {
+              label: 'Approuvés',
+              value: stats && typeof stats === 'object' && 'approved' in stats ? stats.approved : 0,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+              description: 'Total approuvés',
             },
-            { 
-              label: 'Rejetés', 
-              value: (stats && typeof stats === 'object' && 'rejected' in stats) ? stats.rejected : 0, 
-              icon: XCircle, 
-              color: "from-gray-600 to-slate-600",
-              description: "Total rejetés"
+            {
+              label: 'Rejetés',
+              value: stats && typeof stats === 'object' && 'rejected' in stats ? stats.rejected : 0,
+              icon: XCircle,
+              color: 'from-gray-600 to-slate-600',
+              description: 'Total rejetés',
             },
           ].map((stat, index) => {
             const Icon = stat.icon;
@@ -154,12 +166,12 @@ export const AdminReviews = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stat.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
                 </CardContent>
               </Card>
             );
@@ -168,10 +180,10 @@ export const AdminReviews = () => {
 
         {/* Tabs - Style Inventory */}
         <div ref={tabsRef} role="region" aria-label="Onglets de modération">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
+          <Tabs value={activeTab} onValueChange={value => setActiveTab(value as typeof activeTab)}>
             <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full sm:w-auto grid grid-cols-2 sm:grid-cols-4 gap-1">
-              <TabsTrigger 
-                value="pending" 
+              <TabsTrigger
+                value="pending"
                 className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
               >
                 En attente
@@ -181,8 +193,8 @@ export const AdminReviews = () => {
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger 
-                value="flagged" 
+              <TabsTrigger
+                value="flagged"
                 className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
               >
                 Signalés
@@ -192,14 +204,14 @@ export const AdminReviews = () => {
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger 
-                value="approved" 
+              <TabsTrigger
+                value="approved"
                 className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
               >
                 Approuvés
               </TabsTrigger>
-              <TabsTrigger 
-                value="all" 
+              <TabsTrigger
+                value="all"
                 className="flex-1 sm:flex-none gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
               >
                 Tous
@@ -209,7 +221,9 @@ export const AdminReviews = () => {
             <TabsContent value="pending" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-lg sm:text-xl">Avis en attente de modération</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">
+                    Avis en attente de modération
+                  </CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
                     Ces avis nécessitent une validation manuelle
                   </CardDescription>
@@ -219,17 +233,19 @@ export const AdminReviews = () => {
                     <div className="flex justify-center items-center py-8 sm:py-12">
                       <div className="flex flex-col items-center gap-3 sm:gap-4">
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-                        <p className="text-sm sm:text-base text-muted-foreground">Chargement des avis...</p>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                          Chargement des avis...
+                        </p>
                       </div>
                     </div>
                   ) : (
                     <ReviewModerationTable
                       reviews={reviews || []}
                       loading={isLoading}
-                      onApprove={(ids) => approveReviews.mutate(ids)}
-                      onReject={(ids) => rejectReviews.mutate(ids)}
-                      onFlag={(ids) => flagReviews.mutate(ids)}
-                      onDelete={(ids) => deleteReviews.mutate(ids)}
+                      onApprove={ids => approveReviews.mutate(ids)}
+                      onReject={ids => rejectReviews.mutate(ids)}
+                      onFlag={ids => flagReviews.mutate(ids)}
+                      onDelete={ids => deleteReviews.mutate(ids)}
                     />
                   )}
                 </CardContent>
@@ -249,17 +265,19 @@ export const AdminReviews = () => {
                     <div className="flex justify-center items-center py-8 sm:py-12">
                       <div className="flex flex-col items-center gap-3 sm:gap-4">
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-                        <p className="text-sm sm:text-base text-muted-foreground">Chargement des avis...</p>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                          Chargement des avis...
+                        </p>
                       </div>
                     </div>
                   ) : (
                     <ReviewModerationTable
                       reviews={reviews || []}
                       loading={isLoading}
-                      onApprove={(ids) => approveReviews.mutate(ids)}
-                      onReject={(ids) => rejectReviews.mutate(ids)}
-                      onFlag={(ids) => flagReviews.mutate(ids)}
-                      onDelete={(ids) => deleteReviews.mutate(ids)}
+                      onApprove={ids => approveReviews.mutate(ids)}
+                      onReject={ids => rejectReviews.mutate(ids)}
+                      onFlag={ids => flagReviews.mutate(ids)}
+                      onDelete={ids => deleteReviews.mutate(ids)}
                     />
                   )}
                 </CardContent>
@@ -279,17 +297,19 @@ export const AdminReviews = () => {
                     <div className="flex justify-center items-center py-8 sm:py-12">
                       <div className="flex flex-col items-center gap-3 sm:gap-4">
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-                        <p className="text-sm sm:text-base text-muted-foreground">Chargement des avis...</p>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                          Chargement des avis...
+                        </p>
                       </div>
                     </div>
                   ) : (
                     <ReviewModerationTable
                       reviews={reviews || []}
                       loading={isLoading}
-                      onApprove={(ids) => approveReviews.mutate(ids)}
-                      onReject={(ids) => rejectReviews.mutate(ids)}
-                      onFlag={(ids) => flagReviews.mutate(ids)}
-                      onDelete={(ids) => deleteReviews.mutate(ids)}
+                      onApprove={ids => approveReviews.mutate(ids)}
+                      onReject={ids => rejectReviews.mutate(ids)}
+                      onFlag={ids => flagReviews.mutate(ids)}
+                      onDelete={ids => deleteReviews.mutate(ids)}
                     />
                   )}
                 </CardContent>
@@ -309,17 +329,19 @@ export const AdminReviews = () => {
                     <div className="flex justify-center items-center py-8 sm:py-12">
                       <div className="flex flex-col items-center gap-3 sm:gap-4">
                         <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-                        <p className="text-sm sm:text-base text-muted-foreground">Chargement des avis...</p>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                          Chargement des avis...
+                        </p>
                       </div>
                     </div>
                   ) : (
                     <ReviewModerationTable
                       reviews={reviews || []}
                       loading={isLoading}
-                      onApprove={(ids) => approveReviews.mutate(ids)}
-                      onReject={(ids) => rejectReviews.mutate(ids)}
-                      onFlag={(ids) => flagReviews.mutate(ids)}
-                      onDelete={(ids) => deleteReviews.mutate(ids)}
+                      onApprove={ids => approveReviews.mutate(ids)}
+                      onReject={ids => rejectReviews.mutate(ids)}
+                      onFlag={ids => flagReviews.mutate(ids)}
+                      onDelete={ids => deleteReviews.mutate(ids)}
                     />
                   )}
                 </CardContent>
@@ -331,10 +353,3 @@ export const AdminReviews = () => {
     </AdminLayout>
   );
 };
-
-
-
-
-
-
-

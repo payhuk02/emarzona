@@ -87,7 +87,7 @@ const Landing = () => {
 
     const duration = 2000;
     const startTime = Date.now();
-    let  animationFrameId: number;
+    let animationFrameId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -667,7 +667,7 @@ const Landing = () => {
       {/* Payment Methods Section - Optimisé Mobile */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-secondary/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1">
               <div className="hidden sm:block">
                 <MultiCurrencyMockup />
@@ -741,7 +741,7 @@ const Landing = () => {
       {/* Marketplace Section - Optimisé Mobile */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-background">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full mb-4 sm:mb-6 border border-primary/20">
                 <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
@@ -909,7 +909,7 @@ const Landing = () => {
       {/* Email Marketing Section - Optimisé Mobile */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-secondary/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/10 backdrop-blur-sm px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full mb-4 sm:mb-6 border border-accent/20">
                 <Mail className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-accent" />
@@ -988,7 +988,7 @@ const Landing = () => {
       {/* Shipping Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-secondary/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1">
               <div className="bg-card rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 border border-border shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
@@ -1611,7 +1611,7 @@ const Landing = () => {
       {/* Security Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-background">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1">
               <SecurityMockup />
             </div>
@@ -1669,7 +1669,7 @@ const Landing = () => {
       {/* Support Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-secondary/30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center max-w-6xl mx-auto">
             <div className="order-2 md:order-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-primary/10 backdrop-blur-sm px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full mb-6 sm:mb-8 border border-primary/20">
                 <HeadphonesIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
@@ -2126,18 +2126,3 @@ const Landing = () => {
 };
 
 export default Landing;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

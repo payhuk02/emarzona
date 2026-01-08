@@ -119,27 +119,34 @@ export default function AdminSupport() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-6 space-y-6">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
             {/* Header */}
-            <div ref={headerRef} className="flex items-center justify-between" role="banner">
+            <div
+              ref={headerRef}
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+              role="banner"
+            >
               <div>
-                <h1 className="text-3xl font-bold tracking-tight" id="admin-support-title">
+                <h1
+                  className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight"
+                  id="admin-support-title"
+                >
                   Support Client
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                   Gérez les tickets de support des utilisateurs
                 </p>
               </div>
-              <Button className="min-h-[44px]">
+              <Button className="min-h-[44px] w-full sm:w-auto">
                 <MessageSquare className="h-4 w-4 mr-2" />
-                Nouveau Ticket
+                <span className="text-sm sm:text-base">Nouveau Ticket</span>
               </Button>
             </div>
 
             {/* Stats Cards */}
             <div
               ref={statsRef}
-              className="grid gap-4 md:grid-cols-4"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
               role="region"
               aria-label="Statistiques des tickets"
             >
@@ -194,7 +201,7 @@ export default function AdminSupport() {
             <div ref={tableRef} role="region" aria-label="Tableau des tickets">
               <Card>
                 <CardHeader>
-                  <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <div className="flex-1">
                       <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -350,9 +357,3 @@ export default function AdminSupport() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

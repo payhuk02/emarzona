@@ -117,7 +117,7 @@ const ProductListView = ({
 
   // Obtenir la couleur de catégorie - mémorisé
   const getCategoryColor = useCallback((category: string | null) => {
-    const  colors: Record<string, string> = {
+    const colors: Record<string, string> = {
       Formation: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
       Digital: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
       Service: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
@@ -133,23 +133,24 @@ const ProductListView = ({
     <Card
       className={`hover:shadow-md transition-all border-border/50 ${isSelected ? 'ring-2 ring-primary' : ''}`}
     >
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4">
+      <CardContent className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
           {/* Checkbox de sélection */}
           {onSelect && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 order-1 sm:order-none">
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={onSelect}
                 aria-label={t('products.selectProduct', 'Sélectionner ce produit')}
+                className="min-h-[44px] min-w-[44px]"
               />
             </div>
           )}
 
           {/* Image */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 order-2 sm:order-none">
             {product.image_url && !imageError ? (
-              <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-muted">
                 <LazyImage
                   src={product.image_url}
                   alt={product.name}
@@ -158,24 +159,24 @@ const ProductListView = ({
                 />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                <Package className="h-6 w-6 text-muted-foreground" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                <Package className="h-4 w-4 sm:h-6 sm:w-6 text-muted-foreground" />
               </div>
             )}
           </div>
 
           {/* Informations principales */}
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0 space-y-2 order-3 sm:order-none">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-base truncate hover:text-primary transition-colors">
+                <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate hover:text-primary transition-colors">
                   {product.name}
                 </h3>
               </div>
 
               <Badge
                 variant={product.is_active ? 'default' : 'secondary'}
-                className="flex-shrink-0 text-xs"
+                className="flex-shrink-0 text-xs w-fit"
               >
                 {product.is_active
                   ? t('products.status.active', 'Actif')
@@ -223,38 +224,44 @@ const ProductListView = ({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
-                <DollarSign className="h-3 w-3 text-green-600" />
+                <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
                 <span className="font-semibold text-green-600">
                   {product.price.toLocaleString()} {product.currency}
                 </span>
               </div>
               {product.rating > 0 && (
                 <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                  <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
                   <span>{product.rating.toFixed(1)}</span>
                   <span className="text-muted-foreground">({product.reviews_count})</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>{formatDate(product.created_at)}</span>
+                <Calendar className="h-3 w-3 flex-shrink-0" />
+                <span className="hidden sm:inline">{formatDate(product.created_at)}</span>
+                <span className="sm:hidden">
+                  {new Date(product.created_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                  })}
+                </span>
               </div>
               <div className="flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
+                <TrendingUp className="h-3 w-3 flex-shrink-0" />
                 <span>{t('products.salesCount', '{{count}} ventes', { count: 0 })}</span>
               </div>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex-shrink-0 flex items-center gap-2">
+          <div className="flex-shrink-0 flex items-center gap-2 order-4 sm:order-none w-full sm:w-auto justify-end sm:justify-start">
             <Button
               variant="outline"
               size="sm"
               onClick={onEdit}
-              className="flex items-center justify-center gap-1.5 min-w-[100px] lg:min-w-[120px]"
+              className="flex items-center justify-center gap-1.5 min-w-[44px] sm:min-w-[100px] lg:min-w-[120px] min-h-[44px] touch-manipulation"
               aria-label={t('products.actions.edit', 'Modifier')}
             >
               <Edit className="h-4 w-4 flex-shrink-0" />
@@ -268,7 +275,7 @@ const ProductListView = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex items-center justify-center min-w-[40px]"
+                  className="flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation"
                   aria-label={t('products.actionsForProduct', 'Actions pour le produit {{name}}', {
                     name: product.name || product.id,
                   })}
@@ -339,9 +346,3 @@ export default React.memo(ProductListView, (prevProps, nextProps) => {
     prevProps.isSelected === nextProps.isSelected
   );
 });
-
-
-
-
-
-

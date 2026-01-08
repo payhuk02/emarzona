@@ -257,7 +257,7 @@ const Products = () => {
           title: 'Produit supprimé',
           description: 'Le produit a été supprimé avec succès',
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(error instanceof Error ? error : 'Erreur lors de la suppression du produit', {
           error,
@@ -284,7 +284,7 @@ const Products = () => {
           title: 'Produits supprimés',
           description: `${productIds.length} produit(s) supprimé(s) avec succès`,
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(error instanceof Error ? error : 'Erreur lors de la suppression en lot', {
           error,
@@ -313,7 +313,7 @@ const Products = () => {
           title: 'Action appliquée',
           description: `${productIds.length} produit(s) ${action === 'activate' ? 'activé(s)' : 'désactivé(s)'}`,
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(error instanceof Error ? error : `Erreur lors de l'action en lot ${action}`, {
           error,
@@ -350,7 +350,7 @@ const Products = () => {
             title: product.is_active ? 'Produit désactivé' : 'Produit activé',
             description: `Le produit a été ${product.is_active ? 'désactivé' : 'activé'} avec succès`,
           });
-        } catch ( _error: unknown) {
+        } catch (_error: unknown) {
           const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
           logger.error(error instanceof Error ? error : 'Erreur lors du changement de statut', {
             error,
@@ -519,10 +519,10 @@ const Products = () => {
       ];
 
       // OPTIMISATION: Éviter .map().map() en utilisant une seule boucle
-      const  csvRows: string[] = [headers.join(',')];
+      const csvRows: string[] = [headers.join(',')];
 
       for (const product of filteredProducts) {
-        const  row: string[] = [];
+        const row: string[] = [];
         for (const header of headers) {
           const value = product[header as keyof Product];
           // Échapper les virgules et guillemets
@@ -557,7 +557,7 @@ const Products = () => {
           count: filteredProducts.length,
         }),
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error(error instanceof Error ? error : "Erreur lors de l'export CSV", {
         error,
@@ -889,8 +889,8 @@ const Products = () => {
               <>
                 {/* Barre d'actions avec design amélioré pour mobile */}
                 <div className="flex flex-col gap-2 sm:gap-3 lg:gap-4 p-2 sm:p-3 lg:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
-                  <div className="flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
-                    <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0 w-full sm:w-auto">
                       {paginatedProducts.length > 0 && (
                         <Checkbox
                           checked={
@@ -921,12 +921,12 @@ const Products = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setImportDialogOpen(true)}
-                      className="flex-1 hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] text-sm"
+                      className="flex-1 sm:flex-initial hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] text-xs sm:text-sm"
                     >
                       <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                       <span className="hidden sm:inline">{t('products.import', 'Importer')}</span>
@@ -937,7 +937,7 @@ const Products = () => {
                       size="sm"
                       onClick={handleExportCSV}
                       disabled={exportingCSV || filteredProducts.length === 0}
-                      className="flex-1 hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px] text-sm"
+                      className="flex-1 sm:flex-initial hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px] text-xs sm:text-sm"
                     >
                       {exportingCSV ? (
                         <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 animate-spin flex-shrink-0" />
@@ -1087,9 +1087,9 @@ const Products = () => {
                             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                           </Button>
 
-                          <div className="flex items-center gap-1 px-1 sm:px-2">
+                          <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 flex-wrap justify-center">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                              let  _pageNumber;
+                              let _pageNumber;
                               if (totalPages <= 5) {
                                 pageNumber = i + 1;
                               } else if (currentPage <= 3) {
@@ -1106,7 +1106,7 @@ const Products = () => {
                                   variant={currentPage === pageNumber ? 'default' : 'outline'}
                                   size="sm"
                                   onClick={() => handlePageChange(pageNumber)}
-                                  className="min-h-[44px] min-w-[44px] h-11 w-11 transition-all duration-200 hover:scale-105 active:scale-95"
+                                  className="min-h-[44px] min-w-[44px] h-10 w-10 sm:h-11 sm:w-11 transition-all duration-200 hover:scale-105 active:scale-95 text-xs sm:text-sm"
                                   aria-label={t(
                                     'products.pagination.goToPage',
                                     'Aller à la page {{page}}',
@@ -1317,9 +1317,3 @@ const Products = () => {
 };
 
 export default Products;
-
-
-
-
-
-

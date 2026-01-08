@@ -92,7 +92,7 @@ const AdminStores = () => {
 
       setStores(storesWithDetails);
       logger.info(`${storesWithDetails.length} boutiques chargées`);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Erreur lors du chargement des boutiques:', error);
     } finally {
       setLoading(false);
@@ -133,7 +133,7 @@ const AdminStores = () => {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
         >
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
                 <Store
                   className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
@@ -317,9 +317,3 @@ const AdminStores = () => {
 };
 
 export default AdminStores;
-
-
-
-
-
-

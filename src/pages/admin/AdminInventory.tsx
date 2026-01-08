@@ -120,7 +120,7 @@ export default function AdminInventory() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-6 space-y-6">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
             {/* Header */}
             <div
               ref={headerRef}
@@ -436,9 +436,3 @@ export default function AdminInventory() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

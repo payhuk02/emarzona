@@ -50,24 +50,30 @@ export default function AdminAnalytics() {
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-6 space-y-6">
+          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
             {/* Header */}
-            <div ref={headerRef} role="banner">
-              <h1
-                className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight"
-                id="admin-analytics-title"
-              >
-                Analytics Plateforme
-              </h1>
-              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                Vue d'ensemble des statistiques globales
-              </p>
+            <div
+              ref={headerRef}
+              role="banner"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+            >
+              <div>
+                <h1
+                  className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight"
+                  id="admin-analytics-title"
+                >
+                  Analytics Plateforme
+                </h1>
+                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+                  Vue d'ensemble des statistiques globales
+                </p>
+              </div>
             </div>
 
             {/* Main Stats Grid */}
             <div
               ref={statsRef}
-              className="grid gap-4 md:grid-cols-4"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
               role="region"
               aria-label="Statistiques principales"
             >
@@ -139,7 +145,7 @@ export default function AdminAnalytics() {
             </div>
 
             {/* Secondary Stats */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium">
@@ -196,7 +202,7 @@ export default function AdminAnalytics() {
             {/* Charts Placeholder */}
             <div
               ref={chartsRef}
-              className="grid gap-4 md:grid-cols-2"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
               role="region"
               aria-label="Graphiques analytiques"
             >
@@ -286,9 +292,3 @@ export default function AdminAnalytics() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

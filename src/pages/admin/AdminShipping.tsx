@@ -137,7 +137,7 @@ export default function AdminShipping() {
             <div
               ref={headerRef}
               role="banner"
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
             >
               <div>
                 <h1
@@ -156,7 +156,7 @@ export default function AdminShipping() {
             {/* Stats Cards */}
             <div
               ref={statsRef}
-              className="grid gap-4 md:grid-cols-4"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
               role="region"
               aria-label="Statistiques des expéditions"
             >
@@ -374,9 +374,3 @@ export default function AdminShipping() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

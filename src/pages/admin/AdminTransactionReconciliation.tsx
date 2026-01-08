@@ -90,7 +90,7 @@ export default function AdminTransactionReconciliation() {
   } = useQuery({
     queryKey: ['admin-transactions-reconciliation', activeTab],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('transactions')
         .select(
           `
@@ -314,7 +314,7 @@ export default function AdminTransactionReconciliation() {
   }, [filteredTransactions, toast]);
 
   const getStatusBadge = useCallback((status: string) => {
-    const  variants: Record<string, { label: string; className: string }> = {
+    const variants: Record<string, { label: string; className: string }> = {
       completed: { label: 'Complétée', className: 'bg-green-100 text-green-800' },
       processing: { label: 'En traitement', className: 'bg-yellow-100 text-yellow-800' },
       pending: { label: 'En attente', className: 'bg-blue-100 text-blue-800' },
@@ -350,7 +350,7 @@ export default function AdminTransactionReconciliation() {
             <div
               ref={headerRef}
               role="banner"
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
             >
               <div>
                 <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight">
@@ -380,7 +380,7 @@ export default function AdminTransactionReconciliation() {
             {stats && (
               <div
                 ref={statsRef}
-                className="grid gap-4 md:grid-cols-4"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
                 role="region"
                 aria-label="Statistiques"
               >
@@ -660,9 +660,3 @@ export default function AdminTransactionReconciliation() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

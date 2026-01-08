@@ -102,7 +102,7 @@ export default function MyFavorites() {
     queryFn: async (): Promise<FavoriteProduct[]> => {
       if (!user?.id || favorites.size === 0) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('user_favorites')
         .select(
           `
@@ -216,10 +216,10 @@ export default function MyFavorites() {
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-3 sm:p-4 md:p-6">
             <div className="max-w-7xl mx-auto space-y-6">
               <Skeleton className="h-10 w-64" />
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 {[1, 2, 3, 4].map(i => (
                   <Skeleton key={i} className="h-32" />
                 ))}
@@ -630,9 +630,3 @@ export default function MyFavorites() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-
