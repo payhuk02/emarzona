@@ -5,6 +5,25 @@
 
 ---
 
+## ✅ RÉSUMÉ DES CORRECTIONS
+
+**Date**: 2025-01-30  
+**Statut**: ✅ Corrections appliquées localement
+
+### Corrections Effectuées
+
+1. ✅ **CORS** : Code corrigé dans `supabase/functions/moneroo/index.ts` (nécessite redéploiement)
+2. ✅ **MIME Type CSS** : Suppression du chargement manuel CSS dans `src/lib/critical-css.ts`
+3. ✅ **Erreur "error is not defined"** : Correction dans `src/lib/moneroo-payment.ts` (3 occurrences)
+
+### ⚠️ Action Requise
+
+**URGENT** : Redéployer la fonction Supabase `moneroo` pour que les corrections CORS soient effectives.
+
+Voir : `GUIDE_REDEPLOIEMENT_SUPABASE_MONEROO.md`
+
+---
+
 ## 🔴 Problèmes Identifiés
 
 ### 1. Erreur CORS - `api.emarzona.com` bloqué
@@ -117,7 +136,28 @@ if (origin.includes('.emarzona.com')) {
 
 ---
 
-### 3. Mise à jour CSP pour `api.emarzona.com`
+### 3. Correction Erreur "error is not defined"
+
+**Problème identifié**: Dans `src/lib/moneroo-payment.ts`, plusieurs `catch` blocks utilisaient `error` au lieu de `_error`, causant l'erreur "error is not defined" dans la console lors des erreurs de paiement.
+
+**Erreur**:
+```
+Erreur de paiement: error is not defined
+```
+
+**Cause**: Variables `error` non définies dans les `catch` blocks (lignes 386, 523, 673).
+
+**Solution**: 
+- ✅ Ligne 386 : `fullError: error` → `fullError: _error`
+- ✅ Ligne 523 : `parseMonerooError(error)` → `parseMonerooError(_error)`
+- ✅ Ligne 673 : `parseMonerooError(error)` → `parseMonerooError(_error)`
+
+**Fichier modifié**:
+- `src/lib/moneroo-payment.ts` - Correction de 3 occurrences de `error` → `_error`
+
+---
+
+### 4. Mise à jour CSP pour `api.emarzona.com`
 
 **Fichier modifié**: `vercel.json`
 

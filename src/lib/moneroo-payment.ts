@@ -383,7 +383,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         code: monerooError.code,
         statusCode: monerooError.statusCode,
         details: monerooError.details,
-        fullError: error,
+        fullError: _error,
       });
       
       // Améliorer le message d'erreur pour les erreurs Edge Function
@@ -520,7 +520,7 @@ export const verifyTransactionStatus = async (transactionId: string) => {
 
     return transaction;
   } catch ( _error: unknown) {
-    const monerooError = parseMonerooError(error);
+    const monerooError = parseMonerooError(_error);
     logger.error("Transaction verification error:", {
       error: monerooError.message,
       code: monerooError.code,
@@ -670,7 +670,7 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       status: refundResponse.status,
     };
   } catch ( _error: unknown) {
-    const monerooError = parseMonerooError(error);
+    const monerooError = parseMonerooError(_error);
     
     // Log de l'erreur
     await supabase.from("transaction_logs").insert([{
