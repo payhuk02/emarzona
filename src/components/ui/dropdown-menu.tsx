@@ -131,96 +131,91 @@ const DropdownMenuContent = React.forwardRef<
       return () => observer.disconnect();
     }, []);
 
-    // Verrouiller la position sur mobile quand le menu est ouvert pour garantir la stabilité
-    // Utilise le même système que SelectContent pour une stabilité maximale
+    // Verrouiller le scroll du body sur mobile quand le menu est ouvert (comme SelectContent)
+    useBodyScrollLock(isMobile && mobileOptimized && isOpen);
+
+    // Verrouiller la position sur mobile pour éviter les mouvements pendant l'interaction
+    // Système simple comme dans useStableSelect
     React.useEffect(() => {
-      if (!isMobile || !mobileOptimized || !isOpen || !contentRef.current) return;
-      // En mode bottom sheet mobile, le positionnement est déjà géré par les styles inline
-      if (isMobileSheet) return;
+      if (!isMobile || !mobileOptimized || !isOpen || !contentRef.current || isMobileSheet) return;
 
       const menuElement = contentRef.current;
-      let lockedPosition: { top: number; left: number; width: number; height: number } | null =
-        null;
-      let rafId: number | null = null;
+      let lockedPosition: { top: number; left: number; width: number } | null = null;
 
-      let isLocked = false;
-
-      // Fonction pour verrouiller la position de manière stable
+      // Fonction pour verrouiller la position
       const lockPosition = () => {
-        if (!menuElement || isLocked) return;
+        if (!menuElement) return;
 
         const rect = menuElement.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-          // Le menu n'est pas encore positionné, réessayer au prochain frame
-          rafId = requestAnimationFrame(lockPosition);
-          return;
-        }
+        if (rect.width === 0 || rect.height === 0) return;
 
-        // Verrouiller la position exacte
         lockedPosition = {
           top: rect.top,
           left: rect.left,
           width: rect.width,
-          height: rect.height,
         };
 
-        // Forcer la position fixe avec transform: none pour éviter tout mouvement
-        // Utiliser les mêmes techniques que SelectContent
+        // Forcer la position fixe
         menuElement.style.position = 'fixed';
         menuElement.style.top = `${lockedPosition.top}px`;
         menuElement.style.left = `${lockedPosition.left}px`;
         menuElement.style.width = `${lockedPosition.width}px`;
         menuElement.style.maxWidth = `${lockedPosition.width}px`;
         menuElement.style.transform = 'none';
-        menuElement.style.willChange = 'auto'; // Éviter les optimisations qui causent des mouvements
-        menuElement.style.transition = 'none'; // Désactiver les transitions pendant le verrouillage
-
-        isLocked = true;
       };
 
-      // Attendre que le menu soit positionné par Radix UI, puis verrouiller
-      // Utiliser requestAnimationFrame pour une synchronisation précise
-      const initialTimeout = setTimeout(() => {
-        rafId = requestAnimationFrame(lockPosition);
+      // Attendre que le menu soit positionné par Radix UI
+      const timeoutId = setTimeout(() => {
+        lockPosition();
+
+        // Surveiller les changements de position avec MutationObserver
+        const observer = new MutationObserver(() => {
+          if (lockedPosition && menuElement) {
+            const currentRect = menuElement.getBoundingClientRect();
+            // Si la position a changé, la restaurer immédiatement
+            if (
+              Math.abs(currentRect.top - lockedPosition.top) > 1 ||
+              Math.abs(currentRect.left - lockedPosition.left) > 1
+            ) {
+              menuElement.style.top = `${lockedPosition.top}px`;
+              menuElement.style.left = `${lockedPosition.left}px`;
+            }
+          }
+        });
+
+        // Observer les changements d'attributs de style
+        observer.observe(menuElement, {
+          attributes: true,
+          attributeFilter: ['style', 'class'],
+          childList: false,
+          subtree: false,
+        });
+
+        // Stocker l'observer pour le nettoyer plus tard
+        (menuElement as HTMLElement & { _positionObserver?: MutationObserver })._positionObserver =
+          observer;
       }, 100);
 
-      // Observer les changements de position et re-verrouiller si nécessaire
-      const observer = new ResizeObserver(() => {
-        if (lockedPosition && menuElement && isLocked) {
-          // Re-verrouiller si la taille change, mais seulement si déjà verrouillé
-          const currentRect = menuElement.getBoundingClientRect();
-          // Ne re-verrouiller que si la position a vraiment changé
-          if (
-            Math.abs(currentRect.top - lockedPosition.top) > 1 ||
-            Math.abs(currentRect.left - lockedPosition.left) > 1
-          ) {
-            isLocked = false;
-            lockPosition();
-          }
-        }
-      });
-
-      if (menuElement) {
-        observer.observe(menuElement);
-      }
-
       return () => {
-        clearTimeout(initialTimeout);
-        if (rafId !== null) {
-          cancelAnimationFrame(rafId);
-        }
-        observer.disconnect();
-        isLocked = false;
-        if (menuElement && lockedPosition) {
+        clearTimeout(timeoutId);
+        if (menuElement) {
+          // Nettoyer l'observer si présent
+          const elementWithObserver = menuElement as HTMLElement & {
+            _positionObserver?: MutationObserver;
+          };
+          if (elementWithObserver._positionObserver) {
+            elementWithObserver._positionObserver.disconnect();
+            delete elementWithObserver._positionObserver;
+          }
           // Restaurer les styles à la fermeture
-          menuElement.style.position = '';
-          menuElement.style.top = '';
-          menuElement.style.left = '';
-          menuElement.style.width = '';
-          menuElement.style.maxWidth = '';
-          menuElement.style.transform = '';
-          menuElement.style.willChange = '';
-          menuElement.style.transition = '';
+          if (lockedPosition) {
+            menuElement.style.position = '';
+            menuElement.style.top = '';
+            menuElement.style.left = '';
+            menuElement.style.width = '';
+            menuElement.style.maxWidth = '';
+            menuElement.style.transform = '';
+          }
         }
       };
     }, [isMobile, mobileOptimized, isOpen, isMobileSheet]);
@@ -233,20 +228,29 @@ const DropdownMenuContent = React.forwardRef<
           side={isMobileSheet ? 'bottom' : isMobile && mobileOptimized ? 'bottom' : props.side}
           align={isMobileSheet ? 'center' : isMobile && mobileOptimized ? 'end' : props.align}
           // En mode sheet mobile, on gère nous-mêmes le positionnement (pas de collisions Radix)
-          avoidCollisions={isMobileSheet ? false : (props.avoidCollisions ?? true)}
-          collisionPadding={
+          // Sur mobile, désactiver avoidCollisions pour éviter les recalculs de position qui causent des mouvements
+          // Exactement comme SelectContent : avoidCollisions={isMobileSheet ? false : true}
+          avoidCollisions={
             isMobileSheet
-              ? MOBILE_COLLISION_PADDING
+              ? false
               : isMobile && mobileOptimized
-                ? MOBILE_COLLISION_PADDING
-                : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
+                ? false
+                : (props.avoidCollisions ?? true)
           }
+          // Utiliser 'always' sur mobile pour empêcher tout mouvement (comme SelectContent)
           sticky={
             isMobileSheet
               ? 'always'
               : isMobile && mobileOptimized
                 ? 'always'
                 : (props.sticky ?? 'partial')
+          }
+          collisionPadding={
+            isMobileSheet
+              ? MOBILE_COLLISION_PADDING
+              : isMobile && mobileOptimized
+                ? MOBILE_COLLISION_PADDING
+                : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
           }
           style={{
             ...props.style,
@@ -260,10 +264,15 @@ const DropdownMenuContent = React.forwardRef<
               width: '100vw',
               maxWidth: '100vw',
             }),
-            // Empêcher les mouvements pendant l'interaction sur mobile
+            // Sur mobile non-sheet, forcer la position pour éviter les mouvements
+            // Exactement comme SelectContent utilise sticky: 'always'
             ...(isMobile &&
               mobileOptimized &&
-              !isMobileSheet && {
+              !isMobileSheet &&
+              isOpen && {
+                // Forcer la position une fois que le menu est ouvert
+                position: 'fixed',
+                transform: 'none',
                 willChange: 'auto',
               }),
           }}
@@ -382,67 +391,12 @@ const DropdownMenuItem = React.forwardRef<
      */
     inset?: boolean;
   }
->(({ className, inset, onClick, ...props }, ref) => {
+>(({ className, inset, ...props }, ref) => {
   const isMobile = useIsMobile();
-  const itemRef = React.useRef<HTMLDivElement>(null);
-
-  // Combiner les refs
-  React.useImperativeHandle(
-    ref,
-    () => itemRef.current as React.ElementRef<typeof DropdownMenuPrimitive.Item>
-  );
-
-  // Gestion améliorée des événements tactiles sur mobile
-  const handleClick = React.useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      // Sur mobile, empêcher la propagation pour éviter la fermeture prématurée
-      if (isMobile) {
-        e.stopPropagation();
-        // Exécuter l'action immédiatement mais empêcher la fermeture du menu
-        onClick?.(e);
-      } else {
-        onClick?.(e);
-      }
-    },
-    [isMobile, onClick]
-  );
-
-  // Gestion du touch pour mobile - empêcher la fermeture prématurée
-  const handleTouchStart = React.useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    // Empêcher la propagation pour éviter la fermeture du menu
-    e.stopPropagation();
-    // Ajouter un feedback visuel immédiat
-    if (itemRef.current) {
-      itemRef.current.classList.add('bg-accent');
-    }
-  }, []);
-
-  const handleTouchEnd = React.useCallback(
-    (e: React.TouchEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-      // Exécuter l'action si elle existe
-      if (onClick) {
-        // Créer un événement synthétique pour déclencher onClick
-        const syntheticEvent = {
-          ...e,
-          currentTarget: itemRef.current,
-          target: itemRef.current,
-        } as unknown as React.MouseEvent<HTMLDivElement>;
-        onClick(syntheticEvent);
-      }
-      // Restaurer le style après un court délai
-      setTimeout(() => {
-        if (itemRef.current) {
-          itemRef.current.classList.remove('bg-accent');
-        }
-      }, 150);
-    },
-    [onClick]
-  );
 
   return (
     <DropdownMenuPrimitive.Item
-      ref={itemRef}
+      ref={ref}
       className={cn(
         'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
@@ -458,9 +412,13 @@ const DropdownMenuItem = React.forwardRef<
         className
       )}
       role="menuitem"
-      onClick={handleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      // Empêcher la propagation sur pointerDown pour éviter la fermeture prématurée
+      onPointerDown={e => {
+        // Empêcher la propagation qui pourrait fermer le menu prématurément
+        // Mais permettre le comportement par défaut pour la sélection
+        e.stopPropagation();
+        props.onPointerDown?.(e);
+      }}
       {...props}
     />
   );

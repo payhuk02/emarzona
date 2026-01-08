@@ -6,14 +6,12 @@
  * Permet de modifier toutes les étapes comme dans le wizard de création
  */
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Download,
@@ -43,12 +41,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import type {
   DigitalProductFormData,
   DigitalProductFormDataUpdate,
   DigitalProductDownloadableFile,
+  DigitalProductFAQ,
 } from '@/types/digital-product-form';
 import { useQuery } from '@tanstack/react-query';
 
@@ -137,27 +137,16 @@ const convertToFormData = async (productId: string): Promise<Partial<DigitalProd
     .maybeSingle();
 
   // Convert files to downloadable_files format
-  const downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(
-    (file: {
-      id: string;
-      name: string;
-      file_url: string;
-      file_size_mb?: number;
-      file_type?: string;
-      category?: string;
-      version?: string;
-      is_main?: boolean;
-    }) => ({
-      id: file.id,
-      name: file.name,
-      url: file.file_url,
-      size: file.file_size_mb ? file.file_size_mb * 1024 * 1024 : 0,
-      format: file.file_type,
-      category: file.category,
-      version: file.version,
-      is_main: file.is_main || false,
-    })
-  );
+  const downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(file => ({
+    id: file.id,
+    name: file.name,
+    url: file.file_url,
+    size: file.file_size_mb ? file.file_size_mb * 1024 * 1024 : 0,
+    format: file.file_type || undefined,
+    category: file.category || undefined,
+    version: file.version || undefined,
+    is_main: file.is_main || false,
+  }));
 
   return {
     // Basic info
@@ -168,7 +157,11 @@ const convertToFormData = async (productId: string): Promise<Partial<DigitalProd
     category: product.category || 'ebook',
     digital_type: digitalProduct?.digital_type || 'ebook',
     image_url: product.image_url || '',
-    images: product.images || [],
+    images: Array.isArray(product.images)
+      ? (product.images as string[])
+      : product.images
+        ? [String(product.images)]
+        : [],
     price: product.price || 0,
     promotional_price: product.promotional_price || null,
     currency: product.currency || 'XOF',
@@ -241,7 +234,7 @@ const convertToFormData = async (productId: string): Promise<Partial<DigitalProd
     },
 
     // FAQs
-    faqs: product.faqs || [],
+    faqs: Array.isArray(product.faqs) ? (product.faqs as unknown as DigitalProductFAQ[]) : [],
 
     // Licensing
     licensing_type: (product.licensing_type as 'plr' | 'copyrighted' | 'standard') || 'standard',
@@ -249,11 +242,16 @@ const convertToFormData = async (productId: string): Promise<Partial<DigitalProd
 
     // Statistics Display Settings
     hide_purchase_count: product.hide_purchase_count || false,
-    hide_likes_count: product.hide_likes_count || false,
-    hide_recommendations_count: product.hide_recommendations_count || false,
-    hide_downloads_count: product.hide_downloads_count || false,
-    hide_reviews_count: product.hide_reviews_count || false,
-    hide_rating: product.hide_rating || false,
+    hide_likes_count:
+      ((product as Record<string, unknown>).hide_likes_count as boolean | undefined) || false,
+    hide_recommendations_count:
+      ((product as Record<string, unknown>).hide_recommendations_count as boolean | undefined) ||
+      false,
+    hide_downloads_count:
+      ((product as Record<string, unknown>).hide_downloads_count as boolean | undefined) || false,
+    hide_reviews_count:
+      ((product as Record<string, unknown>).hide_reviews_count as boolean | undefined) || false,
+    hide_rating: ((product as Record<string, unknown>).hide_rating as boolean | undefined) || false,
 
     // Metadata
     product_type: 'digital' as const,
@@ -269,7 +267,6 @@ export const EditDigitalProductWizard = ({
   onBack,
 }: EditDigitalProductWizardProps) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
@@ -288,8 +285,6 @@ export const EditDigitalProductWizard = ({
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [formData, setFormData] = useState<Partial<DigitalProductFormData>>({});
   const [validationErrors, setValidationErrors] = useState<Record<number, string[]>>({});
 
@@ -301,14 +296,11 @@ export const EditDigitalProductWizard = ({
   }, [formDataInitial]);
 
   // Server validation hook
-  const {
-    validateSlug,
-    validateDigitalProduct: validateDigitalProductServer,
-    clearServerErrors,
-  } = useWizardServerValidation({
-    storeId: storeId || undefined,
-    productId,
-  });
+  const { validateDigitalProduct: validateDigitalProductServer, clearServerErrors } =
+    useWizardServerValidation({
+      storeId: storeId || undefined,
+      productId,
+    });
 
   const handleUpdateFormData = useCallback((updates: DigitalProductFormDataUpdate) => {
     setFormData(prev => {
@@ -417,11 +409,9 @@ export const EditDigitalProductWizard = ({
                     errors.push(errorObj);
                   } else if (errorObj && typeof errorObj === 'object') {
                     // Essayer d'extraire le message de différentes façons
+                    const errorObjRecord = errorObj as Record<string, unknown>;
                     const message =
-                      errorObj.message ||
-                      errorObj.msg ||
-                      errorObj.error ||
-                      JSON.stringify(errorObj);
+                      (errorObjRecord.message as string | undefined) || JSON.stringify(errorObj);
                     if (message) errors.push(String(message));
                   }
                 });
@@ -566,7 +556,7 @@ export const EditDigitalProductWizard = ({
           meta_title: formData.seo?.meta_title,
           meta_description: formData.seo?.meta_description,
           og_image: formData.seo?.og_image,
-          faqs: formData.faqs || [],
+          faqs: (formData.faqs || []) as unknown as Json,
           licensing_type: formData.licensing_type || 'standard',
           license_terms: formData.license_terms || null,
           hide_purchase_count: formData.hide_purchase_count,
@@ -652,8 +642,8 @@ export const EditDigitalProductWizard = ({
           file_size_mb: (file.size || 0) / (1024 * 1024),
           order_index: index,
           is_main: index === 0,
-          is_preview: file.is_preview || false,
-          requires_purchase: file.requires_purchase !== false && !file.is_preview,
+          is_preview: false,
+          requires_purchase: true,
           version: file.version || '1.0',
         }));
 
@@ -775,7 +765,7 @@ export const EditDigitalProductWizard = ({
       case 1:
         return (
           <DigitalBasicInfoForm
-            formData={formData as DigitalProductFormData}
+            formData={formData as unknown as DigitalProductFormData}
             updateFormData={handleUpdateFormData}
             storeSlug={storeSlug || ''}
           />
@@ -791,8 +781,8 @@ export const EditDigitalProductWizard = ({
         return (
           <div className="space-y-6">
             <DigitalLicenseConfig
-              formData={formData as DigitalProductFormData}
-              updateFormData={handleUpdateFormData}
+              formData={formData as unknown as Record<string, unknown>}
+              updateFormData={handleUpdateFormData as (updates: Record<string, unknown>) => void}
             />
             <ProductStatisticsDisplaySettings
               formData={{
@@ -818,7 +808,7 @@ export const EditDigitalProductWizard = ({
               formData.affiliate || {
                 enabled: false,
                 commission_rate: 20,
-                commission_type: 'percentage',
+                commission_type: 'percentage' as const,
                 fixed_commission_amount: 0,
                 cookie_duration_days: 30,
                 min_order_amount: 0,
@@ -827,7 +817,11 @@ export const EditDigitalProductWizard = ({
                 terms_and_conditions: '',
               }
             }
-            onUpdate={affiliateData => handleUpdateFormData({ affiliate: affiliateData })}
+            onUpdate={affiliateData =>
+              handleUpdateFormData({
+                affiliate: affiliateData as unknown as DigitalProductFormData['affiliate'],
+              })
+            }
           />
         );
       case 5:
@@ -837,12 +831,37 @@ export const EditDigitalProductWizard = ({
               productName={formData.name || ''}
               productDescription={formData.description || ''}
               productPrice={formData.price || 0}
-              data={formData.seo || {}}
-              onUpdate={seoData => handleUpdateFormData({ seo: seoData })}
+              data={{
+                meta_title: formData.seo?.meta_title || '',
+                meta_description: formData.seo?.meta_description || '',
+                meta_keywords: formData.seo?.meta_keywords || '',
+                og_title: formData.seo?.og_title || '',
+                og_description: formData.seo?.og_description || '',
+                og_image: formData.seo?.og_image || '',
+              }}
+              onUpdate={seoData =>
+                handleUpdateFormData({ seo: seoData as unknown as DigitalProductFormData['seo'] })
+              }
             />
             <ProductFAQForm
-              data={formData.faqs || []}
-              onUpdate={faqs => handleUpdateFormData({ faqs })}
+              data={
+                (formData.faqs || []).map((faq, index) => ({
+                  id: faq.id || crypto.randomUUID(),
+                  question: faq.question,
+                  answer: faq.answer,
+                  order: faq.order ?? index,
+                })) as unknown as DigitalProductFAQ[]
+              }
+              onUpdate={faqs =>
+                handleUpdateFormData({
+                  faqs: faqs.map((faq, index) => ({
+                    id: faq.id,
+                    question: faq.question,
+                    answer: faq.answer,
+                    order: faq.order ?? index,
+                  })) as unknown as DigitalProductFAQ[],
+                })
+              }
             />
           </div>
         );
