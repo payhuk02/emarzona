@@ -154,7 +154,7 @@ const convertToFormData = async (
     .order('order_index', { ascending: true });
 
   // Organize lessons by section
-  const  sections: Section[] = (sectionsData || []).map((section: Record<string, unknown>) => ({
+  const sections: Section[] = (sectionsData || []).map((section: Record<string, unknown>) => ({
     id: section.id as string,
     title: (section.title as string) || '',
     description: (section.description as string) || undefined,
@@ -209,8 +209,8 @@ const convertToFormData = async (
         (product.pricing_model as 'one-time' | 'subscription' | 'lifetime') || 'one-time',
       create_free_preview: !!product.free_product_id,
       preview_content_description: '',
-      licensing_type: (course?.licensing_type as 'standard' | 'plr' | 'copyrighted') || 'standard',
-      license_terms: course?.license_terms || '',
+      licensing_type: (product.licensing_type as 'standard' | 'plr' | 'copyrighted') || 'standard',
+      license_terms: product.license_terms || '',
       certificate_enabled: course?.certificate_enabled ?? true,
       certificate_passing_score: course?.certificate_passing_score || 80,
       learning_objectives: course?.learning_objectives || [],
@@ -366,25 +366,30 @@ export const EditCourseProductWizard = ({
    * Validate current step
    */
   const validateStep = useCallback(
-    async (step: number): Promise<boolean> => {
-      const  newErrors: Record<string, string> = {};
+    async (step: number): Promise<{ valid: boolean; errors: string[] }> => {
+      const newErrors: Record<string, string> = {};
+      const errors: string[] = [];
 
       switch (step) {
         case 1: {
           if (!formData.title || formData.title.trim().length < 2) {
-            newErrors.title = 'Le titre doit contenir au moins 2 caractères';
+            const errorMsg = 'Le titre doit contenir au moins 2 caractères';
+            newErrors.title = errorMsg;
+            errors.push(errorMsg);
           }
           if (!formData.price || formData.price <= 0) {
-            newErrors.price = 'Le prix doit être supérieur à 0';
+            const errorMsg = 'Le prix doit être supérieur à 0';
+            newErrors.price = errorMsg;
+            errors.push(errorMsg);
           }
 
           setErrors(newErrors);
-          return Object.keys(newErrors).length === 0;
+          return { valid: Object.keys(newErrors).length === 0, errors };
         }
 
         default:
           setErrors({});
-          return true;
+          return { valid: true, errors: [] };
       }
     },
     [formData]
@@ -401,7 +406,7 @@ export const EditCourseProductWizard = ({
     setIsSaving(true);
     try {
       // Generate slug if not provided
-      let  slug=
+      let slug =
         formData.slug?.trim() ||
         formData.title
           ?.toLowerCase()
@@ -410,7 +415,7 @@ export const EditCourseProductWizard = ({
         'course';
 
       // Check slug uniqueness (excluding current product)
-      let  attempts= 0;
+      let attempts = 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -459,6 +464,8 @@ export const EditCourseProductWizard = ({
           og_image: seoData.og_image,
           faqs: faqs || [],
           pricing_model: formData.pricing_model || 'one-time',
+          licensing_type: formData.licensing_type || 'standard',
+          license_terms: formData.license_terms || null,
         })
         .eq('id', productId);
 
@@ -476,8 +483,6 @@ export const EditCourseProductWizard = ({
         product_id: productId,
         level: formData.level || '',
         language: formData.language || 'fr',
-        licensing_type: formData.licensing_type || 'standard',
-        license_terms: formData.license_terms || '',
         certificate_enabled: formData.certificate_enabled ?? true,
         certificate_passing_score: formData.certificate_passing_score || 80,
         learning_objectives: formData.learning_objectives || [],
@@ -485,7 +490,7 @@ export const EditCourseProductWizard = ({
         target_audience: formData.target_audience || [],
       };
 
-      let  courseId: string;
+      let courseId: string;
       if (existingCourse) {
         const { error: courseError } = await supabase
           .from('courses')
@@ -661,14 +666,18 @@ export const EditCourseProductWizard = ({
   ]);
 
   const handleNext = useCallback(async () => {
-    const isValid = await validateStep(currentStep);
-    if (isValid) {
+    const result = await validateStep(currentStep);
+    if (result.valid) {
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      const errorMessages =
+        result.errors.length > 0
+          ? result.errors.join(', ')
+          : 'Veuillez corriger les erreurs avant de continuer';
       toast({
         title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de continuer',
+        description: errorMessages,
         variant: 'destructive',
       });
     }
@@ -680,13 +689,17 @@ export const EditCourseProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const isValid = await validateStep(currentStep);
-    if (isValid) {
+    const result = await validateStep(currentStep);
+    if (result.valid) {
       await saveCourse();
     } else {
+      const errorMessages =
+        result.errors.length > 0
+          ? result.errors.join(', ')
+          : 'Veuillez corriger les erreurs avant de sauvegarder';
       toast({
         title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de sauvegarder',
+        description: errorMessages,
         variant: 'destructive',
       });
     }
@@ -908,9 +921,3 @@ export const EditCourseProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

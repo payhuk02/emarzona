@@ -235,18 +235,21 @@ export const EditArtistProductWizard = ({
   );
 
   const validateStep = useCallback(
-    (step: number): boolean => {
+    (step: number): { valid: boolean; errors: string[] } => {
+      const errors: string[] = [];
       switch (step) {
         case 1:
           if (!formData.artist_type) {
+            const errorMsg = "Veuillez sélectionner un type d'artiste";
+            errors.push(errorMsg);
             toast({
               title: 'Erreur',
-              description: "Veuillez sélectionner un type d'artiste",
+              description: errorMsg,
               variant: 'destructive',
             });
-            return false;
+            return { valid: false, errors };
           }
-          return true;
+          return { valid: true, errors: [] };
         case 2:
           if (
             !formData.artwork_title ||
@@ -254,67 +257,81 @@ export const EditArtistProductWizard = ({
             !formData.artwork_medium ||
             !formData.price
           ) {
+            const errorMsg = 'Veuillez remplir tous les champs obligatoires';
+            errors.push(errorMsg);
             toast({
               title: 'Erreur',
-              description: 'Veuillez remplir tous les champs obligatoires',
+              description: errorMsg,
               variant: 'destructive',
             });
-            return false;
+            return { valid: false, errors };
           }
           if (!formData.description || formData.description.trim().length < 10) {
+            const errorMsg = 'Veuillez ajouter une description (minimum 10 caractères)';
+            errors.push(errorMsg);
             toast({
               title: 'Erreur',
-              description: 'Veuillez ajouter une description (minimum 10 caractères)',
+              description: errorMsg,
               variant: 'destructive',
             });
-            return false;
+            return { valid: false, errors };
           }
           if (!formData.price || formData.price <= 0) {
+            const errorMsg = 'Le prix doit être supérieur à 0';
+            errors.push(errorMsg);
             toast({
               title: 'Erreur',
-              description: 'Le prix doit être supérieur à 0',
+              description: errorMsg,
               variant: 'destructive',
             });
-            return false;
+            return { valid: false, errors };
           }
           if (!formData.images || formData.images.length === 0) {
+            const errorMsg = 'Veuillez ajouter au moins une image';
+            errors.push(errorMsg);
             toast({
               title: 'Erreur',
-              description: 'Veuillez ajouter au moins une image',
+              description: errorMsg,
               variant: 'destructive',
             });
-            return false;
+            return { valid: false, errors };
           }
           if (!formData.requires_shipping && !formData.artwork_link_url) {
+            const errorMsg = "Pour une œuvre non physique, un lien vers l'œuvre est requis";
+            errors.push(errorMsg);
             toast({
               title: 'Erreur',
-              description: "Pour une œuvre non physique, un lien vers l'œuvre est requis",
+              description: errorMsg,
               variant: 'destructive',
             });
-            return false;
+            return { valid: false, errors };
           }
           if (formData.edition_type === 'limited_edition') {
             if (!formData.edition_number || !formData.total_editions) {
+              const errorMsg =
+                "Pour une édition limitée, le numéro d'édition et le total sont requis";
+              errors.push(errorMsg);
               toast({
                 title: 'Erreur',
-                description:
-                  "Pour une édition limitée, le numéro d'édition et le total sont requis",
+                description: errorMsg,
                 variant: 'destructive',
               });
-              return false;
+              return { valid: false, errors };
             }
             if (formData.edition_number > formData.total_editions) {
+              const errorMsg = "Le numéro d'édition ne peut pas être supérieur au total";
+              errors.push(errorMsg);
               toast({
                 title: 'Erreur',
-                description: "Le numéro d'édition ne peut pas être supérieur au total",
+                description: errorMsg,
                 variant: 'destructive',
               });
-              return false;
+              return { valid: false, errors };
             }
           }
-          return true;
+          return { valid: true, errors: [] };
         default:
-          return true;
+          return { valid: true, errors: [] };
       }
     },
     [formData, toast]
@@ -421,7 +438,8 @@ export const EditArtistProductWizard = ({
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
+    const result = validateStep(currentStep);
+    if (result.valid) {
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
     }
   };
@@ -608,9 +626,3 @@ export const EditArtistProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

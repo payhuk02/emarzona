@@ -28,13 +28,13 @@ import { cn } from '@/lib/utils';
 
 interface CourseBasicInfoFormProps {
   formData: {
-    title: string;
-    slug: string;
-    short_description: string;
-    description: string;
-    level: string;
-    language: string;
-    category: string;
+    title?: string;
+    slug?: string;
+    short_description?: string;
+    description?: string;
+    level?: string;
+    language?: string;
+    category?: string;
     licensing_type?: string;
     license_terms?: string;
     price?: number;
@@ -113,7 +113,7 @@ export const CourseBasicInfoForm = ({
 
   const handleTitleChange = (value: string) => {
     onChange('title', value);
-    if (!formData.slug || formData.slug === generateSlug(formData.title)) {
+    if (!formData.slug || formData.slug === generateSlug(formData.title || '')) {
       onChange('slug', generateSlug(value));
     }
   };
@@ -125,7 +125,7 @@ export const CourseBasicInfoForm = ({
     // Validation taille et type pour tous les fichiers
     const maxSize = 10 * 1024 * 1024; // 10MB
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    const  invalidFiles: string[] = [];
+    const invalidFiles: string[] = [];
 
     for (const file of Array.from(files)) {
       if (file.size > maxSize) {
@@ -228,7 +228,7 @@ export const CourseBasicInfoForm = ({
             <Input
               id="title"
               placeholder="Ex: Maîtriser React et TypeScript en 2025"
-              value={formData.title}
+              value={formData.title || ''}
               onChange={e => handleTitleChange(e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               className={errors.title ? 'border-red-500' : ''}
@@ -260,7 +260,7 @@ export const CourseBasicInfoForm = ({
               <Input
                 id="slug"
                 placeholder="maitriser-react-typescript"
-                value={formData.slug}
+                value={formData.slug || ''}
                 onChange={e => onChange('slug', e.target.value)}
                 className={cn('text-base sm:text-sm', errors.slug && 'border-red-500')}
               />
@@ -278,7 +278,7 @@ export const CourseBasicInfoForm = ({
             <Textarea
               id="short_description"
               placeholder="Résumé en une phrase de votre cours..."
-              value={formData.short_description}
+              value={formData.short_description || ''}
               onChange={e => onChange('short_description', e.target.value)}
               onKeyDown={handleSpaceKeyDown}
               className={cn(
@@ -293,7 +293,7 @@ export const CourseBasicInfoForm = ({
               </p>
             )}
             <p className="text-sm text-muted-foreground">
-              {formData.short_description.length}/200 caractères
+              {(formData.short_description || '').length}/200 caractères
             </p>
           </div>
 
@@ -319,7 +319,7 @@ export const CourseBasicInfoForm = ({
               />
             </div>
             <RichTextEditorPro
-              content={formData.description}
+              content={formData.description || ''}
               onChange={content => onChange('description', content)}
               placeholder="Décrivez en détail ce que les étudiants apprendront, les objectifs, prérequis et ce qui rend votre cours unique..."
               showWordCount={true}
@@ -329,7 +329,7 @@ export const CourseBasicInfoForm = ({
               <p className="text-sm text-red-500 break-words max-w-full">{errors.description}</p>
             )}
             <p className="text-sm text-muted-foreground">
-              {formData.description.length}/2000 caractères
+              {(formData.description || '').length}/2000 caractères
             </p>
           </div>
         </CardContent>
@@ -427,7 +427,7 @@ export const CourseBasicInfoForm = ({
           {/* Niveau */}
           <SelectField
             label="Niveau du cours"
-            value={formData.level}
+            value={formData.level || ''}
             onValueChange={value => onChange('level', value)}
             contentVariant="sheet"
             useMobileSelectRoot
@@ -450,7 +450,7 @@ export const CourseBasicInfoForm = ({
           {/* Langue */}
           <SelectField
             label="Langue du cours"
-            value={formData.language}
+            value={formData.language || ''}
             onValueChange={value => onChange('language', value)}
             contentVariant="sheet"
             useMobileSelectRoot
@@ -472,7 +472,7 @@ export const CourseBasicInfoForm = ({
           <div className="space-y-2">
             <SelectField
               label="Catégorie"
-              value={formData.category}
+              value={formData.category || ''}
               onValueChange={value => {
                 onChange('category', value);
                 // Réinitialiser la catégorie personnalisée si on change de catégorie
@@ -860,9 +860,3 @@ export const CourseBasicInfoForm = ({
     </div>
   );
 };
-
-
-
-
-
-

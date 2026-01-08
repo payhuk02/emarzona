@@ -386,8 +386,8 @@ export const EditServiceProductWizard = ({
    * Validate current step
    */
   const validateStep = useCallback(
-    async (step: number): Promise<boolean> => {
-      const  errors: string[] = [];
+    async (step: number): Promise<{ valid: boolean; errors: string[] }> => {
+      const errors: string[] = [];
       clearServerErrors();
 
       switch (step) {
@@ -401,25 +401,56 @@ export const EditServiceProductWizard = ({
 
           if (errors.length > 0) {
             setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return false;
+            return { valid: false, errors };
           }
 
           // Server validation
           if (storeId && formData.name) {
+            // Générer le slug si nécessaire pour la validation
+            const slugForValidation =
+              formData.slug?.trim() ||
+              formData.name
+                ?.toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '') ||
+              '';
+
             const serverResult = await validateServiceServer({
               name: formData.name || '',
-              slug: formData.slug || '',
+              slug: slugForValidation,
               price: formData.price || 0,
             });
 
             if (!serverResult.valid) {
-              if (serverResult.errors) {
-                Object.values(serverResult.errors).forEach(error => {
-                  if (error) errors.push(error);
+              // Ajouter les erreurs du serveur si disponibles
+              // serverResult.errors est un tableau d'objets {field, message}
+              if (
+                serverResult.errors &&
+                Array.isArray(serverResult.errors) &&
+                serverResult.errors.length > 0
+              ) {
+                serverResult.errors.forEach(errorObj => {
+                  if (errorObj && errorObj.message && typeof errorObj.message === 'string') {
+                    errors.push(errorObj.message);
+                  }
                 });
               }
+              // Si aucune erreur spécifique mais un message général, l'utiliser
+              if (errors.length === 0 && serverResult.message) {
+                errors.push(serverResult.message);
+              }
+              // Si toujours aucune erreur, utiliser un message par défaut
+              if (errors.length === 0) {
+                errors.push('Erreur de validation serveur. Veuillez vérifier vos données.');
+              }
+              logger.warn('[EditServiceProductWizard] Validation échouée', {
+                step,
+                errors,
+                serverResult,
+                formData: { name: formData.name, slug: slugForValidation, price: formData.price },
+              });
               setValidationErrors(prev => ({ ...prev, [step]: errors }));
-              return false;
+              return { valid: false, errors };
             }
           }
 
@@ -428,7 +459,7 @@ export const EditServiceProductWizard = ({
             delete newErrors[step];
             return newErrors;
           });
-          return true;
+          return { valid: true, errors: [] };
         }
 
         default:
@@ -437,7 +468,7 @@ export const EditServiceProductWizard = ({
             delete newErrors[step];
             return newErrors;
           });
-          return true;
+          return { valid: true, errors: [] };
       }
     },
     [formData, storeId, validateServiceServer, clearServerErrors]
@@ -454,7 +485,7 @@ export const EditServiceProductWizard = ({
     setIsSaving(true);
     try {
       // Generate slug if not provided
-      let  slug=
+      let slug =
         formData.slug?.trim() ||
         formData.name
           ?.toLowerCase()
@@ -463,7 +494,7 @@ export const EditServiceProductWizard = ({
         'service';
 
       // Check slug uniqueness (excluding current product)
-      let  attempts= 0;
+      let attempts = 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -700,14 +731,18 @@ export const EditServiceProductWizard = ({
   }, [formData, productId, store, onSuccess, toast]);
 
   const handleNext = useCallback(async () => {
-    const isValid = await validateStep(currentStep);
-    if (isValid) {
+    const result = await validateStep(currentStep);
+    if (result.valid) {
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      const errorMessages =
+        result.errors.length > 0
+          ? result.errors.join(', ')
+          : 'Veuillez corriger les erreurs avant de continuer';
       toast({
         title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de continuer',
+        description: errorMessages,
         variant: 'destructive',
       });
     }
@@ -719,13 +754,17 @@ export const EditServiceProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const isValid = await validateStep(currentStep);
-    if (isValid) {
+    const result = await validateStep(currentStep);
+    if (result.valid) {
       await saveProduct();
     } else {
+      const errorMessages =
+        result.errors.length > 0
+          ? result.errors.join(', ')
+          : 'Veuillez corriger les erreurs avant de sauvegarder';
       toast({
         title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de sauvegarder',
+        description: errorMessages,
         variant: 'destructive',
       });
     }
@@ -945,9 +984,3 @@ export const EditServiceProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

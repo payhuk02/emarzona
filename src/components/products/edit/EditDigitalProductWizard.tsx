@@ -137,7 +137,7 @@ const convertToFormData = async (productId: string): Promise<Partial<DigitalProd
     .maybeSingle();
 
   // Convert files to downloadable_files format
-  const  downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(
+  const downloadableFiles: DigitalProductDownloadableFile[] = (files || []).map(
     (file: {
       id: string;
       name: string;
@@ -344,8 +344,8 @@ export const EditDigitalProductWizard = ({
    * Validate current step
    */
   const validateStep = useCallback(
-    async (step: number): Promise<boolean> => {
-      const  errors: string[] = [];
+    async (step: number): Promise<{ valid: boolean; errors: string[] }> => {
+      const errors: string[] = [];
       clearServerErrors();
 
       switch (step) {
@@ -362,25 +362,98 @@ export const EditDigitalProductWizard = ({
 
           if (errors.length > 0) {
             setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return false;
+            return { valid: false, errors };
           }
 
           // Server validation
-          if (storeId && formData.slug) {
+          // Générer le slug si nécessaire pour la validation
+          const slugForValidation =
+            formData.slug?.trim() ||
+            formData.name
+              ?.toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '') ||
+            null;
+
+          if (storeId && slugForValidation) {
             const serverResult = await validateDigitalProductServer({
               name: formData.name || '',
-              slug: formData.slug,
+              slug: slugForValidation,
               price: pricingModel === 'free' ? 0 : formData.price || 0,
             });
 
             if (!serverResult.valid) {
-              if (serverResult.errors) {
-                Object.values(serverResult.errors).forEach(error => {
-                  if (error) errors.push(error);
+              logger.warn(
+                '[EditDigitalProductWizard] Validation serveur échouée - Analyse détaillée',
+                {
+                  step,
+                  serverResultValid: serverResult.valid,
+                  serverResultErrors: serverResult.errors,
+                  serverResultErrorsType: typeof serverResult.errors,
+                  serverResultErrorsIsArray: Array.isArray(serverResult.errors),
+                  serverResultErrorsLength: serverResult.errors?.length,
+                  serverResultMessage: serverResult.message,
+                  serverResultError: serverResult.error,
+                  serverResultFull: JSON.stringify(serverResult, null, 2),
+                }
+              );
+
+              // Ajouter les erreurs du serveur si disponibles
+              // serverResult.errors est un tableau d'objets {field, message}
+              if (
+                serverResult.errors &&
+                Array.isArray(serverResult.errors) &&
+                serverResult.errors.length > 0
+              ) {
+                serverResult.errors.forEach((errorObj, index) => {
+                  logger.info(`[EditDigitalProductWizard] Traitement erreur ${index}`, {
+                    errorObj,
+                    errorObjType: typeof errorObj,
+                  });
+                  if (errorObj && errorObj.message && typeof errorObj.message === 'string') {
+                    errors.push(errorObj.message);
+                  } else if (typeof errorObj === 'string') {
+                    // Si l'erreur est directement une string
+                    errors.push(errorObj);
+                  } else if (errorObj && typeof errorObj === 'object') {
+                    // Essayer d'extraire le message de différentes façons
+                    const message =
+                      errorObj.message ||
+                      errorObj.msg ||
+                      errorObj.error ||
+                      JSON.stringify(errorObj);
+                    if (message) errors.push(String(message));
+                  }
                 });
               }
-              setValidationErrors(prev => ({ ...prev, [step]: errors }));
-              return false;
+
+              // Si aucune erreur spécifique mais un message général, l'utiliser
+              if (errors.length === 0 && serverResult.message) {
+                errors.push(serverResult.message);
+              }
+
+              // Si toujours aucune erreur, utiliser un message par défaut
+              if (errors.length === 0) {
+                errors.push('Erreur de validation serveur. Veuillez vérifier vos données.');
+              }
+
+              logger.warn('[EditDigitalProductWizard] Erreurs finales après traitement', {
+                step,
+                errorsCount: errors.length,
+                errors,
+                validationErrorsState: validationErrors,
+              });
+
+              setValidationErrors(prev => {
+                const newErrors = { ...prev, [step]: errors };
+                logger.info('[EditDigitalProductWizard] Mise à jour validationErrors', {
+                  step,
+                  newErrors,
+                  previousErrors: prev,
+                });
+                return newErrors;
+              });
+              return { valid: false, errors };
             }
           }
 
@@ -389,7 +462,7 @@ export const EditDigitalProductWizard = ({
             delete newErrors[step];
             return newErrors;
           });
-          return true;
+          return { valid: true, errors: [] };
         }
 
         case 2: {
@@ -402,7 +475,7 @@ export const EditDigitalProductWizard = ({
 
           if (errors.length > 0) {
             setValidationErrors(prev => ({ ...prev, [step]: errors }));
-            return false;
+            return { valid: false, errors };
           }
 
           setValidationErrors(prev => {
@@ -410,7 +483,7 @@ export const EditDigitalProductWizard = ({
             delete newErrors[step];
             return newErrors;
           });
-          return true;
+          return { valid: true, errors: [] };
         }
 
         default:
@@ -419,7 +492,7 @@ export const EditDigitalProductWizard = ({
             delete newErrors[step];
             return newErrors;
           });
-          return true;
+          return { valid: true, errors: [] };
       }
     },
     [formData, storeId, validateDigitalProductServer, clearServerErrors]
@@ -436,7 +509,7 @@ export const EditDigitalProductWizard = ({
     setIsSaving(true);
     try {
       // Generate slug if not provided
-      let  slug=
+      let slug =
         formData.slug?.trim() ||
         formData.name
           ?.toLowerCase()
@@ -445,7 +518,7 @@ export const EditDigitalProductWizard = ({
         'product';
 
       // Check slug uniqueness (excluding current product)
-      let  attempts= 0;
+      let attempts = 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -645,14 +718,18 @@ export const EditDigitalProductWizard = ({
   }, [formData, productId, store, onSuccess, toast]);
 
   const handleNext = useCallback(async () => {
-    const isValid = await validateStep(currentStep);
-    if (isValid) {
+    const result = await validateStep(currentStep);
+    if (result.valid) {
       setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      const errorMessages =
+        result.errors.length > 0
+          ? result.errors.join(', ')
+          : 'Veuillez corriger les erreurs avant de continuer';
       toast({
         title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de continuer',
+        description: errorMessages,
         variant: 'destructive',
       });
     }
@@ -664,13 +741,30 @@ export const EditDigitalProductWizard = ({
   }, []);
 
   const handleSave = useCallback(async () => {
-    const isValid = await validateStep(currentStep);
-    if (isValid) {
+    const result = await validateStep(currentStep);
+    logger.info('[EditDigitalProductWizard] handleSave - Résultat validation', {
+      currentStep,
+      isValid: result.valid,
+      errors: result.errors,
+      errorsCount: result.errors.length,
+    });
+    if (result.valid) {
       await saveProduct();
     } else {
+      const errorMessages =
+        result.errors.length > 0
+          ? result.errors.join(', ')
+          : 'Veuillez corriger les erreurs avant de sauvegarder';
+
+      logger.warn('[EditDigitalProductWizard] handleSave - Validation échouée', {
+        currentStep,
+        errorMessages,
+        errors: result.errors,
+      });
+
       toast({
         title: 'Erreurs de validation',
-        description: 'Veuillez corriger les erreurs avant de sauvegarder',
+        description: errorMessages,
         variant: 'destructive',
       });
     }
@@ -907,18 +1001,30 @@ export const EditDigitalProductWizard = ({
         </Card>
 
         {/* Validation Errors */}
-        {validationErrors[currentStep] && validationErrors[currentStep].length > 0 && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <ul className="list-disc list-inside text-sm space-y-1">
-                {validationErrors[currentStep].map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
+        {(() => {
+          const currentErrors = validationErrors[currentStep];
+          if (currentErrors && currentErrors.length > 0) {
+            logger.info('[EditDigitalProductWizard] Affichage des erreurs de validation', {
+              currentStep,
+              errors: currentErrors,
+              errorsCount: currentErrors.length,
+            });
+            return (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="font-semibold mb-2">Erreurs de validation</div>
+                  <ul className="list-disc list-inside text-sm space-y-1">
+                    {currentErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            );
+          }
+          return null;
+        })()}
 
         {/* Current Step */}
         <Card className="mb-6">
@@ -998,9 +1104,3 @@ export const EditDigitalProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-
