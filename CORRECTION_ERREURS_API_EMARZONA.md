@@ -128,21 +128,36 @@ if (origin.includes('.emarzona.com')) {
 
 ## 🚀 Actions Requises
 
-### 1. Redéployer la fonction Supabase `moneroo`
+### ⚠️ URGENT : Redéployer la fonction Supabase `moneroo`
 
-**Option A : Via Supabase Dashboard (Recommandé)**
+**Le code a été corrigé localement mais doit être redéployé sur Supabase pour être effectif.**
 
-1. Aller sur : https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/moneroo/code
-2. Ouvrir `supabase/functions/moneroo/index.ts`
-3. Copier le contenu mis à jour
-4. Coller dans l'éditeur Supabase
-5. Cliquer sur **Deploy**
+**Option A : Via Supabase Dashboard (Recommandé - Plus Rapide)**
+
+1. **Aller sur** : https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/moneroo/code
+2. **Ouvrir** le fichier `supabase/functions/moneroo/index.ts` dans votre projet local
+3. **Copier** tout le contenu (Ctrl+A, Ctrl+C)
+4. **Coller** dans l'éditeur Supabase Dashboard
+5. **Cliquer sur "Deploy"** ou "Save"
+6. **Vérifier** que le déploiement est réussi (message de confirmation)
 
 **Option B : Via Supabase CLI**
 
 ```bash
+# Installer Supabase CLI si pas déjà fait
+npm install -g supabase
+
+# Se connecter à Supabase
+supabase login
+
+# Lier le projet
+supabase link --project-ref hbdnzajbyjakdhuavrvb
+
+# Déployer la fonction
 supabase functions deploy moneroo
 ```
+
+**⚠️ IMPORTANT** : Sans ce redéploiement, les erreurs CORS continueront car Supabase utilise encore l'ancienne version de la fonction.
 
 ---
 

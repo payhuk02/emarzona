@@ -112,16 +112,10 @@ export function loadNonCriticalCSS(): void {
 
   // Utiliser requestIdleCallback pour charger après les tâches critiques
   const loadCSS = () => {
-    // Charger le CSS du sidebar de manière asynchrone (non-critique)
-    const sidebarCSS = document.createElement('link');
-    sidebarCSS.rel = 'stylesheet';
-    sidebarCSS.href = '/src/styles/sidebar-optimized.css';
-    sidebarCSS.media = 'print';
-    sidebarCSS.onload = () => {
-      sidebarCSS.media = 'all';
-    };
-    document.head.appendChild(sidebarCSS);
-
+    // NOTE: Le CSS sidebar-optimized.css est déjà importé dans index.css
+    // Vite le bundle automatiquement, donc pas besoin de le charger séparément
+    // Cette fonction est conservée pour d'éventuels futurs CSS non-critiques
+    
     // Marquer comme chargé
     document.getElementById('non-critical-css')?.setAttribute('id', 'non-critical-css-loaded');
   };
