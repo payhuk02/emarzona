@@ -132,45 +132,85 @@ const DropdownMenuContent = React.forwardRef<
     }, []);
 
     // Verrouiller la position sur mobile quand le menu est ouvert pour garantir la stabilité
+    // Utilise le même système que SelectContent pour une stabilité maximale
     React.useEffect(() => {
       if (!isMobile || !mobileOptimized || !isOpen || !contentRef.current) return;
-      // En mode bottom sheet mobile, on laisse le layout fixe gérer le positionnement
+      // En mode bottom sheet mobile, le positionnement est déjà géré par les styles inline
       if (isMobileSheet) return;
 
       const menuElement = contentRef.current;
-      let lockedPosition: { top: number; left: number; width: number } | null = null;
+      let lockedPosition: { top: number; left: number; width: number; height: number } | null =
+        null;
+      let rafId: number | null = null;
 
-      // Fonction pour verrouiller la position
+      let isLocked = false;
+
+      // Fonction pour verrouiller la position de manière stable
       const lockPosition = () => {
-        if (!menuElement) return;
+        if (!menuElement || isLocked) return;
 
         const rect = menuElement.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) {
-          // Le menu n'est pas encore positionné, réessayer (sans boucle infinie)
+          // Le menu n'est pas encore positionné, réessayer au prochain frame
+          rafId = requestAnimationFrame(lockPosition);
           return;
         }
 
+        // Verrouiller la position exacte
         lockedPosition = {
           top: rect.top,
           left: rect.left,
           width: rect.width,
+          height: rect.height,
         };
 
-        // Forcer la position fixe pour éviter les mouvements
+        // Forcer la position fixe avec transform: none pour éviter tout mouvement
+        // Utiliser les mêmes techniques que SelectContent
         menuElement.style.position = 'fixed';
         menuElement.style.top = `${lockedPosition.top}px`;
         menuElement.style.left = `${lockedPosition.left}px`;
         menuElement.style.width = `${lockedPosition.width}px`;
         menuElement.style.maxWidth = `${lockedPosition.width}px`;
+        menuElement.style.transform = 'none';
+        menuElement.style.willChange = 'auto'; // Éviter les optimisations qui causent des mouvements
+        menuElement.style.transition = 'none'; // Désactiver les transitions pendant le verrouillage
+
+        isLocked = true;
       };
 
-      // Attendre que le menu soit positionné par Radix UI
-      const lockTimeout = setTimeout(() => {
-        lockPosition();
-      }, 200);
+      // Attendre que le menu soit positionné par Radix UI, puis verrouiller
+      // Utiliser requestAnimationFrame pour une synchronisation précise
+      const initialTimeout = setTimeout(() => {
+        rafId = requestAnimationFrame(lockPosition);
+      }, 100);
+
+      // Observer les changements de position et re-verrouiller si nécessaire
+      const observer = new ResizeObserver(() => {
+        if (lockedPosition && menuElement && isLocked) {
+          // Re-verrouiller si la taille change, mais seulement si déjà verrouillé
+          const currentRect = menuElement.getBoundingClientRect();
+          // Ne re-verrouiller que si la position a vraiment changé
+          if (
+            Math.abs(currentRect.top - lockedPosition.top) > 1 ||
+            Math.abs(currentRect.left - lockedPosition.left) > 1
+          ) {
+            isLocked = false;
+            lockPosition();
+          }
+        }
+      });
+
+      if (menuElement) {
+        observer.observe(menuElement);
+      }
 
       return () => {
-        clearTimeout(lockTimeout);
+        clearTimeout(initialTimeout);
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        observer.disconnect();
+        isLocked = false;
         if (menuElement && lockedPosition) {
           // Restaurer les styles à la fermeture
           menuElement.style.position = '';
@@ -178,6 +218,9 @@ const DropdownMenuContent = React.forwardRef<
           menuElement.style.left = '';
           menuElement.style.width = '';
           menuElement.style.maxWidth = '';
+          menuElement.style.transform = '';
+          menuElement.style.willChange = '';
+          menuElement.style.transition = '';
         }
       };
     }, [isMobile, mobileOptimized, isOpen, isMobileSheet]);
@@ -217,6 +260,12 @@ const DropdownMenuContent = React.forwardRef<
               width: '100vw',
               maxWidth: '100vw',
             }),
+            // Empêcher les mouvements pendant l'interaction sur mobile
+            ...(isMobile &&
+              mobileOptimized &&
+              !isMobileSheet && {
+                willChange: 'auto',
+              }),
           }}
           // Empêcher la fermeture du menu lors d'interactions à l'intérieur
           onInteractOutside={e => {
