@@ -21,7 +21,6 @@ import AdvancedFilters from '@/components/marketplace/AdvancedFilters';
 import ProductComparison from '@/components/marketplace/ProductComparison';
 import FavoritesManager from '@/components/marketplace/FavoritesManager';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
-import { PersonalizedRecommendations } from '@/components/marketplace/ProductRecommendations';
 import { logger } from '@/lib/logger';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { Product } from '@/types/marketplace';
@@ -36,6 +35,7 @@ import '@/styles/marketplace-professional.css';
 import { SEOMeta, WebsiteSchema, BreadcrumbSchema, ItemListSchema } from '@/components/seo';
 import { useFilteredProducts } from '@/hooks/useFilteredProducts';
 import { useCurrentUserId } from '@/hooks/useCurrentUserId';
+import { useAuth } from '@/contexts/AuthContext';
 import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
 import { useQueryClient } from '@tanstack/react-query';
 // ✅ REFACTORING: Imports des nouveaux hooks et composants
@@ -56,7 +56,13 @@ const Marketplace = () => {
     useMarketplaceFavorites();
 
   // Récupérer l'utilisateur pour les recommandations personnalisées
-  const { userId } = useCurrentUserId();
+  // ✅ FIX: Utiliser useAuth() qui est plus fiable et réactif que useCurrentUserId
+  const { user, loading: authLoading } = useAuth();
+  const userId = user?.id ?? null;
+
+  // Fallback: utiliser useCurrentUserId si useAuth n'est pas disponible (pour compatibilité)
+  const { userId: fallbackUserId } = useCurrentUserId();
+  const finalUserId = userId || fallbackUserId;
 
   // États pour compatibilité (seront progressivement remplacés)
   const [products, setProducts] = useState<Product[]>([]);
@@ -72,16 +78,8 @@ const Marketplace = () => {
   const { filters, updateFilter, clearFilters, PRICE_RANGES, SORT_OPTIONS, PRODUCT_TAGS } =
     useMarketplaceFilters();
 
-  const {
-    pagination,
-    setPagination,
-    totalPages,
-    canGoPrevious,
-    canGoNext,
-    goToPage,
-    resetPagination,
-    updateTotalItems,
-  } = useMarketplacePagination(12);
+  const { pagination, totalPages, goToPage, resetPagination, updateTotalItems } =
+    useMarketplacePagination(12);
 
   // État local pour l'input de recherche (non debounced)
   const [searchInput, setSearchInput] = useState('');
@@ -90,19 +88,17 @@ const Marketplace = () => {
   const debouncedSearch = useDebounce(searchInput, 500);
 
   // Recherche full-text serveur
-  const hasSearchQuery = debouncedSearch && debouncedSearch.trim().length > 0;
+  const hasSearchQuery: boolean = !!(debouncedSearch && debouncedSearch.trim().length > 0);
 
   // Utiliser les fonctions RPC optimisées si un type spécifique est sélectionné
-  const shouldUseRPCFiltering = filters.productType !== 'all' && !hasSearchQuery;
+  const shouldUseRPCFiltering: boolean = filters.productType !== 'all' && !hasSearchQuery;
 
   // ✅ OPTIMISATION: Utiliser React Query pour le chargement des produits
   // IMPORTANT: Doit être déclaré APRÈS filters, pagination, hasSearchQuery, shouldUseRPCFiltering
   const {
     products: queryProducts,
     totalCount: queryTotalCount,
-    filteredCount: queryFilteredCount,
     isLoading: queryIsLoading,
-    isFetching: queryIsFetching,
     error: queryError,
     prefetchNextPage,
     prefetchPreviousPage,
@@ -169,7 +165,7 @@ const Marketplace = () => {
   // États des modales et UI
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  const [showComparison, setShowComparison] = useState(false);
+  const [, setShowComparison] = useState(false);
   const [comparisonProducts, setComparisonProducts] = useState<Product[]>(() => {
     // Charger la comparaison depuis localStorage
     try {
@@ -467,7 +463,7 @@ const Marketplace = () => {
         setError(null); // Réinitialiser l'erreur en cas de succès
         setHasLoadedOnce(true); // Marquer qu'on a chargé au moins une fois
       }
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('❌ Erreur lors du chargement des produits :', { error: errorMessage });
       setError(errorMessage);
@@ -766,8 +762,16 @@ const Marketplace = () => {
         return;
       }
 
-      // Vérifier l'authentification
-      if (!userId) {
+      // ✅ FIX: Attendre que l'authentification soit chargée avant de vérifier
+      if (authLoading) {
+        // Attendre un peu que l'auth se charge
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Vérifier l'authentification avec la valeur la plus récente
+      const currentUserId = user?.id ?? finalUserId;
+
+      if (!currentUserId) {
         toast({
           title: 'Authentification requise',
           description: 'Veuillez vous connecter pour effectuer un achat',
@@ -785,7 +789,7 @@ const Marketplace = () => {
 
       navigate(`/checkout?${checkoutParams.toString()}`);
     },
-    [toast, navigate, userId]
+    [toast, navigate, user, finalUserId, authLoading]
   );
 
   // Partage de produit (utilisé par ProductCardModern)
@@ -1169,7 +1173,7 @@ const Marketplace = () => {
           filters={filters}
           totalItems={pagination.totalItems}
           displayedItems={displayProducts.length}
-          hasSearchQuery={hasSearchQuery}
+          hasSearchQuery={!!hasSearchQuery}
           onFilterChange={updateFilter}
           SORT_OPTIONS={SORT_OPTIONS}
         />
@@ -1194,12 +1198,14 @@ const Marketplace = () => {
           }}
           onPageChange={handlePageChange}
           onBuyProduct={handleBuyProduct}
-          userId={userId}
+          userId={finalUserId}
           showRecommendations={
-            userId &&
-            filters.category === 'all' &&
-            filters.search === '' &&
-            filters.productType === 'all'
+            !!(
+              finalUserId &&
+              filters.category === 'all' &&
+              filters.search === '' &&
+              filters.productType === 'all'
+            )
           }
         />
 
