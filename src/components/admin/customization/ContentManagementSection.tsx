@@ -3,7 +3,7 @@
  * Textes, emails, notifications - Personnalisation complète
  */
 
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,8 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Mail, Bell, Globe, Search, Save, RefreshCw, Eye, Edit, Plus, X } from 'lucide-react';
+import { FileText, Mail, Bell, Search, Save, RefreshCw, Edit, X } from 'lucide-react';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { useEmailTemplates } from '@/hooks/useEmail';
 import { supabase } from '@/integrations/supabase/client';
@@ -176,6 +175,10 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
     []
   );
 
+  /**
+   * Textes filtrés selon la recherche et la catégorie sélectionnée
+   * Mémorisé pour éviter les recalculs à chaque render
+   */
   const filteredTexts = useMemo(() => 
     KEY_TEXTS.filter(text => {
       const matchesSearch = text.label.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -201,7 +204,14 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
     if (onChange) onChange();
   }, [customizationData, save, onChange]);
 
-  const updateTemplate = async (updatedTemplate: EmailTemplate) => {
+  /**
+   * Met à jour un template d'email dans la base de données et l'état local
+   * 
+   * @param updatedTemplate - Template d'email avec les modifications
+   * @returns Promise qui se résout avec le template mis à jour
+   * @throws Error si la mise à jour échoue
+   */
+  const updateTemplate = useCallback(async (updatedTemplate: EmailTemplate) => {
     try {
       const { error } = await supabase
         .from('email_templates')
@@ -229,7 +239,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
       logger.error('Error updating template', { error, templateId: updatedTemplate.id });
       throw error;
     }
-  };
+  }, []);
 
   const resetText = useCallback((key: string) => {
     setCustomTexts(prev => {
@@ -504,7 +514,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                                     try {
                                       const updated = { ...editingTemplate, is_active: e.target.checked };
                                       await updateTemplate(updated);
-                                    } catch (error) {
+                                    } catch (_error) {
                                       toast({
                                         title: 'Erreur',
                                         description: 'Impossible de mettre à jour le statut.',
@@ -524,7 +534,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                                     try {
                                       const updated = { ...editingTemplate, is_default: e.target.checked };
                                       await updateTemplate(updated);
-                                    } catch (error) {
+                                    } catch (_error) {
                                       toast({
                                         title: 'Erreur',
                                         description: 'Impossible de mettre à jour le statut.',

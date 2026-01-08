@@ -86,13 +86,13 @@ export const StoreDomainSettings = ({ store, onUpdateStore: onUpdate }: StoreDom
       aRecord: {
         type: 'A',
         name: domain,
-        value: '185.158.133.1',
+        value: '76.76.19.61', // IP Vercel (recommandé: utiliser CNAME vers cname.vercel-dns.com)
         ttl: 3600,
       },
       wwwRecord: {
         type: 'A',
         name: `www.${domain}`,
-        value: '185.158.133.1',
+        value: '76.76.19.61', // IP Vercel (recommandé: utiliser CNAME vers cname.vercel-dns.com)
         ttl: 3600,
       },
       verificationRecord: {

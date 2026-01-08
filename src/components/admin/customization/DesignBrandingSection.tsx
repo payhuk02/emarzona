@@ -3,14 +3,14 @@
  * Permet de personnaliser les couleurs, logos, typographie
  */
 
-import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Palette, Image as ImageIcon, Type, Upload, Eye, RefreshCw, Loader2, X, Settings, Box, Save } from 'lucide-react';
+import { Upload, RefreshCw, Loader2, X, Settings, Box } from 'lucide-react';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { designTokens } from '@/lib/design-system';
 import { supabase } from '@/integrations/supabase/client';

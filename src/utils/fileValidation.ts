@@ -6,6 +6,7 @@
  */
 
 import { detectMediaType } from './media-detection';
+import { logger } from '@/lib/logger';
 
 /**
  * Configuration par défaut pour la validation des fichiers
@@ -93,7 +94,7 @@ export interface FileValidationOptions {
  * @example
  * const result = validateFile(file);
  * if (!result.valid) {
- *   console.error(result.error);
+ *   logger.error('File validation failed', { error: result.error });
  * }
  */
 export function validateFile(

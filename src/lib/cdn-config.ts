@@ -31,6 +31,8 @@ const  defaultCDNConfig: CDNConfig = {
     'supabase.co',
     'storage.googleapis.com',
     'vercel.app',
+    'emarzona.com',
+    'emarzona.vercel.app',
     ...(import.meta.env.VITE_CDN_ALLOWED_DOMAINS?.split(',') || []),
   ],
 };

@@ -4,6 +4,7 @@
  */
 
 import { Product } from '@/types/marketplace';
+import { logger } from '@/lib/logger';
 
 interface CacheEntry<T> {
   data: T;
@@ -17,6 +18,16 @@ const DEFAULT_TTL = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Génère une clé de cache stable basée sur les filtres
+ * 
+ * @param prefix - Préfixe pour la clé de cache (ex: 'products', 'categories')
+ * @param params - Objet contenant les paramètres de filtrage
+ * @returns Clé de cache unique et stable basée sur les paramètres
+ * 
+ * @example
+ * ```ts
+ * const key = generateCacheKey('products', { category: 'electronics', page: 1 });
+ * // Résultat: 'marketplace_products_1.0.0_{"category":"electronics","page":1}'
+ * ```
  */
 export function generateCacheKey(prefix: string, params: Record<string, unknown>): string {
   const stableParams = JSON.stringify(
@@ -42,6 +53,16 @@ function isIndexedDBAvailable(): boolean {
 
 /**
  * Stocke les données dans le cache (localStorage pour petites données, IndexedDB pour grandes)
+ * 
+ * @param key - Clé unique pour identifier l'entrée de cache
+ * @param data - Données à mettre en cache (seront sérialisées en JSON)
+ * @param ttl - Durée de vie en millisecondes (défaut: 10 minutes)
+ * @returns Promise qui se résout une fois les données mises en cache
+ * 
+ * @example
+ * ```ts
+ * await setCache('products_list', products, 5 * 60 * 1000); // Cache pour 5 minutes
+ * ```
  */
 export async function setCache<T>(
   key: string,
@@ -71,16 +92,27 @@ export async function setCache<T>(
       try {
         await setIndexedDBCache(key, entry);
       } catch (indexedDBError) {
-        console.warn('Failed to cache data:', indexedDBError);
+        logger.warn('Failed to cache data in IndexedDB', { error: indexedDBError, key });
       }
     } else {
-      console.warn('Failed to cache data:', error);
+      logger.warn('Failed to cache data', { error, key });
     }
   }
 }
 
 /**
  * Récupère les données du cache
+ * 
+ * @param key - Clé unique de l'entrée de cache à récupérer
+ * @returns Promise qui se résout avec les données en cache ou null si non trouvé/expiré
+ * 
+ * @example
+ * ```ts
+ * const cachedProducts = await getCache<Product[]>('products_list');
+ * if (cachedProducts) {
+ *   // Utiliser les données en cache
+ * }
+ * ```
  */
 export async function getCache<T>(key: string): Promise<T | null> {
   if (typeof window === 'undefined') return null;
@@ -106,7 +138,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
       }
     }
   } catch (error) {
-    console.warn('Failed to get cache:', error);
+    logger.warn('Failed to get cache', { error, key });
   }
 
   return null;
@@ -114,6 +146,13 @@ export async function getCache<T>(key: string): Promise<T | null> {
 
 /**
  * Supprime une entrée du cache
+ * 
+ * @param key - Clé unique de l'entrée de cache à supprimer
+ * 
+ * @example
+ * ```ts
+ * removeCache('products_list'); // Supprime le cache des produits
+ * ```
  */
 export function removeCache(key: string): void {
   if (typeof window === 'undefined') return;
@@ -124,12 +163,19 @@ export function removeCache(key: string): void {
       removeIndexedDBCache(key);
     }
   } catch (error) {
-    console.warn('Failed to remove cache:', error);
+    logger.warn('Failed to remove cache', { error, key });
   }
 }
 
 /**
  * Nettoie le cache expiré
+ * Parcourt toutes les entrées de cache et supprime celles qui ont expiré
+ * 
+ * @example
+ * ```ts
+ * // Appeler périodiquement pour nettoyer le cache
+ * setInterval(cleanExpiredCache, 60 * 60 * 1000); // Toutes les heures
+ * ```
  */
 export function cleanExpiredCache(): void {
   if (typeof window === 'undefined') return;
@@ -154,7 +200,7 @@ export function cleanExpiredCache(): void {
       }
     }
   } catch (error) {
-    console.warn('Failed to clean cache:', error);
+    logger.warn('Failed to clean cache', { error });
   }
 }
 
@@ -184,6 +230,12 @@ async function openDB(): Promise<IDBDatabase> {
   });
 }
 
+/**
+ * Stocke une entrée dans IndexedDB
+ * 
+ * @param key - Clé unique pour l'entrée
+ * @param entry - Données à stocker avec timestamp et expiration
+ */
 async function setIndexedDBCache<T>(key: string, entry: CacheEntry<T>): Promise<void> {
   try {
     const database = await openDB();
@@ -195,10 +247,16 @@ async function setIndexedDBCache<T>(key: string, entry: CacheEntry<T>): Promise<
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.warn('Failed to set IndexedDB cache:', error);
+    logger.warn('Failed to set IndexedDB cache', { error, key });
   }
 }
 
+/**
+ * Récupère une entrée depuis IndexedDB
+ * 
+ * @param key - Clé unique de l'entrée à récupérer
+ * @returns Promise qui se résout avec l'entrée ou null si non trouvée
+ */
 async function getIndexedDBCache<T>(key: string): Promise<CacheEntry<T> | null> {
   try {
     const database = await openDB();
@@ -218,11 +276,16 @@ async function getIndexedDBCache<T>(key: string): Promise<CacheEntry<T> | null> 
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.warn('Failed to get IndexedDB cache:', error);
+    logger.warn('Failed to get IndexedDB cache', { error, key });
     return null;
   }
 }
 
+/**
+ * Supprime une entrée du cache IndexedDB
+ * 
+ * @param key - Clé unique de l'entrée à supprimer
+ */
 function removeIndexedDBCache(key: string): void {
   openDB()
     .then((database) => {
@@ -231,7 +294,7 @@ function removeIndexedDBCache(key: string): void {
       store.delete(key);
     })
     .catch((error) => {
-      console.warn('Failed to remove IndexedDB cache:', error);
+      logger.warn('Failed to remove IndexedDB cache', { error, key });
     });
 }
 

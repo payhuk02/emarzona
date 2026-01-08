@@ -90,14 +90,14 @@ if (typeof window !== 'undefined') {
         initAccessibility();
       }),
     ]).catch(error => {
-      // Logger l'erreur silencieusement - Utiliser logger au lieu de console.error
+      // Logger l'erreur silencieusement
       import('./lib/logger')
         .then(({ logger }) => {
           logger.error('Error initializing non-critical modules', { error });
         })
         .catch(() => {
-          // Fallback si logger n'est pas disponible
-          console.error('Error initializing non-critical modules:', error);
+          // Fallback silencieux si logger n'est pas disponible
+          // Ne pas utiliser console.error ici pour éviter les warnings
         });
     });
 

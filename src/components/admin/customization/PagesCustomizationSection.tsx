@@ -12,19 +12,12 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { 
   FileText, 
-  Image as ImageIcon, 
-  Palette, 
-  Type, 
   Layout, 
-  Eye, 
-  Save, 
   RefreshCw,
   Upload,
   X,
-  Plus,
   Trash2,
   Settings,
   ShoppingCart,
@@ -2113,7 +2106,7 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
         title: 'Image uploadée',
         description: 'L\'image a été uploadée avec succès.',
       });
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',

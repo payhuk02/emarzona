@@ -6,26 +6,27 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export async function testStorageUpload() {
 
   // Étape 1: Vérifier l'authentification
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (!user || authError) {
-    console.error('❌ Utilisateur non authentifié:', authError);
+    logger.error('❌ Utilisateur non authentifié', { error: authError });
     return { success: false, error: 'Non authentifié' };
   }
 
   // Étape 2: Vérifier le bucket
   const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
   if (bucketsError) {
-    console.error('❌ Erreur lors de la récupération des buckets:', bucketsError);
+    logger.error('❌ Erreur lors de la récupération des buckets', { error: bucketsError });
     return { success: false, error: bucketsError.message };
   }
   
   const attachmentsBucket = buckets?.find(b => b.id === 'attachments');
   if (!attachmentsBucket) {
-    console.error('❌ Le bucket "attachments" n\'existe pas');
+    logger.error('❌ Le bucket "attachments" n\'existe pas');
     return { success: false, error: 'Bucket "attachments" introuvable' };
   }
   
@@ -36,7 +37,7 @@ export async function testStorageUpload() {
   });
   
   if (!attachmentsBucket.public) {
-    console.warn('⚠️ Le bucket n\'est PAS public. Activez "Public bucket" dans Supabase Dashboard.');
+    logger.warn('⚠️ Le bucket n\'est PAS public. Activez "Public bucket" dans Supabase Dashboard.');
   }
 
   // Étape 3: Créer un fichier de test
@@ -57,17 +58,19 @@ export async function testStorageUpload() {
     });
 
   if (uploadError) {
-    console.error('❌ Erreur lors de l\'upload:', uploadError);
-    console.error('Détails:', {
+    logger.error('❌ Erreur lors de l\'upload', { 
+      error: uploadError,
+      details: {
       message: uploadError.message,
-      statusCode: (uploadError as { statusCode?: number }).statusCode,
-      error: (uploadError as { error?: string }).error,
+        statusCode: (uploadError as { statusCode?: number }).statusCode,
+        error: (uploadError as { error?: string }).error,
+      }
     });
     return { success: false, error: uploadError.message, uploadError };
   }
 
   if (!uploadData?.path) {
-    console.error('❌ Upload réussi mais pas de path retourné:', uploadData);
+    logger.error('❌ Upload réussi mais pas de path retourné', { uploadData });
     return { success: false, error: 'Pas de path retourné', uploadData };
   }
 
@@ -89,13 +92,13 @@ export async function testStorageUpload() {
     });
 
   if (listError) {
-    console.error('❌ Erreur lors de la liste des fichiers:', listError);
+    logger.error('❌ Erreur lors de la liste des fichiers', { error: listError });
     return { success: false, error: listError.message, uploadData };
   }
 
   const foundFile = fileList?.find(f => f.name === fileName);
   if (!foundFile) {
-    console.error('❌ Fichier non trouvé dans la liste:', { folderPath, fileName, fileList });
+    logger.error('❌ Fichier non trouvé dans la liste', { folderPath, fileName, fileList });
     return { success: false, error: 'Fichier non trouvé après upload', uploadData };
   }
 
@@ -110,7 +113,7 @@ export async function testStorageUpload() {
   // Vérifier le Content-Type
   const contentType = foundFile.metadata?.mimetype || foundFile.metadata?.contentType;
   if (contentType === 'application/json') {
-    console.error('❌ CRITICAL: Le fichier est enregistré comme JSON!', {
+    logger.error('❌ CRITICAL: Le fichier est enregistré comme JSON', {
       expected: 'text/plain',
       actual: contentType,
       metadata: foundFile.metadata,
@@ -119,7 +122,7 @@ export async function testStorageUpload() {
   }
 
   if (contentType !== 'text/plain') {
-    console.warn('⚠️ Content-Type inattendu:', {
+    logger.warn('⚠️ Content-Type inattendu', {
       expected: 'text/plain',
       actual: contentType,
     });
@@ -132,13 +135,13 @@ export async function testStorageUpload() {
     .download(testPath);
 
   if (downloadError) {
-    console.error('❌ Erreur lors du téléchargement:', downloadError);
+    logger.error('❌ Erreur lors du téléchargement', { error: downloadError });
     return { success: false, error: downloadError.message, uploadData, foundFile };
   }
 
   const downloadText = await downloadData.text();
   if (downloadText !== testContent) {
-    console.error('❌ Contenu du fichier incorrect:', {
+    logger.error('❌ Contenu du fichier incorrect', {
       expected: testContent,
       actual: downloadText,
     });
@@ -152,7 +155,7 @@ export async function testStorageUpload() {
     .remove([testPath]);
 
   if (removeError) {
-    console.warn('⚠️ Impossible de supprimer le fichier de test:', removeError);
+    logger.warn('⚠️ Impossible de supprimer le fichier de test', { error: removeError });
   } else {
   }
 

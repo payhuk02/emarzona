@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import {
   Bell,
   Mail,
@@ -59,7 +60,7 @@ export function BookingNotificationPreferences({
         const prefs = await getUserBookingNotificationPreferences(userId);
         setPreferences(prefs);
       } catch (error) {
-        console.error('Error loading preferences', error);
+        logger.error('Error loading preferences', { error });
       } finally {
         setIsLoading(false);
       }
@@ -91,6 +92,7 @@ export function BookingNotificationPreferences({
         description: 'Vos préférences de notifications ont été mises à jour',
       });
     } catch (error) {
+      logger.error('Error saving notification preferences', { error, userId });
       toast({
         title: '❌ Erreur',
         description: 'Impossible de sauvegarder les préférences',

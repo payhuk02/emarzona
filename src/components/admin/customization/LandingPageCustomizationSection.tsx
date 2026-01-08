@@ -15,8 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Home, 
   Image as ImageIcon, 
-  Type, 
-  Palette, 
   Upload, 
   Loader2, 
   X,
@@ -26,8 +24,6 @@ import {
   CheckCircle2,
   DollarSign,
   Globe,
-  Shield,
-  BarChart3,
   Package,
   ArrowRight,
   Zap,
@@ -294,6 +290,10 @@ export const LandingPageCustomizationSection = ({ onChange }: LandingPageCustomi
     }
   }, [customizationData]);
 
+  /**
+   * Configuration de la section sélectionnée
+   * Mémorisée pour éviter les recherches répétées dans le tableau
+   */
   const selectedSectionConfig = useMemo(() => 
     LANDING_SECTIONS.find(s => s.id === selectedSection),
     [selectedSection]

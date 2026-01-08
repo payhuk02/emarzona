@@ -27,7 +27,7 @@ export const RequireAAL2 = ({ children }: RequireAAL2Props) => {
         const { data: { user } } = await supabase.auth.getUser();
         const isPrincipal = user?.email === PRINCIPAL_ADMIN_EMAIL;
         setIsPrincipalAdminLocal(isPrincipal);
-      } catch (error) {
+      } catch (_error) {
         setIsPrincipalAdminLocal(false);
       } finally {
         setCheckingPrincipal(false);

@@ -29,27 +29,17 @@ import {
   AlertCircle, 
   Clock, 
   Copy, 
-  ExternalLink,
   Shield,
   RefreshCw,
   Unplug,
   Settings,
   Info,
   Zap,
-  Lock,
-  Eye,
-  EyeOff,
-  Download,
-  Upload,
-  Trash2,
   Plus,
-  Minus,
-  ArrowRight,
   CheckCircle2,
   XCircle,
   Loader2,
   Activity,
-  Bell,
   Globe2,
   ShieldCheck
 } from "lucide-react";
@@ -157,7 +147,7 @@ export const DomainSettings = () => {
         ssl_enabled: currentStore.ssl_enabled || false,
         redirect_www: currentStore.redirect_www !== false,
         redirect_https: currentStore.redirect_https !== false,
-        dns_records: currentStore.dns_records || []
+        dns_records: (currentStore.dns_records as unknown as DNSRecord[]) || []
       });
       setDomainInput(currentStore.custom_domain || "");
     }
@@ -177,13 +167,13 @@ export const DomainSettings = () => {
       aRecord: {
         type: 'A',
         name: domain,
-        value: '185.158.133.1',
+        value: '76.76.19.61', // IP Vercel (recommandé: utiliser CNAME vers cname.vercel-dns.com)
         ttl: 3600
       },
       wwwRecord: {
         type: 'A',
         name: `www.${domain}`,
-        value: '185.158.133.1',
+        value: '76.76.19.61', // IP Vercel (recommandé: utiliser CNAME vers cname.vercel-dns.com)
         ttl: 3600
       },
       verificationRecord: {
@@ -431,7 +421,8 @@ export const DomainSettings = () => {
       }
 
       // Vérifier les enregistrements DNS requis
-      const dnsInstructions = getDNSInstructions(domain, domainConfig.domain_verification_token || '');
+      // Les instructions DNS sont générées et utilisées dans l'UI (ligne 624+)
+      void getDNSInstructions(domain, domainConfig.domain_verification_token || '');
       
       // Simulation de vérification DNS réelle
       await new Promise(resolve => setTimeout(resolve, 3000));

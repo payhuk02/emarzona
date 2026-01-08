@@ -100,10 +100,11 @@ export const checkDNSPropagation = async (
       const aData = await aResponse.json();
       
       if (aData.Answer && aData.Answer.length > 0) {
-        const targetIP = '185.158.133.1';
-        details.aRecord = aData.Answer.some((answer: any) => answer.data === targetIP);
+        // IPs Vercel pour domaines personnalisés (utiliser CNAME recommandé, mais A record aussi supporté)
+        const targetIPs = ['76.76.19.61', '76.76.21.61', '185.158.133.1'];
+        details.aRecord = aData.Answer.some((answer: any) => targetIPs.includes(answer.data));
         if (!details.aRecord) {
-          errors.push(`Enregistrement A incorrect: pointe vers ${aData.Answer[0].data} au lieu de ${targetIP}`);
+          errors.push(`Enregistrement A incorrect: pointe vers ${aData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`);
         }
       } else {
         errors.push("Enregistrement A manquant");
@@ -118,10 +119,11 @@ export const checkDNSPropagation = async (
       const wwwData = await wwwResponse.json();
       
       if (wwwData.Answer && wwwData.Answer.length > 0) {
-        const targetIP = '185.158.133.1';
-        details.wwwRecord = wwwData.Answer.some((answer: any) => answer.data === targetIP);
+        // IPs Vercel pour domaines personnalisés
+        const targetIPs = ['76.76.19.61', '76.76.21.61', '185.158.133.1'];
+        details.wwwRecord = wwwData.Answer.some((answer: any) => targetIPs.includes(answer.data));
         if (!details.wwwRecord) {
-          errors.push(`Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data} au lieu de ${targetIP}`);
+          errors.push(`Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`);
         }
       } else {
         errors.push("Enregistrement WWW manquant");

@@ -1,3 +1,9 @@
+/**
+ * Composant de sélection de devise
+ * Optimisé avec React.memo pour éviter les re-renders inutiles
+ */
+
+import { memo, useMemo } from 'react';
 import {
   Select,
   SelectContent,
@@ -13,7 +19,20 @@ interface CurrencySelectProps {
   disabled?: boolean;
 }
 
-export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelectProps) => {
+const AFRICAN_CURRENCIES = ['XOF', 'XAF', 'NGN', 'GHS', 'KES', 'ZAR', 'MAD', 'TND', 'EGP', 'UGX', 'TZS', 'RWF'];
+const INTERNATIONAL_CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'CHF', 'JPY', 'CNY'];
+
+export const CurrencySelect = memo(({ value, onValueChange, disabled }: CurrencySelectProps) => {
+  const africanCurrencies = useMemo(
+    () => CURRENCIES.filter(c => AFRICAN_CURRENCIES.includes(c.code)),
+    []
+  );
+
+  const internationalCurrencies = useMemo(
+    () => CURRENCIES.filter(c => INTERNATIONAL_CURRENCIES.includes(c.code)),
+    []
+  );
+
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger>
@@ -23,22 +42,7 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
           Devises africaines
         </div>
-        {CURRENCIES.filter(c =>
-          [
-            'XOF',
-            'XAF',
-            'NGN',
-            'GHS',
-            'KES',
-            'ZAR',
-            'MAD',
-            'TND',
-            'EGP',
-            'UGX',
-            'TZS',
-            'RWF',
-          ].includes(c.code)
-        ).map(currency => (
+        {africanCurrencies.map(currency => (
           <SelectItem key={currency.code} value={currency.code}>
             <span className="flex items-center gap-2">
               <span>{currency.flag}</span>
@@ -50,9 +54,7 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
           Devises internationales
         </div>
-        {CURRENCIES.filter(c =>
-          ['EUR', 'USD', 'GBP', 'CAD', 'CHF', 'JPY', 'CNY'].includes(c.code)
-        ).map(currency => (
+        {internationalCurrencies.map(currency => (
           <SelectItem key={currency.code} value={currency.code}>
             <span className="flex items-center gap-2">
               <span>{currency.flag}</span>
@@ -64,7 +66,9 @@ export const CurrencySelect = ({ value, onValueChange, disabled }: CurrencySelec
       </SelectContent>
     </Select>
   );
-};
+});
+
+CurrencySelect.displayName = 'CurrencySelect';
 
 
 

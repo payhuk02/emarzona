@@ -613,13 +613,13 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       aRecord: {
         type: "A",
         name: "@",
-        value: "76.76.19.61", // IP de Vercel
+        value: "76.76.19.61", // IP Vercel (recommandé: utiliser CNAME vers cname.vercel-dns.com)
         ttl: 3600
       },
       wwwRecord: {
         type: "A",
         name: "www",
-        value: "76.76.19.61", // IP de Vercel
+        value: "76.76.19.61", // IP Vercel (recommandé: utiliser CNAME vers cname.vercel-dns.com)
         ttl: 3600
       },
       verificationRecord: {
