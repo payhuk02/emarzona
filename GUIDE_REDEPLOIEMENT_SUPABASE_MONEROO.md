@@ -16,10 +16,18 @@ Le code a été corrigé localement mais **Supabase utilise encore l'ancienne ve
 
 ## 📋 Méthode 1 : Supabase Dashboard (Recommandé - 2 minutes)
 
-### Étape 1 : Accéder à la fonction
+### ⚠️ IMPORTANT : Utiliser Edge Functions, PAS l'éditeur SQL !
 
-1. Ouvrir : https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/moneroo/code
-2. Se connecter à votre compte Supabase si nécessaire
+**Ne pas utiliser** : Database → SQL Editor ❌  
+**Utiliser** : Edge Functions → moneroo → Code ✅
+
+### Étape 1 : Accéder à l'éditeur Edge Functions
+
+1. **Dans Supabase Dashboard**, cliquer sur **"Edge Functions"** dans la barre latérale gauche (icône ⚡)
+2. **Cliquer sur la fonction** `moneroo` dans la liste
+3. **Cliquer sur l'onglet "Code"** (pas "Logs" ni "Settings")
+
+**URL directe** : https://supabase.com/dashboard/project/hbdnzajbyjakdhuavrvb/functions/moneroo/code
 
 ### Étape 2 : Copier le code mis à jour
 
