@@ -844,14 +844,12 @@ export const EditDigitalProductWizard = ({
               }
             />
             <ProductFAQForm
-              data={
-                (formData.faqs || []).map((faq, index) => ({
-                  id: faq.id || crypto.randomUUID(),
-                  question: faq.question,
-                  answer: faq.answer,
-                  order: faq.order ?? index,
-                })) as unknown as DigitalProductFAQ[]
-              }
+              data={(formData.faqs || []).map((faq, index) => ({
+                id: faq.id || crypto.randomUUID(),
+                question: faq.question,
+                answer: faq.answer,
+                order: faq.order ?? index,
+              }))}
               onUpdate={faqs =>
                 handleUpdateFormData({
                   faqs: faqs.map((faq, index) => ({
