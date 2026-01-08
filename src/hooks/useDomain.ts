@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
@@ -331,7 +331,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
     }
   }, [toast]);
 
-  const enableCSP = useCallback(async (domain: string, policy: string): Promise<boolean> => {
+  const enableCSP = useCallback(async (_domain: string, _policy: string): Promise<boolean> => {
     try {
       // Simulation d'activation CSP
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -396,8 +396,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error connecting domain', { error });
       toast({
         title: "Erreur",
@@ -490,8 +489,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error verifying domain', { error });
       toast({
         title: "Erreur de vérification",
@@ -532,8 +530,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error disconnecting domain', { error });
       toast({
         title: "Erreur",
@@ -563,8 +560,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error updating SSL', { error });
       toast({
         title: "Erreur",
@@ -596,8 +592,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
       logger.error('Error updating redirects', { error });
       toast({
         title: "Erreur",
@@ -637,7 +632,7 @@ Heure: ${new Date(incident.startTime).toLocaleString('fr-FR')}`;
     };
   }, []);
 
-  const checkDNSPropagation = useCallback(async (domain: string): Promise<{
+  const checkDNSPropagation = useCallback(async (_domain: string): Promise<{
     isPropagated: boolean;
     propagationTime: number;
     details: {
@@ -745,7 +740,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
     });
   }, [getDNSInstructions, toast]);
 
-  const validateDNSConfiguration = useCallback(async (domain: string): Promise<{
+  const validateDNSConfiguration = useCallback(async (_domain: string): Promise<{
     isValid: boolean;
     errors: string[];
     warnings: string[];
@@ -820,21 +815,8 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
       // Simulation d'upload de certificat personnalisé
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const  customCert: SSLCertificate = {
-        id: `cert-custom-${Date.now()}`,
-        domain,
-        type: 'custom',
-        status: 'pending',
-        issuedAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 an
-        issuer: 'Custom Certificate Authority',
-        fingerprint: 'SHA256:custom1234certificate5678fingerprint9012',
-        autoRenew: false,
-        domains: [domain],
-        certificate,
-        privateKey,
-        chain
-      };
+      // Certificat personnalisé configuré (simulation)
+      void { domain, certificate, privateKey, chain };
 
       toast({
         title: "Certificat personnalisé uploadé",
@@ -853,7 +835,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
     }
   }, [toast]);
 
-  const renewSSLCertificate = useCallback(async (certificateId: string): Promise<boolean> => {
+  const renewSSLCertificate = useCallback(async (_certificateId: string): Promise<boolean> => {
     try {
       // Simulation de renouvellement de certificat
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -875,7 +857,7 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
     }
   }, [toast]);
 
-  const deleteSSLCertificate = useCallback(async (certificateId: string): Promise<boolean> => {
+  const deleteSSLCertificate = useCallback(async (_certificateId: string): Promise<boolean> => {
     try {
       // Simulation de suppression de certificat
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -937,8 +919,8 @@ ${config.cnameRecord.name} ${config.cnameRecord.type} ${config.cnameRecord.value
   }, [getSSLCertificates]);
 
   const updateSSLConfiguration = useCallback(async (
-    domain: string, 
-    config: Partial<SSLConfiguration>
+    _domain: string, 
+    _config: Partial<SSLConfiguration>
   ): Promise<boolean> => {
     try {
       // Simulation de mise à jour de configuration SSL

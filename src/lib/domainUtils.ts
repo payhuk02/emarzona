@@ -102,14 +102,14 @@ export const checkDNSPropagation = async (
       if (aData.Answer && aData.Answer.length > 0) {
         // IPs Vercel pour domaines personnalisés (utiliser CNAME recommandé, mais A record aussi supporté)
         const targetIPs = ['76.76.19.61', '76.76.21.61', '185.158.133.1'];
-        details.aRecord = aData.Answer.some((answer: any) => targetIPs.includes(answer.data));
+        details.aRecord = aData.Answer.some((answer: { data: string }) => targetIPs.includes(answer.data));
         if (!details.aRecord) {
           errors.push(`Enregistrement A incorrect: pointe vers ${aData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`);
         }
       } else {
         errors.push("Enregistrement A manquant");
       }
-    } catch (e) {
+    } catch (_e) {
       errors.push("Erreur lors de la vérification de l'enregistrement A");
     }
 
@@ -121,14 +121,14 @@ export const checkDNSPropagation = async (
       if (wwwData.Answer && wwwData.Answer.length > 0) {
         // IPs Vercel pour domaines personnalisés
         const targetIPs = ['76.76.19.61', '76.76.21.61', '185.158.133.1'];
-        details.wwwRecord = wwwData.Answer.some((answer: any) => targetIPs.includes(answer.data));
+        details.wwwRecord = wwwData.Answer.some((answer: { data: string }) => targetIPs.includes(answer.data));
         if (!details.wwwRecord) {
           errors.push(`Enregistrement WWW incorrect: pointe vers ${wwwData.Answer[0].data}. IPs attendues: ${targetIPs.join(', ')}`);
         }
       } else {
         errors.push("Enregistrement WWW manquant");
       }
-    } catch (e) {
+    } catch (_e) {
       errors.push("Erreur lors de la vérification de l'enregistrement WWW");
     }
 
@@ -138,7 +138,7 @@ export const checkDNSPropagation = async (
       const txtData = await txtResponse.json();
       
       if (txtData.Answer && txtData.Answer.length > 0) {
-        details.txtRecord = txtData.Answer.some((answer: any) => 
+        details.txtRecord = txtData.Answer.some((answer: { data: string }) => 
           answer.data && answer.data.replace(/"/g, '') === verificationToken
         );
         if (!details.txtRecord) {
@@ -147,7 +147,7 @@ export const checkDNSPropagation = async (
       } else {
         errors.push("Enregistrement TXT de vérification manquant");
       }
-    } catch (e) {
+    } catch (_e) {
       errors.push("Erreur lors de la vérification de l'enregistrement TXT");
     }
 

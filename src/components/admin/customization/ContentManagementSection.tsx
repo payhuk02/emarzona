@@ -578,7 +578,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                                   title: 'Template mis à jour',
                                   description: 'Le template a été sauvegardé avec succès.',
                                 });
-                              } catch (error) {
+                              } catch (_error) {
                                 toast({
                                   title: 'Erreur',
                                   description: 'Impossible de sauvegarder le template.',

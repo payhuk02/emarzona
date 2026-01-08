@@ -19,9 +19,22 @@ function getCorsOrigin(req: Request): string {
     return origin; // Autoriser l'origine exacte pour localhost
   }
 
-  // Autoriser le domaine de production
-  if (origin === siteUrl || origin === `${siteUrl}/`) {
-    return origin;
+  // Autoriser le domaine principal et ses sous-domaines
+  if (origin) {
+    // Autoriser emarzona.com et www.emarzona.com
+    if (origin === siteUrl || origin === `${siteUrl}/` || origin === `https://www.emarzona.com` || origin === `https://www.emarzona.com/`) {
+      return origin;
+    }
+    
+    // Autoriser api.emarzona.com (sous-domaine API)
+    if (origin === 'https://api.emarzona.com' || origin === 'https://api.emarzona.com/') {
+      return origin;
+    }
+    
+    // Autoriser tout sous-domaine *.emarzona.com
+    if (origin.includes('.emarzona.com')) {
+      return origin;
+    }
   }
 
   // Par défaut, utiliser SITE_URL (sans slash final)

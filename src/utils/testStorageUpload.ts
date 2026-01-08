@@ -30,6 +30,7 @@ export async function testStorageUpload() {
     return { success: false, error: 'Bucket "attachments" introuvable' };
   }
   
+  logger.info('✅ Bucket trouvé:', {
     id: attachmentsBucket.id,
     name: attachmentsBucket.name,
     public: attachmentsBucket.public,
@@ -43,6 +44,7 @@ export async function testStorageUpload() {
   // Étape 3: Créer un fichier de test
   const testContent = 'Test upload - ' + new Date().toISOString();
   const testFile = new File([testContent], 'test-upload.txt', { type: 'text/plain' });
+  logger.info('✅ Fichier de test créé:', {
     name: testFile.name,
     type: testFile.type,
     size: testFile.size,

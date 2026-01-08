@@ -518,7 +518,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     save('design', {
       ...customizationData?.design,
       colors: defaultColors,
-    }).catch((error) => {
+    }).catch((_error) => {
       toast({
         title: 'Erreur',
         description: 'Impossible de réinitialiser les couleurs',
