@@ -15,6 +15,7 @@ import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { Product } from '@/types/marketplace';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { PersonalizedRecommendations } from './ProductRecommendations';
 
 interface MarketplaceProductsSectionProps {
   products: Product[];
@@ -147,6 +148,13 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
         aria-label={t('marketplace.productList.ariaLabel')}
       >
         <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
+          {/* Recommandations personnalisées (si utilisateur connecté et aucun filtre actif) */}
+          {showRecommendations && userId && (
+            <div className="mb-12">
+              <PersonalizedRecommendations userId={userId} limit={6} />
+            </div>
+          )}
+
           {error ? (
             <div
               className="text-center py-8 sm:py-12 lg:py-16 px-2"
@@ -154,10 +162,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               aria-live="polite"
             >
               <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
-                <AlertCircle
-                  className="h-8 w-8 sm:h-10 sm:w-10 text-red-500"
-                  aria-hidden="true"
-                />
+                <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500" aria-hidden="true" />
               </div>
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">
                 {t('marketplace.error.title', 'Erreur de chargement')}

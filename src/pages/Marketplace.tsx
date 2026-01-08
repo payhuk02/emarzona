@@ -1,12 +1,9 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ProductGrid } from '@/components/ui/ProductGrid';
-import { VirtualizedProductGrid } from '@/components/ui/VirtualizedProductGrid';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,32 +12,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-// Import optimisé depuis l'index centralisé
-import {
-  ShoppingCart,
-  Filter,
-  Heart,
-  Eye,
-  Star,
-  TrendingUp,
-  Clock,
-  Users,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-  BarChart3,
-  Zap,
-  Sparkles,
-  DollarSign,
-  ArrowRight,
-  Grid3X3,
-  List,
-  Rocket,
-  Download,
-  Package,
-} from '@/components/icons';
-// Icônes non disponibles dans l'index (import direct)
-import { SortAsc, SortDesc, X } from 'lucide-react';
+import { ArrowRight, Rocket, Users } from '@/components/icons';
+import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
 import MarketplaceFooter from '@/components/marketplace/MarketplaceFooter';
@@ -48,13 +21,10 @@ import AdvancedFilters from '@/components/marketplace/AdvancedFilters';
 import ProductComparison from '@/components/marketplace/ProductComparison';
 import FavoritesManager from '@/components/marketplace/FavoritesManager';
 import { ContextualFilters } from '@/components/marketplace/ContextualFilters';
-import UnifiedProductCard from '@/components/products/UnifiedProductCard';
-import { transformToUnifiedProduct } from '@/lib/product-transform';
-import { CategoryNavigationBar } from '@/components/marketplace/CategoryNavigationBar';
 import { PersonalizedRecommendations } from '@/components/marketplace/ProductRecommendations';
 import { logger } from '@/lib/logger';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
-import { Product, FilterState, PaginationState } from '@/types/marketplace';
+import { Product } from '@/types/marketplace';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
@@ -62,15 +32,17 @@ import {
   useSaveSearchHistory,
   type SearchResult,
 } from '@/hooks/useProductSearch';
-import { SearchAutocomplete } from '@/components/marketplace/SearchAutocomplete';
 import '@/styles/marketplace-professional.css';
 import { SEOMeta, WebsiteSchema, BreadcrumbSchema, ItemListSchema } from '@/components/seo';
 import { useFilteredProducts } from '@/hooks/useFilteredProducts';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useCurrentUserId } from '@/hooks/useCurrentUserId';
 import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
-import { ProductListSkeleton } from '@/components/ui/skeleton-enhanced';
 import { useQueryClient } from '@tanstack/react-query';
+// ✅ REFACTORING: Imports des nouveaux hooks et composants
+import { useMarketplaceFilters, useMarketplacePagination } from '@/hooks/marketplace';
+import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHeroSection';
+import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
+import { MarketplaceProductsSection } from '@/components/marketplace/MarketplaceProductsSection';
 
 const Marketplace = () => {
   const { t } = useTranslation();
@@ -92,38 +64,27 @@ const Marketplace = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  // Refs pour scroll animation (déclarés tôt pour éviter les erreurs d'initialisation)
-  const heroRef = useScrollAnimation<HTMLDivElement>();
-  const productsRef = useScrollAnimation<HTMLDivElement>();
+  // ✅ REFACTORING: Les refs sont maintenant gérées dans les composants MarketplaceHeroSection et MarketplaceProductsSection
 
   // Note: userId est maintenant fourni par un cache global (useCurrentUserId)
 
-  // États des filtres
-  const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    category: 'all',
-    productType: 'all',
-    licensingType: 'all',
-    priceRange: 'all',
-    rating: 'all',
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-    viewMode: 'grid',
-    tags: [],
-    verifiedOnly: false,
-    featuredOnly: false,
-    inStock: true,
-  });
+  // ✅ REFACTORING: Utiliser les nouveaux hooks
+  const { filters, updateFilter, clearFilters, PRICE_RANGES, SORT_OPTIONS, PRODUCT_TAGS } =
+    useMarketplaceFilters();
+
+  const {
+    pagination,
+    setPagination,
+    totalPages,
+    canGoPrevious,
+    canGoNext,
+    goToPage,
+    resetPagination,
+    updateTotalItems,
+  } = useMarketplacePagination(12);
 
   // État local pour l'input de recherche (non debounced)
   const [searchInput, setSearchInput] = useState('');
-
-  // État de pagination
-  const [pagination, setPagination] = useState<PaginationState>({
-    currentPage: 1,
-    itemsPerPage: 12,
-    totalItems: 0,
-  });
 
   // Valeur debounced pour éviter trop d'appels API
   const debouncedSearch = useDebounce(searchInput, 500);
@@ -222,53 +183,12 @@ const Marketplace = () => {
   });
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
-  // Constantes pour les filtres (traduites)
-  const PRICE_RANGES = useMemo(
-    () => [
-      { value: 'all', label: t('marketplace.priceRanges.all') },
-      { value: '0-5000', label: t('marketplace.priceRanges.0-5000') },
-      { value: '5000-15000', label: t('marketplace.priceRanges.5000-15000') },
-      { value: '15000-50000', label: t('marketplace.priceRanges.15000-50000') },
-      { value: '50000-100000', label: t('marketplace.priceRanges.50000-100000') },
-      { value: '100000+', label: t('marketplace.priceRanges.100000+') },
-    ],
-    [t]
-  );
-
-  const SORT_OPTIONS = useMemo(
-    () => [
-      { value: 'created_at', label: t('marketplace.sort.newest'), icon: Clock },
-      { value: 'price', label: t('marketplace.sort.price'), icon: DollarSign },
-      { value: 'rating', label: t('marketplace.sort.rating'), icon: Star },
-      { value: 'sales_count', label: t('marketplace.sort.sales'), icon: TrendingUp },
-      { value: 'name', label: t('marketplace.sort.name'), icon: Eye },
-      { value: 'popularity', label: t('marketplace.sort.popularity'), icon: Zap },
-    ],
-    [t]
-  );
-
-  const PRODUCT_TAGS = useMemo(
-    () => [
-      t('marketplace.tags.new'),
-      t('marketplace.tags.popular'),
-      t('marketplace.tags.sale'),
-      t('marketplace.tags.recommended'),
-      t('marketplace.tags.trending'),
-      t('marketplace.tags.premium'),
-      t('marketplace.tags.fastShipping'),
-      t('marketplace.tags.support'),
-      t('marketplace.tags.warranty'),
-      t('marketplace.tags.training'),
-      t('marketplace.tags.updates'),
-      t('marketplace.tags.community'),
-    ],
-    [t]
-  );
+  // ✅ REFACTORING: PRICE_RANGES, SORT_OPTIONS, PRODUCT_TAGS sont maintenant fournis par useMarketplaceFilters
 
   // Synchroniser debouncedSearch avec filters.search
   useEffect(() => {
-    setFilters(prev => ({ ...prev, search: debouncedSearch }));
-  }, [debouncedSearch]);
+    updateFilter({ search: debouncedSearch });
+  }, [debouncedSearch, updateFilter]);
 
   // Enregistrer l'historique de recherche
   useEffect(() => {
@@ -287,7 +207,7 @@ const Marketplace = () => {
       const endIndex = startIndex + pagination.itemsPerPage - 1;
 
       // Construire la requête avec les jointures nécessaires selon le type
-      let  selectQuery= `
+      let selectQuery = `
         *,
         stores!inner (
           id,
@@ -341,7 +261,7 @@ const Marketplace = () => {
           )`;
       }
 
-      let  query= supabase
+      let query = supabase
         .from('products')
         .select(selectQuery, { count: 'exact' }) // Obtenir le count total
         .eq('is_active', true)
@@ -434,7 +354,7 @@ const Marketplace = () => {
       // Ne charger les produits que si pas de recherche active
       if (!hasSearchQuery) {
         // Appliquer les filtres côté client pour les relations
-        let  filteredData= (data || []) as unknown as Product[];
+        let filteredData = (data || []) as unknown as Product[];
 
         if (filters.productType === 'digital' && filters.digitalSubType) {
           filteredData = filteredData.filter(
@@ -543,11 +463,11 @@ const Marketplace = () => {
           `${filteredData.length} produits chargés après filtrage (page ${pagination.currentPage}/${Math.ceil((count || 0) / pagination.itemsPerPage)})`
         );
         setProducts((filteredData || []) as unknown as Product[]);
-        setPagination(prev => ({ ...prev, totalItems: filteredData.length }));
+        updateTotalItems(filteredData.length);
         setError(null); // Réinitialiser l'erreur en cas de succès
         setHasLoadedOnce(true); // Marquer qu'on a chargé au moins une fois
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('❌ Erreur lors du chargement des produits :', { error: errorMessage });
       setError(errorMessage);
@@ -622,7 +542,7 @@ const Marketplace = () => {
       const rpcTotalCount = rpcFilteredProductsRef.current.length;
       if (prevTotalCountRef.current !== rpcTotalCount) {
         prevTotalCountRef.current = rpcTotalCount;
-        setPagination(prev => ({ ...prev, totalItems: rpcTotalCount }));
+        updateTotalItems(rpcTotalCount);
       }
     } else if (!hasSearchQuery) {
       if (queryProductsKey !== prevQueryKeyRef.current) {
@@ -650,7 +570,7 @@ const Marketplace = () => {
       }
       if (prevTotalCountRef.current !== queryTotalCount) {
         prevTotalCountRef.current = queryTotalCount;
-        setPagination(prev => ({ ...prev, totalItems: queryTotalCount }));
+        updateTotalItems(queryTotalCount);
       }
     }
   }, [
@@ -696,7 +616,7 @@ const Marketplace = () => {
         if (payload.eventType === 'INSERT') {
           setProducts(prev => [payload.new as Product, ...prev]);
           // Mettre à jour le total si nécessaire
-          setPagination(prev => ({ ...prev, totalItems: prev.totalItems + 1 }));
+          updateTotalItems(pagination.totalItems + 1);
         } else if (payload.eventType === 'UPDATE') {
           setProducts(prev =>
             prev.map(p => (p.id === payload.new.id ? (payload.new as Product) : p))
@@ -704,7 +624,7 @@ const Marketplace = () => {
         } else if (payload.eventType === 'DELETE') {
           setProducts(prev => prev.filter(p => p.id !== payload.old.id));
           // Mettre à jour le total si nécessaire
-          setPagination(prev => ({ ...prev, totalItems: Math.max(0, prev.totalItems - 1) }));
+          updateTotalItems(Math.max(0, pagination.totalItems - 1));
         }
       })
       .subscribe();
@@ -755,7 +675,7 @@ const Marketplace = () => {
 
     // Sinon, utiliser les produits chargés normalement
     // Filtrage par tags côté client (complexe avec arrays)
-    let  filtered= products;
+    let filtered = products;
     if (filters.tags.length > 0) {
       filtered = filtered.filter(product => filters.tags.some(tag => product.tags?.includes(tag)));
     }
@@ -779,46 +699,20 @@ const Marketplace = () => {
     return types.sort();
   }, [products]);
 
-  // Gestion des filtres (reset page à 1 quand filtres changent)
-  const updateFilter = useCallback((newFilters: Partial<FilterState>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-  }, []);
-
-  const clearFilters = useCallback(() => {
-    setFilters({
-      search: '',
-      category: 'all',
-      productType: 'all',
-      licensingType: 'all',
-      priceRange: 'all',
-      rating: 'all',
-      sortBy: 'created_at',
-      sortOrder: 'desc',
-      viewMode: 'grid',
-      tags: [],
-      verifiedOnly: false,
-      featuredOnly: false,
-      inStock: true,
-      // Réinitialiser tous les filtres spécifiques
-      digitalSubType: undefined,
-      instantDelivery: false,
-      stockAvailability: undefined,
-      shippingType: undefined,
-      physicalCategory: undefined,
-      serviceType: undefined,
-      locationType: undefined,
-      calendarAvailable: false,
-      difficulty: undefined,
-      accessType: undefined,
-      courseDuration: undefined,
-      artistType: undefined,
-      editionType: undefined,
-      certificateOfAuthenticity: false,
-      artworkAvailability: undefined,
-    });
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-  }, []);
+  // ✅ REFACTORING: updateFilter et clearFilters sont maintenant fournis par useMarketplaceFilters
+  // Réinitialiser la pagination quand les filtres changent
+  useEffect(() => {
+    resetPagination();
+  }, [
+    filters.category,
+    filters.productType,
+    filters.priceRange,
+    filters.rating,
+    filters.tags.length,
+    filters.verifiedOnly,
+    filters.featuredOnly,
+    resetPagination,
+  ]);
 
   // Persister la comparaison dans localStorage
   useEffect(() => {
@@ -897,77 +791,14 @@ const Marketplace = () => {
   // Partage de produit (utilisé par ProductCardModern)
   // Note: Cette fonction est disponible mais peut ne pas être utilisée directement ici
 
-  // Pagination (basée sur le total côté serveur)
-  const totalPages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
-  const canGoPrevious = pagination.currentPage > 1;
-  const canGoNext = pagination.currentPage < totalPages;
+  // ✅ REFACTORING: totalPages, canGoPrevious, canGoNext sont maintenant fournis par useMarketplacePagination
 
-  // ✅ OPTIMISATION: Mémoriser la transformation des produits pour éviter recalculs
-  const transformedProducts = useMemo(
-    () =>
-      displayProducts.map(product =>
-        transformToUnifiedProduct({
-          ...product,
-          description: product.description ?? undefined,
-          short_description: product.short_description ?? undefined,
-        } as Parameters<typeof transformToUnifiedProduct>[0])
-      ),
-    [displayProducts]
-  );
-
-  // ✅ OPTIMISATION: Mémoriser le renderItem pour VirtualizedProductGrid
-  const renderProductItem = useCallback(
-    (index: number) => {
-      const unifiedProduct = transformedProducts[index];
-      if (!unifiedProduct) return null;
-
-      return (
-        <UnifiedProductCard
-          key={unifiedProduct.id}
-          product={unifiedProduct}
-          variant="marketplace"
-          showAffiliate={true}
-          showActions={true}
-          onAction={(action, prod) => {
-            if (action === 'view') {
-              // Navigation gérée par le Link dans UnifiedProductCard
-            } else if (action === 'buy') {
-              handleBuyProduct(prod);
-            }
-          }}
-        />
-      );
-    },
-    [transformedProducts, handleBuyProduct]
-  );
-
-  // ✅ OPTIMISATION: Mémoriser le rendu des produits pour ProductGrid
-  const renderedProducts = useMemo(
-    () =>
-      transformedProducts.map(unifiedProduct => (
-        <UnifiedProductCard
-          key={unifiedProduct.id}
-          product={unifiedProduct}
-          variant="marketplace"
-          showAffiliate={true}
-          showActions={true}
-          onAction={(action, prod) => {
-            if (action === 'view') {
-              // Navigation gérée par le Link dans UnifiedProductCard
-            } else if (action === 'buy') {
-              handleBuyProduct(prod);
-            }
-          }}
-        />
-      )),
-    [transformedProducts, handleBuyProduct]
-  );
-
-  // ✅ OPTIMISATION: Prefetching lors du changement de page
-  const goToPage = useCallback(
+  // ✅ REFACTORING: La transformation et le rendu des produits sont maintenant gérés par MarketplaceProductsSection
+  // ✅ REFACTORING: goToPage est maintenant fourni par useMarketplacePagination
+  // Wrapper pour goToPage avec prefetching
+  const handlePageChange = useCallback(
     (page: number) => {
-      if (page < 1 || page > totalPages) return;
-      setPagination(prev => ({ ...prev, currentPage: page }));
+      goToPage(page);
 
       // ✅ OPTIMISATION: Prefetching des pages adjacentes
       if (page < totalPages) {
@@ -976,18 +807,8 @@ const Marketplace = () => {
       if (page > 1) {
         prefetchPreviousPage();
       }
-
-      // Scroll vers le début de la liste de produits (au lieu du top de page)
-      setTimeout(() => {
-        if (productsRef.current) {
-          productsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          // Fallback si ref non disponible
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 100); // Délai pour permettre le re-render
     },
-    [totalPages, productsRef, prefetchNextPage, prefetchPreviousPage]
+    [goToPage, totalPages, prefetchNextPage, prefetchPreviousPage]
   );
 
   // Statistiques (basées sur le total réel, pas seulement la page actuelle)
@@ -1125,272 +946,28 @@ const Marketplace = () => {
           </Breadcrumb>
         </div>
 
-        {/* Hero Section */}
-        <section
-          ref={heroRef}
-          className="relative py-8 sm:py-12 lg:py-16 px-3 sm:px-4 overflow-hidden"
-          aria-labelledby="hero-title"
-          role="banner"
-        >
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"
-            aria-hidden="true"
-          ></div>
-          <div className="container mx-auto max-w-6xl relative z-10">
-            <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
-                <Sparkles
-                  className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 animate-pulse"
-                  aria-hidden="true"
-                />
-                <h1
-                  id="hero-title"
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-                >
-                  {getValue('marketplace.hero.title')}
-                </h1>
-                <Sparkles
-                  className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 animate-pulse"
-                  aria-hidden="true"
-                />
-              </div>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-slate-300 mb-3 sm:mb-4 md:mb-6 lg:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
-                {getValue('marketplace.hero.subtitle')}
-                <br />
-                <span className="text-blue-400 font-semibold">
-                  {getValue('marketplace.hero.tagline')}
-                </span>
-              </p>
-            </div>
-
-            {/* Barre de navigation par catégories */}
-            <CategoryNavigationBar
-              categories={categories}
-              selectedCategory={filters.category}
-              onCategoryChange={category => updateFilter({ category })}
-            />
-
-            {/* Barre de recherche avancée avec auto-complétion */}
-            <div className="max-w-4xl mx-auto mb-4 sm:mb-6 px-2">
-              <SearchAutocomplete
-                value={searchInput}
-                onChange={setSearchInput}
-                onSearch={query => {
-                  setSearchInput(query);
-                  // Réinitialiser la pagination lors d'une nouvelle recherche
-                  setPagination(prev => ({ ...prev, currentPage: 1 }));
-                }}
-                placeholder={
-                  getValue('marketplace.searchPlaceholder') || 'Rechercher des produits...'
-                }
-                className="w-full"
-                showSuggestions={true}
-              />
-            </div>
-
-            {/* Filtres actifs (tags) */}
-            {(filters.category !== 'all' ||
-              filters.productType !== 'all' ||
-              filters.priceRange !== 'all' ||
-              filters.tags.length > 0 ||
-              filters.verifiedOnly ||
-              filters.featuredOnly) && (
-              <div className="flex flex-wrap gap-2 items-center justify-center mb-3 sm:mb-4 px-2">
-                <span className="text-xs sm:text-sm text-slate-300 font-medium">
-                  {getValue('marketplace.filtersActive')}
-                </span>
-
-                {filters.category !== 'all' && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                  >
-                    {getValue('marketplace.filterLabels.category')} {filters.category}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-400"
-                      onClick={() => updateFilter({ category: 'all' })}
-                      aria-label={`${getValue('marketplace.filterLabels.clear')} ${filters.category}`}
-                    />
-                  </Badge>
-                )}
-
-                {filters.productType !== 'all' && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                  >
-                    {getValue('marketplace.filterLabels.type')} {filters.productType}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-400"
-                      onClick={() => updateFilter({ productType: 'all' })}
-                      aria-label={`${getValue('marketplace.filterLabels.clear')} ${filters.productType}`}
-                    />
-                  </Badge>
-                )}
-
-                {filters.priceRange !== 'all' && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                  >
-                    {getValue('marketplace.filterLabels.priceRange')}{' '}
-                    {PRICE_RANGES.find(r => r.value === filters.priceRange)?.label}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-400"
-                      onClick={() => updateFilter({ priceRange: 'all' })}
-                      aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.priceRange')}`}
-                    />
-                  </Badge>
-                )}
-
-                {filters.verifiedOnly && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-700 text-white hover:bg-green-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                  >
-                    ✓ {getValue('marketplace.filterLabels.verified')}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-400"
-                      onClick={() => updateFilter({ verifiedOnly: false })}
-                      aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.verified')}`}
-                    />
-                  </Badge>
-                )}
-
-                {filters.featuredOnly && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-yellow-700 text-white hover:bg-yellow-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                  >
-                    ⭐ {getValue('marketplace.filterLabels.featured')}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-400"
-                      onClick={() => updateFilter({ featuredOnly: false })}
-                      aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.featured')}`}
-                    />
-                  </Badge>
-                )}
-
-                {filters.tags.map((tag, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="bg-purple-700 text-white hover:bg-purple-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                  >
-                    {getValue('marketplace.filterLabels.tag')} {tag}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-red-400"
-                      onClick={() => updateFilter({ tags: filters.tags.filter(t => t !== tag) })}
-                      aria-label={`${getValue('marketplace.filterLabels.clear')} ${tag}`}
-                    />
-                  </Badge>
-                ))}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearFilters}
-                  className="text-xs sm:text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 sm:h-8"
-                  aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.all')}`}
-                >
-                  {getValue('marketplace.filterLabels.clear')}{' '}
-                  {getValue('marketplace.filterLabels.all')}
-                </Button>
-              </div>
-            )}
-
-            {/* Filtres rapides */}
-            <div
-              className="flex flex-wrap gap-2 sm:gap-3 justify-center px-2"
-              role="toolbar"
-              aria-label={t('marketplace.toolbar.ariaLabel')}
-            >
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
-                aria-label={`${showFilters ? t('common.hide') : t('common.show')} ${t('marketplace.filters.advanced')}`}
-                aria-expanded={showFilters}
-                aria-controls="advanced-filters"
-              >
-                <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">{t('marketplace.filters.advanced')}</span>
-                <span className="sm:hidden">Filtres</span>
-                {(filters.category !== 'all' ||
-                  filters.productType !== 'all' ||
-                  filters.priceRange !== 'all' ||
-                  filters.tags.length > 0) && (
-                  <Badge
-                    variant="destructive"
-                    className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse"
-                    aria-label="Filtres actifs"
-                  >
-                    !
-                  </Badge>
-                )}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
-                aria-label="Ouvrir la recherche intelligente"
-                aria-expanded={showAdvancedSearch}
-              >
-                <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Recherche intelligente</span>
-                <span className="sm:hidden">Recherche</span>
-              </Button>
-
-              {/* Note: Le modal FavoritesManager est géré via le composant lui-même */}
-              <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-600 text-white rounded-md px-2 sm:px-4 py-1.5 sm:py-2 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <Heart className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Mes favoris</span>
-                <span className="sm:hidden">Favoris</span>
-                {favoritesCount > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 sm:ml-2 bg-red-600 text-white text-xs"
-                    aria-label={`${favoritesCount} favoris`}
-                  >
-                    {favoritesCount}
-                  </Badge>
-                )}
-              </div>
-
-              <Button
-                variant="outline"
-                onClick={() => setShowComparison(true)}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
-                aria-label={`Comparer ${comparisonProducts.length} produit${comparisonProducts.length !== 1 ? 's' : ''}`}
-                aria-expanded={showComparison}
-              >
-                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Comparer</span>
-                {comparisonProducts.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-1 sm:ml-2 bg-green-600 text-white text-xs animate-bounce"
-                    aria-label={`${comparisonProducts.length} produits en comparaison`}
-                  >
-                    {comparisonProducts.length}
-                  </Badge>
-                )}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
-                aria-label="Effacer tous les filtres"
-              >
-                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Effacer tout</span>
-                <span className="sm:hidden">Effacer</span>
-              </Button>
-            </div>
-          </div>
-        </section>
+        {/* ✅ REFACTORING: Hero Section remplacée par MarketplaceHeroSection */}
+        <MarketplaceHeroSection
+          filters={filters}
+          searchInput={searchInput}
+          onSearchInputChange={setSearchInput}
+          onSearch={query => {
+            setSearchInput(query);
+            resetPagination();
+          }}
+          onFilterChange={updateFilter}
+          onClearFilters={clearFilters}
+          showFilters={showFilters}
+          onToggleFilters={() => setShowFilters(!showFilters)}
+          showAdvancedSearch={showAdvancedSearch}
+          onToggleAdvancedSearch={() => setShowAdvancedSearch(!showAdvancedSearch)}
+          onToggleComparison={() => setShowComparison(true)}
+          categories={categories}
+          favoritesCount={favoritesCount}
+          comparisonCount={comparisonProducts.length}
+          PRICE_RANGES={PRICE_RANGES}
+          getValue={getValue}
+        />
 
         {/* Filtres avancés */}
         {showFilters && (
@@ -1587,266 +1164,44 @@ const Marketplace = () => {
           </section>
         )}
 
-        {/* Contrôles de tri et vue */}
-        <section className="py-4 sm:py-6 px-3 sm:px-4">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
-                  Tous les produits
-                </h2>
-                <Badge
-                  variant="secondary"
-                  className="bg-slate-700 text-slate-300 text-xs sm:text-sm"
-                >
-                  {pagination.totalItems} produit{pagination.totalItems !== 1 ? 's' : ''}
-                </Badge>
-                {filters.search || filters.tags.length > 0 ? (
-                  <Badge variant="secondary" className="bg-blue-600 text-white text-xs sm:text-sm">
-                    {displayProducts.length} résultat{displayProducts.length !== 1 ? 's' : ''}{' '}
-                    affiché{displayProducts.length !== 1 ? 's' : ''}
-                  </Badge>
-                ) : null}
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                {/* Tri */}
-                <div className="flex items-center gap-2">
-                  <label className="text-xs sm:text-sm text-slate-300 hidden sm:block">
-                    {t('marketplace.sorting.label')}
-                  </label>
-                  <select
-                    value={filters.sortBy}
-                    onChange={e => updateFilter({ sortBy: e.target.value })}
-                    className="flex-1 sm:flex-initial px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md text-base sm:text-sm focus:border-blue-500 focus:ring-blue-500 touch-manipulation cursor-pointer"
-                  >
-                    {SORT_OPTIONS.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      updateFilter({ sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc' })
-                    }
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-9 sm:h-10 w-9 sm:w-10 p-0"
-                  >
-                    {filters.sortOrder === 'asc' ? (
-                      <SortAsc className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    ) : (
-                      <SortDesc className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    )}
-                  </Button>
-                </div>
-
-                {/* Mode de vue */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant={filters.viewMode === 'grid' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => updateFilter({ viewMode: 'grid' })}
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-9 sm:h-10 w-9 sm:w-10 p-0"
-                  >
-                    <Grid3X3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </Button>
-                  <Button
-                    variant={filters.viewMode === 'list' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => updateFilter({ viewMode: 'list' })}
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all duration-300 h-9 sm:h-10 w-9 sm:w-10 p-0"
-                  >
-                    <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* ✅ REFACTORING: Contrôles remplacés par MarketplaceControlsSection */}
+        <MarketplaceControlsSection
+          filters={filters}
+          totalItems={pagination.totalItems}
+          displayedItems={displayProducts.length}
+          hasSearchQuery={hasSearchQuery}
+          onFilterChange={updateFilter}
+          SORT_OPTIONS={SORT_OPTIONS}
+        />
 
         {/* Note: sections par type supprimées => tout s'affiche ensemble dans la liste ci-dessous */}
 
-        {/* Liste des produits */}
-        <section
-          ref={productsRef}
-          id="main-content"
-          className="py-4 sm:py-6 px-3 sm:px-4"
-          role="main"
-          aria-label={t('marketplace.productList.ariaLabel')}
-        >
-          <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
-            {error ? (
-              <div
-                className="text-center py-8 sm:py-12 lg:py-16 px-2"
-                role="alert"
-                aria-live="polite"
-              >
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
-                  <AlertCircle
-                    className="h-8 w-8 sm:h-10 sm:w-10 text-red-500"
-                    aria-hidden="true"
-                  />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">
-                  {t('marketplace.error.title', 'Erreur de chargement')}
-                </h3>
-                <p className="text-sm sm:text-base text-slate-400 mb-4 sm:mb-6 max-w-md mx-auto">
-                  {error}
-                </p>
-                <Button
-                  onClick={() => {
-                    setError(null);
-                    // Utiliser React Query pour refetch au lieu de fetchProducts
-                    if (!shouldUseRPCFiltering) {
-                      queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
-                    } else {
-                      fetchProducts();
-                    }
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-10 sm:h-12 px-4 sm:px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
-                  aria-label={t('marketplace.error.retry', 'Réessayer')}
-                >
-                  {t('marketplace.error.retry', 'Réessayer')}
-                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
-              </div>
-            ) : loading && !hasLoadedOnce ? (
-              // ✅ OPTIMISATION: Afficher skeleton au premier chargement
-              <div className="w-full">
-                <ProductListSkeleton count={pagination.itemsPerPage} />
-              </div>
-            ) : displayProducts.length > 0 ? (
-              <>
-                {/* Recommandations personnalisées (si utilisateur connecté et aucun filtre actif) */}
-                {userId &&
-                  filters.category === 'all' &&
-                  filters.search === '' &&
-                  filters.productType === 'all' && (
-                    <div className="mb-12">
-                      <PersonalizedRecommendations userId={userId} limit={6} />
-                    </div>
-                  )}
-
-                {/* Indicateur de chargement discret en haut si rechargement */}
-                {isLoadingProducts && hasLoadedOnce && (
-                  <div className="flex justify-center mb-4">
-                    <div className="h-1 w-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-full animate-pulse" />
-                  </div>
-                )}
-
-                {/* ✅ OPTIMISATION: Utiliser VirtualizedProductGrid dès 12 produits (1 page) pour meilleures performances */}
-                {displayProducts.length >= 12 ? (
-                  <VirtualizedProductGrid
-                    count={displayProducts.length}
-                    renderItem={renderProductItem}
-                    loading={isLoadingProducts && hasLoadedOnce}
-                    loadingCount={pagination.itemsPerPage}
-                    className={
-                      isLoadingProducts && hasLoadedOnce
-                        ? 'opacity-75 transition-opacity duration-300'
-                        : ''
-                    }
-                    emptyMessage={t('marketplace.noProducts')}
-                  />
-                ) : (
-                  <ProductGrid
-                    className={
-                      isLoadingProducts && hasLoadedOnce
-                        ? 'opacity-75 transition-opacity duration-300'
-                        : ''
-                    }
-                  >
-                    {renderedProducts}
-                  </ProductGrid>
-                )}
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <nav
-                    className="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12"
-                    role="navigation"
-                    aria-label={t('marketplace.pagination.ariaLabel')}
-                  >
-                    <Button
-                      variant="outline"
-                      onClick={() => goToPage(pagination.currentPage - 1)}
-                      disabled={!canGoPrevious}
-                      className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 h-8 sm:h-10 w-8 sm:w-10 p-0"
-                      aria-label={t('marketplace.pagination.previous')}
-                    >
-                      <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
-                    </Button>
-
-                    {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                      const  page: number = (() => {
-                        if (totalPages <= 7) {
-                          return i + 1;
-                        } else if (pagination.currentPage <= 4) {
-                          return i + 1;
-                        } else if (pagination.currentPage >= totalPages - 3) {
-                          return totalPages - 6 + i;
-                        } else {
-                          return pagination.currentPage - 3 + i;
-                        }
-                      })();
-
-                      const isActive = page === pagination.currentPage;
-
-                      return (
-                        <Button
-                          key={page}
-                          variant={isActive ? 'default' : 'outline'}
-                          onClick={() => goToPage(page)}
-                          className={`${
-                            isActive
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-slate-800 border-slate-600 text-white hover:bg-slate-700'
-                          } transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 h-8 sm:h-10 w-8 sm:w-10 p-0 text-xs sm:text-sm`}
-                          aria-label={`Page ${page}`}
-                          aria-current={isActive ? 'page' : undefined}
-                        >
-                          {page}
-                        </Button>
-                      );
-                    })}
-
-                    <Button
-                      variant="outline"
-                      onClick={() => goToPage(pagination.currentPage + 1)}
-                      disabled={!canGoNext}
-                      className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 h-8 sm:h-10 w-8 sm:w-10 p-0"
-                      aria-label={t('marketplace.pagination.next')}
-                    >
-                      <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
-                    </Button>
-                  </nav>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8 sm:py-12 lg:py-16 px-2">
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-slate-700 mx-auto mb-4 flex items-center justify-center">
-                  <ShoppingCart className="h-8 w-8 sm:h-10 sm:w-10 text-slate-400" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">
-                  {t('marketplace.noProducts')}
-                </h3>
-                <p className="text-sm sm:text-base text-slate-400 mb-4 sm:mb-6 max-w-md mx-auto">
-                  {filters.search
-                    ? t('marketplace.noProductsSearch')
-                    : t('marketplace.noProductsDefault')}
-                </p>
-                <Link to="/auth">
-                  <Button className="min-h-[44px] bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-11 sm:h-12 px-4 sm:px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm">
-                    {t('marketplace.createStore')}
-                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </section>
+        {/* ✅ REFACTORING: Liste des produits remplacée par MarketplaceProductsSection */}
+        <MarketplaceProductsSection
+          products={displayProducts}
+          loading={loading}
+          error={error}
+          hasLoadedOnce={hasLoadedOnce}
+          isLoadingProducts={isLoadingProducts}
+          pagination={pagination}
+          onRetry={() => {
+            setError(null);
+            if (!shouldUseRPCFiltering) {
+              queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
+            } else {
+              fetchProducts();
+            }
+          }}
+          onPageChange={handlePageChange}
+          onBuyProduct={handleBuyProduct}
+          userId={userId}
+          showRecommendations={
+            userId &&
+            filters.category === 'all' &&
+            filters.search === '' &&
+            filters.productType === 'all'
+          }
+        />
 
         {/* Call to Action */}
         <section className="py-8 sm:py-12 lg:py-16 px-3 sm:px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
@@ -1919,9 +1274,3 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
-
-
-
-
-
-
