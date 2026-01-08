@@ -331,7 +331,7 @@ export const DomainSettings = () => {
         } else {
           errors.push("Enregistrement A manquant");
         }
-      } catch (e) {
+      } catch (_e) {
         errors.push("Erreur lors de la vérification de l'enregistrement A");
       }
 
@@ -349,7 +349,7 @@ export const DomainSettings = () => {
         } else {
           errors.push("Enregistrement WWW manquant");
         }
-      } catch (e) {
+      } catch (_e) {
         errors.push("Erreur lors de la vérification de l'enregistrement WWW");
       }
 
@@ -360,7 +360,7 @@ export const DomainSettings = () => {
         
         if (txtData.Answer && txtData.Answer.length > 0) {
           const expectedToken = domainConfig.domain_verification_token || '';
-          details.txtRecord = txtData.Answer.some((answer: any) => 
+          details.txtRecord = txtData.Answer.some((answer: { data: string }) => 
             answer.data && answer.data.replace(/"/g, '') === expectedToken
           );
           if (!details.txtRecord) {
@@ -369,7 +369,7 @@ export const DomainSettings = () => {
         } else {
           errors.push("Enregistrement TXT de vérification manquant");
         }
-      } catch (e) {
+      } catch (_e) {
         errors.push("Erreur lors de la vérification de l'enregistrement TXT");
       }
 
