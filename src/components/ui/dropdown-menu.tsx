@@ -138,7 +138,7 @@ const DropdownMenuContent = React.forwardRef<
       if (isMobileSheet) return;
 
       const menuElement = contentRef.current;
-      let  lockedPosition: { top: number; left: number; width: number } | null = null;
+      let lockedPosition: { top: number; left: number; width: number } | null = null;
 
       // Fonction pour verrouiller la position
       const lockPosition = () => {
@@ -223,8 +223,19 @@ const DropdownMenuContent = React.forwardRef<
             // Sur mobile, empêcher la fermeture si l'interaction est dans le menu
             if (isMobile && mobileOptimized && contentRef.current) {
               const target = e.target as HTMLElement;
-              if (contentRef.current.contains(target)) {
+              // Vérifier si le clic est dans le menu ou dans un élément enfant
+              if (contentRef.current.contains(target) || contentRef.current === target) {
                 e.preventDefault();
+                return;
+              }
+              // Vérifier aussi si c'est un élément parent (cas des portals)
+              let parent = target.parentElement;
+              while (parent && parent !== document.body) {
+                if (parent === contentRef.current) {
+                  e.preventDefault();
+                  return;
+                }
+                parent = parent.parentElement;
               }
             }
             props.onInteractOutside?.(e);
@@ -233,11 +244,47 @@ const DropdownMenuContent = React.forwardRef<
             // Sur mobile, empêcher la fermeture si le clic est dans le menu
             if (isMobile && mobileOptimized && contentRef.current) {
               const target = e.target as HTMLElement;
-              if (contentRef.current.contains(target)) {
+              // Vérifier si le clic est dans le menu ou dans un élément enfant
+              if (contentRef.current.contains(target) || contentRef.current === target) {
                 e.preventDefault();
+                return;
+              }
+              // Vérifier aussi si c'est un élément parent (cas des portals)
+              let parent = target.parentElement;
+              while (parent && parent !== document.body) {
+                if (parent === contentRef.current) {
+                  e.preventDefault();
+                  return;
+                }
+                parent = parent.parentElement;
               }
             }
             props.onPointerDownOutside?.(e);
+          }}
+          // Empêcher la fermeture lors des événements tactiles sur mobile
+          onTouchStart={e => {
+            // Sur mobile, empêcher la propagation si le touch est dans le menu
+            if (isMobile && mobileOptimized && contentRef.current) {
+              const target = e.target as HTMLElement;
+              if (contentRef.current.contains(target) || contentRef.current === target) {
+                e.stopPropagation();
+              }
+            }
+          }}
+          // Empêcher la fermeture lors des événements tactiles sur mobile
+          onTouchEnd={e => {
+            // Sur mobile, empêcher la propagation si le touch est dans le menu
+            if (isMobile && mobileOptimized && contentRef.current) {
+              const target = e.target as HTMLElement;
+              if (contentRef.current.contains(target) || contentRef.current === target) {
+                e.stopPropagation();
+              }
+            }
+          }}
+          // Empêcher la fermeture lors des événements tactiles
+          onEscapeKeyDown={e => {
+            // Sur mobile, permettre la fermeture avec Escape
+            props.onEscapeKeyDown?.(e);
           }}
           className={cn(
             // Conteneur principal
@@ -286,12 +333,67 @@ const DropdownMenuItem = React.forwardRef<
      */
     inset?: boolean;
   }
->(({ className, inset, ...props }, ref) => {
+>(({ className, inset, onClick, ...props }, ref) => {
   const isMobile = useIsMobile();
+  const itemRef = React.useRef<HTMLDivElement>(null);
+
+  // Combiner les refs
+  React.useImperativeHandle(
+    ref,
+    () => itemRef.current as React.ElementRef<typeof DropdownMenuPrimitive.Item>
+  );
+
+  // Gestion améliorée des événements tactiles sur mobile
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      // Sur mobile, empêcher la propagation pour éviter la fermeture prématurée
+      if (isMobile) {
+        e.stopPropagation();
+        // Exécuter l'action immédiatement mais empêcher la fermeture du menu
+        onClick?.(e);
+      } else {
+        onClick?.(e);
+      }
+    },
+    [isMobile, onClick]
+  );
+
+  // Gestion du touch pour mobile - empêcher la fermeture prématurée
+  const handleTouchStart = React.useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    // Empêcher la propagation pour éviter la fermeture du menu
+    e.stopPropagation();
+    // Ajouter un feedback visuel immédiat
+    if (itemRef.current) {
+      itemRef.current.classList.add('bg-accent');
+    }
+  }, []);
+
+  const handleTouchEnd = React.useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      // Exécuter l'action si elle existe
+      if (onClick) {
+        // Créer un événement synthétique pour déclencher onClick
+        const syntheticEvent = {
+          ...e,
+          currentTarget: itemRef.current,
+          target: itemRef.current,
+        } as unknown as React.MouseEvent<HTMLDivElement>;
+        onClick(syntheticEvent);
+      }
+      // Restaurer le style après un court délai
+      setTimeout(() => {
+        if (itemRef.current) {
+          itemRef.current.classList.remove('bg-accent');
+        }
+      }, 150);
+    },
+    [onClick]
+  );
 
   return (
     <DropdownMenuPrimitive.Item
-      ref={ref}
+      ref={itemRef}
       className={cn(
         'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 min-h-[44px] text-sm outline-none',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
@@ -307,6 +409,9 @@ const DropdownMenuItem = React.forwardRef<
         className
       )}
       role="menuitem"
+      onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       {...props}
     />
   );
@@ -408,9 +513,3 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
 };
-
-
-
-
-
-
