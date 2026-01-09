@@ -138,10 +138,19 @@ const DropdownMenuContent = React.forwardRef<
       const element = contentRef.current;
       let lockedPosition: { top: number; left: number; width: number } | null = null;
       let rafId: number | null = null;
+      let lockTimeout: NodeJS.Timeout | null = null;
 
-      // Attendre que Radix UI positionne le menu, puis verrouiller
-      const lockTimeout = setTimeout(() => {
+      // Verrouiller IMMÉDIATEMENT avec useLayoutEffect (synchrone avant le paint)
+      const lockPosition = () => {
+        if (!element) return;
+
         const rect = element.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+          // Si l'élément n'est pas encore rendu, réessayer au prochain frame
+          lockTimeout = setTimeout(lockPosition, 0);
+          return;
+        }
+
         lockedPosition = { top: rect.top, left: rect.left, width: rect.width };
 
         // Verrouiller la position avec !important pour surcharger Radix UI
@@ -151,20 +160,27 @@ const DropdownMenuContent = React.forwardRef<
         element.style.setProperty('width', `${lockedPosition.width}px`, 'important');
         element.style.setProperty('transform', 'none', 'important');
         element.style.setProperty('will-change', 'auto', 'important');
-      }, 100);
+        element.style.setProperty('transition', 'none', 'important');
+      };
 
-      // Surveiller et restaurer la position si elle change
+      // Verrouiller immédiatement (synchrone)
+      lockPosition();
+
+      // Surveiller et restaurer la position si elle change (avec tolérance de 0.5px)
       const checkPosition = () => {
-        if (!lockedPosition || !element) return;
+        if (!lockedPosition || !element) {
+          rafId = requestAnimationFrame(checkPosition);
+          return;
+        }
 
         const currentRect = element.getBoundingClientRect();
-        const tolerance = 1; // Tolérance de 1px
+        const tolerance = 0.5; // Tolérance très stricte de 0.5px
 
         if (
           Math.abs(currentRect.top - lockedPosition.top) > tolerance ||
           Math.abs(currentRect.left - lockedPosition.left) > tolerance
         ) {
-          // Restaurer la position verrouillée
+          // Restaurer immédiatement la position verrouillée
           element.style.setProperty('top', `${lockedPosition.top}px`, 'important');
           element.style.setProperty('left', `${lockedPosition.left}px`, 'important');
         }
@@ -172,10 +188,13 @@ const DropdownMenuContent = React.forwardRef<
         rafId = requestAnimationFrame(checkPosition);
       };
 
+      // Commencer la surveillance immédiatement
       rafId = requestAnimationFrame(checkPosition);
 
       return () => {
-        clearTimeout(lockTimeout);
+        if (lockTimeout !== null) {
+          clearTimeout(lockTimeout);
+        }
         if (rafId !== null) {
           cancelAnimationFrame(rafId);
         }
@@ -187,6 +206,7 @@ const DropdownMenuContent = React.forwardRef<
           element.style.removeProperty('width');
           element.style.removeProperty('transform');
           element.style.removeProperty('will-change');
+          element.style.removeProperty('transition');
         }
       };
     }, [isMobile, isMobileSheet, isOpen]);
