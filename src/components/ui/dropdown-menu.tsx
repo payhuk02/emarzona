@@ -134,92 +134,6 @@ const DropdownMenuContent = React.forwardRef<
     // Verrouiller le scroll du body sur mobile quand le menu est ouvert (comme SelectContent)
     useBodyScrollLock(isMobile && mobileOptimized && isOpen);
 
-    // Verrouiller la position sur mobile pour éviter les mouvements pendant l'interaction
-    // Système simple comme dans useStableSelect
-    React.useEffect(() => {
-      if (!isMobile || !mobileOptimized || !isOpen || !contentRef.current || isMobileSheet) return;
-
-      const menuElement = contentRef.current;
-      let lockedPosition: { top: number; left: number; width: number } | null = null;
-
-      // Fonction pour verrouiller la position
-      const lockPosition = () => {
-        if (!menuElement) return;
-
-        const rect = menuElement.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
-
-        lockedPosition = {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-        };
-
-        // Forcer la position fixe
-        menuElement.style.position = 'fixed';
-        menuElement.style.top = `${lockedPosition.top}px`;
-        menuElement.style.left = `${lockedPosition.left}px`;
-        menuElement.style.width = `${lockedPosition.width}px`;
-        menuElement.style.maxWidth = `${lockedPosition.width}px`;
-        menuElement.style.transform = 'none';
-      };
-
-      // Attendre que le menu soit positionné par Radix UI
-      const timeoutId = setTimeout(() => {
-        lockPosition();
-
-        // Surveiller les changements de position avec MutationObserver
-        const observer = new MutationObserver(() => {
-          if (lockedPosition && menuElement) {
-            const currentRect = menuElement.getBoundingClientRect();
-            // Si la position a changé, la restaurer immédiatement
-            if (
-              Math.abs(currentRect.top - lockedPosition.top) > 1 ||
-              Math.abs(currentRect.left - lockedPosition.left) > 1
-            ) {
-              menuElement.style.top = `${lockedPosition.top}px`;
-              menuElement.style.left = `${lockedPosition.left}px`;
-            }
-          }
-        });
-
-        // Observer les changements d'attributs de style
-        observer.observe(menuElement, {
-          attributes: true,
-          attributeFilter: ['style', 'class'],
-          childList: false,
-          subtree: false,
-        });
-
-        // Stocker l'observer pour le nettoyer plus tard
-        (menuElement as HTMLElement & { _positionObserver?: MutationObserver })._positionObserver =
-          observer;
-      }, 100);
-
-      return () => {
-        clearTimeout(timeoutId);
-        if (menuElement) {
-          // Nettoyer l'observer si présent
-          const elementWithObserver = menuElement as HTMLElement & {
-            _positionObserver?: MutationObserver;
-          };
-          if (elementWithObserver._positionObserver) {
-            elementWithObserver._positionObserver.disconnect();
-            delete elementWithObserver._positionObserver;
-          }
-          // Restaurer les styles à la fermeture
-          if (lockedPosition) {
-            menuElement.style.position = '';
-            menuElement.style.top = '';
-            menuElement.style.left = '';
-            menuElement.style.width = '';
-            menuElement.style.maxWidth = '';
-            menuElement.style.transform = '';
-          }
-        }
-      };
-    }, [isMobile, mobileOptimized, isOpen, isMobileSheet]);
-
     return (
       <DropdownMenuPrimitive.Portal>
         <DropdownMenuPrimitive.Content
@@ -227,24 +141,11 @@ const DropdownMenuContent = React.forwardRef<
           sideOffset={sideOffset}
           side={isMobileSheet ? 'bottom' : isMobile && mobileOptimized ? 'bottom' : props.side}
           align={isMobileSheet ? 'center' : isMobile && mobileOptimized ? 'end' : props.align}
-          // En mode sheet mobile, on gère nous-mêmes le positionnement (pas de collisions Radix)
-          // Sur mobile, désactiver avoidCollisions pour éviter les recalculs de position qui causent des mouvements
+          // En mode sheet mobile, on gère nous-mêmes le positionnement : pas de collisions Radix
           // Exactement comme SelectContent : avoidCollisions={isMobileSheet ? false : true}
-          avoidCollisions={
-            isMobileSheet
-              ? false
-              : isMobile && mobileOptimized
-                ? false
-                : (props.avoidCollisions ?? true)
-          }
+          avoidCollisions={isMobileSheet ? false : (props.avoidCollisions ?? true)}
           // Utiliser 'always' sur mobile pour empêcher tout mouvement (comme SelectContent)
-          sticky={
-            isMobileSheet
-              ? 'always'
-              : isMobile && mobileOptimized
-                ? 'always'
-                : (props.sticky ?? 'partial')
-          }
+          sticky={isMobile ? 'always' : (props.sticky ?? 'partial')}
           collisionPadding={
             isMobileSheet
               ? MOBILE_COLLISION_PADDING
@@ -264,85 +165,6 @@ const DropdownMenuContent = React.forwardRef<
               width: '100vw',
               maxWidth: '100vw',
             }),
-            // Sur mobile non-sheet, forcer la position pour éviter les mouvements
-            // Exactement comme SelectContent utilise sticky: 'always'
-            ...(isMobile &&
-              mobileOptimized &&
-              !isMobileSheet &&
-              isOpen && {
-                // Forcer la position une fois que le menu est ouvert
-                position: 'fixed',
-                transform: 'none',
-                willChange: 'auto',
-              }),
-          }}
-          // Empêcher la fermeture du menu lors d'interactions à l'intérieur
-          onInteractOutside={e => {
-            // Sur mobile, empêcher la fermeture si l'interaction est dans le menu
-            if (isMobile && mobileOptimized && contentRef.current) {
-              const target = e.target as HTMLElement;
-              // Vérifier si le clic est dans le menu ou dans un élément enfant
-              if (contentRef.current.contains(target) || contentRef.current === target) {
-                e.preventDefault();
-                return;
-              }
-              // Vérifier aussi si c'est un élément parent (cas des portals)
-              let parent = target.parentElement;
-              while (parent && parent !== document.body) {
-                if (parent === contentRef.current) {
-                  e.preventDefault();
-                  return;
-                }
-                parent = parent.parentElement;
-              }
-            }
-            props.onInteractOutside?.(e);
-          }}
-          onPointerDownOutside={e => {
-            // Sur mobile, empêcher la fermeture si le clic est dans le menu
-            if (isMobile && mobileOptimized && contentRef.current) {
-              const target = e.target as HTMLElement;
-              // Vérifier si le clic est dans le menu ou dans un élément enfant
-              if (contentRef.current.contains(target) || contentRef.current === target) {
-                e.preventDefault();
-                return;
-              }
-              // Vérifier aussi si c'est un élément parent (cas des portals)
-              let parent = target.parentElement;
-              while (parent && parent !== document.body) {
-                if (parent === contentRef.current) {
-                  e.preventDefault();
-                  return;
-                }
-                parent = parent.parentElement;
-              }
-            }
-            props.onPointerDownOutside?.(e);
-          }}
-          // Empêcher la fermeture lors des événements tactiles sur mobile
-          onTouchStart={e => {
-            // Sur mobile, empêcher la propagation si le touch est dans le menu
-            if (isMobile && mobileOptimized && contentRef.current) {
-              const target = e.target as HTMLElement;
-              if (contentRef.current.contains(target) || contentRef.current === target) {
-                e.stopPropagation();
-              }
-            }
-          }}
-          // Empêcher la fermeture lors des événements tactiles sur mobile
-          onTouchEnd={e => {
-            // Sur mobile, empêcher la propagation si le touch est dans le menu
-            if (isMobile && mobileOptimized && contentRef.current) {
-              const target = e.target as HTMLElement;
-              if (contentRef.current.contains(target) || contentRef.current === target) {
-                e.stopPropagation();
-              }
-            }
-          }}
-          // Empêcher la fermeture lors des événements tactiles
-          onEscapeKeyDown={e => {
-            // Sur mobile, permettre la fermeture avec Escape
-            props.onEscapeKeyDown?.(e);
           }}
           className={cn(
             // Conteneur principal
@@ -412,13 +234,6 @@ const DropdownMenuItem = React.forwardRef<
         className
       )}
       role="menuitem"
-      // Empêcher la propagation sur pointerDown pour éviter la fermeture prématurée
-      onPointerDown={e => {
-        // Empêcher la propagation qui pourrait fermer le menu prématurément
-        // Mais permettre le comportement par défaut pour la sélection
-        e.stopPropagation();
-        props.onPointerDown?.(e);
-      }}
       {...props}
     />
   );
