@@ -18,7 +18,7 @@
     "test:unit": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:coverage:check": "vitest run --coverage --reporter=verbose",
+    "test:coverage:check": "vitest run --coverage --reporter=verbose && node scripts/check-coverage.js",
     "test:coverage:html": "vitest run --coverage && open coverage/index.html",
     "test:e2e": "playwright test --grep-invert \"visual-regression|accessibility|responsive\"",
     "test:e2e:auth": "playwright test auth",

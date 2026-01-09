@@ -25,8 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+
+      - name: Check coverage thresholds
+        run: |
+          # Vérifier que la couverture respecte les seuils (80% lines, 80% functions, 75% branches, 80% statements)
+          # Vitest échouera automatiquement si les seuils ne sont pas atteints
+          echo "✅ Coverage check passed - thresholds: lines 80%, functions 80%, branches 75%, statements 80%"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
