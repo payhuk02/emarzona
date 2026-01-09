@@ -143,7 +143,7 @@ const DropdownMenuContent = React.forwardRef<
           align={isMobileSheet ? 'center' : isMobile && mobileOptimized ? 'end' : props.align}
           // En mode sheet mobile, on gère nous-mêmes le positionnement : pas de collisions Radix
           // Exactement comme SelectContent : avoidCollisions={isMobileSheet ? false : true}
-          avoidCollisions={isMobileSheet ? false : (props.avoidCollisions ?? true)}
+          avoidCollisions={isMobileSheet ? false : true}
           // Utiliser 'always' sur mobile pour empêcher tout mouvement (comme SelectContent)
           sticky={isMobile ? 'always' : (props.sticky ?? 'partial')}
           collisionPadding={
@@ -155,6 +155,17 @@ const DropdownMenuContent = React.forwardRef<
           }
           style={{
             ...props.style,
+            // Verrouillage de position sur mobile (comme SelectContent)
+            ...(isMobile &&
+              mobileOptimized &&
+              !isMobileSheet && {
+                // Forcer la position fixe pour éviter tout mouvement lors de l'interaction
+                willChange: 'auto',
+                // Empêcher les transformations qui causent le mouvement
+                transform: 'none',
+                // Pas de transition pendant l'interaction pour éviter le mouvement
+                transition: 'none',
+              }),
             ...(isMobileSheet && {
               position: 'fixed',
               left: 0,
