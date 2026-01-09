@@ -70,13 +70,14 @@ export default function PaymentsCustomers() {
 
   // Fetch data
   const { payments, loading: paymentsLoading, refetch: refetchPayments } = usePayments(store?.id);
+  // Utiliser pagination raisonnable (100 max pour la recherche/affichage)
   const {
     data: customersResult,
     isLoading: customersLoading,
     refetch: refetchCustomers,
   } = useCustomers(store?.id, {
     page: 1,
-    pageSize: 1000, // Récupérer tous les clients
+    pageSize: 100, // Limité à 100 clients pour performance (suffisant pour recherche/filtrage)
   });
   const customers = useMemo(() => customersResult?.data || [], [customersResult?.data]);
 
@@ -184,8 +185,8 @@ export default function PaymentsCustomers() {
     async (type: 'payments' | 'customers' | 'all') => {
       setIsExporting(true);
       try {
-        let  csvContent= '';
-        let  filename= '';
+        let csvContent = '';
+        let filename = '';
 
         if (type === 'payments' || type === 'all') {
           const paymentHeaders = [
@@ -276,7 +277,7 @@ export default function PaymentsCustomers() {
           title: '✅ Export réussi',
           description: `Données exportées en CSV`,
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         logger.error('Error exporting to CSV', { error });
         toast({
           title: '❌ Erreur',
@@ -292,7 +293,7 @@ export default function PaymentsCustomers() {
 
   // Get status badge
   const getStatusBadge = useCallback((status: string) => {
-    const  variants: Record<string, { label: string; className: string }> = {
+    const variants: Record<string, { label: string; className: string }> = {
       completed: {
         label: 'Complété',
         className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
@@ -340,7 +341,7 @@ export default function PaymentsCustomers() {
         title: '✅ Actualisation réussie',
         description: 'Les données ont été mises à jour',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       toast({
         title: '❌ Erreur',
         description: "Impossible d'actualiser les données",
@@ -1369,9 +1370,3 @@ export default function PaymentsCustomers() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

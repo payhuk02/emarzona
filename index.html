@@ -68,6 +68,12 @@
     <!-- Note: Les images seront préchargées dynamiquement par React via OptimizedImage -->
     <!-- Le preload statique sera géré par Vite lors du build -->
     
+    <!-- ✅ PERFORMANCE: Preload CSS critique pour améliorer FCP -->
+    <!-- Vite injecte automatiquement le CSS, mais on peut précharger les ressources critiques -->
+    
+    <!-- ✅ PERFORMANCE: Preload JavaScript critique pour améliorer TTI (Time to Interactive) -->
+    <!-- Vite gère automatiquement le code splitting et le preload des chunks critiques -->
+    
     <!-- ✅ PHASE 1: Preload des ressources critiques pour améliorer FCP -->
     <!-- Note: Le CSS est chargé via Vite, pas besoin de preload manuel -->
     
@@ -128,30 +134,3 @@
   </body>
 </html>
 
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>

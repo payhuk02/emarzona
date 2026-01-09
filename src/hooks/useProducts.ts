@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Product {
   id: string;
@@ -30,10 +30,26 @@ export interface Product {
   }> | null;
 }
 
+/**
+ * @deprecated Ce hook charge TOUS les produits sans pagination.
+ * Utilisez useProductsOptimized à la place pour de meilleures performances.
+ *
+ * Ce hook sera supprimé dans une future version.
+ */
 export const useProducts = (storeId?: string | null) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Avertissement en développement
+  if (import.meta.env.DEV) {
+    console.warn(
+      '[useProducts] ⚠️ Hook déprécié détecté. Ce hook charge TOUS les produits sans pagination.\n' +
+        'Migrez vers useProductsOptimized pour de meilleures performances:\n' +
+        "import { useProductsOptimized } from '@/hooks/useProductsOptimized';\n" +
+        'const { products } = useProductsOptimized(storeId, { page: 1, itemsPerPage: 20 });'
+    );
+  }
 
   useEffect(() => {
     if (!storeId) {
@@ -45,15 +61,17 @@ export const useProducts = (storeId?: string | null) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        let  query= supabase
+        let query = supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             product_affiliate_settings!left (
               commission_rate,
               affiliate_enabled
             )
-          `)
+          `
+          )
           .order('created_at', { ascending: false });
 
         if (storeId) {
@@ -63,14 +81,15 @@ export const useProducts = (storeId?: string | null) => {
         const { data, error } = await query;
 
         if (error) throw error;
-        
+
         setProducts(data || []);
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
+      } catch (_error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
         toast({
-          title: "Erreur",
+          title: 'Erreur',
           description: errorMessage,
-          variant: "destructive",
+          variant: 'destructive',
         });
       } finally {
         setLoading(false);
@@ -82,18 +101,20 @@ export const useProducts = (storeId?: string | null) => {
 
   const refetch = useCallback(async () => {
     if (!storeId) return;
-    
+
     try {
       setLoading(true);
-      let  query= supabase
+      let query = supabase
         .from('products')
-        .select(`
+        .select(
+          `
           *,
           product_affiliate_settings!left (
             commission_rate,
             affiliate_enabled
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (storeId) {
@@ -103,14 +124,15 @@ export const useProducts = (storeId?: string | null) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      
+
       setProducts(data || []);
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
+    } catch (_error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -119,9 +141,3 @@ export const useProducts = (storeId?: string | null) => {
 
   return { products, loading, refetch };
 };
-
-
-
-
-
-

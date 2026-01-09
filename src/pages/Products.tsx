@@ -22,7 +22,6 @@ import {
 } from '@/components/icons';
 import { AlertCircle } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
-import { useProducts } from '@/hooks/useProducts';
 import { useProductsOptimized } from '@/hooks/useProductsOptimized';
 import { useProductManagement } from '@/hooks/useProductManagement';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -144,9 +143,8 @@ const Products = () => {
     priceRange: debouncedPriceRange,
   });
 
-  // Fallback: utiliser l'ancien hook si pas de store (pour compatibilité)
-  const fallbackProducts = useProducts(store?.id);
-  const productsLoadingState = store?.id ? productsLoading : fallbackProducts.loading;
+  // Utiliser uniquement le hook optimisé (pas de fallback sur l'ancien hook)
+  const productsLoadingState = productsLoading;
 
   // Extract unique categories and types (pour les filtres)
   // Note: Pour obtenir toutes les catégories/types, on doit charger tous les produits une fois

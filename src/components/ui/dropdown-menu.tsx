@@ -155,17 +155,7 @@ const DropdownMenuContent = React.forwardRef<
           }
           style={{
             ...props.style,
-            // Verrouillage de position sur mobile (comme SelectContent)
-            ...(isMobile &&
-              mobileOptimized &&
-              !isMobileSheet && {
-                // Forcer la position fixe pour éviter tout mouvement lors de l'interaction
-                willChange: 'auto',
-                // Empêcher les transformations qui causent le mouvement
-                transform: 'none',
-                // Pas de transition pendant l'interaction pour éviter le mouvement
-                transition: 'none',
-              }),
+            // Exactement comme SelectContent : seulement pour mobileSheet
             ...(isMobileSheet && {
               position: 'fixed',
               left: 0,
@@ -182,6 +172,9 @@ const DropdownMenuContent = React.forwardRef<
             isMobileSheet
               ? 'fixed inset-x-0 bottom-0 z-[1060] w-screen max-h-[80vh] overflow-hidden rounded-t-2xl border bg-popover p-1 text-popover-foreground shadow-lg sm:relative sm:inset-auto sm:w-auto sm:max-h-[min(24rem,80vh)] sm:rounded-md'
               : 'z-[100] min-w-[8rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
+            // Verrouillage de position sur mobile (comme SelectContent)
+            // Utiliser will-change et transform pour stabiliser lors de l'interaction
+            isMobile && mobileOptimized && !isMobileSheet && 'will-change-auto',
             // Scroll interne mobile (menus longs)
             isMobileSheet &&
               'max-h-[min(24rem,calc(100dvh-6rem))] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]',
