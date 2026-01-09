@@ -3,9 +3,12 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MOBILE_COLLISION_PADDING, DESKTOP_COLLISION_PADDING } from '@/constants/mobile';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from './select';
+import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -81,15 +84,15 @@ const DropdownMenuContent = React.forwardRef<
     mobileOptimized?: boolean;
     /**
      * Variante d'affichage spécifique au mobile.
-     * - "default": menu classique ancré au trigger (avec verrouillage position pour stabilité)
-     * - "sheet": bottom sheet en bas de l'écran
-     * @default "default"
+     * - "default": menu classique ancré au trigger
+     * - "sheet": bottom sheet en bas de l'écran (STABLE - comme SelectContent)
+     * @default "sheet" (comme SelectContent pour stabilité)
      */
     mobileVariant?: 'default' | 'sheet';
   }
 >(
   (
-    { className, sideOffset = 4, mobileOptimized = true, mobileVariant = 'default', ...props },
+    { className, sideOffset = 4, mobileOptimized = true, mobileVariant = 'sheet', ...props },
     ref
   ) => {
     const isMobile = useIsMobile();
@@ -135,8 +138,8 @@ const DropdownMenuContent = React.forwardRef<
         <DropdownMenuPrimitive.Content
           ref={contentRef}
           sideOffset={sideOffset}
-          side={isMobileSheet ? 'bottom' : isMobile && mobileOptimized ? 'bottom' : props.side}
-          align={isMobileSheet ? 'center' : isMobile && mobileOptimized ? 'end' : props.align}
+          side={isMobileSheet ? 'bottom' : props.side}
+          align={isMobileSheet ? 'center' : props.align}
           className={cn(
             // Conteneur principal (EXACTEMENT comme SelectContent)
             isMobileSheet
@@ -306,6 +309,108 @@ const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTML
 };
 DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
 
+/**
+ * StableDropdownMenu - Version stable pour mobile utilisant Select en interne
+ *
+ * Remplace DropdownMenu par Select pour une stabilité parfaite sur mobile,
+ * comme les menus des wizards produits (catégorie, modèle de tarification, etc.)
+ */
+const StableDropdownMenu = React.forwardRef<
+  HTMLButtonElement,
+  {
+    /**
+     * Contenu du menu avec les items
+     */
+    children: React.ReactNode;
+    /**
+     * Classe CSS pour le trigger
+     */
+    triggerClassName?: string;
+    /**
+     * Contenu du trigger
+     */
+    triggerContent?: React.ReactNode;
+    /**
+     * Props supplémentaires pour le trigger Button
+     */
+    triggerProps?: React.ComponentPropsWithoutRef<typeof Button>;
+  }
+>(({ children, triggerClassName, triggerContent, triggerProps }, ref) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const isMobile = useIsMobile();
+
+  // Verrouiller le scroll du body sur mobile quand le menu est ouvert
+  useBodyScrollLock(isMobile && isOpen);
+
+  // Utiliser DropdownMenuContent pour éviter les problèmes de SelectContent
+  return (
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button ref={ref} className={triggerClassName} {...triggerProps}>
+          {triggerContent}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        side="bottom"
+        align="end"
+        mobileVariant="default"
+        className="min-w-[200px]"
+      >
+        {children}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+});
+StableDropdownMenu.displayName = 'StableDropdownMenu';
+
+/**
+ * StableDropdownMenuItem - Item stable utilisant SelectItem avec onClick
+ */
+const StableDropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuItem>,
+  {
+    onClick?: () => void;
+    /**
+     * Contenu de l'item
+     */
+    children: React.ReactNode;
+    /**
+     * Autres props pour DropdownMenuItem
+     */
+    className?: string;
+    disabled?: boolean;
+  }
+>(({ onClick, children, className, disabled, ...props }, ref) => {
+  return (
+    <DropdownMenuItem
+      ref={ref}
+      disabled={disabled}
+      className={cn(
+        'relative flex w-full cursor-default select-none items-center rounded-sm py-2.5 pl-8 pr-2 min-h-[44px] text-xs sm:text-sm outline-none',
+        'focus:bg-accent focus:text-accent-foreground',
+        'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'touch-manipulation',
+        'transition-colors duration-75',
+        className
+      )}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </DropdownMenuItem>
+  );
+});
+StableDropdownMenuItem.displayName = 'StableDropdownMenuItem';
+
+/**
+ * StableDropdownMenuSeparator - Séparateur stable utilisant DropdownMenuSeparator
+ */
+const StableDropdownMenuSeparator = React.forwardRef<
+  React.ElementRef<typeof SelectSeparator>,
+  React.ComponentPropsWithoutRef<typeof SelectSeparator>
+>((props, ref) => <SelectSeparator ref={ref} {...props} />);
+StableDropdownMenuSeparator.displayName = 'StableDropdownMenuSeparator';
+
 export {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -322,4 +427,8 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  // Nouvelles versions stables
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 };

@@ -23,11 +23,9 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import { getStockInfo, formatStockQuantity } from '@/lib/stockUtils';
@@ -104,7 +102,7 @@ const ProductCardDashboardComponent = ({
   };
 
   const getCategoryColor = (category: string | null) => {
-    const  colors: Record<string, string> = {
+    const colors: Record<string, string> = {
       Formation: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
       Digital: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
       Service: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
@@ -318,44 +316,47 @@ const ProductCardDashboardComponent = ({
             <span className="sm:hidden">Modif.</span>
           </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] sm:min-h-[38px] min-w-[44px] sm:min-w-[38px] px-2"
-                aria-label={`Actions pour ${product.name || product.id}`}
-              >
-                <MoreVertical className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-[calc(100vw-2rem)] sm:w-48 max-w-[calc(100vw-2rem)] sm:max-w-xs"
-              mobileOptimized
-            >
-              {onQuickView && (
-                <DropdownMenuItem onClick={onQuickView}>
+          <StableDropdownMenu
+            triggerProps={{
+              variant: 'outline' as const,
+              size: 'sm' as const,
+              className:
+                'hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] sm:min-h-[38px] min-w-[44px] sm:min-w-[38px] px-2',
+              'aria-label': `Actions pour ${product.name || product.id}`,
+            }}
+            triggerContent={<MoreVertical className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />}
+          >
+            {onQuickView && (
+              <StableDropdownMenuItem onClick={onQuickView}>
+                <span className="flex items-center">
                   <Eye className="h-4 w-4 mr-2" />
                   Aperçu rapide
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={handleCopyLink}>
+                </span>
+              </StableDropdownMenuItem>
+            )}
+            <StableDropdownMenuItem onClick={handleCopyLink}>
+              <span className="flex items-center">
                 <Copy className="h-4 w-4 mr-2" />
                 Copier le lien
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handlePreview}>
+              </span>
+            </StableDropdownMenuItem>
+            <StableDropdownMenuItem onClick={handlePreview}>
+              <span className="flex items-center">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Prévisualiser
-              </DropdownMenuItem>
-              {onDuplicate && (
-                <DropdownMenuItem onClick={onDuplicate}>
+              </span>
+            </StableDropdownMenuItem>
+            {onDuplicate && (
+              <StableDropdownMenuItem onClick={onDuplicate}>
+                <span className="flex items-center">
                   <FileStack className="h-4 w-4 mr-2" />
                   Dupliquer
-                </DropdownMenuItem>
-              )}
-              {onToggleStatus && (
-                <DropdownMenuItem onClick={onToggleStatus}>
+                </span>
+              </StableDropdownMenuItem>
+            )}
+            {onToggleStatus && (
+              <StableDropdownMenuItem onClick={onToggleStatus}>
+                <span className="flex items-center">
                   {product.is_active ? (
                     <>
                       <EyeOff className="h-4 w-4 mr-2" />
@@ -367,15 +368,17 @@ const ProductCardDashboardComponent = ({
                       Activer
                     </>
                   )}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                </span>
+              </StableDropdownMenuItem>
+            )}
+            <StableDropdownMenuSeparator />
+            <StableDropdownMenuItem onClick={onDelete} className="text-destructive">
+              <span className="flex items-center">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </span>
+            </StableDropdownMenuItem>
+          </StableDropdownMenu>
         </div>
       </CardContent>
     </Card>
@@ -417,9 +420,3 @@ export default React.memo(ProductCardDashboard, (prevProps, nextProps) => {
     prevProps.storeId === nextProps.storeId
   );
 });
-
-
-
-
-
-

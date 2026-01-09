@@ -9,7 +9,14 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -45,10 +52,9 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import type { RecurringBookingPattern } from '@/hooks/service/useRecurringBookings';
@@ -80,7 +86,9 @@ export default function RecurringBookingsManagement() {
   };
 
   const handleCancel = async (patternId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir annuler toutes les réservations futures de cette série ?')) {
+    if (
+      !confirm('Êtes-vous sûr de vouloir annuler toutes les réservations futures de cette série ?')
+    ) {
       return;
     }
 
@@ -137,9 +145,7 @@ export default function RecurringBookingsManagement() {
       case 'biweekly':
         return 'Bi-hebdomadaire';
       case 'monthly':
-        return pattern.day_of_month
-          ? `Mensuel (jour ${pattern.day_of_month})`
-          : 'Mensuel';
+        return pattern.day_of_month ? `Mensuel (jour ${pattern.day_of_month})` : 'Mensuel';
       case 'custom':
         return `Personnalisé (tous les ${pattern.interval_days} jours)`;
       default:
@@ -205,24 +211,33 @@ export default function RecurringBookingsManagement() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="pt-4 sm:pt-6 p-3 sm:p-4">
-                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">{patterns?.length || 0}</div>
-                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Séries totales</div>
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
+                    {patterns?.length || 0}
+                  </div>
+                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
+                    Séries totales
+                  </div>
                 </CardContent>
               </Card>
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="pt-4 sm:pt-6 p-3 sm:p-4">
                   <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
-                    {patterns?.filter((p) => p.status === 'active').length || 0}
+                    {patterns?.filter(p => p.status === 'active').length || 0}
                   </div>
-                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Séries actives</div>
+                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
+                    Séries actives
+                  </div>
                 </CardContent>
               </Card>
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                 <CardContent className="pt-4 sm:pt-6 p-3 sm:p-4">
                   <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
-                    {patterns?.reduce((sum: number, p) => sum + (p.created_occurrences || 0), 0) || 0}
+                    {patterns?.reduce((sum: number, p) => sum + (p.created_occurrences || 0), 0) ||
+                      0}
                   </div>
-                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Réservations créées</div>
+                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
+                    Réservations créées
+                  </div>
                 </CardContent>
               </Card>
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
@@ -230,7 +245,9 @@ export default function RecurringBookingsManagement() {
                   <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold">
                     {patterns?.reduce((sum: number, p) => sum + (p.total_occurrences || 0), 0) || 0}
                   </div>
-                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">Occurrences totales</div>
+                  <div className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
+                    Occurrences totales
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -238,7 +255,9 @@ export default function RecurringBookingsManagement() {
             {/* Table */}
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader className="p-3 sm:p-4 md:p-6">
-                <CardTitle className="text-sm sm:text-base md:text-lg">Mes Séries de Réservations</CardTitle>
+                <CardTitle className="text-sm sm:text-base md:text-lg">
+                  Mes Séries de Réservations
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
                   Liste de toutes vos séries de réservations récurrentes
                 </CardDescription>
@@ -249,106 +268,128 @@ export default function RecurringBookingsManagement() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm">Titre / Type</TableHead>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Récurrence</TableHead>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Date début</TableHead>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">Horaires</TableHead>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm">Occurrences</TableHead>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
-                          <TableHead className="text-[10px] sm:text-xs md:text-sm">Actions</TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm">
+                            Titre / Type
+                          </TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">
+                            Récurrence
+                          </TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">
+                            Date début
+                          </TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm hidden lg:table-cell">
+                            Horaires
+                          </TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm">
+                            Occurrences
+                          </TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm">
+                            Statut
+                          </TableHead>
+                          <TableHead className="text-[10px] sm:text-xs md:text-sm">
+                            Actions
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
-                    <TableBody>
-                      {patterns.map((pattern) => (
-                        <TableRow key={pattern.id}>
-                          <TableCell className="text-xs sm:text-sm">
-                            <div>
-                              <div className="font-medium">
-                                {pattern.title || 'Série sans titre'}
+                      <TableBody>
+                        {patterns.map(pattern => (
+                          <TableRow key={pattern.id}>
+                            <TableCell className="text-xs sm:text-sm">
+                              <div>
+                                <div className="font-medium">
+                                  {pattern.title || 'Série sans titre'}
+                                </div>
+                                {pattern.notes && (
+                                  <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                                    {pattern.notes}
+                                  </div>
+                                )}
                               </div>
-                              {pattern.notes && (
-                                <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                                  {pattern.notes}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm hidden sm:table-cell">
+                              {getRecurrenceLabel(pattern)}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm hidden md:table-cell">
+                              {format(new Date(pattern.start_date), 'PPP', { locale: fr })}
+                              {pattern.end_date && (
+                                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                                  jusqu'au{' '}
+                                  {format(new Date(pattern.end_date), 'PPP', { locale: fr })}
                                 </div>
                               )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden sm:table-cell">{getRecurrenceLabel(pattern)}</TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden md:table-cell">
-                            {format(new Date(pattern.start_date), 'PPP', { locale: fr })}
-                            {pattern.end_date && (
-                              <div className="text-[10px] sm:text-xs text-muted-foreground">
-                                jusqu'au {format(new Date(pattern.end_date), 'PPP', { locale: fr })}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm hidden lg:table-cell">
+                              <div>
+                                {pattern.start_time} ({pattern.duration_minutes} min)
                               </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm hidden lg:table-cell">
-                            <div>
-                              {pattern.start_time} ({pattern.duration_minutes} min)
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm">
-                            <div>
-                              {pattern.created_occurrences} / {pattern.total_occurrences || '∞'}
-                            </div>
-                            {pattern.occurrence_limit && (
-                              <div className="text-[10px] sm:text-xs text-muted-foreground">
-                                Max: {pattern.occurrence_limit}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              <div>
+                                {pattern.created_occurrences} / {pattern.total_occurrences || '∞'}
                               </div>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs sm:text-sm">{getStatusBadge(pattern.status)}</TableCell>
-                          <TableCell className="text-xs sm:text-sm">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={`Actions pour le réservation récurrente ${pattern.id}`}>
-                                  <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                {pattern.status === 'active' ? (
-                                  <DropdownMenuItem
-                                    onClick={() => handleTogglePause(pattern.id, pattern.status)}
+                              {pattern.occurrence_limit && (
+                                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                                  Max: {pattern.occurrence_limit}
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              {getStatusBadge(pattern.status)}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="min-h-[44px] min-w-[44px]"
+                                    aria-label={`Actions pour le réservation récurrente ${pattern.id}`}
                                   >
-                                    <Pause className="h-4 w-4 mr-2" />
-                                    Mettre en pause
-                                  </DropdownMenuItem>
-                                ) : pattern.status === 'paused' ? (
+                                    <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {pattern.status === 'active' ? (
+                                    <DropdownMenuItem
+                                      onClick={() => handleTogglePause(pattern.id, pattern.status)}
+                                    >
+                                      <Pause className="h-4 w-4 mr-2" />
+                                      Mettre en pause
+                                    </DropdownMenuItem>
+                                  ) : pattern.status === 'paused' ? (
+                                    <DropdownMenuItem
+                                      onClick={() => handleTogglePause(pattern.id, pattern.status)}
+                                    >
+                                      <Play className="h-4 w-4 mr-2" />
+                                      Reprendre
+                                    </DropdownMenuItem>
+                                  ) : null}
                                   <DropdownMenuItem
-                                    onClick={() => handleTogglePause(pattern.id, pattern.status)}
+                                    onClick={() => {
+                                      setSelectedPattern(pattern.id);
+                                      setRescheduleDialogOpen(true);
+                                    }}
                                   >
-                                    <Play className="h-4 w-4 mr-2" />
-                                    Reprendre
+                                    <Calendar className="h-4 w-4 mr-2" />
+                                    Replanifier
                                   </DropdownMenuItem>
-                                ) : null}
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedPattern(pattern.id);
-                                    setRescheduleDialogOpen(true);
-                                  }}
-                                >
-                                  <Calendar className="h-4 w-4 mr-2" />
-                                  Replanifier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleGenerateMore(pattern.id)}
-                                >
-                                  <RefreshCw className="h-4 w-4 mr-2" />
-                                  Générer plus
-                                </DropdownMenuItem>
-                                <Separator />
-                                <DropdownMenuItem
-                                  onClick={() => handleCancel(pattern.id)}
-                                  className="text-red-600"
-                                >
-                                  <Square className="h-4 w-4 mr-2" />
-                                  Annuler série
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                                  <DropdownMenuItem onClick={() => handleGenerateMore(pattern.id)}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Générer plus
+                                  </DropdownMenuItem>
+                                  <Separator />
+                                  <DropdownMenuItem
+                                    onClick={() => handleCancel(pattern.id)}
+                                    className="text-red-600"
+                                  >
+                                    <Square className="h-4 w-4 mr-2" />
+                                    Annuler série
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   </div>
@@ -378,7 +419,7 @@ export default function RecurringBookingsManagement() {
                     <Input
                       type="date"
                       value={newStartDate}
-                      onChange={(e) => setNewStartDate(e.target.value)}
+                      onChange={e => setNewStartDate(e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
                       className="min-h-[44px] text-xs sm:text-sm"
                     />
@@ -408,10 +449,3 @@ export default function RecurringBookingsManagement() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-
-

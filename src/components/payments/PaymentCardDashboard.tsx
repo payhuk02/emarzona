@@ -1,15 +1,15 @@
-import React from "react";
-import { Payment } from "@/hooks/usePayments";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Edit, 
-  Trash2, 
-  Copy, 
-  ExternalLink, 
-  Eye, 
-  EyeOff, 
+import React from 'react';
+import { Payment } from '@/hooks/usePayments';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Edit,
+  Trash2,
+  Copy,
+  ExternalLink,
+  Eye,
+  EyeOff,
   CreditCard,
   Calendar,
   DollarSign,
@@ -19,17 +19,15 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  RotateCcw
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+  RotateCcw,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { useState } from 'react';
 
 interface PaymentCardDashboardProps {
   payment: Payment;
@@ -50,26 +48,26 @@ const PaymentCardDashboardComponent = ({
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      completed: "default",
-      failed: "destructive",
-      refunded: "outline",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      completed: 'default',
+      failed: 'destructive',
+      refunded: 'outline',
     };
 
-    const  labels: Record<string, string> = {
-      pending: "En attente",
-      completed: "Complété",
-      failed: "Échoué",
-      refunded: "Remboursé",
+    const labels: Record<string, string> = {
+      pending: 'En attente',
+      completed: 'Complété',
+      failed: 'Échoué',
+      refunded: 'Remboursé',
     };
 
-    const  icons: Record<string, React.ReactNode> = {
+    const icons: Record<string, React.ReactNode> = {
       pending: <Clock className="h-3 w-3" />,
       completed: <CheckCircle className="h-3 w-3" />,
       failed: <XCircle className="h-3 w-3" />,
@@ -77,7 +75,7 @@ const PaymentCardDashboardComponent = ({
     };
 
     return (
-      <Badge variant={variants[status] || "default"} className="flex items-center gap-1">
+      <Badge variant={variants[status] || 'default'} className="flex items-center gap-1">
         {icons[status]}
         {labels[status] || status}
       </Badge>
@@ -85,19 +83,19 @@ const PaymentCardDashboardComponent = ({
   };
 
   const getMethodLabel = (method: string) => {
-    const  labels: Record<string, string> = {
-      cash: "Espèces",
-      card: "Carte bancaire",
-      mobile_money: "Mobile Money",
-      bank_transfer: "Virement bancaire",
-      check: "Chèque",
-      other: "Autre",
+    const labels: Record<string, string> = {
+      cash: 'Espèces',
+      card: 'Carte bancaire',
+      mobile_money: 'Mobile Money',
+      bank_transfer: 'Virement bancaire',
+      check: 'Chèque',
+      other: 'Autre',
     };
     return labels[method] || method;
   };
 
   const getMethodIcon = (method: string) => {
-    const  icons: Record<string, React.ReactNode> = {
+    const icons: Record<string, React.ReactNode> = {
       cash: <DollarSign className="h-4 w-4" />,
       card: <CreditCard className="h-4 w-4" />,
       mobile_money: <CreditCard className="h-4 w-4" />,
@@ -113,14 +111,14 @@ const PaymentCardDashboardComponent = ({
       try {
         await navigator.clipboard.writeText(payment.transaction_id);
         toast({
-          title: "ID copié",
+          title: 'ID copié',
           description: "L'ID de transaction a été copié dans le presse-papiers",
         });
       } catch (error) {
         toast({
-          title: "Erreur",
+          title: 'Erreur',
           description: "Impossible de copier l'ID",
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     }
@@ -138,12 +136,10 @@ const PaymentCardDashboardComponent = ({
               {payment.customers?.name || 'Client anonyme'}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            {getStatusBadge(payment.status)}
-          </div>
+          <div className="flex items-center gap-2">{getStatusBadge(payment.status)}</div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-4 pt-0 space-y-3">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -179,40 +175,41 @@ const PaymentCardDashboardComponent = ({
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={onEdit}
-          >
+          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
             <Edit className="h-4 w-4 mr-1" />
             Modifier
           </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" aria-label="Actions pour la carte de paiement">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={onView}>
+
+          <StableDropdownMenu
+            triggerProps={{
+              variant: 'outline' as const,
+              size: 'sm' as const,
+              'aria-label': 'Actions pour la carte de paiement',
+            }}
+            triggerContent={<MoreVertical className="h-4 w-4" />}
+          >
+            <StableDropdownMenuItem onClick={onView}>
+              <span className="flex items-center">
                 <Eye className="h-4 w-4 mr-2" />
                 Voir les détails
-              </DropdownMenuItem>
-              {payment.transaction_id && (
-                <DropdownMenuItem onClick={handleCopyTransactionId}>
+              </span>
+            </StableDropdownMenuItem>
+            {payment.transaction_id && (
+              <StableDropdownMenuItem onClick={handleCopyTransactionId}>
+                <span className="flex items-center">
                   <Copy className="h-4 w-4 mr-2" />
                   Copier l'ID
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                </span>
+              </StableDropdownMenuItem>
+            )}
+            <StableDropdownMenuSeparator />
+            <StableDropdownMenuItem onClick={onDelete} className="text-destructive">
+              <span className="flex items-center">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </span>
+            </StableDropdownMenuItem>
+          </StableDropdownMenu>
         </div>
       </CardContent>
     </Card>
@@ -235,9 +232,3 @@ const PaymentCardDashboard = React.memo(PaymentCardDashboardComponent, (prevProp
 PaymentCardDashboard.displayName = 'PaymentCardDashboard';
 
 export default PaymentCardDashboard;
-
-
-
-
-
-

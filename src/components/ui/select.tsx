@@ -335,7 +335,7 @@ const SelectItemComponent = React.forwardRef<
         </SelectPrimitive.ItemIndicator>
       </span>
 
-      <SelectPrimitive.ItemText className="truncate flex-1">{children}</SelectPrimitive.ItemText>
+      <span className="truncate flex-1">{children}</span>
     </SelectPrimitive.Item>
   );
 });
@@ -374,9 +374,3 @@ export { SelectField } from './select-field';
 export type { SelectFieldProps } from './select-field';
 export { MobileSelect } from './mobile-select';
 export type { MobileSelectProps, MobileSelectHandle } from './mobile-select';
-
-
-
-
-
-

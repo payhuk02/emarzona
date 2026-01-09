@@ -11,11 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
   Table,
@@ -49,7 +47,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DigitalProductStatusIndicator, DigitalProductStatus } from './DigitalProductStatusIndicator';
+import {
+  DigitalProductStatusIndicator,
+  DigitalProductStatus,
+} from './DigitalProductStatusIndicator';
 
 /**
  * Catégories de produits digitaux
@@ -112,37 +113,37 @@ export interface DigitalProductListItem {
 export interface DigitalProductsListProps {
   /** Liste des produits digitaux */
   products: DigitalProductListItem[];
-  
+
   /** Callback lors de la sélection d'un produit */
   onSelect?: (productIds: string[]) => void;
-  
+
   /** Callback lors de l'édition d'un produit */
   onEdit?: (productId: string) => void;
-  
+
   /** Callback lors de la suppression d'un produit */
   onDelete?: (productId: string) => void;
-  
+
   /** Callback lors de la duplication d'un produit */
   onDuplicate?: (productId: string) => void;
-  
+
   /** Callback lors de l'archivage d'un produit */
   onArchive?: (productId: string) => void;
-  
+
   /** Callback lors de la visualisation d'un produit */
   onView?: (productId: string) => void;
-  
+
   /** Afficher les actions par lot */
   showBulkActions?: boolean;
-  
+
   /** Afficher les filtres */
   showFilters?: boolean;
-  
+
   /** Afficher la recherche */
   showSearch?: boolean;
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Nombre d'éléments par page */
   pageSize?: number;
 }
@@ -150,7 +151,7 @@ export interface DigitalProductsListProps {
 /**
  * Configuration des catégories
  */
-const  CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }> = {
+const CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }> = {
   ebook: { label: 'Ebook', color: 'text-blue-600' },
   template: { label: 'Template', color: 'text-purple-600' },
   software: { label: 'Logiciel', color: 'text-green-600' },
@@ -164,12 +165,12 @@ const  CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }
 
 /**
  * DigitalProductsList - Liste de produits digitaux avec filtres et actions
- * 
+ *
  * @example
  * ```tsx
  * import { logger } from '@/lib/logger';
- * 
- * <DigitalProductsList 
+ *
+ * <DigitalProductsList
  *   products={digitalProducts}
  *   onEdit={(id) => logger.info('Edit product', { productId: id })}
  *   onDelete={(id) => logger.info('Delete product', { productId: id })}
@@ -179,7 +180,7 @@ const  CATEGORY_CONFIG: Record<DigitalCategory, { label: string; color: string }
  * />
  * ```
  */
-const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
+const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
   products,
   onSelect,
   onEdit,
@@ -217,13 +218,13 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 
   // Filtrer et trier les produits
   const filteredAndSortedProducts = useMemo(() => {
-    let  result= [...products];
+    let result = [...products];
 
     // Recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (p) =>
+        p =>
           p.name.toLowerCase().includes(query) ||
           p.description?.toLowerCase().includes(query) ||
           p.id.toLowerCase().includes(query)
@@ -232,18 +233,18 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 
     // Filtre catégorie
     if (selectedCategory !== 'all') {
-      result = result.filter((p) => p.category === selectedCategory);
+      result = result.filter(p => p.category === selectedCategory);
     }
 
     // Filtre statut
     if (selectedStatus !== 'all') {
-      result = result.filter((p) => p.status === selectedStatus);
+      result = result.filter(p => p.status === selectedStatus);
     }
 
     // Tri
     result.sort((a, b) => {
-      let  aValue: string | number | Date | undefined = a[sortField as keyof DigitalProductListItem];
-      let  bValue: string | number | Date | undefined = b[sortField as keyof DigitalProductListItem];
+      let aValue: string | number | Date | undefined = a[sortField as keyof DigitalProductListItem];
+      let bValue: string | number | Date | undefined = b[sortField as keyof DigitalProductListItem];
 
       // Convertir les dates en timestamps
       if (sortField === 'created_at' || sortField === 'updated_at') {
@@ -285,7 +286,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
       setSelectedProducts(new Set());
       onSelect?.([]);
     } else {
-      const allIds = new Set(paginatedProducts.map((p) => p.id));
+      const allIds = new Set(paginatedProducts.map(p => p.id));
       setSelectedProducts(allIds);
       onSelect?.(Array.from(allIds));
     }
@@ -322,7 +323,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
               <Input
                 placeholder="Rechercher par nom, description ou ID..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
@@ -339,7 +340,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
               {/* Filtre catégorie */}
               <Select
                 value={selectedCategory}
-                onValueChange={(value) => setSelectedCategory(value as DigitalCategory | 'all')}
+                onValueChange={value => setSelectedCategory(value as DigitalCategory | 'all')}
               >
                 <SelectTrigger className="w-full sm:w-[180px] min-h-[44px] h-11">
                   <SelectValue placeholder="Catégorie" />
@@ -357,7 +358,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
               {/* Filtre statut */}
               <Select
                 value={selectedStatus}
-                onValueChange={(value) => setSelectedStatus(value as DigitalProductStatus | 'all')}
+                onValueChange={value => setSelectedStatus(value as DigitalProductStatus | 'all')}
               >
                 <SelectTrigger className="w-full sm:w-[180px] min-h-[44px] h-11">
                   <SelectValue placeholder="Statut" />
@@ -395,7 +396,8 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
             <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <CheckCircle2 className="h-5 w-5 text-blue-600" />
               <span className="font-medium text-blue-700">
-                {selectedProducts.size} produit{selectedProducts.size > 1 ? 's' : ''} sélectionné{selectedProducts.size > 1 ? 's' : ''}
+                {selectedProducts.size} produit{selectedProducts.size > 1 ? 's' : ''} sélectionné
+                {selectedProducts.size > 1 ? 's' : ''}
               </span>
               <div className="ml-auto flex gap-2">
                 <Button size="sm" variant="outline">
@@ -515,7 +517,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedProducts.map((product) => (
+              paginatedProducts.map(product => (
                 <TableRow key={product.id}>
                   {/* Checkbox sélection */}
                   <TableCell>
@@ -626,49 +628,60 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 
                   {/* Actions */}
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour ${product.name || product.id}`}>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {onView && (
-                          <DropdownMenuItem onClick={() => onView(product.id)}>
+                    <StableDropdownMenu
+                      triggerProps={{
+                        variant: 'ghost' as const,
+                        size: 'sm' as const,
+                        className: 'h-8 w-8 p-0',
+                        'aria-label': `Actions pour ${product.name || product.id}`,
+                      }}
+                      triggerContent={<MoreVertical className="h-4 w-4" />}
+                    >
+                      {onView && (
+                        <StableDropdownMenuItem onClick={() => onView(product.id)}>
+                          <span className="flex items-center">
                             <Eye className="h-4 w-4 mr-2" />
                             Voir
-                          </DropdownMenuItem>
-                        )}
-                        {onEdit && (
-                          <DropdownMenuItem onClick={() => onEdit(product.id)}>
+                          </span>
+                        </StableDropdownMenuItem>
+                      )}
+                      {onEdit && (
+                        <StableDropdownMenuItem onClick={() => onEdit(product.id)}>
+                          <span className="flex items-center">
                             <Edit className="h-4 w-4 mr-2" />
                             Éditer
-                          </DropdownMenuItem>
-                        )}
-                        {onDuplicate && (
-                          <DropdownMenuItem onClick={() => onDuplicate(product.id)}>
+                          </span>
+                        </StableDropdownMenuItem>
+                      )}
+                      {onDuplicate && (
+                        <StableDropdownMenuItem onClick={() => onDuplicate(product.id)}>
+                          <span className="flex items-center">
                             <Copy className="h-4 w-4 mr-2" />
                             Dupliquer
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        {onArchive && (
-                          <DropdownMenuItem onClick={() => onArchive(product.id)}>
+                          </span>
+                        </StableDropdownMenuItem>
+                      )}
+                      <StableDropdownMenuSeparator />
+                      {onArchive && (
+                        <StableDropdownMenuItem onClick={() => onArchive(product.id)}>
+                          <span className="flex items-center">
                             <Archive className="h-4 w-4 mr-2" />
                             Archiver
-                          </DropdownMenuItem>
-                        )}
-                        {onDelete && (
-                          <DropdownMenuItem
-                            onClick={() => onDelete(product.id)}
-                            className="text-red-600"
-                          >
+                          </span>
+                        </StableDropdownMenuItem>
+                      )}
+                      {onDelete && (
+                        <StableDropdownMenuItem
+                          onClick={() => onDelete(product.id)}
+                          className="text-red-600"
+                        >
+                          <span className="flex items-center">
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          </span>
+                        </StableDropdownMenuItem>
+                      )}
+                    </StableDropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
@@ -680,13 +693,14 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t p-4">
             <p className="text-sm text-muted-foreground">
-              Page {currentPage} sur {totalPages} • {filteredAndSortedProducts.length} produit{filteredAndSortedProducts.length > 1 ? 's' : ''}
+              Page {currentPage} sur {totalPages} • {filteredAndSortedProducts.length} produit
+              {filteredAndSortedProducts.length > 1 ? 's' : ''}
             </p>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 Précédent
@@ -694,7 +708,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Suivant
@@ -724,9 +738,7 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
             <div>
               <p className="text-sm text-muted-foreground">Revenue total</p>
               <p className="text-xl font-bold text-green-600">
-                {filteredAndSortedProducts
-                  .reduce((sum, p) => sum + p.revenue, 0)
-                  .toLocaleString()}{' '}
+                {filteredAndSortedProducts.reduce((sum, p) => sum + p.revenue, 0).toLocaleString()}{' '}
                 EUR
               </p>
             </div>
@@ -766,31 +778,28 @@ const  DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
 DigitalProductsListComponent.displayName = 'DigitalProductsListComponent';
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const DigitalProductsList = React.memo(DigitalProductsListComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.products.length === nextProps.products.length &&
-    prevProps.onSelect === nextProps.onSelect &&
-    prevProps.onEdit === nextProps.onEdit &&
-    prevProps.onDelete === nextProps.onDelete &&
-    prevProps.onDuplicate === nextProps.onDuplicate &&
-    prevProps.onArchive === nextProps.onArchive &&
-    prevProps.onView === nextProps.onView &&
-    // Comparaison superficielle des products (comparer les IDs)
-    prevProps.products.every((product, index) => 
-      product.id === nextProps.products[index]?.id &&
-      product.is_active === nextProps.products[index]?.is_active &&
-      product.price === nextProps.products[index]?.price
-    )
-  );
-});
+export const DigitalProductsList = React.memo(
+  DigitalProductsListComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.products.length === nextProps.products.length &&
+      prevProps.onSelect === nextProps.onSelect &&
+      prevProps.onEdit === nextProps.onEdit &&
+      prevProps.onDelete === nextProps.onDelete &&
+      prevProps.onDuplicate === nextProps.onDuplicate &&
+      prevProps.onArchive === nextProps.onArchive &&
+      prevProps.onView === nextProps.onView &&
+      // Comparaison superficielle des products (comparer les IDs)
+      prevProps.products.every(
+        (product, index) =>
+          product.id === nextProps.products[index]?.id &&
+          product.is_active === nextProps.products[index]?.is_active &&
+          product.price === nextProps.products[index]?.price
+      )
+    );
+  }
+);
 
 DigitalProductsList.displayName = 'DigitalProductsList';
 
 export default DigitalProductsList;
-
-
-
-
-
-
-
