@@ -95,6 +95,10 @@ const DropdownMenuContent = React.forwardRef<
     const isMobile = useIsMobile();
     const contentRef = React.useRef<HTMLDivElement>(null);
     const [isOpen, setIsOpen] = React.useState(false);
+    const positionLockedRef = React.useRef(false);
+    const lockedPositionRef = React.useRef<{ top: number; left: number; width: number } | null>(
+      null
+    );
     const isMobileSheet = isMobile && mobileOptimized && mobileVariant === 'sheet';
 
     // Bloquer le scroll du body uniquement sur mobile quand le menu est ouvert
@@ -113,7 +117,14 @@ const DropdownMenuContent = React.forwardRef<
       const observer = new MutationObserver(() => {
         if (contentRef.current) {
           const state = contentRef.current.getAttribute('data-state');
+          const wasOpen = isOpen;
           setIsOpen(state === 'open');
+
+          // Quand le menu s'ouvre, réinitialiser le verrouillage de position
+          if (state === 'open' && !wasOpen) {
+            positionLockedRef.current = false;
+            lockedPositionRef.current = null;
+          }
         }
       });
 
@@ -129,7 +140,60 @@ const DropdownMenuContent = React.forwardRef<
       }
 
       return () => observer.disconnect();
-    }, []);
+    }, [isOpen]);
+
+    // CRITIQUE: Verrouiller la position après l'ouverture sur mobile non-sheet
+    // Exactement comme SelectContent : capturer la position après 200ms et la verrouiller
+    React.useEffect(() => {
+      if (!isOpen || !isMobile || isMobileSheet || !mobileOptimized || !contentRef.current) {
+        return;
+      }
+
+      // Attendre que Radix UI positionne le menu
+      const lockTimeout = setTimeout(() => {
+        if (!contentRef.current) return;
+
+        const rect = contentRef.current.getBoundingClientRect();
+        lockedPositionRef.current = {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+        };
+        positionLockedRef.current = true;
+      }, 200);
+
+      // Surveiller les changements de position et les corriger
+      const checkPosition = () => {
+        if (!contentRef.current || !positionLockedRef.current || !lockedPositionRef.current) {
+          return;
+        }
+
+        const rect = contentRef.current.getBoundingClientRect();
+        const locked = lockedPositionRef.current;
+
+        // Si la position a changé de plus de 2px, la corriger
+        if (Math.abs(rect.top - locked.top) > 2 || Math.abs(rect.left - locked.left) > 2) {
+          contentRef.current.style.position = 'fixed';
+          contentRef.current.style.top = `${locked.top}px`;
+          contentRef.current.style.left = `${locked.left}px`;
+          contentRef.current.style.width = `${locked.width}px`;
+          contentRef.current.style.transform = 'none';
+          contentRef.current.style.touchAction = 'manipulation';
+        }
+      };
+
+      const rafId = requestAnimationFrame(function animate() {
+        checkPosition();
+        if (isOpen && contentRef.current) {
+          requestAnimationFrame(animate);
+        }
+      });
+
+      return () => {
+        clearTimeout(lockTimeout);
+        cancelAnimationFrame(rafId);
+      };
+    }, [isOpen, isMobile, isMobileSheet, mobileOptimized]);
 
     // Verrouiller le scroll du body sur mobile quand le menu est ouvert (comme SelectContent)
     useBodyScrollLock(isMobile && mobileOptimized && isOpen);
@@ -166,6 +230,26 @@ const DropdownMenuContent = React.forwardRef<
               width: '100vw',
               maxWidth: '100vw',
             }),
+            // CRITIQUE: Verrouiller la position sur mobile non-sheet lors de l'interaction
+            // Empêcher les recalculs de position Radix UI lors du touch
+            ...(isMobile &&
+              mobileOptimized &&
+              !isMobileSheet &&
+              positionLockedRef.current &&
+              lockedPositionRef.current && {
+                position: 'fixed',
+                top: `${lockedPositionRef.current.top}px`,
+                left: `${lockedPositionRef.current.left}px`,
+                width: `${lockedPositionRef.current.width}px`,
+                // Ne pas utiliser transform pour éviter les recalculs
+                transform: 'none',
+                // Permettre les clics mais empêcher le scroll/zoom
+                touchAction: 'manipulation',
+                // Forcer la stabilité lors de l'interaction
+                willChange: 'auto',
+                // Désactiver les transitions qui peuvent causer le mouvement
+                transition: 'none',
+              }),
           }}
           className={cn(
             // Conteneur principal
@@ -230,13 +314,24 @@ const DropdownMenuItem = React.forwardRef<
         'active:bg-accent active:text-accent-foreground',
         // Optimisations tactiles
         'touch-manipulation',
-        // Transition légère pour le feedback
+        // Transition légère pour le feedback (seulement couleurs, pas position)
         'transition-colors duration-75',
         // Zone de clic plus large sur mobile
         isMobile && 'py-2.5',
         inset && 'pl-8',
         className
       )}
+      style={{
+        // CRITIQUE: Empêcher les gestes tactiles qui causent le mouvement du menu parent
+        ...(isMobile && {
+          touchAction: 'manipulation',
+          // Empêcher le scroll pendant le touch
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+        }),
+        ...props.style,
+      }}
       role="menuitem"
       {...props}
     />

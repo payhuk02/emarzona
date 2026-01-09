@@ -1,7 +1,7 @@
 /**
  * Edge Function: Rate Limiter
  * Protection contre les abus et attaques DDoS
- * 
+ *
  * Limites par défaut:
  * - Requêtes API: 100/minute par IP
  * - Authentification: 5/minute par IP
@@ -29,15 +29,18 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
   payment: { maxRequests: 20, windowSeconds: 60 },
   upload: { maxRequests: 10, windowSeconds: 60 },
   search: { maxRequests: 50, windowSeconds: 60 },
+  'product-creation': { maxRequests: 10, windowSeconds: 60 }, // 10 créations de produits par minute
 };
 
 /**
  * Extraire l'IP du client
  */
 function getClientIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-         req.headers.get('x-real-ip') ||
-         'unknown';
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown'
+  );
 }
 
 /**
@@ -72,7 +75,11 @@ async function checkRateLimit(
 
   if (error) {
     console.error('Error checking rate limit:', error);
-    return { allowed: true, remaining: config.maxRequests, resetAt: new Date(now.getTime() + config.windowSeconds * 1000) };
+    return {
+      allowed: true,
+      remaining: config.maxRequests,
+      resetAt: new Date(now.getTime() + config.windowSeconds * 1000),
+    };
   }
 
   const requestCount = count || 0;
@@ -85,22 +92,20 @@ async function checkRateLimit(
     const logData: any = {
       ip_address: ip,
       endpoint: endpoint,
-      created_at: now.toISOString()
+      created_at: now.toISOString(),
     };
-    
+
     if (userId) {
       logData.user_id = userId;
     }
 
-    await supabase
-      .from('rate_limit_log')
-      .insert(logData);
+    await supabase.from('rate_limit_log').insert(logData);
   }
 
   return { allowed, remaining, resetAt };
 }
 
-serve(async (req) => {
+serve(async req => {
   // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -131,7 +136,7 @@ serve(async (req) => {
         JSON.stringify({
           error: 'Rate limit exceeded',
           message: `Too many requests. Please try again in ${config.windowSeconds} seconds.`,
-          resetAt: result.resetAt
+          resetAt: result.resetAt,
         }),
         { status: 429, headers }
       );
@@ -141,17 +146,15 @@ serve(async (req) => {
       JSON.stringify({
         allowed: true,
         remaining: result.remaining,
-        resetAt: result.resetAt
+        resetAt: result.resetAt,
       }),
       { status: 200, headers }
     );
-
   } catch (error) {
     console.error('Rate limiter error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
-

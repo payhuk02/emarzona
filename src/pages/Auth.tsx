@@ -22,7 +22,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { SEOMeta } from '@/components/seo/SEOMeta';
-import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { logger } from '@/lib/logger';
 import {
   getStoredReferralCode,
@@ -86,7 +85,7 @@ const Auth = () => {
   // Calculate password strength
   const calculatePasswordStrength = (password: string): number => {
     if (!password) return 0;
-    let  strength= 0;
+    let strength = 0;
     if (password.length >= 6) strength += 1;
     if (password.length >= 8) strength += 1;
     if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
@@ -114,6 +113,32 @@ const Auth = () => {
       return;
     }
 
+    // Vérifier le rate limit pour la réinitialisation de mot de passe
+    try {
+      const { checkAuthRateLimit } = await import('@/lib/auth-rate-limiter');
+      const rateLimitResult = await checkAuthRateLimit('password-reset', resetEmail);
+
+      if (!rateLimitResult.allowed) {
+        setResetError(
+          rateLimitResult.message ||
+            t(
+              'auth.forgotPassword.rateLimitExceeded',
+              'Trop de demandes de réinitialisation. Réessayez plus tard.'
+            )
+        );
+        setIsResetLoading(false);
+        toast({
+          title: t('auth.forgotPassword.rateLimitTitle', 'Limite atteinte'),
+          description: rateLimitResult.message || t('auth.forgotPassword.rateLimitExceeded'),
+          variant: 'destructive',
+        });
+        return;
+      }
+    } catch (rateLimitError) {
+      // En cas d'erreur du rate limiter, continuer (fail open)
+      logger.warn('Rate limit check failed for password reset', { error: rateLimitError });
+    }
+
     try {
       const redirectUrl = `${window.location.origin}/auth?type=reset-password`;
 
@@ -131,7 +156,7 @@ const Auth = () => {
           `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`
         ),
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Reset password error', {
         error: errorMessage,
@@ -171,6 +196,32 @@ const Auth = () => {
       setError(t('auth.signup.errorPasswordLength'));
       setIsLoading(false);
       return;
+    }
+
+    // Vérifier le rate limit pour l'inscription
+    try {
+      const { checkAuthRateLimit } = await import('@/lib/auth-rate-limiter');
+      const rateLimitResult = await checkAuthRateLimit('register', email);
+
+      if (!rateLimitResult.allowed) {
+        setError(
+          rateLimitResult.message ||
+            t(
+              'auth.signup.rateLimitExceeded',
+              "Trop de tentatives d'inscription. Réessayez plus tard."
+            )
+        );
+        setIsLoading(false);
+        toast({
+          title: t('auth.signup.rateLimitTitle', 'Limite atteinte'),
+          description: rateLimitResult.message || t('auth.signup.rateLimitExceeded'),
+          variant: 'destructive',
+        });
+        return;
+      }
+    } catch (rateLimitError) {
+      // En cas d'erreur du rate limiter, continuer (fail open)
+      logger.warn('Rate limit check failed for signup', { error: rateLimitError });
     }
 
     const redirectUrl = `${window.location.origin}/dashboard`;
@@ -214,7 +265,7 @@ const Auth = () => {
                 referredId: data.user.id,
               });
             }
-          } catch ( _referralError: unknown) {
+          } catch (_referralError: unknown) {
             // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
             const referralErrorMessage =
               referralError instanceof Error ? referralError.message : String(referralError);
@@ -231,7 +282,7 @@ const Auth = () => {
         });
         navigate('/dashboard');
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Signup error', {
         error: errorMessage,
@@ -257,6 +308,32 @@ const Auth = () => {
       return;
     }
 
+    // Vérifier le rate limit pour la connexion
+    try {
+      const { checkAuthRateLimit } = await import('@/lib/auth-rate-limiter');
+      const rateLimitResult = await checkAuthRateLimit('login', email);
+
+      if (!rateLimitResult.allowed) {
+        setError(
+          rateLimitResult.message ||
+            t(
+              'auth.login.rateLimitExceeded',
+              'Trop de tentatives de connexion. Réessayez dans quelques minutes.'
+            )
+        );
+        setIsLoading(false);
+        toast({
+          title: t('auth.login.rateLimitTitle', 'Limite atteinte'),
+          description: rateLimitResult.message || t('auth.login.rateLimitExceeded'),
+          variant: 'destructive',
+        });
+        return;
+      }
+    } catch (rateLimitError) {
+      // En cas d'erreur du rate limiter, continuer (fail open)
+      logger.warn('Rate limit check failed for login', { error: rateLimitError });
+    }
+
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -272,7 +349,7 @@ const Auth = () => {
         });
         navigate('/dashboard');
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Login error', {
         error: errorMessage,
@@ -696,9 +773,3 @@ const Auth = () => {
 };
 
 export default Auth;
-
-
-
-
-
-
