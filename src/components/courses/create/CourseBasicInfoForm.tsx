@@ -5,14 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RichTextEditorPro } from '@/components/ui/rich-text-editor-pro';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectField,
-} from '@/components/ui/select';
+import { SelectItem, SelectField } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { CurrencySelect } from '@/components/ui/currency-select';
 import { Button } from '@/components/ui/button';
@@ -46,7 +39,7 @@ interface CourseBasicInfoFormProps {
     image_url?: string;
     images?: string[];
   };
-  onChange: (field: string, value: string | number | boolean | null | undefined) => void;
+  onChange: (field: string, value: string | number | boolean | string[] | null | undefined) => void;
   errors?: Record<string, string>;
 }
 
