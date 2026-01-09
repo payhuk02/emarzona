@@ -26,11 +26,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getStockInfo, formatStockQuantity } from '@/lib/stockUtils';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 interface ProductListViewProps {
@@ -93,7 +91,7 @@ const ProductListView = ({
           'Le lien du produit a été copié dans le presse-papiers'
         ),
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: t('common.error', 'Erreur'),
         description: t('products.linkCopyError', 'Impossible de copier le lien'),
@@ -270,46 +268,48 @@ const ProductListView = ({
               </span>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation"
-                  aria-label={t('products.actionsForProduct', 'Actions pour le produit {{name}}', {
-                    name: product.name || product.id,
-                  })}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-[calc(100vw-2rem)] sm:w-48 max-w-[calc(100vw-2rem)] sm:max-w-xs"
-                mobileOptimized
-              >
-                {onQuickView && (
-                  <DropdownMenuItem onClick={onQuickView}>
+            <StableDropdownMenu
+              triggerClassName="flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation"
+              triggerProps={{
+                variant: 'outline',
+                size: 'sm',
+                'aria-label': t('products.actionsForProduct', 'Actions pour le produit {{name}}', {
+                  name: product.name || product.id,
+                }),
+              }}
+              triggerContent={<MoreVertical className="h-4 w-4" />}
+            >
+              {onQuickView && (
+                <StableDropdownMenuItem onClick={onQuickView}>
+                  <span className="flex items-center">
                     <Eye className="h-4 w-4 mr-2" />
                     {t('products.quickView.title', 'Aperçu rapide')}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleCopyLink}>
+                  </span>
+                </StableDropdownMenuItem>
+              )}
+              <StableDropdownMenuItem onClick={handleCopyLink}>
+                <span className="flex items-center">
                   <Copy className="h-4 w-4 mr-2" />
                   {t('products.copyLink', 'Copier le lien')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handlePreview}>
+                </span>
+              </StableDropdownMenuItem>
+              <StableDropdownMenuItem onClick={handlePreview}>
+                <span className="flex items-center">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   {t('products.preview', 'Prévisualiser')}
-                </DropdownMenuItem>
-                {onDuplicate && (
-                  <DropdownMenuItem onClick={onDuplicate}>
+                </span>
+              </StableDropdownMenuItem>
+              {onDuplicate && (
+                <StableDropdownMenuItem onClick={onDuplicate}>
+                  <span className="flex items-center">
                     <FileStack className="h-4 w-4 mr-2" />
                     {t('products.actions.duplicate', 'Dupliquer')}
-                  </DropdownMenuItem>
-                )}
-                {onToggleStatus && (
-                  <DropdownMenuItem onClick={onToggleStatus}>
+                  </span>
+                </StableDropdownMenuItem>
+              )}
+              {onToggleStatus && (
+                <StableDropdownMenuItem onClick={onToggleStatus}>
+                  <span className="flex items-center">
                     {product.is_active ? (
                       <>
                         <EyeOff className="h-4 w-4 mr-2" />
@@ -321,15 +321,17 @@ const ProductListView = ({
                         {t('products.activate', 'Activer')}
                       </>
                     )}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  </span>
+                </StableDropdownMenuItem>
+              )}
+              <StableDropdownMenuSeparator />
+              <StableDropdownMenuItem onClick={onDelete} className="text-destructive">
+                <span className="flex items-center">
                   <Trash2 className="h-4 w-4 mr-2" />
                   {t('products.actions.delete', 'Supprimer')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </span>
+              </StableDropdownMenuItem>
+            </StableDropdownMenu>
           </div>
         </div>
       </CardContent>

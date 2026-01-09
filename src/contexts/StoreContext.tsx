@@ -4,11 +4,10 @@ import { useAuth } from './AuthContext';
 import { logger } from '@/lib/logger';
 
 // Import des types depuis useStores pour éviter la duplication
-import type { Store as StoreType, StoreOpeningHours, StoreLegalPages, StoreMarketingContent } from '@/hooks/useStores';
+import type { Store as StoreType } from '@/hooks/useStores';
 
-export interface Store extends StoreType {
-  // Tous les champs sont hérités de StoreType qui inclut maintenant tous les nouveaux champs de la Phase 1
-}
+// Utiliser directement StoreType au lieu de créer une interface vide
+export type Store = StoreType;
 
 interface StoreContextType {
   stores: Store[];
@@ -108,9 +107,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       // Si aucune boutique n'est sélectionnée, essayer de récupérer depuis localStorage
       if (storesData.length > 0) {
         const storedStoreId = getStoredStoreId();
-        const validStoreId = storedStoreId && storesData.some(s => s.id === storedStoreId)
-          ? storedStoreId
-          : storesData[0].id; // Utiliser la première boutique par défaut
+        const validStoreId =
+          storedStoreId && storesData.some(s => s.id === storedStoreId)
+            ? storedStoreId
+            : storesData[0].id; // Utiliser la première boutique par défaut
 
         setSelectedStoreIdState(validStoreId);
         saveStoreIdToStorage(validStoreId);
@@ -118,9 +118,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         setSelectedStoreIdState(null);
         saveStoreIdToStorage(null);
       }
-    } catch ( _err: any) {
+    } catch (err: unknown) {
       logger.error('Error fetching stores', err);
-      setError(err.message || 'Erreur lors du chargement des boutiques');
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors du chargement des boutiques';
+      setError(errorMessage);
       setStores([]);
       setSelectedStoreIdState(null);
     } finally {
@@ -136,39 +138,45 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   }, [authLoading, fetchStores]);
 
   // Calculer la boutique sélectionnée
-  const selectedStore = selectedStoreId
-    ? stores.find(s => s.id === selectedStoreId) || null
-    : null;
+  const selectedStore = selectedStoreId ? stores.find(s => s.id === selectedStoreId) || null : null;
 
   // Fonction pour définir la boutique sélectionnée
-  const setSelectedStoreId = useCallback((storeId: string | null) => {
-    logger.info('🔄 [StoreContext] Changement de boutique', {
-      oldStoreId: selectedStoreId,
-      newStoreId: storeId,
-    });
+  const setSelectedStoreId = useCallback(
+    (storeId: string | null) => {
+      logger.info('🔄 [StoreContext] Changement de boutique', {
+        oldStoreId: selectedStoreId,
+        newStoreId: storeId,
+      });
 
-    // Vérifier que la boutique existe
-    if (storeId && !stores.some(s => s.id === storeId)) {
-      logger.warn('Tentative de sélectionner une boutique inexistante', { storeId });
-      return;
-    }
+      // Vérifier que la boutique existe
+      if (storeId && !stores.some(s => s.id === storeId)) {
+        logger.warn('Tentative de sélectionner une boutique inexistante', { storeId });
+        return;
+      }
 
-    setSelectedStoreIdState(storeId);
-    saveStoreIdToStorage(storeId);
+      setSelectedStoreIdState(storeId);
+      saveStoreIdToStorage(storeId);
 
-    // Synchroniser avec les autres onglets (optionnel)
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: STORAGE_KEY,
-        newValue: storeId,
-      }));
-    }
-  }, [selectedStoreId, stores, saveStoreIdToStorage]);
+      // Synchroniser avec les autres onglets (optionnel)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: STORAGE_KEY,
+            newValue: storeId,
+          })
+        );
+      }
+    },
+    [selectedStoreId, stores, saveStoreIdToStorage]
+  );
 
   // Fonction pour changer de boutique
-  const switchStore = useCallback((storeId: string) => {
-    setSelectedStoreId(storeId);
-  }, [setSelectedStoreId]);
+  const switchStore = useCallback(
+    (storeId: string) => {
+      setSelectedStoreId(storeId);
+    },
+    [setSelectedStoreId]
+  );
 
   // Fonction pour rafraîchir la liste des boutiques
   const refreshStores = useCallback(async () => {
@@ -215,16 +223,5 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     getRemainingStores,
   };
 
-  return (
-    <StoreContext.Provider value={value}>
-      {children}
-    </StoreContext.Provider>
-  );
+  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 };
-
-
-
-
-
-
-
