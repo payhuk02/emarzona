@@ -38,10 +38,8 @@ import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
@@ -167,26 +165,26 @@ export default function RecurringBookingsManager() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" aria-label={`Actions pour la série de réservations ${s.id}`}>
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewDetails(s.id)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Voir les détails
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleCancelSeries(s.id)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Annuler la série
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <StableDropdownMenu
+                            triggerContent={<MoreVertical className="h-4 w-4" />}
+                            triggerProps={{
+                              variant: "ghost" as const,
+                              size: "sm" as const,
+                              "aria-label": `Actions pour la série de réservations ${s.id}`
+                            }}
+                          >
+                            <StableDropdownMenuItem onClick={() => handleViewDetails(s.id)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Voir les détails
+                            </StableDropdownMenuItem>
+                            <StableDropdownMenuItem
+                              onClick={() => handleCancelSeries(s.id)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Annuler la série
+                            </StableDropdownMenuItem>
+                          </StableDropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}

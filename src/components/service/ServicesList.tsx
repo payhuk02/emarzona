@@ -11,12 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -368,43 +365,45 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             </div>
 
             {/* Actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation" aria-label={`Actions pour ${service.name}`}>
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {onView && (
-                  <DropdownMenuItem onClick={() => onView(service)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Voir détails
-                  </DropdownMenuItem>
-                )}
-                {onEdit && (
-                  <DropdownMenuItem onClick={() => onEdit(service)}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Modifier
-                  </DropdownMenuItem>
-                )}
-                {onDuplicate && (
-                  <DropdownMenuItem onClick={() => onDuplicate(service)}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Dupliquer
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                {onDelete && (
-                  <DropdownMenuItem
-                    onClick={() => onDelete(service)}
-                    className="text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Supprimer
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <StableDropdownMenu
+              triggerContent={<MoreVertical className="h-4 w-4" />}
+              triggerProps={{
+                variant: "ghost" as const,
+                size: "sm" as const,
+                className: "h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation",
+                "aria-label": `Actions pour ${service.name}`,
+                onClick: (e) => e.stopPropagation()
+              }}
+            >
+              {onView && (
+                <StableDropdownMenuItem onClick={() => onView(service)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Voir détails
+                </StableDropdownMenuItem>
+              )}
+              {onEdit && (
+                <StableDropdownMenuItem onClick={() => onEdit(service)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Modifier
+                </StableDropdownMenuItem>
+              )}
+              {onDuplicate && (
+                <StableDropdownMenuItem onClick={() => onDuplicate(service)}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Dupliquer
+                </StableDropdownMenuItem>
+              )}
+              <StableDropdownMenuSeparator />
+              {onDelete && (
+                <StableDropdownMenuItem
+                  onClick={() => onDelete(service)}
+                  className="text-red-600"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Supprimer
+                </StableDropdownMenuItem>
+              )}
+            </StableDropdownMenu>
           </div>
 
           {/* Status */}

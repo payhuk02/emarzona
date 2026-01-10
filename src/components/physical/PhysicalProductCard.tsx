@@ -11,10 +11,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import {
   Package,
@@ -114,28 +112,24 @@ const PhysicalProductCardComponent = ({ product, onEdit, onDelete }: PhysicalPro
 
         {/* Actions Menu */}
         <div className="absolute top-2 right-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="h-8 w-8"
-                aria-label={`Actions pour ${product.name || product.id}`}
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit?.(product.id)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Modifier
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete?.(product.id)} className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <StableDropdownMenu
+            triggerContent={<MoreVertical className="h-4 w-4" />}
+            triggerProps={{
+              variant: "secondary" as const,
+              size: "icon" as const,
+              className: "h-8 w-8",
+              "aria-label": `Actions pour ${product.name || product.id}`
+            }}
+          >
+            <StableDropdownMenuItem onClick={() => onEdit?.(product.id)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Modifier
+            </StableDropdownMenuItem>
+            <StableDropdownMenuItem onClick={() => onDelete?.(product.id)} className="text-destructive">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Supprimer
+            </StableDropdownMenuItem>
+          </StableDropdownMenu>
         </div>
       </div>
 

@@ -337,56 +337,52 @@ export default function RecurringBookingsManagement() {
                               {getStatusBadge(pattern.status)}
                             </TableCell>
                             <TableCell className="text-xs sm:text-sm">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="min-h-[44px] min-w-[44px]"
-                                    aria-label={`Actions pour le réservation récurrente ${pattern.id}`}
+                              <StableDropdownMenu
+                                triggerContent={<MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                                triggerProps={{
+                                  variant: "ghost" as const,
+                                  size: "icon" as const,
+                                  className: "min-h-[44px] min-w-[44px]",
+                                  "aria-label": `Actions pour le réservation récurrente ${pattern.id}`
+                                }}
+                              >
+                                {pattern.status === 'active' ? (
+                                  <StableDropdownMenuItem
+                                    onClick={() => handleTogglePause(pattern.id, pattern.status)}
                                   >
-                                    <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {pattern.status === 'active' ? (
-                                    <DropdownMenuItem
-                                      onClick={() => handleTogglePause(pattern.id, pattern.status)}
-                                    >
-                                      <Pause className="h-4 w-4 mr-2" />
-                                      Mettre en pause
-                                    </DropdownMenuItem>
-                                  ) : pattern.status === 'paused' ? (
-                                    <DropdownMenuItem
-                                      onClick={() => handleTogglePause(pattern.id, pattern.status)}
-                                    >
-                                      <Play className="h-4 w-4 mr-2" />
-                                      Reprendre
-                                    </DropdownMenuItem>
-                                  ) : null}
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedPattern(pattern.id);
-                                      setRescheduleDialogOpen(true);
-                                    }}
+                                    <Pause className="h-4 w-4 mr-2" />
+                                    Mettre en pause
+                                  </StableDropdownMenuItem>
+                                ) : pattern.status === 'paused' ? (
+                                  <StableDropdownMenuItem
+                                    onClick={() => handleTogglePause(pattern.id, pattern.status)}
                                   >
-                                    <Calendar className="h-4 w-4 mr-2" />
-                                    Replanifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleGenerateMore(pattern.id)}>
-                                    <RefreshCw className="h-4 w-4 mr-2" />
-                                    Générer plus
-                                  </DropdownMenuItem>
-                                  <Separator />
-                                  <DropdownMenuItem
-                                    onClick={() => handleCancel(pattern.id)}
-                                    className="text-red-600"
-                                  >
-                                    <Square className="h-4 w-4 mr-2" />
-                                    Annuler série
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                    <Play className="h-4 w-4 mr-2" />
+                                    Reprendre
+                                  </StableDropdownMenuItem>
+                                ) : null}
+                                <StableDropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedPattern(pattern.id);
+                                    setRescheduleDialogOpen(true);
+                                  }}
+                                >
+                                  <Calendar className="h-4 w-4 mr-2" />
+                                  Replanifier
+                                </StableDropdownMenuItem>
+                                <StableDropdownMenuItem onClick={() => handleGenerateMore(pattern.id)}>
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Générer plus
+                                </StableDropdownMenuItem>
+                                <StableDropdownMenuSeparator />
+                                <StableDropdownMenuItem
+                                  onClick={() => handleCancel(pattern.id)}
+                                  className="text-red-600"
+                                >
+                                  <Square className="h-4 w-4 mr-2" />
+                                  Annuler série
+                                </StableDropdownMenuItem>
+                              </StableDropdownMenu>
                             </TableCell>
                           </TableRow>
                         ))}

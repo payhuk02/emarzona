@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MOBILE_COLLISION_PADDING, DESKTOP_COLLISION_PADDING } from '@/constants/mobile';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
+import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard';
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from './select';
 import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu';
 
@@ -96,6 +97,7 @@ const DropdownMenuContent = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile();
+    const { isKeyboardOpen, keyboardHeight } = useMobileKeyboard();
     const contentRef = React.useRef<React.ElementRef<typeof DropdownMenuPrimitive.Content>>(null);
     const [isOpen, setIsOpen] = React.useState(false);
 
@@ -135,50 +137,57 @@ const DropdownMenuContent = React.forwardRef<
 
     return (
       <DropdownMenuPrimitive.Portal>
-        <DropdownMenuPrimitive.Content
-          ref={contentRef}
-          sideOffset={sideOffset}
-          side={isMobileSheet ? 'bottom' : props.side}
-          align={isMobileSheet ? 'center' : props.align}
-          className={cn(
-            // Conteneur principal (EXACTEMENT comme SelectContent)
-            isMobileSheet
-              ? 'fixed inset-x-0 bottom-0 z-[1060] max-h-[80vh] w-full overflow-hidden rounded-t-2xl border bg-popover text-popover-foreground shadow-lg sm:relative sm:inset-auto sm:w-auto sm:max-h-[min(24rem,80vh)] sm:rounded-md'
-              : 'relative z-[1060] max-h-[min(24rem,80vh)] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg',
-            // Animations optimisées pour mobile - CSS only, pas de JS (EXACTEMENT comme SelectContent)
-            isMobile
-              ? isMobileSheet
-                ? 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:duration-150 data-[state=closed]:duration-100'
-                : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-150 data-[state=closed]:duration-100'
-              : 'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
-            // Optimisations mobile supplémentaires (EXACTEMENT comme SelectContent)
-            isMobile && !isMobileSheet && 'max-w-[calc(100vw-1rem)]',
-            className
-          )}
-          collisionPadding={
-            isMobile
-              ? MOBILE_COLLISION_PADDING
-              : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
-          }
-          // En mode sheet mobile, on gère nous-mêmes le positionnement : pas de collisions Radix (EXACTEMENT comme SelectContent)
-          avoidCollisions={isMobileSheet ? false : true}
-          sticky={isMobile ? 'always' : 'partial'}
-          style={{
-            ...props.style,
-            // Forcer un bottom sheet plein écran correctement centré sur mobile (EXACTEMENT comme SelectContent)
-            ...(isMobileSheet && {
-              position: 'fixed',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              top: 'auto',
-              transform: 'none',
-              width: '100vw',
-              maxWidth: '100vw',
-            }),
-          }}
-          {...props}
-        />
+        {/* Wrapper pour forcer le positionnement absolu en mode sheet mobile */}
+        {isMobileSheet ? (
+          <div
+            className="fixed inset-x-0 bottom-0 z-[1060] max-h-[80vh] w-full overflow-hidden rounded-t-2xl border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:duration-150 data-[state=closed]:duration-100"
+            style={{
+              marginBottom: isMobile && isKeyboardOpen && keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
+              maxHeight: isMobile && isKeyboardOpen && keyboardHeight > 0 ? `calc(80vh - ${keyboardHeight}px)` : undefined,
+            }}
+          >
+            <DropdownMenuPrimitive.Content
+              ref={contentRef}
+              sideOffset={0}
+              className={cn(
+                'relative z-[1060] max-h-[80vh] w-full overflow-hidden rounded-t-2xl border-0 bg-transparent text-popover-foreground shadow-none',
+                className
+              )}
+              collisionPadding={0}
+              avoidCollisions={false}
+              sticky="always"
+              {...props}
+            >
+              {/* Viewport pour les enfants (EXACTEMENT comme SelectContent) */}
+              <div className="p-1 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] will-change-scroll scroll-smooth">
+                {props.children}
+              </div>
+            </DropdownMenuPrimitive.Content>
+          </div>
+        ) : (
+          <DropdownMenuPrimitive.Content
+            ref={contentRef}
+            sideOffset={sideOffset}
+            side={props.side}
+            align={props.align}
+            className={cn(
+              'relative z-[1060] max-h-[min(24rem,80vh)] min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg',
+              // Animations pour desktop
+              'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+              // Optimisations mobile supplémentaires
+              isMobile && 'max-w-[calc(100vw-1rem)]',
+              className
+            )}
+            collisionPadding={
+              isMobile
+                ? MOBILE_COLLISION_PADDING
+                : (props.collisionPadding ?? DESKTOP_COLLISION_PADDING)
+            }
+            avoidCollisions={true}
+            sticky={isMobile ? 'always' : 'partial'}
+            {...props}
+          />
+        )}
       </DropdownMenuPrimitive.Portal>
     );
   }
@@ -310,10 +319,10 @@ const DropdownMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTML
 DropdownMenuShortcut.displayName = 'DropdownMenuShortcut';
 
 /**
- * StableDropdownMenu - Version stable pour mobile utilisant Select en interne
+ * StableDropdownMenu - Menu stable utilisant DropdownMenuContent mobileVariant="sheet"
  *
- * Remplace DropdownMenu par Select pour une stabilité parfaite sur mobile,
- * comme les menus des wizards produits (catégorie, modèle de tarification, etc.)
+ * Utilise DropdownMenuContent avec mobileVariant="sheet" pour stabilité parfaite sur mobile,
+ * exactement comme les menus des wizards produits (catégorie, modèle de tarification, etc.)
  */
 const StableDropdownMenu = React.forwardRef<
   HTMLButtonElement,
@@ -342,7 +351,6 @@ const StableDropdownMenu = React.forwardRef<
   // Verrouiller le scroll du body sur mobile quand le menu est ouvert
   useBodyScrollLock(isMobile && isOpen);
 
-  // Utiliser DropdownMenuContent pour éviter les problèmes de SelectContent
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -353,7 +361,7 @@ const StableDropdownMenu = React.forwardRef<
       <DropdownMenuContent
         side="bottom"
         align="end"
-        mobileVariant="default"
+        mobileVariant="sheet"
         className="min-w-[200px]"
       >
         {children}
@@ -364,7 +372,7 @@ const StableDropdownMenu = React.forwardRef<
 StableDropdownMenu.displayName = 'StableDropdownMenu';
 
 /**
- * StableDropdownMenuItem - Item stable utilisant SelectItem avec onClick
+ * StableDropdownMenuItem - Item utilisant DropdownMenuItem avec gestion tactile optimisée
  */
 const StableDropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuItem>,
@@ -375,12 +383,14 @@ const StableDropdownMenuItem = React.forwardRef<
      */
     children: React.ReactNode;
     /**
-     * Autres props pour DropdownMenuItem
+     * Autres props pour l'item
      */
     className?: string;
     disabled?: boolean;
   }
 >(({ onClick, children, className, disabled, ...props }, ref) => {
+  const isMobile = useIsMobile();
+
   return (
     <DropdownMenuItem
       ref={ref}
@@ -391,6 +401,8 @@ const StableDropdownMenuItem = React.forwardRef<
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         'touch-manipulation',
         'transition-colors duration-75',
+        // Optimisations spécifiques pour mobile tactile - zones de clic plus grandes
+        isMobile && 'py-3 min-h-[48px] text-base',
         className
       )}
       onClick={onClick}
@@ -403,12 +415,12 @@ const StableDropdownMenuItem = React.forwardRef<
 StableDropdownMenuItem.displayName = 'StableDropdownMenuItem';
 
 /**
- * StableDropdownMenuSeparator - Séparateur stable utilisant DropdownMenuSeparator
+ * StableDropdownMenuSeparator - Séparateur utilisant DropdownMenuSeparator
  */
 const StableDropdownMenuSeparator = React.forwardRef<
-  React.ElementRef<typeof SelectSeparator>,
-  React.ComponentPropsWithoutRef<typeof SelectSeparator>
->((props, ref) => <SelectSeparator ref={ref} {...props} />);
+  React.ElementRef<typeof DropdownMenuSeparator>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuSeparator>
+>((props, ref) => <DropdownMenuSeparator ref={ref} {...props} />);
 StableDropdownMenuSeparator.displayName = 'StableDropdownMenuSeparator';
 
 export {

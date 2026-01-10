@@ -27,10 +27,8 @@ import { StoreMemberInviteDialog } from './StoreMemberInviteDialog';
 import { StoreMemberRoleSelector } from './StoreMemberRoleSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -216,28 +214,29 @@ export const StoreMembersList = () => {
                           )}
                         </div>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour ${member.user?.email || member.id}`}>
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditRole(member)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Modifier le rôle
-                          </DropdownMenuItem>
-                          {member.role !== 'owner' && (
-                            <DropdownMenuItem
-                              onClick={() => handleRemove(member)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Retirer
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <StableDropdownMenu
+                        triggerContent={<MoreVertical className="h-4 w-4" />}
+                        triggerProps={{
+                          variant: "ghost" as const,
+                          size: "icon" as const,
+                          className: "h-8 w-8",
+                          "aria-label": `Actions pour ${member.user?.email || member.id}`
+                        }}
+                      >
+                        <StableDropdownMenuItem onClick={() => handleEditRole(member)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier le rôle
+                        </StableDropdownMenuItem>
+                        {member.role !== 'owner' && (
+                          <StableDropdownMenuItem
+                            onClick={() => handleRemove(member)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Retirer
+                          </StableDropdownMenuItem>
+                        )}
+                      </StableDropdownMenu>
                     </div>
                   ))}
                 </div>
@@ -282,26 +281,27 @@ export const StoreMembersList = () => {
                           </p>
                         </div>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour ${member.user?.email || member.id}`}>
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditRole(member)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Modifier le rôle
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleRemove(member)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Annuler l'invitation
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <StableDropdownMenu
+                        triggerContent={<MoreVertical className="h-4 w-4" />}
+                        triggerProps={{
+                          variant: "ghost" as const,
+                          size: "icon" as const,
+                          className: "h-8 w-8",
+                          "aria-label": `Actions pour ${member.user?.email || member.id}`
+                        }}
+                      >
+                        <StableDropdownMenuItem onClick={() => handleEditRole(member)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier le rôle
+                        </StableDropdownMenuItem>
+                        <StableDropdownMenuItem
+                          onClick={() => handleRemove(member)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Annuler l'invitation
+                        </StableDropdownMenuItem>
+                      </StableDropdownMenu>
                     </div>
                   ))}
                 </div>

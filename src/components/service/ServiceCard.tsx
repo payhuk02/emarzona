@@ -11,10 +11,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import {
   Calendar,
@@ -121,31 +119,27 @@ const ServiceCardComponent = ({
         {/* Actions Menu */}
         {showActions && (
           <div className="absolute top-2 right-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-11 w-11 sm:h-8 sm:w-8"
-                  aria-label={`Actions pour ${service.name || service.id}`}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit?.(service.id)}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Modifier
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => onDelete?.(service.id)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <StableDropdownMenu
+              triggerContent={<MoreVertical className="h-4 w-4" />}
+              triggerProps={{
+                variant: "secondary" as const,
+                size: "icon" as const,
+                className: "h-11 w-11 sm:h-8 sm:w-8",
+                "aria-label": `Actions pour ${service.name || service.id}`
+              }}
+            >
+              <StableDropdownMenuItem onClick={() => onEdit?.(service.id)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Modifier
+              </StableDropdownMenuItem>
+              <StableDropdownMenuItem
+                onClick={() => onDelete?.(service.id)}
+                className="text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </StableDropdownMenuItem>
+            </StableDropdownMenu>
           </div>
         )}
       </div>

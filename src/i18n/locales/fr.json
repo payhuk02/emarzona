@@ -96,6 +96,7 @@
     "login": {
       "title": "Connexion",
       "subtitle": "Connectez-vous à votre compte",
+      "formLabel": "Connexion",
       "email": "Email",
       "emailPlaceholder": "exemple@email.com",
       "password": "Mot de passe",
@@ -113,6 +114,7 @@
     "signup": {
       "title": "Inscription",
       "subtitle": "Créez votre compte vendeur",
+      "formLabel": "Inscription",
       "name": "Nom complet",
       "namePlaceholder": "Votre nom",
       "email": "Email",
@@ -138,7 +140,11 @@
     "forgotPassword": {
       "title": "Mot de passe oublié",
       "subtitle": "Entrez votre email pour réinitialiser",
+      "description": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
       "email": "Email",
+      "emailLabel": "Adresse email",
+      "emailPlaceholder": "votre@email.com",
+      "sendButton": "Envoyer le lien de réinitialisation",
       "button": "Envoyer le lien",
       "success": "Email de réinitialisation envoyé !",
       "error": "Erreur lors de l'envoi"
@@ -407,6 +413,37 @@
     "delete": "Supprimer",
     "view": "Voir",
     "noProducts": "Aucun produit",
+    "selectProduct": "Sélectionner ce produit",
+    "stock": {
+      "outOfStock": "Rupture de stock"
+    },
+    "salesCount": "{{count}} ventes",
+    "actionsForProduct": "Actions pour le produit {{name}}",
+    "copyLink": "Copier le lien",
+    "preview": "Prévisualiser",
+    "deactivate": "Désactiver",
+    "activate": "Activer",
+    "actions": {
+      "duplicate": "Dupliquer"
+    },
+    "quickView": {
+      "title": "Aperçu rapide"
+    },
+    "linkCopied": "Lien copié",
+    "linkCopiedDescription": "Le lien du produit a été copié dans le presse-papiers",
+    "linkCopyError": "Impossible de copier le lien",
+    "refreshShort": "Raf.",
+    "addNewShort": "+ Ajouter",
+    "filters": {
+      "open": "Ouvrir les filtres",
+      "title": "Filtres",
+      "description": "Utilisez les filtres ci-dessous pour affiner votre recherche de produits"
+    },
+    "selectAll": "Sélectionner tous les produits",
+    "found": "{{count}} produit trouvé",
+    "importShort": "Import",
+    "exportShort": "Export",
+    "subtitle": "Gérez vos produits et vendez plus efficacement",
     "create": {
       "title": "Créer un produit",
       "name": "Nom du produit",

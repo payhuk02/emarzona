@@ -11,10 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import {
   Calendar,
@@ -147,40 +145,41 @@ const BookingCardComponent = ({
           </div>
 
           {showActions && booking.status !== 'completed' && booking.status !== 'cancelled' && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la réservation ${booking.id}`}>
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {booking.status === 'pending' && (
-                  <DropdownMenuItem onClick={() => onConfirm?.(booking.id)}>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Confirmer
-                  </DropdownMenuItem>
-                )}
-                {booking.status === 'confirmed' && (
-                  <DropdownMenuItem onClick={() => onComplete?.(booking.id)}>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Marquer terminé
-                  </DropdownMenuItem>
-                )}
-                {booking.status === 'confirmed' && (
-                  <DropdownMenuItem onClick={() => onNoShow?.(booking.id)}>
-                    <Ban className="h-4 w-4 mr-2" />
-                    Absent
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => onCancel?.(booking.id)}
-                  className="text-destructive"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Annuler
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <StableDropdownMenu
+              triggerContent={<MoreVertical className="h-4 w-4" />}
+              triggerProps={{
+                variant: "ghost" as const,
+                size: "icon" as const,
+                className: "h-8 w-8",
+                "aria-label": `Actions pour la réservation ${booking.id}`
+              }}
+            >
+              {booking.status === 'pending' && (
+                <StableDropdownMenuItem onClick={() => onConfirm?.(booking.id)}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Confirmer
+                </StableDropdownMenuItem>
+              )}
+              {booking.status === 'confirmed' && (
+                <StableDropdownMenuItem onClick={() => onComplete?.(booking.id)}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Marquer terminé
+                </StableDropdownMenuItem>
+              )}
+              {booking.status === 'confirmed' && (
+                <StableDropdownMenuItem onClick={() => onNoShow?.(booking.id)}>
+                  <Ban className="h-4 w-4 mr-2" />
+                  Absent
+                </StableDropdownMenuItem>
+              )}
+              <StableDropdownMenuItem
+                onClick={() => onCancel?.(booking.id)}
+                className="text-destructive"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Annuler
+              </StableDropdownMenuItem>
+            </StableDropdownMenu>
           )}
         </div>
       </CardHeader>

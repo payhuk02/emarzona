@@ -25,11 +25,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  StableDropdownMenu,
+  StableDropdownMenuItem,
+  StableDropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
   Send,
@@ -523,27 +521,27 @@ export default function OrderMessaging() {
                       )}
 
                       {/* Actions Menu */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" aria-label="Menu d'actions">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setShowAdminPanel(true)}>
-                            <Shield className="h-4 w-4 mr-2" />
-                            Demander intervention admin
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => navigate(`/disputes/create?orderId=${orderId}`)}
-                            className="text-destructive"
-                          >
-                            <AlertTriangle className="h-4 w-4 mr-2" />
-                            Ouvrir un litige
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <StableDropdownMenu
+                        triggerContent={<MoreVertical className="h-4 w-4" />}
+                        triggerProps={{
+                          variant: "ghost" as const,
+                          size: "icon" as const,
+                          "aria-label": "Menu d'actions"
+                        }}
+                      >
+                        <StableDropdownMenuItem onClick={() => setShowAdminPanel(true)}>
+                          <Shield className="h-4 w-4 mr-2" />
+                          Demander intervention admin
+                        </StableDropdownMenuItem>
+                        <StableDropdownMenuSeparator />
+                        <StableDropdownMenuItem
+                          onClick={() => navigate(`/disputes/create?orderId=${orderId}`)}
+                          className="text-destructive"
+                        >
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Ouvrir un litige
+                        </StableDropdownMenuItem>
+                      </StableDropdownMenu>
                     </div>
                   </div>
                 </CardHeader>
