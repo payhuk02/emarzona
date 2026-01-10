@@ -68,7 +68,8 @@
     "favicon:generate:simple": "node scripts/generate-favicon-simple.js",
     "audit:aria": "node scripts/audit-aria-labels.js",
     "verify:unsubscribe-css": "node scripts/verify-unsubscribe-css.js",
-    "optimize:images": "node scripts/optimize-images.js"
+    "optimize:images": "node scripts/optimize-images.js",
+    "test:coverage:check": "node scripts/check-test-coverage.js"
   },
   "vercel": {
     "buildCommand": "npm run build",

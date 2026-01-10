@@ -6,9 +6,8 @@
  * Design responsive avec cards sur mobile et table sur desktop
  */
 
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -38,12 +37,14 @@ import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
-export default function RecurringBookingsManager() {
+const RecurringBookingsManager = React.memo(() => {
   const { store } = useStore();
   const { data: series = [], isLoading } = useRecurringSeries(store?.id);
   const cancelSeries = useCancelRecurringSeries();
@@ -54,6 +55,10 @@ export default function RecurringBookingsManager() {
   const [seriesToCancel, setSeriesToCancel] = useState<string | null>(null);
 
   const { data: bookings = [] } = useRecurringBookingsBySeries(selectedSeriesId || undefined);
+
+  // Optimiser les calculs avec useMemo
+  const memoizedBookings = useMemo(() => bookings, [bookings]);
+  const memoizedSeries = useMemo(() => series, [series]);
 
   const handleViewDetails = (seriesId: string) => {
     setSelectedSeriesId(seriesId);
@@ -138,8 +143,11 @@ export default function RecurringBookingsManager() {
                             {s.service?.product?.name || 'Service'}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {s.parent_booking?.scheduled_date &&
-                              format(new Date(s.parent_booking.scheduled_date), 'PPP', { locale: fr })}
+                            {s.parent_booking?.scheduled_date ? (
+                              format(new Date(s.parent_booking.scheduled_date), 'PPP', { locale: fr })
+                            ) : (
+                              'Date non définie'
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -165,26 +173,30 @@ export default function RecurringBookingsManager() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <StableDropdownMenu
-                            triggerContent={<MoreVertical className="h-4 w-4" />}
-                            triggerProps={{
-                              variant: "ghost" as const,
-                              size: "sm" as const,
-                              "aria-label": `Actions pour la série de réservations ${s.id}`
-                            }}
-                          >
-                            <StableDropdownMenuItem onClick={() => handleViewDetails(s.id)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Voir les détails
-                            </StableDropdownMenuItem>
-                            <StableDropdownMenuItem
-                              onClick={() => handleCancelSeries(s.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Annuler la série
-                            </StableDropdownMenuItem>
-                          </StableDropdownMenu>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" aria-label={`Actions pour la série de réservations ${s.id}`}>
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleViewDetails(s.id)}
+                                aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                Voir les détails
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleCancelSeries(s.id)}
+                                className="text-destructive"
+                                aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Annuler la série
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -207,8 +219,11 @@ export default function RecurringBookingsManager() {
                               {s.service?.product?.name || 'Service'}
                             </h3>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {s.parent_booking?.scheduled_date &&
-                                format(new Date(s.parent_booking.scheduled_date), 'PPP', { locale: fr })}
+                              {s.parent_booking?.scheduled_date ? (
+                                format(new Date(s.parent_booking.scheduled_date), 'PPP', { locale: fr })
+                              ) : (
+                                'Date non définie'
+                              )}
                             </p>
                           </div>
                           <DropdownMenu>
@@ -218,13 +233,17 @@ export default function RecurringBookingsManager() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewDetails(s.id)}>
+                              <DropdownMenuItem
+                                onClick={() => handleViewDetails(s.id)}
+                                aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
+                              >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleCancelSeries(s.id)}
                                 className="text-destructive"
+                                aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Annuler la série
@@ -390,7 +409,11 @@ export default function RecurringBookingsManager() {
       </AlertDialog>
     </div>
   );
-}
+});
+
+RecurringBookingsManager.displayName = 'RecurringBookingsManager';
+
+export default RecurringBookingsManager;
 
 
 

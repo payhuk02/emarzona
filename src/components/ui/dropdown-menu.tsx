@@ -8,7 +8,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { MOBILE_COLLISION_PADDING, DESKTOP_COLLISION_PADDING } from '@/constants/mobile';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
 import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from './select';
 import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;

@@ -322,7 +322,7 @@ BookingCard.displayName = 'BookingCard';
  * Bookings List
  */
 interface BookingsListProps {
-  bookings: (ServiceBooking & { product?: any; customer?: any; staff?: any })[];
+  bookings: (ServiceBooking & { product?: unknown; customer?: unknown; staff?: unknown })[];
   loading?: boolean;
   onConfirm?: (id: string) => void;
   onCancel?: (id: string) => void;

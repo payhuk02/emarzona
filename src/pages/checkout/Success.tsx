@@ -7,13 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { SEOMeta } from "@/components/seo/SEOMeta";
+import type { Database } from "@/integrations/supabase/types";
 
 const CheckoutSuccess = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [transaction, setTransaction] = useState<any>(null);
+  const [transaction, setTransaction] = useState<Database['public']['Tables']['transactions']['Row'] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Database['public']['Tables']['products']['Row'] | null>(null);
 
   const transactionId = searchParams.get("transaction_id");
 

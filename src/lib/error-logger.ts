@@ -282,7 +282,7 @@ export function setupGlobalErrorHandlers(): void {
 /**
  * Helper pour envelopper les fonctions async avec gestion d'erreur
  */
-export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
+export function withErrorHandling<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   context: ErrorLogContext = {}
 ): T {
@@ -299,7 +299,7 @@ export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
 /**
  * Helper pour envelopper les fonctions sync avec gestion d'erreur
  */
-export function withErrorHandlingSync<T extends (...args: any[]) => any>(
+export function withErrorHandlingSync<T extends (...args: unknown[]) => unknown>(
   fn: T,
   context: ErrorLogContext = {}
 ): T {

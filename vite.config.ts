@@ -175,11 +175,25 @@ export default defineConfig(({ mode }) => {
               return undefined; // Garder dans le chunk principal
             }
 
-            // Radix UI - Garder dans le chunk principal
-            // Les composants Radix UI ont des dépendances croisées
-            // Garder dans le principal garantit que toutes les dépendances sont disponibles
+            // Radix UI - Séparer intelligemment les composants non-critiques
+            // Garder les composants de base dans le principal, séparer les autres
             if (id.includes('node_modules/@radix-ui')) {
-              return undefined; // Garder dans le chunk principal
+              // Composants critiques pour le premier rendu
+              if (id.includes('@radix-ui/react-slot') ||
+                  id.includes('@radix-ui/react-primitive') ||
+                  id.includes('@radix-ui/react-presence')) {
+                return undefined; // Garder dans le chunk principal
+              }
+              // Composants non-critiques - séparer
+              if (id.includes('@radix-ui/react-tooltip') ||
+                  id.includes('@radix-ui/react-hover-card') ||
+                  id.includes('@radix-ui/react-popover') ||
+                  id.includes('@radix-ui/react-dialog') ||
+                  id.includes('@radix-ui/react-alert-dialog')) {
+                return 'ui-overlays';
+              }
+              // Autres composants Radix UI dans chunk UI général
+              return 'ui-components';
             }
 
             // CRITIQUE: recharts doit rester dans le chunk principal
@@ -207,27 +221,27 @@ export default defineConfig(({ mode }) => {
             // Framer Motion - Garder dans le chunk principal (utilise React.createContext)
             // Note: Déjà géré plus bas, mais gardé ici pour clarté
 
-            // react-hook-form - Garder dans le chunk principal
+            // react-hook-form - Séparer en chunk dédié (formulaires non-critiques au démarrage)
             if (
               id.includes('node_modules/react-hook-form') ||
               id.includes('node_modules/@hookform')
             ) {
-              return undefined; // Garder dans le chunk principal
+              return 'forms';
             }
 
-            // react-helmet - Garder dans le chunk principal
+            // react-helmet - Séparer en chunk dédié (SEO non-critique au démarrage)
             if (id.includes('node_modules/react-helmet')) {
-              return undefined; // Garder dans le chunk principal
+              return 'seo';
             }
 
-            // next-themes - Garder dans le chunk principal
+            // next-themes - Séparer en chunk dédié (utilisé principalement pour le thème)
             if (id.includes('node_modules/next-themes')) {
-              return undefined; // Garder dans le chunk principal
+              return 'theme';
             }
 
-            // framer-motion - Garder dans le chunk principal (utilise React.createContext)
+            // framer-motion - Séparer en chunk dédié (animations non-critiques)
             if (id.includes('node_modules/framer-motion')) {
-              return undefined; // Garder dans le chunk principal
+              return 'animations';
             }
 
             // Supabase client - Garder dans le chunk principal (simplifier)
@@ -235,9 +249,9 @@ export default defineConfig(({ mode }) => {
               return undefined; // Garder dans le chunk principal
             }
 
-            // Date utilities - Garder dans le chunk principal (simplifier)
+            // Date utilities - Séparer en chunk dédié (utilitaires non-critiques au démarrage)
             if (id.includes('node_modules/date-fns')) {
-              return undefined; // Garder dans le chunk principal
+              return 'date-utils';
             }
 
             // Sentry - Garder tout dans le chunk principal
@@ -291,11 +305,10 @@ export default defineConfig(({ mode }) => {
 
             // Autres dépendances node_modules - Grouper par taille
             if (id.includes('node_modules/')) {
-              // CRITIQUE: lucide-react doit rester dans le chunk principal avec React
-              // pour éviter l'erreur "Cannot read properties of undefined (reading 'forwardRef')"
-              // lucide-react utilise forwardRef de React et doit être chargé après React
+              // lucide-react - Séparer en chunk dédié (icônes non-critiques)
+              // Les icônes peuvent être chargées à la demande
               if (id.includes('node_modules/lucide-react')) {
-                return undefined; // Garder dans le chunk principal avec React
+                return 'icons';
               }
 
               // TOUTES les dépendances React - Garder dans le chunk principal
@@ -322,8 +335,8 @@ export default defineConfig(({ mode }) => {
                 }
               }
 
-              // Dépendances lourdes non-React - Garder séparées (très gros chunks, ne dépendent pas de React)
-              // jspdf et plugins - Très lourd (414 KB), peut rester séparé car ne dépend pas de React
+              // Dépendances lourdes non-React - Garder séparées
+              // jspdf et plugins - Très lourd (414 KB), séparé
               if (
                 id.includes('node_modules/jspdf') ||
                 id.includes('node_modules/jspdf-autotable')
@@ -331,14 +344,27 @@ export default defineConfig(({ mode }) => {
                 return 'pdf';
               }
 
-              // html2canvas - Lourd (201 KB), peut rester séparé car ne dépend pas de React
+              // html2canvas - Lourd (201 KB), séparé
               if (id.includes('node_modules/html2canvas')) {
                 return 'canvas';
               }
 
-              // qrcode et html5-qrcode - Lourds, peuvent rester séparés car ne dépendent pas de React
+              // qrcode et html5-qrcode - Lourds, séparés
               if (id.includes('node_modules/qrcode') || id.includes('node_modules/html5-qrcode')) {
                 return 'qrcode';
+              }
+
+              // Utilitaires de style - Séparer
+              if (id.includes('node_modules/clsx') ||
+                  id.includes('node_modules/tailwind-merge') ||
+                  id.includes('node_modules/class-variance-authority')) {
+                return 'utils';
+              }
+
+              // Librairies de données - Séparer
+              if (id.includes('node_modules/papaparse') ||
+                  id.includes('node_modules/xlsx')) {
+                return 'data-processing';
               }
 
               // TOUT LE RESTE garder dans le chunk principal pour éviter toutes les erreurs d'initialisation

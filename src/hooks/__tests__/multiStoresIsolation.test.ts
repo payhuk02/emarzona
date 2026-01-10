@@ -23,6 +23,10 @@ import { useCustomers } from '../useCustomers';
 import { useDashboardStats } from '../useDashboardStats';
 import { useStores } from '../useStores';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+// Type pour les données de test des clients
+type TestCustomer = Pick<Database['public']['Tables']['customers']['Row'], 'id' | 'name' | 'store_id' | 'email'>;
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -257,7 +261,7 @@ describe('Multi-Stores Isolation Tests', () => {
       // Vérifier que la requête a filtré par store_id
       expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');
       expect(result.current.data?.data).toHaveLength(2);
-      expect(result.current.data?.data.every((c: any) => c.store_id === 'store-1')).toBe(true);
+      expect(result.current.data?.data.every((c: TestCustomer) => c.store_id === 'store-1')).toBe(true);
     });
 
     it('should not return customers from other stores', async () => {
@@ -281,8 +285,8 @@ describe('Multi-Stores Isolation Tests', () => {
 
       // Vérifier que seuls les clients de store-1 sont retournés
       expect(result.current.data?.data).toHaveLength(2);
-      expect(result.current.data?.data.every((c: any) => c.store_id === 'store-1')).toBe(true);
-      expect(result.current.data?.data.some((c: any) => c.store_id === 'store-2')).toBe(false);
+      expect(result.current.data?.data.every((c: TestCustomer) => c.store_id === 'store-1')).toBe(true);
+      expect(result.current.data?.data.some((c: TestCustomer) => c.store_id === 'store-2')).toBe(false);
     });
 
     it('should return empty data when storeId is undefined', async () => {

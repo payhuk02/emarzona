@@ -10,8 +10,8 @@ declare module 'react-big-calendar' {
     title?: string;
     start?: Date;
     end?: Date;
-    resource?: any;
-    [key: string]: any;
+    resource?: unknown;
+    [key: string]: unknown;
   }
 
   export interface Localizer {
@@ -19,7 +19,7 @@ declare module 'react-big-calendar' {
     parse(value: string, format: string, culture?: string): Date;
     startOfWeek(culture?: string): number;
     getDay(date: Date, culture?: string): number;
-    locales?: { [key: string]: any };
+    locales?: { [key: string]: unknown };
   }
 
   export interface dateFnsLocalizerOptions {
@@ -27,7 +27,7 @@ declare module 'react-big-calendar' {
     parse: (value: string, format: string, referenceDate: Date, options?: any) => Date;
     startOfWeek: (date: Date, options?: any) => Date;
     getDay: (date: Date) => number;
-    locales?: { [key: string]: any };
+    locales?: { [key: string]: unknown };
   }
 
   export function dateFnsLocalizer(options: dateFnsLocalizerOptions): Localizer;

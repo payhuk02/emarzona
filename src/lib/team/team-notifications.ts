@@ -114,9 +114,9 @@ export async function sendTeamInvitationNotification(
     }
 
     return { success: true };
-  } catch ( _error: any) {
-    logger.error('Error sending team invitation notification', { error, data });
-    return { success: false, error: error.message };
+  } catch (_error: unknown) {
+    logger.error('Error sending team invitation notification', { error: _error, data });
+    return { success: false, error: _error instanceof Error ? _error.message : String(_error) };
   }
 }
 
@@ -171,9 +171,9 @@ export async function sendTaskAssignedNotification(
     await Promise.all(notifications);
 
     return { success: true };
-  } catch ( _error: any) {
-    logger.error('Error sending task assigned notification', { error, data });
-    return { success: false, error: error.message };
+  } catch (_error: unknown) {
+    logger.error('Error sending task assigned notification', { error: _error, data });
+    return { success: false, error: _error instanceof Error ? _error.message : String(_error) };
   }
 }
 
@@ -220,9 +220,9 @@ export async function sendTaskUpdateNotification(
     await Promise.all(notifications);
 
     return { success: true };
-  } catch ( _error: any) {
-    logger.error('Error sending task update notification', { error, taskId });
-    return { success: false, error: error.message };
+  } catch (_error: unknown) {
+    logger.error('Error sending task update notification', { error: _error, taskId });
+    return { success: false, error: _error instanceof Error ? _error.message : String(_error) };
   }
 }
 
@@ -258,9 +258,9 @@ export async function sendTaskOverdueNotification(
     await Promise.all(notifications);
 
     return { success: true };
-  } catch ( _error: any) {
-    logger.error('Error sending task overdue notification', { error, taskId });
-    return { success: false, error: error.message };
+  } catch (_error: unknown) {
+    logger.error('Error sending task overdue notification', { error: _error, taskId });
+    return { success: false, error: _error instanceof Error ? _error.message : String(_error) };
   }
 }
 

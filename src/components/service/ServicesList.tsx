@@ -474,7 +474,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Select
             value={filters.status || 'all'}
             onValueChange={(value) =>
-              setFilters({ ...filters, status: value as any })
+              setFilters({ ...filters, status: value as ServiceStatus | 'all' })
             }
           >
             <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] h-11">

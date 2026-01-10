@@ -123,11 +123,11 @@ export async function triggerUnifiedWebhook(
         eventType: normalizedEventType 
       });
     }
-  } catch ( _error: any) {
-    logger.error('Exception triggering unified webhook', { 
-      error: error.message, 
-      storeId, 
-      eventType 
+  } catch (_error: unknown) {
+    logger.error('Exception triggering unified webhook', {
+      error: _error instanceof Error ? _error.message : String(_error),
+      storeId,
+      eventType
     });
   }
 }
@@ -147,8 +147,8 @@ export async function triggerPurchaseWebhook(
     currency: string;
     payment_status: string;
     status: string;
-    items?: any[];
-    [key: string]: any;
+    items?: unknown[];
+    [key: string]: unknown;
   }
 ): Promise<void> {
   await triggerUnifiedWebhook(
@@ -178,7 +178,7 @@ export async function triggerDownloadWebhook(
     customer_id: string;
     license_key?: string;
     download_url: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 ): Promise<void> {
   await triggerUnifiedWebhook(
@@ -206,7 +206,7 @@ export async function triggerLicenseActivatedWebhook(
     customer_id: string;
     license_key: string;
     license_type: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 ): Promise<void> {
   await triggerUnifiedWebhook(
@@ -234,7 +234,7 @@ export async function triggerProductCreatedWebhook(
     product_type: string;
     price: number;
     currency: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 ): Promise<void> {
   await triggerUnifiedWebhook(

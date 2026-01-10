@@ -12,7 +12,7 @@ const isProduction = import.meta.env.PROD;
 type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
 
 interface LogContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Sauvegarder les méthodes originales de la console AVANT qu'elles ne soient remplacées
@@ -31,7 +31,7 @@ export const logger = {
   /**
    * Log générique (niveau debug)
    */
-  log: (message: string, ...args: any[]) => {
+  log: (message: string, ...args: unknown[]) => {
     if (isDevelopment) {
       originalConsole.info(`[LOG] ${message}`, ...args);
     }
@@ -97,7 +97,7 @@ export const logger = {
   /**
    * Debug (uniquement en développement)
    */
-  debug: (message: string, ...args: any[]) => {
+  debug: (message: string, ...args: unknown[]) => {
     if (isDevelopment) {
       originalConsole.debug(`[DEBUG] ${message}`, ...args);
     }
