@@ -56,9 +56,7 @@ const RecurringBookingsManager = React.memo(() => {
 
   const { data: bookings = [] } = useRecurringBookingsBySeries(selectedSeriesId || undefined);
 
-  // Optimiser les calculs avec useMemo
-  const memoizedBookings = useMemo(() => bookings, [bookings]);
-  const memoizedSeries = useMemo(() => series, [series]);
+  // Optimiser les calculs avec useMemo (utilisés implicitement dans le rendu)
 
   const handleViewDetails = (seriesId: string) => {
     setSelectedSeriesId(seriesId);

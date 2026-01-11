@@ -20,7 +20,6 @@ import React from 'react';
 import { useProducts } from '../useProducts';
 import { useOrders } from '../useOrders';
 import { useCustomers } from '../useCustomers';
-import { useDashboardStats } from '../useDashboardStats';
 import { useStores } from '../useStores';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';

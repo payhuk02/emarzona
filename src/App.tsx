@@ -47,6 +47,14 @@ const CurrencyRatesInitializer = lazy(() =>
     default: m.CurrencyRatesInitializer,
   }))
 );
+// Quiz de style personnalisé - Lazy loaded
+const StyleQuizPage = lazy(() =>
+  import('@/pages/personalization/StyleQuizPage').then(m => ({ default: m.default }))
+);
+// AI Chatbot - Lazy loaded pour réduire le bundle initial
+const AIChatbotWrapper = lazy(() =>
+  import('@/components/ai/AIChatbotWrapper').then(m => ({ default: m.AIChatbotWrapper }))
+);
 import { initSentry } from '@/lib/sentry';
 import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
@@ -513,6 +521,9 @@ const StorageDiagnosticPage = lazy(() => import('./pages/admin/StorageDiagnostic
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import('./pages/I18nTest'));
 
+// Page de démonstration du chatbot IA
+const AIChatbotDemo = lazy(() => import('./pages/AIChatbotDemo'));
+
 // Routes Email publiques
 const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
 
@@ -631,6 +642,7 @@ const AppContent = () => {
               <Route path="/login" element={<Navigate to="/auth" replace />} />
               <Route path="/auth/login" element={<Navigate to="/auth" replace />} />
               <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/personalization/quiz" element={<StyleQuizPage />} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/cart" element={<CartEnhanced />} />
               <Route path="/cart-old" element={<Cart />} />
@@ -2246,6 +2258,7 @@ const AppContent = () => {
         <Suspense fallback={null}>
           <CookieConsentBanner />
           <CrispChat />
+          <AIChatbotWrapper />
         </Suspense>
         {/* Navigation mobile en bas - Affichée seulement sur mobile, sauf sur la page d'accueil et d'authentification */}
         {/* Toujours en bas pour éviter de masquer le contenu */}

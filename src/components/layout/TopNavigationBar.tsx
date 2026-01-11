@@ -35,6 +35,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
+import { LoyaltyBadge } from '@/components/loyalty/LoyaltyBadge';
 
 export const TopNavigationBar = () => {
   const { t } = useTranslation();
@@ -208,6 +209,11 @@ export const TopNavigationBar = () => {
               <LanguageSwitcher variant="outline" showLabel={false} />
             </div>
 
+            {/* Loyalty Badge */}
+            <div className="hidden sm:block">
+              <LoyaltyBadge />
+            </div>
+
             {/* User Menu */}
             <MobileDropdown
               trigger={
@@ -226,13 +232,19 @@ export const TopNavigationBar = () => {
               contentClassName="w-56"
             >
               <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">
-                    {user?.user_metadata?.full_name || user?.email}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {user?.email}
-                  </p>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">
+                      {user?.user_metadata?.full_name || user?.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
+                  {/* Loyalty Badge in User Menu */}
+                  <div className="flex justify-center">
+                    <LoyaltyBadge size="sm" />
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

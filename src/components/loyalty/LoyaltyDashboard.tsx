@@ -18,7 +18,6 @@ import {
   Calendar,
   Award,
   Coins,
-  Target,
   Zap
 } from 'lucide-react';
 import { useLoyaltyProfile, useLoyaltyTransactions, useLoyaltyStats } from '@/hooks/useAdvancedLoyalty';
@@ -36,7 +35,6 @@ export const LoyaltyDashboard: React.FC<LoyaltyDashboardProps> = ({ className })
 
   const { profile, isLoading: profileLoading } = useLoyaltyProfile(user?.id);
   const { data: transactions } = useLoyaltyTransactions(user?.id);
-  const { data: stats } = useLoyaltyStats(user?.id);
 
   if (profileLoading) {
     return <LoyaltyDashboardSkeleton />;

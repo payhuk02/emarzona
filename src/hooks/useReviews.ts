@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 import type {
   Review,
   ReviewReply,
@@ -372,6 +373,7 @@ export const useCreateReview = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user, profile } = useAuth();
+  const { triggerLoyaltyEvent } = useAdvancedLoyalty();
 
   return useMutation({
     mutationFn: async (payload: CreateReviewPayload) => {
@@ -434,10 +436,24 @@ export const useCreateReview = () => {
 
       return data as Review;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (review, variables) => {
       queryClient.invalidateQueries({ queryKey: ['product-reviews', variables.product_id] });
       queryClient.invalidateQueries({ queryKey: ['product-review-stats', variables.product_id] });
       queryClient.invalidateQueries({ queryKey: ['can-review', variables.product_id] });
+
+      // Déclencher l'événement de fidélisation pour la review
+      try {
+        const reward = await triggerLoyaltyEvent('review', {
+          productId: variables.product_id,
+          reviewId: review.id,
+          rating: variables.rating,
+          storeId: review.store_id,
+        });
+        logger.info("Loyalty points awarded for review", { reviewId: review.id, reward });
+      } catch (loyaltyError) {
+        logger.error("Failed to award loyalty points for review", { error: loyaltyError, reviewId: review.id });
+      }
+
       toast({
         title: 'Avis publié',
         description: 'Votre avis a été publié avec succès.',

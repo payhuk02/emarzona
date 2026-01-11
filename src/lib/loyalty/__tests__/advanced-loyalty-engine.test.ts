@@ -1,49 +1,54 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AdvancedLoyaltyEngine } from '../advanced-loyalty-engine';
+import { logger } from '@/lib/logger';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mocks
-vi.mock('@/lib/logger', () => ({
-  logger: {
-    error: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn()
-  }
-}));
+vi.mock('@/lib/logger');
+vi.mock('@/integrations/supabase/client');
 
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
+const mockLogger = {
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn()
+};
+
+const mockSupabase = {
+  from: vi.fn(() => ({
+    select: vi.fn(() => ({
+      eq: vi.fn(() => ({
         eq: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            gte: vi.fn(() => ({
-              lte: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: [],
-                  error: null
-                }))
+          gte: vi.fn(() => ({
+            lte: vi.fn(() => ({
+              order: vi.fn(() => ({
+                data: [],
+                error: null
               }))
             }))
           }))
         }))
-      })),
-      insert: vi.fn(() => ({
-        select: vi.fn(() => ({
-          single: vi.fn(() => ({
-            data: null,
-            error: null
-          }))
-        }))
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => ({
+      }))
+    })),
+    insert: vi.fn(() => ({
+      select: vi.fn(() => ({
+        single: vi.fn(() => ({
           data: null,
           error: null
         }))
       }))
+    })),
+    update: vi.fn(() => ({
+      eq: vi.fn(() => ({
+        data: null,
+        error: null
+      }))
     }))
-  }
-}));
+  }))
+};
+
+// Apply mocks
+vi.mocked(logger).mockReturnValue(mockLogger);
+vi.mocked(supabase).mockReturnValue(mockSupabase);
 
 describe('AdvancedLoyaltyEngine', () => {
   let engine: AdvancedLoyaltyEngine;
@@ -59,7 +64,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('calculatePoints', () => {
     it('should calculate points correctly for a purchase event', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -93,7 +98,7 @@ describe('AdvancedLoyaltyEngine', () => {
     });
 
     it('should apply multiplier when conditions are met', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -127,7 +132,7 @@ describe('AdvancedLoyaltyEngine', () => {
     });
 
     it('should return 0 when no rules match', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -153,7 +158,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('awardPoints', () => {
     it('should successfully award points to a user', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
       const mockInsert = vi.fn(() => ({
         select: vi.fn(() => ({
           single: vi.fn(() => Promise.resolve({
@@ -195,7 +200,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('redeemPoints', () => {
     it('should successfully redeem points', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
 
       // Mock profile check
       mockSupabase.from
@@ -244,7 +249,7 @@ describe('AdvancedLoyaltyEngine', () => {
     });
 
     it('should reject redemption when insufficient balance', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
 
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
@@ -261,7 +266,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('getUserProfile', () => {
     it('should return user profile with calculated stats', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
 
       // Mock profile data
       mockSupabase.from
@@ -310,7 +315,7 @@ describe('AdvancedLoyaltyEngine', () => {
     });
 
     it('should create default profile for new users', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
 
       mockSupabase.from
         .mockReturnValueOnce({
@@ -356,7 +361,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('processLoyaltyEvent', () => {
     it('should process loyalty event and award points', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
 
       // Mock rules
       mockSupabase.from
@@ -413,7 +418,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('Caching', () => {
     it('should cache rules to avoid repeated database calls', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
       const mockQuery = vi.fn(() => ({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -451,7 +456,7 @@ describe('AdvancedLoyaltyEngine', () => {
 
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+      const mockSupabaseInstance = vi.mocked(supabase);
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({

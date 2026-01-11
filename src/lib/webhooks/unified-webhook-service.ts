@@ -97,7 +97,7 @@ export async function triggerUnifiedWebhook(
       p_event_type: normalizedEventType,
       p_event_id: finalEventId || null,
       p_event_data: eventData,
-    } as any); // Type assertion nécessaire car les types générés peuvent ne pas correspondre exactement
+    } as Record<string, unknown>); // Type assertion pour les paramètres RPC
 
     if (error) {
       logger.error('Error triggering unified webhook', { 

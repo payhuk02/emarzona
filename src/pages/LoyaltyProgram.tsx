@@ -13,7 +13,6 @@ import { Gift, Star, Users, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const LoyaltyProgram = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
 
   if (!user) {

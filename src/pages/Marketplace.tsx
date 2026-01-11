@@ -973,6 +973,34 @@ const Marketplace = () => {
           getValue={getValue}
         />
 
+        {/* Section de personnalisation - Quiz de style */}
+        <section className="py-6 sm:py-8 px-3 sm:px-4 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-indigo-900/20 backdrop-blur-sm border-y border-white/5">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">
+                  🎨 Découvrez Votre Style Unique
+                </h2>
+                <p className="text-sm text-slate-300 max-w-md">
+                  Répondez à quelques questions et recevez des recommandations personnalisées
+                  adaptées à vos goûts et préférences.
+                </p>
+              </div>
+              <Button
+                asChild
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link to="/personalization/quiz" className="flex items-center space-x-2">
+                  <Sparkles className="h-5 w-5" />
+                  <span>Faire le Quiz</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Filtres avancés */}
         {showFilters && (
           <section

@@ -34,7 +34,6 @@ import {
   Download,
   Plus,
   RefreshCw,
-  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ServiceStatusIndicator, ServiceStatus } from './ServiceStatusIndicator';
@@ -168,7 +167,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
   onCreate,
 }) => {
   // États
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialViewMode);
+  const [viewMode, _setViewMode] = useState<'grid' | 'list'>(initialViewMode);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<ServicesFilters>({
     search: '',

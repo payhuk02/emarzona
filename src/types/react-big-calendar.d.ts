@@ -23,9 +23,9 @@ declare module 'react-big-calendar' {
   }
 
   export interface dateFnsLocalizerOptions {
-    format: (value: Date | number | string, formatStr: string, options?: any) => string;
-    parse: (value: string, format: string, referenceDate: Date, options?: any) => Date;
-    startOfWeek: (date: Date, options?: any) => Date;
+    format: (value: Date | number | string, formatStr: string, options?: unknown) => string;
+    parse: (value: string, format: string, referenceDate: Date, options?: unknown) => Date;
+    startOfWeek: (date: Date, options?: unknown) => Date;
     getDay: (date: Date) => number;
     locales?: { [key: string]: unknown };
   }
@@ -84,8 +84,8 @@ declare module 'react-big-calendar' {
     popup?: boolean;
     className?: string;
     style?: CSSProperties;
-    components?: any;
-    formats?: any;
+    components?: unknown;
+    formats?: unknown;
     culture?: string;
     defaultView?: View;
     views?: View[];
@@ -111,7 +111,7 @@ declare module 'react-big-calendar' {
     popupContent?: ReactNode;
     selectable?: boolean | 'ignoreEvents';
     longPressThreshold?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export class Calendar<TEvent extends Event = Event, TResource = any> extends Component<CalendarProps<TEvent, TResource>> {}

@@ -16,6 +16,8 @@ import {
 import { Share2, Twitter, Facebook, Linkedin, MessageCircle, Link as LinkIcon, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Review } from '@/types/review';
 
 interface ShareReviewButtonsProps {
@@ -30,6 +32,8 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
   productUrl = window.location.href,
 }) => {
   const { toast } = useToast();
+  const { triggerLoyaltyEvent } = useAdvancedLoyalty();
+  const { user } = useAuth();
   const [copied, setCopied] = React.useState(false);
 
   // Generate share text
@@ -106,10 +110,25 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
   };
 
   // Track share (can be implemented with analytics)
-  const trackShare = (platform: string) => {
+  const trackShare = async (platform: string) => {
     // TODO: Implement analytics tracking
     logger.info('Review shared', { reviewId: review.id, platform });
-    
+
+    // Déclencher l'événement de fidélisation pour le partage social
+    if (user) {
+      try {
+        const reward = await triggerLoyaltyEvent('social_share', {
+          reviewId: review.id,
+          platform,
+          productId: review.product_id,
+          storeId: review.store_id,
+        });
+        logger.info("Loyalty points awarded for social share", { reviewId: review.id, platform, reward });
+      } catch (loyaltyError) {
+        logger.error("Failed to award loyalty points for social share", { error: loyaltyError, reviewId: review.id, platform });
+      }
+    }
+
     // Example: Track with custom event
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('event', 'share_review', {

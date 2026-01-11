@@ -28,11 +28,13 @@ import {
   clearStoredReferralCode,
 } from '@/components/referral/ReferralTracker';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
+import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 
 const Auth = () => {
   const { t } = useTranslation();
   const { getValue } = usePageCustomization('auth');
   const platformLogo = usePlatformLogo();
+  const { triggerLoyaltyEvent } = useAdvancedLoyalty();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState({ login: false, signup: false });
@@ -256,6 +258,32 @@ const Auth = () => {
               // Créer la relation de parrainage
               const { createReferralRelation } = await import('@/lib/referral-helpers');
               await createReferralRelation(referrerProfile.user_id, data.user.id, referralCode);
+
+              // Déclencher l'événement de fidélisation pour le parrainage réussi
+              try {
+                // Points pour le parrain (celui qui a invité)
+                const referrerReward = await triggerLoyaltyEvent('referral_success', {
+                  referrerId: referrerProfile.user_id,
+                  referredId: data.user.id,
+                  referralCode,
+                });
+
+                // Points pour le parrainé (celui qui s'inscrit)
+                const referredReward = await triggerLoyaltyEvent('signup_with_referral', {
+                  referrerId: referrerProfile.user_id,
+                  referredId: data.user.id,
+                  referralCode,
+                });
+
+                logger.info('Referral loyalty events triggered', {
+                  referrerId: referrerProfile.user_id,
+                  referredId: data.user.id,
+                  referrerReward,
+                  referredReward,
+                });
+              } catch (loyaltyError) {
+                logger.error('Failed to trigger referral loyalty events', { error: loyaltyError });
+              }
 
               // Nettoyer le code stocké
               clearStoredReferralCode();

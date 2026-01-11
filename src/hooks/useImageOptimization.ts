@@ -298,7 +298,7 @@ export function useImageFormatSupport() {
  */
 export function generateOptimizedImageUrl(
   src: string,
-  options: ImageOptimizationOptions = {}
+  _options: ImageOptimizationOptions = {}
 ): string {
   if (!src) return '';
 

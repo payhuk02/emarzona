@@ -3,14 +3,13 @@
  * Hook React pour le système de fidélisation avancé
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { loyaltyEngine, type UserLoyaltyProfile, type LoyaltyTransaction } from '@/lib/loyalty/advanced-loyalty-engine';
+import { loyaltyEngine, type LoyaltyTransaction } from '@/lib/loyalty/advanced-loyalty-engine';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 
 export function useLoyaltyProfile(userId?: string) {
-  const { toast } = useToast();
 
   const {
     data: profile,
@@ -52,7 +51,7 @@ export function useAwardPoints() {
       reason: string;
       referenceId?: string;
       referenceType?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       storeId?: string;
     }) => {
       return await loyaltyEngine.awardPoints(userId, points, reason, referenceId, referenceType, metadata, storeId);
@@ -96,7 +95,7 @@ export function useRedeemPoints() {
       userId: string;
       points: number;
       reason: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       storeId?: string;
     }) => {
       return await loyaltyEngine.redeemPoints(userId, points, reason, metadata, storeId);

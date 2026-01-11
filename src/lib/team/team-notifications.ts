@@ -187,7 +187,7 @@ export async function sendTaskUpdateNotification(
   storeName: string,
   assignedTo: string[],
   updateType: 'status_changed' | 'priority_changed' | 'due_date_changed' | 'comment_added',
-  updateDetails?: Record<string, any>
+  updateDetails?: Record<string, unknown>
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const updateMessages = {

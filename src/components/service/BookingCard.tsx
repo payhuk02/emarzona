@@ -8,7 +8,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   StableDropdownMenu,
@@ -18,7 +17,6 @@ import {
   Calendar,
   Clock,
   User,
-  MapPin,
   Video,
   Phone,
   Mail,

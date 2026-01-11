@@ -9,25 +9,27 @@ vi.mock('@/hooks/service/useServiceBookingValidation', () => ({
   useQuickAvailabilityCheck: vi.fn()
 }));
 
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
+const mockSupabase = {
+  from: vi.fn(() => ({
+    select: vi.fn(() => ({
+      eq: vi.fn(() => ({
         eq: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            gte: vi.fn(() => ({
-              lte: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  data: [],
-                  error: null
-                }))
+          gte: vi.fn(() => ({
+            lte: vi.fn(() => ({
+              order: vi.fn(() => ({
+                data: [],
+                error: null
               }))
             }))
           }))
         }))
       }))
     }))
-  }
+  }))
+};
+
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: mockSupabase
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -76,7 +78,7 @@ describe('TimeSlotPicker', () => {
     vi.clearAllMocks();
 
     // Mock Supabase response
-    const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
+    mockSupabase.from.mockReturnValue({
     mockSupabase.from.mockReturnValue({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
@@ -111,7 +113,6 @@ describe('TimeSlotPicker', () => {
 
   describe('Empty State', () => {
     it('shows no slots message when no slots are available', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -312,7 +313,6 @@ describe('TimeSlotPicker', () => {
 
   describe('Error Handling', () => {
     it('handles query errors gracefully', async () => {
-      const mockSupabase = vi.mocked(require('@/integrations/supabase/client').supabase);
       mockSupabase.from.mockReturnValue({
         select: vi.fn(() => ({
           eq: vi.fn(() => ({

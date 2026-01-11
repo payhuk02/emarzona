@@ -5,7 +5,6 @@
 
 import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 
 export interface LoyaltyRule {
   id: string;
@@ -14,7 +13,7 @@ export interface LoyaltyRule {
   eventType: 'purchase' | 'review' | 'referral' | 'social_share' | 'login_streak' | 'birthday' | 'custom';
   points: number;
   multiplier?: number;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   isActive: boolean;
   priority: number;
   storeId?: string;
@@ -39,7 +38,7 @@ export interface LoyaltyBenefit {
   type: 'discount_percentage' | 'discount_fixed' | 'free_shipping' | 'priority_support' | 'early_access' | 'exclusive_content' | 'bonus_points_multiplier';
   value: number;
   description: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   validFrom?: Date;
   validUntil?: Date;
 }
@@ -52,7 +51,7 @@ export interface LoyaltyTransaction {
   reason: string;
   referenceId?: string; // order_id, review_id, etc.
   referenceType?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   expiresAt?: Date;
   createdAt: Date;
   storeId?: string;
@@ -126,7 +125,7 @@ export class AdvancedLoyaltyEngine {
   async calculatePoints(
     userId: string,
     eventType: LoyaltyRule['eventType'],
-    eventData: Record<string, any>,
+    eventData: Record<string, unknown>,
     storeId?: string
   ): Promise<number> {
     try {
@@ -166,7 +165,7 @@ export class AdvancedLoyaltyEngine {
     reason: string,
     referenceId?: string,
     referenceType?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
     storeId?: string
   ): Promise<LoyaltyTransaction> {
     try {
@@ -221,7 +220,7 @@ export class AdvancedLoyaltyEngine {
     userId: string,
     points: number,
     reason: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
     storeId?: string
   ): Promise<LoyaltyTransaction> {
     try {
@@ -303,7 +302,7 @@ export class AdvancedLoyaltyEngine {
   async processLoyaltyEvent(
     userId: string,
     eventType: LoyaltyRule['eventType'],
-    eventData: Record<string, any>,
+    eventData: Record<string, unknown>,
     storeId?: string
   ): Promise<{ pointsAwarded: number; newTotalPoints: number; newTier?: LoyaltyTier }> {
     try {
@@ -368,7 +367,7 @@ export class AdvancedLoyaltyEngine {
     return result;
   }
 
-  private checkRuleConditions(rule: LoyaltyRule, eventData: Record<string, any>): boolean {
+  private checkRuleConditions(rule: LoyaltyRule, eventData: Record<string, unknown>): boolean {
     if (!rule.conditions) return true;
 
     // Implémenter la logique de vérification des conditions
@@ -380,7 +379,7 @@ export class AdvancedLoyaltyEngine {
     userId: string,
     rule: LoyaltyRule,
     points: number,
-    eventData: Record<string, any>
+    eventData: Record<string, unknown>
   ): Promise<number> {
     // Appliquer des conditions spéciales (multiplicateurs, etc.)
     // Pour l'instant, retourner les points inchangés

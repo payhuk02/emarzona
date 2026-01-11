@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import RecurringBookingsManager from '../RecurringBookingsManager';
@@ -109,18 +109,18 @@ describe('RecurringBookingsManager', () => {
       data: mockSeries,
       isLoading: false,
       error: null
-    } as any);
+    });
 
     mockUseCancelRecurringSeries.mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
       isPending: false
-    } as any);
+    });
 
     mockUseRecurringBookingsBySeries.mockReturnValue({
       data: [],
       isLoading: false,
       error: null
-    } as any);
+    });
   });
 
   describe('Loading State', () => {
@@ -129,7 +129,7 @@ describe('RecurringBookingsManager', () => {
         data: undefined,
         isLoading: true,
         error: null
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
@@ -144,7 +144,7 @@ describe('RecurringBookingsManager', () => {
         data: [],
         isLoading: false,
         error: null
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
@@ -185,7 +185,7 @@ describe('RecurringBookingsManager', () => {
         data: mockBookings,
         isLoading: false,
         error: null
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
@@ -209,7 +209,7 @@ describe('RecurringBookingsManager', () => {
       mockUseCancelRecurringSeries.mockReturnValue({
         mutateAsync: mockCancel,
         isPending: false
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
@@ -229,7 +229,7 @@ describe('RecurringBookingsManager', () => {
       mockUseCancelRecurringSeries.mockReturnValue({
         mutateAsync: mockCancel,
         isPending: false
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
@@ -283,7 +283,7 @@ describe('RecurringBookingsManager', () => {
         data: seriesWithoutService,
         isLoading: false,
         error: null
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
@@ -307,7 +307,7 @@ describe('RecurringBookingsManager', () => {
         data: seriesWithoutDate,
         isLoading: false,
         error: null
-      } as any);
+      });
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 

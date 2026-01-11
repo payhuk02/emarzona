@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { CheckCircle, ArrowRight, Loader2, Shield } from "lucide-react";
+import { CheckCircle, ArrowRight, Loader2, Shield, Star, Gift } from "lucide-react";
 import { loadMonerooPayment } from "@/lib/moneroo-lazy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
-import { SEOMeta } from "@/components/seo/SEOMeta";
+import { useAdvancedLoyalty } from "@/hooks/useAdvancedLoyalty";
 import type { Database } from "@/integrations/supabase/types";
 
 const CheckoutSuccess = () => {
@@ -15,7 +15,9 @@ const CheckoutSuccess = () => {
   const [transaction, setTransaction] = useState<Database['public']['Tables']['transactions']['Row'] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [product, setProduct] = useState<Database['public']['Tables']['products']['Row'] | null>(null);
+  const [loyaltyReward, setLoyaltyReward] = useState<{ points: number; tier?: string } | null>(null);
 
+  const { triggerLoyaltyEvent } = useAdvancedLoyalty();
   const transactionId = searchParams.get("transaction_id");
 
   useEffect(() => {
@@ -36,6 +38,23 @@ const CheckoutSuccess = () => {
           setTimeout(() => verifyTransaction(), 3000);
         }
 
+        // Déclencher l'événement de fidélisation pour l'achat réussi
+        if (result.status === "completed" && result.customer_id) {
+          try {
+            const reward = await triggerLoyaltyEvent('purchase', {
+              orderId: result.id,
+              amount: result.amount || 0,
+              currency: result.currency || 'XAF',
+              storeId: result.store_id,
+              customerId: result.customer_id
+            });
+            setLoyaltyReward(reward);
+            logger.info("Loyalty points awarded for purchase", { orderId: result.id, reward });
+          } catch (loyaltyError) {
+            logger.error("Failed to award loyalty points", { error: loyaltyError, orderId: result.id });
+          }
+        }
+
         // Charger le produit lié pour afficher les conditions de licence
         if (result?.product_id) {
           const { data: prod } = await supabase
@@ -45,9 +64,9 @@ const CheckoutSuccess = () => {
             .single();
           if (prod) setProduct(prod);
         }
-      } catch ( _err: unknown) {
-        logger.error("Verification error", { error: err });
-        const errorObj = err instanceof Error ? err : new Error(String(err));
+      } catch (_err: unknown) {
+        logger.error("Verification error", { error: _err });
+        const errorObj = _err instanceof Error ? _err : new Error(String(_err));
         setError(errorObj.message || "Erreur lors de la vérification du paiement");
       } finally {
         setLoading(false);
@@ -137,6 +156,28 @@ const CheckoutSuccess = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Email</span>
                 <span className="text-xs truncate max-w-[200px]">{transaction.customer_email}</span>
+              </div>
+            )}
+            {/* Affichage des récompenses de fidélité */}
+            {isCompleted && loyaltyReward && (
+              <div className="border-t pt-3 mt-3">
+                <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                      Récompense Fidélité !
+                    </span>
+                  </div>
+                  <span className="font-bold text-amber-600 dark:text-amber-400">
+                    +{loyaltyReward.points} pts
+                  </span>
+                </div>
+                {loyaltyReward.tier && (
+                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                    <Gift className="h-3 w-3" />
+                    <span>Nouveau niveau : <strong className="text-amber-600">{loyaltyReward.tier}</strong></span>
+                  </div>
+                )}
               </div>
             )}
           </div>

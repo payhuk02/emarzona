@@ -1,336 +1,297 @@
+/**
+ * Hook pour les recommandations de produits personnalisées
+ * Utilise les préférences de style pour générer des recommandations IA
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { useAuth } from '@/contexts/AuthContext';
+import type { StyleProfile } from '@/components/personalization/StyleQuiz';
+import type { Database } from '@/integrations/supabase/types';
 
-const MISSING_RPC_USER_RECS_KEY = 'emz_missing_rpc:get_user_product_recommendations';
+type Product = Database['public']['Tables']['products']['Row'] & {
+  store?: Database['public']['Tables']['stores']['Row'];
+  average_rating?: number;
+  total_reviews?: number;
+};
 
-export interface ProductRecommendation {
-  product_id: string;
-  product_name: string;
-  product_slug: string;
-  store_id: string;
-  store_name: string;
-  store_slug: string;
-  image_url: string | null;
-  price: number;
-  promotional_price: number | null;
-  currency: string;
-  category: string | null;
-  product_type: string | null;
-  rating: number | null;
-  reviews_count: number | null;
-  purchases_count: number;
-  recommendation_score: number;
-  recommendation_reason: string;
-  recommendation_type:
-    | 'similar'
-    | 'category'
-    | 'tags'
-    | 'popular'
-    | 'purchase_history'
-    | 'collaborative'
-    | 'view_based';
+interface RecommendationResult {
+  products: Product[];
+  reasoning: string[];
+  confidence: number;
+  categories: string[];
 }
 
-export interface FrequentlyBoughtTogether extends ProductRecommendation {
-  times_bought_together: number;
-  confidence_score?: number;
-}
+export function useProductRecommendations() {
+  const { user } = useAuth();
 
-type FrequentlyBoughtTogetherV1Row = Omit<FrequentlyBoughtTogether, 'confidence_score'>;
+  // Obtenir les recommandations personnalisées basées sur le profil de style
+  const getPersonalizedRecommendations = async (
+    profile: StyleProfile,
+    limit: number = 20
+  ): Promise<Product[]> => {
+    try {
+      logger.info('Fetching personalized recommendations', { profile, userId: user?.id });
 
-/**
- * Hook pour obtenir des recommandations de produits basées sur un produit
- */
-export function useProductRecommendations(
-  productId: string | null,
-  limit: number = 6,
-  enabled: boolean = true
-) {
-  return useQuery<ProductRecommendation[]>({
-    queryKey: ['product-recommendations', productId, limit],
-    queryFn: async () => {
-      if (!productId) {
-        return [];
+      // Construire les filtres basés sur le profil
+      const filters = buildRecommendationFilters(profile);
+
+      // Appeler la fonction RPC pour les recommandations
+      const { data, error } = await supabase.rpc('get_personalized_recommendations', {
+        p_user_id: user?.id || null,
+        p_style_profile: profile,
+        p_filters: filters,
+        p_limit: limit
+      });
+
+      if (error) {
+        logger.error('Error fetching personalized recommendations', { error, profile });
+        throw error;
       }
 
-      try {
-        const { data, error } = await supabase.rpc('get_product_recommendations', {
-          p_product_id: productId,
-          p_limit: limit,
-        });
+      logger.info('Personalized recommendations fetched', {
+        count: data?.length || 0,
+        profile,
+        userId: user?.id
+      });
 
-        if (error) {
-          const errorCode = error.code;
-          const errorMessage = error.message || '';
+      return data || [];
+    } catch (error) {
+      logger.error('Failed to get personalized recommendations', { error, profile });
+      // Fallback: retourner des produits populaires
+      return getFallbackRecommendations(limit);
+    }
+  };
 
-          if (errorCode === '42883' || errorMessage.includes('does not exist')) {
-            logger.warn('get_product_recommendations function does not exist.');
-            return [];
-          }
+  // Hook pour les recommandations générales
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['personalized-recommendations', user?.id],
+    queryFn: async (): Promise<RecommendationResult | null> => {
+      if (!user?.id) return null;
 
-          if (errorCode === 'PGRST116' || errorMessage.includes('Bad Request')) {
-            logger.warn('Bad Request error for get_product_recommendations.');
-            return [];
-          }
+      // Récupérer les préférences de style d'abord
+      const { data: preferences } = await supabase
+        .from('user_style_preferences')
+        .select('profile')
+        .eq('user_id', user.id)
+        .single();
 
-          logger.warn('Error fetching product recommendations (non-critical):', {
-            code: errorCode,
-            message: errorMessage,
-          });
+      if (!preferences?.profile) return null;
 
-          return [];
-        }
+      const products = await getPersonalizedRecommendations(preferences.profile);
 
-        return (data || []) as ProductRecommendation[];
-      } catch (error) {
-        logger.warn('Exception in useProductRecommendations:', error);
-        return [];
-      }
+      return {
+        products,
+        reasoning: generateRecommendationReasoning(preferences.profile),
+        confidence: calculateConfidenceScore(preferences.profile),
+        categories: extractProductCategories(products)
+      };
     },
-    enabled: enabled && !!productId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: false, // Ne pas réessayer en cas d'erreur pour éviter le spam console
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
+
+  // Recommandations similaires à un produit
+  const getSimilarProducts = async (
+    productId: string,
+    limit: number = 8
+  ): Promise<Product[]> => {
+    try {
+      const { data, error } = await supabase.rpc('get_similar_products', {
+        p_product_id: productId,
+        p_user_id: user?.id || null,
+        p_limit: limit
+      });
+
+      if (error) {
+        logger.error('Error fetching similar products', { error, productId });
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      logger.error('Failed to get similar products', { error, productId });
+      return [];
+    }
+  };
+
+  // Recommandations basées sur l'historique d'achat
+  const getHistoryBasedRecommendations = async (limit: number = 15): Promise<Product[]> => {
+    if (!user?.id) return [];
+
+    try {
+      const { data, error } = await supabase.rpc('get_history_based_recommendations', {
+        p_user_id: user.id,
+        p_limit: limit
+      });
+
+      if (error) {
+        logger.error('Error fetching history-based recommendations', { error, userId: user.id });
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      logger.error('Failed to get history-based recommendations', { error, userId: user.id });
+      return [];
+    }
+  };
+
+  // Recommandations tendance
+  const getTrendingRecommendations = async (limit: number = 12): Promise<Product[]> => {
+    try {
+      const { data, error } = await supabase.rpc('get_trending_recommendations', {
+        p_limit: limit,
+        p_user_id: user?.id || null
+      });
+
+      if (error) {
+        logger.error('Error fetching trending recommendations', { error });
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      logger.error('Failed to get trending recommendations', { error });
+      return getFallbackRecommendations(limit);
+    }
+  };
+
+  return {
+    recommendations,
+    isLoading,
+    error,
+    refetch,
+    getPersonalizedRecommendations,
+    getSimilarProducts,
+    getHistoryBasedRecommendations,
+    getTrendingRecommendations,
+    hasPreferences: !!recommendations?.products?.length,
+    confidenceScore: recommendations?.confidence || 0
+  };
 }
 
-/**
- * Hook pour obtenir des recommandations personnalisées basées sur l'historique d'achat
- */
-export function useUserProductRecommendations(
-  userId: string | null,
-  limit: number = 6,
-  enabled: boolean = true
-) {
-  return useQuery<ProductRecommendation[]>({
-    queryKey: ['user-product-recommendations', userId, limit],
-    queryFn: async () => {
-      if (!userId) {
-        return [];
-      }
+// Fonctions utilitaires privées
 
-      // Éviter d'appeler en boucle une RPC absente (améliore perf et réduit le bruit console)
-      if (typeof window !== 'undefined') {
-        const isMissing = window.localStorage.getItem(MISSING_RPC_USER_RECS_KEY) === '1';
-        if (isMissing) {
-          return [];
-        }
-      }
+function buildRecommendationFilters(profile: StyleProfile) {
+  const filters: Record<string, any> = {};
 
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(userId)) {
-        logger.warn('Invalid userId format for recommendations:', userId);
-        return [];
-      }
+  // Filtres basés sur le budget
+  switch (profile.budgetRange) {
+    case 'budget':
+      filters.max_price = 50;
+      break;
+    case 'midrange':
+      filters.min_price = 30;
+      filters.max_price = 200;
+      break;
+    case 'premium':
+      filters.min_price = 150;
+      filters.max_price = 1000;
+      break;
+    case 'luxury':
+      filters.min_price = 500;
+      break;
+  }
 
-      try {
-        const { data, error } = await supabase.rpc('get_user_product_recommendations', {
-          p_user_id: userId,
-          p_limit: limit,
-        });
+  // Filtres basés sur les préférences de couleur et style
+  filters.style_tags = [profile.aesthetic, profile.colorPalette];
+  filters.occasion_tags = [profile.occasionFocus];
 
-        if (error) {
-          const errorCode = error.code;
-          const errorMessage = error.message || '';
+  // Préférences de durabilité
+  if (profile.sustainability === 'very_important') {
+    filters.sustainability_only = true;
+  } else if (profile.sustainability === 'somewhat') {
+    filters.include_sustainable = true;
+  }
 
-          if (errorCode === '42883' || errorMessage.includes('does not exist')) {
-            logger.warn('get_user_product_recommendations function does not exist.');
-            if (typeof window !== 'undefined') {
-              window.localStorage.setItem(MISSING_RPC_USER_RECS_KEY, '1');
-            }
-            return [];
-          }
-
-          logger.warn('Error fetching user recommendations (non-critical):', {
-            code: errorCode,
-            message: errorMessage,
-          });
-
-          return [];
-        }
-
-        return (data || []) as ProductRecommendation[];
-      } catch (error) {
-        logger.warn('Exception in useUserProductRecommendations:', error);
-        return [];
-      }
-    },
-    enabled: enabled && !!userId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
+  return filters;
 }
 
-/**
- * Hook pour obtenir des recommandations collaboratives (filtrage collaboratif)
- */
-export function useCollaborativeRecommendations(
-  userId: string | null,
-  limit: number = 10,
-  enabled: boolean = true
-) {
-  return useQuery<ProductRecommendation[]>({
-    queryKey: ['collaborative-recommendations', userId, limit],
-    queryFn: async () => {
-      if (!userId) {
-        return [];
-      }
+function generateRecommendationReasoning(profile: StyleProfile): string[] {
+  const reasoning = [];
 
-      try {
-        const { data, error } = await supabase.rpc('get_collaborative_recommendations', {
-          p_user_id: userId,
-          p_limit: limit,
-        });
+  switch (profile.aesthetic) {
+    case 'minimalist':
+      reasoning.push('Style épuré et fonctionnel');
+      break;
+    case 'bohemian':
+      reasoning.push('Esthétique artistique et libre');
+      break;
+    case 'luxury':
+      reasoning.push('Produits haut de gamme et raffinés');
+      break;
+    case 'streetwear':
+      reasoning.push('Style urbain et contemporain');
+      break;
+  }
 
-        if (error) {
-          const errorCode = error.code;
-          const errorMessage = error.message || '';
+  switch (profile.budgetRange) {
+    case 'budget':
+      reasoning.push('Sélection dans votre gamme de prix abordable');
+      break;
+    case 'luxury':
+      reasoning.push('Pièces exceptionnelles pour les occasions spéciales');
+      break;
+  }
 
-          if (errorCode === '42883' || errorMessage.includes('does not exist')) {
-            logger.warn('get_collaborative_recommendations function does not exist.');
-            return [];
-          }
+  if (profile.sustainability === 'very_important') {
+    reasoning.push('Focus sur les produits durables et éthiques');
+  }
 
-          logger.warn('Error fetching collaborative recommendations:', {
-            code: errorCode,
-            message: errorMessage,
-          });
-
-          return [];
-        }
-
-        return (data || []) as ProductRecommendation[];
-      } catch (error) {
-        logger.warn('Exception in useCollaborativeRecommendations:', error);
-        return [];
-      }
-    },
-    enabled: enabled && !!userId,
-    staleTime: 10 * 60 * 1000, // 10 minutes (plus stable)
-    gcTime: 30 * 60 * 1000,
-  });
+  return reasoning;
 }
 
-/**
- * Hook pour obtenir des produits "Fréquemment achetés ensemble"
- */
-export function useFrequentlyBoughtTogether(
-  productId: string | null,
-  limit: number = 4,
-  enabled: boolean = true
-) {
-  return useQuery<FrequentlyBoughtTogether[]>({
-    queryKey: ['frequently-bought-together', productId, limit],
-    queryFn: async () => {
-      if (!productId) {
-        return [];
-      }
+function calculateConfidenceScore(profile: StyleProfile): number {
+  // Score basé sur la complétude du profil
+  let score = 50; // Base score
 
-      try {
-        // Essayer d'abord la version v2 améliorée
-        const { data, error } = await supabase.rpc('get_frequently_bought_together_v2', {
-          p_product_id: productId,
-          p_limit: limit,
-        });
+  // Bonus pour les préférences bien définies
+  if (profile.aesthetic) score += 10;
+  if (profile.colorPalette) score += 10;
+  if (profile.budgetRange) score += 10;
+  if (profile.occasionFocus) score += 10;
+  if (profile.sustainability !== 'not_important') score += 10;
 
-        if (error) {
-          const errorCode = error.code;
-          const errorMessage = error.message || '';
-
-          // Si v2 n'existe pas, essayer v1
-          if (errorCode === '42883' || errorMessage.includes('does not exist')) {
-            const { data: v1Data, error: v1Error } = await supabase.rpc(
-              'get_frequently_bought_together',
-              {
-                p_product_id: productId,
-                p_limit: limit,
-              }
-            );
-
-            if (v1Error) {
-              logger.warn('Both frequently_bought_together functions do not exist.');
-              return [];
-            }
-
-            return (v1Data || []).map((item: FrequentlyBoughtTogetherV1Row) => ({
-              ...item,
-              confidence_score: undefined,
-            })) as FrequentlyBoughtTogether[];
-          }
-
-          logger.warn('Error fetching frequently bought together:', {
-            code: errorCode,
-            message: errorMessage,
-          });
-
-          return [];
-        }
-
-        return (data || []) as FrequentlyBoughtTogether[];
-      } catch (error) {
-        logger.warn('Exception in useFrequentlyBoughtTogether:', error);
-        return [];
-      }
-    },
-    enabled: enabled && !!productId,
-    staleTime: 15 * 60 * 1000, // 15 minutes (données plus stables)
-    gcTime: 30 * 60 * 1000,
-  });
+  return Math.min(score, 100);
 }
 
-/**
- * Hook pour obtenir des recommandations basées sur les vues
- */
-export function useViewBasedRecommendations(
-  productId: string | null,
-  limit: number = 6,
-  enabled: boolean = true
-) {
-  return useQuery<ProductRecommendation[]>({
-    queryKey: ['view-based-recommendations', productId, limit],
-    queryFn: async () => {
-      if (!productId) {
-        return [];
-      }
+function extractProductCategories(products: Product[]): string[] {
+  const categories = new Set<string>();
 
-      try {
-        const { data, error } = await supabase.rpc('get_view_based_recommendations', {
-          p_product_id: productId,
-          p_limit: limit,
-        });
-
-        if (error) {
-          const errorCode = error.code;
-          const errorMessage = error.message || '';
-
-          if (errorCode === '42883' || errorMessage.includes('does not exist')) {
-            logger.warn('get_view_based_recommendations function does not exist.');
-            return [];
-          }
-
-          logger.warn('Error fetching view-based recommendations:', {
-            code: errorCode,
-            message: errorMessage,
-          });
-
-          return [];
-        }
-
-        return (data || []) as ProductRecommendation[];
-      } catch (error) {
-        logger.warn('Exception in useViewBasedRecommendations:', error);
-        return [];
-      }
-    },
-    enabled: enabled && !!productId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+  products.forEach(product => {
+    if (product.category) {
+      categories.add(product.category);
+    }
   });
+
+  return Array.from(categories);
 }
 
+async function getFallbackRecommendations(limit: number): Promise<Product[]> {
+  // Fallback: produits populaires quand la personnalisation échoue
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        store:stores(*)
+      `)
+      .eq('is_active', true)
+      .order('total_sales', { ascending: false })
+      .limit(limit);
 
-
-
-
-
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    logger.error('Fallback recommendations failed', { error });
+    return [];
+  }
+}
