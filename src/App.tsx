@@ -14,7 +14,10 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { usePrefetch } from '@/hooks/usePrefetch';
 import { usePrefetchRoutes } from '@/hooks/usePrefetchRoutes';
 import { useIsMobile } from '@/hooks/use-mobile';
-import React, { Suspense, lazy, useEffect } from 'react';
+import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
+import { useMobileGestures } from '@/hooks/useMobileGestures';
+import { marketingAutomationEngine } from '@/lib/marketing/marketingAutomationEngine';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 // PerformanceOptimizer - Lazy loaded (non-critique au démarrage)
 const PerformanceOptimizer = lazy(() =>
   import('@/components/optimization/PerformanceOptimizer').then(m => ({
@@ -46,6 +49,14 @@ const CurrencyRatesInitializer = lazy(() =>
   import('@/components/currency/CurrencyRatesInitializer').then(m => ({
     default: m.CurrencyRatesInitializer,
   }))
+);
+// PWA Install Prompt - Lazy loaded
+const PWAInstallPrompt = lazy(() =>
+  import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt }))
+);
+// Marketing Automation Dashboard - Lazy loaded
+const MarketingAutomationDashboard = lazy(() =>
+  import('@/components/marketing/MarketingAutomationDashboard').then(m => ({ default: m.MarketingAutomationDashboard }))
 );
 // Quiz de style personnalisé - Lazy loaded
 const StyleQuizPage = lazy(() =>
@@ -569,11 +580,70 @@ const AppInitializer = ({
 };
 
 const AppContent = () => {
+  const appRef = useRef<HTMLDivElement>(null);
+
   useScrollRestoration();
   useDarkMode(); // Active le mode sombre globalement
   const isMobile = useIsMobile(); // Détecter si mobile
   const location = useLocation(); // Pour vérifier la route actuelle
   const isBottomNavVisible = isMobile && location.pathname !== '/' && location.pathname !== '/auth';
+
+  // Analytics comportementales
+  const {
+    trackPageView,
+    trackProductView,
+    trackCartAdd,
+    trackCartRemove,
+    trackSearch,
+    trackPurchaseStart,
+    trackPurchaseComplete,
+  } = useBehavioralAnalytics(undefined, {
+    trackPageViews: true,
+    trackProductViews: true,
+    trackCartActions: true,
+    trackSearchAndFilter: true,
+    trackSocialInteractions: true,
+    trackFormInteractions: true,
+    enableRealTimeTracking: false,
+    batchSize: 10,
+    flushInterval: 30000,
+  });
+
+  // Gestes mobiles
+  useMobileGestures(
+    {
+      onSwipeLeft: () => {
+        // Navigation vers la droite (produit suivant, etc.)
+        console.log('Swipe left detected');
+      },
+      onSwipeRight: () => {
+        // Navigation vers la gauche (produit précédent, etc.)
+        console.log('Swipe right detected');
+      },
+      onSwipeUp: () => {
+        // Fermer modal, scroll up, etc.
+        console.log('Swipe up detected');
+      },
+      onSwipeDown: () => {
+        // Ouvrir menu, pull to refresh, etc.
+        console.log('Swipe down detected');
+      },
+      onDoubleTap: () => {
+        // Like, zoom, etc.
+        console.log('Double tap detected');
+      },
+    },
+    {
+      swipeThreshold: 50,
+      enableSwipe: isMobile,
+      enableDoubleTap: isMobile,
+    }
+  );
+
+  // Track page views
+  useEffect(() => {
+    trackPageView(location.pathname + location.search, document.referrer);
+  }, [location, trackPageView]);
 
   // Prefetching intelligent des routes et données fréquentes
   usePrefetch({
@@ -2033,6 +2103,14 @@ const AppContent = () => {
                 }
               />
               <Route
+                path="/admin/marketing"
+                element={
+                  <ProtectedRoute>
+                    <MarketingAutomationDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/admin/payments"
                 element={
                   <ProtectedRoute>
@@ -2264,6 +2342,10 @@ const AppContent = () => {
         {/* Toujours en bas pour éviter de masquer le contenu */}
         <Suspense fallback={null}>
           {isBottomNavVisible && <BottomNavigation position="bottom" />}
+        </Suspense>
+        {/* PWA Install Prompt - Affiché sur mobile et desktop */}
+        <Suspense fallback={null}>
+          <PWAInstallPrompt showAsBanner={isMobile} />
         </Suspense>
       </SentryErrorBoundary>
     </ErrorBoundary>

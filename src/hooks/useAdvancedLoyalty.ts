@@ -299,5 +299,8 @@ export function useAutoLoyaltyTracking(userId?: string, storeId?: string) {
   };
 }
 
-// Alias pour compatibilité
-export const useAdvancedLoyalty = useAdvancedLoyaltyEvents;
+// Export principal - utilisation de useAutoLoyaltyTracking comme implémentation principale
+export const useAdvancedLoyalty = useAutoLoyaltyTracking;
+
+// Alias pour compatibilité descendante
+export { useAutoLoyaltyTracking as useAdvancedLoyaltyEvents };

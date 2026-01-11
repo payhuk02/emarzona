@@ -1,53 +1,117 @@
 {
-  "name": "Emarzona - Plateforme de ecommerce et marketing",
+  "name": "Emarzona - E-commerce & Marketplace",
   "short_name": "Emarzona",
-  "description": "Plateforme de ecommerce et marketing - Solution SaaS E-commerce multi-vendeurs pour produits digitaux, physiques, services et cours en ligne",
+  "description": "Plateforme de ecommerce et marketing - Produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3B82F6",
+  "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "scope": "/",
+  "lang": "fr",
+  "categories": ["shopping", "business", "education", "lifestyle"],
   "icons": [
     {
-      "src": "/emarzona-logo.png",
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable any"
     },
     {
-      "src": "/emarzona-logo.png",
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable any"
     }
   ],
-  "categories": ["shopping", "business", "education"],
-  "screenshots": [],
-  "shortcuts": [
+  "screenshots": [
     {
-      "name": "Marketplace",
-      "short_name": "Marketplace",
-      "description": "Accéder au marketplace",
-      "url": "/marketplace",
-      "icons": [{ "src": "/favicon.ico", "sizes": "192x192" }]
+      "src": "/screenshots/mobile-home.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
     },
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "Accéder au tableau de bord",
-      "url": "/dashboard",
-      "icons": [{ "src": "/favicon.ico", "sizes": "192x192" }]
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ],
-  "share_target": {
-    "action": "/share",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
+  "shortcuts": [
+    {
+      "name": "Explorer le Marketplace",
+      "short_name": "Marketplace",
+      "description": "Découvrez tous nos produits",
+      "url": "/marketplace",
+      "icons": [
+        {
+          "src": "/icons/shortcut-marketplace.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Mes Commandes",
+      "short_name": "Commandes",
+      "description": "Suivez vos achats",
+      "url": "/dashboard/orders",
+      "icons": [
+        {
+          "src": "/icons/shortcut-orders.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Mon Panier",
+      "short_name": "Panier",
+      "description": "Vos articles sélectionnés",
+      "url": "/cart",
+      "icons": [
+        {
+          "src": "/icons/shortcut-cart.png",
+          "sizes": "96x96"
+        }
+      ]
     }
-  }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
