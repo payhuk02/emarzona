@@ -275,6 +275,35 @@ function extractProductCategories(products: Product[]): string[] {
   return Array.from(categories);
 }
 
+// Hook pour les produits fréquemment achetés ensemble
+export function useFrequentlyBoughtTogether(productId: string, limit: number = 4) {
+  return useQuery({
+    queryKey: ['frequently-bought-together', productId, limit],
+    queryFn: async (): Promise<Product[]> => {
+      try {
+        // Pour le moment, retourner des produits similaires
+        // TODO: Implémenter la vraie logique de produits fréquemment achetés ensemble
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
+            *,
+            store:stores(*)
+          `)
+          .eq('is_active', true)
+          .neq('id', productId)
+          .limit(limit);
+
+        if (error) throw error;
+        return (data || []) as Product[];
+      } catch (error) {
+        logger.error('Error fetching frequently bought together', { error, productId });
+        return [];
+      }
+    },
+    enabled: !!productId
+  });
+}
+
 async function getFallbackRecommendations(limit: number): Promise<Product[]> {
   // Fallback: produits populaires quand la personnalisation échoue
   try {
@@ -294,4 +323,33 @@ async function getFallbackRecommendations(limit: number): Promise<Product[]> {
     logger.error('Fallback recommendations failed', { error });
     return [];
   }
+}
+
+// Types et exports supplémentaires pour compatibilité
+export interface ProductRecommendation extends Product {}
+
+export function useUserProductRecommendations(userId: string, limit: number = 8) {
+  return useQuery({
+    queryKey: ['user-product-recommendations', userId, limit],
+    queryFn: async (): Promise<Product[]> => {
+      try {
+        // TODO: Implémenter les vraies recommandations utilisateur
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
+            *,
+            store:stores(*)
+          `)
+          .eq('is_active', true)
+          .limit(limit);
+
+        if (error) throw error;
+        return (data || []) as Product[];
+      } catch (error) {
+        logger.error('Error fetching user product recommendations', { error, userId });
+        return [];
+      }
+    },
+    enabled: !!userId
+  });
 }

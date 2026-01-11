@@ -227,7 +227,7 @@ const StyleQuiz: React.FC<StyleQuizProps> = ({
       // Color Palette
       warm: 0, cool: 0, neutral: 0, vibrant: 0, pastel: 0, monochrome: 0,
       // Budget Range
-      budget: 0, midrange: 0, premium: 0, luxury: 0,
+      budget: 0, midrange: 0, premium: 0, luxury_budget: 0,
       // Occasion Focus
       casual: 0, work: 0, special: 0, all: 0,
       // Sustainability

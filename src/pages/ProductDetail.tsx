@@ -51,7 +51,6 @@ import {
 } from '@/components/marketplace/ProductRecommendations';
 import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
 import { useAuth } from '@/contexts/AuthContext';
-} from '@/components/marketplace/ProductRecommendations';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';

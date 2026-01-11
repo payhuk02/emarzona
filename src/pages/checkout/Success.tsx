@@ -88,6 +88,10 @@ const CheckoutSuccess = () => {
       verifyTransaction();
     }
   }, [transactionId, verifyTransaction]);
+    if (transactionId) {
+      verifyTransaction();
+    }
+  }, [transactionId, verifyTransaction]);
 
   if (loading) {
     return (

@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Sparkles, TrendingUp, Users, Package, Target } from 'lucide-react';
-import { ProductCard } from '@/components/marketplace/ProductCard';
+import ProductCard from '@/components/marketplace/ProductCard';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -74,7 +74,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   }, [recommendations, productsData]);
 
   // Gestionnaire d'analytics pour les clics sur recommandations
-  const handleRecommendationClick = async (recommendation: any, position: number) => {
+  const handleRecommendationClick = async (recommendation: { productId: string; score: number; confidence: number }, position: number) => {
     logger.info('AI Recommendation clicked', {
       productId: recommendation.productId,
       reason: recommendation.reason,

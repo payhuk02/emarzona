@@ -298,3 +298,6 @@ export function useAutoLoyaltyTracking(userId?: string, storeId?: string) {
     trackLoginStreak
   };
 }
+
+// Alias pour compatibilité
+export const useAdvancedLoyalty = useAdvancedLoyaltyEvents;

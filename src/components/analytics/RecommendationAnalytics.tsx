@@ -99,7 +99,7 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
       if (item.purchased) acc[item.reason].purchases++;
 
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, { views: number; clicks: number; purchases: number; clickRate: number; purchaseRate: number; conversionRate: number }>);
 
     // Calculer les taux pour chaque raison
     Object.keys(reasonStats).forEach(reason => {
@@ -209,7 +209,7 @@ export const RecommendationAnalytics: React.FC<RecommendationAnalyticsProps> = (
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {Object.entries(metrics.reasonStats).map(([reason, stats]: [string, any]) => (
+            {Object.entries(metrics.reasonStats).map(([reason, stats]: [string, { views: number; clicks: number; purchases: number; clickRate: number; purchaseRate: number; conversionRate: number }]) => (
               <div key={reason} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
