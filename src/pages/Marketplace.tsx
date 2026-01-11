@@ -43,6 +43,7 @@ import { useMarketplaceFilters, useMarketplacePagination } from '@/hooks/marketp
 import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHeroSection';
 import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
 import { MarketplaceProductsSection } from '@/components/marketplace/MarketplaceProductsSection';
+import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
 
 const Marketplace = () => {
   const { t } = useTranslation();
@@ -1236,6 +1237,22 @@ const Marketplace = () => {
             )
           }
         />
+
+        {/* Recommandations IA personnalisées */}
+        {finalUserId && (
+          <section className="py-8 sm:py-12 lg:py-16 px-3 sm:px-4 bg-gradient-to-b from-background to-muted/30">
+            <div className="container mx-auto max-w-7xl">
+              <AIProductRecommendations
+                userId={finalUserId}
+                title="Découvrez nos recommandations personnalisées"
+                limit={8}
+                showReasoning={true}
+                layout="grid"
+                className="border-none bg-transparent shadow-none"
+              />
+            </div>
+          </section>
+        )}
 
         {/* Call to Action */}
         <section className="py-8 sm:py-12 lg:py-16 px-3 sm:px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">

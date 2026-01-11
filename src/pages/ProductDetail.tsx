@@ -49,6 +49,9 @@ import {
   ProductRecommendations,
   FrequentlyBoughtTogether,
 } from '@/components/marketplace/ProductRecommendations';
+import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
+import { useAuth } from '@/contexts/AuthContext';
+} from '@/components/marketplace/ProductRecommendations';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
@@ -130,6 +133,7 @@ const ProductDetails = () => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchData = useCallback(async () => {
     if (!slug || !productSlug) {
@@ -1303,6 +1307,21 @@ const ProductDetails = () => {
                   productCategory={product.category}
                   limit={6}
                   title="Produits similaires"
+                />
+              </div>
+            )}
+
+            {/* Recommandations IA personnalisées */}
+            {product && (
+              <div className="mb-8 sm:mb-10 md:mb-12">
+                <AIProductRecommendations
+                  userId={user?.id}
+                  currentProductId={product.id}
+                  category={product.category || undefined}
+                  title="Recommandé pour vous"
+                  limit={6}
+                  showReasoning={true}
+                  layout="grid"
                 />
               </div>
             )}

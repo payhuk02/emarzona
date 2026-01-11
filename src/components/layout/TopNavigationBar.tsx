@@ -31,7 +31,6 @@ import {
   Menu,
 } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
@@ -64,7 +63,7 @@ export const TopNavigationBar = () => {
         title: t('auth.signOutSuccess', 'Déconnexion réussie'),
         description: t('auth.signOutSuccessDescription', 'Vous avez été déconnecté avec succès.'),
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: t('common.error', 'Erreur'),
         description: t('auth.signOutError', 'Une erreur est survenue lors de la déconnexion.'),

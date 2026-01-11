@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { useAIRecommendations } from '@/lib/ai/recommendation-engine';
 import { useProducts } from '@/hooks/useProducts';
+import { useRecommendationTracking } from '@/hooks/useRecommendationTracking';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,6 +47,9 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
     includeReasoning: showReasoning
   });
 
+  // Hook pour le tracking des interactions
+  const { trackRecommendationClick } = useRecommendationTracking();
+
   // Récupérer les détails des produits recommandés
   const productIds = useMemo(() => {
     return recommendations?.map(rec => rec.productId) || [];
@@ -70,16 +74,26 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   }, [recommendations, productsData]);
 
   // Gestionnaire d'analytics pour les clics sur recommandations
-  const handleRecommendationClick = (recommendation: any) => {
+  const handleRecommendationClick = async (recommendation: any, position: number) => {
     logger.info('AI Recommendation clicked', {
       productId: recommendation.productId,
       reason: recommendation.reason,
       score: recommendation.score,
+      position,
       userId,
       source: 'ai_recommendations'
     });
 
-    // Ici on pourrait envoyer des analytics supplémentaires
+    // Tracker le clic sur la recommandation
+    await trackRecommendationClick({
+      productId: currentProductId,
+      recommendedProductId: recommendation.productId,
+      reason: recommendation.reason,
+      score: recommendation.score,
+      confidence: recommendation.confidence,
+      position,
+      source: 'ai_recommendations'
+    });
   };
 
   // Icône selon le type de recommandation
@@ -201,7 +215,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
           layout === 'horizontal' && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
           layout === 'compact' && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
         )}>
-          {enrichedRecommendations.map((recommendation) => (
+          {enrichedRecommendations.map((recommendation, index) => (
             <div key={recommendation.productId} className="relative group">
               {/* Badge de raison */}
               {showReasoning && (
@@ -226,7 +240,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
               )}
 
               {/* Carte produit */}
-              <div onClick={() => handleRecommendationClick(recommendation)}>
+              <div onClick={() => handleRecommendationClick(recommendation, index + 1)}>
                 <ProductCard
                   product={recommendation.product}
                   className="h-full transition-transform group-hover:scale-[1.02]"

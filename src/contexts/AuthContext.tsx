@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [lastLoginDate, triggerLoyaltyEvent]);
 
   const signOut = async () => {
     clearSentryUser();

@@ -14,7 +14,6 @@ import type {
   Review,
   ReviewReply,
   ReviewVote,
-  ReviewMedia,
   ProductReviewStats,
   CreateReviewPayload,
   UpdateReviewPayload,

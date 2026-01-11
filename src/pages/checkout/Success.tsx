@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { CheckCircle, ArrowRight, Loader2, Shield, Star, Gift } from "lucide-react";
 import { loadMonerooPayment } from "@/lib/moneroo-lazy";
@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { useAdvancedLoyalty } from "@/hooks/useAdvancedLoyalty";
+import { useRecommendationTracking } from "@/hooks/useRecommendationTracking";
 import type { Database } from "@/integrations/supabase/types";
 
 const CheckoutSuccess = () => {
@@ -18,10 +19,10 @@ const CheckoutSuccess = () => {
   const [loyaltyReward, setLoyaltyReward] = useState<{ points: number; tier?: string } | null>(null);
 
   const { triggerLoyaltyEvent } = useAdvancedLoyalty();
+  const { trackRecommendationPurchase } = useRecommendationTracking();
   const transactionId = searchParams.get("transaction_id");
 
-  useEffect(() => {
-    const verifyTransaction = async () => {
+  const verifyTransaction = useCallback(async () => {
       if (!transactionId) {
         setError("ID de transaction manquant");
         setLoading(false);
@@ -49,10 +50,18 @@ const CheckoutSuccess = () => {
               customerId: result.customer_id
             });
             setLoyaltyReward(reward);
-            logger.info("Loyalty points awarded for purchase", { orderId: result.id, reward });
-          } catch (loyaltyError) {
-            logger.error("Failed to award loyalty points", { error: loyaltyError, orderId: result.id });
-          }
+              logger.info("Loyalty points awarded for purchase", { orderId: result.id, reward });
+            } catch (loyaltyError) {
+              logger.error("Failed to award loyalty points", { error: loyaltyError, orderId: result.id });
+            }
+
+            // Tracker l'achat pour les recommandations IA
+            try {
+              await trackRecommendationPurchase(result.product_id || '', 'purchase');
+              logger.info("Purchase tracked for recommendations", { productId: result.product_id, orderId: result.id });
+            } catch (trackingError) {
+              logger.error("Failed to track recommendation purchase", { error: trackingError, orderId: result.id });
+            }
         }
 
         // Charger le produit lié pour afficher les conditions de licence
@@ -72,9 +81,13 @@ const CheckoutSuccess = () => {
         setLoading(false);
       }
     };
+  }, [triggerLoyaltyEvent]);
 
-    verifyTransaction();
-  }, [transactionId]);
+  useEffect(() => {
+    if (transactionId) {
+      verifyTransaction();
+    }
+  }, [transactionId, verifyTransaction]);
 
   if (loading) {
     return (

@@ -100,7 +100,7 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
       });
       setTimeout(() => setCopied(false), 2000);
       trackShare('copy_link');
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: '❌ Erreur',
         description: 'Impossible de copier le lien.',
@@ -130,8 +130,8 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
     }
 
     // Example: Track with custom event
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'share_review', {
+    if (typeof window !== 'undefined' && (window as { gtag?: (command: string, eventName: string, params?: Record<string, unknown>) => void }).gtag) {
+      (window as { gtag?: (command: string, eventName: string, params?: Record<string, unknown>) => void }).gtag('event', 'share_review', {
         review_id: review.id,
         platform,
         product_name: productName,

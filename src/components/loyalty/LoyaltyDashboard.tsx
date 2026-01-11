@@ -5,7 +5,6 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,7 +19,7 @@ import {
   Coins,
   Zap
 } from 'lucide-react';
-import { useLoyaltyProfile, useLoyaltyTransactions, useLoyaltyStats } from '@/hooks/useAdvancedLoyalty';
+import { useLoyaltyProfile, useLoyaltyTransactions } from '@/hooks/useAdvancedLoyalty';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
