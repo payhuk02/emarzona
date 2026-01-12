@@ -16,8 +16,7 @@ import { usePrefetchRoutes } from '@/hooks/usePrefetchRoutes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 import { useMobileGestures } from '@/hooks/useMobileGestures';
-import { marketingAutomationEngine } from '@/lib/marketing/marketingAutomationEngine';
-import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 // PerformanceOptimizer - Lazy loaded (non-critique au démarrage)
 const PerformanceOptimizer = lazy(() =>
   import('@/components/optimization/PerformanceOptimizer').then(m => ({
@@ -56,7 +55,9 @@ const PWAInstallPrompt = lazy(() =>
 );
 // Marketing Automation Dashboard - Lazy loaded
 const MarketingAutomationDashboard = lazy(() =>
-  import('@/components/marketing/MarketingAutomationDashboard').then(m => ({ default: m.MarketingAutomationDashboard }))
+  import('@/components/marketing/MarketingAutomationDashboard').then(m => ({
+    default: m.MarketingAutomationDashboard,
+  }))
 );
 // Quiz de style personnalisé - Lazy loaded
 const StyleQuizPage = lazy(() =>
@@ -196,7 +197,7 @@ const Auth = lazy(() => import('./pages/Auth'));
 const Dashboard = lazy(() =>
   import('./pages/Dashboard')
     .then(m => ({ default: m.default }))
-    .catch( error => {
+    .catch(error => {
       logger.error('Erreur lors du chargement du Dashboard', { error });
       // Retourner un composant de fallback en cas d'erreur
       return {
@@ -219,7 +220,7 @@ const Dashboard = lazy(() =>
     })
 );
 const Products = lazy(() =>
-  import('./pages/Products').catch( error => {
+  import('./pages/Products').catch(error => {
     logger.error('Erreur lors du chargement de Products:', error);
     // Retourner un composant de fallback en cas d'erreur
     return {
@@ -290,7 +291,31 @@ const EditProduct = lazy(() => import('./pages/EditProduct'));
 const Storefront = lazy(() => import('./pages/Storefront'));
 const StoreLegalPage = lazy(() => import('./pages/StoreLegalPage'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const Marketplace = lazy(() => import('./pages/Marketplace'));
+const Marketplace = lazy(() =>
+  import('./pages/Marketplace')
+    .then(m => ({ default: m.default }))
+    .catch(error => {
+      logger.error('Erreur lors du chargement de Marketplace:', { error });
+      // Retourner un composant de fallback en cas d'erreur
+      return {
+        default: () => (
+          <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+            <div className="text-center space-y-4 max-w-md">
+              <h2 className="text-xl font-semibold">Erreur de chargement</h2>
+              <p className="text-muted-foreground">Impossible de charger la page Marketplace</p>
+              <p className="text-sm text-red-500">{error?.message || 'Erreur inconnue'}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-white rounded"
+              >
+                Recharger
+              </button>
+            </div>
+          </div>
+        ),
+      };
+    })
+);
 const Cart = lazy(() => import('./pages/Cart'));
 const CartEnhanced = lazy(() => import('./pages/CartEnhanced'));
 const Checkout = lazy(() => import('./pages/checkout/Checkout'));
@@ -532,9 +557,6 @@ const StorageDiagnosticPage = lazy(() => import('./pages/admin/StorageDiagnostic
 // Page de test i18n (à supprimer en production)
 const I18nTest = lazy(() => import('./pages/I18nTest'));
 
-// Page de démonstration du chatbot IA
-const AIChatbotDemo = lazy(() => import('./pages/AIChatbotDemo'));
-
 // Routes Email publiques
 const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
 
@@ -580,8 +602,6 @@ const AppInitializer = ({
 };
 
 const AppContent = () => {
-  const appRef = useRef<HTMLDivElement>(null);
-
   useScrollRestoration();
   useDarkMode(); // Active le mode sombre globalement
   const isMobile = useIsMobile(); // Détecter si mobile
@@ -589,15 +609,9 @@ const AppContent = () => {
   const isBottomNavVisible = isMobile && location.pathname !== '/' && location.pathname !== '/auth';
 
   // Analytics comportementales
-  const {
-    trackPageView,
-    trackProductView,
-    trackCartAdd,
-    trackCartRemove,
-    trackSearch,
-    trackPurchaseStart,
-    trackPurchaseComplete,
-  } = useBehavioralAnalytics(undefined, {
+  // Les fonctions track* sont disponibles mais non utilisées actuellement
+  // Elles sont gardées pour une utilisation future
+  useBehavioralAnalytics(undefined, {
     trackPageViews: false, // Désactiver temporairement pour améliorer les performances
     trackProductViews: false,
     trackCartActions: true,
@@ -614,23 +628,23 @@ const AppContent = () => {
     {
       onSwipeLeft: () => {
         // Navigation vers la droite (produit suivant, etc.)
-        console.log('Swipe left detected');
+        // Swipe left detected
       },
       onSwipeRight: () => {
         // Navigation vers la gauche (produit précédent, etc.)
-        console.log('Swipe right detected');
+        // Swipe right detected
       },
       onSwipeUp: () => {
         // Fermer modal, scroll up, etc.
-        console.log('Swipe up detected');
+        // Swipe up detected
       },
       onSwipeDown: () => {
         // Ouvrir menu, pull to refresh, etc.
-        console.log('Swipe down detected');
+        // Swipe down detected
       },
       onDoubleTap: () => {
         // Like, zoom, etc.
-        console.log('Double tap detected');
+        // Double tap detected
       },
     },
     {
@@ -640,10 +654,10 @@ const AppContent = () => {
     }
   );
 
-  // Track page views
-  useEffect(() => {
-    trackPageView(location.pathname + location.search, document.referrer);
-  }, [location, trackPageView]);
+  // Track page views (désactivé actuellement, trackPageViews: false)
+  // useEffect(() => {
+  //   trackPageView(location.pathname + location.search, document.referrer);
+  // }, [location, trackPageView]);
 
   // Prefetching intelligent des routes et données fréquentes
   usePrefetch({
@@ -2381,9 +2395,3 @@ const App = () => (
 );
 
 export default App;
-
-
-
-
-
-
