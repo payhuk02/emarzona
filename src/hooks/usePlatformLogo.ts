@@ -2,7 +2,7 @@
  * Hook pour obtenir le logo de la plateforme selon le thème
  * Utilise les logos personnalisés depuis la configuration si disponibles
  * Optimisé pour éviter les flashs et garantir la stabilité
- * 
+ *
  * IMPORTANT: Retourne toujours un logo (personnalisé ou par défaut).
  * Si aucun logo personnalisé n'est configuré, retourne le logo Emarzona par défaut.
  */
@@ -30,10 +30,10 @@ export const usePlatformLogo = () => {
       const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
       if (cachedLogo) {
         const cached = JSON.parse(cachedLogo);
-        const hasPayhukReference = 
+        const hasPayhukReference =
           (cached.light && (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
           (cached.dark && (cached.dark.includes('payhuk') || cached.dark.includes('Payhuk')));
-        
+
         if (hasPayhukReference) {
           localStorage.removeItem(LOGO_CACHE_KEY);
         }
@@ -53,10 +53,11 @@ export const usePlatformLogo = () => {
   // Fonction pour déterminer l'URL du logo selon le thème
   const getLogoUrl = useMemo(() => {
     return (logoData: { light?: string | null; dark?: string | null }, theme?: string) => {
-      const isDark = document.documentElement.classList.contains('dark') || 
-                    window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      let  shouldUseDark= false;
+      const isDark =
+        document.documentElement.classList.contains('dark') ||
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      let shouldUseDark = false;
       if (theme === 'dark') {
         shouldUseDark = true;
       } else if (theme === 'light') {
@@ -76,7 +77,7 @@ export const usePlatformLogo = () => {
 
   // Charger le logo depuis le cache ou les données réelles
   useEffect(() => {
-    let  isMounted= true;
+    let isMounted = true;
 
     // Nettoyer le cache si il contient l'ancien logo Payhuk
     try {
@@ -84,10 +85,10 @@ export const usePlatformLogo = () => {
       if (cachedLogo) {
         const cached = JSON.parse(cachedLogo);
         // Vérifier si le cache contient des références à Payhuk
-        const hasPayhukReference = 
+        const hasPayhukReference =
           (cached.light && (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
           (cached.dark && (cached.dark.includes('payhuk') || cached.dark.includes('Payhuk')));
-        
+
         if (hasPayhukReference) {
           // Nettoyer le cache si il contient l'ancien logo
           localStorage.removeItem(LOGO_CACHE_KEY);
@@ -103,19 +104,21 @@ export const usePlatformLogo = () => {
         const cachedLogo = localStorage.getItem(LOGO_CACHE_KEY);
         if (cachedLogo) {
           const cached = JSON.parse(cachedLogo);
-          const hasRealData = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
-          
+          const hasRealData =
+            customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+
           // Vérifier que le cache ne contient pas l'ancien logo Payhuk
-          const hasPayhukReference = 
-            (cached.light && (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
+          const hasPayhukReference =
+            (cached.light &&
+              (cached.light.includes('payhuk') || cached.light.includes('Payhuk'))) ||
             (cached.dark && (cached.dark.includes('payhuk') || cached.dark.includes('Payhuk')));
-          
+
           if (hasPayhukReference) {
             // Nettoyer le cache et utiliser le logo par défaut
             localStorage.removeItem(LOGO_CACHE_KEY);
             return false;
           }
-          
+
           // Utiliser le cache seulement si les données réelles ne sont pas encore chargées
           if (!hasRealData && (cached.light || cached.dark)) {
             const cachedUrl = getLogoUrl(cached, cached.theme || 'auto');
@@ -127,7 +130,7 @@ export const usePlatformLogo = () => {
                 setIsLoading(false);
                 return false;
               }
-              
+
               // Précharger l'image depuis le cache pour vérifier qu'elle est accessible
               const img = new Image();
               img.src = cachedUrl;
@@ -161,17 +164,21 @@ export const usePlatformLogo = () => {
 
     // 2. Charger depuis les données réelles
     const loadFromData = () => {
-      const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
-      
+      const hasCustomLogo =
+        customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+
       if (hasCustomLogo) {
         // Sauvegarder dans le cache pour les prochains chargements
         try {
-          localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify({
-            light: customizationData.design.logo.light || null,
-            dark: customizationData.design.logo.dark || null,
-            theme: customizationData.design.theme || 'auto',
-            timestamp: Date.now(),
-          }));
+          localStorage.setItem(
+            LOGO_CACHE_KEY,
+            JSON.stringify({
+              light: customizationData.design.logo.light || null,
+              dark: customizationData.design.logo.dark || null,
+              theme: customizationData.design.theme || 'auto',
+              timestamp: Date.now(),
+            })
+          );
         } catch (error) {
           // Ignorer les erreurs localStorage
         }
@@ -190,19 +197,38 @@ export const usePlatformLogo = () => {
           const img = new Image();
           preloadImageRef.current = img;
           img.src = selectedLogoUrl;
-          
+
           img.onload = () => {
             if (isMounted && preloadImageRef.current === img) {
               setLogoUrl(selectedLogoUrl);
               setIsLoading(false);
             }
           };
-          
+
           img.onerror = () => {
             // Si le logo personnalisé ne charge pas, utiliser le logo par défaut
+            logger.warn('Custom logo failed to load, falling back to default', {
+              failedUrl: selectedLogoUrl,
+              defaultLogo: DEFAULT_LOGO,
+            });
             if (isMounted && preloadImageRef.current === img) {
-              setLogoUrl(DEFAULT_LOGO);
-              setIsLoading(false);
+              // Essayer le logo par défaut
+              const defaultImg = new Image();
+              defaultImg.src = DEFAULT_LOGO;
+              defaultImg.onload = () => {
+                if (isMounted) {
+                  setLogoUrl(DEFAULT_LOGO);
+                  setIsLoading(false);
+                }
+              };
+              defaultImg.onerror = () => {
+                // Même le logo par défaut ne charge pas, garder l'URL mais logger l'erreur
+                logger.error('Default logo also failed to load', { defaultLogo: DEFAULT_LOGO });
+                if (isMounted) {
+                  setLogoUrl(DEFAULT_LOGO); // Retourner quand même l'URL pour le fallback UI
+                  setIsLoading(false);
+                }
+              };
             }
           };
 
@@ -238,8 +264,9 @@ export const usePlatformLogo = () => {
     // Stratégie de chargement :
     // 1. Si les données réelles sont disponibles, les utiliser
     // 2. Sinon, utiliser le cache
-    const hasRealData = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
-    
+    const hasRealData =
+      customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+
     if (hasRealData) {
       loadFromData();
     } else {
@@ -268,7 +295,8 @@ export const usePlatformLogo = () => {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = () => {
         // Forcer la mise à jour du logo en recalculant l'URL
-        const hasCustomLogo = customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
+        const hasCustomLogo =
+          customizationData?.design?.logo?.light || customizationData?.design?.logo?.dark;
         if (hasCustomLogo && customizationData?.design?.logo) {
           const selectedLogoUrl = getLogoUrl(customizationData.design.logo, theme);
           setLogoUrl(selectedLogoUrl);
@@ -325,10 +353,3 @@ export const usePlatformFavicon = () => {
   const { customizationData } = usePlatformCustomizationContext();
   return customizationData?.design?.logo?.favicon || null;
 };
-
-
-
-
-
-
-
