@@ -3,7 +3,7 @@
  * Activer/désactiver toutes les fonctionnalités de la plateforme
  */
 
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -22,11 +22,11 @@ import {
   CreditCard,
   Globe,
   Shield,
-  Bell,
   TrendingUp,
   FileText,
   MessageSquare,
 } from '@/components/icons';
+import { Bell } from 'lucide-react';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { logger } from '@/lib/logger';
 
@@ -44,7 +44,7 @@ interface Feature {
   route?: string;
 }
 
-const  ALL_FEATURES: Feature[] = [
+const ALL_FEATURES: Feature[] = [
   // Commerce
   {
     id: 'affiliation',
@@ -454,7 +454,7 @@ export const FeaturesSection = ({ onChange }: FeaturesSectionProps) => {
         save('features', {
           enabled: enabledFeatures,
           disabled: disabledFeatures,
-        }).catch( error => {
+        }).catch(error => {
           logger.error('Error saving feature customization', { error, featureId, enabled });
         });
 
@@ -584,9 +584,3 @@ export const FeaturesSection = ({ onChange }: FeaturesSectionProps) => {
     </div>
   );
 };
-
-
-
-
-
-

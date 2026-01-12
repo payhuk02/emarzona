@@ -12,7 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { ArrowRight, Rocket, Users } from '@/components/icons';
+import { ArrowRight, Rocket, Users, Sparkles } from '@/components/icons';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
@@ -52,6 +52,14 @@ const Marketplace = () => {
   const { getValue } = usePageCustomization('marketplace');
   const queryClient = useQueryClient();
 
+  // ✅ DIAGNOSTIC: Log du montage du composant
+  useEffect(() => {
+    logger.info('[Marketplace] Component mounted');
+    return () => {
+      logger.info('[Marketplace] Component unmounted');
+    };
+  }, []);
+
   // Hook personnalisé pour favoris synchronisés
   const { favorites, favoritesCount, toggleFavorite, clearAllFavorites } =
     useMarketplaceFavorites();
@@ -64,6 +72,15 @@ const Marketplace = () => {
   // Fallback: utiliser useCurrentUserId si useAuth n'est pas disponible (pour compatibilité)
   const { userId: fallbackUserId } = useCurrentUserId();
   const finalUserId = userId || fallbackUserId;
+
+  // ✅ DIAGNOSTIC: Log de l'état d'authentification
+  useEffect(() => {
+    logger.info('[Marketplace] Auth state:', {
+      hasUser: !!user,
+      userId: finalUserId,
+      authLoading,
+    });
+  }, [user, finalUserId, authLoading]);
 
   // États pour compatibilité (seront progressivement remplacés)
   const [products, setProducts] = useState<Product[]>([]);
@@ -109,6 +126,19 @@ const Marketplace = () => {
     hasSearchQuery,
     shouldUseRPCFiltering,
   });
+
+  // ✅ DIAGNOSTIC: Log des erreurs de requête
+  useEffect(() => {
+    if (queryError) {
+      logger.error('[Marketplace] Query error:', {
+        error: queryError,
+        filters,
+        pagination,
+        hasSearchQuery,
+        shouldUseRPCFiltering,
+      });
+    }
+  }, [queryError, filters, pagination, hasSearchQuery, shouldUseRPCFiltering]);
 
   const {
     data: rpcFilteredProducts,
