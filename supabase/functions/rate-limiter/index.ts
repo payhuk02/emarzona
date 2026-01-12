@@ -11,10 +11,45 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+/**
+ * Fonction pour déterminer l'origine autorisée pour CORS
+ */
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get('origin');
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://api.emarzona.com';
+
+  // Autoriser localhost pour le développement
+  if (
+    origin &&
+    (origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1'))
+  ) {
+    return origin; // Autoriser l'origine exacte pour localhost
+  }
+
+  // Autoriser le domaine de production
+  if (origin === siteUrl || origin === `${siteUrl}/` || origin === 'https://api.emarzona.com') {
+    return origin || siteUrl;
+  }
+
+  // Par défaut, utiliser SITE_URL (sans slash final)
+  return siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+}
+
+/**
+ * Fonction pour créer les headers CORS dynamiques
+ */
+function getCorsHeaders(req: Request) {
+  return {
+    'Access-Control-Allow-Origin': getCorsOrigin(req),
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+  };
+}
 
 interface RateLimitConfig {
   maxRequests: number;
@@ -106,9 +141,15 @@ async function checkRateLimit(
 }
 
 serve(async req => {
-  // Handle CORS
+  // Créer les headers CORS dynamiques basés sur l'origine de la requête
+  const corsHeaders = getCorsHeaders(req);
+
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
   }
 
   try {
