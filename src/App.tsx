@@ -598,11 +598,11 @@ const AppContent = () => {
     trackPurchaseStart,
     trackPurchaseComplete,
   } = useBehavioralAnalytics(undefined, {
-    trackPageViews: true,
-    trackProductViews: true,
+    trackPageViews: false, // Désactiver temporairement pour améliorer les performances
+    trackProductViews: false,
     trackCartActions: true,
-    trackSearchAndFilter: true,
-    trackSocialInteractions: true,
+    trackSearchAndFilter: false,
+    trackSocialInteractions: false,
     trackFormInteractions: true,
     enableRealTimeTracking: false,
     batchSize: 10,

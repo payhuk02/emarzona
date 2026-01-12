@@ -194,6 +194,8 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
     priority = false,
     format = 'auto',
     className,
+    showSkeleton: _showSkeleton, // Exclude from props
+    imageClassName: _imageClassName, // Exclude from props
     ...props
   }) => {
     const [isLoaded, setIsLoaded] = useState(false);

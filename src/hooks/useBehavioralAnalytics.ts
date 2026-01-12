@@ -146,6 +146,16 @@ export const useBehavioralAnalytics = (
     if (eventsToFlush.length === 0) return;
 
     try {
+      // Temporarily disable database flushing due to RLS policy issues
+      // TODO: Re-enable once RLS policies are fixed for user_behavior_events
+      logger.info(`Would flush ${eventsToFlush.length} behavior events (temporarily disabled due to RLS policy)`);
+
+      // Keep events in localStorage for now instead of clearing them
+      // localStorage.removeItem('behavior_events');
+      // logger.info(`Flushed ${eventsToFlush.length} behavior events`);
+
+      // Comment out the actual database insertion for now
+      /*
       const { error } = await supabase
         .from('user_behavior_events')
         .insert(eventsToFlush);
@@ -157,6 +167,7 @@ export const useBehavioralAnalytics = (
 
       localStorage.removeItem('behavior_events');
       logger.info(`Flushed ${eventsToFlush.length} behavior events`);
+      */
     } catch (error) {
       logger.error('Failed to flush behavior events', { error });
     }

@@ -176,16 +176,24 @@ export const PerformanceOptimizer = () => {
   const preferences = useUserPreferences();
 
   useEffect(() => {
-    // Initialiser le monitoring des performances
-    const monitor = getPerformanceMonitor();
+    // Différer l'initialisation du monitoring des performances
+    const initPerformanceMonitoring = () => {
+      const monitor = getPerformanceMonitor();
 
-    // Logger le rapport de performance après 5 secondes
-    setTimeout(() => {
-      const report = monitor.getReport();
-      if (import.meta.env.DEV) {
-        logger.info('📊 Performance Report', { report });
-      }
-    }, 5000);
+      // Logger le rapport de performance après 10 secondes (différé)
+      setTimeout(() => {
+        const report = monitor.getReport();
+        if (import.meta.env.DEV) {
+          logger.info('📊 Performance Report', { report });
+        }
+      }, 10000); // Augmenté à 10 secondes
+    };
+
+    // Initialiser seulement si pas en mode production ou si demandé
+    if (import.meta.env.DEV || window.location.search.includes('perf=1')) {
+      // Différer encore plus en production
+      setTimeout(initPerformanceMonitoring, 2000);
+    }
     // Appliquer les préférences utilisateur
     if (preferences.reducedMotion) {
       document.documentElement.classList.add('reduce-motion');
