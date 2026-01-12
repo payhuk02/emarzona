@@ -359,7 +359,31 @@ const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminCommunity = lazy(() => import('./pages/admin/AdminCommunity'));
 const AdminCommissionSettings = lazy(() => import('./pages/admin/AdminCommissionSettings'));
 const PlatformCustomization = lazy(() =>
-  import('./pages/admin/PlatformCustomization').then(m => ({ default: m.PlatformCustomization }))
+  import('./pages/admin/PlatformCustomization')
+    .then(m => ({ default: m.PlatformCustomization }))
+    .catch(error => {
+      logger.error('Erreur lors du chargement de PlatformCustomization:', { error });
+      // Retourner un composant de fallback en cas d'erreur
+      return {
+        default: () => (
+          <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+            <div className="text-center space-y-4 max-w-md">
+              <h2 className="text-xl font-semibold">Erreur de chargement</h2>
+              <p className="text-muted-foreground">
+                Impossible de charger la page de personnalisation
+              </p>
+              <p className="text-sm text-red-500">{error?.message || 'Erreur inconnue'}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-white rounded"
+              >
+                Recharger
+              </button>
+            </div>
+          </div>
+        ),
+      };
+    })
 );
 const AdminCommissionPayments = lazy(() => import('./pages/admin/AdminCommissionPayments'));
 const MonerooAnalytics = lazy(() => import('./pages/admin/MonerooAnalytics'));
