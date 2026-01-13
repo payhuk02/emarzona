@@ -473,7 +473,7 @@ export const SelectMenuLabel = DropdownMenuLabel;
  * - mobileOptimized=true pour optimisations tactiles
  * - Même animations et styles que SelectContent
  */
-export const UnifiedMenuContent = React.forwardRef<
+const UnifiedMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuContent>
 >((props, ref) => (
@@ -491,7 +491,7 @@ UnifiedMenuContent.displayName = 'UnifiedMenuContent';
 /**
  * UnifiedMenuItem - Item unifié qui respecte exactement les mêmes styles que SelectItem
  */
-export const UnifiedMenuItem = React.forwardRef<
+const UnifiedMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuItem>
 >((props, ref) => <DropdownMenuItem ref={ref} {...props} />);
