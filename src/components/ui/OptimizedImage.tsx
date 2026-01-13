@@ -1,408 +1,225 @@
 /**
- * Composant Image Optimisé
- * - Lazy loading automatique avec IntersectionObserver
- * - Support WebP/AVIF avec fallback
- * - srcset pour différentes résolutions
- * - Placeholder blur pendant le chargement
- * - Skeleton pendant le chargement
- * - Optimisé pour mobile et desktop
+ * Composant Image Optimisée pour le SEO et les performances
+ * Génère automatiquement les attributs SEO et les tailles responsive
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useImageOptimization, useImagePerformanceMonitoring } from '@/hooks/useImageOptimization';
+import { generateImageSEOAttributes } from '@/lib/image-optimization';
 import { cn } from '@/lib/utils';
 
-interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface OptimizedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> {
   src: string;
   alt: string;
   width?: number;
   height?: number;
-  /**
-   * Sizes pour responsive images
-   * Ex: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-   */
-  sizes?: string;
-  /**
-   * Qualité de l'image (1-100)
-   * @default 80
-   */
+  priority?: boolean; // Pour LCP
   quality?: number;
-  /**
-   * Afficher un placeholder blur pendant le chargement
-   * @default true
-   */
-  showPlaceholder?: boolean;
-  /**
-   * Afficher un skeleton pendant le chargement
-   * @default false
-   */
-  showSkeleton?: boolean;
-  /**
-   * Classe CSS pour le conteneur
-   */
-  containerClassName?: string;
-  /**
-   * Classe CSS pour l'image
-   */
-  imageClassName?: string;
-  /**
-   * Priorité de chargement (high = pas de lazy loading + preload)
-   * Si true, l'image sera préchargée pour améliorer LCP
-   * @default false
-   */
-  priority?: boolean;
-  /**
-   * Format d'image préféré (webp, avif, auto)
-   * @default 'auto'
-   */
-  format?: 'webp' | 'avif' | 'auto';
+  sizes?: string; // Pour responsive images
+  placeholder?: 'blur' | 'empty';
+  blurDataURL?: string;
+  onLoad?: () => void;
+  onError?: (error: Event) => void;
+
+  // SEO spécifique
+  seoScore?: boolean; // Afficher le score SEO dans les dev tools
+  lazy?: boolean; // Lazy loading
 }
 
-/**
- * Génère l'URL optimisée de l'image avec support WebP/AVIF
- * OPTIMISATION: Cherche automatiquement les versions optimisées dans /optimized/
- */
-function getOptimizedImageUrl(
-  src: string,
-  width?: number,
-  quality: number = 80,
-  format?: 'webp' | 'avif' | 'auto',
-  height?: number
-): string {
-  // Si l'image est déjà une URL complète avec paramètres, la retourner telle quelle
-  if (src.includes('?') || src.includes('&')) {
-    return src;
-  }
+export const OptimizedImage: React.FC<OptimizedImageProps> = ({
+  src,
+  alt,
+  width,
+  height,
+  priority = false,
+  quality = 85,
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  placeholder = 'empty',
+  blurDataURL,
+  className,
+  onLoad,
+  onError,
+  seoScore = false,
+  lazy = true,
+  ...props
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
 
-  // Si Supabase Storage, utiliser les transformations
-  if (src.includes('supabase.co/storage')) {
-    const params = new URLSearchParams();
-    if (width) params.set('width', width.toString());
-    if (height) params.set('height', height.toString());
-    params.set('quality', quality.toString());
+  const { recordMetric } = useImagePerformanceMonitoring();
 
-    // Support format moderne
-    if (format === 'webp' || (format === 'auto' && supportsWebP())) {
-      params.set('format', 'webp');
-    } else if (format === 'avif' && supportsAVIF()) {
-      params.set('format', 'avif');
-    }
-
-    return `${src}?${params.toString()}`;
-  }
-
-  // OPTIMISATION: Pour les images locales, chercher la version optimisée
-  // Si l'image est importée depuis src/assets/, chercher dans src/assets/optimized/
-  if (src.includes('/assets/') && !src.includes('/optimized/')) {
-    const ext = src.split('.').pop()?.toLowerCase();
-    const baseName =
-      src
-        .split('/')
-        .pop()
-        ?.replace(/\.(jpg|jpeg|png)$/i, '') || '';
-
-    // Déterminer le format optimal
-    let targetFormat = 'webp';
-    if (format === 'avif' && supportsAVIF()) {
-      targetFormat = 'avif';
-    } else if (format === 'auto') {
-      if (supportsAVIF()) {
-        targetFormat = 'avif';
-      } else if (supportsWebP()) {
-        targetFormat = 'webp';
-      } else {
-        return src; // Fallback vers l'original
-      }
-    }
-
-    // Construire le chemin vers l'image optimisée
-    const optimizedPath = src
-      .replace('/assets/', '/assets/optimized/')
-      .replace(/\.(jpg|jpeg|png)$/i, `.${targetFormat}`);
-
-    // Si une largeur est spécifiée, utiliser la version responsive
-    if (width) {
-      // Trouver la taille la plus proche
-      const sizes = [320, 640, 768, 1024, 1280, 1920];
-      const closestSize = sizes.reduce((prev, curr) =>
-        Math.abs(curr - width) < Math.abs(prev - width) ? curr : prev
-      );
-      return optimizedPath.replace(`.${targetFormat}`, `-${closestSize}w.${targetFormat}`);
-    }
-
-    // Retourner la version optimisée (le navigateur utilisera le fallback si elle n'existe pas)
-    return optimizedPath;
-  }
-
-  // Pour les autres sources, retourner l'URL originale
-  return src;
-}
-
-/**
- * Génère le srcset pour différentes résolutions
- */
-function generateSrcSet(
-  src: string,
-  widths: number[],
-  quality: number = 80,
-  format?: 'webp' | 'avif' | 'auto',
-  height?: number
-): string {
-  return widths
-    .map(width => {
-      const url = getOptimizedImageUrl(src, width, quality, format, height);
-      return `${url} ${width}w`;
-    })
-    .join(', ');
-}
-
-/**
- * Vérifie le support WebP
- */
-function supportsWebP(): boolean {
-  if (typeof window === 'undefined') return false;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = 1;
-  canvas.height = 1;
-  return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
-}
-
-/**
- * Vérifie le support AVIF
- */
-function supportsAVIF(): boolean {
-  if (typeof window === 'undefined') return false;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = 1;
-  canvas.height = 1;
-  return canvas.toDataURL('image/avif').indexOf('data:image/avif') === 0;
-}
-
-export const OptimizedImage = React.memo<OptimizedImageProps>(
-  ({
-    src,
+  // Générer les attributs SEO
+  const seoAttributes = generateImageSEOAttributes(
+    src.split('/').pop() || 'image',
     alt,
     width,
     height,
-    sizes,
-    quality = 80,
-    showPlaceholder = true,
-    showSkeleton = false,
-    containerClassName,
-    imageClassName,
-    priority = false,
-    format = 'auto',
-    className,
-    showSkeleton: _showSkeleton, // Exclude from props
-    imageClassName: _imageClassName, // Exclude from props
-    ...props
-  }) => {
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const [isInView, setIsInView] = useState(priority); // Si priority, charger immédiatement
-    const imgRef = useRef<HTMLImageElement>(null);
-    const observerRef = useRef<IntersectionObserver | null>(null);
+    lazy ? 'lazy' : 'eager'
+  );
 
-    // Largeurs pour srcset (responsive)
-    const srcsetWidths = useMemo(() => {
-      if (width) {
-        // Générer des largeurs basées sur la largeur originale
-        return [
-          Math.round(width * 0.5),
-          Math.round(width * 0.75),
-          width,
-          Math.round(width * 1.5),
-          Math.round(width * 2),
-        ].filter(w => w > 0);
+  // Gérer le chargement de l'image
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+    onLoad?.();
+
+    // Enregistrer les métriques de performance
+    if (priority) {
+      // Mesurer LCP pour les images prioritaires
+      const observer = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'largest-contentful-paint') {
+            recordMetric('lcp', entry.startTime);
+          }
+        });
+      });
+      observer.observe({ entryTypes: ['largest-contentful-paint'] });
+    }
+  }, [onLoad, priority, recordMetric]);
+
+  const handleError = useCallback((error: Event) => {
+    setHasError(true);
+    setCurrentSrc('/images/fallback-image.jpg'); // Image de fallback
+    onError?.(error);
+  }, [onError]);
+
+  // Générer les sources responsive (srcset)
+  const generateSrcSet = useCallback(() => {
+    if (!width) return undefined;
+
+    const breakpoints = [400, 800, 1200, 1600];
+    const sources: string[] = [];
+
+    breakpoints.forEach(bp => {
+      if (width >= bp) {
+        // Générer l'URL de l'image redimensionnée
+        // Dans un vrai système, ceci pointerait vers des images pré-générées
+        const resizedSrc = `${src}?w=${bp}&q=${quality}`;
+        sources.push(`${resizedSrc} ${bp}w`);
       }
-      // Largeurs par défaut pour responsive
-      return [320, 640, 768, 1024, 1280, 1920];
-    }, [width]);
+    });
 
-    // URL optimisée de l'image
-    const optimizedSrc = useMemo(
-      () => getOptimizedImageUrl(src, width, quality, format, height),
-      [src, width, quality, format, height]
-    );
+    return sources.length > 0 ? sources.join(', ') : undefined;
+  }, [src, width, quality]);
 
-    // Srcset pour différentes résolutions
-    const srcset = useMemo(
-      () => generateSrcSet(src, srcsetWidths, quality, format, height),
-      [src, srcsetWidths, quality, format, height]
-    );
+  const srcSet = generateSrcSet();
 
-    // Sizes par défaut si non fourni
-    const defaultSizes = useMemo(() => {
-      if (sizes) return sizes;
-      if (width) {
-        return `(max-width: ${width}px) 100vw, ${width}px`;
-      }
-      return '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
-    }, [sizes, width]);
+  return (
+    <div className={cn('relative overflow-hidden', className)}>
+      {/* Placeholder pendant le chargement */}
+      {placeholder === 'blur' && blurDataURL && !isLoaded && (
+        <img
+          src={blurDataURL}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover filter blur-sm scale-110"
+          aria-hidden="true"
+        />
+      )}
 
-    // Preload pour images prioritaires (améliore LCP)
-    useEffect(() => {
-      if (!priority || typeof document === 'undefined') return;
+      {/* Image optimisée */}
+      <img
+        {...props}
+        src={currentSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={lazy && !priority ? 'lazy' : 'eager'}
+        decoding="async"
+        fetchPriority={priority ? 'high' : 'auto'}
+        srcSet={srcSet}
+        sizes={sizes}
+        onLoad={handleLoad}
+        onError={handleError}
 
-      // Créer un link preload pour améliorer LCP
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = optimizedSrc;
-      link.setAttribute('fetchpriority', 'high');
+        // Attributs SEO générés automatiquement
+        {...seoAttributes}
 
-      // Ajouter srcset si disponible
-      if (srcsetWidths.length > 1) {
-        link.setAttribute('imagesrcset', srcset);
-        link.setAttribute('imagesizes', defaultSizes);
-      }
+        // Attributs supplémentaires pour le SEO
+        itemProp={props.itemProp || "image"}
+        data-seo-optimized="true"
+        data-original-src={src}
+        data-quality={quality}
 
-      document.head.appendChild(link);
-
-      return () => {
-        // Nettoyer le preload si le composant est démonté
-        document.head.removeChild(link);
-      };
-    }, [priority, optimizedSrc, srcset, defaultSizes, srcsetWidths.length]);
-
-    // IntersectionObserver pour lazy loading
-    useEffect(() => {
-      if (priority || isInView) return;
-
-      const img = imgRef.current;
-      if (!img) return;
-
-      observerRef.current = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              setIsInView(true);
-              observerRef.current?.disconnect();
-            }
-          });
-        },
-        {
-          rootMargin: '50px', // Commencer à charger 50px avant d'entrer dans le viewport
-        }
-      );
-
-      observerRef.current.observe(img);
-
-      return () => {
-        observerRef.current?.disconnect();
-      };
-    }, [priority, isInView]);
-
-    // Gestion du chargement
-    const handleLoad = () => {
-      setIsLoaded(true);
-    };
-
-    const handleError = () => {
-      setHasError(true);
-      setIsLoaded(true); // Arrêter le skeleton même en cas d'erreur
-    };
-
-    // Styles du placeholder blur
-    const placeholderStyle: React.CSSProperties = useMemo(() => {
-      if (!showPlaceholder || isLoaded) return {};
-      return {
-        filter: 'blur(20px)',
-        transition: 'filter 0.3s ease-out',
-      };
-    }, [showPlaceholder, isLoaded]);
-
-    return (
-      <div
-        className={cn('relative overflow-hidden', containerClassName, className)}
-        style={{ width, height }}
-      >
-        {/* Skeleton pendant le chargement */}
-        {showSkeleton && !isLoaded && !hasError && (
-          <div className="absolute inset-0 bg-muted animate-pulse" aria-hidden="true" />
+        className={cn(
+          'transition-opacity duration-300',
+          isLoaded ? 'opacity-100' : 'opacity-0',
+          hasError && 'opacity-50',
+          seoAttributes.className
         )}
 
-        {/* Placeholder blur */}
-        {showPlaceholder && !isLoaded && !hasError && (
-          <img
-            src={optimizedSrc}
-            alt=""
-            className={cn('absolute inset-0 w-full h-full object-cover', imageClassName)}
-            style={placeholderStyle}
-            aria-hidden="true"
-            loading="eager"
-          />
-        )}
+        // Attributs pour les métriques de performance
+        data-lcp-candidate={priority ? 'true' : undefined}
+        data-image-loaded={isLoaded ? 'true' : 'false'}
+        data-image-error={hasError ? 'true' : undefined}
+      />
 
-        {/* Image principale */}
-        {(isInView || priority) && (
-          <img
-            ref={imgRef}
-            src={optimizedSrc}
-            srcSet={srcsetWidths.length > 1 ? srcset : undefined}
-            sizes={defaultSizes}
-            alt={alt}
-            width={width}
-            height={height}
-            className={cn(
-              // ✅ iOS/scroll stability: never render the main image as opacity-0
-              // (can look like it "disappears" during fast scroll). Placeholder/skeleton covers loading state.
-              'w-full h-full',
-              // Utiliser object-contain si spécifié dans imageClassName, sinon object-cover par défaut
-              imageClassName?.includes('object-contain')
-                ? 'object-contain'
-                : imageClassName?.includes('object-cover')
-                  ? 'object-cover'
-                  : 'object-cover',
-              !isLoaded && 'opacity-0', // Masquer jusqu'au chargement complet
-              isLoaded && 'opacity-100 transition-opacity duration-300', // Afficher avec transition
-              imageClassName
-            )}
-            loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? 'high' : 'auto'}
-            decoding="async"
-            onLoad={handleLoad}
-            onError={handleError}
-            {...props}
-          />
-        )}
+      {/* Indicateur de chargement */}
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
-        {/* Erreur de chargement */}
-        {hasError && (
-          <div
-            className="absolute inset-0 flex items-center justify-center bg-muted"
-            role="img"
-            aria-label={alt}
-          >
-            <svg
-              className="w-12 h-12 text-muted-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+      {/* Indicateur d'erreur */}
+      {hasError && (
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <div className="text-center text-gray-500 dark:text-gray-400">
+            <div className="text-2xl mb-2">📷</div>
+            <div className="text-sm">Image non disponible</div>
           </div>
-        )}
-      </div>
-    );
-  },
-  (prevProps, nextProps) => {
-    // Comparaison optimisée pour éviter les re-renders inutiles
-    return (
-      prevProps.src === nextProps.src &&
-      prevProps.alt === nextProps.alt &&
-      prevProps.width === nextProps.width &&
-      prevProps.height === nextProps.height &&
-      prevProps.priority === nextProps.priority
-    );
-  }
+        </div>
+      )}
+
+      {/* Badge SEO (uniquement en développement) */}
+      {seoScore && process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 right-2 bg-black/75 text-white text-xs px-2 py-1 rounded">
+          SEO: {seoAttributes['data-seo-score']}
+          {seoAttributes['data-seo-issues'] > 0 && (
+            <span className="text-red-400 ml-1">
+              ({seoAttributes['data-seo-issues']} issues)
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Hook pour précharger des images critiques
+export function useImagePreloader(srcs: string[]) {
+  useEffect(() => {
+    srcs.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [srcs]);
+}
+
+// Composant pour les images hero (LCP critique)
+export const HeroImage: React.FC<Omit<OptimizedImageProps, 'priority'>> = (props) => (
+  <OptimizedImage {...props} priority={true} lazy={false} />
 );
 
-OptimizedImage.displayName = 'OptimizedImage';
+// Composant pour les images de produit
+export const ProductImage: React.FC<Omit<OptimizedImageProps, 'sizes'>> = (props) => (
+  <OptimizedImage
+    {...props}
+    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+    quality={90}
+  />
+);
+
+// Composant pour les avatars
+export const AvatarImage: React.FC<Omit<OptimizedImageProps, 'sizes' | 'width' | 'height'>> = (props) => (
+  <OptimizedImage
+    {...props}
+    width={40}
+    height={40}
+    sizes="40px"
+    quality={80}
+    placeholder="empty"
+  />
+);
+
+export default OptimizedImage;

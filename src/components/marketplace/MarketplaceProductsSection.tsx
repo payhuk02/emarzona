@@ -15,7 +15,6 @@ import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { Product } from '@/types/marketplace';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { PersonalizedRecommendations } from './ProductRecommendations';
 
 interface MarketplaceProductsSectionProps {
   products: Product[];
@@ -148,13 +147,6 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
         aria-label={t('marketplace.productList.ariaLabel')}
       >
         <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
-          {/* Recommandations personnalisées (si utilisateur connecté et aucun filtre actif) */}
-          {showRecommendations && userId && (
-            <div className="mb-12">
-              <PersonalizedRecommendations userId={userId} limit={6} />
-            </div>
-          )}
-
           {error ? (
             <div
               className="text-center py-8 sm:py-12 lg:py-16 px-2"

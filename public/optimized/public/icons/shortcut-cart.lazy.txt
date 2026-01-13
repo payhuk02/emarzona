@@ -1,0 +1,10 @@
+
+// Image optimisée: shortcut-cart.png
+// Formats disponibles: webp
+<img
+  src="public\icons\shortcut-cart.png"
+  srcset="public\optimized\public\icons\shortcut-cart.webp type="image/webp""
+  loading="lazy"
+  decoding="async"
+  alt=""
+/>

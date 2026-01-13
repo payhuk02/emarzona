@@ -261,6 +261,74 @@ curl -I https://test-boutique.myemarzona.shop
 
 ---
 
+## 🔍 ERREURS CONSOLE VERCEL
+
+Si vous voyez des erreurs dans la console Vercel comme :
+
+```
+/api/front-domains/domain-connect/status?domain=*.myemarzona.shop
+Failed to load resource: the server responded with a status of 400 ()
+Invalid domain
+
+/api/front-domains/check-proxy-status?domain=*.myemarzona.shop
+Failed to load resource: the server responded with a status of 400 ()
+
+/api/front-domains/domain-connect/status?domain=emarzona.com
+Failed to load resource: the server responded with a status of 400 ()
+Domain connect record not found
+```
+
+**Ces erreurs sont normales et peuvent être ignorées** :
+
+- ✅ L'API `domain-connect/status` ne supporte pas les wildcards
+- ✅ L'API `check-proxy-status` peut retourner 400 pour les wildcards
+- ✅ "Domain connect record not found" est normal si vous n'utilisez pas Domain Connect
+- ✅ Ce sont des erreurs de l'interface Vercel, pas du routage réel
+- ✅ Les domaines fonctionnent correctement malgré ces erreurs
+
+**Voir** : [ERREURS_VERCEL_CONSOLE.md](./ERREURS_VERCEL_CONSOLE.md) pour une analyse détaillée et complète
+
+---
+
+## 🔒 CONFIGURATION SSL/TLS CLOUDFLARE
+
+### Dois-je activer "Advanced Certificate Manager" ?
+
+**Réponse** : **NON** ❌
+
+**Pourquoi ?**
+- ✅ Vercel génère automatiquement les certificats SSL pour tous vos domaines
+- ✅ Cloudflare Universal SSL (gratuit) couvre déjà tous vos domaines
+- ✅ Votre configuration "Full (strict)" fonctionne parfaitement
+- ✅ Advanced Certificate Manager est payant et inutile pour votre cas
+
+**Voir** : [FAQ_ADVANCED_CERTIFICATE_MANAGER.md](./FAQ_ADVANCED_CERTIFICATE_MANAGER.md) pour une explication détaillée
+
+---
+
+## 🔍 CAS SPÉCIAL : Sous-domaine Fonctionne mais Wildcard "Invalid Configuration"
+
+Si `test.myemarzona.shop` fonctionne ✅ mais `*.myemarzona.shop` affiche toujours "Invalid Configuration" ❌ :
+
+**Causes possibles** :
+- ⏱️ Délai dans la validation Vercel (jusqu'à 24h)
+- 🔄 Vérification différente pour les wildcards vs domaines spécifiques
+- 📋 Certificat SSL wildcard en cours de génération
+
+**Solutions** :
+1. Vérifier que le CNAME wildcard existe sur Cloudflare (`*` → `cname.vercel-dns.com`)
+2. Vérifier que le proxy est activé (🟠 orange cloud)
+3. Cliquer sur "Refresh" sur Vercel
+4. Attendre jusqu'à 24 heures si nécessaire
+
+**Important** : Si les sous-domaines fonctionnent, le routage fonctionne correctement. Le problème est uniquement la validation Vercel.
+
+**Voir** : 
+- [PROBLEME_WILDCARD_VS_SOUS_DOMAINE.md](./PROBLEME_WILDCARD_VS_SOUS_DOMAINE.md) pour une analyse détaillée
+- [SOLUTION_WILDCARD_INVALID.md](./SOLUTION_WILDCARD_INVALID.md) pour des solutions pratiques immédiates
+
+---
+
 ## 🆘 SI LE PROBLÈME PERSISTE
 
 ### Solution Alternative 1 : Vérifier avec un Sous-domaine Spécifique

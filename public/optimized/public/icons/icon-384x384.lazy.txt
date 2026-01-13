@@ -1,0 +1,10 @@
+
+// Image optimisée: icon-384x384.png
+// Formats disponibles: webp
+<img
+  src="public\icons\icon-384x384.png"
+  srcset="public\optimized\public\icons\icon-384x384.webp type="image/webp""
+  loading="lazy"
+  decoding="async"
+  alt=""
+/>

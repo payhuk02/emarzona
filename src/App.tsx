@@ -400,6 +400,10 @@ const AdminReviews = lazy(() =>
 const AdminInventory = lazy(() => import('./pages/admin/AdminInventory'));
 const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
+const AISettingsPage = lazy(() => import('./pages/admin/AISettingsPage'));
+const Recommendations = lazy(() => import('./pages/Recommendations'));
+const Discover = lazy(() => import('./pages/Discover'));
+const Trending = lazy(() => import('./pages/Trending'));
 const AdminPayments = lazy(() => import('./pages/admin/AdminPayments'));
 const AdminTransactionReconciliation = lazy(
   () => import('./pages/admin/AdminTransactionReconciliation')
@@ -751,6 +755,9 @@ const AppContent = () => {
               <Route path="/login" element={<Navigate to="/auth" replace />} />
               <Route path="/auth/login" element={<Navigate to="/auth" replace />} />
               <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/recommendations" element={<Recommendations />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/trending" element={<Trending />} />
               <Route path="/personalization/quiz" element={<StyleQuizPage />} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/cart" element={<CartEnhanced />} />
@@ -2138,6 +2145,14 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <AdminAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/ai-settings"
+                element={
+                  <ProtectedRoute>
+                    <AISettingsPage />
                   </ProtectedRoute>
                 }
               />

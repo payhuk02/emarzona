@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, X, Smartphone, Zap, Bell, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface PWAInstallPromptProps {
   className?: string;
@@ -59,7 +60,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
         description: 'Emarzona est maintenant disponible hors ligne.',
       });
     } catch (error) {
-      console.error('Installation failed:', error);
+      logger.error('Installation failed', { error });
       toast({
         title: 'Erreur d\'installation',
         description: 'Impossible d\'installer l\'application.',
@@ -94,7 +95,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
         });
       }
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      logger.error('Error requesting notification permission', { error });
     }
   };
 

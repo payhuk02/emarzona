@@ -1,0 +1,10 @@
+
+// Image optimisée: icon-152x152.png
+// Formats disponibles: webp
+<img
+  src="public\icons\icon-152x152.png"
+  srcset="public\optimized\public\icons\icon-152x152.webp type="image/webp""
+  loading="lazy"
+  decoding="async"
+  alt=""
+/>

@@ -9,6 +9,8 @@
  */
 
 import React, { Suspense, lazy, ComponentType } from 'react';
+// ✅ OPTIMISATION: Loader2 reste importé directement car utilisé pour les fallbacks
+// Toutes les autres icônes sont lazy-loaded pour réduire le bundle principal
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 // ✅ PHASE 2: Import logger pour remplacer console.*

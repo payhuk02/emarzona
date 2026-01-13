@@ -167,7 +167,7 @@ export interface CreateServiceOrderResult {
  *     window.location.href = result.checkoutUrl;
  *   } catch (err) {
  *     // Gérer les erreurs de validation (max_bookings_per_day, buffer_time, etc.)
- *     console.error('Erreur de réservation:', err.message);
+ *     logger.error('Erreur de réservation', { error: err });
  *   }
  * };
  * ```
@@ -301,19 +301,19 @@ export const useCreateServiceOrder = () => {
           );
         }
 
-        // Fallback côté client si la fonction SQL n'est pas disponible
-        if (maxBookingsError) {
-          const { data: existingBookingsForDay, error: bookingsCountError } = await supabase
-            .from('service_bookings')
-            .select('id', { count: 'exact', head: true })
-            .eq('product_id', productId)
-            .eq('scheduled_date', bookingDate)
-            .in('status', ['pending', 'confirmed', 'rescheduled']);
+      // Fallback côté client si la fonction SQL n'est pas disponible
+      if (maxBookingsError) {
+        const { data: existingBookingsForDay, error: bookingsCountError } = await supabase
+          .from('service_bookings')
+          .select('id', { count: 'exact', head: true })
+          .eq('product_id', productId)
+          .eq('scheduled_date', bookingDate)
+          .in('status', ['pending', 'confirmed', 'rescheduled']);
 
-          if (bookingsCountError) {
-            logger.error('Erreur lors de la vérification max_bookings_per_day', bookingsCountError);
-            // Ne pas bloquer si erreur de comptage, mais logger
-          } else {
+        if (bookingsCountError) {
+          logger.error('Erreur lors de la vérification max_bookings_per_day', { error: bookingsCountError });
+          // Ne pas bloquer si erreur de comptage, mais logger
+        } else {
             const currentBookingsCount = existingBookingsForDay?.length || 0;
             if (currentBookingsCount >= serviceProduct.max_bookings_per_day) {
               throw new Error(

@@ -59,7 +59,7 @@ import {
   Workflow,
   Gavel,
 } from '@/components/icons';
-import { Database } from 'lucide-react';
+import { Database, Brain } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
@@ -594,6 +594,31 @@ const menuSections = [
     ],
   },
   {
+    label: 'Recommandations IA',
+    items: [
+      {
+        title: 'Mes Recommandations',
+        url: '/recommendations',
+        icon: TrendingUp,
+      },
+      {
+        title: 'Découvertes Personnalisées',
+        url: '/discover',
+        icon: Sparkles,
+      },
+      {
+        title: 'Tendances Produits',
+        url: '/trending',
+        icon: BarChart3,
+      },
+      {
+        title: 'Basé sur mon Historique',
+        url: '/recommendations/history-based',
+        icon: History,
+      },
+    ],
+  },
+  {
     label: 'Systèmes & Intégrations',
     items: [
       {
@@ -631,6 +656,11 @@ const menuSections = [
         title: 'Paramètres',
         url: '/dashboard/settings',
         icon: Settings,
+      },
+      {
+        title: 'IA Recommandations',
+        url: '/admin/ai-settings',
+        icon: Brain,
       },
       {
         title: 'Rejoindre la communauté',

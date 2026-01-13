@@ -1317,6 +1317,8 @@ const ProductDetails = () => {
                   userId={user?.id}
                   currentProductId={product.id}
                   category={product.category || undefined}
+                  productType={product.product_type as 'digital' | 'physical' | 'service' | 'course' | 'artist' | undefined}
+                  sameTypeOnly={true} // Recommander le même type de produit pour cohérence
                   title="Recommandé pour vous"
                   limit={6}
                   showReasoning={true}

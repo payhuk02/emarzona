@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface Product {
   id: string;
@@ -43,7 +44,7 @@ export const useProducts = (storeId?: string | null) => {
 
   // Avertissement en développement
   if (import.meta.env.DEV) {
-    console.warn(
+    logger.warn(
       '[useProducts] ⚠️ Hook déprécié détecté. Ce hook charge TOUS les produits sans pagination.\n' +
         'Migrez vers useProductsOptimized pour de meilleures performances:\n' +
         "import { useProductsOptimized } from '@/hooks/useProductsOptimized';\n" +

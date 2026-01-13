@@ -1,0 +1,10 @@
+
+// Image optimisée: og-image.png
+// Formats disponibles: webp
+<img
+  src="public\og-image.png"
+  srcset="public\optimized\public\og-image.webp type="image/webp""
+  loading="lazy"
+  decoding="async"
+  alt=""
+/>

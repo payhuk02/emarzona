@@ -17,6 +17,7 @@ import { logger } from './logger';
 const ALLOWED_PAYMENT_DOMAINS = [
   'moneroo.io',
   'emarzona.com',
+  'myemarzona.shop', // Domaine dédié aux boutiques
   'emarzona.vercel.app',
   'localhost', // Dev only
   '127.0.0.1', // Dev only

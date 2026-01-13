@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Headphones,
   GraduationCap,
+  Brain,
   Warehouse,
   Truck,
   DollarSign,
@@ -141,6 +142,7 @@ const menuSections = [
     label: 'Configuration',
     items: [
       { icon: Settings, label: 'Paramètres', path: '/admin/settings' },
+      { icon: Brain, label: 'IA Recommandations', path: '/admin/ai-settings' },
       { icon: Percent, label: 'Commissions', path: '/admin/commission-settings' },
       { icon: DollarSign, label: 'Paiements Commissions', path: '/admin/commission-payments' },
       { icon: Sparkles, label: 'Personnalisation', path: '/admin/platform-customization' },

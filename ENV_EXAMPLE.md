@@ -82,14 +82,17 @@ VITE_FEATURE_NEW_CHECKOUT=false
 VITE_FEATURE_ADVANCED_ANALYTICS=false
 ```
 
-### Domaine Principal (Recommandé pour Production)
+### Domaines (Recommandé pour Production)
 
 ```env
-# Domaine principal de l'application
-# Utilisé pour générer les URLs des boutiques et produits
+# Domaine principal de la plateforme (dashboard, marketplace, administration)
 VITE_APP_DOMAIN=emarzona.com
 VITE_SITE_URL=https://emarzona.com
-VITE_PUBLIC_STORE_DOMAIN=emarzona.com
+
+# Domaine dédié aux boutiques des utilisateurs (sous-domaines automatiques)
+# IMPORTANT: Les boutiques utilisent automatiquement myemarzona.shop
+# Format: https://nomboutique.myemarzona.shop
+VITE_PUBLIC_STORE_DOMAIN=myemarzona.shop
 ```
 
 ### Environnement

@@ -6,6 +6,7 @@
 import { loadPDFModules } from '@/lib/pdf-loader';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { logger } from '@/lib/logger';
 
 export interface DigitalProductExportData {
   id: string;
@@ -159,7 +160,7 @@ export const exportDigitalProductsToExcel = async (
       `produits_digitaux_${format(new Date(), 'yyyy-MM-dd', { locale: fr })}.xlsx`
     );
   } catch (error) {
-    console.error("Erreur lors de l'export Excel:", error);
+    logger.error("Erreur lors de l'export Excel", { error });
     throw new Error("Impossible d'exporter en Excel. Veuillez installer la bibliothèque xlsx.");
   }
 };
@@ -232,7 +233,7 @@ export const exportDigitalProductsToPDF = async (
     const filename = `produits_digitaux_${format(new Date(), 'yyyy-MM-dd', { locale: fr })}.pdf`;
     doc.save(filename);
   } catch (error) {
-    console.error("Erreur lors de l'export PDF:", error);
+    logger.error("Erreur lors de l'export PDF", { error });
     throw new Error("Impossible d'exporter en PDF");
   }
 };

@@ -310,11 +310,17 @@ export default defineConfig(({ mode }) => {
 
             // Autres dépendances node_modules - Grouper par taille
             if (id.includes('node_modules/')) {
-              // lucide-react - Séparer en chunk dédié (icônes non-critiques)
-              // Les icônes peuvent être chargées à la demande
-              if (id.includes('node_modules/lucide-react')) {
-                return 'icons';
+            // lucide-react - OPTIMISATION: Séparer en chunk dédié (icônes non-critiques)
+            // Les icônes peuvent être chargées à la demande via LazyIcon component
+            // Cela réduit significativement le bundle principal (~50-100KB)
+            if (id.includes('node_modules/lucide-react')) {
+              // Garder seulement Loader2 dans le chunk principal (utilisé pour loading states)
+              // Toutes les autres icônes seront lazy-loaded via LazyIcon
+              if (id.includes('lucide-react/dist/esm/icons/loader-2')) {
+                return undefined; // Garder dans chunk principal
               }
+              return 'icons'; // Séparer toutes les autres icônes
+            }
 
               // TOUTES les dépendances React - Garder dans le chunk principal
               // Liste exhaustive de toutes les dépendances React identifiées

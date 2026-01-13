@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 interface PWACapabilities {
   isInstallable: boolean;
@@ -53,13 +54,13 @@ export const usePWA = (): PWACapabilities & PWAActions => {
       const { outcome } = await deferredPrompt.userChoice;
 
       if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
+        logger.info('User accepted the install prompt');
         setDeferredPrompt(null);
       } else {
-        console.log('User dismissed the install prompt');
+        logger.info('User dismissed the install prompt');
       }
     } catch (error) {
-      console.error('Error during PWA installation:', error);
+      logger.error('Error during PWA installation', { error });
       throw error;
     }
   };
@@ -73,7 +74,7 @@ export const usePWA = (): PWACapabilities & PWAActions => {
     try {
       await navigator.share(data);
     } catch (error) {
-      console.error('Error sharing content:', error);
+      logger.error('Error sharing content', { error });
       throw error;
     }
   };
@@ -91,14 +92,14 @@ export const usePWA = (): PWACapabilities & PWAActions => {
   // Send notification
   const sendNotification = (title: string, options?: NotificationOptions): void => {
     if (!capabilities.supportsNotifications || Notification.permission !== 'granted') {
-      console.warn('Notifications not permitted');
+      logger.warn('Notifications not permitted');
       return;
     }
 
     try {
       new Notification(title, options);
     } catch (error) {
-      console.error('Error sending notification:', error);
+      logger.error('Error sending notification', { error });
     }
   };
 

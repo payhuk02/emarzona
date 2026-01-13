@@ -1,0 +1,10 @@
+
+// Image optimisée: shortcut-orders.png
+// Formats disponibles: webp
+<img
+  src="public\icons\shortcut-orders.png"
+  srcset="public\optimized\public\icons\shortcut-orders.webp type="image/webp""
+  loading="lazy"
+  decoding="async"
+  alt=""
+/>

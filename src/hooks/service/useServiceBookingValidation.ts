@@ -47,7 +47,7 @@ export interface BookingValidationOptions {
  * });
  *
  * if (!result.isValid) {
- *   console.error('Erreurs:', result.errors);
+ *   logger.error('Erreurs de validation', { errors: result.errors });
  * }
  * ```
  */

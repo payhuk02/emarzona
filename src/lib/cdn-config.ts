@@ -32,6 +32,7 @@ const  defaultCDNConfig: CDNConfig = {
     'storage.googleapis.com',
     'vercel.app',
     'emarzona.com',
+    'myemarzona.shop', // Domaine dédié aux boutiques
     'emarzona.vercel.app',
     ...(import.meta.env.VITE_CDN_ALLOWED_DOMAINS?.split(',') || []),
   ],

@@ -1,0 +1,10 @@
+
+// Image optimisée: shortcut-marketplace.png
+// Formats disponibles: webp
+<img
+  src="public\icons\shortcut-marketplace.png"
+  srcset="public\optimized\public\icons\shortcut-marketplace.webp type="image/webp""
+  loading="lazy"
+  decoding="async"
+  alt=""
+/>

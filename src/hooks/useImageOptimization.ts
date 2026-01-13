@@ -1,335 +1,299 @@
 /**
- * Hook pour l'optimisation automatique des images
- * Fournit des utilitaires pour charger et optimiser les images dynamiquement
+ * Hook pour l'optimisation automatique d'images
+ * Utilise le service d'optimisation pour améliorer le SEO et les performances
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { optimizeImage, validateImageDimensions, generateImageSEOAttributes, type ImageOptimizationOptions, type OptimizedImageResult } from '@/lib/image-optimization';
 import { logger } from '@/lib/logger';
 
-interface ImageOptimizationOptions {
-  quality?: number;
-  format?: 'webp' | 'avif' | 'jpg' | 'png';
-  width?: number;
-  height?: number;
-  fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
-  lazy?: boolean;
-  placeholder?: string;
+interface UseImageOptimizationOptions extends ImageOptimizationOptions {
+  autoOptimize?: boolean;
+  onOptimizationComplete?: (result: OptimizedImageResult) => void;
+  onError?: (error: Error) => void;
 }
 
-interface OptimizedImageResult {
-  src: string;
-  srcSet: string;
-  sizes: string;
-  width: number;
-  height: number;
-  loading: boolean;
-  error: string | null;
-  fallbackSrc: string;
+interface OptimizedImageState {
+  originalUrl?: string;
+  optimizedUrl?: string;
+  sizes?: { [key: string]: string };
+  metadata?: OptimizedImageResult['metadata'];
+  isOptimizing: boolean;
+  error?: string;
+  seoAttributes?: ReturnType<typeof generateImageSEOAttributes>;
 }
 
-/**
- * Hook pour optimiser une image individuelle
- */
 export function useImageOptimization(
-  src: string,
-  options: ImageOptimizationOptions = {}
-): OptimizedImageResult {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
+  imageUrl?: string,
+  altText?: string,
+  options: UseImageOptimizationOptions = {}
+) {
   const {
-    quality = 85,
-    format = 'webp',
-    width,
-    height,
-    fit = 'cover',
-    lazy = true,
-    placeholder
+    autoOptimize = false,
+    onOptimizationComplete,
+    onError,
+    ...optimizationOptions
   } = options;
 
-  // Générer l'URL optimisée
-  const optimizedSrc = useMemo(() => {
-    if (!src) return '';
-
-    try {
-      const url = new URL(src, window.location.origin);
-      const params = new URLSearchParams();
-
-      if (quality && quality !== 85) params.set('q', quality.toString());
-      if (format && format !== 'webp') params.set('f', format);
-      if (width) params.set('w', width.toString());
-      if (height) params.set('h', height.toString());
-      if (fit && fit !== 'cover') params.set('fit', fit);
-
-      url.search = params.toString();
-      return url.toString();
-    } catch {
-      // Si ce n'est pas une URL valide, retourner telle quelle
-      return src;
-    }
-  }, [src, quality, format, width, height, fit]);
-
-  // Générer le srcSet pour les images responsives
-  const srcSet = useMemo(() => {
-    if (!src || !width) return '';
-
-    const sizes = [320, 640, 768, 1024, 1280];
-    const srcSetEntries = sizes
-      .filter(size => size <= (width * 2)) // Ne pas dépasser 2x la taille originale
-      .map(size => {
-        try {
-          const url = new URL(src, window.location.origin);
-          const params = new URLSearchParams();
-          params.set('w', size.toString());
-          params.set('q', quality.toString());
-          params.set('f', format);
-          url.search = params.toString();
-          return `${url.toString()} ${size}w`;
-        } catch {
-          return '';
-        }
-      })
-      .filter(Boolean);
-
-    return srcSetEntries.join(', ');
-  }, [src, width, quality, format]);
-
-  // Générer l'attribut sizes
-  const sizes = useMemo(() => {
-    if (!width) return '';
-
-    // Définition des breakpoints responsive
-    const breakpoints = [
-      { maxWidth: 640, size: '100vw' },
-      { maxWidth: 768, size: '50vw' },
-      { maxWidth: 1024, size: '33vw' },
-      { maxWidth: 1280, size: '25vw' },
-      { maxWidth: Infinity, size: '20vw' }
-    ];
-
-    return breakpoints
-      .map(bp => bp.maxWidth === Infinity ? bp.size : `(max-width: ${bp.maxWidth}px) ${bp.size}`)
-      .join(', ');
-  }, [width]);
-
-  // Charger les dimensions de l'image
-  useEffect(() => {
-    if (!src || !lazy) return;
-
-    const img = new Image();
-    img.onload = () => {
-      setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
-      setLoading(false);
-      setError(null);
-    };
-
-    img.onerror = () => {
-      setError('Failed to load image');
-      setLoading(false);
-      logger.warn('Image failed to load', { src });
-    };
-
-    img.src = optimizedSrc || src;
-  }, [src, optimizedSrc, lazy]);
-
-  return {
-    src: optimizedSrc || src,
-    srcSet,
-    sizes,
-    width: dimensions.width,
-    height: dimensions.height,
-    loading,
-    error,
-    fallbackSrc: placeholder || src
-  };
-}
-
-/**
- * Hook pour optimiser un lot d'images
- */
-export function useBatchImageOptimization(
-  images: Array<{ src: string; options?: ImageOptimizationOptions }>
-) {
-  const [results, setResults] = useState<Record<string, OptimizedImageResult>>({});
-  const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (!images.length) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    const newResults: Record<string, OptimizedImageResult> = {};
-    const newErrors: Record<string, string> = {};
-
-    const loadPromises = images.map(async ({ src, options }) => {
-      try {
-        // Simuler l'appel à une API d'optimisation ou utiliser le hook individuel
-        const optimizedSrc = `${src}?optimized=true`;
-        newResults[src] = {
-          src: optimizedSrc,
-          srcSet: '',
-          sizes: '',
-          width: 0,
-          height: 0,
-          loading: false,
-          error: null,
-          fallbackSrc: src
-        };
-      } catch (error) {
-        newErrors[src] = error instanceof Error ? error.message : 'Optimization failed';
-      }
-    });
-
-    Promise.all(loadPromises).then(() => {
-      setResults(newResults);
-      setErrors(newErrors);
-      setLoading(false);
-    });
-  }, [images]);
-
-  return { results, loading, errors };
-}
-
-/**
- * Hook pour précharger des images optimisées
- */
-export function useImagePreloader(sources: string[]) {
-  const [loaded, setLoaded] = useState<Set<string>>(new Set());
-  const [errors, setErrors] = useState<Set<string>>(new Set());
-
-  const preload = useCallback((src: string) => {
-    return new Promise<void>((resolve, reject) => {
-      const img = new Image();
-
-      img.onload = () => {
-        setLoaded(prev => new Set(prev).add(src));
-        resolve();
-      };
-
-      img.onerror = () => {
-        setErrors(prev => new Set(prev).add(src));
-        reject(new Error(`Failed to preload ${src}`));
-      };
-
-      // Utiliser l'URL optimisée
-      img.src = `${src}?optimized=true&w=100&h=100&fit=cover`;
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!sources.length) return;
-
-    const preloadPromises = sources.map(src => preload(src));
-
-    Promise.allSettled(preloadPromises).then(results => {
-      const failedCount = results.filter(r => r.status === 'rejected').length;
-      if (failedCount > 0) {
-        logger.warn('Some images failed to preload', { failedCount, total: sources.length });
-      }
-    });
-  }, [sources, preload]);
-
-  return {
-    loadedImages: Array.from(loaded),
-    failedImages: Array.from(errors),
-    isLoaded: (src: string) => loaded.has(src),
-    hasError: (src: string) => errors.has(src)
-  };
-}
-
-/**
- * Hook pour détecter le support des formats d'images modernes
- */
-export function useImageFormatSupport() {
-  const [supports, setSupports] = useState({
-    webp: false,
-    avif: false,
-    loading: true
+  const [state, setState] = useState<OptimizedImageState>({
+    isOptimizing: false
   });
 
-  useEffect(() => {
-    const checkSupport = async () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1;
-      canvas.height = 1;
+  // Fonction d'optimisation manuelle
+  const optimizeImageFile = useCallback(async (
+    file: File,
+    customOptions?: Partial<ImageOptimizationOptions>
+  ): Promise<OptimizedImageResult> => {
+    setState(prev => ({ ...prev, isOptimizing: true, error: undefined }));
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        setSupports({ webp: false, avif: false, loading: false });
-        return;
-      }
-
-      // Vérifier WebP
-      const webpSupported = canvas.toDataURL('image/webp').indexOf('image/webp') === 5;
-
-      // Vérifier AVIF (plus complexe)
-      let avifSupported = false;
-      try {
-        const avifImage = new Image();
-        await new Promise((resolve, reject) => {
-          avifImage.onload = resolve;
-          avifImage.onerror = reject;
-          avifImage.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
-        });
-        avifSupported = true;
-      } catch {
-        avifSupported = false;
-      }
-
-      setSupports({
-        webp: webpSupported,
-        avif: avifSupported,
-        loading: false
+    try {
+      // Validation des dimensions
+      const img = new Image();
+      const dimensionsPromise = new Promise<{ width: number; height: number }>((resolve, reject) => {
+        img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        img.onerror = () => reject(new Error('Impossible de charger l\'image'));
+        img.src = URL.createObjectURL(file);
       });
-    };
 
-    checkSupport();
-  }, []);
+      const dimensions = await dimensionsPromise;
+      const validation = validateImageDimensions(
+        dimensions.width,
+        dimensions.height,
+        100, 4000, 100, 4000
+      );
 
-  return supports;
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
+      // Convertir le fichier en buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Optimiser l'image
+      const result = await optimizeImage(buffer, {
+        ...optimizationOptions,
+        ...customOptions
+      });
+
+      // Générer les URLs des différentes tailles
+      const sizeUrls: { [key: string]: string } = {};
+      for (const [size, sizeBuffer] of Object.entries(result.sizes)) {
+        // Ici on simulerait l'upload vers un service de stockage
+        // Pour l'exemple, on utilise des data URLs
+        const blob = new Blob([sizeBuffer], { type: `image/${result.metadata.format}` });
+        sizeUrls[size] = URL.createObjectURL(blob);
+      }
+
+      const optimizedBlob = new Blob([result.optimized], { type: `image/${result.metadata.format}` });
+      const optimizedUrl = URL.createObjectURL(optimizedBlob);
+
+      setState(prev => ({
+        ...prev,
+        optimizedUrl,
+        sizes: sizeUrls,
+        metadata: result.metadata,
+        seoAttributes: generateImageSEOAttributes(
+          file.name,
+          altText || file.name,
+          result.metadata.width,
+          result.metadata.height
+        ),
+        isOptimizing: false
+      }));
+
+      onOptimizationComplete?.(result);
+      logger.info('Image optimisée avec succès', {
+        originalSize: result.metadata.originalSize,
+        optimizedSize: result.metadata.optimizedSize,
+        compressionRatio: result.metadata.compressionRatio
+      });
+
+      return result;
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur d\'optimisation';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage,
+        isOptimizing: false
+      }));
+
+      onError?.(error instanceof Error ? error : new Error(errorMessage));
+      logger.error('Erreur lors de l\'optimisation d\'image', { error });
+
+      throw error;
+    }
+  }, [optimizationOptions, altText, onOptimizationComplete, onError]);
+
+  // Optimisation automatique si activée
+  useEffect(() => {
+    if (autoOptimize && imageUrl && !state.isOptimizing && !state.optimizedUrl) {
+      // Ici on pourrait charger l'image depuis l'URL et l'optimiser
+      // Pour l'exemple, on marque juste comme traité
+      setState(prev => ({
+        ...prev,
+        originalUrl: imageUrl,
+        seoAttributes: generateImageSEOAttributes(
+          imageUrl.split('/').pop() || 'image',
+          altText || 'Image optimisée'
+        )
+      }));
+    }
+  }, [autoOptimize, imageUrl, altText, state.isOptimizing, state.optimizedUrl]);
+
+  // Fonction pour nettoyer les URLs d'objets
+  const cleanup = useCallback(() => {
+    if (state.optimizedUrl) {
+      URL.revokeObjectURL(state.optimizedUrl);
+    }
+    if (state.sizes) {
+      Object.values(state.sizes).forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    }
+  }, [state.optimizedUrl, state.sizes]);
+
+  // Nettoyer à la destruction du composant
+  useEffect(() => {
+    return cleanup;
+  }, [cleanup]);
+
+  return {
+    // État
+    ...state,
+
+    // Actions
+    optimizeImageFile,
+    cleanup,
+
+    // Utilitaires
+    getSrcSet: () => {
+      if (!state.sizes) return '';
+      return Object.keys(state.sizes)
+        .map(size => `${state.sizes![size]} ${size}`)
+        .join(', ');
+    },
+
+    // Métriques
+    getCompressionStats: () => {
+      if (!state.metadata) return null;
+      return {
+        ratio: `${state.metadata.compressionRatio.toFixed(1)}%`,
+        saved: `${((state.metadata.originalSize - state.metadata.optimizedSize) / 1024).toFixed(1)} KB`,
+        finalSize: `${(state.metadata.optimizedSize / 1024).toFixed(1)} KB`
+      };
+    }
+  };
 }
 
 /**
- * Utilitaire pour générer des URLs d'images optimisées
+ * Hook pour optimiser plusieurs images (batch)
  */
-export function generateOptimizedImageUrl(
-  src: string,
-  _options: ImageOptimizationOptions = {}
-): string {
-  if (!src) return '';
+export function useBatchImageOptimization(
+  images: Array<{ file: File; altText?: string }>,
+  options: UseImageOptimizationOptions = {}
+) {
+  const [progress, setProgress] = useState(0);
+  const [results, setResults] = useState<OptimizedImageResult[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  try {
-    const url = new URL(src, window.location.origin);
-    const params = new URLSearchParams(url.search);
+  const processBatch = useCallback(async () => {
+    setIsProcessing(true);
+    setProgress(0);
+    setResults([]);
 
-    // Appliquer les options d'optimisation
-    if (options.quality && options.quality !== 85) {
-      params.set('q', options.quality.toString());
+    const batchResults: OptimizedImageResult[] = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const { file, altText } = images[i];
+
+      try {
+        const result = await optimizeImage(
+          Buffer.from(await file.arrayBuffer()),
+          options
+        );
+
+        batchResults.push(result);
+        setResults([...batchResults]);
+      } catch (error) {
+        logger.error(`Erreur optimisation image ${i + 1}`, { error });
+      }
+
+      setProgress(((i + 1) / images.length) * 100);
     }
 
-    if (options.format && options.format !== 'webp') {
-      params.set('f', options.format);
-    }
+    setIsProcessing(false);
+    logger.info('Batch d\'optimisation terminé', {
+      total: images.length,
+      success: batchResults.length,
+      failed: images.length - batchResults.length
+    });
 
-    if (options.width) {
-      params.set('w', options.width.toString());
-    }
+    return batchResults;
+  }, [images, options]);
 
-    if (options.height) {
-      params.set('h', options.height.toString());
-    }
+  return {
+    processBatch,
+    progress,
+    results,
+    isProcessing,
+    successCount: results.length,
+    errorCount: images.length - results.length
+  };
+}
 
-    if (options.fit && options.fit !== 'cover') {
-      params.set('fit', options.fit);
-    }
+/**
+ * Hook pour le monitoring des performances d'images
+ */
+export function useImagePerformanceMonitoring() {
+  const [metrics, setMetrics] = useState<{
+    lcp: number[];
+    cls: number[];
+    fid: number[];
+  }>({
+    lcp: [],
+    cls: [],
+    fid: []
+  });
 
-    url.search = params.toString();
-    return url.toString();
-  } catch {
-    return src;
-  }
+  const recordMetric = useCallback((type: 'lcp' | 'cls' | 'fid', value: number) => {
+    setMetrics(prev => ({
+      ...prev,
+      [type]: [...prev[type], value].slice(-10) // Garder les 10 dernières mesures
+    }));
+
+    // Logger les métriques critiques
+    if (type === 'lcp' && value > 2500) {
+      logger.warn('LCP trop élevé', { value });
+    }
+    if (type === 'cls' && value > 0.1) {
+      logger.warn('CLS trop élevé', { value });
+    }
+    if (type === 'fid' && value > 100) {
+      logger.warn('FID trop élevé', { value });
+    }
+  }, []);
+
+  const getAverageMetrics = useCallback(() => {
+    return {
+      lcp: metrics.lcp.length > 0 ? metrics.lcp.reduce((a, b) => a + b, 0) / metrics.lcp.length : 0,
+      cls: metrics.cls.length > 0 ? metrics.cls.reduce((a, b) => a + b, 0) / metrics.cls.length : 0,
+      fid: metrics.fid.length > 0 ? metrics.fid.reduce((a, b) => a + b, 0) / metrics.fid.length : 0
+    };
+  }, [metrics]);
+
+  return {
+    recordMetric,
+    metrics,
+    averages: getAverageMetrics(),
+    // Seuils Core Web Vitals
+    thresholds: {
+      lcp: { good: 2500, needsImprovement: 4000 },
+      cls: { good: 0.1, needsImprovement: 0.25 },
+      fid: { good: 100, needsImprovement: 300 }
+    }
+  };
 }

@@ -20,6 +20,8 @@ interface AIProductRecommendationsProps {
   userId?: string;
   currentProductId?: string;
   category?: string;
+  productType?: 'digital' | 'physical' | 'service' | 'course' | 'artist'; // Type de produit pour recommandations cohérentes
+  sameTypeOnly?: boolean; // Si true, recommande seulement le même type (défaut: true)
   title?: string;
   limit?: number;
   showReasoning?: boolean;
@@ -31,6 +33,8 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   userId,
   currentProductId,
   category,
+  productType,
+  sameTypeOnly = true, // Par défaut, recommander le même type pour cohérence
   title = 'Recommandations pour vous',
   limit = 6,
   showReasoning = true,
@@ -46,6 +50,8 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
     userId,
     productId: currentProductId,
     category,
+    productType,
+    sameTypeOnly,
     limit,
     excludeRecentlyViewed: true,
     includeReasoning: showReasoning,

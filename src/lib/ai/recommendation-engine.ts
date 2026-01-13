@@ -24,6 +24,8 @@ export interface RecommendationContext {
   userId?: string;
   productId?: string;
   category?: string;
+  productType?: 'digital' | 'physical' | 'service' | 'course' | 'artist'; // Type de produit pour recommandations cohérentes
+  sameTypeOnly?: boolean; // Si true, recommande seulement le même type de produit
   limit?: number;
   excludeRecentlyViewed?: boolean;
   includeReasoning?: boolean;
