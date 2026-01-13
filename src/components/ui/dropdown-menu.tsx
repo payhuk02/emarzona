@@ -500,4 +500,4 @@ UnifiedMenuItem.displayName = 'UnifiedMenuItem';
 /**
  * UnifiedMenu - Wrapper complet pour garantir cohérence avec Select
  */
-export const UnifiedMenu = DropdownMenu;
+const UnifiedMenu = DropdownMenu;
