@@ -246,6 +246,59 @@ export function useBatchImageOptimization(
 }
 
 /**
+ * Hook pour détecter le support des formats d'images modernes
+ */
+export function useImageFormatSupport() {
+  const [support, setSupport] = useState({
+    webp: false,
+    avif: false,
+    loading: true
+  });
+
+  useEffect(() => {
+    const checkFormatSupport = async () => {
+      try {
+        // Test WebP support
+        const webpSupported = await new Promise<boolean>((resolve) => {
+          const webp = new Image();
+          webp.onload = webp.onerror = () => {
+            resolve(webp.height === 2);
+          };
+          webp.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+        });
+
+        // Test AVIF support
+        const avifSupported = await new Promise<boolean>((resolve) => {
+          const avif = new Image();
+          avif.onload = avif.onerror = () => {
+            resolve(avif.height === 2);
+          };
+          avif.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
+        });
+
+        setSupport({
+          webp: webpSupported,
+          avif: avifSupported,
+          loading: false
+        });
+
+        logger.info('Format support détecté', {
+          webp: webpSupported,
+          avif: avifSupported
+        });
+      } catch (error) {
+        logger.error('Erreur lors de la détection du support des formats', { error });
+        setSupport(prev => ({ ...prev, loading: false }));
+      }
+    };
+
+    checkFormatSupport();
+  }, []);
+
+  return support;
+}
+
+/**
  * Hook pour le monitoring des performances d'images
  */
 export function useImagePerformanceMonitoring() {
