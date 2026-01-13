@@ -34,20 +34,57 @@ export const getStoreDomain = (): string => {
   return hostname;
 };
 
-export const generateStoreUrl = (slug: string, customDomain?: string): string => {
-  const domain = customDomain || getStoreDomain();
-  const protocol = window.location.protocol;
-  return `${protocol}//${slug}.${domain}`;
+/**
+ * Génère l'URL complète d'une boutique
+ *
+ * IMPORTANT: Utilise myemarzona.shop pour les boutiques des utilisateurs
+ * Le domaine emarzona.com est réservé à la plateforme principale
+ *
+ * @param slug - Le slug de la boutique
+ * @param subdomain - Le sous-domaine de la boutique (généré automatiquement)
+ * @param customDomain - Domaine personnalisé optionnel
+ */
+export const generateStoreUrl = (
+  slug: string,
+  subdomain?: string | null,
+  customDomain?: string
+): string => {
+  // Si un domaine personnalisé est configuré, l'utiliser
+  if (customDomain) {
+    const protocol = window.location.protocol;
+    return `${protocol}//${subdomain || slug}.${customDomain}`;
+  }
+
+  // Sinon, utiliser myemarzona.shop (domaine dédié aux boutiques)
+  const protocol = 'https'; // Toujours HTTPS en production
+  const storeSubdomain = subdomain || slug; // Utiliser subdomain si disponible, sinon slug
+  return `${protocol}://${storeSubdomain}.myemarzona.shop`;
 };
 
+/**
+ * Génère l'URL complète d'un produit dans une boutique
+ *
+ * @param storeSlug - Le slug de la boutique
+ * @param storeSubdomain - Le sous-domaine de la boutique (généré automatiquement)
+ * @param productSlug - Le slug du produit
+ * @param customDomain - Domaine personnalisé optionnel
+ */
 export const generateProductUrl = (
   storeSlug: string,
   productSlug: string,
+  storeSubdomain?: string | null,
   customDomain?: string
 ): string => {
-  const domain = customDomain || getStoreDomain();
-  const protocol = window.location.protocol;
-  return `${protocol}//${storeSlug}.${domain}/${productSlug}`;
+  // Si un domaine personnalisé est configuré, l'utiliser
+  if (customDomain) {
+    const protocol = 'https';
+    return `${protocol}://${storeSubdomain || storeSlug}.${customDomain}/products/${productSlug}`;
+  }
+
+  // Sinon, utiliser myemarzona.shop
+  const protocol = 'https';
+  const subdomain = storeSubdomain || storeSlug;
+  return `${protocol}://${subdomain}.myemarzona.shop/products/${productSlug}`;
 };
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
@@ -72,9 +109,3 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     }
   }
 };
-
-
-
-
-
-

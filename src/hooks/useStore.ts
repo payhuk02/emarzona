@@ -63,42 +63,37 @@ export const useStore = () => {
     }
   };
 
-  const getStoreDomain = (): string => {
-    if (store?.custom_domain) {
-      return store.custom_domain;
-    }
-
-    // Utiliser le domaine actuel (Lovable ou custom)
-    const currentDomain = window.location.hostname;
-    return currentDomain;
-  };
+  // Fonction getStoreDomain supprimée (non utilisée)
+  // Le domaine est maintenant toujours myemarzona.shop pour les boutiques
 
   const getStoreUrl = (): string => {
     if (!store) return '';
 
-    const slug = store.slug;
-
     // Si un domaine personnalisé est configuré, utiliser le format sous-domaine
     if (store.custom_domain) {
-      return `https://${slug}.${store.custom_domain}`;
+      return `https://${store.subdomain || store.slug}.${store.custom_domain}`;
     }
 
-    // Sinon, utiliser le format local avec /stores/
-    return `${window.location.origin}/stores/${slug}`;
+    // Utiliser le format myemarzona.shop pour les boutiques
+    // Le subdomain est généré automatiquement lors de la création
+    if (store.subdomain) {
+      return `https://${store.subdomain}.myemarzona.shop`;
+    }
+
+    // Fallback: utiliser le slug si subdomain n'est pas encore généré
+    // (peut arriver si la migration n'a pas été appliquée)
+    return `https://${store.slug}.myemarzona.shop`;
   };
 
   const getProductUrl = (productSlug: string): string => {
     if (!store) return '';
 
-    const slug = store.slug;
-
-    // Si un domaine personnalisé est configuré, utiliser le format sous-domaine
+    // Utiliser le format myemarzona.shop
+    const subdomain = store.subdomain || store.slug;
     if (store.custom_domain) {
-      return `https://${slug}.${store.custom_domain}/${productSlug}`;
+      return `https://${subdomain}.${store.custom_domain}/products/${productSlug}`;
     }
-
-    // Sinon, utiliser le format local avec /stores/.../products/
-    return `${window.location.origin}/stores/${slug}/products/${productSlug}`;
+    return `https://${subdomain}.myemarzona.shop/products/${productSlug}`;
   };
 
   const fetchStore = useCallback(async () => {

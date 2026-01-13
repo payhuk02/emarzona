@@ -427,7 +427,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 
       setIsSubmitting(true);
 
-      const  updates: Partial<Store> & Record<string, unknown> = {
+      const updates: Partial<Store> & Record<string, unknown> = {
         name: name.trim(),
         description: description.trim() || null,
         logo_url: logoUrl || null,
@@ -1096,7 +1096,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                 productCardStyle={productCardStyle}
                 navigationStyle={navigationStyle}
                 onColorChange={(field, value) => {
-                  const  setters: Record<string, (v: string) => void> = {
+                  const setters: Record<string, (v: string) => void> = {
                     primary_color: setPrimaryColor,
                     secondary_color: setSecondaryColor,
                     accent_color: setAccentColor,
@@ -1117,7 +1117,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   setters[field]?.(value);
                 }}
                 onTypographyChange={(field, value) => {
-                  const  setters: Record<string, (v: string) => void> = {
+                  const setters: Record<string, (v: string) => void> = {
                     heading_font: setHeadingFont,
                     body_font: setBodyFont,
                     font_size_base: setFontSizeBase,
@@ -1135,7 +1135,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   type ProductCardStyle = 'minimal' | 'standard' | 'detailed';
                   type NavigationStyle = 'horizontal' | 'vertical' | 'mega';
 
-                  const  setters: Record<string, (v: string | number | boolean) => void> = {
+                  const setters: Record<string, (v: string | number | boolean) => void> = {
                     header_style: v => setHeaderStyle(v as HeaderFooterStyle),
                     footer_style: v => setFooterStyle(v as HeaderFooterStyle),
                     sidebar_enabled: v => setSidebarEnabled(Boolean(v)),
@@ -1279,14 +1279,14 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     ogImageUrl={ogImageUrl}
                     storeUrl={
                       store.custom_domain
-                        ? `https://${store.custom_domain}`
+                        ? `https://${store.subdomain || store.slug}.${store.custom_domain}`
                         : store.slug
-                          ? generateStoreUrl(store.slug)
+                          ? generateStoreUrl(store.slug, store.subdomain || null, undefined)
                           : undefined
                     }
                     faviconUrl={(store as ExtendedStore).favicon_url || undefined}
                     onChange={(field, value) => {
-                      const  setters: Record<string, (v: string) => void> = {
+                      const setters: Record<string, (v: string) => void> = {
                         meta_title: setMetaTitle,
                         meta_description: setMetaDescription,
                         meta_keywords: setMetaKeywords,
@@ -1337,7 +1337,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                     timezone={timezone}
                     openingHours={openingHours}
                     onAddressChange={(field, value) => {
-                      const  setters: Record<string, (v: string) => void> = {
+                      const setters: Record<string, (v: string) => void> = {
                         address_line1: setAddressLine1,
                         address_line2: setAddressLine2,
                         city: setCity,
@@ -2805,7 +2805,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                 productCardStyle={productCardStyle}
                 navigationStyle={navigationStyle}
                 onColorChange={(field, value) => {
-                  const  setters: Record<string, (v: string) => void> = {
+                  const setters: Record<string, (v: string) => void> = {
                     primary_color: setPrimaryColor,
                     secondary_color: setSecondaryColor,
                     accent_color: setAccentColor,
@@ -2826,7 +2826,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   setters[field]?.(value);
                 }}
                 onTypographyChange={(field, value) => {
-                  const  setters: Record<string, (v: string) => void> = {
+                  const setters: Record<string, (v: string) => void> = {
                     heading_font: setHeadingFont,
                     body_font: setBodyFont,
                     font_size_base: setFontSizeBase,
@@ -2839,7 +2839,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                   setters[field]?.(value);
                 }}
                 onLayoutChange={(field, value) => {
-                  const  setters: Record<string, (v: string | number | boolean) => void> = {
+                  const setters: Record<string, (v: string | number | boolean) => void> = {
                     header_style: v => setHeaderStyle(v as 'minimal' | 'standard' | 'extended'),
                     footer_style: v => setFooterStyle(v as 'minimal' | 'standard' | 'extended'),
                     sidebar_enabled: v => setSidebarEnabled(typeof v === 'boolean' ? v : false),
@@ -2882,14 +2882,14 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                 ogImageUrl={ogImageUrl}
                 storeUrl={
                   store.custom_domain
-                    ? `https://${store.custom_domain}`
+                    ? `https://${store.subdomain || store.slug}.${store.custom_domain}`
                     : store.slug
-                      ? generateStoreUrl(store.slug)
+                      ? generateStoreUrl(store.slug, store.subdomain || null, undefined)
                       : undefined
                 }
                 faviconUrl={(store as ExtendedStore).favicon_url || undefined}
                 onChange={(field, value) => {
-                  const  setters: Record<string, (v: string) => void> = {
+                  const setters: Record<string, (v: string) => void> = {
                     meta_title: setMetaTitle,
                     meta_description: setMetaDescription,
                     meta_keywords: setMetaKeywords,
@@ -2942,7 +2942,7 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
                 timezone={timezone}
                 openingHours={openingHours}
                 onAddressChange={(field, value) => {
-                  const  setters: Record<string, (v: string) => void> = {
+                  const setters: Record<string, (v: string) => void> = {
                     address_line1: setAddressLine1,
                     address_line2: setAddressLine2,
                     city: setCity,
@@ -3331,9 +3331,3 @@ const StoreDetails = ({ store }: StoreDetailsProps) => {
 };
 
 export default StoreDetails;
-
-
-
-
-
-
