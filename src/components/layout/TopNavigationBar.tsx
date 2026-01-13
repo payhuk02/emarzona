@@ -46,13 +46,21 @@ export const TopNavigationBar = () => {
 
   // Navigation principale avec i18n
   const mainNavItems = [
-    { label: t('navigation.dashboard', 'Tableau de bord'), path: '/dashboard', icon: LayoutDashboard },
+    {
+      label: t('navigation.dashboard', 'Tableau de bord'),
+      path: '/dashboard',
+      icon: LayoutDashboard,
+    },
     { label: t('navigation.products', 'Produits'), path: '/dashboard/products', icon: Package },
     { label: t('navigation.orders', 'Commandes'), path: '/dashboard/orders', icon: ShoppingCart },
     { label: t('navigation.customers', 'Clients'), path: '/dashboard/customers', icon: Users },
     { label: t('navigation.marketing', 'Marketing'), path: '/dashboard/marketing', icon: Target },
     { label: t('navigation.emails', 'Emails'), path: '/dashboard/emails/campaigns', icon: Mail },
-    { label: t('navigation.analytics', 'Analytics'), path: '/dashboard/analytics', icon: BarChart3 },
+    {
+      label: t('navigation.analytics', 'Analytics'),
+      path: '/dashboard/analytics',
+      icon: BarChart3,
+    },
     { label: t('navigation.settings', 'Paramètres'), path: '/dashboard/settings', icon: Settings },
   ];
 
@@ -86,11 +94,13 @@ export const TopNavigationBar = () => {
           {/* Logo */}
           <NavLink to="/dashboard" className="flex items-center gap-2 shrink-0">
             {platformLogo ? (
-              <LazyImage
-                src={platformLogo}
-                alt="Emarzona"
-                className="h-8 w-8 object-contain"
-              />
+              <div className="h-8 w-8 flex-shrink-0">
+                <LazyImage
+                  src={platformLogo}
+                  alt="Emarzona"
+                  className="object-contain w-full h-full"
+                />
+              </div>
             ) : (
               <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
                 <span className="text-sm font-bold text-primary">E</span>
@@ -103,7 +113,7 @@ export const TopNavigationBar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center max-w-4xl">
-            {mainNavItems.map((item) => {
+            {mainNavItems.map(item => {
               const Icon = item.icon;
               const active = isActive(item.path);
               return (
@@ -143,11 +153,13 @@ export const TopNavigationBar = () => {
                 <div className="p-4 border-b">
                   <div className="flex items-center gap-2">
                     {platformLogo ? (
-                      <LazyImage
-                        src={platformLogo}
-                        alt="Emarzona"
-                        className="h-8 w-8 object-contain"
-                      />
+                      <div className="h-8 w-8 flex-shrink-0">
+                        <LazyImage
+                          src={platformLogo}
+                          alt="Emarzona"
+                          className="object-contain w-full h-full"
+                        />
+                      </div>
                     ) : (
                       <div className="h-8 w-8 rounded bg-primary/20 flex items-center justify-center">
                         <span className="text-sm font-bold">E</span>
@@ -157,7 +169,7 @@ export const TopNavigationBar = () => {
                   </div>
                 </div>
                 <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-                  {mainNavItems.map((item) => {
+                  {mainNavItems.map(item => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
                     return (
@@ -167,11 +179,7 @@ export const TopNavigationBar = () => {
                         onClick={() => setMobileMenuOpen(false)}
                         className={`
                           flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
-                          ${
-                            active
-                              ? 'bg-primary text-primary-foreground'
-                              : 'hover:bg-muted'
-                          }
+                          ${active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}
                         `}
                       >
                         <Icon className="h-5 w-5" />
@@ -236,9 +244,7 @@ export const TopNavigationBar = () => {
                     <p className="text-sm font-medium">
                       {user?.user_metadata?.full_name || user?.email}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                   {/* Loyalty Badge in User Menu */}
                   <div className="flex justify-center">
@@ -271,10 +277,3 @@ export const TopNavigationBar = () => {
     </header>
   );
 };
-
-
-
-
-
-
-

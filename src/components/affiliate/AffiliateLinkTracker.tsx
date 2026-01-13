@@ -19,20 +19,6 @@ function setCookie(name: string, value: string, days: number) {
 }
 
 /**
- * Fonction utilitaire pour obtenir un cookie
- */
-function getCookie(name: string): string | null {
-  const nameEQ = name + '=';
-  const ca = document.cookie.split(';');
-  for (let  i= 0; i < ca.length; i++) {
-    let  c= ca[i];
-    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-  }
-  return null;
-}
-
-/**
  * Fonction pour obtenir l'adresse IP du client (via un service externe ou null)
  */
 async function getClientIP(): Promise<string | null> {
@@ -53,8 +39,9 @@ export function AffiliateLinkTracker() {
   useEffect(() => {
     const trackAffiliateClick = async () => {
       // Vérifier si un paramètre d'affiliation existe dans l'URL
-      const affiliateCode = searchParams.get('aff') || searchParams.get('ref') || searchParams.get('affiliate');
-      
+      const affiliateCode =
+        searchParams.get('aff') || searchParams.get('ref') || searchParams.get('affiliate');
+
       if (!affiliateCode) {
         return;
       }
@@ -83,14 +70,17 @@ export function AffiliateLinkTracker() {
         });
 
         if (error) {
-          logger.error('Error tracking affiliate click', { error: error.message, code: affiliateCode });
+          logger.error('Error tracking affiliate click', {
+            error: error.message,
+            code: affiliateCode,
+          });
           return;
         }
 
         if (!data || !data.success) {
-          logger.warn('Affiliate tracking failed', { 
+          logger.warn('Affiliate tracking failed', {
             error: data?.error || 'Unknown error',
-            code: affiliateCode 
+            code: affiliateCode,
           });
           return;
         }
@@ -98,20 +88,25 @@ export function AffiliateLinkTracker() {
         // Stocker le cookie de tracking
         if (data.tracking_cookie && data.expires_at) {
           const expiresDate = new Date(data.expires_at);
-          const daysUntilExpiry = Math.ceil((expiresDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          
+          const daysUntilExpiry = Math.ceil(
+            (expiresDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          );
+
           // Stocker le cookie principal de tracking
           setCookie('affiliate_tracking_cookie', data.tracking_cookie, daysUntilExpiry);
-          
+
           // Stocker également les informations supplémentaires dans localStorage pour référence
-          localStorage.setItem('affiliate_tracking_info', JSON.stringify({
-            tracking_cookie: data.tracking_cookie,
-            product_id: data.product_id,
-            store_id: data.store_id,
-            click_id: data.click_id,
-            expires_at: data.expires_at,
-            link_code: affiliateCode,
-          }));
+          localStorage.setItem(
+            'affiliate_tracking_info',
+            JSON.stringify({
+              tracking_cookie: data.tracking_cookie,
+              product_id: data.product_id,
+              store_id: data.store_id,
+              click_id: data.click_id,
+              expires_at: data.expires_at,
+              link_code: affiliateCode,
+            })
+          );
 
           logger.info('Affiliate click tracked successfully', {
             code: affiliateCode,
@@ -130,11 +125,11 @@ export function AffiliateLinkTracker() {
           newSearchParams.delete('aff');
           newSearchParams.delete('ref');
           newSearchParams.delete('affiliate');
-          
+
           // Construire la nouvelle URL
           const newUrl = data.redirect_url.split('?')[0]; // Prendre seulement la base de l'URL
           const redirectParams = new URLSearchParams(newUrl.split('?')[1] || '');
-          
+
           // Merger les paramètres existants (sauf les paramètres d'affiliation)
           redirectParams.forEach((value, key) => {
             if (!['aff', 'ref', 'affiliate'].includes(key)) {
@@ -142,7 +137,7 @@ export function AffiliateLinkTracker() {
             }
           });
 
-          const finalUrl = newSearchParams.toString() 
+          const finalUrl = newSearchParams.toString()
             ? `${newUrl.split('?')[0]}?${newSearchParams.toString()}`
             : newUrl.split('?')[0];
 
@@ -154,14 +149,18 @@ export function AffiliateLinkTracker() {
           newSearchParams.delete('aff');
           newSearchParams.delete('ref');
           newSearchParams.delete('affiliate');
-          
+
           if (newSearchParams.toString()) {
-            window.history.replaceState({}, '', `${location.pathname}?${newSearchParams.toString()}`);
+            window.history.replaceState(
+              {},
+              '',
+              `${location.pathname}?${newSearchParams.toString()}`
+            );
           } else {
             window.history.replaceState({}, '', location.pathname);
           }
         }
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Unexpected error tracking affiliate click', {
           error: errorMessage,
@@ -181,10 +180,3 @@ export function AffiliateLinkTracker() {
   // Ce composant ne rend rien
   return null;
 }
-
-
-
-
-
-
-

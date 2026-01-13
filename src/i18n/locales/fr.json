@@ -197,6 +197,10 @@
       "name": "Nom",
       "popularity": "Popularité"
     },
+    "sorting": {
+      "ascending": "Croissant",
+      "descending": "Décroissant"
+    },
     "viewMode": {
       "grid": "Grille",
       "list": "Liste"

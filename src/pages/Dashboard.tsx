@@ -31,19 +31,53 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, lazy, Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
-import {
-  RevenueChart,
-  OrdersChart,
-  PerformanceMetrics,
-  OrdersTrendChart,
-  RevenueVsOrdersChart,
-  CustomersTrendChart,
-} from '@/components/dashboard/AdvancedDashboardComponents';
+// ✅ PHASE 2: Lazy load des composants analytics lourds (utilisent recharts)
+const RevenueChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.RevenueChart,
+  }))
+);
+const OrdersChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.OrdersChart,
+  }))
+);
+const PerformanceMetrics = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.PerformanceMetrics,
+  }))
+);
+const OrdersTrendChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.OrdersTrendChart,
+  }))
+);
+const RevenueVsOrdersChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.RevenueVsOrdersChart,
+  }))
+);
+const CustomersTrendChart = lazy(() =>
+  import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
+    default: m.CustomersTrendChart,
+  }))
+);
+const ProductTypeCharts = lazy(() =>
+  import('@/components/dashboard/ProductTypeCharts').then(m => ({
+    default: m.ProductTypeCharts,
+  }))
+);
+const ProductTypePerformanceMetrics = lazy(() =>
+  import('@/components/dashboard/ProductTypePerformanceMetrics').then(m => ({
+    default: m.ProductTypePerformanceMetrics,
+  }))
+);
+// Composants non-lourds (pas de lazy loading nécessaire)
 import { RecentOrdersCard } from '@/components/dashboard/RecentOrdersCard';
 import { TopProductsCard } from '@/components/dashboard/TopProductsCard';
 import { ProductTypeBreakdown } from '@/components/dashboard/ProductTypeBreakdown';
@@ -51,8 +85,6 @@ import {
   ProductTypeQuickFilters,
   type ProductTypeFilter,
 } from '@/components/dashboard/ProductTypeQuickFilters';
-import { ProductTypeCharts } from '@/components/dashboard/ProductTypeCharts';
-import { ProductTypePerformanceMetrics } from '@/components/dashboard/ProductTypePerformanceMetrics';
 import { PeriodFilter, PeriodType } from '@/components/dashboard/PeriodFilter';
 import {
   useNotifications,
@@ -83,7 +115,27 @@ const Dashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState<ProductTypeFilter>('all');
 
-  // Récupérer les vraies notifications depuis Supabase (inclut les messages)
+  // ✅ PHASE 2: Déferrer les notifications (non-critique pour le premier render)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // Activer les notifications après le premier render (déferré)
+  useEffect(() => {
+    // Utiliser requestIdleCallback ou setTimeout pour déferrer
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      requestIdleCallback(
+        () => {
+          setNotificationsEnabled(true);
+        },
+        { timeout: 2000 }
+      );
+    } else {
+      setTimeout(() => {
+        setNotificationsEnabled(true);
+      }, 100);
+    }
+  }, []);
+
+  // Récupérer les vraies notifications depuis Supabase (inclut les messages) - Déferré
   const { data: notificationsResult } = useNotifications({
     page: 1,
     pageSize: 5, // Afficher les 5 dernières notifications
@@ -91,7 +143,7 @@ const Dashboard = () => {
   });
   const { data: unreadCount = 0 } = useUnreadCount();
 
-  // S'abonner aux notifications en temps réel
+  // S'abonner aux notifications en temps réel - Déferré (seulement si activé)
   useRealtimeNotifications();
 
   // Transformer les notifications Supabase en format compatible avec le Dashboard
@@ -117,7 +169,7 @@ const Dashboard = () => {
       logger.info('Actualisation du dashboard...', {});
       await refetch();
       logger.info('Dashboard actualisé avec succès', {});
-    } catch ( _err: unknown) {
+    } catch (_err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       const error =
         err instanceof Error ? err : new Error("Erreur lors de l'actualisation du dashboard");
@@ -637,8 +689,10 @@ const Dashboard = () => {
 
                 {/* Troisième ligne - Graphique clients */}
                 {stats.revenueByMonth.some(item => item.customers > 0) && (
-                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <CustomersTrendChart data={stats.revenueByMonth} />
+                  <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}>
+                      <CustomersTrendChart data={stats.revenueByMonth} />
+                    </Suspense>
                   </div>
                 )}
               </>
@@ -657,7 +711,9 @@ const Dashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                    <PerformanceMetrics metrics={stats.performanceMetrics} />
+                    <Suspense fallback={<Skeleton className="h-[200px] w-full rounded-lg" />}>
+                      <PerformanceMetrics metrics={stats.performanceMetrics} />
+                    </Suspense>
                   </CardContent>
                 </Card>
               </div>
@@ -692,21 +748,25 @@ const Dashboard = () => {
             {/* Product Type Charts */}
             {stats && stats.revenueByTypeAndMonth && stats.revenueByTypeAndMonth.length > 0 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <ProductTypeCharts
-                  revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
-                  ordersByType={stats.ordersByType}
-                  selectedType={selectedProductType}
-                />
+                <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-lg" />}>
+                  <ProductTypeCharts
+                    revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
+                    ordersByType={stats.ordersByType}
+                    selectedType={selectedProductType}
+                  />
+                </Suspense>
               </div>
             )}
 
             {/* Product Type Performance Metrics */}
             {stats && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <ProductTypePerformanceMetrics
-                  performanceMetricsByType={stats.performanceMetricsByType}
-                  selectedType={selectedProductType}
-                />
+                <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}>
+                  <ProductTypePerformanceMetrics
+                    performanceMetricsByType={stats.performanceMetricsByType}
+                    selectedType={selectedProductType}
+                  />
+                </Suspense>
               </div>
             )}
 
@@ -728,97 +788,99 @@ const Dashboard = () => {
                 'Notifications et activité récente'
               )}
             >
-              {/* Notifications */}
-              <Card
-                id="notifications-section"
-                className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
-                role="region"
-                aria-labelledby="notifications-title"
-              >
-                <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-                  <CardTitle
-                    id="notifications-title"
-                    className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg"
-                  >
-                    <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
-                      <Bell
-                        className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500 dark:text-blue-400"
-                        aria-hidden="true"
-                      />
-                    </div>
-                    {t('dashboard.notifications.title')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                  <div
-                    className="space-y-3"
-                    role="list"
-                    aria-label={t(
-                      'dashboard.notifications.list.ariaLabel',
-                      'Liste des notifications'
-                    )}
-                  >
-                    {notifications.length === 0 ? (
-                      <div className="text-center py-4 sm:py-6">
-                        <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
-                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
-                          Aucune notification
-                        </p>
+              {/* Notifications - ✅ PHASE 2: Déferré pour améliorer le TBT */}
+              {notificationsEnabled && (
+                <Card
+                  id="notifications-section"
+                  className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
+                  role="region"
+                  aria-labelledby="notifications-title"
+                >
+                  <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
+                    <CardTitle
+                      id="notifications-title"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg"
+                    >
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
+                        <Bell
+                          className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500 dark:text-blue-400"
+                          aria-hidden="true"
+                        />
                       </div>
-                    ) : (
-                      notifications.map(notification => (
-                        <div
-                          key={notification.id}
-                          className="flex items-start gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer"
-                          role="listitem"
-                          tabIndex={0}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          <div className="flex-shrink-0 mt-0.5">
-                            <div className="p-1 sm:p-1.5 sm:p-2 rounded-full bg-blue-500/10">
-                              <Bell
-                                className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-500"
-                                aria-hidden="true"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-[10px] sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1">
-                              {notification.title}
-                            </h4>
-                            <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-2 leading-relaxed">
-                              {notification.message}
-                            </p>
-                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                              <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
-                                {new Date(notification.timestamp).toLocaleString('fr-FR', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                              {!notification.read && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
-                                >
-                                  {t('dashboard.notificationsBadge.new')}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
+                      {t('dashboard.notifications.title')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+                    <div
+                      className="space-y-3"
+                      role="list"
+                      aria-label={t(
+                        'dashboard.notifications.list.ariaLabel',
+                        'Liste des notifications'
+                      )}
+                    >
+                      {notifications.length === 0 ? (
+                        <div className="text-center py-4 sm:py-6">
+                          <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
+                          <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                            Aucune notification
+                          </p>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      ) : (
+                        notifications.map(notification => (
+                          <div
+                            key={notification.id}
+                            className="flex items-start gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer"
+                            role="listitem"
+                            tabIndex={0}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                              }
+                            }}
+                          >
+                            <div className="flex-shrink-0 mt-0.5">
+                              <div className="p-1 sm:p-1.5 sm:p-2 rounded-full bg-blue-500/10">
+                                <Bell
+                                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-blue-500"
+                                  aria-hidden="true"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-[10px] sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1">
+                                {notification.title}
+                              </h4>
+                              <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-2 leading-relaxed">
+                                {notification.message}
+                              </p>
+                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                                  {new Date(notification.timestamp).toLocaleString('fr-FR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                                {!notification.read && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
+                                  >
+                                    {t('dashboard.notificationsBadge.new')}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Recent Activity */}
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
@@ -938,9 +1000,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-
-
-
-

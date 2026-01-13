@@ -179,29 +179,32 @@ export default defineConfig(({ mode }) => {
             // Garder les composants de base dans le principal, séparer les autres
             if (id.includes('node_modules/@radix-ui')) {
               // Composants critiques pour le premier rendu
-              if (id.includes('@radix-ui/react-slot') ||
-                  id.includes('@radix-ui/react-primitive') ||
-                  id.includes('@radix-ui/react-presence')) {
+              if (
+                id.includes('@radix-ui/react-slot') ||
+                id.includes('@radix-ui/react-primitive') ||
+                id.includes('@radix-ui/react-presence')
+              ) {
                 return undefined; // Garder dans le chunk principal
               }
               // Composants non-critiques - séparer
-              if (id.includes('@radix-ui/react-tooltip') ||
-                  id.includes('@radix-ui/react-hover-card') ||
-                  id.includes('@radix-ui/react-popover') ||
-                  id.includes('@radix-ui/react-dialog') ||
-                  id.includes('@radix-ui/react-alert-dialog')) {
+              if (
+                id.includes('@radix-ui/react-tooltip') ||
+                id.includes('@radix-ui/react-hover-card') ||
+                id.includes('@radix-ui/react-popover') ||
+                id.includes('@radix-ui/react-dialog') ||
+                id.includes('@radix-ui/react-alert-dialog')
+              ) {
                 return 'ui-overlays';
               }
               // Autres composants Radix UI dans chunk UI général
               return 'ui-components';
             }
 
-            // CRITIQUE: recharts doit rester dans le chunk principal
-            // Utilise React directement et accède à React._SECRET_INTERNALS
-            // Séparer cause "Cannot read properties of undefined (reading '_SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED')"
-            // Même si lazy-loaded, le chunk peut être préchargé avant React
+            // OPTIMISATION: recharts séparé en chunk dédié (chargé à la demande)
+            // Les composants utilisant recharts sont lazy-loaded, donc safe de séparer
+            // Cela réduit significativement le bundle principal
             if (id.includes('node_modules/recharts')) {
-              return undefined; // Forcer dans le chunk principal
+              return 'charts'; // Séparer en chunk dédié
             }
 
             // CRITIQUE: react-big-calendar doit rester dans le chunk principal
@@ -213,9 +216,11 @@ export default defineConfig(({ mode }) => {
               return undefined; // Forcer dans le chunk principal
             }
 
-            // TipTap - Garder dans le chunk principal (utilise React.useLayoutEffect)
+            // OPTIMISATION: TipTap séparé en chunk dédié (chargé à la demande)
+            // TipTap est utilisé seulement dans les éditeurs qui sont lazy-loaded
+            // Cela réduit significativement le bundle principal
             if (id.includes('node_modules/@tiptap')) {
-              return undefined; // Garder dans le chunk principal
+              return 'editor'; // Séparer en chunk dédié
             }
 
             // Framer Motion - Garder dans le chunk principal (utilise React.createContext)
@@ -355,15 +360,16 @@ export default defineConfig(({ mode }) => {
               }
 
               // Utilitaires de style - Séparer
-              if (id.includes('node_modules/clsx') ||
-                  id.includes('node_modules/tailwind-merge') ||
-                  id.includes('node_modules/class-variance-authority')) {
+              if (
+                id.includes('node_modules/clsx') ||
+                id.includes('node_modules/tailwind-merge') ||
+                id.includes('node_modules/class-variance-authority')
+              ) {
                 return 'utils';
               }
 
               // Librairies de données - Séparer
-              if (id.includes('node_modules/papaparse') ||
-                  id.includes('node_modules/xlsx')) {
+              if (id.includes('node_modules/papaparse') || id.includes('node_modules/xlsx')) {
                 return 'data-processing';
               }
 

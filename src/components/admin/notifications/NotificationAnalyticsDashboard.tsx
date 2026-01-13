@@ -5,7 +5,7 @@
  * Dashboard complet pour analyser les performances des notifications
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -414,9 +414,3 @@ export const NotificationAnalyticsDashboard = () => {
     </div>
   );
 };
-
-
-
-
-
-

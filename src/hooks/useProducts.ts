@@ -85,7 +85,7 @@ export const useProducts = (storeId?: string | null) => {
         setProducts(data || []);
       } catch (_error: unknown) {
         const errorMessage =
-          error instanceof Error ? error.message : 'Erreur lors de la récupération des produits';
+          _error instanceof Error ? _error.message : 'Erreur lors de la récupération des produits';
         toast({
           title: 'Erreur',
           description: errorMessage,

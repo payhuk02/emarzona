@@ -132,10 +132,15 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
   // Charger les boutiques au chargement et quand l'utilisateur change
   useEffect(() => {
-    if (!authLoading) {
-      fetchStores();
+    if (!authLoading && user) {
+      // Ajouter un délai pour éviter les appels répétés
+      const timeoutId = setTimeout(() => {
+        fetchStores();
+      }, 1000); // Délai de 1 seconde
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [authLoading, fetchStores]);
+  }, [authLoading, user, fetchStores]);
 
   // Calculer la boutique sélectionnée
   const selectedStore = selectedStoreId ? stores.find(s => s.id === selectedStoreId) || null : null;

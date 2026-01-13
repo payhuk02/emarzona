@@ -10,7 +10,18 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Upload, RefreshCw, Loader2, X, Settings, Box } from 'lucide-react';
+import {
+  Upload,
+  RefreshCw,
+  Loader2,
+  X,
+  Settings,
+  Box,
+  Palette,
+  Image as ImageIcon,
+  Type,
+  Save,
+} from 'lucide-react';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { designTokens } from '@/lib/design-system';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,7 +60,9 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
   );
 
   const [localTypography, setLocalTypography] = useState({
-    fontFamily: customizationData?.design?.typography?.fontFamily || designTokens.typography.fontFamily.sans.join(', '),
+    fontFamily:
+      customizationData?.design?.typography?.fontFamily ||
+      designTokens.typography.fontFamily.sans.join(', '),
     fontSize: customizationData?.design?.typography?.fontSize || designTokens.typography.fontSize,
   });
 
@@ -80,13 +93,17 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
       }
       if (customizationData.design.typography) {
         setLocalTypography({
-          fontFamily: customizationData.design.typography.fontFamily || designTokens.typography.fontFamily.sans.join(', '),
-          fontSize: customizationData.design.typography.fontSize || designTokens.typography.fontSize,
+          fontFamily:
+            customizationData.design.typography.fontFamily ||
+            designTokens.typography.fontFamily.sans.join(', '),
+          fontSize:
+            customizationData.design.typography.fontSize || designTokens.typography.fontSize,
         });
       }
       if (customizationData.design.tokens) {
         setLocalDesignTokens({
-          borderRadius: customizationData.design.tokens.borderRadius || designTokens.borderRadius.md,
+          borderRadius:
+            customizationData.design.tokens.borderRadius || designTokens.borderRadius.md,
           shadow: customizationData.design.tokens.shadow || 'md',
           spacing: customizationData.design.tokens.spacing || '4',
         });
@@ -104,7 +121,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
   const handleColorChange = (colorKey: keyof typeof localColors, value: string) => {
     setLocalColors(prev => ({ ...prev, [colorKey]: value }));
-    
+
     // Mettre à jour l'état local pour l'application en temps réel
     setCustomizationData(prev => ({
       ...prev,
@@ -116,10 +133,10 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         },
       },
     }));
-    
+
     // Application en temps réel
     applyColorInRealTime(colorKey, value);
-    
+
     // Sauvegarder dans Supabase
     save('design', {
       ...customizationData?.design,
@@ -127,22 +144,22 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         ...localColors,
         [colorKey]: value,
       },
-    }).catch((error) => {
+    }).catch(error => {
       logger.error('Error saving color customization', { error, colorKey, value });
     });
   };
 
   const applyColorInRealTime = (colorKey: string, value: string) => {
     const root = document.documentElement;
-    let  hslValue= value;
-    
+    let hslValue = value;
+
     // Convertir HSL si nécessaire
     if (value.startsWith('hsl(')) {
       hslValue = value.replace('hsl(', '').replace(')', '');
     }
-    
+
     // Mapper les clés aux variables CSS
-    const  cssVarMap: Record<string, string> = {
+    const cssVarMap: Record<string, string> = {
       primary: '--primary',
       secondary: '--secondary',
       accent: '--accent',
@@ -154,7 +171,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     const cssVar = cssVarMap[colorKey];
     if (cssVar) {
       root.style.setProperty(cssVar, hslValue);
-      
+
       // Appliquer aussi les variantes
       if (colorKey === 'primary') {
         root.style.setProperty('--primary-foreground', '0 0% 100%');
@@ -176,7 +193,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         fontSize: { ...prev.fontSize, [key]: value },
       }));
     }
-    
+
     // Mettre à jour l'état local
     setCustomizationData(prev => ({
       ...prev,
@@ -184,45 +201,56 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         ...prev?.design,
         typography: {
           ...prev?.design?.typography,
-          [key === 'fontFamily' ? 'fontFamily' : 'fontSize']: key === 'fontFamily' ? value : {
-            ...prev?.design?.typography?.fontSize,
-            [key]: value,
-          },
+          [key === 'fontFamily' ? 'fontFamily' : 'fontSize']:
+            key === 'fontFamily'
+              ? value
+              : {
+                  ...prev?.design?.typography?.fontSize,
+                  [key]: value,
+                },
         },
       },
     }));
-    
+
     // Sauvegarder dans Supabase
-    const updatedTypography = key === 'fontFamily' 
-      ? { ...localTypography, fontFamily: value }
-      : { ...localTypography, fontSize: { ...localTypography.fontSize, [key]: value } };
-    
+    const updatedTypography =
+      key === 'fontFamily'
+        ? { ...localTypography, fontFamily: value }
+        : { ...localTypography, fontSize: { ...localTypography.fontSize, [key]: value } };
+
     save('design', {
       ...customizationData?.design,
       typography: updatedTypography,
-    }).catch((error) => {
+    }).catch(error => {
       logger.error('Error saving typography customization', { error, key, value });
     });
   };
 
   const handleLogoUpload = async (type: 'light' | 'dark' | 'favicon', file: File) => {
     // Validation
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp', 'image/x-icon'];
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'image/svg+xml',
+      'image/webp',
+      'image/x-icon',
+    ];
     const maxSize = type === 'favicon' ? 1024 * 100 : 1024 * 1024 * 2; // 100KB pour favicon, 2MB pour logos
 
     // Vérifier le type MIME du fichier
     if (!file.type || !allowedTypes.includes(file.type)) {
       // Si le type MIME n'est pas détecté, essayer de le déterminer depuis l'extension
       const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const  extToMime: Record<string, string> = {
-        'png': 'image/png',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'svg': 'image/svg+xml',
-        'webp': 'image/webp',
-        'ico': 'image/x-icon',
+      const extToMime: Record<string, string> = {
+        png: 'image/png',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        svg: 'image/svg+xml',
+        webp: 'image/webp',
+        ico: 'image/x-icon',
       };
-      
+
       if (!fileExt || !extToMime[fileExt]) {
         toast({
           title: 'Format non supporté',
@@ -252,7 +280,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
       // Vérifier que le fichier est bien un File
       if (!(file instanceof File)) {
-        throw new Error('Le fichier n\'est pas valide. Type: ' + typeof file);
+        throw new Error("Le fichier n'est pas valide. Type: " + typeof file);
       }
 
       // Vérifier que le fichier a bien un contenu
@@ -261,24 +289,34 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
       }
 
       // Vérifier que le type MIME est valide ou le déterminer depuis l'extension
-      const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp', 'image/x-icon', 'image/vnd.microsoft.icon'];
-      let  fileType= file.type;
-      
+      const allowedMimeTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'image/svg+xml',
+        'image/webp',
+        'image/x-icon',
+        'image/vnd.microsoft.icon',
+      ];
+      let fileType = file.type;
+
       // Si le type MIME n'est pas valide, le déterminer depuis l'extension
       if (!fileType || !allowedMimeTypes.includes(fileType)) {
-        const  extToMime: Record<string, string> = {
-          'png': 'image/png',
-          'jpg': 'image/jpeg',
-          'jpeg': 'image/jpeg',
-          'svg': 'image/svg+xml',
-          'webp': 'image/webp',
-          'ico': 'image/x-icon',
+        const extToMime: Record<string, string> = {
+          png: 'image/png',
+          jpg: 'image/jpeg',
+          jpeg: 'image/jpeg',
+          svg: 'image/svg+xml',
+          webp: 'image/webp',
+          ico: 'image/x-icon',
         };
         fileType = fileExt ? extToMime[fileExt] || 'image/png' : 'image/png';
       }
 
       // Vérifier les permissions de l'utilisateur avant l'upload
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Utilisateur non authentifié');
       }
@@ -290,14 +328,19 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         .eq('user_id', user.id)
         .single();
 
-      const isAdmin = profile?.is_super_admin || profile?.role === 'admin' || user.email === 'contact@edigit-agence.com';
-      
+      const isAdmin =
+        profile?.is_super_admin ||
+        profile?.role === 'admin' ||
+        user.email === 'contact@edigit-agence.com';
+
       if (!isAdmin) {
-        throw new Error('Permissions insuffisantes. Seuls les administrateurs peuvent uploader des logos.');
+        throw new Error(
+          'Permissions insuffisantes. Seuls les administrateurs peuvent uploader des logos.'
+        );
       }
 
-      logger.debug('Uploading logo', { 
-        fileName, 
+      logger.debug('Uploading logo', {
+        fileName,
         originalFileType: file.type,
         correctedFileType: fileType,
         fileSize: file.size,
@@ -307,11 +350,13 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         isFile: file instanceof File,
         constructor: file.constructor.name,
         userId: user.id,
-        isAdmin
+        isAdmin,
       });
 
       // Obtenir la session pour l'authentification
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('Session expirée. Veuillez vous reconnecter.');
       }
@@ -324,7 +369,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
       const uploadData = await new Promise<{ path: string }>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
-        xhr.upload.addEventListener('progress', (e) => {
+        xhr.upload.addEventListener('progress', e => {
           if (e.lengthComputable) {
             const progress = (e.loaded / e.total) * 100;
             logger.debug('Upload progress', { progress, loaded: e.loaded, total: e.total });
@@ -342,7 +387,11 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
           } else {
             try {
               const error = JSON.parse(xhr.responseText);
-              reject(new Error(error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`));
+              reject(
+                new Error(
+                  error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`
+                )
+              );
             } catch {
               reject(new Error(`Erreur upload: ${xhr.statusText} (${xhr.status})`));
             }
@@ -350,7 +399,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         });
 
         xhr.addEventListener('error', () => {
-          reject(new Error('Erreur réseau lors de l\'upload'));
+          reject(new Error("Erreur réseau lors de l'upload"));
         });
 
         xhr.addEventListener('abort', () => {
@@ -367,22 +416,22 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
       });
 
       // Si on arrive ici, l'upload a réussi
-      logger.info('Logo uploaded successfully', { 
-        fileName, 
+      logger.info('Logo uploaded successfully', {
+        fileName,
         path: uploadData.path,
         fileType: fileType,
-        fileSize: file.size
+        fileSize: file.size,
       });
 
       // Récupérer l'URL publique
-      const { data: { publicUrl } } = supabase.storage
-        .from('platform-assets')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('platform-assets').getPublicUrl(fileName);
 
-      logger.debug('Public URL generated', { 
-        publicUrl, 
+      logger.debug('Public URL generated', {
+        publicUrl,
         fileName,
-        type 
+        type,
       });
 
       // Sauvegarder l'URL dans la configuration
@@ -394,34 +443,34 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         },
       };
 
-      logger.debug('Saving logo URL to configuration', { 
-        type, 
+      logger.debug('Saving logo URL to configuration', {
+        type,
         publicUrl: publicUrl.substring(0, 80) + '...',
         hasExistingLogo: !!customizationData?.design?.logo,
         existingLogos: {
           light: !!customizationData?.design?.logo?.light,
           dark: !!customizationData?.design?.logo?.dark,
           favicon: !!customizationData?.design?.logo?.favicon,
-        }
+        },
       });
 
       const saveResult = await save('design', logoData);
 
       if (saveResult) {
-        logger.info('Logo URL saved successfully', { 
-          type, 
+        logger.info('Logo URL saved successfully', {
+          type,
           publicUrl: publicUrl.substring(0, 80) + '...',
-          saved: true
+          saved: true,
         });
         toast({
           title: '✅ Logo téléchargé',
           description: `Le logo ${type} a été téléchargé et sauvegardé avec succès`,
         });
       } else {
-        logger.warn('Logo uploaded but save may have failed', { 
-          type, 
+        logger.warn('Logo uploaded but save may have failed', {
+          type,
           publicUrl: publicUrl.substring(0, 80) + '...',
-          saveResult 
+          saveResult,
         });
         toast({
           title: '⚠️ Logo téléchargé',
@@ -432,7 +481,8 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
 
       if (onChange) onChange();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible de télécharger le logo';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Impossible de télécharger le logo';
       logger.error('Error uploading logo', { error, type, fileName: file.name });
       toast({
         title: '❌ Erreur',
@@ -444,7 +494,10 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     }
   };
 
-  const handleLogoFileSelect = (type: 'light' | 'dark' | 'favicon', event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoFileSelect = (
+    type: 'light' | 'dark' | 'favicon',
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -454,7 +507,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     if (!(file instanceof File)) {
       toast({
         title: '❌ Erreur',
-        description: 'Le fichier sélectionné n\'est pas valide',
+        description: "Le fichier sélectionné n'est pas valide",
         variant: 'destructive',
       });
       return;
@@ -502,9 +555,9 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
       warning: designTokens.colors.warning[500],
       error: designTokens.colors.error[500],
     };
-    
+
     setLocalColors(defaultColors);
-    
+
     // Mettre à jour l'état global
     setCustomizationData(prev => ({
       ...prev,
@@ -513,21 +566,21 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
         colors: defaultColors,
       },
     }));
-    
+
     // Sauvegarder
     save('design', {
       ...customizationData?.design,
       colors: defaultColors,
-    }).catch((_error) => {
+    }).catch(_error => {
       toast({
         title: 'Erreur',
         description: 'Impossible de réinitialiser les couleurs',
         variant: 'destructive',
       });
     });
-    
+
     if (onChange) onChange();
-    
+
     toast({
       title: '✅ Réinitialisation réussie',
       description: 'Les couleurs ont été réinitialisées aux valeurs par défaut.',
@@ -589,14 +642,18 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                     <Input
                       type="text"
                       value={value}
-                      onChange={(e) => handleColorChange(key as keyof typeof localColors, e.target.value)}
+                      onChange={e =>
+                        handleColorChange(key as keyof typeof localColors, e.target.value)
+                      }
                       className="flex-1"
                       placeholder="hsl(210, 100%, 60%)"
                     />
                     <Input
                       type="color"
                       value={value}
-                      onChange={(e) => handleColorChange(key as keyof typeof localColors, e.target.value)}
+                      onChange={e =>
+                        handleColorChange(key as keyof typeof localColors, e.target.value)
+                      }
                       className="w-20"
                     />
                   </div>
@@ -608,13 +665,11 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
           <Card>
             <CardHeader>
               <CardTitle>Thème</CardTitle>
-              <CardDescription>
-                Choisissez le thème par défaut de la plateforme
-              </CardDescription>
+              <CardDescription>Choisissez le thème par défaut de la plateforme</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                {(['light', 'dark', 'auto'] as const).map((theme) => (
+                {(['light', 'dark', 'auto'] as const).map(theme => (
                   <button
                     key={theme}
                     onClick={() => {
@@ -623,16 +678,17 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                       save('design', {
                         ...customizationData?.design,
                         theme: theme,
-                      }).catch((error) => {
+                      }).catch(error => {
                         logger.error('Error saving theme customization', { error, theme });
                       });
                       if (onChange) onChange();
                     }}
                     className={`
                       flex-1 p-3 sm:p-4 rounded-lg border-2 transition-all text-left
-                      ${localTheme === theme
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
+                      ${
+                        localTheme === theme
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
                       }
                     `}
                   >
@@ -685,7 +741,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                       ref={logoInputRefs.light}
                       type="file"
                       accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
-                      onChange={(e) => handleLogoFileSelect('light', e)}
+                      onChange={e => handleLogoFileSelect('light', e)}
                       className="hidden"
                     />
                     <Button
@@ -739,7 +795,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                       ref={logoInputRefs.dark}
                       type="file"
                       accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
-                      onChange={(e) => handleLogoFileSelect('dark', e)}
+                      onChange={e => handleLogoFileSelect('dark', e)}
                       className="hidden"
                     />
                     <Button
@@ -793,7 +849,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                       ref={logoInputRefs.favicon}
                       type="file"
                       accept="image/png,image/jpeg,image/jpg,image/x-icon,image/svg+xml"
-                      onChange={(e) => handleLogoFileSelect('favicon', e)}
+                      onChange={e => handleLogoFileSelect('favicon', e)}
                       className="hidden"
                     />
                     <Button
@@ -829,16 +885,14 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
           <Card>
             <CardHeader>
               <CardTitle>Typographie</CardTitle>
-              <CardDescription>
-                Configurez les polices et tailles de texte
-              </CardDescription>
+              <CardDescription>Configurez les polices et tailles de texte</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Famille de police principale</Label>
                 <Input
                   value={localTypography.fontFamily}
-                  onChange={(e) => handleTypographyChange('fontFamily', e.target.value)}
+                  onChange={e => handleTypographyChange('fontFamily', e.target.value)}
                   placeholder="Poppins, system-ui, sans-serif"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -853,7 +907,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                     <Label className="text-sm capitalize">{key}</Label>
                     <Input
                       value={value}
-                      onChange={(e) => handleTypographyChange(key, e.target.value)}
+                      onChange={e => handleTypographyChange(key, e.target.value)}
                       className="w-32"
                       placeholder="1rem"
                     />
@@ -900,8 +954,11 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                         // Application en temps réel
                         document.documentElement.style.setProperty('--radius', value);
                         // Sauvegarder automatiquement
-                        save('design', updated.design).catch((error) => {
-                          logger.error('Error saving border radius customization', { error, value });
+                        save('design', updated.design).catch(error => {
+                          logger.error('Error saving border radius customization', {
+                            error,
+                            value,
+                          });
                         });
                         if (onChange) onChange();
                       }}
@@ -959,8 +1016,11 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                         // Application en temps réel
                         document.documentElement.style.setProperty('--shadow-default', shadowValue);
                         // Sauvegarder automatiquement
-                        save('design', updated.design).catch((error) => {
-                          logger.error('Error saving shadow customization', { error, shadowKey: key });
+                        save('design', updated.design).catch(error => {
+                          logger.error('Error saving shadow customization', {
+                            error,
+                            shadowKey: key,
+                          });
                         });
                         if (onChange) onChange();
                       }}
@@ -993,59 +1053,67 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
               <div className="space-y-4">
                 <Label>Espacement de base (Base Spacing)</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-                  {Object.entries(designTokens.spacing).slice(0, 8).map(([key, value]) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        setLocalDesignTokens(prev => ({ ...prev, spacing: key }));
-                        const  spacingMap: Record<string, string> = {
-                          '0': '0',
-                          '1': '0.25rem',
-                          '2': '0.5rem',
-                          '3': '0.75rem',
-                          '4': '1rem',
-                          '5': '1.25rem',
-                          '6': '1.5rem',
-                          '8': '2rem',
-                        };
-                        const spacingValue = spacingMap[key] || '1rem';
-                        const updated = {
-                          ...customizationData,
-                          design: {
-                            ...customizationData?.design,
-                            tokens: {
-                              ...customizationData?.design?.tokens,
-                              spacing: key,
+                  {Object.entries(designTokens.spacing)
+                    .slice(0, 8)
+                    .map(([key, value]) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setLocalDesignTokens(prev => ({ ...prev, spacing: key }));
+                          const spacingMap: Record<string, string> = {
+                            '0': '0',
+                            '1': '0.25rem',
+                            '2': '0.5rem',
+                            '3': '0.75rem',
+                            '4': '1rem',
+                            '5': '1.25rem',
+                            '6': '1.5rem',
+                            '8': '2rem',
+                          };
+                          const spacingValue = spacingMap[key] || '1rem';
+                          const updated = {
+                            ...customizationData,
+                            design: {
+                              ...customizationData?.design,
+                              tokens: {
+                                ...customizationData?.design?.tokens,
+                                spacing: key,
+                              },
                             },
-                          },
-                        };
-                        setCustomizationData(updated);
-                        // Application en temps réel
-                        document.documentElement.style.setProperty('--spacing-base', spacingValue);
-                        // Sauvegarder automatiquement
-                        save('design', updated.design).catch((error) => {
-                          logger.error('Error saving spacing customization', { error, spacingKey: key });
-                        });
-                        if (onChange) onChange();
-                      }}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        localDesignTokens.spacing === key
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="bg-primary rounded"
-                          style={{ width: value, height: '20px' }}
-                        />
-                        <div>
-                          <div className="text-sm font-medium">{key}</div>
-                          <div className="text-xs text-muted-foreground">{value}</div>
+                          };
+                          setCustomizationData(updated);
+                          // Application en temps réel
+                          document.documentElement.style.setProperty(
+                            '--spacing-base',
+                            spacingValue
+                          );
+                          // Sauvegarder automatiquement
+                          save('design', updated.design).catch(error => {
+                            logger.error('Error saving spacing customization', {
+                              error,
+                              spacingKey: key,
+                            });
+                          });
+                          if (onChange) onChange();
+                        }}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          localDesignTokens.spacing === key
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="bg-primary rounded"
+                            style={{ width: value, height: '20px' }}
+                          />
+                          <div>
+                            <div className="text-sm font-medium">{key}</div>
+                            <div className="text-xs text-muted-foreground">{value}</div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
                 </div>
               </div>
             </CardContent>
@@ -1054,18 +1122,15 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
       </Tabs>
 
       <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => setShowResetDialog(true)}
           className="w-full sm:w-auto"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Réinitialiser
         </Button>
-        <Button 
-          onClick={handleSave}
-          className="w-full sm:w-auto"
-        >
+        <Button onClick={handleSave} className="w-full sm:w-auto">
           <Save className="h-4 w-4 mr-2" />
           Sauvegarder les modifications
         </Button>
@@ -1102,10 +1167,3 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
     </div>
   );
 };
-
-
-
-
-
-
-

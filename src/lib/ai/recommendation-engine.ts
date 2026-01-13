@@ -6,6 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
+import { useQuery } from '@tanstack/react-query';
 
 type Product = Database['public']['Tables']['products']['Row'];
 type User = Database['public']['Tables']['customers']['Row'];
@@ -16,7 +17,7 @@ export interface RecommendationResult {
   score: number;
   reason: 'collaborative' | 'content' | 'trending' | 'personal' | 'complementary';
   confidence: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface RecommendationContext {
@@ -26,6 +27,10 @@ export interface RecommendationContext {
   limit?: number;
   excludeRecentlyViewed?: boolean;
   includeReasoning?: boolean;
+}
+
+interface UserInteraction {
+  product_id: string;
 }
 
 /**
@@ -38,9 +43,16 @@ export class RecommendationEngine {
   /**
    * Obtenir des recommandations personnalisées pour un utilisateur
    */
-  async getPersonalizedRecommendations(context: RecommendationContext): Promise<RecommendationResult[]> {
+  async getPersonalizedRecommendations(
+    context: RecommendationContext
+  ): Promise<RecommendationResult[]> {
     try {
-      const { userId, limit = 10, excludeRecentlyViewed = true, includeReasoning = false } = context;
+      const {
+        userId,
+        limit = 10,
+        excludeRecentlyViewed = true,
+        includeReasoning = false,
+      } = context;
 
       if (!userId) {
         return this.getTrendingRecommendations(limit);
@@ -92,11 +104,10 @@ export class RecommendationEngine {
       logger.info('Recommendations generated', {
         userId,
         count: finalRecommendations.length,
-        algorithms: ['collaborative', 'content', 'complementary', 'trending']
+        algorithms: ['collaborative', 'content', 'complementary', 'trending'],
       });
 
       return finalRecommendations;
-
     } catch (error) {
       logger.error('Error generating personalized recommendations', { error, context });
       return this.getFallbackRecommendations(limit || 10);
@@ -106,12 +117,15 @@ export class RecommendationEngine {
   /**
    * Recommandations collaboratives (basées sur utilisateurs similaires)
    */
-  private async getCollaborativeRecommendations(userId: string, userHistory: string[]): Promise<RecommendationResult[]> {
+  private async getCollaborativeRecommendations(
+    userId: string,
+    userHistory: string[]
+  ): Promise<RecommendationResult[]> {
     try {
       // Trouver des utilisateurs similaires basés sur l'historique d'achat
       const { data: similarUsers } = await supabase.rpc('find_similar_users', {
         p_user_id: userId,
-        p_limit: 50
+        p_limit: 50,
       });
 
       if (!similarUsers || similarUsers.length === 0) {
@@ -119,7 +133,10 @@ export class RecommendationEngine {
       }
 
       // Récupérer les produits achetés par ces utilisateurs similaires
-      const similarUserIds = similarUsers.map((u: any) => u.user_id);
+      interface SimilarUser {
+        user_id: string;
+      }
+      const similarUserIds = similarUsers.map((u: SimilarUser) => u.user_id);
 
       const { data: similarPurchases } = await supabase
         .from('orders')
@@ -132,9 +149,15 @@ export class RecommendationEngine {
 
       // Compter la fréquence des produits
       const productFrequency: Record<string, number> = {};
-      similarPurchases.forEach((order: any) => {
+      interface OrderItem {
+        product_id?: string;
+      }
+      interface Order {
+        items?: string;
+      }
+      similarPurchases.forEach((order: Order) => {
         if (order.items) {
-          JSON.parse(order.items).forEach((item: any) => {
+          JSON.parse(order.items).forEach((item: OrderItem) => {
             if (item.product_id) {
               productFrequency[item.product_id] = (productFrequency[item.product_id] || 0) + 1;
             }
@@ -152,10 +175,9 @@ export class RecommendationEngine {
           score: Math.min(frequency / similarUsers.length, 1) * 0.8, // Score max 0.8
           reason: 'collaborative' as const,
           confidence: Math.min(frequency / 10, 1), // Confiance basée sur la fréquence
-          metadata: { similarUsers: similarUsers.length, frequency }
+          metadata: { similarUsers: similarUsers.length, frequency },
         }))
         .filter(rec => rec.confidence >= this.MIN_CONFIDENCE);
-
     } catch (error) {
       logger.error('Error in collaborative recommendations', { error, userId });
       return [];
@@ -165,7 +187,9 @@ export class RecommendationEngine {
   /**
    * Recommandations basées sur le contenu (produits similaires)
    */
-  private async getContentBasedRecommendations(userHistory: string[]): Promise<RecommendationResult[]> {
+  private async getContentBasedRecommendations(
+    userHistory: string[]
+  ): Promise<RecommendationResult[]> {
     try {
       if (userHistory.length === 0) return [];
 
@@ -195,7 +219,8 @@ export class RecommendationEngine {
 
         // Analyse basique des mots-clés dans la description
         if (product.description) {
-          const words = product.description.toLowerCase()
+          const words = product.description
+            .toLowerCase()
             .split(/\s+/)
             .filter(word => word.length > 3);
 
@@ -224,35 +249,36 @@ export class RecommendationEngine {
       if (!similarProducts) return [];
 
       // Calculer le score de similarité
-      return similarProducts.map(product => {
-        let similarityScore = 0;
-        let reasons = 0;
+      return similarProducts
+        .map(product => {
+          let similarityScore = 0;
+          let reasons = 0;
 
-        // Score basé sur la catégorie
-        if (product.category && categoryCounts[product.category]) {
-          similarityScore += (categoryCounts[product.category] / purchasedProducts.length) * 0.6;
-          reasons++;
-        }
-
-        // Score basé sur les tags
-        if (product.tags) {
-          const productTags = JSON.parse(product.tags);
-          const matchingTags = productTags.filter((tag: string) => tagCounts[tag]);
-          if (matchingTags.length > 0) {
-            similarityScore += (matchingTags.length / productTags.length) * 0.4;
+          // Score basé sur la catégorie
+          if (product.category && categoryCounts[product.category]) {
+            similarityScore += (categoryCounts[product.category] / purchasedProducts.length) * 0.6;
             reasons++;
           }
-        }
 
-        return {
-          productId: product.id,
-          score: similarityScore,
-          reason: 'content' as const,
-          confidence: reasons > 0 ? Math.min(similarityScore * 1.2, 1) : 0.3,
-          metadata: { matchingReasons: reasons, categories: topCategories, tags: topTags }
-        };
-      }).filter(rec => rec.confidence >= this.MIN_CONFIDENCE);
+          // Score basé sur les tags
+          if (product.tags) {
+            const productTags = JSON.parse(product.tags);
+            const matchingTags = productTags.filter((tag: string) => tagCounts[tag]);
+            if (matchingTags.length > 0) {
+              similarityScore += (matchingTags.length / productTags.length) * 0.4;
+              reasons++;
+            }
+          }
 
+          return {
+            productId: product.id,
+            score: similarityScore,
+            reason: 'content' as const,
+            confidence: reasons > 0 ? Math.min(similarityScore * 1.2, 1) : 0.3,
+            metadata: { matchingReasons: reasons, categories: topCategories, tags: topTags },
+          };
+        })
+        .filter(rec => rec.confidence >= this.MIN_CONFIDENCE);
     } catch (error) {
       logger.error('Error in content-based recommendations', { error, userHistory });
       return [];
@@ -262,15 +288,14 @@ export class RecommendationEngine {
   /**
    * Produits complémentaires (cross-selling)
    */
-  private async getComplementaryRecommendations(userHistory: string[]): Promise<RecommendationResult[]> {
+  private async getComplementaryRecommendations(
+    userHistory: string[]
+  ): Promise<RecommendationResult[]> {
     try {
       if (userHistory.length === 0) return [];
 
       // Analyser les patterns d'achat groupés
-      const { data: orderItems } = await supabase
-        .from('orders')
-        .select('items')
-        .limit(1000);
+      const { data: orderItems } = await supabase.from('orders').select('items').limit(1000);
 
       if (!orderItems) return [];
 
@@ -280,7 +305,12 @@ export class RecommendationEngine {
       orderItems.forEach(order => {
         if (order.items) {
           const items = JSON.parse(order.items);
-          const productIds = items.map((item: any) => item.product_id).filter(Boolean);
+          interface OrderItem {
+            product_id?: string;
+          }
+          const productIds = (items as OrderItem[])
+            .map((item: OrderItem) => item.product_id)
+            .filter(Boolean);
 
           // Pour chaque paire de produits dans la même commande
           for (let i = 0; i < productIds.length; i++) {
@@ -311,7 +341,7 @@ export class RecommendationEngine {
                 score: Math.min(frequency / 10, 1) * 0.7, // Score max 0.7
                 reason: 'complementary' as const,
                 confidence: Math.min(frequency / 5, 1),
-                metadata: { baseProduct: userProductId, frequency }
+                metadata: { baseProduct: userProductId, frequency },
               });
             }
           });
@@ -319,7 +349,6 @@ export class RecommendationEngine {
       });
 
       return recommendations;
-
     } catch (error) {
       logger.error('Error in complementary recommendations', { error });
       return [];
@@ -333,7 +362,7 @@ export class RecommendationEngine {
     try {
       // Récupérer les catégories préférées de l'utilisateur
       const { data: userCategories } = await supabase.rpc('get_user_preferred_categories', {
-        p_user_id: userId
+        p_user_id: userId,
       });
 
       if (!userCategories || userCategories.length === 0) {
@@ -344,19 +373,23 @@ export class RecommendationEngine {
       const { data: trendingProducts } = await supabase.rpc('get_trending_products_by_categories', {
         p_categories: userCategories,
         p_limit: 10,
-        p_days: 30
+        p_days: 30,
       });
 
       if (!trendingProducts) return [];
 
-      return trendingProducts.map((product: any) => ({
+      interface TrendingProduct {
+        id: string;
+        trend_score?: number;
+        category?: string;
+      }
+      return (trendingProducts as TrendingProduct[]).map((product: TrendingProduct) => ({
         productId: product.id,
         score: Math.min(product.trend_score || 0.5, 1) * 0.6,
         reason: 'trending' as const,
         confidence: 0.7,
-        metadata: { trendScore: product.trend_score, category: product.category }
+        metadata: { trendScore: product.trend_score, category: product.category },
       }));
-
     } catch (error) {
       logger.error('Error in personalized trending', { error, userId });
       return [];
@@ -370,19 +403,22 @@ export class RecommendationEngine {
     try {
       const { data: trendingProducts } = await supabase.rpc('get_trending_products', {
         p_limit: limit,
-        p_days: 7
+        p_days: 7,
       });
 
       if (!trendingProducts) return [];
 
-      return trendingProducts.map((product: any) => ({
+      interface TrendingProduct {
+        id: string;
+        trend_score?: number;
+      }
+      return (trendingProducts as TrendingProduct[]).map((product: TrendingProduct) => ({
         productId: product.id,
         score: Math.min(product.trend_score || 0.5, 1) * 0.5,
         reason: 'trending' as const,
         confidence: 0.6,
-        metadata: { trendScore: product.trend_score }
+        metadata: { trendScore: product.trend_score },
       }));
-
     } catch (error) {
       logger.error('Error getting trending recommendations', { error });
       return [];
@@ -403,9 +439,12 @@ export class RecommendationEngine {
       if (!orders) return [];
 
       const productIds = new Set<string>();
+      interface OrderItem {
+        product_id?: string;
+      }
       orders.forEach(order => {
         if (order.items) {
-          JSON.parse(order.items).forEach((item: any) => {
+          JSON.parse(order.items).forEach((item: OrderItem) => {
             if (item.product_id) {
               productIds.add(item.product_id);
             }
@@ -420,7 +459,7 @@ export class RecommendationEngine {
     }
   }
 
-  private async getUserInteractions(userId: string): Promise<any[]> {
+  private async getUserInteractions(userId: string): Promise<UserInteraction[]> {
     // Implémentation pour récupérer les interactions utilisateur (views, wishlist, etc.)
     return [];
   }
@@ -455,7 +494,7 @@ export class RecommendationEngine {
           ...existing,
           score: newScore,
           confidence: newConfidence,
-          metadata: { ...existing.metadata, ...rec.metadata, combined: true }
+          metadata: { ...existing.metadata, ...rec.metadata, combined: true },
         });
       } else {
         productMap.set(rec.productId, rec);
@@ -465,32 +504,35 @@ export class RecommendationEngine {
     return Array.from(productMap.values());
   }
 
-  private async addReasoningToRecommendations(recommendations: RecommendationResult[], userId: string): Promise<void> {
+  private async addReasoningToRecommendations(
+    recommendations: RecommendationResult[],
+    userId: string
+  ): Promise<void> {
     // Ajouter des explications textuelles pour chaque recommandation
     for (const rec of recommendations) {
       switch (rec.reason) {
         case 'collaborative':
           rec.metadata = {
             ...rec.metadata,
-            reasoning: `${Math.round(rec.confidence * 100)}% des utilisateurs similaires ont acheté ce produit`
+            reasoning: `${Math.round(rec.confidence * 100)}% des utilisateurs similaires ont acheté ce produit`,
           };
           break;
         case 'content':
           rec.metadata = {
             ...rec.metadata,
-            reasoning: 'Produit similaire à vos achats précédents'
+            reasoning: 'Produit similaire à vos achats précédents',
           };
           break;
         case 'complementary':
           rec.metadata = {
             ...rec.metadata,
-            reasoning: 'Complète souvent vos achats'
+            reasoning: 'Complète souvent vos achats',
           };
           break;
         case 'trending':
           rec.metadata = {
             ...rec.metadata,
-            reasoning: 'Tendance populaire dans vos catégories préférées'
+            reasoning: 'Tendance populaire dans vos catégories préférées',
           };
           break;
       }
@@ -523,7 +565,7 @@ export async function preloadRecommendations(userId: string): Promise<void> {
       userId,
       limit: 5,
       excludeRecentlyViewed: true,
-      includeReasoning: false
+      includeReasoning: false,
     });
   } catch (error) {
     logger.error('Error preloading recommendations', { error, userId });

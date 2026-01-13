@@ -299,7 +299,7 @@ async function optimizeAllImages() {
     console.log(`⚙️  Optimisation de ${imageInfo.name}...`);
 
     const result = await optimizeImage(imageInfo, outputDir);
-    if (result) {
+        if (result) {
       const actualSavingsPercent = Math.round((result.savings / result.originalSize) * 100);
       console.log(`  ✅ Optimisée: ${Math.round(result.originalSize / 1024)}KB → ${Math.round(result.newSize / 1024)}KB (${actualSavingsPercent}% d'économie)`);
 

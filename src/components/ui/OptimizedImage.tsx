@@ -101,7 +101,7 @@ function getOptimizedImageUrl(
         ?.replace(/\.(jpg|jpeg|png)$/i, '') || '';
 
     // Déterminer le format optimal
-    let  targetFormat= 'webp';
+    let targetFormat = 'webp';
     if (format === 'avif' && supportsAVIF()) {
       targetFormat = 'avif';
     } else if (format === 'auto') {
@@ -251,7 +251,7 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
       link.as = 'image';
       link.href = optimizedSrc;
       link.setAttribute('fetchpriority', 'high');
-      
+
       // Ajouter srcset si disponible
       if (srcsetWidths.length > 1) {
         link.setAttribute('imagesrcset', srcset);
@@ -305,7 +305,7 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
     };
 
     // Styles du placeholder blur
-    const  placeholderStyle: React.CSSProperties = useMemo(() => {
+    const placeholderStyle: React.CSSProperties = useMemo(() => {
       if (!showPlaceholder || isLoaded) return {};
       return {
         filter: 'blur(20px)',
@@ -348,7 +348,13 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
             className={cn(
               // ✅ iOS/scroll stability: never render the main image as opacity-0
               // (can look like it "disappears" during fast scroll). Placeholder/skeleton covers loading state.
-              'w-full h-full object-cover',
+              'w-full h-full',
+              // Utiliser object-contain si spécifié dans imageClassName, sinon object-cover par défaut
+              imageClassName?.includes('object-contain')
+                ? 'object-contain'
+                : imageClassName?.includes('object-cover')
+                  ? 'object-cover'
+                  : 'object-cover',
               !isLoaded && 'opacity-0', // Masquer jusqu'au chargement complet
               isLoaded && 'opacity-100 transition-opacity duration-300', // Afficher avec transition
               imageClassName
@@ -400,9 +406,3 @@ export const OptimizedImage = React.memo<OptimizedImageProps>(
 );
 
 OptimizedImage.displayName = 'OptimizedImage';
-
-
-
-
-
-

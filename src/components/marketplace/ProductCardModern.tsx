@@ -219,7 +219,7 @@ const ProductCardModernComponent = ({
           });
         });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'initialiser le paiement";
       logger.error("Erreur lors de l'achat", {
@@ -244,7 +244,7 @@ const ProductCardModernComponent = ({
     toast,
   ]);
 
-  const handleAddToCart= useCallback(async () => {
+  const handleAddToCart = useCallback(async () => {
     if (!product.store_id) {
       toast({
         title: 'Erreur',
@@ -265,7 +265,7 @@ const ProductCardModernComponent = ({
           | 'artist',
         quantity: 1,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error("Erreur lors de l'ajout au panier", {
         error: error instanceof Error ? error : new Error(String(error)),
       });
@@ -471,7 +471,7 @@ const ProductCardModernComponent = ({
 
         {/* Badges d'information - Placés après le titre de manière professionnelle */}
         <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
-          {isNew() && (
+          {isNew && (
             <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 text-[10px] sm:text-xs px-2 py-0.5 shadow-sm">
               <Sparkles className="h-3 w-3 mr-1" />
               Nouveau
@@ -771,9 +771,3 @@ ProductCardModern.displayName = 'ProductCardModern';
 
 export default ProductCardModern;
 export { ProductCardModern };
-
-
-
-
-
-

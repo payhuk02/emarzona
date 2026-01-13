@@ -31,12 +31,30 @@ import {
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useToast } from '@/hooks/use-toast';
 // Lazy load composants lourds pour optimiser le bundle
-const ProductReviewsSummary = lazy(() => import('@/components/reviews/ProductReviewsSummary').then(m => ({ default: m.ProductReviewsSummary })));
-const ReviewsList = lazy(() => import('@/components/reviews/ReviewsList').then(m => ({ default: m.ReviewsList })));
-const ReviewForm = lazy(() => import('@/components/reviews/ReviewForm').then(m => ({ default: m.ReviewForm })));
-const Artwork3DViewer = lazy(() => import('@/components/artist/Artwork3DViewer').then(m => ({ default: m.Artwork3DViewer })));
-const ArtistShippingCalculator = lazy(() => import('@/components/artist/ArtistShippingCalculator').then(m => ({ default: m.ArtistShippingCalculator })));
-const ArtworkProvenanceDisplay = lazy(() => import('@/components/artist/ArtworkProvenanceDisplay').then(m => ({ default: m.ArtworkProvenanceDisplay })));
+const ProductReviewsSummary = lazy(() =>
+  import('@/components/reviews/ProductReviewsSummary').then(m => ({
+    default: m.ProductReviewsSummary,
+  }))
+);
+const ReviewsList = lazy(() =>
+  import('@/components/reviews/ReviewsList').then(m => ({ default: m.ReviewsList }))
+);
+const ReviewForm = lazy(() =>
+  import('@/components/reviews/ReviewForm').then(m => ({ default: m.ReviewForm }))
+);
+const Artwork3DViewer = lazy(() =>
+  import('@/components/artist/Artwork3DViewer').then(m => ({ default: m.Artwork3DViewer }))
+);
+const ArtistShippingCalculator = lazy(() =>
+  import('@/components/artist/ArtistShippingCalculator').then(m => ({
+    default: m.ArtistShippingCalculator,
+  }))
+);
+const ArtworkProvenanceDisplay = lazy(() =>
+  import('@/components/artist/ArtworkProvenanceDisplay').then(m => ({
+    default: m.ArtworkProvenanceDisplay,
+  }))
+);
 
 import { ProductImages } from '@/components/shared';
 import { useCart } from '@/hooks/cart/useCart';
@@ -45,7 +63,12 @@ import { logger } from '@/lib/logger';
 import { useAnalyticsTracking } from '@/hooks/useProductAnalytics';
 import { useWishlistToggle } from '@/hooks/wishlist/useWishlistToggle';
 import { SEOMeta, ProductSchema } from '@/components/seo';
-import { ArtistCertificateDisplay } from '@/components/artist/ArtistCertificateDisplay';
+// Lazy load ArtistCertificateDisplay (composant lourd, utilisé dans onglet)
+const ArtistCertificateDisplay = lazy(() =>
+  import('@/components/artist/ArtistCertificateDisplay').then(m => ({
+    default: m.ArtistCertificateDisplay,
+  }))
+);
 import {
   useArtwork3DModel,
   useArtworkProvenanceHistory,
@@ -377,22 +400,22 @@ const ArtistProductDetail = () => {
             {artwork3D ? (
               <div className="space-y-4">
                 <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-                <Artwork3DViewer
-                  modelUrl={artwork3D.model_url}
-                  modelType={artwork3D.model_type}
-                  thumbnailUrl={artwork3D.thumbnail_url}
-                  autoRotate={artwork3D.auto_rotate}
-                  autoPlay={artwork3D.auto_play}
-                  showControls={artwork3D.show_controls}
-                  backgroundColor={artwork3D.background_color}
-                  cameraPosition={artwork3D.camera_position}
-                  cameraTarget={artwork3D.camera_target}
-                  onView={() => {
-                    if (artwork3D.id) {
-                      incrementViews.mutate(artwork3D.id);
-                    }
-                  }}
-                />
+                  <Artwork3DViewer
+                    modelUrl={artwork3D.model_url}
+                    modelType={artwork3D.model_type}
+                    thumbnailUrl={artwork3D.thumbnail_url}
+                    autoRotate={artwork3D.auto_rotate}
+                    autoPlay={artwork3D.auto_play}
+                    showControls={artwork3D.show_controls}
+                    backgroundColor={artwork3D.background_color}
+                    cameraPosition={artwork3D.camera_position}
+                    cameraTarget={artwork3D.camera_target}
+                    onView={() => {
+                      if (artwork3D.id) {
+                        incrementViews.mutate(artwork3D.id);
+                      }
+                    }}
+                  />
                 </Suspense>
                 <div className="text-sm text-muted-foreground text-center">
                   {artwork3D.views_count} vue{artwork3D.views_count > 1 ? 's' : ''}
@@ -639,15 +662,17 @@ const ArtistProductDetail = () => {
 
               {/* Certificate Display */}
               {product?.artist && (
-                <ArtistCertificateDisplay
-                  certificateUrl={product.artist.certificate_file_url || undefined}
-                  certificateOfAuthenticity={product.artist.certificate_of_authenticity || false}
-                  signatureAuthenticated={product.artist.signature_authenticated || false}
-                  signatureLocation={product.artist.signature_location || undefined}
-                  editionType={product.artist.artwork_edition_type || undefined}
-                  editionNumber={product.artist.edition_number || undefined}
-                  totalEditions={product.artist.total_editions || undefined}
-                />
+                <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+                  <ArtistCertificateDisplay
+                    certificateUrl={product.artist.certificate_file_url || undefined}
+                    certificateOfAuthenticity={product.artist.certificate_of_authenticity || false}
+                    signatureAuthenticated={product.artist.signature_authenticated || false}
+                    signatureLocation={product.artist.signature_location || undefined}
+                    editionType={product.artist.artwork_edition_type || undefined}
+                    editionNumber={product.artist.edition_number || undefined}
+                    totalEditions={product.artist.total_editions || undefined}
+                  />
+                </Suspense>
               )}
             </div>
           </div>
@@ -692,17 +717,17 @@ const ArtistProductDetail = () => {
               {/* Shipping Calculator - Only show if shipping required */}
               {product?.artist?.requires_shipping && (
                 <Suspense fallback={<Skeleton className="h-32 w-full" />}>
-                <ArtistShippingCalculator
-                  productId={productId!}
-                  artworkValue={product?.price || 0}
-                />
+                  <ArtistShippingCalculator
+                    productId={productId!}
+                    artworkValue={product?.price || 0}
+                  />
                 </Suspense>
               )}
 
               {/* Provenance Display */}
               {provenanceHistory && provenanceHistory.length > 0 && (
                 <Suspense fallback={<Skeleton className="h-48 w-full" />}>
-                <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
+                  <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
                 </Suspense>
               )}
 
@@ -831,7 +856,7 @@ const ArtistProductDetail = () => {
               <TabsContent value="provenance" className="space-y-6">
                 {provenanceHistory && provenanceHistory.length > 0 && (
                   <Suspense fallback={<Skeleton className="h-48 w-full" />}>
-                  <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
+                    <ArtworkProvenanceDisplay provenanceHistory={provenanceHistory} />
                   </Suspense>
                 )}
                 {certificates && certificates.length > 0 && (
@@ -951,7 +976,7 @@ const ArtistProductDetail = () => {
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="space-y-6">
               <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-              <ProductReviewsSummary productId={productId!} productType="artist" />
+                <ProductReviewsSummary productId={productId!} productType="artist" />
               </Suspense>
 
               <Card>
@@ -960,7 +985,7 @@ const ArtistProductDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <Suspense fallback={<Skeleton className="h-48 w-full" />}>
-                  <ReviewsList productId={productId!} />
+                    <ReviewsList productId={productId!} />
                   </Suspense>
                 </CardContent>
               </Card>
@@ -972,14 +997,14 @@ const ArtistProductDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-                    <ReviewForm
-                      productId={productId!}
-                      productType="artist"
-                      onSubmit={() => {
-                        // Refresh reviews after submission
-                        window.location.reload();
-                      }}
-                    />
+                      <ReviewForm
+                        productId={productId!}
+                        productType="artist"
+                        onSubmit={() => {
+                          // Refresh reviews after submission
+                          window.location.reload();
+                        }}
+                      />
                     </Suspense>
                   </CardContent>
                 </Card>
@@ -989,7 +1014,7 @@ const ArtistProductDetail = () => {
 
           {/* Reviews Summary (outside tabs for visibility) */}
           <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-          <ProductReviewsSummary productId={productId!} productType="artist" />
+            <ProductReviewsSummary productId={productId!} productType="artist" />
           </Suspense>
         </main>
       </div>
@@ -999,9 +1024,3 @@ const ArtistProductDetail = () => {
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
 export default React.memo(ArtistProductDetail);
-
-
-
-
-
-

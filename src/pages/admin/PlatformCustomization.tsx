@@ -89,7 +89,7 @@ interface SectionConfig {
   badge?: string;
 }
 
-const  sections: SectionConfig[] = [
+const sections: SectionConfig[] = [
   {
     id: 'design',
     label: 'Design & Branding',
@@ -215,8 +215,8 @@ export const PlatformCustomization = () => {
         title: '✅ Sauvegarde réussie',
         description: 'Toutes les modifications ont été enregistrées.',
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (_error: unknown) {
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       toast({
         title: '❌ Erreur',
         description: errorMessage || 'Impossible de sauvegarder les modifications.',
@@ -240,8 +240,8 @@ export const PlatformCustomization = () => {
         title: '✅ Export réussi',
         description: 'Les personnalisations ont été exportées avec succès.',
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (_error: unknown) {
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       toast({
         title: "❌ Erreur d'export",
         description: errorMessage || "Impossible d'exporter les personnalisations.",
@@ -276,8 +276,8 @@ export const PlatformCustomization = () => {
           setShowImportDialog(false);
           setImportFile(null);
         }
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      } catch (_error: unknown) {
+        const errorMessage = _error instanceof Error ? _error.message : String(_error);
         toast({
           title: "❌ Erreur d'import",
           description: errorMessage || "Impossible d'importer le fichier.",
@@ -556,9 +556,3 @@ export const PlatformCustomization = () => {
     </AdminLayout>
   );
 };
-
-
-
-
-
-

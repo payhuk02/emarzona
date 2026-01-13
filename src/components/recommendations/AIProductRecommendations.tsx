@@ -5,7 +5,7 @@
 
 import React, { useMemo } from 'react';
 import { useAIRecommendations } from '@/lib/ai/recommendation-engine';
-import { useProducts } from '@/hooks/useProducts';
+import { useProductsOptimized } from '@/hooks/useProductsOptimized';
 import { useRecommendationTracking } from '@/hooks/useRecommendationTracking';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,20 +31,24 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   userId,
   currentProductId,
   category,
-  title = "Recommandations pour vous",
+  title = 'Recommandations pour vous',
   limit = 6,
   showReasoning = true,
   className,
-  layout = 'grid'
+  layout = 'grid',
 }) => {
   // Récupérer les recommandations IA
-  const { data: recommendations, isLoading, error } = useAIRecommendations({
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+  } = useAIRecommendations({
     userId,
     productId: currentProductId,
     category,
     limit,
     excludeRecentlyViewed: true,
-    includeReasoning: showReasoning
+    includeReasoning: showReasoning,
   });
 
   // Hook pour le tracking des interactions
@@ -55,33 +59,41 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
     return recommendations?.map(rec => rec.productId) || [];
   }, [recommendations]);
 
-  const { data: productsData, isLoading: productsLoading } = useProducts({
-    filters: { ids: productIds },
-    enabled: productIds.length > 0
-  });
+  const { data: productsData, isLoading: productsLoading } = useProductsOptimized(
+    null, // storeId (null pour tous les stores)
+    {
+      filters: { ids: productIds },
+      enabled: productIds.length > 0,
+    }
+  );
 
   // Combiner les recommandations avec les données des produits
   const enrichedRecommendations = useMemo(() => {
     if (!recommendations || !productsData?.data) return [];
 
-    return recommendations.map(rec => {
-      const product = productsData.data.find(p => p.id === rec.productId);
-      return {
-        ...rec,
-        product
-      };
-    }).filter(rec => rec.product); // Garder seulement les recommandations avec des produits valides
+    return recommendations
+      .map(rec => {
+        const product = productsData.data.find(p => p.id === rec.productId);
+        return {
+          ...rec,
+          product,
+        };
+      })
+      .filter(rec => rec.product); // Garder seulement les recommandations avec des produits valides
   }, [recommendations, productsData]);
 
   // Gestionnaire d'analytics pour les clics sur recommandations
-  const handleRecommendationClick = async (recommendation: { productId: string; score: number; confidence: number }, position: number) => {
+  const handleRecommendationClick = async (
+    recommendation: { productId: string; score: number; confidence: number },
+    position: number
+  ) => {
     logger.info('AI Recommendation clicked', {
       productId: recommendation.productId,
       reason: recommendation.reason,
       score: recommendation.score,
       position,
       userId,
-      source: 'ai_recommendations'
+      source: 'ai_recommendations',
     });
 
     // Tracker le clic sur la recommandation
@@ -92,7 +104,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
       score: recommendation.score,
       confidence: recommendation.confidence,
       position,
-      source: 'ai_recommendations'
+      source: 'ai_recommendations',
     });
   };
 
@@ -133,7 +145,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   // État de chargement
   if (isLoading || productsLoading) {
     return (
-      <Card className={cn("border-border/50 bg-card/50 backdrop-blur-sm", className)}>
+      <Card className={cn('border-border/50 bg-card/50 backdrop-blur-sm', className)}>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />
@@ -141,12 +153,14 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
           </div>
         </CardHeader>
         <CardContent>
-          <div className={cn(
-            "grid gap-4",
-            layout === 'grid' && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-            layout === 'horizontal' && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-            layout === 'compact' && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
-          )}>
+          <div
+            className={cn(
+              'grid gap-4',
+              layout === 'grid' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+              layout === 'horizontal' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+              layout === 'compact' && 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
+            )}
+          >
             {Array.from({ length: limit }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="aspect-square w-full rounded-lg" />
@@ -163,7 +177,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   // Gestion d'erreur
   if (error || !enrichedRecommendations.length) {
     return (
-      <Card className={cn("border-border/50 bg-card/50 backdrop-blur-sm", className)}>
+      <Card className={cn('border-border/50 bg-card/50 backdrop-blur-sm', className)}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-muted-foreground">
             <Sparkles className="h-5 w-5" />
@@ -174,7 +188,9 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
           <div className="text-center py-8">
             <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <p className="text-sm text-muted-foreground">
-              {error ? 'Erreur lors du chargement des recommandations' : 'Aucune recommandation disponible pour le moment'}
+              {error
+                ? 'Erreur lors du chargement des recommandations'
+                : 'Aucune recommandation disponible pour le moment'}
             </p>
             {error && (
               <Button
@@ -193,7 +209,7 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
   }
 
   return (
-    <Card className={cn("border-border/50 bg-card/50 backdrop-blur-sm", className)}>
+    <Card className={cn('border-border/50 bg-card/50 backdrop-blur-sm', className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -204,17 +220,20 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
         </CardTitle>
         {showReasoning && (
           <p className="text-sm text-muted-foreground">
-            Recommandations personnalisées basées sur vos préférences et l'activité des autres utilisateurs
+            Recommandations personnalisées basées sur vos préférences et l'activité des autres
+            utilisateurs
           </p>
         )}
       </CardHeader>
       <CardContent>
-        <div className={cn(
-          "grid gap-4",
-          layout === 'grid' && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-          layout === 'horizontal' && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-          layout === 'compact' && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
-        )}>
+        <div
+          className={cn(
+            'grid gap-4',
+            layout === 'grid' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+            layout === 'horizontal' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+            layout === 'compact' && 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
+          )}
+        >
           {enrichedRecommendations.map((recommendation, index) => (
             <div key={recommendation.productId} className="relative group">
               {/* Badge de raison */}
@@ -264,7 +283,9 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs text-muted-foreground">
               <div>
                 <div className="font-medium">Collaboratif</div>
-                <div>{enrichedRecommendations.filter(r => r.reason === 'collaborative').length}</div>
+                <div>
+                  {enrichedRecommendations.filter(r => r.reason === 'collaborative').length}
+                </div>
               </div>
               <div>
                 <div className="font-medium">Contenu</div>
@@ -272,7 +293,9 @@ const AIProductRecommendations: React.FC<AIProductRecommendationsProps> = ({
               </div>
               <div>
                 <div className="font-medium">Complémentaire</div>
-                <div>{enrichedRecommendations.filter(r => r.reason === 'complementary').length}</div>
+                <div>
+                  {enrichedRecommendations.filter(r => r.reason === 'complementary').length}
+                </div>
               </div>
               <div>
                 <div className="font-medium">Tendance</div>

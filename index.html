@@ -65,8 +65,9 @@
     <link rel="preconnect" href="https://hbdnzajbyjakdhuavrvb.supabase.co" />
     
     <!-- ✅ PERFORMANCE: Preload images LCP pour améliorer LCP -->
-    <!-- Note: Les images seront préchargées dynamiquement par React via OptimizedImage -->
-    <!-- Le preload statique sera géré par Vite lors du build -->
+    <!-- Preload du logo de la plateforme (ressource critique pour LCP) -->
+    <link rel="preload" href="/emarzona-logo.png" as="image" type="image/png" />
+    <!-- Note: Les autres images seront préchargées dynamiquement par React via OptimizedImage -->
     
     <!-- ✅ PERFORMANCE: Preload CSS critique pour améliorer FCP -->
     <!-- Vite injecte automatiquement le CSS, mais on peut précharger les ressources critiques -->
@@ -128,14 +129,6 @@
     <!-- Skip link sera ajouté par React via SkipLink component -->
     
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

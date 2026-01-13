@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone } from "lucide-react";
-import { usePlatformLogo } from "@/hooks/usePlatformLogo";
+import { Link } from 'react-router-dom';
+import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone } from 'lucide-react';
+import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 
 const MarketplaceFooter = () => {
   const currentYear = new Date().getFullYear();
@@ -14,14 +14,16 @@ const MarketplaceFooter = () => {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               {platformLogo ? (
-                <img 
-                  src={platformLogo} 
-                  alt="Emarzona" 
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 flex-shrink-0 object-contain"
-                  loading="eager"
-                />
+                <div className="h-8 w-8 flex-shrink-0 flex items-center justify-center">
+                  <img
+                    src={platformLogo}
+                    alt="Emarzona"
+                    width={32}
+                    height={32}
+                    className="max-w-full max-h-full object-contain"
+                    loading="eager"
+                  />
+                </div>
               ) : (
                 <div className="h-8 w-8 bg-primary rounded flex items-center justify-center flex-shrink-0">
                   <span className="text-sm font-bold text-primary-foreground">E</span>
@@ -77,17 +79,26 @@ const MarketplaceFooter = () => {
             <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Liens rapides</h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               <li>
-                <Link to="/marketplace" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
+                <Link
+                  to="/marketplace"
+                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
+                >
                   Marketplace
                 </Link>
               </li>
               <li>
-                <Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
+                <Link
+                  to="/auth"
+                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
+                >
                   Créer ma boutique
                 </Link>
               </li>
               <li>
-                <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
+                <Link
+                  to="/dashboard"
+                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
+                >
                   Tableau de bord
                 </Link>
               </li>
@@ -99,17 +110,26 @@ const MarketplaceFooter = () => {
             <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Support</h3>
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
               <li>
-                <a href="#faq" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
+                <a
+                  href="#faq"
+                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
+                >
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="#terms" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
+                <a
+                  href="#terms"
+                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
+                >
                   CGU
                 </a>
               </li>
               <li>
-                <a href="#privacy" className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1">
+                <a
+                  href="#privacy"
+                  className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
+                >
                   Confidentialité
                 </a>
               </li>
@@ -122,7 +142,10 @@ const MarketplaceFooter = () => {
             <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 flex-shrink-0" />
-                <a href="mailto:contact@emarzona.com" className="hover:text-primary transition-colors">
+                <a
+                  href="mailto:contact@emarzona.com"
+                  className="hover:text-primary transition-colors"
+                >
                   contact@emarzona.com
                 </a>
               </li>
@@ -141,7 +164,8 @@ const MarketplaceFooter = () => {
 
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-border text-center">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            © {currentYear} <span className="font-semibold text-foreground">Emarzona</span>. Tous droits réservés.
+            © {currentYear} <span className="font-semibold text-foreground">Emarzona</span>. Tous
+            droits réservés.
           </p>
         </div>
       </div>
@@ -150,9 +174,3 @@ const MarketplaceFooter = () => {
 };
 
 export default MarketplaceFooter;
-
-
-
-
-
-

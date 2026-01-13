@@ -3,7 +3,7 @@
  * 2FA, permissions, audit
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -24,7 +24,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
   const { customizationData, save } = usePlatformCustomization();
   const { settings: platformSettings, updateSettings } = usePlatformSettings('admin');
   const { toast } = useToast();
-  
+
   const [requireAAL2Routes, setRequireAAL2Routes] = useState<string[]>([]);
   const [newRoute, setNewRoute] = useState('');
   const [require2FAForAdmins, setRequire2FAForAdmins] = useState(false);
@@ -33,9 +33,11 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
 
   useEffect(() => {
     if (platformSettings?.require_aal2_routes) {
-      setRequireAAL2Routes(Array.isArray(platformSettings.require_aal2_routes) 
-        ? platformSettings.require_aal2_routes 
-        : []);
+      setRequireAAL2Routes(
+        Array.isArray(platformSettings.require_aal2_routes)
+          ? platformSettings.require_aal2_routes
+          : []
+      );
     }
     if (customizationData?.security) {
       setRequire2FAForAdmins(customizationData.security.requireAAL2?.includes('admins') ?? false);
@@ -64,14 +66,14 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
 
     const updatedRoutes = [...requireAAL2Routes, newRoute];
     setRequireAAL2Routes(updatedRoutes);
-    
+
     await updateSettings({
       require_aal2_routes: updatedRoutes,
     });
-    
+
     setNewRoute('');
     if (onChange) onChange();
-    
+
     toast({
       title: '✅ Route ajoutée',
       description: 'La route a été ajoutée avec succès',
@@ -81,13 +83,13 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
   const handleRemoveRoute = async (route: string) => {
     const updatedRoutes = requireAAL2Routes.filter(r => r !== route);
     setRequireAAL2Routes(updatedRoutes);
-    
+
     await updateSettings({
       require_aal2_routes: updatedRoutes,
     });
-    
+
     if (onChange) onChange();
-    
+
     toast({
       title: 'Route supprimée',
       description: 'La route a été supprimée avec succès',
@@ -96,8 +98,8 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
 
   const handle2FAChange = async (type: 'admins' | 'vendors', enabled: boolean) => {
     const currentRequireAAL2 = customizationData?.security?.requireAAL2 || [];
-    let  updatedRequireAAL2: string[];
-    
+    let updatedRequireAAL2: string[];
+
     if (enabled) {
       updatedRequireAAL2 = [...currentRequireAAL2, type];
     } else {
@@ -114,7 +116,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
       ...customizationData?.security,
       requireAAL2: updatedRequireAAL2,
     });
-    
+
     if (onChange) onChange();
   };
 
@@ -150,7 +152,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
             </div>
             <Switch
               checked={require2FAForAdmins}
-              onCheckedChange={(checked) => handle2FAChange('admins', checked)}
+              onCheckedChange={checked => handle2FAChange('admins', checked)}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -162,7 +164,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
             </div>
             <Switch
               checked={require2FAForVendors}
-              onCheckedChange={(checked) => handle2FAChange('vendors', checked)}
+              onCheckedChange={checked => handle2FAChange('vendors', checked)}
             />
           </div>
         </CardContent>
@@ -185,9 +187,9 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
             <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 value={newRoute}
-                onChange={(e) => setNewRoute(e.target.value)}
+                onChange={e => setNewRoute(e.target.value)}
                 placeholder="/admin/example"
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter') {
                     handleAddRoute();
                   }
@@ -214,17 +216,13 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
               </p>
             ) : (
               <div className="space-y-2">
-                {requireAAL2Routes.map((route) => (
+                {requireAAL2Routes.map(route => (
                   <div
                     key={route}
                     className="flex items-center justify-between p-2 border rounded-lg"
                   >
                     <code className="text-sm bg-muted px-2 py-1 rounded">{route}</code>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveRoute(route)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => handleRemoveRoute(route)}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
@@ -240,7 +238,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
             <div className="flex flex-wrap gap-2">
               {defaultRoutes
                 .filter(route => !requireAAL2Routes.includes(route))
-                .map((route) => (
+                .map(route => (
                   <Badge
                     key={route}
                     variant="outline"
@@ -277,7 +275,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
               min="1"
               max="168"
               value={sessionDuration}
-              onChange={(e) => setSessionDuration(parseInt(e.target.value) || 24)}
+              onChange={e => setSessionDuration(parseInt(e.target.value) || 24)}
             />
             <p className="text-xs text-muted-foreground">
               Durée avant expiration de la session (1-168 heures)
@@ -294,7 +292,7 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
             <div className="space-y-1">
               <Label className="text-amber-500">Important</Label>
               <p className="text-sm text-muted-foreground">
-                Les modifications de sécurité peuvent affecter l'accès des utilisateurs. 
+                Les modifications de sécurité peuvent affecter l'accès des utilisateurs.
                 Assurez-vous de tester les changements avant de les appliquer en production.
               </p>
             </div>
@@ -304,10 +302,3 @@ export const SecuritySection = ({ onChange }: SecuritySectionProps) => {
     </div>
   );
 };
-
-
-
-
-
-
-

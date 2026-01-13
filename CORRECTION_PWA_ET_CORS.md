@@ -164,10 +164,30 @@ serve(async req => {
    - Attendre le message de succès
    - Vérifier les logs pour confirmer
 
-#### Option 2 : Via Supabase CLI
+#### Option 2 : Via Supabase CLI (Recommandé si CLI installé)
 
 ```bash
-# Redéployer l'Edge Function
+# Depuis la racine du projet
+supabase functions deploy rate-limiter
+```
+
+**Ou utiliser le script de déploiement** :
+
+```bash
+# Rendre le script exécutable (Linux/Mac)
+chmod +x scripts/deploy-rate-limiter.sh
+
+# Exécuter le script
+./scripts/deploy-rate-limiter.sh
+```
+
+**Sur Windows (PowerShell)** :
+
+```powershell
+# Exécuter directement avec bash (si Git Bash est installé)
+bash scripts/deploy-rate-limiter.sh
+
+# Ou utiliser Supabase CLI directement
 supabase functions deploy rate-limiter
 ```
 

@@ -7,9 +7,15 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
-import { TrendingUp, BarChart3, PieChart, Activity, MousePointerClick, ShoppingCart, DollarSign } from 'lucide-react';
+import { TrendingUp, Activity, MousePointerClick, ShoppingCart, DollarSign } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { format, subDays, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -40,26 +46,25 @@ export const AffiliatePerformanceCharts = ({
   onPeriodChange,
   loading = false,
 }: AffiliatePerformanceChartsProps) => {
-  
   // Préparer les données pour les graphiques
   const chartData = useMemo(() => {
     const daysCount = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 365;
     const startDate = startOfDay(subDays(new Date(), daysCount - 1));
-    
+
     // Créer un tableau de dates
-    const  dates: string[] = [];
-    for (let  i= 0; i < daysCount; i++) {
+    const dates: string[] = [];
+    for (let i = 0; i < daysCount; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       dates.push(format(date, 'yyyy-MM-dd'));
     }
-    
+
     // Fusionner les données par date
     return dates.map(date => {
       const clicks = clicksData.find(d => d.date === date);
       const sales = salesData.find(d => d.date === date);
       const commissions = commissionsData.find(d => d.date === date);
-      
+
       return {
         date: format(new Date(date), 'dd MMM', { locale: fr }),
         fullDate: date,
@@ -67,9 +72,7 @@ export const AffiliatePerformanceCharts = ({
         sales: sales?.sales || 0,
         revenue: sales?.revenue || 0,
         commission: commissions?.commission || 0,
-        conversion_rate: clicks?.clicks 
-          ? ((sales?.sales || 0) / clicks.clicks * 100) 
-          : 0,
+        conversion_rate: clicks?.clicks ? ((sales?.sales || 0) / clicks.clicks) * 100 : 0,
       };
     });
   }, [clicksData, salesData, commissionsData, period]);
@@ -81,9 +84,10 @@ export const AffiliatePerformanceCharts = ({
       totalSales: chartData.reduce((sum, d) => sum + d.sales, 0),
       totalRevenue: chartData.reduce((sum, d) => sum + d.revenue, 0),
       totalCommission: chartData.reduce((sum, d) => sum + d.commission, 0),
-      avgConversionRate: chartData.length > 0
-        ? chartData.reduce((sum, d) => sum + d.conversion_rate, 0) / chartData.length
-        : 0,
+      avgConversionRate:
+        chartData.length > 0
+          ? chartData.reduce((sum, d) => sum + d.conversion_rate, 0) / chartData.length
+          : 0,
     };
   }, [chartData]);
 
@@ -207,35 +211,36 @@ export const AffiliatePerformanceCharts = ({
             </CardHeader>
             <CardContent>
               <LazyRechartsWrapper>
-                {(recharts) => (
+                {recharts => (
                   <recharts.ResponsiveContainer width="100%" height={300}>
                     <recharts.LineChart data={chartData}>
-                      <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                      <recharts.XAxis 
-                        dataKey="date" 
+                      <recharts.CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#374151"
+                        opacity={0.3}
+                      />
+                      <recharts.XAxis
+                        dataKey="date"
                         stroke="#9ca3af"
                         fontSize={12}
                         angle={-45}
                         textAnchor="end"
                         height={80}
                       />
-                      <recharts.YAxis 
-                        stroke="#9ca3af"
-                        fontSize={12}
-                      />
-                      <recharts.Tooltip 
+                      <recharts.YAxis stroke="#9ca3af" fontSize={12} />
+                      <recharts.Tooltip
                         contentStyle={{
                           backgroundColor: '#1f2937',
                           border: '1px solid #374151',
                           borderRadius: '8px',
-                          color: '#f9fafb'
+                          color: '#f9fafb',
                         }}
                         formatter={(value: number) => [value.toLocaleString(), 'Clics']}
                       />
-                      <recharts.Line 
-                        type="monotone" 
-                        dataKey="clicks" 
-                        stroke="#3b82f6" 
+                      <recharts.Line
+                        type="monotone"
+                        dataKey="clicks"
+                        stroke="#3b82f6"
                         strokeWidth={2}
                         dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6 }}
@@ -257,46 +262,45 @@ export const AffiliatePerformanceCharts = ({
                 <ShoppingCart className="h-5 w-5" />
                 Évolution des Ventes
               </CardTitle>
-              <CardDescription>
-                Nombre de ventes générées et revenus sur la période
-              </CardDescription>
+              <CardDescription>Nombre de ventes générées et revenus sur la période</CardDescription>
             </CardHeader>
             <CardContent>
               <LazyRechartsWrapper>
-                {(recharts) => (
+                {recharts => (
                   <recharts.ResponsiveContainer width="100%" height={300}>
                     <recharts.BarChart data={chartData}>
-                      <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                      <recharts.XAxis 
-                        dataKey="date" 
+                      <recharts.CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#374151"
+                        opacity={0.3}
+                      />
+                      <recharts.XAxis
+                        dataKey="date"
                         stroke="#9ca3af"
                         fontSize={12}
                         angle={-45}
                         textAnchor="end"
                         height={80}
                       />
-                      <recharts.YAxis 
-                        stroke="#9ca3af"
-                        fontSize={12}
-                      />
-                      <recharts.Tooltip 
+                      <recharts.YAxis stroke="#9ca3af" fontSize={12} />
+                      <recharts.Tooltip
                         contentStyle={{
                           backgroundColor: '#1f2937',
                           border: '1px solid #374151',
                           borderRadius: '8px',
-                          color: '#f9fafb'
+                          color: '#f9fafb',
                         }}
                         formatter={(value: number, name: string) => [
                           name === 'revenue' ? formatCurrency(value) : value.toLocaleString(),
-                          name === 'sales' ? 'Ventes' : 'Revenus'
+                          name === 'sales' ? 'Ventes' : 'Revenus',
                         ]}
                       />
                       <recharts.Legend />
                       <recharts.Bar dataKey="sales" fill="#10b981" name="Nombre de ventes" />
-                      <recharts.Line 
-                        type="monotone" 
-                        dataKey="revenue" 
-                        stroke="#f59e0b" 
+                      <recharts.Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#f59e0b"
                         strokeWidth={2}
                         yAxisId={1}
                         name="Revenus (XOF)"
@@ -318,42 +322,44 @@ export const AffiliatePerformanceCharts = ({
                 <DollarSign className="h-5 w-5" />
                 Évolution des Commissions
               </CardTitle>
-              <CardDescription>
-                Montant des commissions gagnées sur la période
-              </CardDescription>
+              <CardDescription>Montant des commissions gagnées sur la période</CardDescription>
             </CardHeader>
             <CardContent>
               <LazyRechartsWrapper>
-                {(recharts) => (
+                {recharts => (
                   <recharts.ResponsiveContainer width="100%" height={300}>
                     <recharts.AreaChart data={chartData}>
-                      <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                      <recharts.XAxis 
-                        dataKey="date" 
+                      <recharts.CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#374151"
+                        opacity={0.3}
+                      />
+                      <recharts.XAxis
+                        dataKey="date"
                         stroke="#9ca3af"
                         fontSize={12}
                         angle={-45}
                         textAnchor="end"
                         height={80}
                       />
-                      <recharts.YAxis 
+                      <recharts.YAxis
                         stroke="#9ca3af"
                         fontSize={12}
-                        tickFormatter={(value) => formatCurrency(value)}
+                        tickFormatter={value => formatCurrency(value)}
                       />
-                      <recharts.Tooltip 
+                      <recharts.Tooltip
                         contentStyle={{
                           backgroundColor: '#1f2937',
                           border: '1px solid #374151',
                           borderRadius: '8px',
-                          color: '#f9fafb'
+                          color: '#f9fafb',
                         }}
                         formatter={(value: number) => [formatCurrency(value), 'Commission']}
                       />
-                      <recharts.Area 
-                        type="monotone" 
-                        dataKey="commission" 
-                        stroke="#f59e0b" 
+                      <recharts.Area
+                        type="monotone"
+                        dataKey="commission"
+                        stroke="#f59e0b"
                         fill="#f59e0b"
                         fillOpacity={0.3}
                         name="Commission"
@@ -380,36 +386,43 @@ export const AffiliatePerformanceCharts = ({
             </CardHeader>
             <CardContent>
               <LazyRechartsWrapper>
-                {(recharts) => (
+                {recharts => (
                   <recharts.ResponsiveContainer width="100%" height={300}>
                     <recharts.LineChart data={chartData}>
-                      <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                      <recharts.XAxis 
-                        dataKey="date" 
+                      <recharts.CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#374151"
+                        opacity={0.3}
+                      />
+                      <recharts.XAxis
+                        dataKey="date"
                         stroke="#9ca3af"
                         fontSize={12}
                         angle={-45}
                         textAnchor="end"
                         height={80}
                       />
-                      <recharts.YAxis 
+                      <recharts.YAxis
                         stroke="#9ca3af"
                         fontSize={12}
-                        tickFormatter={(value) => `${value.toFixed(1)}%`}
+                        tickFormatter={value => `${value.toFixed(1)}%`}
                       />
-                      <recharts.Tooltip 
+                      <recharts.Tooltip
                         contentStyle={{
                           backgroundColor: '#1f2937',
                           border: '1px solid #374151',
                           borderRadius: '8px',
-                          color: '#f9fafb'
+                          color: '#f9fafb',
                         }}
-                        formatter={(value: number) => [`${value.toFixed(2)}%`, 'Taux de conversion']}
+                        formatter={(value: number) => [
+                          `${value.toFixed(2)}%`,
+                          'Taux de conversion',
+                        ]}
                       />
-                      <recharts.Line 
-                        type="monotone" 
-                        dataKey="conversion_rate" 
-                        stroke="#8b5cf6" 
+                      <recharts.Line
+                        type="monotone"
+                        dataKey="conversion_rate"
+                        stroke="#8b5cf6"
                         strokeWidth={2}
                         dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6 }}
@@ -426,11 +439,3 @@ export const AffiliatePerformanceCharts = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-

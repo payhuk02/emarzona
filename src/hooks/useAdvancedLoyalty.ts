@@ -10,25 +10,24 @@ import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 
 export function useLoyaltyProfile(userId?: string) {
-
   const {
     data: profile,
     isLoading,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['loyalty-profile', userId],
-    queryFn: () => userId ? loyaltyEngine.getUserProfile(userId) : null,
+    queryFn: () => (userId ? loyaltyEngine.getUserProfile(userId) : null),
     enabled: !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2
+    retry: 2,
   });
 
   return {
     profile,
     isLoading,
     error,
-    refetch
+    refetch,
   };
 }
 
@@ -44,7 +43,7 @@ export function useAwardPoints() {
       referenceId,
       referenceType,
       metadata,
-      storeId
+      storeId,
     }: {
       userId: string;
       points: number;
@@ -54,7 +53,15 @@ export function useAwardPoints() {
       metadata?: Record<string, unknown>;
       storeId?: string;
     }) => {
-      return await loyaltyEngine.awardPoints(userId, points, reason, referenceId, referenceType, metadata, storeId);
+      return await loyaltyEngine.awardPoints(
+        userId,
+        points,
+        reason,
+        referenceId,
+        referenceType,
+        metadata,
+        storeId
+      );
     },
     onSuccess: (data, variables) => {
       // Invalider les queries liées
@@ -62,21 +69,24 @@ export function useAwardPoints() {
       queryClient.invalidateQueries({ queryKey: ['loyalty-transactions', variables.userId] });
 
       toast({
-        title: "Points crédités !",
+        title: 'Points crédités !',
         description: `${variables.points} points ajoutés à votre compte.`,
       });
 
-      logger.info('Points awarded successfully', { userId: variables.userId, points: variables.points });
+      logger.info('Points awarded successfully', {
+        userId: variables.userId,
+        points: variables.points,
+      });
     },
     onError: (error, variables) => {
       toast({
-        title: "Erreur",
-        description: "Impossible de créditer les points.",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de créditer les points.',
+        variant: 'destructive',
       });
 
       logger.error('Failed to award points', { userId: variables.userId, error });
-    }
+    },
   });
 }
 
@@ -90,7 +100,7 @@ export function useRedeemPoints() {
       points,
       reason,
       metadata,
-      storeId
+      storeId,
     }: {
       userId: string;
       points: number;
@@ -106,21 +116,24 @@ export function useRedeemPoints() {
       queryClient.invalidateQueries({ queryKey: ['loyalty-transactions', variables.userId] });
 
       toast({
-        title: "Points utilisés !",
+        title: 'Points utilisés !',
         description: `${variables.points} points déduits de votre compte.`,
       });
 
-      logger.info('Points redeemed successfully', { userId: variables.userId, points: variables.points });
+      logger.info('Points redeemed successfully', {
+        userId: variables.userId,
+        points: variables.points,
+      });
     },
     onError: (error, variables) => {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible d'utiliser les points.",
-        variant: "destructive"
+        variant: 'destructive',
       });
 
       logger.error('Failed to redeem points', { userId: variables.userId, error });
-    }
+    },
   });
 }
 
@@ -135,11 +148,11 @@ export function useLoyaltyTransactions(userId?: string, page = 1, limit = 20) {
       return {
         transactions: [] as LoyaltyTransaction[],
         total: 0,
-        hasMore: false
+        hasMore: false,
       };
     },
     enabled: !!userId,
-    staleTime: 2 * 60 * 1000 // 2 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -152,11 +165,11 @@ export function useProcessLoyaltyEvent() {
       userId,
       eventType,
       eventData,
-      storeId
+      storeId,
     }: {
       userId: string;
       eventType: Parameters<typeof loyaltyEngine.processLoyaltyEvent>[1];
-      eventData: Record<string, any>;
+      eventData: Record<string, unknown>;
       storeId?: string;
     }) => {
       return await loyaltyEngine.processLoyaltyEvent(userId, eventType, eventData, storeId);
@@ -167,22 +180,26 @@ export function useProcessLoyaltyEvent() {
         queryClient.invalidateQueries({ queryKey: ['loyalty-profile', variables.userId] });
 
         toast({
-          title: "Points gagnés !",
+          title: 'Points gagnés !',
           description: `${result.pointsAwarded} points ajoutés à votre compte.`,
         });
 
         // Vérifier si nouveau niveau
         if (result.newTier) {
           toast({
-            title: "Nouveau niveau atteint !",
+            title: 'Nouveau niveau atteint !',
             description: `Félicitations ! Vous êtes maintenant ${result.newTier.name}.`,
           });
         }
       }
     },
     onError: (error, variables) => {
-      logger.error('Failed to process loyalty event', { userId: variables.userId, eventType: variables.eventType, error });
-    }
+      logger.error('Failed to process loyalty event', {
+        userId: variables.userId,
+        eventType: variables.eventType,
+        error,
+      });
+    },
   });
 }
 
@@ -205,11 +222,11 @@ export function useLoyaltyStats(userId?: string) {
         currentStreak: profile.streakData.currentStreak,
         totalReferrals: profile.referralStats.totalReferrals,
         successfulReferrals: profile.referralStats.successfulReferrals,
-        pointsFromReferrals: profile.referralStats.earnedFromReferrals
+        pointsFromReferrals: profile.referralStats.earnedFromReferrals,
       };
     },
     enabled: !!userId,
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -220,64 +237,65 @@ export function useLoyaltyStats(userId?: string) {
 export function useAutoLoyaltyTracking(userId?: string, storeId?: string) {
   const processEvent = useProcessLoyaltyEvent();
 
-  const trackPurchase = useCallback(async (orderData: {
-    orderId: string;
-    totalAmount: number;
-    items: any[];
-  }) => {
-    if (!userId) return;
+  const trackPurchase = useCallback(
+    async (orderData: {
+      orderId: string;
+      totalAmount: number;
+      items: Array<{ productId: string; quantity: number; price: number }>;
+    }) => {
+      if (!userId) return;
 
-    await processEvent.mutateAsync({
-      userId,
-      eventType: 'purchase',
-      eventData: orderData,
-      storeId
-    });
-  }, [userId, storeId, processEvent]);
+      await processEvent.mutateAsync({
+        userId,
+        eventType: 'purchase',
+        eventData: orderData,
+        storeId,
+      });
+    },
+    [userId, storeId, processEvent]
+  );
 
-  const trackReview = useCallback(async (reviewData: {
-    productId: string;
-    rating: number;
-    reviewId: string;
-  }) => {
-    if (!userId) return;
+  const trackReview = useCallback(
+    async (reviewData: { productId: string; rating: number; reviewId: string }) => {
+      if (!userId) return;
 
-    await processEvent.mutateAsync({
-      userId,
-      eventType: 'review',
-      eventData: reviewData,
-      storeId
-    });
-  }, [userId, storeId, processEvent]);
+      await processEvent.mutateAsync({
+        userId,
+        eventType: 'review',
+        eventData: reviewData,
+        storeId,
+      });
+    },
+    [userId, storeId, processEvent]
+  );
 
-  const trackReferral = useCallback(async (referralData: {
-    refereeId: string;
-    refereeEmail: string;
-  }) => {
-    if (!userId) return;
+  const trackReferral = useCallback(
+    async (referralData: { refereeId: string; refereeEmail: string }) => {
+      if (!userId) return;
 
-    await processEvent.mutateAsync({
-      userId,
-      eventType: 'referral',
-      eventData: referralData,
-      storeId
-    });
-  }, [userId, storeId, processEvent]);
+      await processEvent.mutateAsync({
+        userId,
+        eventType: 'referral',
+        eventData: referralData,
+        storeId,
+      });
+    },
+    [userId, storeId, processEvent]
+  );
 
-  const trackSocialShare = useCallback(async (shareData: {
-    platform: string;
-    contentType: string;
-    contentId: string;
-  }) => {
-    if (!userId) return;
+  const trackSocialShare = useCallback(
+    async (shareData: { platform: string; contentType: string; contentId: string }) => {
+      if (!userId) return;
 
-    await processEvent.mutateAsync({
-      userId,
-      eventType: 'social_share',
-      eventData: shareData,
-      storeId
-    });
-  }, [userId, storeId, processEvent]);
+      await processEvent.mutateAsync({
+        userId,
+        eventType: 'social_share',
+        eventData: shareData,
+        storeId,
+      });
+    },
+    [userId, storeId, processEvent]
+  );
 
   const trackLoginStreak = useCallback(async () => {
     if (!userId) return;
@@ -286,16 +304,36 @@ export function useAutoLoyaltyTracking(userId?: string, storeId?: string) {
       userId,
       eventType: 'login_streak',
       eventData: { date: new Date().toISOString() },
-      storeId
+      storeId,
     });
   }, [userId, storeId, processEvent]);
+
+  const triggerLoyaltyEvent = useCallback(
+    async (
+      eventType: Parameters<typeof processEvent.mutateAsync>[0]['eventType'],
+      eventData: Record<string, unknown>
+    ) => {
+      if (!userId) {
+        logger.warn('Cannot trigger loyalty event: userId is undefined', { eventType, eventData });
+        return;
+      }
+      await processEvent.mutateAsync({
+        userId,
+        eventType,
+        eventData,
+        storeId,
+      });
+    },
+    [userId, storeId, processEvent]
+  );
 
   return {
     trackPurchase,
     trackReview,
     trackReferral,
     trackSocialShare,
-    trackLoginStreak
+    trackLoginStreak,
+    triggerLoyaltyEvent,
   };
 }
 

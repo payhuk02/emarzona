@@ -17,11 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { StableDropdownMenu, StableDropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
   MoreHorizontal,
