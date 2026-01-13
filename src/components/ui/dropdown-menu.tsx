@@ -460,10 +460,10 @@ export {
 };
 
 // Alias pour assurer la cohérence avec SelectContent
-export const SelectMenuContent = DropdownMenuContent;
-export const SelectMenuItem = DropdownMenuItem;
-export const SelectMenuSeparator = DropdownMenuSeparator;
-export const SelectMenuLabel = DropdownMenuLabel;
+const SelectMenuContent = DropdownMenuContent;
+const SelectMenuItem = DropdownMenuItem;
+const SelectMenuSeparator = DropdownMenuSeparator;
+const SelectMenuLabel = DropdownMenuLabel;
 
 /**
  * UnifiedMenuContent - Menu unifié qui respecte exactement les mêmes styles que SelectContent
