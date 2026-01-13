@@ -141,8 +141,14 @@ const DropdownMenuContent = React.forwardRef<
           <div
             className="fixed inset-x-0 bottom-0 z-[1060] max-h-[80vh] w-full overflow-hidden rounded-t-2xl border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:duration-150 data-[state=closed]:duration-100"
             style={{
-              marginBottom: isMobile && isKeyboardOpen && keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
-              maxHeight: isMobile && isKeyboardOpen && keyboardHeight > 0 ? `calc(80vh - ${keyboardHeight}px)` : undefined,
+              marginBottom:
+                isMobile && isKeyboardOpen && keyboardHeight > 0
+                  ? `${keyboardHeight}px`
+                  : undefined,
+              maxHeight:
+                isMobile && isKeyboardOpen && keyboardHeight > 0
+                  ? `calc(80vh - ${keyboardHeight}px)`
+                  : undefined,
             }}
           >
             <DropdownMenuPrimitive.Content
@@ -442,4 +448,56 @@ export {
   StableDropdownMenu,
   StableDropdownMenuItem,
   StableDropdownMenuSeparator,
+  // Versions unifiées (cohérentes avec Select)
+  UnifiedMenu,
+  UnifiedMenuContent,
+  UnifiedMenuItem,
+  // Alias compatibilité
+  SelectMenuContent,
+  SelectMenuItem,
+  SelectMenuSeparator,
+  SelectMenuLabel,
 };
+
+// Alias pour assurer la cohérence avec SelectContent
+export const SelectMenuContent = DropdownMenuContent;
+export const SelectMenuItem = DropdownMenuItem;
+export const SelectMenuSeparator = DropdownMenuSeparator;
+export const SelectMenuLabel = DropdownMenuLabel;
+
+/**
+ * UnifiedMenuContent - Menu unifié qui respecte exactement les mêmes styles que SelectContent
+ *
+ * Utilise automatiquement :
+ * - mobileVariant="sheet" pour stabilité sur mobile
+ * - mobileOptimized=true pour optimisations tactiles
+ * - Même animations et styles que SelectContent
+ */
+export const UnifiedMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuContent>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuContent>
+>((props, ref) => (
+  <DropdownMenuContent
+    ref={ref}
+    mobileOptimized={true}
+    mobileVariant="sheet"
+    side="bottom"
+    align="start"
+    {...props}
+  />
+));
+UnifiedMenuContent.displayName = 'UnifiedMenuContent';
+
+/**
+ * UnifiedMenuItem - Item unifié qui respecte exactement les mêmes styles que SelectItem
+ */
+export const UnifiedMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuItem>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuItem>
+>((props, ref) => <DropdownMenuItem ref={ref} {...props} />);
+UnifiedMenuItem.displayName = 'UnifiedMenuItem';
+
+/**
+ * UnifiedMenu - Wrapper complet pour garantir cohérence avec Select
+ */
+export const UnifiedMenu = DropdownMenu;
