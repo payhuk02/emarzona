@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from '
 import { AuthProvider } from '@/contexts/AuthContext';
 import { StoreProvider } from '@/contexts/StoreContext';
 import { PlatformCustomizationProvider } from '@/contexts/PlatformCustomizationContext';
+import { SubdomainMiddleware } from '@/components/multi-tenant/SubdomainMiddleware';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ScrollToTop } from '@/components/navigation/ScrollToTop';
 import { LoadingBar } from '@/components/navigation/LoadingBar';
@@ -2408,8 +2409,10 @@ const App = () => (
         <AuthProvider>
           <StoreProvider>
             <PlatformCustomizationProvider>
-              <AppInitializer queryClient={queryClient} />
-              <AppContent />
+              <SubdomainMiddleware>
+                <AppInitializer queryClient={queryClient} />
+                <AppContent />
+              </SubdomainMiddleware>
             </PlatformCustomizationProvider>
           </StoreProvider>
         </AuthProvider>
