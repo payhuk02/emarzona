@@ -29,12 +29,12 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   const subdomainInfo = detectSubdomain();
   const { setSelectedStoreId } = useStoreContext();
 
-  // Charger la boutique si on est sur un sous-domaine
+  // Charger la boutique UNIQUEMENT si on est sur myemarzona.shop (domaine des boutiques)
   const { data: store, isLoading, isError, error } = useCurrentStoreBySubdomain();
 
   useEffect(() => {
-    // Si on est sur un sous-domaine, charger la boutique
-    if (subdomainInfo.isSubdomain && subdomainInfo.subdomain) {
+    // Si on est sur un sous-domaine de boutique (myemarzona.shop), charger la boutique
+    if (subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain) {
       logger.info('Subdomain detected', {
         subdomain: subdomainInfo.subdomain,
         baseDomain: subdomainInfo.baseDomain,
@@ -61,7 +61,8 @@ export function SubdomainMiddleware({ children }: SubdomainMiddlewareProps) {
   }, [store, subdomainInfo, setSelectedStoreId, location.pathname]);
 
   // Afficher une page 404 si la boutique n'existe pas
-  if (subdomainInfo.isSubdomain && subdomainInfo.subdomain) {
+  // UNIQUEMENT si on est sur le domaine des boutiques (myemarzona.shop)
+  if (subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && subdomainInfo.subdomain) {
     if (isLoading) {
       // Afficher un loader pendant le chargement
       return (

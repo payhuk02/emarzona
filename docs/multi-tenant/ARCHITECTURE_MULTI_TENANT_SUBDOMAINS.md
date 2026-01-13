@@ -25,11 +25,19 @@
 
 ### Objectif
 
-Permettre à chaque vendeur d'avoir automatiquement une boutique accessible via :
+**Séparation claire des domaines** :
 
-```
-https://nomboutique.myemarzona.shop
-```
+1. **`emarzona.com`** - Plateforme principale
+   - Dashboard, marketplace, administration
+   - Pas de sous-domaines
+   - Application React SPA complète
+
+2. **`myemarzona.shop`** - Boutiques utilisateurs
+   - Chaque vendeur reçoit automatiquement un sous-domaine
+   - Format : `https://nomboutique.myemarzona.shop`
+   - Génération automatique lors de la création
+
+> 📚 Voir [SEPARATION_DOMAINES.md](./SEPARATION_DOMAINES.md) pour plus de détails
 
 ### Stack Technique
 
@@ -58,6 +66,22 @@ https://nomboutique.myemarzona.shop
 
 ### Flux de Requête
 
+#### Sur emarzona.com (Plateforme)
+
+```
+1. Utilisateur accède à https://emarzona.com/dashboard
+   ↓
+2. Cloudflare route vers Vercel
+   ↓
+3. Vercel sert l'application React (SPA)
+   ↓
+4. SubdomainMiddleware détecte isPlatformDomain = true
+   ↓
+5. Pas de traitement multi-tenant → Application normale
+```
+
+#### Sur myemarzona.shop (Boutique)
+
 ```
 1. Utilisateur accède à https://boutique.myemarzona.shop
    ↓
@@ -67,11 +91,13 @@ https://nomboutique.myemarzona.shop
    ↓
 4. React détecte le sous-domaine via window.location.hostname
    ↓
-5. SubdomainMiddleware charge la boutique via Edge Function
+5. SubdomainMiddleware détecte isStoreDomain = true
    ↓
-6. Edge Function interroge PostgreSQL pour récupérer la boutique
+6. Charge la boutique via Edge Function
    ↓
-7. Si trouvée → Affiche la boutique
+7. Edge Function interroge PostgreSQL pour récupérer la boutique
+   ↓
+8. Si trouvée → Affiche la boutique
    Si non trouvée → Affiche page 404
 ```
 

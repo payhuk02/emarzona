@@ -137,10 +137,15 @@ serve(async req => {
 
 /**
  * Extrait le sous-domaine depuis le hostname
+ *
+ * IMPORTANT: Cette fonction ne traite QUE les domaines de boutiques (myemarzona.shop)
+ * Les domaines de plateforme (emarzona.com) ne doivent pas être traités ici.
+ *
  * Exemples:
  * - "boutique.myemarzona.shop" -> "boutique"
  * - "www.boutique.myemarzona.shop" -> "boutique" (ignore www)
  * - "myemarzona.shop" -> null (pas de sous-domaine)
+ * - "emarzona.com" -> null (domaine de plateforme, ignoré)
  */
 function extractSubdomain(host: string): string | null {
   if (!host) return null;
@@ -148,18 +153,18 @@ function extractSubdomain(host: string): string | null {
   // Nettoyer le hostname (enlever le port si présent)
   const hostname = host.split(':')[0].toLowerCase();
 
-  // Domaines de base
-  const baseDomains = ['myemarzona.shop', 'emarzona.com', 'api.emarzona.com'];
+  // Domaines de boutiques UNIQUEMENT
+  const storeDomains = ['myemarzona.shop'];
 
-  for (const baseDomain of baseDomains) {
-    if (hostname === baseDomain) {
+  for (const storeDomain of storeDomains) {
+    if (hostname === storeDomain) {
       // Pas de sous-domaine
       return null;
     }
 
-    if (hostname.endsWith(`.${baseDomain}`)) {
+    if (hostname.endsWith(`.${storeDomain}`)) {
       // Extraire le sous-domaine
-      const subdomain = hostname.replace(`.${baseDomain}`, '');
+      const subdomain = hostname.replace(`.${storeDomain}`, '');
 
       // Si c'est "www", essayer d'extraire le vrai sous-domaine
       if (subdomain.startsWith('www.')) {
@@ -171,12 +176,25 @@ function extractSubdomain(host: string): string | null {
     }
   }
 
-  // Si aucun domaine de base ne correspond, essayer d'extraire quand même
-  // (pour le développement local ou autres configurations)
-  const parts = hostname.split('.');
-  if (parts.length >= 3) {
-    // Prendre la première partie comme sous-domaine
-    return parts[0];
+  // Si on est sur un domaine de plateforme (emarzona.com), retourner null
+  // Cette Edge Function ne doit traiter que les domaines de boutiques
+  const platformDomains = ['emarzona.com', 'api.emarzona.com'];
+  for (const platformDomain of platformDomains) {
+    if (hostname === platformDomain || hostname.endsWith(`.${platformDomain}`)) {
+      return null; // Domaine de plateforme, pas de traitement
+    }
+  }
+
+  // Pour le développement local, essayer d'extraire quand même
+  if (
+    hostname === 'localhost' ||
+    hostname.startsWith('127.0.0.1') ||
+    hostname.startsWith('192.168.')
+  ) {
+    const parts = hostname.split('.');
+    if (parts.length >= 2) {
+      return parts[0];
+    }
   }
 
   return null;

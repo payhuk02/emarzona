@@ -7,11 +7,18 @@
 
 ## 🎯 OBJECTIF
 
-Permettre à chaque vendeur d'avoir automatiquement une boutique accessible via :
+Séparation claire entre deux domaines :
+
+1. **`emarzona.com`** - Plateforme principale (dashboard, marketplace, etc.)
+2. **`myemarzona.shop`** - Boutiques des utilisateurs uniquement
+
+Lorsqu'un vendeur crée sa boutique, elle reçoit automatiquement un sous-domaine sur `myemarzona.shop` :
 
 ```
 https://nomboutique.myemarzona.shop
 ```
+
+> 📚 Voir [SEPARATION_DOMAINES.md](./SEPARATION_DOMAINES.md) pour plus de détails
 
 ---
 

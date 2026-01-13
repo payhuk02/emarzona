@@ -215,6 +215,8 @@ export const useStore = () => {
         return false;
       }
 
+      // Le subdomain sera généré automatiquement par le trigger SQL
+      // à partir du slug lors de l'insertion
       const { data, error } = await supabase
         .from('stores')
         .insert({
@@ -222,6 +224,7 @@ export const useStore = () => {
           name,
           slug,
           description: description || null,
+          // subdomain sera généré automatiquement par le trigger auto_generate_subdomain
         })
         .select()
         .limit(1);
@@ -266,7 +269,7 @@ export const useStore = () => {
     try {
       // Nettoyer le payload pour ne garder que les colonnes réellement supportées
       const sanitizedUpdates = sanitizeStorePayload(updates as Record<string, unknown>);
-      const  updateData: Partial<Store> = { ...(sanitizedUpdates as Partial<Store>) };
+      const updateData: Partial<Store> = { ...(sanitizedUpdates as Partial<Store>) };
 
       // Si le nom change, regénérer le slug
       if (updates.name && updates.name !== store.name) {
@@ -329,9 +332,3 @@ export const useStore = () => {
     checkSlugAvailability,
   };
 };
-
-
-
-
-
-

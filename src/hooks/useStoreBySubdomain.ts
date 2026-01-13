@@ -122,7 +122,8 @@ export function useStoreBySubdomain(
 export function useCurrentStoreBySubdomain() {
   const subdomainInfo = detectSubdomain();
 
+  // Activer UNIQUEMENT si on est sur le domaine des boutiques (myemarzona.shop)
   return useStoreBySubdomain(subdomainInfo.subdomain, {
-    enabled: subdomainInfo.isSubdomain,
+    enabled: subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain,
   });
 }

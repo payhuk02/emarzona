@@ -12,16 +12,25 @@ export interface SubdomainInfo {
   baseDomain: string;
   fullHost: string;
   isSubdomain: boolean;
+  isStoreDomain: boolean; // true si on est sur myemarzona.shop
+  isPlatformDomain: boolean; // true si on est sur emarzona.com
 }
 
 /**
  * Domaines de base configurés
+ *
+ * IMPORTANT: Séparation des domaines
+ * - emarzona.com : Plateforme principale (dashboard, marketplace, etc.)
+ * - myemarzona.shop : Boutiques des utilisateurs uniquement (*.myemarzona.shop)
  */
-const BASE_DOMAINS = [
-  'myemarzona.shop',
+const PLATFORM_DOMAINS = [
   'emarzona.com',
   'api.emarzona.com',
   'localhost', // Pour le développement local
+];
+
+const STORE_DOMAINS = [
+  'myemarzona.shop', // Domaine dédié aux boutiques des utilisateurs
 ];
 
 /**
@@ -125,27 +134,31 @@ export function detectSubdomain(): SubdomainInfo {
       baseDomain: '',
       fullHost: '',
       isSubdomain: false,
+      isStoreDomain: false,
+      isPlatformDomain: false,
     };
   }
 
   const hostname = window.location.hostname.toLowerCase();
   const fullHost = window.location.host;
 
-  // Chercher le domaine de base correspondant
-  for (const baseDomain of BASE_DOMAINS) {
-    if (hostname === baseDomain) {
-      // Pas de sous-domaine
+  // 1. Vérifier si on est sur un domaine de boutique (myemarzona.shop)
+  for (const storeDomain of STORE_DOMAINS) {
+    if (hostname === storeDomain) {
+      // Pas de sous-domaine, mais on est sur le domaine de boutiques
       return {
         subdomain: null,
-        baseDomain,
+        baseDomain: storeDomain,
         fullHost,
         isSubdomain: false,
+        isStoreDomain: true,
+        isPlatformDomain: false,
       };
     }
 
-    if (hostname.endsWith(`.${baseDomain}`)) {
-      // Extraire le sous-domaine
-      let subdomain = hostname.replace(`.${baseDomain}`, '');
+    if (hostname.endsWith(`.${storeDomain}`)) {
+      // Extraire le sous-domaine (boutique)
+      let subdomain = hostname.replace(`.${storeDomain}`, '');
 
       // Si c'est "www", essayer d'extraire le vrai sous-domaine
       if (subdomain.startsWith('www.')) {
@@ -154,14 +167,31 @@ export function detectSubdomain(): SubdomainInfo {
 
       return {
         subdomain: subdomain || null,
-        baseDomain,
+        baseDomain: storeDomain,
         fullHost,
-        isSubdomain: true,
+        isSubdomain: !!subdomain,
+        isStoreDomain: true,
+        isPlatformDomain: false,
       };
     }
   }
 
-  // Pour le développement local (localhost:8080, 127.0.0.1:8080, etc.)
+  // 2. Vérifier si on est sur un domaine de plateforme (emarzona.com)
+  for (const platformDomain of PLATFORM_DOMAINS) {
+    if (hostname === platformDomain || hostname.endsWith(`.${platformDomain}`)) {
+      // On est sur la plateforme principale, pas de sous-domaine de boutique
+      return {
+        subdomain: null,
+        baseDomain: platformDomain,
+        fullHost,
+        isSubdomain: false,
+        isStoreDomain: false,
+        isPlatformDomain: true,
+      };
+    }
+  }
+
+  // 3. Pour le développement local (localhost:8080, 127.0.0.1:8080, etc.)
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
     // Essayer d'extraire depuis l'URL complète ou les paramètres
     const urlParams = new URLSearchParams(window.location.search);
@@ -173,6 +203,8 @@ export function detectSubdomain(): SubdomainInfo {
         baseDomain: 'localhost',
         fullHost,
         isSubdomain: true,
+        isStoreDomain: true, // En dev, on simule un domaine de boutique
+        isPlatformDomain: false,
       };
     }
 
@@ -181,26 +213,38 @@ export function detectSubdomain(): SubdomainInfo {
       baseDomain: 'localhost',
       fullHost,
       isSubdomain: false,
+      isStoreDomain: false,
+      isPlatformDomain: true, // En dev sans subdomain, on est sur la plateforme
     };
   }
 
-  // Si aucun domaine de base ne correspond, essayer d'extraire quand même
+  // 4. Si aucun domaine connu ne correspond, essayer d'extraire quand même
   const parts = hostname.split('.');
   if (parts.length >= 3) {
     const potentialSubdomain = parts[0];
+    const potentialBaseDomain = parts.slice(1).join('.');
+
+    // Vérifier si c'est un domaine de boutique connu
+    const isStoreDomain = STORE_DOMAINS.some(d => potentialBaseDomain.includes(d.split('.')[0]));
+
     return {
       subdomain: potentialSubdomain,
-      baseDomain: parts.slice(1).join('.'),
+      baseDomain: potentialBaseDomain,
       fullHost,
       isSubdomain: true,
+      isStoreDomain,
+      isPlatformDomain: !isStoreDomain,
     };
   }
 
+  // 5. Par défaut, considérer comme plateforme
   return {
     subdomain: null,
     baseDomain: hostname,
     fullHost,
     isSubdomain: false,
+    isStoreDomain: false,
+    isPlatformDomain: true,
   };
 }
 
