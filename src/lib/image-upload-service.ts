@@ -357,3 +357,116 @@ export function useOptimizedImageUpload() {
 
 // Import manquant
 import { useState } from 'react';
+
+/**
+ * Hook pour l'upload d'images optimisées via API
+ * Utilise un endpoint serveur pour l'optimisation au lieu de traiter côté client
+ */
+export function useOptimizedImageUpload() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const uploadImage = async (
+    file: File,
+    bucketName?: string,
+    options?: ImageUploadOptions
+  ): Promise<UploadResult> => {
+    setIsUploading(true);
+    setProgress(0);
+
+    try {
+      // Simulation de progression pour l'UX
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 15, 90));
+      }, 300);
+
+      // Créer un FormData pour l'upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucketName', bucketName || 'images');
+
+      // Ajouter les options d'optimisation
+      if (options) {
+        Object.entries(options).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (typeof value === 'object') {
+              formData.append(key, JSON.stringify(value));
+            } else {
+              formData.append(key, String(value));
+            }
+          }
+        });
+      }
+
+      // Upload vers l'API endpoint
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const result: UploadResult = await response.json();
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      return result;
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur d\'upload';
+      logger.error('Erreur upload image via API', { error, fileName: file.name });
+      throw new Error(errorMessage);
+    } finally {
+      setIsUploading(false);
+      setTimeout(() => setProgress(0), 2000);
+    }
+  };
+
+  return {
+    uploadImage,
+    isUploading,
+    progress
+  };
+}
+
+// Ancienne fonction déplacée - maintenant seulement utilisée côté serveur
+export function useOptimizedImageUploadLegacy() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const uploadImage = async (
+    file: File,
+    bucketName?: string,
+    options?: ImageUploadOptions
+  ): Promise<UploadResult> => {
+    setIsUploading(true);
+    setProgress(0);
+
+    try {
+      // Simulation de progression
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
+
+      const result = await uploadOptimizedImage(file, bucketName, options);
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      return result;
+    } finally {
+      setIsUploading(false);
+      setTimeout(() => setProgress(0), 2000); // Reset après 2s
+    }
+  };
+
+  return {
+    uploadImage,
+    isUploading,
+    progress
+  };
+}

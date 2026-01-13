@@ -1,9 +1,20 @@
 /**
  * Service d'optimisation d'images pour SEO et performances
- * Utilise Sharp.js pour compression automatique et génération de tailles multiples
+ * Utilise Sharp.js pour compression automatique et génération de tailles multiples (côté serveur uniquement)
  */
 
-import sharp from 'sharp';
+// Sharp est importé de manière asynchrone pour éviter les erreurs côté client
+let sharp: any = null;
+const isServer = typeof window === 'undefined';
+
+if (isServer) {
+  try {
+    // Import dynamique de sharp seulement côté serveur
+    sharp = require('sharp');
+  } catch (error) {
+    console.warn('Sharp library not available, image optimization will be limited');
+  }
+}
 
 export interface ImageOptimizationOptions {
   quality?: number; // 1-100
@@ -43,6 +54,25 @@ export async function optimizeImage(
     maxWidth = 2000,
     maxHeight = 2000
   } = options;
+
+  // Vérifier si on est côté serveur et si sharp est disponible
+  if (!isServer || !sharp) {
+    console.warn('Image optimization is only available on the server side');
+    // Retourner une version mock pour le développement côté client
+    return {
+      original: inputBuffer,
+      optimized: inputBuffer,
+      sizes: {},
+      metadata: {
+        originalSize: inputBuffer.length,
+        optimizedSize: inputBuffer.length,
+        compressionRatio: 0,
+        format: 'original',
+        width: 0,
+        height: 0
+      }
+    };
+  }
 
   try {
     // Analyse de l'image originale
