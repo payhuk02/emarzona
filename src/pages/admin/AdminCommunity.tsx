@@ -745,7 +745,7 @@ export default function AdminCommunity() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onSelect={handleDeleteMember} className="bg-destructive">
+                <AlertDialogAction onClick={handleDeleteMember} className="bg-destructive">
                   Supprimer
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -763,7 +763,7 @@ export default function AdminCommunity() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onSelect={handleDeletePost} className="bg-destructive">
+                <AlertDialogAction onClick={handleDeletePost} className="bg-destructive">
                   Supprimer
                 </AlertDialogAction>
               </AlertDialogFooter>

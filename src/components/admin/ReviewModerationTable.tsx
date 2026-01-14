@@ -133,7 +133,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
               <Button
                 size="sm"
                 variant="default"
-                onSelect={() => handleApprove(selectedReviews)}
+                onClick={() => handleApprove(selectedReviews)}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               >
                 <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -143,7 +143,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
               <Button
                 size="sm"
                 variant="destructive"
-                onSelect={() => handleReject(selectedReviews)}
+                onClick={() => handleReject(selectedReviews)}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               >
                 <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -153,7 +153,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onSelect={() => handleFlag(selectedReviews)}
+                onClick={() => handleFlag(selectedReviews)}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               >
                 <Flag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -277,7 +277,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                     <Button
                       size="sm"
                       variant="default"
-                      onSelect={() => handleApprove([row.id])}
+                      onClick={() => handleApprove([row.id])}
                       className="min-h-[44px] flex-1"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
@@ -287,7 +287,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                   <Button
                     size="sm"
                     variant="destructive"
-                    onSelect={() => handleReject([row.id])}
+                    onClick={() => handleReject([row.id])}
                     className="min-h-[44px] flex-1"
                   >
                     <XCircle className="h-4 w-4 mr-2" />
@@ -298,7 +298,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onSelect={() => handleFlag([row.id])}
+                    onClick={() => handleFlag([row.id])}
                     className="min-h-[44px] flex-1"
                   >
                     <Flag className="h-4 w-4 mr-2" />
@@ -307,7 +307,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onSelect={() => handleDelete([row.id])}
+                    onClick={() => handleDelete([row.id])}
                     className="min-h-[44px] flex-1 text-destructive"
                   >
                     Supprimer
@@ -475,45 +475,33 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                           }}
                           triggerContent={<MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                         >
-                          <SelectItem value="edit" onSelect onSelect={() => {}} className="text-xs sm:text-sm">
+                          <SelectItem value="edit" onSelect={() => {}} className="text-xs sm:text-sm">
                             <span className="flex items-center">
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails
                             </span>
                           </SelectItem>
                           {!review.is_approved && (
-                            <SelectItem value="delete" onSelect
-                              onSelect={() => handleApprove([review.id])}
-                              className="text-xs sm:text-sm"
-                            >
+                            <SelectItem value="approve" onSelect={() => handleApprove([review.id])} className="text-xs sm:text-sm">
                               <span className="flex items-center">
                                 <CheckCircle className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 Approuver
                               </span>
                             </SelectItem>
                           )}
-                          <SelectItem value="copy" onSelect
-                            onSelect={() => handleReject([review.id])}
-                            className="text-xs sm:text-sm"
-                          >
+                          <SelectItem value="reject" onSelect={() => handleReject([review.id])} className="text-xs sm:text-sm">
                             <span className="flex items-center">
                               <XCircle className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Rejeter
                             </span>
                           </SelectItem>
-                          <SelectItem value="view" onSelect
-                            onSelect={() => handleFlag([review.id])}
-                            className="text-xs sm:text-sm"
-                          >
+                          <SelectItem value="flag" onSelect={() => handleFlag([review.id])} className="text-xs sm:text-sm">
                             <span className="flex items-center">
                               <Flag className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Signaler
                             </span>
                           </SelectItem>
-                          <SelectItem value="export" onSelect
-                            onSelect={() => handleDelete([review.id])}
-                            className="text-destructive text-xs sm:text-sm"
-                          >
+                          <SelectItem value="delete" onSelect={() => handleDelete([review.id])} className="text-destructive text-xs sm:text-sm">
                             <span className="flex items-center">Supprimer</span>
                           </SelectItem>
                         </Select>
