@@ -35,13 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 export default function DigitalProductVersionsManagement() {
   const { productId } = useParams<{ productId: string }>();
@@ -104,7 +98,7 @@ export default function DigitalProductVersionsManagement() {
                   <p className="text-muted-foreground mb-4">
                     Le produit demandé n'existe pas ou vous n'avez pas les permissions nécessaires.
                   </p>
-                  <Button onClick={() => navigate('/dashboard/products')}>
+                  <Button onSelect={() => navigate('/dashboard/products')}>
                     Retour aux produits
                   </Button>
                 </CardContent>
@@ -127,7 +121,7 @@ export default function DigitalProductVersionsManagement() {
               <div>
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(-1)}
+                  onSelect={() => navigate(-1)}
                   className="mb-4"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
@@ -140,7 +134,7 @@ export default function DigitalProductVersionsManagement() {
                   {product.name || 'Produit'}
                 </p>
               </div>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button onSelect={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Version
               </Button>
@@ -281,27 +275,27 @@ export default function DigitalProductVersionsManagement() {
                               : '-'}
                           </TableCell>
                           <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
+                            <Select>
+                              <SelectTrigger
                                 <Button variant="ghost" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setEditingVersion(version.id)}>
+                              </SelectTrigger>
+                              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                <SelectItem value="edit" onSelect onSelect={() => setEditingVersion(version.id)}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Modifier
-                                </DropdownMenuItem>
+                                </SelectItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
+                                <SelectItem value="delete" onSelect
                                   className="text-destructive"
-                                  onClick={() => handleDeleteVersion(version.id)}
+                                  onSelect={() => handleDeleteVersion(version.id)}
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -24,11 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Send,
   Paperclip,
@@ -382,7 +378,7 @@ export default function OrderMessaging() {
           <AppSidebar />
           <main className="flex-1 overflow-x-hidden">
             <div className="container mx-auto p-6">
-              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+              <Button variant="ghost" onSelect={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
@@ -414,7 +410,7 @@ export default function OrderMessaging() {
           <div className="container mx-auto p-6 max-w-7xl">
             {/* Header */}
             <div className="mb-6">
-              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+              <Button variant="ghost" onSelect={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
@@ -490,7 +486,7 @@ export default function OrderMessaging() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={async () => {
+                            onSelect={async () => {
                               if (searchQuery.trim()) {
                                 await searchMessages({
                                   conversationId: currentConversation?.id,
@@ -505,7 +501,7 @@ export default function OrderMessaging() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => {
+                            onSelect={() => {
                               setSearchQuery('');
                               setShowSearch(false);
                               clearSearch();
@@ -515,7 +511,7 @@ export default function OrderMessaging() {
                           </Button>
                         </div>
                       ) : (
-                        <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
+                        <Button variant="ghost" size="icon" onSelect={() => setShowSearch(true)}>
                           <Search className="h-4 w-4" />
                         </Button>
                       )}
@@ -529,19 +525,19 @@ export default function OrderMessaging() {
                           "aria-label": "Menu d'actions"
                         }}
                       >
-                        <StableDropdownMenuItem onClick={() => setShowAdminPanel(true)}>
+                        <SelectItem value="edit" onSelect onSelect={() => setShowAdminPanel(true)}>
                           <Shield className="h-4 w-4 mr-2" />
                           Demander intervention admin
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                         <StableDropdownMenuSeparator />
-                        <StableDropdownMenuItem
-                          onClick={() => navigate(`/disputes/create?orderId=${orderId}`)}
+                        <SelectItem value="delete" onSelect
+                          onSelect={() => navigate(`/disputes/create?orderId=${orderId}`)}
                           className="text-destructive"
                         >
                           <AlertTriangle className="h-4 w-4 mr-2" />
                           Ouvrir un litige
-                        </StableDropdownMenuItem>
-                      </StableDropdownMenu>
+                        </SelectItem>
+                      </Select>
                     </div>
                   </div>
                 </CardHeader>
@@ -599,7 +595,7 @@ export default function OrderMessaging() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={loadMoreMessages}
+                            onSelect={loadMoreMessages}
                             disabled={messagesLoading}
                             className="text-xs"
                           >
@@ -712,7 +708,7 @@ export default function OrderMessaging() {
                             variant="ghost"
                             size="icon"
                             className="h-5 w-5"
-                            onClick={() => removeFile(index)}
+                            onSelect={() => removeFile(index)}
                             aria-label={`Supprimer le fichier ${file.name}`}
                           >
                             <X className="h-3 w-3" />
@@ -751,7 +747,7 @@ export default function OrderMessaging() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => setShowCameraDialog(true)}
+                        onSelect={() => setShowCameraDialog(true)}
                         disabled={sendingMessage || uploadingFiles}
                         aria-label="Prendre une photo"
                         title="Prendre une photo"
@@ -762,7 +758,7 @@ export default function OrderMessaging() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => fileInputRef.current?.click()}
+                        onSelect={() => fileInputRef.current?.click()}
                         disabled={sendingMessage || uploadingFiles}
                         aria-label="Joindre un fichier"
                         title="Joindre un fichier"
@@ -771,7 +767,7 @@ export default function OrderMessaging() {
                       </Button>
 
                       <Button
-                        onClick={handleSendMessage}
+                        onSelect={handleSendMessage}
                         disabled={
                           sendingMessage ||
                           uploadingFiles ||
@@ -839,7 +835,7 @@ export default function OrderMessaging() {
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => navigate(`/orders/${orderId}`)}
+                          onSelect={() => navigate(`/orders/${orderId}`)}
                         >
                           Voir détails commande
                         </Button>
@@ -874,7 +870,7 @@ export default function OrderMessaging() {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() => setShowAdminPanel(true)}
+                      onSelect={() => setShowAdminPanel(true)}
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Demander aide admin
@@ -907,10 +903,10 @@ export default function OrderMessaging() {
               </Alert>
 
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setShowAdminPanel(false)}>
+                <Button variant="outline" onSelect={() => setShowAdminPanel(false)}>
                   Annuler
                 </Button>
-                <Button onClick={handleAdminIntervention}>
+                <Button onSelect={handleAdminIntervention}>
                   <Crown className="h-4 w-4 mr-2" />
                   Confirmer
                 </Button>

@@ -51,12 +51,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
@@ -316,7 +311,7 @@ export default function DigitalBundlesManagement() {
                   Créez et gérez vos packs de produits digitaux
                 </p>
               </div>
-              <Button onClick={handleCreateBundle} className="shrink-0">
+              <Button onSelect={handleCreateBundle} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau Bundle
               </Button>
@@ -416,7 +411,7 @@ export default function DigitalBundlesManagement() {
                         : 'Aucun bundle créé'}
                     </p>
                     {!searchQuery && statusFilter === 'all' && (
-                      <Button onClick={handleCreateBundle}>
+                      <Button onSelect={handleCreateBundle}>
                         <Plus className="h-4 w-4 mr-2" />
                         Créer votre premier bundle
                       </Button>
@@ -506,30 +501,30 @@ export default function DigitalBundlesManagement() {
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
+                              <Select>
+                                <SelectTrigger
                                   <Button variant="ghost" size="sm">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleViewBundle(bundle.id)}>
+                                </SelectTrigger>
+                                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                  <SelectItem value="edit" onSelect onSelect={() => handleViewBundle(bundle.id)}>
                                     <Eye className="h-4 w-4 mr-2" />
                                     Voir
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleEditBundle(bundle.id)}>
+                                  </SelectItem>
+                                  <SelectItem value="delete" onSelect onSelect={() => handleEditBundle(bundle.id)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => setDeletingBundleId(bundle.id)}
+                                  </SelectItem>
+                                  <SelectItem value="copy" onSelect
+                                    onSelect={() => setDeletingBundleId(bundle.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -601,7 +596,7 @@ export default function DigitalBundlesManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deletingBundleId && handleDeleteBundle(deletingBundleId)}
+                    onSelect={() => deletingBundleId && handleDeleteBundle(deletingBundleId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

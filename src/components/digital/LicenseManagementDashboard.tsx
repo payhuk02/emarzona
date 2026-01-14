@@ -37,13 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Key,
@@ -176,7 +170,7 @@ export const LicenseManagementDashboard = ({
           <p className="text-muted-foreground">{productName}</p>
         </div>
 
-        <Button onClick={() => setShowGenerator(true)}>
+        <Button onSelect={() => setShowGenerator(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Générer une licence
         </Button>
@@ -260,7 +254,7 @@ export const LicenseManagementDashboard = ({
             <div className="text-center py-12 text-muted-foreground">
               <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Aucune licence trouvée</p>
-              <Button onClick={() => setShowGenerator(true)} className="mt-4">
+              <Button onSelect={() => setShowGenerator(true)} className="mt-4">
                 <Plus className="h-4 w-4 mr-2" />
                 Créer votre première licence
               </Button>
@@ -287,7 +281,7 @@ export const LicenseManagementDashboard = ({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleCopyKey(license.license_key)}
+                          onSelect={() => handleCopyKey(license.license_key)}
                           aria-label="Copier la clé de licence"
                         >
                           <Copy className="h-3 w-3" />
@@ -334,8 +328,8 @@ export const LicenseManagementDashboard = ({
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button
                             variant="ghost"
                             size="sm"
@@ -343,27 +337,27 @@ export const LicenseManagementDashboard = ({
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setSelectedLicense(license)}>
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="edit" onSelect onSelect={() => setSelectedLicense(license)}>
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleCopyKey(license.license_key)}>
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect onSelect={() => handleCopyKey(license.license_key)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copier clé
-                          </DropdownMenuItem>
+                          </SelectItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleRevoke(license.id)}
+                          <SelectItem value="copy" onSelect
+                            onSelect={() => handleRevoke(license.id)}
                             className="text-destructive"
                             disabled={license.status === 'revoked' || isRevoking}
                           >
                             <Ban className="h-4 w-4 mr-2" />
                             Révoquer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -578,7 +572,7 @@ const LicenseGeneratorDialog = ({
             </div>
           )}
 
-          <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
+          <Button onSelect={handleGenerate} disabled={isGenerating} className="w-full">
             {isGenerating ? 'Génération...' : 'Générer la Licence'}
           </Button>
         </div>

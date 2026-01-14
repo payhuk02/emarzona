@@ -27,12 +27,7 @@ import { Heart, Reply, Flag, Edit, Trash2, MoreVertical, Send, Pin } from 'lucid
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -215,7 +210,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
               />
               <div className="flex justify-end">
                 <Button
-                  onClick={handleSubmitComment}
+                  onSelect={handleSubmitComment}
                   disabled={!newComment.trim() || createComment.isPending}
                 >
                   {createComment.isPending ? (
@@ -290,36 +285,36 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                           </p>
                         </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             {user?.id === comment.user_id && (
                               <>
-                                <DropdownMenuItem onClick={() => handleEdit(comment)}>
+                                <SelectItem value="edit" onSelect onSelect={() => handleEdit(comment)}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Modifier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => setDeletingComment(comment.id)}
+                                </SelectItem>
+                                <SelectItem value="delete" onSelect
+                                  onSelect={() => setDeletingComment(comment.id)}
                                   className="text-destructive"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Supprimer
-                                </DropdownMenuItem>
+                                </SelectItem>
                               </>
                             )}
                             {user?.id !== comment.user_id && (
-                              <DropdownMenuItem onClick={() => setReportingComment(comment.id)}>
+                              <SelectItem value="copy" onSelect onSelect={() => setReportingComment(comment.id)}>
                                 <Flag className="h-4 w-4 mr-2" />
                                 Signaler
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       {editingComment === comment.id ? (
@@ -332,7 +327,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              onClick={handleUpdateComment}
+                              onSelect={handleUpdateComment}
                               disabled={updateComment.isPending}
                             >
                               Enregistrer
@@ -340,7 +335,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
+                              onSelect={() => {
                                 setEditingComment(null);
                                 setEditContent('');
                               }}
@@ -357,7 +352,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleLike(comment.id, comment.is_liked || false)}
+                          onSelect={() => handleLike(comment.id, comment.is_liked || false)}
                           className={cn(comment.is_liked && 'text-red-600 hover:text-red-700')}
                         >
                           <Heart
@@ -368,7 +363,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
+                          onSelect={() =>
                             setReplyingTo(replyingTo === comment.id ? null : comment.id)
                           }
                         >
@@ -389,7 +384,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              onClick={() => handleSubmitReply(comment.id)}
+                              onSelect={() => handleSubmitReply(comment.id)}
                               disabled={!replyContent.trim() || createComment.isPending}
                             >
                               Répondre
@@ -397,7 +392,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
+                              onSelect={() => {
                                 setReplyingTo(null);
                                 setReplyContent('');
                               }}
@@ -433,7 +428,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                                   variant="ghost"
                                   size="sm"
                                   className="h-7 text-xs"
-                                  onClick={() => handleLike(reply.id, reply.is_liked || false)}
+                                  onSelect={() => handleLike(reply.id, reply.is_liked || false)}
                                 >
                                   <Heart
                                     className={cn(
@@ -499,10 +494,10 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setReportingComment(null)}>
+              <Button variant="outline" onSelect={() => setReportingComment(null)}>
                 Annuler
               </Button>
-              <Button onClick={handleReport} disabled={!reportReason || reportComment.isPending}>
+              <Button onSelect={handleReport} disabled={!reportReason || reportComment.isPending}>
                 Signaler
               </Button>
             </div>
@@ -524,7 +519,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onSelect={handleDelete} className="bg-red-600 hover:bg-red-700">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

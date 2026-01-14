@@ -5,14 +5,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Share2, Twitter, Facebook, Linkedin, MessageCircle, Link as LinkIcon, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
@@ -140,40 +133,40 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Select>
+      <SelectTrigger
         <Button variant="ghost" size="sm" className="gap-2">
           <Share2 className="h-4 w-4" />
           Partager
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      </SelectTrigger>
+      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
         <DropdownMenuLabel>Partager cet avis</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={shareOnTwitter} className="gap-2 cursor-pointer">
+        <SelectItem value="edit" onSelect onSelect={shareOnTwitter} className="gap-2 cursor-pointer">
           <Twitter className="h-4 w-4" />
           <span>Twitter / X</span>
-        </DropdownMenuItem>
+        </SelectItem>
         
-        <DropdownMenuItem onClick={shareOnFacebook} className="gap-2 cursor-pointer">
+        <SelectItem value="delete" onSelect onSelect={shareOnFacebook} className="gap-2 cursor-pointer">
           <Facebook className="h-4 w-4" />
           <span>Facebook</span>
-        </DropdownMenuItem>
+        </SelectItem>
         
-        <DropdownMenuItem onClick={shareOnLinkedIn} className="gap-2 cursor-pointer">
+        <SelectItem value="copy" onSelect onSelect={shareOnLinkedIn} className="gap-2 cursor-pointer">
           <Linkedin className="h-4 w-4" />
           <span>LinkedIn</span>
-        </DropdownMenuItem>
+        </SelectItem>
         
-        <DropdownMenuItem onClick={shareOnWhatsApp} className="gap-2 cursor-pointer">
+        <SelectItem value="view" onSelect onSelect={shareOnWhatsApp} className="gap-2 cursor-pointer">
           <MessageCircle className="h-4 w-4" />
           <span>WhatsApp</span>
-        </DropdownMenuItem>
+        </SelectItem>
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={copyLink} className="gap-2 cursor-pointer">
+        <SelectItem value="export" onSelect onSelect={copyLink} className="gap-2 cursor-pointer">
           {copied ? (
             <>
               <Check className="h-4 w-4 text-green-500" />
@@ -185,9 +178,9 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
               <span>Copier le lien</span>
             </>
           )}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </SelectItem>
+      </SelectContent>
+    </Select>
   );
 };
 
@@ -196,17 +189,17 @@ export const ShareReviewButtons : React.FC<ShareReviewButtonsProps> = ({
  */
 export const CompactShareButton : React.FC<ShareReviewButtonsProps> = (props) => {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Select>
+      <SelectTrigger
         <Button variant="ghost" size="icon" aria-label="Partager l'avis">
           <Share2 className="h-4 w-4" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      </SelectTrigger>
+      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
         {/* Same content as above */}
         <ShareReviewButtons {...props} />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </SelectContent>
+    </Select>
   );
 };
 

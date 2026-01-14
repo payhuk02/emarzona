@@ -12,13 +12,7 @@ import {
   Download,
   MoreHorizontal
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,7 +134,7 @@ const PaymentBulkActions = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleSelectAll}
+          onSelect={handleSelectAll}
           className="h-8 w-8 p-0"
         >
           {isAllSelected ? (
@@ -163,7 +157,7 @@ const PaymentBulkActions = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleSelectAll}
+            onSelect={handleSelectAll}
             className="h-6 w-6 p-0"
           >
             {isAllSelected ? (
@@ -183,7 +177,7 @@ const PaymentBulkActions = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleBulkComplete}
+            onSelect={handleBulkComplete}
             className="text-xs"
           >
             <CheckCircle className="h-3 w-3 mr-1" />
@@ -193,7 +187,7 @@ const PaymentBulkActions = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleBulkPending}
+            onSelect={handleBulkPending}
             className="text-xs"
           >
             <Clock className="h-3 w-3 mr-1" />
@@ -203,32 +197,32 @@ const PaymentBulkActions = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleBulkFail}
+            onSelect={handleBulkFail}
             className="text-xs"
           >
             <XCircle className="h-3 w-3 mr-1" />
             Échoué
           </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Select>
+            <SelectTrigger
               <Button variant="outline" size="sm" className="text-xs">
                 <MoreHorizontal className="h-3 w-3 mr-1" />
                 Plus
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleExport}>
+            </SelectTrigger>
+            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+              <SelectItem value="edit" onSelect onSelect={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
                 Exporter en CSV
-              </DropdownMenuItem>
+              </SelectItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleBulkDelete} className="text-destructive">
+              <SelectItem value="delete" onSelect onSelect={handleBulkDelete} className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -243,7 +237,7 @@ const PaymentBulkActions = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onSelect={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

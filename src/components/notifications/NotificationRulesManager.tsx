@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Plus,
   Edit,
@@ -375,14 +375,14 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                       </div>
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button variant="ghost" size="icon">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="view" onSelect
                             onClick={() => {
                               setSelectedRule(rule);
                               setIsEditDialogOpen(true);
@@ -390,8 +390,8 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
+                          </SelectItem>
+                          <SelectItem value="view" onSelect
                             onClick={() => toggleRuleStatus(rule.id, !rule.enabled)}
                           >
                             {rule.enabled ? (
@@ -405,22 +405,22 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                                 Activer
                               </>
                             )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
+                          </SelectItem>
+                          <SelectItem value="export" onSelect
                             onClick={() => navigator.clipboard.writeText(JSON.stringify(rule, null, 2))}
                           >
                             <Copy className="mr-2 h-4 w-4" />
                             Copier JSON
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect
                             onClick={() => handleDeleteRule(rule.id)}
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}

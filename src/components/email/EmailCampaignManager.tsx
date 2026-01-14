@@ -8,12 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,7 +135,7 @@ export const EmailCampaignManager = ({
                 Gérez vos campagnes email marketing ({campaigns?.length || 0})
               </CardDescription>
             </div>
-            <Button onClick={onCreateCampaign}>
+            <Button onSelect={onCreateCampaign}>
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle campagne
             </Button>
@@ -150,7 +145,7 @@ export const EmailCampaignManager = ({
           {!campaigns || campaigns.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Aucune campagne pour le moment</p>
-              <Button onClick={onCreateCampaign}>
+              <Button onSelect={onCreateCampaign}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer votre première campagne
               </Button>
@@ -223,64 +218,64 @@ export const EmailCampaignManager = ({
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button variant="ghost" size="icon" aria-label={`Actions pour la campagne ${campaign.name}`}>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="edit" onSelect
+                              onSelect={() => {
                                 setSelectedCampaign(campaign);
                                 setShowMetrics(true);
                               }}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               Voir métriques
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onEditCampaign?.(campaign)}
+                            </SelectItem>
+                            <SelectItem value="delete" onSelect
+                              onSelect={() => onEditCampaign?.(campaign)}
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
-                            </DropdownMenuItem>
+                            </SelectItem>
                             {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
-                              <DropdownMenuItem
-                                onClick={() => handleSend(campaign.id)}
+                              <SelectItem value="copy" onSelect
+                                onSelect={() => handleSend(campaign.id)}
                                 disabled={sendCampaign.isPending || !campaign.template_id}
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Envoyer
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
-                            <DropdownMenuItem
-                              onClick={() => handleDuplicate(campaign.id)}
+                            <SelectItem value="view" onSelect
+                              onSelect={() => handleDuplicate(campaign.id)}
                               disabled={duplicateCampaign.isPending}
                             >
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliquer
-                            </DropdownMenuItem>
+                            </SelectItem>
                             {campaign.status === 'paused' && (
-                              <DropdownMenuItem
-                                onClick={() => handleResume(campaign.id)}
+                              <SelectItem value="export" onSelect
+                                onSelect={() => handleResume(campaign.id)}
                                 disabled={resumeCampaign.isPending}
                               >
                                 <Play className="h-4 w-4 mr-2" />
                                 Reprendre
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
                             {(campaign.status === 'scheduled' || campaign.status === 'sending') && (
-                              <DropdownMenuItem
-                                onClick={() => handlePause(campaign.id)}
+                              <SelectItem value="duplicate" onSelect
+                                onSelect={() => handlePause(campaign.id)}
                                 disabled={pauseCampaign.isPending}
                               >
                                 <Pause className="h-4 w-4 mr-2" />
                                 Mettre en pause
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
-                            <DropdownMenuItem
-                              onClick={() => {
+                            <SelectItem value="toggle" onSelect
+                              onSelect={() => {
                                 setCampaignToDelete(campaign.id);
                                 setDeleteDialogOpen(true);
                               }}
@@ -288,9 +283,9 @@ export const EmailCampaignManager = ({
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -311,7 +306,7 @@ export const EmailCampaignManager = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => {
+                  onSelect={() => {
                     setShowMetrics(false);
                     setSelectedCampaign(null);
                   }}
@@ -340,7 +335,7 @@ export const EmailCampaignManager = ({
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onSelect={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer

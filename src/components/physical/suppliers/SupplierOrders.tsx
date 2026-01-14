@@ -65,12 +65,7 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 const  ORDER_STATUSES: {
   value: SupplierOrder['status'] | 'all';
@@ -444,7 +439,7 @@ export default function SupplierOrders() {
                   variant="ghost"
                   size="sm"
                   className="absolute right-1 sm:right-1.5 md:right-2 top-1/2 transform -translate-y-1/2 min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12 p-0 hover:bg-muted touch-manipulation"
-                  onClick={() => setSearchInput('')}
+                  onSelect={() => setSearchInput('')}
                   aria-label="Effacer la recherche"
                 >
                   <X className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5" />
@@ -459,7 +454,7 @@ export default function SupplierOrders() {
           </CardContent>
         </Card>
         <Button
-          onClick={() => setIsDialogOpen(true)}
+          onSelect={() => setIsDialogOpen(true)}
           className="min-h-[44px] h-11 sm:h-12 md:h-12 lg:h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-300 hover:scale-105 active:scale-95 touch-manipulation text-xs sm:text-sm md:text-base px-3 sm:px-4 md:px-5 lg:px-6 w-full sm:w-auto shrink-0"
         >
           <Plus className="mr-1 sm:mr-1.5 md:mr-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5" />
@@ -524,7 +519,7 @@ export default function SupplierOrders() {
                     variant="ghost"
                     size="icon"
                     className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-lg hover:bg-background hover:scale-110 transition-all duration-200 touch-manipulation"
-                    onClick={scrollTabsLeft}
+                    onSelect={scrollTabsLeft}
                     aria-label="Défiler vers la gauche"
                   >
                     <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -541,7 +536,7 @@ export default function SupplierOrders() {
                     variant="ghost"
                     size="icon"
                     className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-lg hover:bg-background hover:scale-110 transition-all duration-200 touch-manipulation"
-                    onClick={scrollTabsRight}
+                    onSelect={scrollTabsRight}
                     aria-label="Défiler vers la droite"
                   >
                     <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -607,7 +602,7 @@ export default function SupplierOrders() {
                       variant="ghost"
                       size="icon"
                       className="min-h-[44px] min-w-[44px] h-11 w-11 lg:h-12 lg:w-12 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 shadow-lg hover:bg-card hover:scale-110 transition-all duration-200 touch-manipulation"
-                      onClick={scrollTableLeft}
+                      onSelect={scrollTableLeft}
                       aria-label="Défiler vers la gauche"
                     >
                       <ChevronLeft className="h-4 w-4 lg:h-5 lg:w-5" />
@@ -624,7 +619,7 @@ export default function SupplierOrders() {
                       variant="ghost"
                       size="icon"
                       className="min-h-[44px] min-w-[44px] h-11 w-11 lg:h-12 lg:w-12 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 shadow-lg hover:bg-card hover:scale-110 transition-all duration-200 touch-manipulation"
-                      onClick={scrollTableRight}
+                      onSelect={scrollTableRight}
                       aria-label="Défiler vers la droite"
                     >
                       <ChevronRight className="h-4 w-4 lg:h-5 lg:w-5" />
@@ -740,8 +735,8 @@ export default function SupplierOrders() {
                               )}
                             </TableCell>
                             <TableCell className="text-right whitespace-nowrap min-w-[80px] lg:min-w-[100px] px-2.5 lg:px-3 xl:px-4 2xl:px-6">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
+                              <Select>
+                                <SelectTrigger
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -750,26 +745,22 @@ export default function SupplierOrders() {
                                   >
                                     <MoreVertical className="h-3.5 w-3.5 lg:h-4 lg:w-4 xl:h-5 xl:w-5" />
                                   </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  align="end"
-                                  className="w-[calc(100vw-2rem)] sm:w-44 lg:w-48 xl:w-56 max-w-[calc(100vw-2rem)] sm:max-w-xs"
-                                  mobileOptimized
-                                >
-                                  <DropdownMenuItem className="text-xs lg:text-sm cursor-pointer">
+                                </SelectTrigger>
+                                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                  <SelectItem value="edit" onSelect className="text-xs lg:text-sm cursor-pointer">
                                     <Eye className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                                     Voir détails
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleStatusUpdate(order.id, 'completed')}
+                                  </SelectItem>
+                                  <SelectItem value="delete" onSelect
+                                    onSelect={() => handleStatusUpdate(order.id, 'completed')}
                                     className="text-xs lg:text-sm cursor-pointer"
                                     disabled={order.status === 'completed'}
                                   >
                                     <Package className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                                     Marquer comme terminée
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                           </TableRow>
                         );
@@ -813,8 +804,8 @@ export default function SupplierOrders() {
                             </div>
                           </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button
                               variant="ghost"
                               size="sm"
@@ -823,26 +814,22 @@ export default function SupplierOrders() {
                             >
                               <MoreVertical className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-[calc(100vw-2rem)] xs:w-44 sm:w-48 md:w-56 max-w-[calc(100vw-2rem)] sm:max-w-xs"
-                            mobileOptimized
-                          >
-                            <DropdownMenuItem className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation">
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="copy" onSelect className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation">
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleStatusUpdate(order.id, 'completed')}
+                            </SelectItem>
+                            <SelectItem value="view" onSelect
+                              onSelect={() => handleStatusUpdate(order.id, 'completed')}
                               className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation"
                               disabled={order.status === 'completed'}
                             >
                               <Package className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Marquer comme terminée
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </CardHeader>
                     <CardContent className="px-2.5 sm:px-3 md:px-4 lg:px-5 pb-2.5 sm:pb-3 md:pb-4 lg:pb-5 space-y-2 sm:space-y-2.5 md:space-y-3 w-full">
@@ -968,7 +955,7 @@ export default function SupplierOrders() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleAddItem}
+                    onSelect={handleAddItem}
                     className="min-h-[44px] h-11 sm:h-12 md:h-12 lg:h-12 text-xs sm:text-sm md:text-base w-full xs:w-auto shrink-0 touch-manipulation"
                   >
                     <Plus className="mr-1 sm:mr-1.5 md:mr-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5" />
@@ -1066,7 +1053,7 @@ export default function SupplierOrders() {
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleRemoveItem(index)}
+                              onSelect={() => handleRemoveItem(index)}
                               className="min-h-[44px] h-11 sm:h-12 md:h-12 w-full sm:w-auto px-3 sm:px-4 text-[10px] xs:text-xs sm:text-sm md:text-base text-destructive hover:text-destructive hover:bg-destructive/10 touch-manipulation"
                             >
                               <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1.5 sm:mr-2 md:mr-0" />
@@ -1125,7 +1112,7 @@ export default function SupplierOrders() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsDialogOpen(false)}
+                onSelect={() => setIsDialogOpen(false)}
                 className="w-full xs:w-auto min-h-[44px] h-11 sm:h-12 md:h-12 lg:h-12 text-xs sm:text-sm md:text-base order-2 xs:order-1 touch-manipulation shrink-0"
               >
                 Annuler

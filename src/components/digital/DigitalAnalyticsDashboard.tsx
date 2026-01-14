@@ -39,12 +39,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { subDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { exportAnalyticsToPDF, exportAnalyticsToExcel, exportAnalyticsToCSV } from '@/utils/exportDigitalAnalytics';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
@@ -229,28 +224,28 @@ export const DigitalAnalyticsDashboard = ({
     <div className="space-y-6">
       {/* Export Button */}
       <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <Select>
+          <SelectTrigger
             <Button variant="outline" size="sm">
               <FileDown className="h-4 w-4 mr-2" />
               Exporter
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleExportPDF}>
+          </SelectTrigger>
+          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+            <SelectItem value="edit" onSelect onSelect={handleExportPDF}>
               <FileText className="h-4 w-4 mr-2" />
               Export PDF
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportExcel}>
+            </SelectItem>
+            <SelectItem value="delete" onSelect onSelect={handleExportExcel}>
               <FileText className="h-4 w-4 mr-2" />
               Export Excel
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportCSV}>
+            </SelectItem>
+            <SelectItem value="copy" onSelect onSelect={handleExportCSV}>
               <FileText className="h-4 w-4 mr-2" />
               Export CSV
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       {/* Overview Stats */}

@@ -52,13 +52,7 @@ import {
   AlertTriangle,
   FileDown,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useStore } from '@/hooks/useStore';
 import {
   useDigitalProducts,
@@ -575,7 +569,7 @@ export const DigitalProductsList = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  onClick={handleRefresh}
+                  onSelect={handleRefresh}
                   size="sm"
                   variant="outline"
                   className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
@@ -589,8 +583,8 @@ export const DigitalProductsList = () => {
                   />
                   <span className="hidden sm:inline">Rafraîchir</span>
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                <Select>
+                  <SelectTrigger
                     <Button
                       size="sm"
                       variant="outline"
@@ -600,53 +594,53 @@ export const DigitalProductsList = () => {
                       <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                       <span className="hidden sm:inline">Exporter</span>
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  </SelectTrigger>
+                  <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                       Exporter tous ({filteredProducts.length})
                     </div>
-                    <DropdownMenuItem onClick={() => handleExport(undefined, 'csv')}>
+                    <SelectItem value="edit" onSelect onSelect={() => handleExport(undefined, 'csv')}>
                       <FileDown className="h-4 w-4 mr-2" />
                       CSV
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport(undefined, 'excel')}>
+                    </SelectItem>
+                    <SelectItem value="delete" onSelect onSelect={() => handleExport(undefined, 'excel')}>
                       <FileDown className="h-4 w-4 mr-2" />
                       Excel (.xlsx)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport(undefined, 'pdf')}>
+                    </SelectItem>
+                    <SelectItem value="copy" onSelect onSelect={() => handleExport(undefined, 'pdf')}>
                       <FileDown className="h-4 w-4 mr-2" />
                       PDF
-                    </DropdownMenuItem>
+                    </SelectItem>
                     {selectedProducts.size > 0 && (
                       <>
                         <DropdownMenuSeparator />
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                           Exporter sélectionnés ({selectedProducts.size})
                         </div>
-                        <DropdownMenuItem
-                          onClick={() => handleExport(Array.from(selectedProducts), 'csv')}
+                        <SelectItem value="view" onSelect
+                          onSelect={() => handleExport(Array.from(selectedProducts), 'csv')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           CSV
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleExport(Array.from(selectedProducts), 'excel')}
+                        </SelectItem>
+                        <SelectItem value="export" onSelect
+                          onSelect={() => handleExport(Array.from(selectedProducts), 'excel')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           Excel (.xlsx)
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleExport(Array.from(selectedProducts), 'pdf')}
+                        </SelectItem>
+                        <SelectItem value="duplicate" onSelect
+                          onSelect={() => handleExport(Array.from(selectedProducts), 'pdf')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           PDF
-                        </DropdownMenuItem>
+                        </SelectItem>
                       </>
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </SelectContent>
+                </Select>
                 <Button
-                  onClick={() => navigate('/dashboard/products/new/digital')}
+                  onSelect={() => navigate('/dashboard/products/new/digital')}
                   size="sm"
                   className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm min-h-[44px] touch-manipulation"
                 >
@@ -775,7 +769,7 @@ export const DigitalProductsList = () => {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 sm:h-8 sm:w-8"
-                          onClick={() => handleSearchChange('')}
+                          onSelect={() => handleSearchChange('')}
                           aria-label={t('digitalProducts.clearSearch', 'Effacer la recherche')}
                         >
                           <X className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -794,7 +788,7 @@ export const DigitalProductsList = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleViewModeToggle}
+                    onSelect={handleViewModeToggle}
                     className="h-9 sm:h-10 text-xs sm:text-sm min-h-[44px] touch-manipulation"
                     aria-label={
                       viewMode === 'grid'
@@ -967,7 +961,7 @@ export const DigitalProductsList = () => {
                             )}
                           </p>
                           <Button
-                            onClick={() => navigate('/dashboard/products/new?type=digital')}
+                            onSelect={() => navigate('/dashboard/products/new?type=digital')}
                             size="lg"
                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 min-h-[44px] px-6 sm:px-8 touch-manipulation"
                           >
@@ -1086,7 +1080,7 @@ export const DigitalProductsList = () => {
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => {
+                                            onSelect={() => {
                                               if (store?.slug && product?.slug) {
                                                 navigate(
                                                   `/stores/${store.slug}/products/${product.slug}`
@@ -1110,7 +1104,7 @@ export const DigitalProductsList = () => {
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => {
+                                            onSelect={() => {
                                               if (product?.id) {
                                                 navigate(`/dashboard/products/${product.id}/edit`);
                                               } else {
@@ -1131,7 +1125,7 @@ export const DigitalProductsList = () => {
                                           <Button
                                             size="sm"
                                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                                            onClick={() => {
+                                            onSelect={() => {
                                               if (store?.slug && product?.slug) {
                                                 navigate(
                                                   `/stores/${store.slug}/products/${product.slug}`
@@ -1190,7 +1184,7 @@ export const DigitalProductsList = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handlePageChange(1)}
+                              onSelect={() => handlePageChange(1)}
                               disabled={currentPage === 1}
                               className="hidden sm:flex"
                               aria-label={t('digitalProducts.firstPage', 'Première page')}
@@ -1200,7 +1194,7 @@ export const DigitalProductsList = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handlePageChange(currentPage - 1)}
+                              onSelect={() => handlePageChange(currentPage - 1)}
                               disabled={currentPage === 1}
                               aria-label={t('digitalProducts.previousPage', 'Page précédente')}
                             >
@@ -1217,7 +1211,7 @@ export const DigitalProductsList = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handlePageChange(currentPage + 1)}
+                              onSelect={() => handlePageChange(currentPage + 1)}
                               disabled={currentPage === totalPages}
                               aria-label={t('digitalProducts.nextPage', 'Page suivante')}
                             >
@@ -1226,7 +1220,7 @@ export const DigitalProductsList = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handlePageChange(totalPages)}
+                              onSelect={() => handlePageChange(totalPages)}
                               disabled={currentPage === totalPages}
                               className="hidden sm:flex"
                               aria-label={t('digitalProducts.lastPage', 'Dernière page')}
@@ -1363,7 +1357,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(1)}
+                                onSelect={() => handlePageChange(1)}
                                 disabled={currentPage === 1}
                                 className="hidden sm:flex"
                                 aria-label={t('digitalProducts.firstPage', 'Première page')}
@@ -1373,7 +1367,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(currentPage - 1)}
+                                onSelect={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
                                 aria-label={t('digitalProducts.previousPage', 'Page précédente')}
                               >
@@ -1390,7 +1384,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(currentPage + 1)}
+                                onSelect={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === activeTotalPages}
                                 aria-label={t('digitalProducts.nextPage', 'Page suivante')}
                               >
@@ -1399,7 +1393,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(activeTotalPages)}
+                                onSelect={() => handlePageChange(activeTotalPages)}
                                 disabled={currentPage === activeTotalPages}
                                 className="hidden sm:flex"
                                 aria-label={t('digitalProducts.lastPage', 'Dernière page')}
@@ -1537,7 +1531,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(1)}
+                                onSelect={() => handlePageChange(1)}
                                 disabled={currentPage === 1}
                                 className="hidden sm:flex"
                                 aria-label={t('digitalProducts.firstPage', 'Première page')}
@@ -1547,7 +1541,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(currentPage - 1)}
+                                onSelect={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
                                 aria-label={t('digitalProducts.previousPage', 'Page précédente')}
                               >
@@ -1564,7 +1558,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(currentPage + 1)}
+                                onSelect={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === draftTotalPages}
                                 aria-label={t('digitalProducts.nextPage', 'Page suivante')}
                               >
@@ -1573,7 +1567,7 @@ export const DigitalProductsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlePageChange(draftTotalPages)}
+                                onSelect={() => handlePageChange(draftTotalPages)}
                                 disabled={currentPage === draftTotalPages}
                                 className="hidden sm:flex"
                                 aria-label={t('digitalProducts.lastPage', 'Dernière page')}

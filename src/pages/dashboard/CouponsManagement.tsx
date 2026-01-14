@@ -82,12 +82,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
@@ -314,7 +309,7 @@ export default function CouponsManagement() {
               Créez et gérez vos codes promo pour tous types de produits
             </p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
+          <Button onSelect={() => setIsCreateDialogOpen(true)} className="shrink-0">
             <Plus className="h-4 w-4 mr-2" />
             Nouveau Coupon
           </Button>
@@ -439,7 +434,7 @@ export default function CouponsManagement() {
                     : 'Aucun coupon créé'}
                 </p>
                 {!searchQuery && statusFilter === 'all' && typeFilter === 'all' && (
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                  <Button onSelect={() => setIsCreateDialogOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Créer votre premier coupon
                   </Button>
@@ -470,36 +465,36 @@ export default function CouponsManagement() {
                             )}
                           </div>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <Select>
+                            <SelectTrigger
                               <Button variant="ghost" size="sm" className="shrink-0">
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            </SelectTrigger>
+                            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               {promotion.code && (
-                                <DropdownMenuItem onClick={() => handleCopyCode(promotion.code!)}>
+                                <SelectItem value="edit" onSelect onSelect={() => handleCopyCode(promotion.code!)}>
                                   <Copy className="h-4 w-4 mr-2" />
                                   Copier le code
-                                </DropdownMenuItem>
+                                </SelectItem>
                               )}
-                              <DropdownMenuItem onClick={() => setViewingUsageId(promotion.id)}>
+                              <SelectItem value="delete" onSelect onSelect={() => setViewingUsageId(promotion.id)}>
                                 <BarChart3 className="h-4 w-4 mr-2" />
                                 Voir les utilisations
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setEditingPromotionId(promotion.id)}>
+                              </SelectItem>
+                              <SelectItem value="copy" onSelect onSelect={() => setEditingPromotionId(promotion.id)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Éditer
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => setDeletingPromotionId(promotion.id)}
+                              </SelectItem>
+                              <SelectItem value="view" onSelect
+                                onSelect={() => setDeletingPromotionId(promotion.id)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
@@ -621,40 +616,40 @@ export default function CouponsManagement() {
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
+                              <Select>
+                                <SelectTrigger
                                   <Button variant="ghost" size="sm">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                </SelectTrigger>
+                                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                   {promotion.code && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleCopyCode(promotion.code!)}
+                                    <SelectItem value="export" onSelect
+                                      onSelect={() => handleCopyCode(promotion.code!)}
                                     >
                                       <Copy className="h-4 w-4 mr-2" />
                                       Copier le code
-                                    </DropdownMenuItem>
+                                    </SelectItem>
                                   )}
-                                  <DropdownMenuItem onClick={() => setViewingUsageId(promotion.id)}>
+                                  <SelectItem value="duplicate" onSelect onSelect={() => setViewingUsageId(promotion.id)}>
                                     <BarChart3 className="h-4 w-4 mr-2" />
                                     Voir les utilisations
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => setEditingPromotionId(promotion.id)}
+                                  </SelectItem>
+                                  <SelectItem value="toggle" onSelect
+                                    onSelect={() => setEditingPromotionId(promotion.id)}
                                   >
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => setDeletingPromotionId(promotion.id)}
+                                  </SelectItem>
+                                  <SelectItem value="quickview" onSelect
+                                    onSelect={() => setDeletingPromotionId(promotion.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -766,7 +761,7 @@ export default function CouponsManagement() {
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => deletingPromotionId && handleDeletePromotion(deletingPromotionId)}
+                onSelect={() => deletingPromotionId && handleDeletePromotion(deletingPromotionId)}
                 className="bg-red-600 hover:bg-red-700"
               >
                 Supprimer

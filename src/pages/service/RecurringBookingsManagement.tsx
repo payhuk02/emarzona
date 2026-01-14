@@ -51,11 +51,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import type { RecurringBookingPattern } from '@/hooks/service/useRecurringBookings';
 
@@ -347,42 +343,42 @@ export default function RecurringBookingsManagement() {
                                 }}
                               >
                                 {pattern.status === 'active' ? (
-                                  <StableDropdownMenuItem
-                                    onClick={() => handleTogglePause(pattern.id, pattern.status)}
+                                  <SelectItem value="edit" onSelect
+                                    onSelect={() => handleTogglePause(pattern.id, pattern.status)}
                                   >
                                     <Pause className="h-4 w-4 mr-2" />
                                     Mettre en pause
-                                  </StableDropdownMenuItem>
+                                  </SelectItem>
                                 ) : pattern.status === 'paused' ? (
-                                  <StableDropdownMenuItem
-                                    onClick={() => handleTogglePause(pattern.id, pattern.status)}
+                                  <SelectItem value="delete" onSelect
+                                    onSelect={() => handleTogglePause(pattern.id, pattern.status)}
                                   >
                                     <Play className="h-4 w-4 mr-2" />
                                     Reprendre
-                                  </StableDropdownMenuItem>
+                                  </SelectItem>
                                 ) : null}
-                                <StableDropdownMenuItem
-                                  onClick={() => {
+                                <SelectItem value="copy" onSelect
+                                  onSelect={() => {
                                     setSelectedPattern(pattern.id);
                                     setRescheduleDialogOpen(true);
                                   }}
                                 >
                                   <Calendar className="h-4 w-4 mr-2" />
                                   Replanifier
-                                </StableDropdownMenuItem>
-                                <StableDropdownMenuItem onClick={() => handleGenerateMore(pattern.id)}>
+                                </SelectItem>
+                                <SelectItem value="view" onSelect onSelect={() => handleGenerateMore(pattern.id)}>
                                   <RefreshCw className="h-4 w-4 mr-2" />
                                   Générer plus
-                                </StableDropdownMenuItem>
+                                </SelectItem>
                                 <StableDropdownMenuSeparator />
-                                <StableDropdownMenuItem
-                                  onClick={() => handleCancel(pattern.id)}
+                                <SelectItem value="export" onSelect
+                                  onSelect={() => handleCancel(pattern.id)}
                                   className="text-red-600"
                                 >
                                   <Square className="h-4 w-4 mr-2" />
                                   Annuler série
-                                </StableDropdownMenuItem>
-                              </StableDropdownMenu>
+                                </SelectItem>
+                              </Select>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -423,7 +419,7 @@ export default function RecurringBookingsManagement() {
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
-                      onClick={() => {
+                      onSelect={() => {
                         setRescheduleDialogOpen(false);
                         setSelectedPattern(null);
                         setNewStartDate('');
@@ -432,7 +428,7 @@ export default function RecurringBookingsManagement() {
                     >
                       Annuler
                     </Button>
-                    <Button onClick={handleReschedule} className="min-h-[44px] text-xs sm:text-sm">
+                    <Button onSelect={handleReschedule} className="min-h-[44px] text-xs sm:text-sm">
                       Replanifier
                     </Button>
                   </div>

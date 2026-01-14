@@ -54,12 +54,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -260,7 +255,7 @@ export default function AnalyticsDashboardsManagement() {
                   Créez et gérez vos dashboards analytics personnalisés avec widgets configurables
                 </p>
               </div>
-              <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
+              <Button onSelect={() => setIsCreateDialogOpen(true)} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau Dashboard
               </Button>
@@ -340,7 +335,7 @@ export default function AnalyticsDashboardsManagement() {
                       {searchQuery ? 'Aucun dashboard ne correspond à votre recherche' : 'Aucun dashboard créé'}
                     </p>
                     {!searchQuery && (
-                      <Button onClick={() => setIsCreateDialogOpen(true)}>
+                      <Button onSelect={() => setIsCreateDialogOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Créer votre premier dashboard
                       </Button>
@@ -394,36 +389,36 @@ export default function AnalyticsDashboardsManagement() {
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
+                              <Select>
+                                <SelectTrigger
                                   <Button variant="ghost" size="sm">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => navigate(`/dashboard/analytics/${dashboard.id}`)}>
+                                </SelectTrigger>
+                                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                  <SelectItem value="edit" onSelect onSelect={() => navigate(`/dashboard/analytics/${dashboard.id}`)}>
                                     <Eye className="h-4 w-4 mr-2" />
                                     Voir
-                                  </DropdownMenuItem>
+                                  </SelectItem>
                                   {!dashboard.is_default && (
-                                    <DropdownMenuItem onClick={() => handleSetDefault(dashboard.id)}>
+                                    <SelectItem value="delete" onSelect onSelect={() => handleSetDefault(dashboard.id)}>
                                       <Star className="h-4 w-4 mr-2" />
                                       Définir par défaut
-                                    </DropdownMenuItem>
+                                    </SelectItem>
                                   )}
-                                  <DropdownMenuItem onClick={() => setEditingDashboardId(dashboard.id)}>
+                                  <SelectItem value="copy" onSelect onSelect={() => setEditingDashboardId(dashboard.id)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => setDeletingDashboardId(dashboard.id)}
+                                  </SelectItem>
+                                  <SelectItem value="view" onSelect
+                                    onSelect={() => setDeletingDashboardId(dashboard.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -551,13 +546,13 @@ export default function AnalyticsDashboardsManagement() {
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => {
+                  <Button variant="outline" onSelect={() => {
                     setIsCreateDialogOpen(false);
                     setEditingDashboardId(null);
                   }}>
                     Annuler
                   </Button>
-                  <Button onClick={handleCreateDashboard} disabled={!formData.name || createDashboard.isPending}>
+                  <Button onSelect={handleCreateDashboard} disabled={!formData.name || createDashboard.isPending}>
                     {editingDashboardId ? 'Sauvegarder' : 'Créer'}
                   </Button>
                 </div>
@@ -576,7 +571,7 @@ export default function AnalyticsDashboardsManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deletingDashboardId && handleDeleteDashboard(deletingDashboardId)}
+                    onSelect={() => deletingDashboardId && handleDeleteDashboard(deletingDashboardId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

@@ -19,13 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -136,7 +130,7 @@ function OptionEditor({
             placeholder="Nom de l'option"
           />
         </div>
-        <Button variant="ghost" size="sm" onClick={onDelete} aria-label={`Supprimer l'option ${option.name}`}>
+        <Button variant="ghost" size="sm" onSelect={onDelete} aria-label={`Supprimer l'option ${option.name}`}>
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </CardHeader>
@@ -147,7 +141,7 @@ function OptionEditor({
             <Badge key={value} variant="secondary" className="gap-2 pr-1">
               {value}
               <button
-                onClick={() => handleRemoveValue(value)}
+                onSelect={() => handleRemoveValue(value)}
                 className="hover:bg-destructive/20 rounded p-0.5"
               >
                 <X className="h-3 w-3" />
@@ -164,7 +158,7 @@ function OptionEditor({
             onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
             placeholder={`Ajouter une valeur (ex: ${option.name === 'Couleur' ? 'Rouge' : option.name === 'Taille' ? 'M' : 'Standard'})`}
           />
-          <Button onClick={handleAddValue} size="sm" aria-label={`Ajouter une valeur à l'option ${option.name}`}>
+          <Button onSelect={handleAddValue} size="sm" aria-label={`Ajouter une valeur à l'option ${option.name}`}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -320,7 +314,7 @@ export function VariantManager({
               Définissez les options (couleur, taille, etc.)
             </p>
           </div>
-          <Button onClick={() => setShowAddOption(true)} variant="outline" size="sm" className="gap-2">
+          <Button onSelect={() => setShowAddOption(true)} variant="outline" size="sm" className="gap-2">
             <Plus className="h-4 w-4" />
             Ajouter Option
           </Button>
@@ -359,34 +353,34 @@ export function VariantManager({
           </div>
           <div className="flex gap-2">
             {selectedVariants.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Select>
+                <SelectTrigger
                   <Button variant="outline" size="sm">
                     Actions ({selectedVariants.length})
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleBulkToggleActive(true)}>
+                </SelectTrigger>
+                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                  <SelectItem value="edit" onSelect onSelect={() => handleBulkToggleActive(true)}>
                     <Check className="h-4 w-4 mr-2" />
                     Activer
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleBulkToggleActive(false)}>
+                  </SelectItem>
+                  <SelectItem value="delete" onSelect onSelect={() => handleBulkToggleActive(false)}>
                     <X className="h-4 w-4 mr-2" />
                     Désactiver
-                  </DropdownMenuItem>
+                  </SelectItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setDeleteVariantId('bulk')}
+                  <SelectItem value="copy" onSelect
+                    onSelect={() => setDeleteVariantId('bulk')}
                     className="text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Supprimer ({selectedVariants.length})
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             )}
             <Button
-              onClick={handleGenerateVariants}
+              onSelect={handleGenerateVariants}
               disabled={options.length === 0 || options.some((o) => o.values.length === 0)}
               size="sm"
               className="gap-2"
@@ -536,27 +530,27 @@ export function VariantManager({
 
                         {/* Actions */}
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <Select>
+                            <SelectTrigger
                               <Button variant="ghost" size="sm" aria-label={`Actions pour la variante ${variant.name || variant.id}`}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setEditingVariant(variant)}>
+                            </SelectTrigger>
+                            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                              <SelectItem value="view" onSelect onSelect={() => setEditingVariant(variant)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
-                              </DropdownMenuItem>
+                              </SelectItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => setDeleteVariantId(variant.id)}
+                              <SelectItem value="export" onSelect
+                                onSelect={() => setDeleteVariantId(variant.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                       </TableRow>
                     );
@@ -590,10 +584,10 @@ export function VariantManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddOption(false)}>
+            <Button variant="outline" onSelect={() => setShowAddOption(false)}>
               Annuler
             </Button>
-            <Button onClick={handleAddOption} disabled={!newOptionName.trim()}>
+            <Button onSelect={handleAddOption} disabled={!newOptionName.trim()}>
               Ajouter
             </Button>
           </DialogFooter>
@@ -712,10 +706,10 @@ export function VariantManager({
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setEditingVariant(null)}>
+              <Button variant="outline" onSelect={() => setEditingVariant(null)}>
                 Annuler
               </Button>
-              <Button onClick={() => handleSaveVariant(editingVariant)}>Sauvegarder</Button>
+              <Button onSelect={() => handleSaveVariant(editingVariant)}>Sauvegarder</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -736,7 +730,7 @@ export function VariantManager({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteVariants} className="bg-destructive">
+            <AlertDialogAction onSelect={handleDeleteVariants} className="bg-destructive">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

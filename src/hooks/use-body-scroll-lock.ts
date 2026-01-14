@@ -27,10 +27,11 @@ export function useBodyScrollLock(enabled: boolean) {
     const previousTouchAction = (body.style as CSSStyleDeclaration & { touchAction?: string })
       .touchAction;
 
-    // Bloquer le scroll de fond tout en laissant les interactions tactiles internes
+    // Bloquer le scroll de fond tout en permettant les interactions tactiles
     body.style.overflow = 'hidden';
-    // Limiter les gestes globaux pour réduire les scrolls involontaires
-    (body.style as CSSStyleDeclaration & { touchAction?: string }).touchAction = 'none';
+    // Permettre les gestes tactiles pan-y pour les interactions normales
+    // mais empêcher le zoom et le scroll involontaire
+    (body.style as CSSStyleDeclaration & { touchAction?: string }).touchAction = 'pan-x pinch-zoom';
 
     return () => {
       body.style.overflow = previousOverflow;

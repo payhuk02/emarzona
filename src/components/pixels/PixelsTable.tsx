@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { MoreVertical, Edit, Trash2, Facebook, Globe, Music, Image } from "lucide-react";
 import { usePixels, Pixel } from "@/hooks/usePixels";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -170,14 +170,14 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                       </p>
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  <Select>
+                    <SelectTrigger
                       <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le pixel ${pixel.name || pixel.id}`}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
+                    </SelectTrigger>
+                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                      <SelectItem value="view" onSelect
                         onClick={() => {
                           setSelectedPixel(pixel);
                           setEditDialogOpen(true);
@@ -185,8 +185,8 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                       >
                         <Edit className="h-4 w-4 mr-2" />
                         Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
+                      </SelectItem>
+                      <SelectItem value="delete" onSelect
                         onClick={() => {
                           setSelectedPixel(pixel);
                           setDeleteDialogOpen(true);
@@ -195,9 +195,9 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2 pt-3 border-t border-border/50">

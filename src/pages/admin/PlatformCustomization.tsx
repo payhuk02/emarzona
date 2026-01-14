@@ -52,13 +52,7 @@ import {
   importCustomizationFromString,
 } from '@/lib/platform-customization-export';
 import { logger } from '@/lib/logger';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -355,7 +349,7 @@ export const PlatformCustomization = () => {
                 return (
                   <button
                     key={section.id}
-                    onClick={() => handleSectionChange(section.id)}
+                    onSelect={() => handleSectionChange(section.id)}
                     className={cn(
                       'w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all',
                       'hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
@@ -384,7 +378,7 @@ export const PlatformCustomization = () => {
           {/* Footer avec actions */}
           <div className="p-4 border-t space-y-2">
             <Button
-              onClick={togglePreview}
+              onSelect={togglePreview}
               variant={previewMode ? 'default' : 'outline'}
               className="w-full"
               size="sm"
@@ -398,7 +392,7 @@ export const PlatformCustomization = () => {
               </p>
             )}
             <Button
-              onClick={handleSave}
+              onSelect={handleSave}
               disabled={(!hasUnsavedChanges && !previewMode) || isSaving || previewMode}
               className="w-full"
               size="sm"
@@ -456,25 +450,25 @@ export const PlatformCustomization = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  <Select>
+                    <SelectTrigger
                       <Button variant="outline" size="sm" className="gap-2 min-h-[44px]">
                         <Settings className="h-4 w-4" />
                         <span className="hidden sm:inline">Actions</span>
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onClick={handleExport} className="cursor-pointer">
+                    </SelectTrigger>
+                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                      <SelectItem value="edit" onSelect onSelect={handleExport} className="cursor-pointer">
                         <Download className="h-4 w-4 mr-2" />
                         Exporter JSON
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => fileInputRef.current?.click()}
+                      </SelectItem>
+                      <SelectItem value="delete" onSelect
+                        onSelect={() => fileInputRef.current?.click()}
                         className="cursor-pointer"
                       >
                         <Upload className="h-4 w-4 mr-2" />
                         Importer JSON
-                      </DropdownMenuItem>
+                      </SelectItem>
                       <input
                         ref={fileInputRef}
                         type="file"
@@ -482,8 +476,8 @@ export const PlatformCustomization = () => {
                         className="hidden"
                         onChange={handleFileSelect}
                       />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <Separator />
@@ -534,7 +528,7 @@ export const PlatformCustomization = () => {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isImporting}>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleImportConfirm}
+              onSelect={handleImportConfirm}
               disabled={!importFile || isImporting}
               className="bg-primary text-primary-foreground"
             >

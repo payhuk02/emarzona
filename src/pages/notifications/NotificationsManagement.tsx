@@ -71,13 +71,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   useNotifications,
   useUnreadCount,
@@ -528,12 +522,12 @@ export default function NotificationsManagement() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsPreferencesOpen(true)}>
+                <Button variant="outline" onSelect={() => setIsPreferencesOpen(true)}>
                   <Settings className="h-4 w-4 mr-2" />
                   Préférences
                 </Button>
                 {unreadCount > 0 && (
-                  <Button onClick={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
+                  <Button onSelect={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Tout marquer lu
                   </Button>
@@ -650,7 +644,7 @@ export default function NotificationsManagement() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    onSelect={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                     title={sortOrder === 'asc' ? 'Trier décroissant' : 'Trier croissant'}
                   >
                     {sortOrder === 'asc' ? (
@@ -676,7 +670,7 @@ export default function NotificationsManagement() {
                           selectedNotifications.length === filteredNotifications.length
                         }
                         onCheckedChange={handleSelectAll}
-                        onClick={e => e.stopPropagation()}
+                        onSelect={e => e.stopPropagation()}
                       />
                       <span className="text-sm text-muted-foreground">
                         {selectedNotifications.length > 0
@@ -688,7 +682,7 @@ export default function NotificationsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={e => {
+                            onSelect={e => {
                               e.stopPropagation();
                               handleBulkMarkAsRead();
                             }}
@@ -699,7 +693,7 @@ export default function NotificationsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={e => {
+                            onSelect={e => {
                               e.stopPropagation();
                               handleBulkArchive();
                             }}
@@ -710,7 +704,7 @@ export default function NotificationsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={e => {
+                            onSelect={e => {
                               e.stopPropagation();
                               handleBulkDelete();
                             }}
@@ -749,12 +743,12 @@ export default function NotificationsManagement() {
                               : 'bg-muted/30 hover:bg-muted/50',
                           notification.action_url && 'cursor-pointer'
                         )}
-                        onClick={() => handleNotificationClick(notification)}
+                        onSelect={() => handleNotificationClick(notification)}
                       >
                         <Checkbox
                           checked={selectedNotifications.includes(notification.id)}
                           onCheckedChange={() => handleToggleSelect(notification.id)}
-                          onClick={e => e.stopPropagation()}
+                          onSelect={e => e.stopPropagation()}
                           className="mt-1"
                         />
                         <div className="flex-shrink-0 mt-0.5">
@@ -792,36 +786,36 @@ export default function NotificationsManagement() {
                                 </span>
                               </div>
                             </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+                            <Select>
+                              <DropdownMenuTrigger asChild onSelect={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              </SelectTrigger>
+                              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                 {!notification.is_read && (
-                                  <DropdownMenuItem
-                                    onClick={e => {
+                                  <SelectItem value="edit" onSelect
+                                    onSelect={e => {
                                       e.stopPropagation();
                                       handleMarkAsRead(notification.id);
                                     }}
                                   >
                                     <CheckCircle2 className="h-4 w-4 mr-2" />
                                     Marquer comme lu
-                                  </DropdownMenuItem>
+                                  </SelectItem>
                                 )}
-                                <DropdownMenuItem
-                                  onClick={e => {
+                                <SelectItem value="delete" onSelect
+                                  onSelect={e => {
                                     e.stopPropagation();
                                     handleArchive(notification.id);
                                   }}
                                 >
                                   <Archive className="h-4 w-4 mr-2" />
                                   Archiver
-                                </DropdownMenuItem>
+                                </SelectItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={e => {
+                                <SelectItem value="copy" onSelect
+                                  onSelect={e => {
                                     e.stopPropagation();
                                     handleDelete(notification.id);
                                   }}
@@ -829,9 +823,9 @@ export default function NotificationsManagement() {
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </div>
@@ -852,7 +846,7 @@ export default function NotificationsManagement() {
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"
-                        onClick={e => {
+                        onSelect={e => {
                           e.preventDefault();
                           if (page > 1) setPage(page - 1);
                         }}
@@ -874,7 +868,7 @@ export default function NotificationsManagement() {
                         <PaginationItem key={pageNum}>
                           <PaginationLink
                             href="#"
-                            onClick={e => {
+                            onSelect={e => {
                               e.preventDefault();
                               setPage(pageNum);
                             }}
@@ -893,7 +887,7 @@ export default function NotificationsManagement() {
                     <PaginationItem>
                       <PaginationNext
                         href="#"
-                        onClick={e => {
+                        onSelect={e => {
                           e.preventDefault();
                           if (page < totalPages) setPage(page + 1);
                         }}

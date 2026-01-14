@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { SEOPageData } from "@/hooks/useSEOAnalysis";
 import { getScoreBadgeVariant, getScoreColor } from "@/lib/seo-analyzer";
 import {
@@ -395,18 +395,18 @@ const SEOPagesListComponent = ({ data, isLoading }: SEOPagesListProps) => {
                               {page.type === "product" ? "Produit" : "Boutique"}
                             </Badge>
                           </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <Select>
+                            <SelectTrigger
                               <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la page ${page.title || page.url}`}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => window.open(page.url, "_blank")}>
+                            </SelectTrigger>
+                            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                              <SelectItem value="view" onSelect onClick={() => window.open(page.url, "_blank")}>
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 Ouvrir
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
+                              </SelectItem>
+                              <SelectItem value="export" onSelect
                                 onClick={() => {
                                   setSelectedPage(page);
                                   setDetailsOpen(true);
@@ -414,9 +414,9 @@ const SEOPagesListComponent = ({ data, isLoading }: SEOPagesListProps) => {
                               >
                                 <Eye className="h-4 w-4 mr-2" />
                                 Détails
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         <div className="space-y-2 pt-3 border-t border-border/50">

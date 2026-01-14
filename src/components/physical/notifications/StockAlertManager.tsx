@@ -24,13 +24,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Package,
   Plus,
@@ -151,7 +145,7 @@ export const StockAlertManager = () => {
               <p className="text-muted-foreground mb-4">
                 Créez votre première alerte pour être notifié du retour en stock
               </p>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button onSelect={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer une alerte
               </Button>
@@ -231,16 +225,16 @@ export const StockAlertManager = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button variant="ghost" size="icon" aria-label={`Actions pour l'alerte de stock ${alert.id}`}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() =>
+                          <SelectItem value="edit" onSelect
+                            onSelect={() =>
                               deleteAlert.mutate(alert.id, {
                                 onSuccess: () => {
                                   // Toast déjà géré par le hook
@@ -251,9 +245,9 @@ export const StockAlertManager = () => {
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}

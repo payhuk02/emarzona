@@ -36,12 +36,7 @@ import { useRecurringSeries, useCancelRecurringSeries, useRecurringBookingsBySer
 import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const RecurringBookingsManager = React.memo(() => {
@@ -171,30 +166,30 @@ const RecurringBookingsManager = React.memo(() => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <Select>
+                            <SelectTrigger
                               <Button variant="ghost" size="sm" aria-label={`Actions pour la série de réservations ${s.id}`}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => handleViewDetails(s.id)}
+                            </SelectTrigger>
+                            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                              <SelectItem value="edit" onSelect
+                                onSelect={() => handleViewDetails(s.id)}
                                 aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleCancelSeries(s.id)}
+                              </SelectItem>
+                              <SelectItem value="delete" onSelect
+                                onSelect={() => handleCancelSeries(s.id)}
                                 className="text-destructive"
                                 aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Annuler la série
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -224,30 +219,30 @@ const RecurringBookingsManager = React.memo(() => {
                               )}
                             </p>
                           </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <Select>
+                            <SelectTrigger
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour la série de réservations ${s.id}`}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => handleViewDetails(s.id)}
+                            </SelectTrigger>
+                            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                              <SelectItem value="copy" onSelect
+                                onSelect={() => handleViewDetails(s.id)}
                                 aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleCancelSeries(s.id)}
+                              </SelectItem>
+                              <SelectItem value="view" onSelect
+                                onSelect={() => handleCancelSeries(s.id)}
                                 className="text-destructive"
                                 aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Annuler la série
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
@@ -397,7 +392,7 @@ const RecurringBookingsManager = React.memo(() => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmCancel}
+              onSelect={confirmCancel}
               className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Confirmer

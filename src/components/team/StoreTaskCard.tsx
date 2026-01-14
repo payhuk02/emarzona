@@ -11,12 +11,7 @@ import { useStore } from '@/hooks/useStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,7 +127,7 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
           'hover:shadow-md transition-all cursor-pointer',
           isOverdue && 'border-red-500/50 bg-red-50/50 dark:bg-red-950/20'
         )}
-        onClick={() => setDetailDialogOpen(true)}
+        onSelect={() => setDetailDialogOpen(true)}
       >
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-4">
@@ -216,47 +211,47 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
             </div>
 
             {/* Actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <Select>
+              <DropdownMenuTrigger asChild onSelect={(e) => e.stopPropagation()}>
                 <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la tâche ${task.title || task.id}`}>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={(e) => {
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                <SelectItem value="edit" onSelect onSelect={(e) => {
                   e.stopPropagation();
                   setDetailDialogOpen(true);
                 }}>
                   <Edit className="h-4 w-4 mr-2" />
                   Voir les détails
-                </DropdownMenuItem>
-                <div onClick={(e) => e.stopPropagation()} className="p-1">
+                </SelectItem>
+                <div onSelect={(e) => e.stopPropagation()} className="p-1">
                   <StoreTaskCalendarExport storeId={task.store_id} task={task} />
                 </div>
                 {task.status !== 'completed' && (
-                  <DropdownMenuItem
-                    onClick={(e) => {
+                  <SelectItem value="delete" onSelect
+                    onSelect={(e) => {
                       e.stopPropagation();
                       handleStatusChange('completed');
                     }}
                   >
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Marquer comme terminée
-                  </DropdownMenuItem>
+                  </SelectItem>
                 )}
                 {task.status === 'pending' && (
-                  <DropdownMenuItem
-                    onClick={(e) => {
+                  <SelectItem value="copy" onSelect
+                    onSelect={(e) => {
                       e.stopPropagation();
                       handleStatusChange('in_progress');
                     }}
                   >
                     <Clock className="h-4 w-4 mr-2" />
                     Commencer
-                  </DropdownMenuItem>
+                  </SelectItem>
                 )}
-                <DropdownMenuItem
-                  onClick={(e) => {
+                <SelectItem value="view" onSelect
+                  onSelect={(e) => {
                     e.stopPropagation();
                     setDeleteDialogOpen(true);
                   }}
@@ -264,9 +259,9 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -290,7 +285,7 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onSelect={handleDelete}
               disabled={deleteTask.isPending}
               className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

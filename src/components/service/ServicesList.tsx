@@ -10,11 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Search,
@@ -334,7 +330,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           isSelected && 'ring-2 ring-primary'
         )}
         style={{ willChange: 'transform' }}
-        onClick={() => onServiceSelect?.(service)}
+        onSelect={() => onServiceSelect?.(service)}
       >
         <div className="space-y-3">
           {/* Header */}
@@ -344,7 +340,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
                 <Checkbox
                   checked={isSelected}
                   onCheckedChange={() => toggleSelection(service.id)}
-                  onClick={(e) => e.stopPropagation()}
+                  onSelect={(e) => e.stopPropagation()}
                 />
               )}
               <div className="flex-1">
@@ -375,34 +371,34 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
               }}
             >
               {onView && (
-                <StableDropdownMenuItem onClick={() => onView(service)}>
+                <SelectItem value="edit" onSelect onSelect={() => onView(service)}>
                   <Eye className="h-4 w-4 mr-2" />
                   Voir détails
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
               {onEdit && (
-                <StableDropdownMenuItem onClick={() => onEdit(service)}>
+                <SelectItem value="delete" onSelect onSelect={() => onEdit(service)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Modifier
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
               {onDuplicate && (
-                <StableDropdownMenuItem onClick={() => onDuplicate(service)}>
+                <SelectItem value="copy" onSelect onSelect={() => onDuplicate(service)}>
                   <Copy className="h-4 w-4 mr-2" />
                   Dupliquer
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
               <StableDropdownMenuSeparator />
               {onDelete && (
-                <StableDropdownMenuItem
-                  onClick={() => onDelete(service)}
+                <SelectItem value="view" onSelect
+                  onSelect={() => onDelete(service)}
                   className="text-red-600"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Supprimer
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
-            </StableDropdownMenu>
+            </Select>
           </div>
 
           {/* Status */}
@@ -535,7 +531,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={onRefresh}
+              onSelect={onRefresh}
               disabled={isLoading}
               aria-label="Actualiser la liste des services"
             >
@@ -543,7 +539,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             </Button>
           )}
           {onCreate && (
-            <Button size="sm" onClick={onCreate}>
+            <Button size="sm" onSelect={onCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Nouveau
             </Button>
@@ -564,7 +560,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onBulkAction?.('export', Array.from(selectedIds))}
+              onSelect={() => onBulkAction?.('export', Array.from(selectedIds))}
             >
               <Download className="h-4 w-4 mr-2" />
               Exporter
@@ -572,7 +568,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onBulkAction?.('delete', Array.from(selectedIds))}
+              onSelect={() => onBulkAction?.('delete', Array.from(selectedIds))}
               className="text-red-600"
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -592,7 +588,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={toggleSelectAll}
+              onSelect={toggleSelectAll}
               className="text-xs"
             >
               {selectedIds.size === filteredServices.length
@@ -603,7 +599,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleSort('name')}
+            onSelect={() => toggleSort('name')}
             className="text-xs"
           >
             <ArrowUpDown className="h-3 w-3 mr-1" />
@@ -612,7 +608,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleSort('price')}
+            onSelect={() => toggleSort('price')}
             className="text-xs"
           >
             <ArrowUpDown className="h-3 w-3 mr-1" />
@@ -621,7 +617,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleSort('bookings')}
+            onSelect={() => toggleSort('bookings')}
             className="text-xs"
           >
             <ArrowUpDown className="h-3 w-3 mr-1" />

@@ -21,13 +21,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 interface PaymentListViewProps {
   payment: Payment;
@@ -209,36 +203,36 @@ const PaymentListViewComponent = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={onEdit}
+                  onSelect={onEdit}
                 >
                   <Edit className="h-4 w-4 mr-1" />
                   Modifier
                 </Button>
                 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                <Select>
+                  <SelectTrigger
                     <Button variant="outline" size="sm" aria-label={`Actions pour le paiement ${payment.id || ''}`}>
                       <MoreVertical className="h-4 w-4" />
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={onView}>
+                  </SelectTrigger>
+                  <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                    <SelectItem value="edit" onSelect onSelect={onView}>
                       <Eye className="h-4 w-4 mr-2" />
                       Voir les détails
-                    </DropdownMenuItem>
+                    </SelectItem>
                     {payment.transaction_id && (
-                      <DropdownMenuItem onClick={handleCopyTransactionId}>
+                      <SelectItem value="delete" onSelect onSelect={handleCopyTransactionId}>
                         <Copy className="h-4 w-4 mr-2" />
                         Copier l'ID
-                      </DropdownMenuItem>
+                      </SelectItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                    <SelectItem value="copy" onSelect onSelect={onDelete} className="text-destructive">
                       <Trash2 className="h-4 w-4 mr-2" />
                       Supprimer
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

@@ -10,11 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -378,7 +374,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
+                  onSelect={() => {
                     setSearchQuery('');
                     setSelectedCategory('all');
                     setSelectedStatus('all');
@@ -439,7 +435,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleSort('name')}
+                  onSelect={() => handleSort('name')}
                   className="flex items-center"
                 >
                   Produit
@@ -455,7 +451,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleSort('price')}
+                  onSelect={() => handleSort('price')}
                   className="flex items-center"
                 >
                   Prix
@@ -467,7 +463,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleSort('downloads')}
+                  onSelect={() => handleSort('downloads')}
                   className="flex items-center"
                 >
                   Téléchargements
@@ -479,7 +475,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleSort('revenue')}
+                  onSelect={() => handleSort('revenue')}
                   className="flex items-center"
                 >
                   Revenue
@@ -493,7 +489,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleSort('created_at')}
+                  onSelect={() => handleSort('created_at')}
                   className="flex items-center"
                 >
                   Date création
@@ -638,50 +634,50 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                       triggerContent={<MoreVertical className="h-4 w-4" />}
                     >
                       {onView && (
-                        <StableDropdownMenuItem onClick={() => onView(product.id)}>
+                        <SelectItem value="edit" onSelect onSelect={() => onView(product.id)}>
                           <span className="flex items-center">
                             <Eye className="h-4 w-4 mr-2" />
                             Voir
                           </span>
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                       )}
                       {onEdit && (
-                        <StableDropdownMenuItem onClick={() => onEdit(product.id)}>
+                        <SelectItem value="delete" onSelect onSelect={() => onEdit(product.id)}>
                           <span className="flex items-center">
                             <Edit className="h-4 w-4 mr-2" />
                             Éditer
                           </span>
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                       )}
                       {onDuplicate && (
-                        <StableDropdownMenuItem onClick={() => onDuplicate(product.id)}>
+                        <SelectItem value="copy" onSelect onSelect={() => onDuplicate(product.id)}>
                           <span className="flex items-center">
                             <Copy className="h-4 w-4 mr-2" />
                             Dupliquer
                           </span>
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                       )}
                       <StableDropdownMenuSeparator />
                       {onArchive && (
-                        <StableDropdownMenuItem onClick={() => onArchive(product.id)}>
+                        <SelectItem value="view" onSelect onSelect={() => onArchive(product.id)}>
                           <span className="flex items-center">
                             <Archive className="h-4 w-4 mr-2" />
                             Archiver
                           </span>
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                       )}
                       {onDelete && (
-                        <StableDropdownMenuItem
-                          onClick={() => onDelete(product.id)}
+                        <SelectItem value="export" onSelect
+                          onSelect={() => onDelete(product.id)}
                           className="text-red-600"
                         >
                           <span className="flex items-center">
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
                           </span>
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                       )}
-                    </StableDropdownMenu>
+                    </Select>
                   </TableCell>
                 </TableRow>
               ))
@@ -700,7 +696,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onSelect={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 Précédent
@@ -708,7 +704,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onSelect={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Suivant

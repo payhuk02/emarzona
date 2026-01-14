@@ -50,12 +50,7 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 export default function SupplierProducts() {
   const { store } = useStore();
@@ -296,7 +291,7 @@ export default function SupplierProducts() {
                   variant="ghost"
                   size="sm"
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                  onClick={() => setSearchInput('')}
+                  onSelect={() => setSearchInput('')}
                   aria-label="Effacer la recherche"
                 >
                   <X className="h-4 w-4" />
@@ -309,7 +304,7 @@ export default function SupplierProducts() {
               </div>
             </div>
             <Button 
-              onClick={() => handleOpenDialog(undefined, selectedSupplier)}
+              onSelect={() => handleOpenDialog(undefined, selectedSupplier)}
               className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -425,26 +420,26 @@ export default function SupplierProducts() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour le produit ${product.name || product.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleOpenDialog(product)}>
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(product)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteClick(product)}
+                            </SelectItem>
+                            <SelectItem value="delete" onSelect
+                              onSelect={() => handleDeleteClick(product)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -478,26 +473,26 @@ export default function SupplierProducts() {
                             </p>
                           )}
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour le produit ${product.name || product.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleOpenDialog(product)}>
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(product)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteClick(product)}
+                            </SelectItem>
+                            <SelectItem value="view" onSelect
+                              onSelect={() => handleDeleteClick(product)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="flex items-center gap-2 text-xs sm:text-sm">
@@ -761,7 +756,7 @@ export default function SupplierProducts() {
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={handleCloseDialog} className="w-full sm:w-auto text-sm">
+              <Button type="button" variant="outline" onSelect={handleCloseDialog} className="w-full sm:w-auto text-sm">
                 Annuler
               </Button>
               <Button type="submit" className="w-full sm:w-auto text-sm">
@@ -784,7 +779,7 @@ export default function SupplierProducts() {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <AlertDialogCancel className="w-full sm:w-auto text-sm">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onSelect={handleDelete}
               className="w-full sm:w-auto text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer

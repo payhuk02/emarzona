@@ -9,48 +9,42 @@ import { Bell } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
 import { useUnreadCount, useRealtimeNotifications } from '@/hooks/useNotifications';
 import { NotificationDropdown } from './NotificationDropdown';
 
 export const NotificationBell = () => {
   const { data: unreadCount = 0 } = useUnreadCount();
-  const [open, setOpen] = useState(false);
-  
+
   // S'abonner aux notifications temps réel
   useRealtimeNotifications();
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-[calc(100vw-2rem)] sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-sm p-0"
-        mobileOptimized
+    <Select>
+      <SelectTrigger
+        className="relative"
+        variant="ghost"
+        size="icon"
+        aria-label="Notifications"
       >
-        <NotificationDropdown onClose={() => setOpen(false)} />
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge
+            variant="destructive"
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Badge>
+        )}
+      </SelectTrigger>
+      <SelectContent mobileVariant="sheet" className="w-[calc(100vw-2rem)] sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-sm p-0">
+        <NotificationDropdown onClose={() => {}} />
+      </SelectContent>
+    </Select>
   );
 };
 

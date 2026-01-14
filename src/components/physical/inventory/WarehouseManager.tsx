@@ -25,13 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -224,7 +218,7 @@ export const WarehouseManager : React.FC = () => {
           </p>
         </div>
         <Button 
-          onClick={() => handleOpenDialog()}
+          onSelect={() => handleOpenDialog()}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           size="sm"
         >
@@ -290,7 +284,7 @@ export const WarehouseManager : React.FC = () => {
                     variant="ghost"
                     size="icon"
                     className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
-                    onClick={handleClearSearch}
+                    onSelect={handleClearSearch}
                     aria-label="Effacer"
                   >
                     <X className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -302,7 +296,7 @@ export const WarehouseManager : React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleRefresh}
+                onSelect={handleRefresh}
                 className="h-9 sm:h-10"
                 aria-label="Rafraîchir"
               >
@@ -329,7 +323,7 @@ export const WarehouseManager : React.FC = () => {
                 Aucun entrepôt configuré. Créez votre premier entrepôt pour commencer.
               </p>
               <Button
-                onClick={() => handleOpenDialog()}
+                onSelect={() => handleOpenDialog()}
                 variant="outline"
                 className="mt-4"
               >
@@ -409,27 +403,27 @@ export const WarehouseManager : React.FC = () => {
                         </TableCell>
                         <TableCell>{warehouse.priority}</TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <Select>
+                            <SelectTrigger
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour l'entrepôt ${warehouse.name || warehouse.id}`}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleOpenDialog(warehouse)}>
+                            </SelectTrigger>
+                            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                              <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(warehouse)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Modifier
-                              </DropdownMenuItem>
+                              </SelectItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => setDeleteWarehouseId(warehouse.id)}
+                              <SelectItem value="delete" onSelect
+                                onSelect={() => setDeleteWarehouseId(warehouse.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -601,7 +595,7 @@ export const WarehouseManager : React.FC = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsDialogOpen(false)}
+                onSelect={() => setIsDialogOpen(false)}
               >
                 Annuler
               </Button>
@@ -627,7 +621,7 @@ export const WarehouseManager : React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+            <AlertDialogAction onSelect={handleDelete} className="bg-destructive">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -702,7 +696,7 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
         </div>
         <div className="flex gap-2 pt-2">
           <Button
-            onClick={onEdit}
+            onSelect={onEdit}
             size="sm"
             variant="outline"
             className="flex-1"
@@ -711,7 +705,7 @@ function WarehouseCard({ warehouse, onEdit, onDelete, animationDelay = 0 }: Ware
             <span className="text-xs sm:text-sm">Modifier</span>
           </Button>
           <Button
-            onClick={onDelete}
+            onSelect={onDelete}
             size="sm"
             variant="destructive"
             className="flex-1"

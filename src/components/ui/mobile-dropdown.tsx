@@ -1,26 +1,18 @@
 /**
- * Composant MobileDropdown - Menu dropdown optimisé pour mobile
+ * Composant MobileDropdown - Menu dropdown optimisé pour mobile (utilise maintenant Select)
  * Gère automatiquement le positionnement stable, le scroll lock, et les interactions tactiles
  */
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuCheckboxItem,
-  DropdownMenuRadioItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuShortcut,
-} from './dropdown-menu';
-import { useIsMobile } from '@/hooks/use-mobile';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectLabel,
+  SelectSeparator,
+  SelectGroup,
+} from './select';
 import { cn } from '@/lib/utils';
 
 interface MobileDropdownProps {
@@ -171,17 +163,10 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
 
 // Ré-exporter les composants enfants pour faciliter l'utilisation
 export {
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuCheckboxItem,
-  DropdownMenuRadioItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuShortcut,
+  SelectItem as DropdownMenuItem,
+  SelectLabel as DropdownMenuLabel,
+  SelectSeparator as DropdownMenuSeparator,
+  SelectGroup as DropdownMenuGroup,
 };
 
 

@@ -26,10 +26,7 @@ import { Users, UserPlus, MoreVertical, Trash2, Edit, Mail, Clock } from 'lucide
 import { StoreMemberInviteDialog } from './StoreMemberInviteDialog';
 import { StoreMemberRoleSelector } from './StoreMemberRoleSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -169,7 +166,7 @@ export const StoreMembersList = () => {
               {pendingMembers.length > 0 && `, ${pendingMembers.length} invitation${pendingMembers.length > 1 ? 's' : ''} en attente`}
             </CardDescription>
           </div>
-          <Button onClick={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
+          <Button onSelect={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
             <UserPlus className="h-4 w-4 mr-2" />
             Inviter un membre
           </Button>
@@ -223,20 +220,20 @@ export const StoreMembersList = () => {
                           "aria-label": `Actions pour ${member.user?.email || member.id}`
                         }}
                       >
-                        <StableDropdownMenuItem onClick={() => handleEditRole(member)}>
+                        <SelectItem value="edit" onSelect onSelect={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
-                        </StableDropdownMenuItem>
+                        </SelectItem>
                         {member.role !== 'owner' && (
-                          <StableDropdownMenuItem
-                            onClick={() => handleRemove(member)}
+                          <SelectItem value="delete" onSelect
+                            onSelect={() => handleRemove(member)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Retirer
-                          </StableDropdownMenuItem>
+                          </SelectItem>
                         )}
-                      </StableDropdownMenu>
+                      </Select>
                     </div>
                   ))}
                 </div>
@@ -290,18 +287,18 @@ export const StoreMembersList = () => {
                           "aria-label": `Actions pour ${member.user?.email || member.id}`
                         }}
                       >
-                        <StableDropdownMenuItem onClick={() => handleEditRole(member)}>
+                        <SelectItem value="copy" onSelect onSelect={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
-                        </StableDropdownMenuItem>
-                        <StableDropdownMenuItem
-                          onClick={() => handleRemove(member)}
+                        </SelectItem>
+                        <SelectItem value="view" onSelect
+                          onSelect={() => handleRemove(member)}
                           className="text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Annuler l'invitation
-                        </StableDropdownMenuItem>
-                      </StableDropdownMenu>
+                        </SelectItem>
+                      </Select>
                     </div>
                   ))}
                 </div>
@@ -312,7 +309,7 @@ export const StoreMembersList = () => {
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium mb-2">Aucun membre</p>
               <p className="text-sm mb-4">Commencez par inviter des membres à rejoindre votre équipe</p>
-              <Button onClick={() => setInviteDialogOpen(true)}>
+              <Button onSelect={() => setInviteDialogOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Inviter un membre
               </Button>
@@ -350,7 +347,7 @@ export const StoreMembersList = () => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmRemove}
+              onSelect={confirmRemove}
               disabled={removeMember.isPending}
               className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

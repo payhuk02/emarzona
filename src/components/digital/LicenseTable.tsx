@@ -17,12 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { MoreHorizontal, Ban, RefreshCw, Trash2, Eye } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { format } from 'date-fns';
@@ -164,31 +159,31 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
                       : 'Jamais'}
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    <Select>
+                      <SelectTrigger
                         <Button variant="ghost" size="sm" aria-label={`Actions pour la licence ${license.license_key || license.id}`}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                      </SelectTrigger>
+                      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                        <SelectItem value="edit" onSelect>
                           <Eye className="h-4 w-4 mr-2" />
                           Voir détails
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        </SelectItem>
+                        <SelectItem value="delete" onSelect>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Renouveler
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        </SelectItem>
+                        <SelectItem value="copy" onSelect>
                           <Ban className="h-4 w-4 mr-2" />
                           Suspendre
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        </SelectItem>
+                        <SelectItem value="view" onSelect className="text-destructive">
                           <Trash2 className="h-4 w-4 mr-2" />
                           Révoquer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                 </TableRow>
               ))}

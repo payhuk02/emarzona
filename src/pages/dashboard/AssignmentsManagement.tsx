@@ -84,12 +84,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
@@ -402,7 +397,7 @@ export default function AssignmentsManagement() {
                 </p>
               </div>
               <Button
-                onClick={handleCreateAssignment}
+                onSelect={handleCreateAssignment}
                 className="shrink-0"
                 disabled={!selectedCourseId}
               >
@@ -534,7 +529,7 @@ export default function AssignmentsManagement() {
                             : 'Aucun assignment créé'}
                         </p>
                         {!searchQuery && (
-                          <Button onClick={handleCreateAssignment}>
+                          <Button onSelect={handleCreateAssignment}>
                             <Plus className="h-4 w-4 mr-2" />
                             Créer votre premier assignment
                           </Button>
@@ -603,34 +598,34 @@ export default function AssignmentsManagement() {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
+                                    <Select>
+                                      <SelectTrigger
                                         <Button variant="ghost" size="sm">
                                           <MoreVertical className="h-4 w-4" />
                                         </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuItem
-                                          onClick={() => handleViewSubmissions(assignment.id)}
+                                      </SelectTrigger>
+                                      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                        <SelectItem value="edit" onSelect
+                                          onSelect={() => handleViewSubmissions(assignment.id)}
                                         >
                                           <Eye className="h-4 w-4 mr-2" />
                                           Voir soumissions ({assignmentSubmissions.length})
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() => handleEditAssignment(assignment.id)}
+                                        </SelectItem>
+                                        <SelectItem value="delete" onSelect
+                                          onSelect={() => handleEditAssignment(assignment.id)}
                                         >
                                           <Edit className="h-4 w-4 mr-2" />
                                           Éditer
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() => setDeletingAssignmentId(assignment.id)}
+                                        </SelectItem>
+                                        <SelectItem value="copy" onSelect
+                                          onSelect={() => setDeletingAssignmentId(assignment.id)}
                                           className="text-red-600"
                                         >
                                           <Trash2 className="h-4 w-4 mr-2" />
                                           Supprimer
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                   </TableCell>
                                 </TableRow>
                               );
@@ -781,11 +776,11 @@ export default function AssignmentsManagement() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    <Button variant="outline" onSelect={() => setIsCreateDialogOpen(false)}>
                       Annuler
                     </Button>
                     <Button
-                      onClick={handleSaveAssignment}
+                      onSelect={handleSaveAssignment}
                       disabled={createAssignment.isPending || updateAssignment.isPending}
                     >
                       {editingAssignmentId ? 'Sauvegarder' : 'Créer'}
@@ -911,7 +906,7 @@ export default function AssignmentsManagement() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => window.open(file.url, '_blank')}
+                                              onSelect={() => window.open(file.url, '_blank')}
                                             >
                                               <Download className="h-4 w-4" />
                                             </Button>
@@ -936,7 +931,7 @@ export default function AssignmentsManagement() {
                               <div className="flex justify-end gap-2 pt-2">
                                 {submission.status === 'submitted' && (
                                   <Button
-                                    onClick={() => setGradingSubmissionId(submission.id)}
+                                    onSelect={() => setGradingSubmissionId(submission.id)}
                                     size="sm"
                                   >
                                     <FileCheck className="h-4 w-4 mr-2" />
@@ -946,7 +941,7 @@ export default function AssignmentsManagement() {
                                 {submission.status === 'graded' && (
                                   <Button
                                     variant="outline"
-                                    onClick={() => setGradingSubmissionId(submission.id)}
+                                    onSelect={() => setGradingSubmissionId(submission.id)}
                                     size="sm"
                                   >
                                     <Edit className="h-4 w-4 mr-2" />
@@ -1013,7 +1008,7 @@ export default function AssignmentsManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() =>
+                    onSelect={() =>
                       deletingAssignmentId && handleDeleteAssignment(deletingAssignmentId)
                     }
                     className="bg-red-600 hover:bg-red-700"

@@ -15,13 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Send,
   Paperclip,
@@ -207,7 +201,7 @@ const ConversationItem = memo<ConversationItemProps>(({ conversation, isActive, 
       className={`cursor-pointer transition-colors ${
         isActive ? 'bg-primary/10 border-primary' : 'hover:bg-muted/50'
       }`}
-      onClick={handleClick}
+      onSelect={handleClick}
     >
       <CardContent className="p-3">
         <div className="flex items-start justify-between">
@@ -494,8 +488,8 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                   </Badge>
                 )}
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Select>
+                <SelectTrigger
                   <Button
                     variant="ghost"
                     size="sm"
@@ -504,21 +498,21 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                </SelectTrigger>
+                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                   {!currentConversation.admin_intervention && (
-                    <DropdownMenuItem onClick={handleEnableAdminIntervention}>
+                    <SelectItem value="edit" onSelect onSelect={handleEnableAdminIntervention}>
                       <Shield className="h-4 w-4 mr-2" />
                       Demander intervention admin
-                    </DropdownMenuItem>
+                    </SelectItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleCloseConversation} className="text-destructive">
+                  <SelectItem value="delete" onSelect onSelect={handleCloseConversation} className="text-destructive">
                     <Lock className="h-4 w-4 mr-2" />
                     Fermer la conversation
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Messages */}
@@ -551,7 +545,7 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedFiles([])}
+                      onSelect={() => setSelectedFiles([])}
                       className="h-auto py-1"
                       aria-label="Effacer tous les fichiers sélectionnés"
                     >
@@ -571,7 +565,7 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                           variant="ghost"
                           size="sm"
                           className="h-4 w-4 p-0 ml-1 flex-shrink-0"
-                          onClick={() => removeFile(index)}
+                          onSelect={() => removeFile(index)}
                           aria-label={`Retirer ${file.name}`}
                         >
                           <X className="h-3 w-3" />
@@ -599,7 +593,7 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                       size="sm"
                       disabled={sendingMessage}
                       className="shrink-0"
-                      onClick={() => setShowCameraDialog(true)}
+                      onSelect={() => setShowCameraDialog(true)}
                       aria-label="Prendre une photo"
                       title="Prendre une photo"
                     >
@@ -643,7 +637,7 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                     </Dialog>
                   </div>
                   <Button
-                    onClick={handleSendMessage}
+                    onSelect={handleSendMessage}
                     disabled={
                       sendingMessage || (!messageContent.trim() && selectedFiles.length === 0)
                     }

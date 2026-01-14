@@ -10,10 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Calendar,
   Clock,
@@ -128,18 +125,18 @@ const ServiceCardComponent = ({
                 "aria-label": `Actions pour ${service.name || service.id}`
               }}
             >
-              <StableDropdownMenuItem onClick={() => onEdit?.(service.id)}>
+              <SelectItem value="edit" onSelect onSelect={() => onEdit?.(service.id)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Modifier
-              </StableDropdownMenuItem>
-              <StableDropdownMenuItem
-                onClick={() => onDelete?.(service.id)}
+              </SelectItem>
+              <SelectItem value="delete" onSelect
+                onSelect={() => onDelete?.(service.id)}
                 className="text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
-              </StableDropdownMenuItem>
-            </StableDropdownMenu>
+              </SelectItem>
+            </Select>
           </div>
         )}
       </div>
@@ -241,7 +238,7 @@ const ServiceCardComponent = ({
       </CardContent>
 
       <CardFooter className="pt-3">
-        <Button className="w-full" onClick={() => navigate(`/services/${service.product_id}`)}>
+        <Button className="w-full" onSelect={() => navigate(`/services/${service.product_id}`)}>
           <Calendar className="h-4 w-4 mr-2" />
           Réserver
         </Button>

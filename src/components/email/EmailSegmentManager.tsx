@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -177,39 +177,49 @@ export const EmailSegmentManager = ({
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={`Actions pour le segment ${segment.name}`}>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                        <Select>
+                          <SelectTrigger
+                            className="w-auto"
+                            aria-label={`Actions pour le segment ${segment.name}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             {onPreviewSegment && (
-                              <DropdownMenuItem
-                                onClick={() => onPreviewSegment(segment)}
+                              <SelectItem
+                                value="preview"
+                                onSelect={() => onPreviewSegment(segment)}
                               >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Prévisualiser
-                              </DropdownMenuItem>
+                                <div className="flex items-center">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Prévisualiser
+                                </div>
+                              </SelectItem>
                             )}
-                            <DropdownMenuItem
-                              onClick={() => onEditSegment?.(segment)}
+                            <SelectItem
+                              value="edit"
+                              onSelect={() => onEditSegment?.(segment)}
                             >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
+                              <div className="flex items-center">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Modifier
+                              </div>
+                            </SelectItem>
+                            <SelectItem
+                              value="delete"
+                              onSelect={() => {
                                 setSegmentToDelete(segment.id);
                                 setDeleteDialogOpen(true);
                               }}
                               className="text-destructive"
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              <div className="flex items-center">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}

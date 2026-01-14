@@ -44,12 +44,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
@@ -361,7 +356,7 @@ export default function TaxManagement() {
                   Configurez les taxes automatiques par pays, région et type de produit
                 </p>
               </div>
-              <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
+              <Button onSelect={() => setIsCreateDialogOpen(true)} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Configuration
               </Button>
@@ -458,7 +453,7 @@ export default function TaxManagement() {
                         : 'Aucune configuration de taxe créée'}
                     </p>
                     {!searchQuery && countryFilter === 'all' && (
-                      <Button onClick={() => setIsCreateDialogOpen(true)}>
+                      <Button onSelect={() => setIsCreateDialogOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Créer votre première configuration
                       </Button>
@@ -555,26 +550,26 @@ export default function TaxManagement() {
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                                <Select>
+                                  <SelectTrigger
                                     <Button variant="ghost" size="sm">
                                       <MoreVertical className="h-4 w-4" />
                                     </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => handleEditTax(tax)}>
+                                  </SelectTrigger>
+                                  <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                    <SelectItem value="edit" onSelect onSelect={() => handleEditTax(tax)}>
                                       <Edit className="h-4 w-4 mr-2" />
                                       Éditer
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => setDeletingTaxId(tax.id)}
+                                    </SelectItem>
+                                    <SelectItem value="delete" onSelect
+                                      onSelect={() => setDeletingTaxId(tax.id)}
                                       className="text-red-600"
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Supprimer
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </TableCell>
                             </TableRow>
                           );
@@ -717,7 +712,7 @@ export default function TaxManagement() {
                             formData.applies_to_product_types?.includes(type) ? 'default' : 'outline'
                           }
                           size="sm"
-                          onClick={() => {
+                          onSelect={() => {
                             const current = formData.applies_to_product_types || [];
                             const newTypes = current.includes(type)
                               ? current.filter((t) => t !== type)
@@ -782,7 +777,7 @@ export default function TaxManagement() {
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => {
+                    onSelect={() => {
                       setIsCreateDialogOpen(false);
                       setEditingTaxId(null);
                     }}
@@ -790,7 +785,7 @@ export default function TaxManagement() {
                     Annuler
                   </Button>
                   <Button
-                    onClick={handleSaveTaxConfig}
+                    onSelect={handleSaveTaxConfig}
                     disabled={createTaxConfig.isPending || updateTaxConfig.isPending}
                   >
                     {editingTaxId ? 'Sauvegarder' : 'Créer'}
@@ -811,7 +806,7 @@ export default function TaxManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deletingTaxId && deleteTaxConfig.mutate(deletingTaxId)}
+                    onSelect={() => deletingTaxId && deleteTaxConfig.mutate(deletingTaxId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

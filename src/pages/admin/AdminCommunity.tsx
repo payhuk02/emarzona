@@ -36,12 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -320,7 +315,7 @@ export default function AdminCommunity() {
                         Gérez les membres et leurs statuts
                       </CardDescription>
                     </div>
-                    <Button onClick={() => setMemberFormOpen(true)}>
+                    <Button onSelect={() => setMemberFormOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Nouveau membre
                     </Button>
@@ -448,7 +443,7 @@ export default function AdminCommunity() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                onClick={() => handleMemberStatusChange(row.id, 'approved')}
+                                onSelect={() => handleMemberStatusChange(row.id, 'approved')}
                                 className="min-h-[44px] w-full"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -459,7 +454,7 @@ export default function AdminCommunity() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleMemberStatusChange(row.id, 'suspended')}
+                                onSelect={() => handleMemberStatusChange(row.id, 'suspended')}
                                 className="min-h-[44px] w-full"
                               >
                                 <Ban className="h-4 w-4 mr-2" />
@@ -470,7 +465,7 @@ export default function AdminCommunity() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                onClick={() => handleMemberStatusChange(row.id, 'approved')}
+                                onSelect={() => handleMemberStatusChange(row.id, 'approved')}
                                 className="min-h-[44px] w-full"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -480,7 +475,7 @@ export default function AdminCommunity() {
                             <Button
                               variant="destructive"
                               size="sm"
-                              onClick={() => {
+                              onSelect={() => {
                                 setTargetMemberId(row.id);
                                 setDeleteMemberDialogOpen(true);
                               }}
@@ -559,39 +554,39 @@ export default function AdminCommunity() {
                                     {formatDistanceToNow(new Date(member.join_date || member.created_at), { addSuffix: true, locale: fr })}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
+                                    <Select>
+                                      <SelectTrigger
                                         <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] h-11 w-11" aria-label={`Actions pour ${member.email || member.id}`}>
                                           <MoreVertical className="h-4 w-4" />
                                         </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
+                                      </SelectTrigger>
+                                      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                         {member.status === 'pending' && (
-                                          <DropdownMenuItem
-                                            onClick={() => handleMemberStatusChange(member.id, 'approved')}
+                                          <SelectItem value="edit" onSelect
+                                            onSelect={() => handleMemberStatusChange(member.id, 'approved')}
                                           >
                                             <CheckCircle className="h-4 w-4 mr-2" />
                                             Approuver
-                                          </DropdownMenuItem>
+                                          </SelectItem>
                                         )}
                                         {member.status === 'approved' && (
-                                          <DropdownMenuItem
-                                            onClick={() => handleMemberStatusChange(member.id, 'suspended')}
+                                          <SelectItem value="delete" onSelect
+                                            onSelect={() => handleMemberStatusChange(member.id, 'suspended')}
                                           >
                                             <Ban className="h-4 w-4 mr-2" />
                                             Suspendre
-                                          </DropdownMenuItem>
+                                          </SelectItem>
                                         )}
                                         {member.status === 'suspended' && (
-                                          <DropdownMenuItem
-                                            onClick={() => handleMemberStatusChange(member.id, 'approved')}
+                                          <SelectItem value="copy" onSelect
+                                            onSelect={() => handleMemberStatusChange(member.id, 'approved')}
                                           >
                                             <CheckCircle className="h-4 w-4 mr-2" />
                                             Réactiver
-                                          </DropdownMenuItem>
+                                          </SelectItem>
                                         )}
-                                        <DropdownMenuItem
-                                          onClick={() => {
+                                        <SelectItem value="view" onSelect
+                                          onSelect={() => {
                                             setTargetMemberId(member.id);
                                             setDeleteMemberDialogOpen(true);
                                           }}
@@ -599,9 +594,9 @@ export default function AdminCommunity() {
                                         >
                                           <Trash2 className="h-4 w-4 mr-2" />
                                           Supprimer
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -630,7 +625,7 @@ export default function AdminCommunity() {
                         Gérez les publications de la communauté
                       </CardDescription>
                     </div>
-                    <Button onClick={() => {
+                    <Button onSelect={() => {
                       setSelectedPost(null);
                       setPostFormOpen(true);
                     }}>
@@ -754,7 +749,7 @@ export default function AdminCommunity() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteMember} className="bg-destructive">
+                <AlertDialogAction onSelect={handleDeleteMember} className="bg-destructive">
                   Supprimer
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -772,7 +767,7 @@ export default function AdminCommunity() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeletePost} className="bg-destructive">
+                <AlertDialogAction onSelect={handleDeletePost} className="bg-destructive">
                   Supprimer
                 </AlertDialogAction>
               </AlertDialogFooter>

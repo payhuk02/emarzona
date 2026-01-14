@@ -34,12 +34,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown, ArrowUpDown, ArrowUp, ArrowDown, Filter, Plus, Edit3 } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -266,7 +261,7 @@ const AdminUsers = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
-                      <Button variant="outline" size="sm" onClick={() => setAddAdminOpen(true)} disabled={!isAAL2}>
+                      <Button variant="outline" size="sm" onSelect={() => setAddAdminOpen(true)} disabled={!isAAL2}>
                         <Plus className="h-4 w-4 mr-2" />
                         Ajouter un administrateur
                       </Button>
@@ -289,25 +284,25 @@ const AdminUsers = () => {
                   Affichage de {from} à {to} sur {totalCount} utilisateur{totalCount > 1 ? 's' : ''}
                 </CardDescription>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Select>
+                <SelectTrigger
                   <Button variant="outline" size="sm" className="min-h-[44px]">
                     <FileDown className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Exporter</span>
                     <span className="sm:hidden">Export</span>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={exportToCSV}>
+                </SelectTrigger>
+                <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                  <SelectItem value="edit" onSelect onSelect={exportToCSV}>
                     <Download className="h-4 w-4 mr-2" />
                     Exporter CSV (page actuelle)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={exportToPDF}>
+                  </SelectItem>
+                  <SelectItem value="delete" onSelect onSelect={exportToPDF}>
                     <FileDown className="h-4 w-4 mr-2" />
                     Exporter PDF (page actuelle)
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             {/* Filtres avancés */}
@@ -472,7 +467,7 @@ const AdminUsers = () => {
                               variant="outline"
                               size="sm"
                               disabled={!isAAL2}
-                              onClick={() => {
+                              onSelect={() => {
                                 setRoleTargetUser({ id: row.user_id, email: row.email });
                                 setNewRole(row.role || 'user');
                                 setRoleDialogOpen(true);
@@ -496,7 +491,7 @@ const AdminUsers = () => {
                                 variant="outline"
                                 size="sm"
                                 disabled={!isAAL2}
-                                onClick={async () => {
+                                onSelect={async () => {
                                   const success = await unsuspendUser(row.user_id);
                                   if (success) {
                                     await refetch();
@@ -521,7 +516,7 @@ const AdminUsers = () => {
                                 variant="outline"
                                 size="sm"
                                 disabled={!isAAL2}
-                                onClick={() => {
+                                onSelect={() => {
                                   setSelectedUser(row.user_id);
                                   setSuspendDialogOpen(true);
                                 }}
@@ -544,7 +539,7 @@ const AdminUsers = () => {
                               variant="destructive"
                               size="sm"
                               disabled={!isAAL2}
-                              onClick={() => {
+                              onSelect={() => {
                                 setSelectedUser(row.user_id);
                                 setDeleteDialogOpen(true);
                               }}
@@ -572,7 +567,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="sm"
                           className="min-h-[44px] h-11 -ml-3"
-                          onClick={() => handleSort('display_name')}
+                          onSelect={() => handleSort('display_name')}
                         >
                           Nom complet
                           {sortBy === 'display_name' ? (
@@ -593,7 +588,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="sm"
                           className="min-h-[44px] h-11 -ml-3"
-                          onClick={() => handleSort('created_at')}
+                          onSelect={() => handleSort('created_at')}
                         >
                           Date d'inscription
                           {sortBy === 'created_at' ? (
@@ -658,7 +653,7 @@ const AdminUsers = () => {
                                       variant="outline"
                                       size="sm"
                                       disabled={!isAAL2}
-                                      onClick={() => {
+                                      onSelect={() => {
                                         setRoleTargetUser({ id: user.user_id, email: user.email });
                                         setNewRole(user.role || 'user');
                                         setRoleDialogOpen(true);
@@ -683,7 +678,7 @@ const AdminUsers = () => {
                                         variant="outline"
                                         size="sm"
                                         disabled={!isAAL2}
-                                        onClick={async () => {
+                                        onSelect={async () => {
                                           const success = await unsuspendUser(user.user_id);
                                           if (success) {
                                             await refetch();
@@ -709,7 +704,7 @@ const AdminUsers = () => {
                                         variant="outline"
                                         size="sm"
                                         disabled={!isAAL2}
-                                        onClick={() => {
+                                        onSelect={() => {
                                           setSelectedUser(user.user_id);
                                           setSuspendDialogOpen(true);
                                         }}
@@ -733,7 +728,7 @@ const AdminUsers = () => {
                                       variant="destructive"
                                       size="sm"
                                       disabled={!isAAL2}
-                                      onClick={() => {
+                                      onSelect={() => {
                                         setSelectedUser(user.user_id);
                                         setDeleteDialogOpen(true);
                                       }}
@@ -783,7 +778,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(1)}
+                    onSelect={() => setPage(1)}
                     disabled={page === 1}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Première page"
@@ -794,7 +789,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(page - 1)}
+                    onSelect={() => setPage(page - 1)}
                     disabled={page === 1}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Page précédente"
@@ -822,7 +817,7 @@ const AdminUsers = () => {
                           variant={page === pageNum ? 'default' : 'outline'}
                           size="sm"
                           className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-8 sm:w-8 p-0"
-                          onClick={() => setPage(pageNum)}
+                          onSelect={() => setPage(pageNum)}
                           aria-label={`Page ${pageNum}`}
                         >
                           {pageNum}
@@ -834,7 +829,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(page + 1)}
+                    onSelect={() => setPage(page + 1)}
                     disabled={page === totalPages}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Page suivante"
@@ -845,7 +840,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(totalPages)}
+                    onSelect={() => setPage(totalPages)}
                     disabled={page === totalPages}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Dernière page"
@@ -886,9 +881,9 @@ const AdminUsers = () => {
               </Select>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onClick={() => setRoleDialogOpen(false)} className="w-full sm:w-auto">Annuler</Button>
+              <Button variant="outline" onSelect={() => setRoleDialogOpen(false)} className="w-full sm:w-auto">Annuler</Button>
               <Button
-                onClick={async () => {
+                onSelect={async () => {
                   if (roleTargetUser) {
                     const ok = await setUserRole(roleTargetUser.id, newRole);
                     if (ok) {
@@ -938,9 +933,9 @@ const AdminUsers = () => {
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onClick={() => setAddAdminOpen(false)} className="w-full sm:w-auto">Annuler</Button>
+              <Button variant="outline" onSelect={() => setAddAdminOpen(false)} className="w-full sm:w-auto">Annuler</Button>
               <Button
-                onClick={async () => {
+                onSelect={async () => {
                   if (!addAdminEmail.trim()) return;
                   const ok = await promoteToAdmin(addAdminEmail.trim(), addAdminRole);
                   if (ok) {
@@ -974,12 +969,12 @@ const AdminUsers = () => {
               rows={4}
             />
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onClick={() => setSuspendDialogOpen(false)} className="w-full sm:w-auto">
+              <Button variant="outline" onSelect={() => setSuspendDialogOpen(false)} className="w-full sm:w-auto">
                 Annuler
               </Button>
               <Button
                 variant="destructive"
-                onClick={async () => {
+                onSelect={async () => {
                   if (selectedUser && suspensionReason.trim()) {
                     const success = await suspendUser(selectedUser, suspensionReason);
                     if (success) {
@@ -1012,7 +1007,7 @@ const AdminUsers = () => {
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
               <AlertDialogAction
-                onClick={async () => {
+                onSelect={async () => {
                   if (selectedUser) {
                     const success = await deleteUser(selectedUser);
                     if (success) {

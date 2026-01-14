@@ -23,11 +23,11 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
 import { useToggleReaction } from '@/hooks/community/useCommunityReactions';
 import { useCurrentUserPostReaction } from '@/hooks/community/useCommunityReactions';
 import { useNavigate } from 'react-router-dom';
@@ -115,36 +115,36 @@ export function CommunityPostCard({
             </div>
           </div>
           {showActions && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label={`Actions pour le post ${post.title || post.id}`}>
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+            <Select>
+              <SelectTrigger
+                className="h-8 w-8 shrink-0"
+                variant="ghost"
+                size="icon"
+                aria-label={`Actions pour le post ${post.title || post.id}`}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                 {onPin && (
-                  <DropdownMenuItem onClick={() => onPin(post.id, !post.is_pinned)}>
+                  <SelectItem value="pin" onSelect={() => onPin(post.id, !post.is_pinned)}>
                     <Pin className="h-4 w-4 mr-2" />
                     {post.is_pinned ? 'Désépingler' : 'Épingler'}
-                  </DropdownMenuItem>
+                  </SelectItem>
                 )}
                 {onFeature && (
-                  <DropdownMenuItem onClick={() => onFeature(post.id, !post.is_featured)}>
+                  <SelectItem value="feature" onSelect={() => onFeature(post.id, !post.is_featured)}>
                     <Star className="h-4 w-4 mr-2" />
                     {post.is_featured ? 'Retirer de la vedette' : 'Mettre en vedette'}
-                  </DropdownMenuItem>
+                  </SelectItem>
                 )}
                 {onDelete && (
-                  <DropdownMenuItem 
-                    onClick={() => onDelete(post.id)}
-                    className="text-destructive"
-                  >
+                  <SelectItem value="delete" onSelect={() => onDelete(post.id)} className="text-destructive">
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Supprimer
-                  </DropdownMenuItem>
+                  </SelectItem>
                 )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </SelectContent>
+            </Select>
           )}
         </div>
       </CardHeader>

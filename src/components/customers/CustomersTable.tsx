@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Edit, Trash2, Mail, Phone, MapPin, ShoppingBag, DollarSign, Calendar } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,26 +137,28 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
             },
           ]}
           actions={(row) => (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] touch-manipulation" aria-label="Actions pour le client">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Modifier
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setDeleteId(row.id)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Select>
+              <SelectTrigger
+                className="min-h-[44px] min-w-[44px] touch-manipulation"
+                aria-label="Actions pour le client"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                <SelectItem value="edit" onSelect={() => {}}>
+                  <div className="flex items-center">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Modifier
+                  </div>
+                </SelectItem>
+                <SelectItem value="delete" onSelect={() => setDeleteId(row.id)} className="text-destructive">
+                  <div className="flex items-center">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Supprimer
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           )}
         />
       ) : (
@@ -208,26 +210,28 @@ const CustomersTableComponent = ({ customers, onUpdate }: CustomersTableProps) =
                         {format(new Date(customer.created_at), "dd MMM yyyy", { locale: fr })}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation" aria-label={`Actions pour ${customer.email || 'le client'}`}>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setDeleteId(customer.id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Select>
+                          <SelectTrigger
+                            className="h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+                            aria-label={`Actions pour ${customer.email || 'le client'}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="edit" onSelect={() => {}}>
+                              <div className="flex items-center">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Modifier
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="delete" onSelect={() => setDeleteId(customer.id)} className="text-destructive">
+                              <div className="flex items-center">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}

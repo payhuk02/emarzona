@@ -26,10 +26,12 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getStockInfo, formatStockQuantity } from '@/lib/stockUtils';
 import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProductListViewProps {
   product: Product;
@@ -268,70 +270,69 @@ const ProductListView = ({
               </span>
             </Button>
 
-            <StableDropdownMenu
-              triggerClassName="flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation"
-              triggerProps={{
-                variant: 'outline',
-                size: 'sm',
-                'aria-label': t('products.actionsForProduct', 'Actions pour le produit {{name}}', {
+            <Select>
+              <SelectTrigger
+                className="flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation border-border"
+                aria-label={t('products.actionsForProduct', 'Actions pour le produit {{name}}', {
                   name: product.name || product.id,
-                }),
-              }}
-              triggerContent={<MoreVertical className="h-4 w-4" />}
-            >
-              {onQuickView && (
-                <StableDropdownMenuItem onClick={onQuickView}>
+                })}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                {onQuickView && (
+                  <SelectItem value="quickview" onSelect={onQuickView}>
+                    <span className="flex items-center">
+                      <Eye className="h-4 w-4 mr-2" />
+                      {t('products.quickView.title', 'Aperçu rapide')}
+                    </span>
+                  </SelectItem>
+                )}
+                <SelectItem value="copylink" onSelect={handleCopyLink}>
                   <span className="flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    {t('products.quickView.title', 'Aperçu rapide')}
+                    <Copy className="h-4 w-4 mr-2" />
+                    {t('products.copyLink', 'Copier le lien')}
                   </span>
-                </StableDropdownMenuItem>
-              )}
-              <StableDropdownMenuItem onClick={handleCopyLink}>
-                <span className="flex items-center">
-                  <Copy className="h-4 w-4 mr-2" />
-                  {t('products.copyLink', 'Copier le lien')}
-                </span>
-              </StableDropdownMenuItem>
-              <StableDropdownMenuItem onClick={handlePreview}>
-                <span className="flex items-center">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  {t('products.preview', 'Prévisualiser')}
-                </span>
-              </StableDropdownMenuItem>
-              {onDuplicate && (
-                <StableDropdownMenuItem onClick={onDuplicate}>
+                </SelectItem>
+                <SelectItem value="preview" onSelect={handlePreview}>
                   <span className="flex items-center">
-                    <FileStack className="h-4 w-4 mr-2" />
-                    {t('products.actions.duplicate', 'Dupliquer')}
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    {t('products.preview', 'Prévisualiser')}
                   </span>
-                </StableDropdownMenuItem>
-              )}
-              {onToggleStatus && (
-                <StableDropdownMenuItem onClick={onToggleStatus}>
+                </SelectItem>
+                {onDuplicate && (
+                  <SelectItem value="duplicate" onSelect={onDuplicate}>
+                    <span className="flex items-center">
+                      <FileStack className="h-4 w-4 mr-2" />
+                      {t('products.actions.duplicate', 'Dupliquer')}
+                    </span>
+                  </SelectItem>
+                )}
+                {onToggleStatus && (
+                  <SelectItem value="toggle" onSelect={onToggleStatus}>
+                    <span className="flex items-center">
+                      {product.is_active ? (
+                        <>
+                          <EyeOff className="h-4 w-4 mr-2" />
+                          {t('products.deactivate', 'Désactiver')}
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-4 w-4 mr-2" />
+                          {t('products.activate', 'Activer')}
+                        </>
+                      )}
+                    </span>
+                  </SelectItem>
+                )}
+                <SelectItem value="delete" onSelect={onDelete} className="text-destructive">
                   <span className="flex items-center">
-                    {product.is_active ? (
-                      <>
-                        <EyeOff className="h-4 w-4 mr-2" />
-                        {t('products.deactivate', 'Désactiver')}
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        {t('products.activate', 'Activer')}
-                      </>
-                    )}
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {t('products.actions.delete', 'Supprimer')}
                   </span>
-                </StableDropdownMenuItem>
-              )}
-              <StableDropdownMenuSeparator />
-              <StableDropdownMenuItem onClick={onDelete} className="text-destructive">
-                <span className="flex items-center">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t('products.actions.delete', 'Supprimer')}
-                </span>
-              </StableDropdownMenuItem>
-            </StableDropdownMenu>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardContent>

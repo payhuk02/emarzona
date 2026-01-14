@@ -64,13 +64,7 @@ import {
   ChevronRight,
   X,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useAdvancedPayments } from '@/hooks/useAdvancedPayments';
 import { AdvancedPayment, PaymentType, PaymentStatus } from '@/types/advanced-features';
 import type { PaymentResponse } from '@/types/advanced-features';
@@ -580,7 +574,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
+            onSelect={() => {
               try {
                 exportAdvancedPaymentsToCSV(filteredAndSortedPayments);
                 toast({
@@ -606,7 +600,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleRefresh}
+            onSelect={handleRefresh}
             className="h-9 sm:h-10"
             aria-label={t('common.refresh', 'Rafraîchir')}
           >
@@ -699,7 +693,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
+                onSelect={() => {
                   setDateFrom('');
                   setDateTo('');
                   setCurrentPage(1);
@@ -765,7 +759,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
             <Button
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode('list')}
+              onSelect={() => setViewMode('list')}
               className="h-10 sm:h-11"
               aria-label={t('payments.view.list', 'Vue liste')}
             >
@@ -774,7 +768,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onSelect={() => setViewMode('grid')}
               className="h-10 sm:h-11"
               aria-label={t('payments.view.grid', 'Vue grille')}
             >
@@ -816,7 +810,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
                 </p>
                 {!searchQuery && statusFilter === 'all' && typeFilter === 'all' && (
                   <Button
-                    onClick={() => setShowCreateDialog(true)}
+                    onSelect={() => setShowCreateDialog(true)}
                     className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
                   >
                     <CreditCard className="h-4 w-4 mr-2" aria-hidden="true" />
@@ -869,7 +863,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onSelect={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1 || loading}
                 className="h-9 sm:h-10"
               >
@@ -913,7 +907,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
                       key={i}
                       variant={currentPage === displayPage ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setCurrentPage(displayPage!)}
+                      onSelect={() => setCurrentPage(displayPage!)}
                       disabled={loading}
                       className="h-9 sm:h-10 min-w-[2.5rem]"
                     >
@@ -925,7 +919,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
+                onSelect={() =>
                   setCurrentPage(prev => Math.min(Math.ceil(totalCount / pageSize), prev + 1))
                 }
                 disabled={currentPage >= Math.ceil(totalCount / pageSize) || loading}
@@ -1132,7 +1126,7 @@ const  PaymentCard: React.FC<PaymentCardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onView(payment)}
+              onSelect={() => onView(payment)}
               className="h-9 sm:h-10 text-xs sm:text-sm"
               aria-label="Voir les détails"
             >
@@ -1140,8 +1134,8 @@ const  PaymentCard: React.FC<PaymentCardProps> = ({
               <span className="hidden sm:inline">Voir</span>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <Select>
+              <SelectTrigger
                 <Button
                   variant="outline"
                   size="sm"
@@ -1150,28 +1144,28 @@ const  PaymentCard: React.FC<PaymentCardProps> = ({
                 >
                   <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                 {payment.is_held && payment.status === 'held' && (
-                  <DropdownMenuItem onClick={() => onRelease(payment)}>
+                  <SelectItem value="edit" onSelect onSelect={() => onRelease(payment)}>
                     <Unlock className="h-4 w-4 mr-2" aria-hidden="true" />
                     Libérer le paiement
-                  </DropdownMenuItem>
+                  </SelectItem>
                 )}
-                <DropdownMenuItem onClick={() => onDispute(payment)}>
+                <SelectItem value="delete" onSelect onSelect={() => onDispute(payment)}>
                   <AlertTriangle className="h-4 w-4 mr-2" aria-hidden="true" />
                   Ouvrir un litige
-                </DropdownMenuItem>
+                </SelectItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDelete(payment)}
+                <SelectItem value="copy" onSelect
+                  onSelect={() => onDelete(payment)}
                   className="text-destructive focus:text-destructive"
                 >
                   <XCircle className="h-4 w-4 mr-2" aria-hidden="true" />
                   Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardContent>
@@ -1466,7 +1460,7 @@ const  DisputeDialog: React.FC<DisputeDialogProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.cancel', 'Annuler')}</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onSubmit}
+            onSelect={onSubmit}
             disabled={!disputeReason || !disputeDescription}
             className="bg-destructive hover:bg-destructive/90"
           >

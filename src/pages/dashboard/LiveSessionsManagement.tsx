@@ -54,12 +54,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
@@ -368,7 +363,7 @@ export default function LiveSessionsManagement() {
                   Créez et gérez vos sessions en direct avec Zoom, Google Meet ou streaming natif
                 </p>
               </div>
-              <Button onClick={handleCreateSession} className="shrink-0" disabled={!selectedCourseId}>
+              <Button onSelect={handleCreateSession} className="shrink-0" disabled={!selectedCourseId}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Session
               </Button>
@@ -514,7 +509,7 @@ export default function LiveSessionsManagement() {
                             : 'Aucune session créée'}
                         </p>
                         {!searchQuery && statusFilter === 'all' && platformFilter === 'all' && (
-                          <Button onClick={handleCreateSession}>
+                          <Button onSelect={handleCreateSession}>
                             <Plus className="h-4 w-4 mr-2" />
                             Créer votre première session
                           </Button>
@@ -563,32 +558,32 @@ export default function LiveSessionsManagement() {
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
+                                  <Select>
+                                    <SelectTrigger
                                       <Button variant="ghost" size="sm">
                                         <MoreVertical className="h-4 w-4" />
                                       </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
+                                    </SelectTrigger>
+                                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                       {session.meeting_url && (
-                                        <DropdownMenuItem onClick={() => window.open(session.meeting_url, '_blank')}>
+                                        <SelectItem value="edit" onSelect onSelect={() => window.open(session.meeting_url, '_blank')}>
                                           <ExternalLink className="h-4 w-4 mr-2" />
                                           Ouvrir la réunion
-                                        </DropdownMenuItem>
+                                        </SelectItem>
                                       )}
-                                      <DropdownMenuItem onClick={() => handleEditSession(session.id)}>
+                                      <SelectItem value="delete" onSelect onSelect={() => handleEditSession(session.id)}>
                                         <Edit className="h-4 w-4 mr-2" />
                                         Éditer
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => setDeletingSessionId(session.id)}
+                                      </SelectItem>
+                                      <SelectItem value="copy" onSelect
+                                        onSelect={() => setDeletingSessionId(session.id)}
                                         className="text-red-600"
                                       >
                                         <Trash2 className="h-4 w-4 mr-2" />
                                         Supprimer
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -755,10 +750,10 @@ export default function LiveSessionsManagement() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    <Button variant="outline" onSelect={() => setIsCreateDialogOpen(false)}>
                       Annuler
                     </Button>
-                    <Button onClick={handleSaveSession} disabled={createSession.isPending || updateSession.isPending}>
+                    <Button onSelect={handleSaveSession} disabled={createSession.isPending || updateSession.isPending}>
                       {editingSessionId ? 'Sauvegarder' : 'Créer'}
                     </Button>
                   </div>
@@ -781,7 +776,7 @@ export default function LiveSessionsManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onClick={() => deletingSessionId && handleDeleteSession(deletingSessionId)}
+                    onSelect={() => deletingSessionId && handleDeleteSession(deletingSessionId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

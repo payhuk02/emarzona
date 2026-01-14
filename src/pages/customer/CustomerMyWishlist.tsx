@@ -27,13 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -842,7 +836,7 @@ export default function CustomerMyWishlist() {
                   <>
                     <Button
                       variant="outline"
-                      onClick={() => setShowShareDialog(true)}
+                      onSelect={() => setShowShareDialog(true)}
                       size="sm"
                       className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
                     >
@@ -850,8 +844,8 @@ export default function CustomerMyWishlist() {
                       <span className="hidden sm:inline">Partager</span>
                       <span className="sm:hidden">Partager</span>
                     </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    <Select>
+                      <SelectTrigger
                         <Button
                           variant="outline"
                           size="sm"
@@ -862,18 +856,18 @@ export default function CustomerMyWishlist() {
                           <span className="hidden sm:inline">Exporter</span>
                           <span className="sm:hidden">Export</span>
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={handleExportCSV} disabled={isExporting}>
+                      </SelectTrigger>
+                      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                        <SelectItem value="edit" onSelect onSelect={handleExportCSV} disabled={isExporting}>
                           <FileDown className="h-4 w-4 mr-2" />
                           Exporter en CSV
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                      onSelect={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                       className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
                     >
                       {viewMode === 'grid' ? (
@@ -891,7 +885,7 @@ export default function CustomerMyWishlist() {
                   </>
                 )}
                 <Button
-                  onClick={handleRefresh}
+                  onSelect={handleRefresh}
                   size="sm"
                   className="h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
                 >
@@ -914,7 +908,7 @@ export default function CustomerMyWishlist() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
+                      onSelect={() => {
                         priceDrops.forEach(
                           (drop: {
                             product_id: string;
@@ -1038,7 +1032,7 @@ export default function CustomerMyWishlist() {
                             variant="ghost"
                             size="icon"
                             className="min-h-[44px] min-w-[44px] h-11 w-11"
-                            onClick={() => setSearchInput('')}
+                            onSelect={() => setSearchInput('')}
                             aria-label="Effacer"
                           >
                             <X className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1113,7 +1107,7 @@ export default function CustomerMyWishlist() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setPriceRange([0, Infinity])}
+                            onSelect={() => setPriceRange([0, Infinity])}
                             className="min-h-[44px] min-w-[44px]"
                             aria-label="Réinitialiser le filtre de prix"
                           >
@@ -1203,7 +1197,7 @@ export default function CustomerMyWishlist() {
                       Commencez à ajouter des produits favoris depuis le marketplace !
                     </p>
                     <Button
-                      onClick={() => navigate('/marketplace')}
+                      onSelect={() => navigate('/marketplace')}
                       size="lg"
                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 min-h-[44px] px-6 sm:px-8"
                     >
@@ -1232,7 +1226,7 @@ export default function CustomerMyWishlist() {
                     </p>
                     {(searchInput || activeTab !== 'all') && (
                       <Button
-                        onClick={() => {
+                        onSelect={() => {
                           setSearchInput('');
                           setActiveTab('all');
                           setStoreFilter('all');
@@ -1267,7 +1261,7 @@ export default function CustomerMyWishlist() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleBulkAddToCart}
+                      onSelect={handleBulkAddToCart}
                       disabled={isAddingToCart}
                       className="min-h-[44px]"
                     >
@@ -1281,7 +1275,7 @@ export default function CustomerMyWishlist() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={handleBulkRemove}
+                      onSelect={handleBulkRemove}
                       className="min-h-[44px]"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -1290,7 +1284,7 @@ export default function CustomerMyWishlist() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedProducts(new Set())}
+                      onSelect={() => setSelectedProducts(new Set())}
                       className="min-h-[44px]"
                     >
                       Annuler
@@ -1312,7 +1306,7 @@ export default function CustomerMyWishlist() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={handleSelectAll}
+                      onSelect={handleSelectAll}
                       className="text-xs sm:text-sm"
                     >
                       {selectedProducts.size === paginatedProducts.length ? (
@@ -1346,7 +1340,7 @@ export default function CustomerMyWishlist() {
                       {/* Checkbox de sélection */}
                       <div className="absolute top-2 left-2 z-10">
                         <button
-                          onClick={() => handleToggleSelection(product.id)}
+                          onSelect={() => handleToggleSelection(product.id)}
                           className="p-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
                           aria-label={
                             selectedProducts.has(product.id) ? 'Désélectionner' : 'Sélectionner'
@@ -1390,7 +1384,7 @@ export default function CustomerMyWishlist() {
                           variant="ghost"
                           size="icon"
                           className="absolute top-2 right-2 bg-white/90 hover:bg-white shadow-md h-8 w-8 sm:h-9 sm:w-9 touch-manipulation"
-                          onClick={() =>
+                          onSelect={() =>
                             handleRemoveFavorite(product.id, htmlToPlainText(product.name))
                           }
                           aria-label="Retirer des favoris"
@@ -1465,7 +1459,7 @@ export default function CustomerMyWishlist() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleViewProduct(product)}
+                            onSelect={() => handleViewProduct(product)}
                             className="flex-1 h-9 sm:h-10 text-xs sm:text-sm min-h-[44px] touch-manipulation"
                           >
                             <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -1473,7 +1467,7 @@ export default function CustomerMyWishlist() {
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => handleBuyProduct(product)}
+                            onSelect={() => handleBuyProduct(product)}
                             disabled={isAddingToCart}
                             className="flex-1 h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-xs sm:text-sm min-h-[44px] touch-manipulation"
                           >
@@ -1490,7 +1484,7 @@ export default function CustomerMyWishlist() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
+                          onSelect={() => {
                             const isEnabled = product.price_alert_enabled ?? true;
                             updatePriceAlert.mutate({
                               productId: product.id,
@@ -1527,7 +1521,7 @@ export default function CustomerMyWishlist() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={pagination.previousPage}
+                        onSelect={pagination.previousPage}
                         disabled={!pagination.hasPreviousPage}
                         className="min-h-[44px] text-xs sm:text-sm"
                       >
@@ -1551,7 +1545,7 @@ export default function CustomerMyWishlist() {
                               key={pageNum}
                               variant={pagination.page === pageNum ? 'default' : 'outline'}
                               size="sm"
-                              onClick={() => pagination.goToPage(pageNum)}
+                              onSelect={() => pagination.goToPage(pageNum)}
                               className={`min-h-[44px] min-w-[44px] text-xs sm:text-sm ${
                                 pagination.page === pageNum
                                   ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
@@ -1566,7 +1560,7 @@ export default function CustomerMyWishlist() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={pagination.nextPage}
+                        onSelect={pagination.nextPage}
                         disabled={!pagination.hasNextPage}
                         className="min-h-[44px] text-xs sm:text-sm"
                       >

@@ -23,14 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   History,
   Plus,
@@ -128,7 +121,7 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
               <p className="text-muted-foreground mb-4">
                 Créez votre première version pour commencer l'historique
               </p>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button onSelect={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer une version
               </Button>
@@ -195,28 +188,28 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button variant="ghost" size="icon" aria-label={`Actions pour la version ${version.version_number || version.id}`}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => window.open(version.file_url, '_blank')}
+                          <SelectItem value="edit" onSelect
+                            onSelect={() => window.open(version.file_url, '_blank')}
                           >
                             <Download className="h-4 w-4 mr-2" />
                             Télécharger
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setSelectedVersion(version)}
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect
+                            onSelect={() => setSelectedVersion(version)}
                           >
                             <AlertCircle className="h-4 w-4 mr-2" />
                             Voir les détails
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}

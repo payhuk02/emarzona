@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { StableDropdownMenu, StableDropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Input } from '@/components/ui/input';
 import {
   MoreHorizontal,
@@ -133,7 +133,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
               <Button
                 size="sm"
                 variant="default"
-                onClick={() => handleApprove(selectedReviews)}
+                onSelect={() => handleApprove(selectedReviews)}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               >
                 <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -143,7 +143,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => handleReject(selectedReviews)}
+                onSelect={() => handleReject(selectedReviews)}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               >
                 <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -153,7 +153,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleFlag(selectedReviews)}
+                onSelect={() => handleFlag(selectedReviews)}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               >
                 <Flag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -277,7 +277,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => handleApprove([row.id])}
+                      onSelect={() => handleApprove([row.id])}
                       className="min-h-[44px] flex-1"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
@@ -287,7 +287,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleReject([row.id])}
+                    onSelect={() => handleReject([row.id])}
                     className="min-h-[44px] flex-1"
                   >
                     <XCircle className="h-4 w-4 mr-2" />
@@ -298,7 +298,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleFlag([row.id])}
+                    onSelect={() => handleFlag([row.id])}
                     className="min-h-[44px] flex-1"
                   >
                     <Flag className="h-4 w-4 mr-2" />
@@ -307,7 +307,7 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleDelete([row.id])}
+                    onSelect={() => handleDelete([row.id])}
                     className="min-h-[44px] flex-1 text-destructive"
                   >
                     Supprimer
@@ -475,48 +475,48 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                           }}
                           triggerContent={<MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                         >
-                          <StableDropdownMenuItem onClick={() => {}} className="text-xs sm:text-sm">
+                          <SelectItem value="edit" onSelect onSelect={() => {}} className="text-xs sm:text-sm">
                             <span className="flex items-center">
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails
                             </span>
-                          </StableDropdownMenuItem>
+                          </SelectItem>
                           {!review.is_approved && (
-                            <StableDropdownMenuItem
-                              onClick={() => handleApprove([review.id])}
+                            <SelectItem value="delete" onSelect
+                              onSelect={() => handleApprove([review.id])}
                               className="text-xs sm:text-sm"
                             >
                               <span className="flex items-center">
                                 <CheckCircle className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 Approuver
                               </span>
-                            </StableDropdownMenuItem>
+                            </SelectItem>
                           )}
-                          <StableDropdownMenuItem
-                            onClick={() => handleReject([review.id])}
+                          <SelectItem value="copy" onSelect
+                            onSelect={() => handleReject([review.id])}
                             className="text-xs sm:text-sm"
                           >
                             <span className="flex items-center">
                               <XCircle className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Rejeter
                             </span>
-                          </StableDropdownMenuItem>
-                          <StableDropdownMenuItem
-                            onClick={() => handleFlag([review.id])}
+                          </SelectItem>
+                          <SelectItem value="view" onSelect
+                            onSelect={() => handleFlag([review.id])}
                             className="text-xs sm:text-sm"
                           >
                             <span className="flex items-center">
                               <Flag className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Signaler
                             </span>
-                          </StableDropdownMenuItem>
-                          <StableDropdownMenuItem
-                            onClick={() => handleDelete([review.id])}
+                          </SelectItem>
+                          <SelectItem value="export" onSelect
+                            onSelect={() => handleDelete([review.id])}
                             className="text-destructive text-xs sm:text-sm"
                           >
                             <span className="flex items-center">Supprimer</span>
-                          </StableDropdownMenuItem>
-                        </StableDropdownMenu>
+                          </SelectItem>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))

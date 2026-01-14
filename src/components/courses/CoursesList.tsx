@@ -10,13 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -346,13 +340,13 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                 <Button
                   variant={showFiltersPanel ? 'default' : 'outline'}
                   size="default"
-                  onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+                  onSelect={() => setShowFiltersPanel(!showFiltersPanel)}
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   Filtres
                 </Button>
               )}
-              <Button variant="outline" size="default" onClick={handleExportCSV}>
+              <Button variant="outline" size="default" onSelect={handleExportCSV}>
                 <Download className="h-4 w-4 mr-2" />
                 Exporter
               </Button>
@@ -439,22 +433,22 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                   {selectedCourses.size} cours sélectionné(s)
                 </p>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('publish')}>
+                  <Button size="sm" variant="outline" onSelect={() => handleBulkAction('publish')}>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Publier
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('unpublish')}>
+                  <Button size="sm" variant="outline" onSelect={() => handleBulkAction('unpublish')}>
                     <XCircle className="h-4 w-4 mr-2" />
                     Dépublier
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('archive')}>
+                  <Button size="sm" variant="outline" onSelect={() => handleBulkAction('archive')}>
                     <Archive className="h-4 w-4 mr-2" />
                     Archiver
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => handleBulkAction('delete')}
+                    onSelect={() => handleBulkAction('delete')}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Supprimer
@@ -538,18 +532,18 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                 <TableHead className="w-12">
                   <Checkbox checked={selectedCourses.size === paginatedCourses.length} onCheckedChange={toggleSelectAll} />
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
+                <TableHead className="cursor-pointer" onSelect={() => handleSort('name')}>
                   Cours {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Catégorie</TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('enrolled_students')}>
+                <TableHead className="cursor-pointer" onSelect={() => handleSort('enrolled_students')}>
                   Étudiants {sortField === 'enrolled_students' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('completion_rate')}>
+                <TableHead className="cursor-pointer" onSelect={() => handleSort('completion_rate')}>
                   Complétion {sortField === 'completion_rate' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort('revenue')}>
+                <TableHead className="cursor-pointer" onSelect={() => handleSort('revenue')}>
                   Revenue {sortField === 'revenue' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -574,13 +568,13 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               ) : (
                 paginatedCourses.map((course) => (
                   <TableRow key={course.id} className="cursor-pointer hover:bg-muted/50">
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    <TableCell onSelect={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedCourses.has(course.id)}
                         onCheckedChange={() => toggleCourseSelection(course.id)}
                       />
                     </TableCell>
-                    <TableCell onClick={() => onCourseSelect?.(course.id)}>
+                    <TableCell onSelect={() => onCourseSelect?.(course.id)}>
                       <div className="flex items-center gap-3">
                         {course.thumbnail && (
                           <img
@@ -625,52 +619,52 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button variant="ghost" size="icon" aria-label={`Actions pour ${course.title}`}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onCourseSelect?.(course.id)}>
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="edit" onSelect onSelect={() => onCourseSelect?.(course.id)}>
                             <Eye className="h-4 w-4 mr-2" />
                             Voir
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onEdit?.(course.id)}>
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect onSelect={() => onEdit?.(course.id)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Éditer
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onDuplicate?.(course.id)}>
+                          </SelectItem>
+                          <SelectItem value="copy" onSelect onSelect={() => onDuplicate?.(course.id)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Dupliquer
-                          </DropdownMenuItem>
+                          </SelectItem>
                           <DropdownMenuSeparator />
                           {course.status === 'draft' && onTogglePublish && (
-                            <DropdownMenuItem onClick={() => onTogglePublish(course.id, 'published')}>
+                            <SelectItem value="view" onSelect onSelect={() => onTogglePublish(course.id, 'published')}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Publier
-                            </DropdownMenuItem>
+                            </SelectItem>
                           )}
                           {course.status === 'published' && onTogglePublish && (
-                            <DropdownMenuItem onClick={() => onTogglePublish(course.id, 'draft')}>
+                            <SelectItem value="export" onSelect onSelect={() => onTogglePublish(course.id, 'draft')}>
                               <XCircle className="h-4 w-4 mr-2" />
                               Dépublier
-                            </DropdownMenuItem>
+                            </SelectItem>
                           )}
-                          <DropdownMenuItem onClick={() => onArchive?.(course.id)}>
+                          <SelectItem value="duplicate" onSelect onSelect={() => onArchive?.(course.id)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Archiver
-                          </DropdownMenuItem>
+                          </SelectItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onDelete?.(course.id)}
+                          <SelectItem value="toggle" onSelect
+                            onSelect={() => onDelete?.(course.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))
@@ -691,7 +685,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onSelect={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 Précédent
@@ -699,7 +693,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onSelect={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Suivant

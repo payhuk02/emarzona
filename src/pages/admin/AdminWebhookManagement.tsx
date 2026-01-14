@@ -87,12 +87,7 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { MoreVertical, X } from 'lucide-react';
 
 // Événements webhook disponibles, groupés par catégorie
@@ -403,7 +398,7 @@ export default function AdminWebhookManagement() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
-                    onClick={() => handleOpenDialog()}
+                    onSelect={() => handleOpenDialog()}
                     className="min-h-[44px] h-11 sm:h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
@@ -501,7 +496,7 @@ export default function AdminWebhookManagement() {
                     />
                     {searchQuery && (
                       <button
-                        onClick={() => setSearchQuery('')}
+                        onSelect={() => setSearchQuery('')}
                         className="absolute right-2.5 text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -598,7 +593,7 @@ export default function AdminWebhookManagement() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => {
+                                        onSelect={() => {
                                           setSelectedWebhookId(webhook.id);
                                         }}
                                         className="min-h-[44px] min-w-[44px] h-11 w-11 p-0"
@@ -608,7 +603,7 @@ export default function AdminWebhookManagement() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleTest(webhook)}
+                                        onSelect={() => handleTest(webhook)}
                                         disabled={testWebhook.isPending}
                                         className="min-h-[44px] min-w-[44px] h-11 w-11 p-0"
                                       >
@@ -617,7 +612,7 @@ export default function AdminWebhookManagement() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleOpenDialog(webhook)}
+                                        onSelect={() => handleOpenDialog(webhook)}
                                         className="min-h-[44px] min-w-[44px] h-11 w-11 p-0"
                                       >
                                         <Edit className="h-3.5 w-3.5" />
@@ -625,7 +620,7 @@ export default function AdminWebhookManagement() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => handleDelete(webhook)}
+                                        onSelect={() => handleDelete(webhook)}
                                         disabled={deleteWebhook.isPending}
                                         className="min-h-[44px] min-w-[44px] h-11 w-11 p-0"
                                       >
@@ -708,7 +703,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setSelectedWebhookId(row.id)}
+                                onSelect={() => setSelectedWebhookId(row.id)}
                                 className="min-h-[44px] w-full"
                               >
                                 <Activity className="h-4 w-4 mr-2" />
@@ -717,7 +712,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleTest(row)}
+                                onSelect={() => handleTest(row)}
                                 disabled={testWebhook.isPending}
                                 className="min-h-[44px] w-full"
                               >
@@ -727,7 +722,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleOpenDialog(row)}
+                                onSelect={() => handleOpenDialog(row)}
                                 className="min-h-[44px] w-full"
                               >
                                 <Edit className="h-4 w-4 mr-2" />
@@ -736,7 +731,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDelete(row)}
+                                onSelect={() => handleDelete(row)}
                                 disabled={deleteWebhook.isPending}
                                 className="min-h-[44px] w-full text-destructive"
                               >
@@ -766,8 +761,8 @@ export default function AdminWebhookManagement() {
                                       </Badge>
                                     </div>
                                   </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
+                                  <Select>
+                                    <SelectTrigger
                                       <Button
                                         variant="ghost"
                                         size="icon"
@@ -776,35 +771,35 @@ export default function AdminWebhookManagement() {
                                       >
                                         <MoreVertical className="h-4 w-4" aria-hidden="true" />
                                       </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem
-                                        onClick={() => setSelectedWebhookId(webhook.id)}
+                                    </SelectTrigger>
+                                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                      <SelectItem value="edit" onSelect
+                                        onSelect={() => setSelectedWebhookId(webhook.id)}
                                       >
                                         <Activity className="h-4 w-4 mr-2" />
                                         Historique
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleTest(webhook)}
+                                      </SelectItem>
+                                      <SelectItem value="delete" onSelect
+                                        onSelect={() => handleTest(webhook)}
                                         disabled={testWebhook.isPending}
                                       >
                                         <TestTube className="h-4 w-4 mr-2" />
                                         Tester
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => handleOpenDialog(webhook)}>
+                                      </SelectItem>
+                                      <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(webhook)}>
                                         <Edit className="h-4 w-4 mr-2" />
                                         Modifier
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleDelete(webhook)}
+                                      </SelectItem>
+                                      <SelectItem value="view" onSelect
+                                        onSelect={() => handleDelete(webhook)}
                                         disabled={deleteWebhook.isPending}
                                         className="text-destructive"
                                       >
                                         <Trash2 className="h-4 w-4 mr-2" />
                                         Supprimer
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
 
                                 <div className="space-y-2 pt-3 border-t border-border/50">
@@ -923,7 +918,7 @@ export default function AdminWebhookManagement() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => {
+                                        onSelect={() => {
                                           setViewingDelivery(delivery);
                                           setIsViewDialogOpen(true);
                                         }}
@@ -970,7 +965,7 @@ export default function AdminWebhookManagement() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => {
+                                    onSelect={() => {
                                       setViewingDelivery(delivery);
                                       setIsViewDialogOpen(true);
                                     }}
@@ -1098,7 +1093,7 @@ export default function AdminWebhookManagement() {
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => {
+                          onSelect={() => {
                             const newSecret = btoa(
                               String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))
                             ).slice(0, 32);
@@ -1232,7 +1227,7 @@ export default function AdminWebhookManagement() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setIsDialogOpen(false)}
+                        onSelect={() => setIsDialogOpen(false)}
                         className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
                       >
                         Annuler
@@ -1341,7 +1336,7 @@ export default function AdminWebhookManagement() {
                   )}
                   <DialogFooter>
                     <Button
-                      onClick={() => setIsViewDialogOpen(false)}
+                      onSelect={() => setIsViewDialogOpen(false)}
                       className="w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
                     >
                       Fermer

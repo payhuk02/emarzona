@@ -10,13 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Select,
   SelectContent,
@@ -250,7 +244,7 @@ function PhysicalProductsListComponent({
             </p>
           </div>
           {onCreateProduct && (
-            <Button onClick={onCreateProduct} className="gap-2">
+            <Button onSelect={onCreateProduct} className="gap-2">
               <Plus className="h-4 w-4" />
               Nouveau Produit
             </Button>
@@ -411,36 +405,36 @@ function PhysicalProductsListComponent({
 
                       {/* Actions */}
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button variant="ghost" size="sm" aria-label={`Actions pour le produit ${product.name || product.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => onViewProduct?.(product.id)}
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="edit" onSelect
+                              onSelect={() => onViewProduct?.(product.id)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               Voir
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => onEditProduct?.(product.id)}
+                            </SelectItem>
+                            <SelectItem value="delete" onSelect
+                              onSelect={() => onEditProduct?.(product.id)}
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            </SelectItem>
+                            <SelectItem value="copy" onSelect>
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliquer
-                            </DropdownMenuItem>
+                            </SelectItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <SelectItem value="view" onSelect className="text-destructive">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}

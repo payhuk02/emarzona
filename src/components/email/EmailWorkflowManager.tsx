@@ -15,12 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -155,10 +150,10 @@ export const EmailWorkflowManager = ({
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowDashboard(!showDashboard)}>
+              <Button variant="outline" size="sm" onSelect={() => setShowDashboard(!showDashboard)}>
                 {showDashboard ? 'Masquer' : 'Afficher'} Dashboard
               </Button>
-              <Button onClick={onCreateWorkflow}>
+              <Button onSelect={onCreateWorkflow}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau workflow
               </Button>
@@ -210,7 +205,7 @@ export const EmailWorkflowManager = ({
           {!workflows || workflows.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Aucun workflow pour le moment</p>
-              <Button onClick={onCreateWorkflow}>
+              <Button onSelect={onCreateWorkflow}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer votre premier workflow
               </Button>
@@ -263,18 +258,18 @@ export const EmailWorkflowManager = ({
                         : 'Jamais'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Ouvrir le menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onEditWorkflow?.(workflow)}>
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="edit" onSelect onSelect={() => onEditWorkflow?.(workflow)}>
                             <Edit className="mr-2 h-4 w-4" /> Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleStatus(workflow)}>
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect onSelect={() => handleToggleStatus(workflow)}>
                             {workflow.status === 'active' ? (
                               <>
                                 <Pause className="mr-2 h-4 w-4" /> Mettre en pause
@@ -284,18 +279,18 @@ export const EmailWorkflowManager = ({
                                 <Play className="mr-2 h-4 w-4" /> Activer
                               </>
                             )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
+                          </SelectItem>
+                          <SelectItem value="copy" onSelect
+                            onSelect={() => {
                               setWorkflowToDelete(workflow.id);
                               setDeleteDialogOpen(true);
                             }}
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -316,7 +311,7 @@ export const EmailWorkflowManager = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onSelect={handleDelete} className="bg-red-600 hover:bg-red-700">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

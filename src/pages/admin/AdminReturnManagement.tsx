@@ -78,12 +78,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminReturnManagement() {
@@ -445,7 +440,7 @@ export default function AdminReturnManagement() {
                               <>
                                 <Button
                                   size="sm"
-                                  onClick={() => handleApprove(row.id)}
+                                  onSelect={() => handleApprove(row.id)}
                                   className="min-h-[44px] w-full"
                                 >
                                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -454,7 +449,7 @@ export default function AdminReturnManagement() {
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onClick={() => {
+                                  onSelect={() => {
                                     const reason = prompt('Raison du rejet:');
                                     if (reason) {
                                       handleReject(row.id, reason);
@@ -470,7 +465,7 @@ export default function AdminReturnManagement() {
                             {row.status === 'received' && (
                               <Button
                                 size="sm"
-                                onClick={() => {
+                                onSelect={() => {
                                   setSelectedReturnId(row.id);
                                   setRefundAmount(row.total_amount.toString());
                                   setRefundDialogOpen(true);
@@ -550,8 +545,8 @@ export default function AdminReturnManagement() {
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
+                                  <Select>
+                                    <SelectTrigger
                                       <Button
                                         variant="ghost"
                                         size="icon"
@@ -560,9 +555,9 @@ export default function AdminReturnManagement() {
                                       >
                                         <MoreVertical className="h-4 w-4" />
                                       </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem asChild>
+                                    </SelectTrigger>
+                                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                      <SelectItem value="edit" onSelect asChild>
                                         <Dialog>
                                           <DialogTrigger asChild>
                                             <span className="cursor-pointer">Voir détails</span>
@@ -588,17 +583,17 @@ export default function AdminReturnManagement() {
                                             />
                                           </DialogContent>
                                         </Dialog>
-                                      </DropdownMenuItem>
+                                      </SelectItem>
                                       {returnTyped.status === 'requested' && (
                                         <>
-                                          <DropdownMenuItem
-                                            onClick={() => handleApprove(returnTyped.id)}
+                                          <SelectItem value="delete" onSelect
+                                            onSelect={() => handleApprove(returnTyped.id)}
                                           >
                                             <CheckCircle2 className="h-4 w-4 mr-2" />
                                             Approuver
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem
-                                            onClick={() => {
+                                          </SelectItem>
+                                          <SelectItem value="copy" onSelect
+                                            onSelect={() => {
                                               const reason = prompt('Raison du rejet:');
                                               if (reason) {
                                                 handleReject(returnTyped.id, reason);
@@ -608,12 +603,12 @@ export default function AdminReturnManagement() {
                                           >
                                             <XCircle className="h-4 w-4 mr-2" />
                                             Rejeter
-                                          </DropdownMenuItem>
+                                          </SelectItem>
                                         </>
                                       )}
                                       {returnTyped.status === 'received' && (
-                                        <DropdownMenuItem
-                                          onClick={() => {
+                                        <SelectItem value="view" onSelect
+                                          onSelect={() => {
                                             setSelectedReturnId(returnTyped.id);
                                             setRefundAmount(returnTyped.total_amount.toString());
                                             setRefundDialogOpen(true);
@@ -621,10 +616,10 @@ export default function AdminReturnManagement() {
                                         >
                                           <DollarSign className="h-4 w-4 mr-2" />
                                           Traiter remboursement
-                                        </DropdownMenuItem>
+                                        </SelectItem>
                                       )}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                    </SelectContent>
+                                  </Select>
                                 </TableCell>
                               </TableRow>
                             );
@@ -680,7 +675,7 @@ export default function AdminReturnManagement() {
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => {
+                      onSelect={() => {
                         setRefundDialogOpen(false);
                         setSelectedReturnId(null);
                         setRefundAmount('');
@@ -688,7 +683,7 @@ export default function AdminReturnManagement() {
                     >
                       Annuler
                     </Button>
-                    <Button onClick={handleRefund}>Traiter le remboursement</Button>
+                    <Button onSelect={handleRefund}>Traiter le remboursement</Button>
                   </div>
                 </div>
               </DialogContent>
@@ -726,14 +721,14 @@ function ReturnDetailView({
         <div className="flex gap-2">
           {returnItem.status === 'requested' && (
             <>
-              <Button size="sm" onClick={() => onApprove?.(returnItem.id)}>
+              <Button size="sm" onSelect={() => onApprove?.(returnItem.id)}>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Approuver
               </Button>
               <Button
                 size="sm"
                 variant="destructive"
-                onClick={() => {
+                onSelect={() => {
                   const reason = prompt('Raison du rejet:');
                   if (reason) {
                     onReject?.(returnItem.id, reason);
@@ -746,7 +741,7 @@ function ReturnDetailView({
             </>
           )}
           {returnItem.status === 'received' && (
-            <Button size="sm" onClick={onRefund}>
+            <Button size="sm" onSelect={onRefund}>
               <DollarSign className="h-4 w-4 mr-2" />
               Rembourser
             </Button>

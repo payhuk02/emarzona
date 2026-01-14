@@ -17,12 +17,11 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
@@ -36,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 // ✅ PHASE 2: Lazy load des composants analytics lourds (utilisent recharts)
 const RevenueChart = lazy(() =>
   import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
@@ -399,8 +399,8 @@ const Dashboard = () => {
                 </Button>
 
                 {/* Mobile menu - All controls accessible */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                <Sheet>
+                  <SheetTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
@@ -409,65 +409,70 @@ const Dashboard = () => {
                     >
                       <MoreVertical className="h-5 w-5" aria-hidden="true" />
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] max-w-sm">
-                    {/* Notifications on Mobile */}
-                    {unreadCount > 0 && (
-                      <>
-                        <DropdownMenuItem
-                          className="min-h-[44px]"
-                          onClick={() => navigate('/notifications')}
-                        >
-                          <Bell className="h-4 w-4 mr-2" aria-hidden="true" />
-                          <span className="flex-1">Notifications</span>
-                          <Badge variant="destructive" className="ml-2">
-                            {unreadCount > 99 ? '99+' : unreadCount}
-                          </Badge>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                      </>
-                    )}
-                    {/* Period Filter on Mobile */}
-                    <div className="px-2 py-2">
-                      <div className="text-xs font-medium mb-2 text-muted-foreground">Période</div>
-                      <PeriodFilter
-                        period={period}
-                        onPeriodChange={setPeriod}
-                        customStartDate={customStartDate}
-                        customEndDate={customEndDate}
-                        onCustomDateChange={handleCustomDateChange}
-                        className="w-full"
-                      />
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="h-[80vh]">
+                    <SheetHeader>
+                      <SheetTitle>Options du tableau de bord</SheetTitle>
+                    </SheetHeader>
+                    <div className="space-y-4 mt-6">
+                      {/* Notifications on Mobile */}
+                      {unreadCount > 0 && (
+                        <div className="space-y-2">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start min-h-[44px]"
+                            onClick={() => navigate('/notifications')}
+                          >
+                            <Bell className="h-4 w-4 mr-2" aria-hidden="true" />
+                            <span className="flex-1">Notifications</span>
+                            <Badge variant="destructive" className="ml-2">
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </Badge>
+                          </Button>
+                        </div>
+                      )}
+                      {/* Period Filter on Mobile */}
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-muted-foreground">Période</div>
+                        <PeriodFilter
+                          period={period}
+                          onPeriodChange={setPeriod}
+                          customStartDate={customStartDate}
+                          customEndDate={customEndDate}
+                          onCustomDateChange={handleCustomDateChange}
+                          className="w-full"
+                        />
+                      </div>
+                      {/* Online Status */}
+                      <div className="flex items-center space-x-2 p-2 rounded-md bg-muted/50">
+                        <Activity className="h-4 w-4" aria-hidden="true" />
+                        <span className="flex-1 text-sm">{getValue('dashboard.online')}</span>
+                      </div>
+                      {/* Export */}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start min-h-[44px]"
+                        onClick={handleExport}
+                      >
+                        <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+                        <span>Exporter les données</span>
+                      </Button>
+                      {/* Refresh */}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start min-h-[44px]"
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                      >
+                        <RefreshCw
+                          className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                          aria-hidden="true"
+                        />
+                        <span>{getValue('dashboard.refresh')}</span>
+                      </Button>
                     </div>
-                    <DropdownMenuSeparator />
-                    {/* Online Status */}
-                    <DropdownMenuItem
-                      className="min-h-[44px] cursor-default"
-                      onSelect={e => e.preventDefault()}
-                    >
-                      <Activity className="h-4 w-4 mr-2" aria-hidden="true" />
-                      <span className="flex-1">{getValue('dashboard.online')}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {/* Export */}
-                    <DropdownMenuItem onClick={handleExport} className="min-h-[44px]">
-                      <Download className="h-4 w-4 mr-2" aria-hidden="true" />
-                      <span>Exporter les données</span>
-                    </DropdownMenuItem>
-                    {/* Refresh */}
-                    <DropdownMenuItem
-                      onClick={handleRefresh}
-                      disabled={isRefreshing}
-                      className="min-h-[44px]"
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
-                        aria-hidden="true"
-                      />
-                      <span>{getValue('dashboard.refresh')}</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
 

@@ -24,13 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -449,7 +443,7 @@ export const PromotionsManager : React.FC = () => {
             </CardDescription>
           </div>
           <Button 
-            onClick={() => handleOpenDialog()}
+            onSelect={() => handleOpenDialog()}
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             size="sm"
           >
@@ -468,7 +462,7 @@ export const PromotionsManager : React.FC = () => {
                 Aucune promotion configurée. Créez votre première promotion pour commencer.
               </p>
               <Button 
-                onClick={() => handleOpenDialog()}
+                onSelect={() => handleOpenDialog()}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -559,27 +553,27 @@ export const PromotionsManager : React.FC = () => {
                             )}
                           </TableCell>
                           <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
+                            <Select>
+                              <SelectTrigger
                                 <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la promotion ${promotion.name || promotion.id}`}>
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleOpenDialog(promotion)}>
+                              </SelectTrigger>
+                              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                                <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(promotion)}>
                                   <Edit className="mr-2 h-4 w-4" />
                                   Modifier
-                                </DropdownMenuItem>
+                                </SelectItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => setDeletePromotionId(promotion.id)}
+                                <SelectItem value="delete" onSelect
+                                  onSelect={() => setDeletePromotionId(promotion.id)}
                                   className="text-destructive"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -616,27 +610,27 @@ export const PromotionsManager : React.FC = () => {
                             </code>
                           )}
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Select>
+                          <SelectTrigger
                             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la promotion ${promotion.name || promotion.id}`}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleOpenDialog(promotion)}>
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(promotion)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
-                            </DropdownMenuItem>
+                            </SelectItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => setDeletePromotionId(promotion.id)}
+                            <SelectItem value="view" onSelect
+                              onSelect={() => setDeletePromotionId(promotion.id)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2 pt-3 border-t border-border/50">
@@ -969,7 +963,7 @@ export const PromotionsManager : React.FC = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsDialogOpen(false)}
+                onSelect={() => setIsDialogOpen(false)}
               >
                 Annuler
               </Button>
@@ -996,7 +990,7 @@ export const PromotionsManager : React.FC = () => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDelete} 
+              onSelect={handleDelete} 
               className="w-full sm:w-auto bg-destructive hover:bg-destructive/90"
             >
               Supprimer

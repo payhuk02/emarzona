@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Copy, Trash2, Percent, Calendar, TrendingUp, Tag } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,26 +45,26 @@ const PromotionCard = ({
               </p>
             )}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Select>
+            <SelectTrigger
               <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la promotion ${promotion.name || promotion.code}`}>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onCopy(promotion.code)}>
+            </SelectTrigger>
+            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+              <SelectItem value="export" onSelect onClick={() => onCopy(promotion.code)}>
                 <Copy className="h-4 w-4 mr-2" />
                 Copier le code
-              </DropdownMenuItem>
-              <DropdownMenuItem
+              </SelectItem>
+              <SelectItem value="copy" onSelect
                 onClick={() => onDelete(promotion.id)}
                 className="text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2 pt-3 border-t border-border/50">
@@ -205,26 +205,26 @@ const PromotionsTableComponent = ({ promotions, onUpdate }: PromotionsTableProps
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la promotion ${promo.name || promo.code}`}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleCopyCode(promo.code)}>
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="edit" onSelect onClick={() => handleCopyCode(promo.code)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copier le code
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
+                          </SelectItem>
+                          <SelectItem value="edit" onSelect
                             onClick={() => setDeleteId(promo.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}

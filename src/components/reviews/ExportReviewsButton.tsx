@@ -5,14 +5,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Download, Loader2 } from '@/components/icons';
 import { exportReviewsToCSV } from '@/utils/exportReviewsCSV';
 import { useToast } from '@/hooks/use-toast';
@@ -77,8 +70,8 @@ export const ExportReviewsButton : React.FC<ExportReviewsButtonProps> = ({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Select>
+      <SelectTrigger
         <Button
           variant="outline"
           size="sm"
@@ -97,20 +90,20 @@ export const ExportReviewsButton : React.FC<ExportReviewsButtonProps> = ({
             </>
           )}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      </SelectTrigger>
+      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
         <DropdownMenuLabel>Format d'export</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => handleExport(true)}>
+        <SelectItem value="edit" onSelect onSelect={() => handleExport(true)}>
           <Download className="mr-2 h-4 w-4" />
           CSV Complet (avec médias)
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport(false)}>
+        </SelectItem>
+        <SelectItem value="delete" onSelect onSelect={() => handleExport(false)}>
           <Download className="mr-2 h-4 w-4" />
           CSV Basique (sans médias)
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </SelectItem>
+      </SelectContent>
+    </Select>
   );
 };
 

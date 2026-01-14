@@ -19,13 +19,7 @@ import {
   FileDown,
   MoreHorizontal,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -189,7 +183,7 @@ export const DigitalProductsBulkActions = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleSelectAll}
+          onSelect={handleSelectAll}
           className="h-8 w-8 p-0"
           aria-label={isAllSelected ? 'Désélectionner tout' : 'Sélectionner tout'}
         >
@@ -214,7 +208,7 @@ export const DigitalProductsBulkActions = ({
           <Button
             size="sm"
             variant="outline"
-            onClick={handleBulkActivate}
+            onSelect={handleBulkActivate}
             disabled={isProcessing}
             className="h-8"
           >
@@ -224,7 +218,7 @@ export const DigitalProductsBulkActions = ({
           <Button
             size="sm"
             variant="outline"
-            onClick={handleBulkDeactivate}
+            onSelect={handleBulkDeactivate}
             disabled={isProcessing}
             className="h-8"
           >
@@ -235,7 +229,7 @@ export const DigitalProductsBulkActions = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={handleBulkArchive}
+              onSelect={handleBulkArchive}
               disabled={isProcessing}
               className="h-8"
             >
@@ -244,38 +238,38 @@ export const DigitalProductsBulkActions = ({
             </Button>
           )}
           {onExport && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <Select>
+              <SelectTrigger
                 <Button size="sm" variant="outline" disabled={isProcessing} className="h-8">
                   <FileDown className="h-4 w-4 mr-2" />
                   Exporter
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExport('csv')}>
+              </SelectTrigger>
+              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                <SelectItem value="edit" onSelect onSelect={() => handleExport('csv')}>
                   <FileDown className="h-4 w-4 mr-2" />
                   CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('excel')}>
+                </SelectItem>
+                <SelectItem value="delete" onSelect onSelect={() => handleExport('excel')}>
                   <FileDown className="h-4 w-4 mr-2" />
                   Excel
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                </SelectItem>
+                <SelectItem value="copy" onSelect onSelect={() => handleExport('pdf')}>
                   <FileDown className="h-4 w-4 mr-2" />
                   PDF
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Select>
+            <SelectTrigger
               <Button size="sm" variant="outline" disabled={isProcessing} className="h-8">
                 <MoreHorizontal className="h-4 w-4 mr-2" />
                 Plus
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleSelectAll}>
+            </SelectTrigger>
+            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+              <SelectItem value="view" onSelect onSelect={handleSelectAll}>
                 {isAllSelected ? (
                   <>
                     <Square className="h-4 w-4 mr-2" />
@@ -287,17 +281,17 @@ export const DigitalProductsBulkActions = ({
                     Sélectionner tout
                   </>
                 )}
-              </DropdownMenuItem>
+              </SelectItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleBulkDelete}
+              <SelectItem value="export" onSelect
+                onSelect={handleBulkDelete}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -313,7 +307,7 @@ export const DigitalProductsBulkActions = ({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isProcessing}>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDelete}
+              onSelect={confirmDelete}
               disabled={isProcessing}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

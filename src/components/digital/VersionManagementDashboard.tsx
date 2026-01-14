@@ -10,13 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Package,
   Upload,
@@ -227,7 +221,7 @@ export function VersionManagementDashboard({
                 }}
               />
             )}
-            <Button onClick={handleCreateVersion} className="gap-2">
+            <Button onSelect={handleCreateVersion} className="gap-2">
               <Upload className="h-4 w-4" />
               Nouvelle Version
             </Button>
@@ -298,8 +292,8 @@ export function VersionManagementDashboard({
                       {version.file_size_mb ? `${version.file_size_mb.toFixed(2)} MB` : '-'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button
                             variant="ghost"
                             size="sm"
@@ -307,34 +301,34 @@ export function VersionManagementDashboard({
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditVersion(version)}>
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="edit" onSelect onSelect={() => handleEditVersion(version)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect>
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
-                          </DropdownMenuItem>
+                          </SelectItem>
                           {version.notify_customers && !version.notification_sent_at && (
-                            <DropdownMenuItem
-                              onClick={() => handleNotifyCustomers(version.id, version.product_id)}
+                            <SelectItem value="copy" onSelect
+                              onSelect={() => handleNotifyCustomers(version.id, version.product_id)}
                             >
                               <Bell className="h-4 w-4 mr-2" />
                               Notifier clients
-                            </DropdownMenuItem>
+                            </SelectItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
+                          <SelectItem value="view" onSelect
                             className="text-destructive"
-                            onClick={() => handleDeleteVersion(version.id)}
+                            onSelect={() => handleDeleteVersion(version.id)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}

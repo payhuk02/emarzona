@@ -18,12 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   MoreVertical,
@@ -272,23 +267,23 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  <Select>
+                    <SelectTrigger
                       <Button variant="ghost" size="icon" aria-label={`Actions pour la mise à jour ${update.title || update.id}`}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                    </SelectTrigger>
+                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                      <SelectItem value="edit" onSelect>
                         <Eye className="h-4 w-4 mr-2" />
                         Voir détails
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      </SelectItem>
+                      <SelectItem value="delete" onSelect>
                         <Edit className="h-4 w-4 mr-2" />
                         Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
+                      </SelectItem>
+                      <SelectItem value="copy" onSelect
+                        onSelect={() =>
                           togglePublish.mutate({
                             updateId: update.id,
                             isPublished: update.is_published,
@@ -306,10 +301,10 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                             Publier
                           </>
                         )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
+                      </SelectItem>
+                      <SelectItem value="view" onSelect
                         className="text-destructive"
-                        onClick={() => {
+                        onSelect={() => {
                           if (confirm('Êtes-vous sûr de vouloir supprimer cette mise à jour ?')) {
                             deleteUpdate.mutate(update.id);
                           }
@@ -317,9 +312,9 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
               </TableRow>
             ))}

@@ -9,10 +9,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Calendar,
   Clock,
@@ -153,31 +150,31 @@ const BookingCardComponent = ({
               }}
             >
               {booking.status === 'pending' && (
-                <StableDropdownMenuItem onClick={() => onConfirm?.(booking.id)}>
+                <SelectItem value="edit" onSelect onSelect={() => onConfirm?.(booking.id)}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Confirmer
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
               {booking.status === 'confirmed' && (
-                <StableDropdownMenuItem onClick={() => onComplete?.(booking.id)}>
+                <SelectItem value="delete" onSelect onSelect={() => onComplete?.(booking.id)}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Marquer terminé
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
               {booking.status === 'confirmed' && (
-                <StableDropdownMenuItem onClick={() => onNoShow?.(booking.id)}>
+                <SelectItem value="copy" onSelect onSelect={() => onNoShow?.(booking.id)}>
                   <Ban className="h-4 w-4 mr-2" />
                   Absent
-                </StableDropdownMenuItem>
+                </SelectItem>
               )}
-              <StableDropdownMenuItem
-                onClick={() => onCancel?.(booking.id)}
+              <SelectItem value="view" onSelect
+                onSelect={() => onCancel?.(booking.id)}
                 className="text-destructive"
               >
                 <XCircle className="h-4 w-4 mr-2" />
                 Annuler
-              </StableDropdownMenuItem>
-            </StableDropdownMenu>
+              </SelectItem>
+            </Select>
           )}
         </div>
       </CardHeader>

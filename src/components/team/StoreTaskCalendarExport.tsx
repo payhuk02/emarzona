@@ -8,12 +8,7 @@
 import { useState } from 'react';
 import { useStoreTasks, type StoreTask } from '@/hooks/useStoreTasks';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -64,28 +59,28 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
   if (task) {
     // Export pour une seule tâche
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Select>
+        <SelectTrigger
           <Button variant="outline" size="sm">
             <Calendar className="h-4 w-4 mr-2" />
             Ajouter au calendrier
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => handleExportICal(task)}>
+        </SelectTrigger>
+        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+          <SelectItem value="edit" onSelect onSelect={() => handleExportICal(task)}>
             <Download className="h-4 w-4 mr-2" />
             Télécharger (.ics)
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleOpenGoogleCalendar(task)}>
+          </SelectItem>
+          <SelectItem value="delete" onSelect onSelect={() => handleOpenGoogleCalendar(task)}>
             <ExternalLink className="h-4 w-4 mr-2" />
             Google Calendar
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleOpenOutlookCalendar(task)}>
+          </SelectItem>
+          <SelectItem value="copy" onSelect onSelect={() => handleOpenOutlookCalendar(task)}>
             <ExternalLink className="h-4 w-4 mr-2" />
             Outlook Calendar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </SelectItem>
+        </SelectContent>
+      </Select>
     );
   }
 
@@ -94,7 +89,7 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
     <>
       <Button
         variant="outline"
-        onClick={() => setExportDialogOpen(true)}
+        onSelect={() => setExportDialogOpen(true)}
         className="w-full sm:w-auto"
       >
         <Calendar className="h-4 w-4 mr-2" />
@@ -113,7 +108,7 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() => handleExportICal()}
+              onSelect={() => handleExportICal()}
             >
               <Download className="h-4 w-4 mr-2" />
               Télécharger fichier iCal (.ics)
@@ -123,7 +118,7 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+            <Button variant="outline" onSelect={() => setExportDialogOpen(false)}>
               Fermer
             </Button>
           </DialogFooter>

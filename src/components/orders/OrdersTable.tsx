@@ -12,12 +12,7 @@ import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Eye, Trash2, Edit, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   Select,
   SelectContent,
@@ -83,7 +78,7 @@ const OrdersTableComponent = ({
     return (
       <TableHead
         className="cursor-pointer select-none hover:bg-muted/50 transition-colors"
-        onClick={() => onSort(column)}
+        onSelect={() => onSort(column)}
         role="button"
         aria-label={`Trier par ${children}${isActive ? ` (${sortDirection === 'asc' ? 'croissant' : 'décroissant'})` : ''}`}
         tabIndex={0}
@@ -305,7 +300,7 @@ const OrdersTableComponent = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onSelect={() => {
                     setSelectedOrder(order);
                     setDetailDialogOpen(true);
                   }}
@@ -317,7 +312,7 @@ const OrdersTableComponent = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onSelect={() => {
                     setSelectedOrder(order);
                     setEditDialogOpen(true);
                   }}
@@ -329,7 +324,7 @@ const OrdersTableComponent = ({
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => setDeleteId(order.id)}
+                  onSelect={() => setDeleteId(order.id)}
                   className="w-full sm:w-auto"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
@@ -399,8 +394,8 @@ const OrdersTableComponent = ({
                       {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <Select>
+                        <SelectTrigger
                           <Button
                             variant="ghost"
                             size="icon"
@@ -408,35 +403,35 @@ const OrdersTableComponent = ({
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
+                        </SelectTrigger>
+                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                          <SelectItem value="edit" onSelect
+                            onSelect={() => {
                               setSelectedOrder(order);
                               setDetailDialogOpen(true);
                             }}
                           >
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
+                          </SelectItem>
+                          <SelectItem value="delete" onSelect
+                            onSelect={() => {
                               setSelectedOrder(order);
                               setEditDialogOpen(true);
                             }}
                           >
                             <Edit className="h-4 w-4 mr-2" />
                             Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setDeleteId(order.id)}
+                          </SelectItem>
+                          <SelectItem value="copy" onSelect
+                            onSelect={() => setDeleteId(order.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -470,7 +465,7 @@ const OrdersTableComponent = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={loading}>
+            <AlertDialogAction onSelect={handleDelete} disabled={loading}>
               {loading ? 'Suppression...' : 'Supprimer'}
             </AlertDialogAction>
           </AlertDialogFooter>

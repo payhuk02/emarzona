@@ -22,11 +22,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  StableDropdownMenu,
-  StableDropdownMenuItem,
-  StableDropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useState } from 'react';
 
 interface PaymentCardDashboardProps {
@@ -175,7 +171,7 @@ const PaymentCardDashboardComponent = ({
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+          <Button variant="outline" size="sm" className="flex-1" onSelect={onEdit}>
             <Edit className="h-4 w-4 mr-1" />
             Modifier
           </Button>
@@ -188,28 +184,28 @@ const PaymentCardDashboardComponent = ({
             }}
             triggerContent={<MoreVertical className="h-4 w-4" />}
           >
-            <StableDropdownMenuItem onClick={onView}>
+            <SelectItem value="edit" onSelect onSelect={onView}>
               <span className="flex items-center">
                 <Eye className="h-4 w-4 mr-2" />
                 Voir les détails
               </span>
-            </StableDropdownMenuItem>
+            </SelectItem>
             {payment.transaction_id && (
-              <StableDropdownMenuItem onClick={handleCopyTransactionId}>
+              <SelectItem value="delete" onSelect onSelect={handleCopyTransactionId}>
                 <span className="flex items-center">
                   <Copy className="h-4 w-4 mr-2" />
                   Copier l'ID
                 </span>
-              </StableDropdownMenuItem>
+              </SelectItem>
             )}
             <StableDropdownMenuSeparator />
-            <StableDropdownMenuItem onClick={onDelete} className="text-destructive">
+            <SelectItem value="copy" onSelect onSelect={onDelete} className="text-destructive">
               <span className="flex items-center">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
               </span>
-            </StableDropdownMenuItem>
-          </StableDropdownMenu>
+            </SelectItem>
+          </Select>
         </div>
       </CardContent>
     </Card>
