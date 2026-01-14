@@ -737,10 +737,3 @@ export function VariantManager({
     </div>
   );
 }
-
-
-
-
-
-
-

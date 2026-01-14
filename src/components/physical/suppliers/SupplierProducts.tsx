@@ -788,9 +788,3 @@ export default function SupplierProducts() {
     </div>
   );
 }
-
-
-
-
-
-

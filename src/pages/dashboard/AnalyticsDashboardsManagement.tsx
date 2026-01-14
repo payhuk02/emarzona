@@ -596,10 +596,3 @@ export default function AnalyticsDashboardsManagement() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-
-

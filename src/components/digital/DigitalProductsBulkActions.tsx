@@ -318,9 +318,3 @@ export const DigitalProductsBulkActions = ({
     </>
   );
 };
-
-
-
-
-
-

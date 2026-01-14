@@ -227,9 +227,3 @@ const ProductBulkActions = ({
 };
 
 export default ProductBulkActions;
-
-
-
-
-
-

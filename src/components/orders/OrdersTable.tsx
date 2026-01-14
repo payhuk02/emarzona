@@ -490,9 +490,3 @@ export const OrdersTable = React.memo(OrdersTableComponent, (prevProps, nextProp
 });
 
 OrdersTable.displayName = 'OrdersTable';
-
-
-
-
-
-

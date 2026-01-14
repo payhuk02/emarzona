@@ -468,10 +468,3 @@ export const PhysicalProductsList = React.memo(PhysicalProductsListComponent, (p
 });
 
 PhysicalProductsList.displayName = 'PhysicalProductsList';
-
-
-
-
-
-
-

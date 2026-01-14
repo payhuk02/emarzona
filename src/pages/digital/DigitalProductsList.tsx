@@ -1723,9 +1723,3 @@ export const DigitalProductsList = () => {
 };
 
 export default DigitalProductsList;
-
-
-
-
-
-

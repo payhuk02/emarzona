@@ -1695,9 +1695,3 @@ const  PaymentForm: React.FC<PaymentFormProps> = ({
 };
 
 export default AdvancedPaymentsComponent;
-
-
-
-
-
-

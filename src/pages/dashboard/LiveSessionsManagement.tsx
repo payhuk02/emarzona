@@ -801,10 +801,3 @@ export default function LiveSessionsManagement() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-
-
