@@ -60,22 +60,22 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
     // Export pour une seule tâche
     return (
       <Select>
-        <SelectTrigger
-          <Button variant="outline" size="sm">
+        <SelectTrigger>
+
             <Calendar className="h-4 w-4 mr-2" />
             Ajouter au calendrier
-          </Button>
-        </SelectTrigger>
+          
+</SelectTrigger>
         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-          <SelectItem value="edit" onSelect onSelect={() => handleExportICal(task)}>
+          <SelectItem value="edit" onSelect={() => handleExportICal(task)}>
             <Download className="h-4 w-4 mr-2" />
             Télécharger (.ics)
           </SelectItem>
-          <SelectItem value="delete" onSelect onSelect={() => handleOpenGoogleCalendar(task)}>
+          <SelectItem value="delete" onSelect={() => handleOpenGoogleCalendar(task)}>
             <ExternalLink className="h-4 w-4 mr-2" />
             Google Calendar
           </SelectItem>
-          <SelectItem value="copy" onSelect onSelect={() => handleOpenOutlookCalendar(task)}>
+          <SelectItem value="copy" onSelect={() => handleOpenOutlookCalendar(task)}>
             <ExternalLink className="h-4 w-4 mr-2" />
             Outlook Calendar
           </SelectItem>

@@ -167,21 +167,19 @@ const RecurringBookingsManager = React.memo(() => {
                         </TableCell>
                         <TableCell className="text-right">
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="sm" aria-label={`Actions pour la série de réservations ${s.id}`}>
+                            <SelectTrigger>
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                              <SelectItem value="edit" onSelect
-                                onSelect={() => handleViewDetails(s.id)}
+                              <SelectItem value="edit" onSelect={() => handleViewDetails(s.id)}
                                 aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
                               </SelectItem>
-                              <SelectItem value="delete" onSelect
-                                onSelect={() => handleCancelSeries(s.id)}
+                              <SelectItem value="delete" onSelect={() => handleCancelSeries(s.id)}
                                 className="text-destructive"
                                 aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >
@@ -220,21 +218,19 @@ const RecurringBookingsManager = React.memo(() => {
                             </p>
                           </div>
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour la série de réservations ${s.id}`}>
+                            <SelectTrigger className="h-8 w-8 p-0">
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                              <SelectItem value="copy" onSelect
-                                onSelect={() => handleViewDetails(s.id)}
+                              <SelectItem value="copy" onSelect={() => handleViewDetails(s.id)}
                                 aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
                               </SelectItem>
-                              <SelectItem value="view" onSelect
-                                onSelect={() => handleCancelSeries(s.id)}
+                              <SelectItem value="view" onSelect={() => handleCancelSeries(s.id)}
                                 className="text-destructive"
                                 aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >

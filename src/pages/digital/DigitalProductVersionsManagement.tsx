@@ -276,13 +276,13 @@ export default function DigitalProductVersionsManagement() {
                           </TableCell>
                           <TableCell className="text-right">
                             <Select>
-                              <SelectTrigger
-                                <Button variant="ghost" size="sm">
+                              <SelectTrigger>
+
                                   <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </SelectTrigger>
+                                
+</SelectTrigger>
                               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                <SelectItem value="edit" onSelect onSelect={() => setEditingVersion(version.id)}>
+                                <SelectItem value="edit" onSelect={() => setEditingVersion(version.id)}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Modifier
                                 </SelectItem>

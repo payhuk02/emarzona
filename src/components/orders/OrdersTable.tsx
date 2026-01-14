@@ -395,18 +395,13 @@ const OrdersTableComponent = ({
                     </TableCell>
                     <TableCell className="text-right">
                       <Select>
-                        <SelectTrigger
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`Actions pour la commande ${order.order_number || order.id}`}
-                          >
+                        <SelectTrigger>
+
                             <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="edit" onSelect
-                            onSelect={() => {
+                          <SelectItem value="edit" onSelect={() => {
                               setSelectedOrder(order);
                               setDetailDialogOpen(true);
                             }}
@@ -414,8 +409,7 @@ const OrdersTableComponent = ({
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
                           </SelectItem>
-                          <SelectItem value="delete" onSelect
-                            onSelect={() => {
+                          <SelectItem value="delete" onSelect={() => {
                               setSelectedOrder(order);
                               setEditDialogOpen(true);
                             }}
@@ -423,8 +417,7 @@ const OrdersTableComponent = ({
                             <Edit className="h-4 w-4 mr-2" />
                             Modifier
                           </SelectItem>
-                          <SelectItem value="copy" onSelect
-                            onSelect={() => setDeleteId(order.id)}
+                          <SelectItem value="copy" onSelect={() => setDeleteId(order.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />

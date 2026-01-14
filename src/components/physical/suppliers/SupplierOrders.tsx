@@ -736,23 +736,17 @@ export default function SupplierOrders() {
                             </TableCell>
                             <TableCell className="text-right whitespace-nowrap min-w-[80px] lg:min-w-[100px] px-2.5 lg:px-3 xl:px-4 2xl:px-6">
                               <Select>
-                                <SelectTrigger
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="min-h-[44px] min-w-[44px] h-11 w-11 lg:h-12 lg:w-12 xl:h-12 xl:w-12 p-0 touch-manipulation"
-                                    aria-label={`Actions pour la commande ${order.order_number || order.id}`}
-                                  >
+                                <SelectTrigger className="min-h-[44px] min-w-[44px] h-11 w-11 lg:h-12 lg:w-12 xl:h-12 xl:w-12 p-0 touch-manipulation">
+
                                     <MoreVertical className="h-3.5 w-3.5 lg:h-4 lg:w-4 xl:h-5 xl:w-5" />
-                                  </Button>
-                                </SelectTrigger>
+                                  
+</SelectTrigger>
                                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                   <SelectItem value="edit" onSelect className="text-xs lg:text-sm cursor-pointer">
                                     <Eye className="mr-2 h-3.5 w-3.5 lg:h-4 lg:w-4" />
                                     Voir détails
                                   </SelectItem>
-                                  <SelectItem value="delete" onSelect
-                                    onSelect={() => handleStatusUpdate(order.id, 'completed')}
+                                  <SelectItem value="delete" onSelect={() => handleStatusUpdate(order.id, 'completed')}
                                     className="text-xs lg:text-sm cursor-pointer"
                                     disabled={order.status === 'completed'}
                                   >
@@ -805,23 +799,17 @@ export default function SupplierOrders() {
                           </div>
                         </div>
                         <Select>
-                          <SelectTrigger
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="min-h-[44px] min-w-[44px] h-11 w-11 xs:h-12 xs:w-12 sm:h-12 sm:w-12 p-0 shrink-0 touch-manipulation"
-                              aria-label={`Actions pour la commande ${order.order_number || order.id}`}
-                            >
+                          <SelectTrigger className="min-h-[44px] min-w-[44px] h-11 w-11 xs:h-12 xs:w-12 sm:h-12 sm:w-12 p-0 shrink-0 touch-manipulation">
+
                               <MoreVertical className="h-3.5 w-3.5 xs:h-4 xs:w-4 sm:h-5 sm:w-5" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <SelectItem value="copy" onSelect className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation">
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails
                             </SelectItem>
-                            <SelectItem value="view" onSelect
-                              onSelect={() => handleStatusUpdate(order.id, 'completed')}
+                            <SelectItem value="view" onSelect={() => handleStatusUpdate(order.id, 'completed')}
                               className="text-xs sm:text-sm md:text-base cursor-pointer touch-manipulation"
                               disabled={order.status === 'completed'}
                             >

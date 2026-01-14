@@ -404,19 +404,18 @@ export const WarehouseManager : React.FC = () => {
                         <TableCell>{warehouse.priority}</TableCell>
                         <TableCell className="text-right">
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour l'entrepôt ${warehouse.name || warehouse.id}`}>
+                            <SelectTrigger className="h-8 w-8 p-0">
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                              <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(warehouse)}>
+                              <SelectItem value="edit" onSelect={() => handleOpenDialog(warehouse)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Modifier
                               </SelectItem>
                               <DropdownMenuSeparator />
-                              <SelectItem value="delete" onSelect
-                                onSelect={() => setDeleteWarehouseId(warehouse.id)}
+                              <SelectItem value="delete" onSelect={() => setDeleteWarehouseId(warehouse.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />

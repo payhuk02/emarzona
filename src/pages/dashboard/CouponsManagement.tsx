@@ -466,28 +466,27 @@ export default function CouponsManagement() {
                           </div>
 
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="sm" className="shrink-0">
+                            <SelectTrigger className="shrink-0">
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               {promotion.code && (
-                                <SelectItem value="edit" onSelect onSelect={() => handleCopyCode(promotion.code!)}>
+                                <SelectItem value="edit" onSelect={() => handleCopyCode(promotion.code!)}>
                                   <Copy className="h-4 w-4 mr-2" />
                                   Copier le code
                                 </SelectItem>
                               )}
-                              <SelectItem value="delete" onSelect onSelect={() => setViewingUsageId(promotion.id)}>
+                              <SelectItem value="delete" onSelect={() => setViewingUsageId(promotion.id)}>
                                 <BarChart3 className="h-4 w-4 mr-2" />
                                 Voir les utilisations
                               </SelectItem>
-                              <SelectItem value="copy" onSelect onSelect={() => setEditingPromotionId(promotion.id)}>
+                              <SelectItem value="copy" onSelect={() => setEditingPromotionId(promotion.id)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Éditer
                               </SelectItem>
-                              <SelectItem value="view" onSelect
-                                onSelect={() => setDeletingPromotionId(promotion.id)}
+                              <SelectItem value="view" onSelect={() => setDeletingPromotionId(promotion.id)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -617,32 +616,29 @@ export default function CouponsManagement() {
                             </TableCell>
                             <TableCell className="text-right">
                               <Select>
-                                <SelectTrigger
-                                  <Button variant="ghost" size="sm">
+                                <SelectTrigger>
+
                                     <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </SelectTrigger>
+                                  
+</SelectTrigger>
                                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                   {promotion.code && (
-                                    <SelectItem value="export" onSelect
-                                      onSelect={() => handleCopyCode(promotion.code!)}
+                                    <SelectItem value="export" onSelect={() => handleCopyCode(promotion.code!)}
                                     >
                                       <Copy className="h-4 w-4 mr-2" />
                                       Copier le code
                                     </SelectItem>
                                   )}
-                                  <SelectItem value="duplicate" onSelect onSelect={() => setViewingUsageId(promotion.id)}>
+                                  <SelectItem value="duplicate" onSelect={() => setViewingUsageId(promotion.id)}>
                                     <BarChart3 className="h-4 w-4 mr-2" />
                                     Voir les utilisations
                                   </SelectItem>
-                                  <SelectItem value="toggle" onSelect
-                                    onSelect={() => setEditingPromotionId(promotion.id)}
+                                  <SelectItem value="toggle" onSelect={() => setEditingPromotionId(promotion.id)}
                                   >
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
                                   </SelectItem>
-                                  <SelectItem value="quickview" onSelect
-                                    onSelect={() => setDeletingPromotionId(promotion.id)}
+                                  <SelectItem value="quickview" onSelect={() => setDeletingPromotionId(promotion.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />

@@ -390,28 +390,27 @@ export default function AnalyticsDashboardsManagement() {
                             </TableCell>
                             <TableCell className="text-right">
                               <Select>
-                                <SelectTrigger
-                                  <Button variant="ghost" size="sm">
+                                <SelectTrigger>
+
                                     <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </SelectTrigger>
+                                  
+</SelectTrigger>
                                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                  <SelectItem value="edit" onSelect onSelect={() => navigate(`/dashboard/analytics/${dashboard.id}`)}>
+                                  <SelectItem value="edit" onSelect={() => navigate(`/dashboard/analytics/${dashboard.id}`)}>
                                     <Eye className="h-4 w-4 mr-2" />
                                     Voir
                                   </SelectItem>
                                   {!dashboard.is_default && (
-                                    <SelectItem value="delete" onSelect onSelect={() => handleSetDefault(dashboard.id)}>
+                                    <SelectItem value="delete" onSelect={() => handleSetDefault(dashboard.id)}>
                                       <Star className="h-4 w-4 mr-2" />
                                       Définir par défaut
                                     </SelectItem>
                                   )}
-                                  <SelectItem value="copy" onSelect onSelect={() => setEditingDashboardId(dashboard.id)}>
+                                  <SelectItem value="copy" onSelect={() => setEditingDashboardId(dashboard.id)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
                                   </SelectItem>
-                                  <SelectItem value="view" onSelect
-                                    onSelect={() => setDeletingDashboardId(dashboard.id)}
+                                  <SelectItem value="view" onSelect={() => setDeletingDashboardId(dashboard.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />

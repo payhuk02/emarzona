@@ -551,18 +551,17 @@ export default function TaxManagement() {
                               </TableCell>
                               <TableCell className="text-right">
                                 <Select>
-                                  <SelectTrigger
-                                    <Button variant="ghost" size="sm">
+                                  <SelectTrigger>
+
                                       <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </SelectTrigger>
+                                    
+</SelectTrigger>
                                   <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                    <SelectItem value="edit" onSelect onSelect={() => handleEditTax(tax)}>
+                                    <SelectItem value="edit" onSelect={() => handleEditTax(tax)}>
                                       <Edit className="h-4 w-4 mr-2" />
                                       Éditer
                                     </SelectItem>
-                                    <SelectItem value="delete" onSelect
-                                      onSelect={() => setDeletingTaxId(tax.id)}
+                                    <SelectItem value="delete" onSelect={() => setDeletingTaxId(tax.id)}
                                       className="text-red-600"
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />

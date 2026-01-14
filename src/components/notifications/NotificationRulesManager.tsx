@@ -376,11 +376,11 @@ export const NotificationRulesManager: React.FC<NotificationRulesManagerProps> =
                     </TableCell>
                     <TableCell>
                       <Select>
-                        <SelectTrigger
-                          <Button variant="ghost" size="icon">
+                        <SelectTrigger>
+
                             <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <SelectItem value="view" onSelect
                             onClick={() => {

@@ -171,11 +171,11 @@ const PixelsTableComponent = ({ pixels }: { pixels: Pixel[] }) => {
                     </div>
                   </div>
                   <Select>
-                    <SelectTrigger
-                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le pixel ${pixel.name || pixel.id}`}>
+                    <SelectTrigger className="h-8 w-8">
+
                         <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </SelectTrigger>
+                      
+</SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                       <SelectItem value="view" onSelect
                         onClick={() => {

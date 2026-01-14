@@ -406,20 +406,18 @@ function PhysicalProductsListComponent({
                       {/* Actions */}
                       <TableCell className="text-right">
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="sm" aria-label={`Actions pour le produit ${product.name || product.id}`}>
+                          <SelectTrigger>
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="edit" onSelect
-                              onSelect={() => onViewProduct?.(product.id)}
+                            <SelectItem value="edit" onSelect={() => onViewProduct?.(product.id)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               Voir
                             </SelectItem>
-                            <SelectItem value="delete" onSelect
-                              onSelect={() => onEditProduct?.(product.id)}
+                            <SelectItem value="delete" onSelect={() => onEditProduct?.(product.id)}
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier

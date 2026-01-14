@@ -329,27 +329,22 @@ export const LicenseManagementDashboard = ({
                     </TableCell>
                     <TableCell className="text-right">
                       <Select>
-                        <SelectTrigger
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            aria-label={`Actions pour la licence ${license.license_key || license.id}`}
-                          >
+                        <SelectTrigger>
+
                             <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="edit" onSelect onSelect={() => setSelectedLicense(license)}>
+                          <SelectItem value="edit" onSelect={() => setSelectedLicense(license)}>
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
                           </SelectItem>
-                          <SelectItem value="delete" onSelect onSelect={() => handleCopyKey(license.license_key)}>
+                          <SelectItem value="delete" onSelect={() => handleCopyKey(license.license_key)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copier clé
                           </SelectItem>
                           <DropdownMenuSeparator />
-                          <SelectItem value="copy" onSelect
-                            onSelect={() => handleRevoke(license.id)}
+                          <SelectItem value="copy" onSelect={() => handleRevoke(license.id)}
                             className="text-destructive"
                             disabled={license.status === 'revoked' || isRevoking}
                           >

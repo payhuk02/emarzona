@@ -71,13 +71,8 @@ export const ExportReviewsButton : React.FC<ExportReviewsButtonProps> = ({
 
   return (
     <Select>
-      <SelectTrigger
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled || isExporting}
-          className="gap-2"
-        >
+      <SelectTrigger className="gap-2" disabled={disabled || isExporting}>
+
           {isExporting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -89,16 +84,16 @@ export const ExportReviewsButton : React.FC<ExportReviewsButtonProps> = ({
               Exporter ({reviews.length})
             </>
           )}
-        </Button>
-      </SelectTrigger>
+        
+</SelectTrigger>
       <SelectContent mobileVariant="sheet" className="min-w-[200px]">
         <DropdownMenuLabel>Format d'export</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <SelectItem value="edit" onSelect onSelect={() => handleExport(true)}>
+        <SelectItem value="edit" onSelect={() => handleExport(true)}>
           <Download className="mr-2 h-4 w-4" />
           CSV Complet (avec médias)
         </SelectItem>
-        <SelectItem value="delete" onSelect onSelect={() => handleExport(false)}>
+        <SelectItem value="delete" onSelect={() => handleExport(false)}>
           <Download className="mr-2 h-4 w-4" />
           CSV Basique (sans médias)
         </SelectItem>

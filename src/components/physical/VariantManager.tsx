@@ -354,23 +354,22 @@ export function VariantManager({
           <div className="flex gap-2">
             {selectedVariants.length > 0 && (
               <Select>
-                <SelectTrigger
-                  <Button variant="outline" size="sm">
+                <SelectTrigger>
+
                     Actions ({selectedVariants.length})
-                  </Button>
-                </SelectTrigger>
+                  
+</SelectTrigger>
                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                  <SelectItem value="edit" onSelect onSelect={() => handleBulkToggleActive(true)}>
+                  <SelectItem value="edit" onSelect={() => handleBulkToggleActive(true)}>
                     <Check className="h-4 w-4 mr-2" />
                     Activer
                   </SelectItem>
-                  <SelectItem value="delete" onSelect onSelect={() => handleBulkToggleActive(false)}>
+                  <SelectItem value="delete" onSelect={() => handleBulkToggleActive(false)}>
                     <X className="h-4 w-4 mr-2" />
                     Désactiver
                   </SelectItem>
                   <DropdownMenuSeparator />
-                  <SelectItem value="copy" onSelect
-                    onSelect={() => setDeleteVariantId('bulk')}
+                  <SelectItem value="copy" onSelect={() => setDeleteVariantId('bulk')}
                     className="text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -531,19 +530,18 @@ export function VariantManager({
                         {/* Actions */}
                         <TableCell className="text-right">
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="sm" aria-label={`Actions pour la variante ${variant.name || variant.id}`}>
+                            <SelectTrigger>
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                              <SelectItem value="view" onSelect onSelect={() => setEditingVariant(variant)}>
+                              <SelectItem value="view" onSelect={() => setEditingVariant(variant)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
                               </SelectItem>
                               <DropdownMenuSeparator />
-                              <SelectItem value="export" onSelect
-                                onSelect={() => setDeleteVariantId(variant.id)}
+                              <SelectItem value="export" onSelect={() => setDeleteVariantId(variant.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />

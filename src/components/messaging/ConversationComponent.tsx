@@ -489,25 +489,20 @@ const  ConversationComponent: React.FC<ConversationComponentProps> = ({
                 )}
               </div>
               <Select>
-                <SelectTrigger
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0"
-                    aria-label="Actions de la conversation"
-                  >
+                <SelectTrigger className="shrink-0" aria-label="Actions de la conversation">
+
                     <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </SelectTrigger>
+                  
+</SelectTrigger>
                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                   {!currentConversation.admin_intervention && (
-                    <SelectItem value="edit" onSelect onSelect={handleEnableAdminIntervention}>
+                    <SelectItem value="edit" onSelect={handleEnableAdminIntervention}>
                       <Shield className="h-4 w-4 mr-2" />
                       Demander intervention admin
                     </SelectItem>
                   )}
                   <DropdownMenuSeparator />
-                  <SelectItem value="delete" onSelect onSelect={handleCloseConversation} className="text-destructive">
+                  <SelectItem value="delete" onSelect={handleCloseConversation} className="text-destructive">
                     <Lock className="h-4 w-4 mr-2" />
                     Fermer la conversation
                   </SelectItem>

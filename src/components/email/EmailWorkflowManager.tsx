@@ -259,17 +259,17 @@ export const EmailWorkflowManager = ({
                     </TableCell>
                     <TableCell className="text-right">
                       <Select>
-                        <SelectTrigger
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                        <SelectTrigger className="h-8 w-8 p-0">
+
                             <span className="sr-only">Ouvrir le menu</span>
                             <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="edit" onSelect onSelect={() => onEditWorkflow?.(workflow)}>
+                          <SelectItem value="edit" onSelect={() => onEditWorkflow?.(workflow)}>
                             <Edit className="mr-2 h-4 w-4" /> Modifier
                           </SelectItem>
-                          <SelectItem value="delete" onSelect onSelect={() => handleToggleStatus(workflow)}>
+                          <SelectItem value="delete" onSelect={() => handleToggleStatus(workflow)}>
                             {workflow.status === 'active' ? (
                               <>
                                 <Pause className="mr-2 h-4 w-4" /> Mettre en pause
@@ -280,8 +280,7 @@ export const EmailWorkflowManager = ({
                               </>
                             )}
                           </SelectItem>
-                          <SelectItem value="copy" onSelect
-                            onSelect={() => {
+                          <SelectItem value="copy" onSelect={() => {
                               setWorkflowToDelete(workflow.id);
                               setDeleteDialogOpen(true);
                             }}

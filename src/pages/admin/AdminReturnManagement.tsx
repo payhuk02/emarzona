@@ -546,16 +546,11 @@ export default function AdminReturnManagement() {
                                 </TableCell>
                                 <TableCell>
                                   <Select>
-                                    <SelectTrigger
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="min-h-[44px] min-w-[44px]"
-                                        aria-label={`Actions pour le retour ${returnRequest.id}`}
-                                      >
+                                    <SelectTrigger className="min-h-[44px] min-w-[44px]">
+
                                         <MoreVertical className="h-4 w-4" />
-                                      </Button>
-                                    </SelectTrigger>
+                                      
+</SelectTrigger>
                                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                       <SelectItem value="edit" onSelect asChild>
                                         <Dialog>
@@ -586,14 +581,12 @@ export default function AdminReturnManagement() {
                                       </SelectItem>
                                       {returnTyped.status === 'requested' && (
                                         <>
-                                          <SelectItem value="delete" onSelect
-                                            onSelect={() => handleApprove(returnTyped.id)}
+                                          <SelectItem value="delete" onSelect={() => handleApprove(returnTyped.id)}
                                           >
                                             <CheckCircle2 className="h-4 w-4 mr-2" />
                                             Approuver
                                           </SelectItem>
-                                          <SelectItem value="copy" onSelect
-                                            onSelect={() => {
+                                          <SelectItem value="copy" onSelect={() => {
                                               const reason = prompt('Raison du rejet:');
                                               if (reason) {
                                                 handleReject(returnTyped.id, reason);
@@ -607,8 +600,7 @@ export default function AdminReturnManagement() {
                                         </>
                                       )}
                                       {returnTyped.status === 'received' && (
-                                        <SelectItem value="view" onSelect
-                                          onSelect={() => {
+                                        <SelectItem value="view" onSelect={() => {
                                             setSelectedReturnId(returnTyped.id);
                                             setRefundAmount(returnTyped.total_amount.toString());
                                             setRefundDialogOpen(true);

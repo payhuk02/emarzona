@@ -160,11 +160,11 @@ export const LicenseTable = ({ searchQuery, statusFilter }: LicenseTableProps) =
                   </TableCell>
                   <TableCell className="text-right">
                     <Select>
-                      <SelectTrigger
-                        <Button variant="ghost" size="sm" aria-label={`Actions pour la licence ${license.license_key || license.id}`}>
+                      <SelectTrigger>
+
                           <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </SelectTrigger>
+                        
+</SelectTrigger>
                       <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                         <SelectItem value="edit" onSelect>
                           <Eye className="h-4 w-4 mr-2" />

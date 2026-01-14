@@ -225,22 +225,22 @@ export const DigitalAnalyticsDashboard = ({
       {/* Export Button */}
       <div className="flex justify-end">
         <Select>
-          <SelectTrigger
-            <Button variant="outline" size="sm">
+          <SelectTrigger>
+
               <FileDown className="h-4 w-4 mr-2" />
               Exporter
-            </Button>
-          </SelectTrigger>
+            
+</SelectTrigger>
           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-            <SelectItem value="edit" onSelect onSelect={handleExportPDF}>
+            <SelectItem value="edit" onSelect={handleExportPDF}>
               <FileText className="h-4 w-4 mr-2" />
               Export PDF
             </SelectItem>
-            <SelectItem value="delete" onSelect onSelect={handleExportExcel}>
+            <SelectItem value="delete" onSelect={handleExportExcel}>
               <FileText className="h-4 w-4 mr-2" />
               Export Excel
             </SelectItem>
-            <SelectItem value="copy" onSelect onSelect={handleExportCSV}>
+            <SelectItem value="copy" onSelect={handleExportCSV}>
               <FileText className="h-4 w-4 mr-2" />
               Export CSV
             </SelectItem>

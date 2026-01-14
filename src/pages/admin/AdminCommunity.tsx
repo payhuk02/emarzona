@@ -555,38 +555,34 @@ export default function AdminCommunity() {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <Select>
-                                      <SelectTrigger
-                                        <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] h-11 w-11" aria-label={`Actions pour ${member.email || member.id}`}>
+                                      <SelectTrigger className="min-h-[44px] min-w-[44px] h-11 w-11">
+
                                           <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                      </SelectTrigger>
+                                        
+</SelectTrigger>
                                       <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                         {member.status === 'pending' && (
-                                          <SelectItem value="edit" onSelect
-                                            onSelect={() => handleMemberStatusChange(member.id, 'approved')}
+                                          <SelectItem value="edit" onSelect={() => handleMemberStatusChange(member.id, 'approved')}
                                           >
                                             <CheckCircle className="h-4 w-4 mr-2" />
                                             Approuver
                                           </SelectItem>
                                         )}
                                         {member.status === 'approved' && (
-                                          <SelectItem value="delete" onSelect
-                                            onSelect={() => handleMemberStatusChange(member.id, 'suspended')}
+                                          <SelectItem value="delete" onSelect={() => handleMemberStatusChange(member.id, 'suspended')}
                                           >
                                             <Ban className="h-4 w-4 mr-2" />
                                             Suspendre
                                           </SelectItem>
                                         )}
                                         {member.status === 'suspended' && (
-                                          <SelectItem value="copy" onSelect
-                                            onSelect={() => handleMemberStatusChange(member.id, 'approved')}
+                                          <SelectItem value="copy" onSelect={() => handleMemberStatusChange(member.id, 'approved')}
                                           >
                                             <CheckCircle className="h-4 w-4 mr-2" />
                                             Réactiver
                                           </SelectItem>
                                         )}
-                                        <SelectItem value="view" onSelect
-                                          onSelect={() => {
+                                        <SelectItem value="view" onSelect={() => {
                                             setTargetMemberId(member.id);
                                             setDeleteMemberDialogOpen(true);
                                           }}

@@ -189,21 +189,19 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
                     </TableCell>
                     <TableCell className="text-right">
                       <Select>
-                        <SelectTrigger
-                          <Button variant="ghost" size="icon" aria-label={`Actions pour la version ${version.version_number || version.id}`}>
+                        <SelectTrigger>
+
                             <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <SelectItem value="edit" onSelect
-                            onSelect={() => window.open(version.file_url, '_blank')}
+                          <SelectItem value="edit" onSelect={() => window.open(version.file_url, '_blank')}
                           >
                             <Download className="h-4 w-4 mr-2" />
                             Télécharger
                           </SelectItem>
-                          <SelectItem value="delete" onSelect
-                            onSelect={() => setSelectedVersion(version)}
+                          <SelectItem value="delete" onSelect={() => setSelectedVersion(version)}
                           >
                             <AlertCircle className="h-4 w-4 mr-2" />
                             Voir les détails

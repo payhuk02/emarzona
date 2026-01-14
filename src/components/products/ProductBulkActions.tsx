@@ -184,19 +184,19 @@ const ProductBulkActions = ({
           </Button>
 
           <Select>
-            <SelectTrigger
-              <Button variant="outline" size="sm" className="text-xs">
+            <SelectTrigger className="text-xs">
+
                 <MoreHorizontal className="h-3 w-3 mr-1" />
                 Plus
-              </Button>
-            </SelectTrigger>
+              
+</SelectTrigger>
             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-              <SelectItem value="edit" onSelect onSelect={handleExport}>
+              <SelectItem value="edit" onSelect={handleExport}>
                 <Download className="h-4 w-4 mr-2" />
                 Exporter en CSV
               </SelectItem>
               <DropdownMenuSeparator />
-              <SelectItem value="delete" onSelect onSelect={handleBulkDelete} className="text-destructive">
+              <SelectItem value="delete" onSelect={handleBulkDelete} className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
               </SelectItem>

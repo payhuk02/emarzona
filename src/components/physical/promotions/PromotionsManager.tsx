@@ -554,19 +554,18 @@ export const PromotionsManager : React.FC = () => {
                           </TableCell>
                           <TableCell className="text-right">
                             <Select>
-                              <SelectTrigger
-                                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la promotion ${promotion.name || promotion.id}`}>
+                              <SelectTrigger className="h-8 w-8">
+
                                   <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </SelectTrigger>
+                                
+</SelectTrigger>
                               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(promotion)}>
+                                <SelectItem value="edit" onSelect={() => handleOpenDialog(promotion)}>
                                   <Edit className="mr-2 h-4 w-4" />
                                   Modifier
                                 </SelectItem>
                                 <DropdownMenuSeparator />
-                                <SelectItem value="delete" onSelect
-                                  onSelect={() => setDeletePromotionId(promotion.id)}
+                                <SelectItem value="delete" onSelect={() => setDeletePromotionId(promotion.id)}
                                   className="text-destructive"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
@@ -611,19 +610,18 @@ export const PromotionsManager : React.FC = () => {
                           )}
                         </div>
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la promotion ${promotion.name || promotion.id}`}>
+                          <SelectTrigger className="h-8 w-8">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(promotion)}>
+                            <SelectItem value="copy" onSelect={() => handleOpenDialog(promotion)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
                             <DropdownMenuSeparator />
-                            <SelectItem value="view" onSelect
-                              onSelect={() => setDeletePromotionId(promotion.id)}
+                            <SelectItem value="view" onSelect={() => setDeletePromotionId(promotion.id)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />

@@ -451,19 +451,18 @@ export const PlatformCustomization = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Select>
-                    <SelectTrigger
-                      <Button variant="outline" size="sm" className="gap-2 min-h-[44px]">
+                    <SelectTrigger className="gap-2 min-h-[44px]">
+
                         <Settings className="h-4 w-4" />
                         <span className="hidden sm:inline">Actions</span>
-                      </Button>
-                    </SelectTrigger>
+                      
+</SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                      <SelectItem value="edit" onSelect onSelect={handleExport} className="cursor-pointer">
+                      <SelectItem value="edit" onSelect={handleExport} className="cursor-pointer">
                         <Download className="h-4 w-4 mr-2" />
                         Exporter JSON
                       </SelectItem>
-                      <SelectItem value="delete" onSelect
-                        onSelect={() => fileInputRef.current?.click()}
+                      <SelectItem value="delete" onSelect={() => fileInputRef.current?.click()}
                         className="cursor-pointer"
                       >
                         <Upload className="h-4 w-4 mr-2" />

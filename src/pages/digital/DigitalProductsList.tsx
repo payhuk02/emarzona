@@ -584,30 +584,25 @@ export const DigitalProductsList = () => {
                   <span className="hidden sm:inline">Rafraîchir</span>
                 </Button>
                 <Select>
-                  <SelectTrigger
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 sm:h-10 text-xs sm:text-sm"
-                      disabled={isExporting || filteredProducts.length === 0}
-                    >
+                  <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" disabled={isExporting || filteredProducts.length === 0}>
+
                       <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                       <span className="hidden sm:inline">Exporter</span>
-                    </Button>
-                  </SelectTrigger>
+                    
+</SelectTrigger>
                   <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                       Exporter tous ({filteredProducts.length})
                     </div>
-                    <SelectItem value="edit" onSelect onSelect={() => handleExport(undefined, 'csv')}>
+                    <SelectItem value="edit" onSelect={() => handleExport(undefined, 'csv')}>
                       <FileDown className="h-4 w-4 mr-2" />
                       CSV
                     </SelectItem>
-                    <SelectItem value="delete" onSelect onSelect={() => handleExport(undefined, 'excel')}>
+                    <SelectItem value="delete" onSelect={() => handleExport(undefined, 'excel')}>
                       <FileDown className="h-4 w-4 mr-2" />
                       Excel (.xlsx)
                     </SelectItem>
-                    <SelectItem value="copy" onSelect onSelect={() => handleExport(undefined, 'pdf')}>
+                    <SelectItem value="copy" onSelect={() => handleExport(undefined, 'pdf')}>
                       <FileDown className="h-4 w-4 mr-2" />
                       PDF
                     </SelectItem>
@@ -617,20 +612,17 @@ export const DigitalProductsList = () => {
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                           Exporter sélectionnés ({selectedProducts.size})
                         </div>
-                        <SelectItem value="view" onSelect
-                          onSelect={() => handleExport(Array.from(selectedProducts), 'csv')}
+                        <SelectItem value="view" onSelect={() => handleExport(Array.from(selectedProducts), 'csv')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           CSV
                         </SelectItem>
-                        <SelectItem value="export" onSelect
-                          onSelect={() => handleExport(Array.from(selectedProducts), 'excel')}
+                        <SelectItem value="export" onSelect={() => handleExport(Array.from(selectedProducts), 'excel')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           Excel (.xlsx)
                         </SelectItem>
-                        <SelectItem value="duplicate" onSelect
-                          onSelect={() => handleExport(Array.from(selectedProducts), 'pdf')}
+                        <SelectItem value="duplicate" onSelect={() => handleExport(Array.from(selectedProducts), 'pdf')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           PDF

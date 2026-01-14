@@ -559,24 +559,23 @@ export default function LiveSessionsManagement() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <Select>
-                                    <SelectTrigger
-                                      <Button variant="ghost" size="sm">
+                                    <SelectTrigger>
+
                                         <MoreVertical className="h-4 w-4" />
-                                      </Button>
-                                    </SelectTrigger>
+                                      
+</SelectTrigger>
                                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                       {session.meeting_url && (
-                                        <SelectItem value="edit" onSelect onSelect={() => window.open(session.meeting_url, '_blank')}>
+                                        <SelectItem value="edit" onSelect={() => window.open(session.meeting_url, '_blank')}>
                                           <ExternalLink className="h-4 w-4 mr-2" />
                                           Ouvrir la réunion
                                         </SelectItem>
                                       )}
-                                      <SelectItem value="delete" onSelect onSelect={() => handleEditSession(session.id)}>
+                                      <SelectItem value="delete" onSelect={() => handleEditSession(session.id)}>
                                         <Edit className="h-4 w-4 mr-2" />
                                         Éditer
                                       </SelectItem>
-                                      <SelectItem value="copy" onSelect
-                                        onSelect={() => setDeletingSessionId(session.id)}
+                                      <SelectItem value="copy" onSelect={() => setDeletingSessionId(session.id)}
                                         className="text-red-600"
                                       >
                                         <Trash2 className="h-4 w-4 mr-2" />

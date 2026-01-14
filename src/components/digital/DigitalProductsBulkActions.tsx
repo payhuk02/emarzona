@@ -239,22 +239,22 @@ export const DigitalProductsBulkActions = ({
           )}
           {onExport && (
             <Select>
-              <SelectTrigger
-                <Button size="sm" variant="outline" disabled={isProcessing} className="h-8">
+              <SelectTrigger className="h-8" disabled={isProcessing}>
+
                   <FileDown className="h-4 w-4 mr-2" />
                   Exporter
-                </Button>
-              </SelectTrigger>
+                
+</SelectTrigger>
               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                <SelectItem value="edit" onSelect onSelect={() => handleExport('csv')}>
+                <SelectItem value="edit" onSelect={() => handleExport('csv')}>
                   <FileDown className="h-4 w-4 mr-2" />
                   CSV
                 </SelectItem>
-                <SelectItem value="delete" onSelect onSelect={() => handleExport('excel')}>
+                <SelectItem value="delete" onSelect={() => handleExport('excel')}>
                   <FileDown className="h-4 w-4 mr-2" />
                   Excel
                 </SelectItem>
-                <SelectItem value="copy" onSelect onSelect={() => handleExport('pdf')}>
+                <SelectItem value="copy" onSelect={() => handleExport('pdf')}>
                   <FileDown className="h-4 w-4 mr-2" />
                   PDF
                 </SelectItem>
@@ -262,14 +262,14 @@ export const DigitalProductsBulkActions = ({
             </Select>
           )}
           <Select>
-            <SelectTrigger
-              <Button size="sm" variant="outline" disabled={isProcessing} className="h-8">
+            <SelectTrigger className="h-8" disabled={isProcessing}>
+
                 <MoreHorizontal className="h-4 w-4 mr-2" />
                 Plus
-              </Button>
-            </SelectTrigger>
+              
+</SelectTrigger>
             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-              <SelectItem value="view" onSelect onSelect={handleSelectAll}>
+              <SelectItem value="view" onSelect={handleSelectAll}>
                 {isAllSelected ? (
                   <>
                     <Square className="h-4 w-4 mr-2" />
@@ -283,8 +283,7 @@ export const DigitalProductsBulkActions = ({
                 )}
               </SelectItem>
               <DropdownMenuSeparator />
-              <SelectItem value="export" onSelect
-                onSelect={handleBulkDelete}
+              <SelectItem value="export" onSelect={handleBulkDelete}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />

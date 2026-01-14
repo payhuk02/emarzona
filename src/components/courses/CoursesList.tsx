@@ -620,44 +620,43 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                     </TableCell>
                     <TableCell className="text-right">
                       <Select>
-                        <SelectTrigger
-                          <Button variant="ghost" size="icon" aria-label={`Actions pour ${course.title}`}>
+                        <SelectTrigger>
+
                             <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="edit" onSelect onSelect={() => onCourseSelect?.(course.id)}>
+                          <SelectItem value="edit" onSelect={() => onCourseSelect?.(course.id)}>
                             <Eye className="h-4 w-4 mr-2" />
                             Voir
                           </SelectItem>
-                          <SelectItem value="delete" onSelect onSelect={() => onEdit?.(course.id)}>
+                          <SelectItem value="delete" onSelect={() => onEdit?.(course.id)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Éditer
                           </SelectItem>
-                          <SelectItem value="copy" onSelect onSelect={() => onDuplicate?.(course.id)}>
+                          <SelectItem value="copy" onSelect={() => onDuplicate?.(course.id)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Dupliquer
                           </SelectItem>
                           <DropdownMenuSeparator />
                           {course.status === 'draft' && onTogglePublish && (
-                            <SelectItem value="view" onSelect onSelect={() => onTogglePublish(course.id, 'published')}>
+                            <SelectItem value="view" onSelect={() => onTogglePublish(course.id, 'published')}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Publier
                             </SelectItem>
                           )}
                           {course.status === 'published' && onTogglePublish && (
-                            <SelectItem value="export" onSelect onSelect={() => onTogglePublish(course.id, 'draft')}>
+                            <SelectItem value="export" onSelect={() => onTogglePublish(course.id, 'draft')}>
                               <XCircle className="h-4 w-4 mr-2" />
                               Dépublier
                             </SelectItem>
                           )}
-                          <SelectItem value="duplicate" onSelect onSelect={() => onArchive?.(course.id)}>
+                          <SelectItem value="duplicate" onSelect={() => onArchive?.(course.id)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Archiver
                           </SelectItem>
                           <DropdownMenuSeparator />
-                          <SelectItem value="toggle" onSelect
-                            onSelect={() => onDelete?.(course.id)}
+                          <SelectItem value="toggle" onSelect={() => onDelete?.(course.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />

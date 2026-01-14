@@ -396,11 +396,11 @@ const SEOPagesListComponent = ({ data, isLoading }: SEOPagesListProps) => {
                             </Badge>
                           </div>
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la page ${page.title || page.url}`}>
+                            <SelectTrigger className="h-8 w-8">
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               <SelectItem value="view" onSelect onClick={() => window.open(page.url, "_blank")}>
                                 <ExternalLink className="h-4 w-4 mr-2" />

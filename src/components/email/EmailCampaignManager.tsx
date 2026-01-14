@@ -219,14 +219,13 @@ export const EmailCampaignManager = ({
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="icon" aria-label={`Actions pour la campagne ${campaign.name}`}>
+                          <SelectTrigger>
+
                               <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="edit" onSelect
-                              onSelect={() => {
+                            <SelectItem value="edit" onSelect={() => {
                                 setSelectedCampaign(campaign);
                                 setShowMetrics(true);
                               }}
@@ -234,31 +233,27 @@ export const EmailCampaignManager = ({
                               <Eye className="h-4 w-4 mr-2" />
                               Voir métriques
                             </SelectItem>
-                            <SelectItem value="delete" onSelect
-                              onSelect={() => onEditCampaign?.(campaign)}
+                            <SelectItem value="delete" onSelect={() => onEditCampaign?.(campaign)}
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </SelectItem>
                             {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
-                              <SelectItem value="copy" onSelect
-                                onSelect={() => handleSend(campaign.id)}
+                              <SelectItem value="copy" onSelect={() => handleSend(campaign.id)}
                                 disabled={sendCampaign.isPending || !campaign.template_id}
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Envoyer
                               </SelectItem>
                             )}
-                            <SelectItem value="view" onSelect
-                              onSelect={() => handleDuplicate(campaign.id)}
+                            <SelectItem value="view" onSelect={() => handleDuplicate(campaign.id)}
                               disabled={duplicateCampaign.isPending}
                             >
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliquer
                             </SelectItem>
                             {campaign.status === 'paused' && (
-                              <SelectItem value="export" onSelect
-                                onSelect={() => handleResume(campaign.id)}
+                              <SelectItem value="export" onSelect={() => handleResume(campaign.id)}
                                 disabled={resumeCampaign.isPending}
                               >
                                 <Play className="h-4 w-4 mr-2" />
@@ -266,16 +261,14 @@ export const EmailCampaignManager = ({
                               </SelectItem>
                             )}
                             {(campaign.status === 'scheduled' || campaign.status === 'sending') && (
-                              <SelectItem value="duplicate" onSelect
-                                onSelect={() => handlePause(campaign.id)}
+                              <SelectItem value="duplicate" onSelect={() => handlePause(campaign.id)}
                                 disabled={pauseCampaign.isPending}
                               >
                                 <Pause className="h-4 w-4 mr-2" />
                                 Mettre en pause
                               </SelectItem>
                             )}
-                            <SelectItem value="toggle" onSelect
-                              onSelect={() => {
+                            <SelectItem value="toggle" onSelect={() => {
                                 setCampaignToDelete(campaign.id);
                                 setDeleteDialogOpen(true);
                               }}

@@ -502,22 +502,21 @@ export default function DigitalBundlesManagement() {
                             </TableCell>
                             <TableCell className="text-right">
                               <Select>
-                                <SelectTrigger
-                                  <Button variant="ghost" size="sm">
+                                <SelectTrigger>
+
                                     <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </SelectTrigger>
+                                  
+</SelectTrigger>
                                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                  <SelectItem value="edit" onSelect onSelect={() => handleViewBundle(bundle.id)}>
+                                  <SelectItem value="edit" onSelect={() => handleViewBundle(bundle.id)}>
                                     <Eye className="h-4 w-4 mr-2" />
                                     Voir
                                   </SelectItem>
-                                  <SelectItem value="delete" onSelect onSelect={() => handleEditBundle(bundle.id)}>
+                                  <SelectItem value="delete" onSelect={() => handleEditBundle(bundle.id)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
                                   </SelectItem>
-                                  <SelectItem value="copy" onSelect
-                                    onSelect={() => setDeletingBundleId(bundle.id)}
+                                  <SelectItem value="copy" onSelect={() => setDeletingBundleId(bundle.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />

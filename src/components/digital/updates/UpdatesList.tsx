@@ -268,11 +268,11 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                 </TableCell>
                 <TableCell className="text-right">
                   <Select>
-                    <SelectTrigger
-                      <Button variant="ghost" size="icon" aria-label={`Actions pour la mise à jour ${update.title || update.id}`}>
+                    <SelectTrigger>
+
                         <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </SelectTrigger>
+                      
+</SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                       <SelectItem value="edit" onSelect>
                         <Eye className="h-4 w-4 mr-2" />
@@ -282,8 +282,7 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                         <Edit className="h-4 w-4 mr-2" />
                         Modifier
                       </SelectItem>
-                      <SelectItem value="copy" onSelect
-                        onSelect={() =>
+                      <SelectItem value="copy" onSelect={() =>
                           togglePublish.mutate({
                             updateId: update.id,
                             isPublished: update.is_published,

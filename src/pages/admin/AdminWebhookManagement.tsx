@@ -762,36 +762,28 @@ export default function AdminWebhookManagement() {
                                     </div>
                                   </div>
                                   <Select>
-                                    <SelectTrigger
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        aria-label={`Actions pour le webhook ${webhook.name}`}
-                                      >
+                                    <SelectTrigger className="h-8 w-8">
+
                                         <MoreVertical className="h-4 w-4" aria-hidden="true" />
-                                      </Button>
-                                    </SelectTrigger>
+                                      
+</SelectTrigger>
                                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                      <SelectItem value="edit" onSelect
-                                        onSelect={() => setSelectedWebhookId(webhook.id)}
+                                      <SelectItem value="edit" onSelect={() => setSelectedWebhookId(webhook.id)}
                                       >
                                         <Activity className="h-4 w-4 mr-2" />
                                         Historique
                                       </SelectItem>
-                                      <SelectItem value="delete" onSelect
-                                        onSelect={() => handleTest(webhook)}
+                                      <SelectItem value="delete" onSelect={() => handleTest(webhook)}
                                         disabled={testWebhook.isPending}
                                       >
                                         <TestTube className="h-4 w-4 mr-2" />
                                         Tester
                                       </SelectItem>
-                                      <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(webhook)}>
+                                      <SelectItem value="copy" onSelect={() => handleOpenDialog(webhook)}>
                                         <Edit className="h-4 w-4 mr-2" />
                                         Modifier
                                       </SelectItem>
-                                      <SelectItem value="view" onSelect
-                                        onSelect={() => handleDelete(webhook)}
+                                      <SelectItem value="view" onSelect={() => handleDelete(webhook)}
                                         disabled={deleteWebhook.isPending}
                                         className="text-destructive"
                                       >

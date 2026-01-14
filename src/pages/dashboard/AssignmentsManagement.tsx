@@ -599,26 +599,23 @@ export default function AssignmentsManagement() {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <Select>
-                                      <SelectTrigger
-                                        <Button variant="ghost" size="sm">
+                                      <SelectTrigger>
+
                                           <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                      </SelectTrigger>
+                                        
+</SelectTrigger>
                                       <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                        <SelectItem value="edit" onSelect
-                                          onSelect={() => handleViewSubmissions(assignment.id)}
+                                        <SelectItem value="edit" onSelect={() => handleViewSubmissions(assignment.id)}
                                         >
                                           <Eye className="h-4 w-4 mr-2" />
                                           Voir soumissions ({assignmentSubmissions.length})
                                         </SelectItem>
-                                        <SelectItem value="delete" onSelect
-                                          onSelect={() => handleEditAssignment(assignment.id)}
+                                        <SelectItem value="delete" onSelect={() => handleEditAssignment(assignment.id)}
                                         >
                                           <Edit className="h-4 w-4 mr-2" />
                                           Éditer
                                         </SelectItem>
-                                        <SelectItem value="copy" onSelect
-                                          onSelect={() => setDeletingAssignmentId(assignment.id)}
+                                        <SelectItem value="copy" onSelect={() => setDeletingAssignmentId(assignment.id)}
                                           className="text-red-600"
                                         >
                                           <Trash2 className="h-4 w-4 mr-2" />

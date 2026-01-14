@@ -318,35 +318,31 @@ export const WebhooksManager = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le webhook ${webhook.name || webhook.id}`}>
+                            <SelectTrigger className="h-8 w-8">
+
                                 <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </SelectTrigger>
+                              
+</SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <SelectItem value="edit" onSelect
-                                onSelect={() => setEditingWebhook(webhook.id)}
+                              <SelectItem value="edit" onSelect={() => setEditingWebhook(webhook.id)}
                               >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Modifier
                               </SelectItem>
-                              <SelectItem value="delete" onSelect
-                                onSelect={() => handleTest(webhook.id)}
+                              <SelectItem value="delete" onSelect={() => handleTest(webhook.id)}
                                 disabled={testWebhook.isPending}
                               >
                                 <Play className="h-4 w-4 mr-2" />
                                 Tester
                               </SelectItem>
-                              <SelectItem value="copy" onSelect
-                                onSelect={() => setViewingLogs(webhook.id)}
+                              <SelectItem value="copy" onSelect={() => setViewingLogs(webhook.id)}
                               >
                                 <Activity className="h-4 w-4 mr-2" />
                                 Voir les logs
                               </SelectItem>
                               <DropdownMenuSeparator />
-                              <SelectItem value="view" onSelect
-                                onSelect={() => setDeletingWebhook(webhook.id)}
+                              <SelectItem value="view" onSelect={() => setDeletingWebhook(webhook.id)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -384,35 +380,31 @@ export const WebhooksManager = () => {
                           </div>
                         </div>
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le webhook ${webhook.name || webhook.id}`}>
+                          <SelectTrigger className="h-8 w-8">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <SelectItem value="export" onSelect
-                              onSelect={() => setEditingWebhook(webhook.id)}
+                            <SelectItem value="export" onSelect={() => setEditingWebhook(webhook.id)}
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="duplicate" onSelect
-                              onSelect={() => handleTest(webhook.id)}
+                            <SelectItem value="duplicate" onSelect={() => handleTest(webhook.id)}
                               disabled={testWebhook.isPending}
                             >
                               <Play className="h-4 w-4 mr-2" />
                               Tester
                             </SelectItem>
-                            <SelectItem value="toggle" onSelect
-                              onSelect={() => setViewingLogs(webhook.id)}
+                            <SelectItem value="toggle" onSelect={() => setViewingLogs(webhook.id)}
                             >
                               <Activity className="h-4 w-4 mr-2" />
                               Voir les logs
                             </SelectItem>
                             <DropdownMenuSeparator />
-                            <SelectItem value="quickview" onSelect
-                              onSelect={() => setDeletingWebhook(webhook.id)}
+                            <SelectItem value="quickview" onSelect={() => setDeletingWebhook(webhook.id)}
                               className="text-red-600"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

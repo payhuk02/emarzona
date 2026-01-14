@@ -286,20 +286,19 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                         </div>
 
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <SelectTrigger className="h-8 w-8">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             {user?.id === comment.user_id && (
                               <>
-                                <SelectItem value="edit" onSelect onSelect={() => handleEdit(comment)}>
+                                <SelectItem value="edit" onSelect={() => handleEdit(comment)}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Modifier
                                 </SelectItem>
-                                <SelectItem value="delete" onSelect
-                                  onSelect={() => setDeletingComment(comment.id)}
+                                <SelectItem value="delete" onSelect={() => setDeletingComment(comment.id)}
                                   className="text-destructive"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
@@ -308,7 +307,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                               </>
                             )}
                             {user?.id !== comment.user_id && (
-                              <SelectItem value="copy" onSelect onSelect={() => setReportingComment(comment.id)}>
+                              <SelectItem value="copy" onSelect={() => setReportingComment(comment.id)}>
                                 <Flag className="h-4 w-4 mr-2" />
                                 Signaler
                               </SelectItem>

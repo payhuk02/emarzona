@@ -390,18 +390,17 @@ export default function SuppliersManagement() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour le fournisseur ${supplier.name || supplier.id}`}>
+                          <SelectTrigger className="h-8 w-8 p-0">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(supplier)}>
+                            <SelectItem value="edit" onSelect={() => handleOpenDialog(supplier)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="delete" onSelect
-                              onSelect={() => handleDeleteClick(supplier)}
+                            <SelectItem value="delete" onSelect={() => handleDeleteClick(supplier)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -443,18 +442,17 @@ export default function SuppliersManagement() {
                           )}
                         </div>
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour le fournisseur ${supplier.name || supplier.id}`}>
+                          <SelectTrigger className="h-8 w-8 p-0">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(supplier)}>
+                            <SelectItem value="copy" onSelect={() => handleOpenDialog(supplier)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="view" onSelect
-                              onSelect={() => handleDeleteClick(supplier)}
+                            <SelectItem value="view" onSelect={() => handleDeleteClick(supplier)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />

@@ -1135,30 +1135,24 @@ const  PaymentCard: React.FC<PaymentCardProps> = ({
             </Button>
 
             <Select>
-              <SelectTrigger
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 sm:h-10 text-xs sm:text-sm"
-                  aria-label={`Actions pour le paiement ${payment.id}`}
-                >
+              <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+
                   <MoreVertical className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
-                </Button>
-              </SelectTrigger>
+                
+</SelectTrigger>
               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                 {payment.is_held && payment.status === 'held' && (
-                  <SelectItem value="edit" onSelect onSelect={() => onRelease(payment)}>
+                  <SelectItem value="edit" onSelect={() => onRelease(payment)}>
                     <Unlock className="h-4 w-4 mr-2" aria-hidden="true" />
                     Libérer le paiement
                   </SelectItem>
                 )}
-                <SelectItem value="delete" onSelect onSelect={() => onDispute(payment)}>
+                <SelectItem value="delete" onSelect={() => onDispute(payment)}>
                   <AlertTriangle className="h-4 w-4 mr-2" aria-hidden="true" />
                   Ouvrir un litige
                 </SelectItem>
                 <DropdownMenuSeparator />
-                <SelectItem value="copy" onSelect
-                  onSelect={() => onDelete(payment)}
+                <SelectItem value="copy" onSelect={() => onDelete(payment)}
                   className="text-destructive focus:text-destructive"
                 >
                   <XCircle className="h-4 w-4 mr-2" aria-hidden="true" />

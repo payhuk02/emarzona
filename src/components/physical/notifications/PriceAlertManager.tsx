@@ -198,15 +198,14 @@ export const PriceAlertManager = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="icon" aria-label={`Actions pour l'alerte de prix ${alert.id}`}>
+                          <SelectTrigger>
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <SelectItem value="edit" onSelect
-                              onSelect={() =>
+                            <SelectItem value="edit" onSelect={() =>
                                 deleteAlert.mutate(alert.id, {
                                   onSuccess: () => {
                                     // Toast déjà géré par le hook

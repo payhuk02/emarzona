@@ -363,18 +363,17 @@ export default function AutoReorderRules() {
                       </TableCell>
                       <TableCell className="text-right">
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour la règle ${rule.product_name || rule.id}`}>
+                          <SelectTrigger className="h-8 w-8 p-0">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="edit" onSelect onSelect={() => handleOpenDialog(rule)}>
+                            <SelectItem value="edit" onSelect={() => handleOpenDialog(rule)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="delete" onSelect
-                              onSelect={() => handleDeleteClick(rule)}
+                            <SelectItem value="delete" onSelect={() => handleDeleteClick(rule)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -411,18 +410,17 @@ export default function AutoReorderRules() {
                           </p>
                         </div>
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Actions pour la règle ${rule.product_name || rule.id}`}>
+                          <SelectTrigger className="h-8 w-8 p-0">
+
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </SelectTrigger>
+                            
+</SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="copy" onSelect onSelect={() => handleOpenDialog(rule)}>
+                            <SelectItem value="copy" onSelect={() => handleOpenDialog(rule)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                             </SelectItem>
-                            <SelectItem value="view" onSelect
-                              onSelect={() => handleDeleteClick(rule)}
+                            <SelectItem value="view" onSelect={() => handleDeleteClick(rule)}
                               className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />

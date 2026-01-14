@@ -293,17 +293,13 @@ export function VersionManagementDashboard({
                     </TableCell>
                     <TableCell className="text-right">
                       <Select>
-                        <SelectTrigger
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            aria-label={`Actions pour la version ${version.version_number || version.id}`}
-                          >
+                        <SelectTrigger>
+
                             <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </SelectTrigger>
+                          
+</SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="edit" onSelect onSelect={() => handleEditVersion(version)}>
+                          <SelectItem value="edit" onSelect={() => handleEditVersion(version)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Modifier
                           </SelectItem>
@@ -312,8 +308,7 @@ export function VersionManagementDashboard({
                             Voir détails
                           </SelectItem>
                           {version.notify_customers && !version.notification_sent_at && (
-                            <SelectItem value="copy" onSelect
-                              onSelect={() => handleNotifyCustomers(version.id, version.product_id)}
+                            <SelectItem value="copy" onSelect={() => handleNotifyCustomers(version.id, version.product_id)}
                             >
                               <Bell className="h-4 w-4 mr-2" />
                               Notifier clients

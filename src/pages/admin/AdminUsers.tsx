@@ -285,19 +285,17 @@ const AdminUsers = () => {
                 </CardDescription>
               </div>
               <Select>
-                <SelectTrigger
-                  <Button variant="outline" size="sm" className="min-h-[44px]">
-                    <FileDown className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Exporter</span>
-                    <span className="sm:hidden">Export</span>
-                  </Button>
+                <SelectTrigger className="min-h-[44px]">
+                  <FileDown className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Exporter</span>
+                  <span className="sm:hidden">Export</span>
                 </SelectTrigger>
                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                  <SelectItem value="edit" onSelect onSelect={exportToCSV}>
+                  <SelectItem value="csv" onSelect={exportToCSV}>
                     <Download className="h-4 w-4 mr-2" />
                     Exporter CSV (page actuelle)
                   </SelectItem>
-                  <SelectItem value="delete" onSelect onSelect={exportToPDF}>
+                  <SelectItem value="delete" onSelect={exportToPDF}>
                     <FileDown className="h-4 w-4 mr-2" />
                     Exporter PDF (page actuelle)
                   </SelectItem>
