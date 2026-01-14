@@ -58,6 +58,7 @@ import { ProductCardSkeleton } from '@/components/products/ProductCardSkeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 import {
   Sheet,
   SheetContent,
@@ -76,7 +77,7 @@ const Products = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { store, loading: storeLoading } = useStore();
-  const { deleteProduct, updateProduct } = useProductManagement(store?.id || '');
+  const { deleteProduct, updateProduct, createProduct } = useProductManagement(store?.id || '');
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -182,6 +183,19 @@ const Products = () => {
   const filtersRef = useScrollAnimation<HTMLDivElement>();
   const productsRef = useScrollAnimation<HTMLDivElement>();
 
+  // Réinitialiser la sélection quand les filtres changent
+  useEffect(() => {
+    setSelectedProducts([]);
+    setCurrentPage(1); // Réinitialiser aussi la page à 1
+  }, [
+    debouncedSearchQuery,
+    debouncedCategory,
+    debouncedProductType,
+    debouncedStatus,
+    debouncedStockStatus,
+    debouncedPriceRange,
+  ]);
+
   // Sélection de tous les produits
   const handleSelectAll = useCallback(() => {
     if (selectedProducts.length === paginatedProducts.length) {
@@ -256,11 +270,14 @@ const Products = () => {
           description: 'Le produit a été supprimé avec succès',
         });
       } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-        logger.error(error instanceof Error ? error : 'Erreur lors de la suppression du produit', {
-          error,
-          productId: deletingProductId,
-        });
+        const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+        logger.error(
+          _error instanceof Error ? _error : 'Erreur lors de la suppression du produit',
+          {
+            error: _error,
+            productId: deletingProductId,
+          }
+        );
         toast({
           title: 'Erreur',
           description: errorMessage || 'Impossible de supprimer le produit',
@@ -283,9 +300,9 @@ const Products = () => {
           description: `${productIds.length} produit(s) supprimé(s) avec succès`,
         });
       } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-        logger.error(error instanceof Error ? error : 'Erreur lors de la suppression en lot', {
-          error,
+        const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+        logger.error(_error instanceof Error ? _error : 'Erreur lors de la suppression en lot', {
+          error: _error,
           productIds,
         });
         toast({
@@ -312,12 +329,15 @@ const Products = () => {
           description: `${productIds.length} produit(s) ${action === 'activate' ? 'activé(s)' : 'désactivé(s)'}`,
         });
       } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-        logger.error(error instanceof Error ? error : `Erreur lors de l'action en lot ${action}`, {
-          error,
-          action,
-          productIds,
-        });
+        const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+        logger.error(
+          _error instanceof Error ? _error : `Erreur lors de l'action en lot ${action}`,
+          {
+            error: _error,
+            action,
+            productIds,
+          }
+        );
         toast({
           title: 'Erreur',
           description:
@@ -349,9 +369,9 @@ const Products = () => {
             description: `Le produit a été ${product.is_active ? 'désactivé' : 'activé'} avec succès`,
           });
         } catch (_error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-          logger.error(error instanceof Error ? error : 'Erreur lors du changement de statut', {
-            error,
+          const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+          logger.error(_error instanceof Error ? _error : 'Erreur lors du changement de statut', {
+            error: _error,
             productId,
           });
           toast({
@@ -461,35 +481,86 @@ const Products = () => {
   // Import CSV avec validation
   const handleImportConfirmed = useCallback(
     async (validatedProducts: Product[]) => {
-      try {
-        // Ici, vous devriez appeler votre API pour créer les produits
-        // Pour l'instant, simulons l'import
-        // await Promise.all(validatedProducts.map(product => createProduct(product)));
+      if (!store?.id) {
+        toast({
+          title: t('products.import.error', "Erreur d'import"),
+          description: t('products.import.noStore', 'Aucun magasin disponible'),
+          variant: 'destructive',
+        });
+        return;
+      }
 
-        // Pour la démo, on refresh juste la liste
+      try {
+        logger.info('Import CSV de produits', {
+          count: validatedProducts.length,
+          storeId: store.id,
+        });
+
+        // Créer tous les produits avec gestion d'erreurs par produit
+        const results = await Promise.allSettled(
+          validatedProducts.map(product =>
+            createProduct({
+              name: product.name,
+              slug: product.slug,
+              description: product.description || undefined,
+              price: product.price,
+              currency: product.currency || 'XOF',
+              category: product.category || undefined,
+              product_type: product.product_type || 'digital',
+              image_url: product.image_url || undefined,
+            })
+          )
+        );
+
+        const successful = results.filter(r => r.status === 'fulfilled' && r.value).length;
+        const failed = results.filter(
+          r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value)
+        ).length;
+
+        // Rafraîchir la liste
         await refetch();
 
-        toast({
-          title: t('products.import.success', 'Import réussi'),
-          description: t(
-            'products.import.successDescription',
-            '{{count}} produit(s) importé(s) avec succès',
-            { count: validatedProducts.length }
-          ),
-        });
+        if (failed > 0) {
+          toast({
+            title: t('products.import.partialSuccess', 'Import partiel'),
+            description: t(
+              'products.import.partialSuccessDescription',
+              '{{successful}} produit(s) importé(s), {{failed}} échec(s)',
+              { successful, failed }
+            ),
+            variant: 'default',
+          });
+        } else {
+          toast({
+            title: t('products.import.success', 'Import réussi'),
+            description: t(
+              'products.import.successDescription',
+              '{{count}} produit(s) importé(s) avec succès',
+              { count: successful }
+            ),
+          });
+        }
+
+        logger.info('Import CSV terminé', { successful, failed, total: validatedProducts.length });
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+        logger.error(error instanceof Error ? error : new Error("Erreur lors de l'import CSV"), {
+          error: errorMessage,
+          count: validatedProducts.length,
+        });
         toast({
           title: t('products.import.error', "Erreur d'import"),
           description: t(
             'products.import.errorDescription',
-            "Impossible d'importer les produits dans la base de données"
+            "Impossible d'importer les produits dans la base de données: {{error}}",
+            { error: errorMessage }
           ),
           variant: 'destructive',
         });
         throw error; // Re-throw pour que le dialog puisse gérer l'erreur
       }
     },
-    [refetch, toast]
+    [store?.id, createProduct, refetch, toast, t]
   );
 
   // Export CSV
@@ -556,9 +627,9 @@ const Products = () => {
         }),
       });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error(error instanceof Error ? error : "Erreur lors de l'export CSV", {
-        error,
+      const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+      logger.error(_error instanceof Error ? _error : "Erreur lors de l'export CSV", {
+        error: _error,
         count: filteredProducts.length,
       });
       toast({
@@ -576,6 +647,8 @@ const Products = () => {
   // Pagination handlers
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
+    // Réinitialiser la sélection lors du changement de page
+    setSelectedProducts([]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -897,11 +970,11 @@ const Products = () => {
                           }
                           onCheckedChange={handleSelectAll}
                           aria-label={t('products.selectAll', 'Sélectionner tous les produits')}
-                          className="transition-all duration-200 flex-shrink-0"
+                          className="transition-all duration-200 flex-shrink-0 min-h-[44px] min-w-[44px] touch-manipulation"
                         />
                       )}
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
-                        <p className="text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0 flex-1">
+                        <p className="text-sm sm:text-base font-medium text-foreground break-words">
                           {t('products.found', '{{count}} produit trouvé', {
                             count: filteredProducts.length,
                           })}
@@ -909,7 +982,7 @@ const Products = () => {
                         {selectedProducts.length > 0 && (
                           <Badge
                             variant="default"
-                            className="animate-in zoom-in-95 duration-200 shadow-sm text-xs flex-shrink-0"
+                            className="animate-in zoom-in-95 duration-200 shadow-sm text-xs sm:text-sm flex-shrink-0 px-2 sm:px-3 py-1"
                           >
                             {t('products.selected', '{{count}} sélectionné', {
                               count: selectedProducts.length,
@@ -1087,7 +1160,7 @@ const Products = () => {
 
                           <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 flex-wrap justify-center">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                              let _pageNumber;
+                              let pageNumber: number;
                               if (totalPages <= 5) {
                                 pageNumber = i + 1;
                               } else if (currentPage <= 3) {
@@ -1247,12 +1320,7 @@ const Products = () => {
                       [&_*]:text-foreground"
                     style={{ color: 'inherit' }}
                     dangerouslySetInnerHTML={{
-                      __html: quickViewProduct.description
-                        .replace(/color:\s*white\s*;?/gi, '')
-                        .replace(/color:\s*#ffffff\s*;?/gi, '')
-                        .replace(/color:\s*#FFFFFF\s*;?/gi, '')
-                        .replace(/color:\s*rgb\(255,\s*255,\s*255\)\s*;?/gi, '')
-                        .replace(/color:\s*rgb\(255,255,255\)\s*;?/gi, ''),
+                      __html: sanitizeProductDescription(quickViewProduct.description),
                     }}
                   />
                 </div>

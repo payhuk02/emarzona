@@ -80,7 +80,7 @@ const ProductFiltersDashboardComponent = ({
   }, [onCategoryChange, onProductTypeChange, onStatusChange, onStockStatusChange, onSearchChange]);
 
   const activeFiltersCount = useMemo(() => {
-    let  count= 0;
+    let count = 0;
     if (category !== 'all') count++;
     if (productType !== 'all') count++;
     if (status !== 'all') count++;
@@ -104,19 +104,19 @@ const ProductFiltersDashboardComponent = ({
   );
 
   return (
-    <div className="space-y-2 sm:space-y-3 lg:space-y-4">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-5">
       {/* Statistiques rapides avec design amélioré */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 lg:gap-4 p-2 sm:p-3 lg:p-4 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 lg:gap-4 p-3 sm:p-4 lg:p-5 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" />
-            <span className="text-xs sm:text-sm font-medium text-foreground">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="text-sm sm:text-base font-medium text-foreground">
               {totalProducts} produit{totalProducts > 1 ? 's' : ''} total
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-xs sm:text-sm text-muted-foreground">
+            <div className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green-500 animate-pulse flex-shrink-0"></div>
+            <span className="text-sm sm:text-base text-muted-foreground">
               {activeProducts} actif{activeProducts > 1 ? 's' : ''}
             </span>
           </div>
@@ -125,26 +125,26 @@ const ProductFiltersDashboardComponent = ({
 
       {/* Barre de recherche et filtres avec design amélioré */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground z-10" />
           <Input
             ref={searchInputRef}
             type="search"
             placeholder="Rechercher un produit..."
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
-            className="pl-10 pr-9 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200"
+            className="pl-10 sm:pl-11 pr-9 sm:pr-10 h-11 sm:h-12 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200 text-sm sm:text-base touch-manipulation"
           />
           {searchQuery && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onSearchChange('')}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-accent/50 transition-all duration-200"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 sm:h-10 sm:w-10 p-0 hover:bg-accent/50 transition-all duration-200 touch-manipulation"
               style={{ willChange: 'transform' }}
               aria-label="Effacer la recherche"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           )}
         </div>
@@ -153,16 +153,15 @@ const ProductFiltersDashboardComponent = ({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="relative h-9 sm:h-10 hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+              className="relative h-11 sm:h-12 w-full sm:w-auto hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
               style={{ willChange: 'transform' }}
             >
-              <SlidersHorizontal className="h-4 w-4 mr-1.5 sm:mr-2" />
-              <span className="hidden sm:inline">Filtres</span>
-              <span className="sm:hidden">Filtres</span>
+              <SlidersHorizontal className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+              <span className="text-sm sm:text-base">Filtres</span>
               {hasFilters && (
                 <Badge
                   variant="secondary"
-                  className="ml-1.5 sm:ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-semibold animate-in zoom-in-95 duration-200"
+                  className="ml-2 h-5 w-5 sm:h-6 sm:w-6 rounded-full p-0 flex items-center justify-center text-xs font-semibold animate-in zoom-in-95 duration-200 flex-shrink-0"
                 >
                   {activeFiltersCount}
                 </Badge>
@@ -170,7 +169,7 @@ const ProductFiltersDashboardComponent = ({
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[calc(100vw-2rem)] sm:w-80 max-w-[320px] sm:max-w-none"
+            className="w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] sm:max-w-none p-4 sm:p-6"
             align="end"
             sideOffset={8}
           >
@@ -344,12 +343,12 @@ const ProductFiltersDashboardComponent = ({
         </Popover>
 
         <Select value={sortBy} onValueChange={onSortByChange}>
-          <SelectTrigger className="w-full sm:w-[140px] lg:w-[180px] h-9 sm:h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200">
+          <SelectTrigger className="w-full sm:w-[140px] lg:w-[180px] h-11 sm:h-12 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm sm:text-base touch-manipulation">
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent mobileVariant="sheet" className="w-[calc(100vw-2rem)] sm:w-auto">
             {sortOptions.map(option => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem key={option.value} value={option.value} className="text-sm sm:text-base">
                 {option.label}
               </SelectItem>
             ))}
@@ -390,9 +389,3 @@ const ProductFiltersDashboard = React.memo(
 ProductFiltersDashboard.displayName = 'ProductFiltersDashboard';
 
 export default ProductFiltersDashboard;
-
-
-
-
-
-

@@ -134,15 +134,15 @@ const ProductListView = ({
       className={`hover:shadow-md transition-all border-border/50 ${isSelected ? 'ring-2 ring-primary' : ''}`}
     >
       <CardContent className="p-3 sm:p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
           {/* Checkbox de sélection */}
           {onSelect && (
-            <div className="flex-shrink-0 order-1 sm:order-none">
+            <div className="flex-shrink-0 order-1 sm:order-none self-start sm:self-center">
               <Checkbox
                 checked={isSelected}
                 onCheckedChange={onSelect}
                 aria-label={t('products.selectProduct', 'Sélectionner ce produit')}
-                className="min-h-[44px] min-w-[44px]"
+                className="min-h-[44px] min-w-[44px] touch-manipulation"
               />
             </div>
           )}
@@ -150,7 +150,7 @@ const ProductListView = ({
           {/* Image */}
           <div className="flex-shrink-0 order-2 sm:order-none">
             {product.image_url && !imageError ? (
-              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-muted">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-lg overflow-hidden bg-muted">
                 <LazyImage
                   src={product.image_url}
                   alt={product.name}
@@ -159,24 +159,24 @@ const ProductListView = ({
                 />
               </div>
             ) : (
-              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                <Package className="h-4 w-4 sm:h-6 sm:w-6 text-muted-foreground" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                <Package className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-muted-foreground" />
               </div>
             )}
           </div>
 
           {/* Informations principales */}
-          <div className="flex-1 min-w-0 space-y-2 order-3 sm:order-none">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+          <div className="flex-1 min-w-0 space-y-2 sm:space-y-3 order-3 sm:order-none w-full">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate hover:text-primary transition-colors">
+                <h3 className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl break-words hover:text-primary transition-colors">
                   {product.name}
                 </h3>
               </div>
 
               <Badge
                 variant={product.is_active ? 'default' : 'secondary'}
-                className="flex-shrink-0 text-xs w-fit"
+                className="flex-shrink-0 text-xs sm:text-sm w-fit self-start sm:self-center"
               >
                 {product.is_active
                   ? t('products.status.active', 'Actif')
@@ -184,17 +184,17 @@ const ProductListView = ({
               </Badge>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {product.category && (
                 <Badge
                   variant="outline"
-                  className={`text-xs ${getCategoryColor(product.category)}`}
+                  className={`text-xs sm:text-sm ${getCategoryColor(product.category)}`}
                 >
                   {product.category}
                 </Badge>
               )}
               {product.product_type && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs sm:text-sm">
                   {product.product_type}
                 </Badge>
               )}
@@ -202,46 +202,66 @@ const ProductListView = ({
               {product.track_inventory !== false && product.product_type !== 'digital' && (
                 <Badge
                   variant="outline"
-                  className={`text-xs flex items-center gap-1 ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/20 text-red-400 border-red-500/30' : stockInfo.status === 'low_stock' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-green-500/20 text-green-400 border-green-500/30'}`}
+                  className={`text-xs sm:text-sm flex items-center gap-1 ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/20 text-red-400 border-red-500/30' : stockInfo.status === 'low_stock' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-green-500/20 text-green-400 border-green-500/30'}`}
                 >
                   {stockInfo.status === 'out_of_stock' ? (
                     <>
-                      <AlertTriangle className="h-3 w-3" />{' '}
-                      {t('products.stock.outOfStock', 'Rupture de stock')}
+                      <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{' '}
+                      <span className="hidden sm:inline">
+                        {t('products.stock.outOfStock', 'Rupture de stock')}
+                      </span>
+                      <span className="sm:hidden">
+                        {t('products.stock.outOfStockShort', 'Rupture')}
+                      </span>
                     </>
                   ) : stockInfo.status === 'low_stock' ? (
                     <>
-                      <AlertTriangle className="h-3 w-3" />{' '}
-                      {t('products.stock.lowStock', 'Stock faible')} ({product.stock_quantity})
+                      <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{' '}
+                      <span className="hidden sm:inline">
+                        {t('products.stock.lowStock', 'Stock faible')} ({product.stock_quantity})
+                      </span>
+                      <span className="sm:hidden">
+                        {t('products.stock.lowStockShort', 'Faible')} ({product.stock_quantity})
+                      </span>
                     </>
                   ) : (
                     <>
-                      <PackageCheck className="h-3 w-3" /> {t('products.stock.inStock', 'En stock')}{' '}
-                      ({formatStockQuantity(product.stock_quantity, product.track_inventory)})
+                      <PackageCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{' '}
+                      <span className="hidden sm:inline">
+                        {t('products.stock.inStock', 'En stock')} (
+                        {formatStockQuantity(product.stock_quantity, product.track_inventory)})
+                      </span>
+                      <span className="sm:hidden">
+                        {t('products.stock.inStockShort', 'Stock')} (
+                        {formatStockQuantity(product.stock_quantity, product.track_inventory)})
+                      </span>
                     </>
                   )}
                 </Badge>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
-                <span className="font-semibold text-green-600">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
+                <span className="font-semibold text-green-600 text-sm sm:text-base">
                   {product.price.toLocaleString()} {product.currency}
                 </span>
               </div>
               {product.rating > 0 && (
                 <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
+                  <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-500 fill-current flex-shrink-0" />
                   <span>{product.rating.toFixed(1)}</span>
-                  <span className="text-muted-foreground">({product.reviews_count})</span>
+                  <span className="text-muted-foreground hidden sm:inline">
+                    ({product.reviews_count})
+                  </span>
+                  <span className="text-muted-foreground sm:hidden">({product.reviews_count})</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 flex-shrink-0" />
-                <span className="hidden sm:inline">{formatDate(product.created_at)}</span>
-                <span className="sm:hidden">
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden md:inline">{formatDate(product.created_at)}</span>
+                <span className="md:hidden">
                   {new Date(product.created_at).toLocaleDateString('fr-FR', {
                     day: 'numeric',
                     month: 'short',
@@ -249,28 +269,59 @@ const ProductListView = ({
                 </span>
               </div>
               <div className="flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 flex-shrink-0" />
-                <span>{t('products.salesCount', '{{count}} ventes', { count: 0 })}</span>
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">
+                  {t('products.salesCount', '{{count}} ventes', { count: 0 })}
+                </span>
+                <span className="sm:hidden">
+                  {t('products.salesCountShort', '{{count}} v.', { count: 0 })}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex-shrink-0 flex items-center gap-2 order-4 sm:order-none w-full sm:w-auto justify-end sm:justify-start">
+          <div className="flex-shrink-0 flex items-center gap-2 order-4 sm:order-none w-full sm:w-auto justify-end sm:justify-start mt-2 sm:mt-0">
             <Button
               variant="outline"
               size="sm"
               onClick={onEdit}
-              className="flex items-center justify-center gap-1.5 min-w-[44px] sm:min-w-[100px] lg:min-w-[120px] min-h-[44px] touch-manipulation"
+              className="flex items-center justify-center gap-1.5 flex-1 sm:flex-initial min-w-[44px] sm:min-w-[100px] lg:min-w-[120px] min-h-[44px] touch-manipulation"
               aria-label={t('products.actions.edit', 'Modifier')}
             >
               <Edit className="h-4 w-4 flex-shrink-0" />
-              <span className="hidden lg:inline whitespace-nowrap">
+              <span className="hidden sm:inline whitespace-nowrap">
                 {t('products.actions.edit', 'Modifier')}
               </span>
             </Button>
 
-            <Select>
+            <Select
+              onValueChange={value => {
+                // Gérer les actions selon la valeur sélectionnée
+                switch (value) {
+                  case 'quickview':
+                    onQuickView?.();
+                    break;
+                  case 'copylink':
+                    handleCopyLink();
+                    break;
+                  case 'preview':
+                    handlePreview();
+                    break;
+                  case 'duplicate':
+                    onDuplicate?.();
+                    break;
+                  case 'toggle':
+                    onToggleStatus?.();
+                    break;
+                  case 'delete':
+                    onDelete();
+                    break;
+                  default:
+                    break;
+                }
+              }}
+            >
               <SelectTrigger
                 className="flex items-center justify-center min-w-[44px] min-h-[44px] touch-manipulation border-border"
                 aria-label={t('products.actionsForProduct', 'Actions pour le produit {{name}}', {
@@ -281,27 +332,27 @@ const ProductListView = ({
               </SelectTrigger>
               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                 {onQuickView && (
-                  <SelectItem value="quickview" onSelect={onQuickView}>
+                  <SelectItem value="quickview">
                     <span className="flex items-center">
                       <Eye className="h-4 w-4 mr-2" />
                       {t('products.quickView.title', 'Aperçu rapide')}
                     </span>
                   </SelectItem>
                 )}
-                <SelectItem value="copylink" onSelect={handleCopyLink}>
+                <SelectItem value="copylink">
                   <span className="flex items-center">
                     <Copy className="h-4 w-4 mr-2" />
                     {t('products.copyLink', 'Copier le lien')}
                   </span>
                 </SelectItem>
-                <SelectItem value="preview" onSelect={handlePreview}>
+                <SelectItem value="preview">
                   <span className="flex items-center">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     {t('products.preview', 'Prévisualiser')}
                   </span>
                 </SelectItem>
                 {onDuplicate && (
-                  <SelectItem value="duplicate" onSelect={onDuplicate}>
+                  <SelectItem value="duplicate">
                     <span className="flex items-center">
                       <FileStack className="h-4 w-4 mr-2" />
                       {t('products.actions.duplicate', 'Dupliquer')}
@@ -309,7 +360,7 @@ const ProductListView = ({
                   </SelectItem>
                 )}
                 {onToggleStatus && (
-                  <SelectItem value="toggle" onSelect={onToggleStatus}>
+                  <SelectItem value="toggle">
                     <span className="flex items-center">
                       {product.is_active ? (
                         <>
@@ -325,7 +376,7 @@ const ProductListView = ({
                     </span>
                   </SelectItem>
                 )}
-                <SelectItem value="delete" onSelect={onDelete} className="text-destructive">
+                <SelectItem value="delete" className="text-destructive">
                   <span className="flex items-center">
                     <Trash2 className="h-4 w-4 mr-2" />
                     {t('products.actions.delete', 'Supprimer')}

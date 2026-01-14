@@ -1,17 +1,18 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CheckSquare, 
-  Square, 
-  Eye, 
-  EyeOff, 
-  Trash2, 
-  Copy, 
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  CheckSquare,
+  Square,
+  Eye,
+  EyeOff,
+  Trash2,
+  Copy,
   Download,
-  MoreHorizontal
-} from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+  MoreHorizontal,
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,9 +22,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Product } from "@/hooks/useProducts";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/alert-dialog';
+import { Product } from '@/hooks/useProducts';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductBulkActionsProps {
   selectedProducts: string[];
@@ -59,16 +60,16 @@ const ProductBulkActions = ({
   const handleBulkActivate = () => {
     onBulkAction('activate', selectedProducts);
     toast({
-      title: "Produits activés",
-      description: `${selectedCount} produit${selectedCount > 1 ? "s" : ""} activé${selectedCount > 1 ? "s" : ""}`,
+      title: 'Produits activés',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} activé${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
   const handleBulkDeactivate = () => {
     onBulkAction('deactivate', selectedProducts);
     toast({
-      title: "Produits désactivés",
-      description: `${selectedCount} produit${selectedCount > 1 ? "s" : ""} désactivé${selectedCount > 1 ? "s" : ""}`,
+      title: 'Produits désactivés',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} désactivé${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
@@ -81,8 +82,8 @@ const ProductBulkActions = ({
     onSelectionChange([]);
     setShowDeleteDialog(false);
     toast({
-      title: "Produits supprimés",
-      description: `${selectedCount} produit${selectedCount > 1 ? "s" : ""} supprimé${selectedCount > 1 ? "s" : ""}`,
+      title: 'Produits supprimés',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} supprimé${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
@@ -90,15 +91,17 @@ const ProductBulkActions = ({
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
     const csvContent = [
       ['Nom', 'Prix', 'Devise', 'Catégorie', 'Type', 'Statut', 'Date de création'].join(','),
-      ...selectedProductsData.map(product => [
-        `"${product.name}"`,
-        product.price,
-        product.currency,
-        `"${product.category || ''}"`,
-        `"${product.product_type || ''}"`,
-        product.is_active ? 'Actif' : 'Inactif',
-        new Date(product.created_at).toLocaleDateString('fr-FR')
-      ].join(','))
+      ...selectedProductsData.map(product =>
+        [
+          `"${product.name}"`,
+          product.price,
+          product.currency,
+          `"${product.category || ''}"`,
+          `"${product.product_type || ''}"`,
+          product.is_active ? 'Actif' : 'Inactif',
+          new Date(product.created_at).toLocaleDateString('fr-FR'),
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -112,93 +115,105 @@ const ProductBulkActions = ({
     document.body.removeChild(link);
 
     toast({
-      title: "Export réussi",
-      description: `${selectedCount} produit${selectedCount > 1 ? "s" : ""} exporté${selectedCount > 1 ? "s" : ""}`,
+      title: 'Export réussi',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} exporté${selectedCount > 1 ? 's' : ''}`,
     });
   };
 
   if (selectedCount === 0) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Button
           variant="ghost"
           size="sm"
-          onSelect={handleSelectAll}
-          className="h-8 w-8 p-0"
+          onClick={handleSelectAll}
+          className="h-11 w-11 sm:h-10 sm:w-10 p-0 touch-manipulation"
         >
           {isAllSelected ? (
-            <CheckSquare className="h-4 w-4" />
+            <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4" />
           ) : (
-            <Square className="h-4 w-4" />
+            <Square className="h-5 w-5 sm:h-4 sm:w-4" />
           )}
         </Button>
-        <span className="text-sm text-muted-foreground">
-          Sélectionner tout
-        </span>
+        <span className="text-sm sm:text-base text-muted-foreground">Sélectionner tout</span>
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg border">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
             size="sm"
-            onSelect={handleSelectAll}
-            className="h-6 w-6 p-0"
+            onClick={handleSelectAll}
+            className="h-11 w-11 sm:h-10 sm:w-10 p-0 touch-manipulation"
           >
             {isAllSelected ? (
-              <CheckSquare className="h-4 w-4" />
+              <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4" />
             ) : isIndeterminate ? (
-              <div className="h-4 w-4 border-2 border-primary bg-primary/20 rounded" />
+              <div className="h-5 w-5 sm:h-4 sm:w-4 border-2 border-primary bg-primary/20 rounded" />
             ) : (
-              <Square className="h-4 w-4" />
+              <Square className="h-5 w-5 sm:h-4 sm:w-4" />
             )}
           </Button>
-          <Badge variant="secondary" className="text-xs">
-            {selectedCount} sélectionné{selectedCount > 1 ? "s" : ""}
+          <Badge variant="secondary" className="text-xs sm:text-sm px-2 sm:px-3 py-1">
+            {selectedCount} sélectionné{selectedCount > 1 ? 's' : ''}
           </Badge>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1 sm:flex-initial justify-start sm:justify-end">
           <Button
             variant="outline"
             size="sm"
-            onSelect={handleBulkActivate}
-            className="text-xs"
+            onClick={handleBulkActivate}
+            className="text-xs sm:text-sm min-h-[44px] touch-manipulation flex-1 sm:flex-initial"
           >
-            <Eye className="h-3 w-3 mr-1" />
-            Activer
+            <Eye className="h-4 w-4 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">Activer</span>
+            <span className="sm:hidden">Activer</span>
           </Button>
-          
+
           <Button
             variant="outline"
             size="sm"
-            onSelect={handleBulkDeactivate}
-            className="text-xs"
+            onClick={handleBulkDeactivate}
+            className="text-xs sm:text-sm min-h-[44px] touch-manipulation flex-1 sm:flex-initial"
           >
-            <EyeOff className="h-3 w-3 mr-1" />
-            Désactiver
+            <EyeOff className="h-4 w-4 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">Désactiver</span>
+            <span className="sm:hidden">Désactiver</span>
           </Button>
 
-          <Select>
-            <SelectTrigger className="text-xs">
-
-                <MoreHorizontal className="h-3 w-3 mr-1" />
-                Plus
-              
-</SelectTrigger>
-            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-              <SelectItem value="edit" onSelect={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
-                Exporter en CSV
+          <Select
+            onValueChange={value => {
+              if (value === 'export') {
+                handleExport();
+              } else if (value === 'delete') {
+                handleBulkDelete();
+              }
+            }}
+          >
+            <SelectTrigger className="text-xs sm:text-sm min-h-[44px] touch-manipulation flex-1 sm:flex-initial min-w-[100px]">
+              <MoreHorizontal className="h-4 w-4 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-1 flex-shrink-0" />
+              <span>Plus</span>
+            </SelectTrigger>
+            <SelectContent mobileVariant="sheet" className="min-w-[200px] sm:min-w-[220px]">
+              <SelectItem value="export" className="text-sm sm:text-base">
+                <div className="flex items-center">
+                  <Download className="h-4 w-4 mr-2 flex-shrink-0" />
+                  Exporter en CSV
+                </div>
               </SelectItem>
-              <DropdownMenuSeparator />
-              <SelectItem value="delete" onSelect={handleBulkDelete} className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Supprimer
+              <div className="px-2 py-1">
+                <Separator />
+              </div>
+              <SelectItem value="delete" className="text-destructive text-sm sm:text-base">
+                <div className="flex items-center">
+                  <Trash2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                  Supprimer
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>
@@ -210,13 +225,17 @@ const ProductBulkActions = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer {selectedCount} produit{selectedCount > 1 ? "s" : ""} ? 
-              Cette action est irréversible et supprimera définitivement {selectedCount > 1 ? "ces produits" : "ce produit"}.
+              Êtes-vous sûr de vouloir supprimer {selectedCount} produit
+              {selectedCount > 1 ? 's' : ''} ? Cette action est irréversible et supprimera
+              définitivement {selectedCount > 1 ? 'ces produits' : 'ce produit'}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

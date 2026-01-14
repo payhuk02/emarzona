@@ -1,7 +1,7 @@
 /**
  * useProductsOptimized Hook
  * Date: 28 Janvier 2025
- * 
+ *
  * Hook optimisé pour les produits avec pagination serveur et gestion d'erreurs améliorée
  */
 
@@ -14,7 +14,15 @@ import type { Product } from './useProducts';
 export interface ProductsPaginationOptions {
   page?: number;
   itemsPerPage?: number;
-  sortBy?: 'recent' | 'oldest' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'popular' | 'rating';
+  sortBy?:
+    | 'recent'
+    | 'oldest'
+    | 'name-asc'
+    | 'name-desc'
+    | 'price-asc'
+    | 'price-desc'
+    | 'popular'
+    | 'rating';
   sortOrder?: 'asc' | 'desc';
   searchQuery?: string;
   category?: string;
@@ -93,15 +101,18 @@ export const useProductsOptimized = (
         const endIndex = startIndex + itemsPerPage - 1;
 
         // Construire la requête de base
-        let  queryBuilder= supabase
+        let queryBuilder = supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             product_affiliate_settings!left (
               commission_rate,
               affiliate_enabled
             )
-          `, { count: 'exact' })
+          `,
+            { count: 'exact' }
+          )
           .eq('store_id', storeId);
 
         // Appliquer les filtres
@@ -127,9 +138,7 @@ export const useProductsOptimized = (
 
         // Filtre prix (doit être fait côté serveur si possible)
         if (priceRange[0] > 0 || priceRange[1] < 1000000) {
-          queryBuilder = queryBuilder
-            .gte('price', priceRange[0])
-            .lte('price', priceRange[1]);
+          queryBuilder = queryBuilder.gte('price', priceRange[0]).lte('price', priceRange[1]);
         }
 
         // Appliquer le tri
@@ -173,9 +182,9 @@ export const useProductsOptimized = (
         }
 
         // Filtrer par stockStatus côté client (trop complexe pour SQL)
-        let  filteredData= (data || []) as Product[];
+        let filteredData = (data || []) as Product[];
         if (stockStatus !== 'all') {
-          filteredData = filteredData.filter((product) => {
+          filteredData = filteredData.filter(product => {
             if (product.track_inventory === false || product.product_type === 'digital') {
               return stockStatus === 'in_stock';
             }
@@ -215,12 +224,12 @@ export const useProductsOptimized = (
           page,
           itemsPerPage,
         });
-        throw error;
+        throw _error;
       }
     },
     enabled: !!storeId,
     retry: (failureCount, error) => shouldRetryError(error, failureCount),
-    retryDelay: (attemptIndex) => getRetryDelay(attemptIndex),
+    retryDelay: attemptIndex => getRetryDelay(attemptIndex),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -236,10 +245,3 @@ export const useProductsOptimized = (
     refetch: query.refetch,
   };
 };
-
-
-
-
-
-
-
