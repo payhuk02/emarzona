@@ -52,7 +52,7 @@ import {
   AlertTriangle,
   FileDown,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useStore } from '@/hooks/useStore';
 import {
   useDigitalProducts,
@@ -266,7 +266,7 @@ export const DigitalProductsList = () => {
     }
 
     // Calculer les revenus réels depuis les commandes payées
-    let  totalRevenue= 0;
+    let totalRevenue = 0;
     if (revenueMap) {
       products.forEach(p => {
         const product = 'product' in p ? p.product : p;
@@ -584,12 +584,13 @@ export const DigitalProductsList = () => {
                   <span className="hidden sm:inline">Rafraîchir</span>
                 </Button>
                 <Select>
-                  <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm" disabled={isExporting || filteredProducts.length === 0}>
-
-                      <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                      <span className="hidden sm:inline">Exporter</span>
-                    
-</SelectTrigger>
+                  <SelectTrigger
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
+                    disabled={isExporting || filteredProducts.length === 0}
+                  >
+                    <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                    <span className="hidden sm:inline">Exporter</span>
+                  </SelectTrigger>
                   <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                       Exporter tous ({filteredProducts.length})
@@ -612,14 +613,23 @@ export const DigitalProductsList = () => {
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                           Exporter sélectionnés ({selectedProducts.size})
                         </div>
+                        <SelectItem
+                          value="export-csv-selected"
+                          onSelect={() => handleExport(selectedProducts, 'csv')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           CSV
                         </SelectItem>
+                        <SelectItem
+                          value="export-excel-selected"
+                          onSelect={() => handleExport(selectedProducts, 'excel')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           Excel (.xlsx)
                         </SelectItem>
+                        <SelectItem
+                          value="export-pdf-selected"
+                          onSelect={() => handleExport(selectedProducts, 'pdf')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           PDF
