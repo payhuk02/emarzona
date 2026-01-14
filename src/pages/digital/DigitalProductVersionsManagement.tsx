@@ -287,7 +287,7 @@ export default function DigitalProductVersionsManagement() {
                                   Modifier
                                 </SelectItem>
                                 <DropdownMenuSeparator />
-                                <SelectItem value="delete" onSelect
+                                <SelectItem value="delete"
                                   className="text-destructive"
                                   onSelect={() => handleDeleteVersion(version.id)}
                                 >

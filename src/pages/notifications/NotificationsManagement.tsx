@@ -791,7 +791,7 @@ export default function NotificationsManagement() {
                                 <Button variant="ghost" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
-                              </SelectTrigger>
+                              </DropdownMenuTrigger>
                               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                 {!notification.is_read && (
                                   <SelectItem value="edit" onSelect

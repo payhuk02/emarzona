@@ -343,21 +343,21 @@ export default function RecurringBookingsManagement() {
                                 }}
                               >
                                 {pattern.status === 'active' ? (
-                                  <SelectItem value="edit" onSelect
+                                  <SelectItem value="edit"
                                     onSelect={() => handleTogglePause(pattern.id, pattern.status)}
                                   >
                                     <Pause className="h-4 w-4 mr-2" />
                                     Mettre en pause
                                   </SelectItem>
                                 ) : pattern.status === 'paused' ? (
-                                  <SelectItem value="delete" onSelect
+                                  <SelectItem value="delete"
                                     onSelect={() => handleTogglePause(pattern.id, pattern.status)}
                                   >
                                     <Play className="h-4 w-4 mr-2" />
                                     Reprendre
                                   </SelectItem>
                                 ) : null}
-                                <SelectItem value="copy" onSelect
+                                <SelectItem value="copy"
                                   onSelect={() => {
                                     setSelectedPattern(pattern.id);
                                     setRescheduleDialogOpen(true);
@@ -366,19 +366,19 @@ export default function RecurringBookingsManagement() {
                                   <Calendar className="h-4 w-4 mr-2" />
                                   Replanifier
                                 </SelectItem>
-                                <SelectItem value="view" onSelect onSelect={() => handleGenerateMore(pattern.id)}>
+                                <SelectItem value="view" onSelect={() => handleGenerateMore(pattern.id)}>
                                   <RefreshCw className="h-4 w-4 mr-2" />
                                   Générer plus
                                 </SelectItem>
                                 <StableDropdownMenuSeparator />
-                                <SelectItem value="export" onSelect
+                                <SelectItem value="export"
                                   onSelect={() => handleCancel(pattern.id)}
                                   className="text-red-600"
                                 >
                                   <Square className="h-4 w-4 mr-2" />
                                   Annuler série
                                 </SelectItem>
-                              </Select>
+                              </StableDropdownMenu>
                             </TableCell>
                           </TableRow>
                         ))}
