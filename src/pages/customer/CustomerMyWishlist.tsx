@@ -846,19 +846,15 @@ export default function CustomerMyWishlist() {
                     </Button>
                     <Select>
                       <SelectTrigger
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
-                          disabled={isExporting}
-                        >
-                          <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                          <span className="hidden sm:inline">Exporter</span>
-                          <span className="sm:hidden">Export</span>
-                        </Button>
+                        className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
+                        disabled={isExporting}
+                      >
+                        <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">Exporter</span>
+                        <span className="sm:hidden">Export</span>
                       </SelectTrigger>
                       <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                        <SelectItem value="edit" onSelect onSelect={handleExportCSV} disabled={isExporting}>
+                        <SelectItem value="csv" onSelect={handleExportCSV} disabled={isExporting}>
                           <FileDown className="h-4 w-4 mr-2" />
                           Exporter en CSV
                         </SelectItem>
