@@ -531,7 +531,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onSelect={onRefresh}
+              onClick={onRefresh}
               disabled={isLoading}
               aria-label="Actualiser la liste des services"
             >
@@ -539,7 +539,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             </Button>
           )}
           {onCreate && (
-            <Button size="sm" onSelect={onCreate}>
+            <Button size="sm" onClick={onCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Nouveau
             </Button>
@@ -560,7 +560,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onSelect={() => onBulkAction?.('export', Array.from(selectedIds))}
+              onClick={() => onBulkAction?.('export', Array.from(selectedIds))}
             >
               <Download className="h-4 w-4 mr-2" />
               Exporter
@@ -568,7 +568,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onSelect={() => onBulkAction?.('delete', Array.from(selectedIds))}
+              onClick={() => onBulkAction?.('delete', Array.from(selectedIds))}
               className="text-red-600"
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -588,7 +588,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onSelect={toggleSelectAll}
+              onClick={toggleSelectAll}
               className="text-xs"
             >
               {selectedIds.size === filteredServices.length
@@ -599,7 +599,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onSelect={() => toggleSort('name')}
+            onClick={() => toggleSort('name')}
             className="text-xs"
           >
             <ArrowUpDown className="h-3 w-3 mr-1" />
@@ -608,7 +608,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onSelect={() => toggleSort('price')}
+            onClick={() => toggleSort('price')}
             className="text-xs"
           >
             <ArrowUpDown className="h-3 w-3 mr-1" />
@@ -617,7 +617,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onSelect={() => toggleSort('bookings')}
+            onClick={() => toggleSort('bookings')}
             className="text-xs"
           >
             <ArrowUpDown className="h-3 w-3 mr-1" />

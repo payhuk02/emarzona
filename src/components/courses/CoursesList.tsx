@@ -340,13 +340,13 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                 <Button
                   variant={showFiltersPanel ? 'default' : 'outline'}
                   size="default"
-                  onSelect={() => setShowFiltersPanel(!showFiltersPanel)}
+                  onClick={() => setShowFiltersPanel(!showFiltersPanel)}
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   Filtres
                 </Button>
               )}
-              <Button variant="outline" size="default" onSelect={handleExportCSV}>
+              <Button variant="outline" size="default" onClick={handleExportCSV}>
                 <Download className="h-4 w-4 mr-2" />
                 Exporter
               </Button>
@@ -433,22 +433,22 @@ export const CoursesList : React.FC<CoursesListProps> = ({
                   {selectedCourses.size} cours sélectionné(s)
                 </p>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onSelect={() => handleBulkAction('publish')}>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('publish')}>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Publier
                   </Button>
-                  <Button size="sm" variant="outline" onSelect={() => handleBulkAction('unpublish')}>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('unpublish')}>
                     <XCircle className="h-4 w-4 mr-2" />
                     Dépublier
                   </Button>
-                  <Button size="sm" variant="outline" onSelect={() => handleBulkAction('archive')}>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('archive')}>
                     <Archive className="h-4 w-4 mr-2" />
                     Archiver
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
-                    onSelect={() => handleBulkAction('delete')}
+                    onClick={() => handleBulkAction('delete')}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Supprimer
@@ -685,7 +685,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onSelect={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 Précédent
@@ -693,7 +693,7 @@ export const CoursesList : React.FC<CoursesListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onSelect={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Suivant

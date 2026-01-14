@@ -261,7 +261,7 @@ const AdminUsers = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
-                      <Button variant="outline" size="sm" onSelect={() => setAddAdminOpen(true)} disabled={!isAAL2}>
+                      <Button variant="outline" size="sm" onClick={() => setAddAdminOpen(true)} disabled={!isAAL2}>
                         <Plus className="h-4 w-4 mr-2" />
                         Ajouter un administrateur
                       </Button>
@@ -467,7 +467,7 @@ const AdminUsers = () => {
                               variant="outline"
                               size="sm"
                               disabled={!isAAL2}
-                              onSelect={() => {
+                              onClick={() => {
                                 setRoleTargetUser({ id: row.user_id, email: row.email });
                                 setNewRole(row.role || 'user');
                                 setRoleDialogOpen(true);
@@ -491,7 +491,7 @@ const AdminUsers = () => {
                                 variant="outline"
                                 size="sm"
                                 disabled={!isAAL2}
-                                onSelect={async () => {
+                                onClick={async () => {
                                   const success = await unsuspendUser(row.user_id);
                                   if (success) {
                                     await refetch();
@@ -516,7 +516,7 @@ const AdminUsers = () => {
                                 variant="outline"
                                 size="sm"
                                 disabled={!isAAL2}
-                                onSelect={() => {
+                                onClick={() => {
                                   setSelectedUser(row.user_id);
                                   setSuspendDialogOpen(true);
                                 }}
@@ -539,7 +539,7 @@ const AdminUsers = () => {
                               variant="destructive"
                               size="sm"
                               disabled={!isAAL2}
-                              onSelect={() => {
+                              onClick={() => {
                                 setSelectedUser(row.user_id);
                                 setDeleteDialogOpen(true);
                               }}
@@ -567,7 +567,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="sm"
                           className="min-h-[44px] h-11 -ml-3"
-                          onSelect={() => handleSort('display_name')}
+                          onClick={() => handleSort('display_name')}
                         >
                           Nom complet
                           {sortBy === 'display_name' ? (
@@ -588,7 +588,7 @@ const AdminUsers = () => {
                           variant="ghost"
                           size="sm"
                           className="min-h-[44px] h-11 -ml-3"
-                          onSelect={() => handleSort('created_at')}
+                          onClick={() => handleSort('created_at')}
                         >
                           Date d'inscription
                           {sortBy === 'created_at' ? (
@@ -653,7 +653,7 @@ const AdminUsers = () => {
                                       variant="outline"
                                       size="sm"
                                       disabled={!isAAL2}
-                                      onSelect={() => {
+                                      onClick={() => {
                                         setRoleTargetUser({ id: user.user_id, email: user.email });
                                         setNewRole(user.role || 'user');
                                         setRoleDialogOpen(true);
@@ -678,7 +678,7 @@ const AdminUsers = () => {
                                         variant="outline"
                                         size="sm"
                                         disabled={!isAAL2}
-                                        onSelect={async () => {
+                                        onClick={async () => {
                                           const success = await unsuspendUser(user.user_id);
                                           if (success) {
                                             await refetch();
@@ -704,7 +704,7 @@ const AdminUsers = () => {
                                         variant="outline"
                                         size="sm"
                                         disabled={!isAAL2}
-                                        onSelect={() => {
+                                        onClick={() => {
                                           setSelectedUser(user.user_id);
                                           setSuspendDialogOpen(true);
                                         }}
@@ -728,7 +728,7 @@ const AdminUsers = () => {
                                       variant="destructive"
                                       size="sm"
                                       disabled={!isAAL2}
-                                      onSelect={() => {
+                                      onClick={() => {
                                         setSelectedUser(user.user_id);
                                         setDeleteDialogOpen(true);
                                       }}
@@ -778,7 +778,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onSelect={() => setPage(1)}
+                    onClick={() => setPage(1)}
                     disabled={page === 1}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Première page"
@@ -789,7 +789,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onSelect={() => setPage(page - 1)}
+                    onClick={() => setPage(page - 1)}
                     disabled={page === 1}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Page précédente"
@@ -817,7 +817,7 @@ const AdminUsers = () => {
                           variant={page === pageNum ? 'default' : 'outline'}
                           size="sm"
                           className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-8 sm:w-8 p-0"
-                          onSelect={() => setPage(pageNum)}
+                          onClick={() => setPage(pageNum)}
                           aria-label={`Page ${pageNum}`}
                         >
                           {pageNum}
@@ -829,7 +829,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onSelect={() => setPage(page + 1)}
+                    onClick={() => setPage(page + 1)}
                     disabled={page === totalPages}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Page suivante"
@@ -840,7 +840,7 @@ const AdminUsers = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onSelect={() => setPage(totalPages)}
+                    onClick={() => setPage(totalPages)}
                     disabled={page === totalPages}
                     className="min-h-[44px] min-w-[44px] sm:min-w-auto"
                     aria-label="Dernière page"
@@ -881,9 +881,9 @@ const AdminUsers = () => {
               </Select>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onSelect={() => setRoleDialogOpen(false)} className="w-full sm:w-auto">Annuler</Button>
+              <Button variant="outline" onClick={() => setRoleDialogOpen(false)} className="w-full sm:w-auto">Annuler</Button>
               <Button
-                onSelect={async () => {
+                onClick={async () => {
                   if (roleTargetUser) {
                     const ok = await setUserRole(roleTargetUser.id, newRole);
                     if (ok) {
@@ -933,9 +933,9 @@ const AdminUsers = () => {
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onSelect={() => setAddAdminOpen(false)} className="w-full sm:w-auto">Annuler</Button>
+              <Button variant="outline" onClick={() => setAddAdminOpen(false)} className="w-full sm:w-auto">Annuler</Button>
               <Button
-                onSelect={async () => {
+                onClick={async () => {
                   if (!addAdminEmail.trim()) return;
                   const ok = await promoteToAdmin(addAdminEmail.trim(), addAdminRole);
                   if (ok) {
@@ -969,12 +969,12 @@ const AdminUsers = () => {
               rows={4}
             />
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button variant="outline" onSelect={() => setSuspendDialogOpen(false)} className="w-full sm:w-auto">
+              <Button variant="outline" onClick={() => setSuspendDialogOpen(false)} className="w-full sm:w-auto">
                 Annuler
               </Button>
               <Button
                 variant="destructive"
-                onSelect={async () => {
+                onClick={async () => {
                   if (selectedUser && suspensionReason.trim()) {
                     const success = await suspendUser(selectedUser, suspensionReason);
                     if (success) {

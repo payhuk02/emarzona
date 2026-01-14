@@ -522,12 +522,12 @@ export default function NotificationsManagement() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onSelect={() => setIsPreferencesOpen(true)}>
+                <Button variant="outline" onClick={() => setIsPreferencesOpen(true)}>
                   <Settings className="h-4 w-4 mr-2" />
                   Préférences
                 </Button>
                 {unreadCount > 0 && (
-                  <Button onSelect={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
+                  <Button onClick={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     Tout marquer lu
                   </Button>
@@ -644,7 +644,7 @@ export default function NotificationsManagement() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onSelect={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                     title={sortOrder === 'asc' ? 'Trier décroissant' : 'Trier croissant'}
                   >
                     {sortOrder === 'asc' ? (
@@ -682,7 +682,7 @@ export default function NotificationsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={e => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleBulkMarkAsRead();
                             }}
@@ -693,7 +693,7 @@ export default function NotificationsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={e => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleBulkArchive();
                             }}
@@ -704,7 +704,7 @@ export default function NotificationsManagement() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onSelect={e => {
+                            onClick={e => {
                               e.stopPropagation();
                               handleBulkDelete();
                             }}

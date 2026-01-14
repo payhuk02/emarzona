@@ -210,7 +210,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
               />
               <div className="flex justify-end">
                 <Button
-                  onSelect={handleSubmitComment}
+                  onClick={handleSubmitComment}
                   disabled={!newComment.trim() || createComment.isPending}
                 >
                   {createComment.isPending ? (
@@ -327,7 +327,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              onSelect={handleUpdateComment}
+                              onClick={handleUpdateComment}
                               disabled={updateComment.isPending}
                             >
                               Enregistrer
@@ -335,7 +335,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                             <Button
                               size="sm"
                               variant="outline"
-                              onSelect={() => {
+                              onClick={() => {
                                 setEditingComment(null);
                                 setEditContent('');
                               }}
@@ -352,7 +352,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                         <Button
                           variant="ghost"
                           size="sm"
-                          onSelect={() => handleLike(comment.id, comment.is_liked || false)}
+                          onClick={() => handleLike(comment.id, comment.is_liked || false)}
                           className={cn(comment.is_liked && 'text-red-600 hover:text-red-700')}
                         >
                           <Heart
@@ -363,7 +363,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                         <Button
                           variant="ghost"
                           size="sm"
-                          onSelect={() =>
+                          onClick={() =>
                             setReplyingTo(replyingTo === comment.id ? null : comment.id)
                           }
                         >
@@ -384,7 +384,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              onSelect={() => handleSubmitReply(comment.id)}
+                              onClick={() => handleSubmitReply(comment.id)}
                               disabled={!replyContent.trim() || createComment.isPending}
                             >
                               Répondre
@@ -392,7 +392,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                             <Button
                               size="sm"
                               variant="outline"
-                              onSelect={() => {
+                              onClick={() => {
                                 setReplyingTo(null);
                                 setReplyContent('');
                               }}
@@ -428,7 +428,7 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
                                   variant="ghost"
                                   size="sm"
                                   className="h-7 text-xs"
-                                  onSelect={() => handleLike(reply.id, reply.is_liked || false)}
+                                  onClick={() => handleLike(reply.id, reply.is_liked || false)}
                                 >
                                   <Heart
                                     className={cn(
@@ -494,10 +494,10 @@ export function PortfolioComments({ portfolioId, className }: PortfolioCommentsP
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onSelect={() => setReportingComment(null)}>
+              <Button variant="outline" onClick={() => setReportingComment(null)}>
                 Annuler
               </Button>
-              <Button onSelect={handleReport} disabled={!reportReason || reportComment.isPending}>
+              <Button onClick={handleReport} disabled={!reportReason || reportComment.isPending}>
                 Signaler
               </Button>
             </div>

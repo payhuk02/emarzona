@@ -221,7 +221,7 @@ export function VersionManagementDashboard({
                 }}
               />
             )}
-            <Button onSelect={handleCreateVersion} className="gap-2">
+            <Button onClick={handleCreateVersion} className="gap-2">
               <Upload className="h-4 w-4" />
               Nouvelle Version
             </Button>

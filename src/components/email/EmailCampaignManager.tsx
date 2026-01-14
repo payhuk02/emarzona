@@ -135,7 +135,7 @@ export const EmailCampaignManager = ({
                 Gérez vos campagnes email marketing ({campaigns?.length || 0})
               </CardDescription>
             </div>
-            <Button onSelect={onCreateCampaign}>
+            <Button onClick={onCreateCampaign}>
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle campagne
             </Button>
@@ -145,7 +145,7 @@ export const EmailCampaignManager = ({
           {!campaigns || campaigns.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Aucune campagne pour le moment</p>
-              <Button onSelect={onCreateCampaign}>
+              <Button onClick={onCreateCampaign}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer votre première campagne
               </Button>
@@ -306,7 +306,7 @@ export const EmailCampaignManager = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onSelect={() => {
+                  onClick={() => {
                     setShowMetrics(false);
                     setSelectedCampaign(null);
                   }}

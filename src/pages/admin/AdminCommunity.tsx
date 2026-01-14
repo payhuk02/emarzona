@@ -315,7 +315,7 @@ export default function AdminCommunity() {
                         Gérez les membres et leurs statuts
                       </CardDescription>
                     </div>
-                    <Button onSelect={() => setMemberFormOpen(true)}>
+                    <Button onClick={() => setMemberFormOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Nouveau membre
                     </Button>
@@ -443,7 +443,7 @@ export default function AdminCommunity() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                onSelect={() => handleMemberStatusChange(row.id, 'approved')}
+                                onClick={() => handleMemberStatusChange(row.id, 'approved')}
                                 className="min-h-[44px] w-full"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -454,7 +454,7 @@ export default function AdminCommunity() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onSelect={() => handleMemberStatusChange(row.id, 'suspended')}
+                                onClick={() => handleMemberStatusChange(row.id, 'suspended')}
                                 className="min-h-[44px] w-full"
                               >
                                 <Ban className="h-4 w-4 mr-2" />
@@ -465,7 +465,7 @@ export default function AdminCommunity() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                onSelect={() => handleMemberStatusChange(row.id, 'approved')}
+                                onClick={() => handleMemberStatusChange(row.id, 'approved')}
                                 className="min-h-[44px] w-full"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -475,7 +475,7 @@ export default function AdminCommunity() {
                             <Button
                               variant="destructive"
                               size="sm"
-                              onSelect={() => {
+                              onClick={() => {
                                 setTargetMemberId(row.id);
                                 setDeleteMemberDialogOpen(true);
                               }}
@@ -625,7 +625,7 @@ export default function AdminCommunity() {
                         Gérez les publications de la communauté
                       </CardDescription>
                     </div>
-                    <Button onSelect={() => {
+                    <Button onClick={() => {
                       setSelectedPost(null);
                       setPostFormOpen(true);
                     }}>

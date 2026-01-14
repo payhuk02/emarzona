@@ -419,7 +419,7 @@ export default function RecurringBookingsManagement() {
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
-                      onSelect={() => {
+                      onClick={() => {
                         setRescheduleDialogOpen(false);
                         setSelectedPattern(null);
                         setNewStartDate('');
@@ -428,7 +428,7 @@ export default function RecurringBookingsManagement() {
                     >
                       Annuler
                     </Button>
-                    <Button onSelect={handleReschedule} className="min-h-[44px] text-xs sm:text-sm">
+                    <Button onClick={handleReschedule} className="min-h-[44px] text-xs sm:text-sm">
                       Replanifier
                     </Button>
                   </div>

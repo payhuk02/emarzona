@@ -170,7 +170,7 @@ export const LicenseManagementDashboard = ({
           <p className="text-muted-foreground">{productName}</p>
         </div>
 
-        <Button onSelect={() => setShowGenerator(true)}>
+        <Button onClick={() => setShowGenerator(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Générer une licence
         </Button>
@@ -254,7 +254,7 @@ export const LicenseManagementDashboard = ({
             <div className="text-center py-12 text-muted-foreground">
               <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Aucune licence trouvée</p>
-              <Button onSelect={() => setShowGenerator(true)} className="mt-4">
+              <Button onClick={() => setShowGenerator(true)} className="mt-4">
                 <Plus className="h-4 w-4 mr-2" />
                 Créer votre première licence
               </Button>
@@ -281,7 +281,7 @@ export const LicenseManagementDashboard = ({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onSelect={() => handleCopyKey(license.license_key)}
+                          onClick={() => handleCopyKey(license.license_key)}
                           aria-label="Copier la clé de licence"
                         >
                           <Copy className="h-3 w-3" />
@@ -572,7 +572,7 @@ const LicenseGeneratorDialog = ({
             </div>
           )}
 
-          <Button onSelect={handleGenerate} disabled={isGenerating} className="w-full">
+          <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
             {isGenerating ? 'Génération...' : 'Générer la Licence'}
           </Button>
         </div>

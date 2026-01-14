@@ -98,7 +98,7 @@ export default function DigitalProductVersionsManagement() {
                   <p className="text-muted-foreground mb-4">
                     Le produit demandé n'existe pas ou vous n'avez pas les permissions nécessaires.
                   </p>
-                  <Button onSelect={() => navigate('/dashboard/products')}>
+                  <Button onClick={() => navigate('/dashboard/products')}>
                     Retour aux produits
                   </Button>
                 </CardContent>
@@ -121,7 +121,7 @@ export default function DigitalProductVersionsManagement() {
               <div>
                 <Button
                   variant="ghost"
-                  onSelect={() => navigate(-1)}
+                  onClick={() => navigate(-1)}
                   className="mb-4"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
@@ -134,7 +134,7 @@ export default function DigitalProductVersionsManagement() {
                   {product.name || 'Produit'}
                 </p>
               </div>
-              <Button onSelect={() => setIsCreateDialogOpen(true)}>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Version
               </Button>

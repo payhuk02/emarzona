@@ -378,7 +378,7 @@ export default function OrderMessaging() {
           <AppSidebar />
           <main className="flex-1 overflow-x-hidden">
             <div className="container mx-auto p-6">
-              <Button variant="ghost" onSelect={() => navigate(-1)} className="mb-4">
+              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
@@ -410,7 +410,7 @@ export default function OrderMessaging() {
           <div className="container mx-auto p-6 max-w-7xl">
             {/* Header */}
             <div className="mb-6">
-              <Button variant="ghost" onSelect={() => navigate(-1)} className="mb-4">
+              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
@@ -486,7 +486,7 @@ export default function OrderMessaging() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onSelect={async () => {
+                            onClick={async () => {
                               if (searchQuery.trim()) {
                                 await searchMessages({
                                   conversationId: currentConversation?.id,
@@ -501,7 +501,7 @@ export default function OrderMessaging() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onSelect={() => {
+                            onClick={() => {
                               setSearchQuery('');
                               setShowSearch(false);
                               clearSearch();
@@ -511,7 +511,7 @@ export default function OrderMessaging() {
                           </Button>
                         </div>
                       ) : (
-                        <Button variant="ghost" size="icon" onSelect={() => setShowSearch(true)}>
+                        <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
                           <Search className="h-4 w-4" />
                         </Button>
                       )}
@@ -595,7 +595,7 @@ export default function OrderMessaging() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onSelect={loadMoreMessages}
+                            onClick={loadMoreMessages}
                             disabled={messagesLoading}
                             className="text-xs"
                           >
@@ -708,7 +708,7 @@ export default function OrderMessaging() {
                             variant="ghost"
                             size="icon"
                             className="h-5 w-5"
-                            onSelect={() => removeFile(index)}
+                            onClick={() => removeFile(index)}
                             aria-label={`Supprimer le fichier ${file.name}`}
                           >
                             <X className="h-3 w-3" />
@@ -747,7 +747,7 @@ export default function OrderMessaging() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onSelect={() => setShowCameraDialog(true)}
+                        onClick={() => setShowCameraDialog(true)}
                         disabled={sendingMessage || uploadingFiles}
                         aria-label="Prendre une photo"
                         title="Prendre une photo"
@@ -758,7 +758,7 @@ export default function OrderMessaging() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onSelect={() => fileInputRef.current?.click()}
+                        onClick={() => fileInputRef.current?.click()}
                         disabled={sendingMessage || uploadingFiles}
                         aria-label="Joindre un fichier"
                         title="Joindre un fichier"
@@ -767,7 +767,7 @@ export default function OrderMessaging() {
                       </Button>
 
                       <Button
-                        onSelect={handleSendMessage}
+                        onClick={handleSendMessage}
                         disabled={
                           sendingMessage ||
                           uploadingFiles ||
@@ -835,7 +835,7 @@ export default function OrderMessaging() {
                         <Button
                           variant="outline"
                           className="w-full"
-                          onSelect={() => navigate(`/orders/${orderId}`)}
+                          onClick={() => navigate(`/orders/${orderId}`)}
                         >
                           Voir détails commande
                         </Button>
@@ -870,7 +870,7 @@ export default function OrderMessaging() {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onSelect={() => setShowAdminPanel(true)}
+                      onClick={() => setShowAdminPanel(true)}
                     >
                       <Shield className="h-4 w-4 mr-2" />
                       Demander aide admin
@@ -903,10 +903,10 @@ export default function OrderMessaging() {
               </Alert>
 
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onSelect={() => setShowAdminPanel(false)}>
+                <Button variant="outline" onClick={() => setShowAdminPanel(false)}>
                   Annuler
                 </Button>
-                <Button onSelect={handleAdminIntervention}>
+                <Button onClick={handleAdminIntervention}>
                   <Crown className="h-4 w-4 mr-2" />
                   Confirmer
                 </Button>

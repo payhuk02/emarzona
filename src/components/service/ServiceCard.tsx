@@ -238,7 +238,7 @@ const ServiceCardComponent = ({
       </CardContent>
 
       <CardFooter className="pt-3">
-        <Button className="w-full" onSelect={() => navigate(`/services/${service.product_id}`)}>
+        <Button className="w-full" onClick={() => navigate(`/services/${service.product_id}`)}>
           <Calendar className="h-4 w-4 mr-2" />
           Réserver
         </Button>

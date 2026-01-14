@@ -255,7 +255,7 @@ export default function AnalyticsDashboardsManagement() {
                   Créez et gérez vos dashboards analytics personnalisés avec widgets configurables
                 </p>
               </div>
-              <Button onSelect={() => setIsCreateDialogOpen(true)} className="shrink-0">
+              <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau Dashboard
               </Button>
@@ -335,7 +335,7 @@ export default function AnalyticsDashboardsManagement() {
                       {searchQuery ? 'Aucun dashboard ne correspond à votre recherche' : 'Aucun dashboard créé'}
                     </p>
                     {!searchQuery && (
-                      <Button onSelect={() => setIsCreateDialogOpen(true)}>
+                      <Button onClick={() => setIsCreateDialogOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Créer votre premier dashboard
                       </Button>
@@ -546,13 +546,13 @@ export default function AnalyticsDashboardsManagement() {
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onSelect={() => {
+                  <Button variant="outline" onClick={() => {
                     setIsCreateDialogOpen(false);
                     setEditingDashboardId(null);
                   }}>
                     Annuler
                   </Button>
-                  <Button onSelect={handleCreateDashboard} disabled={!formData.name || createDashboard.isPending}>
+                  <Button onClick={handleCreateDashboard} disabled={!formData.name || createDashboard.isPending}>
                     {editingDashboardId ? 'Sauvegarder' : 'Créer'}
                   </Button>
                 </div>

@@ -121,7 +121,7 @@ export const FileVersionManager = ({ fileId, fileName }: FileVersionManagerProps
               <p className="text-muted-foreground mb-4">
                 Créez votre première version pour commencer l'historique
               </p>
-              <Button onSelect={() => setIsCreateDialogOpen(true)}>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer une version
               </Button>

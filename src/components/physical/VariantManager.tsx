@@ -130,7 +130,7 @@ function OptionEditor({
             placeholder="Nom de l'option"
           />
         </div>
-        <Button variant="ghost" size="sm" onSelect={onDelete} aria-label={`Supprimer l'option ${option.name}`}>
+        <Button variant="ghost" size="sm" onClick={onDelete} aria-label={`Supprimer l'option ${option.name}`}>
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </CardHeader>
@@ -158,7 +158,7 @@ function OptionEditor({
             onKeyDown={(e) => e.key === 'Enter' && handleAddValue()}
             placeholder={`Ajouter une valeur (ex: ${option.name === 'Couleur' ? 'Rouge' : option.name === 'Taille' ? 'M' : 'Standard'})`}
           />
-          <Button onSelect={handleAddValue} size="sm" aria-label={`Ajouter une valeur à l'option ${option.name}`}>
+          <Button onClick={handleAddValue} size="sm" aria-label={`Ajouter une valeur à l'option ${option.name}`}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -314,7 +314,7 @@ export function VariantManager({
               Définissez les options (couleur, taille, etc.)
             </p>
           </div>
-          <Button onSelect={() => setShowAddOption(true)} variant="outline" size="sm" className="gap-2">
+          <Button onClick={() => setShowAddOption(true)} variant="outline" size="sm" className="gap-2">
             <Plus className="h-4 w-4" />
             Ajouter Option
           </Button>
@@ -380,7 +380,7 @@ export function VariantManager({
               </Select>
             )}
             <Button
-              onSelect={handleGenerateVariants}
+              onClick={handleGenerateVariants}
               disabled={options.length === 0 || options.some((o) => o.values.length === 0)}
               size="sm"
               className="gap-2"
@@ -584,10 +584,10 @@ export function VariantManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onSelect={() => setShowAddOption(false)}>
+            <Button variant="outline" onClick={() => setShowAddOption(false)}>
               Annuler
             </Button>
-            <Button onSelect={handleAddOption} disabled={!newOptionName.trim()}>
+            <Button onClick={handleAddOption} disabled={!newOptionName.trim()}>
               Ajouter
             </Button>
           </DialogFooter>
@@ -706,10 +706,10 @@ export function VariantManager({
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onSelect={() => setEditingVariant(null)}>
+              <Button variant="outline" onClick={() => setEditingVariant(null)}>
                 Annuler
               </Button>
-              <Button onSelect={() => handleSaveVariant(editingVariant)}>Sauvegarder</Button>
+              <Button onClick={() => handleSaveVariant(editingVariant)}>Sauvegarder</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

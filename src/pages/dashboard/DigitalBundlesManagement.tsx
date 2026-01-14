@@ -311,7 +311,7 @@ export default function DigitalBundlesManagement() {
                   Créez et gérez vos packs de produits digitaux
                 </p>
               </div>
-              <Button onSelect={handleCreateBundle} className="shrink-0">
+              <Button onClick={handleCreateBundle} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau Bundle
               </Button>
@@ -411,7 +411,7 @@ export default function DigitalBundlesManagement() {
                         : 'Aucun bundle créé'}
                     </p>
                     {!searchQuery && statusFilter === 'all' && (
-                      <Button onSelect={handleCreateBundle}>
+                      <Button onClick={handleCreateBundle}>
                         <Plus className="h-4 w-4 mr-2" />
                         Créer votre premier bundle
                       </Button>

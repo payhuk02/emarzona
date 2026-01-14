@@ -397,7 +397,7 @@ export default function AssignmentsManagement() {
                 </p>
               </div>
               <Button
-                onSelect={handleCreateAssignment}
+                onClick={handleCreateAssignment}
                 className="shrink-0"
                 disabled={!selectedCourseId}
               >
@@ -529,7 +529,7 @@ export default function AssignmentsManagement() {
                             : 'Aucun assignment créé'}
                         </p>
                         {!searchQuery && (
-                          <Button onSelect={handleCreateAssignment}>
+                          <Button onClick={handleCreateAssignment}>
                             <Plus className="h-4 w-4 mr-2" />
                             Créer votre premier assignment
                           </Button>
@@ -776,11 +776,11 @@ export default function AssignmentsManagement() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onSelect={() => setIsCreateDialogOpen(false)}>
+                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                       Annuler
                     </Button>
                     <Button
-                      onSelect={handleSaveAssignment}
+                      onClick={handleSaveAssignment}
                       disabled={createAssignment.isPending || updateAssignment.isPending}
                     >
                       {editingAssignmentId ? 'Sauvegarder' : 'Créer'}
@@ -906,7 +906,7 @@ export default function AssignmentsManagement() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              onSelect={() => window.open(file.url, '_blank')}
+                                              onClick={() => window.open(file.url, '_blank')}
                                             >
                                               <Download className="h-4 w-4" />
                                             </Button>
@@ -931,7 +931,7 @@ export default function AssignmentsManagement() {
                               <div className="flex justify-end gap-2 pt-2">
                                 {submission.status === 'submitted' && (
                                   <Button
-                                    onSelect={() => setGradingSubmissionId(submission.id)}
+                                    onClick={() => setGradingSubmissionId(submission.id)}
                                     size="sm"
                                   >
                                     <FileCheck className="h-4 w-4 mr-2" />
@@ -941,7 +941,7 @@ export default function AssignmentsManagement() {
                                 {submission.status === 'graded' && (
                                   <Button
                                     variant="outline"
-                                    onSelect={() => setGradingSubmissionId(submission.id)}
+                                    onClick={() => setGradingSubmissionId(submission.id)}
                                     size="sm"
                                   >
                                     <Edit className="h-4 w-4 mr-2" />

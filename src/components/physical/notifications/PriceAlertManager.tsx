@@ -116,7 +116,7 @@ export const PriceAlertManager = () => {
               <p className="text-muted-foreground mb-4">
                 Créez votre première alerte pour être notifié des baisses de prix
               </p>
-              <Button onSelect={() => setIsCreateDialogOpen(true)}>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer une alerte
               </Button>

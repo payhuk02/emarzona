@@ -150,10 +150,10 @@ export const EmailWorkflowManager = ({
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onSelect={() => setShowDashboard(!showDashboard)}>
+              <Button variant="outline" size="sm" onClick={() => setShowDashboard(!showDashboard)}>
                 {showDashboard ? 'Masquer' : 'Afficher'} Dashboard
               </Button>
-              <Button onSelect={onCreateWorkflow}>
+              <Button onClick={onCreateWorkflow}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau workflow
               </Button>
@@ -205,7 +205,7 @@ export const EmailWorkflowManager = ({
           {!workflows || workflows.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Aucun workflow pour le moment</p>
-              <Button onSelect={onCreateWorkflow}>
+              <Button onClick={onCreateWorkflow}>
                 <Plus className="h-4 w-4 mr-2" />
                 Créer votre premier workflow
               </Button>

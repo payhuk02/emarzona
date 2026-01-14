@@ -89,7 +89,7 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
     <>
       <Button
         variant="outline"
-        onSelect={() => setExportDialogOpen(true)}
+        onClick={() => setExportDialogOpen(true)}
         className="w-full sm:w-auto"
       >
         <Calendar className="h-4 w-4 mr-2" />
@@ -108,7 +108,7 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
             <Button
               variant="outline"
               className="w-full justify-start"
-              onSelect={() => handleExportICal()}
+              onClick={() => handleExportICal()}
             >
               <Download className="h-4 w-4 mr-2" />
               Télécharger fichier iCal (.ics)
@@ -118,7 +118,7 @@ export const StoreTaskCalendarExport = ({ storeId, task }: StoreTaskCalendarExpo
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onSelect={() => setExportDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Fermer
             </Button>
           </DialogFooter>

@@ -166,7 +166,7 @@ export const StoreMembersList = () => {
               {pendingMembers.length > 0 && `, ${pendingMembers.length} invitation${pendingMembers.length > 1 ? 's' : ''} en attente`}
             </CardDescription>
           </div>
-          <Button onSelect={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
+          <Button onClick={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
             <UserPlus className="h-4 w-4 mr-2" />
             Inviter un membre
           </Button>
@@ -309,7 +309,7 @@ export const StoreMembersList = () => {
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium mb-2">Aucun membre</p>
               <p className="text-sm mb-4">Commencez par inviter des membres à rejoindre votre équipe</p>
-              <Button onSelect={() => setInviteDialogOpen(true)}>
+              <Button onClick={() => setInviteDialogOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Inviter un membre
               </Button>

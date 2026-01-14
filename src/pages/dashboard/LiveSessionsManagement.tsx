@@ -363,7 +363,7 @@ export default function LiveSessionsManagement() {
                   Créez et gérez vos sessions en direct avec Zoom, Google Meet ou streaming natif
                 </p>
               </div>
-              <Button onSelect={handleCreateSession} className="shrink-0" disabled={!selectedCourseId}>
+              <Button onClick={handleCreateSession} className="shrink-0" disabled={!selectedCourseId}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Session
               </Button>
@@ -509,7 +509,7 @@ export default function LiveSessionsManagement() {
                             : 'Aucune session créée'}
                         </p>
                         {!searchQuery && statusFilter === 'all' && platformFilter === 'all' && (
-                          <Button onSelect={handleCreateSession}>
+                          <Button onClick={handleCreateSession}>
                             <Plus className="h-4 w-4 mr-2" />
                             Créer votre première session
                           </Button>
@@ -750,10 +750,10 @@ export default function LiveSessionsManagement() {
                   </div>
 
                   <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onSelect={() => setIsCreateDialogOpen(false)}>
+                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                       Annuler
                     </Button>
-                    <Button onSelect={handleSaveSession} disabled={createSession.isPending || updateSession.isPending}>
+                    <Button onClick={handleSaveSession} disabled={createSession.isPending || updateSession.isPending}>
                       {editingSessionId ? 'Sauvegarder' : 'Créer'}
                     </Button>
                   </div>

@@ -261,7 +261,7 @@ export default function AutoReorderRules() {
               variant="ghost"
               size="sm"
               className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-              onSelect={() => setSearchInput('')}
+              onClick={() => setSearchInput('')}
               aria-label="Effacer la recherche"
             >
               <X className="h-4 w-4" />
@@ -274,7 +274,7 @@ export default function AutoReorderRules() {
           </div>
         </div>
         <Button 
-          onSelect={() => handleOpenDialog()}
+          onClick={() => handleOpenDialog()}
           className="h-10 sm:h-11 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -634,7 +634,7 @@ export default function AutoReorderRules() {
               </div>
             </div>
             <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onSelect={handleCloseDialog} className="w-full sm:w-auto text-sm">
+              <Button type="button" variant="outline" onClick={handleCloseDialog} className="w-full sm:w-auto text-sm">
                 Annuler
               </Button>
               <Button type="submit" className="w-full sm:w-auto text-sm">

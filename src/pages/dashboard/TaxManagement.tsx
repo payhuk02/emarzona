@@ -356,7 +356,7 @@ export default function TaxManagement() {
                   Configurez les taxes automatiques par pays, région et type de produit
                 </p>
               </div>
-              <Button onSelect={() => setIsCreateDialogOpen(true)} className="shrink-0">
+              <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Configuration
               </Button>
@@ -453,7 +453,7 @@ export default function TaxManagement() {
                         : 'Aucune configuration de taxe créée'}
                     </p>
                     {!searchQuery && countryFilter === 'all' && (
-                      <Button onSelect={() => setIsCreateDialogOpen(true)}>
+                      <Button onClick={() => setIsCreateDialogOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Créer votre première configuration
                       </Button>
@@ -712,7 +712,7 @@ export default function TaxManagement() {
                             formData.applies_to_product_types?.includes(type) ? 'default' : 'outline'
                           }
                           size="sm"
-                          onSelect={() => {
+                          onClick={() => {
                             const current = formData.applies_to_product_types || [];
                             const newTypes = current.includes(type)
                               ? current.filter((t) => t !== type)
@@ -777,7 +777,7 @@ export default function TaxManagement() {
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="outline"
-                    onSelect={() => {
+                    onClick={() => {
                       setIsCreateDialogOpen(false);
                       setEditingTaxId(null);
                     }}
@@ -785,7 +785,7 @@ export default function TaxManagement() {
                     Annuler
                   </Button>
                   <Button
-                    onSelect={handleSaveTaxConfig}
+                    onClick={handleSaveTaxConfig}
                     disabled={createTaxConfig.isPending || updateTaxConfig.isPending}
                   >
                     {editingTaxId ? 'Sauvegarder' : 'Créer'}

@@ -309,7 +309,7 @@ export default function CouponsManagement() {
               Créez et gérez vos codes promo pour tous types de produits
             </p>
           </div>
-          <Button onSelect={() => setIsCreateDialogOpen(true)} className="shrink-0">
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
             <Plus className="h-4 w-4 mr-2" />
             Nouveau Coupon
           </Button>
@@ -434,7 +434,7 @@ export default function CouponsManagement() {
                     : 'Aucun coupon créé'}
                 </p>
                 {!searchQuery && statusFilter === 'all' && typeFilter === 'all' && (
-                  <Button onSelect={() => setIsCreateDialogOpen(true)}>
+                  <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Créer votre premier coupon
                   </Button>

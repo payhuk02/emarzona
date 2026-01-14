@@ -440,7 +440,7 @@ export default function AdminReturnManagement() {
                               <>
                                 <Button
                                   size="sm"
-                                  onSelect={() => handleApprove(row.id)}
+                                  onClick={() => handleApprove(row.id)}
                                   className="min-h-[44px] w-full"
                                 >
                                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -449,7 +449,7 @@ export default function AdminReturnManagement() {
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onSelect={() => {
+                                  onClick={() => {
                                     const reason = prompt('Raison du rejet:');
                                     if (reason) {
                                       handleReject(row.id, reason);
@@ -465,7 +465,7 @@ export default function AdminReturnManagement() {
                             {row.status === 'received' && (
                               <Button
                                 size="sm"
-                                onSelect={() => {
+                                onClick={() => {
                                   setSelectedReturnId(row.id);
                                   setRefundAmount(row.total_amount.toString());
                                   setRefundDialogOpen(true);
@@ -675,7 +675,7 @@ export default function AdminReturnManagement() {
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       variant="outline"
-                      onSelect={() => {
+                      onClick={() => {
                         setRefundDialogOpen(false);
                         setSelectedReturnId(null);
                         setRefundAmount('');
@@ -683,7 +683,7 @@ export default function AdminReturnManagement() {
                     >
                       Annuler
                     </Button>
-                    <Button onSelect={handleRefund}>Traiter le remboursement</Button>
+                    <Button onClick={handleRefund}>Traiter le remboursement</Button>
                   </div>
                 </div>
               </DialogContent>
@@ -721,14 +721,14 @@ function ReturnDetailView({
         <div className="flex gap-2">
           {returnItem.status === 'requested' && (
             <>
-              <Button size="sm" onSelect={() => onApprove?.(returnItem.id)}>
+              <Button size="sm" onClick={() => onApprove?.(returnItem.id)}>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Approuver
               </Button>
               <Button
                 size="sm"
                 variant="destructive"
-                onSelect={() => {
+                onClick={() => {
                   const reason = prompt('Raison du rejet:');
                   if (reason) {
                     onReject?.(returnItem.id, reason);
@@ -741,7 +741,7 @@ function ReturnDetailView({
             </>
           )}
           {returnItem.status === 'received' && (
-            <Button size="sm" onSelect={onRefund}>
+            <Button size="sm" onClick={onRefund}>
               <DollarSign className="h-4 w-4 mr-2" />
               Rembourser
             </Button>

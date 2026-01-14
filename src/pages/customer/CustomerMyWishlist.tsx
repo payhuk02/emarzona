@@ -863,7 +863,7 @@ export default function CustomerMyWishlist() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onSelect={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                      onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                       className="h-9 sm:h-10 transition-all hover:scale-105 text-xs sm:text-sm"
                     >
                       {viewMode === 'grid' ? (
