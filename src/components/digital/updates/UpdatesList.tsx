@@ -1,13 +1,12 @@
 /**
  * Updates List Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Liste des mises à jour d'un produit digital
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -18,8 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   MoreVertical,
   Download,
@@ -37,7 +35,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/lib/logger';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { DigitalProductUpdate } from '@/hooks/digital/useProductUpdates';
@@ -84,7 +81,7 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
         description: 'Le statut de publication a été modifié',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de modifier le statut',
@@ -94,12 +91,9 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
   });
 
   // Supprimer une mise à jour
-  const deleteUpdate = useMutation({
+  const _deleteUpdate = useMutation({
     mutationFn: async (updateId: string) => {
-      const { error } = await supabase
-        .from('digital_product_updates')
-        .delete()
-        .eq('id', updateId);
+      const { error } = await supabase.from('digital_product_updates').delete().eq('id', updateId);
 
       if (error) throw error;
     },
@@ -110,7 +104,7 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
         description: 'La mise à jour a été supprimée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
         description: error.message || 'Impossible de supprimer la mise à jour',
@@ -157,7 +151,7 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-20 w-full" />
             ))}
           </div>
@@ -171,16 +165,12 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
       <Card>
         <CardHeader>
           <CardTitle>Historique des mises à jour</CardTitle>
-          <CardDescription>
-            Aucune mise à jour pour ce produit
-          </CardDescription>
+          <CardDescription>Aucune mise à jour pour ce produit</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12">
             <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              Créez votre première mise à jour pour commencer
-            </p>
+            <p className="text-muted-foreground">Créez votre première mise à jour pour commencer</p>
           </div>
         </CardContent>
       </Card>
@@ -209,13 +199,15 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
             </TableRow>
           </TableHeader>
           <TableBody>
-            {updates.map((update) => (
+            {updates.map(update => (
               <TableRow key={update.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-semibold">{update.version}</span>
                     {update.version === currentVersion && (
-                      <Badge variant="outline" className="text-xs">Actuelle</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        Actuelle
+                      </Badge>
                     )}
                   </div>
                 </TableCell>
@@ -269,10 +261,8 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                 <TableCell className="text-right">
                   <Select>
                     <SelectTrigger>
-
-                        <MoreVertical className="h-4 w-4" />
-                      
-</SelectTrigger>
+                      <MoreVertical className="h-4 w-4" />
+                    </SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                       <SelectItem value="edit" onSelect>
                         <Eye className="h-4 w-4 mr-2" />
@@ -282,7 +272,9 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                         <Edit className="h-4 w-4 mr-2" />
                         Modifier
                       </SelectItem>
-                      <SelectItem value="copy" onSelect={() =>
+                      <SelectItem
+                        value="copy"
+                        onSelect={() =>
                           togglePublish.mutate({
                             updateId: update.id,
                             isPublished: update.is_published,
@@ -301,14 +293,7 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
                           </>
                         )}
                       </SelectItem>
-                      <SelectItem value="view" onSelect
-                        className="text-destructive"
-                        onSelect={() => {
-                          if (confirm('Êtes-vous sûr de vouloir supprimer cette mise à jour ?')) {
-                            deleteUpdate.mutate(update.id);
-                          }
-                        }}
-                      >
+                      <SelectItem value="view" className="text-destructive">
                         <Trash2 className="h-4 w-4 mr-2" />
                         Supprimer
                       </SelectItem>
@@ -323,10 +308,3 @@ export function UpdatesList({ digitalProductId, currentVersion }: UpdatesListPro
     </Card>
   );
 }
-
-
-
-
-
-
-

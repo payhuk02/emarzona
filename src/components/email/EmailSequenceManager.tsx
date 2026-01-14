@@ -7,13 +7,20 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/select';
+} from '@/components/ui/stable-dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,10 +33,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Copy, Mail } from 'lucide-react';
 import { useEmailSequences } from '@/hooks/email/useEmailSequences';
-import {
-  useDeleteEmailSequence,
-} from '@/hooks/email/useEmailSequences';
-import type { EmailSequence, SequenceStatus, SequenceTriggerType } from '@/lib/email/email-sequence-service';
+import { useDeleteEmailSequence } from '@/hooks/email/useEmailSequences';
+import type {
+  EmailSequence,
+  SequenceStatus,
+  SequenceTriggerType,
+} from '@/lib/email/email-sequence-service';
 import { cn } from '@/lib/utils';
 
 interface EmailSequenceManagerProps {
@@ -39,19 +48,19 @@ interface EmailSequenceManagerProps {
   onViewSteps?: (sequence: EmailSequence) => void;
 }
 
-const  STATUS_COLORS: Record<SequenceStatus, string> = {
+const STATUS_COLORS: Record<SequenceStatus, string> = {
   active: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
   paused: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
   archived: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const  STATUS_LABELS: Record<SequenceStatus, string> = {
+const STATUS_LABELS: Record<SequenceStatus, string> = {
   active: 'Active',
   paused: 'En pause',
   archived: 'Archivée',
 };
 
-const  TRIGGER_LABELS: Record<SequenceTriggerType, string> = {
+const TRIGGER_LABELS: Record<SequenceTriggerType, string> = {
   event: 'Événement',
   time: 'Temps',
   behavior: 'Comportement',
@@ -130,7 +139,7 @@ export const EmailSequenceManager = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sequences.map((sequence) => (
+                  {sequences.map(sequence => (
                     <TableRow key={sequence.id}>
                       <TableCell>
                         <div>
@@ -143,9 +152,7 @@ export const EmailSequenceManager = ({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {TRIGGER_LABELS[sequence.trigger_type]}
-                        </Badge>
+                        <Badge variant="outline">{TRIGGER_LABELS[sequence.trigger_type]}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -156,34 +163,30 @@ export const EmailSequenceManager = ({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm font-medium">
-                          {sequence.enrolled_count || 0}
-                        </span>
+                        <span className="text-sm font-medium">{sequence.enrolled_count || 0}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm font-medium">
-                          {sequence.completed_count || 0}
-                        </span>
+                        <span className="text-sm font-medium">{sequence.completed_count || 0}</span>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={`Actions pour la séquence ${sequence.name || sequence.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Actions pour la séquence ${sequence.name || sequence.id}`}
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {onViewSteps && (
-                              <DropdownMenuItem
-                                onClick={() => onViewSteps(sequence)}
-                              >
+                              <DropdownMenuItem onClick={() => onViewSteps(sequence)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Voir les étapes
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem
-                              onClick={() => onEditSequence?.(sequence)}
-                            >
+                            <DropdownMenuItem onClick={() => onEditSequence?.(sequence)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
@@ -215,7 +218,8 @@ export const EmailSequenceManager = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer la séquence ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. La séquence et toutes ses étapes seront définitivement supprimées.
+              Cette action est irréversible. La séquence et toutes ses étapes seront définitivement
+              supprimées.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -232,10 +236,3 @@ export const EmailSequenceManager = ({
     </>
   );
 };
-
-
-
-
-
-
-

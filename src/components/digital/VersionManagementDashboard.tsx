@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Package,
   Upload,
@@ -52,7 +52,7 @@ interface VersionManagementDashboardProps {
 // ============================================================================
 
 function VersionStatusBadge({ status }: { status: VersionStatus }) {
-  const  variants: Record<
+  const variants: Record<
     VersionStatus,
     { variant: 'secondary' | 'default' | 'destructive'; label: string; icon: React.ReactNode }
   > = {
@@ -294,10 +294,8 @@ export function VersionManagementDashboard({
                     <TableCell className="text-right">
                       <Select>
                         <SelectTrigger>
-
-                            <MoreVertical className="h-4 w-4" />
-                          
-</SelectTrigger>
+                          <MoreVertical className="h-4 w-4" />
+                        </SelectTrigger>
                         <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                           <SelectItem value="edit" onSelect={() => handleEditVersion(version)}>
                             <Edit className="h-4 w-4 mr-2" />
@@ -308,14 +306,17 @@ export function VersionManagementDashboard({
                             Voir détails
                           </SelectItem>
                           {version.notify_customers && !version.notification_sent_at && (
-                            <SelectItem value="copy" onSelect={() => handleNotifyCustomers(version.id, version.product_id)}
+                            <SelectItem
+                              value="copy"
+                              onSelect={() => handleNotifyCustomers(version.id, version.product_id)}
                             >
                               <Bell className="h-4 w-4 mr-2" />
                               Notifier clients
                             </SelectItem>
                           )}
                           <DropdownMenuSeparator />
-                          <SelectItem value="view" onSelect
+                          <SelectItem
+                            value="delete"
                             className="text-destructive"
                             onSelect={() => handleDeleteVersion(version.id)}
                           >
@@ -335,9 +336,3 @@ export function VersionManagementDashboard({
     </div>
   );
 }
-
-
-
-
-
-

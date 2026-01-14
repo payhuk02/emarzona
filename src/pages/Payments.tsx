@@ -69,7 +69,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import PaymentCardDashboard from '@/components/payments/PaymentCardDashboard';
-import PaymentListView from '@/components/payments/PaymentListView';
+import PaymentListViewFixed from '@/components/payments/PaymentListViewFixed';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function Payments() {
@@ -199,7 +199,7 @@ export default function Payments() {
       await refetch();
       setEditDialogOpen(false);
       setSelectedPayment(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la mise à jour du paiement', error);
       toast({
@@ -230,7 +230,7 @@ export default function Payments() {
       await refetch();
       setDeleteDialogOpen(false);
       setSelectedPayment(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la suppression du paiement', error);
       toast({
@@ -252,7 +252,7 @@ export default function Payments() {
         description: 'La liste des paiements a été mise à jour.',
       });
       logger.info('Payments refreshed');
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error refreshing payments', { error: errorMessage });
       toast({
@@ -323,7 +323,7 @@ export default function Payments() {
         description: `${filteredPayments.length} paiement(s) exporté(s) en CSV.`,
       });
       logger.info('Payments exported to CSV', { count: filteredPayments.length });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error exporting payments to CSV', { error: errorMessage });
       toast({
@@ -762,7 +762,7 @@ export default function Payments() {
                               className="animate-in fade-in slide-in-from-left-4"
                               style={{ animationDelay: `${index * 50}ms` }}
                             >
-                              <PaymentListView
+                              <PaymentListViewFixed
                                 payment={payment}
                                 onEdit={() => handleEditPayment(payment)}
                                 onDelete={() => {
@@ -1024,9 +1024,3 @@ export default function Payments() {
     </MainLayout>
   );
 }
-
-
-
-
-
-

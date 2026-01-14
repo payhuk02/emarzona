@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { StableDropdownMenu } from '@/components/ui/stable-dropdown-menu';
+import { StableDropdownMenu, DropdownMenuSeparator } from '@/components/ui/stable-dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -72,7 +72,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   useNotifications,
   useUnreadCount,
@@ -129,7 +128,7 @@ export default function NotificationsManagement() {
 
   // Filtered and sorted notifications
   const filteredNotifications = useMemo(() => {
-    let  filtered= notifications;
+    let filtered = notifications;
 
     // Filter by type
     if (typeFilter !== 'all') {
@@ -166,7 +165,7 @@ export default function NotificationsManagement() {
         const dateB = new Date(b.created_at).getTime();
         return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
       } else if (sortBy === 'priority') {
-        const  priorityOrder: Record<string, number> = { urgent: 4, high: 3, normal: 2, low: 1 };
+        const priorityOrder: Record<string, number> = { urgent: 4, high: 3, normal: 2, low: 1 };
         const priorityA = priorityOrder[a.priority] || 2;
         const priorityB = priorityOrder[b.priority] || 2;
         return sortOrder === 'desc' ? priorityB - priorityA : priorityA - priorityB;
@@ -190,7 +189,7 @@ export default function NotificationsManagement() {
 
   // Get notification type label
   const getTypeLabel = (type: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       // Produits digitaux
       digital_product_purchased: 'Produit digital acheté',
       digital_product_download_ready: 'Téléchargement prêt',
@@ -312,9 +311,9 @@ export default function NotificationsManagement() {
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await markAsRead.mutateAsync(notificationId);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Impossible de marquer comme lu';
+        _error instanceof Error ? _error.message : 'Impossible de marquer comme lu';
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -330,9 +329,9 @@ export default function NotificationsManagement() {
         title: '✅ Toutes marquées comme lues',
         description: 'Toutes les notifications ont été marquées comme lues',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Impossible de marquer toutes comme lues';
+        _error instanceof Error ? _error.message : 'Impossible de marquer toutes comme lues';
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -348,9 +347,9 @@ export default function NotificationsManagement() {
         title: '✅ Notification archivée',
         description: 'La notification a été archivée',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Impossible d'archiver la notification";
+        _error instanceof Error ? _error.message : "Impossible d'archiver la notification";
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -366,9 +365,9 @@ export default function NotificationsManagement() {
         title: '✅ Notification supprimée',
         description: 'La notification a été supprimée',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Impossible de supprimer la notification';
+        _error instanceof Error ? _error.message : 'Impossible de supprimer la notification';
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -419,9 +418,9 @@ export default function NotificationsManagement() {
         title: '✅ Notifications marquées comme lues',
         description: `${selectedNotifications.length} notification(s) marquée(s) comme lue(s)`,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Impossible de marquer comme lues';
+        _error instanceof Error ? _error.message : 'Impossible de marquer comme lues';
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -440,9 +439,9 @@ export default function NotificationsManagement() {
         title: '✅ Notifications archivées',
         description: `${selectedNotifications.length} notification(s) archivée(s)`,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Impossible d'archiver les notifications";
+        _error instanceof Error ? _error.message : "Impossible d'archiver les notifications";
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -461,9 +460,9 @@ export default function NotificationsManagement() {
         title: '✅ Notifications supprimées',
         description: `${selectedNotifications.length} notification(s) supprimée(s)`,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Impossible de supprimer les notifications';
+        _error instanceof Error ? _error.message : 'Impossible de supprimer les notifications';
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -790,23 +789,33 @@ export default function NotificationsManagement() {
                             <StableDropdownMenu
                               triggerContent={<MoreVertical className="h-4 w-4" />}
                               triggerProps={{
-                                variant: "ghost" as const,
-                                size: "sm" as const,
-                                "aria-label": `Actions pour la notification ${notification.id}`
+                                variant: 'ghost' as const,
+                                size: 'sm' as const,
+                                'aria-label': `Actions pour la notification ${notification.id}`,
                               }}
                             >
                               {!notification.is_read && (
-                                <SelectItem value="edit" onSelect={() => handleMarkAsRead(notification.id)}>
+                                <SelectItem
+                                  value="edit"
+                                  onSelect={() => handleMarkAsRead(notification.id)}
+                                >
                                   <CheckCircle2 className="h-4 w-4 mr-2" />
                                   Marquer comme lu
                                 </SelectItem>
                               )}
-                              <SelectItem value="delete" onSelect={() => handleArchive(notification.id)}>
+                              <SelectItem
+                                value="delete"
+                                onSelect={() => handleArchive(notification.id)}
+                              >
                                 <Archive className="h-4 w-4 mr-2" />
                                 Archiver
                               </SelectItem>
                               <DropdownMenuSeparator />
-                              <SelectItem value="copy" onSelect={() => handleDelete(notification.id)} className="text-red-600">
+                              <SelectItem
+                                value="copy"
+                                onSelect={() => handleDelete(notification.id)}
+                                className="text-red-600"
+                              >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Supprimer
                               </SelectItem>
@@ -839,7 +848,7 @@ export default function NotificationsManagement() {
                       />
                     </PaginationItem>
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let  pageNum: number;
+                      let pageNum: number;
                       if (totalPages <= 5) {
                         pageNum = i + 1;
                       } else if (page <= 3) {
@@ -951,9 +960,3 @@ export default function NotificationsManagement() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

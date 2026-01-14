@@ -24,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Send,
   Paperclip,
@@ -54,9 +54,10 @@ import { MediaAttachment } from '@/components/media';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { Progress } from '@/components/ui/progress';
 import { useMessageSearch } from '@/hooks/useMessageSearch';
-import { Search, X, ChevronUp } from 'lucide-react';
+import { Search, ChevronUp } from 'lucide-react';
 import { highlightText } from '@/utils/highlightText.tsx';
 import { CameraCapture } from '@/components/camera/CameraCapture';
+import { StableDropdownMenu, DropdownMenuSeparator } from '@/components/ui/stable-dropdown-menu';
 
 export default function OrderMessaging() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -217,8 +218,8 @@ export default function OrderMessaging() {
       setUploadProgress(0);
 
       // Upload files if any (utilise le hook avec progress tracking)
-      let  fileUrls: string[] = [];
-      let  storagePaths: string[] = [];
+      let fileUrls: string[] = [];
+      let storagePaths: string[] = [];
       if (selectedFiles.length > 0 && currentConversation) {
         const uploadResults = await uploadFilesWithProgress(selectedFiles, {
           folder: `message-attachments/${currentConversation.id}`,
@@ -234,7 +235,7 @@ export default function OrderMessaging() {
       }
 
       // Determine message type
-      let  messageType: MessageType = 'text';
+      let messageType: MessageType = 'text';
       if (selectedFiles.length > 0) {
         const firstFile = selectedFiles[0];
         if (firstFile.type.startsWith('image/')) {
@@ -272,7 +273,7 @@ export default function OrderMessaging() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Impossible d'envoyer le message";
       logger.error('Send order message error', { error, orderId, conversationId });
@@ -299,7 +300,7 @@ export default function OrderMessaging() {
         description: 'Un administrateur a été notifié',
       });
       setShowAdminPanel(false);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
@@ -520,17 +521,18 @@ export default function OrderMessaging() {
                       <StableDropdownMenu
                         triggerContent={<MoreVertical className="h-4 w-4" />}
                         triggerProps={{
-                          variant: "ghost" as const,
-                          size: "icon" as const,
-                          "aria-label": "Menu d'actions"
+                          variant: 'ghost' as const,
+                          size: 'icon' as const,
+                          'aria-label': "Menu d'actions",
                         }}
                       >
-                        <SelectItem value="edit" onSelect onSelect={() => setShowAdminPanel(true)}>
+                        <SelectItem value="edit" onSelect={() => setShowAdminPanel(true)}>
                           <Shield className="h-4 w-4 mr-2" />
                           Demander intervention admin
                         </SelectItem>
-                        <StableDropdownMenuSeparator />
-                        <SelectItem value="delete" onSelect
+                        <DropdownMenuSeparator />
+                        <SelectItem
+                          value="delete"
                           onSelect={() => navigate(`/disputes/create?orderId=${orderId}`)}
                           className="text-destructive"
                         >
@@ -926,9 +928,3 @@ export default function OrderMessaging() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

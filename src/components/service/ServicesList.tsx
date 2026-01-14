@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Search,
@@ -79,61 +79,61 @@ export interface ServicesFilters {
 export interface ServicesListProps {
   /** Liste des services */
   services: Service[];
-  
+
   /** Callback lors de la sélection d'un service */
   onServiceSelect?: (service: Service) => void;
-  
+
   /** Callback pour éditer un service */
   onEdit?: (service: Service) => void;
-  
+
   /** Callback pour supprimer un service */
   onDelete?: (service: Service) => void;
-  
+
   /** Callback pour dupliquer un service */
   onDuplicate?: (service: Service) => void;
-  
+
   /** Callback pour voir les détails */
   onView?: (service: Service) => void;
-  
+
   /** Callback pour actions groupées */
   onBulkAction?: (action: string, selectedIds: string[]) => void;
-  
+
   /** Afficher la sélection multiple */
   enableSelection?: boolean;
-  
+
   /** Afficher les stats */
   showStats?: boolean;
-  
+
   /** Mode d'affichage */
   viewMode?: 'grid' | 'list';
-  
+
   /** Catégories disponibles (pour filtres) */
   categories?: string[];
-  
+
   /** Staff disponible (pour filtres) */
   staffMembers?: string[];
-  
+
   /** Classe CSS personnalisée */
   className?: string;
-  
+
   /** Loading state */
   isLoading?: boolean;
-  
+
   /** Callback pour refresh */
   onRefresh?: () => void;
-  
+
   /** Callback pour créer un nouveau service */
   onCreate?: () => void;
 }
 
 /**
  * ServicesList - Composant de liste complète de services avec filtres et actions
- * 
+ *
  * @example
  * ```tsx
  * import { logger } from '@/lib/logger';
- * 
- * <ServicesList 
+ *
+ * <ServicesList
  *   services={services}
  *   onEdit={(service) => logger.info('Edit service', { serviceId: service.id })}
  *   onDelete={(service) => logger.info('Delete service', { serviceId: service.id })}
@@ -144,7 +144,7 @@ export interface ServicesListProps {
  * />
  * ```
  */
-const  ServicesListComponent: React.FC<ServicesListProps> = ({
+const ServicesListComponent: React.FC<ServicesListProps> = ({
   services,
   onServiceSelect,
   onEdit,
@@ -176,13 +176,13 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
 
   // Filtrage et tri
   const filteredServices = useMemo(() => {
-    let  result= [...services];
+    let result = [...services];
 
     // Search
     if (filters.search) {
       const search = filters.search.toLowerCase();
       result = result.filter(
-        (service) =>
+        service =>
           service.name.toLowerCase().includes(search) ||
           service.category.toLowerCase().includes(search)
       );
@@ -190,36 +190,34 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
 
     // Status filter
     if (filters.status && filters.status !== 'all') {
-      result = result.filter((service) => service.status === filters.status);
+      result = result.filter(service => service.status === filters.status);
     }
 
     // Category filter
     if (filters.category && filters.category !== 'all') {
-      result = result.filter((service) => service.category === filters.category);
+      result = result.filter(service => service.category === filters.category);
     }
 
     // Staff filter
     if (filters.staff && filters.staff !== 'all') {
-      result = result.filter((service) =>
-        service.assignedStaff?.includes(filters.staff!)
-      );
+      result = result.filter(service => service.assignedStaff?.includes(filters.staff!));
     }
 
     // Price range filter
     if (filters.priceRange) {
       if (filters.priceRange.min !== undefined) {
-        result = result.filter((service) => service.price >= filters.priceRange!.min!);
+        result = result.filter(service => service.price >= filters.priceRange!.min!);
       }
       if (filters.priceRange.max !== undefined) {
-        result = result.filter((service) => service.price <= filters.priceRange!.max!);
+        result = result.filter(service => service.price <= filters.priceRange!.max!);
       }
     }
 
     // Sorting
     if (filters.sortBy) {
       result.sort((a, b) => {
-        let  aValue: string | number | Date | undefined = a[filters.sortBy as keyof typeof a];
-        let  bValue: string | number | Date | undefined = b[filters.sortBy as keyof typeof b];
+        let aValue: string | number | Date | undefined = a[filters.sortBy as keyof typeof a];
+        let bValue: string | number | Date | undefined = b[filters.sortBy as keyof typeof b];
 
         // Handle dates
         if (filters.sortBy === 'createdAt' || filters.sortBy === 'updatedAt') {
@@ -240,12 +238,11 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
   const stats = useMemo(() => {
     return {
       total: services.length,
-      active: services.filter((s) => s.isActive).length,
+      active: services.filter(s => s.isActive).length,
       totalBookings: services.reduce((sum, s) => sum + (s.bookingsCount || 0), 0),
       totalRevenue: services.reduce((sum, s) => sum + (s.revenue || 0), 0),
-      averagePrice: services.length > 0
-        ? services.reduce((sum, s) => sum + s.price, 0) / services.length
-        : 0,
+      averagePrice:
+        services.length > 0 ? services.reduce((sum, s) => sum + s.price, 0) / services.length : 0,
     };
   }, [services]);
 
@@ -264,7 +261,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
     if (selectedIds.size === filteredServices.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredServices.map((s) => s.id)));
+      setSelectedIds(new Set(filteredServices.map(s => s.id)));
     }
   };
 
@@ -304,15 +301,11 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Revenue total</p>
-          <p className="text-2xl font-bold">
-            {stats.totalRevenue.toLocaleString()} EUR
-          </p>
+          <p className="text-2xl font-bold">{stats.totalRevenue.toLocaleString()} EUR</p>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">Prix moyen</p>
-          <p className="text-2xl font-bold">
-            {Math.round(stats.averagePrice)} EUR
-          </p>
+          <p className="text-2xl font-bold">{Math.round(stats.averagePrice)} EUR</p>
         </div>
       </div>
     );
@@ -340,7 +333,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
                 <Checkbox
                   checked={isSelected}
                   onCheckedChange={() => toggleSelection(service.id)}
-                  onSelect={(e) => e.stopPropagation()}
+                  onSelect={e => e.stopPropagation()}
                 />
               )}
               <div className="flex-1">
@@ -363,11 +356,12 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
             <StableDropdownMenu
               triggerContent={<MoreVertical className="h-4 w-4" />}
               triggerProps={{
-                variant: "ghost" as const,
-                size: "sm" as const,
-                className: "h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation",
-                "aria-label": `Actions pour ${service.name}`,
-                onClick: (e) => e.stopPropagation()
+                variant: 'ghost' as const,
+                size: 'sm' as const,
+                className:
+                  'h-8 w-8 sm:h-10 sm:w-10 min-h-[44px] min-w-[44px] p-0 touch-manipulation',
+                'aria-label': `Actions pour ${service.name}`,
+                onClick: e => e.stopPropagation(),
               }}
             >
               {onView && (
@@ -390,7 +384,8 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
               )}
               <StableDropdownMenuSeparator />
               {onDelete && (
-                <SelectItem value="view" onSelect
+                <SelectItem
+                  value="delete"
                   onSelect={() => onDelete(service)}
                   className="text-red-600"
                 >
@@ -459,7 +454,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           <Input
             placeholder="Rechercher un service..."
             value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            onChange={e => setFilters({ ...filters, search: e.target.value })}
             className="pl-10"
           />
         </div>
@@ -468,7 +463,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
         <div className="flex gap-2">
           <Select
             value={filters.status || 'all'}
-            onValueChange={(value) =>
+            onValueChange={value =>
               setFilters({ ...filters, status: value as ServiceStatus | 'all' })
             }
           >
@@ -487,16 +482,14 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           {categories.length > 0 && (
             <Select
               value={filters.category || 'all'}
-              onValueChange={(value) =>
-                setFilters({ ...filters, category: value })
-              }
+              onValueChange={value => setFilters({ ...filters, category: value })}
             >
               <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] h-11">
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes</SelectItem>
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>
@@ -508,14 +501,14 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
           {staffMembers.length > 0 && (
             <Select
               value={filters.staff || 'all'}
-              onValueChange={(value) => setFilters({ ...filters, staff: value })}
+              onValueChange={value => setFilters({ ...filters, staff: value })}
             >
               <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] h-11">
                 <SelectValue placeholder="Staff" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous</SelectItem>
-                {staffMembers.map((staff) => (
+                {staffMembers.map(staff => (
                   <SelectItem key={staff} value={staff}>
                     {staff}
                   </SelectItem>
@@ -553,9 +546,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
       {/* Bulk actions */}
       {enableSelection && selectedIds.size > 0 && (
         <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
-          <p className="text-sm font-medium">
-            {selectedIds.size} service(s) sélectionné(s)
-          </p>
+          <p className="text-sm font-medium">{selectedIds.size} service(s) sélectionné(s)</p>
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -580,37 +571,20 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
 
       {/* Results header */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {filteredServices.length} résultat(s)
-        </p>
+        <p className="text-sm text-muted-foreground">{filteredServices.length} résultat(s)</p>
         <div className="flex items-center gap-2">
           {enableSelection && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSelectAll}
-              className="text-xs"
-            >
+            <Button variant="ghost" size="sm" onClick={toggleSelectAll} className="text-xs">
               {selectedIds.size === filteredServices.length
                 ? 'Désélectionner tout'
                 : 'Sélectionner tout'}
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleSort('name')}
-            className="text-xs"
-          >
+          <Button variant="ghost" size="sm" onClick={() => toggleSort('name')} className="text-xs">
             <ArrowUpDown className="h-3 w-3 mr-1" />
             Nom
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleSort('price')}
-            className="text-xs"
-          >
+          <Button variant="ghost" size="sm" onClick={() => toggleSort('price')} className="text-xs">
             <ArrowUpDown className="h-3 w-3 mr-1" />
             Prix
           </Button>
@@ -639,12 +613,10 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
       ) : (
         <div
           className={cn(
-            viewMode === 'grid'
-              ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-4'
-              : 'space-y-3'
+            viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'
           )}
         >
-          {filteredServices.map((service) => renderServiceCard(service))}
+          {filteredServices.map(service => renderServiceCard(service))}
         </div>
       )}
     </div>
@@ -662,10 +634,11 @@ export const ServicesList = React.memo(ServicesListComponent, (prevProps, nextPr
     prevProps.onDelete === nextProps.onDelete &&
     prevProps.onView === nextProps.onView &&
     // Comparaison superficielle des services (comparer les IDs)
-    prevProps.services.every((service, index) => 
-      service.id === nextProps.services[index]?.id &&
-      service.is_active === nextProps.services[index]?.is_active &&
-      service.price === nextProps.services[index]?.price
+    prevProps.services.every(
+      (service, index) =>
+        service.id === nextProps.services[index]?.id &&
+        service.is_active === nextProps.services[index]?.is_active &&
+        service.price === nextProps.services[index]?.price
     )
   );
 });
@@ -673,10 +646,3 @@ export const ServicesList = React.memo(ServicesListComponent, (prevProps, nextPr
 ServicesList.displayName = 'ServicesList';
 
 export default ServicesList;
-
-
-
-
-
-
-

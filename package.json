@@ -29,7 +29,7 @@
     "test:a11y": "playwright test accessibility",
     "test:a11y:check": "node scripts/check-accessibility.js",
     "test:all": "npm run test:unit && npm run test:e2e && npm run test:visual && npm run test:a11y",
-    "vercel-build": "vite build",
+    "vercel-build": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "sitemap:generate": "tsx scripts/generate-sitemap-dynamic.ts",
     "sitemap:generate:old": "node scripts/generate-sitemap.js",
     "build:with-sitemap": "npm run sitemap:generate && vite build",

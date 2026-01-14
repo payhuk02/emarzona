@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import {
   MoreHorizontal,
@@ -475,36 +475,56 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                           }}
                           triggerContent={<MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                         >
-                          <SelectItem value="edit" onSelect={() => {}} className="text-xs sm:text-sm">
+                          <SelectItem
+                            value="edit"
+                            onSelect={() => {}}
+                            className="text-xs sm:text-sm"
+                          >
                             <span className="flex items-center">
                               <Eye className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Voir détails
                             </span>
                           </SelectItem>
                           {!review.is_approved && (
-                            <SelectItem value="approve" onSelect={() => handleApprove([review.id])} className="text-xs sm:text-sm">
+                            <SelectItem
+                              value="approve"
+                              onSelect={() => handleApprove([review.id])}
+                              className="text-xs sm:text-sm"
+                            >
                               <span className="flex items-center">
                                 <CheckCircle className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 Approuver
                               </span>
                             </SelectItem>
                           )}
-                          <SelectItem value="reject" onSelect={() => handleReject([review.id])} className="text-xs sm:text-sm">
+                          <SelectItem
+                            value="reject"
+                            onSelect={() => handleReject([review.id])}
+                            className="text-xs sm:text-sm"
+                          >
                             <span className="flex items-center">
                               <XCircle className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Rejeter
                             </span>
                           </SelectItem>
-                          <SelectItem value="flag" onSelect={() => handleFlag([review.id])} className="text-xs sm:text-sm">
+                          <SelectItem
+                            value="flag"
+                            onSelect={() => handleFlag([review.id])}
+                            className="text-xs sm:text-sm"
+                          >
                             <span className="flex items-center">
                               <Flag className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               Signaler
                             </span>
                           </SelectItem>
-                          <SelectItem value="delete" onSelect={() => handleDelete([review.id])} className="text-destructive text-xs sm:text-sm">
+                          <SelectItem
+                            value="delete"
+                            onSelect={() => handleDelete([review.id])}
+                            className="text-destructive text-xs sm:text-sm"
+                          >
                             <span className="flex items-center">Supprimer</span>
                           </SelectItem>
-                        </Select>
+                        </StableDropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))
