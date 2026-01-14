@@ -63,7 +63,8 @@ body {
   line-height: 1.5;
 }
 
-@media (max-width: 640px) {
+/* Mobile - Unifié à 768px pour cohérence avec useIsMobile hook */
+@media (max-width: 767px) {
   .product-form-container {
     font-size: 16px; /* Évite le zoom automatique sur iOS */
   }
@@ -318,7 +319,8 @@ body {
   grid-template-columns: repeat(4, 1fr);
 }
 
-@media (max-width: 640px) {
+/* Mobile - Unifié à 768px pour cohérence avec useIsMobile hook */
+@media (max-width: 767px) {
   .theme-grid-cols-2,
   .theme-grid-cols-3,
   .theme-grid-cols-4 {

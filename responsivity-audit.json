@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-10-22T11:25:30.104Z",
+  "timestamp": "2026-01-14T18:00:01.815Z",
   "summary": {
     "totalPages": 15,
     "totalComponents": 6,
     "criticalIssues": 1,
-    "highIssues": 32,
-    "mediumIssues": 70,
+    "highIssues": 19,
+    "mediumIssues": 50,
     "lowIssues": 0
   },
   "pages": [
@@ -16,13 +16,6 @@
       "type": "Public",
       "issues": [
         {
-          "id": "landing-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "landing-hasFocusStates",
           "description": "Manque de focusstates",
           "breakpoint": "all",
@@ -30,8 +23,8 @@
           "fix": "Ajouter des états focus pour l'accessibilité"
         }
       ],
-      "lines": 1047,
-      "size": 54038
+      "lines": 2181,
+      "size": 130257
     },
     {
       "page": "Marketplace",
@@ -47,15 +40,15 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "marketplace-hasTouchTargets",
-          "description": "Manque de touchtargets",
+          "id": "marketplace-hasImageOptimization",
+          "description": "Manque de imageoptimization",
           "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
+          "severity": "Medium",
+          "fix": "Ajouter object-cover et aspect-ratio pour les images"
         }
       ],
-      "lines": 1264,
-      "size": 49604
+      "lines": 1358,
+      "size": 55267
     },
     {
       "page": "Storefront",
@@ -85,13 +78,6 @@
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
         },
         {
-          "id": "storefront-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
           "id": "storefront-hasFocusStates",
           "description": "Manque de focusstates",
           "breakpoint": "all",
@@ -106,8 +92,8 @@
           "fix": "Implémenter grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
         }
       ],
-      "lines": 208,
-      "size": 7922
+      "lines": 645,
+      "size": 26715
     },
     {
       "page": "ProductDetail",
@@ -121,13 +107,6 @@
           "breakpoint": "all",
           "severity": "High",
           "fix": "Implémenter un menu mobile avec hamburger"
-        },
-        {
-          "id": "productdetail-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
         },
         {
           "id": "productdetail-hasImageOptimization",
@@ -144,13 +123,6 @@
           "fix": "Ajouter des états focus pour l'accessibilité"
         },
         {
-          "id": "productdetail-hasOverflowControl",
-          "description": "Manque de overflowcontrol",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Contrôler le débordement avec overflow-hidden"
-        },
-        {
           "id": "product-detail-image",
           "description": "Images produit non optimisées",
           "breakpoint": "all",
@@ -158,8 +130,8 @@
           "fix": "Ajouter aspect-ratio et object-cover"
         }
       ],
-      "lines": 243,
-      "size": 8404
+      "lines": 1352,
+      "size": 60848
     },
     {
       "page": "Auth",
@@ -168,13 +140,6 @@
       "type": "Public",
       "issues": [
         {
-          "id": "auth-hasResponsiveClasses",
-          "description": "Manque de responsiveclasses",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Ajouter des classes Tailwind responsive (sm:, md:, lg:, xl:)"
-        },
-        {
           "id": "auth-hasMobileMenu",
           "description": "Manque de mobilemenu",
           "breakpoint": "all",
@@ -182,25 +147,11 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "auth-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "auth-hasImageOptimization",
           "description": "Manque de imageoptimization",
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
-        },
-        {
-          "id": "auth-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
         },
         {
           "id": "auth-hasFocusStates",
@@ -217,8 +168,8 @@
           "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 253,
-      "size": 8395
+      "lines": 804,
+      "size": 32625
     },
     {
       "page": "Dashboard",
@@ -234,13 +185,6 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "dashboard-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "dashboard-hasImageOptimization",
           "description": "Manque de imageoptimization",
           "breakpoint": "all",
@@ -253,10 +197,17 @@
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "dashboard-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 392,
-      "size": 17981
+      "lines": 1008,
+      "size": 47024
     },
     {
       "page": "Products",
@@ -270,45 +221,10 @@
           "breakpoint": "all",
           "severity": "High",
           "fix": "Implémenter un menu mobile avec hamburger"
-        },
-        {
-          "id": "products-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
-          "id": "products-hasImageOptimization",
-          "description": "Manque de imageoptimization",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Ajouter object-cover et aspect-ratio pour les images"
-        },
-        {
-          "id": "products-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
-          "id": "products-hasFocusStates",
-          "description": "Manque de focusstates",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Ajouter des états focus pour l'accessibilité"
-        },
-        {
-          "id": "products-hasOverflowControl",
-          "description": "Manque de overflowcontrol",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 423,
-      "size": 16984
+      "lines": 1318,
+      "size": 58232
     },
     {
       "page": "Store",
@@ -331,13 +247,6 @@
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
         },
         {
-          "id": "store-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
           "id": "store-hasFocusStates",
           "description": "Manque de focusstates",
           "breakpoint": "all",
@@ -345,8 +254,8 @@
           "fix": "Ajouter des états focus pour l'accessibilité"
         }
       ],
-      "lines": 99,
-      "size": 5116
+      "lines": 159,
+      "size": 10074
     },
     {
       "page": "Settings",
@@ -362,13 +271,6 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "settings-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "settings-hasImageOptimization",
           "description": "Manque de imageoptimization",
           "breakpoint": "all",
@@ -376,22 +278,22 @@
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
         },
         {
-          "id": "settings-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
           "id": "settings-hasFocusStates",
           "description": "Manque de focusstates",
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter des états focus pour l'accessibilité"
+        },
+        {
+          "id": "settings-hasOverflowControl",
+          "description": "Manque de overflowcontrol",
+          "breakpoint": "all",
+          "severity": "Medium",
+          "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 208,
-      "size": 10136
+      "lines": 189,
+      "size": 10180
     },
     {
       "page": "Payments",
@@ -407,43 +309,15 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "payments-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "payments-hasImageOptimization",
           "description": "Manque de imageoptimization",
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
-        },
-        {
-          "id": "payments-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
-          "id": "payments-hasFocusStates",
-          "description": "Manque de focusstates",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Ajouter des états focus pour l'accessibilité"
-        },
-        {
-          "id": "payments-hasOverflowControl",
-          "description": "Manque de overflowcontrol",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 484,
-      "size": 18515
+      "lines": 1027,
+      "size": 45252
     },
     {
       "page": "Orders",
@@ -459,25 +333,11 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "orders-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "orders-hasImageOptimization",
           "description": "Manque de imageoptimization",
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
-        },
-        {
-          "id": "orders-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
         },
         {
           "id": "orders-hasFocusStates",
@@ -494,8 +354,8 @@
           "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 139,
-      "size": 5356
+      "lines": 769,
+      "size": 32767
     },
     {
       "page": "Customers",
@@ -511,13 +371,6 @@
           "fix": "Implémenter un menu mobile avec hamburger"
         },
         {
-          "id": "customers-hasTouchTargets",
-          "description": "Manque de touchtargets",
-          "breakpoint": "all",
-          "severity": "High",
-          "fix": "Ajouter touch-manipulation et min-h-[44px] pour les boutons"
-        },
-        {
           "id": "customers-hasImageOptimization",
           "description": "Manque de imageoptimization",
           "breakpoint": "all",
@@ -525,29 +378,15 @@
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
         },
         {
-          "id": "customers-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
           "id": "customers-hasFocusStates",
           "description": "Manque de focusstates",
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter des états focus pour l'accessibilité"
-        },
-        {
-          "id": "customers-hasOverflowControl",
-          "description": "Manque de overflowcontrol",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 203,
-      "size": 6694
+      "lines": 373,
+      "size": 18624
     },
     {
       "page": "Analytics",
@@ -577,29 +416,15 @@
           "fix": "Ajouter object-cover et aspect-ratio pour les images"
         },
         {
-          "id": "analytics-hasHoverEffects",
-          "description": "Manque de hovereffects",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Implémenter des effets hover avec group-hover"
-        },
-        {
           "id": "analytics-hasFocusStates",
           "description": "Manque de focusstates",
           "breakpoint": "all",
           "severity": "Medium",
           "fix": "Ajouter des états focus pour l'accessibilité"
-        },
-        {
-          "id": "analytics-hasOverflowControl",
-          "description": "Manque de overflowcontrol",
-          "breakpoint": "all",
-          "severity": "Medium",
-          "fix": "Contrôler le débordement avec overflow-hidden"
         }
       ],
-      "lines": 170,
-      "size": 6575
+      "lines": 330,
+      "size": 15311
     },
     {
       "page": "CreateProduct",
@@ -664,8 +489,8 @@
           "fix": "Utiliser des espacements responsive"
         }
       ],
-      "lines": 44,
-      "size": 1252
+      "lines": 69,
+      "size": 2220
     },
     {
       "page": "EditProduct",
@@ -737,8 +562,8 @@
           "fix": "Utiliser des espacements responsive"
         }
       ],
-      "lines": 96,
-      "size": 2567
+      "lines": 197,
+      "size": 5796
     }
   ],
   "components": [
@@ -747,12 +572,6 @@
       "file": "src/components/marketplace/ProductCard.tsx",
       "type": "Product Display",
       "issues": [
-        {
-          "id": "productcard-hasTouchSupport",
-          "description": "Composant ProductCard manque touchsupport",
-          "severity": "Medium",
-          "fix": "Implémenter le support tactile"
-        },
         {
           "id": "productcard-hasFocusStates",
           "description": "Composant ProductCard manque focusstates",
@@ -766,12 +585,6 @@
       "file": "src/components/ui/ProductGrid.tsx",
       "type": "Layout",
       "issues": [
-        {
-          "id": "productgrid-hasAccessibility",
-          "description": "Composant ProductGrid manque accessibility",
-          "severity": "High",
-          "fix": "Ajouter des attributs ARIA et role"
-        },
         {
           "id": "productgrid-hasTouchSupport",
           "description": "Composant ProductGrid manque touchsupport",
@@ -823,12 +636,6 @@
       "type": "Navigation",
       "issues": [
         {
-          "id": "appsidebar-hasAccessibility",
-          "description": "Composant AppSidebar manque accessibility",
-          "severity": "High",
-          "fix": "Ajouter des attributs ARIA et role"
-        },
-        {
           "id": "appsidebar-hasTouchSupport",
           "description": "Composant AppSidebar manque touchsupport",
           "severity": "Medium",
@@ -839,12 +646,6 @@
           "description": "Composant AppSidebar manque focusstates",
           "severity": "Medium",
           "fix": "Ajouter des états focus"
-        },
-        {
-          "id": "appsidebar-hasLoadingStates",
-          "description": "Composant AppSidebar manque loadingstates",
-          "severity": "Medium",
-          "fix": "Implémenter des états de chargement"
         }
       ]
     },
@@ -853,24 +654,6 @@
       "file": "src/components/marketplace/MarketplaceHeader.tsx",
       "type": "Header",
       "issues": [
-        {
-          "id": "marketplaceheader-hasAccessibility",
-          "description": "Composant MarketplaceHeader manque accessibility",
-          "severity": "High",
-          "fix": "Ajouter des attributs ARIA et role"
-        },
-        {
-          "id": "marketplaceheader-hasFocusStates",
-          "description": "Composant MarketplaceHeader manque focusstates",
-          "severity": "Medium",
-          "fix": "Ajouter des états focus"
-        },
-        {
-          "id": "marketplaceheader-hasLoadingStates",
-          "description": "Composant MarketplaceHeader manque loadingstates",
-          "severity": "Medium",
-          "fix": "Implémenter des états de chargement"
-        },
         {
           "id": "marketplaceheader-hasErrorHandling",
           "description": "Composant MarketplaceHeader manque errorhandling",
@@ -889,12 +672,6 @@
           "description": "Composant MarketplaceFooter manque focusstates",
           "severity": "Medium",
           "fix": "Ajouter des états focus"
-        },
-        {
-          "id": "marketplacefooter-hasLoadingStates",
-          "description": "Composant MarketplaceFooter manque loadingstates",
-          "severity": "Medium",
-          "fix": "Implémenter des états de chargement"
         },
         {
           "id": "marketplacefooter-hasErrorHandling",

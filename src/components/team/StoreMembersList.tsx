@@ -1,7 +1,7 @@
 /**
  * Store Members List Component
  * Date: 2 Février 2025
- * 
+ *
  * Affiche la liste des membres d'équipe d'une boutique
  */
 
@@ -26,11 +26,11 @@ import { Users, UserPlus, MoreVertical, Trash2, Edit, Mail, Clock } from 'lucide
 import { StoreMemberInviteDialog } from './StoreMemberInviteDialog';
 import { StoreMemberRoleSelector } from './StoreMemberRoleSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-const  ROLE_LABELS: Record<StoreMember['role'], string> = {
+const ROLE_LABELS: Record<StoreMember['role'], string> = {
   owner: 'Propriétaire',
   manager: 'Gestionnaire',
   staff: 'Employé',
@@ -38,7 +38,7 @@ const  ROLE_LABELS: Record<StoreMember['role'], string> = {
   viewer: 'Observateur',
 };
 
-const  ROLE_COLORS: Record<StoreMember['role'], string> = {
+const ROLE_COLORS: Record<StoreMember['role'], string> = {
   owner: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
   manager: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   staff: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
@@ -46,7 +46,7 @@ const  ROLE_COLORS: Record<StoreMember['role'], string> = {
   viewer: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const  STATUS_LABELS: Record<StoreMember['status'], string> = {
+const STATUS_LABELS: Record<StoreMember['status'], string> = {
   pending: 'En attente',
   active: 'Actif',
   inactive: 'Inactif',
@@ -90,12 +90,9 @@ export const StoreMembersList = () => {
   }, [memberToRemove, store, removeMember]);
 
   // Tous les hooks doivent être appelés avant les early returns
-  const activeMembers = useMemo(
-    () => members?.filter((m) => m.status === 'active') || [],
-    [members]
-  );
+  const activeMembers = useMemo(() => members?.filter(m => m.status === 'active') || [], [members]);
   const pendingMembers = useMemo(
-    () => members?.filter((m) => m.status === 'pending') || [],
+    () => members?.filter(m => m.status === 'pending') || [],
     [members]
   );
 
@@ -110,7 +107,7 @@ export const StoreMembersList = () => {
     const name = getDisplayName(member);
     return name
       .split(' ')
-      .map((n) => n[0])
+      .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -134,7 +131,7 @@ export const StoreMembersList = () => {
           <Skeleton className="h-4 w-64 mt-2" />
         </CardHeader>
         <CardContent className="space-y-4">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3].map(i => (
             <Skeleton key={i} className="h-20 w-full" />
           ))}
         </CardContent>
@@ -163,7 +160,8 @@ export const StoreMembersList = () => {
             </CardTitle>
             <CardDescription>
               {activeMembers.length} membre{activeMembers.length > 1 ? 's' : ''} actif
-              {pendingMembers.length > 0 && `, ${pendingMembers.length} invitation${pendingMembers.length > 1 ? 's' : ''} en attente`}
+              {pendingMembers.length > 0 &&
+                `, ${pendingMembers.length} invitation${pendingMembers.length > 1 ? 's' : ''} en attente`}
             </CardDescription>
           </div>
           <Button onClick={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
@@ -178,7 +176,7 @@ export const StoreMembersList = () => {
               {activeMembers.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-muted-foreground">Membres actifs</h3>
-                  {activeMembers.map((member) => (
+                  {activeMembers.map(member => (
                     <div
                       key={member.id}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
@@ -214,10 +212,11 @@ export const StoreMembersList = () => {
                       <StableDropdownMenu
                         triggerContent={<MoreVertical className="h-4 w-4" />}
                         triggerProps={{
-                          variant: "ghost" as const,
-                          size: "icon" as const,
-                          className: "h-8 w-8",
-                          "aria-label": `Actions pour ${member.user?.email || member.id}`
+                          variant: 'ghost' as const,
+                          size: 'icon' as const,
+                          className:
+                            'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation',
+                          'aria-label': `Actions pour ${member.user?.email || member.id}`,
                         }}
                       >
                         <SelectItem value="edit" onSelect={() => handleEditRole(member)}>
@@ -225,7 +224,8 @@ export const StoreMembersList = () => {
                           Modifier le rôle
                         </SelectItem>
                         {member.role !== 'owner' && (
-                          <SelectItem value="delete"
+                          <SelectItem
+                            value="delete"
                             onSelect={() => handleRemove(member)}
                             className="text-destructive"
                           >
@@ -246,7 +246,7 @@ export const StoreMembersList = () => {
                     <Clock className="h-4 w-4" />
                     Invitations en attente
                   </h3>
-                  {pendingMembers.map((member) => (
+                  {pendingMembers.map(member => (
                     <div
                       key={member.id}
                       className="flex items-center justify-between p-4 border rounded-lg bg-muted/30"
@@ -273,7 +273,11 @@ export const StoreMembersList = () => {
                           <p className="text-xs text-muted-foreground mt-1">
                             Invité le {new Date(member.invited_at).toLocaleDateString('fr-FR')}
                             {member.invitation_expires_at && (
-                              <> • Expire le {new Date(member.invitation_expires_at).toLocaleDateString('fr-FR')}</>
+                              <>
+                                {' '}
+                                • Expire le{' '}
+                                {new Date(member.invitation_expires_at).toLocaleDateString('fr-FR')}
+                              </>
                             )}
                           </p>
                         </div>
@@ -281,17 +285,19 @@ export const StoreMembersList = () => {
                       <StableDropdownMenu
                         triggerContent={<MoreVertical className="h-4 w-4" />}
                         triggerProps={{
-                          variant: "ghost" as const,
-                          size: "icon" as const,
-                          className: "h-8 w-8",
-                          "aria-label": `Actions pour ${member.user?.email || member.id}`
+                          variant: 'ghost' as const,
+                          size: 'icon' as const,
+                          className:
+                            'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation',
+                          'aria-label': `Actions pour ${member.user?.email || member.id}`,
                         }}
                       >
                         <SelectItem value="copy" onSelect={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
                         </SelectItem>
-                        <SelectItem value="view"
+                        <SelectItem
+                          value="view"
                           onSelect={() => handleRemove(member)}
                           className="text-destructive"
                         >
@@ -308,7 +314,9 @@ export const StoreMembersList = () => {
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium mb-2">Aucun membre</p>
-              <p className="text-sm mb-4">Commencez par inviter des membres à rejoindre votre équipe</p>
+              <p className="text-sm mb-4">
+                Commencez par inviter des membres à rejoindre votre équipe
+              </p>
               <Button onClick={() => setInviteDialogOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Inviter un membre
@@ -319,10 +327,7 @@ export const StoreMembersList = () => {
       </Card>
 
       {/* Dialogs */}
-      <StoreMemberInviteDialog
-        open={inviteDialogOpen}
-        onClose={() => setInviteDialogOpen(false)}
-      />
+      <StoreMemberInviteDialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)} />
 
       {selectedMember && (
         <StoreMemberRoleSelector
@@ -359,10 +364,3 @@ export const StoreMembersList = () => {
     </>
   );
 };
-
-
-
-
-
-
-

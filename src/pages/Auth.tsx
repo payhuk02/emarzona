@@ -529,7 +529,7 @@ const Auth = () => {
                         onClick={() =>
                           setShowPassword({ ...showPassword, login: !showPassword.login })
                         }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                         aria-label={
                           showPassword.login
                             ? 'Masquer le mot de passe'
@@ -547,7 +547,7 @@ const Auth = () => {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full gradient-primary min-h-[44px] text-base"
+                    className="w-full gradient-primary min-h-[44px] text-base touch-manipulation"
                     disabled={isLoading}
                     aria-busy={isLoading}
                   >
@@ -620,7 +620,7 @@ const Auth = () => {
                         onClick={() =>
                           setShowPassword({ ...showPassword, signup: !showPassword.signup })
                         }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                         aria-label={
                           showPassword.signup
                             ? 'Masquer le mot de passe'
@@ -669,7 +669,7 @@ const Auth = () => {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full gradient-primary min-h-[44px] text-base"
+                    className="w-full gradient-primary min-h-[44px] text-base touch-manipulation"
                     disabled={isLoading}
                     aria-busy={isLoading}
                   >
@@ -726,7 +726,7 @@ const Auth = () => {
                     setResetSent(false);
                     setResetEmail('');
                   }}
-                  className="w-full min-h-[44px] text-base"
+                  className="w-full min-h-[44px] text-base touch-manipulation"
                 >
                   {t('common.close', 'Fermer')}
                 </Button>
@@ -765,7 +765,7 @@ const Auth = () => {
               <div className="flex flex-col gap-2">
                 <Button
                   type="submit"
-                  className="w-full min-h-[44px] text-base"
+                  className="w-full min-h-[44px] text-base touch-manipulation"
                   disabled={isResetLoading || !resetEmail}
                   aria-busy={isResetLoading}
                 >
@@ -786,6 +786,7 @@ const Auth = () => {
                     setResetEmail('');
                     setResetError('');
                   }}
+                  className="touch-manipulation min-h-[44px]"
                   disabled={isResetLoading}
                   className="min-h-[44px] text-base"
                 >

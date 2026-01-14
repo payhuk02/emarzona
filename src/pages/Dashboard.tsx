@@ -16,12 +16,7 @@ import {
   Target,
   MoreVertical,
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
@@ -284,7 +279,7 @@ const Dashboard = () => {
                   </p>
                   <Button
                     onClick={() => navigate('/dashboard/store')}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white min-h-[44px] text-sm sm:text-base"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white min-h-[44px] text-sm sm:text-base touch-manipulation"
                   >
                     {getValue('dashboard.createStoreButton')}
                   </Button>
@@ -324,7 +319,7 @@ const Dashboard = () => {
                       </span>
                     </div>
                   </h1>
-                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+                  <p className="text-sm sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                     Vue d'ensemble de votre boutique
                   </p>
                 </div>
@@ -335,7 +330,7 @@ const Dashboard = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="min-h-[44px] min-w-[44px] p-0 relative"
+                    className="min-h-[44px] min-w-[44px] p-0 relative touch-manipulation"
                     aria-label="Notifications"
                     title="Notifications"
                     onClick={() => {
@@ -347,7 +342,7 @@ const Dashboard = () => {
                     {unreadCount > 0 && (
                       <Badge
                         variant="destructive"
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] font-semibold"
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs font-semibold"
                       >
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </Badge>
@@ -376,7 +371,7 @@ const Dashboard = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleExport}
-                  className="hidden sm:flex min-h-[44px] gap-2"
+                  className="hidden sm:flex min-h-[44px] gap-2 touch-manipulation"
                   aria-label="Exporter les données"
                   title="Exporter les données"
                 >
@@ -388,7 +383,7 @@ const Dashboard = () => {
                   size="sm"
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="min-h-[44px] min-w-[44px] p-0"
+                  className="min-h-[44px] min-w-[44px] p-0 touch-manipulation"
                   aria-label={getValue('dashboard.refresh')}
                   title={getValue('dashboard.refresh')}
                 >
@@ -404,7 +399,7 @@ const Dashboard = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="sm:hidden min-h-[44px] min-w-[44px] p-0"
+                      className="sm:hidden min-h-[44px] min-w-[44px] p-0 touch-manipulation"
                       aria-label="Menu des options"
                     >
                       <MoreVertical className="h-5 w-5" aria-hidden="true" />
@@ -494,7 +489,7 @@ const Dashboard = () => {
                     variant="outline"
                     size="sm"
                     onClick={handleRefresh}
-                    className="min-h-[44px] text-xs sm:text-sm"
+                    className="min-h-[44px] text-xs sm:text-sm touch-manipulation"
                     aria-label={t('dashboard.retry')}
                   >
                     {t('dashboard.retry')}
@@ -556,7 +551,7 @@ const Dashboard = () => {
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
                       <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
-                        <CardTitle className="text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                        <CardTitle className="text-sm sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
                           <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
                           {stat.label}
                         </CardTitle>
@@ -567,12 +562,12 @@ const Dashboard = () => {
                         >
                           {stat.value}
                         </div>
-                        <p className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 leading-tight">
+                        <p className="text-sm sm:text-[11px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 leading-tight">
                           {stat.description}
                         </p>
                         <Badge
                           variant="default"
-                          className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
+                          className="text-xs sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
                         >
                           {stat.trend}
                         </Badge>
@@ -664,7 +659,7 @@ const Dashboard = () => {
                               <h3 className="font-semibold text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 break-words">
                                 {action.title}
                               </h3>
-                              <p className="text-[10px] sm:text-[11px] md:text-xs lg:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                              <p className="text-sm sm:text-[11px] md:text-xs lg:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                                 {action.description}
                               </p>
                             </div>
@@ -827,7 +822,7 @@ const Dashboard = () => {
                       {notifications.length === 0 ? (
                         <div className="text-center py-4 sm:py-6">
                           <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
-                          <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                          <p className="text-sm sm:text-xs md:text-sm text-muted-foreground">
                             Aucune notification
                           </p>
                         </div>
@@ -853,14 +848,14 @@ const Dashboard = () => {
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-[10px] sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1">
+                              <h4 className="text-sm sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1">
                                 {notification.title}
                               </h4>
-                              <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-2 leading-relaxed">
+                              <p className="text-sm sm:text-xs md:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-2 leading-relaxed">
                                 {notification.message}
                               </p>
                               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                                <span className="text-xs sm:text-xs md:text-xs text-muted-foreground">
                                   {new Date(notification.timestamp).toLocaleString('fr-FR', {
                                     day: '2-digit',
                                     month: '2-digit',
@@ -872,7 +867,7 @@ const Dashboard = () => {
                                 {!notification.read && (
                                   <Badge
                                     variant="secondary"
-                                    className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
+                                    className="text-xs sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
                                   >
                                     {t('dashboard.notificationsBadge.new')}
                                   </Badge>
@@ -902,7 +897,7 @@ const Dashboard = () => {
                     {stats.recentActivity.length === 0 ? (
                       <div className="text-center py-4 sm:py-6">
                         <Activity className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-1.5 sm:mb-2 text-muted-foreground opacity-50" />
-                        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                        <p className="text-sm sm:text-xs md:text-sm text-muted-foreground">
                           Aucune activité récente
                         </p>
                       </div>
@@ -924,11 +919,11 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-[10px] sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1 line-clamp-2 leading-relaxed">
+                            <h4 className="text-sm sm:text-xs md:text-sm font-medium mb-0.5 sm:mb-1 line-clamp-2 leading-relaxed">
                               {activity.message}
                             </h4>
                             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                              <span className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                              <span className="text-xs sm:text-xs md:text-xs text-muted-foreground">
                                 {new Date(activity.timestamp).toLocaleString('fr-FR', {
                                   day: '2-digit',
                                   month: '2-digit',
@@ -940,7 +935,7 @@ const Dashboard = () => {
                               {activity.status && (
                                 <Badge
                                   variant="outline"
-                                  className="text-[9px] sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
+                                  className="text-xs sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
                                 >
                                   {activity.status}
                                 </Badge>
@@ -968,7 +963,7 @@ const Dashboard = () => {
                   <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
                     <Button
                       variant="outline"
-                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-[10px] sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors"
+                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-sm sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors"
                       onClick={handleViewStore}
                     >
                       <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
@@ -977,7 +972,7 @@ const Dashboard = () => {
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-[10px] sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors"
+                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-sm sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors"
                       onClick={handleManageCustomers}
                     >
                       <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
@@ -986,7 +981,7 @@ const Dashboard = () => {
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-[10px] sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors"
+                      className="w-full justify-start h-9 sm:h-10 md:h-12 text-sm sm:text-xs md:text-sm touch-manipulation min-h-[44px] hover:bg-muted/50 transition-colors"
                       onClick={handleSettings}
                     >
                       <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />

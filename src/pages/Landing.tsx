@@ -145,6 +145,28 @@ const Landing = () => {
     return () => observer.disconnect();
   }, [statsAnimationStarted, heroRef]);
 
+  // Gérer la fermeture du menu mobile avec Escape et empêcher le scroll du body
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    // Empêcher le scroll du body quand le menu est ouvert
+    document.body.style.overflow = 'hidden';
+
+    // Fermer le menu avec la touche Escape
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* SEO Meta Tags */}
@@ -168,12 +190,14 @@ const Landing = () => {
         className="sticky top-0 z-40 border-b border-border/50 bg-card/80 backdrop-blur-xl shadow-lg"
         role="banner"
       >
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2.5 sm:py-3 md:py-4 flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 lg:py-4 flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
+          {/* Logo - Responsive sizing */}
           <Link
             to="/"
-            className="relative flex items-center justify-start gap-1.5 sm:gap-2 flex-shrink-0 min-w-0"
+            className="relative flex items-center justify-start gap-1.5 sm:gap-2 flex-shrink-0 min-w-0 group"
+            aria-label="Accueil Emarzona"
           >
-            <div className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 flex-shrink-0">
+            <div className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 lg:h-9 lg:w-9 flex-shrink-0 transition-transform group-hover:scale-105">
               {platformLogo ? (
                 <OptimizedImage
                   src={platformLogo}
@@ -186,31 +210,31 @@ const Landing = () => {
                 />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-                  <span className="text-xs sm:text-sm font-bold text-white">E</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-bold text-white">E</span>
                 </div>
               )}
             </div>
-            <span className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-extrabold text-foreground tracking-tight truncate">
+            <span className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl font-extrabold text-foreground tracking-tight truncate max-w-[120px] sm:max-w-none">
               Emarzona
             </span>
           </Link>
 
-          {/* Desktop Navigation Premium */}
+          {/* Desktop Navigation Premium - Hidden on mobile/tablet */}
           <nav
-            className="hidden lg:flex items-center gap-1 xl:gap-2"
+            className="hidden lg:flex items-center gap-1 xl:gap-2 flex-shrink-0"
             aria-label="Navigation principale"
           >
-            <Link to="/marketplace">
+            <Link to="/marketplace" className="flex-shrink-0">
               <Button
                 variant="ghost"
-                className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-3 xl:px-4"
+                className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-2 xl:px-3 2xl:px-4 whitespace-nowrap"
               >
                 Marketplace
               </Button>
             </Link>
             <Button
               variant="ghost"
-              className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-3 xl:px-4"
+              className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-2 xl:px-3 2xl:px-4 whitespace-nowrap"
               onClick={() =>
                 document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
               }
@@ -219,102 +243,126 @@ const Landing = () => {
             </Button>
             <Button
               variant="ghost"
-              className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-3 xl:px-4"
+              className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-2 xl:px-3 2xl:px-4 whitespace-nowrap"
               onClick={() =>
                 document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })
               }
             >
               Tarifs
             </Button>
-            <LanguageSwitcher variant="ghost" showLabel={false} />
-            <Link to="/auth">
+            <div className="hidden xl:block">
+              <LanguageSwitcher variant="ghost" showLabel={false} />
+            </div>
+            <Link to="/auth" className="flex-shrink-0">
               <Button
                 variant="ghost"
-                className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-3 xl:px-4"
+                className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-2 xl:px-3 2xl:px-4 whitespace-nowrap"
               >
                 Connexion
               </Button>
             </Link>
-            <Link to="/auth">
-              <Button className="gradient-accent text-accent-foreground font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 text-sm xl:text-base px-4 xl:px-6">
+            <Link to="/auth" className="flex-shrink-0">
+              <Button className="gradient-accent text-accent-foreground font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 text-xs xl:text-sm 2xl:text-base px-3 xl:px-4 2xl:px-6 whitespace-nowrap">
                 Démarrer gratuitement
               </Button>
             </Link>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden p-2.5 text-foreground hover:text-primary active:text-primary/80 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md hover:bg-primary/5 active:bg-primary/10 touch-manipulation"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={mobileMenuOpen}
-            type="button"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5 sm:h-6 sm:w-6" />
-            ) : (
-              <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
-            )}
-          </button>
+          {/* Tablet/Mobile: Language Switcher + Menu Button */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:hidden">
+            {/* Language Switcher - Visible on tablet, hidden on mobile */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher variant="ghost" showLabel={false} />
+            </div>
+            {/* Mobile Menu Button */}
+            <button
+              className="p-2 text-foreground hover:text-primary active:text-primary/80 transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md hover:bg-primary/5 active:bg-primary/10 touch-manipulation"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+              aria-expanded={mobileMenuOpen}
+              type="button"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Improved animation and overlay */}
         {mobileMenuOpen && (
-          <nav
-            className="lg:hidden border-t bg-card/98 backdrop-blur-sm animate-fade-in-up max-h-[calc(100vh-80px)] overflow-y-auto"
-            aria-label="Menu mobile"
-          >
-            <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-2 sm:gap-3">
-              <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)} className="w-full">
+          <>
+            {/* Overlay for mobile menu */}
+            <div
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30 lg:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+            <nav
+              className="lg:hidden border-t bg-card/98 backdrop-blur-sm animate-fade-in-up max-h-[calc(100vh-80px)] overflow-y-auto z-40 relative"
+              aria-label="Menu mobile"
+            >
+              <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-2 sm:gap-3">
+                <Link to="/marketplace" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
+                  >
+                    Marketplace
+                  </Button>
+                </Link>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setTimeout(() => {
+                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
                 >
-                  Marketplace
+                  Fonctionnalités
                 </Button>
-              </Link>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Fonctionnalités
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Tarifs
-              </Button>
-              <div className="border-t border-border/50 pt-2 sm:pt-3 mt-1">
-                <LanguageSwitcher
-                  variant="outline"
-                  showLabel={true}
-                  className="w-full min-h-[44px]"
-                />
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setTimeout(() => {
+                      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                >
+                  Tarifs
+                </Button>
+                {/* Language Switcher - Only visible on mobile */}
+                <div className="sm:hidden border-t border-border/50 pt-2 mt-1">
+                  <LanguageSwitcher
+                    variant="outline"
+                    showLabel={true}
+                    className="w-full min-h-[44px]"
+                  />
+                </div>
+                <div className="border-t border-border/50 pt-2 sm:pt-3 mt-1 flex flex-col gap-2">
+                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
+                    >
+                      Connexion
+                    </Button>
+                  </Link>
+                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <Button className="w-full gradient-accent text-accent-foreground font-semibold shadow-glow hover:opacity-90 active:opacity-80 transition-all duration-200 min-h-[44px] text-sm sm:text-base">
+                      Démarrer gratuitement
+                    </Button>
+                  </Link>
+                </div>
               </div>
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full mt-1">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
-                >
-                  Connexion
-                </Button>
-              </Link>
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                <Button className="w-full gradient-accent text-accent-foreground font-semibold shadow-glow hover:opacity-90 active:opacity-80 transition-all duration-200 min-h-[44px] text-sm sm:text-base">
-                  Démarrer gratuitement
-                </Button>
-              </Link>
-            </div>
-          </nav>
+            </nav>
+          </>
         )}
       </header>
 

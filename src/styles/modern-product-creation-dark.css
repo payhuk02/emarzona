@@ -426,8 +426,8 @@
   color: var(--danger);
 }
 
-/* Amélioration de la responsivité */
-@media (max-width: 640px) {
+/* Amélioration de la responsivité - Unifié à 768px pour cohérence avec useIsMobile hook */
+@media (max-width: 767px) {
   .modern-title-xl-dark {
     font-size: 1.5rem;
   }

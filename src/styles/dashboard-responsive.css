@@ -94,8 +94,8 @@
   @apply text-xs sm:text-sm text-muted-foreground;
 }
 
-/* Mobile Optimizations */
-@media (max-width: 640px) {
+/* Mobile Optimizations - Unifié à 768px pour cohérence avec useIsMobile hook */
+@media (max-width: 767px) {
   .dashboard-card {
     @apply min-h-[120px];
   }
@@ -114,7 +114,7 @@
 }
 
 /* Tablet Optimizations */
-@media (min-width: 641px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .dashboard-card {
     @apply min-h-[140px];
   }

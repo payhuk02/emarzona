@@ -208,7 +208,7 @@ const ProductDetails = () => {
         const paidProduct = paidResult?.data ?? null;
 
         // S'assurer que store_id est présent (utiliser foundStore.id si manquant)
-        const  productWithStore: ExtendedProduct = {
+        const productWithStore: ExtendedProduct = {
           ...product,
           store_id: product.store_id || foundStore.id,
           free_product: freeProduct as Product | null,
@@ -225,7 +225,7 @@ const ProductDetails = () => {
           promotional_price: product.promotional_price ?? null,
         });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors du chargement du produit:', error);
       const finalErrorMessage =
@@ -321,7 +321,7 @@ const ProductDetails = () => {
       }
 
       navigate(`/checkout?${checkoutParams.toString()}`);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Erreur lors de la redirection vers checkout:', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -553,7 +553,7 @@ const ProductDetails = () => {
               >
                 {/* Collection de toutes les images */}
                 {(() => {
-                  const  allImages: string[] = [];
+                  const allImages: string[] = [];
 
                   // Ajouter l'image principale
                   if (product.image_url) {
@@ -605,8 +605,8 @@ const ProductDetails = () => {
                               <ResponsiveProductImage
                                 src={currentImage}
                                 alt={product.name}
-                                className="w-full h-full transition-transform duration-300 group-hover:scale-110"
-                                fit="contain"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                fit="cover"
                                 fill={true}
                                 context="grid"
                                 priority={selectedImageIndex === 0}
@@ -650,7 +650,7 @@ const ProductDetails = () => {
                                 width={96}
                                 height={96}
                                 containerClassName="w-full h-full"
-                                imageClassName="w-full h-full object-contain bg-muted/30 object-center product-image"
+                                imageClassName="w-full h-full object-cover bg-muted/30 object-center product-image"
                                 priority={index < 3}
                                 showPlaceholder={false}
                               />
@@ -1317,7 +1317,15 @@ const ProductDetails = () => {
                   userId={user?.id}
                   currentProductId={product.id}
                   category={product.category || undefined}
-                  productType={product.product_type as 'digital' | 'physical' | 'service' | 'course' | 'artist' | undefined}
+                  productType={
+                    product.product_type as
+                      | 'digital'
+                      | 'physical'
+                      | 'service'
+                      | 'course'
+                      | 'artist'
+                      | undefined
+                  }
                   sameTypeOnly={true} // Recommander le même type de produit pour cohérence
                   title="Recommandé pour vous"
                   limit={6}
@@ -1343,9 +1351,3 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
-
-
-
-
-
-

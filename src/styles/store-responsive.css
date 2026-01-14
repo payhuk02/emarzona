@@ -242,14 +242,14 @@
   @apply text-muted-foreground;
 }
 
-/* Mobile Optimizations */
-@media (max-width: 640px) {
+/* Mobile Optimizations - Unifié à 768px pour cohérence avec useIsMobile hook */
+@media (max-width: 767px) {
   .store-tabs-list {
     @apply grid-cols-2 gap-1;
   }
 
   .store-tabs-trigger {
-    @apply text-xs px-2;
+    @apply text-sm px-2; /* Minimum 14px sur mobile */
   }
 
   .store-card-header {
@@ -274,7 +274,7 @@
 }
 
 /* Tablet Optimizations */
-@media (min-width: 641px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .store-tabs-list {
     @apply grid-cols-4 gap-2;
   }

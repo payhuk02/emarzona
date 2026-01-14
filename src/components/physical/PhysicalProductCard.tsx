@@ -10,7 +10,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Package,
   Edit,
@@ -112,21 +112,25 @@ const PhysicalProductCardComponent = ({ product, onEdit, onDelete }: PhysicalPro
           <StableDropdownMenu
             triggerContent={<MoreVertical className="h-4 w-4" />}
             triggerProps={{
-              variant: "secondary" as const,
-              size: "icon" as const,
-              className: "h-8 w-8",
-              "aria-label": `Actions pour ${product.name || product.id}`
+              variant: 'secondary' as const,
+              size: 'icon' as const,
+              className: 'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] touch-manipulation',
+              'aria-label': `Actions pour ${product.name || product.id}`,
             }}
           >
             <SelectItem value="edit" onSelect={() => onEdit?.(product.id)}>
               <Edit className="h-4 w-4 mr-2" />
               Modifier
             </SelectItem>
-            <SelectItem value="delete" onSelect={() => onDelete?.(product.id)} className="text-destructive">
+            <SelectItem
+              value="delete"
+              onSelect={() => onDelete?.(product.id)}
+              className="text-destructive"
+            >
               <Trash2 className="h-4 w-4 mr-2" />
               Supprimer
             </SelectItem>
-          </Select>
+          </StableDropdownMenu>
         </div>
       </div>
 
@@ -365,9 +369,3 @@ export const PhysicalProductCardSkeleton = () => (
     </CardFooter>
   </Card>
 );
-
-
-
-
-
-

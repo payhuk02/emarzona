@@ -137,7 +137,7 @@ export const TopNavigationBar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden min-h-[44px] min-w-[44px] touch-manipulation"
                 aria-label="Ouvrir le menu de navigation"
               >
                 <Menu className="h-5 w-5" />
@@ -222,7 +222,7 @@ export const TopNavigationBar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-accent touch-manipulation"
+                  className="hover:bg-accent touch-manipulation min-h-[44px] min-w-[44px]"
                   aria-label="Menu utilisateur"
                 >
                   <User className="h-5 w-5" />

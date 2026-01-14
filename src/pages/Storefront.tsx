@@ -53,7 +53,7 @@ const Storefront = () => {
     itemsPerPage: isMobile ? 24 : 100,
   });
   // Store-wide reviews not implemented yet; keep placeholders to avoid runtime errors
-  const  reviews: unknown[] = [];
+  const reviews: unknown[] = [];
   const reviewsLoading = false;
 
   const fetchStore = useCallback(async () => {
@@ -86,7 +86,7 @@ const Storefront = () => {
 
       if (data) {
         // Convertir domain_status null en undefined pour correspondre au type Store
-        const  storeData: Store = {
+        const storeData: Store = {
           ...data,
           domain_status: data.domain_status || undefined,
         } as Store;
@@ -116,7 +116,7 @@ const Storefront = () => {
         setError('Boutique introuvable');
         setHasLoadedOnce(true); // Même en cas d'erreur, on a tenté de charger
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -314,7 +314,7 @@ const Storefront = () => {
                 setError(null);
                 fetchStore();
               }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 touch-manipulation min-h-[44px] min-w-[44px]"
               aria-label="Réessayer le chargement de la boutique"
             >
               Réessayer
@@ -531,6 +531,7 @@ const Storefront = () => {
                                 setProductType('all');
                                 setLicensingType('all');
                               }}
+                              className="touch-manipulation min-h-[44px]"
                               aria-label="Réinitialiser les filtres"
                             >
                               Réinitialiser les filtres
@@ -636,9 +637,3 @@ const Storefront = () => {
 };
 
 export default Storefront;
-
-
-
-
-
-

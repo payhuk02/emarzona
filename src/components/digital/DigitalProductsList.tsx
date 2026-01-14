@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -628,7 +628,8 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                       triggerProps={{
                         variant: 'ghost' as const,
                         size: 'sm' as const,
-                        className: 'h-8 w-8 p-0',
+                        className:
+                          'h-8 w-8 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] p-0 touch-manipulation',
                         'aria-label': `Actions pour ${product.name || product.id}`,
                       }}
                       triggerContent={<MoreVertical className="h-4 w-4" />}
@@ -667,7 +668,8 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                         </SelectItem>
                       )}
                       {onDelete && (
-                        <SelectItem value="export"
+                        <SelectItem
+                          value="export"
                           onSelect={() => onDelete(product.id)}
                           className="text-red-600"
                         >

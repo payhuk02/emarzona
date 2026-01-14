@@ -470,7 +470,8 @@ export const ReviewModerationTable: React.FC<ReviewModerationTableProps> = ({
                           triggerProps={{
                             variant: 'ghost' as const,
                             size: 'icon' as const,
-                            className: 'h-8 w-8 sm:h-9 sm:w-9',
+                            className:
+                              'h-8 w-8 sm:h-9 sm:w-9 min-h-[44px] min-w-[44px] touch-manipulation',
                             'aria-label': `Actions pour l'avis ${review.id}`,
                           }}
                           triggerContent={<MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
