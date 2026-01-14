@@ -150,19 +150,19 @@ const BookingCardComponent = ({
               }}
             >
               {booking.status === 'pending' && (
-                <SelectItem value="edit" onSelect onSelect={() => onConfirm?.(booking.id)}>
+                <SelectItem value="edit" onSelect={() => onConfirm?.(booking.id)}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Confirmer
                 </SelectItem>
               )}
               {booking.status === 'confirmed' && (
-                <SelectItem value="delete" onSelect onSelect={() => onComplete?.(booking.id)}>
+                <SelectItem value="delete" onSelect={() => onComplete?.(booking.id)}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Marquer terminé
                 </SelectItem>
               )}
               {booking.status === 'confirmed' && (
-                <SelectItem value="copy" onSelect onSelect={() => onNoShow?.(booking.id)}>
+                <SelectItem value="copy" onSelect={() => onNoShow?.(booking.id)}>
                   <Ban className="h-4 w-4 mr-2" />
                   Absent
                 </SelectItem>

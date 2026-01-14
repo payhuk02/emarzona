@@ -97,7 +97,7 @@ const AdminUsers = () => {
   }, [sortBy, sortDirection]);
   
   // Fonction pour gérer les filtres
-  const handleFilterChange = useCallback((key: keyof UserFilters, value: any) => {
+  const handleFilterChange = useCallback((key: keyof UserFilters, value: UserFilters[keyof UserFilters]) => {
     logger.info(`Filtre utilisateurs ${key}: ${value}`);
     setFilters(prev => ({ ...prev, [key]: value }));
     setPage(1); // Reset à la page 1

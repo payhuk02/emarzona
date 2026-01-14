@@ -220,12 +220,12 @@ export const StoreMembersList = () => {
                           "aria-label": `Actions pour ${member.user?.email || member.id}`
                         }}
                       >
-                        <SelectItem value="edit" onSelect onSelect={() => handleEditRole(member)}>
+                        <SelectItem value="edit" onSelect={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
                         </SelectItem>
                         {member.role !== 'owner' && (
-                          <SelectItem value="delete" onSelect
+                          <SelectItem value="delete"
                             onSelect={() => handleRemove(member)}
                             className="text-destructive"
                           >
@@ -287,11 +287,11 @@ export const StoreMembersList = () => {
                           "aria-label": `Actions pour ${member.user?.email || member.id}`
                         }}
                       >
-                        <SelectItem value="copy" onSelect onSelect={() => handleEditRole(member)}>
+                        <SelectItem value="copy" onSelect={() => handleEditRole(member)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier le rôle
                         </SelectItem>
-                        <SelectItem value="view" onSelect
+                        <SelectItem value="view"
                           onSelect={() => handleRemove(member)}
                           className="text-destructive"
                         >

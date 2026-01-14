@@ -218,7 +218,7 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
                 </Button>
               </SelectTrigger>
               <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                <SelectItem value="edit" onSelect onSelect={(e) => {
+                <SelectItem value="edit" onSelect={(e) => {
                   e.stopPropagation();
                   setDetailDialogOpen(true);
                 }}>

@@ -184,14 +184,14 @@ const PaymentCardDashboardComponent = ({
             }}
             triggerContent={<MoreVertical className="h-4 w-4" />}
           >
-            <SelectItem value="edit" onSelect onSelect={onView}>
+            <SelectItem value="edit" onSelect={onView}>
               <span className="flex items-center">
                 <Eye className="h-4 w-4 mr-2" />
                 Voir les détails
               </span>
             </SelectItem>
             {payment.transaction_id && (
-              <SelectItem value="delete" onSelect onSelect={handleCopyTransactionId}>
+              <SelectItem value="delete" onSelect={handleCopyTransactionId}>
                 <span className="flex items-center">
                   <Copy className="h-4 w-4 mr-2" />
                   Copier l'ID

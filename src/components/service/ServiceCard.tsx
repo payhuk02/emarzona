@@ -125,11 +125,11 @@ const ServiceCardComponent = ({
                 "aria-label": `Actions pour ${service.name || service.id}`
               }}
             >
-              <SelectItem value="edit" onSelect onSelect={() => onEdit?.(service.id)}>
+              <SelectItem value="edit" onSelect={() => onEdit?.(service.id)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Modifier
               </SelectItem>
-              <SelectItem value="delete" onSelect
+              <SelectItem value="delete"
                 onSelect={() => onDelete?.(service.id)}
                 className="text-destructive"
               >

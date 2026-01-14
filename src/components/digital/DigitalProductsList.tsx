@@ -634,7 +634,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                       triggerContent={<MoreVertical className="h-4 w-4" />}
                     >
                       {onView && (
-                        <SelectItem value="edit" onSelect onSelect={() => onView(product.id)}>
+                        <SelectItem value="edit" onSelect={() => onView(product.id)}>
                           <span className="flex items-center">
                             <Eye className="h-4 w-4 mr-2" />
                             Voir
@@ -642,7 +642,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                         </SelectItem>
                       )}
                       {onEdit && (
-                        <SelectItem value="delete" onSelect onSelect={() => onEdit(product.id)}>
+                        <SelectItem value="delete" onSelect={() => onEdit(product.id)}>
                           <span className="flex items-center">
                             <Edit className="h-4 w-4 mr-2" />
                             Éditer
@@ -650,7 +650,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                         </SelectItem>
                       )}
                       {onDuplicate && (
-                        <SelectItem value="copy" onSelect onSelect={() => onDuplicate(product.id)}>
+                        <SelectItem value="copy" onSelect={() => onDuplicate(product.id)}>
                           <span className="flex items-center">
                             <Copy className="h-4 w-4 mr-2" />
                             Dupliquer
@@ -659,7 +659,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                       )}
                       <StableDropdownMenuSeparator />
                       {onArchive && (
-                        <SelectItem value="view" onSelect onSelect={() => onArchive(product.id)}>
+                        <SelectItem value="view" onSelect={() => onArchive(product.id)}>
                           <span className="flex items-center">
                             <Archive className="h-4 w-4 mr-2" />
                             Archiver

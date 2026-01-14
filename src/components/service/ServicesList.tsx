@@ -371,19 +371,19 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
               }}
             >
               {onView && (
-                <SelectItem value="edit" onSelect onSelect={() => onView(service)}>
+                <SelectItem value="edit" onSelect={() => onView(service)}>
                   <Eye className="h-4 w-4 mr-2" />
                   Voir détails
                 </SelectItem>
               )}
               {onEdit && (
-                <SelectItem value="delete" onSelect onSelect={() => onEdit(service)}>
+                <SelectItem value="delete" onSelect={() => onEdit(service)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Modifier
                 </SelectItem>
               )}
               {onDuplicate && (
-                <SelectItem value="copy" onSelect onSelect={() => onDuplicate(service)}>
+                <SelectItem value="copy" onSelect={() => onDuplicate(service)}>
                   <Copy className="h-4 w-4 mr-2" />
                   Dupliquer
                 </SelectItem>
