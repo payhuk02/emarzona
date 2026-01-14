@@ -458,7 +458,7 @@ const OrdersTableComponent = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onSelect={handleDelete} disabled={loading}>
+            <AlertDialogAction onClick={handleDelete} disabled={loading}>
               {loading ? 'Suppression...' : 'Supprimer'}
             </AlertDialogAction>
           </AlertDialogFooter>

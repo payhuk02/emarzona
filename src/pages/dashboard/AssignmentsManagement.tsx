@@ -1005,7 +1005,7 @@ export default function AssignmentsManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onSelect={() =>
+                    onClick={() =>
                       deletingAssignmentId && handleDeleteAssignment(deletingAssignmentId)
                     }
                     className="bg-red-600 hover:bg-red-700"

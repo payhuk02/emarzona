@@ -1006,7 +1006,7 @@ const AdminUsers = () => {
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
               <AlertDialogAction
-                onSelect={async () => {
+                onClick={async () => {
                   if (selectedUser) {
                     const success = await deleteUser(selectedUser);
                     if (success) {

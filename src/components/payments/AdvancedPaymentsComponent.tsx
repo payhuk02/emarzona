@@ -1454,7 +1454,7 @@ const  DisputeDialog: React.FC<DisputeDialogProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.cancel', 'Annuler')}</AlertDialogCancel>
           <AlertDialogAction
-            onSelect={onSubmit}
+            onClick={onSubmit}
             disabled={!disputeReason || !disputeDescription}
             className="bg-destructive hover:bg-destructive/90"
           >

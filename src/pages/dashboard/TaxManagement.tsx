@@ -805,7 +805,7 @@ export default function TaxManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onSelect={() => deletingTaxId && deleteTaxConfig.mutate(deletingTaxId)}
+                    onClick={() => deletingTaxId && deleteTaxConfig.mutate(deletingTaxId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

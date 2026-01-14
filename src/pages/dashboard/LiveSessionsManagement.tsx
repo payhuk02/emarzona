@@ -775,7 +775,7 @@ export default function LiveSessionsManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onSelect={() => deletingSessionId && handleDeleteSession(deletingSessionId)}
+                    onClick={() => deletingSessionId && handleDeleteSession(deletingSessionId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

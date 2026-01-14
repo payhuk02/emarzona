@@ -728,7 +728,7 @@ export function VariantManager({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onSelect={handleDeleteVariants} className="bg-destructive">
+            <AlertDialogAction onClick={handleDeleteVariants} className="bg-destructive">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

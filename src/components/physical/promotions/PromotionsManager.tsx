@@ -988,7 +988,7 @@ export const PromotionsManager : React.FC = () => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction 
-              onSelect={handleDelete} 
+              onClick={handleDelete} 
               className="w-full sm:w-auto bg-destructive hover:bg-destructive/90"
             >
               Supprimer

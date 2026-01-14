@@ -388,7 +388,7 @@ const RecurringBookingsManager = React.memo(() => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={confirmCancel}
+              onClick={confirmCancel}
               className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Confirmer

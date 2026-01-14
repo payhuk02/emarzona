@@ -655,7 +655,7 @@ export default function AutoReorderRules() {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <AlertDialogCancel className="w-full sm:w-auto text-sm">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={handleDelete}
+              onClick={handleDelete}
               className="w-full sm:w-auto text-sm bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer

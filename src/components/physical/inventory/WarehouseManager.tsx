@@ -620,7 +620,7 @@ export const WarehouseManager : React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onSelect={handleDelete} className="bg-destructive">
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive">
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

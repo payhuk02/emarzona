@@ -347,7 +347,7 @@ export const StoreMembersList = () => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={confirmRemove}
+              onClick={confirmRemove}
               disabled={removeMember.isPending}
               className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

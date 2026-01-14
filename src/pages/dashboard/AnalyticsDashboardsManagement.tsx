@@ -570,7 +570,7 @@ export default function AnalyticsDashboardsManagement() {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction
-                    onSelect={() => deletingDashboardId && handleDeleteDashboard(deletingDashboardId)}
+                    onClick={() => deletingDashboardId && handleDeleteDashboard(deletingDashboardId)}
                     className="bg-red-600 hover:bg-red-700"
                   >
                     Supprimer

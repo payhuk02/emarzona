@@ -527,7 +527,7 @@ export const PlatformCustomization = () => {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isImporting}>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={handleImportConfirm}
+              onClick={handleImportConfirm}
               disabled={!importFile || isImporting}
               className="bg-primary text-primary-foreground"
             >

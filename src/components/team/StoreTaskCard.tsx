@@ -285,7 +285,7 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={handleDelete}
+              onClick={handleDelete}
               disabled={deleteTask.isPending}
               className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

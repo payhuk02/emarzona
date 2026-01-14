@@ -306,7 +306,7 @@ export const DigitalProductsBulkActions = ({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isProcessing}>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={confirmDelete}
+              onClick={confirmDelete}
               disabled={isProcessing}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
