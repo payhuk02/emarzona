@@ -167,14 +167,14 @@ const BookingCardComponent = ({
                   Absent
                 </SelectItem>
               )}
-              <SelectItem value="view" onSelect
+              <SelectItem value="view"
                 onSelect={() => onCancel?.(booking.id)}
                 className="text-destructive"
               >
                 <XCircle className="h-4 w-4 mr-2" />
                 Annuler
               </SelectItem>
-            </Select>
+            </StableDropdownMenu>
           )}
         </div>
       </CardHeader>

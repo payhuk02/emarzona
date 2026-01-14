@@ -667,7 +667,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                         </SelectItem>
                       )}
                       {onDelete && (
-                        <SelectItem value="export" onSelect
+                        <SelectItem value="export"
                           onSelect={() => onDelete(product.id)}
                           className="text-red-600"
                         >
@@ -677,7 +677,7 @@ const DigitalProductsListComponent: React.FC<DigitalProductsListProps> = ({
                           </span>
                         </SelectItem>
                       )}
-                    </Select>
+                    </StableDropdownMenu>
                   </TableCell>
                 </TableRow>
               ))

@@ -136,7 +136,7 @@ const ServiceCardComponent = ({
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
               </SelectItem>
-            </Select>
+            </StableDropdownMenu>
           </div>
         )}
       </div>

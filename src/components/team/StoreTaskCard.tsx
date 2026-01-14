@@ -11,7 +11,7 @@ import { useStore } from '@/hooks/useStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { StableDropdownMenu } from "@/components/ui/stable-dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -211,57 +211,39 @@ export const StoreTaskCard = memo(({ task }: StoreTaskCardProps) => {
             </div>
 
             {/* Actions */}
-            <Select>
-              <DropdownMenuTrigger asChild onSelect={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour la tâche ${task.title || task.id}`}>
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </SelectTrigger>
-              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                <SelectItem value="edit" onSelect={(e) => {
-                  e.stopPropagation();
-                  setDetailDialogOpen(true);
-                }}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Voir les détails
+            <StableDropdownMenu
+              triggerContent={<MoreVertical className="h-4 w-4" />}
+              triggerProps={{
+                variant: "ghost" as const,
+                size: "icon" as const,
+                className: "h-8 w-8",
+                "aria-label": `Actions pour la tâche ${task.title || task.id}`
+              }}
+            >
+              <SelectItem value="edit" onSelect={() => setDetailDialogOpen(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Voir les détails
+              </SelectItem>
+              <div className="p-1">
+                <StoreTaskCalendarExport storeId={task.store_id} task={task} />
+              </div>
+              {task.status !== 'completed' && (
+                <SelectItem value="delete" onSelect={() => handleStatusChange('completed')}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Marquer comme terminée
                 </SelectItem>
-                <div onSelect={(e) => e.stopPropagation()} className="p-1">
-                  <StoreTaskCalendarExport storeId={task.store_id} task={task} />
-                </div>
-                {task.status !== 'completed' && (
-                  <SelectItem value="delete" onSelect
-                    onSelect={(e) => {
-                      e.stopPropagation();
-                      handleStatusChange('completed');
-                    }}
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Marquer comme terminée
-                  </SelectItem>
-                )}
-                {task.status === 'pending' && (
-                  <SelectItem value="copy" onSelect
-                    onSelect={(e) => {
-                      e.stopPropagation();
-                      handleStatusChange('in_progress');
-                    }}
-                  >
-                    <Clock className="h-4 w-4 mr-2" />
-                    Commencer
-                  </SelectItem>
-                )}
-                <SelectItem value="view" onSelect
-                  onSelect={(e) => {
-                    e.stopPropagation();
-                    setDeleteDialogOpen(true);
-                  }}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Supprimer
+              )}
+              {task.status === 'pending' && (
+                <SelectItem value="copy" onSelect={() => handleStatusChange('in_progress')}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Commencer
                 </SelectItem>
-              </SelectContent>
-            </Select>
+              )}
+              <SelectItem value="view" onSelect={() => setDeleteDialogOpen(true)} className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </SelectItem>
+            </StableDropdownMenu>
           </div>
         </CardContent>
       </Card>

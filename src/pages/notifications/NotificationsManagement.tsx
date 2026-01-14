@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { StableDropdownMenu } from '@/components/ui/stable-dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -786,46 +787,30 @@ export default function NotificationsManagement() {
                                 </span>
                               </div>
                             </div>
-                            <Select>
-                              <DropdownMenuTrigger asChild onSelect={e => e.stopPropagation()}>
-                                <Button variant="ghost" size="sm">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                {!notification.is_read && (
-                                  <SelectItem value="edit" onSelect
-                                    onSelect={e => {
-                                      e.stopPropagation();
-                                      handleMarkAsRead(notification.id);
-                                    }}
-                                  >
-                                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                                    Marquer comme lu
-                                  </SelectItem>
-                                )}
-                                <SelectItem value="delete" onSelect
-                                  onSelect={e => {
-                                    e.stopPropagation();
-                                    handleArchive(notification.id);
-                                  }}
-                                >
-                                  <Archive className="h-4 w-4 mr-2" />
-                                  Archiver
+                            <StableDropdownMenu
+                              triggerContent={<MoreVertical className="h-4 w-4" />}
+                              triggerProps={{
+                                variant: "ghost" as const,
+                                size: "sm" as const,
+                                "aria-label": `Actions pour la notification ${notification.id}`
+                              }}
+                            >
+                              {!notification.is_read && (
+                                <SelectItem value="edit" onSelect={() => handleMarkAsRead(notification.id)}>
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                                  Marquer comme lu
                                 </SelectItem>
-                                <DropdownMenuSeparator />
-                                <SelectItem value="copy" onSelect
-                                  onSelect={e => {
-                                    e.stopPropagation();
-                                    handleDelete(notification.id);
-                                  }}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Supprimer
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
+                              )}
+                              <SelectItem value="delete" onSelect={() => handleArchive(notification.id)}>
+                                <Archive className="h-4 w-4 mr-2" />
+                                Archiver
+                              </SelectItem>
+                              <DropdownMenuSeparator />
+                              <SelectItem value="copy" onSelect={() => handleDelete(notification.id)} className="text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Supprimer
+                              </SelectItem>
+                            </StableDropdownMenu>
                           </div>
                         </div>
                       </div>

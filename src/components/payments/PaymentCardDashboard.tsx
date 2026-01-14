@@ -199,13 +199,13 @@ const PaymentCardDashboardComponent = ({
               </SelectItem>
             )}
             <StableDropdownMenuSeparator />
-            <SelectItem value="copy" onSelect onSelect={onDelete} className="text-destructive">
+            <SelectItem value="copy" onSelect={onDelete} className="text-destructive">
               <span className="flex items-center">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Supprimer
               </span>
             </SelectItem>
-          </Select>
+          </StableDropdownMenu>
         </div>
       </CardContent>
     </Card>

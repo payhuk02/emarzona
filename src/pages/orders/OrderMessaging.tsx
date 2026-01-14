@@ -537,7 +537,7 @@ export default function OrderMessaging() {
                           <AlertTriangle className="h-4 w-4 mr-2" />
                           Ouvrir un litige
                         </SelectItem>
-                      </Select>
+                      </StableDropdownMenu>
                     </div>
                   </div>
                 </CardHeader>

@@ -398,7 +398,7 @@ const  ServicesListComponent: React.FC<ServicesListProps> = ({
                   Supprimer
                 </SelectItem>
               )}
-            </Select>
+            </StableDropdownMenu>
           </div>
 
           {/* Status */}

@@ -233,7 +233,7 @@ export const StoreMembersList = () => {
                             Retirer
                           </SelectItem>
                         )}
-                      </Select>
+                      </StableDropdownMenu>
                     </div>
                   ))}
                 </div>
@@ -298,7 +298,7 @@ export const StoreMembersList = () => {
                           <Trash2 className="h-4 w-4 mr-2" />
                           Annuler l'invitation
                         </SelectItem>
-                      </Select>
+                      </StableDropdownMenu>
                     </div>
                   ))}
                 </div>
