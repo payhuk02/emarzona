@@ -14,6 +14,7 @@ import {
   SelectGroup,
 } from './select';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MobileDropdownProps {
   /**
@@ -21,7 +22,7 @@ interface MobileDropdownProps {
    */
   trigger: React.ReactNode;
   /**
-   * Contenu du menu
+   * Contenu du menu (SelectItem uniquement)
    */
   children: React.ReactNode;
   /**
@@ -29,15 +30,7 @@ interface MobileDropdownProps {
    */
   align?: 'start' | 'center' | 'end';
   /**
-   * Côté d'ouverture du menu
-   */
-  side?: 'top' | 'right' | 'bottom' | 'left';
-  /**
-   * Offset depuis le trigger
-   */
-  sideOffset?: number;
-  /**
-   * Classes CSS supplémentaires
+   * Classes CSS supplémentaires pour le trigger
    */
   className?: string;
   /**
@@ -49,47 +42,25 @@ interface MobileDropdownProps {
    */
   width?: string | number;
   /**
-   * Désactiver l'optimisation mobile
+   * Callback quand une valeur est sélectionnée
    */
-  disableMobileOptimization?: boolean;
+  onValueChange?: (value: string) => void;
   /**
-   * Variante d'affichage sur mobile pour le contenu.
-   * - "default": petit menu ancré au trigger
-   * - "sheet": bottom sheet en bas de l'écran
-   * @default "default"
+   * Valeur sélectionnée
    */
-  mobileVariant?: 'default' | 'sheet';
-  /**
-   * Callback quand le menu s'ouvre
-   */
-  onOpenChange?: (open: boolean) => void;
-  /**
-   * État contrôlé d'ouverture
-   */
-  open?: boolean;
-  /**
-   * Mode modal (empêche les interactions en dehors)
-   */
-  modal?: boolean;
+  value?: string;
 }
 
 /**
- * Composant MobileDropdown - Menu dropdown optimisé pour mobile
+ * Composant MobileDropdown - Menu dropdown utilisant Select (version simplifiée)
  *
- * Wrapper autour de DropdownMenu qui gère automatiquement :
- * - Le positionnement stable sur mobile
- * - Les animations optimisées
- * - La gestion de l'état (contrôlé ou non-contrôlé)
+ * Wrapper autour de Select pour maintenir la compatibilité.
  *
  * @example
  * ```tsx
- * <MobileDropdown
- *   trigger={<Button>Menu</Button>}
- *   align="end"
- *   side="bottom"
- * >
- *   <DropdownMenuItem>Option 1</DropdownMenuItem>
- *   <DropdownMenuItem>Option 2</DropdownMenuItem>
+ * <MobileDropdown trigger={<Button>Menu</Button>}>
+ *   <SelectItem value="option1">Option 1</SelectItem>
+ *   <SelectItem value="option2">Option 2</SelectItem>
  * </MobileDropdown>
  * ```
  */
@@ -97,77 +68,33 @@ export const MobileDropdown: React.FC<MobileDropdownProps> = ({
   trigger,
   children,
   align = 'end',
-  side = 'bottom',
-  sideOffset = 4,
   className,
   contentClassName,
   width,
-  disableMobileOptimization = false,
-  onOpenChange,
-  open: controlledOpen,
-  modal = false,
-  mobileVariant = 'default',
+  onValueChange,
+  value,
 }) => {
-  const isMobile = useIsMobile();
-  const [internalOpen, setInternalOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const handleOpenChange = (newOpen: boolean) => {
-    if (controlledOpen === undefined) {
-      setInternalOpen(newOpen);
-    }
-    onOpenChange?.(newOpen);
-  };
-
-  // Le positionnement est géré par Radix UI via les props
-  // Pas besoin de hook supplémentaire
-
   return (
-    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange} modal={modal}>
-      <DropdownMenuTrigger ref={triggerRef} asChild className={cn('touch-manipulation', className)}>
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className={cn('touch-manipulation', className)}>
         {trigger}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        ref={menuRef}
-        align={align}
-        side={side}
-        sideOffset={sideOffset}
-        mobileOptimized={!disableMobileOptimization}
-        mobileVariant={mobileVariant}
+      </SelectTrigger>
+      <SelectContent
+        mobileVariant="sheet"
         className={cn(
-          // En mode bottom sheet mobile, on laisse la largeur se gérer en plein écran
-          !(isMobile && mobileVariant === 'sheet') &&
-            width &&
-            typeof width === 'number' &&
-            `w-[${width}px]`,
-          !(isMobile && mobileVariant === 'sheet') && typeof width === 'string' && width,
+          'min-w-[200px]',
+          typeof width === 'number' && `w-[${width}px]`,
+          typeof width === 'string' && width,
           contentClassName
         )}
-        style={
-          isMobile && mobileVariant === 'sheet'
-            ? undefined
-            : width
-              ? { width: typeof width === 'number' ? `${width}px` : width }
-              : undefined
-        }
-        // Laisser Radix UI gérer tous les événements normalement
-        // Pas de manipulation supplémentaire qui pourrait bloquer l'application
       >
         {children}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </SelectContent>
+    </Select>
   );
 };
 
-// Ré-exporter les composants enfants pour faciliter l'utilisation
-export {
-  SelectItem as DropdownMenuItem,
-  SelectLabel as DropdownMenuLabel,
-  SelectSeparator as DropdownMenuSeparator,
-  SelectGroup as DropdownMenuGroup,
-};
+// Les composants enfants sont maintenant directement importés depuis @/components/ui/select
 
 
 

@@ -11,12 +11,8 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ThemeSelectorCompact } from '@/components/navigation/ThemeSelector';
 import { Button } from '@/components/ui/button';
 import { LazyImage } from '@/components/ui/lazy-image';
-import {
-  MobileDropdown,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from '@/components/ui/mobile-dropdown';
+import { SelectItem, SelectLabel, SelectSeparator } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
   Package,
@@ -32,7 +28,7 @@ import {
 } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { LoyaltyBadge } from '@/components/loyalty/LoyaltyBadge';
 
@@ -222,8 +218,8 @@ export const TopNavigationBar = () => {
             </div>
 
             {/* User Menu */}
-            <MobileDropdown
-              trigger={
+            <Sheet>
+              <SheetTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -232,45 +228,55 @@ export const TopNavigationBar = () => {
                 >
                   <User className="h-5 w-5" />
                 </Button>
-              }
-              align="end"
-              side="bottom"
-              width={224}
-              contentClassName="w-56"
-            >
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-2">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">
-                      {user?.user_metadata?.full_name || user?.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <SheetHeader>
+                  <SheetTitle>Menu utilisateur</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col space-y-4 mt-6">
+                  <div className="flex flex-col space-y-2 p-4 bg-muted/50 rounded-lg">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">
+                        {user?.user_metadata?.full_name || user?.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                    {/* Loyalty Badge in User Menu */}
+                    <div className="flex justify-center">
+                      <LoyaltyBadge size="sm" />
+                    </div>
                   </div>
-                  {/* Loyalty Badge in User Menu */}
-                  <div className="flex justify-center">
-                    <LoyaltyBadge size="sm" />
+
+                  <div className="flex flex-col space-y-2">
+                    <NavLink
+                      to="/account/profile"
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                    >
+                      <User className="h-5 w-5" />
+                      <span>{t('navigation.myProfile', 'Mon Profil')}</span>
+                    </NavLink>
+
+                    <NavLink
+                      to="/dashboard/settings"
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                    >
+                      <Settings className="h-5 w-5" />
+                      <span>{t('navigation.settings', 'Paramètres')}</span>
+                    </NavLink>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer w-full text-left"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>{t('auth.signOut', 'Déconnexion')}</span>
+                    </button>
                   </div>
                 </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <NavLink to="/account/profile" className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  {t('navigation.myProfile', 'Mon Profil')}
-                </NavLink>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <NavLink to="/dashboard/settings" className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  {t('navigation.settings', 'Paramètres')}
-                </NavLink>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                {t('auth.signOut', 'Déconnexion')}
-              </DropdownMenuItem>
-            </MobileDropdown>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>

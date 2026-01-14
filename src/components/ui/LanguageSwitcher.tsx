@@ -8,7 +8,8 @@ import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import { Loader2 } from 'lucide-react';
-import { MobileDropdown, DropdownMenuItem } from '@/components/ui/mobile-dropdown';
+import { MobileDropdown } from '@/components/ui/mobile-dropdown';
+import { SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/config';
 import { cn } from '@/lib/utils';
@@ -143,22 +144,14 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   return (
     <MobileDropdown
       trigger={triggerButton}
-      align="end"
-      side="bottom"
-      sideOffset={isMobile ? MOBILE_SIDE_OFFSET : DESKTOP_SIDE_OFFSET}
-      width={180}
-      open={open}
-      onOpenChange={handleOpenChange}
+      onValueChange={(value) => changeLanguage(value)}
       className={className}
       contentClassName="min-w-[180px]"
     >
       {AVAILABLE_LANGUAGES.map(lang => (
-        <DropdownMenuItem
+        <SelectItem
           key={lang.code}
-          onSelect={() => {
-            // onSelect est appelé automatiquement par Radix UI, pas besoin de preventDefault
-            changeLanguage(lang.code);
-          }}
+          value={lang.code}
           className={cn(
             'gap-2 cursor-pointer touch-manipulation min-h-[44px]',
             'select-none',
@@ -170,7 +163,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           {currentLanguage.code === lang.code && (
             <span className="ml-auto text-xs text-muted-foreground">✓</span>
           )}
-        </DropdownMenuItem>
+        </SelectItem>
       ))}
     </MobileDropdown>
   );
