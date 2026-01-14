@@ -64,7 +64,6 @@ import {
   ChevronRight,
   X,
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useAdvancedPayments } from '@/hooks/useAdvancedPayments';
 import { AdvancedPayment, PaymentType, PaymentStatus } from '@/types/advanced-features';
 import type { PaymentResponse } from '@/types/advanced-features';

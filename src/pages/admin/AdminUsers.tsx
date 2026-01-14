@@ -34,7 +34,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Users, Search, Download, Shield, User, Ban, CheckCircle, Trash2, AlertTriangle, FileDown, ArrowUpDown, ArrowUp, ArrowDown, Filter, Plus, Edit3 } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -304,8 +303,9 @@ const AdminUsers = () => {
             </div>
           </CardHeader>
 
-          {/* Filtres avancés */}
-            <div className="mt-4 space-y-4">
+          <CardContent>
+            {/* Filtres avancés */}
+            <div className="mb-6 space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Filter className="h-4 w-4" />
                 Filtres
@@ -325,7 +325,7 @@ const AdminUsers = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Filtre par rôle */}
                 <div className="space-y-2">
                   <Label htmlFor="role-filter">Rôle</Label>
@@ -353,7 +353,7 @@ const AdminUsers = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Filtre par statut */}
                 <div className="space-y-2">
                   <Label htmlFor="status-filter">Statut</Label>
@@ -383,7 +383,6 @@ const AdminUsers = () => {
                 </div>
               </div>
             </div>
-          </CardHeader>
           <CardContent>
             {users.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">

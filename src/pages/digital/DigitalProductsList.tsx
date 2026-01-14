@@ -612,17 +612,14 @@ export const DigitalProductsList = () => {
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
                           Exporter sélectionnés ({selectedProducts.size})
                         </div>
-                        <SelectItem value="view" onSelect={() => handleExport(Array.from(selectedProducts), 'csv')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           CSV
                         </SelectItem>
-                        <SelectItem value="export" onSelect={() => handleExport(Array.from(selectedProducts), 'excel')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           Excel (.xlsx)
                         </SelectItem>
-                        <SelectItem value="duplicate" onSelect={() => handleExport(Array.from(selectedProducts), 'pdf')}
                         >
                           <FileDown className="h-4 w-4 mr-2" />
                           PDF
