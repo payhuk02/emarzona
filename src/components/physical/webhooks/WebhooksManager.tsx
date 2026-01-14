@@ -325,10 +325,8 @@ export const WebhooksManager = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <Select>
-                            <SelectTrigger
-                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le webhook ${webhook.name || webhook.id}`}>
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
+                            <SelectTrigger className="h-8 w-8" aria-label={`Actions pour le webhook ${webhook.name || webhook.id}`}>
+                              <MoreVertical className="h-4 w-4" />
                             </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
@@ -387,10 +385,8 @@ export const WebhooksManager = () => {
                           </div>
                         </div>
                         <Select>
-                          <SelectTrigger
-                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Actions pour le webhook ${webhook.name || webhook.id}`}>
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
+                          <SelectTrigger className="h-8 w-8" aria-label={`Actions pour le webhook ${webhook.name || webhook.id}`}>
+                            <MoreVertical className="h-4 w-4" />
                           </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
