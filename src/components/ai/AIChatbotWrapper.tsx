@@ -8,9 +8,7 @@ import React, { Suspense } from 'react';
 import { useAIChatbot } from '@/hooks/useAIChatbot';
 
 // Lazy import du composant AIChatbot
-const AIChatbot = React.lazy(() =>
-  import('./AIChatbot').then(module => ({ default: module.AIChatbot }))
-);
+const AIChatbot = React.lazy(() => import('./AIChatbot'));
 
 export const AIChatbotWrapper: React.FC = () => {
   const {
@@ -31,6 +29,12 @@ export const AIChatbotWrapper: React.FC = () => {
       <AIChatbot
         isOpen={isOpen}
         onToggle={toggleChatbot}
+        messages={messages}
+        isTyping={isTyping}
+        sessionId={sessionId}
+        sendMessage={sendMessage}
+        isMinimized={isMinimized}
+        minimizeChatbot={minimizeChatbot}
       />
     </Suspense>
   );

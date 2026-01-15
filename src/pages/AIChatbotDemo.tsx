@@ -57,8 +57,8 @@ export default function AIChatbotDemo() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Suggestions personnalisées basées sur vos préférences et historique d'achat.
-                Découvrez de nouveaux produits adaptés à vos goûts.
+                Suggestions pertinentes basées sur les produits populaires ou des critères basiques.
+                La personnalisation avancée est une fonctionnalité future.
               </CardDescription>
             </CardContent>
           </Card>
@@ -87,8 +87,8 @@ export default function AIChatbotDemo() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Le chatbot peut initier des conversations pour vous aider :
-                rappels de commandes, suggestions de produits, offres spéciales.
+                Le chatbot peut suggérer des actions et des réponses rapides pour vous guider.
+                L'initiation proactive de conversations est une fonctionnalité future.
               </CardDescription>
             </CardContent>
           </Card>
@@ -102,8 +102,8 @@ export default function AIChatbotDemo() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Le système apprend de chaque interaction pour améliorer ses réponses.
-                Vos feedbacks nous aident à perfectionner l'expérience.
+                Nous collectons vos feedbacks pour améliorer continuellement nos réponses.
+                Un apprentissage automatique complet est en cours de développement.
               </CardDescription>
             </CardContent>
           </Card>
@@ -117,8 +117,8 @@ export default function AIChatbotDemo() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Support automatique de plusieurs langues grâce à notre système
-                de traduction intégré. Communication fluide mondiale.
+                Le chatbot supporte actuellement le français. Un support multilingue étendu
+                avec traduction intégrée est prévu pour l'avenir.
               </CardDescription>
             </CardContent>
           </Card>
@@ -184,8 +184,8 @@ export default function AIChatbotDemo() {
               <div>
                 <h4 className="font-semibold mb-3">🤖 Intelligence Artificielle</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Analyse d'intention avancée</li>
-                  <li>• Apprentissage continu des interactions</li>
+                  <li>• Analyse d'intention robuste par mots-clés</li>
+                  <li>• Collecte de feedback pour amélioration</li>
                   <li>• Génération de réponses contextuelles</li>
                   <li>• Système de feedback utilisateur</li>
                 </ul>
@@ -195,7 +195,7 @@ export default function AIChatbotDemo() {
                 <h4 className="font-semibold mb-3">⚡ Performance</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Lazy-loading pour optimisation bundle</li>
-                  <li>• Cache intelligent des sessions</li>
+                  <li>• Persistance et gestion de session</li>
                   <li>• Réponses en temps réel</li>
                   <li>• Sauvegarde automatique des conversations</li>
                 </ul>
@@ -204,9 +204,9 @@ export default function AIChatbotDemo() {
               <div>
                 <h4 className="font-semibold mb-3">🔒 Sécurité</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Chiffrement des données utilisateur</li>
+                  <li>• Sécurité des données gérée par Supabase</li>
                   <li>• Sessions sécurisées</li>
-                  <li>• Modération automatique du contenu</li>
+                  <li>• Sanitization des entrées utilisateur</li>
                   <li>• Conformité RGPD</li>
                 </ul>
               </div>

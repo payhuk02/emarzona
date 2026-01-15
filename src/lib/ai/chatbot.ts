@@ -1,464 +1,106 @@
 /**
- * AI Chatbot System
- * Chatbot intelligent pour support client et recommandations
+ * AI Chatbot Core Logic
+ * Gère les sessions de chat, l'analyse d'intention, la génération de réponses et la persistance.
  * Date: Janvier 2026
  */
 
-import { logger } from '@/lib/logger';
+// Using crypto.randomUUID() instead of uuid package for better compatibility
+const uuidv4 = () => crypto.randomUUID();
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import { sanitizeString } from '@/lib/security/securityUtils';
+import { debounce } from '@/lib/utils';
+import { CHATBOT_RESPONSES } from './chatbotResponses';
+import { recommendationService } from './recommendationService';
+
+// =============================================================================
+// Interfaces & Types
+// =============================================================================
 
 export interface ChatMessage {
   id: string;
   content: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant';
   timestamp: Date;
   metadata?: {
-    intent?: string;
-    confidence?: number;
     actions?: ChatAction[];
-    context?: Record<string, any>;
+    suggestions?: string[];
+    sentiment?: 'positive' | 'negative' | 'neutral';
+    intent?: string;
+    entities?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    feedback?: boolean; // true for thumbs up, false for thumbs down
   };
 }
 
 export interface ChatAction {
-  type: 'product_recommendation' | 'order_status' | 'support_ticket' | 'navigation' | 'quick_reply';
-  payload: any;
   label: string;
-  description?: string;
+  type: 'quick_reply' | 'navigation' | 'product_recommendation' | 'order_status' | 'support_ticket';
+  payload: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+export interface IntentAnalysisResult {
+  intent: string;
+  confidence: number;
+  entities: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+}
+
+export interface ChatSessionContext {
+  currentIntent?: string;
+  orderNumber?: string;
+  productQuery?: string;
+  shippingAspect?: string;
+  returnReason?: string;
+  lastOrder?: {
+    productId: string;
+  };
+  browsingHistory?: string[]; // Array of product IDs or categories
 }
 
 export interface ChatSession {
   id: string;
   userId?: string;
   messages: ChatMessage[];
-  context: {
-    currentIntent?: string;
-    userProfile?: any;
-    browsingHistory?: any[];
-    cartItems?: any[];
-    lastOrder?: any;
-    preferences?: Record<string, any>;
-  };
+  context: ChatSessionContext;
   metadata: {
     startedAt: Date;
     lastActivity: Date;
-    platform: 'web' | 'mobile';
+    platform: string;
     language: string;
-    satisfaction?: number;
+    // Add any other session-level metadata
   };
 }
 
 export interface ChatbotResponse {
   message: string;
   actions?: ChatAction[];
-  context?: Record<string, any>;
   suggestions?: string[];
-  followUp?: boolean;
+  metadata?: ChatMessage['metadata'];
 }
 
-/**
- * Moteur principal du chatbot IA
- */
+// =============================================================================
+// AI Chatbot Class
+// =============================================================================
+
 export class AIChatbot {
   private sessions: Map<string, ChatSession> = new Map();
-  private readonly maxContextLength = 10;
-  private readonly contextWindow = 20; // Derniers messages gardés en mémoire
+  private contextWindow = 10; // Number of messages to keep in context for intent analysis
 
-  /**
-   * Traite un message utilisateur et génère une réponse
-   */
-  async processMessage(
-    sessionId: string,
-    userMessage: string,
-    userId?: string,
-    context?: Record<string, any>
-  ): Promise<ChatbotResponse> {
-    try {
-      // Récupérer ou créer la session
-      let session = this.sessions.get(sessionId);
-      if (!session) {
-        session = this.createNewSession(sessionId, userId);
-        this.sessions.set(sessionId, session);
-      }
-
-      // Analyser l'intention du message
-      const intent = await this.analyzeIntent(userMessage, session.context);
-
-      // Ajouter le message utilisateur à la session
-      const userChatMessage: ChatMessage = {
-        id: `user_${Date.now()}`,
-        content: userMessage,
-        role: 'user',
-        timestamp: new Date(),
-        metadata: {
-          intent: intent.intent,
-          confidence: intent.confidence
-        }
-      };
-
-      session.messages.push(userChatMessage);
-      session.metadata.lastActivity = new Date();
-
-      // Générer la réponse
-      const response = await this.generateResponse(userMessage, session, intent, context);
-
-      // Ajouter la réponse à la session
-      const assistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
-        content: response.message,
-        role: 'assistant',
-        timestamp: new Date(),
-        metadata: {
-          actions: response.actions,
-          context: response.context
-        }
-      };
-
-      session.messages.push(assistantMessage);
-
-      // Nettoyer l'historique si trop long
-      this.trimSessionHistory(session);
-
-      // Sauvegarder la session en base si utilisateur connecté
-      if (userId) {
-        await this.saveSession(session);
-      }
-
-      return response;
-
-    } catch (error) {
-      logger.error('Erreur dans le traitement du message chatbot', { error, sessionId, userMessage });
-      return {
-        message: "Désolé, je rencontre un problème technique. Un conseiller va prendre le relais.",
-        actions: [{
-          type: 'support_ticket',
-          payload: { message: userMessage, error: String(error) },
-          label: 'Créer un ticket support'
-        }]
-      };
-    }
+  constructor() {
+    this.debouncedSaveSession = debounce(this._saveSession.bind(this), 3000);
   }
 
-  /**
-   * Analyse l'intention du message utilisateur
-   */
-  private async analyzeIntent(
-    message: string,
-    sessionContext: any
-  ): Promise<{ intent: string; confidence: number; entities: Record<string, any> }> {
-    // Analyse basique des mots-clés (à remplacer par un vrai NLP plus tard)
-    const lowerMessage = message.toLowerCase();
-
-    // Intentions de support
-    if (lowerMessage.includes('commande') || lowerMessage.includes('order') || lowerMessage.includes('achat')) {
-      return { intent: 'order_inquiry', confidence: 0.9, entities: {} };
-    }
-
-    if (lowerMessage.includes('livraison') || lowerMessage.includes('delivery') || lowerMessage.includes('expédition')) {
-      return { intent: 'shipping_inquiry', confidence: 0.9, entities: {} };
-    }
-
-    if (lowerMessage.includes('retour') || lowerMessage.includes('return') || lowerMessage.includes('remboursement')) {
-      return { intent: 'return_inquiry', confidence: 0.9, entities: {} };
-    }
-
-    if (lowerMessage.includes('produit') || lowerMessage.includes('product') || lowerMessage.includes('chercher')) {
-      return { intent: 'product_search', confidence: 0.8, entities: {} };
-    }
-
-    if (lowerMessage.includes('recommandation') || lowerMessage.includes('suggérer') || lowerMessage.includes('conseil')) {
-      return { intent: 'recommendation', confidence: 0.8, entities: {} };
-    }
-
-    if (lowerMessage.includes('aide') || lowerMessage.includes('help') || lowerMessage.includes('support')) {
-      return { intent: 'help', confidence: 0.7, entities: {} };
-    }
-
-    // Intention par défaut
-    return { intent: 'general', confidence: 0.5, entities: {} };
-  }
+  // ===========================================================================
+  // Public Methods
+  // ===========================================================================
 
   /**
-   * Génère une réponse intelligente basée sur l'intention et le contexte
+   * Crée une nouvelle session de chat pour un utilisateur donné.
+   * @param userId L'ID de l'utilisateur (peut être undefined pour les utilisateurs non connectés).
+   * @returns La nouvelle session de chat.
    */
-  private async generateResponse(
-    userMessage: string,
-    session: ChatSession,
-    intent: any,
-    context?: Record<string, any>
-  ): Promise<ChatbotResponse> {
-
-    switch (intent.intent) {
-      case 'order_inquiry':
-        return await this.handleOrderInquiry(session, context);
-
-      case 'shipping_inquiry':
-        return await this.handleShippingInquiry(session, context);
-
-      case 'return_inquiry':
-        return await this.handleReturnInquiry(session, context);
-
-      case 'product_search':
-        return await this.handleProductSearch(userMessage, session, context);
-
-      case 'recommendation':
-        return await this.handleRecommendation(session, context);
-
-      case 'help':
-        return this.handleHelp();
-
-      default:
-        return this.handleGeneralInquiry(userMessage, session);
-    }
-  }
-
-  /**
-   * Gestion des demandes liées aux commandes
-   */
-  private async handleOrderInquiry(session: ChatSession, context?: Record<string, any>): Promise<ChatbotResponse> {
-    if (!session.userId) {
-      return {
-        message: "Pour voir vos commandes, vous devez être connecté. Souhaitez-vous vous connecter ?",
-        actions: [{
-          type: 'navigation',
-          payload: { path: '/auth' },
-          label: 'Se connecter'
-        }]
-      };
-    }
-
-    try {
-      // Récupérer les dernières commandes de l'utilisateur
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('id, status, created_at, total_amount, currency')
-        .eq('customer_id', session.userId)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (!orders || orders.length === 0) {
-        return {
-          message: "Je ne trouve pas de commandes à votre nom. Avez-vous déjà passé commande sur notre plateforme ?",
-          actions: [{
-            type: 'navigation',
-            payload: { path: '/marketplace' },
-            label: 'Découvrir nos produits'
-          }]
-        };
-      }
-
-      const lastOrder = orders[0];
-      const statusText = this.getOrderStatusText(lastOrder.status);
-
-      return {
-        message: `Votre dernière commande (${lastOrder.id.slice(-8)}) est ${statusText}. Souhaitez-vous voir tous vos détails de commande ?`,
-        actions: [{
-          type: 'navigation',
-          payload: { path: `/orders/${lastOrder.id}` },
-          label: 'Voir ma commande'
-        }, {
-          type: 'quick_reply',
-          payload: { message: 'Voir toutes mes commandes' },
-          label: 'Voir toutes les commandes'
-        }]
-      };
-
-    } catch (error) {
-      logger.error('Erreur lors de la récupération des commandes', { error, userId: session.userId });
-      return {
-        message: "Je rencontre un problème pour accéder à vos commandes. Puis-je vous aider autrement ?"
-      };
-    }
-  }
-
-  /**
-   * Gestion des demandes de livraison
-   */
-  private async handleShippingInquiry(session: ChatSession, context?: Record<string, any>): Promise<ChatbotResponse> {
-    return {
-      message: "Pour les informations de livraison, nous travaillons avec plusieurs transporteurs : Chronopost, Colissimo, UPS, FedEx et DHL. Les délais varient selon votre région.",
-      actions: [{
-        type: 'navigation',
-        payload: { path: '/shipping' },
-        label: 'Voir les options de livraison'
-      }],
-      suggestions: [
-        "Quels sont les délais pour [votre région] ?",
-        "Puis-je changer l'adresse de livraison ?",
-        "Comment suivre ma commande ?"
-      ]
-    };
-  }
-
-  /**
-   * Gestion des demandes de retour
-   */
-  private async handleReturnInquiry(session: ChatSession, context?: Record<string, any>): Promise<ChatbotResponse> {
-    return {
-      message: "Notre politique de retour vous permet de retourner vos produits dans les 30 jours. Les frais de retour sont offerts pour les produits défectueux.",
-      actions: [{
-        type: 'navigation',
-        payload: { path: '/returns' },
-        label: 'Voir la politique de retour'
-      }, {
-        type: 'quick_reply',
-        payload: { message: 'Je veux faire un retour' },
-        label: 'Initier un retour'
-      }]
-    };
-  }
-
-  /**
-   * Gestion de la recherche de produits
-   */
-  private async handleProductSearch(userMessage: string, session: ChatSession, context?: Record<string, any>): Promise<ChatbotResponse> {
-    // Extraction basique de termes de recherche (à améliorer avec NLP)
-    const searchTerms = userMessage.toLowerCase()
-      .replace(/chercher|trouver|besoin|veut/g, '')
-      .trim();
-
-    if (!searchTerms) {
-      return {
-        message: "Que recherchez-vous exactement ? Je peux vous aider à trouver des produits digitaux, physiques, des cours ou des services.",
-        suggestions: [
-          "Un logiciel de design",
-          "Des cours de programmation",
-          "Des produits artisanaux"
-        ]
-      };
-    }
-
-    try {
-      // Recherche de produits
-      const { data: products } = await supabase
-        .from('products')
-        .select('id, name, category')
-        .ilike('name', `%${searchTerms}%`)
-        .limit(3);
-
-      if (!products || products.length === 0) {
-        return {
-          message: `Je n'ai pas trouvé de produits correspondant à "${searchTerms}". Essayez avec d'autres termes ou parcourez nos catégories.`,
-          actions: [{
-            type: 'navigation',
-            payload: { path: '/marketplace' },
-            label: 'Voir toutes les catégories'
-          }]
-        };
-      }
-
-      const productList = products.map(p => p.name).join(', ');
-
-      return {
-        message: `J'ai trouvé plusieurs produits correspondant à votre recherche : ${productList}. Voulez-vous que je vous montre plus de détails ?`,
-        actions: products.slice(0, 2).map(product => ({
-          type: 'navigation' as const,
-          payload: { path: `/product/${product.id}` },
-          label: `Voir ${product.name}`
-        }))
-      };
-
-    } catch (error) {
-      logger.error('Erreur lors de la recherche de produits', { error, searchTerms });
-      return {
-        message: "Je rencontre un problème avec la recherche. Essayez de naviguer directement dans notre marketplace."
-      };
-    }
-  }
-
-  /**
-   * Gestion des recommandations
-   */
-  private async handleRecommendation(session: ChatSession, context?: Record<string, any>): Promise<ChatbotResponse> {
-    try {
-      // Recommandations basées sur l'historique ou populaires
-      const { data: popularProducts } = await supabase
-        .from('products')
-        .select('id, name')
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (!popularProducts || popularProducts.length === 0) {
-        return {
-          message: "Découvrez nos produits phares ! Nous avons des articles digitaux, physiques, des cours et des services.",
-          actions: [{
-            type: 'navigation',
-            payload: { path: '/marketplace' },
-            label: 'Explorer le marketplace'
-          }]
-        };
-      }
-
-      return {
-        message: "Voici quelques-unes de nos meilleures recommendations :",
-        actions: popularProducts.map(product => ({
-          type: 'product_recommendation' as const,
-          payload: { productId: product.id },
-          label: `Voir ${product.name}`
-        }))
-      };
-
-    } catch (error) {
-      logger.error('Erreur lors des recommandations', { error });
-      return {
-        message: "Découvrez nos produits populaires dans notre marketplace !"
-      };
-    }
-  }
-
-  /**
-   * Gestion de l'aide générale
-   */
-  private handleHelp(): ChatbotResponse {
-    return {
-      message: "Je peux vous aider avec : vos commandes, la livraison, les retours, la recherche de produits, et des recommandations personnalisées. Que souhaitez-vous savoir ?",
-      suggestions: [
-        "Où en est ma commande ?",
-        "Comment retourner un produit ?",
-        "Quels produits recommandez-vous ?"
-      ]
-    };
-  }
-
-  /**
-   * Gestion des demandes générales
-   */
-  private handleGeneralInquiry(userMessage: string, session: ChatSession): Promise<ChatbotResponse> {
-    // Analyse des mots-clés pour des réponses plus intelligentes
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut') || lowerMessage.includes('hello')) {
-      return Promise.resolve({
-        message: "Bonjour ! Je suis ravi de vous aider. Comment puis-je vous assister aujourd'hui ?",
-        suggestions: [
-          "Je cherche un produit",
-          "Aide avec ma commande",
-          "Informations de livraison"
-        ]
-      });
-    }
-
-    if (lowerMessage.includes('merci') || lowerMessage.includes('thank')) {
-      return Promise.resolve({
-        message: "De rien ! N'hésitez pas si vous avez d'autres questions. Bonne journée ! 👋"
-      });
-    }
-
-    return Promise.resolve({
-      message: "Je comprends votre demande. Pouvez-vous me donner plus de détails pour que je puisse mieux vous aider ?",
-      suggestions: [
-        "Expliquez votre problème",
-        "Contactez le support",
-        "Retournez au menu principal"
-      ]
-    });
-  }
-
-  /**
-   * Utilitaires
-   */
-  private createNewSession(sessionId: string, userId?: string): ChatSession {
-    return {
+  public createNewSession(userId?: string): ChatSession {
+    const sessionId = uuidv4();
+    const newSession: ChatSession = {
       id: sessionId,
       userId,
       messages: [],
@@ -466,48 +108,533 @@ export class AIChatbot {
       metadata: {
         startedAt: new Date(),
         lastActivity: new Date(),
-        platform: 'web',
-        language: 'fr'
-      }
+        platform: 'web', // Peut être dynamique
+        language: 'fr', // Peut être dynamique
+      },
     };
+    this.sessions.set(sessionId, newSession);
+    logger.info(`Nouvelle session créée: ${sessionId}`, { userId });
+    return newSession;
   }
 
-  private trimSessionHistory(session: ChatSession) {
-    // Garder seulement les derniers messages
-    if (session.messages.length > this.contextWindow) {
-      session.messages = session.messages.slice(-this.contextWindow);
+  /**
+   * Traite un message utilisateur, génère une réponse et met à jour la session.
+   * @param sessionId L'ID de la session.
+   * @param userMessage Le message de l'utilisateur.
+   * @param userId L'ID de l'utilisateur.
+   * @returns La réponse du chatbot.
+   */
+  public async processMessage(
+    sessionId: string,
+    userMessage: string,
+    userId?: string,
+  ): Promise<ChatbotResponse> {
+      let session = this.sessions.get(sessionId);
+
+      if (!session) {
+      logger.warn(`Session ${sessionId} non trouvée, création d'une nouvelle.`, { userId });
+      session = this.createNewSession(userId);
+    }
+
+    // Mettre à jour le userId si la session existait sans et que l'utilisateur se connecte
+    if (userId && !session.userId) {
+      session.userId = userId;
+    }
+
+    const sanitizedMessage = sanitizeString(userMessage);
+
+    const newUserMessage: ChatMessage = {
+      id: uuidv4(),
+      content: sanitizedMessage,
+        role: 'user',
+        timestamp: new Date(),
+    };
+    session.messages.push(newUserMessage);
+
+    let assistantResponse: ChatbotResponse;
+
+    try {
+      const intentAnalysis = await this.analyzeIntent(sanitizedMessage, session.context);
+      session.context.currentIntent = intentAnalysis.intent;
+      session.context = { ...session.context, ...intentAnalysis.entities }; // Fusionner les entités dans le contexte
+      newUserMessage.metadata = { ...newUserMessage.metadata, intent: intentAnalysis.intent, entities: intentAnalysis.entities };
+
+      assistantResponse = await this.generateResponse(sanitizedMessage, session, intentAnalysis);
+    } catch (error) {
+      logger.error('Erreur dans le traitement du message chatbot', { sessionId, userId, error });
+      assistantResponse = {
+        message: CHATBOT_RESPONSES.TECHNICAL_ERROR,
+        actions: [
+          {
+            label: CHATBOT_RESPONSES.CREATE_SUPPORT_TICKET_ACTION_LABEL,
+            type: 'support_ticket',
+            payload: { error: (error as Error).message, userMessage: sanitizedMessage },
+          },
+        ],
+      };
+    }
+
+    const newAssistantMessage: ChatMessage = {
+      id: uuidv4(),
+      content: assistantResponse.message,
+        role: 'assistant',
+        timestamp: new Date(),
+        metadata: {
+        actions: assistantResponse.actions,
+        suggestions: assistantResponse.suggestions,
+        ...assistantResponse.metadata,
+      },
+    };
+    session.messages.push(newAssistantMessage);
+
+      this.trimSessionHistory(session);
+
+    session.metadata.lastActivity = new Date();
+    if (session.userId) {
+      this.debouncedSaveSession(session);
+    }
+
+    return assistantResponse;
+  }
+
+  // ===========================================================================
+  // Private Core Logic Methods
+  // ===========================================================================
+
+  /**
+   * Analyse l'intention du message utilisateur.
+   * @param message Le message utilisateur.
+   * @param context Le contexte actuel de la session.
+   * @returns Un objet IntentAnalysisResult.
+   */
+  private async analyzeIntent(message: string, context: ChatSessionContext): Promise<IntentAnalysisResult> {
+    const lowerMessage = message.toLowerCase();
+    let intent = 'general';
+    let confidence = 0.5;
+    const entities: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    // Détection d'intention pour les commandes
+    const orderMatch = lowerMessage.match(/(commande|suivi|où est).*?#?(\d{6,})/);
+    if (orderMatch) {
+      intent = 'order_inquiry';
+      entities.orderNumber = orderMatch[2];
+      confidence = 0.9;
+    } else if (lowerMessage.includes('commande') || lowerMessage.includes('mes commandes')) {
+      intent = 'order_inquiry';
+      confidence = 0.7;
+    }
+
+    // Détection d'intention pour la livraison
+    if (lowerMessage.includes('livraison') || lowerMessage.includes('expedition')) {
+      intent = 'shipping_inquiry';
+      if (lowerMessage.includes('adresse')) entities.shippingAspect = 'address';
+      if (lowerMessage.includes('délais')) entities.shippingAspect = 'time';
+      confidence = Math.max(confidence, 0.8);
+    }
+
+    // Détection d'intention pour les retours
+    if (lowerMessage.includes('retour') || lowerMessage.includes('remboursement')) {
+      intent = 'return_inquiry';
+      confidence = Math.max(confidence, 0.8);
+    }
+
+    // Détection d'intention pour la recherche de produits
+    if (lowerMessage.includes('produit') || lowerMessage.includes('cherche') || lowerMessage.includes('trouver')) {
+      intent = 'product_search';
+      const productQueryMatch = lowerMessage.match(/(produit|cherche|trouver)\s+(un|une|des|le|la|les)?\s*(.*)/);
+      if (productQueryMatch?.[3]) {
+        entities.productQuery = productQueryMatch[3].trim();
+      } else {
+        entities.productQuery = message; // Utiliser le message entier si pas de match spécifique
+      }
+      confidence = Math.max(confidence, 0.85);
+    }
+
+    // Détection d'intention pour les recommandations
+    if (lowerMessage.includes('recommande') || lowerMessage.includes('suggere')) {
+      intent = 'recommendation_inquiry';
+      confidence = Math.max(confidence, 0.9);
+    }
+
+    // Détection d'intention d'aide
+    if (lowerMessage.includes('aide') || lowerMessage.includes('help') || lowerMessage.includes('comment faire')) {
+      intent = 'help';
+      confidence = Math.max(confidence, 0.7);
+    }
+
+    // Si aucune intention forte, utiliser l'intention du contexte précédent si pertinent
+    if (confidence < 0.7 && context.currentIntent) {
+      // Potentiellement ajuster la confiance ou changer d'intention si le nouveau message est très différent
+    }
+
+    logger.debug('Intent Analysis Result', { message, intent, confidence, entities });
+    return { intent, confidence, entities };
+  }
+
+  /**
+   * Génère une réponse du chatbot basée sur l'intention analysée.
+   * @param userMessage Le message original de l'utilisateur.
+   * @param session La session de chat actuelle.
+   * @param intentAnalysis Le résultat de l'analyse d'intention.
+   * @returns La réponse générée.
+   */
+  private async generateResponse(
+    userMessage: string,
+    session: ChatSession,
+    intentAnalysis: IntentAnalysisResult,
+  ): Promise<ChatbotResponse> {
+    const { intent, entities } = intentAnalysis;
+
+    // Dispatch vers les handlers spécifiques
+    switch (intent) {
+      case 'order_inquiry':
+        return this.handleOrderInquiry(session, session.context);
+      case 'shipping_inquiry':
+        return this.handleShippingInquiry(session, session.context);
+      case 'return_inquiry':
+        return this.handleReturnInquiry(session, session.context);
+      case 'product_search':
+        return this.handleProductSearch(userMessage, session, session.context);
+      case 'recommendation_inquiry':
+        return this.handleRecommendation(session, session.context);
+      case 'help':
+        return this.handleHelp();
+      case 'general':
+      default:
+        return this.handleGeneralInquiry(userMessage, session);
     }
   }
 
-  private async saveSession(session: ChatSession) {
+  /**
+   * Gère les demandes d'informations sur les commandes.
+   * @param session La session de chat.
+   * @param _context Le contexte de la session.
+   * @returns Une réponse du chatbot.
+   */
+  private async handleOrderInquiry(session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+    if (!session.userId) {
+      return {
+        message: CHATBOT_RESPONSES.ORDER_NOT_LOGGED_IN,
+        actions: [{
+          label: CHATBOT_RESPONSES.ORDER_NOT_LOGGED_IN_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/login'
+          }
+        }],
+      };
+    }
+
+    const { data: orders, error } = await supabase
+        .from('orders')
+      .select('*')
+      .eq('user_id', session.userId)
+      .order('created_at', {
+        ascending: false
+      })
+      .limit(1);
+
+    if (error) {
+      logger.error('Erreur lors de la récupération des commandes', {
+        userId: session.userId,
+        error
+      });
+        return {
+        message: CHATBOT_RESPONSES.ORDER_FETCH_ERROR
+      };
+    }
+
+    if (!orders || orders.length === 0) {
+      return {
+        message: CHATBOT_RESPONSES.ORDER_NOT_FOUND,
+        actions: [{
+          label: CHATBOT_RESPONSES.ORDER_NOT_FOUND_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/marketplace'
+          }
+        }],
+      };
+    }
+
+    const lastOrder = orders[0];
+    const orderStatusMessage = CHATBOT_RESPONSES.ORDER_LAST_STATUS(lastOrder.id, lastOrder.status);
+
+    return {
+      message: orderStatusMessage,
+      actions: [{
+        label: CHATBOT_RESPONSES.ORDER_VIEW_ACTION_LABEL,
+        type: 'navigation',
+        payload: {
+          path: `/orders/${lastOrder.id}`
+        }
+      }, {
+        label: CHATBOT_RESPONSES.ORDER_ALL_ACTION_LABEL,
+        type: 'navigation',
+        payload: {
+          path: '/orders'
+        }
+      }],
+      metadata: {
+        lastOrder: {
+          productId: lastOrder.id
+        }
+      }, // Supposons que nous voulons recommander basé sur la dernière commande
+    };
+  }
+
+  /**
+   * Gère les demandes d'informations sur la livraison.
+   * @param _session La session de chat.
+   * @param _context Le contexte de la session.
+   * @returns Une réponse du chatbot.
+   */
+  private async handleShippingInquiry(_session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+    return {
+      message: CHATBOT_RESPONSES.SHIPPING_INFO,
+      actions: [{
+        label: CHATBOT_RESPONSES.SHIPPING_ACTION_LABEL,
+        type: 'navigation',
+        payload: {
+          path: '/shipping-policy'
+        }
+      }],
+      suggestions: CHATBOT_RESPONSES.SHIPPING_SUGGESTIONS,
+    };
+  }
+
+  /**
+   * Gère les demandes d'informations sur les retours.
+   * @param _session La session de chat.
+   * @param _context Le contexte de la session.
+   * @returns Une réponse du chatbot.
+   */
+  private async handleReturnInquiry(_session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+    return {
+      message: CHATBOT_RESPONSES.RETURN_POLICY,
+      actions: [{
+        label: CHATBOT_RESPONSES.RETURN_POLICY_ACTION_LABEL,
+        type: 'navigation',
+        payload: {
+          path: '/return-policy'
+        }
+      }, {
+        label: CHATBOT_RESPONSES.RETURN_INITIATE_ACTION_LABEL,
+        type: 'navigation',
+        payload: {
+          path: '/returns/initiate'
+        }
+      }],
+    };
+  }
+
+  /**
+   * Gère les demandes de recherche de produits.
+   * @param userMessage Le message de l'utilisateur.
+   * @param session La session de chat.
+   * @param _context Le contexte de la session.
+   * @returns Une réponse du chatbot.
+   */
+  private async handleProductSearch(userMessage: string, session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
+    const productQuery = session.context.productQuery || userMessage;
+
+    if (!productQuery) {
+      return {
+        message: CHATBOT_RESPONSES.PRODUCT_SEARCH_NO_QUERY,
+        suggestions: CHATBOT_RESPONSES.PRODUCT_SEARCH_NO_QUERY_SUGGESTIONS,
+      };
+    }
+
+    const { data: products, error } = await supabase
+        .from('products')
+        .select('id, name, category')
+      .ilike('name', `%${productQuery}%`)
+        .limit(3);
+
+    if (error) {
+      logger.error('Erreur lors de la recherche de produits', {
+        productQuery,
+        error
+      });
+      return {
+        message: CHATBOT_RESPONSES.PRODUCT_SEARCH_ERROR
+      };
+    }
+
+    if (!products || products.length === 0) {
+      return {
+        message: CHATBOT_RESPONSES.PRODUCT_SEARCH_NOT_FOUND(productQuery),
+        actions: [{
+          label: CHATBOT_RESPONSES.PRODUCT_SEARCH_ALL_CATEGORIES_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/marketplace'
+          }
+        }],
+      };
+    }
+
+    const productList = products.map(p => p.name).join(', ');
+    return {
+      message: CHATBOT_RESPONSES.PRODUCT_SEARCH_FOUND(productList),
+      actions: products.map(p => ({
+        label: CHATBOT_RESPONSES.PRODUCT_SEARCH_VIEW_ACTION_LABEL(p.name),
+        type: 'product_recommendation',
+        payload: {
+          productId: p.id
+        },
+      })),
+    };
+  }
+
+  /**
+   * Gère les demandes de recommandations de produits.
+   * @param session La session de chat.
+   * @param _context Le contexte de la session.
+   * @returns Une réponse du chatbot.
+   */
+  private async handleRecommendation(session: ChatSession, _context?: ChatSessionContext): Promise<ChatbotResponse> {
     try {
-      // Sauvegarder la session en base (implémentation simplifiée)
-      await supabase.from('chat_sessions').upsert({
+      const recommendations = await recommendationService.getRecommendations(
+        session.userId,
+        session.context,
+        5 // Limite de 5 recommandations
+      );
+
+      if (!recommendations || recommendations.length === 0) {
+        return {
+          message: CHATBOT_RESPONSES.RECOMMENDATION_NO_PRODUCTS,
+          actions: [{
+            label: CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL,
+            type: 'navigation',
+            payload: {
+              path: '/marketplace'
+            }
+          }],
+        };
+      }
+
+      const recommendationList = recommendations.map(r => r.name).join(', ');
+      return {
+        message: `${CHATBOT_RESPONSES.RECOMMENDATION_FOUND} ${recommendationList}.`,
+        actions: recommendations.map(r => ({
+          label: CHATBOT_RESPONSES.RECOMMENDATION_VIEW_ACTION_LABEL(r.name),
+          type: 'product_recommendation',
+          payload: {
+            productId: r.id
+          },
+        })),
+      };
+    } catch (error) {
+      logger.error('Erreur lors des recommandations', {
+        userId: session.userId,
+        error
+      });
+      return {
+        message: CHATBOT_RESPONSES.RECOMMENDATION_ERROR,
+        actions: [{
+          label: CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL,
+          type: 'navigation',
+          payload: {
+            path: '/marketplace'
+          }
+        }],
+      };
+    }
+  }
+
+  /**
+   * Gère les demandes d'aide générale.
+   * @returns Une réponse du chatbot.
+   */
+  private handleHelp(): ChatbotResponse {
+    return {
+      message: CHATBOT_RESPONSES.HELP_MESSAGE,
+      suggestions: CHATBOT_RESPONSES.HELP_SUGGESTIONS,
+    };
+  }
+
+  /**
+   * Gère les demandes générales ou non reconnues.
+   * @param userMessage Le message de l'utilisateur.
+   * @param _session La session de chat.
+   * @returns Une réponse du chatbot.
+   */
+  private async handleGeneralInquiry(userMessage: string, _session: ChatSession): Promise<ChatbotResponse> {
+    const lowerMessage = userMessage.toLowerCase();
+
+    if (['bonjour', 'salut', 'hello'].some(greeting => lowerMessage.includes(greeting))) {
+      return {
+        message: CHATBOT_RESPONSES.GENERAL_GREETING,
+        suggestions: CHATBOT_RESPONSES.GENERAL_GREETING_SUGGESTIONS,
+      };
+    }
+
+    if (['merci', 'thank you'].some(thanks => lowerMessage.includes(thanks))) {
+      return {
+        message: CHATBOT_RESPONSES.GENERAL_THANK_YOU,
+      };
+    }
+
+    return {
+      message: CHATBOT_RESPONSES.GENERAL_FALLBACK,
+      suggestions: CHATBOT_RESPONSES.GENERAL_FALLBACK_SUGGESTIONS,
+    };
+  }
+
+  /**
+   * Réduit l'historique des messages de la session pour ne conserver que les plus récents.
+   * Priorise les messages importants (ex: avec entités, actions).
+   * @param session La session de chat.
+   */
+  private trimSessionHistory(session: ChatSession): void {
+    if (session.messages.length <= this.contextWindow) {
+      return;
+    }
+
+    // Garder les N derniers messages
+      session.messages = session.messages.slice(-this.contextWindow);
+
+    logger.debug('Session history trimmed', {
+      sessionId: session.id,
+      newLength: session.messages.length
+    });
+  }
+
+  /**
+   * Sauvegarde la session de chat dans Supabase.
+   * @param session La session de chat à sauvegarder.
+   */
+  private async _saveSession(session: ChatSession): Promise<void> {
+    try {
+      const { error } = await supabase.from('chat_sessions').upsert({
         id: session.id,
         user_id: session.userId,
         messages: session.messages,
         context: session.context,
         metadata: session.metadata,
-        updated_at: new Date()
+      },
+      {
+        onConflict: 'id'
       });
+
+      if (error) {
+        logger.warn('Impossible de sauvegarder la session chat', {
+          sessionId: session.id,
+          error
+        });
+      } else {
+        logger.debug('Session chat sauvegardée', {
+          sessionId: session.id
+        });
+      }
     } catch (error) {
-      logger.warn('Impossible de sauvegarder la session chat', { error, sessionId: session.id });
+      logger.error('Erreur inattendue lors de la sauvegarde de la session', {
+        sessionId: session.id,
+        error
+      });
     }
   }
 
-  private getOrderStatusText(status: string): string {
-    const statusMap: Record<string, string> = {
-      'pending': 'en attente',
-      'confirmed': 'confirmée',
-      'processing': 'en préparation',
-      'shipped': 'expédiée',
-      'delivered': 'livrée',
-      'cancelled': 'annulée',
-      'refunded': 'remboursée'
-    };
-    return statusMap[status] || status;
-  }
+  private debouncedSaveSession: (session: ChatSession) => void;
 }
-
-// Instance singleton du chatbot
-export const aiChatbot = new AIChatbot();

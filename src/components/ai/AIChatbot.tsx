@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
   MessageCircle,
   Send,
@@ -23,8 +22,7 @@ import {
   ThumbsDown,
   RefreshCw
 } from 'lucide-react';
-import { aiChatbot, ChatMessage, ChatAction } from '@/lib/ai/chatbot';
-import { useAuth } from '@/contexts/AuthContext';
+import { ChatMessage, ChatAction } from '@/lib/ai/chatbot';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 
@@ -32,42 +30,31 @@ interface AIChatbotProps {
   isOpen: boolean;
   onToggle: () => void;
   className?: string;
+
+  // Props passées du hook useAIChatbot
+  messages: ChatMessage[];
+  isTyping: boolean;
+  sessionId: string;
+  sendMessage: (message: string) => Promise<void>;
+  isMinimized: boolean;
+  minimizeChatbot: () => void;
 }
 
-export const AIChatbot: React.FC<AIChatbotProps> = ({
+const AIChatbot: React.FC<AIChatbotProps> = ({
   isOpen,
   onToggle,
-  className
+  className,
+  messages,
+  isTyping,
+  sessionId,
+  sendMessage,
+  isMinimized, // Destructurer isMinimized
+  minimizeChatbot, // Destructurer minimizeChatbot
 }) => {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [sessionId] = useState(() => `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Messages d'accueil
-  useEffect(() => {
-    if (messages.length === 0 && isOpen) {
-      const welcomeMessage: ChatMessage = {
-        id: 'welcome',
-        content: "👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider avec vos commandes, recommandations de produits, informations de livraison, et bien plus encore. Que puis-je faire pour vous ?",
-        role: 'assistant',
-        timestamp: new Date(),
-        metadata: {
-          suggestions: [
-            "Où en est ma commande ?",
-            "Quels produits recommandez-vous ?",
-            "Informations de livraison"
-          ]
-        }
-      };
-      setMessages([welcomeMessage]);
-    }
-  }, [isOpen, messages.length]);
 
   // Auto-scroll vers le bas
   useEffect(() => {
@@ -86,55 +73,9 @@ export const AIChatbot: React.FC<AIChatbotProps> = ({
     if (!messageToSend || isTyping) return;
 
     setInputValue('');
-    setIsTyping(true);
+    await sendMessage(messageToSend); // Utiliser le sendMessage du hook
 
-    try {
-      // Ajouter le message utilisateur à l'interface
-      const userMessage: ChatMessage = {
-        id: `user_${Date.now()}`,
-        content: messageToSend,
-        role: 'user',
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, userMessage]);
-
-      // Traiter avec le chatbot IA
-      const response = await aiChatbot.processMessage(
-        sessionId,
-        messageToSend,
-        user?.id
-      );
-
-      // Ajouter la réponse du chatbot
-      const assistantMessage: ChatMessage = {
-        id: `assistant_${Date.now()}`,
-        content: response.message,
-        role: 'assistant',
-        timestamp: new Date(),
-        metadata: {
-          actions: response.actions,
-          suggestions: response.suggestions
-        }
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-    } catch (error) {
-      logger.error('Erreur lors de l\'envoi du message', { error, message: messageToSend });
-
-      const errorMessage: ChatMessage = {
-        id: `error_${Date.now()}`,
-        content: "Désolé, je rencontre un problème technique. Veuillez réessayer ou contacter notre support.",
-        role: 'assistant',
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  }, [inputValue, isTyping, sessionId, user?.id]);
+  }, [inputValue, isTyping, sendMessage]);
 
   const handleActionClick = useCallback(async (action: ChatAction) => {
     switch (action.type) {
@@ -193,7 +134,7 @@ export const AIChatbot: React.FC<AIChatbotProps> = ({
         isMinimized ? "h-14" : "h-[600px] max-h-[calc(100vh-2rem)]"
       )}>
         {/* Header */}
-        <CardHeader className="pb-3 cursor-pointer" onClick={() => setIsMinimized(!isMinimized)}>
+        <CardHeader className="pb-3 cursor-pointer" onClick={minimizeChatbot}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="w-8 h-8">
@@ -215,7 +156,7 @@ export const AIChatbot: React.FC<AIChatbotProps> = ({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsMinimized(!isMinimized);
+                  minimizeChatbot();
                 }}
                 aria-label={isMinimized ? "Agrandir le chat" : "Réduire le chat"}
               >
@@ -386,3 +327,5 @@ export const AIChatbot: React.FC<AIChatbotProps> = ({
     </div>
   );
 };
+
+export default AIChatbot;
