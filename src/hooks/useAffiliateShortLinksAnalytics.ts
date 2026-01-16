@@ -45,7 +45,7 @@ export interface OptimizationSuggestions {
     priority: 'low' | 'medium' | 'high';
     title: string;
     description: string;
-    affected_links?: any[];
+    affected_links?: { short_code: string; clicks: number }[];
     action_suggestion: string;
   }>;
   total_suggestions: number;

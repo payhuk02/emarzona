@@ -4,7 +4,7 @@
  * Date: 25/10/2025
  */
 
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useCurrentAffiliate, useAffiliates } from '@/hooks/useAffiliates';
 import { useAffiliateLinks, type AffiliateLink } from '@/hooks/useAffiliateLinks';
@@ -20,9 +19,9 @@ import { CreateAffiliateLinkDialog } from '@/components/affiliate/CreateAffiliat
 import { useAffiliateCommissions, type AffiliateCommission } from '@/hooks/useAffiliateCommissions';
 import { useAffiliateBalance, useAffiliateWithdrawals } from '@/hooks/useAffiliateWithdrawals';
 import { PaginationControls } from '@/components/affiliate/PaginationControls';
-import { 
-  TrendingUp, 
-  DollarSign, 
+import {
+  TrendingUp,
+  DollarSign,
   MousePointerClick,
   ShoppingCart,
   Link as LinkIcon,
@@ -32,10 +31,7 @@ import {
   Wallet,
   CheckCircle2,
   Clock,
-  UserPlus,
-  BarChart3,
-  AlertCircle,
-  Loader2
+  BarChart3
 } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
@@ -233,28 +229,28 @@ const AffiliateDashboard = () => {
   const [commissionsPageSize, setCommissionsPageSize] = useState(20);
   const [commissionsPage, setCommissionsPage] = useState(1);
   
-  const { 
-    links, 
+  const {
+    links,
     loading: linksLoading,
     pagination: linksPagination,
     goToPage: goToLinksPage,
-    nextPage: nextLinksPage,
-    previousPage: previousLinksPage,
+    nextPage: _nextLinksPage,
+    previousPage: _previousLinksPage,
     setPageSize: setLinksPageSizeFromHook
   } = useAffiliateLinks(
-    affiliate?.id, 
+    affiliate?.id,
     undefined,
     { page: linksPage, pageSize: linksPageSize }
   );
   
-  const { 
-    commissions, 
-    stats, 
+  const {
+    commissions,
+    stats,
     loading: commissionsLoading,
     pagination: commissionsPagination,
     goToPage: goToCommissionsPage,
-    nextPage: nextCommissionsPage,
-    previousPage: previousCommissionsPage,
+    nextPage: _nextCommissionsPage,
+    previousPage: _previousCommissionsPage,
     setPageSize: setCommissionsPageSizeFromHook
   } = useAffiliateCommissions(
     { affiliate_id: affiliate?.id },

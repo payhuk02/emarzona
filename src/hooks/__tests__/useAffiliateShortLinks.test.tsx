@@ -90,7 +90,7 @@ describe('useAffiliateShortLinks', () => {
         order: vi.fn().mockReturnThis(),
       }));
 
-      (supabase.from as any).mockReturnValue(mockFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks(), { wrapper });
 
@@ -131,7 +131,7 @@ describe('useAffiliateShortLinks', () => {
         order: mockOrder,
       }));
 
-      (supabase.from as any).mockReturnValue(mockFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
@@ -154,7 +154,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any).mockReturnValue(mockFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
@@ -213,7 +213,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any)
+      (supabase.from as unknown as jest.Mock)
         .mockReturnValueOnce(mockAffiliateLinkFrom) // First call for affiliate link
         .mockReturnValueOnce(mockAliasCheckFrom) // Second call for alias check
         .mockReturnValueOnce(mockCreateFrom); // Third call for creation
@@ -260,7 +260,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any)
+      (supabase.from as unknown as jest.Mock)
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockAliasCheckFrom);
 
@@ -305,7 +305,7 @@ describe('useAffiliateShortLinks', () => {
       }));
 
       // Mock RPC call for code generation
-      (supabase.rpc as any).mockResolvedValue({
+      (supabase.rpc as unknown as jest.Mock).mockResolvedValue({
         data: 'XYZ789',
         error: null,
       });
@@ -320,7 +320,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any)
+      (supabase.from as unknown as jest.Mock)
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockCreateFrom);
 
@@ -370,7 +370,7 @@ describe('useAffiliateShortLinks', () => {
       }));
 
       // Mock RPC failure
-      (supabase.rpc as any).mockRejectedValue(new Error('RPC function not found'));
+      (supabase.rpc as unknown as jest.Mock).mockRejectedValue(new Error('RPC function not found'));
 
       // Mock short link creation
       const mockCreateFrom = vi.fn(() => ({
@@ -382,7 +382,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any)
+      (supabase.from as unknown as jest.Mock)
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockCreateFrom);
 
@@ -437,7 +437,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any)
+      (supabase.from as unknown as jest.Mock)
         .mockReturnValueOnce(mockAffiliateLinkFrom)
         .mockReturnValueOnce(mockAliasCheckFrom)
         .mockReturnValueOnce(mockCreateFrom);
@@ -465,7 +465,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any).mockReturnValue(mockDeleteFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockDeleteFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
@@ -484,7 +484,7 @@ describe('useAffiliateShortLinks', () => {
         eq: vi.fn().mockRejectedValue(new Error('Deletion failed')),
       }));
 
-      (supabase.from as any).mockReturnValue(mockDeleteFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockDeleteFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
@@ -506,7 +506,7 @@ describe('useAffiliateShortLinks', () => {
         }),
       }));
 
-      (supabase.from as any).mockReturnValue(mockUpdateFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockUpdateFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
@@ -525,7 +525,7 @@ describe('useAffiliateShortLinks', () => {
         eq: vi.fn().mockRejectedValue(new Error('Toggle failed')),
       }));
 
-      (supabase.from as any).mockReturnValue(mockUpdateFrom);
+      (supabase.from as unknown as jest.Mock).mockReturnValue(mockUpdateFrom);
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 

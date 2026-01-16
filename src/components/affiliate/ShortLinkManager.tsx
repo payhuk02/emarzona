@@ -11,18 +11,15 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Copy, Link as LinkIcon, Plus, Trash2, Loader2, CheckCircle2, XCircle, BarChart3, TrendingUp, MapPin, Lightbulb, Users, Target, Clock, MousePointer } from '@/components/icons';
+import { Copy, Link as LinkIcon, Plus, Trash2, Loader2, CheckCircle2, XCircle, BarChart3, TrendingUp, Lightbulb, Target } from '@/components/icons';
 import { useAffiliateShortLinks } from '@/hooks/useAffiliateShortLinks';
 import { useAffiliateShortLinksInsights } from '@/hooks/useAffiliateShortLinksAnalytics';
 import { CreateShortLinkForm, ShortLinkExpirationRule } from '@/types/affiliate';
 import { useToast } from '@/hooks/use-toast';
-import { formatCurrency } from '@/lib/utils';
-import { AffiliateError, AffiliateErrorCode } from '@/lib/affiliate-errors';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
@@ -33,8 +30,8 @@ interface ShortLinkManagerProps {
   fullUrl: string;
 }
 
-export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerProps) => {
-  const { shortLinks, loading, createShortLink, deleteShortLink, toggleShortLink, refetch } = useAffiliateShortLinks(affiliateLinkId);
+export const ShortLinkManager = ({ affiliateLinkId, fullUrl: _fullUrl }: ShortLinkManagerProps) => {
+  const { shortLinks, loading, createShortLink, deleteShortLink, toggleShortLink, refetch: _refetch } = useAffiliateShortLinks(affiliateLinkId);
   const { insights, isLoading: insightsLoading } = useAffiliateShortLinksInsights(affiliateLinkId);
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -197,7 +194,7 @@ export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerP
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Expiration du lien</Label>
-                  <RadioGroup value={expirationType} onValueChange={(value: any) => setExpirationType(value)}>
+                  <RadioGroup value={expirationType} onValueChange={(value) => setExpirationType(value as 'none' | 'fixed_date' | 'duration' | 'clicks_limit' | 'combined')}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="none" id="none" />
                       <Label htmlFor="none" className="text-sm">Pas d'expiration</Label>
@@ -302,7 +299,7 @@ export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerP
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Condition principale</Label>
-                      <RadioGroup value={primaryCondition} onValueChange={(value: any) => setPrimaryCondition(value)}>
+                      <RadioGroup value={primaryCondition} onValueChange={(value) => setPrimaryCondition(value as 'date' | 'clicks' | 'duration')}>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="date" id="primary_date" />
                           <Label htmlFor="primary_date" className="text-sm">Date fixe</Label>
@@ -320,7 +317,7 @@ export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerP
 
                     <div className="space-y-2">
                       <Label>Condition secondaire</Label>
-                      <RadioGroup value={secondaryCondition} onValueChange={(value: any) => setSecondaryCondition(value)}>
+                      <RadioGroup value={secondaryCondition} onValueChange={(value) => setSecondaryCondition(value as 'date' | 'clicks' | 'duration')}>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="date" id="secondary_date" />
                           <Label htmlFor="secondary_date" className="text-sm">Date fixe</Label>
@@ -722,7 +719,7 @@ export const ShortLinkManager = ({ affiliateLinkId, fullUrl }: ShortLinkManagerP
                   <div>
                     <p className="text-sm font-medium mb-2">Liens concernés :</p>
                     <div className="space-y-1">
-                      {suggestion.affected_links.map((link: any, linkIndex: number) => (
+                      {suggestion.affected_links.map((link: { short_code: string; clicks: number }, linkIndex: number) => (
                         <div key={linkIndex} className="flex items-center justify-between p-2 bg-card rounded border">
                           <code className="text-xs font-mono">{link.short_code}</code>
                           <span className="text-xs text-muted-foreground">
