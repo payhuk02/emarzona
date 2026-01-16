@@ -207,6 +207,10 @@ self.addEventListener('push', (event) => {
     tag: 'default',
     data: {},
     requireInteraction: false,
+    // Préférences par défaut (peuvent être surchargées par les données push)
+    soundEnabled: true,
+    vibrationEnabled: true,
+    vibrationIntensity: 'medium',
   };
 
   // Parser les données du push
@@ -222,6 +226,10 @@ self.addEventListener('push', (event) => {
         data: data.data || data.metadata || {},
         requireInteraction: data.requireInteraction || false,
         url: data.url || data.action_url || '/',
+        // Préférences utilisateur passées depuis le serveur
+        soundEnabled: data.soundEnabled !== undefined ? data.soundEnabled : notificationData.soundEnabled,
+        vibrationEnabled: data.vibrationEnabled !== undefined ? data.vibrationEnabled : notificationData.vibrationEnabled,
+        vibrationIntensity: data.vibrationIntensity || notificationData.vibrationIntensity,
       };
     } catch (e) {
       // Si les données ne sont pas en JSON, utiliser le texte brut
@@ -229,7 +237,19 @@ self.addEventListener('push', (event) => {
     }
   }
 
-  // Afficher la notification avec son (silent: false par défaut)
+  // Déterminer les options de notification selon les préférences
+  const getVibrationPattern = () => {
+    if (!notificationData.vibrationEnabled) return [];
+
+    switch (notificationData.vibrationIntensity) {
+      case 'light': return [100, 50, 100];
+      case 'heavy': return [300, 150, 300];
+      case 'medium':
+      default: return [200, 100, 200];
+    }
+  };
+
+  // Afficher la notification avec son et vibration selon les préférences
   const notificationOptions = {
     body: notificationData.body,
     icon: notificationData.icon,
@@ -240,8 +260,8 @@ self.addEventListener('push', (event) => {
       url: notificationData.url,
     },
     requireInteraction: notificationData.requireInteraction,
-    silent: false, // ✅ SON ACTIVÉ - La notification fera du bruit
-    vibrate: [200, 100, 200], // ✅ Vibration pour mobile
+    silent: !notificationData.soundEnabled, // 🔄 Respecte les préférences utilisateur
+    vibrate: getVibrationPattern(), // 🔄 Vibration conditionnelle selon préférences
     timestamp: Date.now(),
     actions: notificationData.data.actions || [],
   };

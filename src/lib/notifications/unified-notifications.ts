@@ -117,8 +117,8 @@ export async function sendUnifiedNotification(
   notification: UnifiedNotification
 ): Promise<{ success: boolean; error?: string; notification_id?: string }> {
   const startTime = Date.now();
-  let  notificationId: string | undefined;
-  const  results: Array<{ channel: string; success: boolean; error?: string }> = [];
+  let notificationId: string | undefined;
+  const results: Array<{ channel: string; success: boolean; error?: string }> = [];
 
   try {
     // 1. Vérifier les préférences utilisateur
@@ -236,7 +236,7 @@ export async function sendUnifiedNotification(
       success: hasSuccess,
       notification_id: notificationId,
     };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error sending unified notification', {
       error: errorMessage,
@@ -319,7 +319,7 @@ async function getUserNotificationPreferences(
 
     // Convertir les préférences de la BDD en format unifié
     type ChannelPrefs = { in_app: boolean; email: boolean; sms: boolean; push: boolean };
-    const  preferences: Partial<Record<NotificationType, ChannelPrefs>> = {};
+    const preferences: Partial<Record<NotificationType, ChannelPrefs>> = {};
 
     // Mapper les préférences existantes
     const dataRecord = data as Record<string, unknown>;
@@ -353,7 +353,7 @@ async function getUserNotificationPreferences(
  * Mapper une clé de préférence vers un type de notification
  */
 function mapPreferenceKeyToNotificationType(key: string): NotificationType | null {
-  const  mapping: Record<string, NotificationType> = {
+  const mapping: Record<string, NotificationType> = {
     email_course_enrollment: 'course_enrollment',
     email_course_complete: 'course_complete',
     email_certificate_ready: 'course_certificate_ready',
@@ -383,9 +383,9 @@ async function sendEmailNotification(notification: UnifiedNotification): Promise
     const language = (await notificationI18nService.getUserLanguage(notification.user_id)) || 'fr';
 
     // Essayer d'utiliser le template centralisé depuis notification_templates
-    let  subject= notification.title;
-    let  htmlContent= '';
-    let  templateSlug= notification.type;
+    let subject = notification.title;
+    let htmlContent = '';
+    let templateSlug = notification.type;
 
     try {
       const rendered = await notificationTemplateService.renderTemplate(
@@ -475,7 +475,7 @@ async function sendEmailNotification(notification: UnifiedNotification): Promise
       type: notification.type,
       templateUsed: htmlContent ? 'centralized' : 'fallback',
     });
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error sending email notification', { error: errorMessage, notification });
     throw error;
@@ -512,7 +512,7 @@ async function sendSMSNotification(notification: UnifiedNotification): Promise<v
     }
 
     logger.info('SMS notification sent', { userId: notification.user_id, type: notification.type });
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error sending SMS notification', { error: errorMessage, notification });
     throw error;
@@ -536,7 +536,34 @@ async function sendPushNotification(notification: UnifiedNotification): Promise<
       return;
     }
 
-    // Envoyer à chaque token avec son et affichage
+    // 🔄 Récupérer les préférences utilisateur pour les sons et vibrations
+    const { data: preferences } = await supabase
+      .from('notification_preferences')
+      .select('sound_notifications, vibration_notifications, vibration_intensity')
+      .eq('user_id', notification.user_id)
+      .maybeSingle();
+
+    // Respecter les préférences utilisateur (true par défaut)
+    const soundEnabled = preferences?.sound_notifications !== false;
+    const vibrationEnabled = preferences?.vibration_notifications !== false;
+    const vibrationIntensity = preferences?.vibration_intensity || 'medium';
+
+    // Déterminer le pattern de vibration selon l'intensité
+    const getVibrationPattern = (): number[] => {
+      if (!vibrationEnabled) return [];
+
+      switch (vibrationIntensity) {
+        case 'light':
+          return [100, 50, 100];
+        case 'heavy':
+          return [300, 150, 300];
+        case 'medium':
+        default:
+          return [200, 100, 200];
+      }
+    };
+
+    // Envoyer à chaque token avec son et affichage selon préférences
     for (const tokenData of pushTokens) {
       await supabase.functions.invoke('send-push', {
         body: {
@@ -548,21 +575,28 @@ async function sendPushNotification(notification: UnifiedNotification): Promise<
             ...notification.metadata,
             url: notification.action_url || '/',
             type: notification.type,
+            // 🔄 Passer les préférences utilisateur au push
+            soundEnabled,
+            vibrationEnabled,
+            vibrationIntensity,
           },
-          // Options pour son et affichage
-          silent: false, // ✅ SON ACTIVÉ
+          // Options pour son et affichage selon préférences
+          silent: !soundEnabled, // 🔄 Respecte les préférences utilisateur
           requireInteraction:
             notification.priority === 'urgent' || notification.priority === 'high',
-          vibrate: [200, 100, 200], // ✅ Vibration pour mobile
+          vibrate: getVibrationPattern(), // 🔄 Vibration conditionnelle selon préférences
         },
       });
     }
 
-    logger.info('Push notification sent', {
+    logger.info('Push notification sent with user preferences', {
       userId: notification.user_id,
       type: notification.type,
+      soundEnabled,
+      vibrationEnabled,
+      vibrationIntensity,
     });
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error sending push notification', { error: errorMessage, notification });
     throw error;
@@ -573,7 +607,7 @@ async function sendPushNotification(notification: UnifiedNotification): Promise<
  * Obtenir le template email selon le type de notification
  */
 function getEmailTemplate(type: NotificationType): string {
-  const  templates: Record<NotificationType, string> = {
+  const templates: Record<NotificationType, string> = {
     // Digital
     digital_product_purchased: 'digital-product-purchased',
     digital_product_download_ready: 'digital-download-ready',
@@ -761,9 +795,3 @@ export async function notifyArtistProductEditionSoldOut(
     priority: 'low',
   });
 }
-
-
-
-
-
-

@@ -32,7 +32,7 @@ export const useNotifications = (options?: {
   return useQuery({
     queryKey: ['notifications', page, pageSize, includeArchived],
     queryFn: async (): Promise<{ data: Notification[]; count: number }> => {
-      let  query= supabase.from('notifications').select('*', { count: 'exact' });
+      let query = supabase.from('notifications').select('*', { count: 'exact' });
 
       // Si on n'inclut pas les archivées, filtrer
       if (!includeArchived) {
@@ -276,9 +276,12 @@ export const useRealtimeNotifications = () => {
   const queryClient = useQueryClient();
   const [isSubscribed, setIsSubscribed] = useState(false);
 
+  // Récupérer les préférences utilisateur pour les sons et vibrations
+  const { data: preferences } = useNotificationPreferences();
+
   useEffect(() => {
-    let  channel: ReturnType<typeof supabase.channel> | null = null;
-    let  isMounted= true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isMounted = true;
 
     const setupSubscription = async () => {
       const {
@@ -311,6 +314,27 @@ export const useRealtimeNotifications = () => {
             // Afficher une notification browser avec son et vibration
             if ('Notification' in window && Notification.permission === 'granted') {
               const notif = payload.new as Notification;
+
+              // Respecter les préférences utilisateur pour les sons et vibrations
+              const shouldPlaySound = preferences?.sound_notifications !== false; // true par défaut
+              const shouldVibrate = preferences?.vibration_notifications !== false; // true par défaut
+
+              // Déterminer l'intensité de vibration selon les préférences
+              const getVibrationPattern = (): number[] => {
+                if (!shouldVibrate) return [];
+
+                const intensity = preferences?.vibration_intensity || 'medium';
+                switch (intensity) {
+                  case 'light':
+                    return [100, 50, 100];
+                  case 'heavy':
+                    return [300, 150, 300];
+                  case 'medium':
+                  default:
+                    return [200, 100, 200];
+                }
+              };
+
               const notification = new Notification(notif.title, {
                 body: notif.message,
                 icon: '/icon-192x192.png',
@@ -322,8 +346,8 @@ export const useRealtimeNotifications = () => {
                   action_url: notif.action_url,
                 },
                 requireInteraction: false,
-                silent: false, // ✅ SON ACTIVÉ - La notification fera du bruit
-                vibrate: [200, 100, 200] as number[], // ✅ Vibration pour mobile (type assertion)
+                silent: !shouldPlaySound, // 🔄 Respecte les préférences utilisateur
+                vibrate: getVibrationPattern(), // 🔄 Vibration conditionnelle selon préférences
                 timestamp: Date.now(),
               } as NotificationOptions);
 
@@ -381,9 +405,3 @@ export const useRequestNotificationPermission = () => {
 
   return { permission, requestPermission };
 };
-
-
-
-
-
-

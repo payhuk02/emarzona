@@ -68,6 +68,18 @@ export interface NotificationPreferences {
   // Pause
   pause_until?: string | null;
 
+  // Sound and vibration preferences (nullable from database)
+  sound_notifications?: boolean | null; // Enable/disable notification sounds
+  vibration_notifications?: boolean | null; // Enable/disable vibrations
+  sound_volume?: number | null; // Sound volume 0-100 (default: 80)
+  vibration_intensity?: 'light' | 'medium' | 'heavy' | null; // Vibration intensity (default: 'medium')
+  notification_sound_type?: 'default' | 'gentle' | 'urgent' | null; // Sound type (default: 'default')
+
+  // Accessibility preferences
+  accessibility_mode?: boolean | null; // Enable accessibility enhancements
+  high_contrast_sounds?: boolean | null; // Enhanced sound distinction for visually impaired
+  screen_reader_friendly?: boolean | null; // Enhanced compatibility with screen readers
+
   created_at: string;
   updated_at: string;
 }
@@ -82,9 +94,3 @@ export interface CreateNotificationData {
   action_label?: string;
   priority?: NotificationPriority;
 }
-
-
-
-
-
-
