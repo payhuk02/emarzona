@@ -133,12 +133,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   // Charger les boutiques au chargement et quand l'utilisateur change
   useEffect(() => {
     if (!authLoading && user) {
-      // Ajouter un délai pour éviter les appels répétés
-      const timeoutId = setTimeout(() => {
-        fetchStores();
-      }, 1000); // Délai de 1 seconde
-
-      return () => clearTimeout(timeoutId);
+      fetchStores();
     }
   }, [authLoading, user, fetchStores]);
 

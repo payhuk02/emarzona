@@ -8,7 +8,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAffiliateShortLinks } from '../useAffiliateShortLinks';
 import { supabase } from '@/integrations/supabase/client';
-import { AffiliateError } from '@/lib/affiliate-errors';
+// import { AffiliateError } from '@/lib/affiliate-errors'; // Not used
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -51,7 +51,7 @@ vi.mock('@/lib/affiliate-errors', () => ({
     databaseError: vi.fn(() => new Error('Database error')),
   },
   AffiliateError: class extends Error {
-    constructor(message: string, code?: string) {
+    constructor(message: string, _code?: string) {
       super(message);
       this.name = 'AffiliateError';
     }
@@ -220,7 +220,7 @@ describe('useAffiliateShortLinks', () => {
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
-      let createdLink: any = null;
+      let createdLink: unknown = null;
       await act(async () => {
         createdLink = await result.current.createShortLink({
           affiliate_link_id: 'affiliate-link-123',
@@ -266,7 +266,7 @@ describe('useAffiliateShortLinks', () => {
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
-      let resultValue: any = null;
+      let resultValue: unknown = null;
       await act(async () => {
         resultValue = await result.current.createShortLink({
           affiliate_link_id: 'affiliate-link-123',
@@ -326,7 +326,7 @@ describe('useAffiliateShortLinks', () => {
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
-      let createdLink: any = null;
+      let createdLink: unknown = null;
       await act(async () => {
         createdLink = await result.current.createShortLink({
           affiliate_link_id: 'affiliate-link-123',
@@ -388,7 +388,7 @@ describe('useAffiliateShortLinks', () => {
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
-      let createdLink: any = null;
+      let createdLink: unknown = null;
       await act(async () => {
         createdLink = await result.current.createShortLink({
           affiliate_link_id: 'affiliate-link-123',
@@ -444,7 +444,7 @@ describe('useAffiliateShortLinks', () => {
 
       const { result } = renderHook(() => useAffiliateShortLinks('affiliate-link-123'), { wrapper });
 
-      let createdLink: any = null;
+      let createdLink: unknown = null;
       await act(async () => {
         createdLink = await result.current.createShortLink({
           affiliate_link_id: 'affiliate-link-123',
