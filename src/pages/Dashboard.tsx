@@ -88,6 +88,7 @@ import {
   useUnreadCount,
   useRealtimeNotifications,
 } from '@/hooks/useNotifications';
+import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 import '@/styles/dashboard-responsive.css';
 
 const Dashboard = () => {
@@ -691,6 +692,11 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Core Web Vitals Monitor - Métriques de performance */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <CoreWebVitalsMonitor />
+            </div>
 
             {/* Charts Section - Graphiques de visualisation */}
             {stats && stats.revenueByMonth.length > 0 && (
