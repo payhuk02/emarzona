@@ -402,6 +402,7 @@ const AdminSupport = lazy(() => import('./pages/admin/AdminSupport'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AISettingsPage = lazy(() => import('./pages/admin/AISettingsPage'));
 const Recommendations = lazy(() => import('./pages/Recommendations'));
+const HistoryBasedRecommendations = lazy(() => import('./pages/HistoryBasedRecommendations'));
 const Discover = lazy(() => import('./pages/Discover'));
 const Trending = lazy(() => import('./pages/Trending'));
 const AdminPayments = lazy(() => import('./pages/admin/AdminPayments'));
@@ -756,6 +757,10 @@ const AppContent = () => {
               <Route path="/auth/login" element={<Navigate to="/auth" replace />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/recommendations" element={<Recommendations />} />
+              <Route
+                path="/recommendations/history-based"
+                element={<HistoryBasedRecommendations />}
+              />
               <Route path="/discover" element={<Discover />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/personalization/quiz" element={<StyleQuizPage />} />

@@ -206,7 +206,7 @@ const Landing = () => {
                   height={36}
                   className="h-full w-full object-contain rounded-lg"
                   priority
-                  showPlaceholder={false}
+                  placeholder="empty"
                 />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
@@ -1627,7 +1627,7 @@ const Landing = () => {
                             width={56}
                             height={56}
                             className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 flex-shrink-0 transition-all duration-300"
-                            showPlaceholder={false}
+                            placeholder="empty"
                           />
                           <div className="min-w-0 flex-1">
                             <p className="font-bold text-xs sm:text-sm md:text-base lg:text-lg text-foreground truncate">
@@ -2030,7 +2030,7 @@ const Landing = () => {
                     height={32}
                     className="h-8 w-8 flex-shrink-0 object-contain"
                     priority
-                    showPlaceholder={false}
+                    placeholder="empty"
                   />
                 ) : (
                   <div className="h-8 w-8 bg-primary rounded flex items-center justify-center flex-shrink-0">

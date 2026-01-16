@@ -8,8 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TrendingUp, Flame, Clock, Calendar, BarChart3, Zap } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  TrendingUp,
+  Flame,
+  Clock,
+  Calendar,
+  BarChart3,
+  Zap,
+  GraduationCap,
+  Palette,
+  FileText,
+  Package,
+  Wrench,
+} from 'lucide-react';
 import { useTrendingRecommendations } from '@/hooks/useAIRecommendations';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
@@ -21,25 +39,28 @@ const Trending = () => {
 
   const { data: trendingData, isLoading } = useTrendingRecommendations({
     limit: 20,
-    enabled: !!selectedStoreId
+    enabled: !!selectedStoreId,
   });
 
   const timeRanges = [
     { value: '24h', label: '24 heures', icon: Clock },
     { value: '7d', label: '7 jours', icon: Calendar },
-    { value: '30d', label: '30 jours', icon: BarChart3 }
+    { value: '30d', label: '30 jours', icon: BarChart3 },
   ];
 
   const trendingCategories = [
     { id: 'all', label: 'Tous les produits', icon: Flame },
-    { id: 'digital', label: 'Produits digitaux', icon: Zap },
-    { id: 'physical', label: 'Produits physiques', icon: BarChart3 },
-    { id: 'services', label: 'Services', icon: TrendingUp }
+    { id: 'digital', label: 'Produits digitaux', icon: FileText },
+    { id: 'physical', label: 'Produits physiques', icon: Package },
+    { id: 'services', label: 'Services', icon: Wrench },
+    { id: 'courses', label: 'Cours en ligne', icon: GraduationCap },
+    { id: 'artwork', label: "Œuvres d'artiste", icon: Palette },
   ];
 
   const getTrendingLevel = (score: number) => {
     if (score >= 80) return { level: '🔥 Viral', color: 'text-red-500', bg: 'bg-red-50' };
-    if (score >= 60) return { level: '📈 Très populaire', color: 'text-orange-500', bg: 'bg-orange-50' };
+    if (score >= 60)
+      return { level: '📈 Très populaire', color: 'text-orange-500', bg: 'bg-orange-50' };
     if (score >= 40) return { level: '📊 En hausse', color: 'text-blue-500', bg: 'bg-blue-50' };
     return { level: '📈 Émergent', color: 'text-green-500', bg: 'bg-green-50' };
   };
@@ -80,65 +101,89 @@ const Trending = () => {
         </div>
       </div>
 
-      {/* Stats des tendances */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Stats des tendances - 5 systèmes e-commerce */}
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Produits tendance</p>
-                <p className="text-2xl font-bold">{trendingData?.length || 0}</p>
-              </div>
-              <Flame className="h-8 w-8 text-red-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Croissance max</p>
-                <p className="text-2xl font-bold">
-                  {trendingData?.length ? Math.max(...trendingData.map(t => t.score)) * 100 : 0}%
+                <p className="text-sm font-medium">Produits Digitaux</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {trendingData?.filter(t => t.type === 'digital').length || 0}
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Package className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Période</p>
-                <p className="text-2xl font-bold">{timeRanges.find(r => r.value === timeRange)?.label}</p>
+                <p className="text-sm font-medium">Produits Physiques</p>
+                <p className="text-lg font-bold text-green-600">
+                  {trendingData?.filter(t => t.type === 'physical').length || 0}
+                </p>
               </div>
-              <Clock className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Wrench className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Mise à jour</p>
-                <p className="text-2xl font-bold">Auto</p>
+                <p className="text-sm font-medium">Services</p>
+                <p className="text-lg font-bold text-orange-600">
+                  {trendingData?.filter(t => t.type === 'service').length || 0}
+                </p>
               </div>
-              <Zap className="h-8 w-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <GraduationCap className="h-5 w-5 text-purple-600" />
+              <div>
+                <p className="text-sm font-medium">Cours en Ligne</p>
+                <p className="text-lg font-bold text-purple-600">
+                  {trendingData?.filter(t => t.type === 'course').length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Palette className="h-5 w-5 text-pink-600" />
+              <div>
+                <p className="text-sm font-medium">Œuvres d'Artiste</p>
+                <p className="text-lg font-bold text-pink-600">
+                  {trendingData?.filter(t => t.type === 'artwork').length || 0}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
           {trendingCategories.map(category => {
             const IconComponent = category.icon;
             return (
-              <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-2">
+              <TabsTrigger
+                key={category.id}
+                value={category.id}
+                className="flex items-center gap-2"
+              >
                 <IconComponent className="h-4 w-4" />
                 {category.label}
               </TabsTrigger>
@@ -157,8 +202,9 @@ const Trending = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-6">
-                Les produits qui gagnent le plus en popularité sur notre plateforme,
-                toutes catégories confondues.
+                Les produits qui gagnent le plus en popularité sur notre plateforme, toutes nos 5
+                catégories e-commerce confondues : produits digitaux, physiques, services, cours en
+                ligne et œuvres d'artiste.
               </p>
 
               {isLoading ? (
@@ -178,7 +224,10 @@ const Trending = () => {
                   {trendingData.slice(0, 12).map((trend, index) => {
                     const trendingInfo = getTrendingLevel(trend.score);
                     return (
-                      <Card key={trend.productId} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      <Card
+                        key={trend.productId}
+                        className="overflow-hidden hover:shadow-lg transition-shadow"
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <Badge variant="secondary" className="text-xs">
@@ -217,9 +266,7 @@ const Trending = () => {
                   <p className="text-muted-foreground mb-4">
                     Les tendances se mettent à jour en temps réel. Revenez plus tard !
                   </p>
-                  <Button onClick={() => window.location.reload()}>
-                    Actualiser
-                  </Button>
+                  <Button onClick={() => window.location.reload()}>Actualiser</Button>
                 </div>
               )}
             </CardContent>
@@ -231,18 +278,19 @@ const Trending = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-blue-500" />
-                Tendances Digitales
+                <FileText className="h-5 w-5 text-blue-600" />
+                Tendances Produits Digitaux
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Les produits digitaux (templates, ebooks, logiciels) qui gagnent en popularité.
+                Les produits digitaux (e-books, templates, logiciels, ressources) qui gagnent en
+                popularité. Téléchargeables instantanément après achat.
               </p>
 
               <div className="text-center py-8">
-                <Zap className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground">Filtrage par type en développement</p>
+                <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Filtrage par catégorie en développement</p>
               </div>
             </CardContent>
           </Card>
@@ -253,18 +301,19 @@ const Trending = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-green-500" />
-                Tendances Physiques
+                <Package className="h-5 w-5 text-green-600" />
+                Tendances Produits Physiques
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Les produits physiques qui font le buzz sur notre marketplace.
+                Les produits physiques (articles, matériel, objets) qui font le buzz sur notre
+                marketplace. Livraison garantie et sécurisée.
               </p>
 
               <div className="text-center py-8">
-                <BarChart3 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground">Filtrage par type en développement</p>
+                <Package className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Filtrage par catégorie en développement</p>
               </div>
             </CardContent>
           </Card>
@@ -275,18 +324,65 @@ const Trending = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-purple-500" />
+                <Wrench className="h-5 w-5 text-orange-600" />
                 Tendances Services
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Les services qui attirent le plus de demandes actuellement.
+                Les services professionnels (consulting, prestations, expertises) qui attirent le
+                plus de demandes. Qualité garantie par nos vendeurs certifiés.
               </p>
 
               <div className="text-center py-8">
-                <TrendingUp className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground">Filtrage par type en développement</p>
+                <Wrench className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Filtrage par domaine en développement</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Cours en ligne */}
+        <TabsContent value="courses" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-purple-600" />
+                Tendances Cours en Ligne
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Les formations et cours en ligne qui attirent le plus d'inscriptions actuellement.
+              </p>
+
+              <div className="text-center py-8">
+                <GraduationCap className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">Filtrage par domaine en développement</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Œuvres d'artiste */}
+        <TabsContent value="artwork" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-pink-600" />
+                Tendances Œuvres d'Artiste
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Les œuvres d'art originales qui captivent l'attention des collectionneurs.
+              </p>
+
+              <div className="text-center py-8">
+                <Palette className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">
+                  Filtrage par style artistique en développement
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -299,6 +395,17 @@ const Trending = () => {
           <CardTitle>Comment calculons-nous les tendances ?</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <p className="text-muted-foreground">
+              Nos algorithmes analysent en temps réel les 5 systèmes e-commerce de la plateforme :
+              <strong className="text-foreground"> produits digitaux</strong>,
+              <strong className="text-foreground"> produits physiques</strong>,
+              <strong className="text-foreground"> services</strong>,
+              <strong className="text-foreground"> cours en ligne</strong> et
+              <strong className="text-foreground"> œuvres d'artiste</strong>.
+            </p>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <h4 className="font-medium mb-3">Métriques analysées</h4>
@@ -346,8 +453,8 @@ const Trending = () => {
               🤖 Intelligence Artificielle
             </h4>
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              Nos algorithmes analysent en temps réel le comportement des utilisateurs pour identifier
-              les véritables tendances émergentes, pas seulement les produits populaires.
+              Nos algorithmes analysent en temps réel le comportement des utilisateurs pour
+              identifier les véritables tendances émergentes, pas seulement les produits populaires.
             </p>
           </div>
         </CardContent>

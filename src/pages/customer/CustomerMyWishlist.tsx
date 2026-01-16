@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -132,7 +132,7 @@ export default function CustomerMyWishlist() {
 
   // Récupérer les baisses de prix
   const { data: priceDropsData } = usePriceDrops();
-  const  priceDrops: Array<{
+  const priceDrops: Array<{
     product_id: string;
     old_price: number;
     new_price: number;
@@ -279,7 +279,7 @@ export default function CustomerMyWishlist() {
   const filteredAndSortedProducts = useMemo(() => {
     if (!favoriteProducts) return [];
 
-    let  filtered= [...favoriteProducts];
+    let filtered = [...favoriteProducts];
 
     // Filtre par type (tab)
     if (activeTab !== 'all') {
@@ -350,7 +350,7 @@ export default function CustomerMyWishlist() {
       return { total: 0, byType: {} };
     }
 
-    const  byType: Record<string, number> = {};
+    const byType: Record<string, number> = {};
     favoriteProducts.forEach(p => {
       byType[p.product_type] = (byType[p.product_type] || 0) + 1;
     });
@@ -378,7 +378,7 @@ export default function CustomerMyWishlist() {
           description: `${htmlToPlainText(product.name)} a été ajouté à votre panier`,
         });
         logger.info('Produit ajouté au panier depuis wishlist', { productId: product.id });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -434,7 +434,7 @@ export default function CustomerMyWishlist() {
           productId: product.id,
           storeId: product.store_id,
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -492,7 +492,7 @@ export default function CustomerMyWishlist() {
       });
       setSelectedProducts(new Set());
       logger.info('Produits ajoutés au panier en masse', { count: selectedProducts.size });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -517,7 +517,7 @@ export default function CustomerMyWishlist() {
       });
       setSelectedProducts(new Set());
       logger.info('Produits retirés de la wishlist en masse', { count: selectedProducts.size });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -542,7 +542,7 @@ export default function CustomerMyWishlist() {
         'Description',
         "Date d'ajout",
       ];
-      const  csvRows: string[] = [headers.join(',')];
+      const csvRows: string[] = [headers.join(',')];
 
       const productsToExport =
         selectedProducts.size > 0
@@ -581,7 +581,7 @@ export default function CustomerMyWishlist() {
         description: `${productsToExport.length} produit(s) exporté(s) en CSV`,
       });
       logger.info('Wishlist exportée en CSV', { count: productsToExport.length });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error("Erreur lors de l'export CSV", { error });
       toast({
         title: 'Erreur',
@@ -1362,7 +1362,7 @@ export default function CustomerMyWishlist() {
                             containerClassName="absolute inset-0 w-full h-full"
                             className="!w-full !h-full"
                             imageClassName="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            showPlaceholder={false}
+                            placeholder="empty"
                             showSkeleton={true}
                             priority={true}
                             sizes={
@@ -1526,7 +1526,7 @@ export default function CustomerMyWishlist() {
                       </Button>
                       <div className="flex items-center gap-1">
                         {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                          let  pageNum: number;
+                          let pageNum: number;
                           if (pagination.totalPages <= 5) {
                             pageNum = i + 1;
                           } else if (pagination.page <= 3) {
@@ -1577,9 +1577,3 @@ export default function CustomerMyWishlist() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

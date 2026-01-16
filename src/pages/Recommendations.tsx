@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Heart, Star, RefreshCw, Sparkles, Target } from 'lucide-react';
+import { TrendingUp, Heart, Star, RefreshCw, Sparkles, Target, Users } from 'lucide-react';
 import { useUserRecommendations, useTrendingRecommendations } from '@/hooks/useAIRecommendations';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
@@ -19,15 +19,23 @@ const Recommendations = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Récupérer les recommandations personnalisées
-  const { data: userRecommendations, isLoading: userLoading, refetch: refetchUser } = useUserRecommendations({
+  const {
+    data: userRecommendations,
+    isLoading: userLoading,
+    refetch: refetchUser,
+  } = useUserRecommendations({
     limit: 12,
-    enabled: !!selectedStoreId
+    enabled: !!selectedStoreId,
   });
 
   // Récupérer les tendances
-  const { data: trendingRecommendations, isLoading: trendingLoading, refetch: refetchTrending } = useTrendingRecommendations({
+  const {
+    data: trendingRecommendations,
+    isLoading: trendingLoading,
+    refetch: refetchTrending,
+  } = useTrendingRecommendations({
     limit: 8,
-    enabled: !!selectedStoreId
+    enabled: !!selectedStoreId,
   });
 
   const handleRefresh = () => {
@@ -40,7 +48,7 @@ const Recommendations = () => {
   const recommendationStats = {
     total: userRecommendations?.length || 0,
     trending: trendingRecommendations?.length || 0,
-    categories: new Set(userRecommendations?.map(r => r.metadata.category).filter(Boolean)).size
+    categories: new Set(userRecommendations?.map(r => r.metadata.category).filter(Boolean)).size,
   };
 
   return (
@@ -63,7 +71,9 @@ const Recommendations = () => {
             onClick={handleRefresh}
             disabled={userLoading || trendingLoading}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${userLoading || trendingLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${userLoading || trendingLoading ? 'animate-spin' : ''}`}
+            />
             Actualiser
           </Button>
         </div>
@@ -126,7 +136,8 @@ const Recommendations = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Basées sur votre historique d'achat, vos préférences et votre comportement de navigation.
+                Basées sur votre historique d'achat, vos préférences et votre comportement de
+                navigation.
               </p>
 
               {userLoading ? (
@@ -144,7 +155,10 @@ const Recommendations = () => {
               ) : userRecommendations && userRecommendations.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {userRecommendations.slice(0, 9).map((recommendation, index) => (
-                    <Card key={recommendation.productId} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <Card
+                      key={recommendation.productId}
+                      className="overflow-hidden hover:shadow-lg transition-shadow"
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant="secondary" className="text-xs">
@@ -176,9 +190,10 @@ const Recommendations = () => {
                   <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">Aucune recommandation disponible</h3>
                   <p className="text-muted-foreground mb-4">
-                    Continuez à explorer et acheter pour recevoir des recommandations personnalisées.
+                    Continuez à explorer et acheter pour recevoir des recommandations
+                    personnalisées.
                   </p>
-                  <Button onClick={() => window.location.href = '/marketplace'}>
+                  <Button onClick={() => (window.location.href = '/marketplace')}>
                     Explorer le Marketplace
                   </Button>
                 </div>
@@ -214,7 +229,10 @@ const Recommendations = () => {
               ) : trendingRecommendations && trendingRecommendations.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {trendingRecommendations.slice(0, 9).map((recommendation, index) => (
-                    <Card key={recommendation.productId} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <Card
+                      key={recommendation.productId}
+                      className="overflow-hidden hover:shadow-lg transition-shadow"
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant="secondary" className="text-xs">

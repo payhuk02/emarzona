@@ -652,7 +652,7 @@ const ProductDetails = () => {
                                 containerClassName="w-full h-full"
                                 imageClassName="w-full h-full object-cover bg-muted/30 object-center product-image"
                                 priority={index < 3}
-                                showPlaceholder={false}
+                                placeholder="empty"
                               />
                             </button>
                           ))}

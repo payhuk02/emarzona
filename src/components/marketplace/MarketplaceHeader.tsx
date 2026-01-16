@@ -32,7 +32,7 @@ const MarketplaceHeader = () => {
                   height={32}
                   className="max-w-full max-h-full object-contain"
                   loading="eager"
-                  fetchPriority="high"
+                  style={{ objectFit: 'contain' }}
                 />
               </div>
             ) : (
