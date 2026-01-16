@@ -82,7 +82,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
@@ -157,7 +156,7 @@ export default function CouponsManagement() {
 
   // Filtrer les promotions
   const filteredPromotions = useMemo(() => {
-    let  filtered= promotions;
+    let filtered = promotions;
 
     // Filtre par statut
     if (statusFilter !== 'all') {
@@ -221,7 +220,7 @@ export default function CouponsManagement() {
         title: '✅ Coupon supprimé',
         description: 'Le coupon a été supprimé avec succès',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: '❌ Erreur',
@@ -263,7 +262,7 @@ export default function CouponsManagement() {
   };
 
   const getDiscountTypeLabel = (type: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       percentage: 'Pourcentage',
       fixed_amount: 'Montant fixe',
       buy_x_get_y: 'Acheter X obtenir Y',
@@ -291,6 +290,13 @@ export default function CouponsManagement() {
   return (
     <MainLayout layoutType="promotions">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Annonce pour screen readers - État de chargement */}
+        <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {storeLoading ? 'Chargement de la boutique...' : null}
+          {promotionsLoading ? 'Chargement des coupons...' : null}
+          {!storeLoading && !promotionsLoading ? 'Page chargée' : null}
+        </div>
+
         {/* Header */}
         <div
           ref={headerRef}
@@ -299,7 +305,7 @@ export default function CouponsManagement() {
           <div className="flex-1 min-w-0">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
               <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
-                <Tag className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
+                <Tag className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" aria-hidden="true" />
               </div>
               <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Gestion des Coupons
@@ -309,8 +315,12 @@ export default function CouponsManagement() {
               Créez et gérez vos codes promo pour tous types de produits
             </p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="shrink-0"
+            aria-label="Créer un nouveau coupon de réduction"
+          >
+            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
             Nouveau Coupon
           </Button>
         </div>
@@ -319,11 +329,15 @@ export default function CouponsManagement() {
         <div
           ref={statsRef}
           className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          role="region"
+          aria-label="Statistiques des coupons"
         >
-          <Card>
+          <Card role="article" aria-labelledby="total-coupons-label">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
-              <Tag className="h-4 w-4 text-muted-foreground" />
+              <CardTitle id="total-coupons-label" className="text-xs sm:text-sm font-medium">
+                Total
+              </CardTitle>
+              <Tag className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
@@ -467,26 +481,35 @@ export default function CouponsManagement() {
 
                           <Select>
                             <SelectTrigger className="shrink-0">
-
-                                <MoreVertical className="h-4 w-4" />
-                              
-</SelectTrigger>
+                              <MoreVertical className="h-4 w-4" />
+                            </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                               {promotion.code && (
-                                <SelectItem value="edit" onSelect={() => handleCopyCode(promotion.code!)}>
+                                <SelectItem
+                                  value="edit"
+                                  onSelect={() => handleCopyCode(promotion.code!)}
+                                >
                                   <Copy className="h-4 w-4 mr-2" />
                                   Copier le code
                                 </SelectItem>
                               )}
-                              <SelectItem value="delete" onSelect={() => setViewingUsageId(promotion.id)}>
+                              <SelectItem
+                                value="delete"
+                                onSelect={() => setViewingUsageId(promotion.id)}
+                              >
                                 <BarChart3 className="h-4 w-4 mr-2" />
                                 Voir les utilisations
                               </SelectItem>
-                              <SelectItem value="copy" onSelect={() => setEditingPromotionId(promotion.id)}>
+                              <SelectItem
+                                value="copy"
+                                onSelect={() => setEditingPromotionId(promotion.id)}
+                              >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Éditer
                               </SelectItem>
-                              <SelectItem value="view" onSelect={() => setDeletingPromotionId(promotion.id)}
+                              <SelectItem
+                                value="view"
+                                onSelect={() => setDeletingPromotionId(promotion.id)}
                                 className="text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -617,28 +640,35 @@ export default function CouponsManagement() {
                             <TableCell className="text-right">
                               <Select>
                                 <SelectTrigger>
-
-                                    <MoreVertical className="h-4 w-4" />
-                                  
-</SelectTrigger>
+                                  <MoreVertical className="h-4 w-4" />
+                                </SelectTrigger>
                                 <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                   {promotion.code && (
-                                    <SelectItem value="export" onSelect={() => handleCopyCode(promotion.code!)}
+                                    <SelectItem
+                                      value="export"
+                                      onSelect={() => handleCopyCode(promotion.code!)}
                                     >
                                       <Copy className="h-4 w-4 mr-2" />
                                       Copier le code
                                     </SelectItem>
                                   )}
-                                  <SelectItem value="duplicate" onSelect={() => setViewingUsageId(promotion.id)}>
+                                  <SelectItem
+                                    value="duplicate"
+                                    onSelect={() => setViewingUsageId(promotion.id)}
+                                  >
                                     <BarChart3 className="h-4 w-4 mr-2" />
                                     Voir les utilisations
                                   </SelectItem>
-                                  <SelectItem value="toggle" onSelect={() => setEditingPromotionId(promotion.id)}
+                                  <SelectItem
+                                    value="toggle"
+                                    onSelect={() => setEditingPromotionId(promotion.id)}
                                   >
                                     <Edit className="h-4 w-4 mr-2" />
                                     Éditer
                                   </SelectItem>
-                                  <SelectItem value="quickview" onSelect={() => setDeletingPromotionId(promotion.id)}
+                                  <SelectItem
+                                    value="quickview"
+                                    onSelect={() => setDeletingPromotionId(promotion.id)}
                                     className="text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
@@ -769,9 +799,3 @@ export default function CouponsManagement() {
     </MainLayout>
   );
 }
-
-
-
-
-
-
