@@ -136,16 +136,20 @@ class RecommendationService {
   // Charge les paramètres depuis la base de données
   private async loadSettings() {
     try {
-      const { data, error } = await supabase
-        .from('platform_settings')
-        .select('ai_recommendation_settings')
-        .eq('id', '00000000-0000-0000-0000-000000000001') // ID des paramètres globaux
-        .maybeSingle();
+      // Utiliser la fonction RPC au lieu d'accéder directement à la table
+      const { data, error } = await supabase.rpc('get_ai_recommendation_settings');
 
-      if (error) throw error;
+      if (error) {
+        // Si la fonction n'existe pas, utiliser les paramètres par défaut
+        if (error.message.includes('function') || error.message.includes('does not exist')) {
+          logger.debug('AI recommendation settings function not available, using defaults');
+          return;
+        }
+        throw error;
+      }
 
-      if (data?.ai_recommendation_settings) {
-        const loadedSettings = data.ai_recommendation_settings as RecommendationSettings;
+      if (data) {
+        const loadedSettings = data as RecommendationSettings;
         // Validation basique des données chargées
         if (loadedSettings && typeof loadedSettings === 'object') {
           this.settings = { ...defaultRecommendationSettings, ...loadedSettings };

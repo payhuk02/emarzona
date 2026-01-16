@@ -171,16 +171,13 @@ export const usePlatformCustomization = () => {
 
   const load = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('platform_settings')
-        .select('settings, updated_at')
-        .eq('key', 'customization')
-        .maybeSingle();
+      // Utiliser la fonction RPC au lieu d'accéder directement à la table
+      const { data, error } = await supabase.rpc('get_platform_customization');
 
       if (error) {
-        // Si la table n'existe pas encore ou si la clé n'existe pas, on continue avec des données vides
-        if (error.code === 'PGRST116' || error.code === '42P01' || error.message.includes('does not exist')) {
-          logger.debug('Customization settings not found, using defaults');
+        // Si la fonction n'existe pas ou si les données n'existent pas, on continue avec des données vides
+        if (error.code === 'PGRST116' || error.message.includes('function') || error.message.includes('does not exist')) {
+          logger.debug('Customization settings not found or function not available, using defaults');
           return;
         }
         // Pour les autres erreurs, on log dans Sentry
@@ -192,10 +189,10 @@ export const usePlatformCustomization = () => {
         });
         return;
       }
-      
-      if (data?.settings) {
+
+      if (data) {
         // Valider les données chargées
-        const validation = validateCustomizationData(data.settings);
+        const validation = validateCustomizationData(data);
         if (!validation.valid) {
           logger.warn('Données de personnalisation invalides', {
             errors: validation.errors,
@@ -205,29 +202,25 @@ export const usePlatformCustomization = () => {
           if (validation.data) {
             setCustomizationData(validation.data);
           } else {
-        setCustomizationData(data.settings as PlatformCustomizationData);
+            setCustomizationData(data as PlatformCustomizationData);
           }
         } else {
-          setCustomizationData(validation.data || data.settings as PlatformCustomizationData);
+          setCustomizationData(validation.data || data as PlatformCustomizationData);
         }
-        
-        // Sauvegarder le timestamp de dernière sauvegarde
-        if (data.updated_at) {
-          lastSavedTimestampRef.current = data.updated_at;
-          try {
-            localStorage.setItem(LAST_SAVED_KEY, data.updated_at);
-          } catch (e) {
-            // Ignorer les erreurs localStorage
-          }
+
+        // Sauvegarder le timestamp de dernière sauvegarde (approximatif)
+        const now = new Date().toISOString();
+        lastSavedTimestampRef.current = now;
+        try {
+          localStorage.setItem(LAST_SAVED_KEY, now);
+        } catch (e) {
+          // Ignorer les erreurs localStorage
         }
       }
-    } catch ( _error: unknown) {
-      // Logger dans Sentry pour les erreurs inattendues
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error loading customization', {
-        error: errorMessage,
+    } catch (error) {
+      logger.error('Exception during customization loading', {
+        error: error instanceof Error ? error.message : 'Unknown error',
         level: 'section',
-        extra: { error },
       });
     }
   }, []);

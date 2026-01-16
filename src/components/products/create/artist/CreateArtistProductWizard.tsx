@@ -126,7 +126,7 @@ const CreateArtistProductWizardComponent = ({
   const { toast } = useToast();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
-  const storeSlugValue = storeSlug || hookStore?.slug;
+  const storeSlugValue = _storeSlug || hookStore?.slug;
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -862,7 +862,7 @@ const CreateArtistProductWizardComponent = ({
               <ArtistBasicInfoForm
                 data={formData}
                 onUpdate={handleUpdateFormData}
-                storeSlug={storeSlug}
+                storeSlug={storeSlugValue}
               />
             )}
 
