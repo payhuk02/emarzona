@@ -161,11 +161,15 @@ SELECT
     'name', c.name,
     'email', c.email
   ) as customer,
-  ARRAY_AGG(
-    DISTINCT JSON_BUILD_OBJECT(
-      'type', COALESCE(oi.products.product_type, p.product_type)
-    )
-  ) FILTER (WHERE oi.id IS NOT NULL) as product_types
+  (
+    SELECT ARRAY_AGG(JSON_BUILD_OBJECT('type', pt.product_type))
+    FROM (
+      SELECT DISTINCT p2.product_type
+      FROM order_items oi2
+      JOIN products p2 ON oi2.product_id = p2.id
+      WHERE oi2.order_id = o.id AND p2.product_type IS NOT NULL
+    ) pt
+  ) as product_types
 FROM orders o
 LEFT JOIN customers c ON o.customer_id = c.id
 LEFT JOIN order_items oi ON o.id = oi.order_id
