@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from './useStore';
+import { useAuthRefresh } from './useAuthRefresh';
 import { logger } from '@/lib/logger';
 
 // Types pour les vues matérialisées
@@ -223,6 +224,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { store } = useStore();
+  const { withAuthRetry } = useAuthRefresh();
 
   // Fonction pour transformer les données optimisées vers le format existant
   const transformOptimizedData = useCallback((data: OptimizedDashboardData): DashboardStats => {
@@ -418,10 +420,13 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       else if (options?.period === '90d') periodDays = 90;
 
       // Une seule requête RPC optimisée au lieu de 10 requêtes individuelles
-      const { data, error: rpcError } = await supabase.rpc('get_dashboard_stats_rpc', {
-        store_id: store.id,
-        period_days: periodDays,
-      });
+      const { data, error: rpcError } = await withAuthRetry(
+        () => supabase.rpc('get_dashboard_stats_rpc', {
+          store_id: store.id,
+          period_days: periodDays,
+        }),
+        'chargement stats dashboard'
+      );
 
       const endTime = performance.now();
       const loadTime = endTime - startTime;

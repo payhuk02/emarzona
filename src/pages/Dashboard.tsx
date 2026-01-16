@@ -89,6 +89,7 @@ import {
   useRealtimeNotifications,
 } from '@/hooks/useNotifications';
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
+import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning';
 import '@/styles/dashboard-responsive.css';
 
 const Dashboard = () => {
@@ -319,6 +320,9 @@ const Dashboard = () => {
         <AppSidebar />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+            {/* Session Expiry Warning */}
+            <SessionExpiryWarning />
+
             {/* Header - Responsive & Animated */}
             <div
               ref={headerRef}

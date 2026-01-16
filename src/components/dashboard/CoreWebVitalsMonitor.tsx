@@ -93,13 +93,14 @@ export const CoreWebVitalsMonitor = () => {
 
   // Fonction pour obtenir l'icône de notation
   const getRatingIcon = (rating: 'good' | 'needs-improvement' | 'poor') => {
+    const iconClass = "h-4 w-4 inline";
     switch (rating) {
       case 'good':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className={`${iconClass} text-green-500`} />;
       case 'needs-improvement':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className={`${iconClass} text-yellow-500`} />;
       case 'poor':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className={`${iconClass} text-red-500`} />;
     }
   };
 
