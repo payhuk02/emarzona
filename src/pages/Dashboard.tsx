@@ -31,6 +31,8 @@ import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
+import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 // ✅ PHASE 2: Lazy load des composants analytics lourds (utilisent recharts)
 const RevenueChart = lazy(() =>
   import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
@@ -89,6 +91,24 @@ import {
 import '@/styles/dashboard-responsive.css';
 
 const Dashboard = () => {
+  // ✅ PERFORMANCE: Preload logo platform (potentielle LCP sur dashboard)
+  const platformLogo = usePlatformLogo();
+
+  useEffect(() => {
+    if (platformLogo) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = platformLogo;
+      link.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(link);
+      return () => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      };
+    }
+  }, [platformLogo]);
   const { t } = useTranslation();
   const { getValue } = usePageCustomization('dashboard');
   const { store, loading: storeLoading } = useStore();

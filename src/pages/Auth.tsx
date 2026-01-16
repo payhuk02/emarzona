@@ -786,9 +786,8 @@ const Auth = () => {
                     setResetEmail('');
                     setResetError('');
                   }}
-                  className="touch-manipulation min-h-[44px]"
+                  className="touch-manipulation min-h-[44px] text-base"
                   disabled={isResetLoading}
-                  className="min-h-[44px] text-base"
                 >
                   {t('common.cancel', 'Annuler')}
                 </Button>

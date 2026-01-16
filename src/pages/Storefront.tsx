@@ -26,6 +26,8 @@ import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
 import type { Store } from '@/hooks/useStores';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
+import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 
 const Storefront = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -43,6 +45,20 @@ const Storefront = () => {
   );
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { isLowBandwidth } = useAdaptiveLoading();
+
+  // ✅ PERFORMANCE: Preload image hero du store ou logo (potentielle LCP)
+  const storeHeroImage = getValue('heroImage') as string | undefined;
+  const storeLogo = store?.logo_url || undefined;
+
+  useLCPPreload({
+    src: storeHeroImage || storeLogo || '',
+    sizes:
+      storeHeroImage || storeLogo
+        ? '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px'
+        : undefined,
+    priority: !!(storeHeroImage || storeLogo),
+  });
 
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
@@ -546,7 +562,8 @@ const Storefront = () => {
                   store ? (
                     <>
                       {/* Contenu marketing */}
-                      {store.marketing_content && (
+                      {/* Contenu marketing - Chargement adaptatif */}
+                      {store.marketing_content && !isLowBandwidth && (
                         <StoreMarketingSections
                           marketingContent={store.marketing_content}
                           store={store}
@@ -587,11 +604,18 @@ const Storefront = () => {
                 }
                 reviewsContent={
                   store ? (
-                    <ReviewsList
-                      reviews={reviews}
-                      loading={reviewsLoading}
-                      storeSlug={store.slug}
-                    />
+                    // Chargement adaptatif des avis
+                    !isLowBandwidth ? (
+                      <ReviewsList
+                        reviews={reviews}
+                        loading={reviewsLoading}
+                        storeSlug={store.slug}
+                      />
+                    ) : (
+                      <div className="text-center py-12 px-4 text-muted-foreground">
+                        Avis non affichés en mode faible bande passante.
+                      </div>
+                    )
                   ) : null
                 }
                 contactContent={

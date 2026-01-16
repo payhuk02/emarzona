@@ -1,16 +1,16 @@
 /**
  * Système d'extraction et d'injection du CSS critique
  * Le CSS critique est le CSS nécessaire pour le rendu above-the-fold
+ *
+ * ✅ OPTIMISATION: CSS critique synchronisé avec scripts/extract-critical-css.js
  */
 
-/**
- * CSS critique pour le rendu initial
- * Contient uniquement les styles nécessaires pour le First Contentful Paint
- */
 /**
  * CSS critique optimisé pour FCP (First Contentful Paint)
  * Contient uniquement les styles nécessaires pour le rendu above-the-fold
  * Taille cible : < 50KB (actuellement ~2KB)
+ *
+ * Note: Ce CSS est également extrait automatiquement au build via scripts/extract-critical-css.js
  */
 export const criticalCSS = `
 /* Variables CSS critiques - Minimales pour FCP */
@@ -115,7 +115,7 @@ export function loadNonCriticalCSS(): void {
     // NOTE: Le CSS sidebar-optimized.css est déjà importé dans index.css
     // Vite le bundle automatiquement, donc pas besoin de le charger séparément
     // Cette fonction est conservée pour d'éventuels futurs CSS non-critiques
-    
+
     // Marquer comme chargé
     document.getElementById('non-critical-css')?.setAttribute('id', 'non-critical-css-loaded');
   };
@@ -135,9 +135,3 @@ export function loadNonCriticalCSS(): void {
   marker.style.display = 'none';
   document.body.appendChild(marker);
 }
-
-
-
-
-
-

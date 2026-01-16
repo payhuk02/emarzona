@@ -22,6 +22,7 @@ import { CartEmpty } from '@/components/cart/CartEmpty';
 import { ShoppingBag, Trash2, Sparkles, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,14 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function CartEnhanced() {
+  // ✅ PERFORMANCE: Preload image LCP (logo ou image générique du panier)
+  // Ici on utilise une image générique si le logo n'est pas pertinent
+  useLCPPreload({
+    src: '/images/cart-hero.jpg', // Image générique pour le panier
+    sizes: '(max-width: 640px) 100vw, 500px',
+    priority: true,
+  });
+
   const navigate = useNavigate();
   const { toast } = useToast();
   const { items, summary, isLoading, updateItem, removeItem, clearCart, isEmpty } = useCart();
@@ -45,7 +54,7 @@ export default function CartEnhanced() {
     async (itemId: string, quantity: number) => {
       try {
         await updateItem({ item_id: itemId, quantity });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -65,7 +74,7 @@ export default function CartEnhanced() {
           title: 'Article supprimé',
           description: "L'article a été retiré de votre panier",
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         toast({
           title: 'Erreur',
@@ -86,7 +95,7 @@ export default function CartEnhanced() {
         title: 'Panier vidé',
         description: 'Tous les articles ont été retirés de votre panier',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -264,9 +273,3 @@ export default function CartEnhanced() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

@@ -167,13 +167,15 @@ class RecommendationService {
   // Méthode principale pour obtenir les recommandations
   public async getRecommendations(
     userId: string | undefined,
-    sessionContext: ChatSessionContext,
+    _sessionContext: ChatSessionContext,
     currentProductId?: string // Si la recommandation est pour un produit spécifique
   ): Promise<RecommendedProduct[]> {
     await this.loadSettings(); // S'assurer que les derniers paramètres sont chargés
 
-    let recommendations: RecommendedProduct[] = [];
-    const enabledAlgorithms = Object.entries(this.settings.algorithms).filter(([, enabled]) => enabled);
+    const recommendations: RecommendedProduct[] = [];
+    const enabledAlgorithms = Object.entries(this.settings.algorithms).filter(
+      ([, enabled]) => enabled
+    );
 
     // 1. Exécuter les algorithmes actifs et pondérer leurs résultats
     for (const [algoName] of enabledAlgorithms) {
@@ -208,8 +210,13 @@ class RecommendationService {
     // 3. Appliquer les seuils de confiance et les limites par type de produit
     let finalRecommendations: RecommendedProduct[] = [];
     for (const rec of aggregatedRecommendations) {
-      const productTypeConfig = this.settings.productTypes[rec.type as keyof typeof this.settings.productTypes];
-      if (productTypeConfig?.enabled && rec.score >= (productTypeConfig?.similarityThreshold || this.settings.limits.minConfidenceThreshold)) {
+      const productTypeConfig =
+        this.settings.productTypes[rec.type as keyof typeof this.settings.productTypes];
+      if (
+        productTypeConfig?.enabled &&
+        rec.score >=
+          (productTypeConfig?.similarityThreshold || this.settings.limits.minConfidenceThreshold)
+      ) {
         finalRecommendations.push(rec);
       }
     }
@@ -220,8 +227,16 @@ class RecommendationService {
       .slice(0, this.settings.limits.maxRecommendationsPerPage);
 
     // 4. Appliquer les règles de fallback si pas assez de recommandations
-    if (finalRecommendations.length < this.settings.limits.maxRecommendationsPerPage && Object.values(this.settings.fallbacks).some(Boolean)) {
-      const fallbackRecs = await this.applyFallbacks(userId, sessionContext, currentProductId, finalRecommendations);
+    if (
+      finalRecommendations.length < this.settings.limits.maxRecommendationsPerPage &&
+      Object.values(this.settings.fallbacks).some(Boolean)
+    ) {
+      const fallbackRecs = await this.applyFallbacks(
+        userId,
+        sessionContext,
+        currentProductId,
+        finalRecommendations
+      );
       finalRecommendations.push(...fallbackRecs);
       // Dédupliquer à nouveau après fallback et re-limiter
       finalRecommendations = this.aggregateAndDedup(finalRecommendations)
@@ -234,7 +249,10 @@ class RecommendationService {
 
   // --- Implémentations des algorithmes (simulées pour l'instant) ---
 
-  private async getCollaborativeRecommendations(userId: string | undefined, sessionContext: ChatSessionContext): Promise<RecommendedProduct[]> {
+  private async getCollaborativeRecommendations(
+    userId: string | undefined,
+    sessionContext: ChatSessionContext
+  ): Promise<RecommendedProduct[]> {
     if (!userId || !this.settings.limits.enablePersonalization) return [];
     // Logique complexe pour trouver des utilisateurs similaires et leurs préférences
     logger.debug('Fetching collaborative recommendations for user', { userId });
@@ -242,7 +260,10 @@ class RecommendationService {
     return this.getPopularProducts(3, 0.7, 'collaborative', 'Basé sur les utilisateurs similaires');
   }
 
-  private async getContentBasedRecommendations(currentProductId: string | undefined, sessionContext: ChatSessionContext): Promise<RecommendedProduct[]> {
+  private async getContentBasedRecommendations(
+    currentProductId: string | undefined,
+    sessionContext: ChatSessionContext
+  ): Promise<RecommendedProduct[]> {
     if (!currentProductId) return [];
     // Logique pour trouver des produits similaires en fonction des attributs (catégorie, tags, prix, type)
     logger.debug('Fetching content-based recommendations for product', { currentProductId });
@@ -257,15 +278,29 @@ class RecommendationService {
     return this.getPopularProducts(3, 0.8, 'trending', 'Produits tendance');
   }
 
-  private async getBehavioralRecommendations(userId: string | undefined, sessionContext: ChatSessionContext): Promise<RecommendedProduct[]> {
+  private async getBehavioralRecommendations(
+    userId: string | undefined,
+    sessionContext: ChatSessionContext
+  ): Promise<RecommendedProduct[]> {
     if (!userId || !this.settings.limits.enablePersonalization) return [];
     // Logique basée sur l'historique de navigation/achat de l'utilisateur (sessionContext.browsingHistory, cartItems, etc.)
-    logger.debug('Fetching behavioral recommendations for user', { userId, history: sessionContext.browsingHistory });
+    logger.debug('Fetching behavioral recommendations for user', {
+      userId,
+      history: sessionContext.browsingHistory,
+    });
     // Simulation
-    return this.getPopularProducts(3, 0.75, 'behavioral', 'Basé sur le comportement de l\'utilisateur');
+    return this.getPopularProducts(
+      3,
+      0.75,
+      'behavioral',
+      "Basé sur le comportement de l'utilisateur"
+    );
   }
 
-  private async getCrossTypeRecommendations(currentProductId: string | undefined, sessionContext: ChatSessionContext): Promise<RecommendedProduct[]> {
+  private async getCrossTypeRecommendations(
+    currentProductId: string | undefined,
+    sessionContext: ChatSessionContext
+  ): Promise<RecommendedProduct[]> {
     if (!currentProductId) return [];
     // Logique pour recommander des produits d'autres types basés sur le produit actuel ou le contexte
     logger.debug('Fetching cross-type recommendations for product', { currentProductId });
@@ -275,8 +310,13 @@ class RecommendationService {
 
   // --- Fonctions de Fallback ---
 
-  private async applyFallbacks(userId: string | undefined, sessionContext: ChatSessionContext, currentProductId: string | undefined, existingRecs: RecommendedProduct[]): Promise<RecommendedProduct[]> {
-    let fallbackRecommendations: RecommendedProduct[] = [];
+  private async applyFallbacks(
+    userId: string | undefined,
+    sessionContext: ChatSessionContext,
+    currentProductId: string | undefined,
+    existingRecs: RecommendedProduct[]
+  ): Promise<RecommendedProduct[]> {
+    const fallbackRecommendations: RecommendedProduct[] = [];
     const needed = this.settings.limits.maxRecommendationsPerPage - existingRecs.length;
     if (needed <= 0) return [];
 
@@ -288,19 +328,32 @@ class RecommendationService {
     }
 
     if (this.settings.fallbacks.fallbackToPopular) {
-      const popular = await this.getPopularProducts(needed, 0.5, 'fallback_popular', 'Fallback: produits populaires');
+      const popular = await this.getPopularProducts(
+        needed,
+        0.5,
+        'fallback_popular',
+        'Fallback: produits populaires'
+      );
       fallbackRecommendations.push(...popular.slice(0, needed - fallbackRecommendations.length));
       if (fallbackRecommendations.length >= needed) return fallbackRecommendations;
     }
 
     if (this.settings.fallbacks.fallbackToCategory && currentProductId) {
-      const categoryRecs = await this.getCategoryRecommendations(currentProductId, needed - fallbackRecommendations.length, 0.4);
+      const categoryRecs = await this.getCategoryRecommendations(
+        currentProductId,
+        needed - fallbackRecommendations.length,
+        0.4
+      );
       fallbackRecommendations.push(...categoryRecs);
       if (fallbackRecommendations.length >= needed) return fallbackRecommendations;
     }
 
     if (this.settings.fallbacks.fallbackToStore && currentProductId) {
-      const storeRecs = await this.getStoreRecommendations(currentProductId, needed - fallbackRecommendations.length, 0.3);
+      const storeRecs = await this.getStoreRecommendations(
+        currentProductId,
+        needed - fallbackRecommendations.length,
+        0.3
+      );
       fallbackRecommendations.push(...storeRecs);
     }
 
@@ -308,7 +361,12 @@ class RecommendationService {
   }
 
   // Fonctions utilitaires pour les fallbacks (simulées)
-  private async getPopularProducts(limit: number, score: number, reasonTag: string, reasonText: string): Promise<RecommendedProduct[]> {
+  private async getPopularProducts(
+    limit: number,
+    score: number,
+    reasonTag: string,
+    reasonText: string
+  ): Promise<RecommendedProduct[]> {
     const { data: products } = await supabase
       .from('products')
       .select('id, name, category, type')
@@ -318,7 +376,11 @@ class RecommendationService {
     return (products || []).map(p => ({ ...p, score, reason: reasonText }));
   }
 
-  private async getCategoryRecommendations(currentProductId: string, limit: number, score: number): Promise<RecommendedProduct[]> {
+  private async getCategoryRecommendations(
+    currentProductId: string,
+    limit: number,
+    score: number
+  ): Promise<RecommendedProduct[]> {
     // Récupérer la catégorie du produit actuel
     const { data: currentProduct } = await supabase
       .from('products')
@@ -336,10 +398,18 @@ class RecommendationService {
       .order('created_at', { ascending: false }) // Ou un autre critère de tri
       .limit(limit);
 
-    return (products || []).map(p => ({ ...p, score, reason: `Produit similaire dans la catégorie ${currentProduct.category}` }));
+    return (products || []).map(p => ({
+      ...p,
+      score,
+      reason: `Produit similaire dans la catégorie ${currentProduct.category}`,
+    }));
   }
 
-  private async getStoreRecommendations(currentProductId: string, limit: number, score: number): Promise<RecommendedProduct[]> {
+  private async getStoreRecommendations(
+    currentProductId: string,
+    limit: number,
+    score: number
+  ): Promise<RecommendedProduct[]> {
     // Récupérer l'ID de la boutique du produit actuel
     const { data: currentProduct } = await supabase
       .from('products')
@@ -357,7 +427,11 @@ class RecommendationService {
       .order('created_at', { ascending: false }) // Ou un autre critère de tri
       .limit(limit);
 
-    return (products || []).map(p => ({ ...p, score, reason: `Autres produits de la même boutique` }));
+    return (products || []).map(p => ({
+      ...p,
+      score,
+      reason: `Autres produits de la même boutique`,
+    }));
   }
 
   // --- Fonctions utilitaires ---

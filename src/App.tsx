@@ -248,9 +248,9 @@ const MyTasks = lazy(() => import('./pages/MyTasks'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Customers = lazy(() => import('./pages/Customers'));
 const Marketing = lazy(() => import('./pages/Marketing').then(m => ({ default: m.default })));
-const UnifiedPromotionsPage = lazy(() =>
-  import('./pages/promotions/UnifiedPromotionsPage').then(m => ({
-    default: m.UnifiedPromotionsPage,
+const PromotionsPage = lazy(() =>
+  import('./pages/Promotions').then(m => ({
+    default: m.default,
   }))
 );
 const PromotionsStatsPage = lazy(() =>
@@ -1018,7 +1018,7 @@ const AppContent = () => {
                 path="/dashboard/promotions"
                 element={
                   <ProtectedRoute>
-                    <UnifiedPromotionsPage />
+                    <PromotionsPage />
                   </ProtectedRoute>
                 }
               />

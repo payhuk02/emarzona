@@ -58,6 +58,7 @@ import { formatPrice, calculateDiscount } from '@/lib/product-helpers';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { cn } from '@/lib/utils';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
 import type { ProductSpecification, ProductFAQ } from '@/types/product-form';
 import type { Product } from '@/types/marketplace';
 import type { Store } from '@/hooks/useStore';
@@ -133,6 +134,35 @@ const ProductDetails = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // ✅ PERFORMANCE: Preload image principale du produit (LCP critique)
+  useEffect(() => {
+    if (!product) return;
+
+    const mainProductImage =
+      product.image_url ||
+      (Array.isArray(product.images) && product.images[0]
+        ? typeof product.images[0] === 'string'
+          ? product.images[0]
+          : (product.images[0] as { url: string }).url
+        : undefined);
+
+    if (mainProductImage) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = mainProductImage;
+      link.setAttribute('fetchpriority', 'high');
+      link.setAttribute('imagesizes', '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 600px');
+      document.head.appendChild(link);
+
+      return () => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      };
+    }
+  }, [product]);
 
   const fetchData = useCallback(async () => {
     if (!slug || !productSlug) {

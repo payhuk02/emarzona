@@ -26,6 +26,7 @@ import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
 import { formatPrice } from '@/lib/product-helpers';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
 
 interface CheckoutFormData {
   firstName: string;
@@ -78,6 +79,15 @@ const Checkout = () => {
   const productId = searchParams.get('productId');
   const storeId = searchParams.get('storeId');
   const variantId = searchParams.get('variantId');
+
+  // ✅ PERFORMANCE: Preload image LCP pour améliorer Core Web Vitals
+  // L'image sera mise à jour une fois le produit chargé
+  const productImage = product?.image_url || undefined;
+  useLCPPreload({
+    src: productImage || '',
+    sizes: productImage ? '(max-width: 640px) 100vw, 200px' : undefined,
+    priority: !!productImage,
+  });
 
   // États
   const [loading, setLoading] = useState(true);
@@ -268,7 +278,7 @@ const Checkout = () => {
           country: currentUser.user_metadata?.country || 'Burkina Faso',
           postalCode: currentUser.user_metadata?.postal_code || '',
         });
-      } catch ( _err: unknown) {
+      } catch (_err: unknown) {
         logger.error(
           'Error loading checkout data:',
           err instanceof Error ? err : new Error(String(err))
@@ -284,7 +294,7 @@ const Checkout = () => {
 
   // Validation du formulaire
   const validateForm = (): boolean => {
-    const  errors: Partial<Record<keyof CheckoutFormData, string>> = {};
+    const errors: Partial<Record<keyof CheckoutFormData, string>> = {};
 
     if (!formData.firstName.trim()) {
       errors.firstName = 'Le prénom est requis';
@@ -325,7 +335,7 @@ const Checkout = () => {
     const basePrice = Number(product.price) || 0;
 
     // Déterminer le prix de base (promo ou normal)
-    let  finalBasePrice: number;
+    let finalBasePrice: number;
     if (promoPrice && Number(promoPrice) < basePrice && Number(promoPrice) > 0) {
       finalBasePrice = Number(promoPrice);
     } else {
@@ -943,9 +953,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-
-
-
-
-
-

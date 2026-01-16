@@ -1,12 +1,18 @@
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
 import { X, Filter, Calendar } from 'lucide-react';
 import { Search } from '@/components/icons';
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { useState } from "react";
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useState } from 'react';
 
 interface PromotionFiltersProps {
   searchQuery: string;
@@ -44,31 +50,46 @@ export const PromotionFilters = ({
   };
 
   return (
-    <div 
+    <div
       ref={filtersRef}
       className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700"
     >
       {/* Filtres de base */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+          <label htmlFor="promotion-search" className="sr-only">
+            Rechercher des promotions par code ou description
+          </label>
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10"
+            aria-hidden="true"
+          />
           <Input
+            id="promotion-search"
             placeholder="Rechercher par code ou description..."
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={e => onSearchChange(e.target.value)}
             className="pl-9 pr-9 h-9 sm:h-10 text-xs sm:text-sm"
+            aria-describedby="search-description"
           />
+          <div id="search-description" className="sr-only">
+            La recherche est effectuée automatiquement avec un délai pour optimiser les performances
+          </div>
           {searchQuery && (
             <Button
               variant="ghost"
               size="icon"
               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-muted"
-              onClick={() => onSearchChange("")}
+              onClick={() => onSearchChange('')}
               aria-label="Effacer la recherche"
+              aria-describedby="clear-search-description"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
           )}
+          <div id="clear-search-description" className="sr-only">
+            Effacer le contenu de la recherche
+          </div>
         </div>
 
         <Select value={statusFilter} onValueChange={onStatusChange}>
@@ -86,17 +107,28 @@ export const PromotionFilters = ({
         <Popover open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
           <PopoverTrigger asChild>
             <Button
-              variant={hasAdvancedFilters ? "default" : "outline"}
+              variant={hasAdvancedFilters ? 'default' : 'outline'}
               className="h-9 sm:h-10 text-xs sm:text-sm"
+              aria-expanded={isAdvancedOpen}
+              aria-haspopup="dialog"
+              aria-label={`${hasAdvancedFilters ? 'Modifier' : 'Ouvrir'} les filtres avancés${hasAdvancedFilters ? ' (filtres actifs)' : ''}`}
             >
-              <Filter className="h-4 w-4 mr-2" />
+              <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
               Filtres avancés
               {hasAdvancedFilters && (
-                <span className="ml-2 h-2 w-2 rounded-full bg-primary-foreground" />
+                <span
+                  className="ml-2 h-2 w-2 rounded-full bg-primary-foreground"
+                  aria-label="Filtres actifs"
+                />
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] sm:max-w-sm p-4" align="end">
+          <PopoverContent
+            className="w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] sm:max-w-sm p-4"
+            align="end"
+            role="dialog"
+            aria-label="Filtres avancés de recherche"
+          >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-sm">Filtres avancés</h4>
@@ -143,7 +175,7 @@ export const PromotionFilters = ({
                         <Input
                           type="date"
                           value={dateFromFilter || ''}
-                          onChange={(e) => onDateFromChange(e.target.value)}
+                          onChange={e => onDateFromChange(e.target.value)}
                           className="h-9 text-xs"
                         />
                       </div>
@@ -154,7 +186,7 @@ export const PromotionFilters = ({
                         <Input
                           type="date"
                           value={dateToFilter || ''}
-                          onChange={(e) => onDateToChange(e.target.value)}
+                          onChange={e => onDateToChange(e.target.value)}
                           className="h-9 text-xs"
                         />
                       </div>
@@ -169,9 +201,3 @@ export const PromotionFilters = ({
     </div>
   );
 };
-
-
-
-
-
-

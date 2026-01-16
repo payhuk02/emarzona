@@ -19,20 +19,22 @@ import { join, extname, basename, dirname } from 'path';
 import { existsSync } from 'fs';
 import sharp from 'sharp';
 
-const DEFAULT_OPTIONS = {
-  format: 'both', // 'webp', 'avif', 'both'
-  quality: 80,
-  input: 'public',
-  output: 'public/optimized',
-  lazy: true,
-};
+  const DEFAULT_OPTIONS = {
+    format: 'both', // 'webp', 'avif', 'both', 'jpg'
+    quality: 80,
+    input: 'public',
+    output: 'public/optimized',
+    lazy: true,
+    outputFormats: ['avif', 'webp', 'jpg'], // Nouveaux formats de sortie par défaut
+  };
 
-// Formats d'images supportés
-const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-const OUTPUT_FORMATS = {
-  webp: { ext: '.webp', mime: 'image/webp' },
-  avif: { ext: '.avif', mime: 'image/avif' },
-};
+  // Formats d'images supportés
+  const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const OUTPUT_FORMATS = {
+    webp: { ext: '.webp', mime: 'image/webp' },
+    avif: { ext: '.avif', mime: 'image/avif' },
+    jpg: { ext: '.jpg', mime: 'image/jpeg' }, // Ajout du fallback JPG
+  };
 
 /**
  * Parser les arguments de ligne de commande
@@ -50,6 +52,8 @@ function parseArgs() {
       options.input = arg.split('=')[1];
     } else if (arg.startsWith('--output=')) {
       options.output = arg.split('=')[1];
+    } else if (arg.startsWith('--outputFormats=')) {
+      options.outputFormats = arg.split('=')[1].split(',');
     } else if (arg === '--lazy') {
       options.lazy = true;
     }
@@ -112,6 +116,8 @@ async function optimizeImage(inputPath, outputPath, format, quality) {
       output = image.webp({ quality, effort: 6 });
     } else if (format === 'avif') {
       output = image.avif({ quality, effort: 4 });
+    } else if (format === 'jpg' || format === 'jpeg' || format === 'png') { // Ajout du format JPG/JPEG/PNG pour le fallback
+      output = image.jpeg({ quality, progressive: true, mozjpeg: true }); // Utilisation de JPEG pour la compatibilité
     } else {
       throw new Error(`Format non supporté: ${format}`);
     }
@@ -128,33 +134,51 @@ async function optimizeImage(inputPath, outputPath, format, quality) {
       optimizedSize: stats.size,
       reduction: `${reduction}%`,
       format,
+      width: metadata.width,
+      height: metadata.height,
     };
   } catch (error) {
     return {
       success: false,
       error: error.message,
+      width: 0,
+      height: 0,
     };
   }
 }
 
 /**
- * Générer le code pour lazy loading
+ * Générer le code pour l'élément <picture> avec lazy loading
  */
-function generateLazyLoadingCode(originalPath, optimizedPaths) {
+function generateLazyLoadingCode(originalPath, optimizedPaths, originalWidth, originalHeight) {
   const relativePath = originalPath.replace(/^public\//, '/');
-  
+  const baseName = basename(originalPath, extname(originalPath));
+
+  // Déterminer le chemin de l'image de fallback (originale ou JPG optimisée si disponible)
+  const fallbackFormat = optimizedPaths.jpg || relativePath;
+
+  const sources = Object.entries(optimizedPaths)
+    .filter(([format, _]) => format !== 'jpg') // Exclure le fallback de la source
+    .map(([format, path]) => {
+      const type = OUTPUT_FORMATS[format as 'webp' | 'avif'].mime;
+      const srcset = path.replace(/^public\//, '/'); // Assumer que ces chemins sont déjà en srcset ou de base
+      return `<source srcset="${srcset}" type="${type}" />`;
+    })
+    .join('\n    ');
+
   const code = `
-// Image optimisée: ${basename(originalPath)}
-// Formats disponibles: ${Object.keys(optimizedPaths).join(', ')}
-<img
-  src="${relativePath}"
-  srcset="${Object.entries(optimizedPaths)
-    .map(([format, path]) => `${path.replace(/^public\//, '/')} ${format === 'avif' ? 'type="image/avif"' : 'type="image/webp"'}`)
-    .join(', ')}"
-  loading="lazy"
-  decoding="async"
-  alt=""
-/>
+// Image optimisée: ${baseName}
+<picture>
+    ${sources}
+    <img
+      src="${fallbackFormat.replace(/^public\//, '/')}"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="${originalWidth}"
+      height="${originalHeight}"
+    />
+</picture>
 `;
 
   return code;
@@ -212,11 +236,20 @@ async function main() {
 
     console.log(`🖼️  Optimisation: ${relativePath}`);
 
-    const formats = options.format === 'both' ? ['webp', 'avif'] : [options.format];
+    const formatsToProcess = options.outputFormats; // Utiliser les nouveaux formats
     const optimizedPaths = {};
+    let originalWidth = 0;
+    let originalHeight = 0;
 
-    for (const format of formats) {
-      const outputPath = join(outputDir, `${baseName}${OUTPUT_FORMATS[format].ext}`);
+    for (const format of formatsToProcess) {
+      // Vérifier si le format est valide
+      if (!OUTPUT_FORMATS[format as keyof typeof OUTPUT_FORMATS]) {
+        console.log(`   ❌ Format non supporté: ${format}`);
+        continue;
+      }
+
+      const ext = OUTPUT_FORMATS[format as keyof typeof OUTPUT_FORMATS].ext;
+      const outputPath = join(outputDir, `${baseName}${ext}`);
       
       const result = await optimizeImage(imagePath, outputPath, format, options.quality);
 
@@ -225,6 +258,8 @@ async function main() {
         stats.success++;
         stats.totalOriginalSize += result.originalSize;
         stats.totalOptimizedSize += result.optimizedSize;
+        originalWidth = result.width || originalWidth;
+        originalHeight = result.height || originalHeight;
         
         console.log(`   ✅ ${format.toUpperCase()}: ${(result.optimizedSize / 1024).toFixed(1)}KB (réduction: ${result.reduction})`);
       } else {
@@ -235,7 +270,7 @@ async function main() {
 
     // Générer le code lazy loading si demandé
     if (options.lazy && Object.keys(optimizedPaths).length > 0) {
-      const lazyCode = generateLazyLoadingCode(imagePath, optimizedPaths);
+      const lazyCode = generateLazyLoadingCode(imagePath, optimizedPaths, originalWidth, originalHeight);
       const lazyCodePath = join(outputDir, `${baseName}.lazy.txt`);
       const fs = await import('fs');
       await fs.promises.writeFile(lazyCodePath, lazyCode);

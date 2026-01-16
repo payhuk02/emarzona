@@ -32,6 +32,7 @@ import { useState, useEffect, useRef } from 'react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
 import testimonial1 from '@/assets/testimonial-1.jpg';
 import testimonial2 from '@/assets/testimonial-2.jpg';
 import testimonial3 from '@/assets/testimonial-3.jpg';
@@ -68,6 +69,31 @@ const Landing = () => {
   const [statsAnimationStarted, setStatsAnimationStarted] = useState(false);
 
   const autoplayPlugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }));
+
+  // ✅ PERFORMANCE: Preload images LCP pour améliorer Core Web Vitals
+  // Preload la première image testimonial (potentielle LCP) et le logo platform
+  useLCPPreload({
+    src: testimonial1,
+    sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+    priority: true,
+  });
+
+  // Preload le logo platform si disponible (souvent LCP sur landing)
+  useEffect(() => {
+    if (platformLogo) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = platformLogo;
+      link.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(link);
+      return () => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      };
+    }
+  }, [platformLogo]);
 
   // Animated counters for stats - Optimisé avec requestAnimationFrame
   useEffect(() => {

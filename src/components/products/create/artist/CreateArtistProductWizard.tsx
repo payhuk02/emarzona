@@ -5,7 +5,7 @@
  * Wizard professionnel pour la création de produits artistes
  */
 
-import React, { useState, useCallback, useEffect, Suspense, lazy, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, Suspense, lazy, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
@@ -67,13 +67,11 @@ import { validateAndSanitizeArtistProduct } from '@/lib/artist-product-sanitizer
 import { validateArtistProduct } from '@/lib/validation/centralized-validation';
 import {
   getRequiredFieldError,
-  getMinLengthError,
   getPriceError,
   getDescriptionError,
   getImagesError,
   getNonPhysicalArtworkError,
   getEditionError,
-  formatErrorMessage,
   getFieldDisplayName,
 } from '@/lib/artist-product-error-messages';
 
@@ -125,7 +123,10 @@ const CreateArtistProductWizardComponent = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { store: hookStore, loading: storeLoading } = useStore();
-  const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
+  const store = useMemo(
+    () => hookStore || (propsStoreId ? { id: propsStoreId } : null),
+    [hookStore, propsStoreId]
+  );
   const storeSlugValue = _storeSlug || hookStore?.slug;
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
@@ -417,7 +418,7 @@ const CreateArtistProductWizardComponent = ({
     // Étape 8: Aperçu - Pas de validation stricte, juste confirmation
 
     return true;
-  }, [formData, validateStep, toast]);
+  }, [formData, toast]);
 
   const saveArtistProduct = async (isDraft: boolean = false) => {
     if (!store) {
@@ -441,8 +442,8 @@ const CreateArtistProductWizardComponent = ({
       const sanitizedData = validateAndSanitizeArtistProduct(formData);
 
       // Generate slug (après sanitization, AVANT validation serveur)
-      let  slug= generateSlug(sanitizedData.artwork_title || sanitizedData.name || 'artwork');
-      let  attempts= 0;
+      let slug = generateSlug(sanitizedData.artwork_title || sanitizedData.name || 'artwork');
+      let attempts = 0;
       while (attempts < 10) {
         const { data: existing } = await supabase
           .from('products')
@@ -481,7 +482,7 @@ const CreateArtistProductWizardComponent = ({
 
       // Create product (utiliser données sanitizées)
       // Préparer les données d'insertion (exclure les colonnes qui pourraient ne pas exister)
-      const  productData: Record<string, unknown> = {
+      const productData: Record<string, unknown> = {
         store_id: store.id,
         name: sanitizedData.artwork_title || sanitizedData.name,
         slug,
@@ -611,7 +612,7 @@ const CreateArtistProductWizardComponent = ({
             price: product.price,
             currency: product.currency,
             created_at: product.created_at,
-          }).catch( err => {
+          }).catch(err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
         });
@@ -1008,9 +1009,3 @@ const CreateArtistProductWizardComponent = ({
 
 // Optimisation avec React.memo
 export const CreateArtistProductWizard = React.memo(CreateArtistProductWizardComponent);
-
-
-
-
-
-

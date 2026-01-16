@@ -6,7 +6,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useDebounce } from '@/hooks/useDebounce';
 import { logger } from '@/lib/logger';
 import { validateSection, validateCustomizationData } from '@/lib/schemas/platform-customization';
 import type { PlatformCustomizationSchemaType } from '@/lib/schemas/platform-customization';
@@ -127,7 +126,7 @@ export const usePlatformCustomization = () => {
   const customizationDataRef = useRef<PlatformCustomizationData>({});
   const lastSavedTimestampRef = useRef<string | null>(null);
   const { toast } = useToast();
-  
+
   // Synchroniser le ref avec le state
   useEffect(() => {
     customizationDataRef.current = customizationData;
@@ -140,10 +139,10 @@ export const usePlatformCustomization = () => {
       if (savedPreview) {
         const previewData = JSON.parse(savedPreview);
         setCustomizationData(previewData);
-        logger.debug('Données d\'aperçu restaurées depuis localStorage', { previewData });
+        logger.debug("Données d'aperçu restaurées depuis localStorage", { previewData });
       }
     } catch (error) {
-      logger.warn('Erreur lors de la restauration des données d\'aperçu', { error });
+      logger.warn("Erreur lors de la restauration des données d'aperçu", { error });
     }
   }, []);
 
@@ -151,9 +150,9 @@ export const usePlatformCustomization = () => {
   const savePreviewToLocalStorage = useCallback((data: PlatformCustomizationData) => {
     try {
       localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(data));
-      logger.debug('Données d\'aperçu sauvegardées dans localStorage');
+      logger.debug("Données d'aperçu sauvegardées dans localStorage");
     } catch (error) {
-      logger.warn('Erreur lors de la sauvegarde des données d\'aperçu', { error });
+      logger.warn("Erreur lors de la sauvegarde des données d'aperçu", { error });
     }
   }, []);
 
@@ -176,8 +175,14 @@ export const usePlatformCustomization = () => {
 
       if (error) {
         // Si la fonction n'existe pas ou si les données n'existent pas, on continue avec des données vides
-        if (error.code === 'PGRST116' || error.message.includes('function') || error.message.includes('does not exist')) {
-          logger.debug('Customization settings not found or function not available, using defaults');
+        if (
+          error.code === 'PGRST116' ||
+          error.message.includes('function') ||
+          error.message.includes('does not exist')
+        ) {
+          logger.debug(
+            'Customization settings not found or function not available, using defaults'
+          );
           return;
         }
         // Pour les autres erreurs, on log dans Sentry
@@ -205,7 +210,7 @@ export const usePlatformCustomization = () => {
             setCustomizationData(data as PlatformCustomizationData);
           }
         } else {
-          setCustomizationData(validation.data || data as PlatformCustomizationData);
+          setCustomizationData(validation.data || (data as PlatformCustomizationData));
         }
 
         // Sauvegarder le timestamp de dernière sauvegarde (approximatif)
@@ -213,7 +218,7 @@ export const usePlatformCustomization = () => {
         lastSavedTimestampRef.current = now;
         try {
           localStorage.setItem(LAST_SAVED_KEY, now);
-        } catch (e) {
+        } catch (_e) {
           // Ignorer les erreurs localStorage
         }
       }
@@ -225,152 +230,158 @@ export const usePlatformCustomization = () => {
     }
   }, []);
 
-  const save = useCallback(async (section: string, data: unknown) => {
-    try {
-      setIsSaving(true);
-      
-      // Valider les données de la section
-      const validation = validateSection(section, data);
-      if (!validation.valid) {
-        const errorMessages = validation.errors.map(e => {
-          const fieldName = e.path || 'champ inconnu';
-          return `• ${fieldName}: ${e.message}`;
-        });
-        
-        logger.warn('Validation échouée pour la section', {
-          section,
-          errors: validation.errors,
-          level: 'section',
-        });
-        
-        toast({
-          title: 'Erreur de validation',
-          description: `Données invalides pour "${section}":\n\n${errorMessages.join('\n')}`,
-          variant: 'destructive',
-          duration: 10000, // Afficher plus longtemps pour lire les erreurs
-        });
-        setIsSaving(false);
-        return false;
-      }
-      
-      // Utiliser le ref pour avoir les données les plus récentes
-      const currentData = customizationDataRef.current;
-      
-      // Fusionner les données existantes avec les nouvelles
-      const updatedData = {
-        ...currentData,
-        [section]: {
-          ...currentData?.[section as keyof PlatformCustomizationData],
-          ...data,
-        },
-      };
-      
-      // Mettre à jour l'état local immédiatement
-      setCustomizationData(updatedData);
-      
-      // Déclencher l'événement immédiatement pour synchronisation temps réel
-      // (avant même la sauvegarde en base)
-      window.dispatchEvent(new CustomEvent('platform-customization-updated', {
-        detail: { customizationData: updatedData }
-      }));
-      
-      // Si on est en mode preview, sauvegarder dans localStorage
-      if (previewMode) {
-        savePreviewToLocalStorage(updatedData);
-        setIsSaving(false);
-        return true;
-      }
-      
-      // Vérifier optimistic locking (conflit de modification)
-      const { data: currentSettings, error: fetchError } = await supabase
-        .from('platform_settings')
-        .select('updated_at')
-        .eq('key', 'customization')
-        .maybeSingle();
+  const save = useCallback(
+    async (section: string, data: unknown) => {
+      try {
+        setIsSaving(true);
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        throw fetchError;
-      }
+        // Valider les données de la section
+        const validation = validateSection(section, data);
+        if (!validation.valid) {
+          const errorMessages = validation.errors.map(e => {
+            const fieldName = e.path || 'champ inconnu';
+            return `• ${fieldName}: ${e.message}`;
+          });
 
-      // Si les données ont été modifiées depuis le dernier chargement
-      if (currentSettings?.updated_at && lastSavedTimestampRef.current) {
-        if (currentSettings.updated_at !== lastSavedTimestampRef.current) {
-          logger.warn('Conflit de modification détecté', {
-            lastSaved: lastSavedTimestampRef.current,
-            current: currentSettings.updated_at,
+          logger.warn('Validation échouée pour la section', {
+            section,
+            errors: validation.errors,
             level: 'section',
           });
+
           toast({
-            title: '⚠️ Conflit de modification',
-            description: 'Les données ont été modifiées par un autre administrateur. Rechargez la page pour voir les dernières modifications.',
-            variant: 'default',
+            title: 'Erreur de validation',
+            description: `Données invalides pour "${section}":\n\n${errorMessages.join('\n')}`,
+            variant: 'destructive',
+            duration: 10000, // Afficher plus longtemps pour lire les erreurs
           });
-          // Recharger les données
-          await load();
           setIsSaving(false);
           return false;
         }
-      }
-      
-      // Sauvegarder dans Supabase
-      const { error } = await supabase
-        .from('platform_settings')
-        .upsert({
+
+        // Utiliser le ref pour avoir les données les plus récentes
+        const currentData = customizationDataRef.current;
+
+        // Fusionner les données existantes avec les nouvelles
+        const updatedData = {
+          ...currentData,
+          [section]: {
+            ...currentData?.[section as keyof PlatformCustomizationData],
+            ...data,
+          },
+        };
+
+        // Mettre à jour l'état local immédiatement
+        setCustomizationData(updatedData);
+
+        // Déclencher l'événement immédiatement pour synchronisation temps réel
+        // (avant même la sauvegarde en base)
+        window.dispatchEvent(
+          new CustomEvent('platform-customization-updated', {
+            detail: { customizationData: updatedData },
+          })
+        );
+
+        // Si on est en mode preview, sauvegarder dans localStorage
+        if (previewMode) {
+          savePreviewToLocalStorage(updatedData);
+          setIsSaving(false);
+          return true;
+        }
+
+        // Vérifier optimistic locking (conflit de modification)
+        const { data: currentSettings, error: fetchError } = await supabase
+          .from('platform_settings')
+          .select('updated_at')
+          .eq('key', 'customization')
+          .maybeSingle();
+
+        if (fetchError && fetchError.code !== 'PGRST116') {
+          throw fetchError;
+        }
+
+        // Si les données ont été modifiées depuis le dernier chargement
+        if (currentSettings?.updated_at && lastSavedTimestampRef.current) {
+          if (currentSettings.updated_at !== lastSavedTimestampRef.current) {
+            logger.warn('Conflit de modification détecté', {
+              lastSaved: lastSavedTimestampRef.current,
+              current: currentSettings.updated_at,
+              level: 'section',
+            });
+            toast({
+              title: '⚠️ Conflit de modification',
+              description:
+                'Les données ont été modifiées par un autre administrateur. Rechargez la page pour voir les dernières modifications.',
+              variant: 'default',
+            });
+            // Recharger les données
+            await load();
+            setIsSaving(false);
+            return false;
+          }
+        }
+
+        // Sauvegarder dans Supabase
+        const { error } = await supabase.from('platform_settings').upsert({
           key: 'customization',
           settings: updatedData,
           updated_at: new Date().toISOString(),
         });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Mettre à jour le timestamp de dernière sauvegarde
-      const newTimestamp = new Date().toISOString();
-      lastSavedTimestampRef.current = newTimestamp;
-      try {
-        localStorage.setItem(LAST_SAVED_KEY, newTimestamp);
-      } catch (e) {
-        // Ignorer les erreurs localStorage
+        // Mettre à jour le timestamp de dernière sauvegarde
+        const newTimestamp = new Date().toISOString();
+        lastSavedTimestampRef.current = newTimestamp;
+        try {
+          localStorage.setItem(LAST_SAVED_KEY, newTimestamp);
+        } catch (_e) {
+          // Ignorer les erreurs localStorage
+        }
+
+        // Déclencher l'événement pour synchroniser avec la plateforme
+        window.dispatchEvent(
+          new CustomEvent('platform-customization-updated', {
+            detail: { customizationData: updatedData },
+          })
+        );
+
+        setIsSaving(false);
+        return true;
+      } catch (_error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('Error saving customization', {
+          error: errorMessage,
+          section,
+          level: 'section',
+          extra: { error },
+        });
+        toast({
+          title: 'Erreur de sauvegarde',
+          description: error.message || 'Impossible de sauvegarder les modifications',
+          variant: 'destructive',
+        });
+        setIsSaving(false);
+        return false;
       }
-
-      // Déclencher l'événement pour synchroniser avec la plateforme
-      window.dispatchEvent(new CustomEvent('platform-customization-updated', {
-        detail: { customizationData: updatedData }
-      }));
-
-      setIsSaving(false);
-      return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error saving customization', {
-        error: errorMessage,
-        section,
-        level: 'section',
-        extra: { error },
-      });
-      toast({
-        title: 'Erreur de sauvegarde',
-        description: error.message || 'Impossible de sauvegarder les modifications',
-        variant: 'destructive',
-      });
-      setIsSaving(false);
-      return false;
-    }
-  }, [toast, previewMode, savePreviewToLocalStorage, load]);
+    },
+    [toast, previewMode, savePreviewToLocalStorage, load]
+  );
 
   const saveAll = useCallback(async () => {
     try {
       setIsSaving(true);
-      
+
       // Si on est en mode preview, on ne sauvegarde pas en base
       if (previewMode) {
         logger.debug('Preview mode: changes not saved to database');
         setIsSaving(false);
         return true;
       }
-      
+
       // Utiliser le ref pour avoir les données les plus récentes
       const currentData = customizationDataRef.current;
-      
+
       // Valider toutes les données avant sauvegarde
       const validation = validateCustomizationData(currentData);
       if (!validation.valid) {
@@ -378,12 +389,12 @@ export const usePlatformCustomization = () => {
           const fieldName = e.path || 'champ inconnu';
           return `• ${fieldName}: ${e.message}`;
         });
-        
+
         logger.warn('Validation échouée pour toutes les données', {
           errors: validation.errors,
           level: 'section',
         });
-        
+
         toast({
           title: 'Erreur de validation',
           description: `Données invalides détectées:\n\n${errorMessages.join('\n')}`,
@@ -393,7 +404,7 @@ export const usePlatformCustomization = () => {
         setIsSaving(false);
         return false;
       }
-      
+
       // Vérifier optimistic locking
       const { data: currentSettings, error: fetchError } = await supabase
         .from('platform_settings')
@@ -414,7 +425,8 @@ export const usePlatformCustomization = () => {
           });
           toast({
             title: '⚠️ Conflit de modification',
-            description: 'Les données ont été modifiées par un autre administrateur. Rechargez la page pour voir les dernières modifications.',
+            description:
+              'Les données ont été modifiées par un autre administrateur. Rechargez la page pour voir les dernières modifications.',
             variant: 'default',
           });
           await load();
@@ -422,15 +434,13 @@ export const usePlatformCustomization = () => {
           return false;
         }
       }
-      
+
       // Supabase upsert avec gestion du conflit sur la clé primaire
-      const { error } = await supabase
-        .from('platform_settings')
-        .upsert({
-          key: 'customization',
-          settings: validation.data || currentData,
-          updated_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from('platform_settings').upsert({
+        key: 'customization',
+        settings: validation.data || currentData,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) throw error;
 
@@ -439,24 +449,26 @@ export const usePlatformCustomization = () => {
       lastSavedTimestampRef.current = newTimestamp;
       try {
         localStorage.setItem(LAST_SAVED_KEY, newTimestamp);
-      } catch (e) {
+      } catch (_e) {
         // Ignorer les erreurs localStorage
       }
 
       // Nettoyer les données d'aperçu sauvegardées
       try {
         localStorage.removeItem(PREVIEW_STORAGE_KEY);
-      } catch (e) {
+      } catch (_e) {
         // Ignorer les erreurs localStorage
       }
 
       // Déclencher l'événement pour synchroniser avec la plateforme
-      window.dispatchEvent(new CustomEvent('platform-customization-updated', {
-        detail: { customizationData: validation.data || currentData }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('platform-customization-updated', {
+          detail: { customizationData: validation.data || currentData },
+        })
+      );
 
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error saving all customization', {
         error: errorMessage,
@@ -472,7 +484,7 @@ export const usePlatformCustomization = () => {
   const togglePreview = useCallback(() => {
     setPreviewMode(prev => {
       const newMode = !prev;
-      
+
       if (newMode) {
         // Activer le mode aperçu : sauvegarder l'état actuel dans localStorage
         savePreviewToLocalStorage(customizationDataRef.current);
@@ -484,13 +496,16 @@ export const usePlatformCustomization = () => {
           if (savedPreview) {
             const previewData = JSON.parse(savedPreview);
             setCustomizationData(previewData);
-            logger.debug('Données d\'aperçu restaurées', { level: 'section' });
+            logger.debug("Données d'aperçu restaurées", { level: 'section' });
           }
         } catch (error) {
-          logger.warn('Erreur lors de la restauration des données d\'aperçu', { error, level: 'section' });
+          logger.warn("Erreur lors de la restauration des données d'aperçu", {
+            error,
+            level: 'section',
+          });
         }
       }
-      
+
       return newMode;
     });
   }, [savePreviewToLocalStorage]);
@@ -506,10 +521,3 @@ export const usePlatformCustomization = () => {
     togglePreview,
   };
 };
-
-
-
-
-
-
-

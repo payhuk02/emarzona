@@ -44,6 +44,7 @@ import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHero
 import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
 import { MarketplaceProductsSection } from '@/components/marketplace/MarketplaceProductsSection';
 import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
+import { useLCPPreload } from '@/hooks/useLCPPreload';
 
 const Marketplace = () => {
   const { t } = useTranslation();
@@ -59,6 +60,19 @@ const Marketplace = () => {
       logger.info('[Marketplace] Component unmounted');
     };
   }, []);
+
+  // ✅ PERFORMANCE: Preload images LCP pour améliorer Core Web Vitals
+  // Preload la première image de produit si disponible (potentielle LCP)
+  // Note: Les images de produits seront preloadées dynamiquement par ProductCardModern
+  const { getValue: getMarketplaceValue } = usePageCustomization('marketplace');
+  const heroImage = getMarketplaceValue('heroImage') as string | undefined;
+
+  // Preload hero image si disponible
+  useLCPPreload({
+    src: heroImage || '', // Fallback vide si pas d'image
+    sizes: heroImage ? '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px' : undefined,
+    priority: !!heroImage, // Seulement si image présente
+  });
 
   // Hook personnalisé pour favoris synchronisés
   const { favorites, favoritesCount, toggleFavorite, clearAllFavorites } =

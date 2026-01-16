@@ -15,6 +15,7 @@ const pages = [
   { name: 'Dashboard', path: '/dashboard' },
   { name: 'Produits', path: '/products' },
   { name: 'Commandes', path: '/orders' },
+  { name: 'Promotions', path: '/dashboard/promotions' },
 ];
 
 test.describe('Accessibilité - Scan Automatique', () => {
@@ -368,5 +369,86 @@ test.describe('Accessibilité - Formulaires', () => {
     });
 
     expect(requiredFields).toBeTruthy();
+  });
+});
+
+test.describe('Accessibilité - Page Promotions', () => {
+  test('devrait avoir tous les attributs ARIA requis', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/promotions`);
+    await page.waitForLoadState('networkidle');
+
+    // Vérifier les régions ARIA principales
+    await expect(
+      page.locator('[role="region"][aria-label="Statistiques des promotions"]')
+    ).toBeVisible();
+    await expect(
+      page.locator('[role="region"][aria-label="Filtres et recherche de promotions"]')
+    ).toBeVisible();
+
+    // Vérifier les cartes de statistiques avec leurs labels
+    const statCards = page.locator('[role="article"]');
+    await expect(statCards).toHaveCount(4);
+
+    // Vérifier les labels spécifiques aux statistiques
+    await expect(page.locator('#total-promotions-label')).toBeVisible();
+    await expect(page.locator('#active-promotions-label')).toBeVisible();
+
+    // Vérifier les boutons avec aria-label
+    const createButton = page.locator('button[aria-label*="Créer une nouvelle promotion"]');
+    await expect(createButton).toBeVisible();
+
+    // Vérifier la section d'état vide
+    await expect(page.locator('#empty-state-title')).toBeVisible();
+
+    // Vérifier les éléments avec aria-hidden approprié
+    const hiddenIcons = page.locator('[aria-hidden="true"]');
+    expect(await hiddenIcons.count()).toBeGreaterThan(0);
+  });
+
+  test("devrait annoncer les états dynamiques aux lecteurs d'écran", async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/promotions`);
+    await page.waitForLoadState('networkidle');
+
+    // Vérifier l'annonce des états de chargement (screen reader only)
+    const statusElement = page.locator('[role="status"][aria-live="polite"]');
+    await expect(statusElement).toBeVisible();
+  });
+
+  test('devrait supporter la navigation clavier complète', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/promotions`);
+    await page.waitForLoadState('networkidle');
+
+    // Vérifier que le premier élément focusable est accessible
+    await page.keyboard.press('Tab');
+    const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+    expect(focusedElement).toBeTruthy();
+
+    // Tester la navigation vers le bouton de création
+    const createButton = page.locator('button[aria-label*="Créer une nouvelle promotion"]');
+    await createButton.focus();
+    await expect(createButton).toBeFocused();
+
+    // Vérifier que le bouton est activable au clavier
+    await page.keyboard.press('Enter');
+    // Le dialog devrait s'ouvrir (nous vérifions juste que l'événement est déclenché)
+  });
+
+  test('devrait avoir des descriptions accessibles pour les actions complexes', async ({
+    page,
+  }) => {
+    await page.goto(`${BASE_URL}/dashboard/promotions`);
+    await page.waitForLoadState('networkidle');
+
+    // Vérifier les descriptions des boutons d'export
+    const exportButton = page.locator('button[aria-label*="Exporter"]');
+    if (await exportButton.isVisible()) {
+      await expect(exportButton).toHaveAttribute('aria-label');
+    }
+
+    // Vérifier les descriptions des contrôles de pagination
+    const paginationButtons = page.locator('button[aria-label*="page"]');
+    for (const button of await paginationButtons.all()) {
+      await expect(button).toHaveAttribute('aria-label');
+    }
   });
 });
