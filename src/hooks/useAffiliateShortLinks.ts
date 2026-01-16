@@ -46,15 +46,18 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
       }
 
       setShortLinks(data || []);
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error fetching short links:', affiliateError);
       // Ne pas afficher de toast si c'est juste que la table n'existe pas
-      if (!(error && typeof error === 'object' && 'code' in error && 
+      if (!(error && typeof error === 'object' && 'code' in error &&
             (error.code === 'PGRST301' || error.code === '42P01'))) {
+        const suggestion = affiliateError.getSuggestion();
         toast({
           title: 'Erreur',
-          description: affiliateError.getUserMessage(),
+          description: suggestion
+            ? `${affiliateError.getUserMessage()}\n\n💡 ${suggestion}`
+            : affiliateError.getUserMessage(),
           variant: 'destructive',
         });
       }
@@ -68,7 +71,7 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
   }, [fetchShortLinks]);
 
   /**
-   * Créer un nouveau lien court
+   * Créer un nouveau lien court avec rate limiting
    */
   const createShortLink = useCallback(async (
     formData: CreateShortLinkForm
@@ -130,19 +133,57 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
         }
       }
 
-      // Créer le lien court
+      // Créer le lien court avec rate limiting intégré
+      const { data: creationResult, error: creationError } = await supabase.rpc('create_short_link_with_rate_limit', {
+        p_affiliate_link_id: formData.affiliate_link_id,
+        p_short_code: shortCode,
+        p_target_url: affiliateLink.full_url,
+        p_custom_alias: formData.custom_alias?.toLowerCase() || null,
+        p_expires_at: formData.expires_at || null,
+        p_ip_address: null, // Sera détecté côté serveur depuis les headers
+        p_user_agent: navigator.userAgent,
+      });
+
+      if (creationError) {
+        // Gestion spécifique des erreurs de rate limiting
+        if (creationResult?.error === 'rate_limit_exceeded' ||
+            creationError.message?.includes('rate_limit_exceeded') ||
+            creationError.details?.reason === 'rate_limit_exceeded') {
+          const remainingTime = creationResult?.details?.time_window_minutes ||
+                               creationError.details?.time_window_minutes || 60;
+          const maxActions = creationResult?.details?.max_actions ||
+                           creationError.details?.max_actions || 50;
+
+          throw AffiliateErrors.shortLinkRateLimited(remainingTime * 60, maxActions);
+        }
+        throw handleSupabaseError(creationError);
+      }
+
+      // Vérifier le résultat de la fonction
+      if (!creationResult?.success) {
+        if (creationResult?.error === 'rate_limit_exceeded') {
+          throw new AffiliateError(
+            `Trop de liens courts créés récemment. Réessayez dans ${creationResult.details?.time_window_minutes || 60} minutes.`,
+            AffiliateErrorCode.VALIDATION_ERROR,
+            429,
+            {
+              rate_limit_exceeded: true,
+              remaining_time: creationResult.details?.time_window_minutes,
+              max_actions: creationResult.details?.max_actions
+            }
+          );
+        }
+        throw new AffiliateError(
+          creationResult?.error || 'Erreur lors de la création du lien court',
+          AffiliateErrorCode.DATABASE_ERROR
+        );
+      }
+
+      // Récupérer les données du lien créé
       const { data, error } = await supabase
         .from('affiliate_short_links')
-        .insert({
-          affiliate_link_id: formData.affiliate_link_id,
-          affiliate_id: affiliateLink.affiliate_id,
-          short_code: shortCode,
-          target_url: affiliateLink.full_url,
-          custom_alias: formData.custom_alias?.toLowerCase() || null,
-          expires_at: formData.expires_at || null,
-          is_active: true,
-        })
-        .select()
+        .select('*')
+        .eq('id', creationResult.short_link_id)
         .single();
 
       if (error) {
@@ -160,19 +201,23 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
 
       toast({
         title: 'Lien court créé ! 🎉',
-        description: `Votre lien court : ${shortCode}`,
+        description: `Votre lien court : ${window.location.origin}/aff/${shortCode}`,
       });
 
       // Rafraîchir la liste
       await fetchShortLinks();
 
       return data;
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error creating short link:', affiliateError);
+
+      const suggestion = affiliateError.getSuggestion();
       toast({
         title: 'Erreur',
-        description: affiliateError.getUserMessage(),
+        description: suggestion
+          ? `${affiliateError.getUserMessage()}\n\n💡 ${suggestion}`
+          : affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return null;
@@ -198,12 +243,16 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
 
       await fetchShortLinks();
       return true;
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error deleting short link:', affiliateError);
+
+      const suggestion = affiliateError.getSuggestion();
       toast({
         title: 'Erreur',
-        description: affiliateError.getUserMessage(),
+        description: suggestion
+          ? `${affiliateError.getUserMessage()}\n\n💡 ${suggestion}`
+          : affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return false;
@@ -229,12 +278,16 @@ export const useAffiliateShortLinks = (affiliateLinkId?: string) => {
 
       await fetchShortLinks();
       return true;
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const affiliateError = handleSupabaseError(error);
       logger.error('Error toggling short link:', affiliateError);
+
+      const suggestion = affiliateError.getSuggestion();
       toast({
         title: 'Erreur',
-        description: affiliateError.getUserMessage(),
+        description: suggestion
+          ? `${affiliateError.getUserMessage()}\n\n💡 ${suggestion}`
+          : affiliateError.getUserMessage(),
         variant: 'destructive',
       });
       return false;

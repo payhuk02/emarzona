@@ -514,190 +514,154 @@ const AffiliateDashboard = () => {
       <div className="flex h-screen w-full overflow-x-hidden bg-background">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
-          <div className="w-full p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header - Responsive & Animated */}
-            <div 
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-            >
-              <div className="flex-1 min-w-0">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
-                  </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Tableau de bord affilié
-                  </span>
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground truncate">
-                  Bienvenue, {affiliate.display_name || affiliate.email} • Code : <Badge variant="outline" className="ml-1 sm:ml-2 text-xs">{affiliate.affiliate_code}</Badge>
-                </p>
-              </div>
-              <Button 
-                className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                size="sm"
+          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+          {/* Header avec animation - Style MyTemplates */}
+          <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div>
+              <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+                </div>
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Tableau de bord affilié
+                </span>
+              </h1>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+                Bienvenue, {affiliate.display_name || affiliate.email} • Code : <Badge variant="outline" className="ml-1 sm:ml-2 text-xs">{affiliate.affiliate_code}</Badge>
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
                 onClick={() => setShowCreateLinkDialog(true)}
+                className="min-h-[44px] h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
               >
-                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Nouveau lien</span>
                 <span className="sm:hidden">Nouveau</span>
               </Button>
             </div>
+          </div>
 
-            {/* Stats Cards - Responsive & Animated */}
-            <div 
-              ref={statsRef}
-              className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              {[
-                { 
-                  label: 'Clics totaux', 
-                  value: affiliate.total_clicks, 
-                  icon: MousePointerClick, 
-                  color: 'from-blue-600 to-cyan-600',
-                  subtitle: 'Sur tous vos liens'
-                },
-                { 
-                  label: 'Ventes générées', 
-                  value: affiliate.total_sales, 
-                  icon: ShoppingCart, 
-                  color: 'from-emerald-600 to-green-600',
-                  subtitle: `${stats?.conversion_rate.toFixed(1) || '0'}% de conversion`
-                },
-                { 
-                  label: 'CA généré', 
-                  value: formatCurrency(affiliate.total_revenue), 
-                  icon: TrendingUp, 
-                  color: 'from-purple-600 to-pink-600',
-                  subtitle: 'Chiffre d\'affaires total'
-                },
-                { 
-                  label: 'Gains totaux', 
-                  value: formatCurrency(affiliate.total_commission_earned), 
-                  icon: DollarSign, 
-                  color: 'from-orange-600 to-amber-600',
-                  subtitle: 'Commissions gagnées'
-                },
-                { 
-                  label: 'Solde disponible', 
-                  value: balanceLoading ? '...' : formatCurrency(balance.available), 
-                  icon: Wallet, 
-                  color: 'from-purple-600 to-pink-600',
-                  subtitle: 'Disponible pour retrait',
-                  highlight: true
-                }
-              ].map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <Card
-                    key={stat.label}
-                    className={`border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 ${stat.highlight ? 'border-2 border-purple-500/50' : ''}`}
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-                      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        <span className="truncate">{stat.label}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
-                        {stat.value}
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {stat.subtitle}
-                      </p>
-                      {stat.highlight && !balanceLoading && balance.available >= 10000 && (
-                        <Button size="sm" className="w-full mt-2 text-xs" variant="outline">
-                          <Wallet  className ="h-3 w-3 mr-1.5" />
-                          Retirer
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {/* Progression vers le prochain retrait */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
-              <CardHeader className="p-3 sm:p-4">
-                <CardTitle className="text-sm sm:text-base">Progression vers le retrait minimum</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm">
-                    <span className="text-muted-foreground">Minimum : 10 000 XOF</span>
-                    <span className="font-semibold">
-                      {balanceLoading ? '...' : `${formatCurrency(balance.available)} / 10 000 XOF`}
-                    </span>
-                  </div>
-                  <Progress value={balanceLoading ? 0 : Math.min((balance.available / 10000) * 100, 100)} className="h-2" />
-                  {!balanceLoading && balance.available >= 10000 && (
-                    <Alert className="mt-2 sm:mt-3">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <AlertTitle className="text-sm">Vous pouvez retirer !</AlertTitle>
-                      <AlertDescription className="text-xs sm:text-sm">
-                        Vous avez atteint le montant minimum de retrait
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Tabs Content */}
-            <div ref={tabsRef}>
-              <Tabs defaultValue="links" className="space-y-4 sm:space-y-6">
-                <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm">
-                  <TabsTrigger 
-                    value="links"
-                    className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    <LinkIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Mes liens</span>
-                    <span className="xs:hidden">Liens</span>
-                    <Badge variant="secondary" className="ml-1.5 sm:ml-2 text-xs px-1.5 py-0">
-                      {linksPagination?.total || links.length}
-                    </Badge>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="commissions"
-                    className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    <DollarSign className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Commissions</span>
-                    <span className="xs:hidden">Com.</span>
-                    {pendingCommissions.length > 0 && (
-                      <Badge variant="secondary" className="ml-1.5 sm:ml-2 text-xs px-1.5 py-0">
-                        {pendingCommissions.length}
-                      </Badge>
+          {/* Stats Cards - Style MyTemplates (Purple-Pink Gradient) */}
+          <div
+            ref={statsRef}
+            className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-4 duration-700"
+          >
+            {[
+              { label: 'Clics totaux', value: affiliate.total_clicks, icon: MousePointerClick, color: "from-blue-600 to-cyan-600", subtitle: 'Sur tous vos liens' },
+              { label: 'Ventes générées', value: affiliate.total_sales, icon: ShoppingCart, color: "from-emerald-600 to-green-600", subtitle: `${stats?.conversion_rate.toFixed(1) || '0'}% de conversion` },
+              { label: 'CA généré', value: formatCurrency(affiliate.total_revenue), icon: TrendingUp, color: "from-purple-600 to-pink-600", subtitle: 'Chiffre d\'affaires total' },
+              { label: 'Gains totaux', value: formatCurrency(affiliate.total_commission_earned), icon: DollarSign, color: "from-orange-600 to-amber-600", subtitle: 'Commissions gagnées' },
+              { label: 'Solde disponible', value: balanceLoading ? '...' : formatCurrency(balance.available), icon: Wallet, color: "from-purple-600 to-pink-600", subtitle: 'Disponible pour retrait', highlight: true }
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <Card
+                  key={stat.label}
+                  className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+                    <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                      <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-3.5 md:w-3.5 lg:h-4 lg:w-4" />
+                      {stat.label}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                    <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent break-words`}>
+                      {stat.value}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate mt-1">
+                      {stat.subtitle}
+                    </p>
+                    {stat.highlight && !balanceLoading && balance.available >= 10000 && (
+                      <Button size="sm" className="w-full mt-2 text-xs" variant="outline">
+                        <Wallet  className ="h-3 w-3 mr-1.5" />
+                        Retirer
+                      </Button>
                     )}
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="withdrawals"
-                    className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    <Wallet  className ="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Retraits</span>
-                    <span className="xs:hidden">Ret.</span>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Progression vers le retrait minimum */}
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+            <CardHeader className="p-3 sm:p-4">
+              <CardTitle className="text-sm sm:text-base">Progression vers le retrait minimum</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm">
+                  <span className="text-muted-foreground">Minimum : 10 000 XOF</span>
+                  <span className="font-semibold">
+                    {balanceLoading ? '...' : `${formatCurrency(balance.available)} / 10 000 XOF`}
+                  </span>
+                </div>
+                <Progress value={balanceLoading ? 0 : Math.min((balance.available / 10000) * 100, 100)} className="h-2" />
+                {!balanceLoading && balance.available >= 10000 && (
+                  <Alert className="mt-2 sm:mt-3">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <AlertTitle className="text-sm">Vous pouvez retirer !</AlertTitle>
+                    <AlertDescription className="text-xs sm:text-sm">
+                      Vous avez atteint le montant minimum de retrait
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tabs Content */}
+          <div ref={tabsRef}>
+            <Tabs defaultValue="links" className="space-y-4 sm:space-y-6">
+              <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1 w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
+                <TabsTrigger value="links" className="text-[10px] xs:text-xs sm:text-sm min-h-[44px] py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis">
+                  <LinkIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Mes liens</span>
+                  <span className="sm:hidden">Liens</span>
+                  <Badge variant="secondary" className="ml-1.5 sm:ml-2 text-xs px-1.5 py-0">
+                    {linksPagination?.total || links.length}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="commissions"
+                  className="text-[10px] xs:text-xs sm:text-sm min-h-[44px] py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  <DollarSign className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Commissions</span>
+                  <span className="sm:hidden">Com.</span>
+                  {pendingCommissions.length > 0 && (
                     <Badge variant="secondary" className="ml-1.5 sm:ml-2 text-xs px-1.5 py-0">
-                      {withdrawals.length}
+                      {pendingCommissions.length}
                     </Badge>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="performance"
-                    className="text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
-                  >
-                    <BarChart3 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Performance</span>
-                    <span className="xs:hidden">Stats</span>
-                  </TabsTrigger>
-                </TabsList>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="withdrawals"
+                  className="text-[10px] xs:text-xs sm:text-sm min-h-[44px] py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  <Wallet  className ="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Retraits</span>
+                  <span className="sm:hidden">Ret.</span>
+                  <Badge variant="secondary" className="ml-1.5 sm:ml-2 text-xs px-1.5 py-0">
+                    {withdrawals.length}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="performance"
+                  className="text-[10px] xs:text-xs sm:text-sm min-h-[44px] py-2 sm:py-1.5 md:py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  <BarChart3 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Performance</span>
+                  <span className="sm:hidden">Stats</span>
+                </TabsTrigger>
+              </TabsList>
 
                 {/* Mes liens */}
                 <TabsContent value="links" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                     <CardHeader className="p-3 sm:p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                         <div className="flex-1 min-w-0">
@@ -713,7 +677,7 @@ const AffiliateDashboard = () => {
                         </div>
                         <div className="flex gap-2">
                           {links.length > 0 && (
-                            <Button 
+                            <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
@@ -732,15 +696,15 @@ const AffiliateDashboard = () => {
                                   });
                                 }
                               }}
-                              className="gap-2"
+                              className="gap-2 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
                             >
                               <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               <span className="hidden sm:inline">Exporter CSV</span>
                               <span className="sm:hidden">CSV</span>
                             </Button>
                           )}
-                          <Button 
-                            className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                          <Button
+                            className="gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm"
                             size="sm"
                             onClick={() => setShowCreateLinkDialog(true)}
                           >
@@ -769,7 +733,7 @@ const AffiliateDashboard = () => {
                   ) : (
                     <>
                       <AffiliateLinksList links={linksWithConversionRates} />
-                      
+
                       {/* Pagination pour les liens */}
                       {linksPagination && linksPagination.totalPages > 1 && (
                         <div className="mt-4 sm:mt-6 pt-4 border-t">
@@ -788,7 +752,7 @@ const AffiliateDashboard = () => {
 
                 {/* Commissions */}
                 <TabsContent value="commissions" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
                     <CardHeader className="p-3 sm:p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                         <div className="flex-1 min-w-0">
@@ -803,7 +767,7 @@ const AffiliateDashboard = () => {
                           </CardDescription>
                         </div>
                         {commissions.length > 0 && (
-                          <Button 
+                          <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
@@ -822,7 +786,7 @@ const AffiliateDashboard = () => {
                                 });
                               }
                             }}
-                            className="gap-2"
+                            className="gap-2 min-h-[44px] h-9 sm:h-10 text-xs sm:text-sm transition-all hover:scale-105"
                           >
                             <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             <span className="hidden sm:inline">Exporter CSV</span>
@@ -863,7 +827,7 @@ const AffiliateDashboard = () => {
                               </TableBody>
                             </Table>
                           </div>
-                          
+
                           {/* Pagination pour les commissions */}
                           {commissionsPagination && commissionsPagination.totalPages > 1 && (
                             <div className="mt-4 sm:mt-6 pt-4 border-t px-3 sm:px-4 pb-3 sm:pb-4">
@@ -882,7 +846,7 @@ const AffiliateDashboard = () => {
 
                 {/* Retraits */}
                 <TabsContent value="withdrawals" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
                     <CardHeader className="p-3 sm:p-4">
                       <CardTitle className="text-base sm:text-lg">Demandes de retrait</CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
@@ -963,14 +927,24 @@ const AffiliateDashboard = () => {
 
                 {/* Performance et Graphiques */}
                 <TabsContent value="performance" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-                  <AffiliatePerformanceCharts
-                    clicksData={clicksData}
-                    salesData={salesData}
-                    commissionsData={commissionsData}
-                    period={chartPeriod}
-                    onPeriodChange={setChartPeriod}
-                    loading={dailyStatsLoading}
-                  />
+                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-600">
+                    <CardHeader className="p-3 sm:p-4">
+                      <CardTitle className="text-base sm:text-lg">Analyse des performances</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
+                        Suivez l'évolution de vos clics, ventes et commissions
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 pt-0">
+                      <AffiliatePerformanceCharts
+                        clicksData={clicksData}
+                        salesData={salesData}
+                        commissionsData={commissionsData}
+                        period={chartPeriod}
+                        onPeriodChange={setChartPeriod}
+                        loading={dailyStatsLoading}
+                      />
+                    </CardContent>
+                  </Card>
                 </TabsContent>
               </Tabs>
             </div>

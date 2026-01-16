@@ -9,11 +9,11 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format a number as currency.
  * @param amount The amount to format.
- * @param currency The currency code (defaults to 'EUR').
+ * @param currency The currency code (defaults to 'XOF' for FCFA).
  * @param locale The locale for formatting (defaults to 'fr-FR').
  * @returns A formatted currency string.
  */
-export function formatCurrency(amount: number, currency: string = 'EUR', locale: string = 'fr-FR'): string {
+export function formatCurrency(amount: number, currency: string = 'XOF', locale: string = 'fr-FR'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,

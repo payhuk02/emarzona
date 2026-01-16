@@ -182,8 +182,19 @@ export interface AffiliateShortLink {
 export interface CreateShortLinkForm {
   affiliate_link_id: string;
   custom_alias?: string;  // Alias personnalisé (optionnel)
-  expires_at?: string;  // Date d'expiration (optionnelle)
+  expires_at?: string;  // Date d'expiration (optionnelle) - LEGACY
   short_code_length?: number;  // Longueur du code (4-10, défaut: 6)
+  expiration_rule?: ShortLinkExpirationRule; // Nouvelle règle d'expiration flexible
+}
+
+export interface ShortLinkExpirationRule {
+  type: 'none' | 'fixed_date' | 'duration' | 'clicks_limit' | 'combined';
+  fixed_expiration_date?: string;
+  duration_days?: number;
+  duration_hours?: number;
+  max_clicks?: number;
+  primary_condition?: 'date' | 'clicks' | 'duration';
+  secondary_condition?: 'date' | 'clicks' | 'duration';
 }
 
 // ==============================================

@@ -93,46 +93,133 @@ export class AffiliateError extends Error {
     if (this.details?.migration && this.message.includes('migration')) {
       return this.message;
     }
-    
+
     const  messages: Record<AffiliateErrorCode, string> = {
       [AffiliateErrorCode.AFFILIATE_NOT_FOUND]: 'Affilié introuvable',
       [AffiliateErrorCode.AFFILIATE_ALREADY_EXISTS]: 'Cet affilié existe déjà',
       [AffiliateErrorCode.AFFILIATE_SUSPENDED]: 'Cet affilié est suspendu',
       [AffiliateErrorCode.AFFILIATE_INACTIVE]: 'Cet affilié est inactif',
-      
+
       [AffiliateErrorCode.LINK_NOT_FOUND]: 'Lien d\'affiliation introuvable',
       [AffiliateErrorCode.LINK_INVALID]: 'Lien d\'affiliation invalide',
       [AffiliateErrorCode.LINK_EXPIRED]: 'Ce lien d\'affiliation a expiré',
       [AffiliateErrorCode.LINK_ALREADY_EXISTS]: 'Un lien existe déjà pour ce produit',
-      
+
       [AffiliateErrorCode.PRODUCT_AFFILIATE_DISABLED]: 'L\'affiliation n\'est pas activée pour ce produit',
       [AffiliateErrorCode.PRODUCT_NOT_FOUND]: 'Produit introuvable',
       [AffiliateErrorCode.PRODUCT_SETTINGS_NOT_FOUND]: 'Paramètres d\'affiliation introuvables',
-      
+
       [AffiliateErrorCode.COMMISSION_NOT_FOUND]: 'Commission introuvable',
       [AffiliateErrorCode.COMMISSION_ALREADY_PAID]: 'Cette commission a déjà été payée',
       [AffiliateErrorCode.COMMISSION_INVALID_AMOUNT]: 'Montant de commission invalide',
       [AffiliateErrorCode.COMMISSION_BELOW_MINIMUM]: 'Le montant de la commande est inférieur au minimum requis',
-      
+
       [AffiliateErrorCode.TRACKING_COOKIE_INVALID]: 'Cookie de tracking invalide',
       [AffiliateErrorCode.TRACKING_COOKIE_EXPIRED]: 'Cookie de tracking expiré',
       [AffiliateErrorCode.CLICK_NOT_FOUND]: 'Clic d\'affiliation introuvable',
       [AffiliateErrorCode.CLICK_ALREADY_CONVERTED]: 'Ce clic a déjà été converti',
-      
+
       [AffiliateErrorCode.WITHDRAWAL_NOT_FOUND]: 'Demande de retrait introuvable',
       [AffiliateErrorCode.WITHDRAWAL_INSUFFICIENT_BALANCE]: 'Solde insuffisant pour ce retrait',
       [AffiliateErrorCode.WITHDRAWAL_BELOW_MINIMUM]: 'Le montant est inférieur au minimum de retrait (10 000 XOF)',
       [AffiliateErrorCode.WITHDRAWAL_ALREADY_PROCESSED]: 'Cette demande de retrait a déjà été traitée',
-      
+
       [AffiliateErrorCode.VALIDATION_ERROR]: 'Erreur de validation des données',
       [AffiliateErrorCode.INVALID_INPUT]: 'Données d\'entrée invalides',
-      
+
       [AffiliateErrorCode.DATABASE_ERROR]: 'Erreur de base de données',
       [AffiliateErrorCode.NETWORK_ERROR]: 'Erreur de réseau',
       [AffiliateErrorCode.UNKNOWN_ERROR]: 'Une erreur inconnue s\'est produite',
     };
 
     return messages[this.code] || this.message;
+  }
+
+  /**
+   * Retourne une suggestion d'action pour résoudre l'erreur
+   */
+  getSuggestion(): string | null {
+    // Suggestions basées sur le code d'erreur et les détails
+    switch (this.code) {
+      case AffiliateErrorCode.AFFILIATE_SUSPENDED:
+        return 'Contactez le support pour réactiver votre compte affilié';
+
+      case AffiliateErrorCode.LINK_EXPIRED:
+        return 'Créez un nouveau lien d\'affiliation pour ce produit';
+
+      case AffiliateErrorCode.PRODUCT_AFFILIATE_DISABLED:
+        return 'L\'affiliation n\'est pas disponible pour ce produit actuellement';
+
+      case AffiliateErrorCode.COMMISSION_BELOW_MINIMUM:
+        return 'Augmentez le montant de votre commande pour bénéficier de commissions';
+
+      case AffiliateErrorCode.WITHDRAWAL_INSUFFICIENT_BALANCE:
+        return 'Accumulez plus de commissions avant de faire une demande de retrait';
+
+      case AffiliateErrorCode.WITHDRAWAL_BELOW_MINIMUM:
+        return 'Le montant minimum de retrait est de 10 000 XOF';
+
+      case AffiliateErrorCode.DATABASE_ERROR:
+        if (this.details?.migration) {
+          return `Migration requise: ${this.details.migration}. Contactez l'administrateur.`;
+        }
+        return 'Réessayez dans quelques instants ou contactez le support';
+
+      case AffiliateErrorCode.VALIDATION_ERROR:
+        if (this.details?.rate_limit_exceeded) {
+          return `Réessayez dans ${Math.ceil((this.details.remaining_time || 3600) / 60)} minutes`;
+        }
+        if (this.details?.suggestion) {
+          return this.details.suggestion;
+        }
+        return 'Vérifiez vos données et réessayez';
+
+      default:
+        return this.details?.suggestion as string || null;
+    }
+  }
+
+  /**
+   * Retourne les informations de débogage pour les développeurs
+   */
+  getDebugInfo(): Record<string, unknown> {
+    return {
+      code: this.code,
+      statusCode: this.statusCode,
+      details: this.details,
+      stack: this.stack,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Vérifie si l'erreur peut être retentée
+   */
+  isRetryable(): boolean {
+    const retryableCodes = [
+      AffiliateErrorCode.NETWORK_ERROR,
+      AffiliateErrorCode.DATABASE_ERROR,
+      AffiliateErrorCode.UNKNOWN_ERROR,
+    ];
+
+    // Les erreurs de rate limiting peuvent être retentées après un délai
+    if (this.code === AffiliateErrorCode.VALIDATION_ERROR && this.details?.rate_limit_exceeded) {
+      return true;
+    }
+
+    return retryableCodes.includes(this.code);
+  }
+
+  /**
+   * Calcule le délai avant retry (en millisecondes)
+   */
+  getRetryDelay(): number {
+    if (this.details?.rate_limit_exceeded && this.details.remaining_time) {
+      return (this.details.remaining_time as number) * 1000;
+    }
+
+    // Délai exponentiel basé sur le nombre de retries (simulé)
+    return Math.min(1000 * Math.pow(2, 0), 30000); // Max 30 secondes
   }
 }
 
@@ -264,6 +351,52 @@ export const AffiliateErrors = {
       AffiliateErrorCode.UNKNOWN_ERROR,
       500,
       { originalError: error instanceof Error ? error.message : String(error) }
+    ),
+
+  // Nouvelles erreurs spécifiques aux liens courts
+  shortLinkCreationFailed: (reason?: string) =>
+    new AffiliateError(
+      `Échec de la création du lien court${reason ? `: ${reason}` : ''}`,
+      AffiliateErrorCode.VALIDATION_ERROR,
+      400,
+      {
+        reason,
+        suggestion: 'Vérifiez que l\'alias n\'est pas déjà utilisé et que les paramètres sont valides'
+      }
+    ),
+
+  shortLinkExpired: (expirationType?: string, expiredAt?: string) =>
+    new AffiliateError(
+      'Ce lien court a expiré',
+      AffiliateErrorCode.VALIDATION_ERROR,
+      410,
+      {
+        expirationType,
+        expiredAt,
+        suggestion: 'Créez un nouveau lien court avec une durée d\'expiration plus longue'
+      }
+    ),
+
+  shortLinkRateLimited: (retryAfter: number, maxActions: number) =>
+    new AffiliateError(
+      `Trop de liens courts créés récemment. Réessayez dans ${Math.ceil(retryAfter / 60)} minutes.`,
+      AffiliateErrorCode.VALIDATION_ERROR,
+      429,
+      {
+        retryAfter,
+        maxActions,
+        suggestion: 'Attendez le temps indiqué avant de créer un nouveau lien court'
+      }
+    ),
+
+  shortLinkAnalyticsUnavailable: () =>
+    new AffiliateError(
+      'Les analytics ne sont pas disponibles pour le moment',
+      AffiliateErrorCode.DATABASE_ERROR,
+      503,
+      {
+        suggestion: 'Réessayez dans quelques minutes ou contactez le support si le problème persiste'
+      }
     ),
 };
 

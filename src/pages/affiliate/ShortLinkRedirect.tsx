@@ -29,68 +29,49 @@ export const ShortLinkRedirect = () => {
       try {
         setLoading(true);
 
-        // Appeler la fonction RPC pour tracker le clic et obtenir l'URL cible
-        const { data, error: rpcError } = await supabase.rpc('track_short_link_click', {
-          p_short_code: code.toUpperCase(),
-        });
+        // Recherche insensible à la casse - vérifier tous les liens actifs
+        const { data: allLinks, error: linksError } = await supabase
+          .from('affiliate_short_links')
+          .select('id, short_code, target_url, is_active, expires_at, total_clicks')
+          .eq('is_active', true);
 
-        if (rpcError) {
-          logger.error('Error tracking short link click:', rpcError);
-          
-          // Si la fonction RPC n'existe pas, essayer une requête directe
-          const { data: shortLinkData, error: queryError } = await supabase
-            .from('affiliate_short_links')
-            .select('target_url, is_active, expires_at')
-            .eq('short_code', code.toUpperCase())
-            .single();
-
-          if (queryError || !shortLinkData) {
-            setError('Lien court introuvable ou expiré');
-            setLoading(false);
-            return;
-          }
-
-          if (!shortLinkData.is_active) {
-            setError('Ce lien court a été désactivé');
-            setLoading(false);
-            return;
-          }
-
-          if (shortLinkData.expires_at && new Date(shortLinkData.expires_at) < new Date()) {
-            setError('Ce lien court a expiré');
-            setLoading(false);
-            return;
-          }
-
-          // Mettre à jour les statistiques manuellement
-          const { data: currentLink } = await supabase
-            .from('affiliate_short_links')
-            .select('total_clicks')
-            .eq('short_code', code.toUpperCase())
-            .single();
-
-          await supabase
-            .from('affiliate_short_links')
-            .update({
-              total_clicks: (currentLink?.total_clicks || 0) + 1,
-              last_used_at: new Date().toISOString(),
-            })
-            .eq('short_code', code.toUpperCase());
-
-          // Rediriger vers l'URL cible
-          window.location.href = shortLinkData.target_url;
+        if (linksError) {
+          logger.error('Error fetching links:', linksError);
+          setError('Erreur lors de la recherche du lien');
+          setLoading(false);
           return;
         }
 
-        // Si la fonction RPC a fonctionné
-        if (data && data.success && data.target_url) {
-          // Rediriger vers l'URL cible
-          window.location.href = data.target_url;
-        } else {
-          setError(data?.error || 'Lien court introuvable ou expiré');
+        // Trouver le lien correspondant (insensible à la casse)
+        const matchingLink = allLinks?.find(link =>
+          link.short_code.toLowerCase() === code.toLowerCase()
+        );
+
+        if (!matchingLink) {
+          setError('Lien court introuvable ou expiré');
           setLoading(false);
+          return;
         }
-      } catch ( _err: unknown) {
+
+        // Vérifier l'expiration
+        if (matchingLink.expires_at && new Date(matchingLink.expires_at) < new Date()) {
+          setError('Ce lien court a expiré');
+          setLoading(false);
+          return;
+        }
+
+        // Mettre à jour les statistiques
+        await supabase
+          .from('affiliate_short_links')
+          .update({
+            total_clicks: matchingLink.total_clicks + 1,
+            last_used_at: new Date().toISOString(),
+          })
+          .eq('id', matchingLink.id);
+
+        // Rediriger vers l'URL cible
+        window.location.href = matchingLink.target_url;
+      } catch (err: unknown) {
         logger.error('Error in short link redirect:', err);
         setError('Une erreur est survenue lors de la redirection');
         setLoading(false);

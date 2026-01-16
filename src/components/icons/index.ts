@@ -62,6 +62,8 @@ export {
   Truck,
   Warehouse,
   Calendar,
+  Lightbulb,
+  MapPin,
 } from 'lucide-react';
 
 // Icônes utilitaires
