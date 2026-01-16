@@ -17,7 +17,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStatsOptimized';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
