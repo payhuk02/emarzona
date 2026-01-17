@@ -166,12 +166,13 @@ export const useSessionManager = () => {
   }, [user, sessionState.lastActivity, sessionState.isValid, sessionState.isExpiringSoon, checkSession, refreshSession, forceReconnect]);
 
   // Gestion des erreurs de requête
-  const handleRequestError = useCallback(async (error: any): Promise<boolean> => {
+  const handleRequestError = useCallback(async (error: Error | unknown): Promise<boolean> => {
     // Détecter les erreurs JWT
-    const isJwtError = error?.message?.includes('JWT expired') ||
-                      error?.message?.includes('401') ||
-                      error?.code === 'PGRST303' ||
-                      error?.status === 401;
+    const errorObj = error as Error;
+    const isJwtError = errorObj?.message?.includes('JWT expired') ||
+                      errorObj?.message?.includes('401') ||
+                      (errorObj as any)?.code === 'PGRST303' ||
+                      (errorObj as any)?.status === 401;
 
     if (isJwtError) {
       logger.warn('🔐 Erreur JWT détectée, tentative de récupération');

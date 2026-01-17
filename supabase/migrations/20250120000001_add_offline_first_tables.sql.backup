@@ -1,0 +1,109 @@
+-- Migration: Tables pour le système offline-first
+-- Date: 2025-01-20
+-- Description: Ajout des tables nécessaires pour la synchronisation offline-first
+
+-- Table des clés d'idempotency
+-- Assure qu'une même action n'est exécutée qu'une seule fois
+CREATE TABLE IF NOT EXISTS idempotency_keys (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  key TEXT NOT NULL UNIQUE,
+  action_type TEXT NOT NULL,
+  user_id UUID NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Commentaire
+COMMENT ON TABLE idempotency_keys IS 'Clés d''idempotency pour éviter les doublons dans les actions synchronisées';
+
+-- Politiques RLS (Row Level Security)
+ALTER TABLE idempotency_keys ENABLE ROW LEVEL SECURITY;
+
+-- Politique: les utilisateurs ne peuvent voir que leurs propres clés
+CREATE POLICY "Users can view their own idempotency keys" ON public.idempotency_keys
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Politique: seuls les utilisateurs authentifiés peuvent créer des clés
+CREATE POLICY "Authenticated users can create idempotency keys" ON public.idempotency_keys
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Index pour les performances
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_key ON idempotency_keys(key);
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_user_id ON idempotency_keys(user_id);
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_created_at ON idempotency_keys(created_at);
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_user_created ON idempotency_keys(user_id, created_at);
+
+-- Extension pour les UUID si nécessaire
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Vérification des tables existantes et ajout de colonnes si nécessaire
+DO $$
+BEGIN
+  -- Vérifier que la table orders existe et ajouter des colonnes si nécessaire
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'orders') THEN
+    -- Ajouter la colonne idempotency_key si elle n'existe pas
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'orders' AND column_name = 'idempotency_key') THEN
+      ALTER TABLE orders ADD COLUMN idempotency_key TEXT;
+      CREATE INDEX idx_orders_idempotency_key ON orders(idempotency_key);
+    END IF;
+  END IF;
+
+  -- Vérifier que la table products existe
+  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'products') THEN
+    RAISE NOTICE 'Table products does not exist. Please create it first.';
+  END IF;
+
+  -- Vérifier que la table carts existe
+  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'carts') THEN
+    RAISE NOTICE 'Table carts does not exist. Please create it first.';
+  END IF;
+
+  -- Vérifier que la table stores existe
+  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'stores') THEN
+    RAISE NOTICE 'Table stores does not exist. Please create it first.';
+  END IF;
+
+  -- Vérifier que la table users existe
+  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users') THEN
+    RAISE NOTICE 'Table users does not exist. Please create it first.';
+  END IF;
+END $$;
+
+-- Fonction helper pour nettoyer les anciennes clés d'idempotency (optionnel)
+CREATE OR REPLACE FUNCTION cleanup_old_idempotency_keys()
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  deleted_count INTEGER;
+BEGIN
+  -- Supprimer les clés de plus de 30 jours
+  DELETE FROM idempotency_keys
+  WHERE created_at < NOW() - INTERVAL '30 days';
+
+  GET DIAGNOSTICS deleted_count = ROW_COUNT;
+  RETURN deleted_count;
+END;
+$$;
+
+-- Commentaire sur la fonction
+COMMENT ON FUNCTION cleanup_old_idempotency_keys() IS 'Nettoie les clés d''idempotency de plus de 30 jours. À exécuter périodiquement.';
+
+-- Trigger pour nettoyer automatiquement (optionnel - à activer si souhaité)
+-- CREATE OR REPLACE FUNCTION auto_cleanup_idempotency_keys()
+-- RETURNS TRIGGER
+-- LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+--   -- Nettoyer automatiquement tous les 1000 enregistrements
+--   IF (SELECT COUNT(*) FROM idempotency_keys) > 10000 THEN
+--     PERFORM cleanup_old_idempotency_keys();
+--   END IF;
+--   RETURN NEW;
+-- END;
+-- $$;
+
+-- CREATE TRIGGER trigger_cleanup_idempotency_keys
+--   AFTER INSERT ON idempotency_keys
+--   FOR EACH STATEMENT
+--   EXECUTE FUNCTION auto_cleanup_idempotency_keys();

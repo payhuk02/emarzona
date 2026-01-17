@@ -582,6 +582,8 @@ const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminErrorMonitoring = lazy(() => import('./pages/admin/AdminErrorMonitoring'));
 const AdminMonitoring = lazy(() => import('./pages/admin/AdminMonitoring'));
 const AdminAccessibilityReport = lazy(() => import('./pages/admin/AdminAccessibilityReport'));
+const AdminDataStorage = lazy(() => import('./pages/admin/AdminDataStorage'));
+const OfflineQueueManager = lazy(() => import('./pages/admin/OfflineQueueManager'));
 const StorageDiagnosticPage = lazy(() => import('./pages/admin/StorageDiagnosticPage'));
 
 // Page de test i18n (à supprimer en production)
@@ -2334,6 +2336,22 @@ const AppContent = () => {
                 element={
                   <ProtectedRoute>
                     <AdminBatchShipping />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/data-storage"
+                element={
+                  <ProtectedRoute>
+                    <AdminDataStorage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/offline-queue"
+                element={
+                  <ProtectedRoute>
+                    <OfflineQueueManager />
                   </ProtectedRoute>
                 }
               />

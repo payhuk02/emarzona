@@ -443,9 +443,9 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
         );
         data = result.data;
         rpcError = result.error;
-      } catch (authError: any) {
+      } catch (authError: Error | unknown) {
         // Utiliser le gestionnaire de session pour les erreurs JWT
-        const shouldRetry = await handleRequestError(authError);
+        const shouldRetry = await handleRequestError(authError as Error);
 
         if (shouldRetry) {
           logger.info('🔄 [useDashboardStatsOptimized] Session rafraîchie, nouvelle tentative');
@@ -458,7 +458,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
             });
             data = retryResult.data;
             rpcError = retryResult.error;
-          } catch (retryError: any) {
+          } catch (retryError: Error | unknown) {
             logger.error('❌ [useDashboardStatsOptimized] Échec de la nouvelle tentative:', retryError);
             throw new Error('SESSION_RETRY_FAILED');
           }
