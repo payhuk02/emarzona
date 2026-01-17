@@ -137,7 +137,7 @@ export const SessionExpiryWarning = ({
   return (
     <Alert className={`border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950 ${className}`}>
       <AlertTriangle className="h-4 w-4 text-orange-600" />
-      <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="font-medium">Session expirant bientôt</span>
           <Badge variant={getUrgencyColor()}>
@@ -175,7 +175,7 @@ export const SessionExpiryWarning = ({
             </Button>
           )}
         </div>
-      </AlertDescription>
+      </div>
     </Alert>
   );
 };

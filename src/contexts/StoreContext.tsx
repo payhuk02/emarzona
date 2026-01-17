@@ -130,42 +130,55 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, getStoredStoreId, saveStoreIdToStorage]);
 
-  // Charger les boutiques au chargement et quand l'utilisateur change
+  // ✅ FIX: Charger les boutiques de manière plus stable
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user?.id) {
+      logger.info('🔄 [StoreContext] Chargement initial des boutiques pour user:', user.id);
       fetchStores();
+    } else if (!authLoading && !user) {
+      // Utilisateur déconnecté
+      setStores([]);
+      setSelectedStoreIdState(null);
+      setLoading(false);
+      setError(null);
     }
-  }, [authLoading, user, fetchStores]);
+  }, [authLoading, user?.id]); // ✅ FIX: Dépendance simplifiée, pas fetchStores
 
   // Calculer la boutique sélectionnée
   const selectedStore = selectedStoreId ? stores.find(s => s.id === selectedStoreId) || null : null;
 
-  // Fonction pour définir la boutique sélectionnée
+  // ✅ FIX: Fonction pour définir la boutique sélectionnée avec moins de dépendances
   const setSelectedStoreId = useCallback(
     (storeId: string | null) => {
       logger.info('🔄 [StoreContext] Changement de boutique', {
         oldStoreId: selectedStoreId,
         newStoreId: storeId,
+        storesCount: stores.length,
       });
 
-      // Vérifier que la boutique existe
-      if (storeId && !stores.some(s => s.id === storeId)) {
-        logger.warn('Tentative de sélectionner une boutique inexistante', { storeId });
-        return;
-      }
+      // ✅ FIX: Validation plus stricte et avec retry
+      const validateAndSet = () => {
+        if (storeId && !stores.some(s => s.id === storeId)) {
+          logger.warn('Tentative de sélectionner une boutique inexistante, retry dans 100ms', { storeId, availableStores: stores.map(s => s.id) });
 
-      setSelectedStoreIdState(storeId);
-      saveStoreIdToStorage(storeId);
+          // Retry après un court délai si les stores ne sont pas encore chargés
+          setTimeout(() => {
+            if (stores.some(s => s.id === storeId)) {
+              logger.info('✅ [StoreContext] Retry réussi, boutique trouvée');
+              setSelectedStoreIdState(storeId);
+              saveStoreIdToStorage(storeId);
+            } else {
+              logger.error('❌ [StoreContext] Retry échoué, boutique toujours introuvable');
+            }
+          }, 100);
+          return;
+        }
 
-      // Synchroniser avec les autres onglets (optionnel)
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(
-          new StorageEvent('storage', {
-            key: STORAGE_KEY,
-            newValue: storeId,
-          })
-        );
-      }
+        setSelectedStoreIdState(storeId);
+        saveStoreIdToStorage(storeId);
+      };
+
+      validateAndSet();
     },
     [selectedStoreId, stores, saveStoreIdToStorage]
   );
@@ -193,22 +206,36 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     return Math.max(0, MAX_STORES_PER_USER - stores.length);
   }, [stores.length]);
 
-  // Écouter les changements de localStorage depuis d'autres onglets
+  // ✅ FIX: Écouter les changements de localStorage sans dépendances problématiques
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY && e.newValue !== selectedStoreId) {
         const newStoreId = e.newValue;
-        if (newStoreId && stores.some(s => s.id === newStoreId)) {
-          setSelectedStoreIdState(newStoreId);
+        logger.info('🔄 [StoreContext] Changement détecté depuis autre onglet:', newStoreId);
+
+        // ✅ FIX: Validation simplifiée et sécurisée
+        if (newStoreId) {
+          // Ne pas changer immédiatement, laisser la logique normale gérer
+          // Cela évite les boucles potentielles
+          setTimeout(() => {
+            if (stores.some(s => s.id === newStoreId)) {
+              logger.info('✅ [StoreContext] Boutique validée, application du changement');
+              setSelectedStoreIdState(newStoreId);
+            } else {
+              logger.warn('⚠️ [StoreContext] Boutique invalide depuis autre onglet');
+            }
+          }, 100);
+        } else {
+          setSelectedStoreIdState(null);
         }
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [selectedStoreId, stores]);
+  }, []); // ✅ FIX: Aucune dépendance pour éviter les re-créations répétées
 
   const value: StoreContextType = {
     stores,

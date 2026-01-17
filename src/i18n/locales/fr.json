@@ -519,12 +519,22 @@
       "totalSales": "Ventes totales",
       "totalOrders": "Commandes totales",
       "totalProducts": "Produits",
-      "totalCustomers": "Clients"
+      "totalCustomers": "Clients",
+      "ariaLabel": "Statistiques du tableau de bord"
     },
     "recentOrders": "Commandes récentes",
     "topProducts": "Produits populaires",
     "analytics": "Analyses",
-    "quickActions": "Actions rapides"
+    "quickActions": "Actions rapides",
+    "quickActions.ariaLabel": "Actions rapides disponibles",
+    "bottomSection": {
+      "ariaLabel": "Notifications et activité récente"
+    },
+    "notifications": {
+      "list": {
+        "ariaLabel": "Liste des notifications"
+      }
+    }
   },
   "settings": {
     "title": "Paramètres",
@@ -960,6 +970,19 @@
     },
     "notificationsBadge": {
       "new": "Nouveau"
+    },
+    "description": "Vue d'ensemble de votre boutique",
+    "performanceMetrics": {
+      "title": "Métriques de Performance"
+    },
+    "quickSettings": {
+      "title": "Paramètres Rapides",
+      "storeSettings": "Paramètres Boutique",
+      "storeSettingsShort": "Boutique",
+      "manageCustomers": "Gérer les Clients",
+      "manageCustomersShort": "Clients",
+      "configuration": "Configuration",
+      "configurationShort": "Config"
     }
   },
   "landing": {

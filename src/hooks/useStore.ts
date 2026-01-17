@@ -97,46 +97,35 @@ export const useStore = () => {
   };
 
   const fetchStore = useCallback(async () => {
+    // ✅ FIX: Vérifications de sécurité supplémentaires pour éviter les requêtes inutiles
+    if (!user || !user.id) {
+      logger.warn('❌ [useStore] fetchStore appelé sans utilisateur valide');
+      setStore(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       logger.info('🔍 [useStore] fetchStore appelé', {
-        authLoading,
-        contextLoading,
-        userId: user?.id,
+        userId: user.id,
         selectedStoreId,
         contextStoreId: contextStore?.id,
       });
 
-      // Attendre que l'authentification et le contexte soient chargés
-      if (authLoading || contextLoading) {
-        logger.info("⏳ [useStore] En attente de l'auth ou du contexte...");
-        return;
-      }
-
       setLoading(true);
-      logger.info('🔄 [useStore] setLoading(true)');
 
-      if (!user) {
-        logger.info("❌ [useStore] Pas d'utilisateur, setStore(null)");
-        setStore(null);
-        setLoading(false);
-        return;
-      }
-
-      // Utiliser la boutique du contexte si disponible
-      if (contextStore) {
-        logger.info(
-          '✅ [useStore] Utilisation de la boutique du contexte:',
-          contextStore.id,
-          contextStore.name
-        );
+      // Utiliser la boutique du contexte si disponible et valide
+      if (contextStore && contextStore.id && contextStore.user_id === user.id) {
+        logger.info('✅ [useStore] Utilisation de la boutique du contexte:', contextStore.id);
         setStore(contextStore);
         setLoading(false);
         return;
       }
 
-      // Si pas de boutique sélectionnée mais un ID, récupérer depuis la base
-      if (selectedStoreId) {
-        logger.info('📡 [useStore] Récupération de la boutique sélectionnée:', selectedStoreId);
+      // Si pas de boutique sélectionnée mais un ID valide
+      if (selectedStoreId && selectedStoreId.trim()) {
+        logger.info('📡 [useStore] Récupération depuis DB:', selectedStoreId);
+
         const { data, error } = await supabase
           .from('stores')
           .select('*')
@@ -145,31 +134,31 @@ export const useStore = () => {
           .single();
 
         if (error) {
-          logger.error('❌ [useStore] Erreur lors de la récupération:', error);
+          logger.error('❌ [useStore] Erreur DB:', error);
           setStore(null);
-          setLoading(false);
-          return;
+        } else {
+          logger.info('✅ [useStore] Boutique récupérée:', data.id);
+          setStore(data);
         }
-
-        logger.info('✅ [useStore] Boutique récupérée:', data?.id || 'null', data?.name);
-        setStore(data);
       } else {
-        // Aucune boutique sélectionnée
         logger.info('⚠️ [useStore] Aucune boutique sélectionnée');
         setStore(null);
       }
     } catch (error) {
       logger.error('💥 [useStore] Exception:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger votre boutique',
-        variant: 'destructive',
-      });
+      setStore(null);
+      // Éviter les toasts répétés en cas d'erreur
+      if (!store) {
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger votre boutique',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
-      logger.info('✅ [useStore] setLoading(false)');
     }
-  }, [user, authLoading, contextLoading, selectedStoreId, contextStore, toast]);
+  }, [user?.id, selectedStoreId, contextStore?.id, toast]); // ✅ Dépendances simplifiées
 
   const createStore = async (name: string, description?: string) => {
     try {
@@ -309,11 +298,33 @@ export const useStore = () => {
     }
   };
 
+  // ✅ FIX: Éviter les requêtes répétées avec un debounce et des conditions plus strictes
   useEffect(() => {
-    if (!authLoading && !contextLoading) {
-      fetchStore();
+    // Ne pas exécuter si encore en chargement
+    if (authLoading || contextLoading) {
+      logger.info('⏳ [useStore] En attente de l\'auth et du contexte...');
+      return;
     }
-  }, [authLoading, contextLoading, user?.id, selectedStoreId, contextStore?.id]); // ✅ Réagir aux changements de boutique sélectionnée
+
+    // Ne pas exécuter si pas d'utilisateur
+    if (!user) {
+      logger.info('❌ [useStore] Pas d\'utilisateur, pas de requête');
+      setStore(null);
+      setLoading(false);
+      return;
+    }
+
+    // Éviter les requêtes répétées pour la même boutique
+    if (contextStore && store?.id === contextStore.id) {
+      logger.info('✅ [useStore] Boutique déjà chargée depuis le contexte');
+      setStore(contextStore);
+      setLoading(false);
+      return;
+    }
+
+    logger.info('🔄 [useStore] Exécution de fetchStore');
+    fetchStore();
+  }, [user?.id, selectedStoreId]); // ✅ Dépendances simplifiées pour éviter les re-renders inutiles
 
   return {
     store,

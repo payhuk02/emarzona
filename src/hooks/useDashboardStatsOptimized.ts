@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from './useStore';
 import { useAuthRefresh } from './useAuthRefresh';
+import { useSessionManager } from './useSessionManager';
 import { logger } from '@/lib/logger';
 
 // Types pour les vues matérialisées
@@ -225,6 +226,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   const { toast } = useToast();
   const { store } = useStore();
   const { withAuthRetry } = useAuthRefresh();
+  const { handleRequestError, isAuthenticated } = useSessionManager();
 
   // Fonction pour transformer les données optimisées vers le format existant
   const transformOptimizedData = useCallback((data: OptimizedDashboardData): DashboardStats => {
@@ -397,6 +399,15 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   }, [options?.period]);
 
   const fetchStats = useCallback(async () => {
+    // Vérifier l'authentification avant toute requête
+    if (!isAuthenticated) {
+      logger.warn('🔐 [useDashboardStatsOptimized] Utilisateur non authentifié');
+      setError('SESSION_EXPIRED');
+      setStats(getFallbackStats());
+      setLoading(false);
+      return;
+    }
+
     if (!store) {
       logger.info('⚠️ [useDashboardStatsOptimized] Pas de boutique, utilisation des stats par défaut');
       setStats(getFallbackStats());
@@ -420,21 +431,62 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       else if (options?.period === '90d') periodDays = 90;
 
       // Une seule requête RPC optimisée au lieu de 10 requêtes individuelles
-      const { data, error: rpcError } = await withAuthRetry(
-        () => supabase.rpc('get_dashboard_stats_rpc', {
-          store_id: store.id,
-          period_days: periodDays,
-        }),
-        'chargement stats dashboard'
-      );
+      let data, rpcError;
+
+      try {
+        const result = await withAuthRetry(
+          () => supabase.rpc('get_dashboard_stats_rpc', {
+            store_id: store.id,
+            period_days: periodDays,
+          }),
+          'chargement stats dashboard'
+        );
+        data = result.data;
+        rpcError = result.error;
+      } catch (authError: any) {
+        // Utiliser le gestionnaire de session pour les erreurs JWT
+        const shouldRetry = await handleRequestError(authError);
+
+        if (shouldRetry) {
+          logger.info('🔄 [useDashboardStatsOptimized] Session rafraîchie, nouvelle tentative');
+
+          // Réessayer immédiatement avec la nouvelle session
+          try {
+            const retryResult = await supabase.rpc('get_dashboard_stats_rpc', {
+              store_id: store.id,
+              period_days: periodDays,
+            });
+            data = retryResult.data;
+            rpcError = retryResult.error;
+          } catch (retryError: any) {
+            logger.error('❌ [useDashboardStatsOptimized] Échec de la nouvelle tentative:', retryError);
+            throw new Error('SESSION_RETRY_FAILED');
+          }
+        } else {
+          // La session n'a pas pu être rafraîchie, l'utilisateur sera redirigé
+          throw new Error('SESSION_EXPIRED');
+        }
+      }
 
       const endTime = performance.now();
       const loadTime = endTime - startTime;
 
       if (rpcError) {
-        // Fallback vers l'ancienne méthode si la RPC n'est pas disponible
-        logger.warn('⚠️ [useDashboardStatsOptimized] RPC non disponible, fallback vers ancienne méthode:', rpcError);
-        throw new Error(`RPC non disponible: ${rpcError.message}`);
+        // Vérifier si c'est une erreur de base de données (pas de RPC)
+        if (rpcError.message?.includes('function') && rpcError.message?.includes('does not exist')) {
+          logger.warn('⚠️ [useDashboardStatsOptimized] Fonction RPC inexistante, fallback vers ancienne méthode');
+          throw new Error(`RPC_INEXISTANTE: ${rpcError.message}`);
+        }
+
+        // Vérifier si c'est une erreur de permissions
+        if (rpcError.message?.includes('permission denied') || rpcError.code === '42501') {
+          logger.warn('⚠️ [useDashboardStatsOptimized] Problème de permissions RPC');
+          throw new Error(`RPC_PERMISSIONS: ${rpcError.message}`);
+        }
+
+        // Autres erreurs RPC
+        logger.warn('⚠️ [useDashboardStatsOptimized] Erreur RPC:', rpcError);
+        throw new Error(`RPC_ERROR: ${rpcError.message}`);
       }
 
       if (data) {
@@ -450,17 +502,47 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
         setStats(getFallbackStats());
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors du chargement des statistiques';
+      const errorObj = error instanceof Error ? error : new Error('Erreur inconnue');
+      const errorMessage = errorObj.message;
+
       logger.error('❌ [useDashboardStatsOptimized] Erreur:', errorMessage);
 
-      setError(errorMessage);
+      // Gestion spécifique des erreurs de session
+      if (errorMessage.includes('SESSION_EXPIRED')) {
+        logger.warn('🔐 Session expirée détectée, pas de fallback');
+        setError('Votre session a expiré. Veuillez vous reconnecter.');
+        setStats(getFallbackStats());
+
+        // Le hook useAuthRefresh devrait déjà avoir déconnecté l'utilisateur
+        // et affiché un toast approprié
+        return;
+      }
+
+      // Gestion des erreurs RPC spécifiques
+      if (errorMessage.includes('RPC_INEXISTANTE')) {
+        logger.warn('⚠️ Fonction RPC manquante, utilisation du fallback');
+        setError('Service temporairement indisponible. Utilisation des données de démonstration.');
+      } else if (errorMessage.includes('RPC_PERMISSIONS')) {
+        logger.warn('⚠️ Problème de permissions RPC');
+        setError('Problème d\'autorisation. Veuillez contacter le support.');
+      } else if (errorMessage.includes('RPC_ERROR') || errorMessage.includes('GROUP BY')) {
+        logger.warn('⚠️ Erreur dans la base de données');
+        setError('Erreur technique temporaire. Les données peuvent ne pas être à jour.');
+      } else {
+        // Erreur générique
+        setError('Erreur de chargement des statistiques.');
+      }
+
       setStats(getFallbackStats());
 
-      toast({
-        title: 'Erreur de chargement',
-        description: 'Utilisation des données de démonstration. Les données peuvent ne pas être à jour.',
-        variant: 'destructive',
-      });
+      // Afficher un toast seulement pour les erreurs non-critiques
+      if (!errorMessage.includes('SESSION_EXPIRED')) {
+        toast({
+          title: 'Erreur de chargement',
+          description: 'Utilisation des données de démonstration. Les données peuvent ne pas être à jour.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }

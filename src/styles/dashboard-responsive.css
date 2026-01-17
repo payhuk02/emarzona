@@ -1,12 +1,62 @@
+/* ✅ UTILITAIRES: Classes communes pour réduire la duplication */
+.dashboard-card-base {
+  @apply border-border/50 bg-card/50 backdrop-blur-sm;
+}
+
+.dashboard-card-hover {
+  @apply hover:shadow-lg transition-all duration-300;
+}
+
+.dashboard-text-responsive {
+  @apply text-xs sm:text-sm md:text-base lg:text-lg;
+}
+
+.dashboard-text-responsive-small {
+  @apply text-[10px] sm:text-[11px] md:text-xs;
+}
+
+.dashboard-padding-responsive {
+  @apply p-3 sm:p-4 md:p-6;
+}
+
+.dashboard-padding-responsive-compact {
+  @apply p-2.5 sm:p-3 md:p-4;
+}
+
+.dashboard-gap-responsive {
+  @apply gap-3 sm:gap-4 md:gap-6;
+}
+
+.dashboard-icon-size-responsive {
+  @apply h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4;
+}
+
+.dashboard-icon-size-responsive-large {
+  @apply h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5;
+}
+
 /* Dashboard Responsive Styles */
 .dashboard-card {
   @apply transition-all duration-300 ease-out;
   @apply hover:shadow-lg hover:-translate-y-1;
   @apply touch-manipulation;
+  /* ✅ PERFORMANCE: will-change pour optimiser les animations sur mobile */
+  will-change: transform, box-shadow;
 }
 
 .dashboard-card:hover {
   transform: translateY(-4px) scale(1.01);
+}
+
+/* ✅ PERFORMANCE: Optimisation mobile - utiliser transform au lieu de scale */
+@media (max-width: 767px) {
+  .dashboard-card {
+    will-change: transform;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .dashboard-stats-grid {
@@ -34,10 +84,23 @@
 
 .dashboard-icon-container {
   @apply p-2 rounded-lg transition-colors duration-300;
+  /* ✅ PERFORMANCE: will-change pour animations fluides */
+  will-change: transform;
 }
 
 .dashboard-icon-container:hover {
-  @apply scale-110;
+  transform: scale(1.1);
+}
+
+/* ✅ PERFORMANCE: Limiter les animations sur mobile */
+@media (max-width: 767px) {
+  .dashboard-icon-container {
+    will-change: auto;
+  }
+  
+  .dashboard-icon-container:hover {
+    transform: none;
+  }
 }
 
 .dashboard-notification-item {
@@ -187,17 +250,37 @@
   }
 }
 
-/* Reduced Motion */
+/* ✅ ACCESSIBILITÉ: Reduced Motion - Désactiver toutes les animations */
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-card {
+  .dashboard-card,
+  .dashboard-icon-container,
+  .dashboard-notification-item,
+  .dashboard-activity-item,
+  .dashboard-button {
     @apply transition-none;
+    will-change: auto;
   }
 
-  .dashboard-card:hover {
+  .dashboard-card:hover,
+  .dashboard-icon-container:hover {
     transform: none;
   }
 
-  .animate-fade-in {
-    animation: none;
+  .animate-fade-in,
+  .animate-fade-in-delayed,
+  .animate-in {
+    animation: none !important;
+  }
+  
+  /* Désactiver les animations inline dans les composants React */
+  [style*="animationDelay"] {
+    animation: none !important;
+  }
+}
+
+/* ✅ PERFORMANCE: Désactiver will-change quand l'animation est terminée */
+@supports (animation-timeline: scroll()) {
+  .dashboard-card {
+    animation-timeline: view();
   }
 }

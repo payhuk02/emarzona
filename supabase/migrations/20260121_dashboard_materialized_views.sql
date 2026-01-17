@@ -161,15 +161,7 @@ SELECT
     'name', c.name,
     'email', c.email
   ) as customer,
-  (
-    SELECT ARRAY_AGG(JSON_BUILD_OBJECT('type', pt.product_type))
-    FROM (
-      SELECT DISTINCT p2.product_type
-      FROM order_items oi2
-      JOIN products p2 ON oi2.product_id = p2.id
-      WHERE oi2.order_id = o.id AND p2.product_type IS NOT NULL
-    ) pt
-  ) as product_types
+  COALESCE(ARRAY_AGG(DISTINCT p.product_type) FILTER (WHERE p.product_type IS NOT NULL), ARRAY[]::text[]) as product_types
 FROM orders o
 LEFT JOIN customers c ON o.customer_id = c.id
 LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -288,9 +280,12 @@ BEGIN
       'orderCount', order_count
     )
   ) INTO top_products
-  FROM dashboard_top_products
-  WHERE store_id = store_id_param AND rank <= 5
-  ORDER BY rank;
+  FROM (
+    SELECT id, name, price, image_url, product_type, total_revenue, total_quantity_sold, order_count
+    FROM dashboard_top_products
+    WHERE store_id = store_id_param AND rank <= 5
+    ORDER BY rank
+  ) top_products_subquery;
 
   -- Récupérer les commandes récentes (limité à 5)
   SELECT array_agg(

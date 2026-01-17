@@ -124,7 +124,9 @@ export const CoreWebVitalsMonitor = () => {
       case 'fid':
         return `${value.toFixed(0)}ms`;
       case 'cls':
-        return value.toFixed(4);
+        // CLS est une valeur relative (sans unité), normaliser si nécessaire
+        const clsValue = value > 1 ? value / 1000 : value; // Convertir ms en secondes si nécessaire
+        return clsValue.toFixed(4);
       case 'ttfb':
         return `${value.toFixed(0)}ms`;
       default:

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboard RPC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .sql-code { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnostic Dashboard RPC</h1>
+
+    <div class="test-section">
+        <h2>1. Test de Connexion</h2>
+        <button onclick="testConnection()">Tester la connexion</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test des Boutiques</h2>
+        <button onclick="testStores()">Tester les boutiques</button>
+        <div id="stores-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Vue Matérialisée</h2>
+        <button onclick="testMaterializedView()">Tester dashboard_recent_orders</button>
+        <div id="view-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Fonction RPC</h2>
+        <button onclick="testRPC()">Tester get_dashboard_stats_rpc</button>
+        <div id="rpc-result"></div>
+    </div>
+
+    <div class="test-section warning">
+        <h2>🔧 Instructions de Correction</h2>
+        <p>Si les tests échouent, appliquez ce SQL dans Supabase > SQL Editor :</p>
+
+        <div class="sql-code">
+DROP MATERIALIZED VIEW IF EXISTS dashboard_recent_orders;
+
+CREATE MATERIALIZED VIEW dashboard_recent_orders AS
+SELECT
+  o.id,
+  o.order_number,
+  o.total_amount,
+  o.status,
+  o.created_at,
+  o.store_id,
+  JSON_BUILD_OBJECT(
+    'id', c.id,
+    'name', c.name,
+    'email', c.email
+  ) as customer,
+  COALESCE(ARRAY_AGG(DISTINCT p.product_type) FILTER (WHERE p.product_type IS NOT NULL), ARRAY[]::text[]) as product_types
+FROM orders o
+LEFT JOIN customers c ON o.customer_id = c.id
+LEFT JOIN order_items oi ON o.id = oi.order_id
+LEFT JOIN products p ON oi.product_id = p.id
+WHERE o.created_at >= CURRENT_DATE - INTERVAL '90 days'
+GROUP BY o.id, o.order_number, o.total_amount, o.status, o.created_at, o.store_id, c.id, c.name, c.email
+ORDER BY o.created_at DESC;
+
+-- Index et permissions
+CREATE INDEX IF NOT EXISTS idx_dashboard_recent_orders_store_created
+ON dashboard_recent_orders(store_id, created_at DESC);
+
+REFRESH MATERIALIZED VIEW dashboard_recent_orders;
+GRANT SELECT ON dashboard_recent_orders TO authenticated;
+        </div>
+
+        <button onclick="copySQL()">📋 Copier le SQL</button>
+    </div>
+
+    <script>
+        // Configuration Supabase (à remplacer par vos vraies valeurs)
+        const SUPABASE_URL = 'https://hbdnzajbyjakdhuavrvb.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY4MTQ2MjEsImV4cCI6MjA1MjM5MDYyMX0.eyJyb2xlIjoiYW5vbiIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwiaWF0IjoxNzM2ODE0NjIxLCJleHAiOjIwNTIzOTA2MjF9.example';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentStoreId = null;
+
+        function updateResult(elementId, content, isSuccess = null) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = content;
+            element.className = isSuccess === true ? 'success' :
+                              isSuccess === false ? 'error' : '';
+        }
+
+        async function testConnection() {
+            try {
+                const { data, error } = await supabase.from('stores').select('count').limit(1);
+                if (error) throw error;
+                updateResult('connection-result',
+                    '✅ Connexion réussie à Supabase', true);
+            } catch (error) {
+                updateResult('connection-result',
+                    `❌ Erreur de connexion: ${error.message}`, false);
+            }
+        }
+
+        async function testStores() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    updateResult('stores-result',
+                        '❌ Aucun utilisateur connecté', false);
+                    return;
+                }
+
+                const { data: stores, error } = await supabase
+                    .from('stores')
+                    .select('id, name')
+                    .eq('user_id', user.id);
+
+                if (error) throw error;
+
+                if (!stores || stores.length === 0) {
+                    updateResult('stores-result',
+                        '⚠️ Aucune boutique trouvée', false);
+                    return;
+                }
+
+                currentStoreId = stores[0].id;
+                const storeList = stores.map(s => `- ${s.name} (ID: ${s.id})`).join('<br>');
+                updateResult('stores-result',
+                    `✅ ${stores.length} boutique(s):<br>${storeList}`, true);
+
+            } catch (error) {
+                updateResult('stores-result',
+                    `❌ Erreur boutiques: ${error.message}`, false);
+            }
+        }
+
+        async function testMaterializedView() {
+            try {
+                const { data, error } = await supabase
+                    .from('dashboard_recent_orders')
+                    .select('*')
+                    .limit(1);
+
+                if (error) {
+                    updateResult('view-result',
+                        `❌ Erreur vue: ${error.message}<br>Code: ${error.code}`, false);
+                } else {
+                    updateResult('view-result',
+                        `✅ Vue accessible (${data?.length || 0} enregistrement(s))`, true);
+                }
+            } catch (error) {
+                updateResult('view-result',
+                    `💥 Exception vue: ${error.message}`, false);
+            }
+        }
+
+        async function testRPC() {
+            if (!currentStoreId) {
+                updateResult('rpc-result',
+                    '❌ Testez d\'abord les boutiques pour obtenir un storeId', false);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.rpc('get_dashboard_stats_rpc', {
+                    store_id: currentStoreId,
+                    period_days: 30
+                });
+
+                if (error) {
+                    let diagnosis = '';
+                    if (error.message?.includes('GROUP BY')) {
+                        diagnosis = '<br>🚨 La vue matérialisée doit être corrigée (voir instructions ci-dessous)';
+                    } else if (error.message?.includes('does not exist')) {
+                        diagnosis = '<br>🚨 La fonction RPC n\'existe pas';
+                    }
+
+                    updateResult('rpc-result',
+                        `❌ Erreur RPC: ${error.message}${diagnosis}`, false);
+                } else {
+                    const stats = {
+                        base: !!data?.baseStats,
+                        orders: !!data?.ordersStats,
+                        customers: !!data?.customersStats,
+                        products: data?.productPerformance?.length || 0,
+                        topProducts: data?.topProducts?.length || 0,
+                        recentOrders: data?.recentOrders?.length || 0
+                    };
+
+                    updateResult('rpc-result',
+                        `✅ RPC réussie!<br>
+                        Base: ${stats.base ? '✅' : '❌'} |
+                        Orders: ${stats.orders ? '✅' : '❌'} |
+                        Customers: ${stats.customers ? '✅' : '❌'}<br>
+                        Products: ${stats.products} |
+                        Top Products: ${stats.topProducts} |
+                        Recent Orders: ${stats.recentOrders}`, true);
+                }
+            } catch (error) {
+                updateResult('rpc-result',
+                    `💥 Exception RPC: ${error.message}`, false);
+            }
+        }
+
+        function copySQL() {
+            const sql = `DROP MATERIALIZED VIEW IF EXISTS dashboard_recent_orders;
+
+CREATE MATERIALIZED VIEW dashboard_recent_orders AS
+SELECT
+  o.id,
+  o.order_number,
+  o.total_amount,
+  o.status,
+  o.created_at,
+  o.store_id,
+  JSON_BUILD_OBJECT(
+    'id', c.id,
+    'name', c.name,
+    'email', c.email
+  ) as customer,
+  COALESCE(ARRAY_AGG(DISTINCT p.product_type) FILTER (WHERE p.product_type IS NOT NULL), ARRAY[]::text[]) as product_types
+FROM orders o
+LEFT JOIN customers c ON o.customer_id = c.id
+LEFT JOIN order_items oi ON o.id = oi.order_id
+LEFT JOIN products p ON oi.product_id = p.id
+WHERE o.created_at >= CURRENT_DATE - INTERVAL '90 days'
+GROUP BY o.id, o.order_number, o.total_amount, o.status, o.created_at, o.store_id, c.id, c.name, c.email
+ORDER BY o.created_at DESC;
+
+CREATE INDEX IF NOT EXISTS idx_dashboard_recent_orders_store_created
+ON dashboard_recent_orders(store_id, created_at DESC);
+
+REFRESH MATERIALIZED VIEW dashboard_recent_orders;
+GRANT SELECT ON dashboard_recent_orders TO authenticated;`;
+
+            navigator.clipboard.writeText(sql).then(() => {
+                alert('SQL copié dans le presse-papiers!');
+            });
+        }
+    </script>
+</body>
+</html>

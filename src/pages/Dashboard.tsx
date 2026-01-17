@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
 import {
   Package,
   ShoppingCart,
@@ -33,6 +34,7 @@ import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
+import type { Notification } from '@/types/notifications';
 // ✅ PHASE 2: Lazy load des composants analytics lourds (utilisent recharts)
 const RevenueChart = lazy(() =>
   import('@/components/dashboard/AdvancedDashboardComponents').then(m => ({
@@ -90,6 +92,7 @@ import {
 } from '@/hooks/useNotifications';
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning';
+import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
 import '@/styles/dashboard-responsive.css';
 
 const Dashboard = () => {
@@ -163,30 +166,62 @@ const Dashboard = () => {
   // S'abonner aux notifications en temps réel - Déferré (seulement si activé)
   useRealtimeNotifications();
 
+  // ✅ VALIDATION: Type-safe transformation des notifications Supabase
+  interface DashboardNotification {
+    id: string;
+    title: string;
+    message: string;
+    type: 'warning' | 'success';
+    timestamp: string;
+    read: boolean;
+  }
+
+  // Fonction de validation stricte des notifications
+  const validateNotification = (notif: unknown): notif is Notification => {
+    if (!notif || typeof notif !== 'object') return false;
+    const n = notif as Record<string, unknown>;
+    return (
+      typeof n.id === 'string' &&
+      typeof n.title === 'string' &&
+      typeof n.message === 'string' &&
+      typeof n.created_at === 'string' &&
+      (n.is_read === undefined || typeof n.is_read === 'boolean')
+    );
+  };
+
   // Transformer les notifications Supabase en format compatible avec le Dashboard
-  const notifications = useMemo(() => {
+  const notifications = useMemo<DashboardNotification[]>(() => {
     const dbNotifications = notificationsResult?.data || [];
-    return dbNotifications.map(notif => ({
-      id: notif.id,
-      title: notif.title,
-      message: notif.message,
-      type:
-        notif.priority === 'urgent' || notif.priority === 'high'
-          ? ('warning' as const)
-          : ('success' as const),
-      timestamp: notif.created_at,
-      read: notif.is_read || false,
-    }));
+    return dbNotifications
+      .filter(validateNotification)
+      .map((notif): DashboardNotification => ({
+        id: notif.id,
+        title: notif.title,
+        message: notif.message,
+        type:
+          notif.priority === 'urgent' || notif.priority === 'high'
+            ? ('warning' as const)
+            : ('success' as const),
+        timestamp: notif.created_at,
+        read: notif.is_read || false,
+      }));
   }, [notificationsResult?.data]);
+
+  // ✅ ACCESSIBILITÉ: État pour les annonces aria-live
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   const handleRefresh = useCallback(async () => {
     try {
       setIsRefreshing(true);
       setError(null);
+      setStatusMessage('Actualisation des données en cours...');
       logger.info('Actualisation du dashboard...', {});
       await refetch();
+      setStatusMessage('Données actualisées avec succès');
       logger.info('Dashboard actualisé avec succès', {});
-    } catch (_err: unknown) {
+      // Effacer le message après 3 secondes
+      setTimeout(() => setStatusMessage(''), 3000);
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       const error =
         err instanceof Error ? err : new Error("Erreur lors de l'actualisation du dashboard");
@@ -226,6 +261,13 @@ const Dashboard = () => {
     (startDate: Date | undefined, endDate: Date | undefined) => {
       setCustomStartDate(startDate);
       setCustomEndDate(endDate);
+      // ✅ ACCESSIBILITÉ: Annoncer le changement de période
+      if (startDate && endDate) {
+        const start = startDate.toLocaleDateString('fr-FR');
+        const end = endDate.toLocaleDateString('fr-FR');
+        setStatusMessage(`Période modifiée : du ${start} au ${end}`);
+        setTimeout(() => setStatusMessage(''), 3000);
+      }
     },
     []
   );
@@ -316,9 +358,11 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider>
+      {/* ✅ ACCESSIBILITÉ: Skip link pour navigation clavier */}
+      <SkipToMainContent />
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <main className="flex-1 overflow-auto">
+        <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
           <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             {/* Session Expiry Warning */}
             <SessionExpiryWarning />
@@ -345,7 +389,7 @@ const Dashboard = () => {
                     </div>
                   </h1>
                   <p className="text-sm sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                    Vue d'ensemble de votre boutique
+                    {t('dashboard.description')}
                   </p>
                 </div>
               </div>
@@ -496,32 +540,22 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Error Alert */}
-            {(error || hookError) && (
-              <Alert
-                variant="destructive"
-                className="animate-in fade-in slide-in-from-top-4 duration-500"
-              >
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle className="text-sm sm:text-base">
-                  {t('dashboard.error.title')}
-                </AlertTitle>
-                <AlertDescription className="text-xs sm:text-sm mt-1">
-                  {error || hookError}
-                </AlertDescription>
-                <div className="mt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRefresh}
-                    className="min-h-[44px] text-xs sm:text-sm touch-manipulation"
-                    aria-label={t('dashboard.retry')}
-                  >
-                    {t('dashboard.retry')}
-                  </Button>
-                </div>
-              </Alert>
-            )}
+            {/* ✅ ACCESSIBILITÉ: Aria-live region pour les mises à jour dynamiques */}
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            >
+              {statusMessage}
+            </div>
+
+            {/* Gestion d'erreurs améliorée */}
+            <DashboardErrorHandler
+              error={error || hookError}
+              onRetry={handleRefresh}
+              isRetrying={isRefreshing}
+            />
             {/* Stats Cards - Responsive & Animated */}
             {stats && (
               <div
@@ -737,7 +771,7 @@ const Dashboard = () => {
                       <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
                         <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500 dark:text-blue-400" />
                       </div>
-                      Métriques de Performance
+                      {t('dashboard.performanceMetrics.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -857,7 +891,9 @@ const Dashboard = () => {
                           </p>
                         </div>
                       ) : (
-                        notifications.map(notification => (
+                        // ✅ PERFORMANCE: Limité à 5 notifications, pas besoin de virtualisation
+                        // Pour > 20 éléments, envisager @tanstack/react-virtual
+                        notifications.slice(0, 5).map(notification => (
                           <div
                             key={notification.id}
                             className="flex items-start gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer"
@@ -932,7 +968,9 @@ const Dashboard = () => {
                         </p>
                       </div>
                     ) : (
-                      stats.recentActivity.map(activity => (
+                      // ✅ PERFORMANCE: Limité à 10 activités récentes
+                      // Pour > 20 éléments, envisager @tanstack/react-virtual
+                      stats.recentActivity.slice(0, 10).map(activity => (
                         <div
                           key={activity.id}
                           className="flex items-start gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer"
@@ -986,7 +1024,7 @@ const Dashboard = () => {
                     <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-gray-500/10 to-gray-500/5 backdrop-blur-sm border border-gray-500/20">
                       <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-gray-500 dark:text-gray-400" />
                     </div>
-                    Paramètres Rapides
+                    {t('dashboard.quickSettings.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -997,8 +1035,8 @@ const Dashboard = () => {
                       onClick={handleViewStore}
                     >
                       <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
-                      <span className="hidden sm:inline">Paramètres Boutique</span>
-                      <span className="sm:hidden">Boutique</span>
+                      <span className="hidden sm:inline">{t('dashboard.quickSettings.storeSettings')}</span>
+                      <span className="sm:hidden">{t('dashboard.quickSettings.storeSettingsShort')}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -1006,8 +1044,8 @@ const Dashboard = () => {
                       onClick={handleManageCustomers}
                     >
                       <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
-                      <span className="hidden sm:inline">Gérer les Clients</span>
-                      <span className="sm:hidden">Clients</span>
+                      <span className="hidden sm:inline">{t('dashboard.quickSettings.manageCustomers')}</span>
+                      <span className="sm:hidden">{t('dashboard.quickSettings.manageCustomersShort')}</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -1015,8 +1053,8 @@ const Dashboard = () => {
                       onClick={handleSettings}
                     >
                       <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
-                      <span className="hidden sm:inline">Configuration</span>
-                      <span className="sm:hidden">Config</span>
+                      <span className="hidden sm:inline">{t('dashboard.quickSettings.configuration')}</span>
+                      <span className="sm:hidden">{t('dashboard.quickSettings.configurationShort')}</span>
                     </Button>
                   </div>
                 </CardContent>

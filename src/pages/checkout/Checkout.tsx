@@ -80,6 +80,11 @@ const Checkout = () => {
   const storeId = searchParams.get('storeId');
   const variantId = searchParams.get('variantId');
 
+  // États
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [product, setProduct] = useState<CheckoutProduct>(null);
+
   // ✅ PERFORMANCE: Preload image LCP pour améliorer Core Web Vitals
   // L'image sera mise à jour une fois le produit chargé
   const productImage = product?.image_url || undefined;
@@ -88,11 +93,6 @@ const Checkout = () => {
     sizes: productImage ? '(max-width: 640px) 100vw, 200px' : undefined,
     priority: !!productImage,
   });
-
-  // États
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [product, setProduct] = useState<CheckoutProduct>(null);
   const [store, setStore] = useState<CheckoutStore>(null);
   const [user, setUser] = useState<CheckoutUser>(null);
   const [error, setError] = useState<string | null>(null);
