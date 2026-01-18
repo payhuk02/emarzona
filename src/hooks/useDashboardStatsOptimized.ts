@@ -229,174 +229,481 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   const { handleRequestError, isAuthenticated } = useSessionManager();
 
   // Fonction pour transformer les données optimisées vers le format existant
-  const transformOptimizedData = useCallback((data: OptimizedDashboardData): DashboardStats => {
-    const base = data.baseStats || {
-      totalProducts: 0,
-      activeProducts: 0,
-      digitalProducts: 0,
-      physicalProducts: 0,
-      serviceProducts: 0,
-      courseProducts: 0,
-      artistProducts: 0,
-      avgProductPrice: 0,
-    };
+  const transformOptimizedData = useCallback(
+    (data: OptimizedDashboardData): DashboardStats => {
+      const base = data.baseStats || {
+        totalProducts: 0,
+        activeProducts: 0,
+        digitalProducts: 0,
+        physicalProducts: 0,
+        serviceProducts: 0,
+        courseProducts: 0,
+        artistProducts: 0,
+        avgProductPrice: 0,
+      };
 
-    const orders = data.ordersStats || {
-      totalOrders: 0,
-      completedOrders: 0,
-      pendingOrders: 0,
-      cancelledOrders: 0,
-      totalRevenue: 0,
-      avgOrderValue: 0,
-      revenue30d: 0,
-      orders30d: 0,
-      revenue7d: 0,
-      orders7d: 0,
-      revenue90d: 0,
-      orders90d: 0,
-    };
+      const orders = data.ordersStats || {
+        totalOrders: 0,
+        completedOrders: 0,
+        pendingOrders: 0,
+        cancelledOrders: 0,
+        totalRevenue: 0,
+        avgOrderValue: 0,
+        revenue30d: 0,
+        orders30d: 0,
+        revenue7d: 0,
+        orders7d: 0,
+        revenue90d: 0,
+        orders90d: 0,
+      };
 
-    const customers = data.customersStats || {
-      totalCustomers: 0,
-      newCustomers30d: 0,
-      newCustomers7d: 0,
-      newCustomers90d: 0,
-      customersWithOrders: 0,
-    };
+      const customers = data.customersStats || {
+        totalCustomers: 0,
+        newCustomers30d: 0,
+        newCustomers7d: 0,
+        newCustomers90d: 0,
+        customersWithOrders: 0,
+      };
 
-    // Calculer les tendances basées sur les données disponibles
-    const currentPeriodDays = options?.period === '7d' ? 7 : options?.period === '90d' ? 90 : 30;
-    const revenueGrowth = orders.totalOrders > 0 ?
-      Math.round(((orders.revenue30d - (orders.revenue90d - orders.revenue30d) / (90 - 30) * 30) / orders.totalRevenue) * 100) : 0;
-    const orderGrowth = orders.totalOrders > 0 ?
-      Math.round(((orders.orders30d - (orders.orders90d - orders.orders30d) / (90 - 30) * 30) / orders.totalOrders) * 100) : 0;
-    const customerGrowth = customers.totalCustomers > 0 ?
-      Math.round((customers.newCustomers30d / customers.totalCustomers) * 100) : 0;
-    const productGrowth = base.activeProducts > 0 ?
-      Math.round((base.activeProducts * 0.1) * 100) : 0; // Estimation basée sur les données disponibles
+      // Calculer les tendances basées sur les données disponibles
+      const currentPeriodDays = options?.period === '7d' ? 7 : options?.period === '90d' ? 90 : 30;
+      const revenueGrowth =
+        orders.totalOrders > 0
+          ? Math.round(
+              ((orders.revenue30d - ((orders.revenue90d - orders.revenue30d) / (90 - 30)) * 30) /
+                orders.totalRevenue) *
+                100
+            )
+          : 0;
+      const orderGrowth =
+        orders.totalOrders > 0
+          ? Math.round(
+              ((orders.orders30d - ((orders.orders90d - orders.orders30d) / (90 - 30)) * 30) /
+                orders.totalOrders) *
+                100
+            )
+          : 0;
+      const customerGrowth =
+        customers.totalCustomers > 0
+          ? Math.round((customers.newCustomers30d / customers.totalCustomers) * 100)
+          : 0;
+      const productGrowth =
+        base.activeProducts > 0 ? Math.round(base.activeProducts * 0.1 * 100) : 0; // Estimation basée sur les données disponibles
 
-    // Transformer les performances par type
-    const performanceByType = data.productPerformance.reduce((acc, perf) => {
-      const type = perf.type as keyof typeof acc;
-      if (type in acc) {
-        acc[type] = {
-          conversionRate: customers.totalCustomers > 0 ? Math.round((perf.orders / customers.totalCustomers) * 100) : 0,
-          averageOrderValue: perf.orders > 0 ? perf.revenue / perf.orders : 0,
-          customerRetention: customers.customersWithOrders > 0 ? Math.round((customers.customersWithOrders / customers.totalCustomers) * 100) : 0,
-        };
-      }
-      return acc;
-    }, {
-      digital: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      physical: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      service: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      course: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      artist: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-    });
+      // Transformer les performances par type
+      const performanceByType = data.productPerformance.reduce(
+        (acc, perf) => {
+          const type = perf.type as keyof typeof acc;
+          if (type in acc) {
+            acc[type] = {
+              conversionRate:
+                customers.totalCustomers > 0
+                  ? Math.round((perf.orders / customers.totalCustomers) * 100)
+                  : 0,
+              averageOrderValue: perf.orders > 0 ? perf.revenue / perf.orders : 0,
+              customerRetention:
+                customers.customersWithOrders > 0
+                  ? Math.round((customers.customersWithOrders / customers.totalCustomers) * 100)
+                  : 0,
+            };
+          }
+          return acc;
+        },
+        {
+          digital: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+          physical: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+          service: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+          course: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+          artist: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
+        }
+      );
 
-    return {
-      totalProducts: base.totalProducts,
-      activeProducts: base.activeProducts,
-      totalOrders: orders.totalOrders,
-      pendingOrders: orders.pendingOrders,
-      completedOrders: orders.completedOrders,
-      cancelledOrders: orders.cancelledOrders,
-      totalCustomers: customers.totalCustomers,
-      totalRevenue: orders.totalRevenue,
-      recentOrders: data.recentOrders.map(order => ({
-        id: order.id,
-        order_number: order.orderNumber,
-        total_amount: order.totalAmount,
-        status: order.status,
-        created_at: order.createdAt,
-        customers: order.customer ? {
-          name: order.customer.name,
-          email: order.customer.email,
-        } : null,
-        product_types: order.productTypes,
-      })),
-      topProducts: data.topProducts.map(product => ({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image_url: product.imageUrl,
-        product_type: product.productType,
-        orderCount: product.orderCount,
-        revenue: product.revenue,
-      })),
-      revenueByMonth: [], // Sera calculé séparément si nécessaire
-      ordersByStatus: [
-        { status: 'Completed', count: orders.completedOrders, percentage: orders.totalOrders > 0 ? Math.round((orders.completedOrders / orders.totalOrders) * 100) : 0 },
-        { status: 'Pending', count: orders.pendingOrders, percentage: orders.totalOrders > 0 ? Math.round((orders.pendingOrders / orders.totalOrders) * 100) : 0 },
-        { status: 'Cancelled', count: orders.cancelledOrders, percentage: orders.totalOrders > 0 ? Math.round((orders.cancelledOrders / orders.totalOrders) * 100) : 0 },
-      ],
-      recentActivity: [
-        ...data.recentOrders.slice(0, 3).map(order => ({
-          id: `order-${order.id}`,
-          type: 'order' as const,
-          message: `Nouvelle commande #${order.orderNumber} de ${order.totalAmount} FCFA`,
-          timestamp: order.createdAt,
+      return {
+        totalProducts: base.totalProducts,
+        activeProducts: base.activeProducts,
+        totalOrders: orders.totalOrders,
+        pendingOrders: orders.pendingOrders,
+        completedOrders: orders.completedOrders,
+        cancelledOrders: orders.cancelledOrders,
+        totalCustomers: customers.totalCustomers,
+        totalRevenue: orders.totalRevenue,
+        recentOrders: data.recentOrders.map(order => ({
+          id: order.id,
+          order_number: order.orderNumber,
+          total_amount: order.totalAmount,
           status: order.status,
+          created_at: order.createdAt,
+          customers: order.customer
+            ? {
+                name: order.customer.name,
+                email: order.customer.email,
+              }
+            : null,
+          product_types: order.productTypes,
         })),
-        ...data.topProducts.slice(0, 2).map(product => ({
-          id: `product-${product.id}`,
-          type: 'product' as const,
-          message: `Produit "${product.name}" populaire`,
-          timestamp: new Date().toISOString(),
-          status: 'success',
+        topProducts: data.topProducts.map(product => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image_url: product.imageUrl,
+          product_type: product.productType,
+          orderCount: product.orderCount,
+          revenue: product.revenue,
         })),
-      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
-      performanceMetrics: {
-        conversionRate: customers.totalCustomers > 0 ? Math.round((orders.completedOrders / customers.totalCustomers) * 100) : 0,
-        averageOrderValue: orders.avgOrderValue,
-        customerRetention: customers.customersWithOrders > 0 ? Math.round((customers.customersWithOrders / customers.totalCustomers) * 100) : 0,
-        pageViews: orders.totalOrders * 10, // Estimation
-        bounceRate: Math.max(20 - orders.totalOrders * 0.5, 10), // Estimation
-        sessionDuration: Math.floor(180 + orders.totalOrders * 2), // Estimation
-      },
-      trends: {
-        revenueGrowth,
-        orderGrowth,
-        customerGrowth,
-        productGrowth,
-      },
-      productsByType: {
-        digital: base.digitalProducts,
-        physical: base.physicalProducts,
-        service: base.serviceProducts,
-        course: base.courseProducts,
-        artist: base.artistProducts,
-      },
-      revenueByType: data.productPerformance.reduce((acc, perf) => {
-        const type = perf.type as keyof typeof acc;
-        if (type in acc) {
-          acc[type] = perf.revenue;
-        }
-        return acc;
-      }, {
-        digital: 0,
-        physical: 0,
-        service: 0,
-        course: 0,
-        artist: 0,
-      }),
-      ordersByType: data.productPerformance.reduce((acc, perf) => {
-        const type = perf.type as keyof typeof acc;
-        if (type in acc) {
-          acc[type] = perf.orders;
-        }
-        return acc;
-      }, {
-        digital: 0,
-        physical: 0,
-        service: 0,
-        course: 0,
-        artist: 0,
-      }),
-      performanceMetricsByType: performanceByType,
-      revenueByTypeAndMonth: [], // Peut être ajouté si nécessaire
-    };
-  }, [options?.period]);
+        // Calculer revenueByMonth à partir des commandes récentes
+        revenueByMonth: (() => {
+          const monthMap: Record<
+            string,
+            { revenue: number; orders: number; customers: Set<string> }
+          > = {};
+
+          // Calculer à partir des commandes récentes
+          data.recentOrders.forEach(order => {
+            if (!order.createdAt) return;
+            const month = new Date(order.createdAt).toLocaleString('fr-FR', {
+              month: 'short',
+              year: 'numeric',
+            });
+
+            if (!monthMap[month]) {
+              monthMap[month] = { revenue: 0, orders: 0, customers: new Set() };
+            }
+
+            monthMap[month].revenue += Number(order.totalAmount) || 0;
+            monthMap[month].orders += 1;
+
+            if (order.customer?.id) {
+              monthMap[month].customers.add(order.customer.id);
+            }
+          });
+
+          // Convertir en tableau et trier
+          return Object.entries(monthMap)
+            .map(([month, data]) => ({
+              month,
+              revenue: data.revenue,
+              orders: data.orders,
+              customers: data.customers.size,
+            }))
+            .sort((a, b) => {
+              const dateA = new Date(a.month);
+              const dateB = new Date(b.month);
+              return dateA.getTime() - dateB.getTime();
+            });
+        })(),
+        ordersByStatus: [
+          {
+            status: 'Completed',
+            count: orders.completedOrders,
+            percentage:
+              orders.totalOrders > 0
+                ? Math.round((orders.completedOrders / orders.totalOrders) * 100)
+                : 0,
+          },
+          {
+            status: 'Pending',
+            count: orders.pendingOrders,
+            percentage:
+              orders.totalOrders > 0
+                ? Math.round((orders.pendingOrders / orders.totalOrders) * 100)
+                : 0,
+          },
+          {
+            status: 'Cancelled',
+            count: orders.cancelledOrders,
+            percentage:
+              orders.totalOrders > 0
+                ? Math.round((orders.cancelledOrders / orders.totalOrders) * 100)
+                : 0,
+          },
+        ],
+        recentActivity: [
+          ...data.recentOrders.slice(0, 3).map(order => ({
+            id: `order-${order.id}`,
+            type: 'order' as const,
+            message: `Nouvelle commande #${order.orderNumber} de ${order.totalAmount} FCFA`,
+            timestamp: order.createdAt,
+            status: order.status,
+          })),
+          ...data.topProducts.slice(0, 2).map(product => ({
+            id: `product-${product.id}`,
+            type: 'product' as const,
+            message: `Produit "${product.name}" populaire`,
+            timestamp: new Date().toISOString(),
+            status: 'success',
+          })),
+        ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+        performanceMetrics: {
+          conversionRate:
+            customers.totalCustomers > 0
+              ? Math.round((orders.completedOrders / customers.totalCustomers) * 100)
+              : 0,
+          averageOrderValue: orders.avgOrderValue,
+          customerRetention:
+            customers.customersWithOrders > 0
+              ? Math.round((customers.customersWithOrders / customers.totalCustomers) * 100)
+              : 0,
+          pageViews: orders.totalOrders * 10, // Estimation
+          bounceRate: Math.max(20 - orders.totalOrders * 0.5, 10), // Estimation
+          sessionDuration: Math.floor(180 + orders.totalOrders * 2), // Estimation
+        },
+        trends: {
+          revenueGrowth,
+          orderGrowth,
+          customerGrowth,
+          productGrowth,
+        },
+        productsByType: {
+          digital: base.digitalProducts,
+          physical: base.physicalProducts,
+          service: base.serviceProducts,
+          course: base.courseProducts,
+          artist: base.artistProducts,
+        },
+        revenueByType: data.productPerformance.reduce(
+          (acc, perf) => {
+            const type = perf.type as keyof typeof acc;
+            if (type in acc) {
+              acc[type] = perf.revenue;
+            }
+            return acc;
+          },
+          {
+            digital: 0,
+            physical: 0,
+            service: 0,
+            course: 0,
+            artist: 0,
+          }
+        ),
+        ordersByType: data.productPerformance.reduce(
+          (acc, perf) => {
+            const type = perf.type as keyof typeof acc;
+            if (type in acc) {
+              acc[type] = perf.orders;
+            }
+            return acc;
+          },
+          {
+            digital: 0,
+            physical: 0,
+            service: 0,
+            course: 0,
+            artist: 0,
+          }
+        ),
+        performanceMetricsByType: performanceByType,
+        // Calculer revenueByTypeAndMonth à partir des commandes récentes
+        revenueByTypeAndMonth: (() => {
+          const monthMap: Record<
+            string,
+            {
+              digital: number;
+              physical: number;
+              service: number;
+              course: number;
+              artist: number;
+            }
+          > = {};
+
+          // Calculer à partir des commandes récentes avec leurs types de produits
+          data.recentOrders.forEach(order => {
+            if (!order.createdAt || !order.productTypes || order.productTypes.length === 0) return;
+
+            const month = new Date(order.createdAt).toLocaleString('fr-FR', {
+              month: 'short',
+              year: 'numeric',
+            });
+
+            if (!monthMap[month]) {
+              monthMap[month] = {
+                digital: 0,
+                physical: 0,
+                service: 0,
+                course: 0,
+                artist: 0,
+              };
+            }
+
+            // Répartir le revenu proportionnellement par type de produit
+            // Pour simplifier, on divise le montant total par le nombre de types
+            const revenuePerType = (Number(order.totalAmount) || 0) / order.productTypes.length;
+
+            order.productTypes.forEach(type => {
+              const typedType = type as keyof (typeof monthMap)[string];
+              if (typedType && typedType in monthMap[month]) {
+                monthMap[month][typedType] += revenuePerType;
+              }
+            });
+          });
+
+          // Si on n'a pas de données dans recentOrders, utiliser les données de productPerformance
+          // pour créer une distribution approximative
+          if (Object.keys(monthMap).length === 0 && data.productPerformance.length > 0) {
+            // Créer une entrée pour le mois actuel basée sur les performances totales
+            const currentMonth = new Date().toLocaleString('fr-FR', {
+              month: 'short',
+              year: 'numeric',
+            });
+            monthMap[currentMonth] = {
+              digital: 0,
+              physical: 0,
+              service: 0,
+              course: 0,
+              artist: 0,
+            };
+
+            data.productPerformance.forEach(perf => {
+              const type = perf.type as keyof (typeof monthMap)[string];
+              if (type && type in monthMap[currentMonth]) {
+                monthMap[currentMonth][type] = perf.revenue;
+              }
+            });
+          }
+
+          // Convertir en tableau et trier
+          return Object.entries(monthMap)
+            .map(([month, data]) => ({
+              month,
+              ...data,
+            }))
+            .sort((a, b) => {
+              const dateA = new Date(a.month);
+              const dateB = new Date(b.month);
+              return dateA.getTime() - dateB.getTime();
+            });
+        })(),
+      };
+    },
+    [options?.period]
+  );
+
+  // Fonction de fallback pour récupérer les données depuis les tables/vues si la RPC n'existe pas
+  const fetchDashboardStatsFromTables = useCallback(
+    async (storeId: string, periodDays: number): Promise<OptimizedDashboardData | null> => {
+      try {
+        // Récupérer les données depuis les tables/vues matérialisées
+        const [
+          baseStatsResult,
+          ordersStatsResult,
+          customersStatsResult,
+          productPerformanceResult,
+          topProductsResult,
+          recentOrdersResult,
+        ] = await Promise.all([
+          supabase.from('dashboard_base_stats').select('*').eq('store_id', storeId).single(),
+          supabase.from('dashboard_orders_stats').select('*').eq('store_id', storeId).single(),
+          supabase.from('dashboard_customers_stats').select('*').eq('store_id', storeId).single(),
+          supabase.from('dashboard_product_performance').select('*').eq('store_id', storeId),
+          supabase.from('dashboard_top_products').select('*').eq('store_id', storeId).limit(5),
+          supabase
+            .from('dashboard_recent_orders')
+            .select('*')
+            .eq('store_id', storeId)
+            .limit(5)
+            .order('created_at', { ascending: false }),
+        ]);
+
+        // Transformer les données au format OptimizedDashboardData
+        const baseStats = baseStatsResult.data
+          ? {
+              totalProducts: baseStatsResult.data.total_products || 0,
+              activeProducts: baseStatsResult.data.active_products || 0,
+              digitalProducts: baseStatsResult.data.digital_products || 0,
+              physicalProducts: baseStatsResult.data.physical_products || 0,
+              serviceProducts: baseStatsResult.data.service_products || 0,
+              courseProducts: baseStatsResult.data.course_products || 0,
+              artistProducts: baseStatsResult.data.artist_products || 0,
+              avgProductPrice: baseStatsResult.data.avg_product_price || 0,
+            }
+          : null;
+
+        const ordersStats = ordersStatsResult.data
+          ? {
+              totalOrders: ordersStatsResult.data.total_orders || 0,
+              completedOrders: ordersStatsResult.data.completed_orders || 0,
+              pendingOrders: ordersStatsResult.data.pending_orders || 0,
+              cancelledOrders: ordersStatsResult.data.cancelled_orders || 0,
+              totalRevenue: ordersStatsResult.data.total_revenue || 0,
+              avgOrderValue: ordersStatsResult.data.avg_order_value || 0,
+              revenue30d: ordersStatsResult.data.revenue_30d || 0,
+              orders30d: ordersStatsResult.data.orders_30d || 0,
+              revenue7d: ordersStatsResult.data.revenue_7d || 0,
+              orders7d: ordersStatsResult.data.orders_7d || 0,
+              revenue90d: ordersStatsResult.data.revenue_90d || 0,
+              orders90d: ordersStatsResult.data.orders_90d || 0,
+            }
+          : null;
+
+        const customersStats = customersStatsResult.data
+          ? {
+              totalCustomers: customersStatsResult.data.total_customers || 0,
+              newCustomers30d: customersStatsResult.data.new_customers_30d || 0,
+              newCustomers7d: customersStatsResult.data.new_customers_7d || 0,
+              newCustomers90d: customersStatsResult.data.new_customers_90d || 0,
+              customersWithOrders: customersStatsResult.data.customers_with_orders || 0,
+            }
+          : null;
+
+        const productPerformance: ProductPerformance[] =
+          productPerformanceResult.data?.map(item => ({
+            type: item.product_type || '',
+            orders: item.orders || 0,
+            revenue: item.revenue || 0,
+            quantity: item.quantity || 0,
+            avgOrderValue: item.avg_order_value || 0,
+            productsSold: item.products_sold || 0,
+            orders30d: item.orders_30d || 0,
+            revenue30d: item.revenue_30d || 0,
+          })) || [];
+
+        const topProducts: TopProduct[] =
+          topProductsResult.data?.map(item => ({
+            id: item.product_id || '',
+            name: item.product_name || '',
+            price: item.price || 0,
+            imageUrl: item.image_url,
+            productType: item.product_type || '',
+            revenue: item.total_revenue || 0,
+            quantity: item.total_quantity || 0,
+            orderCount: item.order_count || 0,
+          })) || [];
+
+        const recentOrders: RecentOrder[] =
+          recentOrdersResult.data?.map(item => ({
+            id: item.order_id || '',
+            orderNumber: item.order_number || '',
+            totalAmount: item.total_amount || 0,
+            status: item.status || '',
+            createdAt: item.created_at || new Date().toISOString(),
+            customer:
+              item.customer_id && item.customer_name && item.customer_email
+                ? {
+                    id: item.customer_id,
+                    name: item.customer_name,
+                    email: item.customer_email,
+                  }
+                : null,
+            productTypes: item.product_types || [],
+          })) || [];
+
+        return {
+          baseStats,
+          ordersStats,
+          customersStats,
+          productPerformance,
+          topProducts,
+          recentOrders,
+          generatedAt: new Date().toISOString(),
+          periodDays,
+        };
+      } catch (error) {
+        logger.error('❌ [useDashboardStatsOptimized] Erreur fallback tables:', error);
+        return null;
+      }
+    },
+    []
+  );
 
   const fetchStats = useCallback(async () => {
     // Vérifier l'authentification avant toute requête
@@ -409,7 +716,9 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     }
 
     if (!store) {
-      logger.info('⚠️ [useDashboardStatsOptimized] Pas de boutique, utilisation des stats par défaut');
+      logger.info(
+        '⚠️ [useDashboardStatsOptimized] Pas de boutique, utilisation des stats par défaut'
+      );
       setStats(getFallbackStats());
       setLoading(false);
       return;
@@ -417,11 +726,14 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
     try {
       setError(null);
-      logger.info('🔄 [useDashboardStatsOptimized] Récupération des stats optimisées pour la boutique:', {
-        storeId: store.id,
-        storeName: store.name,
-        period: options?.period,
-      });
+      logger.info(
+        '🔄 [useDashboardStatsOptimized] Récupération des stats optimisées pour la boutique:',
+        {
+          storeId: store.id,
+          storeName: store.name,
+          period: options?.period,
+        }
+      );
 
       const startTime = performance.now();
 
@@ -435,10 +747,11 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
       try {
         const result = await withAuthRetry(
-          () => supabase.rpc('get_dashboard_stats_rpc', {
-            store_id: store.id,
-            period_days: periodDays,
-          }),
+          () =>
+            supabase.rpc('get_dashboard_stats_rpc', {
+              store_id: store.id,
+              period_days: periodDays,
+            }),
           'chargement stats dashboard'
         );
         data = result.data;
@@ -459,7 +772,10 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
             data = retryResult.data;
             rpcError = retryResult.error;
           } catch (retryError: Error | unknown) {
-            logger.error('❌ [useDashboardStatsOptimized] Échec de la nouvelle tentative:', retryError);
+            logger.error(
+              '❌ [useDashboardStatsOptimized] Échec de la nouvelle tentative:',
+              retryError
+            );
             throw new Error('SESSION_RETRY_FAILED');
           }
         } else {
@@ -473,8 +789,30 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
       if (rpcError) {
         // Vérifier si c'est une erreur de base de données (pas de RPC)
-        if (rpcError.message?.includes('function') && rpcError.message?.includes('does not exist')) {
-          logger.warn('⚠️ [useDashboardStatsOptimized] Fonction RPC inexistante, fallback vers ancienne méthode');
+        if (
+          rpcError.message?.includes('function') &&
+          (rpcError.message?.includes('does not exist') ||
+            rpcError.message?.includes('not found') ||
+            rpcError.message?.includes('schema cache'))
+        ) {
+          logger.warn(
+            '⚠️ [useDashboardStatsOptimized] Fonction RPC inexistante, fallback vers requêtes directes'
+          );
+          // Fallback : récupérer les données depuis les tables/vues matérialisées
+          try {
+            const fallbackData = await fetchDashboardStatsFromTables(store.id, periodDays);
+            if (fallbackData) {
+              logger.info(
+                `✅ [useDashboardStatsOptimized] Stats chargées via fallback en ${(performance.now() - startTime).toFixed(0)}ms`
+              );
+              const transformedStats = transformOptimizedData(fallbackData);
+              setStats(transformedStats);
+              setLoading(false);
+              return;
+            }
+          } catch (fallbackError) {
+            logger.error('❌ [useDashboardStatsOptimized] Erreur fallback:', fallbackError);
+          }
           throw new Error(`RPC_INEXISTANTE: ${rpcError.message}`);
         }
 
@@ -490,7 +828,9 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       }
 
       if (data) {
-        logger.info(`✅ [useDashboardStatsOptimized] Stats chargées en ${loadTime.toFixed(0)}ms (1 requête RPC)`);
+        logger.info(
+          `✅ [useDashboardStatsOptimized] Stats chargées en ${loadTime.toFixed(0)}ms (1 requête RPC)`
+        );
 
         // Transformer les données optimisées vers le format existant
         const transformedStats = transformOptimizedData(data);
@@ -524,7 +864,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
         setError('Service temporairement indisponible. Utilisation des données de démonstration.');
       } else if (errorMessage.includes('RPC_PERMISSIONS')) {
         logger.warn('⚠️ Problème de permissions RPC');
-        setError('Problème d\'autorisation. Veuillez contacter le support.');
+        setError("Problème d'autorisation. Veuillez contacter le support.");
       } else if (errorMessage.includes('RPC_ERROR') || errorMessage.includes('GROUP BY')) {
         logger.warn('⚠️ Erreur dans la base de données');
         setError('Erreur technique temporaire. Les données peuvent ne pas être à jour.');
@@ -539,7 +879,8 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       if (!errorMessage.includes('SESSION_EXPIRED')) {
         toast({
           title: 'Erreur de chargement',
-          description: 'Utilisation des données de démonstration. Les données peuvent ne pas être à jour.',
+          description:
+            'Utilisation des données de démonstration. Les données peuvent ne pas être à jour.',
           variant: 'destructive',
         });
       }

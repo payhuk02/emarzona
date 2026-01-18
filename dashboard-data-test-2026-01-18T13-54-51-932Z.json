@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-01-18T13:54:51.932Z",
+  "summary": {
+    "total": 5,
+    "passed": 2,
+    "failed": 3,
+    "warnings": 0,
+    "successRate": "40.0%"
+  },
+  "tests": [
+    {
+      "name": "Connexion Supabase",
+      "success": true,
+      "message": "Connexion Supabase établie avec succès",
+      "details": {
+        "storesCount": 1
+      }
+    },
+    {
+      "name": "Existence des vues matérialisées",
+      "success": true,
+      "warning": false,
+      "message": "Toutes les vues matérialisées existent et contiennent des données",
+      "details": {
+        "dashboard_base_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_orders_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_customers_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_product_performance": {
+          "exists": true,
+          "hasData": false
+        },
+        "dashboard_top_products": {
+          "exists": true,
+          "hasData": false
+        },
+        "dashboard_recent_orders": {
+          "exists": true,
+          "hasData": true
+        }
+      }
+    },
+    {
+      "name": "Fonction RPC get_dashboard_stats_rpc",
+      "success": false,
+      "message": "Échec de la fonction RPC: Could not find the function public.get_dashboard_stats_rpc(period_days, store_id) in the schema cache",
+      "details": {
+        "code": "PGRST202",
+        "details": "Searched for the function public.get_dashboard_stats_rpc with parameters period_days, store_id or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.",
+        "hint": "Perhaps you meant to call the function public.get_dashboard_stats_rpc(period_days_param, store_id_param)",
+        "message": "Could not find the function public.get_dashboard_stats_rpc(period_days, store_id) in the schema cache"
+      }
+    },
+    {
+      "name": "Cohérence des données",
+      "success": false,
+      "message": "Aucune donnée RPC pour tester la cohérence"
+    },
+    {
+      "name": "Complétude des données",
+      "success": false,
+      "message": "Aucune donnée RPC récupérée"
+    }
+  ]
+}

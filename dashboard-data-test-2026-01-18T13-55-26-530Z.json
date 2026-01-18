@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-01-18T13:55:26.530Z",
+  "summary": {
+    "total": 5,
+    "passed": 3,
+    "failed": 2,
+    "warnings": 0,
+    "successRate": "60.0%"
+  },
+  "tests": [
+    {
+      "name": "Connexion Supabase",
+      "success": true,
+      "message": "Connexion Supabase établie avec succès",
+      "details": {
+        "storesCount": 1
+      }
+    },
+    {
+      "name": "Existence des vues matérialisées",
+      "success": true,
+      "warning": false,
+      "message": "Toutes les vues matérialisées existent et contiennent des données",
+      "details": {
+        "dashboard_base_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_orders_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_customers_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_product_performance": {
+          "exists": true,
+          "hasData": false
+        },
+        "dashboard_top_products": {
+          "exists": true,
+          "hasData": false
+        },
+        "dashboard_recent_orders": {
+          "exists": true,
+          "hasData": true
+        }
+      }
+    },
+    {
+      "name": "Fonction RPC get_dashboard_stats_rpc",
+      "success": true,
+      "message": "Fonction RPC fonctionne correctement (données vides)",
+      "details": {
+        "storeId": "9ca30045-dd35-4667-9e94-ccc020b16abe",
+        "dataKeys": [
+          "baseStats",
+          "ordersStats",
+          "customersStats",
+          "productPerformance",
+          "topProducts",
+          "recentOrders",
+          "generatedAt",
+          "periodDays"
+        ],
+        "hasData": false,
+        "sampleData": {
+          "baseStats": {
+            "totalProducts": 0,
+            "activeProducts": 0,
+            "digitalProducts": 0,
+            "physicalProducts": 0,
+            "serviceProducts": 0,
+            "courseProducts": 0,
+            "artistProducts": 0,
+            "avgProductPrice": null
+          },
+          "ordersCount": 0,
+          "productsCount": 0
+        }
+      }
+    },
+    {
+      "name": "Cohérence des données",
+      "success": false,
+      "message": "Aucune donnée RPC pour tester la cohérence"
+    },
+    {
+      "name": "Complétude des données",
+      "success": false,
+      "message": "Aucune donnée RPC récupérée"
+    }
+  ]
+}

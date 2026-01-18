@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-01-18T13:25:51.093Z",
+  "summary": {
+    "total": 5,
+    "passed": 2,
+    "failed": 3,
+    "warnings": 0,
+    "successRate": "40.0%"
+  },
+  "tests": [
+    {
+      "name": "Connexion Supabase",
+      "success": true,
+      "message": "Connexion Supabase établie avec succès",
+      "details": {
+        "storesCount": 1
+      }
+    },
+    {
+      "name": "Existence des vues matérialisées",
+      "success": true,
+      "warning": false,
+      "message": "Toutes les vues matérialisées existent et contiennent des données",
+      "details": {
+        "dashboard_base_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_orders_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_customers_stats": {
+          "exists": true,
+          "hasData": true
+        },
+        "dashboard_product_performance": {
+          "exists": true,
+          "hasData": false
+        },
+        "dashboard_top_products": {
+          "exists": true,
+          "hasData": false
+        },
+        "dashboard_recent_orders": {
+          "exists": true,
+          "hasData": true
+        }
+      }
+    },
+    {
+      "name": "Fonction RPC get_dashboard_stats_rpc",
+      "success": false,
+      "message": "Échec de la fonction RPC: column \"dashboard_recent_orders.created_at\" must appear in the GROUP BY clause or be used in an aggregate function",
+      "details": {
+        "code": "42803",
+        "details": null,
+        "hint": null,
+        "message": "column \"dashboard_recent_orders.created_at\" must appear in the GROUP BY clause or be used in an aggregate function"
+      }
+    },
+    {
+      "name": "Cohérence des données",
+      "success": false,
+      "message": "Aucune donnée RPC pour tester la cohérence"
+    },
+    {
+      "name": "Complétude des données",
+      "success": false,
+      "message": "Aucune donnée RPC récupérée"
+    }
+  ]
+}
