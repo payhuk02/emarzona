@@ -27,7 +27,7 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
   const {
     autoRetry = true,
     retryInterval = 30000, // 30 secondes
-    showToasts = true
+    showToasts = true,
   } = options;
 
   const { toast } = useToast();
@@ -37,7 +37,7 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
     isBackendDown: false,
     pendingActions: 0,
     lastSyncTime: null,
-    connectionStatus: navigator.onLine ? 'online' : 'offline'
+    connectionStatus: navigator.onLine ? 'online' : 'offline',
   });
 
   // Met à jour les statistiques de queue
@@ -46,7 +46,7 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
       const stats = await localQueue.getQueueStats();
       setState(prev => ({
         ...prev,
-        pendingActions: stats.pending
+        pendingActions: stats.pending,
       }));
     } catch (error) {
       logger.error('Erreur récupération stats queue:', error);
@@ -61,8 +61,8 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
         method: 'GET',
         cache: 'no-cache',
         headers: {
-          'Cache-Control': 'no-cache'
-        }
+          'Cache-Control': 'no-cache',
+        },
       });
 
       return response.ok;
@@ -87,7 +87,7 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
       ...prev,
       isOffline: !isOnline,
       isBackendDown: !backendUp,
-      connectionStatus: newStatus
+      connectionStatus: newStatus,
     }));
 
     // Si on revient en ligne, déclencher une sync
@@ -100,14 +100,14 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
         if (showToasts) {
           if (result.success) {
             toast({
-              title: "Synchronisation réussie",
+              title: 'Synchronisation réussie',
               description: `${result.synced} actions synchronisées`,
             });
           } else {
             toast({
-              title: "Synchronisation partielle",
+              title: 'Synchronisation partielle',
               description: `${result.synced} réussis, ${result.failed} échoués`,
-              variant: "destructive"
+              variant: 'destructive',
             });
           }
         }
@@ -115,98 +115,99 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
         setState(prev => ({
           ...prev,
           lastSyncTime: new Date().toISOString(),
-          connectionStatus: 'online'
+          connectionStatus: 'online',
         }));
-
       } catch (error) {
         logger.error('Erreur sync automatique:', error);
         setState(prev => ({ ...prev, connectionStatus: 'backend_down' }));
       }
     }
-
   }, [checkBackendHealth, showToasts, toast]);
 
   // Fonction principale pour exécuter une action
-  const executeAction = useCallback(async <T,>(
-    actionType: ActionType,
-    storeId: string,
-    payload: Record<string, unknown>,
-    onlineAction: () => Promise<T>,
-    options: {
-      priority?: number;
-      fallbackValue?: T;
-      skipOfflineQueue?: boolean;
-    } = {}
-  ): Promise<T | null> => {
-    const { priority = 3, fallbackValue = null, skipOfflineQueue = false } = options;
+  const executeAction = useCallback(
+    async <T>(
+      actionType: ActionType,
+      storeId: string,
+      payload: Record<string, unknown>,
+      onlineAction: () => Promise<T>,
+      options: {
+        priority?: number;
+        fallbackValue?: T;
+        skipOfflineQueue?: boolean;
+      } = {}
+    ): Promise<T | null> => {
+      const { priority = 3, fallbackValue = null, skipOfflineQueue = false } = options;
 
-    // Essayer d'abord en ligne
-    if (state.connectionStatus === 'online') {
-      try {
-        const result = await onlineAction();
-        return result;
-      } catch (error) {
-        logger.warn(`Action ${actionType} échouée en ligne, basculement offline:`, error);
+      // Essayer d'abord en ligne
+      if (state.connectionStatus === 'online') {
+        try {
+          const result = await onlineAction();
+          return result;
+        } catch (error) {
+          logger.warn(`Action ${actionType} échouée en ligne, basculement offline:`, error);
 
-        // Marquer le backend comme down
-        setState(prev => ({
-          ...prev,
-          isBackendDown: true,
-          connectionStatus: 'backend_down'
-        }));
+          // Marquer le backend comme down
+          setState(prev => ({
+            ...prev,
+            isBackendDown: true,
+            connectionStatus: 'backend_down',
+          }));
 
-        // Si on ne doit pas utiliser la queue offline, retourner la valeur de fallback
-        if (skipOfflineQueue) {
-          if (showToasts) {
-            toast({
-              title: "Action temporairement indisponible",
-              description: "Veuillez réessayer dans quelques instants",
-              variant: "destructive"
-            });
+          // Si on ne doit pas utiliser la queue offline, retourner la valeur de fallback
+          if (skipOfflineQueue) {
+            if (showToasts) {
+              toast({
+                title: 'Action temporairement indisponible',
+                description: 'Veuillez réessayer dans quelques instants',
+                variant: 'destructive',
+              });
+            }
+            return fallbackValue;
           }
-          return fallbackValue;
         }
       }
-    }
 
-    // Mode offline - ajouter à la queue locale
-    try {
-      await localQueue.addAction(actionType, storeId, payload, priority);
+      // Mode offline - ajouter à la queue locale
+      try {
+        await localQueue.addAction(actionType, storeId, payload, priority);
 
-      if (showToasts) {
-        toast({
-          title: "Action enregistrée",
-          description: "Elle sera synchronisée automatiquement dès que possible",
-        });
+        if (showToasts) {
+          toast({
+            title: 'Action enregistrée',
+            description: 'Elle sera synchronisée automatiquement dès que possible',
+          });
+        }
+
+        // Mettre à jour les stats
+        await updateQueueStats();
+
+        return fallbackValue;
+      } catch (error) {
+        logger.error(`Erreur ajout action offline ${actionType}:`, error);
+
+        if (showToasts) {
+          toast({
+            title: 'Erreur',
+            description: "Impossible d'enregistrer l'action",
+            variant: 'destructive',
+          });
+        }
+
+        return fallbackValue;
       }
-
-      // Mettre à jour les stats
-      await updateQueueStats();
-
-      return fallbackValue;
-    } catch (error) {
-      logger.error(`Erreur ajout action offline ${actionType}:`, error);
-
-      if (showToasts) {
-        toast({
-          title: "Erreur",
-          description: "Impossible d'enregistrer l'action",
-          variant: "destructive"
-        });
-      }
-
-      return fallbackValue;
-    }
-  }, [state.connectionStatus, showToasts, toast, updateQueueStats]);
+    },
+    [state.connectionStatus, showToasts, toast, updateQueueStats]
+  );
 
   // Force la synchronisation
   const forceSync = useCallback(async () => {
     if (state.connectionStatus === 'offline') {
       if (showToasts) {
         toast({
-          title: "Hors ligne",
-          description: "Veuillez vérifier votre connexion internet",
-          variant: "destructive"
+          title: 'Hors ligne',
+          description: 'Veuillez vérifier votre connexion internet',
+          variant: 'destructive',
         });
       }
       return;
@@ -220,14 +221,14 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
       if (showToasts) {
         if (result.success) {
           toast({
-            title: "Synchronisation réussie",
+            title: 'Synchronisation réussie',
             description: `${result.synced} actions synchronisées`,
           });
         } else {
           toast({
-            title: "Synchronisation partielle",
+            title: 'Synchronisation partielle',
             description: `${result.synced} réussis, ${result.failed} échoués`,
-            variant: "destructive"
+            variant: 'destructive',
           });
         }
       }
@@ -235,20 +236,19 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
       setState(prev => ({
         ...prev,
         lastSyncTime: new Date().toISOString(),
-        connectionStatus: result.success ? 'online' : 'backend_down'
+        connectionStatus: result.success ? 'online' : 'backend_down',
       }));
 
       await updateQueueStats();
-
     } catch (error) {
       logger.error('Erreur sync forcé:', error);
       setState(prev => ({ ...prev, connectionStatus: 'backend_down' }));
 
       if (showToasts) {
         toast({
-          title: "Erreur de synchronisation",
-          description: "Veuillez réessayer plus tard",
-          variant: "destructive"
+          title: 'Erreur de synchronisation',
+          description: 'Veuillez réessayer plus tard',
+          variant: 'destructive',
         });
       }
     }
@@ -265,21 +265,20 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
 
       if (showToasts && result.failed > 0) {
         toast({
-          title: "Retry terminé",
+          title: 'Retry terminé',
           description: `${result.synced} actions retentées avec succès`,
         });
       }
 
       await updateQueueStats();
-
     } catch (error) {
       logger.error('Erreur retry:', error);
 
       if (showToasts) {
         toast({
-          title: "Erreur retry",
-          description: "Impossible de retenter les actions",
-          variant: "destructive"
+          title: 'Erreur retry',
+          description: 'Impossible de retenter les actions',
+          variant: 'destructive',
         });
       }
     }
@@ -327,8 +326,6 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
     // Utilitaires
     isActionable: state.connectionStatus === 'online',
     hasPendingActions: state.pendingActions > 0,
-    canRetry: state.connectionStatus === 'online' && state.pendingActions > 0
+    canRetry: state.connectionStatus === 'online' && state.pendingActions > 0,
   };
 };
-
-export { useOfflineMode };

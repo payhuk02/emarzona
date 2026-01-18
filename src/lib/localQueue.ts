@@ -37,9 +37,7 @@ export interface LocalAction {
   priority: number; // 1 = low, 5 = critical
 }
 
-interface LocalQueueDB extends IDBDatabase {
-  // TypeScript enhancement for our custom DB
-}
+type LocalQueueDB = IDBDatabase;
 
 class LocalQueueManager {
   private db: LocalQueueDB | null = null;
@@ -67,7 +65,7 @@ class LocalQueueManager {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result as LocalQueueDB;
         this.createObjectStore(db);
       };
@@ -96,7 +94,7 @@ class LocalQueueManager {
   /**
    * Ajoute une action à la queue locale
    */
-  async addAction(action_type: ActionType,
+  async addAction(
     action_type: ActionType,
     store_id: string,
     payload: Record<string, unknown>,
@@ -118,7 +116,7 @@ class LocalQueueManager {
       created_at: new Date().toISOString(),
       synced: false,
       retry_count: 0,
-      priority
+      priority,
     };
 
     // Vérifier la taille de la queue avant d'ajouter
@@ -311,8 +309,8 @@ class LocalQueueManager {
 
       request.onsuccess = () => {
         const actions = request.result as LocalAction[];
-        const failedActions = actions.filter(action =>
-          !action.synced && action.retry_count >= maxRetries
+        const failedActions = actions.filter(
+          action => !action.synced && action.retry_count >= maxRetries
         );
         resolve(failedActions);
       };
@@ -376,7 +374,7 @@ class LocalQueueManager {
           synced: actions.filter(a => a.synced).length,
           failed: actions.filter(a => !a.synced && a.retry_count >= this.MAX_RETRY_COUNT).length,
           byType: {} as Record<string, number>,
-          byStore: {} as Record<string, number>
+          byStore: {} as Record<string, number>,
         };
 
         // Statistiques par type
@@ -408,7 +406,9 @@ class LocalQueueManager {
         await this.deleteAction(action.id);
       }
 
-      logger.warn(`Queue size limit atteint, ${syncedActions.length} actions synchronisées supprimées`);
+      logger.warn(
+        `Queue size limit atteint, ${syncedActions.length} actions synchronisées supprimées`
+      );
     }
   }
 

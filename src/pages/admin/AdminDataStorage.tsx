@@ -10,7 +10,6 @@ import {
   Database,
   HardDrive,
   Cloud,
-  Sync,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -21,7 +20,7 @@ import {
   Activity,
   Archive,
   Wifi,
-  WifiOff
+  WifiOff,
 } from 'lucide-react';
 import { hybridStorage } from '@/lib/storage/hybrid-storage-service';
 import { backupService } from '@/lib/storage/backup-service';
@@ -73,7 +72,7 @@ const AdminDataStorage = () => {
         hybridStorage.getStorageStats(),
         backupService.getBackupStats(),
         syncService.getSyncStats(),
-        recoveryService.getHealthStatus()
+        recoveryService.getHealthStatus(),
       ]);
 
       setStorageStats(stats);
@@ -83,9 +82,9 @@ const AdminDataStorage = () => {
     } catch (error) {
       logger.error('Erreur chargement données stockage:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les données de stockage",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de charger les données de stockage',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -99,7 +98,6 @@ const AdminDataStorage = () => {
     return () => clearInterval(interval);
   }, [loadData]);
 
-
   // Actions principales
   const handleFullSync = async () => {
     setSyncInProgress(true);
@@ -109,17 +107,17 @@ const AdminDataStorage = () => {
       const totalErrors = results.reduce((sum, r) => sum + r.errors, 0);
 
       toast({
-        title: "Synchronisation terminée",
+        title: 'Synchronisation terminée',
         description: `${totalSynced} éléments synchronisés, ${totalErrors} erreurs`,
-        variant: totalErrors > 0 ? "destructive" : "default"
+        variant: totalErrors > 0 ? 'destructive' : 'default',
       });
 
       await loadData();
     } catch (error) {
       toast({
-        title: "Erreur de synchronisation",
+        title: 'Erreur de synchronisation',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setSyncInProgress(false);
@@ -131,20 +129,20 @@ const AdminDataStorage = () => {
     try {
       const backupId = await backupService.createManualBackup(
         `Sauvegarde manuelle ${new Date().toLocaleString('fr-FR')}`,
-        'Créée depuis l\'interface d\'administration'
+        "Créée depuis l'interface d'administration"
       );
 
       toast({
-        title: "Sauvegarde créée",
+        title: 'Sauvegarde créée',
         description: `Sauvegarde ${backupId} créée avec succès`,
       });
 
       await loadData();
     } catch (error) {
       toast({
-        title: "Erreur de sauvegarde",
+        title: 'Erreur de sauvegarde',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
     } finally {
       setBackupInProgress(false);
@@ -154,13 +152,13 @@ const AdminDataStorage = () => {
   const handleEmergencyBackup = async () => {
     try {
       const backupId = await backupService.createEmergencyBackup(
-        'Sauvegarde d\'urgence demandée depuis l\'administration'
+        "Sauvegarde d'urgence demandée depuis l'administration"
       );
 
       toast({
         title: "Sauvegarde d'urgence créée",
         description: `Sauvegarde ${backupId} créée`,
-        variant: "destructive"
+        variant: 'destructive',
       });
 
       await loadData();
@@ -168,7 +166,7 @@ const AdminDataStorage = () => {
       toast({
         title: "Erreur sauvegarde d'urgence",
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
   };
@@ -183,7 +181,7 @@ const AdminDataStorage = () => {
 
   const getHealthBadge = (system: string, status: boolean | undefined) => {
     return (
-      <Badge variant={status ? "default" : "destructive"} className="flex items-center gap-1">
+      <Badge variant={status ? 'default' : 'destructive'} className="flex items-center gap-1">
         {status ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
         {system}
       </Badge>
@@ -202,23 +200,15 @@ const AdminDataStorage = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={handleFullSync}
-              disabled={syncInProgress}
-              variant="outline"
-            >
+            <Button onClick={handleFullSync} disabled={syncInProgress} variant="outline">
               {syncInProgress ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Sync className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 mr-2" />
               )}
               Sync Complète
             </Button>
-            <Button
-              onClick={handleManualBackup}
-              disabled={backupInProgress}
-              variant="outline"
-            >
+            <Button onClick={handleManualBackup} disabled={backupInProgress} variant="outline">
               {backupInProgress ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               ) : (
@@ -226,10 +216,7 @@ const AdminDataStorage = () => {
               )}
               Sauvegarde
             </Button>
-            <Button
-              onClick={handleEmergencyBackup}
-              variant="destructive"
-            >
+            <Button onClick={handleEmergencyBackup} variant="destructive">
               <AlertTriangle className="w-4 h-4 mr-2" />
               Urgence
             </Button>
@@ -242,8 +229,8 @@ const AdminDataStorage = () => {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Problèmes détectés</AlertTitle>
             <AlertDescription>
-              {healthStatus.activeFailures} problème(s) actif(s) détecté(s).
-              Vérifiez l'onglet Santé pour plus de détails.
+              {healthStatus.activeFailures} problème(s) actif(s) détecté(s). Vérifiez l'onglet Santé
+              pour plus de détails.
             </AlertDescription>
           </Alert>
         )}
@@ -269,26 +256,24 @@ const AdminDataStorage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {formatBytes((storageStats.indexeddb?.size || 0) + (storageStats.localstorage?.size || 0))}
+                    {formatBytes(
+                      (storageStats.indexeddb?.size || 0) + (storageStats.localstorage?.size || 0)
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    IndexedDB + localStorage
-                  </p>
+                  <p className="text-xs text-muted-foreground">IndexedDB + localStorage</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">État Sync</CardTitle>
-                  <Sync className="h-4 w-4 text-muted-foreground" />
+                  <RefreshCw className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-green-600">
                     {syncStats.queue?.pending || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    En attente
-                  </p>
+                  <p className="text-xs text-muted-foreground">En attente</p>
                 </CardContent>
               </Card>
 
@@ -298,12 +283,8 @@ const AdminDataStorage = () => {
                   <Archive className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {backupStats.total || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Total disponibles
-                  </p>
+                  <div className="text-2xl font-bold">{backupStats.total || 0}</div>
+                  <p className="text-xs text-muted-foreground">Total disponibles</p>
                 </CardContent>
               </Card>
 
@@ -315,7 +296,7 @@ const AdminDataStorage = () => {
                 <CardContent>
                   <div className="text-2xl font-bold">
                     {healthStatus.storage?.supabase?.available &&
-                     healthStatus.storage?.indexeddb ? (
+                    healthStatus.storage?.indexeddb ? (
                       <CheckCircle className="h-8 w-8 text-green-600" />
                     ) : (
                       <XCircle className="h-8 w-8 text-red-600" />
@@ -393,9 +374,17 @@ const AdminDataStorage = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Utilisation</span>
-                      <span>{((storageStats.indexeddb?.size || 0) / (500 * 1024 * 1024) * 100).toFixed(1)}%</span>
+                      <span>
+                        {(
+                          ((storageStats.indexeddb?.size || 0) / (500 * 1024 * 1024)) *
+                          100
+                        ).toFixed(1)}
+                        %
+                      </span>
                     </div>
-                    <Progress value={(storageStats.indexeddb?.size || 0) / (500 * 1024 * 1024) * 100} />
+                    <Progress
+                      value={((storageStats.indexeddb?.size || 0) / (500 * 1024 * 1024)) * 100}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -420,9 +409,17 @@ const AdminDataStorage = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Utilisation</span>
-                      <span>{((storageStats.localstorage?.size || 0) / (10 * 1024 * 1024) * 100).toFixed(1)}%</span>
+                      <span>
+                        {(
+                          ((storageStats.localstorage?.size || 0) / (10 * 1024 * 1024)) *
+                          100
+                        ).toFixed(1)}
+                        %
+                      </span>
                     </div>
-                    <Progress value={(storageStats.localstorage?.size || 0) / (10 * 1024 * 1024) * 100} />
+                    <Progress
+                      value={((storageStats.localstorage?.size || 0) / (10 * 1024 * 1024)) * 100}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -489,19 +486,24 @@ const AdminDataStorage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {syncStats.recentActivity?.slice(0, 5).map((activity: SyncActivity, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-2 border rounded">
-                      <span>{activity.collection}</span>
-                      <div className="flex gap-2">
-                        <Badge variant={activity.success ? "default" : "destructive"}>
-                          {activity.synced || 0} sync
-                        </Badge>
-                        <Badge variant="outline">
-                          {new Date(activity.timestamp).toLocaleTimeString()}
-                        </Badge>
+                  {syncStats.recentActivity
+                    ?.slice(0, 5)
+                    .map((activity: SyncActivity, index: number) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-2 border rounded"
+                      >
+                        <span>{activity.collection}</span>
+                        <div className="flex gap-2">
+                          <Badge variant={activity.success ? 'default' : 'destructive'}>
+                            {activity.synced || 0} sync
+                          </Badge>
+                          <Badge variant="outline">
+                            {new Date(activity.timestamp).toLocaleTimeString()}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  )) || <p className="text-muted-foreground">Aucune activité récente</p>}
+                    )) || <p className="text-muted-foreground">Aucune activité récente</p>}
                 </div>
               </CardContent>
             </Card>
@@ -582,8 +584,12 @@ const AdminDataStorage = () => {
                       )}
                       <span>Connexion Supabase</span>
                     </div>
-                    <Badge variant={healthStatus.storage?.supabase?.available ? "default" : "destructive"}>
-                      {healthStatus.storage?.supabase?.available ? "OK" : "HS"}
+                    <Badge
+                      variant={
+                        healthStatus.storage?.supabase?.available ? 'default' : 'destructive'
+                      }
+                    >
+                      {healthStatus.storage?.supabase?.available ? 'OK' : 'HS'}
                     </Badge>
                   </div>
 
@@ -592,8 +598,8 @@ const AdminDataStorage = () => {
                       <HardDrive className="h-5 w-5 text-blue-600" />
                       <span>IndexedDB</span>
                     </div>
-                    <Badge variant={healthStatus.storage?.indexeddb ? "default" : "destructive"}>
-                      {healthStatus.storage?.indexeddb ? "OK" : "HS"}
+                    <Badge variant={healthStatus.storage?.indexeddb ? 'default' : 'destructive'}>
+                      {healthStatus.storage?.indexeddb ? 'OK' : 'HS'}
                     </Badge>
                   </div>
                 </div>
@@ -603,7 +609,7 @@ const AdminDataStorage = () => {
                   <div className="space-y-2">
                     <h4 className="font-medium">Problèmes récents</h4>
                     {healthStatus.recentFailures?.map((failure: FailureEvent, index: number) => (
-                      <Alert key={index} variant={failure.resolved ? "default" : "destructive"}>
+                      <Alert key={index} variant={failure.resolved ? 'default' : 'destructive'}>
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>{failure.type}</AlertTitle>
                         <AlertDescription>{failure.description}</AlertDescription>
