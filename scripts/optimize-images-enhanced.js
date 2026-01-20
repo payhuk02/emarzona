@@ -160,7 +160,7 @@ function generateLazyLoadingCode(originalPath, optimizedPaths, originalWidth, or
   const sources = Object.entries(optimizedPaths)
     .filter(([format, _]) => format !== 'jpg') // Exclure le fallback de la source
     .map(([format, path]) => {
-      const type = OUTPUT_FORMATS[format as 'webp' | 'avif'].mime;
+      const type = OUTPUT_FORMATS[format].mime;
       const srcset = path.replace(/^public\//, '/'); // Assumer que ces chemins sont déjà en srcset ou de base
       return `<source srcset="${srcset}" type="${type}" />`;
     })
@@ -243,12 +243,12 @@ async function main() {
 
     for (const format of formatsToProcess) {
       // Vérifier si le format est valide
-      if (!OUTPUT_FORMATS[format as keyof typeof OUTPUT_FORMATS]) {
+      if (!OUTPUT_FORMATS[format]) {
         console.log(`   ❌ Format non supporté: ${format}`);
         continue;
       }
 
-      const ext = OUTPUT_FORMATS[format as keyof typeof OUTPUT_FORMATS].ext;
+      const ext = OUTPUT_FORMATS[format].ext;
       const outputPath = join(outputDir, `${baseName}${ext}`);
       
       const result = await optimizeImage(imagePath, outputPath, format, options.quality);

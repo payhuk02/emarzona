@@ -5,8 +5,12 @@
  * Utilisation: node scripts/extract-critical-css.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * CSS critique minimal pour FCP
@@ -120,7 +124,7 @@ ${CRITICAL_CSS}
 }
 
 // Exécuter si appelé directement
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     extractCriticalCSS();
     generateCriticalCSSHTML();
@@ -131,4 +135,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { extractCriticalCSS, CRITICAL_CSS };
+export { extractCriticalCSS, CRITICAL_CSS };
