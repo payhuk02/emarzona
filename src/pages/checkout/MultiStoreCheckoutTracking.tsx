@@ -24,7 +24,6 @@ import {
   XCircle,
   Clock,
   ExternalLink,
-  RefreshCw,
   ArrowLeft,
   Loader2,
   AlertCircle,
@@ -220,7 +219,7 @@ export default function MultiStoreCheckoutTracking() {
   const pendingCount = ordersWithUrls.filter(
     o => o.status === 'pending' || o.status === 'processing'
   ).length;
-  const failedCount = ordersWithUrls.filter(o => o.status === 'failed').length;
+  const _failedCount = ordersWithUrls.filter(o => o.status === 'failed').length;
   const totalAmount = ordersWithUrls.reduce((sum, o) => sum + o.amount, 0);
   const paidAmount = ordersWithUrls
     .filter(o => o.status === 'completed')

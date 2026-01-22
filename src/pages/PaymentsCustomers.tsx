@@ -1194,15 +1194,16 @@ export default function PaymentsCustomers() {
 
                     {/* Adresse depuis customers si pas dans transaction */}
                     {!selectedPayment.transaction?.shipping_address &&
-                      (selectedPayment.customers?.address || selectedPayment.customers?.city) && (
+                      (selectedPayment.customers?.full_name) && (
                         <div>
                           <label className="text-xs sm:text-sm font-medium text-muted-foreground">
                             Adresse client
                           </label>
                           <div className="text-[10px] sm:text-xs md:text-sm space-y-1">
-                            {selectedPayment.customers.address && (
+                            {/* Address fields removed - not available in customers table */}
+                            {/* {selectedPayment.customers.address && (
                               <p>{selectedPayment.customers.address}</p>
-                            )}
+                            )} */}
                             {[
                               selectedPayment.customers.postal_code,
                               selectedPayment.customers.city,

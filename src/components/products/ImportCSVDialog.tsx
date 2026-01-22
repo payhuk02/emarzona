@@ -29,9 +29,19 @@ import {
   Loader2,
   Download,
   X,
+  Eye,
+  ChevronLeft,
+  FileDown,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import Papa from "papaparse";
 import { validateProductsImport } from "@/lib/validation/productSchemas";
+import {
+  previewImport,
+  ImportPreviewResult,
+  exportImportErrorsToCSV,
+  exportPreviewResultsToCSV
+} from "@/lib/import-export/import-export";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/hooks/useProducts";
 import type { z } from "zod";
@@ -51,7 +61,13 @@ type ValidationResult = {
 interface ImportCSVDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImportConfirmed: (products: Product[]) => Promise<void>;
+  onImportConfirmed: (
+    products: Product[], 
+    options?: { 
+      onProgress?: (progress: { imported: number; total: number; percentage: number }) => void;
+      onCancel?: () => boolean;
+    }
+  ) => Promise<void>;
 }
 
 const ImportCSVDialogComponent = ({
@@ -64,13 +80,29 @@ const ImportCSVDialogComponent = ({
 
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ imported: number; total: number; percentage: number } | null>(null);
   const [parsedData, setParsedData] = useState<Papa.ParseResult<unknown> | null>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [step, setStep] = useState<'upload' | 'preview'>('upload');
+  const [previewResult, setPreviewResult] = useState<ImportPreviewResult | null>(null);
+  const [step, setStep] = useState<'upload' | 'preview' | 'confirm'>('upload');
+  const [importCancelled, setImportCancelled] = useState(false);
+  const importCancelledRef = useRef(false);
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Validation taille fichier (10MB max)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: "Fichier trop volumineux",
+        description: `La taille maximum est de ${MAX_FILE_SIZE / 1024 / 1024}MB. Votre fichier fait ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setParsing(true);
     setStep('preview');
@@ -81,6 +113,18 @@ const ImportCSVDialogComponent = ({
       transformHeader: (header) => header.trim(),
       complete: (results) => {
         setParsedData(results);
+        
+        // Validation nombre de produits (1000 max)
+        const MAX_PRODUCTS = 1000;
+        if (results.data.length > MAX_PRODUCTS) {
+          setParsing(false);
+          toast({
+            title: "Trop de produits",
+            description: `Maximum ${MAX_PRODUCTS} produits par import. Votre fichier contient ${results.data.length} produits`,
+            variant: "destructive",
+          });
+          return;
+        }
         
         // Valider les données
         const validation = validateProductsImport(results.data);
@@ -111,30 +155,94 @@ const ImportCSVDialogComponent = ({
     });
   }, []); // Note: toast est stable, setParsing, setStep, setParsedData, setValidationResult sont stables
 
-  const handleConfirmImport = useCallback(async () => {
-    if (!validationResult || validationResult.successCount === 0) return;
+  const handleCancelImport = useCallback(() => {
+    importCancelledRef.current = true;
+    setImportCancelled(true);
+    setImporting(false);
+    toast({
+      title: "Import annulé",
+      description: "L'import a été annulé. Les produits déjà importés ont été sauvegardés.",
+      variant: "default",
+    });
+  }, [toast]);
 
-    setImporting(true);
+  const handlePreviewImport = useCallback(async () => {
+    if (!parsedData?.data || !Array.isArray(parsedData.data)) return;
+
+    setPreviewing(true);
     try {
-      const validProducts = validationResult.successes.map((s: ValidationSuccess) => s.data) as Product[];
-      await onImportConfirmed(validProducts);
-      
+      // Utiliser le preview mode pour analyser les données
+      const result = await previewImport('', 'products', parsedData.data);
+      setPreviewResult(result);
+      setStep('confirm');
+
+      toast({
+        title: "Analyse terminée",
+        description: `${result.validRows} valide(s), ${result.invalidRows} erreur(s)`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur d'analyse",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setPreviewing(false);
+    }
+  }, [parsedData, toast]);
+
+  const handleConfirmImport = useCallback(async () => {
+    if (!previewResult || previewResult.validRows === 0) return;
+
+    // Réinitialiser le flag d'annulation
+    importCancelledRef.current = false;
+    setImportCancelled(false);
+    setImporting(true);
+    setImportProgress({ imported: 0, total: previewResult.validRows, percentage: 0 });
+
+    try {
+      const validProducts = previewResult.validationResults
+        .filter(r => r.isValid && r.data)
+        .map(r => r.data) as Product[];
+
+      // Passer le callback de progression et le flag d'annulation
+      await onImportConfirmed(validProducts, {
+        onProgress: (progress) => {
+          if (!importCancelledRef.current) {
+            setImportProgress(progress);
+          }
+        },
+        onCancel: () => importCancelledRef.current,
+      });
+
+      // Vérifier si l'import a été annulé
+      if (importCancelledRef.current) {
+        return;
+      }
+
       toast({
         title: "Import réussi",
         description: `${validProducts.length} produit(s) importé(s) avec succès`,
       });
-      
+
       handleClose();
     } catch (error) {
+      if (importCancelledRef.current) {
+        return; // Ne pas afficher d'erreur si annulé
+      }
+
+      const errorMessage = error instanceof Error ? error.message : "Impossible d'importer les produits";
       toast({
         title: "Erreur d'import",
-        description: "Impossible d'importer les produits",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setImporting(false);
+      setImportProgress(null);
+      importCancelledRef.current = false;
     }
-  }, [validationResult, onImportConfirmed]); // Note: toast est stable
+  }, [previewResult, onImportConfirmed, toast]);
 
   const handleClose = useCallback(() => {
     setParsedData(null);
@@ -349,6 +457,76 @@ const ImportCSVDialogComponent = ({
                     )}
                   </div>
                 )}
+
+                {/* Résumé du preview */}
+                {step === 'confirm' && previewResult && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{previewResult.validRows}</div>
+                        <div className="text-sm text-green-800">Valides</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">{previewResult.invalidRows}</div>
+                        <div className="text-sm text-red-800">Erreurs</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{previewResult.categoriesFound.length}</div>
+                        <div className="text-sm text-blue-800">Catégories</div>
+                      </div>
+                    </div>
+
+                    {previewResult.invalidRows > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-red-800">Erreurs détectées :</h4>
+                        <div className="max-h-32 overflow-y-auto space-y-1">
+                          {previewResult.validationResults
+                            .filter(r => !r.isValid)
+                            .slice(0, 5)
+                            .map(result => (
+                              <div key={result.row} className="text-sm text-red-700 bg-red-50 p-2 rounded">
+                                Ligne {result.row}: {result.errors.map(e => e.message).join(', ')}
+                              </div>
+                            ))}
+                        </div>
+                        {previewResult.invalidRows > 5 && (
+                          <p className="text-sm text-muted-foreground">
+                            ... et {previewResult.invalidRows - 5} autres erreurs
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {previewResult.categoriesFound.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-blue-800">Catégories trouvées :</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {previewResult.categoriesFound.map(cat => (
+                            <Badge
+                              key={cat.name}
+                              variant={cat.categoryId ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {cat.name} ({cat.count})
+                              {cat.categoryId ? ' ✓' : ' ⚠'}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Barre de progression pendant l'import */}
+                {importing && importProgress && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Import en cours...</span>
+                      <span className="font-medium">{importProgress.imported} / {importProgress.total} ({importProgress.percentage}%)</span>
+                    </div>
+                    <Progress value={importProgress.percentage} className="w-full" />
+                  </div>
+                )}
               </>
             ) : null}
           </div>
@@ -373,22 +551,24 @@ const ImportCSVDialogComponent = ({
                 <X className="h-4 w-4 mr-2" />
                 Annuler
               </Button>
-              <Button
-                onClick={handleConfirmImport}
-                disabled={parsing || importing || !validationResult || validationResult.successCount === 0}
-              >
-                {importing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Import en cours...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Importer {validationResult?.successCount || 0} produit(s)
-                  </>
-                )}
-              </Button>
+              {importing ? (
+                <Button
+                  onClick={handleCancelImport}
+                  variant="destructive"
+                  disabled={!importing}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Annuler l'import
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleConfirmImport}
+                  disabled={parsing || importing || !validationResult || validationResult.successCount === 0}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importer {validationResult?.successCount || 0} produit(s)
+                </Button>
+              )}
             </>
           )}
         </DialogFooter>

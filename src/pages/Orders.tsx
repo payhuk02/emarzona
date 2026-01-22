@@ -120,8 +120,10 @@ const Orders = () => {
         order.customers?.name?.toLowerCase().includes(searchLower) ||
         order.customers?.email?.toLowerCase().includes(searchLower) ||
         order.customers?.phone?.toLowerCase().includes(searchLower) ||
-        order.customers?.address?.toLowerCase().includes(searchLower) ||
-        order.customers?.city?.toLowerCase().includes(searchLower) ||
+        // Address search removed - field not available in customers table
+        // order.customers?.address?.toLowerCase().includes(searchLower) ||
+        // City search removed - field not available in customers table
+        // order.customers?.city?.toLowerCase().includes(searchLower) ||
         order.customers?.postal_code?.toLowerCase().includes(searchLower) ||
         order.customers?.country?.toLowerCase().includes(searchLower) ||
         (order.notes && order.notes.toLowerCase().includes(searchLower)) ||

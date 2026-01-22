@@ -56,10 +56,12 @@ export const exportOrdersToCSV = (orders: Order[], filename?: string) => {
   const data = orders.map(order => {
     // Adresse client complète
     const customerAddress = [
-      order.customers?.address,
-      order.customers?.postal_code,
-      order.customers?.city,
-      order.customers?.country,
+      // Address export removed - field not available in customers table
+      null, //       // Address fields removed - not available in customers table
+      null, // order.customers?.address,
+      null, // order.customers?.postal_code,
+      null, // order.customers?.city,
+      null, // order.customers?.country,
     ]
       .filter(Boolean)
       .join(', ');
@@ -102,9 +104,10 @@ export const exportOrdersToCSV = (orders: Order[], filename?: string) => {
       'Email Client': order.customers?.email || '',
       'Téléphone Client': order.customers?.phone || '',
       'Adresse Client': customerAddress || '',
-      'Ville Client': order.customers?.city || '',
-      'Code Postal Client': order.customers?.postal_code || '',
-      'Pays Client': order.customers?.country || '',
+      // Address fields removed - not available in customers table
+      'Ville Client': '', // order.customers?.city || '',
+      'Code Postal Client': '', // order.customers?.postal_code || '',
+      'Pays Client': '', // order.customers?.country || '',
       // Adresse de livraison
       'Nom Livraison': order.shipping_address?.full_name || '',
       'Email Livraison': order.shipping_address?.email || '',

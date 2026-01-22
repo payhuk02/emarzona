@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { DropdownMenuSeparator } from '@/components/ui/stable-dropdown-menu';
 import {
   CreditCard,
   Percent,
@@ -155,7 +156,7 @@ const  AdvancedPaymentsComponent: React.FC<AdvancedPaymentsComponentProps> = ({
           payment.transaction_id?.toLowerCase().includes(query) ||
           payment.id?.toLowerCase().includes(query) ||
           payment.notes?.toLowerCase().includes(query) ||
-          payment.customers?.name?.toLowerCase().includes(query) ||
+          payment.customers?.full_name?.toLowerCase().includes(query) ||
           payment.customers?.email?.toLowerCase().includes(query) ||
           payment.orders?.order_number?.toLowerCase().includes(query) ||
           payment.order_id?.toLowerCase().includes(query) ||
@@ -1102,7 +1103,7 @@ const  PaymentCard: React.FC<PaymentCardProps> = ({
               {payment.customers && (
                 <div className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span className="truncate">{payment.customers.name}</span>
+                  <span className="truncate">{payment.customers.full_name}</span>
                 </div>
               )}
               {payment.orders && (
@@ -1336,7 +1337,7 @@ const  PaymentDetailsDialog: React.FC<PaymentDetailsDialogProps> = ({
                       <div className="text-muted-foreground">
                         {t('payments.details.customer', 'Client')}
                       </div>
-                      <div className="font-medium">{payment.customers.name}</div>
+                      <div className="font-medium">{payment.customers.full_name}</div>
                       {payment.customers.email && (
                         <div className="text-xs text-muted-foreground">
                           {payment.customers.email}

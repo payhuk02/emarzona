@@ -64,6 +64,10 @@ const MarketingAutomationDashboard = lazy(() =>
 const StyleQuizPage = lazy(() =>
   import('@/pages/personalization/StyleQuizPage').then(m => ({ default: m.default }))
 );
+// Recommandations personnalisées - Lazy loaded
+const PersonalizedRecommendationsPage = lazy(() =>
+  import('@/pages/personalization/PersonalizedRecommendationsPage').then(m => ({ default: m.default }))
+);
 // AI Chatbot - Lazy loaded pour réduire le bundle initial
 const AIChatbotWrapper = lazy(() =>
   import('@/components/ai/AIChatbotWrapper').then(m => ({ default: m.AIChatbotWrapper }))
@@ -766,6 +770,7 @@ const AppContent = () => {
               <Route path="/discover" element={<Discover />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/personalization/quiz" element={<StyleQuizPage />} />
+              <Route path="/personalization/recommendations" element={<PersonalizedRecommendationsPage />} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/cart" element={<CartEnhanced />} />
               <Route path="/cart-old" element={<Cart />} />

@@ -50,7 +50,7 @@ const CheckoutSuccess = () => {
               customerId: result.customer_id
             });
             setLoyaltyReward(reward);
-              logger.info("Loyalty points awarded for purchase", { orderId: result.id, reward });
+            logger.info("Loyalty points awarded for purchase", { orderId: result.id, reward });
             } catch (loyaltyError) {
               logger.error("Failed to award loyalty points", { error: loyaltyError, orderId: result.id });
             }

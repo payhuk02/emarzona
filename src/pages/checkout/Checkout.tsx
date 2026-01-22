@@ -293,7 +293,7 @@ const Checkout = () => {
   }, [productId, storeId, variantId, navigate, toast]);
 
   // Validation du formulaire
-  const validateForm = (): boolean => {
+  const validateForm = useCallback((): boolean => {
     const errors: Partial<Record<keyof CheckoutFormData, string>> = {};
 
     if (!formData.firstName.trim()) {
@@ -316,7 +316,7 @@ const Checkout = () => {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData, setFormErrors]);
 
   // Calculer le prix - IMPORTANT: Utiliser le prix promo si disponible, puis appliquer le coupon
   const calculatePrice = useCallback((): number => {

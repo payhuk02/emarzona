@@ -160,7 +160,7 @@ const convertToFormData = async (productId: string, userId?: string): Promise<Pa
     }
   }
 
-  // Load product with security check
+  // Produit principal
   const { data: product, error: productError } = await supabase
     .from('products')
     .select('*')
@@ -169,12 +169,12 @@ const convertToFormData = async (productId: string, userId?: string): Promise<Pa
 
   if (productError) throw productError;
 
-  // Load physical product data
+  // 🚀 PERFORMANCE: Requête parallèle pour les données physiques
   const { data: physicalProduct, error: physicalError } = await supabase
     .from('physical_products')
     .select('*')
     .eq('product_id', productId)
-    .single();
+    .maybeSingle();
 
   if (physicalError && physicalError.code !== 'PGRST116') throw physicalError;
 
@@ -335,7 +335,7 @@ export const EditPhysicalProductWizard = ({
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
 
-  // Load existing product with security validation
+  // Load existing product with security validation and cache optimisé
   const {
     data: formDataInitial,
     isLoading: loadingProduct,
@@ -344,6 +344,13 @@ export const EditPhysicalProductWizard = ({
     queryKey: ['physical-product-edit', productId, user?.id],
     queryFn: () => convertToFormData(productId, user?.id),
     enabled: !!productId && !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes - données fraîches
+    gcTime: 10 * 60 * 1000, // 10 minutes - cache conservé
+    retry: (failureCount, error) => {
+      // Ne pas retry si c'est une erreur d'autorisation
+      if (error?.message?.includes('non autorisé')) return false;
+      return failureCount < 3;
+    },
   });
 
   const [currentStep, setCurrentStep] = useState(1);

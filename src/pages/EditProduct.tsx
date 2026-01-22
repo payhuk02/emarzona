@@ -56,6 +56,7 @@ const EditProduct = () => {
   const { toast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingPhase, setLoadingPhase] = useState<'auth' | 'security' | 'data' | 'ready'>('auth');
 
   // ✅ SÉCURITÉ: Fonction de validation de propriété du produit
   const validateProductOwnership = async (productId: string, userId: string): Promise<boolean> => {
@@ -88,6 +89,7 @@ const EditProduct = () => {
       if (!id || !user) return;
 
       try {
+        setLoadingPhase('security');
         // ✅ SÉCURITÉ: Vérifier que l'utilisateur possède ce produit
         const hasOwnership = await validateProductOwnership(id, user.id);
         if (!hasOwnership) {
@@ -100,6 +102,7 @@ const EditProduct = () => {
           return;
         }
 
+        setLoadingPhase('data');
         const { data, error } = await supabase
           .from('products')
           .select('*')
@@ -108,6 +111,7 @@ const EditProduct = () => {
 
         if (error) throw error;
         setProduct(data);
+        setLoadingPhase('ready');
       } catch ( _error: unknown) {
         const errorMessage = _error instanceof Error ? _error.message : String(_error);
         toast({
@@ -127,9 +131,20 @@ const EditProduct = () => {
   }, [id, storeLoading, authLoading, user, navigate, toast]);
 
   if (authLoading || loading || storeLoading) {
+    const getLoadingMessage = () => {
+      if (authLoading) return 'Vérification de l\'authentification...';
+      if (storeLoading) return 'Chargement de la boutique...';
+      if (loadingPhase === 'security') return 'Vérification des permissions...';
+      if (loadingPhase === 'data') return 'Chargement des données du produit...';
+      return 'Chargement...';
+    };
+
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">{getLoadingMessage()}</p>
+        </div>
       </div>
     );
   }

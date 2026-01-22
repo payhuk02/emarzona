@@ -101,7 +101,7 @@ const RecentOrdersCardComponent = ({ orders }: RecentOrdersCardProps) => {
                   {getStatusBadge(order.status)}
                 </div>
                 <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1 line-clamp-1">
-                  {order.customers?.name || 'Client inconnu'} •{' '}
+                  {order.customers?.full_name || 'Client inconnu'} •{' '}
                   {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
                 </p>
                 {order.product_types && order.product_types.length > 0 && (
@@ -163,7 +163,7 @@ export const RecentOrdersCard = React.memo(RecentOrdersCardComponent, (prevProps
       order.status === nextOrder.status &&
       order.total_amount === nextOrder.total_amount &&
       order.created_at === nextOrder.created_at &&
-      order.customers?.name === nextOrder.customers?.name
+      order.customers?.full_name === nextOrder.customers?.full_name
     );
   });
 });

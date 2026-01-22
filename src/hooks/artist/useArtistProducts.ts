@@ -177,23 +177,30 @@ export const useArtistProduct = (productId?: string, userId?: string) => {
           }
         }
 
-        const { data, error } = await supabase
-          .from('artist_products')
-          .select(`
-            *,
-            product:products(*)
-          `)
-          .eq('product_id', productId)
-          .single();
+        // 🚀 PERFORMANCE: Requêtes parallèles optimisées
+        const [
+          { data: product, error: productError },
+          { data: artistProduct, error: artistError }
+        ] = await Promise.all([
+          supabase.from('products').select('*').eq('id', productId).single(),
+          supabase.from('artist_products').select('*').eq('product_id', productId).single()
+        ]);
 
-        if (error) throw error;
-        return data as ArtistProductWithStats;
+        if (productError) throw productError;
+        if (artistError) throw artistError;
+
+        return {
+          ...artistProduct,
+          product: product,
+        } as ArtistProductWithStats;
       } catch (error) {
         logger.error('Error fetching artist product', { error, productId });
         throw error;
       }
     },
-    enabled: !!productId && (!userId || !!userId), // Toujours activé si pas d'userId, sinon vérifier userId
+    enabled: !!productId,
+    staleTime: 5 * 60 * 1000, // 5 minutes - cache optimisé
+    gcTime: 10 * 60 * 1000, // 10 minutes - garbage collection
   });
 };
 

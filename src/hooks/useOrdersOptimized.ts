@@ -67,7 +67,7 @@ export const useOrdersOptimized = (
           .select(`
             *,
             customers (
-              name,
+              full_name,
               email,
               phone
             )

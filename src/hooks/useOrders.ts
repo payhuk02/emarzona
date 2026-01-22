@@ -49,13 +49,9 @@ export interface Order {
   // Metadata for additional information
   metadata?: Record<string, unknown> | null;
   customers?: {
-    name: string;
+    full_name: string | null;
     email: string | null;
     phone: string | null;
-    address: string | null;
-    city: string | null;
-    postal_code: string | null;
-    country: string | null;
   } | null;
   // Transactions linked to this order
   transactions?: OrderTransaction[] | null;

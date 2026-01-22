@@ -16,7 +16,6 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -25,19 +24,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users,
   ArrowLeft,
-  Calendar,
   TrendingUp,
   BarChart3,
   UserCheck,
-  UserX,
-  Clock,
   Award,
-  BookOpen,
-  FileText,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
-  Download,
   Settings,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -47,7 +38,6 @@ import {
   useCohortAnalytics,
   useCalculateCohortAnalytics,
   useUpdateEnrollmentStatus,
-  useCohortProgressSnapshots,
   type CohortEnrollment,
 } from '@/hooks/courses/useAdvancedCohorts';
 import { format } from 'date-fns';
@@ -455,7 +445,13 @@ function CohortAnalyticsTab({
   isLoading,
 }: {
   cohortId: string;
-  analytics: any[];
+  analytics: Array<{
+    analytics_date: string;
+    average_progress: number;
+    active_enrollments: number;
+    completed_enrollments: number;
+    retention_rate?: number;
+  }>;
   isLoading: boolean;
 }) {
   const chartData = analytics

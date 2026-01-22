@@ -141,7 +141,7 @@ const convertToFormData = async (
     }
   }
 
-  // Load product with security check
+  // Produit principal
   const { data: product, error: productError } = await supabase
     .from('products')
     .select('*')
@@ -150,28 +150,27 @@ const convertToFormData = async (
 
   if (productError) throw productError;
 
-  // Load course data
-  const { data: course, error: courseError } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('product_id', productId)
-    .single();
+  // 🚀 PERFORMANCE: Requêtes parallèles pour les données de course
+  const [
+    { data: course, error: courseError },
+    { data: affiliateSettings },
+    { data: sectionsData },
+    { data: lessonsData }
+  ] = await Promise.all([
+    // Données de la course
+    supabase.from('courses').select('*').eq('product_id', productId).maybeSingle(),
+
+    // Paramètres d'affiliation
+    supabase.from('product_affiliate_settings').select('*').eq('product_id', productId).maybeSingle(),
+
+    // Sections (si course existe)
+    supabase.from('course_sections').select('*').eq('product_id', productId).order('order_index', { ascending: true }),
+
+    // Lessons (si course existe)
+    supabase.from('course_lessons').select('*').eq('product_id', productId).order('order_index', { ascending: true })
+  ]);
 
   if (courseError && courseError.code !== 'PGRST116') throw courseError;
-
-  // Load sections
-  const { data: sectionsData } = await supabase
-    .from('course_sections')
-    .select('*')
-    .eq('course_id', course?.id || productId)
-    .order('order_index', { ascending: true });
-
-  // Load lessons
-  const { data: lessonsData } = await supabase
-    .from('course_lessons')
-    .select('*')
-    .eq('course_id', course?.id || productId)
-    .order('order_index', { ascending: true });
 
   // Organize lessons by section
   const sections: Section[] = (sectionsData || []).map((section: Record<string, unknown>) => ({
@@ -195,13 +194,7 @@ const convertToFormData = async (
     isOpen: false,
   }));
 
-  // Load affiliate settings
-  const { data: affiliateSettings } = await supabase
-    .from('product_affiliate_settings')
-    .select('*')
-    .eq('product_id', productId)
-    .limit(1)
-    .maybeSingle();
+  // Affiliate settings déjà chargés via jointure
 
   // Load pixels/tracking settings
   const { data: pixelsSettings } = await supabase
@@ -315,7 +308,7 @@ export const EditCourseProductWizard = ({
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
 
-  // Load existing course with security validation
+  // Load existing course with security validation and cache optimisé
   const {
     data: courseData,
     isLoading: loadingCourse,
@@ -324,6 +317,13 @@ export const EditCourseProductWizard = ({
     queryKey: ['course-product-edit', productId, user?.id],
     queryFn: () => convertToFormData(productId, user?.id),
     enabled: !!productId && !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes - données fraîches
+    gcTime: 10 * 60 * 1000, // 10 minutes - cache conservé
+    retry: (failureCount, error) => {
+      // Ne pas retry si c'est une erreur d'autorisation
+      if (error?.message?.includes('non autorisé')) return false;
+      return failureCount < 3;
+    },
   });
 
   const [currentStep, setCurrentStep] = useState(1);

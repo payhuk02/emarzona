@@ -478,9 +478,15 @@ const Products = () => {
     [products, toast, refetch]
   );
 
-  // Import CSV avec validation
+  // Import CSV avec validation et batch processing optimisé
   const handleImportConfirmed = useCallback(
-    async (validatedProducts: Product[]) => {
+    async (
+      validatedProducts: Product[],
+      options?: { 
+        onProgress?: (progress: { imported: number; total: number; percentage: number }) => void;
+        onCancel?: () => boolean;
+      }
+    ) => {
       if (!store?.id) {
         toast({
           title: t('products.import.error', "Erreur d'import"),
@@ -490,32 +496,67 @@ const Products = () => {
         return;
       }
 
+      const BATCH_SIZE = 20; // Nombre de produits par batch
+      let successful = 0;
+      let failed = 0;
+      const total = validatedProducts.length;
+
       try {
-        logger.info('Import CSV de produits', {
+        logger.info('Import CSV de produits avec batch processing', {
           count: validatedProducts.length,
           storeId: store.id,
+          batchSize: BATCH_SIZE,
         });
 
-        // Créer tous les produits avec gestion d'erreurs par produit
-        const results = await Promise.allSettled(
-          validatedProducts.map(product =>
-            createProduct({
-              name: product.name,
-              slug: product.slug,
-              description: product.description || undefined,
-              price: product.price,
-              currency: product.currency || 'XOF',
-              category: product.category || undefined,
-              product_type: product.product_type || 'digital',
-              image_url: product.image_url || undefined,
-            })
-          )
-        );
+        // Import par batch pour performance optimale
+        for (let i = 0; i < validatedProducts.length; i += BATCH_SIZE) {
+          // Vérifier si l'import a été annulé
+          if (options?.onCancel && options.onCancel()) {
+            logger.info('Import annulé par l\'utilisateur', { imported: successful, failed, total });
+            break;
+          }
 
-        const successful = results.filter(r => r.status === 'fulfilled' && r.value).length;
-        const failed = results.filter(
-          r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value)
-        ).length;
+          const batch = validatedProducts.slice(i, i + BATCH_SIZE);
+          
+          // Traiter le batch en parallèle
+          const batchResults = await Promise.allSettled(
+            batch.map(product =>
+              createProduct({
+                name: product.name,
+                slug: product.slug,
+                description: product.description || undefined,
+                price: product.price,
+                currency: product.currency || 'XOF',
+                category: product.category || undefined,
+                product_type: product.product_type || 'digital',
+                image_url: product.image_url || undefined,
+              })
+            )
+          );
+
+          // Compter les succès et échecs
+          batchResults.forEach(result => {
+            if (result.status === 'fulfilled' && result.value) {
+              successful++;
+            } else {
+              failed++;
+            }
+          });
+
+          // Mettre à jour la progression
+          if (options?.onProgress && (!options?.onCancel || !options.onCancel())) {
+            options.onProgress({
+              imported: successful,
+              total,
+              percentage: Math.round((successful / total) * 100),
+            });
+          }
+
+          // Petit délai entre batches pour éviter surcharge DB
+          if (i + BATCH_SIZE < validatedProducts.length && (!options?.onCancel || !options.onCancel())) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
 
         // Rafraîchir la liste
         await refetch();

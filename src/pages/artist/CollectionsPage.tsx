@@ -7,14 +7,13 @@
 import { useParams } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 import { CollectionsGallery } from '@/components/artist/CollectionsGallery';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { Package } from 'lucide-react';
 
 const CollectionsPage = () => {
-  const { storeSlug } = useParams<{ storeSlug?: string }>();
+  const { storeSlug: _storeSlug } = useParams<{ storeSlug?: string }>();
   const { selectedStore: store } = useStoreContext();
 
   // Utiliser le storeSlug de l'URL ou le store du contexte

@@ -34,29 +34,33 @@ export function useProductRecommendations() {
     try {
       logger.info('Fetching personalized recommendations', { profile, userId: user?.id });
 
-      // Construire les filtres basés sur le profil
-      const filters = buildRecommendationFilters(profile);
+      // Essayer d'abord la fonction RPC si elle existe
+      try {
+        // Construire les filtres basés sur le profil
+        const filters = buildRecommendationFilters(profile);
 
-      // Appeler la fonction RPC pour les recommandations
-      const { data, error } = await supabase.rpc('get_personalized_recommendations', {
-        p_user_id: user?.id || null,
-        p_style_profile: profile,
-        p_filters: filters,
-        p_limit: limit
-      });
+        const { data, error } = await supabase.rpc('get_personalized_recommendations', {
+          p_user_id: user?.id || null,
+          p_style_profile: profile,
+          p_filters: filters,
+          p_limit: limit
+        });
 
-      if (error) {
-        logger.error('Error fetching personalized recommendations', { error, profile });
-        throw error;
+        if (!error && data) {
+          logger.info('Personalized recommendations fetched via RPC', {
+            count: data?.length || 0,
+            profile,
+            userId: user?.id
+          });
+          return data || [];
+        }
+      } catch (rpcError) {
+        logger.warn('RPC get_personalized_recommendations not available, using fallback', { rpcError });
       }
 
-      logger.info('Personalized recommendations fetched', {
-        count: data?.length || 0,
-        profile,
-        userId: user?.id
-      });
-
-      return data || [];
+      // Fallback: retourner des produits populaires
+      logger.info('Using fallback recommendations', { profile });
+      return getFallbackRecommendations(limit);
     } catch (error) {
       logger.error('Failed to get personalized recommendations', { error, profile });
       // Fallback: retourner des produits populaires
@@ -311,10 +315,10 @@ async function getFallbackRecommendations(limit: number): Promise<Product[]> {
       .from('products')
       .select(`
         *,
-        store:stores(*)
+        stores(*)
       `)
       .eq('is_active', true)
-      .order('total_sales', { ascending: false })
+      .order('created_at', { ascending: false }) // Utiliser created_at au lieu de total_sales
       .limit(limit);
 
     if (error) throw error;
