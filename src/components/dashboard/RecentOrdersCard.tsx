@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ArrowRight, FileText, Truck, Wrench, GraduationCap, Palette } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { PRODUCT_TYPE_CONFIG, type ProductType } from '@/constants/product-types';
 
 interface Order {
   id: string;
@@ -17,34 +18,6 @@ interface Order {
   customers: { name: string } | null;
   product_types?: string[];
 }
-
-const TYPE_CONFIG = {
-  digital: {
-    label: 'Digital',
-    icon: FileText,
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  },
-  physical: {
-    label: 'Physique',
-    icon: Truck,
-    color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-  },
-  service: {
-    label: 'Service',
-    icon: Wrench,
-    color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  },
-  course: {
-    label: 'Cours',
-    icon: GraduationCap,
-    color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
-  },
-  artist: {
-    label: 'Artiste',
-    icon: Palette,
-    color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
-  },
-} as const;
 
 interface RecentOrdersCardProps {
   orders: Order[];
@@ -134,7 +107,8 @@ const RecentOrdersCardComponent = ({ orders }: RecentOrdersCardProps) => {
                 {order.product_types && order.product_types.length > 0 && (
                   <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap mt-1 sm:mt-1.5">
                     {order.product_types.slice(0, 3).map(type => {
-                      const config = TYPE_CONFIG[type as keyof typeof TYPE_CONFIG];
+                      const productType = type as ProductType;
+                      const config = PRODUCT_TYPE_CONFIG[productType];
                       if (!config) return null;
                       const Icon = config.icon;
                       return (
@@ -143,7 +117,9 @@ const RecentOrdersCardComponent = ({ orders }: RecentOrdersCardProps) => {
                           variant="outline"
                           className={cn(
                             'text-[8px] sm:text-[9px] md:text-[10px] px-1.5 sm:px-2 py-0.5 flex items-center gap-1',
-                            config.color
+                            config.bgColor,
+                            config.textColor,
+                            config.borderColor
                           )}
                         >
                           <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />

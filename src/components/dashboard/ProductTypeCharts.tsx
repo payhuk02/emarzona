@@ -15,6 +15,12 @@ import {
 } from '@/components/charts/LazyCharts';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  PRODUCT_TYPE_COLORS,
+  PRODUCT_TYPE_LABELS,
+  getAllProductTypes,
+  type ProductType,
+} from '@/constants/product-types';
 
 interface ProductTypeChartsProps {
   revenueByTypeAndMonth: Array<{
@@ -32,25 +38,9 @@ interface ProductTypeChartsProps {
     course: number;
     artist: number;
   };
-  selectedType?: 'all' | 'digital' | 'physical' | 'service' | 'course' | 'artist';
+  selectedType?: 'all' | ProductType;
   className?: string;
 }
-
-const TYPE_COLORS = {
-  digital: '#3b82f6', // blue-500
-  physical: '#10b981', // green-500
-  service: '#a855f7', // purple-500
-  course: '#f97316', // orange-500
-  artist: '#ec4899', // pink-500
-};
-
-const TYPE_LABELS = {
-  digital: 'Digitaux',
-  physical: 'Physiques',
-  service: 'Services',
-  course: 'Cours',
-  artist: 'Artistes',
-};
 
 export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
   ({ revenueByTypeAndMonth, ordersByType, selectedType = 'all', className }) => {
@@ -78,22 +68,19 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
               Artistes: item.artist,
             }
           : {
-              [TYPE_LABELS[selectedType]]: item[selectedType],
+              [PRODUCT_TYPE_LABELS[selectedType]]: item[selectedType],
             }),
       }));
     }, [filteredRevenueData, selectedType]);
 
     // Préparer les données pour le graphique de commandes
     const ordersChartData = useMemo(() => {
-      const types =
-        selectedType === 'all'
-          ? (['digital', 'physical', 'service', 'course', 'artist'] as const)
-          : [selectedType];
+      const types = selectedType === 'all' ? getAllProductTypes() : [selectedType];
 
       return types.map(type => ({
-        type: TYPE_LABELS[type],
+        type: PRODUCT_TYPE_LABELS[type],
         commandes: ordersByType[type],
-        couleur: TYPE_COLORS[type],
+        couleur: PRODUCT_TYPE_COLORS[type],
       }));
     }, [ordersByType, selectedType]);
 
@@ -160,35 +147,35 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
                         <Line
                           type="monotone"
                           dataKey="Digitaux"
-                          stroke={TYPE_COLORS.digital}
+                          stroke={PRODUCT_TYPE_COLORS.digital}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
                         <Line
                           type="monotone"
                           dataKey="Physiques"
-                          stroke={TYPE_COLORS.physical}
+                          stroke={PRODUCT_TYPE_COLORS.physical}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
                         <Line
                           type="monotone"
                           dataKey="Services"
-                          stroke={TYPE_COLORS.service}
+                          stroke={PRODUCT_TYPE_COLORS.service}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
                         <Line
                           type="monotone"
                           dataKey="Cours"
-                          stroke={TYPE_COLORS.course}
+                          stroke={PRODUCT_TYPE_COLORS.course}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
                         <Line
                           type="monotone"
                           dataKey="Artistes"
-                          stroke={TYPE_COLORS.artist}
+                          stroke={PRODUCT_TYPE_COLORS.artist}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
@@ -196,8 +183,8 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
                     ) : (
                       <Line
                         type="monotone"
-                        dataKey={TYPE_LABELS[selectedType]}
-                        stroke={TYPE_COLORS[selectedType]}
+                        dataKey={PRODUCT_TYPE_LABELS[selectedType]}
+                        stroke={PRODUCT_TYPE_COLORS[selectedType]}
                         strokeWidth={2}
                         dot={{ r: 4 }}
                       />

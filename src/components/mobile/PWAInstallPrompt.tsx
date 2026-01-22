@@ -110,10 +110,13 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
 
   if (showAsBanner) {
     return (
-      <div className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 shadow-lg",
-        className
-      )}>
+      <div
+        data-pwa-install
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 shadow-lg",
+          className
+        )}
+      >
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <Smartphone className="h-6 w-6" />
@@ -148,7 +151,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
   }
 
   return (
-    <Card className={cn("w-full max-w-md mx-auto", className)}>
+    <Card data-pwa-install className={cn("w-full max-w-md mx-auto", className)}>
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-fit">
           <Download className="h-8 w-8 text-white" />

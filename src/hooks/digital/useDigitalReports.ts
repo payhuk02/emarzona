@@ -572,14 +572,13 @@ export const useCustomersReport = (period: ReportPeriod = 'month') => {
         .map(([customerId, stats]) => {
           const customer = customersMap.get(customerId);
 
-            return {
-              id: customerId,
-              name: customer?.name || 'Inconnu',
-              email: customer?.email || '',
-              ...stats,
-            };
-          })
-      );
+          return {
+            id: customerId,
+            name: customer?.name || 'Inconnu',
+            email: customer?.email || '',
+            ...stats,
+          };
+        });
 
       return {
         period,

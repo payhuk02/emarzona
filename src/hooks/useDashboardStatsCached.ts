@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useDashboardStatsOptimized as useDashboardStatsOptimizedBase } from './useDashboardStatsOptimized';
+import { useDashboardStatsOptimized as useDashboardStatsOptimizedBase, transformOptimizedData } from './useDashboardStatsOptimized';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from './useStore';
 import { logger } from '@/lib/logger';
@@ -81,7 +81,7 @@ export const useDashboardStatsCached = (options: UseDashboardStatsCachedOptions 
       logger.info('✅ [useDashboardStatsCached] Données chargées depuis Supabase');
 
       // Transformer les données (même logique que useDashboardStatsOptimized)
-      return transformDashboardData(data);
+      return transformOptimizedData(data, defaultOptions);
     },
     ...defaultOptions,
     // Stratégies de cache avancées
@@ -109,7 +109,7 @@ export const useDashboardStatsCached = (options: UseDashboardStatsCachedOptions 
       });
 
       if (error) throw error;
-      return transformDashboardData(data);
+      return transformOptimizedData(data, defaultOptions);
     },
     onSuccess: (data) => {
       // Mettre à jour le cache avec les nouvelles données
@@ -149,7 +149,7 @@ export const useDashboardStatsCached = (options: UseDashboardStatsCachedOptions 
                         nextPeriod === '90d' ? 90 : 30,
           });
           if (error) throw error;
-          return transformDashboardData(data);
+          return transformOptimizedData(data, { ...defaultOptions, period: nextPeriod });
         },
         staleTime: 10 * 60 * 1000, // Préchargement moins agressif
       });
@@ -191,68 +191,7 @@ export const useDashboardStatsCached = (options: UseDashboardStatsCachedOptions 
 };
 
 // Fonction utilitaire pour transformer les données (extraite pour réutilisation)
-function transformDashboardData(data: any) {
-  // Logique de transformation identique à useDashboardStatsOptimized
-  // (Simplifiée pour cet exemple - utiliserait la vraie logique)
-  return {
-    totalProducts: data?.baseStats?.totalProducts || 0,
-    activeProducts: data?.baseStats?.activeProducts || 0,
-    totalOrders: data?.ordersStats?.totalOrders || 0,
-    pendingOrders: data?.ordersStats?.pendingOrders || 0,
-    completedOrders: data?.ordersStats?.completedOrders || 0,
-    cancelledOrders: data?.ordersStats?.cancelledOrders || 0,
-    totalCustomers: data?.customersStats?.totalCustomers || 0,
-    totalRevenue: data?.ordersStats?.totalRevenue || 0,
-    recentOrders: data?.recentOrders || [],
-    topProducts: data?.topProducts || [],
-    revenueByMonth: [], // Calculé séparément si nécessaire
-    ordersByStatus: [], // Calculé depuis ordersStats
-    recentActivity: [], // Calculé depuis données disponibles
-    performanceMetrics: {
-      conversionRate: 0, // Calculé depuis données
-      averageOrderValue: data?.ordersStats?.avgOrderValue || 0,
-      customerRetention: 0, // Calculé depuis données
-      pageViews: 0,
-      bounceRate: 0,
-      sessionDuration: 0,
-    },
-    trends: {
-      revenueGrowth: 0, // Calculé depuis périodes
-      orderGrowth: 0, // Calculé depuis périodes
-      customerGrowth: 0, // Calculé depuis périodes
-      productGrowth: 0,
-    },
-    productsByType: {
-      digital: data?.baseStats?.digitalProducts || 0,
-      physical: data?.baseStats?.physicalProducts || 0,
-      service: data?.baseStats?.serviceProducts || 0,
-      course: data?.baseStats?.courseProducts || 0,
-      artist: data?.baseStats?.artistProducts || 0,
-    },
-    revenueByType: {
-      digital: 0, // Calculé depuis productPerformance
-      physical: 0,
-      service: 0,
-      course: 0,
-      artist: 0,
-    },
-    ordersByType: {
-      digital: 0, // Calculé depuis productPerformance
-      physical: 0,
-      service: 0,
-      course: 0,
-      artist: 0,
-    },
-    performanceMetricsByType: {
-      digital: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      physical: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      service: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      course: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-      artist: { conversionRate: 0, averageOrderValue: 0, customerRetention: 0 },
-    },
-    revenueByTypeAndMonth: [],
-  };
-}
+// La fonction transformOptimizedData du hook useDashboardStatsOptimizedBase est maintenant utilisée directement.
 
 // Hook utilitaire pour précharger plusieurs périodes
 export const useDashboardStatsBulk = (storeId: string, periods: string[] = ['7d', '30d', '90d']) => {
@@ -269,7 +208,7 @@ export const useDashboardStatsBulk = (storeId: string, periods: string[] = ['7d'
             period_days: period === '7d' ? 7 : period === '90d' ? 90 : 30,
           });
           if (error) throw error;
-          return transformDashboardData(data);
+          return transformOptimizedData(data, { period: period, customStartDate: options.customStartDate, customEndDate: options.customEndDate });
         },
         staleTime: 5 * 60 * 1000,
       });

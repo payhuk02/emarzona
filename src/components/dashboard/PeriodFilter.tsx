@@ -127,14 +127,21 @@ export const PeriodFilter : React.FC<PeriodFilterProps> = ({
                 <span className="flex-1">Sélectionner une période</span>
               )}
               {customStartDate && (
-                <button
-                  type="button"
+                <span
                   onClick={handleClearDates}
-                  className="ml-1.5 sm:ml-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 opacity-50 hover:opacity-100 transition-opacity flex items-center justify-center"
+                  className="ml-1.5 sm:ml-2 h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 opacity-50 hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   aria-label="Effacer les dates"
+                  onKeyDown={(e: React.KeyboardEvent<HTMLSpanElement>) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleClearDates(e);
+                    }
+                  }}
                 >
                   <X className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                </button>
+                </span>
               )}
             </Button>
           </PopoverTrigger>

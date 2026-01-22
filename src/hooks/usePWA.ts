@@ -106,8 +106,13 @@ export const usePWA = (): PWACapabilities & PWAActions => {
   useEffect(() => {
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      // Only prevent default if we have a component that will use the prompt
+      // Otherwise, let the browser show its native install prompt
+      const hasPWAComponent = document.querySelector('[data-pwa-install]');
+      if (hasPWAComponent) {
+        e.preventDefault();
+        setDeferredPrompt(e as BeforeInstallPromptEvent);
+      }
     };
 
     // Listen for appinstalled event

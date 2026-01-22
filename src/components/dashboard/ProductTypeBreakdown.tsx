@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Package, Wrench, GraduationCap, Palette, PieChart } from 'lucide-react';
+import { PieChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PRODUCT_TYPE_CONFIG, getAllProductTypes, type ProductType } from '@/constants/product-types';
 
 interface ProductTypeBreakdownProps {
   productsByType: {
@@ -29,52 +30,14 @@ interface ProductTypeBreakdownProps {
   className?: string;
 }
 
-const TYPE_CONFIG = {
-  digital: {
-    label: 'Digitaux',
-    icon: FileText,
-    color: 'bg-blue-500',
-    textColor: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-500/10',
-  },
-  physical: {
-    label: 'Physiques',
-    icon: Package,
-    color: 'bg-green-500',
-    textColor: 'text-green-600 dark:text-green-400',
-    bgColor: 'bg-green-500/10',
-  },
-  service: {
-    label: 'Services',
-    icon: Wrench,
-    color: 'bg-purple-500',
-    textColor: 'text-purple-600 dark:text-purple-400',
-    bgColor: 'bg-purple-500/10',
-  },
-  course: {
-    label: 'Cours',
-    icon: GraduationCap,
-    color: 'bg-orange-500',
-    textColor: 'text-orange-600 dark:text-orange-400',
-    bgColor: 'bg-orange-500/10',
-  },
-  artist: {
-    label: 'Artistes',
-    icon: Palette,
-    color: 'bg-pink-500',
-    textColor: 'text-pink-600 dark:text-pink-400',
-    bgColor: 'bg-pink-500/10',
-  },
-} as const;
-
 export const ProductTypeBreakdown = React.memo<ProductTypeBreakdownProps>(
   ({ productsByType, revenueByType, ordersByType, className }) => {
     const totalProducts = Object.values(productsByType).reduce((sum, count) => sum + count, 0);
     const totalRevenue = Object.values(revenueByType).reduce((sum, revenue) => sum + revenue, 0);
     const totalOrders = Object.values(ordersByType).reduce((sum, count) => sum + count, 0);
 
-    const typeStats = (Object.keys(TYPE_CONFIG) as Array<keyof typeof TYPE_CONFIG>).map(type => {
-      const config = TYPE_CONFIG[type];
+    const typeStats = getAllProductTypes().map(type => {
+      const config = PRODUCT_TYPE_CONFIG[type];
       const products = productsByType[type];
       const revenue = revenueByType[type];
       const orders = ordersByType[type];

@@ -288,7 +288,6 @@ BEGIN
   ) top_products_subquery;
 
   -- Récupérer les commandes récentes (limité à 5)
-  -- IMPORTANT: passer par une sous-requête pour éviter les erreurs de GROUP BY / agrégat
   SELECT array_agg(recent_order_row) INTO recent_orders
   FROM (
     SELECT json_build_object(
@@ -351,18 +350,11 @@ COMMENT ON FUNCTION refresh_dashboard_materialized_views() IS 'Rafraîchit toute
 COMMENT ON FUNCTION get_dashboard_stats(UUID, INTEGER) IS 'Récupère toutes les statistiques du dashboard en une seule requête';
 COMMENT ON FUNCTION get_dashboard_stats_rpc(UUID, INTEGER) IS 'RPC wrapper pour get_dashboard_stats';
 
--- Créer un job cron pour rafraîchir automatiquement les vues (toutes les heures)
--- Note: Cette partie nécessite l'extension pg_cron si disponible
--- Créer un job cron pour rafraîchir automatiquement les vues (toutes les heures)
--- Note: Cette partie nécessite l'extension pg_cron si disponible
--- INSERT INTO cron.job (schedule, command, nodename, nodeport, database, username)
--- VALUES ('0 * * * *', 'SELECT refresh_dashboard_materialized_views();', 'localhost', 5432, 'postgres', 'postgres');
-
 -- Message de confirmation
 DO $$
 BEGIN
   RAISE NOTICE 'Migration des vues matérialisées du dashboard terminée avec succès!';
   RAISE NOTICE 'Vues créées: dashboard_base_stats, dashboard_orders_stats, dashboard_customers_stats, dashboard_product_performance, dashboard_top_products, dashboard_recent_orders';
   RAISE NOTICE 'Fonctions créées: refresh_dashboard_materialized_views(), get_dashboard_stats(), get_dashboard_stats_rpc()';
-  RAISE NOTICE 'N''oubliez pas de rafraîchir les vues régulièrement avec: SELECT refresh_dashboard_materialized_views();';
+  RAISE NOTICE 'N oubliez pas de rafraîchir les vues régulièrement avec: SELECT refresh_dashboard_materialized_views();';
 END $$;

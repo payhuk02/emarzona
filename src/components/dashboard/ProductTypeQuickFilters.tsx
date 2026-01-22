@@ -1,10 +1,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Package, Wrench, GraduationCap, Palette, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PRODUCT_TYPE_CONFIG, getAllProductTypes, type ProductType } from '@/constants/product-types';
 
-export type ProductTypeFilter = 'all' | 'digital' | 'physical' | 'service' | 'course' | 'artist';
+export type ProductTypeFilter = 'all' | ProductType;
 
 interface ProductTypeQuickFiltersProps {
   selectedType: ProductTypeFilter;
@@ -21,43 +22,12 @@ interface ProductTypeQuickFiltersProps {
   className?: string;
 }
 
-const TYPE_CONFIG = {
-  all: {
-    label: 'Tous',
-    icon: null,
-    color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20',
-    hoverColor: 'hover:bg-gray-500/20',
-  },
-  digital: {
-    label: 'Digitaux',
-    icon: FileText,
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    hoverColor: 'hover:bg-blue-500/20',
-  },
-  physical: {
-    label: 'Physiques',
-    icon: Package,
-    color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-    hoverColor: 'hover:bg-green-500/20',
-  },
-  service: {
-    label: 'Services',
-    icon: Wrench,
-    color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-    hoverColor: 'hover:bg-purple-500/20',
-  },
-  course: {
-    label: 'Cours',
-    icon: GraduationCap,
-    color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
-    hoverColor: 'hover:bg-orange-500/20',
-  },
-  artist: {
-    label: 'Artistes',
-    icon: Palette,
-    color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
-    hoverColor: 'hover:bg-pink-500/20',
-  },
+// Configuration spéciale pour le filtre "all"
+const ALL_FILTER_CONFIG = {
+  label: 'Tous',
+  icon: null,
+  color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20',
+  hoverColor: 'hover:bg-gray-500/20',
 } as const;
 
 export const ProductTypeQuickFilters = React.memo<ProductTypeQuickFiltersProps>(
@@ -74,8 +44,33 @@ export const ProductTypeQuickFilters = React.memo<ProductTypeQuickFiltersProps>(
 
     return (
       <div className={cn('flex items-center gap-2 flex-wrap', className)}>
-        {(Object.keys(TYPE_CONFIG) as ProductTypeFilter[]).map(type => {
-          const config = TYPE_CONFIG[type];
+        {/* Bouton "Tous" */}
+        <Button
+          key="all"
+          variant={selectedType === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onTypeChange('all')}
+          className={cn(
+            'h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm gap-1.5 sm:gap-2 min-h-[36px] transition-all',
+            selectedType === 'all'
+              ? ALL_FILTER_CONFIG.color
+              : `${ALL_FILTER_CONFIG.color} ${ALL_FILTER_CONFIG.hoverColor} border`
+          )}
+        >
+          <span>{ALL_FILTER_CONFIG.label}</span>
+          {getTypeCount('all') > 0 && (
+            <Badge
+              variant={selectedType === 'all' ? 'secondary' : 'outline'}
+              className="ml-1 text-[9px] sm:text-[10px] px-1.5 py-0 h-4 sm:h-5"
+            >
+              {getTypeCount('all')}
+            </Badge>
+          )}
+        </Button>
+
+        {/* Boutons pour chaque type de produit */}
+        {getAllProductTypes().map(type => {
+          const config = PRODUCT_TYPE_CONFIG[type];
           const Icon = config.icon;
           const isSelected = selectedType === type;
           const count = getTypeCount(type);
@@ -88,10 +83,12 @@ export const ProductTypeQuickFilters = React.memo<ProductTypeQuickFiltersProps>(
               onClick={() => onTypeChange(type)}
               className={cn(
                 'h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm gap-1.5 sm:gap-2 min-h-[36px] transition-all',
-                isSelected ? config.color : `${config.color} ${config.hoverColor} border`
+                isSelected
+                  ? `${config.bgColor} ${config.textColor} ${config.borderColor || ''}`
+                  : `${config.bgColor} ${config.textColor} ${config.hoverColor || ''} ${config.borderColor || ''} border`
               )}
             >
-              {Icon && <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
+              <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               <span>{config.label}</span>
               {count > 0 && (
                 <Badge

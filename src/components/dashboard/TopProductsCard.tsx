@@ -2,9 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Package, FileText, Truck, Wrench, GraduationCap, Palette } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { PRODUCT_TYPE_CONFIG, type ProductType } from '@/constants/product-types';
+import { LazyImage } from '@/components/ui/lazy-image';
 
 interface Product {
   id: string;
@@ -14,34 +16,6 @@ interface Product {
   orderCount: number;
   product_type?: string;
 }
-
-const TYPE_CONFIG = {
-  digital: {
-    label: 'Digital',
-    icon: FileText,
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  },
-  physical: {
-    label: 'Physique',
-    icon: Truck,
-    color: 'bg-green-500/10 text-green-600 dark:text-green-400',
-  },
-  service: {
-    label: 'Service',
-    icon: Wrench,
-    color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-  },
-  course: {
-    label: 'Cours',
-    icon: GraduationCap,
-    color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
-  },
-  artist: {
-    label: 'Artiste',
-    icon: Palette,
-    color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
-  },
-} as const;
 
 interface TopProductsCardProps {
   products: Product[];
@@ -109,10 +83,13 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
                 {index + 1}
               </div>
               {product.image_url ? (
-                <img
+                <LazyImage
                   src={product.image_url}
                   alt={product.name}
                   className="h-10 w-10 sm:h-12 sm:w-12 object-cover rounded-md flex-shrink-0"
+                  width={48}
+                  height={48}
+                  placeholder="/api/placeholder/48/48"
                 />
               ) : (
                 <div className="h-10 w-10 sm:h-12 sm:w-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
@@ -124,28 +101,27 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
                   <p className="text-[10px] sm:text-xs md:text-sm font-medium truncate">
                     {product.name}
                   </p>
-                  {product.product_type &&
-                    TYPE_CONFIG[product.product_type as keyof typeof TYPE_CONFIG] && (
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          'text-[8px] sm:text-[9px] md:text-[10px] px-1.5 sm:px-2 py-0.5 flex items-center gap-1',
-                          TYPE_CONFIG[product.product_type as keyof typeof TYPE_CONFIG].color
-                        )}
-                      >
-                        {(() => {
-                          const config =
-                            TYPE_CONFIG[product.product_type as keyof typeof TYPE_CONFIG];
-                          const Icon = config.icon;
-                          return (
-                            <>
-                              <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                              <span>{config.label}</span>
-                            </>
-                          );
-                        })()}
-                      </Badge>
-                    )}
+                  {product.product_type && (
+                    (() => {
+                      const productType = product.product_type as ProductType;
+                      const config = PRODUCT_TYPE_CONFIG[productType];
+                      if (!config) return null;
+                      const Icon = config.icon;
+                      return (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'text-[8px] sm:text-[9px] md:text-[10px] px-1.5 sm:px-2 py-0.5 flex items-center gap-1',
+                            config.bgColor,
+                            config.textColor
+                          )}
+                        >
+                          <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                          <span>{config.label}</span>
+                        </Badge>
+                      );
+                    })()
+                  )}
                 </div>
                 <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                   {product.orderCount} vente{product.orderCount > 1 ? 's' : ''}

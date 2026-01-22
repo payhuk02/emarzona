@@ -96,18 +96,28 @@ export default function VendorMessaging() {
   // Auto-scroll to bottom when new messages arrive (seulement pour nouveaux messages, pas lors du chargement de plus)
   useEffect(() => {
     // Ne scroll que si on n'est pas en train de charger plus de messages
-    if (!messagesLoading && !hasMoreMessages) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!messagesLoading && !hasMoreMessages && messagesEndRef.current) {
+      try {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        console.warn('Failed to scroll to messages end:', error);
+      }
     }
   }, [messages.length, messagesLoading, hasMoreMessages]);
 
   // Scroll automatique vers le haut lors du chargement de plus de messages
   useEffect(() => {
     if (messagesLoading && messagesTopRef.current) {
-      // Sauvegarder la position actuelle
-      const scrollContainer = messagesTopRef.current.closest(
-        '[data-radix-scroll-area-viewport]'
-      ) as HTMLElement;
+      try {
+        // Sauvegarder la position actuelle
+        const scrollContainer = messagesTopRef.current.closest(
+          '[data-radix-scroll-area-viewport]'
+        ) as HTMLElement;
+
+        if (!scrollContainer) {
+          console.warn('Scroll container not found for messages loading');
+          return;
+        }
       if (scrollContainer) {
         const previousScrollHeight = scrollContainer.scrollHeight;
         // Après le chargement, ajuster la position pour rester au même endroit visuel
@@ -117,6 +127,9 @@ export default function VendorMessaging() {
           scrollContainer.scrollTop = scrollDifference;
         }, 100);
       }
+    }
+    } catch (error) {
+      console.error('Error adjusting scroll position during messages loading:', error);
     }
   }, [messagesLoading]);
 

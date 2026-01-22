@@ -1,18 +1,13 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  FileText,
-  Package,
-  Wrench,
-  GraduationCap,
-  Palette,
-  Target,
-  TrendingUp,
-  DollarSign,
-  Users,
-} from 'lucide-react';
+import { Target, TrendingUp, DollarSign, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  PRODUCT_TYPE_CONFIG,
+  getAllProductTypes,
+  type ProductType,
+} from '@/constants/product-types';
 
 interface ProductTypePerformanceMetricsProps {
   performanceMetricsByType: {
@@ -42,44 +37,14 @@ interface ProductTypePerformanceMetricsProps {
       customerRetention: number;
     };
   };
-  selectedType?: 'all' | 'digital' | 'physical' | 'service' | 'course' | 'artist';
+  selectedType?: 'all' | ProductType;
   className?: string;
 }
-
-const TYPE_CONFIG = {
-  digital: {
-    label: 'Digitaux',
-    icon: FileText,
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  },
-  physical: {
-    label: 'Physiques',
-    icon: Package,
-    color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-  },
-  service: {
-    label: 'Services',
-    icon: Wrench,
-    color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  },
-  course: {
-    label: 'Cours',
-    icon: GraduationCap,
-    color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
-  },
-  artist: {
-    label: 'Artistes',
-    icon: Palette,
-    color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
-  },
-} as const;
 
 export const ProductTypePerformanceMetrics = React.memo<ProductTypePerformanceMetricsProps>(
   ({ performanceMetricsByType, selectedType = 'all', className }) => {
     const typesToShow =
-      selectedType === 'all'
-        ? (Object.keys(TYPE_CONFIG) as Array<keyof typeof TYPE_CONFIG>)
-        : [selectedType];
+      selectedType === 'all' ? getAllProductTypes() : [selectedType];
 
     return (
       <Card className={cn('border-border/50 bg-card/50 backdrop-blur-sm', className)}>
@@ -101,7 +66,7 @@ export const ProductTypePerformanceMetrics = React.memo<ProductTypePerformanceMe
         <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {typesToShow.map(type => {
-              const config = TYPE_CONFIG[type];
+              const config = PRODUCT_TYPE_CONFIG[type];
               const Icon = config.icon;
               const metrics = performanceMetricsByType[type];
 
@@ -112,7 +77,14 @@ export const ProductTypePerformanceMetrics = React.memo<ProductTypePerformanceMe
                 >
                   <CardHeader className="pb-2 p-3 sm:p-4">
                     <div className="flex items-center gap-2">
-                      <div className={cn('p-2 rounded-lg', config.color)}>
+                      <div
+                        className={cn(
+                          'p-2 rounded-lg',
+                          config.bgColor,
+                          config.textColor,
+                          config.borderColor
+                        )}
+                      >
                         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
                       <CardTitle className="text-[10px] sm:text-xs md:text-sm">

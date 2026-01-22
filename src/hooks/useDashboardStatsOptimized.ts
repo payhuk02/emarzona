@@ -290,8 +290,8 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       const productGrowth =
         base.activeProducts > 0 ? Math.round(base.activeProducts * 0.1 * 100) : 0; // Estimation basée sur les données disponibles
 
-      // Transformer les performances par type
-      const performanceByType = data.productPerformance.reduce(
+      // Transformer les performances par type (fallback si null/undefined)
+      const performanceByType = (data.productPerformance || []).reduce(
         (acc, perf) => {
           const type = perf.type as keyof typeof acc;
           if (type in acc) {
@@ -327,7 +327,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
         cancelledOrders: orders.cancelledOrders,
         totalCustomers: customers.totalCustomers,
         totalRevenue: orders.totalRevenue,
-        recentOrders: data.recentOrders.map(order => ({
+        recentOrders: (data.recentOrders || []).map(order => ({
           id: order.id,
           order_number: order.orderNumber,
           total_amount: order.totalAmount,
@@ -341,7 +341,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
             : null,
           product_types: order.productTypes,
         })),
-        topProducts: data.topProducts.map(product => ({
+        topProducts: (data.topProducts || []).map(product => ({
           id: product.id,
           name: product.name,
           price: product.price,
@@ -358,7 +358,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
           > = {};
 
           // Calculer à partir des commandes récentes
-          data.recentOrders.forEach(order => {
+          (data.recentOrders || []).forEach(order => {
             if (!order.createdAt) return;
             const month = new Date(order.createdAt).toLocaleString('fr-FR', {
               month: 'short',
@@ -418,14 +418,14 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
           },
         ],
         recentActivity: [
-          ...data.recentOrders.slice(0, 3).map(order => ({
+          ...(data.recentOrders || []).slice(0, 3).map(order => ({
             id: `order-${order.id}`,
             type: 'order' as const,
             message: `Nouvelle commande #${order.orderNumber} de ${order.totalAmount} FCFA`,
             timestamp: order.createdAt,
             status: order.status,
           })),
-          ...data.topProducts.slice(0, 2).map(product => ({
+          ...(data.topProducts || []).slice(0, 2).map(product => ({
             id: `product-${product.id}`,
             type: 'product' as const,
             message: `Produit "${product.name}" populaire`,
@@ -460,7 +460,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
           course: base.courseProducts,
           artist: base.artistProducts,
         },
-        revenueByType: data.productPerformance.reduce(
+        revenueByType: (data.productPerformance || []).reduce(
           (acc, perf) => {
             const type = perf.type as keyof typeof acc;
             if (type in acc) {
@@ -476,7 +476,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
             artist: 0,
           }
         ),
-        ordersByType: data.productPerformance.reduce(
+        ordersByType: (data.productPerformance || []).reduce(
           (acc, perf) => {
             const type = perf.type as keyof typeof acc;
             if (type in acc) {
@@ -507,7 +507,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
           > = {};
 
           // Calculer à partir des commandes récentes avec leurs types de produits
-          data.recentOrders.forEach(order => {
+          (data.recentOrders || []).forEach(order => {
             if (!order.createdAt || !order.productTypes || order.productTypes.length === 0) return;
 
             const month = new Date(order.createdAt).toLocaleString('fr-FR', {
@@ -527,9 +527,10 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
             // Répartir le revenu proportionnellement par type de produit
             // Pour simplifier, on divise le montant total par le nombre de types
-            const revenuePerType = (Number(order.totalAmount) || 0) / order.productTypes.length;
+            const productTypes = order.productTypes || [];
+            const revenuePerType = (Number(order.totalAmount) || 0) / productTypes.length;
 
-            order.productTypes.forEach(type => {
+            productTypes.forEach(type => {
               const typedType = type as keyof (typeof monthMap)[string];
               if (typedType && typedType in monthMap[month]) {
                 monthMap[month][typedType] += revenuePerType;
@@ -539,7 +540,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
           // Si on n'a pas de données dans recentOrders, utiliser les données de productPerformance
           // pour créer une distribution approximative
-          if (Object.keys(monthMap).length === 0 && data.productPerformance.length > 0) {
+          if (Object.keys(monthMap).length === 0 && data.productPerformance && data.productPerformance.length > 0) {
             // Créer une entrée pour le mois actuel basée sur les performances totales
             const currentMonth = new Date().toLocaleString('fr-FR', {
               month: 'short',
@@ -553,7 +554,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
               artist: 0,
             };
 
-            data.productPerformance.forEach(perf => {
+            (data.productPerformance || []).forEach(perf => {
               const type = perf.type as keyof (typeof monthMap)[string];
               if (type && type in monthMap[currentMonth]) {
                 monthMap[currentMonth][type] = perf.revenue;
@@ -788,15 +789,22 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       const loadTime = endTime - startTime;
 
       if (rpcError) {
-        // Vérifier si c'est une erreur de base de données (pas de RPC)
-        if (
+        const isNotFoundError =
           rpcError.message?.includes('function') &&
           (rpcError.message?.includes('does not exist') ||
             rpcError.message?.includes('not found') ||
-            rpcError.message?.includes('schema cache'))
-        ) {
+            rpcError.message?.includes('schema cache'));
+
+        const isHttpNotAvailableError =
+          rpcError.code === 'PGRST404' ||
+          rpcError.code === 'PGRST406' ||
+          rpcError.message?.includes('404') ||
+          rpcError.message?.includes('406');
+
+        // Vérifier si c'est une erreur de base de données (pas de RPC) OU un 404/406 REST
+        if (isNotFoundError || isHttpNotAvailableError) {
           logger.warn(
-            '⚠️ [useDashboardStatsOptimized] Fonction RPC inexistante, fallback vers requêtes directes'
+            '⚠️ [useDashboardStatsOptimized] RPC indisponible (404/406 ou inexistante), fallback vers requêtes directes'
           );
           // Fallback : récupérer les données depuis les tables/vues matérialisées
           try {

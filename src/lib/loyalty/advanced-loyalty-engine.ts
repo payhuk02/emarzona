@@ -270,7 +270,19 @@ export class AdvancedLoyaltyEngine {
         .eq('user_id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) {
+        // PGRST116 = no rows found (normal for new users)
+        if (error.code === 'PGRST116') {
+          // Create default profile
+          return await this.createDefaultProfile(userId);
+        }
+        // Handle RLS/permission errors gracefully
+        if (error.code === '42501' || error.code === 'PGRST301' || error.message?.includes('permission')) {
+          console.warn('RLS permission error for user_loyalty_profiles, creating default profile', { userId, error: error.message });
+          return await this.createDefaultProfile(userId);
+        }
+        throw error;
+      }
 
       if (!profile) {
         // Créer un profil par défaut

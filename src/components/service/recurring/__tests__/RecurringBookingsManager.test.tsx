@@ -287,7 +287,9 @@ describe('RecurringBookingsManager', () => {
 
       render(<RecurringBookingsManager />, { wrapper: createWrapper() });
 
-      expect(screen.getByText('Service')).toBeInTheDocument();
+      // "Service" appears in multiple places (table header + fallback cells),
+      // so use a role-based query to avoid ambiguous matches.
+      expect(screen.getByRole('columnheader', { name: 'Service' })).toBeInTheDocument();
     });
 
     it('handles missing scheduled date gracefully', () => {
