@@ -118,18 +118,19 @@ export default function VendorMessaging() {
           console.warn('Scroll container not found for messages loading');
           return;
         }
-      if (scrollContainer) {
-        const previousScrollHeight = scrollContainer.scrollHeight;
-        // Après le chargement, ajuster la position pour rester au même endroit visuel
-        setTimeout(() => {
-          const newScrollHeight = scrollContainer.scrollHeight;
-          const scrollDifference = newScrollHeight - previousScrollHeight;
-          scrollContainer.scrollTop = scrollDifference;
-        }, 100);
+
+        if (scrollContainer) {
+          const previousScrollHeight = scrollContainer.scrollHeight;
+          // Après le chargement, ajuster la position pour rester au même endroit visuel
+          setTimeout(() => {
+            const newScrollHeight = scrollContainer.scrollHeight;
+            const scrollDifference = newScrollHeight - previousScrollHeight;
+            scrollContainer.scrollTop = scrollDifference;
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error adjusting scroll position during messages loading:', error);
       }
-    }
-    } catch (error) {
-      console.error('Error adjusting scroll position during messages loading:', error);
     }
   }, [messagesLoading]);
 
