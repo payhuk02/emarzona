@@ -44,6 +44,7 @@ import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { ProductStatisticsDisplaySettings } from '../create/shared/ProductStatisticsDisplaySettings';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
@@ -124,9 +125,27 @@ interface EditServiceProductWizardProps {
 
 /**
  * Convert service product from DB to form data
+ * ✅ SÉCURITÉ: Inclut validation de propriété
  */
-const convertToFormData = async (productId: string): Promise<Partial<ServiceProductFormData>> => {
-  // Load product
+const convertToFormData = async (productId: string, userId?: string): Promise<Partial<ServiceProductFormData>> => {
+  // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
+  if (userId) {
+    const { data: ownershipCheck, error: ownershipError } = await supabase
+      .from('products')
+      .select(`
+        id,
+        stores!inner(user_id)
+      `)
+      .eq('id', productId)
+      .eq('stores.user_id', userId)
+      .single();
+
+    if (ownershipError || !ownershipCheck) {
+      throw new Error('Accès non autorisé à ce produit');
+    }
+  }
+
+  // Load product with security check
   const { data: product, error: productError } = await supabase
     .from('products')
     .select('*')
@@ -305,19 +324,20 @@ export const EditServiceProductWizard = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
   const storeId = propsStoreId || store?.id;
 
-  // Load existing product
+  // Load existing product with security validation
   const {
     data: formDataInitial,
     isLoading: loadingProduct,
     error: productError,
   } = useQuery({
-    queryKey: ['service-product-edit', productId],
-    queryFn: () => convertToFormData(productId),
-    enabled: !!productId,
+    queryKey: ['service-product-edit', productId, user?.id],
+    queryFn: () => convertToFormData(productId, user?.id),
+    enabled: !!productId && !!user?.id,
   });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -484,6 +504,22 @@ export const EditServiceProductWizard = ({
 
     setIsSaving(true);
     try {
+      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
+      if (user) {
+        const { data: ownershipCheck, error: ownershipError } = await supabase
+          .from('products')
+          .select(`
+            id,
+            stores!inner(user_id)
+          `)
+          .eq('id', productId)
+          .eq('stores.user_id', user.id)
+          .single();
+
+        if (ownershipError || !ownershipCheck) {
+          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit');
+        }
+      }
       // Generate slug if not provided
       let slug =
         formData.slug?.trim() ||

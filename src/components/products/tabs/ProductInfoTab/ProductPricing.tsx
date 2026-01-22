@@ -140,7 +140,7 @@ export const ProductPricing = ({
                 min="0"
                 step="0.01"
                 aria-label="Prix du produit"
-                aria-required={true}
+                aria-required="true"
                 aria-invalid={!!validationErrors.price}
                 aria-describedby={validationErrors.price ? "price-error" : undefined}
                 className={cn(
@@ -180,7 +180,7 @@ export const ProductPricing = ({
               <SelectTrigger
                 id="product-currency"
                 aria-label="Devise du produit"
-                aria-required={true}
+                aria-required="true"
                 className="bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
               >
                 <SelectValue placeholder="Sélectionnez une devise" />

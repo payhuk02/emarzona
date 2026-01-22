@@ -1,10 +1,14 @@
 
-// Image optimisée: emarzona-logo.webp
-// Formats disponibles: webp
-<img
-  src="public\optimized\public\emarzona-logo.webp"
-  srcset="public\optimized\public\optimized\public\emarzona-logo.webp type="image/webp""
-  loading="lazy"
-  decoding="async"
-  alt=""
-/>
+// Image optimisée: emarzona-logo
+<picture>
+    <source srcset="public\optimized\public\optimized\public\emarzona-logo.avif" type="image/avif" />
+    <source srcset="public\optimized\public\optimized\public\emarzona-logo.webp" type="image/webp" />
+    <img
+      src="public\optimized\public\optimized\public\emarzona-logo.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="500"
+      height="500"
+    />
+</picture>

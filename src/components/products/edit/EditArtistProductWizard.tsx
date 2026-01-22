@@ -40,6 +40,7 @@ import { ProductFAQForm } from '../create/shared/ProductFAQForm';
 import { PaymentOptionsForm } from '../create/shared/PaymentOptionsForm';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -137,15 +138,16 @@ export const EditArtistProductWizard = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { store: hookStore, loading: storeLoading } = useStore();
   const store = hookStore || (propsStoreId ? { id: propsStoreId } : null);
 
-  // Load existing product
+  // Load existing product with security validation
   const {
     data: artistProductData,
     isLoading: loadingProduct,
     error: productError,
-  } = useArtistProduct(productId);
+  } = useArtistProduct(productId, user?.id);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
@@ -345,6 +347,22 @@ export const EditArtistProductWizard = ({
     setIsSaving(true);
 
     try {
+      // ✅ SÉCURITÉ: Vérifier propriété du produit avant modification
+      if (user) {
+        const { data: ownershipCheck, error: ownershipError } = await supabase
+          .from('products')
+          .select(`
+            id,
+            stores!inner(user_id)
+          `)
+          .eq('id', artistProductData.product_id)
+          .eq('stores.user_id', user.id)
+          .single();
+
+        if (ownershipError || !ownershipCheck) {
+          throw new Error('Vous n\'avez pas les permissions pour modifier ce produit artiste');
+        }
+      }
       // Update base product
       const { error: productError } = await supabase
         .from('products')

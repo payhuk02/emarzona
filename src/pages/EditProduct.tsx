@@ -2,10 +2,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState, lazy, Suspense } from 'react';
 import type React from 'react';
 import { useStore } from '@/hooks/useStore';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/types/marketplace';
 
@@ -49,38 +51,82 @@ const EditGenericProductWizard = lazy(() =>
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { store, loading: storeLoading } = useStore();
   const { toast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ SÉCURITÉ: Fonction de validation de propriété du produit
+  const validateProductOwnership = async (productId: string, userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id,
+          store_id,
+          stores!inner(user_id)
+        `)
+        .eq('id', productId)
+        .eq('stores.user_id', userId)
+        .single();
+
+      if (error) {
+        logger.error('❌ [EditProduct] Erreur validation propriété:', error);
+        return false;
+      }
+
+      return !!data;
+    } catch (error) {
+      logger.error('❌ [EditProduct] Erreur validation propriété:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!id) return;
+      if (!id || !user) return;
 
       try {
-        const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
+        // ✅ SÉCURITÉ: Vérifier que l'utilisateur possède ce produit
+        const hasOwnership = await validateProductOwnership(id, user.id);
+        if (!hasOwnership) {
+          toast({
+            title: 'Accès refusé',
+            description: 'Vous n\'avez pas les permissions pour modifier ce produit.',
+            variant: 'destructive',
+          });
+          navigate('/dashboard/products');
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
 
         if (error) throw error;
         setProduct(data);
       } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = _error instanceof Error ? _error.message : String(_error);
         toast({
           title: 'Erreur',
           description: errorMessage,
           variant: 'destructive',
         });
+        navigate('/dashboard/products');
       } finally {
         setLoading(false);
       }
     };
 
-    if (!storeLoading) {
+    if (!authLoading && !storeLoading && user) {
       fetchProduct();
     }
-  }, [id, storeLoading]);
+  }, [id, storeLoading, authLoading, user, navigate, toast]);
 
-  if (loading || storeLoading) {
+  if (authLoading || loading || storeLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -143,6 +189,23 @@ const EditProduct = () => {
       {children}
     </Suspense>
   );
+
+  // Redirect to login if not authenticated
+  if (!authLoading && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Authentification requise</h2>
+          <p className="text-muted-foreground mb-4">
+            Vous devez être connecté pour modifier un produit.
+          </p>
+          <Button onClick={() => navigate('/auth')}>
+            Se connecter
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

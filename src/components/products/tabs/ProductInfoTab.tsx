@@ -382,7 +382,7 @@ export const ProductInfoTab = ({
                 onChange={e => handleNameChange(e.target.value)}
                 placeholder="Ex: Guide complet Facebook Ads 2025"
                 aria-label="Nom du produit"
-                aria-required={true}
+                aria-required="true"
                 aria-invalid={!!validationErrors.name}
                 aria-describedby={validationErrors.name ? 'name-error' : undefined}
                 className={cn(
@@ -425,7 +425,7 @@ export const ProductInfoTab = ({
                     onChange={e => updateFormData('slug', generateSlug(e.target.value))}
                     placeholder="guide-facebook-ads-2025"
                     aria-label="URL du produit (slug)"
-                    aria-required={true}
+                    aria-required="true"
                     aria-invalid={!!validationErrors.slug}
                     aria-describedby={validationErrors.slug ? 'slug-error' : 'slug-status'}
                     className={cn(
@@ -540,7 +540,7 @@ export const ProductInfoTab = ({
                   <SelectTrigger
                     id="product-category"
                     aria-label="Catégorie du produit"
-                    aria-required={true}
+                    aria-required="true"
                     aria-invalid={!!validationErrors.category}
                     className={cn(
                       'bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]',
@@ -615,7 +615,7 @@ export const ProductInfoTab = ({
                   <SelectTrigger
                     id="pricing-model"
                     aria-label="Modèle de tarification"
-                    aria-required={true}
+                    aria-required="true"
                     aria-invalid={!!validationErrors.pricing_model}
                     className={cn(
                       'bg-gray-700/50 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]',

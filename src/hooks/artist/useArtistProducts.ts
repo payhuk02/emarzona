@@ -10,6 +10,33 @@ import { supabase } from '@/integrations/supabase/client';
 import type { ArtistProduct } from '@/types/artist-product';
 import { logger } from '@/lib/logger';
 
+// ✅ SÉCURITÉ: Fonction de validation de propriété du produit artiste
+const validateArtistProductOwnership = async (productId: string, userId?: string): Promise<boolean> => {
+  if (!userId) return false;
+
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id,
+        stores!inner(user_id)
+      `)
+      .eq('id', productId)
+      .eq('stores.user_id', userId)
+      .single();
+
+    if (error) {
+      logger.error('❌ [useArtistProduct] Erreur validation propriété:', error);
+      return false;
+    }
+
+    return !!data;
+  } catch (error) {
+    logger.error('❌ [useArtistProduct] Erreur validation propriété:', error);
+    return false;
+  }
+};
+
 export interface ArtistProductWithStats extends ArtistProduct {
   product?: {
     id: string;
@@ -133,14 +160,23 @@ export const useArtistProducts = (storeId?: string) => {
 
 /**
  * Get a single artist product by product_id
+ * ✅ SÉCURITÉ: Inclut validation de propriété
  */
-export const useArtistProduct = (productId?: string) => {
+export const useArtistProduct = (productId?: string, userId?: string) => {
   return useQuery({
-    queryKey: ['artist-product', productId],
+    queryKey: ['artist-product', productId, userId],
     queryFn: async () => {
       if (!productId) throw new Error('Product ID is required');
 
       try {
+        // ✅ SÉCURITÉ: Vérifier propriété du produit avant chargement
+        if (userId) {
+          const hasOwnership = await validateArtistProductOwnership(productId, userId);
+          if (!hasOwnership) {
+            throw new Error('Accès non autorisé à ce produit artiste');
+          }
+        }
+
         const { data, error } = await supabase
           .from('artist_products')
           .select(`
@@ -157,7 +193,7 @@ export const useArtistProduct = (productId?: string) => {
         throw error;
       }
     },
-    enabled: !!productId,
+    enabled: !!productId && (!userId || !!userId), // Toujours activé si pas d'userId, sinon vérifier userId
   });
 };
 

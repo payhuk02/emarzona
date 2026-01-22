@@ -1,10 +1,14 @@
 
-// Image optimisée: icon-72x72.png
-// Formats disponibles: webp
-<img
-  src="public\icons\icon-72x72.png"
-  srcset="public\optimized\public\icons\icon-72x72.webp type="image/webp""
-  loading="lazy"
-  decoding="async"
-  alt=""
-/>
+// Image optimisée: icon-72x72
+<picture>
+    <source srcset="public\optimized\public\icons\icon-72x72.avif" type="image/avif" />
+    <source srcset="public\optimized\public\icons\icon-72x72.webp" type="image/webp" />
+    <img
+      src="public\optimized\public\icons\icon-72x72.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="72"
+      height="72"
+    />
+</picture>

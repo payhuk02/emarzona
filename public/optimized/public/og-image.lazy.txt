@@ -1,10 +1,14 @@
 
-// Image optimisée: og-image.png
-// Formats disponibles: webp
-<img
-  src="public\og-image.png"
-  srcset="public\optimized\public\og-image.webp type="image/webp""
-  loading="lazy"
-  decoding="async"
-  alt=""
-/>
+// Image optimisée: og-image
+<picture>
+    <source srcset="public\optimized\public\og-image.avif" type="image/avif" />
+    <source srcset="public\optimized\public\og-image.webp" type="image/webp" />
+    <img
+      src="public\optimized\public\og-image.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="500"
+      height="500"
+    />
+</picture>
