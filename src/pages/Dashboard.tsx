@@ -62,7 +62,7 @@ import '@/styles/dashboard-responsive.css';
 
 /**
  * Page principale du Dashboard
- * 
+ *
  * Affiche un tableau de bord complet avec :
  * - Statistiques en temps réel (produits, commandes, clients, revenus)
  * - Graphiques de performance par type de produit
@@ -70,10 +70,10 @@ import '@/styles/dashboard-responsive.css';
  * - Produits les plus vendus
  * - Actions rapides
  * - Notifications
- * 
+ *
  * @component
  * @returns {JSX.Element} Le composant Dashboard
- * 
+ *
  * @remarks
  * - Utilise lazy loading pour les composants analytics lourds
  * - Preload du logo platform pour améliorer LCP
@@ -81,7 +81,7 @@ import '@/styles/dashboard-responsive.css';
  * - Optimisations de performance (useMemo, useCallback)
  * - Responsive design avec classes Tailwind
  * - Accessible avec ARIA labels complets
- * 
+ *
  * @example
  * ```tsx
  * <Route path="/dashboard" element={<Dashboard />} />
@@ -113,7 +113,11 @@ const Dashboard = () => {
   const [error, setError] = useState<string | null>(null);
 
   // ✅ SESSION HEALTH: Surveillance proactive de la santé des sessions
-  const { isHealthy: sessionHealthy, connectionStatus, refreshSessionIfNeeded } = useSessionHealth();
+  const {
+    isHealthy: sessionHealthy,
+    connectionStatus,
+    refreshSessionIfNeeded,
+  } = useSessionHealth();
   const [period, setPeriod] = useState<PeriodType>('30d');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -125,6 +129,7 @@ const Dashboard = () => {
     stats,
     loading,
     error: hookError,
+    isUpdating,
     refetch,
   } = useDashboardStats({
     period,
@@ -199,9 +204,8 @@ const Dashboard = () => {
   // Transformer les notifications Supabase en format compatible avec le Dashboard
   const notifications = useMemo<DashboardNotification[]>(() => {
     const dbNotifications = notificationsResult?.data || [];
-    return dbNotifications
-      .filter(validateNotification)
-      .map((notif): DashboardNotification => ({
+    return dbNotifications.filter(validateNotification).map(
+      (notif): DashboardNotification => ({
         id: notif.id,
         title: notif.title,
         message: notif.message,
@@ -211,7 +215,8 @@ const Dashboard = () => {
             : ('success' as const),
         timestamp: notif.created_at,
         read: notif.is_read || false,
-      }));
+      })
+    );
   }, [notificationsResult?.data]);
 
   // ✅ ACCESSIBILITÉ: État pour les annonces aria-live
@@ -244,10 +249,10 @@ const Dashboard = () => {
 
   /**
    * Exporte les données du dashboard au format JSON
-   * 
+   *
    * @function handleExport
    * @returns {void}
-   * 
+   *
    * @remarks
    * - Génère un fichier JSON avec les statistiques actuelles
    * - Inclut la date d'export et la période sélectionnée
@@ -319,48 +324,54 @@ const Dashboard = () => {
   const actionsRef = useScrollAnimation<HTMLDivElement>();
 
   // ✅ PERFORMANCE: Mémoriser les props pour éviter les re-renders inutiles
-  const dashboardHeaderProps = useMemo(() => ({
-    period,
-    onPeriodChange: setPeriod,
-    customStartDate,
-    customEndDate,
-    onCustomDateChange: handleCustomDateChange,
-    onExport: handleExport,
-    onRefresh: handleRefresh,
-    isRefreshing,
-    unreadCount,
-  }), [period, customStartDate, customEndDate, handleCustomDateChange, handleExport, handleRefresh, isRefreshing, unreadCount]);
+  const dashboardHeaderProps = useMemo(
+    () => ({
+      period,
+      onPeriodChange: setPeriod,
+      customStartDate,
+      customEndDate,
+      onCustomDateChange: handleCustomDateChange,
+      onExport: handleExport,
+      onRefresh: handleRefresh,
+      isRefreshing,
+      isUpdating,
+      unreadCount,
+    }),
+    [
+      period,
+      customStartDate,
+      customEndDate,
+      handleCustomDateChange,
+      handleExport,
+      handleRefresh,
+      isRefreshing,
+      isUpdating,
+      unreadCount,
+    ]
+  );
 
-  const dashboardNotificationsProps = useMemo(() => ({
-    notifications,
-    notificationsEnabled,
-    stats,
-    onViewStore: handleViewStore,
-    onManageCustomers: handleManageCustomers,
-    onSettings: handleSettings,
-  }), [notifications, notificationsEnabled, stats, handleViewStore, handleManageCustomers, handleSettings]);
+  const dashboardNotificationsProps = useMemo(
+    () => ({
+      notifications,
+      notificationsEnabled,
+      stats,
+      onViewStore: handleViewStore,
+      onManageCustomers: handleManageCustomers,
+      onSettings: handleSettings,
+    }),
+    [
+      notifications,
+      notificationsEnabled,
+      stats,
+      handleViewStore,
+      handleManageCustomers,
+      handleSettings,
+    ]
+  );
 
-  // Loading state
-  if (storeLoading || loading) {
-    return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <Skeleton className="h-10 w-64" />
-              <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4">
-                {[1, 2, 3, 4].map(i => (
-                  <Skeleton key={i} className="h-24" />
-                ))}
-              </div>
-              <Skeleton className="h-96 w-full" />
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
-    );
-  }
+  // Loading state - Désactivé pour affichage immédiat
+  // Les données s'affichent immédiatement avec des valeurs par défaut
+  // La mise à jour se fait en arrière-plan
 
   // No store state
   if (!store) {
@@ -409,12 +420,7 @@ const Dashboard = () => {
             <DashboardHeader {...dashboardHeaderProps} />
 
             {/* ✅ ACCESSIBILITÉ: Aria-live region pour les mises à jour dynamiques */}
-            <div
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-              className="sr-only"
-            >
+            <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
               {statusMessage}
             </div>
 
@@ -531,7 +537,7 @@ const Dashboard = () => {
 
             {/* Product Type Quick Filters */}
             {stats && (
-              <div 
+              <div
                 className="animate-in fade-in slide-in-from-bottom-4 duration-700"
                 role="region"
                 aria-labelledby="product-type-filters-title"
@@ -553,7 +559,7 @@ const Dashboard = () => {
 
             {/* Product Type Breakdown */}
             {stats && (
-              <div 
+              <div
                 className="animate-in fade-in slide-in-from-bottom-4 duration-700"
                 role="region"
                 aria-labelledby="product-type-breakdown-title"

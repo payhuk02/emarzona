@@ -7,14 +7,7 @@ import React, { useRef } from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  LayoutDashboard,
-  Bell,
-  Activity,
-  Download,
-  RefreshCw,
-  MoreVertical,
-} from 'lucide-react';
+import { LayoutDashboard, Bell, Activity, Download, RefreshCw, MoreVertical } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { PeriodFilter, type PeriodType } from '@/components/dashboard/PeriodFilter';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
@@ -31,6 +24,7 @@ interface DashboardHeaderProps {
   onExport: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
+  isUpdating?: boolean;
   unreadCount: number;
 }
 
@@ -44,6 +38,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
     onExport,
     onRefresh,
     isRefreshing,
+    isUpdating = false,
     unreadCount,
   }) => {
     const { t } = useTranslation();
@@ -71,6 +66,12 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
                     {getValue('dashboard.title') || t('dashboard.title')}
                   </span>
+                  {isUpdating && (
+                    <div className="ml-2 flex items-center gap-1 text-xs text-muted-foreground animate-in fade-in">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span className="hidden sm:inline">Mise à jour...</span>
+                    </div>
+                  )}
                 </div>
               </h1>
               <p className="text-sm sm:text-xs md:text-sm lg:text-base text-muted-foreground">
