@@ -262,8 +262,8 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { store } = useStore();
-  const { withAuthRetry } = useAuthRefresh();
-  const { handleRequestError, isAuthenticated } = useSessionManager();
+  // const { withAuthRetry } = useAuthRefresh();
+  const { isAuthenticated } = useSessionManager();
 
   // Fonction pour transformer les données optimisées vers le format existant
   const transformOptimizedData = useCallback(
@@ -303,7 +303,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       };
 
       // Calculer les tendances basées sur les données disponibles
-      const currentPeriodDays = options?.period === '7d' ? 7 : options?.period === '90d' ? 90 : 30;
+      // const currentPeriodDays = options?.period === '7d' ? 7 : options?.period === '90d' ? 90 : 30;
       const revenueGrowth =
         orders.totalOrders > 0
           ? Math.round(
@@ -616,114 +616,121 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     [options?.period]
   );
 
-  // Fonction de fallback pour récupérer les données depuis les tables/vues si la RPC n'existe pas
+  // Fonction de fallback pour récupérer les données depuis les vraies tables
   const fetchDashboardStatsFromTables = useCallback(
     async (storeId: string, periodDays: number): Promise<OptimizedDashboardData | null> => {
       try {
-        // Récupérer les données depuis les tables/vues matérialisées
+        // Calculer la date de début selon la période
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - periodDays);
+
+        logger.info(`🔄 [useDashboardStatsOptimized] Récupération données depuis tables réelles pour période ${periodDays} jours`);
+
+        // Récupérer les données depuis les vraies tables
         const [
-          baseStatsResult,
-          ordersStatsResult,
-          customersStatsResult,
-          productPerformanceResult,
-          topProductsResult,
-          recentOrdersResult,
+          productsResult,
+          ordersResult,
+          customersResult,
+          orderItemsResult,
         ] = await Promise.all([
-          supabase.from('dashboard_base_stats').select('*').eq('store_id', storeId).single(),
-          supabase.from('dashboard_orders_stats').select('*').eq('store_id', storeId).single(),
-          supabase.from('dashboard_customers_stats').select('*').eq('store_id', storeId).single(),
-          supabase.from('dashboard_product_performance').select('*').eq('store_id', storeId),
-          supabase.from('dashboard_top_products').select('*').eq('store_id', storeId).limit(5),
+          // Statistiques des produits
           supabase
-            .from('dashboard_recent_orders')
-            .select('*')
+            .from('products')
+            .select('product_type, price, is_active')
+            .eq('store_id', storeId),
+
+          // Statistiques des commandes
+          supabase
+            .from('orders')
+            .select('status, total_amount, created_at, customer_id')
             .eq('store_id', storeId)
-            .limit(5)
-            .order('created_at', { ascending: false }),
+            .gte('created_at', startDate.toISOString()),
+
+          // Statistiques des clients
+          supabase
+            .from('customers')
+            .select('created_at')
+            .eq('store_id', storeId),
+
+          // Items de commande pour les performances produits (simplifié)
+          // supabase.from('order_items')...
         ]);
 
-        // Transformer les données au format OptimizedDashboardData
-        const baseStats = baseStatsResult.data
-          ? {
-              totalProducts: baseStatsResult.data.total_products || 0,
-              activeProducts: baseStatsResult.data.active_products || 0,
-              digitalProducts: baseStatsResult.data.digital_products || 0,
-              physicalProducts: baseStatsResult.data.physical_products || 0,
-              serviceProducts: baseStatsResult.data.service_products || 0,
-              courseProducts: baseStatsResult.data.course_products || 0,
-              artistProducts: baseStatsResult.data.artist_products || 0,
-              avgProductPrice: baseStatsResult.data.avg_product_price || 0,
-            }
-          : null;
+        // Transformer les données brutes en statistiques
+        const products = productsResult.data || [];
+        const orders = ordersResult.data || [];
+        const customers = customersResult.data || [];
+        // const orderItems = orderItemsResult.data || []; // Non utilisé pour l'instant
 
-        const ordersStats = ordersStatsResult.data
-          ? {
-              totalOrders: ordersStatsResult.data.total_orders || 0,
-              completedOrders: ordersStatsResult.data.completed_orders || 0,
-              pendingOrders: ordersStatsResult.data.pending_orders || 0,
-              cancelledOrders: ordersStatsResult.data.cancelled_orders || 0,
-              totalRevenue: ordersStatsResult.data.total_revenue || 0,
-              avgOrderValue: ordersStatsResult.data.avg_order_value || 0,
-              revenue30d: ordersStatsResult.data.revenue_30d || 0,
-              orders30d: ordersStatsResult.data.orders_30d || 0,
-              revenue7d: ordersStatsResult.data.revenue_7d || 0,
-              orders7d: ordersStatsResult.data.orders_7d || 0,
-              revenue90d: ordersStatsResult.data.revenue_90d || 0,
-              orders90d: ordersStatsResult.data.orders_90d || 0,
-            }
-          : null;
+        // Statistiques des produits
+        const baseStats = {
+          totalProducts: products.length,
+          activeProducts: products.filter(p => p.is_active).length,
+          digitalProducts: products.filter(p => p.is_active && p.product_type === 'digital').length,
+          physicalProducts: products.filter(p => p.is_active && p.product_type === 'physical').length,
+          serviceProducts: products.filter(p => p.is_active && p.product_type === 'service').length,
+          courseProducts: products.filter(p => p.is_active && p.product_type === 'course').length,
+          artistProducts: products.filter(p => p.is_active && p.product_type === 'artist').length,
+          avgProductPrice: products.length > 0
+            ? products.reduce((sum, p) => sum + (p.price || 0), 0) / products.length
+            : 0,
+        };
 
-        const customersStats = customersStatsResult.data
-          ? {
-              totalCustomers: customersStatsResult.data.total_customers || 0,
-              newCustomers30d: customersStatsResult.data.new_customers_30d || 0,
-              newCustomers7d: customersStatsResult.data.new_customers_7d || 0,
-              newCustomers90d: customersStatsResult.data.new_customers_90d || 0,
-              customersWithOrders: customersStatsResult.data.customers_with_orders || 0,
-            }
-          : null;
+        // Statistiques des commandes
+        const ordersStats = {
+          totalOrders: orders.length,
+          completedOrders: orders.filter(o => o.status === 'completed').length,
+          pendingOrders: orders.filter(o => o.status === 'pending').length,
+          cancelledOrders: orders.filter(o => o.status === 'cancelled').length,
+          totalRevenue: orders
+            .filter(o => o.status === 'completed')
+            .reduce((sum, o) => sum + (o.total_amount || 0), 0),
+          avgOrderValue: orders.filter(o => o.status === 'completed').length > 0
+            ? orders
+                .filter(o => o.status === 'completed')
+                .reduce((sum, o) => sum + (o.total_amount || 0), 0) /
+              orders.filter(o => o.status === 'completed').length
+            : 0,
+          revenue30d: orders
+            .filter(o => o.status === 'completed' && new Date(o.created_at) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+            .reduce((sum, o) => sum + (o.total_amount || 0), 0),
+          orders30d: orders.filter(o => new Date(o.created_at) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length,
+          revenue7d: orders
+            .filter(o => o.status === 'completed' && new Date(o.created_at) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+            .reduce((sum, o) => sum + (o.total_amount || 0), 0),
+          orders7d: orders.filter(o => new Date(o.created_at) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+          revenue90d: orders
+            .filter(o => o.status === 'completed' && new Date(o.created_at) >= new Date(Date.now() - 90 * 24 * 60 * 60 * 1000))
+            .reduce((sum, o) => sum + (o.total_amount || 0), 0),
+          orders90d: orders.filter(o => new Date(o.created_at) >= new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)).length,
+        };
 
-        const productPerformance: ProductPerformance[] =
-          productPerformanceResult.data?.map(item => ({
-            type: item.product_type || '',
-            orders: item.orders || 0,
-            revenue: item.revenue || 0,
-            quantity: item.quantity || 0,
-            avgOrderValue: item.avg_order_value || 0,
-            productsSold: item.products_sold || 0,
-            orders30d: item.orders_30d || 0,
-            revenue30d: item.revenue_30d || 0,
-          })) || [];
+        // Statistiques des clients
+        const customersStats = {
+          totalCustomers: customers.length,
+          newCustomers30d: customers.filter(c => new Date(c.created_at) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length,
+          newCustomers7d: customers.filter(c => new Date(c.created_at) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+          newCustomers90d: customers.filter(c => new Date(c.created_at) >= new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)).length,
+          customersWithOrders: new Set(orders.map(o => o.customer_id).filter(Boolean)).size,
+        };
 
-        const topProducts: TopProduct[] =
-          topProductsResult.data?.map(item => ({
-            id: item.product_id || '',
-            name: item.product_name || '',
-            price: item.price || 0,
-            imageUrl: item.image_url,
-            productType: item.product_type || '',
-            revenue: item.total_revenue || 0,
-            quantity: item.total_quantity || 0,
-            orderCount: item.order_count || 0,
-          })) || [];
+        // Performance par type de produit (simplifié)
+        const productPerformance: ProductPerformance[] = [];
 
-        const recentOrders: RecentOrder[] =
-          recentOrdersResult.data?.map(item => ({
-            id: item.order_id || '',
-            orderNumber: item.order_number || '',
-            totalAmount: item.total_amount || 0,
-            status: item.status || '',
-            createdAt: item.created_at || new Date().toISOString(),
-            customer:
-              item.customer_id && item.customer_name && item.customer_email
-                ? {
-                    id: item.customer_id,
-                    name: item.customer_name,
-                    email: item.customer_email,
-                  }
-                : null,
-            productTypes: item.product_types || [],
-          })) || [];
+        // Top produits (simplifié - TODO: améliorer avec vraies données)
+        const topProducts: TopProduct[] = [];
+
+        // Commandes récentes
+        const recentOrders: RecentOrder[] = orders
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5)
+          .map(order => ({
+            id: order.id || '',
+            customer_name: 'Client anonyme', // TODO: récupérer nom depuis customers
+            total_amount: order.total_amount || 0,
+            status: order.status || 'pending',
+            created_at: order.created_at || new Date().toISOString(),
+          }));
 
         return {
           baseStats,
@@ -793,75 +800,31 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
       // La fonction RPC get_complete_dashboard_data_optimized a des problèmes de types
       logger.info('🔄 [useDashboardStatsOptimized] Utilisation tables individuelles (RPC désactivée)');
 
-      let data, rpcError;
-      rpcError = { message: 'RPC disabled - using table fallback' }; // Forcer le fallback
+      const data = null;
+      const rpcError = null;
 
-      // Simuler un appel réussi pour déclencher le fallback
-      data = null;
+      // const endTime = performance.now();
+      // const loadTime = endTime - startTime;
 
-      const endTime = performance.now();
-      const loadTime = endTime - startTime;
-
-      if (rpcError) {
-        const isNotFoundError =
-          rpcError.message?.includes('function') &&
-          (rpcError.message?.includes('does not exist') ||
-            rpcError.message?.includes('not found') ||
-            rpcError.message?.includes('schema cache'));
-
-        const isHttpNotAvailableError =
-          rpcError.code === 'PGRST404' ||
-          rpcError.code === 'PGRST406' ||
-          rpcError.message?.includes('404') ||
-          rpcError.message?.includes('406');
-
-        // Vérifier si c'est une erreur de base de données (pas de RPC) OU un 404/406 REST
-        if (isNotFoundError || isHttpNotAvailableError) {
-          logger.warn(
-            '⚠️ [useDashboardStatsOptimized] RPC indisponible (404/406 ou inexistante), fallback vers requêtes directes'
+      // Utilisation exclusive du fallback tables individuelles (RPC désactivé)
+      logger.info('🔄 [useDashboardStatsOptimized] Utilisation exclusive du fallback tables individuelles');
+      try {
+        const fallbackData = await fetchDashboardStatsFromTables(store.id, periodDays);
+        if (fallbackData) {
+          logger.info(
+            `✅ [useDashboardStatsOptimized] Stats chargées via fallback en ${(performance.now() - startTime).toFixed(0)}ms`
           );
-          // Fallback : récupérer les données depuis les tables/vues matérialisées
-          try {
-            const fallbackData = await fetchDashboardStatsFromTables(store.id, periodDays);
-            if (fallbackData) {
-              logger.info(
-                `✅ [useDashboardStatsOptimized] Stats chargées via fallback en ${(performance.now() - startTime).toFixed(0)}ms`
-              );
-              const transformedStats = transformOptimizedData(fallbackData);
-              setStats(transformedStats);
-              setLoading(false);
-              return;
-            }
-          } catch (fallbackError) {
-            logger.error('❌ [useDashboardStatsOptimized] Erreur fallback:', fallbackError);
-          }
-          throw new Error(`RPC_INEXISTANTE: ${rpcError.message}`);
+          const transformedStats = transformOptimizedData(fallbackData);
+          setStats(transformedStats);
+          setLoading(false);
+          return;
         }
-
-        // Vérifier si c'est une erreur de permissions
-        if (rpcError.message?.includes('permission denied') || rpcError.code === '42501') {
-          logger.warn('⚠️ [useDashboardStatsOptimized] Problème de permissions RPC');
-          throw new Error(`RPC_PERMISSIONS: ${rpcError.message}`);
-        }
-
-        // Autres erreurs RPC
-        logger.warn('⚠️ [useDashboardStatsOptimized] Erreur RPC:', rpcError);
-        throw new Error(`RPC_ERROR: ${rpcError.message}`);
-      }
-
-      if (data) {
-        logger.info(
-          `✅ [useDashboardStatsOptimized] Stats chargées en ${loadTime.toFixed(0)}ms (1 requête RPC)`
-        );
-
-        // Transformer les données optimisées vers le format existant
-        const transformedStats = transformOptimizedData(data);
-        setStats(transformedStats);
-
-        logger.info('✅ [useDashboardStatsOptimized] Données transformées avec succès');
-      } else {
-        logger.warn('⚠️ [useDashboardStatsOptimized] Aucune donnée reçue de la RPC');
+      } catch (fallbackError) {
+        logger.error('❌ [useDashboardStatsOptimized] Erreur fallback:', fallbackError);
+        // En cas d'erreur fallback, utiliser les données par défaut
         setStats(getFallbackStats());
+        setLoading(false);
+        return;
       }
     } catch (error: unknown) {
       const errorObj = error instanceof Error ? error : new Error('Erreur inconnue');
