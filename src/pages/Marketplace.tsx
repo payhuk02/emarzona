@@ -385,7 +385,7 @@ const Marketplace = () => {
       // Appliquer la pagination côté serveur
       query = query.range(startIndex, endIndex);
 
-      const { data, error, count } = await query;
+      const { data: productsData, error, count } = await query;
 
       if (error) {
         logger.error('Erreur Supabase lors du chargement des produits:', error);
@@ -395,7 +395,7 @@ const Marketplace = () => {
       // Ne charger les produits que si pas de recherche active
       if (!hasSearchQuery) {
         // Appliquer les filtres côté client pour les relations
-        let filteredData = (data || []) as unknown as Product[];
+        let filteredData = (productsData || []) as unknown as Product[];
 
         if (filters.productType === 'digital' && filters.digitalSubType) {
           filteredData = filteredData.filter(
@@ -949,13 +949,19 @@ const Marketplace = () => {
         />
       )}
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-x-hidden">
+      <div 
+        className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-x-hidden"
+        role="main"
+        id="main-content"
+        aria-label={t('marketplace.mainContent', 'Contenu principal de la marketplace')}
+      >
         {/* Skip to main content link for keyboard navigation */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
+          aria-label={t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
         >
-          {t('marketplace.hero.skipToMain')}
+          {t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
         </a>
 
         <MarketplaceHeader />
@@ -1019,14 +1025,25 @@ const Marketplace = () => {
         />
 
         {/* Section de personnalisation - Quiz de style */}
-        <section className="py-6 sm:py-8 px-3 sm:px-4 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-indigo-900/20 backdrop-blur-sm border-y border-white/5">
+        <section 
+          className="py-6 sm:py-8 px-3 sm:px-4 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-indigo-900/20 backdrop-blur-sm border-y border-white/5"
+          role="region"
+          aria-labelledby="style-quiz-title"
+          aria-describedby="style-quiz-description"
+        >
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
-                <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">
+                <h2 
+                  id="style-quiz-title"
+                  className="text-lg sm:text-xl font-semibold text-white mb-2"
+                >
                   🎨 Découvrez Votre Style Unique
                 </h2>
-                <p className="text-sm text-slate-300 max-w-md">
+                <p 
+                  id="style-quiz-description"
+                  className="text-sm text-slate-300 max-w-md"
+                >
                   Répondez à quelques questions et recevez des recommandations personnalisées
                   adaptées à vos goûts et préférences.
                 </p>
@@ -1035,11 +1052,12 @@ const Marketplace = () => {
                 asChild
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                aria-label={t('marketplace.quiz.button', 'Commencer le quiz de style personnalisé')}
               >
                 <Link to="/personalization/quiz" className="flex items-center space-x-2">
-                  <Sparkles className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5" aria-hidden="true" />
                   <span>Faire le Quiz</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </Button>
             </div>

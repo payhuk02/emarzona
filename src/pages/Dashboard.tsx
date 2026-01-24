@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
+import { useSessionHealth } from '@/hooks/useSessionHealth';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import type { Notification } from '@/types/notifications';
@@ -55,10 +56,37 @@ import {
   useRealtimeNotifications,
 } from '@/hooks/useNotifications';
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
-import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning';
+// import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
 import '@/styles/dashboard-responsive.css';
 
+/**
+ * Page principale du Dashboard
+ * 
+ * Affiche un tableau de bord complet avec :
+ * - Statistiques en temps réel (produits, commandes, clients, revenus)
+ * - Graphiques de performance par type de produit
+ * - Commandes récentes
+ * - Produits les plus vendus
+ * - Actions rapides
+ * - Notifications
+ * 
+ * @component
+ * @returns {JSX.Element} Le composant Dashboard
+ * 
+ * @remarks
+ * - Utilise lazy loading pour les composants analytics lourds
+ * - Preload du logo platform pour améliorer LCP
+ * - Gestion d'erreurs robuste avec ErrorBoundary
+ * - Optimisations de performance (useMemo, useCallback)
+ * - Responsive design avec classes Tailwind
+ * - Accessible avec ARIA labels complets
+ * 
+ * @example
+ * ```tsx
+ * <Route path="/dashboard" element={<Dashboard />} />
+ * ```
+ */
 const Dashboard = () => {
   // ✅ PERFORMANCE: Preload logo platform (potentielle LCP sur dashboard)
   const platformLogo = usePlatformLogo();
@@ -83,6 +111,9 @@ const Dashboard = () => {
   const { store, loading: storeLoading } = useStore();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+
+  // ✅ SESSION HEALTH: Surveillance proactive de la santé des sessions
+  const { isHealthy: sessionHealthy, connectionStatus, refreshSessionIfNeeded } = useSessionHealth();
   const [period, setPeriod] = useState<PeriodType>('30d');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
@@ -122,6 +153,14 @@ const Dashboard = () => {
       }, 100);
     }
   }, []);
+
+  // ✅ SESSION HEALTH: Vérifier la santé de la session périodiquement
+  useEffect(() => {
+    if (!sessionHealthy && connectionStatus === 'online') {
+      logger.warn('⚠️ [Dashboard] Session potentially unhealthy, attempting refresh');
+      refreshSessionIfNeeded();
+    }
+  }, [sessionHealthy, connectionStatus, refreshSessionIfNeeded]);
 
   // Récupérer les vraies notifications depuis Supabase (inclut les messages) - Déferré
   const { data: notificationsResult } = useNotifications({
@@ -203,6 +242,18 @@ const Dashboard = () => {
     }
   }, [refetch]);
 
+  /**
+   * Exporte les données du dashboard au format JSON
+   * 
+   * @function handleExport
+   * @returns {void}
+   * 
+   * @remarks
+   * - Génère un fichier JSON avec les statistiques actuelles
+   * - Inclut la date d'export et la période sélectionnée
+   * - Télécharge automatiquement le fichier
+   * - Gère les erreurs silencieusement avec logging
+   */
   const handleExport = useCallback(() => {
     try {
       const data = {
@@ -351,8 +402,8 @@ const Dashboard = () => {
         <AppSidebar />
         <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
           <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Session Expiry Warning */}
-            <SessionExpiryWarning />
+            {/* ✅ SILENCIEUX: Session gérée automatiquement via useSessionHealth */}
+            {/* <SessionExpiryWarning /> */}
 
             {/* Header - Responsive & Animated */}
             <DashboardHeader {...dashboardHeaderProps} />
@@ -480,9 +531,16 @@ const Dashboard = () => {
 
             {/* Product Type Quick Filters */}
             {stats && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div 
+                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                role="region"
+                aria-labelledby="product-type-filters-title"
+              >
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                   <CardContent className="p-3 sm:p-4 md:p-6">
+                    <h2 id="product-type-filters-title" className="sr-only">
+                      {t('dashboard.filters.productType.title', 'Filtres par type de produit')}
+                    </h2>
                     <ProductTypeQuickFilters
                       selectedType={selectedProductType}
                       onTypeChange={setSelectedProductType}
@@ -495,7 +553,14 @@ const Dashboard = () => {
 
             {/* Product Type Breakdown */}
             {stats && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div 
+                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                role="region"
+                aria-labelledby="product-type-breakdown-title"
+              >
+                <h2 id="product-type-breakdown-title" className="sr-only">
+                  {t('dashboard.breakdown.title', 'Répartition par type de produit')}
+                </h2>
                 <ProductTypeBreakdown
                   productsByType={stats.productsByType}
                   revenueByType={stats.revenueByType}

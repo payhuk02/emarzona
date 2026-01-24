@@ -18,7 +18,7 @@ interface UseAuthRefreshOptions {
 export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
   const {
     autoRefresh = true,
-    refreshThreshold = 5, // 5 minutes avant expiration
+    refreshThreshold = 10, // 10 minutes avant expiration pour être plus prudent
     maxRetries = 3
   } = options;
 
@@ -70,11 +70,28 @@ export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
 
   // Fonction pour gérer les erreurs d'authentification
   const handleAuthError = useCallback(async (error: any): Promise<boolean> => {
-    // Vérifier si c'est une erreur JWT expiré
+    // Vérifier si c'est une erreur JWT réellement expiré (très spécifique pour éviter les faux positifs)
     const isJwtExpired = error?.code === 'PGRST303' ||
-                        error?.message?.includes('JWT expired') ||
-                        error?.message?.includes('401') ||
-                        error?.status === 401;
+                        (error?.message?.includes('JWT expired') && error?.message?.includes('expired')) ||
+                        (error?.message?.includes('Invalid JWT') && error?.message?.includes('expired'));
+
+    // Considérer comme erreur réseau (et donc retriable) beaucoup plus de cas
+    const isNetworkError = error?.message?.includes('fetch') ||
+                          error?.message?.includes('Network') ||
+                          error?.message?.includes('Failed to fetch') ||
+                          error?.message?.includes('network') ||
+                          error?.code === 'NETWORK_ERROR' ||
+                          error?.status >= 500 ||
+                          error?.name === 'TypeError' ||
+                          !navigator.onLine || // Si offline, considérer comme erreur réseau
+                          error?.message?.includes('timeout') ||
+                          error?.message?.includes('aborted');
+
+    // Ne pas déconnecter pour les erreurs réseau (retry automatique suffira)
+    if (isNetworkError) {
+      logger.warn('🌐 Erreur réseau détectée, pas de déconnexion automatique');
+      return false; // Laisser le retry automatique gérer
+    }
 
     if (!isJwtExpired) return false;
 
@@ -97,15 +114,10 @@ export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
     }
 
     // Toutes les tentatives ont échoué
-    logger.error('❌ Impossible de rafraîchir le token, déconnexion requise');
+    logger.error('❌ Impossible de rafraîchir le token, déconnexion silencieuse');
 
-    toast({
-      title: 'Session expirée',
-      description: 'Votre session a expiré. Veuillez vous reconnecter.',
-      variant: 'destructive',
-    });
-
-    // Déconnecter l'utilisateur
+    // ✅ SILENCIEUX: Pas de toast visible, redirection automatique
+    // L'utilisateur sera automatiquement redirigé vers la page de connexion
     await signOut();
 
     return false; // Ne pas réessayer
@@ -148,8 +160,8 @@ export const useAuthRefresh = (options: UseAuthRefreshOptions = {}) => {
       }
     };
 
-    // Vérifier toutes les 2 minutes
-    const interval = setInterval(checkAndRefresh, 2 * 60 * 1000);
+    // Vérifier toutes les 5 minutes (plus fréquent pour éviter les expirations surprises)
+    const interval = setInterval(checkAndRefresh, 5 * 60 * 1000);
 
     // Vérifier au montage
     checkAndRefresh();

@@ -53,28 +53,58 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Récupérer la boutique sélectionnée depuis localStorage
+  // Récupérer la boutique sélectionnée depuis localStorage (avec validation)
   const getStoredStoreId = useCallback((): string | null => {
     if (typeof window === 'undefined') return null;
     try {
-      return localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return null;
+
+      // Valider que c'est un UUID valide
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(stored)) {
+        logger.warn('Invalid UUID in localStorage, cleaning up:', stored);
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+
+      return stored;
     } catch (e) {
-      logger.warn('Failed to read selectedStoreId from localStorage', e);
+      logger.warn('Failed to read selectedStoreId from localStorage, cleaning up', e);
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (cleanupError) {
+        logger.error('Failed to cleanup corrupted localStorage', cleanupError);
+      }
       return null;
     }
   }, []);
 
-  // Sauvegarder la boutique sélectionnée dans localStorage
+  // Sauvegarder la boutique sélectionnée dans localStorage (avec validation)
   const saveStoreIdToStorage = useCallback((storeId: string | null) => {
     if (typeof window === 'undefined') return;
     try {
       if (storeId) {
+        // Valider que c'est un UUID valide avant de sauvegarder
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(storeId)) {
+          logger.error('Attempted to save invalid UUID to localStorage:', storeId);
+          return;
+        }
         localStorage.setItem(STORAGE_KEY, storeId);
+        logger.debug('✅ Store ID saved to localStorage:', storeId);
       } else {
         localStorage.removeItem(STORAGE_KEY);
+        logger.debug('🗑️ Store ID removed from localStorage');
       }
     } catch (e) {
-      logger.warn('Failed to save selectedStoreId to localStorage', e);
+      logger.warn('Failed to save selectedStoreId to localStorage:', e);
+      // Essayer de nettoyer en cas d'erreur
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (cleanupError) {
+        logger.error('Failed to cleanup localStorage after save error:', cleanupError);
+      }
     }
   }, []);
 

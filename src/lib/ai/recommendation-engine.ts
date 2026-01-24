@@ -296,36 +296,42 @@ export class RecommendationEngine {
     try {
       if (userHistory.length === 0) return [];
 
-      // Analyser les patterns d'achat groupés
-      const { data: orderItems } = await supabase.from('orders').select('items').limit(1000);
+      // Analyser les patterns d'achat groupés en utilisant order_items
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('order_id, product_id')
+        .limit(1000);
 
       if (!orderItems) return [];
+
+      // Grouper les items par commande pour analyser les co-occurrences
+      const orderGroups: Record<string, string[]> = {};
+      orderItems.forEach(item => {
+        if (item.order_id && item.product_id) {
+          if (!orderGroups[item.order_id]) {
+            orderGroups[item.order_id] = [];
+          }
+          orderGroups[item.order_id].push(item.product_id);
+        }
+      });
 
       // Construire une matrice de co-occurrence
       const coOccurrence: Record<string, Record<string, number>> = {};
 
-      orderItems.forEach(order => {
-        if (order.items) {
-          const items = JSON.parse(order.items);
-          interface OrderItem {
-            product_id?: string;
-          }
-          const productIds = (items as OrderItem[])
-            .map((item: OrderItem) => item.product_id)
-            .filter(Boolean);
+      Object.values(orderGroups).forEach(productIds => {
+        const validProductIds = productIds.filter(Boolean);
 
-          // Pour chaque paire de produits dans la même commande
-          for (let i = 0; i < productIds.length; i++) {
-            for (let j = i + 1; j < productIds.length; j++) {
-              const productA = productIds[i];
-              const productB = productIds[j];
+        // Pour chaque paire de produits dans la même commande
+        for (let i = 0; i < validProductIds.length; i++) {
+          for (let j = i + 1; j < validProductIds.length; j++) {
+            const productA = validProductIds[i];
+            const productB = validProductIds[j];
 
-              if (!coOccurrence[productA]) coOccurrence[productA] = {};
-              if (!coOccurrence[productB]) coOccurrence[productB] = {};
+            if (!coOccurrence[productA]) coOccurrence[productA] = {};
+            if (!coOccurrence[productB]) coOccurrence[productB] = {};
 
-              coOccurrence[productA][productB] = (coOccurrence[productA][productB] || 0) + 1;
-              coOccurrence[productB][productA] = (coOccurrence[productB][productA] || 0) + 1;
-            }
+            coOccurrence[productA][productB] = (coOccurrence[productA][productB] || 0) + 1;
+            coOccurrence[productB][productA] = (coOccurrence[productB][productA] || 0) + 1;
           }
         }
       });
@@ -470,7 +476,11 @@ export class RecommendationEngine {
     try {
       // Récupérer les produits récemment vus (implémentation simplifiée)
       const { data: views } = await supabase
-        .from('product_views')
+        .from('orders')
+        .select('customer_id')
+        .not('customer_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1000)
         .select('product_id')
         .eq('user_id', userId)
         .order('viewed_at', { ascending: false })

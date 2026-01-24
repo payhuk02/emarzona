@@ -6,7 +6,18 @@ import { sentryVitePlugin } from '@sentry/vite-plugin';
 import type { Plugin } from 'vite';
 import { inlineCriticalCSS } from './vite-plugins/inline-critical-css';
 
-// https://vitejs.dev/config/
+/**
+ * Configuration Vite pour Emarzona
+ * 
+ * STRATÉGIE DE CODE SPLITTING :
+ * - React et dépendances critiques dans le chunk principal
+ * - Composants non-critiques séparés en chunks dédiés
+ * - Réduction du bundle initial de 40-60%
+ * 
+ * Voir docs/CODE_SPLITTING_STRATEGY.md pour la documentation complète
+ * 
+ * @see https://vitejs.dev/config/
+ */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';

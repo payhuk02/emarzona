@@ -1,0 +1,14 @@
+
+// Image optimisée: icon-384x384
+<picture>
+    <source srcset="public\optimized\public\optimized\public\optimized\public\optimized\public\optimized\public\icons\icon-384x384.avif" type="image/avif" />
+    <source srcset="public\optimized\public\optimized\public\optimized\public\optimized\public\optimized\public\icons\icon-384x384.webp" type="image/webp" />
+    <img
+      src="public\optimized\public\optimized\public\optimized\public\optimized\public\optimized\public\icons\icon-384x384.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="384"
+      height="384"
+    />
+</picture>

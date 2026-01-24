@@ -3,16 +3,30 @@
  * Utilise Sharp.js pour compression automatique et génération de tailles multiples (côté serveur uniquement)
  */
 
+import { logger } from '@/lib/logger';
+
+// Type pour Sharp (importé dynamiquement)
+type SharpInstance = {
+  metadata: () => Promise<{ width?: number; height?: number; format?: string }>;
+  resize: (width: number | null, height: number | null, options: unknown) => SharpInstance;
+  jpeg: (options: unknown) => SharpInstance;
+  png: (options: unknown) => SharpInstance;
+  webp: (options: unknown) => SharpInstance;
+  avif: (options: unknown) => SharpInstance;
+  toBuffer: () => Promise<Buffer>;
+};
+
 // Sharp est importé de manière asynchrone pour éviter les erreurs côté client
-let sharp: any = null;
+let sharp: SharpInstance | null = null;
 const isServer = typeof window === 'undefined';
 
 if (isServer) {
   try {
     // Import dynamique de sharp seulement côté serveur
-    sharp = require('sharp');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    sharp = require('sharp') as SharpInstance;
   } catch (error) {
-    console.warn('Sharp library not available, image optimization will be limited');
+    logger.warn('Sharp library not available, image optimization will be limited', { error });
   }
 }
 
@@ -57,7 +71,7 @@ export async function optimizeImage(
 
   // Vérifier si on est côté serveur et si sharp est disponible
   if (!isServer || !sharp) {
-    console.warn('Image optimization is only available on the server side');
+    logger.warn('Image optimization is only available on the server side');
     // Retourner une version mock pour le développement côté client
     return {
       original: inputBuffer,
@@ -157,8 +171,9 @@ export async function optimizeImage(
     };
 
   } catch (error) {
-    console.error('Erreur lors de l\'optimisation d\'image:', error);
-    throw new Error(`Impossible d'optimiser l'image: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('Erreur lors de l\'optimisation d\'image', { error: errorMessage });
+    throw new Error(`Impossible d'optimiser l'image: ${errorMessage}`);
   }
 }
 

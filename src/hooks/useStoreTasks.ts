@@ -475,7 +475,7 @@ export const useStoreTaskUpdate = () => {
       }
 
       // Gérer les changements de statut
-      const  updatePayload: any = { ...updateData };
+      const updatePayload: Partial<StoreTask> = { ...updateData };
 
       if (updateData.status === 'in_progress' && !updateData.started_at) {
         updatePayload.started_at = new Date().toISOString();

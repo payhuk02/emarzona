@@ -278,7 +278,7 @@ export class AdvancedLoyaltyEngine {
         }
         // Handle RLS/permission errors gracefully
         if (error.code === '42501' || error.code === 'PGRST301' || error.message?.includes('permission')) {
-          console.warn('RLS permission error for user_loyalty_profiles, creating default profile', { userId, error: error.message });
+          logger.warn('RLS permission error for user_loyalty_profiles, creating default profile', { userId, error: error.message });
           return await this.createDefaultProfile(userId);
         }
         throw error;

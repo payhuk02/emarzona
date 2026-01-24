@@ -1,6 +1,42 @@
 /**
  * Hook optimisé pour charger les produits du marketplace avec React Query
- * Remplace fetchProducts avec cache intelligent et prefetching
+ * 
+ * Remplace fetchProducts avec cache intelligent et prefetching.
+ * Utilise des fonctions RPC Supabase pour un filtrage côté serveur optimisé.
+ * 
+ * @hook
+ * @param {MarketplaceProductsParams} params - Paramètres de chargement
+ * @param {FilterState} params.filters - Filtres à appliquer
+ * @param {PaginationState} params.pagination - État de pagination
+ * @param {boolean} params.hasSearchQuery - Indique si une recherche est active
+ * @param {boolean} params.shouldUseRPCFiltering - Utiliser le filtrage RPC côté serveur
+ * 
+ * @returns {Object} Objet contenant les produits et l'état de chargement
+ * @returns {Product[]} returns.products - Liste des produits
+ * @returns {number} returns.totalCount - Nombre total de produits
+ * @returns {number} returns.filteredCount - Nombre de produits après filtrage
+ * @returns {boolean} returns.isLoading - État de chargement
+ * @returns {Error | null} returns.error - Erreur éventuelle
+ * 
+ * @example
+ * ```tsx
+ * const { products, totalCount, isLoading, error } = useMarketplaceProducts({
+ *   filters: { productType: 'digital', category: 'all' },
+ *   pagination: { currentPage: 1, itemsPerPage: 12 },
+ *   hasSearchQuery: false,
+ *   shouldUseRPCFiltering: true
+ * });
+ * ```
+ * 
+ * @remarks
+ * - **Performance** : Utilise React Query pour le caching intelligent
+ * - **Optimisation** : Filtrage côté serveur via RPC pour grandes listes
+ * - **Cache** : Mise en cache automatique avec stratégies optimisées
+ * - **Prefetching** : Prefetch automatique des pages adjacentes
+ * - **Fallback** : Retour vers requête standard si RPC échoue
+ * 
+ * @see {@link fetchMarketplaceProducts} pour la fonction de chargement
+ * @see {@link cacheMarketplaceProducts} pour la gestion du cache
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -42,14 +78,17 @@ async function fetchMarketplaceProducts({
   const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
   const endIndex = startIndex + pagination.itemsPerPage - 1;
 
-  // ✅ OPTIMISATION: Utiliser les fonctions RPC pour filtrage côté serveur si activé
-  if (shouldUseRPCFiltering && filters.productType !== 'all') {
+  // 🚀 NOUVELLE OPTIMISATION: Utiliser la fonction RPC unifiée get_marketplace_products_filtered
+  // Au lieu de fonctions spécifiques par type, une seule fonction optimisée
+  if (shouldUseRPCFiltering) {
     try {
-      const rpcFunctionName = `filter_${filters.productType}_products`;
-      const  rpcParams: Record<string, unknown> = {
+      logger.info('🔄 [useMarketplaceProducts] Utilisation de la fonction RPC optimisée');
+
+      const { data, error } = await supabase.rpc('get_marketplace_products_filtered', {
         p_limit: pagination.itemsPerPage,
         p_offset: startIndex,
         p_category: filters.category !== 'all' && filters.category !== 'featured' ? filters.category : null,
+        p_product_type: filters.productType !== 'all' ? filters.productType : null,
         p_min_price: filters.priceRange !== 'all' ? (() => {
           const [min] = filters.priceRange.split('-').map(Number);
           return min || null;
@@ -61,43 +100,40 @@ async function fetchMarketplaceProducts({
         p_min_rating: filters.rating !== 'all' ? Number(filters.rating) : null,
         p_sort_by: filters.sortBy || 'created_at',
         p_sort_order: filters.sortOrder || 'desc',
-      };
-
-      // Ajouter les paramètres spécifiques selon le type de produit
-      if (filters.productType === 'digital') {
-        rpcParams.p_digital_sub_type = filters.digitalSubType && filters.digitalSubType !== 'all' ? filters.digitalSubType : null;
-        rpcParams.p_instant_delivery = filters.instantDelivery || null;
-      } else if (filters.productType === 'physical') {
-        rpcParams.p_stock_availability = filters.stockAvailability && filters.stockAvailability !== 'all' ? filters.stockAvailability : null;
-        rpcParams.p_shipping_type = filters.shippingType && filters.shippingType !== 'all' ? filters.shippingType : null;
-      } else if (filters.productType === 'service') {
-        rpcParams.p_service_type = filters.serviceType && filters.serviceType !== 'all' ? filters.serviceType : null;
-        rpcParams.p_location_type = filters.locationType && filters.locationType !== 'all' ? filters.locationType : null;
-        rpcParams.p_calendar_available = filters.calendarAvailable || null;
-      } else if (filters.productType === 'course') {
-        rpcParams.p_difficulty = filters.difficulty && filters.difficulty !== 'all' ? filters.difficulty : null;
-        rpcParams.p_access_type = filters.accessType && filters.accessType !== 'all' ? filters.accessType : null;
-      } else if (filters.productType === 'artist') {
-        rpcParams.p_artist_type = filters.artistType && filters.artistType !== 'all' ? filters.artistType : null;
-        rpcParams.p_edition_type = filters.editionType && filters.editionType !== 'all' ? filters.editionType : null;
-        rpcParams.p_certificate_of_authenticity = filters.certificateOfAuthenticity || null;
-      }
-
-      const { data, error } = await supabase.rpc(rpcFunctionName, rpcParams);
+        p_search_query: hasSearchQuery && filters.searchQuery ? filters.searchQuery : null,
+        p_featured_only: filters.category === 'featured',
+      });
 
       if (error) {
-        logger.error('Erreur RPC lors du filtrage des produits:', {
-          error,
-          functionName: rpcFunctionName,
-          params: rpcParams,
-        });
-        // Fallback vers la méthode standard en cas d'erreur RPC
+        logger.error('❌ Erreur RPC marketplace:', error);
+        // Fallback vers la méthode standard
       } else if (data && Array.isArray(data) && data.length > 0) {
+        const firstItem = data[0] as Record<string, unknown>;
+        const totalCount = firstItem.total_count ? Number(firstItem.total_count) : data.length;
+
         // Transformer les données RPC en format Product
         const products = data.map((item: unknown) => {
           const product = item as Record<string, unknown>;
           return {
-            ...product,
+            id: product.id as string,
+            name: product.name as string,
+            slug: product.slug as string,
+            description: product.description as string,
+            short_description: product.short_description as string,
+            image_url: product.image_url as string,
+            price: Number(product.price),
+            promotional_price: product.promotional_price ? Number(product.promotional_price) : null,
+            currency: product.currency as string,
+            rating: product.rating ? Number(product.rating) : null,
+            reviews_count: product.reviews_count ? Number(product.reviews_count) : 0,
+            category: product.category as string,
+            product_type: product.product_type as string,
+            licensing_type: product.licensing_type as string,
+            license_terms: product.license_terms as string,
+            is_featured: product.is_featured as boolean,
+            created_at: product.created_at as string,
+            updated_at: product.updated_at as string,
+            tags: product.tags as string[],
             stores: product.store_name ? {
               id: product.store_id as string,
               name: product.store_name as string,
@@ -105,20 +141,28 @@ async function fetchMarketplaceProducts({
               logo_url: product.store_logo_url as string | null,
               created_at: product.created_at as string,
             } : null,
+            product_affiliate_settings: product.commission_rate ? {
+              commission_rate: Number(product.commission_rate),
+              affiliate_enabled: product.affiliate_enabled as boolean,
+            } : null,
           } as Product;
         });
 
+        logger.info(`✅ [useMarketplaceProducts] ${products.length} produits chargés via RPC (${totalCount} total)`);
+
         return {
           products,
-          totalCount: products.length, // Les fonctions RPC ne retournent pas le count total, on utilise la longueur
-          filteredCount: products.length,
+          totalCount,
+          filteredCount: totalCount,
         };
       }
     } catch (error) {
-      logger.error('Erreur lors de l\'appel RPC:', error);
-      // Continue avec la méthode standard en cas d'erreur
+      logger.error('❌ Erreur lors de l\'appel RPC marketplace:', error);
+      // Continue avec la méthode standard
     }
   }
+
+  // Fallback vers la méthode standard si RPC échoue ou non activée
 
   // ✅ OPTIMISATION 1: Sélection de colonnes spécifiques au lieu de *
   // Sélectionner uniquement les colonnes nécessaires pour réduire la taille des données

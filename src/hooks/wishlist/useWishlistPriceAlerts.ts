@@ -48,7 +48,7 @@ export const useUpdatePriceAlertSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const  updates: any = {};
+      const updates: Partial<{ price_drop_alert_enabled: boolean; price_drop_threshold: number }> = {};
       if (enabled !== undefined) updates.price_drop_alert_enabled = enabled;
       if (threshold !== undefined) updates.price_drop_threshold = threshold;
 

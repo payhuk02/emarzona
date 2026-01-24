@@ -127,7 +127,7 @@ export const SessionExpiryWarning = ({
   };
 
   const getUrgencyMessage = () => {
-    if (isSessionExpired) return 'Session expirée - Reconnexion requise';
+    if (isSessionExpired) return 'Reconnexion en cours...';
     if (timeRemaining === null) return 'Expiration imminente';
     if (timeRemaining <= 1) return `Expire dans moins d'1 minute`;
     if (timeRemaining === 1) return 'Expire dans 1 minute';

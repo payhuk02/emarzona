@@ -298,33 +298,40 @@ export const useStore = () => {
     }
   };
 
-  // ✅ FIX: Éviter les requêtes répétées avec un debounce et des conditions plus strictes
+  // ✅ FIX: Gestion améliorée de la persistance avec prévention des pertes de session
   useEffect(() => {
-    // Ne pas exécuter si encore en chargement
+    // Attendre que tout soit chargé
     if (authLoading || contextLoading) {
-      logger.info('⏳ [useStore] En attente de l\'auth et du contexte...');
+      logger.debug('⏳ [useStore] En attente du chargement complet...');
       return;
     }
 
-    // Ne pas exécuter si pas d'utilisateur
-    if (!user) {
-      logger.info('❌ [useStore] Pas d\'utilisateur, pas de requête');
+    // Pas d'utilisateur = pas de boutique
+    if (!user?.id) {
+      logger.debug('❌ [useStore] Aucun utilisateur authentifié');
       setStore(null);
       setLoading(false);
       return;
     }
 
-    // Éviter les requêtes répétées pour la même boutique
-    if (contextStore && store?.id === contextStore.id) {
-      logger.info('✅ [useStore] Boutique déjà chargée depuis le contexte');
+    // Utiliser la boutique du contexte si elle est valide et à jour
+    if (contextStore && contextStore.id && contextStore.user_id === user.id) {
+      logger.info('✅ [useStore] Utilisation boutique contexte:', contextStore.id);
       setStore(contextStore);
       setLoading(false);
       return;
     }
 
-    logger.info('🔄 [useStore] Exécution de fetchStore');
-    fetchStore();
-  }, [user?.id, selectedStoreId]); // ✅ Dépendances simplifiées pour éviter les re-renders inutiles
+    // Charger depuis la DB si nécessaire
+    if (selectedStoreId) {
+      logger.info('🔄 [useStore] Chargement boutique DB:', selectedStoreId);
+      fetchStore();
+    } else {
+      logger.info('ℹ️ [useStore] Aucune boutique sélectionnée');
+      setStore(null);
+      setLoading(false);
+    }
+  }, [user?.id, selectedStoreId, contextStore?.id]); // Dépendances minimales
 
   return {
     store,

@@ -70,6 +70,34 @@ type LooseSupabaseQuery = {
 };
 type LooseSupabaseClient = { from: (table: string) => LooseSupabaseQuery };
 
+/**
+ * Page de finalisation de commande (Checkout)
+ * 
+ * Permet à l'utilisateur de finaliser son achat en :
+ * - Remplissant ses informations de livraison
+ * - Appliquant un code promo éventuel
+ * - Vérifiant le résumé de commande
+ * - Procédant au paiement via Moneroo/PayDunya
+ * 
+ * @component
+ * @returns {JSX.Element} Le composant Checkout
+ * 
+ * @remarks
+ * - Preload des images produit pour améliorer LCP
+ * - Validation complète du formulaire
+ * - Gestion des codes promo
+ * - Intégration Moneroo avec lazy loading
+ * - Gestion d'erreurs robuste
+ * - Accessible avec ARIA labels complets
+ * 
+ * @example
+ * ```tsx
+ * <Route path="/checkout" element={<Checkout />} />
+ * ```
+ * 
+ * @see {@link loadMonerooPayment} pour l'intégration Moneroo
+ * @see {@link CouponInput} pour la gestion des codes promo
+ */
 const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -292,7 +320,18 @@ const Checkout = () => {
     loadData();
   }, [productId, storeId, variantId, navigate, toast]);
 
-  // Validation du formulaire
+  /**
+   * Valide le formulaire de commande
+   * 
+   * @function validateForm
+   * @returns {boolean} true si le formulaire est valide, false sinon
+   * 
+   * @remarks
+   * - Vérifie que tous les champs requis sont remplis
+   * - Valide le format de l'email
+   * - Met à jour les erreurs de formulaire
+   * - Retourne true uniquement si aucune erreur
+   */
   const validateForm = useCallback((): boolean => {
     const errors: Partial<Record<keyof CheckoutFormData, string>> = {};
 
@@ -318,7 +357,24 @@ const Checkout = () => {
     return Object.keys(errors).length === 0;
   }, [formData, setFormErrors]);
 
-  // Calculer le prix - IMPORTANT: Utiliser le prix promo si disponible, puis appliquer le coupon
+  /**
+   * Calcule le prix final de la commande
+   * 
+   * @function calculatePrice
+   * @returns {number} Le prix final après application des promotions et coupons
+   * 
+   * @remarks
+   * - Priorité : Prix variante > Prix promo > Prix normal
+   * - Applique la réduction du code promo sur le prix de base
+   * - Retourne toujours un prix >= 0
+   * 
+   * @example
+   * ```tsx
+   * const finalPrice = calculatePrice();
+   * // Si produit à 10000 XOF avec promo à 8000 XOF et coupon -1000 XOF
+   * // Retourne : 7000 XOF
+   * ```
+   */
   const calculatePrice = useCallback((): number => {
     if (!product) return 0;
 
@@ -519,15 +575,28 @@ const Checkout = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0">
+      <div 
+        className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0"
+        role="main"
+        aria-label="Page de paiement"
+        aria-busy="true"
+        aria-live="polite"
+      >
         <div className="max-w-7xl mx-auto">
+          <div 
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+          >
+            Chargement des informations de paiement...
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <Skeleton className="h-12 w-64" />
-              <Skeleton className="h-96" />
+            <div className="lg:col-span-2 space-y-6" aria-label="Informations de commande">
+              <Skeleton className="h-12 w-64" aria-hidden="true" />
+              <Skeleton className="h-96" aria-hidden="true" />
             </div>
-            <div className="space-y-6">
-              <Skeleton className="h-64" />
+            <div className="space-y-6" aria-label="Résumé de commande">
+              <Skeleton className="h-64" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -557,33 +626,44 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0">
+    <div 
+      className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0"
+      role="main"
+      aria-label="Page de finalisation de commande"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
-            <Link
-              to={
-                product && store ? `/stores/${store.slug}/products/${product.slug}` : '/marketplace'
-              }
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="text-sm sm:text-base">Retour</span>
-            </Link>
-          </Button>
+        <header className="mb-6 sm:mb-8">
+          <nav aria-label="Navigation de la page de paiement">
+            <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
+              <Link
+                to={
+                  product && store ? `/stores/${store.slug}/products/${product.slug}` : '/marketplace'
+                }
+                aria-label="Retour à la page précédente"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                <span className="text-sm sm:text-base">Retour</span>
+              </Link>
+            </Button>
+          </nav>
           <h1 className="text-2xl sm:text-3xl font-bold">Finaliser votre commande</h1>
           <p className="text-muted-foreground mt-2">
             Complétez vos informations pour procéder au paiement
           </p>
-        </div>
+        </header>
 
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Résumé de la commande - En haut sur mobile, à droite sur desktop */}
-          <div className="order-2 lg:order-2 lg:col-span-1">
+          <aside 
+            className="order-2 lg:order-2 lg:col-span-1"
+            role="complementary"
+            aria-label="Résumé de la commande"
+          >
             <Card className="lg:sticky lg:top-4">
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                   Résumé de la commande
                 </CardTitle>
               </CardHeader>
@@ -796,7 +876,7 @@ const Checkout = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </aside>
 
           {/* Formulaire principal - En bas sur mobile, à gauche sur desktop */}
           <div className="order-1 lg:order-1 lg:col-span-2 space-y-6">

@@ -701,9 +701,17 @@ const Products = () => {
   if (storeLoading) {
     return (
       <MainLayout layoutType="products">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div 
+          className="flex items-center justify-center min-h-[60vh]"
+          role="status"
+          aria-live="polite"
+          aria-label={t('products.loadingProducts', 'Chargement des produits...')}
+        >
           <div className="text-center">
-            <Loader2 className="inline-block h-8 w-8 animate-spin text-primary" />
+            <Loader2 
+              className="inline-block h-8 w-8 animate-spin text-primary" 
+              aria-hidden="true"
+            />
             <p className="mt-2 text-muted-foreground">{t('products.loadingProducts')}</p>
           </div>
         </div>
@@ -795,7 +803,15 @@ const Products = () => {
         </div>
         {/* États de chargement */}
         {productsLoadingState ? (
-          <div className="space-y-4">
+          <div 
+            className="space-y-4"
+            role="status"
+            aria-live="polite"
+            aria-label={t('products.loading', 'Chargement des produits...')}
+          >
+            <div className="sr-only">
+              {t('products.loading', 'Chargement des produits...')}
+            </div>
             <ProductGrid className="gap-3 sm:gap-4 lg:gap-6">
               {Array.from({ length: itemsPerPage }).map((_, index) => (
                 <ProductCardSkeleton key={`skeleton-${index}`} />

@@ -1,6 +1,49 @@
 /**
  * Composant pour l'affichage des produits du marketplace
- * Gère l'affichage en grille/liste, la virtualisation, et la pagination
+ * 
+ * Gère l'affichage en grille/liste, la virtualisation, et la pagination.
+ * Optimisé pour les performances avec virtualisation pour grandes listes.
+ * 
+ * @component
+ * @param {MarketplaceProductsSectionProps} props - Propriétés du composant
+ * @param {Product[]} props.products - Liste des produits à afficher
+ * @param {boolean} props.loading - État de chargement initial
+ * @param {string | null} props.error - Message d'erreur éventuel
+ * @param {boolean} props.hasLoadedOnce - Indique si les données ont été chargées au moins une fois
+ * @param {boolean} props.isLoadingProducts - Indique si les produits sont en cours de chargement
+ * @param {Object} props.pagination - Informations de pagination
+ * @param {Function} props.onRetry - Fonction appelée pour réessayer en cas d'erreur
+ * @param {Function} props.onPageChange - Fonction appelée lors du changement de page
+ * @param {Function} props.onBuyProduct - Fonction appelée lors de l'achat d'un produit
+ * @param {string | null} [props.userId] - ID de l'utilisateur connecté
+ * @param {boolean} props.showRecommendations - Afficher les recommandations IA
+ * @param {Function} [props.onRecommendationsRender] - Callback pour le rendu des recommandations
+ * 
+ * @returns {JSX.Element} Le composant de section produits
+ * 
+ * @example
+ * ```tsx
+ * <MarketplaceProductsSection
+ *   products={products}
+ *   loading={loading}
+ *   error={error}
+ *   hasLoadedOnce={hasLoadedOnce}
+ *   isLoadingProducts={isLoadingProducts}
+ *   pagination={pagination}
+ *   onRetry={handleRetry}
+ *   onPageChange={handlePageChange}
+ *   onBuyProduct={handleBuyProduct}
+ *   userId={userId}
+ *   showRecommendations={true}
+ * />
+ * ```
+ * 
+ * @remarks
+ * - **Virtualisation** : Utilise VirtualizedProductGrid pour 12+ produits
+ * - **Performance** : Mémorise les transformations et rendus
+ * - **Accessibilité** : ARIA labels complets et navigation clavier
+ * - **Responsive** : Adapté mobile, tablette et desktop
+ * - **Loading States** : Skeleton loaders et indicateurs de chargement
  */
 
 import React, { useMemo, useCallback } from 'react';
@@ -143,9 +186,16 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
         ref={productsRef}
         id="main-content"
         className="py-4 sm:py-6 px-3 sm:px-4"
-        role="main"
-        aria-label={t('marketplace.productList.ariaLabel')}
+        role="region"
+        aria-labelledby="products-section-title"
+        aria-describedby="products-section-description"
       >
+        <h2 id="products-section-title" className="sr-only">
+          {t('marketplace.productList.title', 'Liste des produits')}
+        </h2>
+        <p id="products-section-description" className="sr-only">
+          {t('marketplace.productList.description', 'Affichage des produits disponibles sur la marketplace')}
+        </p>
         <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
           {error ? (
             <div
@@ -173,7 +223,15 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             </div>
           ) : loading && !hasLoadedOnce ? (
             // ✅ OPTIMISATION: Afficher skeleton au premier chargement
-            <div className="w-full">
+            <div 
+              className="w-full"
+              role="status"
+              aria-live="polite"
+              aria-label={t('marketplace.loading', 'Chargement des produits...')}
+            >
+              <div className="sr-only">
+                {t('marketplace.loading', 'Chargement des produits...')}
+              </div>
               <ProductListSkeleton count={pagination.itemsPerPage} />
             </div>
           ) : products.length > 0 ? (

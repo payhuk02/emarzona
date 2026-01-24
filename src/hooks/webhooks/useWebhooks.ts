@@ -122,7 +122,7 @@ export const useCreateWebhook = () => {
         description: `Le webhook "${data.name}" a été créé avec succès.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de la création du webhook',
@@ -142,7 +142,7 @@ export const useUpdateWebhook = () => {
 
   return useMutation({
     mutationFn: async (form: UpdateWebhookForm) => {
-      const  updates: any = {};
+      const updates: Partial<UpdateWebhookForm> = {};
 
       if (form.name !== undefined) updates.name = form.name;
       if (form.description !== undefined) updates.description = form.description;
@@ -175,7 +175,7 @@ export const useUpdateWebhook = () => {
         description: 'Le webhook a été mis à jour avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de la mise à jour du webhook',
@@ -217,7 +217,7 @@ export const useDeleteWebhook = () => {
         description: 'Le webhook a été supprimé avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de la suppression du webhook',
@@ -255,7 +255,7 @@ export const useTestWebhook = () => {
         queryClient.invalidateQueries({ queryKey: ['webhook-delivery', deliveryId] });
       }, 2000);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de l\'envoi du test',

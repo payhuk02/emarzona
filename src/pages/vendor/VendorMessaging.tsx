@@ -100,7 +100,7 @@ export default function VendorMessaging() {
       try {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       } catch (error) {
-        console.warn('Failed to scroll to messages end:', error);
+        logger.warn('Failed to scroll to messages end', { error });
       }
     }
   }, [messages.length, messagesLoading, hasMoreMessages]);
@@ -115,7 +115,7 @@ export default function VendorMessaging() {
         ) as HTMLElement;
 
         if (!scrollContainer) {
-          console.warn('Scroll container not found for messages loading');
+          logger.warn('Scroll container not found for messages loading');
           return;
         }
 
@@ -129,7 +129,7 @@ export default function VendorMessaging() {
           }, 100);
         }
       } catch (error) {
-        console.error('Error adjusting scroll position during messages loading:', error);
+        logger.error('Error adjusting scroll position during messages loading', { error });
       }
     }
   }, [messagesLoading]);

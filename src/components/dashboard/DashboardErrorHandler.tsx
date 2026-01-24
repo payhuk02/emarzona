@@ -27,7 +27,6 @@ interface DashboardErrorHandlerProps {
 }
 
 type ErrorType =
-  | 'SESSION_EXPIRED'
   | 'RPC_INEXISTANTE'
   | 'RPC_PERMISSIONS'
   | 'NETWORK_ERROR'
@@ -50,11 +49,13 @@ export const DashboardErrorHandler = ({
       return;
     }
 
-    if (error.includes('SESSION_EXPIRED') ||
-        error.includes('JWT expired') ||
-        error.includes('session') && error.includes('expir')) {
-      setErrorType('SESSION_EXPIRED');
-    } else if (error.includes('RPC_INEXISTANTE') ||
+    // ✅ SILENCIEUX: Plus de détection d'erreurs de session
+    // if (error.includes('SESSION_EXPIRED') ||
+    //     error.includes('JWT expired') ||
+    //     error.includes('session') && error.includes('expir')) {
+    //   setErrorType('SESSION_EXPIRED');
+    // } else
+    if (error.includes('RPC_INEXISTANTE') ||
                error.includes('function') && error.includes('does not exist')) {
       setErrorType('RPC_INEXISTANTE');
     } else if (error.includes('RPC_PERMISSIONS') ||
@@ -105,22 +106,6 @@ export const DashboardErrorHandler = ({
 
   const getErrorConfig = () => {
     switch (errorType) {
-      case 'SESSION_EXPIRED':
-        return {
-          icon: <LogOut className="h-5 w-5" />,
-          title: 'Session expirée',
-          description: 'Votre session de connexion a expiré. Veuillez vous reconnecter pour continuer.',
-          variant: 'destructive' as const,
-          actions: [
-            {
-              label: 'Se reconnecter',
-              onClick: handleSignOut,
-              variant: 'default' as const,
-              icon: <LogOut className="h-4 w-4" />
-            }
-          ]
-        };
-
       case 'RPC_INEXISTANTE':
         return {
           icon: <Database className="h-5 w-5" />,

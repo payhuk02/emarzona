@@ -181,7 +181,10 @@ export const useCourseViewsTimeline = (productId: string, days: number = 7) => {
       startDate.setDate(startDate.getDate() - days);
 
       const { data, error } = await supabase
-        .from('product_views')
+        .from('orders')
+        .select('customer_id, created_at')
+        .eq('product_type', 'course')
+        .order('created_at', { ascending: false })
         .select('created_at')
         .eq('product_id', productId)
         .gte('created_at', startDate.toISOString())

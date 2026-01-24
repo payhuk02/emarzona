@@ -185,7 +185,7 @@ export function useProductRecommendations() {
 // Fonctions utilitaires privées
 
 function buildRecommendationFilters(profile: StyleProfile) {
-  const filters: Record<string, any> = {};
+  const filters: Record<string, string | number | boolean> = {};
 
   // Filtres basés sur le budget
   switch (profile.budgetRange) {

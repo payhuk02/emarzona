@@ -98,20 +98,15 @@ export const useSessionManager = () => {
   const forceReconnect = useCallback(async () => {
     logger.warn('🔐 Forçage de reconnexion suite à session expirée');
 
-    toast({
-      title: 'Session expirée',
-      description: 'Vous allez être redirigé vers la page de connexion.',
-      variant: 'destructive',
-    });
-
-    // Attendre un peu pour que l'utilisateur voie le message
+    // ✅ SILENCIEUX: Redirection automatique sans message visible
+    // L'utilisateur sera automatiquement redirigé vers la page de connexion
     setTimeout(async () => {
       try {
         await signOut();
       } catch (error) {
         logger.error('Erreur lors de la déconnexion forcée:', error);
       }
-    }, 2000);
+    }, 500); // Délai plus court
   }, [signOut, toast]);
 
   // Rafraîchissement automatique
