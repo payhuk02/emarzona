@@ -16,6 +16,7 @@ DROP POLICY IF EXISTS "platform_settings_update_policy" ON platform_settings;
 DROP POLICY IF EXISTS "platform_settings_delete_policy" ON platform_settings;
 
 -- Nouvelle politique SELECT : Utilisateurs authentifiés peuvent lire les données de personnalisation
+DROP POLICY IF EXISTS "platform_settings_select_authenticated_policy" ON platform_settings;
 CREATE POLICY "platform_settings_select_authenticated_policy"
   ON platform_settings FOR SELECT
   TO authenticated
