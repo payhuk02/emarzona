@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#007bff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- ✅ Performance optimizations -->
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ✅ Favicon et icônes multi-plateformes -->
+    <!-- Le favicon sera géré dynamiquement par DynamicFavicon component -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3">
+    <meta name="msapplication-TileColor" content="#007bff" />
+
+    <title>Emarzona - Plateforme de ecommerce et marketing</title>
+    <meta name="description" content="Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services, cours en ligne et oeuvres d&#39;artiste. Solution e-commerce moderne et sécurisée.">
+    <meta name="author" content="Emarzona" />
+
+    <!-- ✅ Resource Hints pour améliorer les Core Web Vitals -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    
+    <!-- ✅ PERFORMANCE: Google Fonts optimisé pour FCP -->
+    <!-- Preconnect pour établir la connexion rapidement -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- ✅ PERFORMANCE: Font-display swap pour éviter FOIT (Flash of Invisible Text) -->
+    <!-- ✅ PERFORMANCE: Chargement asynchrone des fonts pour ne pas bloquer le render -->
+    <!-- ✅ PHASE 1: Optimisé pour améliorer FCP - Preload des fonts critiques -->
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all';this.onload=null;"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    
+    <!-- ✅ Preconnect pour Supabase (améliore TTFB) -->
+    <link rel="preconnect" href="https://mcpcsfisijxagrjndgdl.supabase.co" />
+    
+    <!-- ✅ PERFORMANCE: Preload images LCP pour améliorer LCP -->
+    <!-- Note: Logo preload removed - logo is loaded dynamically via usePlatformLogo hook -->
+    <!-- Note: Les autres images seront préchargées dynamiquement par React via OptimizedImage -->
+    
+    <!-- ✅ PERFORMANCE: Preload CSS critique pour améliorer FCP -->
+    <!-- Vite injecte automatiquement le CSS, mais on peut précharger les ressources critiques -->
+    
+    <!-- ✅ PERFORMANCE: Preload JavaScript critique pour améliorer TTI (Time to Interactive) -->
+    <!-- Vite gère automatiquement le code splitting et le preload des chunks critiques -->
+    
+    <!-- ✅ PERFORMANCE: Preload fonts critiques pour améliorer FCP -->
+    <!-- Les fonts Poppins sont déjà préchargées ci-dessus avec font-display: swap -->
+    
+    <!-- ✅ PERFORMANCE: Preload Supabase client pour améliorer TTFB -->
+    <!-- Le client Supabase sera chargé par Vite automatiquement -->
+    
+    <!-- ✅ PHASE 1: Preload des ressources critiques pour améliorer FCP -->
+    <!-- Note: Le CSS est chargé via Vite, pas besoin de preload manuel -->
+    
+    <!-- ✅ Prefetch pour les routes critiques (améliore la navigation) -->
+    <!-- Note: Les prefetch sont gérés dynamiquement par React Router -->
+    
+    <!-- ✅ Preconnect pour CDN et services externes (améliore TTFB) -->
+    <link rel="preconnect" href="https://storage.googleapis.com" />
+    <link rel="preconnect" href="https://api.moneroo.com" />
+    
+    <!-- ✅ PHASE 1: Preconnect pour améliorer TTFB sur les domaines critiques -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- ✅ Prefetch pour routes critiques (améliore la navigation) -->
+    <!-- Note: React Router gère déjà le prefetch via lazy loading -->
+    <!-- Les prefetch de routes sont gérés dynamiquement par usePrefetchRoutes et useIntelligentPrefetch -->
+
+    <!-- ✅ Open Graph (Facebook, WhatsApp, LinkedIn...) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Emarzona" />
+
+
+<meta property="og:image" content="https://emarzona.com/og-image.png">
+<meta property="og:url" content="https://emarzona.com" />
+
+    <!-- ✅ Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://emarzona.com/og-image.png">
+    
+    
+    
+    
+    
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Emarzona - Plateforme de ecommerce et marketing">
+  <meta name="twitter:title" content="Emarzona - Plateforme de ecommerce et marketing">
+  <meta property="og:description" content="Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services, cours en ligne et oeuvres d&#39;artiste. Solution e-commerce moderne et sécurisée.">
+  <meta name="twitter:description" content="Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services, cours en ligne et oeuvres d&#39;artiste. Solution e-commerce moderne et sécurisée.">
+</head>
+
+  <body>
+    <!-- Skip link sera ajouté par React via SkipLink component -->
+    
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

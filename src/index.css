@@ -1,0 +1,1348 @@
+/* All @import statements must come first */
+/* Google Fonts chargé via <link> dans index.html pour éviter les problèmes CSP */
+@import './styles/animations.css';
+@import './styles/mobile-optimizations.css';
+@import './styles/mobile-first-system.css';
+@import './styles/sidebar-optimized.css';
+
+/**
+ * Font optimization: font-display: swap
+ * Améliore le FCP (First Contentful Paint)
+ * Évite le FOIT (Flash of Invisible Text)
+ * 
+ * Animations personnalisées importées depuis ./styles/animations.css
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Thème clair par défaut (Professionnel) */
+    --background: 0 0% 100%;
+    --foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste sur fond blanc (WCAG AA) */
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste */
+
+    --primary: 217 91% 60%; /* Bleu moderne #3B82F6 (inspiré Linear, Stripe) */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%; /* Gris très clair moderne */
+    --secondary-foreground: 0 0% 12%; /* Noir doux */
+
+    --muted: 0 0% 98%; /* Gris ultra clair */
+    --muted-foreground: 0 0% 35%; /* Gris foncé pour meilleur contraste sur fond blanc (WCAG AA) */
+
+    --accent: 38 92% 50%; /* Orange/Jaune moderne pour contraste avec primary */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%; /* Gris clair moderne */
+    --input: 0 0% 90%; /* Gris clair moderne */
+    --ring: 217 91% 60%; /* Bleu moderne */
+
+    --radius: 0.5rem; /* 8px - Border radius moderne et cohérent */
+
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(38, 92%, 45%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(220, 30%, 12%) 0%, hsl(220, 35%, 18%) 100%);
+
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Sidebar claire par défaut */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 40% 10%; /* Plus foncé pour meilleur contraste sur fond blanc */
+    --sidebar-primary: 217 91% 60%; /* Bleu moderne */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%; /* Gris très clair */
+    --sidebar-accent-foreground: 0 0% 12%; /* Noir doux */
+    --sidebar-border: 0 0% 90%; /* Gris clair */
+    --sidebar-ring: 217 91% 60%; /* Bleu moderne */
+  }
+
+  .dark {
+    --background: 220 35% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 30% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 30% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 217 91% 65%; /* Bleu moderne plus clair pour dark mode */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 18%; /* Gris foncé moderne */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 16%; /* Gris très foncé */
+    --muted-foreground: 0 0% 65%; /* Gris moyen */
+
+    --accent: 38 92% 55%; /* Orange/Jaune moderne pour contraste avec primary */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%; /* Gris foncé */
+    --input: 0 0% 20%; /* Gris foncé */
+    --ring: 217 91% 65%; /* Bleu moderne */
+
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 65%) 0%, hsl(217, 91%, 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 55%) 0%, hsl(38, 92%, 50%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 50%, 12%) 0%, hsl(220, 45%, 18%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(220, 35%, 8%) 0%, hsl(220, 40%, 14%) 100%);
+
+    --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4);
+
+    /* Sidebar toujours en thème clair même en mode sombre */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 33 100% 96.5%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 20 5.9% 90%;
+    --sidebar-ring: 25 95% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* Times New Roman pour les titres */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  /* OPTIMISATION: CSS du sidebar déplacé dans sidebar-optimized.css
+     pour permettre le chargement asynchrone et réduire le CSS critique */
+  /* Les styles du sidebar sont maintenant dans ./styles/sidebar-optimized.css */
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-size: 1rem; /* 16px - Taille professionnelle */
+    line-height: 1.625; /* Amélioré pour meilleure lisibilité */
+    letter-spacing: 0;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hiérarchie typographique moderne */
+  h1 {
+    font-size: 2.5rem; /* 40px */
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: 2rem; /* 32px */
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  h4 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  h5 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  h6 {
+    font-size: 1rem; /* 16px */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* Responsive typography */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem; /* 32px */
+    }
+    h2 {
+      font-size: 1.75rem; /* 28px */
+    }
+    h3 {
+      font-size: 1.5rem; /* 24px */
+    }
+  }
+
+  /* Optimisations pour très petits écrans (< 360px) */
+  @media (max-width: 360px) {
+    h1 {
+      font-size: 1.75rem; /* 28px */
+      line-height: 1.2;
+    }
+    h2 {
+      font-size: 1.5rem; /* 24px */
+      line-height: 1.25;
+    }
+    h3 {
+      font-size: 1.25rem; /* 20px */
+      line-height: 1.3;
+    }
+
+    /* Padding réduit pour très petits écrans */
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    /* Textes plus petits mais lisibles - Minimum 14px pour accessibilité */
+    body {
+      font-size: 0.875rem; /* 14px - Minimum recommandé WCAG */
+      line-height: 1.5;
+    }
+
+    /* Boutons compacts mais touch-friendly */
+    button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      min-height: 40px; /* Légèrement réduit mais toujours touch-friendly */
+      min-width: 40px;
+    }
+
+    /* Cards plus compactes */
+    [class*='card'],
+    [class*='Card'] {
+      padding: 0.75rem;
+    }
+
+    /* Espacement réduit */
+    .space-y-3 > * + * {
+      margin-top: 0.5rem;
+    }
+
+    .space-y-4 > * + * {
+      margin-top: 0.75rem;
+    }
+
+    .gap-3 {
+      gap: 0.5rem;
+    }
+
+    .gap-4 {
+      gap: 0.75rem;
+    }
+
+    /* Grilles adaptées */
+    .grid {
+      gap: 0.5rem;
+    }
+  }
+
+  #root {
+    min-height: 100vh;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /*
+   * ⚠️ PERF: éviter les transitions globales sur `*`
+   * Cela augmente le coût des recalculs de style (surtout sur mobile) et peut dégrader le scroll.
+   * On applique des transitions uniquement aux éléments interactifs et composants UI.
+   */
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  [role='button'] {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .hover-scale {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Optimisations mobile et interactions tactiles */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .touch-friendly {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Réduction des animations pour l'accessibilité */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* Désactiver les animations spécifiques */
+    .animate-fade-in-up,
+    .animate-float,
+    .animate-pulse {
+      animation: none !important;
+    }
+
+    /* Désactiver les transformations au hover */
+    *:hover {
+      transform: none !important;
+    }
+  }
+
+  /* OPTIMISATION PERFORMANCE: Réduire les animations sur mobile pour économiser la batterie */
+  @media (max-width: 768px) {
+    /* Réduire la durée des animations */
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.2s !important;
+      transition-duration: 0.15s !important;
+    }
+
+    /* Désactiver les animations non-essentielles */
+    .animate-float,
+    .animate-pulse:not([aria-busy='true']) {
+      animation: none !important;
+    }
+
+    /* Désactiver les transformations au hover (peu utiles sur mobile) */
+    .hover-smooth-lift:hover,
+    .hover-smooth-scale:hover,
+    .product-card-zoom:hover {
+      transform: none !important;
+    }
+
+    /* Réduire les effets de glow et shadow sur mobile */
+    .shadow-glow {
+      box-shadow: var(--shadow-soft) !important;
+    }
+  }
+
+  /* Optimisations pour très petits écrans */
+  @media (max-width: 475px) {
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    .text-responsive-xs {
+      font-size: 0.75rem;
+      line-height: 1rem;
+    }
+
+    .p-responsive-xs {
+      padding: 0.5rem;
+    }
+
+    .gap-responsive-xs {
+      gap: 0.5rem;
+    }
+  }
+
+  /* Optimisations supplémentaires pour très petits écrans (< 360px) */
+  @media (max-width: 360px) {
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    /* Textes adaptés - Minimum 14px pour accessibilité WCAG */
+    .text-responsive-xs {
+      font-size: 0.875rem; /* 14px minimum pour accessibilité */
+      line-height: 1.25rem;
+    }
+
+    /* Padding minimal */
+    .p-responsive-xs {
+      padding: 0.375rem;
+    }
+
+    /* Gap minimal */
+    .gap-responsive-xs {
+      gap: 0.375rem;
+    }
+
+    /* Cards plus compactes */
+    .card {
+      padding: 0.75rem;
+    }
+
+    /* Boutons compacts mais touch-friendly */
+    button {
+      min-height: 40px; /* Légèrement réduit mais toujours touch-friendly */
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* ===================================== */
+  /* ACCESSIBILITÉ WCAG AA LEVEL */
+  /* ===================================== */
+
+  /* 1. Focus visible amélioré - Respecte WCAG 2.4.7 */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    transition: outline-offset 0.2s ease;
+  }
+
+  /* Focus étendu pour les interactions tactiles */
+  @media (hover: none) {
+    *:focus-visible {
+      outline-width: 4px;
+      outline-offset: 3px;
+    }
+  }
+
+  /* Skip links - Respecte WCAG 2.4.1 */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sr-only:focus,
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* 2. Contraste amélioré pour les liens - Respecte WCAG 1.4.3 */
+  a {
+    color: hsl(var(--primary));
+    text-decoration-skip-ink: auto;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  a:focus {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* 3. Boutons accessibles - Respecte WCAG 2.1.1 */
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  button:focus-visible,
+  [role='button']:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    outline-style: solid;
+    border-radius: 0.25rem;
+  }
+
+  /* Focus visible amélioré pour navigation clavier - WCAG 2.4.7 */
+  *:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    outline-style: solid;
+  }
+
+  /* Exception pour les éléments avec focus interne (inputs, etc.) */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* 4. Messages d'erreur et status - Respecte WCAG 3.3.1 & 3.3.2 */
+  [role='alert'],
+  [aria-live='assertive'],
+  [aria-live='polite'] {
+    position: relative;
+  }
+
+  /* 5. Cibles tactiles minimum 44x44px - Respecte WCAG 2.5.5 */
+  button,
+  a,
+  input[type='checkbox'],
+  input[type='radio'],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Exception pour les icônes dans les boutons */
+  button > svg,
+  a > svg {
+    pointer-events: none;
+  }
+
+  /* 6. Texte sélectionnable avec contraste - Respecte WCAG 1.4.3 */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  /* 7. Mode sombre avec contraste respecté */
+  .dark {
+    /* Garantir un contraste minimum de 4.5:1 */
+    --text-high-contrast: 0 0% 100%;
+    --text-medium-contrast: 0 0% 85%;
+    --text-low-contrast: 0 0% 70%;
+  }
+
+  /* 8. États hover et active clairs - Respecte WCAG 1.4.1 */
+  button:hover:not(:disabled),
+  [role='button']:hover:not([aria-disabled='true']) {
+    filter: brightness(1.1);
+  }
+
+  button:active:not(:disabled),
+  [role='button']:active:not([aria-disabled='true']) {
+    filter: brightness(0.9);
+  }
+
+  /* 9. Navigation au clavier visible */
+  [tabindex]:focus-visible,
+  [role='tab']:focus-visible,
+  [role='menuitem']:focus-visible,
+  [role='option']:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    z-index: 10;
+  }
+
+  /* 10. Indicateurs de chargement accessibles */
+  @keyframes spin-accessible {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  [aria-busy='true']::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.5em;
+    border: 2px solid hsl(var(--primary));
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin-accessible 0.8s linear infinite;
+  }
+
+  /* 11. Amélioration du contraste pour les placeholders */
+  ::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 0.7;
+  }
+
+  input:focus::placeholder,
+  textarea:focus::placeholder {
+    opacity: 0.5;
+  }
+
+  /* 12. Focus pour les éléments de formulaire */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-color: hsl(var(--ring));
+  }
+
+  /* 13. Tooltips accessibles */
+  [role='tooltip'] {
+    background-color: hsl(var(--popover));
+    color: hsl(var(--popover-foreground));
+    border: 1px solid hsl(var(--border));
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    box-shadow: var(--shadow-medium);
+  }
+
+  /* 14. Indicateur de page actuelle */
+  [aria-current='page'] {
+    font-weight: 600;
+    position: relative;
+  }
+
+  [aria-current='page']::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: hsl(var(--primary));
+  }
+
+  /* 15. Respect des préférences utilisateur */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: 220 20% 40%;
+      --ring: 210 100% 70%;
+    }
+
+    button,
+    a {
+      outline-width: 4px;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      color-scheme: dark;
+    }
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY - Focus Visible & Keyboard Navigation
+   ============================================ */
+
+/* Amélioration du focus visible pour la navigation clavier */
+@layer utilities {
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Focus visible amélioré pour tous les éléments interactifs */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  /* Focus visible pour les boutons */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
+  }
+
+  /* Focus visible pour les éléments avec tabindex */
+  [tabindex]:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Amélioration du contraste du focus */
+  .dark *:focus-visible {
+    outline-color: hsl(var(--primary));
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--primary));
+  }
+}
+
+@layer utilities {
+  /* Sidebar styles optimisés - Utilisation de variables CSS au lieu de !important */
+  /* Les styles détaillés sont dans sidebar-optimized.css */
+
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-dark {
+    background: var(--gradient-dark);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-large {
+    box-shadow: var(--shadow-large);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  /* Micro-interactions améliorées */
+  .micro-interaction-scale {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .micro-interaction-scale:active {
+    transform: scale(0.95);
+  }
+
+  .micro-interaction-bounce {
+    transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .micro-interaction-bounce:active {
+    transform: scale(0.9);
+  }
+
+  /* Smooth hover effects avec GPU acceleration */
+  .hover-smooth-lift {
+    transition:
+      transform 0.2s ease-out,
+      box-shadow 0.2s ease-out;
+    will-change: transform;
+  }
+
+  .hover-smooth-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .hover-smooth-scale {
+    transition: transform 0.2s ease-out;
+    will-change: transform;
+  }
+
+  .hover-smooth-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* Respect des préférences utilisateur (reduced motion) */
+  @media (prefers-reduced-motion: reduce) {
+    .micro-interaction-scale,
+    .micro-interaction-bounce,
+    .hover-smooth-lift,
+    .hover-smooth-scale {
+      transition: none !important;
+      transform: none !important;
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  /* Page transitions */
+  .page-transition {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+  }
+
+  .page-transition.fadeOut {
+    animation-name: fadeOutPage;
+  }
+
+  .page-transition.fadeIn {
+    animation-name: fadeInPage;
+  }
+
+  /* Link hover effects */
+  .nav-link {
+    position: relative;
+    transition: var(--transition-smooth);
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: hsl(var(--primary));
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 100%;
+  }
+
+  /* Button ripple effect */
+  .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition:
+      width 0.6s,
+      height 0.6s;
+  }
+
+  .btn-ripple:active::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Product card zoom effect */
+  .product-card-zoom {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .product-card-zoom:hover {
+    transform: scale(1.02);
+  }
+
+  .product-card-zoom:active {
+    transform: scale(0.98);
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOutPage {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes fadeInPage {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+  }
+
+  /* Animation shimmer pour LazyImage et effets de brillance */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(200%) translateY(200%) rotate(45deg);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s infinite;
+  }
+}
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  @apply focus:outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-muted-foreground;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror h1 {
+  @apply text-3xl font-bold mb-4;
+}
+
+.ProseMirror h2 {
+  @apply text-2xl font-bold mb-3;
+}
+
+.ProseMirror h3 {
+  @apply text-xl font-bold mb-2;
+}
+
+.ProseMirror ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.ProseMirror ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 border-primary pl-4 italic my-4;
+}
+
+.ProseMirror a {
+  @apply text-primary underline cursor-pointer;
+}
+
+.ProseMirror code {
+  @apply bg-muted px-1 py-0.5 rounded text-sm;
+}
+
+.ProseMirror pre {
+  @apply bg-muted p-4 rounded my-4 overflow-x-auto;
+}
+
+.ProseMirror strong {
+  @apply font-bold;
+}
+
+.ProseMirror em {
+  @apply italic;
+}
+
+.ProseMirror u {
+  @apply underline;
+}
+
+/* ============================================================
+   STYLES PROFESSIONNELS POUR DESCRIPTION PRODUIT
+   Respecte tous les formats définis dans RichTextEditorPro
+   ============================================================ */
+
+.product-description-content {
+  @apply text-foreground;
+  font-size: 0.9375rem; /* 15px base */
+  line-height: 1.75;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Responsive typography */
+@media (min-width: 640px) {
+  .product-description-content {
+    font-size: 1rem; /* 16px sur tablette */
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-description-content {
+    font-size: 1.0625rem; /* 17px sur desktop */
+    line-height: 1.8;
+  }
+}
+
+/* Paragraphes */
+.product-description-content p {
+  @apply text-foreground mb-4 sm:mb-5;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.product-description-content p:last-child {
+  @apply mb-0;
+}
+
+/* Titres */
+.product-description-content h1 {
+  @apply text-foreground font-bold mb-4 sm:mb-5 mt-6 sm:mt-8;
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.3;
+}
+
+.product-description-content h2 {
+  @apply text-foreground font-bold mb-3 sm:mb-4 mt-5 sm:mt-6;
+  font-size: 1.5rem; /* 24px */
+  line-height: 1.35;
+}
+
+.product-description-content h3 {
+  @apply text-foreground font-semibold mb-3 sm:mb-4 mt-4 sm:mt-5;
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.4;
+}
+
+.product-description-content h4 {
+  @apply text-foreground font-semibold mb-2 sm:mb-3 mt-3 sm:mt-4;
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.45;
+}
+
+.product-description-content h5 {
+  @apply text-foreground font-semibold mb-2 sm:mb-3 mt-3 sm:mt-4;
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
+}
+
+.product-description-content h6 {
+  @apply text-foreground font-semibold mb-2 sm:mb-3 mt-3 sm:mt-4;
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.5;
+}
+
+/* Responsive headings */
+@media (min-width: 640px) {
+  .product-description-content h1 {
+    font-size: 2rem; /* 32px */
+  }
+  .product-description-content h2 {
+    font-size: 1.75rem; /* 28px */
+  }
+  .product-description-content h3 {
+    font-size: 1.375rem; /* 22px */
+  }
+}
+
+/* Formatage de texte */
+.product-description-content strong,
+.product-description-content b {
+  @apply font-bold text-foreground;
+}
+
+.product-description-content em,
+.product-description-content i {
+  @apply italic text-foreground;
+}
+
+.product-description-content u {
+  @apply underline decoration-2 underline-offset-2;
+  text-decoration-color: currentColor;
+}
+
+.product-description-content s,
+.product-description-content strike {
+  @apply line-through text-muted-foreground;
+}
+
+/* Listes */
+.product-description-content ul,
+.product-description-content ol {
+  @apply mb-4 sm:mb-5 ml-4 sm:ml-6;
+  list-style-position: outside;
+}
+
+.product-description-content ul {
+  @apply list-disc;
+}
+
+.product-description-content ol {
+  @apply list-decimal;
+}
+
+.product-description-content li {
+  @apply mb-2 text-foreground;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.product-description-content li::marker {
+  @apply text-foreground;
+}
+
+/* Liens */
+.product-description-content a {
+  @apply text-primary underline decoration-2 underline-offset-2;
+  transition: color 0.2s ease;
+}
+
+.product-description-content a:hover {
+  @apply text-primary/80;
+}
+
+.product-description-content a:focus {
+  @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* Citations */
+.product-description-content blockquote {
+  @apply border-l-4 border-primary pl-4 sm:pl-6 py-2 sm:py-3 my-4 sm:my-6;
+  @apply bg-muted/50 italic text-foreground;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+/* Code */
+.product-description-content code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm;
+  @apply text-foreground font-mono;
+  font-size: 0.875em;
+}
+
+.product-description-content pre {
+  @apply bg-muted p-3 sm:p-4 rounded-lg my-4 sm:my-6;
+  @apply overflow-x-auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.product-description-content pre code {
+  @apply bg-transparent p-0;
+  font-size: inherit;
+}
+
+/* Divs et spans avec styles inline (couleurs, etc.) */
+.product-description-content div,
+.product-description-content span {
+  @apply text-foreground;
+}
+
+/* Respect des styles inline définis dans le wizard */
+.product-description-content [style*='color'] {
+  /* Les couleurs définies dans le wizard sont préservées */
+}
+
+.product-description-content [style*='background-color'] {
+  /* Les couleurs de fond sont préservées */
+}
+
+.product-description-content [style*='text-decoration'] {
+  /* Les décorations de texte sont préservées */
+}
+
+.product-description-content [style*='font-weight'] {
+  /* Les poids de police sont préservés */
+}
+
+.product-description-content [style*='font-style'] {
+  /* Les styles de police sont préservés */
+}
+
+/* Images dans la description (si ajoutées) */
+.product-description-content img {
+  @apply max-w-full h-auto rounded-lg my-4 sm:my-6;
+  @apply border border-border;
+}
+
+/* Tables (si ajoutées) */
+.product-description-content table {
+  @apply w-full border-collapse my-4 sm:my-6;
+  @apply overflow-x-auto block sm:table;
+}
+
+.product-description-content th,
+.product-description-content td {
+  @apply border border-border px-3 sm:px-4 py-2 sm:py-3;
+  @apply text-left text-foreground;
+}
+
+.product-description-content th {
+  @apply font-semibold bg-muted;
+}
+
+/* Saut de ligne */
+.product-description-content br {
+  @apply block;
+  content: '';
+  margin-top: 0.5rem;
+}
+
+/* ============================================================
+   SCROLLBARS PERSONNALISÉES POUR SIDEBARS
+   Design professionnel et moderne
+   ============================================================ */
+
+/* Scrollbar personnalisée pour les sidebars */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Scrollbar pour Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* OPTIMISATION: CSS du sidebar déplacé dans sidebar-optimized.css
+   pour permettre le chargement asynchrone et réduire le CSS critique */

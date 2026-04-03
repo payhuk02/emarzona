@@ -1,0 +1,50 @@
+/**
+ * Console guard: route console methods through the project logger.
+ * In production, logger is a no-op, effectively silencing console.* calls.
+ */
+import { logger } from './logger';
+
+type ConsoleMethod = (...args: unknown[]) => void;
+
+const bind = (fn: ConsoleMethod): ConsoleMethod => fn.bind(null);
+
+// Replace global console methods to ensure consistent behavior across the app
+// and avoid accidental logs leaking in production.
+// This runs very early from main.tsx.
+export function installConsoleGuard(): void {
+  // Only override console in production to avoid breaking dev tools and Vite overlays
+  if (!import.meta.env.PROD) return;
+  // Preserve original methods just in case debugging is needed in dev tools
+  const original = {
+    info: console.info,
+    warn: console.warn,
+    error: console.error,
+    debug: console.debug,
+  };
+
+  // Map all to logger which is environment-aware
+  console.info = bind(logger.info as ConsoleMethod);
+  console.warn = bind(logger.warn as ConsoleMethod);
+  console.error = bind(logger.error as ConsoleMethod);
+  console.debug = bind(logger.log as ConsoleMethod);
+
+  // Provide a way to restore if ever needed during debugging
+  // Utiliser une interface pour éviter any
+  interface WindowWithRestoreConsole extends Window {
+    __restoreConsole?: () => void;
+  }
+  (window as WindowWithRestoreConsole)._restoreConsole = () => {
+    console.info = original.info;
+    console.warn = original.warn;
+    console.error = original.error;
+    console.debug = original.debug;
+  };
+}
+
+
+
+
+
+
+
+

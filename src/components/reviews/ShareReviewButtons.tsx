@@ -1,0 +1,159 @@
+/**
+ * Composant : ShareReviewButtons
+ * Boutons de partage pour les avis clients
+ * Date : 27 octobre 2025
+ */
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Share2, Copy, Check, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
+import type { Review } from '@/types/review';
+
+interface ShareReviewButtonsProps {
+  review: Review;
+  productName?: string;
+  productUrl?: string;
+}
+
+export const ShareReviewButtons: React.FC<ShareReviewButtonsProps> = ({
+  review,
+  productName,
+  productUrl,
+}) => {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const reviewUrl = productUrl
+    ? `${productUrl}#review-${review.id}`
+    : `${window.location.origin}/products/${review.product_id}#review-${review.id}`;
+
+  const shareText = `Découvrez cet avis sur ${productName || 'ce produit'} : "${review.comment?.substring(0, 100)}${review.comment && review.comment.length > 100 ? '...' : ''}"`;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(reviewUrl);
+      setCopied(true);
+      toast({
+        title: 'Lien copié',
+        description: "Le lien de l'avis a été copié dans le presse-papiers",
+      });
+      setTimeout(() => setCopied(false), 2000);
+
+      // TODO: Implement analytics tracking
+      // logger.track('review_shared', { method: 'copy', reviewId: review.id });
+    } catch (error) {
+      logger.error('Error copying review link', { error });
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de copier le lien',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Avis sur ${productName || 'produit'}`,
+          text: shareText,
+          url: reviewUrl,
+        });
+
+        // TODO: Implement analytics tracking
+        // logger.track('review_shared', { method: 'native', reviewId: review.id });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          logger.error('Error sharing review', { error });
+        }
+      }
+    }
+  };
+
+  const handleSocialShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
+    const encodedUrl = encodeURIComponent(reviewUrl);
+    const encodedText = encodeURIComponent(shareText);
+
+    const shareUrls = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    };
+
+    window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+
+    // TODO: Implement analytics tracking
+    // logger.track('review_shared', { method: platform, reviewId: review.id });
+  };
+
+  const supportsNativeShare = typeof navigator !== 'undefined' && navigator.share;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {supportsNativeShare && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleNativeShare}
+          className="flex items-center gap-2"
+        >
+          <Share2 className="h-4 w-4" />
+          <span className="hidden sm:inline">Partager</span>
+        </Button>
+      )}
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleCopyLink}
+        className="flex items-center gap-2"
+      >
+        {copied ? (
+          <>
+            <Check className="h-4 w-4" />
+            <span className="hidden sm:inline">Copié</span>
+          </>
+        ) : (
+          <>
+            <Copy className="h-4 w-4" />
+            <span className="hidden sm:inline">Copier le lien</span>
+          </>
+        )}
+      </Button>
+
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSocialShare('facebook')}
+          className="h-8 w-8 p-0"
+          aria-label="Partager sur Facebook"
+        >
+          <Facebook className="h-4 w-4 text-blue-600" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSocialShare('twitter')}
+          className="h-8 w-8 p-0"
+          aria-label="Partager sur Twitter"
+        >
+          <Twitter className="h-4 w-4 text-blue-400" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSocialShare('linkedin')}
+          className="h-8 w-8 p-0"
+          aria-label="Partager sur LinkedIn"
+        >
+          <Linkedin className="h-4 w-4 text-blue-700" />
+        </Button>
+      </div>
+    </div>
+  );
+};

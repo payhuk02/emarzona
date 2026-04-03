@@ -1,0 +1,248 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  CheckSquare,
+  Square,
+  Eye,
+  EyeOff,
+  Trash2,
+  Copy,
+  Download,
+  MoreHorizontal,
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Product } from '@/hooks/useProducts';
+import { useToast } from '@/hooks/use-toast';
+
+interface ProductBulkActionsProps {
+  selectedProducts: string[];
+  products: Product[];
+  onSelectionChange: (productIds: string[]) => void;
+  onBulkAction: (action: string, productIds: string[]) => void;
+  onDelete: (productIds: string[]) => void;
+}
+
+const ProductBulkActions = ({
+  selectedProducts,
+  products,
+  onSelectionChange,
+  onBulkAction,
+  onDelete,
+}: ProductBulkActionsProps) => {
+  const { toast } = useToast();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const selectedCount = selectedProducts.length;
+  const totalCount = products.length;
+  const isAllSelected = selectedCount === totalCount && totalCount > 0;
+  const isIndeterminate = selectedCount > 0 && selectedCount < totalCount;
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      onSelectionChange([]);
+    } else {
+      onSelectionChange(products.map(p => p.id));
+    }
+  };
+
+  const handleBulkActivate = () => {
+    onBulkAction('activate', selectedProducts);
+    toast({
+      title: 'Produits activés',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} activé${selectedCount > 1 ? 's' : ''}`,
+    });
+  };
+
+  const handleBulkDeactivate = () => {
+    onBulkAction('deactivate', selectedProducts);
+    toast({
+      title: 'Produits désactivés',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} désactivé${selectedCount > 1 ? 's' : ''}`,
+    });
+  };
+
+  const handleBulkDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    onDelete(selectedProducts);
+    onSelectionChange([]);
+    setShowDeleteDialog(false);
+    toast({
+      title: 'Produits supprimés',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} supprimé${selectedCount > 1 ? 's' : ''}`,
+    });
+  };
+
+  const handleExport = () => {
+    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
+    const csvContent = [
+      ['Nom', 'Prix', 'Devise', 'Catégorie', 'Type', 'Statut', 'Date de création'].join(','),
+      ...selectedProductsData.map(product =>
+        [
+          `"${product.name}"`,
+          product.price,
+          product.currency,
+          `"${product.category || ''}"`,
+          `"${product.product_type || ''}"`,
+          product.is_active ? 'Actif' : 'Inactif',
+          new Date(product.created_at).toLocaleDateString('fr-FR'),
+        ].join(',')
+      ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `produits-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: 'Export réussi',
+      description: `${selectedCount} produit${selectedCount > 1 ? 's' : ''} exporté${selectedCount > 1 ? 's' : ''}`,
+    });
+  };
+
+  if (selectedCount === 0) {
+    return (
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSelectAll}
+          className="h-11 w-11 sm:h-10 sm:w-10 p-0 touch-manipulation"
+        >
+          {isAllSelected ? (
+            <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4" />
+          ) : (
+            <Square className="h-5 w-5 sm:h-4 sm:w-4" />
+          )}
+        </Button>
+        <span className="text-sm sm:text-base text-muted-foreground">Sélectionner tout</span>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg border">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSelectAll}
+            className="h-11 w-11 sm:h-10 sm:w-10 p-0 touch-manipulation"
+          >
+            {isAllSelected ? (
+              <CheckSquare className="h-5 w-5 sm:h-4 sm:w-4" />
+            ) : isIndeterminate ? (
+              <div className="h-5 w-5 sm:h-4 sm:w-4 border-2 border-primary bg-primary/20 rounded" />
+            ) : (
+              <Square className="h-5 w-5 sm:h-4 sm:w-4" />
+            )}
+          </Button>
+          <Badge variant="secondary" className="text-xs sm:text-sm px-2 sm:px-3 py-1">
+            {selectedCount} sélectionné{selectedCount > 1 ? 's' : ''}
+          </Badge>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1 sm:flex-initial justify-start sm:justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBulkActivate}
+            className="text-xs sm:text-sm min-h-[44px] touch-manipulation flex-1 sm:flex-initial"
+          >
+            <Eye className="h-4 w-4 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">Activer</span>
+            <span className="sm:hidden">Activer</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBulkDeactivate}
+            className="text-xs sm:text-sm min-h-[44px] touch-manipulation flex-1 sm:flex-initial"
+          >
+            <EyeOff className="h-4 w-4 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-1 flex-shrink-0" />
+            <span className="hidden sm:inline">Désactiver</span>
+            <span className="sm:hidden">Désactiver</span>
+          </Button>
+
+          <Select
+            onValueChange={value => {
+              if (value === 'export') {
+                handleExport();
+              } else if (value === 'delete') {
+                handleBulkDelete();
+              }
+            }}
+          >
+            <SelectTrigger className="text-xs sm:text-sm min-h-[44px] touch-manipulation flex-1 sm:flex-initial min-w-[100px]">
+              <MoreHorizontal className="h-4 w-4 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-1 flex-shrink-0" />
+              <span>Plus</span>
+            </SelectTrigger>
+            <SelectContent mobileVariant="sheet" className="min-w-[200px] sm:min-w-[220px]">
+              <SelectItem value="export" className="text-sm sm:text-base">
+                <div className="flex items-center">
+                  <Download className="h-4 w-4 mr-2 flex-shrink-0" />
+                  Exporter en CSV
+                </div>
+              </SelectItem>
+              <div className="px-2 py-1">
+                <Separator />
+              </div>
+              <SelectItem value="delete" className="text-destructive text-sm sm:text-base">
+                <div className="flex items-center">
+                  <Trash2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                  Supprimer
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer {selectedCount} produit
+              {selectedCount > 1 ? 's' : ''} ? Cette action est irréversible et supprimera
+              définitivement {selectedCount > 1 ? 'ces produits' : 'ce produit'}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
+export default ProductBulkActions;
