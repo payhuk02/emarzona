@@ -1,0 +1,22 @@
+# robots.txt pour Emarzona
+# Permet aux moteurs de recherche d'indexer les pages publiques
+
+User-agent: *
+Allow: /
+Allow: /marketplace
+Allow: /storefront
+Allow: /product/
+Allow: /static
+Allow: /_next/static
+
+# Bloquer les pages privées et admin
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /account
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /auth
+
+# Sitemap
+Sitemap: https://emarzona.com/sitemap.xml

@@ -1,0 +1,286 @@
+/* ✅ UTILITAIRES: Classes communes pour réduire la duplication */
+.dashboard-card-base {
+  @apply border-border/50 bg-card/50 backdrop-blur-sm;
+}
+
+.dashboard-card-hover {
+  @apply hover:shadow-lg transition-all duration-300;
+}
+
+.dashboard-text-responsive {
+  @apply text-xs sm:text-sm md:text-base lg:text-lg;
+}
+
+.dashboard-text-responsive-small {
+  @apply text-[10px] sm:text-[11px] md:text-xs;
+}
+
+.dashboard-padding-responsive {
+  @apply p-3 sm:p-4 md:p-6;
+}
+
+.dashboard-padding-responsive-compact {
+  @apply p-2.5 sm:p-3 md:p-4;
+}
+
+.dashboard-gap-responsive {
+  @apply gap-3 sm:gap-4 md:gap-6;
+}
+
+.dashboard-icon-size-responsive {
+  @apply h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4;
+}
+
+.dashboard-icon-size-responsive-large {
+  @apply h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5;
+}
+
+/* Dashboard Responsive Styles */
+.dashboard-card {
+  @apply transition-all duration-300 ease-out;
+  @apply hover:shadow-lg hover:-translate-y-1;
+  @apply touch-manipulation;
+  /* ✅ PERFORMANCE: will-change pour optimiser les animations sur mobile */
+  will-change: transform, box-shadow;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ✅ PERFORMANCE: Optimisation mobile - utiliser transform au lieu de scale */
+@media (max-width: 767px) {
+  .dashboard-card {
+    will-change: transform;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.dashboard-stats-grid {
+  @apply grid gap-3 sm:gap-4;
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+}
+
+.dashboard-actions-grid {
+  @apply grid gap-3 sm:gap-4;
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.dashboard-bottom-grid {
+  @apply grid gap-4 sm:gap-6;
+  @apply grid-cols-1 lg:grid-cols-3;
+}
+
+.dashboard-card-content {
+  @apply p-3 sm:p-4 lg:p-6;
+}
+
+.dashboard-card-header {
+  @apply pb-3 p-3 sm:p-4 lg:p-6;
+}
+
+.dashboard-icon-container {
+  @apply p-2 rounded-lg transition-colors duration-300;
+  /* ✅ PERFORMANCE: will-change pour animations fluides */
+  will-change: transform;
+}
+
+.dashboard-icon-container:hover {
+  transform: scale(1.1);
+}
+
+/* ✅ PERFORMANCE: Limiter les animations sur mobile */
+@media (max-width: 767px) {
+  .dashboard-icon-container {
+    will-change: auto;
+  }
+  
+  .dashboard-icon-container:hover {
+    transform: none;
+  }
+}
+
+.dashboard-notification-item {
+  @apply flex items-start gap-3 p-3 rounded-lg;
+  @apply hover:bg-muted/50 transition-colors;
+  @apply touch-manipulation min-h-[60px];
+}
+
+.dashboard-activity-item {
+  @apply flex items-start gap-3 p-3 rounded-lg;
+  @apply hover:bg-muted/50 transition-colors;
+  @apply touch-manipulation min-h-[60px];
+}
+
+.dashboard-button {
+  @apply touch-manipulation min-h-[44px];
+  @apply transition-all duration-300;
+  @apply hover:bg-muted/50;
+}
+
+.dashboard-header {
+  @apply sticky top-0 z-10 border-b;
+  @apply bg-card/95 backdrop-blur-sm;
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-main {
+  @apply flex-1 p-3 sm:p-4 md:p-6 lg:p-8;
+  @apply bg-background overflow-x-hidden;
+}
+
+/* Responsive Typography */
+.dashboard-title {
+  @apply text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate;
+}
+
+.dashboard-card-title {
+  @apply text-xs sm:text-sm font-medium text-muted-foreground;
+}
+
+.dashboard-stat-value {
+  @apply text-xl sm:text-2xl font-bold mb-1;
+}
+
+.dashboard-stat-description {
+  @apply text-xs text-muted-foreground mb-2;
+}
+
+.dashboard-action-title {
+  @apply font-semibold text-sm sm:text-base mb-1;
+}
+
+.dashboard-action-description {
+  @apply text-xs sm:text-sm text-muted-foreground;
+}
+
+/* Mobile Optimizations - Unifié à 768px pour cohérence avec useIsMobile hook */
+@media (max-width: 767px) {
+  .dashboard-card {
+    @apply min-h-[120px];
+  }
+
+  .dashboard-stats-grid {
+    @apply gap-3;
+  }
+
+  .dashboard-actions-grid {
+    @apply gap-3;
+  }
+
+  .dashboard-bottom-grid {
+    @apply gap-4;
+  }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dashboard-card {
+    @apply min-h-[140px];
+  }
+
+  .dashboard-stats-grid {
+    @apply gap-4;
+  }
+
+  .dashboard-actions-grid {
+    @apply gap-4;
+  }
+}
+
+/* Desktop Optimizations */
+@media (min-width: 1024px) {
+  .dashboard-card {
+    @apply min-h-[160px];
+  }
+
+  .dashboard-stats-grid {
+    @apply gap-6;
+  }
+
+  .dashboard-actions-grid {
+    @apply gap-6;
+  }
+
+  .dashboard-bottom-grid {
+    @apply gap-8;
+  }
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-delayed {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Focus States for Accessibility */
+.dashboard-card:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+.dashboard-button:focus-visible {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .dashboard-card {
+    @apply bg-card border-border;
+  }
+
+  .dashboard-header {
+    @apply bg-card/95;
+  }
+}
+
+/* ✅ ACCESSIBILITÉ: Reduced Motion - Désactiver toutes les animations */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-card,
+  .dashboard-icon-container,
+  .dashboard-notification-item,
+  .dashboard-activity-item,
+  .dashboard-button {
+    @apply transition-none;
+    will-change: auto;
+  }
+
+  .dashboard-card:hover,
+  .dashboard-icon-container:hover {
+    transform: none;
+  }
+
+  .animate-fade-in,
+  .animate-fade-in-delayed,
+  .animate-in {
+    animation: none !important;
+  }
+  
+  /* Désactiver les animations inline dans les composants React */
+  [style*="animationDelay"] {
+    animation: none !important;
+  }
+}
+
+/* ✅ PERFORMANCE: Désactiver will-change quand l'animation est terminée */
+@supports (animation-timeline: scroll()) {
+  .dashboard-card {
+    animation-timeline: view();
+  }
+}

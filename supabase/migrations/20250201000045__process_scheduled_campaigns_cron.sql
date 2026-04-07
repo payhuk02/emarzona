@@ -1,0 +1,29 @@
+-- Migration: Documentation pour le Cron Job des Campagnes Programmées
+-- Date: 1er Février 2025
+-- 
+-- Cette migration documente la configuration du cron job pour traiter
+-- automatiquement les campagnes email programmées.
+-- 
+-- IMPORTANT: Supabase ne supporte pas pg_cron par défaut.
+-- Configurez le cron job via l'une des méthodes suivantes:
+-- 
+-- 1. SUPABASE DASHBOARD (Recommandé):
+--    - Allez dans Database > Cron Jobs
+--    - Créez un nouveau cron job avec:
+--      Schedule: toutes les 5 minutes (expression cron: */5 * * * *)
+--      Function: process-scheduled-campaigns
+--      Payload: {}
+-- 
+-- 2. SERVICE EXTERNE:
+--    - Vercel Cron Jobs
+--    - GitHub Actions (workflow schedule)
+--    - Cloudflare Workers (Cron Triggers)
+--    - AWS EventBridge
+--    - Google Cloud Scheduler
+-- 
+-- Voir supabase/functions/process-scheduled-campaigns/README.md pour plus de détails.
+
+-- Cette migration ne crée pas de fonction SQL car Supabase utilise
+-- Edge Functions qui sont appelées via HTTP, pas via SQL.
+-- Le cron job doit être configuré via le dashboard Supabase ou un service externe.
+

@@ -1,0 +1,14 @@
+
+// Image optimisée: emarzona-logo
+<picture>
+    <source srcset="/optimized/emarzona-logo.avif" type="image/avif" />
+    <source srcset="/optimized/emarzona-logo.webp" type="image/webp" />
+    <img
+      src="/optimized/emarzona-logo.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="500"
+      height="500"
+    />
+</picture>

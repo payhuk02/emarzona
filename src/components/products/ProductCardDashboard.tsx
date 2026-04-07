@@ -1,0 +1,423 @@
+import React from 'react';
+import { Product } from '@/hooks/useProducts';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Edit,
+  Trash2,
+  Copy,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Star,
+  TrendingUp,
+  Calendar,
+  DollarSign,
+  Package,
+  MoreVertical,
+  FileStack,
+  PackageCheck,
+  AlertTriangle,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useState } from 'react';
+import { getStockInfo, formatStockQuantity } from '@/lib/stockUtils';
+import { LazyImage } from '@/components/ui/LazyImage';
+import { getImageAttributesForPreset } from '@/lib/image-transform';
+import { generateProductUrl } from '@/lib/store-utils';
+
+interface ProductCardDashboardProps {
+  product: Product;
+  storeSlug: string;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleStatus?: () => void;
+  onDuplicate?: () => void;
+  onQuickView?: () => void;
+  isSelected?: boolean;
+  onSelect?: (selected: boolean) => void;
+}
+
+const ProductCardDashboardComponent = ({
+  product,
+  storeSlug,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  onDuplicate,
+  onQuickView,
+  isSelected = false,
+  onSelect,
+}: ProductCardDashboardProps) => {
+  const { toast } = useToast();
+  const [imageError, setImageError] = useState(false);
+
+  const productUrl = generateProductUrl(storeSlug, product.slug);
+
+  // Calculer les informations de stock
+  const stockInfo = getStockInfo(
+    product.stock_quantity,
+    product.low_stock_threshold,
+    product.track_inventory ?? product.product_type !== 'digital'
+  );
+
+  // Optimiser l'image avec LazyImage et presets
+  const imageAttrs =
+    product.image_url && !imageError
+      ? getImageAttributesForPreset(product.image_url, 'productImage')
+      : null;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(productUrl);
+      toast({
+        title: 'Lien copié',
+        description: 'Le lien du produit a été copié dans le presse-papiers',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de copier le lien',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePreview = () => {
+    window.open(productUrl, '_blank');
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const getCategoryColor = (category: string | null) => {
+    const colors: Record<string, string> = {
+      Formation: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+      Digital: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+      Service: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
+      Ebook: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
+      Logiciel: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100',
+    };
+    return (
+      colors[category || ''] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
+    );
+  };
+
+  return (
+    <Card
+      className={`group shadow-sm hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm flex flex-col min-h-[400px] md:min-h-[500px] lg:min-h-[600px] ${isSelected ? 'ring-2 ring-primary shadow-primary/20' : ''}`}
+      style={{ willChange: 'transform' }}
+    >
+      <CardHeader className="p-0 relative overflow-hidden rounded-t-lg flex-[0.6] min-h-[240px] md:min-h-[300px] lg:min-h-[360px]">
+        {product.image_url && !imageError && imageAttrs ? (
+          <div className="h-full w-full rounded-t-lg overflow-hidden bg-muted relative aspect-[3/2]">
+            <LazyImage
+              {...imageAttrs}
+              alt={product.name}
+              placeholder="skeleton"
+              className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300 sm:duration-500 ease-out"
+              style={{ willChange: 'transform' }}
+              width={450}
+              height={300}
+              onError={() => setImageError(true)}
+              format="webp"
+              quality={85}
+              loading="lazy"
+            />
+            <div className="absolute top-2 left-2 z-10">
+              {onSelect && (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onSelect}
+                  className="bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all duration-200"
+                  aria-label="Sélectionner ce produit"
+                />
+              )}
+            </div>
+            <div className="absolute top-2 right-2 flex flex-col gap-1.5 z-10">
+              <Badge
+                variant={product.is_active ? 'default' : 'secondary'}
+                className="text-xs sm:text-xs font-semibold shadow-md animate-in zoom-in-95 duration-200"
+              >
+                {product.is_active ? 'Actif' : 'Inactif'}
+              </Badge>
+              {product.track_inventory !== false && product.product_type !== 'digital' && (
+                <Badge
+                  variant="outline"
+                  className={`text-xs sm:text-xs font-semibold shadow-md animate-in zoom-in-95 duration-200 ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/90 text-white border-red-600' : stockInfo.status === 'low_stock' ? 'bg-orange-500/90 text-white border-orange-600' : 'bg-green-500/90 text-white border-green-600'}`}
+                >
+                  {stockInfo.status === 'out_of_stock' ? (
+                    <>
+                      <AlertTriangle className="h-3 w-3 mr-1" /> Rupture
+                    </>
+                  ) : stockInfo.status === 'low_stock' ? (
+                    <>
+                      <AlertTriangle className="h-3 w-3 mr-1" /> {product.stock_quantity}
+                    </>
+                  ) : (
+                    <>
+                      <PackageCheck className="h-3 w-3 mr-1" /> {product.stock_quantity}
+                    </>
+                  )}
+                </Badge>
+              )}
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+        ) : (
+          <div className="h-full w-full rounded-t-lg bg-gradient-to-br from-muted via-muted/80 to-muted/50 flex items-center justify-center relative">
+            <div className="text-center">
+              <Package className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-2 group-hover:scale-110 transition-transform duration-200" />
+              <span className="text-muted-foreground text-xs sm:text-sm">Pas d'image</span>
+            </div>
+            <div className="absolute top-2 left-2 z-10">
+              {onSelect && (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={onSelect}
+                  className="bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all duration-200"
+                  aria-label="Sélectionner ce produit"
+                />
+              )}
+            </div>
+            <div className="absolute top-2 right-2 flex flex-col gap-1.5 z-10">
+              <Badge
+                variant={product.is_active ? 'default' : 'secondary'}
+                className="text-xs sm:text-xs font-semibold shadow-md animate-in zoom-in-95 duration-200"
+              >
+                {product.is_active ? 'Actif' : 'Inactif'}
+              </Badge>
+              {product.track_inventory !== false && product.product_type !== 'digital' && (
+                <Badge
+                  variant="outline"
+                  className={`text-xs sm:text-xs font-semibold shadow-md animate-in zoom-in-95 duration-200 ${stockInfo.status === 'out_of_stock' ? 'bg-red-500/90 text-white border-red-600' : stockInfo.status === 'low_stock' ? 'bg-orange-500/90 text-white border-orange-600' : 'bg-green-500/90 text-white border-green-600'}`}
+                >
+                  {stockInfo.status === 'out_of_stock' ? (
+                    <>
+                      <AlertTriangle className="h-3 w-3 mr-1" /> Rupture
+                    </>
+                  ) : stockInfo.status === 'low_stock' ? (
+                    <>
+                      <AlertTriangle className="h-3 w-3 mr-1" /> {product.stock_quantity}
+                    </>
+                  ) : (
+                    <>
+                      <PackageCheck className="h-3 w-3 mr-1" /> {product.stock_quantity}
+                    </>
+                  )}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+      </CardHeader>
+
+      <CardContent className="p-2.5 sm:p-3 lg:p-4 space-y-2 sm:space-y-2.5 lg:space-y-3 flex-[0.4] flex flex-col">
+        <div className="space-y-1.5 sm:space-y-2">
+          <CardTitle className="line-clamp-2 text-sm sm:text-base lg:text-lg leading-tight group-hover:text-primary transition-colors duration-200 font-semibold">
+            {product.name}
+          </CardTitle>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 sm:gap-2 lg:gap-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 flex-wrap">
+            <DollarSign className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+            <span className="text-base sm:text-lg lg:text-xl font-bold text-green-600 dark:text-green-400 break-words">
+              {product.price.toLocaleString()} {product.currency}
+            </span>
+          </div>
+          {product.rating > 0 && (
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
+              <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-yellow-500 fill-current" />
+              <span className="text-xs sm:text-xs lg:text-sm font-medium">
+                {product.rating.toFixed(1)}
+              </span>
+              <span className="text-xs sm:text-xs lg:text-xs text-muted-foreground">
+                ({product.reviews_count})
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          {product.category && (
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <Badge
+                variant="outline"
+                className={`text-xs sm:text-xs ${getCategoryColor(product.category)}`}
+              >
+                {product.category}
+              </Badge>
+              {product.product_type && (
+                <Badge variant="outline" className="text-xs sm:text-xs">
+                  {product.product_type}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-xs text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(product.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              <span>0 ventes</span>
+            </div>
+          </div>
+
+          {/* Information de stock pour les produits physiques */}
+          {product.track_inventory !== false && product.product_type !== 'digital' && (
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-xs flex-wrap">
+              <PackageCheck className={`h-3 w-3 ${stockInfo.color}`} />
+              <span className={`font-medium ${stockInfo.color}`}>
+                {stockInfo.label}:{' '}
+                {formatStockQuantity(product.stock_quantity, product.track_inventory)}
+              </span>
+              {stockInfo.status === 'low_stock' && product.low_stock_threshold && (
+                <span className="text-muted-foreground">
+                  (Seuil: {product.low_stock_threshold})
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1 text-xs sm:text-xs text-muted-foreground pt-1 border-t border-border/30">
+          <div className="flex items-center gap-1">
+            <span className="font-medium">Lien:</span>
+            <code className="flex-1 truncate bg-muted/50 px-1.5 py-0.5 rounded text-xs sm:text-xs font-mono">
+              {product.slug}
+            </code>
+          </div>
+        </div>
+
+        <div className="flex gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-sm sm:text-xs lg:text-sm hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] sm:min-h-[38px]"
+            onClick={onEdit}
+          >
+            <Edit className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 mr-0.5 sm:mr-1 lg:mr-1.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Modifier</span>
+            <span className="sm:hidden">Modif.</span>
+          </Button>
+
+          <Select>
+            <SelectTrigger
+              className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] sm:min-h-[38px] min-w-[44px] sm:min-w-[38px] px-2"
+              aria-label={`Actions pour ${product.name || product.id}`}
+            >
+              <MoreVertical className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
+            </SelectTrigger>
+            <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+              {onQuickView && (
+                <SelectItem value="quickview" onSelect={onQuickView}>
+                  <span className="flex items-center">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Aperçu rapide
+                  </span>
+                </SelectItem>
+              )}
+              <SelectItem value="copylink" onSelect={handleCopyLink}>
+                <span className="flex items-center">
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copier le lien
+                </span>
+              </SelectItem>
+              <SelectItem value="preview" onSelect={handlePreview}>
+                <span className="flex items-center">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Prévisualiser
+                </span>
+              </SelectItem>
+              {onDuplicate && (
+                <SelectItem value="duplicate" onSelect={onDuplicate}>
+                  <span className="flex items-center">
+                    <FileStack className="h-4 w-4 mr-2" />
+                    Dupliquer
+                  </span>
+                </SelectItem>
+              )}
+              {onToggleStatus && (
+                <SelectItem value="toggle" onSelect={onToggleStatus}>
+                  <span className="flex items-center">
+                    {product.is_active ? (
+                      <>
+                        <EyeOff className="h-4 w-4 mr-2" />
+                        Désactiver
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Activer
+                      </>
+                    )}
+                  </span>
+                </SelectItem>
+              )}
+              <SelectItem value="delete" onSelect={onDelete} className="text-destructive">
+                <span className="flex items-center">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Supprimer
+                </span>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+const ProductCardDashboard = React.memo(ProductCardDashboardComponent, (prevProps, nextProps) => {
+  // Comparaison personnalisée pour éviter re-renders inutiles
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.product.price === nextProps.product.price &&
+    prevProps.product.is_active === nextProps.product.is_active &&
+    prevProps.product.image_url === nextProps.product.image_url &&
+    prevProps.product.name === nextProps.product.name &&
+    prevProps.product.stock_quantity === nextProps.product.stock_quantity &&
+    prevProps.product.rating === nextProps.product.rating &&
+    prevProps.product.reviews_count === nextProps.product.reviews_count &&
+    prevProps.storeSlug === nextProps.storeSlug &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onToggleStatus === nextProps.onToggleStatus &&
+    prevProps.onDuplicate === nextProps.onDuplicate &&
+    prevProps.onQuickView === nextProps.onQuickView &&
+    prevProps.onSelect === nextProps.onSelect
+  );
+});
+
+ProductCardDashboard.displayName = 'ProductCardDashboard';
+
+// Optimisation avec React.memo pour éviter les re-renders inutiles
+export default React.memo(ProductCardDashboard, (prevProps, nextProps) => {
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.product.updated_at === nextProps.product.updated_at &&
+    prevProps.product.is_active === nextProps.product.is_active &&
+    prevProps.product.price === nextProps.product.price &&
+    prevProps.storeId === nextProps.storeId
+  );
+});
