@@ -193,12 +193,27 @@ serve(async req => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
       },
     });
   }
 
   try {
+    const internalSecret = req.headers.get('x-internal-secret');
+    const expectedInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+    if (!expectedInternalSecret) {
+      return new Response(JSON.stringify({ error: 'EDGE_INTERNAL_SECRET is not configured' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (!internalSecret || internalSecret.trim() !== expectedInternalSecret.trim()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Vérifier la clé API Resend
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not set');

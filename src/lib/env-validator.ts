@@ -12,7 +12,8 @@ import { logger } from './logger';
 const envSchema = z.object({
   // Supabase (Requis)
   VITE_SUPABASE_URL: z.string().url('VITE_SUPABASE_URL doit être une URL valide'),
-  VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1, 'VITE_SUPABASE_PUBLISHABLE_KEY est requis'),
+  VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  VITE_SUPABASE_ANON_KEY: z.string().min(1).optional(),
 
   // Moneroo (Optionnel)
   VITE_MONEROO_API_URL: z.string().url().optional().or(z.literal('')),
@@ -76,6 +77,14 @@ export function validateEnv(): ValidatedEnv {
 
     // Valider avec Zod
     validatedEnv = envSchema.parse(env);
+
+    if (!validatedEnv.VITE_SUPABASE_PUBLISHABLE_KEY && !validatedEnv.VITE_SUPABASE_ANON_KEY) {
+      throw new Error(
+        "❌ Erreur de validation des variables d'environnement:\n" +
+          'VITE_SUPABASE_PUBLISHABLE_KEY ou VITE_SUPABASE_ANON_KEY est requis.\n\n' +
+          "Vérifiez votre fichier .env et assurez-vous qu'au moins une clé Supabase publique est définie."
+      );
+    }
 
     return validatedEnv;
   } catch (error) {

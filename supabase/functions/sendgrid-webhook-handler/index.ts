@@ -9,7 +9,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const SENDGRID_WEBHOOK_SECRET = Deno.env.get('SENDGRID_WEBHOOK_SECRET'); // Optionnel pour validation
+const SENDGRID_WEBHOOK_SECRET = Deno.env.get('SENDGRID_WEBHOOK_SECRET');
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -42,6 +42,21 @@ serve(async (req) => {
     if (method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
         status: 405,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!SENDGRID_WEBHOOK_SECRET) {
+      return new Response(JSON.stringify({ error: 'SENDGRID_WEBHOOK_SECRET is not configured' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const providedSecret = req.headers.get('x-sendgrid-webhook-secret');
+    if (!providedSecret || providedSecret.trim() !== SENDGRID_WEBHOOK_SECRET.trim()) {
+      return new Response(JSON.stringify({ error: 'Unauthorized webhook request' }), {
+        status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }

@@ -12,7 +12,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
 interface AutoPayoutConfig {
@@ -163,12 +163,18 @@ serve(async (req) => {
   }
 
   try {
-    // Vérifier l'authentification (optionnel, peut être appelé par cron)
-    const authHeader = req.headers.get('Authorization');
+    // Vérifier l'authentification cron
     const cronSecret = req.headers.get('x-cron-secret');
-    
-    // Accepter si Authorization header ou x-cron-secret
-    if (!authHeader && !cronSecret) {
+    const expectedCronSecret = Deno.env.get('CRON_SECRET');
+
+    if (!expectedCronSecret) {
+      return new Response(
+        JSON.stringify({ error: 'CRON_SECRET is not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!cronSecret || cronSecret.trim() !== expectedCronSecret.trim()) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

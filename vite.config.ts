@@ -10,9 +10,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
   const hasSentryToken = !!env.SENTRY_AUTH_TOKEN;
-  const publicBackendUrl = env.VITE_SUPABASE_URL || 'https://mcpcsfisijxagrjndgdl.supabase.co';
-  const publicBackendKey = env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jcGNzZmlzaWp4YWdyam5kZ2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDA5NjUsImV4cCI6MjA5MDM3Njk2NX0.ZUqP4psxym5xqI1DGAo0R3H3zeRrXAynWt-cwiCUo1I';
-  const publicBackendProjectId = env.VITE_SUPABASE_PROJECT_ID || 'mcpcsfisijxagrjndgdl';
+  const publicBackendUrl = env.VITE_SUPABASE_URL || 'https://hbdnzajbyjakdhuavrvb.supabase.co';
+  const publicBackendKey = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1OTgyMzEsImV4cCI6MjA3MzE3NDIzMX0.myur8r50wIORQwfcCP4D1ZxlhKFxICdVqjUM80CgtnM';
+  const publicBackendProjectId = env.VITE_SUPABASE_PROJECT_ID || 'hbdnzajbyjakdhuavrvb';
 
   // Garantit l'ordre de chargement : index (React) avant les autres chunks
   const ensureChunkOrderPlugin = (): Plugin => ({

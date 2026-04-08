@@ -101,25 +101,29 @@ serve(async (req) => {
     // Vérifier l'authentification
     // Option 1: Header Authorization avec service role key ou anon key (pour appels externes)
     // Option 2: Header x-cron-secret (pour appels depuis cron job interne)
-    const authHeader = req.headers.get('Authorization');
     const cronSecret = req.headers.get('x-cron-secret');
-    const expectedCronSecret = Deno.env.get('CRON_SECRET') || 'process-scheduled-campaigns-secret-2025';
-    
-    // Accepter si :
-    // 1. Authorization header avec Bearer token (service role key ou anon key)
-    // 2. x-cron-secret header correspond au secret attendu
-    // 3. Aucune authentification (pour appels internes Supabase - moins sécurisé mais fonctionnel)
-    const isAuthenticated = 
-      (authHeader && (authHeader.startsWith('Bearer ') || authHeader.startsWith('apikey '))) ||
-      (cronSecret && cronSecret.trim() === expectedCronSecret.trim()) ||
-      (!authHeader && !cronSecret); // Accepter les appels sans auth pour compatibilité
-    
-    // Ne retourner 401 que si on a des headers mais qu'ils sont invalides
-    if (!isAuthenticated && (authHeader || cronSecret)) {
+    const expectedCronSecret = Deno.env.get('CRON_SECRET');
+
+    // Fail-closed: secret obligatoire, aucun fallback permissif.
+    if (!expectedCronSecret) {
+      console.error('CRON_SECRET is not configured');
+      return new Response(
+        JSON.stringify({
+          error: 'Server misconfiguration',
+          message: 'CRON_SECRET is not configured',
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    const isAuthenticated = !!cronSecret && cronSecret.trim() === expectedCronSecret.trim();
+    if (!isAuthenticated) {
       console.warn('Unauthorized request:', {
-        hasAuthHeader: !!authHeader,
         hasCronSecret: !!cronSecret,
-        cronSecretMatch: cronSecret === expectedCronSecret
+        cronSecretMatch: cronSecret === expectedCronSecret,
       });
       return new Response(
         JSON.stringify({ 
