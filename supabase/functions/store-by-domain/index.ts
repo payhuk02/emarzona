@@ -50,12 +50,17 @@ serve(async req => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extraire le sous-domaine depuis les headers
-    // Priorité : header personnalisé x-subdomain (envoyé par le client)
-    // Fallback : hostname via 'host' ou 'x-forwarded-host' (Cloudflare/Vercel)
+    // Extraire le sous-domaine
+    // Priorité :
+    // 1) query param ?subdomain= (fiable en contexte cross-origin/proxy)
+    // 2) header personnalisé x-subdomain
+    // 3) fallback hostname via 'host' ou 'x-forwarded-host'
+    const url = new URL(req.url);
+    const querySubdomain = url.searchParams.get('subdomain');
     const customSubdomain = req.headers.get('x-subdomain');
     const host = req.headers.get('host') || req.headers.get('x-forwarded-host') || '';
-    const subdomain = customSubdomain?.trim() || extractSubdomain(host);
+    const subdomain =
+      querySubdomain?.trim().toLowerCase() || customSubdomain?.trim().toLowerCase() || extractSubdomain(host);
 
     // Si pas de sous-domaine, vérifier si c'est un domaine personnalisé
     if (!subdomain) {

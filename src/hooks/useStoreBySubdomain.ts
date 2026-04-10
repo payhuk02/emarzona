@@ -25,13 +25,21 @@ interface StoreBySubdomainResponse {
 async function fetchStoreBySubdomain(subdomain: string): Promise<Store> {
   // Option 1: Utiliser l'Edge Function (recommandé pour la production)
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const functionUrl = `${supabaseUrl}/functions/v1/store-by-domain`;
+  const supabaseKey =
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const functionUrl = `${supabaseUrl}/functions/v1/store-by-domain?subdomain=${encodeURIComponent(subdomain)}`;
 
   try {
     const response = await fetch(functionUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...(supabaseKey
+          ? {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+            }
+          : {}),
         // Passer le sous-domaine dans un header personnalisé si nécessaire
         'x-subdomain': subdomain,
       },
