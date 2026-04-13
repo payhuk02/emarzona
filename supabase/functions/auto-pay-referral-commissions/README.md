@@ -49,7 +49,7 @@ Dans Supabase Dashboard > Database > Cron Jobs, créer un job :
 - **Schedule**: `0 4 * * *` (tous les jours à 4h du matin)
 - **Function**: `auto-pay-referral-commissions`
 - **Headers**:
-  - `x-cron-secret`: `auto-pay-referral-commissions-secret-2025` (ou votre secret)
+  - `x-cron-secret`: `<YOUR_SECURE_CRON_SECRET>`
 
 ## Notes
 

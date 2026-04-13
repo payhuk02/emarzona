@@ -50,7 +50,7 @@ Dans Supabase Dashboard > Database > Cron Jobs, créer un job :
 - **Schedule**: `0 3 * * *` (tous les jours à 3h du matin)
 - **Function**: `auto-payout-vendors`
 - **Headers**:
-  - `x-cron-secret`: `auto-payout-vendors-secret-2025` (ou votre secret)
+  - `x-cron-secret`: `<YOUR_SECURE_CRON_SECRET>`
 
 ## Notes
 

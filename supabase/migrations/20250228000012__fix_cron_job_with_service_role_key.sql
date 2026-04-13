@@ -4,8 +4,8 @@
 -- Description : Utilise la service role key directement pour résoudre les erreurs 401
 -- =========================================================
 
--- ⚠️ ATTENTION : Cette migration utilise la service role key directement
--- En production, considérez utiliser un secret ou une variable d'environnement
+-- ⚠️ ATTENTION : N'incluez jamais de service role key en clair dans une migration
+-- Utilisez uniquement un secret d'exécution dédié au cron (x-cron-secret)
 
 -- Supprimer l'ancien cron job
 DO $$
@@ -26,8 +26,7 @@ SELECT cron.schedule(
     url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/process-scheduled-campaigns',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzU5ODIzMSwiZXhwIjoyMDczMTc0MjMxfQ.MT2e4tcw_5eK0fRQFN5tF1Cwu210MKFUAUGqmYm_1XE',
-      'x-cron-secret', 'process-scheduled-campaigns-secret-2025'
+      'x-cron-secret', 'REPLACE_WITH_SECURE_CRON_SECRET'
     ),
     body := jsonb_build_object('limit', 10)
   ) AS request_id;

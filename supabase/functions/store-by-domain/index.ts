@@ -50,31 +50,36 @@ serve(async req => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extraire le sous-domaine
-    // Priorité :
-    // 1) query param ?subdomain= (fiable en contexte cross-origin/proxy)
-    // 2) header personnalisé x-subdomain
-    // 3) fallback hostname via 'host' ou 'x-forwarded-host'
+    // Extraire les identifiants
+    // Priorité custom domain:
+    // 1) query param ?domain=
+    // 2) host/x-forwarded-host
+    // Priorité subdomain:
+    // 1) query param ?subdomain=
+    // 2) header x-subdomain
+    // 3) extraction via host/x-forwarded-host
     const url = new URL(req.url);
+    const queryDomain = url.searchParams.get('domain')?.trim().toLowerCase() || null;
     const querySubdomain = url.searchParams.get('subdomain');
     const customSubdomain = req.headers.get('x-subdomain');
     const host = req.headers.get('host') || req.headers.get('x-forwarded-host') || '';
+    const hostDomain = host.split(':')[0].toLowerCase() || null;
     const subdomain =
       querySubdomain?.trim().toLowerCase() || customSubdomain?.trim().toLowerCase() || extractSubdomain(host);
 
-    // Si pas de sous-domaine, vérifier si c'est un domaine personnalisé
-    if (!subdomain) {
-      const hostname = host.split(':')[0].toLowerCase();
-      // Essayer de trouver une boutique par domaine personnalisé
+    const customDomain = queryDomain || (!subdomain ? hostDomain : null);
+
+    // Si domaine personnalisé explicite, tenter d'abord la résolution custom domain
+    if (customDomain) {
       const { data: storeByDomain, error: domainError } = await supabase
-        .rpc('get_store_by_custom_domain', { p_domain: hostname });
+        .rpc('get_store_by_custom_domain', { p_domain: customDomain });
 
       if (!domainError && storeByDomain && storeByDomain.length > 0) {
         return new Response(
           JSON.stringify({
             success: true,
             store: storeByDomain[0],
-            custom_domain: hostname,
+            custom_domain: customDomain,
           }),
           {
             status: 200,
@@ -82,7 +87,10 @@ serve(async req => {
           }
         );
       }
+    }
 
+    // Si pas de sous-domaine (et pas de match custom domain), erreur d'entrée
+    if (!subdomain) {
       return new Response(
         JSON.stringify({ error: 'Invalid subdomain', message: 'No subdomain found in request' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

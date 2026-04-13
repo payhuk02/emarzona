@@ -27,7 +27,7 @@ SELECT cron.schedule(
   $$
   SELECT net.http_post(
     url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/check-ssl-expiration',
-    headers := '{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzU5ODIzMSwiZXhwIjoyMDczMTc0MjMxfQ.MT2e4tcw_5eK0fRQFN5tF1Cwu210MKFUAUGqmYm_1XE"}'::jsonb,
+    headers := '{"Content-Type": "application/json", "x-cron-secret": "REPLACE_WITH_SECURE_CRON_SECRET"}'::jsonb,
     body := '{}'::jsonb
   ) AS request_id;
   $$

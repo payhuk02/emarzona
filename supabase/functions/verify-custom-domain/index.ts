@@ -8,43 +8,86 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const baseCorsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  const allowOrigin = allowedOrigins.includes(origin)
+    ? origin
+    : (allowedOrigins[0] || 'https://myemarzona.shop');
+
+  return {
+    ...baseCorsHeaders,
+    'Access-Control-Allow-Origin': allowOrigin,
+    Vary: 'Origin',
+  };
+}
+
+function jsonResponse(req: Request, body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+  });
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const authHeader = req.headers.get('Authorization');
+
+    if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
+      return jsonResponse(req, { error: 'Server misconfigured' }, 500);
+    }
+
+    if (!authHeader || !authHeader.toLowerCase().startsWith('bearer ')) {
+      return jsonResponse(req, { error: 'Unauthorized' }, 401);
+    }
+
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: authData, error: authError } = await authClient.auth.getUser();
+    const user = authData?.user;
+    if (authError || !user) {
+      return jsonResponse(req, { error: 'Unauthorized' }, 401);
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { domain_id } = await req.json();
 
     if (!domain_id) {
-      return new Response(
-        JSON.stringify({ error: 'domain_id is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse(req, { error: 'domain_id is required' }, 400);
     }
 
     // Récupérer le domaine
     const { data: domainRecord, error: fetchError } = await supabase
       .from('custom_domains')
-      .select('*')
+      .select('id, store_id, domain, verification_token, stores!inner(user_id)')
       .eq('id', domain_id)
       .single();
 
     if (fetchError || !domainRecord) {
-      return new Response(
-        JSON.stringify({ error: 'Domain not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse(req, { error: 'Domain not found' }, 404);
+    }
+
+    const ownerId = (domainRecord as any).stores?.user_id;
+    if (!ownerId || ownerId !== user.id) {
+      return jsonResponse(req, { error: 'Forbidden' }, 403);
     }
 
     // Vérifier le DNS TXT record
@@ -110,29 +153,20 @@ serve(async (req) => {
       console.error('Update error:', updateError);
     }
 
-    return new Response(
-      JSON.stringify({
-        verified,
-        domain,
-        status: verified ? 'active' : 'pending',
-        message: verified
-          ? 'Domaine vérifié et activé avec succès !'
-          : `L'enregistrement TXT "_emarzona.${domain}" n'a pas été trouvé. Assurez-vous d'avoir ajouté l'enregistrement DNS et attendez la propagation (jusqu'à 48h).`,
-        dns_records_found: dnsRecordsFound,
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return jsonResponse(req, {
+      verified,
+      domain,
+      status: verified ? 'active' : 'pending',
+      message: verified
+        ? 'Domaine vérifié et activé avec succès !'
+        : `L'enregistrement TXT "_emarzona.${domain}" n'a pas été trouvé. Assurez-vous d'avoir ajouté l'enregistrement DNS et attendez la propagation (jusqu'à 48h).`,
+      dns_records_found: dnsRecordsFound,
+    }, 200);
   } catch (error: unknown) {
     console.error('Unexpected error:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return jsonResponse(req, {
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 500);
   }
 });

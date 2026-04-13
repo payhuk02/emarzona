@@ -20,14 +20,25 @@ interface StoreBySubdomainResponse {
 }
 
 /**
- * Récupère une boutique par son sous-domaine via l'Edge Function
+ * Récupère une boutique via l'Edge Function store-by-domain.
+ * Supporte les 2 modes: sous-domaine et domaine personnalisé.
  */
-async function fetchStoreBySubdomain(subdomain: string): Promise<Store> {
+async function fetchStoreBySubdomain(subdomain?: string | null, customDomain?: string | null): Promise<Store> {
+  const normalizedSubdomain = subdomain?.trim().toLowerCase() || null;
+  const normalizedCustomDomain = customDomain?.trim().toLowerCase() || null;
+  const identifier = normalizedSubdomain || normalizedCustomDomain;
+  if (!identifier) {
+    throw new Error('Aucun identifiant de boutique fourni');
+  }
+
   // Option 1: Utiliser l'Edge Function (recommandé pour la production)
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey =
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const functionUrl = `${supabaseUrl}/functions/v1/store-by-domain?subdomain=${encodeURIComponent(subdomain)}`;
+  const params = new URLSearchParams();
+  if (normalizedSubdomain) params.set('subdomain', normalizedSubdomain);
+  if (normalizedCustomDomain) params.set('domain', normalizedCustomDomain);
+  const functionUrl = `${supabaseUrl}/functions/v1/store-by-domain?${params.toString()}`;
 
   try {
     const response = await fetch(functionUrl, {
@@ -41,13 +52,13 @@ async function fetchStoreBySubdomain(subdomain: string): Promise<Store> {
             }
           : {}),
         // Passer le sous-domaine dans un header personnalisé si nécessaire
-        'x-subdomain': subdomain,
+        ...(normalizedSubdomain ? { 'x-subdomain': normalizedSubdomain } : {}),
       },
     });
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw new Error(`Boutique non trouvée pour le sous-domaine: ${subdomain}`);
+        throw new Error(`Boutique non trouvée pour: ${identifier}`);
       }
       throw new Error(`Erreur lors de la récupération de la boutique: ${response.statusText}`);
     }
@@ -60,25 +71,34 @@ async function fetchStoreBySubdomain(subdomain: string): Promise<Store> {
 
     return data.store;
   } catch (error) {
-    logger.error('Error fetching store by subdomain via Edge Function', { error, subdomain });
+    logger.error('Error fetching store by subdomain via Edge Function', {
+      error,
+      subdomain: normalizedSubdomain,
+      customDomain: normalizedCustomDomain,
+    });
 
     // Option 2: Fallback - Utiliser directement Supabase RPC
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_store_by_subdomain', {
-        store_subdomain: subdomain,
-      });
+      const rpcResult = normalizedSubdomain
+        ? await supabase.rpc('get_store_by_subdomain', { store_subdomain: normalizedSubdomain })
+        : await supabase.rpc('get_store_by_custom_domain', { p_domain: normalizedCustomDomain });
+      const { data, error: rpcError } = rpcResult;
 
       if (rpcError) {
         throw rpcError;
       }
 
       if (!data || data.length === 0) {
-        throw new Error(`Boutique non trouvée pour le sous-domaine: ${subdomain}`);
+        throw new Error(`Boutique non trouvée pour: ${identifier}`);
       }
 
       return data[0] as Store;
     } catch (rpcError) {
-      logger.error('Error fetching store by subdomain via RPC', { error: rpcError, subdomain });
+      logger.error('Error fetching store by subdomain via RPC', {
+        error: rpcError,
+        subdomain: normalizedSubdomain,
+        customDomain: normalizedCustomDomain,
+      });
       throw rpcError;
     }
   }
@@ -96,6 +116,7 @@ export function useStoreBySubdomain(
     enabled?: boolean;
     retry?: boolean;
     refetchOnWindowFocus?: boolean;
+    customDomain?: string | null;
   }
 ) {
   // Détecter le contexte courant une seule fois pour éviter les incohérences
@@ -105,12 +126,12 @@ export function useStoreBySubdomain(
   const enabled = (options?.enabled ?? true) && !!detectedSubdomain && !currentHostInfo.isPlatformDomain;
 
   return useQuery({
-    queryKey: ['store-by-subdomain', detectedSubdomain],
+    queryKey: ['store-by-subdomain', detectedSubdomain, options?.customDomain || null],
     queryFn: () => {
-      if (!detectedSubdomain) {
-        throw new Error('No subdomain provided or detected');
+      if (!detectedSubdomain && !options?.customDomain) {
+        throw new Error('No subdomain or custom domain provided or detected');
       }
-      return fetchStoreBySubdomain(detectedSubdomain);
+      return fetchStoreBySubdomain(detectedSubdomain, options?.customDomain);
     },
     enabled,
     retry: options?.retry ?? 2,
@@ -127,12 +148,13 @@ export function useStoreBySubdomain(
  */
 export function useCurrentStoreBySubdomain() {
   const subdomainInfo = detectSubdomain();
-  const shouldResolveStore =
-    !subdomainInfo.isPlatformDomain &&
-    ((subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain) || subdomainInfo.isCustomDomain);
-  const storeIdentifier = shouldResolveStore ? subdomainInfo.subdomain || subdomainInfo.customDomain : null;
+  const useStoreSubdomain =
+    !subdomainInfo.isPlatformDomain && subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain;
+  const useCustomDomain = !subdomainInfo.isPlatformDomain && subdomainInfo.isCustomDomain;
+  const shouldResolveStore = useStoreSubdomain || useCustomDomain;
 
-  return useStoreBySubdomain(storeIdentifier, {
+  return useStoreBySubdomain(useStoreSubdomain ? subdomainInfo.subdomain : null, {
     enabled: shouldResolveStore,
+    customDomain: useCustomDomain ? subdomainInfo.customDomain : null,
   });
 }

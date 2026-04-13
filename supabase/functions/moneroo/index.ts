@@ -288,9 +288,14 @@ function getCorsOrigin(req: Request): string {
       return origin;
     }
     
-    // Autoriser tout sous-domaine *.emarzona.com
-    if (origin.includes('.emarzona.com')) {
-      return origin;
+    // Autoriser strictement les sous-domaines *.emarzona.com
+    try {
+      const parsedOrigin = new URL(origin);
+      if (parsedOrigin.hostname.endsWith('.emarzona.com')) {
+        return origin;
+      }
+    } catch {
+      // Origin invalide: fallback vers siteUrl
     }
   }
 
@@ -318,7 +323,6 @@ serve(async req => {
   console.log('[Moneroo Edge Function] Request received:', {
     method: req.method,
     url: req.url,
-    headers: Object.fromEntries(req.headers.entries()),
     timestamp: new Date().toISOString(),
   });
 
@@ -406,7 +410,7 @@ serve(async req => {
     console.log('[Moneroo Edge Function] Processing request:', {
       action,
       hasData: !!data,
-      dataKeys: data ? Object.keys(data) : [],
+      dataKeys: data && typeof data === 'object' ? Object.keys(data as Record<string, unknown>) : [],
     });
 
     let endpoint = '';
@@ -497,11 +501,11 @@ serve(async req => {
 
         // Log pour diagnostic
         console.log('[Moneroo Edge Function] Customer name processing:', {
-          originalCustomerName: data.customer_name,
+          originalCustomerName: typeof data === 'object' && data ? (data as Record<string, unknown>).customer_name : undefined,
           processedCustomerName: customerName,
           firstName,
           lastName,
-          customerEmail: data.customer_email,
+          customerEmail: typeof data === 'object' && data ? (data as Record<string, unknown>).customer_email : undefined,
           nameParts: customerNameParts,
         });
 
@@ -633,7 +637,6 @@ serve(async req => {
       url: monerooApiUrl,
       method,
       hasBody: !!body,
-      body: body ? JSON.stringify(body) : null,
     });
 
     let monerooResponse: Response;

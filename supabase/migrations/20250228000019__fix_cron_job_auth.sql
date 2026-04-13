@@ -4,8 +4,8 @@
 -- Description : Ajoute le header Authorization au cron job pour résoudre les erreurs 401
 -- =========================================================
 
--- Mettre à jour le cron job pour inclure le header Authorization
--- Supabase exige un header Authorization ou apikey pour appeler les Edge Functions
+-- Mettre à jour le cron job pour inclure un secret dédié x-cron-secret
+-- Les fonctions sensibles doivent refuser les appels sans secret cron
 
 -- Supprimer l'ancien cron job s'il existe
 DO $$
@@ -17,7 +17,7 @@ BEGIN
   END IF;
 END $$;
 
--- Recréer le cron job avec le header Authorization
+-- Recréer le cron job avec secret cron
 SELECT cron.schedule(
   'process-scheduled-email-campaigns',
   '0,5,10,15,20,25,30,35,40,45,50,55 * * * *',  -- Toutes les 5 minutes
@@ -26,8 +26,7 @@ SELECT cron.schedule(
     url := 'https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/process-scheduled-campaigns',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key', true),
-      'x-cron-secret', 'process-scheduled-campaigns-secret-2025'
+      'x-cron-secret', 'REPLACE_WITH_SECURE_CRON_SECRET'
     ),
     body := jsonb_build_object('limit', 10)
   ) AS request_id;
