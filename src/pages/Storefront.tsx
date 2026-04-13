@@ -30,6 +30,7 @@ import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
+import { detectSubdomain } from '@/lib/subdomain-detector';
 
 const Storefront = () => {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -87,11 +88,32 @@ const Storefront = () => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('stores_public' as any)
-        .select('*')
-        .eq('slug', slug)
-        .single();
+      const subdomainInfo = detectSubdomain();
+      const isStoreSubdomainContext =
+        subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && !!subdomainInfo.subdomain;
+
+      let data: any = null;
+      let fetchError: any = null;
+
+      if (isStoreSubdomainContext) {
+        // En contexte sous-domaine, rechercher par subdomain pour éviter les faux négatifs liés au slug.
+        const result = await supabase
+          .from('stores_public' as any)
+          .select('*')
+          .eq('subdomain', subdomainInfo.subdomain)
+          .eq('is_active', true)
+          .limit(1);
+        fetchError = result.error;
+        data = result.data?.[0] || null;
+      } else {
+        const result = await supabase
+          .from('stores_public' as any)
+          .select('*')
+          .eq('slug', slug)
+          .limit(1);
+        fetchError = result.error;
+        data = result.data?.[0] || null;
+      }
 
       if (fetchError) {
         // Si l'erreur est "PGRST116" (no rows returned), c'est normal
@@ -138,8 +160,8 @@ const Storefront = () => {
       }
     } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
+        _error instanceof Error
+          ? _error.message
           : 'Impossible de charger la boutique. Veuillez réessayer plus tard.';
       logger.error('Erreur lors du chargement de la boutique:', {
         error: errorMessage,
