@@ -9,6 +9,7 @@ import type {
   RefundResponse,
   WebhookEvent,
   PaymentProvider,
+  PaymentFeature,
 } from './types';
 
 export abstract class BasePaymentProvider {
@@ -55,7 +56,7 @@ export abstract class BasePaymentProvider {
   abstract verifyWebhookSignature(
     payload: string,
     signature: string
-  ): boolean;
+  ): Promise<boolean>;
 
   /**
    * Parser un événement webhook
@@ -79,7 +80,7 @@ export abstract class BasePaymentProvider {
   /**
    * Vérifier si le provider supporte une fonctionnalité
    */
-  supportsFeature(feature: string): boolean {
+  supportsFeature(feature: PaymentFeature): boolean {
     return this.getProviderInfo().features.includes(feature);
   }
 }

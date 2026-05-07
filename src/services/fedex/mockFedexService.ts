@@ -136,7 +136,6 @@ const MOCK_SERVICE_TYPES = {
 // =====================================================
 
 class MockFedexService {
-  private testMode = true;
   private mockDelay = 1000; // 1 second delay to simulate API call
 
   /**
@@ -323,6 +322,7 @@ class MockFedexService {
     totalWeight: number;
   }): Promise<{ success: boolean; confirmation_number: string }> {
     await this.simulateDelay();
+    void data;
 
     const confirmationNumber = `PU${Date.now().toString().slice(-8)}`;
 

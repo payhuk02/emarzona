@@ -6,32 +6,59 @@ import { mockFedexService, type FedexRateRequest, type FedexRate, type FedexShip
  */
 export class FedexService {
   private readonly apiKey = import.meta.env.VITE_FEDEX_API_KEY as string | undefined;
-  private readonly baseUrl = 'https://apis.fedex.com';
+  private readonly apiSecret = import.meta.env.VITE_FEDEX_API_SECRET as string | undefined;
+  private readonly accountNumber = import.meta.env.VITE_FEDEX_ACCOUNT_NUMBER as string | undefined;
+  private readonly forceMockMode = import.meta.env.VITE_FEDEX_FORCE_MOCK === 'true';
 
   private get isConfigured(): boolean {
-    return !!this.apiKey;
+    return !!this.apiKey && !!this.apiSecret && !!this.accountNumber;
+  }
+
+  private get shouldUseMock(): boolean {
+    return this.forceMockMode || !this.isConfigured;
+  }
+
+  private ensureOperationalMode(operation: string): void {
+    if (this.shouldUseMock) {
+      if (this.forceMockMode) return;
+
+      // Legacy behavior: no credentials => mock for local/dev.
+      // If only partial credentials are set, we fail fast to avoid false production confidence.
+      const hasAnyCredential = !!this.apiKey || !!this.apiSecret || !!this.accountNumber;
+      const hasAllCredentials = this.isConfigured;
+
+      if (hasAnyCredential && !hasAllCredentials) {
+        throw new Error(
+          `FedEx ${operation} refused: incomplete credentials. Set VITE_FEDEX_API_KEY, VITE_FEDEX_API_SECRET and VITE_FEDEX_ACCOUNT_NUMBER or enable VITE_FEDEX_FORCE_MOCK=true for development.`
+        );
+      }
+    }
   }
 
   async getRates(request: FedexRateRequest): Promise<FedexRate[]> {
-    if (!this.isConfigured) return mockFedexService.getRates(request);
+    this.ensureOperationalMode('getRates');
+    if (this.shouldUseMock) return mockFedexService.getRates(request);
     // TODO: Implement real API call
     return await mockFedexService.getRates(request);
   }
 
   async createShipment(request: FedexShipmentRequest): Promise<FedexShipmentResponse> {
-    if (!this.isConfigured) return mockFedexService.createShipment(request);
+    this.ensureOperationalMode('createShipment');
+    if (this.shouldUseMock) return mockFedexService.createShipment(request);
     // TODO: Implement real API call
     return await mockFedexService.createShipment(request);
   }
 
   async getTracking(trackingNumber: string): Promise<FedexTrackingResponse> {
-    if (!this.isConfigured) return mockFedexService.getTracking(trackingNumber);
+    this.ensureOperationalMode('getTracking');
+    if (this.shouldUseMock) return mockFedexService.getTracking(trackingNumber);
     // TODO: Implement real API call
     return await mockFedexService.getTracking(trackingNumber);
   }
 
   async cancelShipment(trackingNumber: string): Promise<{ success: boolean }> {
-    if (!this.isConfigured) return mockFedexService.cancelShipment(trackingNumber);
+    this.ensureOperationalMode('cancelShipment');
+    if (this.shouldUseMock) return mockFedexService.cancelShipment(trackingNumber);
     // TODO: Implement real API call
     return await mockFedexService.cancelShipment(trackingNumber);
   }

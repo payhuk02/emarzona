@@ -65,6 +65,12 @@ export default tseslint.config(
       "no-console": "off", // Console.* nécessaire dans ce fichier
     },
   },
+  {
+    files: ["src/lib/logger.ts"],
+    rules: {
+      "no-console": "off", // logger encapsule volontairement les appels console
+    },
+  },
   // Exception pour les fixtures Playwright qui utilisent le pattern 'use' mais ne sont pas des React Hooks
   {
     files: ["tests/**/*.ts", "tests/**/*.tsx"],
@@ -77,6 +83,12 @@ export default tseslint.config(
     files: ["src/hooks/useStoreAffiliates.ts"],
     rules: {
       "react-hooks/rules-of-hooks": "off", // Faux positifs - hooks toujours appelés inconditionnellement
+    },
+  },
+  {
+    files: ["src/components/pixels/PixelInjector.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off", // ce fichier exporte aussi des helpers de tracking
     },
   },
 );

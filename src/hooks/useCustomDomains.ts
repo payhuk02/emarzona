@@ -87,12 +87,20 @@ export function useCustomDomains() {
       const supabaseKey =
         import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
         import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+
+      if (!accessToken) {
+        throw new Error('Session utilisateur introuvable. Veuillez vous reconnecter.');
+      }
 
       const response = await fetch(`${supabaseUrl}/functions/v1/verify-custom-domain`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseKey}`,
+          'Authorization': `Bearer ${accessToken}`,
           'apikey': supabaseKey,
         },
         body: JSON.stringify({ domain_id: domainId }),

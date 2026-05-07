@@ -10,6 +10,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import type { Json } from '@/integrations/supabase/types';
 import type { WebhookEventType } from '@/types/webhooks';
 import type { RecordString } from '@/types/common';
 
@@ -95,9 +96,9 @@ export async function triggerUnifiedWebhook(
     const { data, error } = await supabase.rpc('trigger_webhook', {
       p_store_id: storeId,
       p_event_type: normalizedEventType,
-      p_event_id: finalEventId || null,
-      p_event_data: eventData,
-    } as Record<string, unknown>); // Type assertion pour les paramètres RPC
+      p_event_id: finalEventId,
+      p_event_data: eventData as unknown as Json,
+    });
 
     if (error) {
       logger.error('Error triggering unified webhook', { 

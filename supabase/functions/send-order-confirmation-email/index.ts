@@ -1,10 +1,27 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allowOrigin =
+    ALLOWED_ORIGINS.length === 0
+      ? '*'
+      : ALLOWED_ORIGINS.includes(origin)
+        ? origin
+        : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
+}
 
 interface EmailPayload {
   order_id: string;
@@ -14,14 +31,45 @@ interface EmailPayload {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const internalSecret = req.headers.get('x-internal-secret');
+    const expectedInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const authClient = createClient(supabaseUrl, supabaseServiceKey);
+    let isAuthorized = false;
+    if (expectedInternalSecret && internalSecret?.trim() === expectedInternalSecret.trim()) {
+      isAuthorized = true;
+    }
+    if (!isAuthorized) {
+      const authHeader = req.headers.get('authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+      if (token) {
+        const { data: userData, error: userError } = await authClient.auth.getUser(token);
+        if (!userError && userData.user) {
+          isAuthorized = true;
+        }
+      }
+    }
+    if (!isAuthorized) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const payload: EmailPayload = await req.json();

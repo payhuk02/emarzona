@@ -285,7 +285,7 @@ export interface ReturnEventData {
     refund_amount: number;
     created_at: string;
   };
-  order_item?: OrderEventData['order_items'][0];
+  order_item?: NonNullable<OrderEventData['order_items']>[number];
 }
 
 // ============================================================================

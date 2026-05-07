@@ -4,7 +4,7 @@
  */
 
 import { BasePaymentProvider } from './base';
-import type {
+import {
   PaymentRequest,
   PaymentResponse,
   RefundRequest,
@@ -16,6 +16,7 @@ import type {
   RefundStatus,
 } from './types';
 import { logger } from '@/lib/logger';
+import { verifyHmacSha256Signature } from './webhook-signature';
 
 export class PayPalProvider extends BasePaymentProvider {
   private paypalApiUrl: string;
@@ -24,7 +25,7 @@ export class PayPalProvider extends BasePaymentProvider {
     apiKey: string;
     apiSecret?: string;
     testMode?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   }) {
     super(config);
     this.paypalApiUrl = this.testMode
@@ -139,7 +140,9 @@ export class PayPalProvider extends BasePaymentProvider {
       const order = await response.json();
 
       // Trouver le lien d'approbation
-      const approveLink = order.links?.find((link: any) => link.rel === 'approve');
+      const approveLink = (order.links as Array<{ rel?: string; href?: string }> | undefined)?.find(
+        link => link.rel === 'approve'
+      );
 
       return {
         success: true,
@@ -273,18 +276,26 @@ export class PayPalProvider extends BasePaymentProvider {
     }
   }
 
-  verifyWebhookSignature(payload: string, signature: string): boolean {
-    // TODO: Implémenter la vérification de signature PayPal
-    return true; // Placeholder
+  async verifyWebhookSignature(payload: string, signature: string): Promise<boolean> {
+    try {
+      const webhookSecret = (this.config.webhookSecret as string | undefined) || this.apiSecret;
+      if (!webhookSecret) return false;
+      return await verifyHmacSha256Signature(payload, signature, webhookSecret);
+    } catch (error) {
+      logger.error('PayPal verifyWebhookSignature error', { error });
+      return false;
+    }
   }
 
-  parseWebhookEvent(payload: any): WebhookEvent {
+  parseWebhookEvent(payload: Record<string, unknown>): WebhookEvent {
+    const resource = (payload.resource as Record<string, unknown> | undefined) || {};
     return {
-      eventType: payload.event_type,
-      paymentId: payload.resource?.id || payload.resource?.order_id || '',
-      data: payload.resource || {},
-      timestamp: payload.create_time || new Date().toISOString(),
-      signature: payload.signature,
+      eventType: String(payload.event_type || ''),
+      paymentId: String(resource.id || resource.order_id || ''),
+      data: resource,
+      timestamp:
+        typeof payload.create_time === 'string' ? payload.create_time : new Date().toISOString(),
+      signature: typeof payload.signature === 'string' ? payload.signature : undefined,
     };
   }
 }

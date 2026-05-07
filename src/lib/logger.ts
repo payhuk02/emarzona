@@ -9,7 +9,7 @@ const isDevelopment = import.meta.env.DEV;
 const isProduction = import.meta.env.PROD;
 
 // Niveaux de log
-type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
+// (Type conservé implicitement via les méthodes exposées; pas besoin d'un alias dédié ici.)
 
 interface LogContext {
   [key: string]: unknown;

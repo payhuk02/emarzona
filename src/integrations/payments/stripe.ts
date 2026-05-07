@@ -4,7 +4,7 @@
  */
 
 import { BasePaymentProvider } from './base';
-import type {
+import {
   PaymentRequest,
   PaymentResponse,
   RefundRequest,
@@ -16,6 +16,7 @@ import type {
   RefundStatus,
 } from './types';
 import { logger } from '@/lib/logger';
+import { verifyHmacSha256Signature } from './webhook-signature';
 
 export class StripeProvider extends BasePaymentProvider {
   private stripeApiUrl = 'https://api.stripe.com/v1';
@@ -175,7 +176,7 @@ export class StripeProvider extends BasePaymentProvider {
       }
 
       // Récupérer d'abord le payment intent depuis la session
-      const session = await this.verifyPayment(request.paymentId);
+      await this.verifyPayment(request.paymentId);
       
       // Créer le remboursement
       const response = await fetch(`${this.stripeApiUrl}/refunds`, {
@@ -211,19 +212,27 @@ export class StripeProvider extends BasePaymentProvider {
     }
   }
 
-  verifyWebhookSignature(payload: string, signature: string): boolean {
-    // TODO: Implémenter la vérification de signature Stripe
-    // Utiliser crypto.createHmac avec le webhook secret
-    return true; // Placeholder
+  async verifyWebhookSignature(payload: string, signature: string): Promise<boolean> {
+    try {
+      const webhookSecret = (this.config.webhookSecret as string | undefined) || this.apiSecret;
+      if (!webhookSecret) return false;
+      return await verifyHmacSha256Signature(payload, signature, webhookSecret);
+    } catch (error) {
+      logger.error('Stripe verifyWebhookSignature error', { error });
+      return false;
+    }
   }
 
-  parseWebhookEvent(payload: any): WebhookEvent {
+  parseWebhookEvent(payload: Record<string, unknown>): WebhookEvent {
+    const data = (payload.data as Record<string, unknown> | undefined) || {};
+    const object = (data.object as Record<string, unknown> | undefined) || {};
+    const created = typeof payload.created === 'number' ? payload.created : Date.now() / 1000;
     return {
-      eventType: payload.type,
-      paymentId: payload.data?.object?.id || '',
-      data: payload.data?.object || {},
-      timestamp: new Date(payload.created * 1000).toISOString(),
-      signature: payload.signature,
+      eventType: String(payload.type || ''),
+      paymentId: String(object.id || ''),
+      data: object,
+      timestamp: new Date(created * 1000).toISOString(),
+      signature: typeof payload.signature === 'string' ? payload.signature : undefined,
     };
   }
 }

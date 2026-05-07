@@ -15,7 +15,28 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@emarzona.com';
-const RESEND_FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'Payhula';
+const RESEND_FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'Emarzona';
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allowOrigin =
+    ALLOWED_ORIGINS.length === 0
+      ? '*'
+      : ALLOWED_ORIGINS.includes(origin)
+        ? origin
+        : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+    Vary: 'Origin',
+  };
+}
 
 interface EmailRequest {
   to: string;
@@ -65,7 +86,7 @@ function generateEmailHTML(template: string, data: Record<string, unknown>): str
               ${transactionId ? `<p style="margin: 10px 0 0 0;"><strong>Transaction:</strong> ${transactionId}</p>` : ''}
             </div>
             <p>Merci pour votre achat !</p>
-            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Payhula</p>
+            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Emarzona</p>
           </div>
         </body>
         </html>
@@ -95,7 +116,7 @@ function generateEmailHTML(template: string, data: Record<string, unknown>): str
                 : ''
             }
             <p>Veuillez réessayer ou contacter le support si le problème persiste.</p>
-            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Payhula</p>
+            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Emarzona</p>
           </div>
         </body>
         </html>
@@ -119,7 +140,7 @@ function generateEmailHTML(template: string, data: Record<string, unknown>): str
             <p>Votre paiement de ${formattedAmount} a été annulé.</p>
             ${reason ? `<p><strong>Raison:</strong> ${reason}</p>` : ''}
             <p>Si vous souhaitez finaliser votre commande, vous pouvez réessayer à tout moment.</p>
-            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Payhula</p>
+            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Emarzona</p>
           </div>
         </body>
         </html>
@@ -144,7 +165,7 @@ function generateEmailHTML(template: string, data: Record<string, unknown>): str
             ${reason ? `<p><strong>Raison:</strong> ${reason}</p>` : ''}
             ${transactionId ? `<p><strong>Transaction:</strong> ${transactionId}</p>` : ''}
             <p>Le remboursement devrait apparaître sur votre compte bancaire dans les 5-10 jours ouvrables.</p>
-            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Payhula</p>
+            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Emarzona</p>
           </div>
         </body>
         </html>
@@ -167,7 +188,7 @@ function generateEmailHTML(template: string, data: Record<string, unknown>): str
             <p>Bonjour ${customerName},</p>
             <p>Votre paiement de ${formattedAmount} est en cours de traitement.</p>
             <p>Vous recevrez une notification une fois le paiement confirmé.</p>
-            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Payhula</p>
+            <p style="margin-top: 30px;">Cordialement,<br>L'équipe Emarzona</p>
           </div>
         </body>
         </html>
@@ -187,27 +208,39 @@ function generateEmailHTML(template: string, data: Record<string, unknown>): str
 }
 
 serve(async req => {
+  const corsHeaders = getCorsHeaders(req);
   // Gérer les requêtes CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
-      },
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const internalSecret = req.headers.get('x-internal-secret');
     const expectedInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
-    if (!expectedInternalSecret) {
-      return new Response(JSON.stringify({ error: 'EDGE_INTERNAL_SECRET is not configured' }), {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    if (!internalSecret || internalSecret.trim() !== expectedInternalSecret.trim()) {
+    const authClient = createClient(supabaseUrl, supabaseServiceKey);
+    let isAuthorized = false;
+    if (expectedInternalSecret && internalSecret?.trim() === expectedInternalSecret.trim()) {
+      isAuthorized = true;
+    }
+    if (!isAuthorized) {
+      const authHeader = req.headers.get('authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+      if (token) {
+        const { data: userData, error: userError } = await authClient.auth.getUser(token);
+        if (!userError && userData.user) {
+          isAuthorized = true;
+        }
+      }
+    }
+    if (!isAuthorized) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -284,7 +317,7 @@ serve(async req => {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       }
     );
@@ -295,7 +328,7 @@ serve(async req => {
       status: 500,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        ...corsHeaders,
       },
     });
   }

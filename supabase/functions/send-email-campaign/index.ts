@@ -9,6 +9,27 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
 const SENDGRID_API_URL = 'https://api.sendgrid.com/v3/mail/send';
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allowOrigin =
+    ALLOWED_ORIGINS.length === 0
+      ? '*'
+      : ALLOWED_ORIGINS.includes(origin)
+        ? origin
+        : ALLOWED_ORIGINS[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+    Vary: 'Origin',
+  };
+}
 
 interface SendCampaignRequest {
   campaign_id: string;
@@ -350,18 +371,45 @@ async function updateCampaignStatus(
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   // Gérer les requêtes CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      },
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const internalSecret = req.headers.get('x-internal-secret');
+    const expectedInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    if (!supabaseUrl || !supabaseKey) {
+      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const authClient = createClient(supabaseUrl, supabaseKey);
+    let isAuthorized = false;
+    if (expectedInternalSecret && internalSecret?.trim() === expectedInternalSecret.trim()) {
+      isAuthorized = true;
+    }
+    if (!isAuthorized) {
+      const authHeader = req.headers.get('authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+      if (token) {
+        const { data: userData, error: userError } = await authClient.auth.getUser(token);
+        if (!userError && userData.user) {
+          isAuthorized = true;
+        }
+      }
+    }
+    if (!isAuthorized) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Vérifier la clé API SendGrid
     if (!SENDGRID_API_KEY) {
       return new Response(
@@ -387,8 +435,6 @@ serve(async (req) => {
     }
 
     // Créer le client Supabase
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Récupérer la campagne
@@ -460,7 +506,7 @@ serve(async (req) => {
           status: 200,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            ...corsHeaders,
           },
         }
       );
@@ -533,7 +579,7 @@ serve(async (req) => {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       }
     );
@@ -545,7 +591,7 @@ serve(async (req) => {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
         },
       }
     );

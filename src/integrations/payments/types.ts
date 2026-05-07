@@ -30,7 +30,7 @@ export interface PaymentRequest {
   customerEmail?: string;
   customerName?: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   returnUrl?: string;
   cancelUrl?: string;
 }
@@ -44,7 +44,7 @@ export interface PaymentResponse {
   status: PaymentStatus;
   amount: number;
   currency: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export enum PaymentStatus {
@@ -80,7 +80,7 @@ export enum RefundStatus {
 export interface WebhookEvent {
   eventType: string;
   paymentId: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: string;
   signature?: string;
 }

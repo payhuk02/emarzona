@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import { PixelsInit } from '@/components/analytics/PixelsInit';
 import type { Store } from '@/hooks/useStores';
+import { logger } from '@/lib/logger';
 
 interface StoreAnalyticsScriptsProps {
   store: Store;
@@ -13,25 +14,34 @@ interface StoreAnalyticsScriptsProps {
 
 export const StoreAnalyticsScripts = ({ store }: StoreAnalyticsScriptsProps) => {
   useEffect(() => {
-    // Injecter les scripts personnalisés si activés
-    if (store.custom_scripts_enabled && store.custom_tracking_scripts) {
-      const scriptElement = document.createElement('div');
-      scriptElement.innerHTML = store.custom_tracking_scripts;
-      document.head.appendChild(scriptElement);
+    // IMPORTANT (sécurité):
+    // Ne jamais exécuter du HTML/JS arbitraire stocké en base en production.
+    // Cela ouvre une XSS persistante avec prise de contrôle complète du navigateur.
+    const allowCustomScripts =
+      import.meta.env.DEV && import.meta.env.VITE_ALLOW_CUSTOM_TRACKING_SCRIPTS === 'true';
 
-      // Exécuter les scripts contenus
-      const scripts = scriptElement.querySelectorAll('script');
-      scripts.forEach((oldScript) => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach((attr) => {
-          newScript.setAttribute(attr.name, attr.value);
+    if (!allowCustomScripts) {
+      if (store.custom_scripts_enabled && store.custom_tracking_scripts) {
+        logger.warn('Custom tracking scripts are disabled for security reasons.', {
+          storeId: (store as unknown as { id?: string }).id,
         });
-        newScript.textContent = oldScript.textContent;
-        document.head.appendChild(newScript);
-        document.head.removeChild(scriptElement);
-      });
+      }
+      return;
     }
-  }, [store.custom_scripts_enabled, store.custom_tracking_scripts]);
+
+    // Mode dev uniquement: fonctionnalité explicitement activée.
+    // Note: même en dev, éviter d’exécuter des scripts non maîtrisés.
+    // Ici on se contente d'injecter un marqueur texte pour faciliter le debug.
+    if (store.custom_scripts_enabled && store.custom_tracking_scripts) {
+      const marker = document.createElement('meta');
+      marker.setAttribute('name', 'emarzona-custom-tracking-scripts');
+      marker.setAttribute('content', 'disabled-execution-dev-marker');
+      document.head.appendChild(marker);
+      return () => {
+        marker.remove();
+      };
+    }
+  }, [store]);
 
   return (
     <PixelsInit

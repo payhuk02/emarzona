@@ -149,7 +149,7 @@ export async function createWebhook(
 
     return { success: true, webhook };
   } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error creating webhook', { error: errorMessage });
     return { success: false, error: errorMessage };
   }
@@ -185,7 +185,7 @@ export async function triggerWebhook(
     const { triggerUnifiedWebhook } = await import('./unified-webhook-service');
     await triggerUnifiedWebhook(storeId, normalizedEventType, payload, eventId);
   } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Exception triggering webhook', { error: errorMessage, storeId, eventType });
   }
 }
@@ -263,7 +263,7 @@ export async function sendWebhook(
 
     return { success, statusCode: response.status };
   } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error sending webhook', { error: errorMessage, webhookId: webhook.id });
 
     // Mettre à jour le log
@@ -312,7 +312,7 @@ async function signPayload(payload: string, secret: string): Promise<string> {
     const hashArray = Array.from(new Uint8Array(signature));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error signing payload', { error: errorMessage });
     throw new Error('Failed to sign webhook payload');
   }
@@ -331,7 +331,7 @@ export async function verifyWebhookSignature(
     const expectedSignature = await signPayload(payload, secret);
     return constantTimeEquals(signature, expectedSignature);
   } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error verifying webhook signature', { error: errorMessage });
     return false;
   }
@@ -436,7 +436,7 @@ async function updateWebhookLog(
       }); // Type assertion nécessaire pour compatibilité
     }
   } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error updating webhook log', { error: errorMessage });
   }
 }

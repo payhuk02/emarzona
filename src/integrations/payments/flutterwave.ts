@@ -4,7 +4,7 @@
  */
 
 import { BasePaymentProvider } from './base';
-import type {
+import {
   PaymentRequest,
   PaymentResponse,
   RefundRequest,
@@ -16,6 +16,7 @@ import type {
   RefundStatus,
 } from './types';
 import { logger } from '@/lib/logger';
+import { verifyHmacSha256Signature } from './webhook-signature';
 
 export class FlutterwaveProvider extends BasePaymentProvider {
   private flutterwaveApiUrl = 'https://api.flutterwave.com/v3';
@@ -226,19 +227,25 @@ export class FlutterwaveProvider extends BasePaymentProvider {
     }
   }
 
-  verifyWebhookSignature(payload: string, signature: string): boolean {
-    // TODO: Implémenter la vérification de signature Flutterwave
-    // Utiliser crypto.createHmac avec le secret hash
-    return true; // Placeholder
+  async verifyWebhookSignature(payload: string, signature: string): Promise<boolean> {
+    try {
+      const webhookSecret = (this.config.webhookSecret as string | undefined) || this.apiSecret;
+      if (!webhookSecret) return false;
+      return await verifyHmacSha256Signature(payload, signature, webhookSecret);
+    } catch (error) {
+      logger.error('Flutterwave verifyWebhookSignature error', { error });
+      return false;
+    }
   }
 
-  parseWebhookEvent(payload: any): WebhookEvent {
+  parseWebhookEvent(payload: Record<string, unknown>): WebhookEvent {
+    const data = (payload.data as Record<string, unknown> | undefined) || {};
     return {
-      eventType: payload.event,
-      paymentId: payload.data.tx_ref || payload.data.id?.toString() || '',
-      data: payload.data || {},
+      eventType: String(payload.event || ''),
+      paymentId: String(data.tx_ref || data.id || ''),
+      data,
       timestamp: new Date().toISOString(),
-      signature: payload.signature,
+      signature: typeof payload.signature === 'string' ? payload.signature : undefined,
     };
   }
 }

@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noCheck": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/integrations/payments/**/*.ts",
+    "src/lib/webhooks/**/*.ts",
+    "src/services/fedex/**/*.ts",
+    "src/integrations/supabase/client.ts",
+    "src/vite-env.d.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.*",
+    "src/**/*.spec.*",
+    "src/test/**"
+  ]
+}

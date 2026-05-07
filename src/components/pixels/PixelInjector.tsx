@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { usePixels } from '@/hooks/usePixels';
+import { logger } from '@/lib/logger';
 
 // Interfaces pour les APIs de tracking
 interface PixelEventData {
@@ -81,8 +82,14 @@ export const PixelInjector = ({
           injectPinterestPixel(pixel.pixel_id);
           break;
         case 'custom':
+          // IMPORTANT (sécurité):
+          // Exécuter du code arbitraire stocké en base = XSS persistante.
+          // Fonctionnalité désactivée par défaut (prod + dev).
           if (pixel.pixel_code) {
-            injectCustomCode(pixel.pixel_code);
+            logger.warn('Custom pixel code is disabled for security reasons.', {
+              pixelId: pixel.id,
+              storeUserId,
+            });
           }
           break;
       }
@@ -100,7 +107,7 @@ export const PixelInjector = ({
     return () => {
       // Cleanup scripts on unmount if needed
     };
-  }, [storeUserId, pixels, productId]);
+  }, [storeUserId, pixels, productId, productName, productPrice, trackEvent]);
 
   return null;
 };
@@ -183,7 +190,10 @@ const injectPinterestPixel = (pixelId: string) => {
   const script = document.createElement('script');
   script.innerHTML = `
     !function(e){if(!window.pintrk){window.pintrk = function () {
-    window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var n=window.pintrk;n.queue=[],n.version="3.0";var t=document.createElement("script");t.async=!0,t.src=e;var r=document.getElementsByTagName("script")[0];
+    window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+ n=window.pintrk;n.queue=[],n.version="3.0";var
+ t=document.createElement("script");t.async=!0,t.src=e;var
+ r=document.getElementsByTagName("script")[0];
       r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
     pintrk('load', '${pixelId}', {em: '<user_email_address>'});
     pintrk('page');
@@ -195,14 +205,7 @@ const injectPinterestPixel = (pixelId: string) => {
   document.body.appendChild(noscript);
 };
 
-// Custom code injection
-const injectCustomCode = (code: string) => {
-  if (typeof window === 'undefined') return;
-
-  const div = document.createElement('div');
-  div.innerHTML = code;
-  document.body.appendChild(div);
-};
+// NOTE: Custom code injection intentionally removed (security).
 
 // Export tracking functions for use in other components
 export const trackAddToCart = (pixelId: string, pixelType: string, data: PixelEventData) => {
