@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noCheck": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/contexts/AuthContext.tsx",
+    "src/components/AdminRoute.tsx",
+    "src/hooks/useAdmin.ts",
+    "src/integrations/supabase/client.ts",
+    "src/integrations/supabase/client.server.ts",
+    "src/integrations/supabase/auth-middleware.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.*",
+    "src/**/*.spec.*",
+    "src/test/**"
+  ]
+}

@@ -1,0 +1,14 @@
+
+// Image optimisée: og-image
+<picture>
+    <source srcset="/optimized/og-image.avif" type="image/avif" />
+    <source srcset="/optimized/og-image.webp" type="image/webp" />
+    <img
+      src="/optimized/og-image.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="500"
+      height="500"
+    />
+</picture>

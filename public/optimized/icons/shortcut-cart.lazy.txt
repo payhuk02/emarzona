@@ -1,0 +1,14 @@
+
+// Image optimisée: shortcut-cart
+<picture>
+    <source srcset="/optimized/icons/shortcut-cart.avif" type="image/avif" />
+    <source srcset="/optimized/icons/shortcut-cart.webp" type="image/webp" />
+    <img
+      src="/optimized/icons/shortcut-cart.jpg"
+      loading="lazy"
+      decoding="async"
+      alt=""
+      width="96"
+      height="96"
+    />
+</picture>

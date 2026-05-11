@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noCheck": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/pages/checkout/Checkout.tsx",
+    "src/hooks/orders/useCreateDigitalOrder.ts",
+    "src/hooks/orders/useCreateCourseOrder.ts",
+    "src/lib/moneroo-payment.ts",
+    "src/lib/moneroo-client.ts",
+    "src/lib/payment-service.ts",
+    "src/components/checkout/PaymentProviderSelector.tsx"
+  ],
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/**/*.test.*",
+    "src/**/*.spec.*",
+    "src/test/**"
+  ]
+}

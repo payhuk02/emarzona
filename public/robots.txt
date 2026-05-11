@@ -1,0 +1,68 @@
+# robots.txt - emarzona.com
+User-agent: *
+Allow: /
+Allow: /marketplace
+Allow: /product/
+Allow: /store/
+Allow: /collections
+Allow: /auctions
+Allow: /community
+Allow: /trending
+Allow: /discover
+Allow: /recommendations
+Allow: /digital/search
+Allow: /products/compare
+Allow: /courses/
+Allow: /portfolio/
+Allow: /about
+Allow: /contact
+Allow: /pricing
+Allow: /legal/
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /account
+Disallow: /settings
+Disallow: /api
+Disallow: /cart
+Disallow: /checkout
+Disallow: /auth
+Disallow: /payment/
+Disallow: /unsubscribe
+Disallow: /wishlist/
+
+# Bots IA - autorisation explicite
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: CCBot
+Disallow: /
+
+# Bloquer les paramètres d'URL qui dupliquent du contenu (filtres, tri, tracking)
+User-agent: *
+Disallow: /*?utm_*
+Disallow: /*?ref=*
+Disallow: /*?fbclid=*
+Disallow: /*?gclid=*
+Disallow: /*?sort=*
+Disallow: /*?filter=*
+Disallow: /*?page=*&*
+
+# Sitemaps servis directement par les Edge Functions Supabase
+Sitemap: https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-main
+Sitemap: https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/sitemap-stores

@@ -1,0 +1,1 @@
+# Audit IA + Centre de gestion AI (Admin)\n\n## Audit des systèmes AI existants\n\n| # | Système | Fichiers clés | Type | Statut |\n|---|---|---|---|---|\n| 1 | Chatbot client | `src/lib/ai/chatbot.ts`, `chatbotResponses.ts`, `hooks/useAIChatbot.ts`, `components/ai/AIChatbot.tsx`, `pages/AIChatbotPage.tsx` | **Règles hardcodé

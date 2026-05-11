@@ -1,0 +1,127 @@
+/**
+ * Service Booking Calendar - Custom Styles
+ * Date: 2 Février 2025
+ * 
+ * Styles personnalisés pour le calendrier de réservation
+ */
+
+/* Styles pour les heures de travail */
+.rbc-calendar-service .business-hours {
+  background-color: rgba(59, 130, 246, 0.05); /* blue-500 avec opacité */
+  border-left: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Styles pour les heures hors travail */
+.rbc-calendar-service .off-hours {
+  background-color: rgba(107, 114, 128, 0.03); /* gray-500 avec opacité */
+  opacity: 0.6;
+}
+
+/* Styles pour la colonne d'aujourd'hui */
+.rbc-calendar-service .rbc-today-column {
+  background-color: rgba(139, 92, 246, 0.1); /* violet-500 avec opacité */
+  border-left: 2px solid #8b5cf6;
+}
+
+/* Styles pour les jours passés */
+.rbc-calendar-service .rbc-past-day {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Amélioration des événements */
+.rbc-calendar-service .rbc-event {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.rbc-calendar-service .rbc-event:hover {
+  transform: scale(1.02);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+}
+
+/* Amélioration des slots sélectionnables */
+.rbc-calendar-service .rbc-time-slot {
+  transition: background-color 0.15s ease-in-out;
+}
+
+.rbc-calendar-service .rbc-time-slot:hover {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+/* Styles pour les tooltips */
+.rbc-calendar-service .rbc-event-tooltip {
+  z-index: 1000;
+}
+
+/* Responsive amélioré */
+@media (max-width: 768px) {
+  .rbc-calendar-service {
+    font-size: 0.75rem;
+  }
+
+  .rbc-calendar-service .rbc-event {
+    font-size: 0.7rem;
+    padding: 2px 4px;
+  }
+
+  .rbc-calendar-service .rbc-time-slot {
+    min-height: 30px;
+  }
+}
+
+/* Animation pour les nouveaux événements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rbc-calendar-service .rbc-event {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Amélioration de la toolbar */
+.rbc-calendar-service .rbc-toolbar {
+  padding: 1rem 0;
+}
+
+.rbc-calendar-service .rbc-toolbar button {
+  transition: all 0.2s ease-in-out;
+}
+
+.rbc-calendar-service .rbc-toolbar button:hover {
+  transform: translateY(-1px);
+}
+
+/* Styles pour les vues différentes */
+.rbc-calendar-service .rbc-month-view {
+  border-radius: 8px;
+}
+
+.rbc-calendar-service .rbc-time-view {
+  border-radius: 8px;
+}
+
+.rbc-calendar-service .rbc-day-view {
+  border-radius: 8px;
+}
+
+/* Amélioration de l'accessibilité */
+.rbc-calendar-service .rbc-event:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+.rbc-calendar-service .rbc-time-slot:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: -2px;
+}

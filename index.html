@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- ✅ Performance optimizations -->
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ✅ Favicon et icônes multi-plateformes -->
+    <!-- Le favicon sera géré dynamiquement par DynamicFavicon component -->
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+
+    <title>Emarzona - Plateforme de ecommerce et marketing</title>
+    <meta name="description" content="Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services et cours en ligne. Solution e-commerce moderne et sécurisée.">
+    <meta name="author" content="Emarzona" />
+    <!-- Canonical et hreflang sont injectés dynamiquement par AutoSEO/react-helmet-async
+         pour s'adapter au domaine réel servi (preview, lovable.app, custom domain). -->
+
+    <!-- ✅ Resource Hints pour améliorer les Core Web Vitals -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    
+    <!-- ✅ Google Fonts: une seule déclaration Poppins, swap pour éviter FOIT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!-- ✅ Preconnect pour Supabase et CDN tiers -->
+    <link rel="preconnect" href="https://hbdnzajbyjakdhuavrvb.supabase.co" />
+    <link rel="preconnect" href="https://storage.googleapis.com" />
+    <link rel="preconnect" href="https://api.moneroo.com" />
+
+    <!-- ✅ Prefetch pour routes critiques (améliore la navigation) -->
+    <!-- Note: React Router gère déjà le prefetch via lazy loading -->
+    <!-- Les prefetch de routes sont gérés dynamiquement par usePrefetchRoutes et useIntelligentPrefetch -->
+
+    <!-- ✅ Open Graph (Facebook, WhatsApp, LinkedIn...) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Emarzona" />
+<meta property="og:locale" content="fr_FR" />
+
+
+<meta property="og:image" content="https://www.emarzona.com/og-image.png">
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Emarzona - Plateforme de ecommerce et marketing" />
+<meta property="og:url" content="https://www.emarzona.com" />
+
+    <!-- ✅ Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://www.emarzona.com/og-image.png">
+    
+    
+    
+    
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:title" content="Emarzona - Plateforme de ecommerce et marketing">
+  <meta name="twitter:title" content="Emarzona - Plateforme de ecommerce et marketing">
+  <meta property="og:description" content="Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services et cours en ligne. Solution e-commerce moderne et sécurisée.">
+  <meta name="twitter:description" content="Plateforme de ecommerce et marketing. Vendez vos produits digitaux, physiques, services et cours en ligne. Solution e-commerce moderne et sécurisée.">
+
+  <!-- JSON-LD Organization statique : visible immédiatement par Google, Bing, GPTBot, ClaudeBot... -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Emarzona",
+    "url": "https://www.emarzona.com",
+    "logo": "https://www.emarzona.com/emarzona-logo.png",
+    "description": "Plateforme e-commerce et marketing pour vendre produits digitaux, physiques, services et cours en ligne.",
+    "sameAs": []
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Emarzona",
+    "url": "https://www.emarzona.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.emarzona.com/marketplace?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+</head>
+
+  <body>
+    <!-- Skip link sera ajouté par React via SkipLink component -->
+    
+    <div id="root"></div>
+
+    <!-- Contenu SEO statique pour crawlers / bots IA sans exécution JS.
+         Masqué dès que React monte (voir src/main.tsx). -->
+    <noscript>
+      <style>#seo-fallback{display:block !important;}</style>
+    </noscript>
+    <div id="seo-fallback" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;">
+      <h1>Emarzona — Plateforme e-commerce et marketing tout-en-un</h1>
+      <p>Emarzona est une plateforme française qui permet aux créateurs, artistes et entrepreneurs de vendre des produits digitaux, physiques, des services et des cours en ligne depuis une seule interface, avec paiements sécurisés, marketing intégré et programme d'affiliation.</p>
+      <h2>Ce que vous pouvez vendre sur Emarzona</h2>
+      <ul>
+        <li><a href="/marketplace">Marketplace de produits</a></li>
+        <li><a href="/digital/search">Produits digitaux : ebooks, logiciels, templates, musique</a></li>
+        <li><a href="/courses">Cours en ligne et formations</a></li>
+        <li><a href="/portfolio">Portfolios d'artistes et œuvres d'art</a></li>
+        <li><a href="/auctions">Enchères et éditions limitées</a></li>
+        <li><a href="/community">Communauté de créateurs</a></li>
+      </ul>
+      <h2>Pourquoi choisir Emarzona</h2>
+      <ul>
+        <li>Boutique personnalisable avec sous-domaine dédié</li>
+        <li>Paiements sécurisés multi-devises (Moneroo, Stripe)</li>
+        <li>Programme d'affiliation et de fidélité intégrés</li>
+        <li>Outils marketing : email, coupons, abandons de panier</li>
+        <li>Gestion d'inventaire, expéditions et retours</li>
+        <li>Tableaux de bord analytics avancés</li>
+      </ul>
+      <p><a href="/about">À propos d'Emarzona</a> · <a href="/pricing">Tarifs</a> · <a href="/contact">Contact</a></p>
+    </div>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
