@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const STORE_FIELDS = 'id, user_id, name, slug, description, logo_url, banner_url, is_active, created_at, updated_at, about, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, ssl_enabled, redirect_www, redirect_https, dns_records, primary_color, secondary_color, accent_color, background_color, text_color, text_secondary_color, button_primary_color, button_primary_text, button_secondary_color, button_secondary_text, link_color, link_hover_color, border_radius, shadow_intensity, heading_font, body_font, font_size_base, heading_size_h1, heading_size_h2, heading_size_h3, line_height, letter_spacing, header_style, footer_style, sidebar_enabled, sidebar_position, product_grid_columns, product_card_style, navigation_style, favicon_url, apple_touch_icon_url, watermark_url, placeholder_image_url, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, timezone, opening_hours, support_email, sales_email, press_email, partnership_email, support_phone, sales_phone, whatsapp_number, telegram_username, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, legal_pages, marketing_content, meta_title, meta_description, meta_keywords, og_image, seo_score, theme_color, google_analytics_id, google_analytics_enabled, facebook_pixel_id, facebook_pixel_enabled, google_tag_manager_id, google_tag_manager_enabled, tiktok_pixel_id, tiktok_pixel_enabled, custom_tracking_scripts, custom_scripts_enabled';
+const STORE_FIELDS =
+  'id, user_id, name, slug, description, logo_url, banner_url, is_active, created_at, updated_at, about, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, ssl_enabled, redirect_www, redirect_https, dns_records, primary_color, secondary_color, accent_color, background_color, text_color, text_secondary_color, button_primary_color, button_primary_text, button_secondary_color, button_secondary_text, link_color, link_hover_color, border_radius, shadow_intensity, heading_font, body_font, font_size_base, heading_size_h1, heading_size_h2, heading_size_h3, line_height, letter_spacing, header_style, footer_style, sidebar_enabled, sidebar_position, product_grid_columns, product_card_style, navigation_style, favicon_url, apple_touch_icon_url, watermark_url, placeholder_image_url, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, timezone, opening_hours, support_email, sales_email, press_email, partnership_email, support_phone, sales_phone, whatsapp_number, telegram_username, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, legal_pages, marketing_content, meta_title, meta_description, meta_keywords, og_image, seo_score, theme_color, google_analytics_id, google_analytics_enabled, facebook_pixel_id, facebook_pixel_enabled, google_tag_manager_id, google_tag_manager_enabled, tiktok_pixel_id, tiktok_pixel_enabled, custom_tracking_scripts, custom_scripts_enabled';
 
 // Types pour les horaires d'ouverture
 export interface StoreOpeningHours {
@@ -194,11 +194,13 @@ export const useStores = () => {
     data: stores = [],
     isLoading: loading,
     error: queryError,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['stores'],
     queryFn: async (): Promise<Store[]> => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         throw new Error('Utilisateur non authentifié');
@@ -208,7 +210,7 @@ export const useStores = () => {
         .from('stores')
         .select(STORE_FIELDS)
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true });
 
       if (error) {
         throw error;
@@ -230,9 +232,11 @@ export const useStores = () => {
   }
 
   // Mutation pour créer une boutique
-  const createStoreMutation = useMutation({
+  useMutation({
     mutationFn: async (storeData: Omit<Store, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         throw new Error('Utilisateur non authentifié');
@@ -245,10 +249,12 @@ export const useStores = () => {
 
       const { data, error } = await supabase
         .from('stores')
-        .insert([{
-          ...storeData,
-          user_id: user.id
-        }])
+        .insert([
+          {
+            ...storeData,
+            user_id: user.id,
+          },
+        ])
         .select()
         .single();
 
@@ -258,27 +264,27 @@ export const useStores = () => {
 
       return data;
     },
-    onSuccess: (newStore) => {
+    onSuccess: newStore => {
       // Invalider le cache pour rafraîchir la liste
       queryClient.invalidateQueries({ queryKey: ['stores'] });
       toast({
-        title: "Boutique créée",
+        title: 'Boutique créée',
         description: `La boutique "${newStore.name}" a été créée avec succès`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Erreur lors de la création de la boutique:', error);
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de créer la boutique",
-        variant: "destructive"
+        title: 'Erreur',
+        description: error.message || 'Impossible de créer la boutique',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Mutation pour mettre à jour une boutique
-  const updateStoreMutation = useMutation({
-    mutationFn: async ({ storeId, updates }: { storeId: string, updates: Partial<Store> }) => {
+  useMutation({
+    mutationFn: async ({ storeId, updates }: { storeId: string; updates: Partial<Store> }) => {
       const { data, error } = await supabase
         .from('stores')
         .update(updates)
@@ -292,31 +298,28 @@ export const useStores = () => {
 
       return data;
     },
-    onSuccess: (updatedStore) => {
+    onSuccess: updatedStore => {
       // Invalider le cache
       queryClient.invalidateQueries({ queryKey: ['stores'] });
       toast({
-        title: "Boutique mise à jour",
+        title: 'Boutique mise à jour',
         description: `La boutique "${updatedStore.name}" a été mise à jour`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Erreur lors de la mise à jour de la boutique:', error);
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la boutique",
-        variant: "destructive"
+        title: 'Erreur',
+        description: error.message || 'Impossible de mettre à jour la boutique',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Mutation pour supprimer une boutique
-  const deleteStoreMutation = useMutation({
+  useMutation({
     mutationFn: async (storeId: string) => {
-      const { error } = await supabase
-        .from('stores')
-        .delete()
-        .eq('id', storeId);
+      const { error } = await supabase.from('stores').delete().eq('id', storeId);
 
       if (error) {
         throw error;
@@ -326,18 +329,18 @@ export const useStores = () => {
       // Invalider le cache
       queryClient.invalidateQueries({ queryKey: ['stores'] });
       toast({
-        title: "Boutique supprimée",
-        description: "La boutique a été supprimée avec succès",
+        title: 'Boutique supprimée',
+        description: 'La boutique a été supprimée avec succès',
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       logger.error('Erreur lors de la suppression de la boutique:', error);
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de supprimer la boutique",
-        variant: "destructive"
+        title: 'Erreur',
+        description: error.message || 'Impossible de supprimer la boutique',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Fonction de compatibilité pour l'ancien code
@@ -355,24 +358,30 @@ export const useStores = () => {
 
   const createStore = async (storeData: Partial<Store>) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error('Utilisateur non authentifié');
       }
 
       // Vérifier la limite de 3 boutiques
       if (!canCreateStore()) {
-        throw new Error(`Limite de ${MAX_STORES_PER_USER} boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.`);
+        throw new Error(
+          `Limite de ${MAX_STORES_PER_USER} boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.`
+        );
       }
 
       const { data, error } = await supabase
         .from('stores')
-        .insert([{
-          ...storeData,
-          user_id: user.id,
-          is_active: true
-        }])
+        .insert([
+          {
+            ...storeData,
+            user_id: user.id,
+            is_active: true,
+          },
+        ])
         .select()
         .single();
 
@@ -382,20 +391,20 @@ export const useStores = () => {
 
       // Rafraîchir la liste des boutiques
       await fetchStores();
-      
+
       toast({
-        title: "Boutique créée",
-        description: "Votre nouvelle boutique a été créée avec succès"
+        title: 'Boutique créée',
+        description: 'Votre nouvelle boutique a été créée avec succès',
       });
 
       return data;
     } catch (_err: unknown) {
-      const errorMessage = _err instanceof Error ? _err.message : "Impossible de créer la boutique";
+      const errorMessage = _err instanceof Error ? _err.message : 'Impossible de créer la boutique';
       logger.error('Erreur lors de la création de la boutique:', _err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive"
+        variant: 'destructive',
       });
       throw _err;
     }
@@ -416,19 +425,19 @@ export const useStores = () => {
 
       // Rafraîchir la liste des boutiques
       await fetchStores();
-      
+
       toast({
-        title: "Boutique mise à jour",
-        description: "Les modifications ont été enregistrées"
+        title: 'Boutique mise à jour',
+        description: 'Les modifications ont été enregistrées',
       });
 
       return data;
     } catch (_err: unknown) {
       logger.error('Erreur lors de la mise à jour de la boutique:', _err);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour la boutique",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de mettre à jour la boutique',
+        variant: 'destructive',
       });
       throw _err;
     }
@@ -436,10 +445,7 @@ export const useStores = () => {
 
   const deleteStore = async (storeId: string) => {
     try {
-      const { error } = await supabase
-        .from('stores')
-        .delete()
-        .eq('id', storeId);
+      const { error } = await supabase.from('stores').delete().eq('id', storeId);
 
       if (error) {
         throw error;
@@ -447,25 +453,21 @@ export const useStores = () => {
 
       // Rafraîchir la liste des boutiques
       await fetchStores();
-      
+
       toast({
-        title: "Boutique supprimée",
-        description: "La boutique a été supprimée avec succès"
+        title: 'Boutique supprimée',
+        description: 'La boutique a été supprimée avec succès',
       });
     } catch (_err: unknown) {
       logger.error('Erreur lors de la suppression de la boutique:', _err);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer la boutique",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de supprimer la boutique',
+        variant: 'destructive',
       });
       throw _err;
     }
   };
-
-  useEffect(() => {
-    fetchStores();
-  }, []);
 
   return {
     stores,
@@ -476,12 +478,6 @@ export const useStores = () => {
     deleteStore,
     refetch: fetchStores,
     canCreateStore,
-    getRemainingStores
+    getRemainingStores,
   };
 };
-
-
-
-
-
-

@@ -6,7 +6,8 @@ import { useStoreContext } from '@/contexts/StoreContext';
 import { logger } from '@/lib/logger';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 
-const STORE_FIELDS = 'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, created_at, updated_at';
+const STORE_FIELDS =
+  'id, user_id, name, slug, subdomain, description, default_currency, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, logo_url, banner_url, info_message, info_message_color, info_message_font, created_at, updated_at';
 
 export interface Store {
   id: string;
@@ -109,14 +110,9 @@ export const useStore = () => {
 
       setLoading(true);
 
-      // Utiliser la boutique du contexte si disponible et valide
-      if (contextStore && contextStore.id && contextStore.user_id === user.id) {
-        logger.info('✅ [useStore] Utilisation de la boutique du contexte:', contextStore.id);
-        setStore(contextStore);
-        setLoading(false);
-        return;
-      }
-
+      // Le contextStore du StoreContext ne contient que id/name/slug/created_at/updated_at
+      // et manque les champs essentiels (description, logo_url, etc.)
+      // On doit toujours faire un fetch DB pour avoir toutes les données
       // Si pas de boutique sélectionnée mais un ID valide
       if (selectedStoreId && selectedStoreId.trim()) {
         logger.info('📡 [useStore] Récupération depuis DB:', selectedStoreId);
@@ -142,18 +138,15 @@ export const useStore = () => {
     } catch (error) {
       logger.error('💥 [useStore] Exception:', error);
       setStore(null);
-      // Éviter les toasts répétés en cas d'erreur
-      if (!store) {
-        toast({
-          title: 'Erreur',
-          description: 'Impossible de charger votre boutique',
-          variant: 'destructive',
-        });
-      }
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger votre boutique',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
-  }, [user?.id, selectedStoreId, contextStore?.id, toast]); // ✅ Dépendances simplifiées
+  }, [user?.id, selectedStoreId, contextStore?.id, toast]);
 
   const createStore = async (name: string, description?: string) => {
     try {
@@ -308,13 +301,9 @@ export const useStore = () => {
       return;
     }
 
-    // Utiliser la boutique du contexte si elle est valide et à jour
-    if (contextStore && contextStore.id && contextStore.user_id === user.id) {
-      logger.info('✅ [useStore] Utilisation boutique contexte:', contextStore.id);
-      setStore(contextStore);
-      setLoading(false);
-      return;
-    }
+    // Le contextStore du StoreContext ne contient que 5 champs basiques,
+    // il faut toujours faire un fetch DB complet pour useStore
+    // Ne pas utiliser contextStore comme raccourci ici
 
     // Charger depuis la DB si un ID est sélectionné
     if (selectedStoreId) {
@@ -341,10 +330,13 @@ export const useStore = () => {
         } else if (data && data.length > 0) {
           logger.info('✅ [useStore] Boutique trouvée automatiquement:', data[0].id);
           setStore(data[0]);
-          // Mettre à jour le contexte pour les prochains rendus
+          // Mettre à jour le contexte via setSelectedStoreId (évite la désynchronisation)
           try {
-            localStorage.setItem('selectedStoreId', data[0].id);
-          } catch {}
+            setSelectedStoreId(data[0].id);
+          } catch (e) {
+            // Context might not be ready yet
+            logger.debug('Context sync failed during auto-select', e);
+          }
         } else {
           logger.info('ℹ️ [useStore] Aucune boutique existante');
           setStore(null);
@@ -356,7 +348,7 @@ export const useStore = () => {
         setLoading(false);
       }
     })();
-  }, [user?.id, selectedStoreId, contextStore?.id]); // Dépendances minimales
+  }, [user?.id, selectedStoreId, authLoading, contextLoading, fetchStore]); // Dépendances complètes
 
   return {
     store,

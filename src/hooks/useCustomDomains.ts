@@ -2,9 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useStoreContext } from '@/contexts/StoreContext';
-import { logger } from '@/lib/logger';
 
-const CUSTOM_DOMAIN_FIELDS = 'id, store_id, domain, status, verification_token, verification_method, ssl_status, ssl_expires_at, dns_records, is_primary, error_message, verified_at, last_checked_at, created_at, updated_at';
+const CUSTOM_DOMAIN_FIELDS =
+  'id, store_id, domain, status, verification_token, verification_method, ssl_status, ssl_expires_at, dns_records, is_primary, error_message, verified_at, last_checked_at, created_at, updated_at';
 
 export interface CustomDomain {
   id: string;
@@ -49,9 +49,16 @@ export function useCustomDomains() {
     mutationFn: async (domain: string) => {
       if (!selectedStoreId) throw new Error('Aucune boutique sélectionnée');
 
-      const cleanDomain = domain.toLowerCase().trim().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/+$/, '');
+      const cleanDomain = domain
+        .toLowerCase()
+        .trim()
+        .replace(/^(https?:\/\/)?(www\.)?/, '')
+        .replace(/\/+$/, '');
 
-      if (!cleanDomain || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(cleanDomain)) {
+      if (
+        !cleanDomain ||
+        !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(cleanDomain)
+      ) {
         throw new Error('Format de domaine invalide');
       }
 
@@ -76,7 +83,10 @@ export function useCustomDomains() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-domains', selectedStoreId] });
-      toast({ title: 'Domaine ajouté', description: 'Configurez vos enregistrements DNS pour vérifier la propriété.' });
+      toast({
+        title: 'Domaine ajouté',
+        description: 'Configurez vos enregistrements DNS pour vérifier la propriété.',
+      });
     },
     onError: (error: Error) => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -87,8 +97,7 @@ export function useCustomDomains() {
     mutationFn: async (domainId: string) => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey =
-        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-        import.meta.env.VITE_SUPABASE_ANON_KEY;
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -102,8 +111,8 @@ export function useCustomDomains() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'apikey': supabaseKey,
+          Authorization: `Bearer ${accessToken}`,
+          apikey: supabaseKey,
         },
         body: JSON.stringify({ domain_id: domainId }),
       });
@@ -115,27 +124,60 @@ export function useCustomDomains() {
 
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['custom-domains', selectedStoreId] });
       if (data.verified) {
-        toast({ title: '✅ Domaine vérifié', description: 'Votre domaine a été vérifié avec succès !' });
+        toast({
+          title: '✅ Domaine vérifié',
+          description: 'Votre domaine a été vérifié avec succès !',
+        });
       } else {
-        toast({ title: 'Vérification en cours', description: data.message || 'Les enregistrements DNS n\'ont pas encore été détectés.', variant: 'destructive' });
+        toast({
+          title: 'Vérification en cours',
+          description: data.message || "Les enregistrements DNS n'ont pas encore été détectés.",
+          variant: 'destructive',
+        });
       }
     },
     onError: (error: Error) => {
-      toast({ title: 'Erreur de vérification', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Erreur de vérification',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
   const removeDomain = useMutation({
     mutationFn: async (domainId: string) => {
-      const { error } = await supabase
-        .from('custom_domains')
-        .delete()
-        .eq('id', domainId);
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey =
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
 
-      if (error) throw error;
+      if (!accessToken) {
+        throw new Error('Session utilisateur introuvable. Veuillez vous reconnecter.');
+      }
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/remove-custom-domain`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+          apikey: supabaseKey,
+        },
+        body: JSON.stringify({ domain_id: domainId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Erreur lors de la suppression');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-domains', selectedStoreId] });

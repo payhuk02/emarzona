@@ -1,16 +1,18 @@
 /**
  * Edge Function: Vérification automatique des domaines personnalisés
- * 
+ *
  * Cette fonction vérifie périodiquement l'état des domaines personnalisés :
  * - Vérifie la propagation DNS
- * - Active automatiquement SSL si le domaine est vérifié
+ * - Enregistre automatiquement dans Vercel si vérifié
  * - Met à jour le statut des domaines
- * 
- * Déclenchement : Cron job (toutes les 15 minutes)
+ *
+ * Déclenchement : Cron job (via CRON_SECRET)
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+type SupabaseClient = ReturnType<typeof createClient>;
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -26,7 +28,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type, x-cron-secret',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -46,9 +48,9 @@ interface CustomDomainRow {
   id: string;
   store_id: string;
   domain: string;
-  status: 'pending' | 'verifying' | 'verified' | 'active' | 'error' | 'removed';
+  status: string;
   verification_token: string | null;
-  ssl_status: 'pending' | 'provisioning' | 'active' | 'error' | 'expired';
+  ssl_status: string | null;
   error_message: string | null;
   verified_at: string | null;
   last_checked_at: string | null;
@@ -89,9 +91,7 @@ const allowedATargets = resolveAllowedDnsTargets('CUSTOM_DOMAIN_A_TARGETS');
 const allowedCnameTargets = resolveAllowedDnsTargets('CUSTOM_DOMAIN_CNAME_TARGETS');
 
 function matchesConfiguredTargets(value: string, expected: string[]): boolean {
-  if (expected.length === 0) {
-    return true; // Pas de contrainte explicite configurée
-  }
+  if (expected.length === 0) return true;
   return expected.includes(normalizeDnsValue(value));
 }
 
@@ -113,45 +113,33 @@ async function checkDNSPropagation(
   };
 
   try {
-    // Vérifier enregistrement A principal
+    // 1. Vérifier enregistrement A principal
     try {
       const aResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=A`);
       const aData = (await aResponse.json()) as DnsResponse;
-
       if (hasAnyDnsAnswer(aData)) {
         details.aRecord = (aData.Answer || []).some(answer =>
           matchesConfiguredTargets(answer.data || '', allowedATargets)
         );
-        if (!details.aRecord) {
-          errors.push('Enregistrement A présent mais ne correspond pas aux cibles attendues');
-        }
-      } else {
-        errors.push("Enregistrement A manquant");
       }
-    } catch {
-      errors.push("Erreur lors de la vérification de l'enregistrement A");
+    } catch (e) {
+      console.error('A check error', e);
     }
 
-    // Vérifier enregistrement A www
+    // 2. Vérifier enregistrement A www
     try {
       const wwwResponse = await fetch(`https://dns.google/resolve?name=www.${domain}&type=A`);
       const wwwData = (await wwwResponse.json()) as DnsResponse;
-
       if (hasAnyDnsAnswer(wwwData)) {
         details.wwwRecord = (wwwData.Answer || []).some(answer =>
           matchesConfiguredTargets(answer.data || '', allowedATargets)
         );
-        if (!details.wwwRecord) {
-          errors.push('Enregistrement A (www) présent mais ne correspond pas aux cibles attendues');
-        }
-      } else {
-        errors.push("Enregistrement WWW manquant");
       }
-    } catch {
-      errors.push("Erreur lors de la vérification de l'enregistrement WWW");
+    } catch (e) {
+      console.error('WWW A check error', e);
     }
 
-    // Vérifier CNAME principal (utile selon le provider DNS)
+    // 3. Vérifier CNAME principal
     try {
       const cnameResponse = await fetch(`https://dns.google/resolve?name=${domain}&type=CNAME`);
       const cnameData = (await cnameResponse.json()) as DnsResponse;
@@ -159,63 +147,57 @@ async function checkDNSPropagation(
         details.cnameRecord = (cnameData.Answer || []).some(answer =>
           matchesConfiguredTargets(answer.data || '', allowedCnameTargets)
         );
-        if (!details.cnameRecord) {
-          errors.push('Enregistrement CNAME présent mais ne correspond pas aux cibles attendues');
-        }
       }
-    } catch {
-      errors.push("Erreur lors de la vérification de l'enregistrement CNAME");
+    } catch (e) {
+      console.error('CNAME check error', e);
     }
 
-    // Vérifier CNAME www
+    // 4. Vérifier CNAME www
     try {
-      const wwwCnameResponse = await fetch(`https://dns.google/resolve?name=www.${domain}&type=CNAME`);
+      const wwwCnameResponse = await fetch(
+        `https://dns.google/resolve?name=www.${domain}&type=CNAME`
+      );
       const wwwCnameData = (await wwwCnameResponse.json()) as DnsResponse;
       if (hasAnyDnsAnswer(wwwCnameData)) {
         details.wwwCnameRecord = (wwwCnameData.Answer || []).some(answer =>
           matchesConfiguredTargets(answer.data || '', allowedCnameTargets)
         );
-        if (!details.wwwCnameRecord) {
-          errors.push('Enregistrement CNAME (www) présent mais ne correspond pas aux cibles attendues');
-        }
       }
-    } catch {
-      errors.push("Erreur lors de la vérification de l'enregistrement CNAME www");
+    } catch (e) {
+      console.error('WWW CNAME check error', e);
     }
 
-    // Vérifier enregistrement TXT de vérification (aligné avec l'UI et verify-custom-domain)
+    // 5. Vérifier enregistrement TXT (_emarzona.domain)
     try {
-      const txtResponse = await fetch(`https://dns.google/resolve?name=_emarzona.${domain}&type=TXT`);
+      const txtResponse = await fetch(
+        `https://dns.google/resolve?name=_emarzona.${domain}&type=TXT`
+      );
       const txtData = (await txtResponse.json()) as DnsResponse;
-
       if (hasAnyDnsAnswer(txtData)) {
         details.txtRecord = (txtData.Answer || []).some(answer =>
           normalizeDnsValue(answer.data).includes(normalizeDnsValue(verificationToken))
         );
-        if (!details.txtRecord) {
-          errors.push("Token de vérification TXT incorrect ou manquant");
-        }
-      } else {
-        errors.push("Enregistrement TXT de vérification manquant");
       }
-    } catch {
-      errors.push("Erreur lors de la vérification de l'enregistrement TXT");
+    } catch (e) {
+      console.error('TXT check error', e);
     }
 
-    // Certaines configurations production utilisent CNAME plutôt que A fixe.
     const hasReachableDns =
       details.aRecord || details.wwwRecord || details.cnameRecord || details.wwwCnameRecord;
+
+    if (!details.txtRecord) errors.push('Enregistrement TXT (_emarzona) manquant ou incorrect');
+    if (!hasReachableDns) errors.push('Aucun enregistrement A ou CNAME valide détecté');
+
     const isPropagated = details.txtRecord && hasReachableDns;
-    const propagationTime = Date.now() - startTime;
-    
+
     return {
       isPropagated,
       details,
       errors,
-      propagationTime,
+      propagationTime: Date.now() - startTime,
     };
   } catch (error) {
-    console.error('Error checking DNS propagation', error);
+    console.error('General DNS error', error);
     return {
       isPropagated: false,
       details: {
@@ -225,7 +207,7 @@ async function checkDNSPropagation(
         wwwCnameRecord: false,
         txtRecord: false,
       },
-      errors: ["Erreur générale lors de la vérification DNS"],
+      errors: ['Erreur générale de vérification DNS'],
       propagationTime: 0,
     };
   }
@@ -235,186 +217,146 @@ async function checkDNSPropagation(
  * Vérifie et met à jour l'état d'un domaine
  */
 async function verifyAndUpdateDomain(
-  supabase: any,
+  supabase: SupabaseClient,
   domainRow: CustomDomainRow
 ): Promise<{ success: boolean; message: string }> {
   if (!domainRow.domain || !domainRow.verification_token) {
-    return { success: false, message: 'Domaine ou token manquant' };
+    return { success: false, message: 'Données manquantes' };
   }
 
-  // Vérifier la propagation DNS pour tous les états monitorés
   const result = await checkDNSPropagation(domainRow.domain, domainRow.verification_token);
   const nowIso = new Date().toISOString();
 
   if (result.isPropagated) {
-    // Domaine vérifié, mettre à jour la table custom_domains (source de vérité)
-    const { error } = await supabase
+    // 1. Mise à jour custom_domains
+    const { error: updateError } = await supabase
       .from('custom_domains')
       .update({
         status: 'active',
         verified_at: domainRow.verified_at || nowIso,
         last_checked_at: nowIso,
         error_message: null,
-        ssl_status:
-          domainRow.ssl_status === 'active' ? 'active' : 'provisioning',
+        ssl_status: domainRow.ssl_status === 'active' ? 'active' : 'provisioning',
       })
       .eq('id', domainRow.id);
 
-    if (error) {
-      console.error('Error updating custom_domains status:', error);
-      return { success: false, message: 'Erreur lors de la mise à jour: ' + error.message };
+    if (updateError) return { success: false, message: updateError.message };
+
+    // 2. Inscription Vercel
+    const vercelToken = Deno.env.get('VERCEL_API_TOKEN');
+    const vercelProjectId = Deno.env.get('VERCEL_PROJECT_ID');
+
+    if (vercelToken && vercelProjectId) {
+      try {
+        const vercelRes = await fetch(
+          `https://api.vercel.com/v10/projects/${vercelProjectId}/domains`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${vercelToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: domainRow.domain }),
+          }
+        );
+
+        if (!vercelRes.ok) {
+          const vErr = await vercelRes.json();
+          if (vErr.error?.code !== 'domain_already_in_use') {
+            await supabase
+              .from('custom_domains')
+              .update({ error_message: `Vercel: ${vErr.error?.message || 'Error'}` })
+              .eq('id', domainRow.id);
+          }
+        }
+      } catch (err) {
+        console.error('Vercel API fail', err);
+      }
     }
 
-    // Compatibilité legacy: synchroniser les champs stores si présents
+    // 3. Sync stores (Legacy)
     await supabase
       .from('stores')
       .update({
         custom_domain: domainRow.domain,
         domain_status: 'verified',
         domain_verified_at: nowIso,
-        domain_error_message: null,
         ssl_enabled: true,
       })
       .eq('id', domainRow.store_id);
 
-    return { 
-      success: true, 
-      message: `Domaine vérifié avec succès (propagation: ${Math.floor(result.propagationTime / 1000)}s). SSL activé.` 
-    };
+    return { success: true, message: 'Domaine vérifié et activé' };
   } else {
-    // Propagation incomplète, mettre à jour les erreurs
-    const { error } = await supabase
+    // Échec de propagation
+    await supabase
       .from('custom_domains')
       .update({
-        status: 'pending',
         last_checked_at: nowIso,
         error_message: result.errors.join(', '),
-        ssl_status: domainRow.ssl_status === 'active' ? 'error' : domainRow.ssl_status,
       })
       .eq('id', domainRow.id);
 
-    if (error) {
-      console.error('Error updating custom_domains status:', error);
-      return { success: false, message: 'Erreur lors de la mise à jour: ' + error.message };
-    }
-
-    // Compatibilité legacy
-    await supabase
-      .from('stores')
-      .update({
-        domain_status: 'pending',
-        domain_error_message: result.errors.join(', '),
-      })
-      .eq('id', domainRow.store_id);
-
-    return { 
-      success: false, 
-      message: 'Propagation DNS incomplète: ' + result.errors.join(', ') 
-    };
+    return { success: false, message: result.errors.join(', ') };
   }
 }
 
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const expectedCronSecret = Deno.env.get('CRON_SECRET');
-    const providedCronSecret = req.headers.get('x-cron-secret');
-    if (!expectedCronSecret || !providedCronSecret || providedCronSecret.trim() !== expectedCronSecret.trim()) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    // Vérification Secret
+    const secret = Deno.env.get('CRON_SECRET');
+    const provided = req.headers.get('x-cron-secret');
+    if (!secret || provided !== secret) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Créer le client Supabase avec les credentials du service
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Récupérer tous les domaines custom monitorés (source de vérité)
     const { data: domains, error: fetchError } = await supabase
       .from('custom_domains')
-      .select('id, store_id, domain, status, verification_token, ssl_status, error_message, verified_at, last_checked_at, stores(name)')
-      .in('status', ['pending', 'verified', 'active'])
-      .neq('status', 'removed');
+      .select('*, stores(name)')
+      .in('status', ['pending', 'verified', 'active']);
 
-    if (fetchError) {
-      console.error('Error fetching stores:', fetchError);
-      return new Response(
-        JSON.stringify({ error: 'Erreur lors de la récupération des domaines' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    if (fetchError) throw fetchError;
 
     if (!domains || domains.length === 0) {
-      return new Response(
-        JSON.stringify({ 
-          message: 'Aucun domaine à vérifier',
-          checked: 0,
-          verified: 0,
-          failed: 0,
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      return new Response(JSON.stringify({ message: 'No domains to check' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Vérifier chaque domaine
     const results = await Promise.allSettled(
-      (domains as CustomDomainRow[]).map(domainRow => verifyAndUpdateDomain(supabase, domainRow))
+      (domains as CustomDomainRow[]).map(d => verifyAndUpdateDomain(supabase, d))
     );
 
-    const verified = results.filter(
-      r => r.status === 'fulfilled' && r.value.success
-    ).length;
+    const stats = {
+      total: domains.length,
+      success: results.filter(
+        r => r.status === 'fulfilled' && (r as PromiseFulfilledResult<any>).value.success
+      ).length,
+      failed: results.filter(
+        r =>
+          r.status === 'rejected' ||
+          (r.status === 'fulfilled' && !(r as PromiseFulfilledResult<any>).value.success)
+      ).length,
+    };
 
-    const failed = results.filter(
-      r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)
-    ).length;
-
-    console.log(`Vérification terminée: ${verified} vérifiés, ${failed} échoués sur ${domains.length} domaines`);
-
-    return new Response(
-      JSON.stringify({
-        message: 'Vérification des domaines terminée',
-        checked: domains.length,
-        verified,
-        failed,
-        results: results.map((r, i) => ({
-          store: (domains as CustomDomainRow[])[i].stores?.name || null,
-          domain: (domains as CustomDomainRow[])[i].domain,
-          result: r.status === 'fulfilled' ? r.value : { success: false, message: r.reason },
-        })),
-      }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
-  } catch (error: unknown) {
-    console.error('Error in verify-domains function:', error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    return new Response(JSON.stringify({ message: 'Check complete', stats }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
-

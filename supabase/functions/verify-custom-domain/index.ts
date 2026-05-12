@@ -34,12 +34,14 @@ function getCorsHeaders(req: Request) {
   const origin = req.headers.get('origin') || '';
   const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || '')
     .split(',')
-    .map((v) => v.trim())
+    .map(v => v.trim())
     .filter(Boolean);
 
   const allowOrigin = allowedOrigins.includes(origin)
     ? origin
-    : (isDefaultAllowedOrigin(origin) ? origin : (allowedOrigins[0] || 'https://www.emarzona.com'));
+    : isDefaultAllowedOrigin(origin)
+      ? origin
+      : allowedOrigins[0] || 'https://www.emarzona.com';
 
   return {
     ...baseCorsHeaders,
@@ -55,7 +57,7 @@ function jsonResponse(req: Request, body: unknown, status: number) {
   });
 }
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: getCorsHeaders(req) });
   }
@@ -121,13 +123,10 @@ serve(async (req) => {
       const dnsData = await dnsResponse.json();
 
       if (dnsData.Answer) {
-        dnsRecordsFound = dnsData.Answer
-          .filter((record: any) => record.type === 16) // TXT records
+        dnsRecordsFound = dnsData.Answer.filter((record: any) => record.type === 16) // TXT records
           .map((record: any) => record.data?.replace(/"/g, '') || '');
 
-        verified = dnsRecordsFound.some(
-          (txt: string) => txt.includes(expectedToken)
-        );
+        verified = dnsRecordsFound.some((txt: string) => txt.includes(expectedToken));
       }
     } catch (dnsError) {
       console.error('DNS lookup error:', dnsError);
@@ -143,11 +142,46 @@ serve(async (req) => {
     if (verified) {
       updateData.verified_at = now;
       updateData.error_message = null;
-      // Activer le domaine si vérifié
       updateData.status = 'active';
       updateData.ssl_status = 'provisioning';
 
-      // Aussi mettre à jour le champ custom_domain dans la table stores
+      // 1. Ajouter le domaine au projet Vercel via l'API Vercel
+      const vercelToken = Deno.env.get('VERCEL_API_TOKEN');
+      const vercelProjectId = Deno.env.get('VERCEL_PROJECT_ID');
+
+      if (vercelToken && vercelProjectId) {
+        try {
+          const vercelRes = await fetch(
+            `https://api.vercel.com/v10/projects/${vercelProjectId}/domains`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${vercelToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name: domain }),
+            }
+          );
+
+          if (!vercelRes.ok) {
+            const vercelError = await vercelRes.json();
+            console.error('Vercel API error:', vercelError);
+            // Si le domaine est déjà ajouté, Vercel renvoie souvent une erreur, on l'accepte.
+            // Si c'est une autre erreur, on peut quand même continuer (le dashboard affichera Actif, mais il faudra checker).
+            if (vercelError.error?.code !== 'domain_already_in_use') {
+              updateData.error_message = `Vercel Warning: ${vercelError.error?.message || 'Erreur inconnue'}`;
+            }
+          } else {
+            console.log(`Domaine ${domain} ajouté au projet Vercel avec succès.`);
+          }
+        } catch (vErr) {
+          console.error('Failed to call Vercel API:', vErr);
+        }
+      } else {
+        console.warn('VERCEL_API_TOKEN ou VERCEL_PROJECT_ID non configurés.');
+      }
+
+      // 2. Mettre à jour le champ custom_domain dans la table stores
       await supabase
         .from('stores')
         .update({
@@ -170,20 +204,28 @@ serve(async (req) => {
       console.error('Update error:', updateError);
     }
 
-    return jsonResponse(req, {
-      verified,
-      domain,
-      status: verified ? 'active' : 'pending',
-      message: verified
-        ? 'Domaine vérifié et activé avec succès !'
-        : `L'enregistrement TXT "_emarzona.${domain}" n'a pas été trouvé. Assurez-vous d'avoir ajouté l'enregistrement DNS et attendez la propagation (jusqu'à 48h).`,
-      dns_records_found: dnsRecordsFound,
-    }, 200);
+    return jsonResponse(
+      req,
+      {
+        verified,
+        domain,
+        status: verified ? 'active' : 'pending',
+        message: verified
+          ? 'Domaine vérifié et activé avec succès !'
+          : `L'enregistrement TXT "_emarzona.${domain}" n'a pas été trouvé. Assurez-vous d'avoir ajouté l'enregistrement DNS et attendez la propagation (jusqu'à 48h).`,
+        dns_records_found: dnsRecordsFound,
+      },
+      200
+    );
   } catch (error: unknown) {
     console.error('Unexpected error:', error);
-    return jsonResponse(req, {
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    }, 500);
+    return jsonResponse(
+      req,
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    );
   }
 });

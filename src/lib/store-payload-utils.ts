@@ -1,13 +1,10 @@
-import type { Store as FrontendStore } from '@/hooks/useStores';
+// Import types if needed in the future
 
 /**
  * Champs qui ne doivent PAS être envoyés à la table `stores`
  * car ils n'existent pas dans le schéma Supabase actuel.
  */
 const UNSUPPORTED_STORE_FIELDS: string[] = [
-  // Champs Open Graph détaillés (pas de colonnes og_title / og_description dans stores)
-  'og_title',
-  'og_description',
   // Score SEO calculé côté serveur
   'seo_score',
   // Couleur de thème legacy (pas de colonne theme_color utilisée directement)

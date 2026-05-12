@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  ReactNode,
+} from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { logger } from '@/lib/logger';
@@ -52,6 +60,12 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [selectedStoreId, setSelectedStoreIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Ref to avoid stale closures in setTimeout and storage event handlers
+  const storesRef = useRef<Store[]>(stores);
+  useEffect(() => {
+    storesRef.current = stores;
+  }, [stores]);
 
   // Récupérer la boutique sélectionnée depuis localStorage (avec validation)
   const getStoredStoreId = useCallback((): string | null => {
@@ -172,7 +186,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       setError(null);
     }
-  }, [authLoading, user?.id]); // ✅ FIX: Dépendance simplifiée, pas fetchStores
+  }, [authLoading, user?.id, fetchStores]); // Added missing deps
 
   // Calculer la boutique sélectionnée
   const selectedStore = selectedStoreId ? stores.find(s => s.id === selectedStoreId) || null : null;
@@ -186,14 +200,17 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         storesCount: stores.length,
       });
 
-      // ✅ FIX: Validation plus stricte et avec retry
+      // Validation avec retry utilisant le ref pour éviter la stale closure
       const validateAndSet = () => {
-        if (storeId && !stores.some(s => s.id === storeId)) {
-          logger.warn('Tentative de sélectionner une boutique inexistante, retry dans 100ms', { storeId, availableStores: stores.map(s => s.id) });
+        if (storeId && !storesRef.current.some(s => s.id === storeId)) {
+          logger.warn('Tentative de sélectionner une boutique inexistante, retry dans 100ms', {
+            storeId,
+            availableStores: storesRef.current.map(s => s.id),
+          });
 
           // Retry après un court délai si les stores ne sont pas encore chargés
           setTimeout(() => {
-            if (stores.some(s => s.id === storeId)) {
+            if (storesRef.current.some(s => s.id === storeId)) {
               logger.info('✅ [StoreContext] Retry réussi, boutique trouvée');
               setSelectedStoreIdState(storeId);
               saveStoreIdToStorage(storeId);
@@ -241,22 +258,18 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window === 'undefined') return;
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue !== selectedStoreId) {
+      if (e.key === STORAGE_KEY) {
         const newStoreId = e.newValue;
         logger.info('🔄 [StoreContext] Changement détecté depuis autre onglet:', newStoreId);
 
-        // ✅ FIX: Validation simplifiée et sécurisée
         if (newStoreId) {
-          // Ne pas changer immédiatement, laisser la logique normale gérer
-          // Cela évite les boucles potentielles
-          setTimeout(() => {
-            if (stores.some(s => s.id === newStoreId)) {
-              logger.info('✅ [StoreContext] Boutique validée, application du changement');
-              setSelectedStoreIdState(newStoreId);
-            } else {
-              logger.warn('⚠️ [StoreContext] Boutique invalide depuis autre onglet');
-            }
-          }, 100);
+          // Utiliser le ref pour lire les stores actuels (évite la stale closure)
+          if (storesRef.current.some(s => s.id === newStoreId)) {
+            logger.info('✅ [StoreContext] Boutique validée, application du changement');
+            setSelectedStoreIdState(newStoreId);
+          } else {
+            logger.warn('⚠️ [StoreContext] Boutique invalide depuis autre onglet');
+          }
         } else {
           setSelectedStoreIdState(null);
         }
@@ -265,7 +278,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []); // ✅ FIX: Aucune dépendance pour éviter les re-créations répétées
+  }, []); // Stable listener – uses storesRef to avoid stale closure
 
   const value: StoreContextType = {
     stores,
