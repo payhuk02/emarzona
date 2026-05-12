@@ -162,7 +162,7 @@ export interface Store {
   legal_pages?: StoreLegalPages | null;
   // Contenu marketing (JSONB)
   marketing_content?: StoreMarketingContent | null;
-  // SEO (champs existants mais non utilisés)
+  // SEO
   meta_title?: string | null;
   meta_description?: string | null;
   meta_keywords?: string | null;
@@ -222,18 +222,17 @@ export const useStores = () => {
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
     refetchOnWindowFocus: false,
-    // throwOnError: false ensures React Query doesn't throw rendering errors
     throwOnError: false,
   });
 
-  // Log query errors without crashing
+  // Log query errors
   if (queryError) {
     logger.error('Erreur lors du chargement des boutiques:', queryError);
   }
 
   // Mutation pour créer une boutique
-  useMutation({
-    mutationFn: async (storeData: Omit<Store, 'id' | 'created_at' | 'updated_at'>) => {
+  const createStoreMutation = useMutation({
+    mutationFn: async (storeData: Partial<Store>) => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -242,135 +241,8 @@ export const useStores = () => {
         throw new Error('Utilisateur non authentifié');
       }
 
-      // Vérifier la limite
       if (stores.length >= MAX_STORES_PER_USER) {
-        throw new Error('Limite de 3 boutiques atteinte');
-      }
-
-      const { data, error } = await supabase
-        .from('stores')
-        .insert([
-          {
-            ...storeData,
-            user_id: user.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: newStore => {
-      // Invalider le cache pour rafraîchir la liste
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
-      toast({
-        title: 'Boutique créée',
-        description: `La boutique "${newStore.name}" a été créée avec succès`,
-      });
-    },
-    onError: (error: Error) => {
-      logger.error('Erreur lors de la création de la boutique:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Impossible de créer la boutique',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Mutation pour mettre à jour une boutique
-  useMutation({
-    mutationFn: async ({ storeId, updates }: { storeId: string; updates: Partial<Store> }) => {
-      const { data, error } = await supabase
-        .from('stores')
-        .update(updates)
-        .eq('id', storeId)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
-    },
-    onSuccess: updatedStore => {
-      // Invalider le cache
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
-      toast({
-        title: 'Boutique mise à jour',
-        description: `La boutique "${updatedStore.name}" a été mise à jour`,
-      });
-    },
-    onError: (error: Error) => {
-      logger.error('Erreur lors de la mise à jour de la boutique:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour la boutique',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Mutation pour supprimer une boutique
-  useMutation({
-    mutationFn: async (storeId: string) => {
-      const { error } = await supabase.from('stores').delete().eq('id', storeId);
-
-      if (error) {
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      // Invalider le cache
-      queryClient.invalidateQueries({ queryKey: ['stores'] });
-      toast({
-        title: 'Boutique supprimée',
-        description: 'La boutique a été supprimée avec succès',
-      });
-    },
-    onError: (error: Error) => {
-      logger.error('Erreur lors de la suppression de la boutique:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Impossible de supprimer la boutique',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Fonction de compatibilité pour l'ancien code
-  const fetchStores = async () => {
-    await refetch();
-  };
-
-  const canCreateStore = () => {
-    return stores.length < MAX_STORES_PER_USER;
-  };
-
-  const getRemainingStores = () => {
-    return Math.max(0, MAX_STORES_PER_USER - stores.length);
-  };
-
-  const createStore = async (storeData: Partial<Store>) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error('Utilisateur non authentifié');
-      }
-
-      // Vérifier la limite de 3 boutiques
-      if (!canCreateStore()) {
-        throw new Error(
-          `Limite de ${MAX_STORES_PER_USER} boutiques par utilisateur atteinte. Vous devez supprimer une boutique existante avant d'en créer une nouvelle.`
-        );
+        throw new Error(`Limite de ${MAX_STORES_PER_USER} boutiques atteinte.`);
       }
 
       const { data, error } = await supabase
@@ -389,29 +261,28 @@ export const useStores = () => {
         throw error;
       }
 
-      // Rafraîchir la liste des boutiques
-      await fetchStores();
-
+      return data;
+    },
+    onSuccess: newStore => {
+      queryClient.invalidateQueries({ queryKey: ['stores'] });
       toast({
         title: 'Boutique créée',
-        description: 'Votre nouvelle boutique a été créée avec succès',
+        description: `La boutique "${newStore.name}" a été créée avec succès`,
       });
-
-      return data;
-    } catch (_err: unknown) {
-      const errorMessage = _err instanceof Error ? _err.message : 'Impossible de créer la boutique';
-      logger.error('Erreur lors de la création de la boutique:', _err);
+    },
+    onError: (error: Error) => {
+      logger.error('Erreur lors de la création de la boutique:', error);
       toast({
         title: 'Erreur',
-        description: errorMessage,
+        description: error.message || 'Impossible de créer la boutique',
         variant: 'destructive',
       });
-      throw _err;
-    }
-  };
+    },
+  });
 
-  const updateStore = async (storeId: string, updates: Partial<Store>) => {
-    try {
+  // Mutation pour mettre à jour une boutique
+  const updateStoreMutation = useMutation({
+    mutationFn: async ({ storeId, updates }: { storeId: string; updates: Partial<Store> }) => {
       const { data, error } = await supabase
         .from('stores')
         .update(updates)
@@ -423,60 +294,66 @@ export const useStores = () => {
         throw error;
       }
 
-      // Rafraîchir la liste des boutiques
-      await fetchStores();
-
+      return data;
+    },
+    onSuccess: updatedStore => {
+      queryClient.invalidateQueries({ queryKey: ['stores'] });
       toast({
         title: 'Boutique mise à jour',
-        description: 'Les modifications ont été enregistrées',
+        description: `La boutique "${updatedStore.name}" a été mise à jour`,
       });
-
-      return data;
-    } catch (_err: unknown) {
-      logger.error('Erreur lors de la mise à jour de la boutique:', _err);
+    },
+    onError: (error: Error) => {
+      logger.error('Erreur lors de la mise à jour de la boutique:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible de mettre à jour la boutique',
+        description: error.message || 'Impossible de mettre à jour la boutique',
         variant: 'destructive',
       });
-      throw _err;
-    }
-  };
+    },
+  });
 
-  const deleteStore = async (storeId: string) => {
-    try {
+  // Mutation pour supprimer une boutique
+  const deleteStoreMutation = useMutation({
+    mutationFn: async (storeId: string) => {
       const { error } = await supabase.from('stores').delete().eq('id', storeId);
-
       if (error) {
         throw error;
       }
-
-      // Rafraîchir la liste des boutiques
-      await fetchStores();
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stores'] });
       toast({
         title: 'Boutique supprimée',
         description: 'La boutique a été supprimée avec succès',
       });
-    } catch (_err: unknown) {
-      logger.error('Erreur lors de la suppression de la boutique:', _err);
+    },
+    onError: (error: Error) => {
+      logger.error('Erreur lors de la suppression de la boutique:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible de supprimer la boutique',
+        description: error.message || 'Impossible de supprimer la boutique',
         variant: 'destructive',
       });
-      throw _err;
-    }
+    },
+  });
+
+  const canCreateStore = () => {
+    return stores.length < MAX_STORES_PER_USER;
+  };
+
+  const getRemainingStores = () => {
+    return Math.max(0, MAX_STORES_PER_USER - stores.length);
   };
 
   return {
     stores,
     loading,
-    error: queryError?.message || null,
-    createStore,
-    updateStore,
-    deleteStore,
-    refetch: fetchStores,
+    error: queryError instanceof Error ? queryError.message : null,
+    createStore: createStoreMutation.mutateAsync,
+    updateStore: updateStoreMutation.mutateAsync,
+    deleteStore: deleteStoreMutation.mutateAsync,
+    refetch,
     canCreateStore,
     getRemainingStores,
   };
