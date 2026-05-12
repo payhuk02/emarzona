@@ -7,7 +7,7 @@
 import { hybridStorage, StorageItem } from './hybrid-storage-service';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { backupService } from './backup-service';
+// Removed unused backupService import
 
 export interface SyncConfig {
   enabled: boolean;
@@ -46,7 +46,7 @@ export interface SyncQueueItem {
   id: string;
   collection: string;
   action: 'create' | 'update' | 'delete';
-  data: any;
+  data: unknown;
   priority: number;
   timestamp: string;
   retryCount: number;
@@ -62,11 +62,11 @@ export class SyncService {
     conflictStrategy: 'last_wins',
     priorityCollections: ['admin_config', 'user_sessions', 'critical_data'],
     syncWhenOffline: false,
-    adaptiveSync: true
+    adaptiveSync: true,
   };
 
   private syncInProgress = new Map<string, boolean>();
-  private realtimeSubscription: any = null;
+  private realtimeSubscription: { unsubscribe: () => void } | null = null;
   private batchInterval: NodeJS.Timeout | null = null;
   private queueProcessor: NodeJS.Timeout | null = null;
   private connectivityMonitor: NodeJS.Timeout | null = null;
@@ -139,13 +139,17 @@ export class SyncService {
     try {
       this.realtimeSubscription = supabase
         .channel('storage_sync')
-        .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: '*' // Écouter tous les changements
-        }, (payload) => {
-          this.handleRealtimeChange(payload);
-        })
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: '*', // Écouter tous les changements
+          },
+          payload => {
+            this.handleRealtimeChange(payload);
+          }
+        )
         .subscribe();
 
       logger.info('Synchronisation temps réel démarrée');
@@ -161,13 +165,16 @@ export class SyncService {
     if (this.batchInterval) return;
 
     // Synchronisation toutes les 5 minutes
-    this.batchInterval = setInterval(async () => {
-      try {
-        await this.performBatchSync();
-      } catch (error) {
-        logger.error('Erreur sync batch:', error);
-      }
-    }, 5 * 60 * 1000);
+    this.batchInterval = setInterval(
+      async () => {
+        try {
+          await this.performBatchSync();
+        } catch (error) {
+          logger.error('Erreur sync batch:', error);
+        }
+      },
+      5 * 60 * 1000
+    );
 
     logger.info('Synchronisation par lot démarrée');
   }
@@ -175,7 +182,12 @@ export class SyncService {
   /**
    * Gère les changements temps réel
    */
-  private async handleRealtimeChange(payload: any): Promise<void> {
+  private async handleRealtimeChange(payload: {
+    table: string;
+    eventType: string;
+    new: unknown;
+    old: unknown;
+  }): Promise<void> {
     const { table, eventType, new: newRecord, old: oldRecord } = payload;
 
     if (!this.shouldSyncTable(table)) return;
@@ -209,7 +221,10 @@ export class SyncService {
   /**
    * Gère l'insertion temps réel
    */
-  private async handleRealtimeInsert(table: string, record: any): Promise<void> {
+  private async handleRealtimeInsert(
+    table: string,
+    record: Record<string, unknown>
+  ): Promise<void> {
     const item: StorageItem = {
       id: record.id,
       data: record.data || record,
@@ -219,8 +234,8 @@ export class SyncService {
         version: 1,
         source: 'supabase',
         syncStatus: 'synced',
-        checksum: this.generateChecksum(record)
-      }
+        checksum: this.generateChecksum(record),
+      },
     };
 
     await hybridStorage.set(table, record.id, item.data);
@@ -229,7 +244,11 @@ export class SyncService {
   /**
    * Gère la mise à jour temps réel
    */
-  private async handleRealtimeUpdate(table: string, newRecord: any, oldRecord: any): Promise<void> {
+  private async handleRealtimeUpdate(
+    table: string,
+    newRecord: Record<string, unknown>,
+    oldRecord: Record<string, unknown>
+  ): Promise<void> {
     const localItem = await hybridStorage.get(table, oldRecord.id);
 
     if (localItem) {
@@ -243,8 +262,8 @@ export class SyncService {
           version: 1,
           source: 'supabase',
           syncStatus: 'synced',
-          checksum: this.generateChecksum(newRecord)
-        }
+          checksum: this.generateChecksum(newRecord),
+        },
       });
 
       if (hasConflict) {
@@ -257,8 +276,8 @@ export class SyncService {
             version: 1,
             source: 'supabase',
             syncStatus: 'synced',
-            checksum: this.generateChecksum(newRecord)
-          }
+            checksum: this.generateChecksum(newRecord),
+          },
         });
       } else {
         await hybridStorage.set(table, newRecord.id, newRecord.data || newRecord);
@@ -271,7 +290,7 @@ export class SyncService {
   /**
    * Gère la suppression temps réel
    */
-  private async handleRealtimeDelete(table: string, record: any): Promise<void> {
+  private async handleRealtimeDelete(table: string, record: { id: string }): Promise<void> {
     await hybridStorage.set(table, record.id, null); // Soft delete
   }
 
@@ -313,7 +332,7 @@ export class SyncService {
         errors: 0,
         skipped: 0,
         duration: 0,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
 
@@ -323,7 +342,7 @@ export class SyncService {
       let synced = 0;
       let conflicts = 0;
       let errors = 0;
-      let skipped = 0;
+      const skipped = 0;
 
       // Récupère les éléments locaux modifiés
       const localItems = await this.getModifiedLocalItems(collection);
@@ -383,16 +402,17 @@ export class SyncService {
         errors,
         skipped,
         duration,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       // Log le résultat
       await this.logSyncResult(result);
 
-      logger.info(`Synchronisation ${collection} terminée: ${synced} sync, ${conflicts} conflits, ${errors} erreurs`);
+      logger.info(
+        `Synchronisation ${collection} terminée: ${synced} sync, ${conflicts} conflits, ${errors} erreurs`
+      );
 
       return result;
-
     } finally {
       this.syncInProgress.delete(collection);
     }
@@ -405,8 +425,10 @@ export class SyncService {
     if (!local.metadata || !remote.metadata) return false;
 
     // Conflit si les checksums diffèrent et que les deux ont été modifiés
-    return local.metadata.checksum !== remote.metadata.checksum &&
-           local.metadata.updatedAt !== remote.metadata.updatedAt;
+    return (
+      local.metadata.checksum !== remote.metadata.checksum &&
+      local.metadata.updatedAt !== remote.metadata.updatedAt
+    );
   }
 
   /**
@@ -419,7 +441,11 @@ export class SyncService {
   /**
    * Gère un conflit selon la stratégie configurée
    */
-  private async handleConflict(collection: string, local: StorageItem, remote: StorageItem): Promise<void> {
+  private async handleConflict(
+    collection: string,
+    local: StorageItem,
+    remote: StorageItem
+  ): Promise<void> {
     const conflictId = `${collection}_${local.id}_${Date.now()}`;
 
     const conflict: ConflictResolution = {
@@ -429,7 +455,7 @@ export class SyncService {
       remote,
       strategy: this.config.conflictStrategy === 'manual' ? 'manual' : 'local',
       resolved: false,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Log le conflit
@@ -458,7 +484,7 @@ export class SyncService {
    */
   async resolveConflict(conflict: ConflictResolution): Promise<void> {
     try {
-      let resolvedData: any;
+      let resolvedData: unknown;
 
       switch (conflict.strategy) {
         case 'local':
@@ -484,7 +510,7 @@ export class SyncService {
       if (conflict.strategy !== 'remote') {
         await this.pushToRemote(conflict.collection, {
           ...conflict.local,
-          data: resolvedData
+          data: resolvedData,
         });
       }
 
@@ -493,7 +519,6 @@ export class SyncService {
       await hybridStorage.set('sync_conflicts', conflict.id, conflict);
 
       logger.info(`Conflit ${conflict.id} résolu avec stratégie ${conflict.strategy}`);
-
     } catch (error) {
       logger.error(`Erreur résolution conflit ${conflict.id}:`, error);
     }
@@ -502,7 +527,7 @@ export class SyncService {
   /**
    * Fusionne les données en cas de conflit
    */
-  private mergeData(localData: any, remoteData: any): any {
+  private mergeData(localData: unknown, remoteData: unknown): unknown {
     // Stratégie de fusion simple : les propriétés locales gagnent
     // En production, une logique plus sophistiquée serait nécessaire
     return { ...remoteData, ...localData };
@@ -519,9 +544,9 @@ export class SyncService {
       const parsed = JSON.parse(exportData);
       const items = parsed.collections[collection] || [];
 
-      return items.filter((item: StorageItem) =>
-        item.metadata.syncStatus === 'pending' ||
-        item.metadata.syncStatus === 'conflict'
+      return items.filter(
+        (item: StorageItem) =>
+          item.metadata.syncStatus === 'pending' || item.metadata.syncStatus === 'conflict'
       );
     } catch (error) {
       logger.error('Erreur récupération éléments locaux modifiés:', error);
@@ -551,10 +576,10 @@ export class SyncService {
           version: 1,
           source: 'supabase',
           syncStatus: 'synced',
-          checksum: this.generateChecksum(data)
-        }
+          checksum: this.generateChecksum(data),
+        },
       };
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -563,14 +588,12 @@ export class SyncService {
    * Pousse un élément vers le remote
    */
   private async pushToRemote(collection: string, item: StorageItem): Promise<void> {
-    const { error } = await supabase
-      .from(collection)
-      .upsert({
-        id: item.id,
-        data: item.data,
-        metadata: item.metadata,
-        updated_at: new Date().toISOString()
-      });
+    const { error } = await supabase.from(collection).upsert({
+      id: item.id,
+      data: item.data,
+      metadata: item.metadata,
+      updated_at: new Date().toISOString(),
+    });
 
     if (error) throw error;
   }
@@ -606,8 +629,8 @@ export class SyncService {
           version: 1,
           source: 'supabase',
           syncStatus: 'synced',
-          checksum: this.generateChecksum(item)
-        }
+          checksum: this.generateChecksum(item),
+        },
       }));
     } catch (error) {
       logger.error('Erreur récupération nouveaux éléments distants:', error);
@@ -618,11 +641,11 @@ export class SyncService {
   /**
    * Génère un checksum simple
    */
-  private generateChecksum(data: any): string {
+  private generateChecksum(data: unknown): string {
     const str = JSON.stringify(data);
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = (hash << 5) - hash + str.charCodeAt(i);
       hash = hash & hash;
     }
     return hash.toString(36);
@@ -658,7 +681,7 @@ export class SyncService {
   private async updateSyncMetadata(collection: string): Promise<void> {
     await hybridStorage.set('sync_metadata', collection, {
       lastSync: new Date().toISOString(),
-      status: 'completed'
+      status: 'completed',
     });
   }
 
@@ -715,7 +738,7 @@ export class SyncService {
    */
   private pauseRealtimeSync(): void {
     if (this.realtimeSubscription) {
-      supabase.removeChannel(this.realtimeSubscription);
+      this.realtimeSubscription.unsubscribe();
       this.realtimeSubscription = null;
       logger.info('Synchronisation temps réel mise en pause');
     }
@@ -756,7 +779,7 @@ export class SyncService {
         try {
           await this.processQueueItem(item);
           await this.removeFromQueue(item.id);
-        } catch (error) {
+        } catch (_error) {
           // Incrémente le compteur de retry
           item.retryCount++;
           await this.updateQueueItem(item);
@@ -764,7 +787,7 @@ export class SyncService {
         }
       }
     } catch (error) {
-      logger.error('Erreur traitement file d\'attente:', error);
+      logger.error("Erreur traitement file d'attente:", error);
     }
   }
 
@@ -776,7 +799,7 @@ export class SyncService {
       const exportData = await hybridStorage.exportData();
       const parsed = JSON.parse(exportData);
       return parsed.collections['sync_queue'] || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -799,7 +822,13 @@ export class SyncService {
   /**
    * Ajoute à la file d'attente de synchronisation
    */
-  async addToSyncQueue(collection: string, id: string, action: 'create' | 'update' | 'delete', data: any, priority = 1): Promise<void> {
+  async addToSyncQueue(
+    collection: string,
+    id: string,
+    action: 'create' | 'update' | 'delete',
+    data: unknown,
+    priority = 1
+  ): Promise<void> {
     const queueItem: SyncQueueItem = {
       id: `${collection}_${id}_${Date.now()}`,
       collection,
@@ -807,7 +836,7 @@ export class SyncService {
       data,
       priority,
       timestamp: new Date().toISOString(),
-      retryCount: 0
+      retryCount: 0,
     };
 
     await hybridStorage.set('sync_queue', queueItem.id, queueItem);
@@ -858,7 +887,7 @@ export class SyncService {
           errors: 1,
           skipped: 0,
           duration: 0,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -870,7 +899,7 @@ export class SyncService {
   /**
    * Obtient les statistiques de synchronisation
    */
-  async getSyncStats(): Promise<any> {
+  async getSyncStats(): Promise<Record<string, unknown>> {
     try {
       const exportData = await hybridStorage.exportData();
       const parsed = JSON.parse(exportData);
@@ -884,14 +913,14 @@ export class SyncService {
       return {
         conflicts: {
           total: conflicts.length,
-          unresolved: conflicts.filter((c: ConflictResolution) => !c.resolved).length
+          unresolved: conflicts.filter((c: ConflictResolution) => !c.resolved).length,
         },
         queue: {
           pending: queue.filter((q: SyncQueueItem) => q.retryCount >= 0).length,
-          failed: queue.filter((q: SyncQueueItem) => q.retryCount < 0).length
+          failed: queue.filter((q: SyncQueueItem) => q.retryCount < 0).length,
         },
         recentActivity: recentLogs,
-        lastFullSync: logs.length > 0 ? logs[logs.length - 1].timestamp : null
+        lastFullSync: logs.length > 0 ? logs[logs.length - 1].timestamp : null,
       };
     } catch (error) {
       logger.error('Erreur récupération stats sync:', error);

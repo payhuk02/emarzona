@@ -41,11 +41,19 @@ vi.mock('@/lib/security/securityUtils', () => ({
 }));
 
 const mockSupabaseFrom = vi.mocked(supabase.from);
-const mockRecommendationServiceGetRecommendations = vi.mocked(recommendationService.getRecommendations);
+const mockRecommendationServiceGetRecommendations = vi.mocked(
+  recommendationService.getRecommendations
+);
 
 describe('AIChatbot', () => {
   let chatbot: AIChatbot;
-  let mockSession: { id: string; userId: string | undefined; messages: ChatMessage[]; context: ChatSessionContext; metadata: { startedAt: Date; lastActivity: Date; platform: string; language: string; }; };
+  let mockSession: {
+    id: string;
+    userId: string | undefined;
+    messages: ChatMessage[];
+    context: ChatSessionContext;
+    metadata: { startedAt: Date; lastActivity: Date; platform: string; language: string };
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -62,15 +70,25 @@ describe('AIChatbot', () => {
         language: 'fr',
       },
     };
-      // Mock internal sessions map
-      (chatbot as { sessions: Map<string, any> }).sessions.set(mockSession.id, mockSession);
-    });
-    
+    // Mock internal sessions map
+    (chatbot as unknown as { sessions: Map<string, ChatSession> }).sessions.set(
+      mockSession.id,
+      mockSession
+    );
+  });
+
   // Test for analyzeIntent
   describe('analyzeIntent', () => {
     it('should detect order_inquiry intent and extract order number', async () => {
       const message = 'où est ma commande #123456';
-      const result = await (chatbot as { analyzeIntent: (message: string, context: ChatSessionContext) => Promise<IntentAnalysisResult> }).analyzeIntent(message, mockSession.context);
+      const result = await (
+        chatbot as {
+          analyzeIntent: (
+            message: string,
+            context: ChatSessionContext
+          ) => Promise<IntentAnalysisResult>;
+        }
+      ).analyzeIntent(message, mockSession.context);
       expect(result.intent).toBe('order_inquiry');
       expect(result.entities.orderNumber).toBe('123456');
       expect(result.confidence).toBeGreaterThan(0.5);
@@ -78,28 +96,56 @@ describe('AIChatbot', () => {
 
     it('should detect shipping_inquiry intent and shipping aspect', async () => {
       const message = 'informations sur la livraison adresse';
-      const result = await (chatbot as { analyzeIntent: (message: string, context: ChatSessionContext) => Promise<IntentAnalysisResult> }).analyzeIntent(message, mockSession.context);
+      const result = await (
+        chatbot as {
+          analyzeIntent: (
+            message: string,
+            context: ChatSessionContext
+          ) => Promise<IntentAnalysisResult>;
+        }
+      ).analyzeIntent(message, mockSession.context);
       expect(result.intent).toBe('shipping_inquiry');
       expect(result.entities.shippingAspect).toBe('address');
     });
 
     it('should detect product_search intent and product query', async () => {
       const message = 'je cherche un logiciel de design';
-      const result = await (chatbot as { analyzeIntent: (message: string, context: ChatSessionContext) => Promise<IntentAnalysisResult> }).analyzeIntent(message, mockSession.context);
+      const result = await (
+        chatbot as {
+          analyzeIntent: (
+            message: string,
+            context: ChatSessionContext
+          ) => Promise<IntentAnalysisResult>;
+        }
+      ).analyzeIntent(message, mockSession.context);
       expect(result.intent).toBe('product_search');
       expect(result.entities.productQuery).toBe('un logiciel de design');
     });
 
     it('should return general intent for unrecognized messages', async () => {
       const message = 'bonjour comment allez-vous';
-      const result = await (chatbot as { analyzeIntent: (message: string, context: ChatSessionContext) => Promise<IntentAnalysisResult> }).analyzeIntent(message, mockSession.context);
+      const result = await (
+        chatbot as {
+          analyzeIntent: (
+            message: string,
+            context: ChatSessionContext
+          ) => Promise<IntentAnalysisResult>;
+        }
+      ).analyzeIntent(message, mockSession.context);
       expect(result.intent).toBe('general');
       expect(result.confidence).toBe(0.5);
     });
 
     it('should update session context with detected intent and entities', async () => {
       const message = 'où est ma commande #789012';
-      await (chatbot as { analyzeIntent: (message: string, context: ChatSessionContext) => Promise<IntentAnalysisResult> }).analyzeIntent(message, mockSession.context);
+      await (
+        chatbot as {
+          analyzeIntent: (
+            message: string,
+            context: ChatSessionContext
+          ) => Promise<IntentAnalysisResult>;
+        }
+      ).analyzeIntent(message, mockSession.context);
       expect(mockSession.context.currentIntent).toBe('order_inquiry');
       expect(mockSession.context.orderNumber).toBe('789012');
     });
@@ -109,7 +155,14 @@ describe('AIChatbot', () => {
   describe('handleOrderInquiry', () => {
     it('should ask user to login if not authenticated', async () => {
       mockSession.userId = undefined;
-      const response = await (chatbot as { handleOrderInquiry: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleOrderInquiry(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleOrderInquiry: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleOrderInquiry(mockSession as unknown as ChatSession);
       expect(response.message).toContain('connecté');
       expect(response.actions?.[0].type).toBe('navigation');
     });
@@ -119,10 +172,34 @@ describe('AIChatbot', () => {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValueOnce({ data: [{ id: 'order-1', status: 'processing', created_at: new Date(), total_amount: 100, currency: 'EUR' }], error: null }),
-      } as { select: () => { eq: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } } } });
+        limit: vi
+          .fn()
+          .mockResolvedValueOnce({
+            data: [
+              {
+                id: 'order-1',
+                status: 'processing',
+                created_at: new Date(),
+                total_amount: 100,
+                currency: 'EUR',
+              },
+            ],
+            error: null,
+          }),
+      } as unknown as {
+        select: () => {
+          eq: () => { order: () => { limit: () => Promise<{ data: unknown[]; error: unknown }> } };
+        };
+      });
 
-      const response = await (chatbot as { handleOrderInquiry: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleOrderInquiry(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleOrderInquiry: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleOrderInquiry(mockSession as unknown as ChatSession);
       expect(response.message).toContain('en préparation');
       expect(response.actions?.[0].label).toContain('Voir ma commande');
     });
@@ -133,9 +210,20 @@ describe('AIChatbot', () => {
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValueOnce({ data: [], error: null }),
-      } as { select: () => { eq: () => { order: () => { limit: () => Promise<{ data: any[]; error: any }> } } } });
+      } as unknown as {
+        select: () => {
+          eq: () => { order: () => { limit: () => Promise<{ data: unknown[]; error: unknown }> } };
+        };
+      });
 
-      const response = await (chatbot as { handleOrderInquiry: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleOrderInquiry(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleOrderInquiry: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleOrderInquiry(mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.ORDER_NOT_FOUND);
     });
 
@@ -145,9 +233,22 @@ describe('AIChatbot', () => {
         eq: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValueOnce({ data: null, error: { message: 'DB Error' } }),
-      } as { select: () => { eq: () => { order: () => { limit: () => Promise<{ data: any; error: { message: string } }> } } } });
+      } as unknown as {
+        select: () => {
+          eq: () => {
+            order: () => { limit: () => Promise<{ data: unknown; error: { message: string } }> };
+          };
+        };
+      });
 
-      const response = await (chatbot as { handleOrderInquiry: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleOrderInquiry(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleOrderInquiry: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleOrderInquiry(mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.ORDER_FETCH_ERROR);
     });
   });
@@ -155,7 +256,15 @@ describe('AIChatbot', () => {
   // Test for handleProductSearch
   describe('handleProductSearch', () => {
     it('should ask for clarification if no search terms provided', async () => {
-      const response = await (chatbot as { handleProductSearch: (userMessage: string, session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleProductSearch('', mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleProductSearch: (
+            userMessage: string,
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleProductSearch('', mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.PRODUCT_SEARCH_NO_QUERY);
       expect(response.suggestions).toEqual(CHATBOT_RESPONSES.PRODUCT_SEARCH_NO_QUERY_SUGGESTIONS);
     });
@@ -164,11 +273,28 @@ describe('AIChatbot', () => {
       mockSupabaseFrom.mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         ilike: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValueOnce({ data: [{ id: 'p1', name: 'Produit Test 1', category: 'Digital' }], error: null }),
-      } as { select: () => { ilike: () => { limit: () => Promise<{ data: any[]; error: any }> } } } );
+        limit: vi
+          .fn()
+          .mockResolvedValueOnce({
+            data: [{ id: 'p1', name: 'Produit Test 1', category: 'Digital' }],
+            error: null,
+          }),
+      } as unknown as {
+        select: () => {
+          ilike: () => { limit: () => Promise<{ data: unknown[]; error: unknown }> };
+        };
+      });
 
-      const response = await (chatbot as { handleProductSearch: (message: string, session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleProductSearch('test', mockSession);
-      expect(response.message).toContain('J\'ai trouvé plusieurs produits');
+      const response = await (
+        chatbot as unknown as {
+          handleProductSearch: (
+            message: string,
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleProductSearch('test', mockSession as unknown as ChatSession);
+      expect(response.message).toContain("J'ai trouvé plusieurs produits");
       expect(response.actions).toHaveLength(1);
       expect(response.actions?.[0].label).toContain('Voir Produit Test 1');
     });
@@ -178,9 +304,21 @@ describe('AIChatbot', () => {
         select: vi.fn().mockReturnThis(),
         ilike: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValueOnce({ data: [], error: null }),
-      } as { select: () => { ilike: () => { limit: () => Promise<{ data: any[]; error: any }> } } } );
+      } as unknown as {
+        select: () => {
+          ilike: () => { limit: () => Promise<{ data: unknown[]; error: unknown }> };
+        };
+      });
 
-      const response = await (chatbot as { handleProductSearch: (userMessage: string, session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleProductSearch('nonexistent', mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleProductSearch: (
+            userMessage: string,
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleProductSearch('nonexistent', mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.PRODUCT_SEARCH_NOT_FOUND('nonexistent'));
     });
 
@@ -189,9 +327,21 @@ describe('AIChatbot', () => {
         select: vi.fn().mockReturnThis(),
         ilike: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValueOnce({ data: null, error: { message: 'DB Error' } }),
-      } as { select: () => { ilike: () => { limit: () => Promise<{ data: any; error: { message: string } }> } } } );
+      } as unknown as {
+        select: () => {
+          ilike: () => { limit: () => Promise<{ data: unknown; error: { message: string } }> };
+        };
+      });
 
-      const response = await (chatbot as { handleProductSearch: (userMessage: string, session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleProductSearch('error', mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleProductSearch: (
+            userMessage: string,
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleProductSearch('error', mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.PRODUCT_SEARCH_ERROR);
     });
   });
@@ -200,37 +350,83 @@ describe('AIChatbot', () => {
   describe('handleRecommendation', () => {
     it('should return recommendations from service', async () => {
       mockRecommendationServiceGetRecommendations.mockResolvedValueOnce([
-        { id: 'rec1', name: 'Reco Produit 1', category: 'cat', type: 'digital', score: 0.9, reason: 'test' },
+        {
+          id: 'rec1',
+          name: 'Reco Produit 1',
+          category: 'cat',
+          type: 'digital',
+          score: 0.9,
+          reason: 'test',
+        },
       ]);
 
-      const response = await (chatbot as { handleRecommendation: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleRecommendation(mockSession);
-      expect(response.message).toContain('Voici quelques-unes de nos meilleures recommendations : Reco Produit 1.');
+      const response = await (
+        chatbot as unknown as {
+          handleRecommendation: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleRecommendation(mockSession as unknown as ChatSession);
+      expect(response.message).toContain(
+        'Voici quelques-unes de nos meilleures recommendations : Reco Produit 1.'
+      );
       expect(response.actions).toHaveLength(1);
       expect(response.actions?.[0].label).toContain('Voir Reco Produit 1');
-      expect(mockRecommendationServiceGetRecommendations).toHaveBeenCalledWith(mockSession.userId, mockSession.context, undefined);
+      expect(mockRecommendationServiceGetRecommendations).toHaveBeenCalledWith(
+        mockSession.userId,
+        mockSession.context,
+        undefined
+      );
     });
 
     it('should handle no recommendations found', async () => {
       mockRecommendationServiceGetRecommendations.mockResolvedValueOnce([]);
 
-      const response = await (chatbot as { handleRecommendation: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleRecommendation(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleRecommendation: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleRecommendation(mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.RECOMMENDATION_NO_PRODUCTS);
-      expect(response.actions?.[0].label).toBe(CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL);
+      expect(response.actions?.[0].label).toBe(
+        CHATBOT_RESPONSES.RECOMMENDATION_EXPLORE_ACTION_LABEL
+      );
     });
 
     it('should handle errors during recommendation fetching', async () => {
       mockRecommendationServiceGetRecommendations.mockRejectedValueOnce(new Error('Reco Error'));
 
-      const response = await (chatbot as { handleRecommendation: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleRecommendation(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleRecommendation: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleRecommendation(mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.RECOMMENDATION_ERROR);
-      expect(logger.error).toHaveBeenCalledWith('Erreur lors des recommandations', expect.any(Object));
+      expect(logger.error).toHaveBeenCalledWith(
+        'Erreur lors des recommandations',
+        expect.any(Object)
+      );
     });
   });
 
   // Test for handleShippingInquiry
   describe('handleShippingInquiry', () => {
     it('should return shipping information', async () => {
-      const response = await (chatbot as { handleShippingInquiry: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleShippingInquiry(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleShippingInquiry: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleShippingInquiry(mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.SHIPPING_INFO);
       expect(response.actions).toHaveLength(1);
       expect(response.suggestions).toEqual(CHATBOT_RESPONSES.SHIPPING_SUGGESTIONS);
@@ -240,7 +436,14 @@ describe('AIChatbot', () => {
   // Test for handleReturnInquiry
   describe('handleReturnInquiry', () => {
     it('should return return policy information', async () => {
-      const response = await (chatbot as { handleReturnInquiry: (session: typeof mockSession, context?: ChatSessionContext) => Promise<any> }).handleReturnInquiry(mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleReturnInquiry: (
+            session: ChatSession,
+            context?: ChatSessionContext
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleReturnInquiry(mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.RETURN_POLICY);
       expect(response.actions).toHaveLength(2);
       expect(response.actions?.[0].label).toBe(CHATBOT_RESPONSES.RETURN_POLICY_ACTION_LABEL);
@@ -250,7 +453,7 @@ describe('AIChatbot', () => {
   // Test for handleHelp
   describe('handleHelp', () => {
     it('should return general help message and suggestions', () => {
-      const response = (chatbot as any).handleHelp(); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const response = (chatbot as unknown as { handleHelp: () => ChatbotResponse }).handleHelp();
       expect(response.message).toContain('Je peux vous aider avec');
       expect(response.suggestions).toHaveLength(3);
     });
@@ -259,18 +462,39 @@ describe('AIChatbot', () => {
   // Test for handleGeneralInquiry
   describe('handleGeneralInquiry', () => {
     it('should return a greeting message for greetings', async () => {
-      const response = await (chatbot as { handleGeneralInquiry: (userMessage: string, session: typeof mockSession) => Promise<any> }).handleGeneralInquiry('bonjour', mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleGeneralInquiry: (
+            userMessage: string,
+            session: ChatSession
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleGeneralInquiry('bonjour', mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.GENERAL_GREETING);
       expect(response.suggestions).toEqual(CHATBOT_RESPONSES.GENERAL_GREETING_SUGGESTIONS);
     });
 
     it('should return a thank you message for thanks', async () => {
-      const response = await (chatbot as { handleGeneralInquiry: (userMessage: string, session: typeof mockSession) => Promise<any> }).handleGeneralInquiry('merci', mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleGeneralInquiry: (
+            userMessage: string,
+            session: ChatSession
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleGeneralInquiry('merci', mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.GENERAL_THANK_YOU);
     });
 
     it('should return a fallback message for unrecognized general inquiries', async () => {
-      const response = await (chatbot as { handleGeneralInquiry: (userMessage: string, session: typeof mockSession) => Promise<any> }).handleGeneralInquiry('question obscure', mockSession);
+      const response = await (
+        chatbot as unknown as {
+          handleGeneralInquiry: (
+            userMessage: string,
+            session: ChatSession
+          ) => Promise<ChatbotResponse>;
+        }
+      ).handleGeneralInquiry('question obscure', mockSession as unknown as ChatSession);
       expect(response.message).toBe(CHATBOT_RESPONSES.GENERAL_FALLBACK);
       expect(response.suggestions).toEqual(CHATBOT_RESPONSES.GENERAL_FALLBACK_SUGGESTIONS);
     });
@@ -279,12 +503,16 @@ describe('AIChatbot', () => {
   // Test for processMessage
   describe('processMessage', () => {
     it('should create new session if not exists', async () => {
-      (chatbot as { sessions: Map<string, any> }).sessions.clear(); // Clear existing sessions // eslint-disable-line @typescript-eslint/no-explicit-any
-      mockAiChatbotProcessMessage.mockResolvedValueOnce({ message: 'New session response' }); // eslint-disable-line @typescript-eslint/no-explicit-any
+      (chatbot as unknown as { sessions: Map<string, ChatSession> }).sessions.clear(); // Clear existing sessions
+      mockAiChatbotProcessMessage.mockResolvedValueOnce({ message: 'New session response' });
 
       const response = await chatbot.processMessage('new-session-id', 'Hello', 'user-new');
       expect(response.message).toBe('New session response');
-      expect((chatbot as { sessions: Map<string, any> }).sessions.has('new-session-id')).toBe(true); // eslint-disable-line @typescript-eslint/no-explicit-any
+      expect(
+        (chatbot as unknown as { sessions: Map<string, ChatSession> }).sessions.has(
+          'new-session-id'
+        )
+      ).toBe(true);
     });
 
     it('should add user and assistant messages to session history', async () => {
@@ -296,13 +524,19 @@ describe('AIChatbot', () => {
     });
 
     it('should call saveSession (debounced) if userId is provided', async () => {
-      const spy = vi.spyOn(chatbot as { debouncedSaveSession: (session: any) => void }, 'debouncedSaveSession'); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const spy = vi.spyOn(
+        chatbot as unknown as { debouncedSaveSession: (session: ChatSession) => void },
+        'debouncedSaveSession'
+      );
       await chatbot.processMessage(mockSession.id, 'Test', mockSession.userId);
       expect(spy).toHaveBeenCalledWith(mockSession);
     });
 
     it('should not call saveSession if userId is not provided', async () => {
-      const spy = vi.spyOn(chatbot as any, 'debouncedSaveSession'); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const spy = vi.spyOn(
+        chatbot as unknown as { debouncedSaveSession: (session: ChatSession) => void },
+        'debouncedSaveSession'
+      );
       await chatbot.processMessage(mockSession.id, 'Test', undefined);
       expect(spy).not.toHaveBeenCalled();
     });
@@ -311,28 +545,53 @@ describe('AIChatbot', () => {
       (chatbot as { contextWindow: number }).contextWindow = 3; // Set a small context window for testing
       // Fill messages to exceed the context window
       for (let i = 0; i < 5; i++) {
-        mockSession.messages.push({ id: `m${i}`, content: `msg${i}`, role: 'user', timestamp: new Date() });
+        mockSession.messages.push({
+          id: `m${i}`,
+          content: `msg${i}`,
+          role: 'user',
+          timestamp: new Date(),
+        });
       }
 
       await chatbot.processMessage(mockSession.id, 'New message', mockSession.userId);
 
-      expect(mockSession.messages.length).toBeLessThanOrEqual((chatbot as { contextWindow: number }).contextWindow);
+      expect(mockSession.messages.length).toBeLessThanOrEqual(
+        (chatbot as { contextWindow: number }).contextWindow
+      );
       expect(mockSession.messages.some(msg => msg.content === 'msg0')).toBe(false); // Oldest message should be trimmed
     });
 
     it('should handle processMessage errors and return a support ticket action', async () => {
-      mockAiChatbotProcessMessage.mockRejectedValueOnce(new Error('Process Error')); // Simulate error in generateResponse // eslint-disable-line @typescript-eslint/no-explicit-any
+      // @ts-expect-error - Mocking internal method
+      vi.spyOn(chatbot, 'generateResponse').mockRejectedValueOnce(new Error('Process Error')); // Simulate error in generateResponse
 
       // Mock analyzeIntent to succeed so we can test the outer catch block
-      vi.spyOn(chatbot as { analyzeIntent: (message: string, context: ChatSessionContext) => Promise<IntentAnalysisResult> }, 'analyzeIntent').mockResolvedValueOnce({
-        intent: 'general', confidence: 0.5, entities: {},
+      vi.spyOn(
+        chatbot as {
+          analyzeIntent: (
+            message: string,
+            context: ChatSessionContext
+          ) => Promise<IntentAnalysisResult>;
+        },
+        'analyzeIntent'
+      ).mockResolvedValueOnce({
+        intent: 'general',
+        confidence: 0.5,
+        entities: {},
       });
 
-      const response = await chatbot.processMessage(mockSession.id, 'Error message', mockSession.userId);
+      const response = await chatbot.processMessage(
+        mockSession.id,
+        'Error message',
+        mockSession.userId
+      );
       expect(response.message).toBe(CHATBOT_RESPONSES.TECHNICAL_ERROR);
       expect(response.actions?.[0].type).toBe('support_ticket');
       expect(response.actions?.[0].label).toBe('Créer un ticket support');
-      expect(logger.error).toHaveBeenCalledWith('Erreur dans le traitement du message chatbot', expect.any(Object));
+      expect(logger.error).toHaveBeenCalledWith(
+        'Erreur dans le traitement du message chatbot',
+        expect.any(Object)
+      );
     });
   });
 
@@ -341,24 +600,33 @@ describe('AIChatbot', () => {
     it('should upsert session to supabase', async () => {
       mockSupabaseFrom.mockReturnValueOnce({
         upsert: vi.fn().mockResolvedValueOnce({ data: {}, error: null }),
-      } as { upsert: () => Promise<{ data: any; error: any }> });
+      } as unknown as { upsert: () => Promise<{ data: unknown; error: unknown }> });
 
-      await (chatbot as { _saveSession: (session: any) => Promise<void> })._saveSession(mockSession); // eslint-disable-line @typescript-eslint/no-explicit-any
+      await (
+        chatbot as unknown as { _saveSession: (session: ChatSession) => Promise<void> }
+      )._saveSession(mockSession as unknown as ChatSession);
       expect(mockSupabaseFrom).toHaveBeenCalledWith('chat_sessions');
-      expect(mockSupabaseFrom().upsert).toHaveBeenCalledWith(expect.objectContaining({
-        id: 'test-session-id',
-        user_id: 'test-user-id',
-        messages: [],
-      }));
+      expect(mockSupabaseFrom().upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-session-id',
+          user_id: 'test-user-id',
+          messages: [],
+        })
+      );
     });
 
     it('should log warning if save fails', async () => {
       mockSupabaseFrom.mockReturnValueOnce({
         upsert: vi.fn().mockResolvedValueOnce({ data: null, error: { message: 'Save Error' } }),
-      } as { upsert: () => Promise<{ data: any; error: any }> });
+      } as unknown as { upsert: () => Promise<{ data: unknown; error: unknown }> });
 
-      await (chatbot as any)._saveSession(mockSession); // eslint-disable-line @typescript-eslint/no-explicit-any
-      expect(logger.warn).toHaveBeenCalledWith('Impossible de sauvegarder la session chat', expect.any(Object));
+      await (
+        chatbot as unknown as { _saveSession: (session: ChatSession) => Promise<void> }
+      )._saveSession(mockSession as unknown as ChatSession);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Impossible de sauvegarder la session chat',
+        expect.any(Object)
+      );
     });
   });
 });

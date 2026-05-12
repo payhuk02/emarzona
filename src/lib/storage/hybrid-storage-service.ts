@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
 // Types pour le stockage hybride
-export interface StorageItem<T = any> {
+export interface StorageItem<T = unknown> {
   id: string;
   data: T;
   metadata: {
@@ -68,7 +68,7 @@ export class HybridStorageService {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
         this.createObjectStores(db);
       };
@@ -125,7 +125,7 @@ export class HybridStorageService {
       supabase: false,
       indexeddb: false,
       localstorage: false,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     try {
@@ -178,7 +178,7 @@ export class HybridStorageService {
       maxRetries: 3,
       enableBackup: true,
       backupInterval: 24,
-      ...config
+      ...config,
     };
 
     const item: StorageItem<T> = {
@@ -190,8 +190,8 @@ export class HybridStorageService {
         version: 1,
         source: 'indexeddb',
         syncStatus: 'pending',
-        checksum: this.generateChecksum(data)
-      }
+        checksum: this.generateChecksum(data),
+      },
     };
 
     try {
@@ -214,7 +214,6 @@ export class HybridStorageService {
       if (fullConfig.enableBackup) {
         await this.createBackup(collection, id, data);
       }
-
     } catch (error) {
       logger.error(`Erreur stockage ${collection}:${id}:`, error);
       await this.logError('storage_error', { collection, id, error: error.message });
@@ -247,7 +246,6 @@ export class HybridStorageService {
 
       // Fallback vers localStorage
       return this.fetchFromLocalStorage(collection, id);
-
     } catch (error) {
       logger.error(`Erreur récupération ${collection}:${id}:`, error);
       await this.logError('fetch_error', { collection, id, error: error.message });
@@ -300,7 +298,6 @@ export class HybridStorageService {
           // Marque comme synchronisé
           item.metadata.syncStatus = 'synced';
           await this.storeLocally(collection, item);
-
         } catch (err) {
           errors++;
           logger.error(`Erreur sync item ${item.id}:`, err);
@@ -311,10 +308,11 @@ export class HybridStorageService {
       await this.updateSyncMetadata(collection);
 
       const duration = Date.now() - startTime;
-      logger.info(`Synchronisation ${collection} terminée: ${synced} sync, ${conflicts} conflits, ${errors} erreurs`);
+      logger.info(
+        `Synchronisation ${collection} terminée: ${synced} sync, ${conflicts} conflits, ${errors} erreurs`
+      );
 
       return { success: true, synced, conflicts, errors, duration };
-
     } finally {
       this.syncInProgress.delete(collection);
     }
@@ -332,7 +330,7 @@ export class HybridStorageService {
       itemId: id,
       data,
       createdAt: new Date().toISOString(),
-      checksum: this.generateChecksum(data)
+      checksum: this.generateChecksum(data),
     };
 
     const transaction = this.db.transaction(['backups'], 'readwrite');
@@ -346,7 +344,10 @@ export class HybridStorageService {
   /**
    * Récupère un élément depuis Supabase
    */
-  private async fetchFromSupabase(collection: string, id: string): Promise<StorageItem | null> {
+  private async fetchFromSupabase(
+    collection: string,
+    id: string
+  ): Promise<StorageItem<unknown> | null> {
     const { data, error } = await supabase
       .from(collection)
       .select('id,data,metadata')
@@ -358,22 +359,20 @@ export class HybridStorageService {
     return {
       id: data.id,
       data: data.data,
-      metadata: data.metadata
+      metadata: data.metadata,
     };
   }
 
   /**
    * Stocke un élément dans Supabase
    */
-  private async syncToSupabase(collection: string, item: StorageItem): Promise<void> {
-    const { error } = await supabase
-      .from(collection)
-      .upsert({
-        id: item.id,
-        data: item.data,
-        metadata: item.metadata,
-        updated_at: new Date().toISOString()
-      });
+  private async syncToSupabase(collection: string, item: StorageItem<unknown>): Promise<void> {
+    const { error } = await supabase.from(collection).upsert({
+      id: item.id,
+      data: item.data,
+      metadata: item.metadata,
+      updated_at: new Date().toISOString(),
+    });
 
     if (error) throw error;
   }
@@ -381,7 +380,7 @@ export class HybridStorageService {
   /**
    * Stocke un élément localement (IndexedDB)
    */
-  private async storeLocally(collection: string, item: StorageItem): Promise<void> {
+  private async storeLocally(collection: string, item: StorageItem<unknown>): Promise<void> {
     if (!this.db) throw new Error('IndexedDB non initialisé');
 
     const dataWithCollection = { ...item, collection };
@@ -393,7 +392,10 @@ export class HybridStorageService {
   /**
    * Récupère un élément depuis IndexedDB
    */
-  private async fetchFromIndexedDB(collection: string, id: string): Promise<StorageItem | null> {
+  private async fetchFromIndexedDB(
+    collection: string,
+    id: string
+  ): Promise<StorageItem<unknown> | null> {
     if (!this.db) return null;
 
     const transaction = this.db.transaction(['data'], 'readonly');
@@ -406,14 +408,17 @@ export class HybridStorageService {
   /**
    * Fallback vers localStorage
    */
-  private fallbackToLocalStorage(collection: string, id: string, data: any): void {
+  private fallbackToLocalStorage(collection: string, id: string, data: unknown): void {
     try {
       const key = `storage_${collection}_${id}`;
-      localStorage.setItem(key, JSON.stringify({
-        data,
-        timestamp: new Date().toISOString(),
-        fallback: true
-      }));
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          data,
+          timestamp: new Date().toISOString(),
+          fallback: true,
+        })
+      );
     } catch (error) {
       logger.error('Erreur localStorage fallback:', error);
     }
@@ -422,7 +427,7 @@ export class HybridStorageService {
   /**
    * Récupère depuis localStorage (fallback)
    */
-  private fetchFromLocalStorage(collection: string, id: string): any {
+  private fetchFromLocalStorage(collection: string, id: string): unknown {
     try {
       const key = `storage_${collection}_${id}`;
       const stored = localStorage.getItem(key);
@@ -451,12 +456,12 @@ export class HybridStorageService {
   /**
    * Génère un checksum pour détecter les changements
    */
-  private generateChecksum(data: any): string {
+  private generateChecksum(data: unknown): string {
     const str = JSON.stringify(data);
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convertir en 32 bits
     }
     return hash.toString(36);
@@ -465,15 +470,21 @@ export class HybridStorageService {
   /**
    * Détecte les conflits entre versions
    */
-  private hasConflict(local: StorageItem, remote: StorageItem): boolean {
-    return local.metadata.checksum !== remote.metadata.checksum &&
-           local.metadata.updatedAt !== remote.metadata.updatedAt;
+  private hasConflict(local: StorageItem<unknown>, remote: StorageItem<unknown>): boolean {
+    return (
+      local.metadata.checksum !== remote.metadata.checksum &&
+      local.metadata.updatedAt !== remote.metadata.updatedAt
+    );
   }
 
   /**
    * Résout un conflit (stratégie: dernière modification gagne)
    */
-  private async resolveConflict(collection: string, local: StorageItem, remote: StorageItem): Promise<boolean> {
+  private async resolveConflict(
+    collection: string,
+    local: StorageItem<unknown>,
+    remote: StorageItem<unknown>
+  ): Promise<boolean> {
     const winner = local.metadata.updatedAt > remote.metadata.updatedAt ? local : remote;
     const loser = local.metadata.updatedAt > remote.metadata.updatedAt ? remote : local;
 
@@ -488,7 +499,7 @@ export class HybridStorageService {
         winner: winner.metadata.source,
         loser: loser.metadata.source,
         winnerUpdated: winner.metadata.updatedAt,
-        loserUpdated: loser.metadata.updatedAt
+        loserUpdated: loser.metadata.updatedAt,
       });
 
       return true;
@@ -501,7 +512,7 @@ export class HybridStorageService {
   /**
    * Récupère les éléments en attente de synchronisation
    */
-  private async getPendingItems(collection: string): Promise<StorageItem[]> {
+  private async getPendingItems(collection: string): Promise<StorageItem<unknown>[]> {
     if (!this.db) return [];
 
     const transaction = this.db.transaction(['data'], 'readonly');
@@ -510,7 +521,9 @@ export class HybridStorageService {
     const request = index.getAll('pending');
 
     const results = await this.promisifyRequest(request);
-    return results.filter((item: any) => item.collection === collection);
+    return results.filter(
+      (item: StorageItem<unknown> & { collection: string }) => item.collection === collection
+    );
   }
 
   /**
@@ -522,7 +535,7 @@ export class HybridStorageService {
     const metadata = {
       collection,
       lastSync: new Date().toISOString(),
-      status: 'completed'
+      status: 'completed',
     };
 
     const transaction = this.db.transaction(['sync_metadata'], 'readwrite');
@@ -542,11 +555,14 @@ export class HybridStorageService {
     const request = index.getAll(collection);
 
     const backups = await this.promisifyRequest(request);
-    const itemBackups = backups.filter((b: any) => b.itemId === itemId);
+    const itemBackups = backups.filter((b: { itemId: string; id: string }) => b.itemId === itemId);
 
     if (itemBackups.length > 10) {
       // Trie par date et supprime les plus anciennes
-      itemBackups.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      itemBackups.sort(
+        (a: { createdAt: string }, b: { createdAt: string }) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
       for (let i = 10; i < itemBackups.length; i++) {
         await this.promisifyRequest(store.delete(itemBackups[i].id));
@@ -557,14 +573,14 @@ export class HybridStorageService {
   /**
    * Log une erreur dans IndexedDB
    */
-  private async logError(type: string, details: any): Promise<void> {
+  private async logError(type: string, details: unknown): Promise<void> {
     if (!this.db) return;
 
     const errorLog = {
       id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
       details,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const transaction = this.db.transaction(['error_log'], 'readwrite');
@@ -601,7 +617,7 @@ export class HybridStorageService {
     const exportData = {
       timestamp: new Date().toISOString(),
       version: '1.0',
-      collections: {}
+      collections: {},
     };
 
     // Exporte toutes les collections depuis IndexedDB
@@ -614,7 +630,7 @@ export class HybridStorageService {
 
       // Groupe par collection
       const collections: Record<string, StorageItem[]> = {};
-      allData.forEach((item: any) => {
+      allData.forEach((item: StorageItem<unknown> & { collection: string }) => {
         if (!collections[item.collection]) {
           collections[item.collection] = [];
         }
@@ -639,7 +655,9 @@ export class HybridStorageService {
       }
 
       // Importe chaque collection
-      for (const [collection, items] of Object.entries(importData.collections as Record<string, StorageItem[]>)) {
+      for (const [collection, items] of Object.entries(
+        importData.collections as Record<string, StorageItem<unknown>[]>
+      )) {
         for (const item of items) {
           await this.storeLocally(collection, item);
         }
@@ -647,7 +665,7 @@ export class HybridStorageService {
 
       logger.info('Import des données terminé avec succès');
     } catch (error) {
-      logger.error('Erreur lors de l\'import:', error);
+      logger.error("Erreur lors de l'import:", error);
       throw error;
     }
   }
@@ -655,13 +673,13 @@ export class HybridStorageService {
   /**
    * Obtient les statistiques de stockage
    */
-  async getStorageStats(): Promise<any> {
+  async getStorageStats(): Promise<Record<string, unknown>> {
     const stats = {
       indexeddb: { collections: 0, items: 0, size: 0 },
       localstorage: { items: 0, size: 0 },
       supabase: { available: false },
       sync: { pending: 0, conflicts: 0 },
-      health: {}
+      health: {},
     };
 
     // Stats IndexedDB
@@ -670,7 +688,7 @@ export class HybridStorageService {
       const store = transaction.objectStore('data');
       const allData = await this.promisifyRequest(store.getAll());
 
-      const collections = new Set(allData.map((item: any) => item.collection));
+      const collections = new Set(allData.map((item: { collection: string }) => item.collection));
       stats.indexeddb.collections = collections.size;
       stats.indexeddb.items = allData.length;
       stats.indexeddb.size = JSON.stringify(allData).length;
@@ -680,7 +698,7 @@ export class HybridStorageService {
     if (typeof Storage !== 'undefined') {
       let lsItems = 0;
       let lsSize = 0;
-      for (let key in localStorage) {
+      for (const key in localStorage) {
         if (key.startsWith('storage_')) {
           lsItems++;
           lsSize += localStorage[key].length;
