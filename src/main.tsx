@@ -21,6 +21,18 @@ loadNonCriticalCSS();
 // ✅ PERFORMANCE: Initialisations critiques uniquement (nécessaires pour le fonctionnement de base)
 import { setupGlobalErrorHandlers } from './lib/error-logger';
 import { installConsoleGuard } from './lib/console-guard';
+import { validateEnv } from './lib/env-validator';
+
+// Valider les variables d'environnement au démarrage pour "fail fast"
+try {
+  validateEnv();
+} catch (error) {
+  if (import.meta.env.PROD) {
+    throw error;
+  } else {
+    console.error("❌ Erreur de validation des variables d'environnement", error);
+  }
+}
 
 const LOVABLE_HOST_REGEX = /(?:^|\.)lovable\.app$/i;
 
@@ -78,27 +90,6 @@ if (typeof window !== 'undefined') {
   scheduleNonCriticalInit(() => {
     // Initialiser les modules non-critiques de manière asynchrone
     Promise.all([
-      // Validation d'environnement (non-bloquant)
-      import('./lib/env-validator').then(({ validateEnv }) => {
-        try {
-          validateEnv();
-          // logger sera importé ci-dessous
-          import('./lib/logger').then(({ logger }) => {
-            logger.info("✅ Variables d'environnement validées");
-          });
-        } catch (error) {
-          import('./lib/logger').then(({ logger }) => {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.error("❌ Erreur de validation des variables d'environnement", {
-              error: errorMessage,
-            });
-            // En production, on ne peut pas continuer sans les variables requises
-            if (import.meta.env.PROD) {
-              throw error;
-            }
-          });
-        }
-      }),
       // Nettoyer le cache (non-bloquant)
       import('./utils/clearLegacyLogoCache').then(
         ({ clearLegacyLogoCache, clearAllLegacyLogoReferences }) => {

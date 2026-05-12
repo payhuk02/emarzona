@@ -67,7 +67,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ÉTAPE 2: Créer le cron job avec votre clé
 -- ============================================
 
-SELECT * FROM setup_ssl_expiration_check_cron('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiZG56YWpieWpha2RodWF2cnZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzU5ODIzMSwiZXhwIjoyMDczMTc0MjMxfQ.MT2e4tcw_5eK0fRQFN5tF1Cwu210MKFUAUGqmYm_1XE');
+SELECT * FROM setup_ssl_expiration_check_cron(current_setting('app.settings.service_role_key', true));
 
 -- ============================================
 -- ÉTAPE 3: Vérifier que le cron job est créé

@@ -5,38 +5,16 @@ import { mockFedexService, type FedexRateRequest, type FedexRate, type FedexShip
  * If VITE_FEDEX_API_KEY is not set, we transparently fallback to mock service.
  */
 export class FedexService {
-  private readonly apiKey = import.meta.env.VITE_FEDEX_API_KEY as string | undefined;
-  private readonly apiSecret: string | undefined;
-  private readonly accountNumber = import.meta.env.VITE_FEDEX_ACCOUNT_NUMBER as string | undefined;
-  private readonly forceMockMode = import.meta.env.VITE_FEDEX_FORCE_MOCK === 'true';
-
-  constructor(secret?: string) {
-    // Secret must come from secure server-side integration, not VITE_* env.
-    this.apiSecret = secret;
-  }
-
-  private get isConfigured(): boolean {
-    return !!this.apiKey && !!this.apiSecret && !!this.accountNumber;
-  }
+  // Les clés secrètes doivent résider UNIQUEMENT côté serveur (Edge Functions)
+  private readonly forceMockMode = true; // Forcé en mock en attendant l'implémentation complète via Edge Function
 
   private get shouldUseMock(): boolean {
-    return this.forceMockMode || !this.isConfigured;
+    return this.forceMockMode;
   }
 
   private ensureOperationalMode(operation: string): void {
-    if (this.shouldUseMock) {
-      if (this.forceMockMode) return;
-
-      // Legacy behavior: no credentials => mock for local/dev.
-      // If only partial credentials are set, we fail fast to avoid false production confidence.
-      const hasAnyCredential = !!this.apiKey || !!this.apiSecret || !!this.accountNumber;
-      const hasAllCredentials = this.isConfigured;
-
-      if (hasAnyCredential && !hasAllCredentials) {
-        throw new Error(
-          `FedEx ${operation} refused: incomplete credentials. Provide secure server-side credentials and VITE_FEDEX_API_KEY/VITE_FEDEX_ACCOUNT_NUMBER, or enable VITE_FEDEX_FORCE_MOCK=true for development.`
-        );
-      }
+    if (!this.shouldUseMock) {
+      throw new Error(`FedEx ${operation} must be implemented via a secure Supabase Edge Function.`);
     }
   }
 

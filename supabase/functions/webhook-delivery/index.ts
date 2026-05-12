@@ -351,8 +351,29 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Récupérer le delivery_id depuis la requête (optionnel)
-    const { delivery_id } = await req.json().catch(() => ({}));
+    import { z } from "https://esm.sh/zod@3.22.4";
+
+    const RequestSchema = z.object({
+      delivery_id: z.string().uuid().optional(),
+    }).catchall(z.unknown()); // Permet d'ignorer les autres champs optionnels en toute sécurité
+
+    let payload;
+    try {
+      const rawPayload = await req.json().catch(() => ({}));
+      payload = RequestSchema.parse(rawPayload);
+    } catch (error) {
+      logEvent('warn', 'Invalid request payload', { requestId, error });
+      return jsonResponse(
+        corsHeaders,
+        400,
+        { error: 'Invalid request payload format' },
+        requestId,
+        requestStart
+      );
+    }
+    
+    // Récupérer le delivery_id depuis la requête validée (optionnel)
+    const { delivery_id } = payload;
 
     let deliveries: WebhookDelivery[];
 
