@@ -1,9 +1,9 @@
 /**
  * Tests d'isolation multi-stores
- * 
+ *
  * Objectif : Valider que chaque boutique a son propre tableau
  * et gère bien ses propres données sans fuite entre boutiques
- * 
+ *
  * Couverture :
  * - Isolation des produits par store_id
  * - Isolation des commandes par store_id
@@ -25,7 +25,10 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
 // Type pour les données de test des clients
-type TestCustomer = Pick<Database['public']['Tables']['customers']['Row'], 'id' | 'name' | 'store_id' | 'email'>;
+type TestCustomer = Pick<
+  Database['public']['Tables']['customers']['Row'],
+  'id' | 'name' | 'store_id' | 'email'
+>;
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -77,13 +80,12 @@ vi.mock('@/contexts/AuthContext', () => ({
 }));
 
 describe('Multi-Stores Isolation Tests', () => {
-  let  queryClient: QueryClient;
-  let  mockQuery: ReturnType<typeof vi.fn>;
-  let  mockSelect: ReturnType<typeof vi.fn>;
-  let  mockEq: ReturnType<typeof vi.fn>;
-  let  mockOrder: ReturnType<typeof vi.fn>;
-  let  mockRange: ReturnType<typeof vi.fn>;
-  let  mockSingle: ReturnType<typeof vi.fn>;
+  let queryClient: QueryClient;
+  let mockSelect: ReturnType<typeof vi.fn>;
+  let mockEq: ReturnType<typeof vi.fn>;
+  let mockOrder: ReturnType<typeof vi.fn>;
+  let mockRange: ReturnType<typeof vi.fn>;
+  let mockSingle: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -95,22 +97,26 @@ describe('Multi-Stores Isolation Tests', () => {
       },
     });
 
-    // Setup mock chain
-    mockRange = vi.fn().mockReturnThis();
-    mockOrder = vi.fn().mockReturnThis();
-    mockEq = vi.fn().mockReturnThis();
-    mockSelect = vi.fn().mockReturnThis();
-    mockSingle = vi.fn();
+    // Chaîne PostgREST : chaque maillon renvoie le même objet (pas mockReturnThis — sinon this est faux en strict mode)
+    const chain = {
+      select: vi.fn(),
+      eq: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(),
+      single: vi.fn(),
+    };
+    chain.select.mockImplementation(() => chain);
+    chain.eq.mockImplementation(() => chain);
+    chain.order.mockImplementation(() => chain);
+    chain.range.mockImplementation(() => chain);
 
-    mockQuery = vi.fn().mockReturnValue({
-      select: mockSelect,
-      eq: mockEq,
-      order: mockOrder,
-      range: mockRange,
-      single: mockSingle,
-    });
+    mockSelect = chain.select;
+    mockEq = chain.eq;
+    mockOrder = chain.order;
+    mockRange = chain.range;
+    mockSingle = chain.single;
 
-    (supabase.from as ReturnType<typeof vi.fn>).mockReturnValue(mockQuery);
+    (supabase.from as ReturnType<typeof vi.fn>).mockImplementation(() => chain);
   });
 
   afterEach(() => {
@@ -260,7 +266,9 @@ describe('Multi-Stores Isolation Tests', () => {
       // Vérifier que la requête a filtré par store_id
       expect(mockEq).toHaveBeenCalledWith('store_id', 'store-1');
       expect(result.current.data?.data).toHaveLength(2);
-      expect(result.current.data?.data.every((c: TestCustomer) => c.store_id === 'store-1')).toBe(true);
+      expect(result.current.data?.data.every((c: TestCustomer) => c.store_id === 'store-1')).toBe(
+        true
+      );
     });
 
     it('should not return customers from other stores', async () => {
@@ -284,8 +292,12 @@ describe('Multi-Stores Isolation Tests', () => {
 
       // Vérifier que seuls les clients de store-1 sont retournés
       expect(result.current.data?.data).toHaveLength(2);
-      expect(result.current.data?.data.every((c: TestCustomer) => c.store_id === 'store-1')).toBe(true);
-      expect(result.current.data?.data.some((c: TestCustomer) => c.store_id === 'store-2')).toBe(false);
+      expect(result.current.data?.data.every((c: TestCustomer) => c.store_id === 'store-1')).toBe(
+        true
+      );
+      expect(result.current.data?.data.some((c: TestCustomer) => c.store_id === 'store-2')).toBe(
+        false
+      );
     });
 
     it('should return empty data when storeId is undefined', async () => {
@@ -320,11 +332,17 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'product-1', is_active: true, created_at: '2025-01-01', store_id: 'store-1' },
       ];
       const ordersData = [
-        { id: 'order-1', status: 'completed', total_amount: 100, created_at: '2025-01-01', store_id: 'store-1' },
+        {
+          id: 'order-1',
+          status: 'completed',
+          total_amount: 100,
+          created_at: '2025-01-01',
+          store_id: 'store-1',
+        },
       ];
 
       // Mock multiple queries
-      let  callCount= 0;
+      let callCount = 0;
       mockSelect.mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
@@ -361,18 +379,21 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'store-3', user_id: 'user-1' },
       ];
 
-      mockSelect.mockResolvedValueOnce({
-        data: existingStores,
-        error: null,
-      });
+      // Chaîne Supabase : .order() doit résoudre avec { data, error } (Strict Mode peut double-invocation)
+      mockOrder.mockImplementation(() =>
+        Promise.resolve({
+          data: existingStores,
+          error: null,
+        })
+      );
 
       const { result } = renderHook(() => useStores(), { wrapper });
 
       await waitFor(() => {
+        expect(result.current.stores).toHaveLength(3);
         expect(result.current.loading).toBe(false);
       });
 
-      // Vérifier que canCreateStore retourne false
       expect(result.current.canCreateStore()).toBe(false);
       expect(result.current.getRemainingStores()).toBe(0);
     });
@@ -394,14 +415,17 @@ describe('Multi-Stores Isolation Tests', () => {
         { id: 'store-2', user_id: 'user-1' },
       ];
 
-      mockSelect.mockResolvedValueOnce({
-        data: existingStores,
-        error: null,
-      });
+      mockOrder.mockImplementation(() =>
+        Promise.resolve({
+          data: existingStores,
+          error: null,
+        })
+      );
 
       const { result } = renderHook(() => useStores(), { wrapper });
 
       await waitFor(() => {
+        expect(result.current.stores).toHaveLength(2);
         expect(result.current.loading).toBe(false);
       });
 
@@ -413,12 +437,8 @@ describe('Multi-Stores Isolation Tests', () => {
 
   describe('Cross-Store Data Leakage Prevention', () => {
     it('should prevent products from store-2 appearing in store-1 queries', async () => {
-      const store1Products = [
-        { id: 'product-1', name: 'Product 1', store_id: 'store-1' },
-      ];
-      const store2Products = [
-        { id: 'product-2', name: 'Product 2', store_id: 'store-2' },
-      ];
+      const store1Products = [{ id: 'product-1', name: 'Product 1', store_id: 'store-1' }];
+      const store2Products = [{ id: 'product-2', name: 'Product 2', store_id: 'store-2' }];
 
       // Test store-1
       mockSelect.mockResolvedValueOnce({
@@ -547,10 +567,3 @@ describe('Multi-Stores Isolation Tests', () => {
     });
   });
 });
-
-
-
-
-
-
-

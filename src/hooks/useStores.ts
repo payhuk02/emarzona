@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 
 const STORE_FIELDS =
@@ -188,22 +189,24 @@ const MAX_STORES_PER_USER = 3;
 export const useStores = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, loading: authLoading } = useAuth();
+
+  const storesQueryEnabled = !authLoading && Boolean(user?.id);
 
   // Query pour récupérer les boutiques avec cache
+  // Important : attendre l'auth (comme StoreContext). Sinon la requête peut échouer une fois
+  // avec « non authentifié », rester en erreur/vide alors que le sidebar a déjà chargé les boutiques.
   const {
     data: stores = [],
-    isLoading: loading,
+    isFetching: storesQueryFetching,
     error: queryError,
     refetch,
   } = useQuery({
-    queryKey: ['stores'],
+    queryKey: ['stores', user?.id ?? 'none'],
+    enabled: storesQueryEnabled,
     queryFn: async (): Promise<Store[]> => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error('Utilisateur non authentifié');
+      if (!user?.id) {
+        return [];
       }
 
       const { data, error } = await supabase
@@ -225,6 +228,21 @@ export const useStores = () => {
     throwOnError: false,
   });
 
+  // isFetching === false lorsque la requête est désactivée ou terminée (succès / erreur après retries)
+  const loading = authLoading || (storesQueryEnabled && storesQueryFetching);
+
+  const storesLoadErrorMessage =
+    queryError == null
+      ? null
+      : queryError instanceof Error
+        ? queryError.message
+        : typeof queryError === 'object' &&
+            queryError !== null &&
+            'message' in queryError &&
+            typeof (queryError as { message: unknown }).message === 'string'
+          ? (queryError as { message: string }).message
+          : String(queryError);
+
   // Log query errors
   if (queryError) {
     logger.error('Erreur lors du chargement des boutiques:', queryError);
@@ -234,10 +252,10 @@ export const useStores = () => {
   const createStoreMutation = useMutation({
     mutationFn: async (storeData: Partial<Store>) => {
       const {
-        data: { user },
+        data: { user: authUser },
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (!authUser) {
         throw new Error('Utilisateur non authentifié');
       }
 
@@ -250,7 +268,7 @@ export const useStores = () => {
         .insert([
           {
             ...storeData,
-            user_id: user.id,
+            user_id: authUser.id,
             is_active: true,
           },
         ])
@@ -349,7 +367,7 @@ export const useStores = () => {
   return {
     stores,
     loading,
-    error: queryError instanceof Error ? queryError.message : null,
+    error: storesLoadErrorMessage,
     createStore: createStoreMutation.mutateAsync,
     updateStore: updateStoreMutation.mutateAsync,
     deleteStore: deleteStoreMutation.mutateAsync,

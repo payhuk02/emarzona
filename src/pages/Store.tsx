@@ -1,17 +1,24 @@
-import { useCallback, Component, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store as StoreIcon, ExternalLink, Plus, Settings, AlertCircle, RefreshCw } from "lucide-react";
+import { useCallback, Component, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Store as StoreIcon,
+  ExternalLink,
+  Plus,
+  Settings,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react';
 import { generateStoreUrl } from '@/lib/store-utils';
-import { useStores } from "@/hooks/useStores";
-import StoreDetails from "@/components/store/StoreDetails";
-import { useNavigate, Link } from "react-router-dom";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { logger } from "@/lib/logger";
+import { useStores } from '@/hooks/useStores';
+import StoreDetails from '@/components/store/StoreDetails';
+import { useNavigate, Link } from 'react-router-dom';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { logger } from '@/lib/logger';
 
 // Error Boundary local pour capturer les erreurs de rendu du Store
 class StoreErrorBoundary extends Component<
@@ -28,7 +35,10 @@ class StoreErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    logger.error('[Store] Rendering error caught by boundary:', { error: error.message, stack: errorInfo.componentStack });
+    logger.error('[Store] Rendering error caught by boundary:', {
+      error: error.message,
+      stack: errorInfo.componentStack,
+    });
   }
 
   render() {
@@ -71,7 +81,7 @@ class StoreErrorBoundary extends Component<
 
 const Store = () => {
   const { t } = useTranslation();
-  const { stores, loading, error: storesError } = useStores();
+  const { stores, loading, error: storesError, refetch: refetchStores } = useStores();
   const navigate = useNavigate();
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
@@ -83,10 +93,13 @@ const Store = () => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        
+
         <div className="flex-1 flex flex-col">
           {/* Header - Simple et fonctionnel */}
-          <header ref={headerRef} className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm">
+          <header
+            ref={headerRef}
+            className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur-sm"
+          >
             <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 px-3 sm:px-4 md:px-6">
               <SidebarTrigger className="touch-manipulation min-h-[44px] min-w-[44px]" />
               <div className="flex-1 min-w-0 flex items-center gap-2 sm:gap-3">
@@ -121,14 +134,51 @@ const Store = () => {
                   <CardContent className="py-12 sm:py-16 lg:py-20 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                      <p className="text-sm sm:text-base text-muted-foreground">{t('store.loading')}</p>
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        {t('store.loading')}
+                      </p>
                     </div>
+                  </CardContent>
+                </Card>
+              ) : storesError ? (
+                <Card className="shadow-sm border border-destructive/20 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4">
+                  <CardHeader className="text-center py-8 sm:py-12">
+                    <div className="flex justify-center mb-4">
+                      <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                        <AlertCircle className="h-8 w-8 text-destructive" />
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg sm:text-xl">
+                      {t('store.error.title', 'Impossible de charger les boutiques')}
+                    </CardTitle>
+                    <CardDescription className="max-w-md mx-auto mt-2">
+                      {storesError}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex justify-center pb-8">
+                    <Button
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => void refetchStores()}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      {t('common.retry', 'Réessayer')}
+                    </Button>
                   </CardContent>
                 </Card>
               ) : stores.length > 0 ? (
                 <Tabs defaultValue="manage" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto" role="tablist" aria-label={t('store.tabs.ariaLabel')}>
-                    <TabsTrigger value="manage" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]" role="tab" aria-label={t('store.tabs.manage')}>
+                  <TabsList
+                    className="grid w-full grid-cols-2 gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto"
+                    role="tablist"
+                    aria-label={t('store.tabs.ariaLabel')}
+                  >
+                    <TabsTrigger
+                      value="manage"
+                      className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px]"
+                      role="tab"
+                      aria-label={t('store.tabs.manage')}
+                    >
                       <StoreIcon className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
                       <span className="hidden sm:inline">{t('store.tabs.manage')}</span>
                       <span className="sm:hidden">{t('store.tabs.manageShort')}</span>
@@ -148,7 +198,7 @@ const Store = () => {
 
                   <TabsContent value="manage" className="space-y-4 sm:space-y-6">
                     <StoreErrorBoundary>
-                      {stores.map((store) => (
+                      {stores.map(store => (
                         <StoreDetails key={store.id} store={store} />
                       ))}
                     </StoreErrorBoundary>
@@ -162,7 +212,9 @@ const Store = () => {
                         <StoreIcon className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-purple-600 dark:text-purple-400" />
                       </div>
                     </div>
-                    <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">{t('store.empty.title')}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">
+                      {t('store.empty.title')}
+                    </CardTitle>
                     <CardDescription className="mt-3 sm:mt-4 max-w-2xl mx-auto text-[10px] sm:text-xs md:text-sm lg:text-base leading-relaxed text-muted-foreground">
                       {t('store.empty.description')}
                     </CardDescription>
@@ -177,22 +229,32 @@ const Store = () => {
                         {t('store.goToSettings')}
                       </Button>
                       <div className="mt-4 sm:mt-6 md:mt-8 p-3 sm:p-4 md:p-6 lg:p-8 bg-muted/30 rounded-xl text-left max-w-2xl mx-auto border border-border/50">
-                        <p className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 lg:mb-6">{t('store.whatIs.title')}</p>
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold mb-2 sm:mb-3 md:mb-4 lg:mb-6">
+                          {t('store.whatIs.title')}
+                        </p>
                         <ul className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-4">
                           <li className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
-                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">✓</span>
+                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">
+                              ✓
+                            </span>
                             <span>{t('store.whatIs.feature1')}</span>
                           </li>
                           <li className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
-                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">✓</span>
+                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">
+                              ✓
+                            </span>
                             <span>{t('store.whatIs.feature2')}</span>
                           </li>
                           <li className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
-                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">✓</span>
+                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">
+                              ✓
+                            </span>
                             <span>{t('store.whatIs.feature3')}</span>
                           </li>
                           <li className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
-                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">✓</span>
+                            <span className="text-primary font-bold text-sm sm:text-base md:text-lg">
+                              ✓
+                            </span>
                             <span>{t('store.whatIs.feature4')}</span>
                           </li>
                         </ul>
@@ -210,9 +272,3 @@ const Store = () => {
 };
 
 export default Store;
-
-
-
-
-
-
