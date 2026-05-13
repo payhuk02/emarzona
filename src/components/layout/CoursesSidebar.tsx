@@ -4,15 +4,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
-import {
-  GraduationCap,
-  Plus,
-  BookOpen,
-  BarChart3,
-} from 'lucide-react';
+import { GraduationCap, Plus, BookOpen, BarChart3 } from 'lucide-react';
 
 // Navigation des cours
 const coursesNavItems = [
@@ -33,14 +28,14 @@ const coursesNavItems = [
   },
   {
     label: 'Analytics Cours',
-    path: '/dashboard/courses/analytics',
+    path: '/dashboard/my-courses',
     icon: BarChart3,
   },
 ];
 
 export const CoursesSidebar = () => {
   const location = useLocation();
-  
+
   const getActiveSection = () => {
     if (location.pathname.includes('/courses/new')) return 'Créer un Cours';
     if (location.pathname.includes('/my-courses')) return 'Gestion Cours';
@@ -50,7 +45,7 @@ export const CoursesSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const  breadcrumbItems: BreadcrumbItem[] = [
+  const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Cours', path: '/account/courses' },
     { label: activeSection },
   ];
@@ -58,10 +53,10 @@ export const CoursesSidebar = () => {
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
       <nav className="space-y-1" aria-label="Navigation cours">
-        {coursesNavItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-                         location.pathname.startsWith(item.path + '/');
-          
+        {coursesNavItems.map(item => {
+          const isActive =
+            location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
           return (
             <ContextSidebarNavItem
               key={item.path}
@@ -84,10 +79,3 @@ export const CoursesSidebar = () => {
     </BaseContextSidebar>
   );
 };
-
-
-
-
-
-
-

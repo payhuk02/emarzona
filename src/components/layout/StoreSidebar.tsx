@@ -4,14 +4,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
-import {
-  Store,
-  Users,
-  Settings,
-} from 'lucide-react';
+import { Store, Users, Settings } from 'lucide-react';
 
 // Navigation de la boutique
 const storeNavItems = [
@@ -27,14 +23,14 @@ const storeNavItems = [
   },
   {
     label: 'Paramètres Boutique',
-    path: '/dashboard/store/settings',
+    path: '/dashboard/settings?tab=store',
     icon: Settings,
   },
 ];
 
 export const StoreSidebar = () => {
   const location = useLocation();
-  
+
   const getActiveSection = () => {
     if (location.pathname.includes('/team')) return 'Équipe';
     if (location.pathname.includes('/settings')) return 'Paramètres';
@@ -43,7 +39,7 @@ export const StoreSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const  breadcrumbItems: BreadcrumbItem[] = [
+  const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Boutique', path: '/dashboard/store' },
     { label: activeSection },
   ];
@@ -51,10 +47,10 @@ export const StoreSidebar = () => {
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
       <nav className="space-y-1" aria-label="Navigation boutique">
-        {storeNavItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-                         location.pathname.startsWith(item.path + '/');
-          
+        {storeNavItems.map(item => {
+          const isActive =
+            location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
           return (
             <ContextSidebarNavItem
               key={item.path}
@@ -77,10 +73,3 @@ export const StoreSidebar = () => {
     </BaseContextSidebar>
   );
 };
-
-
-
-
-
-
-

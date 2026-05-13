@@ -4,15 +4,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
-import {
-  TrendingUp,
-  GraduationCap,
-  BarChart3,
-  DollarSign,
-} from 'lucide-react';
+import { TrendingUp, GraduationCap, Users } from 'lucide-react';
 
 // Navigation de l'affiliation
 const affiliateNavItems = [
@@ -27,30 +22,30 @@ const affiliateNavItems = [
     icon: GraduationCap,
   },
   {
-    label: 'Statistiques',
-    path: '/affiliate/stats',
-    icon: BarChart3,
+    label: 'Programme d’Affiliation',
+    path: '/dashboard/affiliates',
+    icon: Users,
   },
   {
-    label: 'Revenus',
-    path: '/affiliate/revenue',
-    icon: DollarSign,
+    label: 'Parrainages',
+    path: '/dashboard/referrals',
+    icon: Users,
   },
 ];
 
 export const AffiliateSidebar = () => {
   const location = useLocation();
-  
+
   const getActiveSection = () => {
     if (location.pathname.includes('/courses')) return 'Cours Promus';
-    if (location.pathname.includes('/stats')) return 'Statistiques';
-    if (location.pathname.includes('/revenue')) return 'Revenus';
+    if (location.pathname.includes('/affiliates')) return 'Programme d’Affiliation';
+    if (location.pathname.includes('/referrals')) return 'Parrainages';
     return 'Tableau de bord';
   };
 
   const activeSection = getActiveSection();
 
-  const  breadcrumbItems: BreadcrumbItem[] = [
+  const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Affiliation', path: '/affiliate/dashboard' },
     { label: activeSection },
   ];
@@ -58,10 +53,10 @@ export const AffiliateSidebar = () => {
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
       <nav className="space-y-1" aria-label="Navigation affiliation">
-        {affiliateNavItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-                         location.pathname.startsWith(item.path + '/');
-          
+        {affiliateNavItems.map(item => {
+          const isActive =
+            location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
           return (
             <ContextSidebarNavItem
               key={item.path}
@@ -84,10 +79,3 @@ export const AffiliateSidebar = () => {
     </BaseContextSidebar>
   );
 };
-
-
-
-
-
-
-

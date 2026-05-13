@@ -33,8 +33,10 @@ export const ContextSidebarNavItem = ({
   horizontal = false,
 }: ContextSidebarNavItemProps) => {
   const location = useLocation();
-  const isActive = forcedActive ?? 
-    (location.pathname === path || location.pathname.startsWith(path + '/'));
+  const normalizedPath = path.split('?')[0];
+  const isActive =
+    forcedActive ??
+    (location.pathname === normalizedPath || location.pathname.startsWith(normalizedPath + '/'));
 
   // Mode horizontal (mobile - barre en bas)
   if (horizontal) {
@@ -54,10 +56,13 @@ export const ContextSidebarNavItem = ({
         aria-label={label}
         aria-current={isActive ? 'page' : undefined}
       >
-        <Icon className={cn(
-          'h-4 w-4 flex-shrink-0 transition-colors duration-200',
-          isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-        )} aria-hidden="true" />
+        <Icon
+          className={cn(
+            'h-4 w-4 flex-shrink-0 transition-colors duration-200',
+            isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+          )}
+          aria-hidden="true"
+        />
         <span className="text-xs font-medium text-center leading-tight max-w-[56px] truncate px-0.5">
           {label}
         </span>
@@ -84,10 +89,12 @@ export const ContextSidebarNavItem = ({
           : 'text-blue-100 hover:bg-blue-600/40 hover:text-white hover:translate-x-1 hover:shadow-sm'
       )}
     >
-      <Icon className={cn(
-        'h-4 w-4 sm:h-4.5 sm:w-4.5 flex-shrink-0 transition-colors duration-200',
-        isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
-      )} />
+      <Icon
+        className={cn(
+          'h-4 w-4 sm:h-4.5 sm:w-4.5 flex-shrink-0 transition-colors duration-200',
+          isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
+        )}
+      />
       <span className="truncate flex-1">{label}</span>
       {isActive && (
         <div className="absolute right-2 h-2 w-2 rounded-full bg-blue-300 animate-pulse" />
@@ -95,10 +102,3 @@ export const ContextSidebarNavItem = ({
     </NavLink>
   );
 };
-
-
-
-
-
-
-

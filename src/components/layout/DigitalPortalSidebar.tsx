@@ -4,16 +4,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
-import {
-  Package,
-  Download,
-  Key,
-  BarChart3,
-  Sparkles,
-} from 'lucide-react';
+import { Package, Download, Key, BarChart3, Sparkles } from 'lucide-react';
 
 // Navigation du portail digital
 const digitalPortalNavItems = [
@@ -34,7 +28,7 @@ const digitalPortalNavItems = [
   },
   {
     label: 'Analytics',
-    path: '/account/digital/analytics',
+    path: '/dashboard/digital-products?view=analytics',
     icon: BarChart3,
   },
   {
@@ -46,7 +40,7 @@ const digitalPortalNavItems = [
 
 export const DigitalPortalSidebar = () => {
   const location = useLocation();
-  
+
   const getActiveSection = () => {
     if (location.pathname.includes('/downloads')) return 'Mes Téléchargements';
     if (location.pathname.includes('/my-licenses')) return 'Mes Licences';
@@ -57,7 +51,7 @@ export const DigitalPortalSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const  breadcrumbItems: BreadcrumbItem[] = [
+  const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Portail Digital', path: '/account/digital' },
     { label: activeSection },
   ];
@@ -65,10 +59,10 @@ export const DigitalPortalSidebar = () => {
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
       <nav className="space-y-1" aria-label="Navigation portail digital">
-        {digitalPortalNavItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-                         location.pathname.startsWith(item.path + '/');
-          
+        {digitalPortalNavItems.map(item => {
+          const isActive =
+            location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
           return (
             <ContextSidebarNavItem
               key={item.path}
@@ -91,10 +85,3 @@ export const DigitalPortalSidebar = () => {
     </BaseContextSidebar>
   );
 };
-
-
-
-
-
-
-
