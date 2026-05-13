@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { analyzeSEO, SEOAnalysis } from "@/lib/seo-analyzer";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { analyzeSEO, SEOAnalysis } from '@/lib/seo-analyzer';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 
-const STORE_SEO_FIELDS = 'id, user_id, name, slug, description, about, meta_title, meta_description, meta_keywords, logo_url';
-const PRODUCT_SEO_FIELDS = 'id, store_id, name, slug, description, meta_title, meta_description, meta_keywords, image_url, images';
+const PRODUCT_SEO_FIELDS =
+  'id, store_id, name, slug, description, meta_title, meta_description, meta_keywords, image_url, images';
 
 export interface SEOPageData {
   id: string;
@@ -19,14 +19,14 @@ export const useSEOAnalysis = (userId?: string) => {
   return useQuery({
     queryKey: ['seo-analysis', userId],
     queryFn: async () => {
-      if (!userId) throw new Error("User ID required");
+      if (!userId) throw new Error('User ID required');
 
-      const  results: SEOPageData[] = [];
+      const results: SEOPageData[] = [];
 
       // Fetch user's stores
       const { data: stores, error: storesError } = await supabase
         .from('stores')
-        .select(STORE_SEO_FIELDS)
+        .select('*')
         .eq('user_id', userId);
 
       if (storesError) throw storesError;
@@ -41,7 +41,7 @@ export const useSEOAnalysis = (userId?: string) => {
             meta_description: store.meta_description,
             meta_keywords: store.meta_keywords,
             image_url: store.logo_url,
-            slug: store.slug
+            slug: store.slug,
           });
 
           results.push({
@@ -50,7 +50,7 @@ export const useSEOAnalysis = (userId?: string) => {
             name: store.name,
             url: generateStoreUrl(store.slug),
             analysis,
-            lastAnalyzed: new Date()
+            lastAnalyzed: new Date(),
           });
 
           // Update SEO score in database
@@ -64,7 +64,7 @@ export const useSEOAnalysis = (userId?: string) => {
       // Fetch user's products through stores
       if (stores && stores.length > 0) {
         const storeIds = stores.map(s => s.id);
-        
+
         const { data: products, error: productsError } = await supabase
           .from('products')
           .select(PRODUCT_SEO_FIELDS)
@@ -76,7 +76,7 @@ export const useSEOAnalysis = (userId?: string) => {
         if (products) {
           for (const product of products) {
             const store = stores.find(s => s.id === product.store_id);
-            
+
             const analysis = analyzeSEO({
               name: product.name,
               description: product.description,
@@ -85,7 +85,7 @@ export const useSEOAnalysis = (userId?: string) => {
               meta_keywords: product.meta_keywords,
               image_url: product.image_url,
               images: Array.isArray(product.images) ? product.images : [],
-              slug: product.slug
+              slug: product.slug,
             });
 
             results.push({
@@ -94,36 +94,37 @@ export const useSEOAnalysis = (userId?: string) => {
               name: product.name,
               url: store ? generateProductUrl(store.slug, product.slug) : '#',
               analysis,
-              lastAnalyzed: new Date()
+              lastAnalyzed: new Date(),
             });
 
             // Update SEO score in database
-            await supabase
-              .from('seo_pages')
-              .upsert({
+            await supabase.from('seo_pages').upsert(
+              {
                 page_type: 'product',
                 page_id: product.id,
                 title: product.name,
                 description: product.description,
                 url: store ? generateProductUrl(store.slug, product.slug) : '#',
                 seo_score: analysis.score.overall,
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'page_id'
-              });
+                updated_at: new Date().toISOString(),
+              },
+              {
+                onConflict: 'page_id',
+              }
+            );
           }
         }
       }
 
       return results;
     },
-    enabled: !!userId
+    enabled: !!userId,
   });
 };
 
 export const useAverageSEOScore = (data: SEOPageData[] | undefined) => {
   if (!data || data.length === 0) return 0;
-  
+
   const totalScore = data.reduce((sum, page) => sum + page.analysis.score.overall, 0);
   return Math.round(totalScore / data.length);
 };
@@ -137,9 +138,3 @@ export const usePagesToFixCount = (data: SEOPageData[] | undefined) => {
   if (!data) return 0;
   return data.filter(page => page.analysis.score.overall < 70).length;
 };
-
-
-
-
-
-

@@ -4,8 +4,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 
-const STORE_FIELDS =
-  'id, user_id, name, slug, description, logo_url, banner_url, is_active, created_at, updated_at, about, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, custom_domain, domain_status, domain_verification_token, domain_verified_at, domain_error_message, ssl_enabled, redirect_www, redirect_https, dns_records, primary_color, secondary_color, accent_color, background_color, text_color, text_secondary_color, button_primary_color, button_primary_text, button_secondary_color, button_secondary_text, link_color, link_hover_color, border_radius, shadow_intensity, heading_font, body_font, font_size_base, heading_size_h1, heading_size_h2, heading_size_h3, line_height, letter_spacing, header_style, footer_style, sidebar_enabled, sidebar_position, product_grid_columns, product_card_style, navigation_style, favicon_url, apple_touch_icon_url, watermark_url, placeholder_image_url, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, timezone, opening_hours, support_email, sales_email, press_email, partnership_email, support_phone, sales_phone, whatsapp_number, telegram_username, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, legal_pages, marketing_content, meta_title, meta_description, meta_keywords, og_image, seo_score, theme_color, google_analytics_id, google_analytics_enabled, facebook_pixel_id, facebook_pixel_enabled, google_tag_manager_id, google_tag_manager_enabled, tiktok_pixel_id, tiktok_pixel_enabled, custom_tracking_scripts, custom_scripts_enabled';
+// Lecture : utiliser uniquement les colonnes réellement présentes en base (évite
+// « column … does not exist » quand la prod n’a pas encore toutes les migrations).
+// L’interface `Store` garde les champs optionnels pour ce qui manque.
 
 // Types pour les horaires d'ouverture
 export interface StoreOpeningHours {
@@ -181,6 +182,7 @@ export interface Store {
   tiktok_pixel_enabled?: boolean;
   custom_tracking_scripts?: string | null;
   custom_scripts_enabled?: boolean;
+  subdomain?: string | null;
 }
 
 const MAX_STORES_PER_USER = 3;
@@ -211,7 +213,7 @@ export const useStores = () => {
 
       const { data, error } = await supabase
         .from('stores')
-        .select(STORE_FIELDS)
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
@@ -219,7 +221,7 @@ export const useStores = () => {
         throw error;
       }
 
-      return data || [];
+      return (data ?? []) as Store[];
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
