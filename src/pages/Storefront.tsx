@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useProductsOptimized } from '@/hooks/useProducts';
+import { useStorefrontProducts } from '@/hooks/useProducts';
 import StoreHeader from '@/components/storefront/StoreHeader';
 import StoreTabs from '@/components/storefront/StoreTabs';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
@@ -25,7 +25,6 @@ import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { StoreThemeProvider } from '@/components/storefront/StoreThemeProvider';
 import { StoreAnalyticsScripts } from '@/components/storefront/StoreAnalyticsScripts';
 import type { Store } from '@/hooks/useStores';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
@@ -52,7 +51,6 @@ const Storefront = () => {
     'all'
   );
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   const { isLowBandwidth } = useAdaptiveLoading();
 
   // ✅ PERFORMANCE: Preload image hero du store ou logo (potentielle LCP)
@@ -70,12 +68,9 @@ const Storefront = () => {
 
   // Utiliser un ID stable pour éviter les violations des règles des hooks
   const storeId = store?.id || null;
-  // Utiliser useProductsOptimized avec pagination pour meilleures performances
-  const { products, isLoading: productsLoading } = useProductsOptimized(storeId, {
-    page: 1,
-    // ✅ Mobile: limiter le DOM (scroll + perf). Desktop: conserver une liste large.
-    itemsPerPage: isMobile ? 24 : 100,
-  });
+  // Storefront public : requête simple sur `products` (via useStorefrontProducts)
+  // pour ne pas dépendre de la RPC d'admin `get_products_management`.
+  const { products, isLoading: productsLoading } = useStorefrontProducts(storeId);
   // Store-wide reviews not implemented yet; keep placeholders to avoid runtime errors
   const reviews: unknown[] = [];
   const reviewsLoading = false;
@@ -95,8 +90,8 @@ const Storefront = () => {
       const isStoreSubdomainContext =
         subdomainInfo.isStoreDomain && subdomainInfo.isSubdomain && !!subdomainInfo.subdomain;
 
-      let data: any = null;
-      let fetchError: any = null;
+      let data: Store | null = null;
+      let fetchError: unknown = null;
 
       if (isStoreSubdomainContext) {
         // En contexte sous-domaine, passer par la RPC dédiée.
@@ -105,21 +100,26 @@ const Storefront = () => {
           store_subdomain: subdomainInfo.subdomain,
         });
         fetchError = result.error;
-        data = result.data?.[0] || null;
+        data = (result.data?.[0] as Store | undefined) ?? null;
       } else {
         const result = await supabase
-          .from('stores_public' as any)
+          .from('stores_public')
           .select(STOREFRONT_STORE_FIELDS)
           .eq('slug', slug)
           .eq('is_active', true)
           .limit(1);
         fetchError = result.error;
-        data = result.data?.[0] || null;
+        data = (result.data?.[0] as Store | undefined) ?? null;
       }
 
       if (fetchError) {
         // Si l'erreur est "PGRST116" (no rows returned), c'est normal
-        if (fetchError.code === 'PGRST116') {
+        if (
+          typeof fetchError === 'object' &&
+          fetchError !== null &&
+          'code' in fetchError &&
+          (fetchError as { code?: string }).code === 'PGRST116'
+        ) {
           setStore(null);
           setError('Boutique introuvable');
           setHasLoadedOnce(true);

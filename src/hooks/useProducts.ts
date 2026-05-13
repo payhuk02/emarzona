@@ -150,7 +150,9 @@ export const useProductsOptimized = (
               short_description: product.short_description as string,
               image_url: product.image_url as string,
               price: Number(product.price),
-              promotional_price: product.promotional_price ? Number(product.promotional_price) : null,
+              promotional_price: product.promotional_price
+                ? Number(product.promotional_price)
+                : null,
               currency: product.currency as string,
               category: product.category as string,
               product_type: product.product_type as string,
@@ -166,13 +168,19 @@ export const useProductsOptimized = (
               updated_at: product.updated_at as string,
               tags: product.tags as string[],
               effective_price: Number(product.effective_price),
-              sales_last_30_days: product.sales_last_30_days ? Number(product.sales_last_30_days) : 0,
-              revenue_last_30_days: product.revenue_last_30_days ? Number(product.revenue_last_30_days) : 0,
+              sales_last_30_days: product.sales_last_30_days
+                ? Number(product.sales_last_30_days)
+                : 0,
+              revenue_last_30_days: product.revenue_last_30_days
+                ? Number(product.revenue_last_30_days)
+                : 0,
               stock_status: product.stock_status as string,
-              product_affiliate_settings: product.commission_rate ? {
-                commission_rate: Number(product.commission_rate),
-                affiliate_enabled: product.affiliate_enabled as boolean,
-              } : null,
+              product_affiliate_settings: product.commission_rate
+                ? {
+                    commission_rate: Number(product.commission_rate),
+                    affiliate_enabled: product.affiliate_enabled as boolean,
+                  }
+                : null,
             } as Product & {
               effective_price: number;
               sales_last_30_days: number;
@@ -226,3 +234,65 @@ export const useProductsOptimized = (
  * @deprecated Utilisez useProductsOptimized à la place.
  */
 export const useProducts = useProductsOptimized;
+
+/**
+ * Hook simplifié pour le **storefront public**.
+ *
+ * Objectif : éviter de dépendre de la RPC d'administration
+ * `get_products_management` (qui peut ne pas être déployée partout)
+ * et garantir que les produits s'affichent dès qu'ils existent
+ * dans la table `products`.
+ *
+ * Filtrage serveur minimal :
+ * - `store_id` = boutique courante
+ * - `is_active = true`
+ *
+ * Les autres filtres (type, catégorie, licence...) sont appliqués
+ * côté React dans `Storefront.tsx`.
+ */
+export const useStorefrontProducts = (storeId?: string | null) => {
+  const enabled = !!storeId;
+
+  const query = useQuery<Product[]>({
+    queryKey: ['storefront-products', storeId],
+    enabled,
+    queryFn: async () => {
+      if (!storeId) {
+        return [];
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('store_id', storeId)
+          .eq('is_active', true);
+
+        if (error) {
+          logger.error('Erreur chargement produits storefront:', error);
+          throw error;
+        }
+
+        // `data` peut contenir plus de champs que `Product`, on caste simplement.
+        return (data ?? []) as Product[];
+      } catch (_error: unknown) {
+        logger.error('Erreur dans useStorefrontProducts', {
+          error: _error instanceof Error ? _error.message : String(_error),
+          storeId,
+        });
+        throw _error;
+      }
+    },
+    retry: (failureCount, error) => shouldRetryError(error, failureCount),
+    retryDelay: attemptIndex => getRetryDelay(attemptIndex),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  return {
+    products: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error as Error | null,
+    refetch: query.refetch,
+  };
+};
