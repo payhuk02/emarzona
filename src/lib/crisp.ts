@@ -1,20 +1,22 @@
 /**
  * Configuration Crisp Chat - Support Live Chat
- * Universel : Fonctionne pour TOUS les types de produits (digital, physical, service, course)
+ * Universel : Fonctionne pour TOUS les types de produits (digital, physical, service, course, artist)
  * Date : 27 octobre 2025
  */
 
 import { logger } from './logger';
 
+type CrispCommand = unknown[];
+
 // Types pour Crisp
 declare global {
   interface Window {
-    $crisp: any[];
+    $crisp: CrispCommand[];
     CRISP_WEBSITE_ID?: string;
   }
 }
 
-export type ProductType = 'digital' | 'physical' | 'service' | 'course';
+export type ProductType = 'digital' | 'physical' | 'service' | 'course' | 'artist';
 
 export interface CrispUserData {
   email?: string;
@@ -39,7 +41,7 @@ export interface CrispSessionData {
  */
 export const initCrisp = (websiteId: string) => {
   if (typeof window === 'undefined') return;
-  
+
   // Éviter double initialisation
   if (window.$crisp) {
     logger.warn('Crisp already initialized');
@@ -59,8 +61,8 @@ export const initCrisp = (websiteId: string) => {
     logger.info('Crisp Chat initialized successfully');
   };
 
-  script.onerror = () => {
-    logger.error('Error loading Crisp', { error });
+  script.onerror = event => {
+    logger.error('Error loading Crisp', { event });
   };
 };
 
@@ -112,7 +114,7 @@ export const setCrispSegment = (segment: string) => {
 /**
  * Ajouter un événement personnalisé
  */
-export const pushCrispEvent = (eventName: string, data?: Record<string, any>) => {
+export const pushCrispEvent = (eventName: string, data?: Record<string, unknown>) => {
   if (!window.$crisp) return;
   window.$crisp.push(['set', 'session:event', [[eventName, data || {}]]]);
 };
@@ -175,11 +177,12 @@ export const setCrispProductContext = (
   storeName?: string
 ) => {
   // Segment basé sur le type de produit
-  const  segmentMap: Record<ProductType, string> = {
+  const segmentMap: Record<ProductType, string> = {
     digital: 'digital-product-visitor',
     physical: 'physical-product-visitor',
     service: 'service-visitor',
     course: 'course-visitor',
+    artist: 'artist-product-visitor',
   };
 
   setCrispSegment(segmentMap[productType]);
@@ -209,7 +212,7 @@ export const setCrispCheckoutContext = (
   currency: string = 'XOF'
 ) => {
   setCrispSegment('checkout-visitor');
-  
+
   pushCrispEvent('started_checkout', {
     product_type: productType,
     amount,
@@ -226,7 +229,7 @@ export const setCrispPostPurchaseContext = (
   amount: number
 ) => {
   setCrispSegment('customer');
-  
+
   pushCrispEvent('completed_purchase', {
     product_type: productType,
     order_id: orderId,
@@ -237,7 +240,9 @@ export const setCrispPostPurchaseContext = (
 /**
  * Messages automatiques par contexte
  */
-export const triggerCrispAutoMessage = (context: 'product' | 'checkout' | 'support' | 'enrollment') => {
+export const triggerCrispAutoMessage = (
+  context: 'product' | 'checkout' | 'support' | 'enrollment'
+) => {
   const messages = {
     product: "👋 Besoin d'aide pour ce produit ? Je suis là pour répondre à vos questions !",
     checkout: "💳 Une question sur le paiement ? N'hésitez pas à me contacter !",
@@ -271,7 +276,7 @@ export const configureCrispForRole = (role: 'seller' | 'buyer' | 'admin' | 'visi
 export const setupCrispInactivityTrigger = (delayMs: number = 30000) => {
   if (typeof window === 'undefined') return;
 
-  let  inactivityTimer: NodeJS.Timeout;
+  let inactivityTimer: NodeJS.Timeout;
 
   const resetTimer = () => {
     clearTimeout(inactivityTimer);
@@ -281,16 +286,9 @@ export const setupCrispInactivityTrigger = (delayMs: number = 30000) => {
   };
 
   // Reset sur toute interaction
-  ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach((event) => {
+  ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
     document.addEventListener(event, resetTimer, true);
   });
 
   resetTimer();
 };
-
-
-
-
-
-
-

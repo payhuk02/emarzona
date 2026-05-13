@@ -1,7 +1,7 @@
 /**
  * Hook : useCrispProduct
  * Configurer Crisp pour une page produit spécifique
- * Universel : Fonctionne pour digital, physical, service, course
+ * Universel : Fonctionne pour digital, physical, service, course, artist
  * Date : 27 octobre 2025
  */
 
@@ -23,12 +23,7 @@ export const useCrispProduct = (product: ProductInfo | null) => {
   useEffect(() => {
     if (!product) return;
 
-    setCrispProductContext(
-      product.type,
-      product.name,
-      product.id,
-      product.storeName
-    );
+    setCrispProductContext(product.type, product.name, product.id, product.storeName);
   }, [product]);
 };
 
@@ -42,10 +37,3 @@ export const useCrispCheckout = (product: ProductInfo | null) => {
     setCrispCheckoutContext(product.type, product.price);
   }, [product]);
 };
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 /**
  * UnifiedProductCard - Carte produit unifiée pour tous les types
- * S'adapte dynamiquement selon le type de produit (digital, physical, service, course)
+ * S'adapte dynamiquement selon le type de produit (digital, physical, service, course, artist)
  * Gère les fallbacks intelligents et l'affiliation
  *
  * Inspiré de: ComeUp, Gumroad, Lemonsqueezy
@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
-import { UnifiedProductCardProps, DigitalProduct } from '@/types/unified-product';
+import { UnifiedProductCardProps } from '@/types/unified-product';
 import {
   getProductKeyInfo,
   getProductTypeBadge,
@@ -47,7 +47,6 @@ import { ArtistProductCard } from './ArtistProductCard';
 import { PhysicalProductCard } from './PhysicalProductCard';
 import { ServiceProductCard } from './ServiceProductCard';
 import { CourseProductCard } from './CourseProductCard';
-import { useToast } from '@/hooks/use-toast';
 import { useMarketplaceFavorites } from '@/hooks/useMarketplaceFavorites';
 import {
   Dialog,
@@ -60,12 +59,11 @@ import {
 const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
   product,
   variant = 'marketplace',
-  showAffiliate: showAffiliate = true,
+  showAffiliate: _showAffiliate = true,
   showActions = true,
   onAction,
   className,
 }) => {
-  const { toast } = useToast();
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
   const isFavorite = favorites.has(product.id);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
@@ -99,7 +97,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       // Le toast est géré par useMarketplaceFavorites
       onAction?.('favorite', product);
     },
-    [product.id, product, toggleFavorite, onAction]
+    [product, toggleFavorite, onAction]
   );
 
   // Gérer le zoom

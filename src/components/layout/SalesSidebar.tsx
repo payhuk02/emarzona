@@ -3,8 +3,9 @@
  * Design professionnel et totalement responsive
  */
 
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
 import {
@@ -27,6 +28,8 @@ import {
   Camera,
   ShoppingBag,
   Globe,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 // Navigation des ventes & logistique
@@ -214,10 +217,11 @@ const salesNavGroups = [
 
 export const SalesSidebar = () => {
   const location = useLocation();
+  const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
 
   const getActiveSection = () => {
     const activeItem = salesNavItems.find(
-      (item) =>
+      item =>
         location.pathname === item.path ||
         (item.path !== '/dashboard/orders' && location.pathname.startsWith(item.path))
     );
@@ -226,7 +230,7 @@ export const SalesSidebar = () => {
 
   const activeSection = getActiveSection();
 
-  const  breadcrumbItems: BreadcrumbItem[] = [
+  const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Ventes & Logistique', path: '/dashboard/orders' },
     { label: activeSection },
   ];
@@ -236,45 +240,55 @@ export const SalesSidebar = () => {
       <nav className="space-y-4 md:space-y-6" aria-label="Navigation ventes">
         {salesNavGroups.map((group, groupIndex) => (
           <div key={groupIndex} className="space-y-2">
-            <h3 className="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-blue-200/80 uppercase tracking-wider border-b border-blue-800/30">
-              {group.label}
-            </h3>
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive =
-                  location.pathname === item.path ||
-                  (item.path !== '/dashboard/orders' &&
-                    location.pathname.startsWith(item.path));
+            <button
+              type="button"
+              onClick={() =>
+                setCollapsedGroups(prev =>
+                  prev.includes(group.label)
+                    ? prev.filter(label => label !== group.label)
+                    : [...prev, group.label]
+                )
+              }
+              className="w-full flex items-center justify-between px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-blue-200/80 uppercase tracking-wider border-b border-blue-800/30"
+              aria-expanded={!collapsedGroups.includes(group.label)}
+            >
+              <span>{group.label}</span>
+              {collapsedGroups.includes(group.label) ? (
+                <ChevronRight className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
+            </button>
+            {!collapsedGroups.includes(group.label) && (
+              <div className="space-y-1">
+                {group.items.map(item => {
+                  const isActive =
+                    location.pathname === item.path ||
+                    (item.path !== '/dashboard/orders' && location.pathname.startsWith(item.path));
 
-                return (
-                  <ContextSidebarNavItem
-                    key={item.path}
-                    label={item.label}
-                    path={item.path}
-                    icon={item.icon}
-                    isActive={isActive}
-                    onClick={() => {
-                      if (window.innerWidth < 768) {
-                        setTimeout(() => {
-                          const event = new Event('close-mobile-sidebar');
-                          window.dispatchEvent(event);
-                        }, 100);
-                      }
-                    }}
-                  />
-                );
-              })}
-            </div>
+                  return (
+                    <ContextSidebarNavItem
+                      key={item.path}
+                      label={item.label}
+                      path={item.path}
+                      icon={item.icon}
+                      isActive={isActive}
+                      onClick={() => {
+                        if (window.innerWidth < 768) {
+                          setTimeout(() => {
+                            const event = new Event('close-mobile-sidebar');
+                            window.dispatchEvent(event);
+                          }, 100);
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         ))}
       </nav>
     </BaseContextSidebar>
   );
 };
-
-
-
-
-
-
-

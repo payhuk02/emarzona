@@ -14,7 +14,7 @@ export const OrganizationSchema = () => {
     url: 'https://www.emarzona.com',
     logo: 'https://www.emarzona.com/emarzona-logo.png',
     description:
-      'Plateforme de ecommerce et marketing. Solution SaaS E-commerce pour la vente de produits digitaux, physiques, services et cours en ligne',
+      "Plateforme de ecommerce et marketing. Solution SaaS E-commerce pour la vente de produits digitaux, physiques, services, cours en ligne et œuvres d'artistes",
 
     // Contact
     contactPoint: {
@@ -65,9 +65,3 @@ export const OrganizationSchema = () => {
     </Helmet>
   );
 };
-
-
-
-
-
-

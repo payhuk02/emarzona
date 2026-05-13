@@ -1,7 +1,7 @@
 # 🛍️ Emarzona - Plateforme de ecommerce et marketing
 
 > **Plateforme E-commerce SaaS Haut de Gamme Multi-Produits**  
-> Solution professionnelle pour la vente de produits digitaux, physiques, services et cours en ligne
+> Solution professionnelle pour la vente de produits digitaux, physiques, services, cours en ligne et œuvres d'artistes
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8_Strict-blue)](https://www.typescriptlang.org/)
@@ -41,7 +41,7 @@
 
 ### ✨ Points Forts
 
-- ✅ **Multi-produits** : 4 types de produits dans une seule plateforme
+- ✅ **Multi-produits** : 5 types de produits dans une seule plateforme
 - ✅ **Paiements Avancés** : Acompte, paiement sécurisé (escrow), PayDunya/Moneroo
 - ✅ **Shipping Professionnel** : Intégration FedEx pour calcul et suivi en temps réel
 - ✅ **Messaging Intégré** : Chat vendor-client avec upload de médias
@@ -321,15 +321,17 @@ emarzona/
 │   ├── components/          # Composants React
 │   │   ├── digital/         # Composants produits digitaux
 │   │   ├── physical/        # Composants produits physiques
-│   │   ├── services/        # Composants services
+│   │   ├── service/         # Composants services
 │   │   ├── courses/         # Composants cours en ligne
+│   │   ├── artist/          # Composants œuvres d'artistes
 │   │   ├── shared/          # Composants partagés
 │   │   └── ui/              # ShadCN UI components
 │   ├── hooks/               # Custom React hooks
 │   │   ├── digital/         # Hooks produits digitaux
 │   │   ├── physical/        # Hooks produits physiques
-│   │   ├── services/        # Hooks services
-│   │   └── courses/         # Hooks cours
+│   │   ├── service/         # Hooks services
+│   │   ├── courses/         # Hooks cours
+│   │   └── artist/          # Hooks œuvres d'artistes
 │   ├── lib/                 # Utilitaires & config
 │   │   ├── supabase.ts      # Client Supabase
 │   │   └── utils.ts         # Helper functions

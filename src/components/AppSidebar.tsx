@@ -59,11 +59,11 @@ import {
   Workflow,
   Gavel,
 } from '@/components/icons';
-import { Database, Brain } from 'lucide-react';
+import { Database, Brain, Clock3, ChevronDown, ChevronRight } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import React from 'react';
 import {
   Sidebar,
@@ -78,6 +78,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -622,7 +623,7 @@ const menuSections = [
         icon: Sparkles,
       },
       {
-        title: 'Studio IA d\'images',
+        title: "Studio IA d'images",
         url: '/dashboard/image-studio',
         icon: Sparkles,
       },
@@ -997,6 +998,16 @@ const adminMenuSections = [
 // Menu Admin flat pour rétrocompatibilité (réservé pour usage futur)
 // const adminMenuItems = adminMenuSections.flatMap(section => section.items);
 
+const PINNED_NAV_KEY = 'sidebarPinnedUrls';
+const RECENT_NAV_KEY = 'sidebarRecentUrls';
+const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
+const MAX_RECENT_ITEMS = 6;
+
+const flattenSections = (sections: typeof menuSections) =>
+  sections.flatMap(section =>
+    section.items.map(item => ({ ...item, sectionLabel: section.label }))
+  );
+
 // Composant Logo avec fallback en cas d'erreur
 const LogoImageWithFallback = ({ src, className }: { src: string; className?: string }) => {
   const [hasError, setHasError] = useState(false);
@@ -1085,6 +1096,108 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed';
   // Détecte si on est sur une page admin
   const isOnAdminPage = location.pathname.startsWith('/admin');
+  const [navSearch, setNavSearch] = useState('');
+  const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
+  const [recentUrls, setRecentUrls] = useState<string[]>([]);
+  const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
+
+  const showAdminMenu = isAdmin && isOnAdminPage;
+  const showUserMenu = !showAdminMenu;
+  const activeSections = showAdminMenu ? adminMenuSections : menuSections;
+
+  const allCurrentEntries = useMemo(() => flattenSections(activeSections), [activeSections]);
+
+  const currentNavItem = useMemo(() => {
+    return allCurrentEntries.find(
+      item =>
+        location.pathname === item.url ||
+        (item.url !== '/dashboard' && location.pathname.startsWith(`${item.url}/`))
+    );
+  }, [allCurrentEntries, location.pathname]);
+
+  useEffect(() => {
+    try {
+      const storedPinned = localStorage.getItem(PINNED_NAV_KEY);
+      const storedRecent = localStorage.getItem(RECENT_NAV_KEY);
+      const storedCollapsed = localStorage.getItem(COLLAPSED_SECTIONS_KEY);
+
+      if (storedPinned) setPinnedUrls(JSON.parse(storedPinned));
+      if (storedRecent) setRecentUrls(JSON.parse(storedRecent));
+      if (storedCollapsed) setCollapsedSections(JSON.parse(storedCollapsed));
+    } catch (error) {
+      logger.warn('Failed to restore sidebar preferences', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(PINNED_NAV_KEY, JSON.stringify(pinnedUrls));
+  }, [pinnedUrls]);
+
+  useEffect(() => {
+    localStorage.setItem(RECENT_NAV_KEY, JSON.stringify(recentUrls));
+  }, [recentUrls]);
+
+  useEffect(() => {
+    localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify(collapsedSections));
+  }, [collapsedSections]);
+
+  useEffect(() => {
+    if (!currentNavItem?.url) return;
+
+    setRecentUrls(prev => {
+      const deduped = prev.filter(url => url !== currentNavItem.url);
+      return [currentNavItem.url, ...deduped].slice(0, MAX_RECENT_ITEMS);
+    });
+  }, [currentNavItem?.url]);
+
+  const toggleSectionCollapse = (sectionLabel: string) => {
+    setCollapsedSections(prev =>
+      prev.includes(sectionLabel)
+        ? prev.filter(label => label !== sectionLabel)
+        : [...prev, sectionLabel]
+    );
+  };
+
+  const togglePinForCurrentPage = () => {
+    if (!currentNavItem?.url) return;
+    setPinnedUrls(prev =>
+      prev.includes(currentNavItem.url)
+        ? prev.filter(url => url !== currentNavItem.url)
+        : [currentNavItem.url, ...prev].slice(0, 10)
+    );
+  };
+
+  const pinnedItems = useMemo(
+    () => allCurrentEntries.filter(item => pinnedUrls.includes(item.url)),
+    [allCurrentEntries, pinnedUrls]
+  );
+
+  const recentItems = useMemo(
+    () =>
+      recentUrls
+        .map(url => allCurrentEntries.find(item => item.url === url))
+        .filter((item): item is (typeof allCurrentEntries)[number] => Boolean(item))
+        .filter(item => !pinnedUrls.includes(item.url)),
+    [allCurrentEntries, recentUrls, pinnedUrls]
+  );
+
+  const filterSectionsBySearch = useMemo(() => {
+    const normalizedSearch = navSearch.trim().toLowerCase();
+    const sections = activeSections;
+
+    if (!normalizedSearch) {
+      return sections;
+    }
+
+    return sections
+      .map(section => ({
+        ...section,
+        items: section.items.filter(item =>
+          `${item.title} ${item.url}`.toLowerCase().includes(normalizedSearch)
+        ),
+      }))
+      .filter(section => section.items.length > 0);
+  }, [navSearch, activeSections]);
 
   const handleLogout = async () => {
     try {
@@ -1161,132 +1274,251 @@ export function AppSidebar() {
             </Link>
           </div>
 
-          {/* Menu Items - Organisé par sections (masqué sur pages admin) */}
-          {!isOnAdminPage &&
-            menuSections.map(section => (
+          {/* Barre utilitaire de navigation */}
+          {!isCollapsed && (
+            <div className="px-3 pt-3 pb-2 border-b border-white/10">
+              <label
+                htmlFor="sidebar-search"
+                className="text-[11px] uppercase tracking-wide text-white/70 font-semibold"
+              >
+                Navigation rapide
+              </label>
+              <div className="relative mt-2">
+                <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/60" />
+                <Input
+                  id="sidebar-search"
+                  value={navSearch}
+                  onChange={e => setNavSearch(e.target.value)}
+                  placeholder="Rechercher une page..."
+                  className="h-9 pl-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/40"
+                  aria-label="Rechercher dans le menu de navigation"
+                />
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={togglePinForCurrentPage}
+                  disabled={!currentNavItem}
+                  className="h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
+                >
+                  {currentNavItem && pinnedUrls.includes(currentNavItem.url)
+                    ? 'Désépingler cette page'
+                    : 'Épingler cette page'}
+                </Button>
+                {currentNavItem && (
+                  <span className="text-[11px] text-white/60 truncate max-w-[140px]">
+                    {currentNavItem.title}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!isCollapsed && (pinnedItems.length > 0 || recentItems.length > 0) && (
+            <div className="px-3 py-2 border-b border-white/10 space-y-2">
+              {pinnedItems.length > 0 && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold mb-1">
+                    Accès épinglés
+                  </p>
+                  <div className="space-y-1">
+                    {pinnedItems.slice(0, 5).map(item => (
+                      <Button
+                        key={`pin-${item.url}`}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(item.url)}
+                        className="w-full justify-start h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
+                      >
+                        <item.icon className="h-3.5 w-3.5 mr-2" />
+                        <span className="truncate">{item.title}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {recentItems.length > 0 && (
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold mb-1 flex items-center gap-1">
+                    <Clock3 className="h-3 w-3" />
+                    Récents
+                  </p>
+                  <div className="space-y-1">
+                    {recentItems.slice(0, 4).map(item => (
+                      <Button
+                        key={`recent-${item.url}`}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(item.url)}
+                        className="w-full justify-start h-7 px-2 text-xs text-white/80 hover:bg-white/10 hover:text-white"
+                      >
+                        <item.icon className="h-3.5 w-3.5 mr-2" />
+                        <span className="truncate">{item.title}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Menu Items - Organisé par sections */}
+          {showUserMenu &&
+            filterSectionsBySearch.map(section => (
               <SidebarGroup key={section.label}>
                 <SidebarGroupLabel
                   className="font-semibold opacity-90"
                   aria-label={`Section ${section.label}`}
                 >
                   {!isCollapsed && (
-                    <span className="text-orange-500" style={{ color: '#FF8C00' }}>
-                      {section.label}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleSectionCollapse(section.label)}
+                      className="w-full flex items-center justify-between text-orange-500"
+                      style={{ color: '#FF8C00' }}
+                      aria-expanded={!collapsedSections.includes(section.label)}
+                    >
+                      <span>{section.label}</span>
+                      {collapsedSections.includes(section.label) ? (
+                        <ChevronRight className="h-3.5 w-3.5 text-white/70" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5 text-white/70" />
+                      )}
+                    </button>
                   )}
                 </SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {section.items.map(item => {
-                      const IconComponent = item.icon;
-                      if (!IconComponent) {
-                        logger.warn(`Menu item missing icon: ${item.title}`);
-                        return null;
-                      }
+                {!collapsedSections.includes(section.label) && (
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {section.items.map(item => {
+                        const IconComponent = item.icon;
+                        if (!IconComponent) {
+                          logger.warn(`Menu item missing icon: ${item.title}`);
+                          return null;
+                        }
 
-                      // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
-                      if (item.title === 'Tableau de bord' && !storesLoading && stores.length > 0) {
-                        const isDashboardActive = location.pathname === '/dashboard';
-                        return (
-                          <SidebarMenuItem
-                            key={`${section.label}-${item.title}-${item.url}-dashboard`}
-                          >
-                            <SidebarMenuButton
-                              asChild
-                              className={`transition-all duration-300 group relative flex items-center ${
-                                isDashboardActive
-                                  ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
-                                  : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
-                              }`}
+                        // Menu spécial pour "Tableau de bord" avec sous-menu des boutiques - STATIQUE (toujours ouvert)
+                        if (
+                          item.title === 'Tableau de bord' &&
+                          !storesLoading &&
+                          stores.length > 0
+                        ) {
+                          const isDashboardActive = location.pathname === '/dashboard';
+                          return (
+                            <SidebarMenuItem
+                              key={`${section.label}-${item.title}-${item.url}-dashboard`}
                             >
-                              <NavLink to={item.url} end className="flex items-center gap-2 w-full">
+                              <SidebarMenuButton
+                                asChild
+                                className={`transition-all duration-300 group relative flex items-center ${
+                                  isDashboardActive
+                                    ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
+                                    : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
+                                }`}
+                              >
+                                <NavLink
+                                  to={item.url}
+                                  end
+                                  className="flex items-center gap-2 w-full"
+                                >
+                                  <IconComponent
+                                    className="h-4 w-4 flex-shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  {!isCollapsed && (
+                                    <span className="flex-1 font-medium">{item.title}</span>
+                                  )}
+                                </NavLink>
+                              </SidebarMenuButton>
+                              {/* Sous-menu des boutiques - TOUJOURS VISIBLE (statique) */}
+                              {!isCollapsed && (
+                                <div className="ml-4 mt-1 space-y-1">
+                                  {stores.map(store => (
+                                    <Button
+                                      key={store.id}
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        switchStore(store.id);
+                                        navigate('/dashboard');
+                                        toast({
+                                          title: 'Boutique changée',
+                                          description: `Vous consultez maintenant les données de "${store.name}"`,
+                                        });
+                                      }}
+                                      className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
+                                        selectedStoreId === store.id
+                                          ? 'bg-white/20 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100'
+                                          : 'hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white'
+                                      }`}
+                                    >
+                                      {selectedStoreId === store.id && (
+                                        <Check className="h-3 w-3 mr-2" />
+                                      )}
+                                      <span className="truncate">{store.name}</span>
+                                    </Button>
+                                  ))}
+                                  {canCreateStore() && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => navigate('/dashboard/store')}
+                                      className="w-full justify-start !text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90"
+                                    >
+                                      <Plus className="h-3 w-3 mr-2" />
+                                      <span>Créer une boutique</span>
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                            </SidebarMenuItem>
+                          );
+                        }
+
+                        // Menu items normaux
+                        return (
+                          <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
+                            <SidebarMenuButton asChild>
+                              <NavLink
+                                to={item.url}
+                                end={item.url === '/dashboard'}
+                                className={({ isActive }) =>
+                                  `transition-all duration-300 group relative flex items-center ${
+                                    isActive
+                                      ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
+                                      : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
+                                  }`
+                                }
+                              >
                                 <IconComponent
                                   className="h-4 w-4 flex-shrink-0"
                                   aria-hidden="true"
                                 />
-                                {!isCollapsed && (
+                                {!isCollapsed ? (
                                   <span className="flex-1 font-medium">{item.title}</span>
+                                ) : (
+                                  <span className="sr-only">{item.title}</span>
                                 )}
                               </NavLink>
                             </SidebarMenuButton>
-                            {/* Sous-menu des boutiques - TOUJOURS VISIBLE (statique) */}
-                            {!isCollapsed && (
-                              <div className="ml-4 mt-1 space-y-1">
-                                {stores.map(store => (
-                                  <Button
-                                    key={store.id}
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      switchStore(store.id);
-                                      navigate('/dashboard');
-                                      toast({
-                                        title: 'Boutique changée',
-                                        description: `Vous consultez maintenant les données de "${store.name}"`,
-                                      });
-                                    }}
-                                    className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
-                                      selectedStoreId === store.id
-                                        ? 'bg-white/20 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100'
-                                        : 'hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white'
-                                    }`}
-                                  >
-                                    {selectedStoreId === store.id && (
-                                      <Check className="h-3 w-3 mr-2" />
-                                    )}
-                                    <span className="truncate">{store.name}</span>
-                                  </Button>
-                                ))}
-                                {canCreateStore() && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => navigate('/dashboard/store')}
-                                    className="w-full justify-start !text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90"
-                                  >
-                                    <Plus className="h-3 w-3 mr-2" />
-                                    <span>Créer une boutique</span>
-                                  </Button>
-                                )}
-                              </div>
-                            )}
                           </SidebarMenuItem>
                         );
-                      }
-
-                      // Menu items normaux
-                      return (
-                        <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                          <SidebarMenuButton asChild>
-                            <NavLink
-                              to={item.url}
-                              end={item.url === '/dashboard'}
-                              className={({ isActive }) =>
-                                `transition-all duration-300 group relative flex items-center ${
-                                  isActive
-                                    ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
-                                    : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
-                                }`
-                              }
-                            >
-                              <IconComponent className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                              {!isCollapsed ? (
-                                <span className="flex-1 font-medium">{item.title}</span>
-                              ) : (
-                                <span className="sr-only">{item.title}</span>
-                              )}
-                            </NavLink>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                )}
               </SidebarGroup>
             ))}
 
+          {!isCollapsed && filterSectionsBySearch.length === 0 && (
+            <div className="px-3 py-4 text-sm text-white/70">
+              Aucun résultat pour <span className="font-semibold text-white">"{navSearch}"</span>.
+            </div>
+          )}
+
           {/* Bouton Retour Dashboard (visible uniquement sur pages admin) */}
-          {isAdmin && isOnAdminPage && (
+          {showAdminMenu && (
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -1308,50 +1540,63 @@ export function AppSidebar() {
           )}
 
           {/* Admin Menu Items - Organisé par sections */}
-          {isAdmin &&
-            adminMenuSections.map(section => (
+          {showAdminMenu &&
+            filterSectionsBySearch.map(section => (
               <SidebarGroup key={section.label}>
                 <SidebarGroupLabel className="font-semibold opacity-90">
                   {!isCollapsed && (
-                    <span className="text-orange-500" style={{ color: '#FF8C00' }}>
-                      {section.label}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleSectionCollapse(section.label)}
+                      className="w-full flex items-center justify-between text-orange-500"
+                      style={{ color: '#FF8C00' }}
+                      aria-expanded={!collapsedSections.includes(section.label)}
+                    >
+                      <span>{section.label}</span>
+                      {collapsedSections.includes(section.label) ? (
+                        <ChevronRight className="h-3.5 w-3.5 text-white/70" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5 text-white/70" />
+                      )}
+                    </button>
                   )}
                 </SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {section.items.map(item => {
-                      const IconComponent = item.icon;
-                      if (!IconComponent) {
-                        logger.warn(`Menu item missing icon: ${item.title}`);
-                        return null;
-                      }
-                      return (
-                        <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                          <SidebarMenuButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className={({ isActive }) =>
-                                `transition-all duration-300 ${
-                                  isActive
-                                    ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
-                                    : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
-                                }`
-                              }
-                            >
-                              <IconComponent className="h-4 w-4" aria-hidden="true" />
-                              {!isCollapsed ? (
-                                <span>{item.title}</span>
-                              ) : (
-                                <span className="sr-only">{item.title}</span>
-                              )}
-                            </NavLink>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      );
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
+                {!collapsedSections.includes(section.label) && (
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {section.items.map(item => {
+                        const IconComponent = item.icon;
+                        if (!IconComponent) {
+                          logger.warn(`Menu item missing icon: ${item.title}`);
+                          return null;
+                        }
+                        return (
+                          <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
+                            <SidebarMenuButton asChild>
+                              <NavLink
+                                to={item.url}
+                                className={({ isActive }) =>
+                                  `transition-all duration-300 ${
+                                    isActive
+                                      ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
+                                      : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
+                                  }`
+                                }
+                              >
+                                <IconComponent className="h-4 w-4" aria-hidden="true" />
+                                {!isCollapsed ? (
+                                  <span>{item.title}</span>
+                                ) : (
+                                  <span className="sr-only">{item.title}</span>
+                                )}
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                )}
               </SidebarGroup>
             ))}
         </SidebarContent>
