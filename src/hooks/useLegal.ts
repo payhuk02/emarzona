@@ -6,18 +6,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import type { 
-  LegalDocument, 
-  UserConsent, 
-  CookiePreferences, 
+import type {
+  LegalDocument,
+  UserConsent,
+  CookiePreferences,
   GDPRRequest,
   LegalDocumentType,
-  GDPRRequestType
+  GDPRRequestType,
 } from '@/types/legal';
 
-const USER_CONSENT_FIELDS = 'id, user_id, document_type, document_version, consented_at, ip_address, user_agent, consent_method, created_at';
-const COOKIE_PREFERENCES_FIELDS = 'id, user_id, necessary, analytics, marketing, preferences, consent_date, updated_at';
-const GDPR_REQUEST_FIELDS = 'id, user_id, request_type, status, notes, requested_at, processed_at, processed_by, response_data';
+const USER_CONSENT_FIELDS =
+  'id, user_id, document_type, document_version, consented_at, ip_address, user_agent, consent_method, created_at';
+/** Colonnes alignées sur `public.cookie_preferences` (types Supabase) */
+const COOKIE_PREFERENCES_FIELDS =
+  'id, user_id, necessary, analytics, marketing, functional, created_at, updated_at';
+const GDPR_REQUEST_FIELDS =
+  'id, user_id, request_type, status, notes, requested_at, processed_at, processed_by, response_data';
 
 // Hook: Obtenir un document légal
 export const useLegalDocument = (
@@ -29,7 +33,7 @@ export const useLegalDocument = (
     queryFn: async (): Promise<LegalDocument | null> => {
       const { data, error } = await supabase.rpc('get_latest_legal_document', {
         doc_type: type,
-        doc_language: language
+        doc_language: language,
       });
 
       if (error) throw error;
@@ -49,7 +53,7 @@ export const useRecordConsent = () => {
       documentVersion,
       ipAddress,
       userAgent,
-      consentMethod = 'settings'
+      consentMethod = 'settings',
     }: {
       userId: string;
       documentType: string;
@@ -64,7 +68,7 @@ export const useRecordConsent = () => {
         p_document_version: documentVersion,
         p_ip_address: ipAddress,
         p_user_agent: userAgent,
-        p_consent_method: consentMethod
+        p_consent_method: consentMethod,
       });
 
       if (error) throw error;
@@ -118,22 +122,34 @@ export const useCookiePreferences = (userId: string | undefined) => {
         // Ignorer les erreurs 404 et PGRST116
         if (error) {
           // Codes d'erreur à ignorer (table inexistante ou aucune ligne)
-          if (error.code === 'PGRST116' || error.code === '42P01' || error.message?.includes('404') || error.message?.includes('does not exist')) {
+          if (
+            error.code === 'PGRST116' ||
+            error.code === '42P01' ||
+            error.message?.includes('404') ||
+            error.message?.includes('does not exist')
+          ) {
             return null;
           }
           // Pour les autres erreurs, log mais ne pas throw
           logger.warn('Erreur lors de la récupération des préférences cookies', { error, userId });
           return null;
         }
-        
+
         return data || null;
       } catch (_err: unknown) {
         const errorObj = _err as { code?: string; message?: string };
         // Gérer les erreurs inattendues (table n'existe pas, etc.)
-        if (errorObj?.code === '42P01' || errorObj?.message?.includes('does not exist') || errorObj?.message?.includes('404')) {
+        if (
+          errorObj?.code === '42P01' ||
+          errorObj?.message?.includes('does not exist') ||
+          errorObj?.message?.includes('404')
+        ) {
           return null; // Table n'existe pas, retourner null silencieusement
         }
-        logger.warn('Erreur inattendue lors de la récupération des préférences cookies', { error: _err, userId });
+        logger.warn('Erreur inattendue lors de la récupération des préférences cookies', {
+          error: _err,
+          userId,
+        });
         return null;
       }
     },
@@ -148,7 +164,7 @@ export const useUpdateCookiePreferences = () => {
   return useMutation({
     mutationFn: async ({
       userId,
-      preferences
+      preferences,
     }: {
       userId?: string;
       preferences: Partial<CookiePreferences>;
@@ -162,19 +178,29 @@ export const useUpdateCookiePreferences = () => {
       try {
         const { data, error } = await supabase
           .from('cookie_preferences')
-          .upsert({
-            user_id: userId,
-            ...preferences,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id'
-          })
+          .upsert(
+            {
+              user_id: userId,
+              ...preferences,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              onConflict: 'user_id',
+            }
+          )
           .select(COOKIE_PREFERENCES_FIELDS)
           .maybeSingle(); // Utiliser maybeSingle pour éviter erreur si pas de ligne
 
         // Si la table n'existe pas, sauvegarder en localStorage comme fallback
-        if (error && (error.code === '42P01' || error.message?.includes('does not exist') || error.message?.includes('404'))) {
-          logger.warn('Table cookie_preferences n\'existe pas, sauvegarde en localStorage', { userId });
+        if (
+          error &&
+          (error.code === '42P01' ||
+            error.message?.includes('does not exist') ||
+            error.message?.includes('404'))
+        ) {
+          logger.warn("Table cookie_preferences n'existe pas, sauvegarde en localStorage", {
+            userId,
+          });
           localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
           return preferences as Partial<CookiePreferences>;
         }
@@ -185,17 +211,24 @@ export const useUpdateCookiePreferences = () => {
           localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
           return preferences as Partial<CookiePreferences>;
         }
-        
-        return data || preferences as Partial<CookiePreferences>;
+
+        return data || (preferences as Partial<CookiePreferences>);
       } catch (_err: unknown) {
         const errorObj = _err as { code?: string; message?: string };
         // Fallback: sauvegarder en localStorage si erreur Supabase
-        if (errorObj?.code === '42P01' || errorObj?.message?.includes('does not exist') || errorObj?.message?.includes('404')) {
+        if (
+          errorObj?.code === '42P01' ||
+          errorObj?.message?.includes('does not exist') ||
+          errorObj?.message?.includes('404')
+        ) {
           // Table n'existe pas, utiliser localStorage silencieusement
           localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
           return preferences as Partial<CookiePreferences>;
         }
-        logger.warn('Erreur lors de la sauvegarde des préférences cookies, fallback localStorage', { error: _err, userId });
+        logger.warn('Erreur lors de la sauvegarde des préférences cookies, fallback localStorage', {
+          error: _err,
+          userId,
+        });
         localStorage.setItem('cookiePreferences', JSON.stringify(preferences));
         return preferences as Partial<CookiePreferences>;
       }
@@ -214,19 +247,19 @@ export const useCreateGDPRRequest = () => {
     mutationFn: async ({
       userId,
       requestType,
-      notes
+      notes,
     }: {
       userId: string;
       requestType: GDPRRequestType;
       notes?: string;
     }) => {
-      const { data, error} = await supabase
+      const { data, error } = await supabase
         .from('gdpr_requests')
         .insert({
           user_id: userId,
           request_type: requestType,
           notes,
-          status: 'pending'
+          status: 'pending',
         })
         .select(GDPR_REQUEST_FIELDS)
         .single();
@@ -259,10 +292,3 @@ export const useGDPRRequests = (userId: string | undefined) => {
     enabled: !!userId,
   });
 };
-
-
-
-
-
-
-

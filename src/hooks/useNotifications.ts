@@ -15,7 +15,8 @@ import type {
   NotificationPreferences,
 } from '@/types/notifications';
 
-const NOTIFICATION_PREFERENCES_FIELDS = 'id, user_id, email_notifications, push_notifications, sound_notifications, vibration_notifications, vibration_intensity, created_at, updated_at';
+const NOTIFICATION_PREFERENCES_FIELDS =
+  'id, user_id, email_notifications, push_notifications, sound_notifications, vibration_notifications, vibration_intensity, created_at, updated_at';
 
 /**
  * Hook pour récupérer les notifications de l'utilisateur avec pagination
@@ -36,7 +37,10 @@ export const useNotifications = (options?: {
     queryFn: async (): Promise<{ data: Notification[]; count: number }> => {
       let query = supabase
         .from('notifications')
-        .select('id,type,title,body,is_read,is_archived,metadata,created_at,updated_at', { count: 'exact' });
+        .select(
+          'id,user_id,type,title,message,is_read,is_archived,metadata,action_url,action_label,priority,read_at,created_at,updated_at',
+          { count: 'exact' }
+        );
 
       // Si on n'inclut pas les archivées, filtrer
       if (!includeArchived) {
@@ -218,7 +222,9 @@ export const useNotificationPreferences = () => {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        logger.warn('Error fetching notification preferences (table may not exist)', { error: error.message });
+        logger.warn('Error fetching notification preferences (table may not exist)', {
+          error: error.message,
+        });
         return null;
       }
 
