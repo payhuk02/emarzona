@@ -84,7 +84,7 @@ export default function PayBalanceList() {
   } = useQuery({
     queryKey: ['pay-balance-orders', user?.id, store?.id],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('orders')
         .select(
           `
@@ -109,7 +109,24 @@ export default function PayBalanceList() {
       if (store?.id) {
         query = query.eq('store_id', store.id);
       } else if (user?.id) {
-        query = query.eq('buyer_id', user.id);
+        // Pas de colonne buyer_id côté API : lier via customers.email ou legacy customer_id = auth uid
+        if (user.email) {
+          const { data: customerRows, error: customersError } = await supabase
+            .from('customers')
+            .select('id')
+            .eq('email', user.email);
+
+          if (customersError) throw customersError;
+
+          const customerIds = (customerRows ?? []).map(c => c.id).filter(Boolean);
+          if (customerIds.length > 0) {
+            query = query.in('customer_id', customerIds);
+          } else {
+            query = query.eq('customer_id', user.id);
+          }
+        } else {
+          query = query.eq('customer_id', user.id);
+        }
       }
 
       const { data, error } = await query;
@@ -248,8 +265,8 @@ export default function PayBalanceList() {
         description: `${filteredOrders.length} solde(s) exporté(s) en CSV.`,
       });
       logger.info('Balances exported to CSV', { count: filteredOrders.length });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    } catch (_error: unknown) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
       logger.error('Error exporting balances to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
@@ -270,8 +287,8 @@ export default function PayBalanceList() {
         description: 'La liste des soldes a été mise à jour.',
       });
       logger.info('Balances refreshed');
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    } catch (_error: unknown) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
       logger.error('Error refreshing balances', { error: errorMessage });
       toast({
         title: '❌ Erreur',
@@ -649,9 +666,3 @@ export default function PayBalanceList() {
     </MainLayout>
   );
 }
-
-
-
-
-
-

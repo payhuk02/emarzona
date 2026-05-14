@@ -113,7 +113,7 @@ export default function PaymentManagementList() {
       if (!authUser) throw new Error('Not authenticated');
 
       // Get user profile and store
-      let  storeId= store?.id;
+      let storeId = store?.id;
 
       if (!storeId && authUser?.id) {
         const { data: profile } = await supabase
@@ -133,7 +133,7 @@ export default function PaymentManagementList() {
         }
       }
 
-      let  query= supabase
+      let query = supabase
         .from('orders')
         .select(
           `
@@ -158,8 +158,24 @@ export default function PaymentManagementList() {
       if (storeId) {
         query = query.eq('store_id', storeId);
       } else if (authUser?.id) {
-        // Fallback: filter by buyer_id
-        query = query.eq('buyer_id', authUser.id);
+        // Pas de colonne buyer_id : rattacher les commandes via customers.email (ou legacy customer_id = uid auth)
+        if (authUser.email) {
+          const { data: customerRows, error: customersError } = await supabase
+            .from('customers')
+            .select('id')
+            .eq('email', authUser.email);
+
+          if (customersError) throw customersError;
+
+          const customerIds = (customerRows ?? []).map(c => c.id).filter(Boolean);
+          if (customerIds.length > 0) {
+            query = query.in('customer_id', customerIds);
+          } else {
+            query = query.eq('customer_id', authUser.id);
+          }
+        } else {
+          query = query.eq('customer_id', authUser.id);
+        }
       }
 
       const { data, error: queryError } = await query;
@@ -356,7 +372,7 @@ export default function PaymentManagementList() {
         description: `${filteredOrders.length} commande(s) exportée(s) en CSV.`,
       });
       logger.info('Payment management orders exported to CSV', { count: filteredOrders.length });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error exporting orders to CSV', { error: errorMessage });
       toast({
@@ -378,7 +394,7 @@ export default function PaymentManagementList() {
         description: 'La liste des paiements a été mise à jour.',
       });
       logger.info('Payment management orders refreshed');
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error refreshing orders', { error: errorMessage });
       toast({
@@ -740,9 +756,3 @@ export default function PaymentManagementList() {
     </MainLayout>
   );
 }
-
-
-
-
-
-
