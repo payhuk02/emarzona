@@ -28,6 +28,8 @@ import { formatPrice } from '@/lib/product-helpers';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
+import type { Currency } from '@/lib/currency-converter';
+import { isSupportedCurrency } from '@/lib/currency-converter';
 
 interface CheckoutFormData {
   firstName: string;
@@ -54,12 +56,17 @@ type CheckoutStore = {
 } | null;
 type CheckoutProduct = {
   id: string;
+  store_id?: string;
+  slug?: string | null;
   name?: string | null;
   price?: number | null;
   promotional_price?: number | null;
   currency?: string | null;
   description?: string | null;
   short_description?: string | null;
+  image_url?: string | null;
+  product_type?: string | null;
+  stores?: CheckoutStore | CheckoutStore[] | null;
 } | null;
 type CheckoutVariant = {
   id: string;
@@ -79,22 +86,23 @@ type LooseSupabaseClient = { from: (table: string) => LooseSupabaseQuery };
 const CHECKOUT_PRODUCT_FIELDS =
   'id, store_id, slug, name, description, short_description, price, promotional_price, currency, image_url, product_type';
 const CHECKOUT_STORE_FIELDS = 'id, name, slug, subdomain, default_currency, logo_url, created_at';
-const CHECKOUT_PUBLIC_STORE_FIELDS = 'id, name, slug, subdomain, default_currency, logo_url, created_at';
+const CHECKOUT_PUBLIC_STORE_FIELDS =
+  'id, name, slug, subdomain, default_currency, logo_url, created_at';
 const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_value, name';
 const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_value, name';
 
 /**
  * Page de finalisation de commande (Checkout)
- * 
+ *
  * Permet à l'utilisateur de finaliser son achat en :
  * - Remplissant ses informations de livraison
  * - Appliquant un code promo éventuel
  * - Vérifiant le résumé de commande
  * - Procédant au paiement via Moneroo/PayDunya
- * 
+ *
  * @component
  * @returns {JSX.Element} Le composant Checkout
- * 
+ *
  * @remarks
  * - Preload des images produit pour améliorer LCP
  * - Validation complète du formulaire
@@ -102,12 +110,12 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  * - Intégration Moneroo avec lazy loading
  * - Gestion d'erreurs robuste
  * - Accessible avec ARIA labels complets
- * 
+ *
  * @example
  * ```tsx
  * <Route path="/checkout" element={<Checkout />} />
  * ```
- * 
+ *
  * @see {@link loadMonerooPayment} pour l'intégration Moneroo
  * @see {@link CouponInput} pour la gestion des codes promo
  */
@@ -243,7 +251,7 @@ const Checkout = () => {
           return;
         }
 
-        setProduct(productData);
+        setProduct(productData as unknown as CheckoutProduct);
 
         // Extraire la boutique depuis la relation
         // Supabase retourne stores comme un tableau même avec !inner
@@ -252,11 +260,11 @@ const Checkout = () => {
           Array.isArray(productData.stores) &&
           productData.stores.length > 0
         ) {
-          setStore(productData.stores[0]);
+          setStore(productData.stores[0] as CheckoutStore);
         } else {
           // Fallback: charger la boutique séparément si la relation n'a pas fonctionné
           const { data: storeData, error: storeError } = await supabase
-            .from('stores_public' as any)
+            .from('stores_public')
             .select(CHECKOUT_PUBLIC_STORE_FIELDS)
             .eq('id', storeId)
             .single();
@@ -266,7 +274,7 @@ const Checkout = () => {
           }
 
           if (storeData) {
-            setStore(storeData);
+            setStore(storeData as unknown as CheckoutStore);
           }
         }
 
@@ -331,10 +339,10 @@ const Checkout = () => {
 
   /**
    * Valide le formulaire de commande
-   * 
+   *
    * @function validateForm
    * @returns {boolean} true si le formulaire est valide, false sinon
-   * 
+   *
    * @remarks
    * - Vérifie que tous les champs requis sont remplis
    * - Valide le format de l'email
@@ -368,15 +376,15 @@ const Checkout = () => {
 
   /**
    * Calcule le prix final de la commande
-   * 
+   *
    * @function calculatePrice
    * @returns {number} Le prix final après application des promotions et coupons
-   * 
+   *
    * @remarks
    * - Priorité : Prix variante > Prix promo > Prix normal
    * - Applique la réduction du code promo sur le prix de base
    * - Retourne toujours un prix >= 0
-   * 
+   *
    * @example
    * ```tsx
    * const finalPrice = calculatePrice();
@@ -447,7 +455,8 @@ const Checkout = () => {
 
       try {
         const finalPrice = calculatePrice();
-        const finalCurrency = (product.currency || 'XOF').trim();
+        const rawCurrency = (product.currency || 'XOF').trim();
+        const finalCurrency: Currency = isSupportedCurrency(rawCurrency) ? rawCurrency : 'XOF';
         const customerName = `${formData.firstName} ${formData.lastName}`.trim();
 
         // Vérification importante: s'assurer qu'on utilise bien le prix promo, pas le prix barré
@@ -583,7 +592,7 @@ const Checkout = () => {
 
   if (loading) {
     return (
-      <div 
+      <div
         className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0"
         role="main"
         aria-label="Page de paiement"
@@ -591,11 +600,7 @@ const Checkout = () => {
         aria-live="polite"
       >
         <div className="max-w-7xl mx-auto">
-          <div 
-            className="sr-only"
-            role="status"
-            aria-live="polite"
-          >
+          <div className="sr-only" role="status" aria-live="polite">
             Chargement des informations de paiement...
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -634,7 +639,7 @@ const Checkout = () => {
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8 px-4 sm:px-6 lg:px-8 pb-16 md:pb-0"
       role="main"
       aria-label="Page de finalisation de commande"
@@ -646,7 +651,9 @@ const Checkout = () => {
             <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
               <Link
                 to={
-                  product && store ? generateProductUrl(store.slug, product.slug, store.subdomain) : '/marketplace'
+                  product && store
+                    ? generateProductUrl(store.slug, product.slug, store.subdomain)
+                    : '/marketplace'
                 }
                 aria-label="Retour à la page précédente"
               >
@@ -663,7 +670,7 @@ const Checkout = () => {
 
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Résumé de la commande - En haut sur mobile, à droite sur desktop */}
-          <aside 
+          <aside
             className="order-2 lg:order-2 lg:col-span-1"
             role="complementary"
             aria-label="Résumé de la commande"

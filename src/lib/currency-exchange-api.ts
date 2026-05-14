@@ -21,7 +21,7 @@ interface CachedRates {
 
 // Cache en mémoire (durée de vie : 1 heure)
 const CACHE_DURATION = 60 * 60 * 1000; // 1 heure en millisecondes
-let  cachedRates: CachedRates | null = null;
+let cachedRates: CachedRates | null = null;
 
 /**
  * Récupère les taux de change depuis ExchangeRate-API
@@ -44,13 +44,13 @@ export async function fetchExchangeRates(
     // Récupérer les taux depuis l'API
     // ExchangeRate-API gratuit : https://api.exchangerate-api.com/v4/latest/{base}
     const apiUrl = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
-    
+
     logger.info('Fetching exchange rates from API', { apiUrl, baseCurrency });
-    
+
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       // Timeout de 5 secondes
       signal: AbortSignal.timeout(5000),
@@ -60,14 +60,14 @@ export async function fetchExchangeRates(
       throw new Error(`API returned ${response.status}: ${response.statusText}`);
     }
 
-    const  data: ExchangeRateResponse = await response.json();
+    const data: ExchangeRateResponse = await response.json();
 
     if (!data.rates || typeof data.rates !== 'object') {
       throw new Error('Invalid API response format');
     }
 
     // Convertir les taux en format attendu
-    const  rates: Record<string, number> = {
+    const rates: Record<string, number> = {
       ...data.rates,
       // Ajouter le taux de base (1:1)
       [baseCurrency]: 1,
@@ -87,13 +87,14 @@ export async function fetchExchangeRates(
     });
 
     return rates;
-  } catch ( _error: any) {
+  } catch (_error: unknown) {
+    const msg = _error instanceof Error ? _error.message : String(_error);
     logger.error('Failed to fetch exchange rates from API', {
-      error: error.message,
+      error: msg,
       baseCurrency,
       fallback: 'using static rates',
     });
-    
+
     // Retourner null pour utiliser les taux statiques en fallback
     return null;
   }
@@ -102,7 +103,7 @@ export async function fetchExchangeRates(
 /**
  * Convertit les taux depuis une devise de base (EUR) vers XOF
  * Utilise le taux fixe XOF/EUR pour convertir tous les autres taux
- * 
+ *
  * L'API retourne des taux comme : { USD: 1.10 } signifiant "1 EUR = 1.10 USD"
  * On convertit cela en taux XOF : "1 currency = X XOF"
  */
@@ -111,9 +112,9 @@ export function convertRatesToXOF(
   xofToEurRate: number = 0.00152
 ): Record<string, number> {
   const eurToXofRate = 1 / xofToEurRate; // ~655.957 XOF pour 1 EUR
-  
+
   // Taux de base : 1 XOF = 1 XOF
-  const  baseRates: Record<string, number> = {
+  const baseRates: Record<string, number> = {
     XOF: 1,
   };
 
@@ -132,20 +133,20 @@ export function convertRatesToXOF(
   }
 
   // Générer tous les taux de conversion entre les devises supportées
-  const  supportedCurrencies: Currency[] = ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'];
-  
-  const  conversionRates: Record<string, number> = {};
-  
+  const supportedCurrencies: Currency[] = ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'];
+
+  const conversionRates: Record<string, number> = {};
+
   for (const from of supportedCurrencies) {
     for (const to of supportedCurrencies) {
       if (from === to) continue;
-      
+
       const key = `${from}_${to}`;
-      
+
       // Obtenir les taux de base en XOF
       const fromRateInXof = from === 'XOF' ? 1 : baseRates[from];
       const toRateInXof = to === 'XOF' ? 1 : baseRates[to];
-      
+
       if (fromRateInXof && toRateInXof && fromRateInXof > 0) {
         // Taux de conversion = (Taux de destination en XOF) / (Taux de source en XOF)
         // Exemple: XOF vers USD = (Taux USD en XOF) / (Taux XOF) = USD_rate / 1
@@ -168,7 +169,7 @@ export async function updateExchangeRates(): Promise<Record<string, number> | nu
   try {
     // Récupérer les taux depuis l'API (base EUR)
     const eurRates = await fetchExchangeRates('EUR');
-    
+
     if (!eurRates) {
       logger.warn('Failed to fetch rates from API, using static rates');
       return null;
@@ -176,10 +177,11 @@ export async function updateExchangeRates(): Promise<Record<string, number> | nu
 
     // Convertir en taux XOF
     const xofRates = convertRatesToXOF(eurRates);
-    
+
     return xofRates;
-  } catch ( _error: any) {
-    logger.error('Error updating exchange rates', { error: error.message });
+  } catch (_error: unknown) {
+    const msg = _error instanceof Error ? _error.message : String(_error);
+    logger.error('Error updating exchange rates', { error: msg });
     return null;
   }
 }
@@ -187,17 +189,14 @@ export async function updateExchangeRates(): Promise<Record<string, number> | nu
 /**
  * Récupère un taux de change spécifique depuis le cache ou l'API
  */
-export async function getExchangeRate(
-  from: Currency,
-  to: Currency
-): Promise<number | null> {
+export async function getExchangeRate(from: Currency, to: Currency): Promise<number | null> {
   if (from === to) {
     return 1;
   }
 
   // Essayer de récupérer depuis le cache ou l'API
   const rates = await fetchExchangeRates('EUR');
-  
+
   if (!rates) {
     return null; // Utiliser les taux statiques en fallback
   }
@@ -235,10 +234,3 @@ export function getCacheInfo(): { cached: boolean; age?: number; base?: string }
     base: cachedRates.base,
   };
 }
-
-
-
-
-
-
-

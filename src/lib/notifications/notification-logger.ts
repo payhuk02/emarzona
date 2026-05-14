@@ -10,6 +10,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import type { NotificationType } from './unified-notifications';
 
+/** Chains (update + order/limit) not fully expressed on generated `notification_logs` types */
+type LooseNotificationLogUpdate = {
+  update: (data: Record<string, unknown>) => {
+    eq: (
+      column: string,
+      value: string
+    ) => {
+      eq: (
+        column: string,
+        value: string
+      ) => {
+        order: (
+          column: string,
+          options: { ascending: boolean }
+        ) => {
+          limit: (count: number) => Promise<{ error: { message: string } | null }>;
+        };
+      };
+    };
+  };
+};
+type LooseSupabaseForNotificationLogs = {
+  from: (table: 'notification_logs') => LooseNotificationLogUpdate;
+};
+
 export type NotificationChannel = 'in_app' | 'email' | 'sms' | 'push';
 export type NotificationStatus = 'sent' | 'delivered' | 'opened' | 'clicked' | 'failed' | 'bounced';
 
@@ -30,7 +55,7 @@ export interface NotificationLog {
  */
 export async function logNotification(log: NotificationLog): Promise<void> {
   try {
-    const  logData: Record<string, unknown> = {
+    const logData: Record<string, unknown> = {
       user_id: log.userId,
       notification_id: log.notificationId || null,
       notification_type: log.type,
@@ -70,7 +95,7 @@ export async function logNotification(log: NotificationLog): Promise<void> {
         break;
     }
 
-    const { error } = await supabase.from('notification_logs').insert(logData);
+    const { error } = await supabase.from('notification_logs').insert([logData as never]);
 
     if (error) {
       logger.error('Error logging notification', { error, log });
@@ -97,7 +122,7 @@ export async function updateNotificationLogStatus(
   metadata?: Record<string, unknown>
 ): Promise<void> {
   try {
-    const  updateData: Record<string, unknown> = {
+    const updateData: Record<string, unknown> = {
       status,
       metadata: metadata || {},
     };
@@ -119,7 +144,7 @@ export async function updateNotificationLogStatus(
         break;
     }
 
-    const { error } = await supabase
+    const { error } = await (supabase as unknown as LooseSupabaseForNotificationLogs)
       .from('notification_logs')
       .update(updateData)
       .eq('user_id', userId)
@@ -206,9 +231,3 @@ export async function getNotificationStats(options?: {
     throw error;
   }
 }
-
-
-
-
-
-

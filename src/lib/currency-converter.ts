@@ -7,7 +7,19 @@
 import { updateExchangeRates as fetchRatesFromAPI } from './currency-exchange-api';
 import { logger } from './logger';
 
-export type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';
+export type Currency =
+  | 'XOF'
+  | 'EUR'
+  | 'USD'
+  | 'GBP'
+  | 'NGN'
+  | 'GHS'
+  | 'KES'
+  | 'ZAR'
+  | 'UGX'
+  | 'TZS'
+  | 'RWF'
+  | 'ETB';
 
 export interface CurrencyRate {
   from: Currency;
@@ -20,44 +32,44 @@ export interface CurrencyRate {
  * Taux de change de base (fallback si l'API n'est pas disponible)
  * Ces taux sont utilisés en cas d'erreur API ou lors du premier chargement
  */
-const  FALLBACK_RATES: Record<string, number> = {
+const FALLBACK_RATES: Record<string, number> = {
   // XOF (Franc CFA) comme devise de base
-  'XOF_EUR': 0.00152, // 1 XOF = 0.00152 EUR
-  'XOF_USD': 0.00167, // 1 XOF = 0.00167 USD
-  'XOF_GBP': 0.00132, // 1 XOF = 0.00132 GBP
-  'XOF_NGN': 2.50,    // 1 XOF = 2.50 NGN
-  'XOF_GHS': 0.025,   // 1 XOF = 0.025 GHS
-  'XOF_KES': 0.23,    // 1 XOF = 0.23 KES
-  'XOF_ZAR': 0.031,   // 1 XOF = 0.031 ZAR
+  XOF_EUR: 0.00152, // 1 XOF = 0.00152 EUR
+  XOF_USD: 0.00167, // 1 XOF = 0.00167 USD
+  XOF_GBP: 0.00132, // 1 XOF = 0.00132 GBP
+  XOF_NGN: 2.5, // 1 XOF = 2.50 NGN
+  XOF_GHS: 0.025, // 1 XOF = 0.025 GHS
+  XOF_KES: 0.23, // 1 XOF = 0.23 KES
+  XOF_ZAR: 0.031, // 1 XOF = 0.031 ZAR
 
   // Taux inverses
-  'EUR_XOF': 655.957, // 1 EUR = 655.957 XOF
-  'USD_XOF': 599.04,  // 1 USD = 599.04 XOF
-  'GBP_XOF': 757.576, // 1 GBP = 757.576 XOF
-  'NGN_XOF': 0.40,    // 1 NGN = 0.40 XOF
-  'GHS_XOF': 40.00,   // 1 GHS = 40.00 XOF
-  'KES_XOF': 4.35,    // 1 KES = 4.35 XOF
-  'ZAR_XOF': 32.26,   // 1 ZAR = 32.26 XOF
+  EUR_XOF: 655.957, // 1 EUR = 655.957 XOF
+  USD_XOF: 599.04, // 1 USD = 599.04 XOF
+  GBP_XOF: 757.576, // 1 GBP = 757.576 XOF
+  NGN_XOF: 0.4, // 1 NGN = 0.40 XOF
+  GHS_XOF: 40.0, // 1 GHS = 40.00 XOF
+  KES_XOF: 4.35, // 1 KES = 4.35 XOF
+  ZAR_XOF: 32.26, // 1 ZAR = 32.26 XOF
 
   // Autres conversions
-  'EUR_USD': 1.10,
-  'USD_EUR': 0.91,
-  'EUR_GBP': 0.86,
-  'GBP_EUR': 1.16,
-  'USD_GBP': 0.79,
-  'GBP_USD': 1.27,
+  EUR_USD: 1.1,
+  USD_EUR: 0.91,
+  EUR_GBP: 0.86,
+  GBP_EUR: 1.16,
+  USD_GBP: 0.79,
+  GBP_USD: 1.27,
 };
 
 /**
  * Taux de change dynamiques (mis à jour depuis l'API)
  * Sera mis à jour automatiquement lors du premier appel
  */
-let  DYNAMIC_RATES: Record<string, number> | null = null;
+let DYNAMIC_RATES: Record<string, number> | null = null;
 
 /**
  * Indique si les taux ont été initialisés
  */
-let  ratesInitialized= false;
+let ratesInitialized = false;
 
 /**
  * Initialise les taux de change depuis l'API (appelé automatiquement au premier usage)
@@ -70,7 +82,7 @@ async function initializeRates(): Promise<void> {
   try {
     // Récupérer les taux depuis l'API
     const apiRates = await fetchRatesFromAPI();
-    
+
     if (apiRates) {
       DYNAMIC_RATES = apiRates;
       logger.info('Exchange rates initialized from API', {
@@ -80,8 +92,9 @@ async function initializeRates(): Promise<void> {
       logger.warn('Failed to fetch rates from API, using fallback rates');
       DYNAMIC_RATES = FALLBACK_RATES;
     }
-  } catch ( _error: any) {
-    logger.error('Error initializing exchange rates', { error: error.message });
+  } catch (_error: unknown) {
+    const msg = _error instanceof Error ? _error.message : String(_error);
+    logger.error('Error initializing exchange rates', { error: msg });
     DYNAMIC_RATES = FALLBACK_RATES;
   } finally {
     ratesInitialized = true;
@@ -93,41 +106,41 @@ async function initializeRates(): Promise<void> {
  */
 function getRate(from: Currency, to: Currency): number {
   const rateKey = `${from}_${to}`;
-  
+
   // Essayer d'abord les taux dynamiques (API)
   if (DYNAMIC_RATES && DYNAMIC_RATES[rateKey]) {
     return DYNAMIC_RATES[rateKey];
   }
-  
+
   // Fallback sur les taux statiques
   if (FALLBACK_RATES[rateKey]) {
     return FALLBACK_RATES[rateKey];
   }
-  
+
   // Si pas de taux direct, essayer de calculer via une devise intermédiaire (EUR)
   if (from !== 'EUR' && to !== 'EUR') {
     const fromToEurKey = `${from}_EUR`;
     const eurToToKey = `EUR_${to}`;
-    
-    let  fromToEur: number | undefined;
-    let  eurToTo: number | undefined;
-    
+
+    let fromToEur: number | undefined;
+    let eurToTo: number | undefined;
+
     // Essayer depuis les taux dynamiques
     if (DYNAMIC_RATES) {
       fromToEur = DYNAMIC_RATES[fromToEurKey];
       eurToTo = DYNAMIC_RATES[eurToToKey];
     }
-    
+
     // Si pas trouvé, essayer depuis les taux de fallback
     if (!fromToEur) fromToEur = FALLBACK_RATES[fromToEurKey];
     if (!eurToTo) eurToTo = FALLBACK_RATES[eurToToKey];
-    
+
     // Si on a les deux taux, calculer le taux de conversion
     if (fromToEur && eurToTo) {
       return fromToEur * eurToTo;
     }
   }
-  
+
   // Si toujours pas de taux, retourner 1 (pas de conversion)
   logger.warn(`Exchange rate not found for ${from} to ${to}, using 1:1`);
   return 1;
@@ -137,18 +150,14 @@ function getRate(from: Currency, to: Currency): number {
  * Convertit un montant d'une devise à une autre
  * Utilise les taux de l'API si disponibles, sinon les taux de fallback
  */
-export function convertCurrency(
-  amount: number,
-  from: Currency,
-  to: Currency
-): number {
+export function convertCurrency(amount: number, from: Currency, to: Currency): number {
   if (from === to) {
     return amount;
   }
 
   // Initialiser les taux si ce n'est pas déjà fait (de façon asynchrone)
   if (!ratesInitialized) {
-    initializeRates().catch((error) => {
+    initializeRates().catch(error => {
       logger.error('Failed to initialize rates', { error });
     });
   }
@@ -175,7 +184,7 @@ export function formatCurrency(amount: number, currency: Currency): string {
  * Récupère le symbole de devise
  */
 export function getCurrencySymbol(currency: Currency): string {
-  const  symbols: Record<Currency, string> = {
+  const symbols: Record<Currency, string> = {
     XOF: 'CFA',
     EUR: '€',
     USD: '$',
@@ -184,6 +193,10 @@ export function getCurrencySymbol(currency: Currency): string {
     GHS: '₵',
     KES: 'KSh',
     ZAR: 'R',
+    UGX: 'USh',
+    TZS: 'TSh',
+    RWF: 'RF',
+    ETB: 'Br',
   };
 
   return symbols[currency] || currency;
@@ -193,14 +206,27 @@ export function getCurrencySymbol(currency: Currency): string {
  * Vérifie si une devise est supportée
  */
 export function isSupportedCurrency(currency: string): currency is Currency {
-  return ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'].includes(currency);
+  return [
+    'XOF',
+    'EUR',
+    'USD',
+    'GBP',
+    'NGN',
+    'GHS',
+    'KES',
+    'ZAR',
+    'UGX',
+    'TZS',
+    'RWF',
+    'ETB',
+  ].includes(currency);
 }
 
 /**
  * Récupère toutes les devises supportées
  */
 export function getSupportedCurrencies(): Currency[] {
-  return ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'];
+  return ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR', 'UGX', 'TZS', 'RWF', 'ETB'];
 }
 
 /**
@@ -214,7 +240,7 @@ export function getExchangeRate(from: Currency, to: Currency): number {
 
   // Initialiser les taux si ce n'est pas déjà fait (de façon asynchrone)
   if (!ratesInitialized) {
-    initializeRates().catch((error) => {
+    initializeRates().catch(error => {
       logger.error('Failed to initialize rates', { error });
     });
   }
@@ -229,10 +255,10 @@ export function getExchangeRate(from: Currency, to: Currency): number {
 export async function updateExchangeRates(): Promise<void> {
   try {
     logger.info('Updating exchange rates from API...');
-    
+
     // Forcer un nouveau fetch (le cache sera ignoré)
     const apiRates = await fetchRatesFromAPI();
-    
+
     if (apiRates) {
       DYNAMIC_RATES = apiRates;
       ratesInitialized = true;
@@ -242,9 +268,10 @@ export async function updateExchangeRates(): Promise<void> {
     } else {
       logger.warn('Failed to update rates from API, keeping existing rates');
     }
-  } catch ( _error: any) {
-    logger.error('Error updating exchange rates', { error: error.message });
-    throw error;
+  } catch (_error: unknown) {
+    const msg = _error instanceof Error ? _error.message : String(_error);
+    logger.error('Error updating exchange rates', { error: msg });
+    throw _error;
   }
 }
 
@@ -261,10 +288,3 @@ export function getCurrentRates(): Record<string, number> {
 export function areRatesFromAPI(): boolean {
   return DYNAMIC_RATES !== null && DYNAMIC_RATES !== FALLBACK_RATES;
 }
-
-
-
-
-
-
-

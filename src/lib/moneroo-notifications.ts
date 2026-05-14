@@ -5,6 +5,7 @@
  * MIGRÉ vers le système unifié pour garantir la cohérence et les notifications sonores
  */
 
+import { supabase } from '@/integrations/supabase/client';
 import { sendUnifiedNotification } from './notifications/unified-notifications';
 import { logger } from './logger';
 
@@ -13,6 +14,8 @@ export interface PaymentNotificationData {
   userId?: string;
   customerEmail?: string;
   customerName?: string;
+  customerPhone?: string;
+  storeId?: string;
   amount: number;
   currency: string;
   status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'refunded';
@@ -47,7 +50,7 @@ export const notifyPaymentSuccess = async (data: PaymentNotificationData): Promi
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch( err => {
+      }).catch(err => {
         logger.warn('Error sending unified payment success notification:', err);
       });
     }
@@ -63,7 +66,7 @@ export const notifyPaymentSuccess = async (data: PaymentNotificationData): Promi
           currency: data.currency,
           payment_method: data.paymentMethod,
           customer_id: data.userId,
-        }).catch( err => {
+        }).catch(err => {
           logger.error('Error triggering payment webhook', {
             error: err,
             transactionId: data.transactionId,
@@ -107,7 +110,7 @@ export const notifyPaymentFailed = async (data: PaymentNotificationData): Promis
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Réessayer le paiement',
         order_id: data.orderId,
-      }).catch( err => {
+      }).catch(err => {
         logger.warn('Error sending unified payment failed notification:', err);
       });
     }
@@ -147,7 +150,7 @@ export const notifyPaymentCancelled = async (data: PaymentNotificationData): Pro
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch( err => {
+      }).catch(err => {
         logger.warn('Error sending unified payment cancelled notification:', err);
       });
     }
@@ -186,7 +189,7 @@ export const notifyPaymentRefunded = async (data: PaymentNotificationData): Prom
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch( err => {
+      }).catch(err => {
         logger.warn('Error sending unified payment refunded notification:', err);
       });
     }
@@ -225,7 +228,7 @@ export const notifyPaymentPending = async (data: PaymentNotificationData): Promi
         action_url: data.orderId ? `/orders/${data.orderId}` : '/orders',
         action_label: 'Voir la commande',
         order_id: data.orderId,
-      }).catch( err => {
+      }).catch(err => {
         logger.warn('Error sending unified payment pending notification:', err);
       });
     }
@@ -270,8 +273,8 @@ async function _sendPaymentEmail(params: {
       template: params.template,
       messageId: data?.messageId,
     });
-  } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+  } catch (_error: unknown) {
+    const errorMessage = _error instanceof Error ? _error.message : String(_error);
     logger.error('Error sending payment email:', {
       error: errorMessage,
       to: params.to,
@@ -309,8 +312,8 @@ export async function sendPaymentSMS(params: {
       template: params.template,
       messageId: data?.messageId,
     });
-  } catch ( _error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+  } catch (_error: unknown) {
+    const errorMessage = _error instanceof Error ? _error.message : String(_error);
     logger.error('Error sending payment SMS:', {
       error: errorMessage,
       to: params.to,
@@ -403,9 +406,3 @@ export const sendPaymentRefundedSMS = async (data: PaymentNotificationData): Pro
     },
   });
 };
-
-
-
-
-
-

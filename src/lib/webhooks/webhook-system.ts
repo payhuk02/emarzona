@@ -88,7 +88,7 @@ export async function createWebhook(
 ): Promise<{ success: boolean; webhook?: Webhook; error?: string }> {
   try {
     // Générer un secret si non fourni
-    let  webhookSecret= secret;
+    let webhookSecret = secret;
     if (!webhookSecret) {
       const { data: secretData, error: secretError } =
         await supabase.rpc('generate_webhook_secret');
@@ -132,7 +132,7 @@ export async function createWebhook(
     logger.info('Webhook created', { webhookId: data.id, storeId, events });
 
     // Convertir au format Webhook pour compatibilité
-    const  webhook: Webhook = {
+    const webhook: Webhook = {
       id: data.id,
       store_id: data.store_id,
       url: data.url,
@@ -142,13 +142,13 @@ export async function createWebhook(
       is_active: data.status === 'active',
       last_triggered_at: data.last_triggered_at || undefined,
       failure_count: data.failed_deliveries || 0,
-      last_error: undefined,
+      last_error: undefined as string | undefined,
       created_at: data.created_at,
       updated_at: data.updated_at,
     };
 
     return { success: true, webhook };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error creating webhook', { error: errorMessage });
     return { success: false, error: errorMessage };
@@ -169,7 +169,7 @@ export async function triggerWebhook(
 ): Promise<void> {
   try {
     // Mapper les anciens types d'événements vers les nouveaux
-    const  eventTypeMap: Record<string, string> = {
+    const eventTypeMap: Record<string, string> = {
       'order.payment_received': 'payment.completed',
       'order.payment_failed': 'payment.failed',
       'product.stock_low': 'product.updated',
@@ -184,7 +184,7 @@ export async function triggerWebhook(
     // Utiliser le service unifié en interne
     const { triggerUnifiedWebhook } = await import('./unified-webhook-service');
     await triggerUnifiedWebhook(storeId, normalizedEventType, payload, eventId);
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Exception triggering webhook', { error: errorMessage, storeId, eventType });
   }
@@ -262,7 +262,7 @@ export async function sendWebhook(
     }
 
     return { success, statusCode: response.status };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error sending webhook', { error: errorMessage, webhookId: webhook.id });
 
@@ -311,7 +311,7 @@ async function signPayload(payload: string, secret: string): Promise<string> {
     // Convertir en hexadécimal
     const hashArray = Array.from(new Uint8Array(signature));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error signing payload', { error: errorMessage });
     throw new Error('Failed to sign webhook payload');
@@ -330,7 +330,7 @@ export async function verifyWebhookSignature(
   try {
     const expectedSignature = await signPayload(payload, secret);
     return constantTimeEquals(signature, expectedSignature);
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error verifying webhook signature', { error: errorMessage });
     return false;
@@ -346,8 +346,8 @@ function constantTimeEquals(a: string, b: string): boolean {
     return false;
   }
 
-  let  result= 0;
-  for (let  i= 0; i < a.length; i++) {
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
 
@@ -369,7 +369,7 @@ async function updateWebhookLog(
 ): Promise<void> {
   try {
     // Mapper le type d'événement vers le format unifié
-    const  eventTypeMap: Record<string, string> = {
+    const eventTypeMap: Record<string, string> = {
       'order.payment_received': 'payment.completed',
       'order.payment_failed': 'payment.failed',
       'product.stock_low': 'product.updated',
@@ -435,7 +435,7 @@ async function updateWebhookLog(
         p_error_message?: string;
       }); // Type assertion nécessaire pour compatibilité
     }
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
     logger.error('Error updating webhook log', { error: errorMessage });
   }
@@ -472,7 +472,7 @@ export async function getWebhooks(storeId: string): Promise<Webhook[]> {
     is_active: w.status === 'active',
     last_triggered_at: w.last_triggered_at || undefined,
     failure_count: w.failed_deliveries || 0,
-    last_error: undefined,
+    last_error: undefined as string | undefined,
     created_at: w.created_at,
     updated_at: w.updated_at,
   })) as Webhook[];
@@ -522,9 +522,3 @@ export async function getWebhookLogs(webhookId: string, limit: number = 50): Pro
     completed_at: delivery.delivered_at || delivery.failed_at || undefined,
   })) as WebhookLog[];
 }
-
-
-
-
-
-

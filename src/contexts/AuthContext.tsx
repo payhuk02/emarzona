@@ -19,6 +19,8 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
+// Hook + provider in one file is intentional for this context module
+// eslint-disable-next-line react-refresh/only-export-components -- useAuth must live next to AuthProvider
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -29,33 +31,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
 
-        // Mettre à jour l'utilisateur dans Sentry
-        if (session?.user) {
-          setSentryUser({
-            id: session.user.id,
-            email: session.user.email,
-            username: session.user.user_metadata?.username,
-          });
-        } else {
-          clearSentryUser();
-        }
+      // Mettre à jour l'utilisateur dans Sentry
+      if (session?.user) {
+        setSentryUser({
+          id: session.user.id,
+          email: session.user.email,
+          username: session.user.user_metadata?.username,
+        });
+      } else {
+        clearSentryUser();
       }
-    );
+    });
 
     // THEN check for existing session (avec retry automatique)
     const checkExistingSession = async (retryCount = 0) => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
         if (error) {
           logger.error('Erreur récupération session existante:', error);
-          if (retryCount < 2 && (error.message?.includes('network') || error.message?.includes('fetch'))) {
+          if (
+            retryCount < 2 &&
+            (error.message?.includes('network') || error.message?.includes('fetch'))
+          ) {
             setTimeout(() => checkExistingSession(retryCount + 1), 1000);
             return;
           }
@@ -74,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
         }
       } catch (error) {
-        logger.error('Exception lors de la vérification de session:', error);
+        logger.error('Exception lors de la vérification de session:', { error });
         if (retryCount < 2) {
           setTimeout(() => checkExistingSession(retryCount + 1), 1000);
           return;
@@ -101,9 +109,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-
-
-
-
-
-

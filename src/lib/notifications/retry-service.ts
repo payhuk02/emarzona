@@ -7,6 +7,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { logger } from '@/lib/logger';
 import type { UnifiedNotification } from './unified-notifications';
 
@@ -29,10 +30,10 @@ export interface RetryResult {
 }
 
 const NOTIFICATION_RETRY_FIELDS =
-  'id,notification_id,user_id,notification_type,channel,notification_data,error_message,attempt_number,max_attempts,next_retry_at,status,completed_at';
+  'id,user_id,notification_type,channel,notification_data,error_message,attempt_number,max_attempts,next_retry_at,status,completed_at';
 
 // Configuration par défaut
-const  DEFAULT_CONFIG: Required<RetryConfig> = {
+const DEFAULT_CONFIG: Required<RetryConfig> = {
   maxRetries: 3,
   initialDelay: 1000, // 1 seconde
   maxDelay: 30000, // 30 secondes
@@ -109,9 +110,9 @@ export class NotificationRetryService {
    */
   async executeWithRetry<T>(fn: () => Promise<T>, config: RetryConfig = {}): Promise<T> {
     const finalConfig = { ...DEFAULT_CONFIG, ...config };
-    let  lastError: unknown;
+    let lastError: unknown;
 
-    for (let  attempt= 0; attempt <= finalConfig.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
       try {
         const result = await fn();
 
@@ -175,7 +176,7 @@ export class NotificationRetryService {
         user_id: notification.user_id,
         notification_type: notification.type,
         channel,
-        notification_data: notification,
+        notification_data: notification as unknown as Json,
         error_message: error instanceof Error ? error.message : 'Unknown error',
         attempt_number: attempt + 1,
         max_attempts: DEFAULT_CONFIG.maxRetries,
@@ -207,9 +208,9 @@ export class NotificationRetryService {
     succeeded: number;
     failed: number;
   }> {
-    let  processed= 0;
-    let  succeeded= 0;
-    let  failed= 0;
+    let processed = 0;
+    let succeeded = 0;
+    let failed = 0;
 
     try {
       // Récupérer les retries en attente
@@ -295,10 +296,10 @@ export class NotificationRetryService {
   private async sendToDeadLetterQueue(
     retry: {
       id: string;
-      notification_id?: string;
       user_id: string;
       channel: string;
-      type: string;
+      notification_type: string;
+      notification_data: Json;
       error_message?: string;
     },
     error: unknown
@@ -327,9 +328,3 @@ export class NotificationRetryService {
 
 // Instance singleton
 export const notificationRetryService = new NotificationRetryService();
-
-
-
-
-
-

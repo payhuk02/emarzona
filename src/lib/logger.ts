@@ -11,8 +11,12 @@ const isProduction = import.meta.env.PROD;
 // Niveaux de log
 // (Type conservé implicitement via les méthodes exposées; pas besoin d'un alias dédié ici.)
 
-interface LogContext {
-  [key: string]: unknown;
+function toSentryExtras(context?: unknown): Record<string, unknown> | undefined {
+  if (context === undefined || context === null) return undefined;
+  if (typeof context === 'object' && !Array.isArray(context)) {
+    return context as Record<string, unknown>;
+  }
+  return { detail: String(context) };
 }
 
 // Sauvegarder les méthodes originales de la console AVANT qu'elles ne soient remplacées
@@ -41,16 +45,16 @@ export const logger = {
   /**
    * Log d'information
    */
-  info: (message: string, context?: LogContext) => {
+  info: (message: string, context?: unknown) => {
     if (isDevelopment) {
       originalConsole.info(`[INFO] ${message}`, context);
     }
     // En production, envoyer à Sentry si important
-    if (isProduction && context) {
+    if (isProduction && context !== undefined && context !== null) {
       Sentry.addBreadcrumb({
         category: 'info',
         message,
-        data: context,
+        data: toSentryExtras(context) ?? {},
         level: 'info',
       });
     }
@@ -59,7 +63,7 @@ export const logger = {
   /**
    * Avertissement
    */
-  warn: (message: string, context?: LogContext) => {
+  warn: (message: string, context?: unknown) => {
     if (isDevelopment) {
       originalConsole.warn(`[WARN] ${message}`, context);
     }
@@ -67,7 +71,7 @@ export const logger = {
     if (isProduction) {
       Sentry.captureMessage(message, {
         level: 'warning',
-        extra: context,
+        extra: toSentryExtras(context),
       });
     }
   },
@@ -75,20 +79,21 @@ export const logger = {
   /**
    * Erreur
    */
-  error: (message: string | Error, context?: LogContext) => {
+  error: (message: string | Error, context?: unknown) => {
     if (isDevelopment) {
       originalConsole.error(`[ERROR] ${message}`, context);
     }
     // En production, toujours envoyer à Sentry
     if (isProduction) {
+      const extras = toSentryExtras(context);
       if (message instanceof Error) {
         Sentry.captureException(message, {
-          extra: context,
+          extra: extras,
         });
       } else {
         Sentry.captureMessage(message, {
           level: 'error',
-          extra: context,
+          extra: extras,
         });
       }
     }
@@ -104,9 +109,3 @@ export const logger = {
     // Jamais en production
   },
 };
-
-
-
-
-
-

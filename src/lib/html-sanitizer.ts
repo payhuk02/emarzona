@@ -7,6 +7,9 @@
 
 import DOMPurify from 'dompurify';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- DOMPurify config shape matches runtime API
+type PurifyConfig = any;
+
 // ============================================================================
 // CONFIGURATIONS
 // ============================================================================
@@ -15,7 +18,7 @@ import DOMPurify from 'dompurify';
  * Configuration pour les descriptions de produits
  * Permet un formatage riche mais sécurisé
  */
-const  PRODUCT_DESCRIPTION_CONFIG: DOMPurify.Config = {
+const PRODUCT_DESCRIPTION_CONFIG: PurifyConfig = {
   ALLOWED_TAGS: [
     'p',
     'br',
@@ -54,7 +57,7 @@ const  PRODUCT_DESCRIPTION_CONFIG: DOMPurify.Config = {
  * Configuration pour les commentaires/avis
  * Plus restrictif que les descriptions
  */
-const  REVIEW_CONFIG: DOMPurify.Config = {
+const REVIEW_CONFIG: PurifyConfig = {
   ALLOWED_TAGS: ['p', 'br', 'strong', 'em'],
   ALLOWED_ATTR: [],
   ALLOW_DATA_ATTR: false,
@@ -64,7 +67,7 @@ const  REVIEW_CONFIG: DOMPurify.Config = {
  * Configuration pour le texte simple
  * Très restrictif, convertit en texte brut
  */
-const  PLAIN_TEXT_CONFIG: DOMPurify.Config = {
+const PLAIN_TEXT_CONFIG: PurifyConfig = {
   ALLOWED_TAGS: [],
   ALLOWED_ATTR: [],
   KEEP_CONTENT: true,
@@ -94,7 +97,7 @@ const  PLAIN_TEXT_CONFIG: DOMPurify.Config = {
  */
 export function sanitizeProductDescription(html: string | null | undefined): string {
   if (!html) return '';
-  return DOMPurify.sanitize(html, PRODUCT_DESCRIPTION_CONFIG);
+  return String(DOMPurify.sanitize(html, PRODUCT_DESCRIPTION_CONFIG));
 }
 
 /**
@@ -106,7 +109,7 @@ export function sanitizeProductDescription(html: string | null | undefined): str
  */
 export function sanitizeReview(html: string | null | undefined): string {
   if (!html) return '';
-  return DOMPurify.sanitize(html, REVIEW_CONFIG);
+  return String(DOMPurify.sanitize(html, REVIEW_CONFIG));
 }
 
 /**
@@ -118,7 +121,7 @@ export function sanitizeReview(html: string | null | undefined): string {
  */
 export function sanitizeHTML(html: string | null | undefined): string {
   if (!html) return '';
-  return DOMPurify.sanitize(html);
+  return String(DOMPurify.sanitize(html));
 }
 
 /**
@@ -132,7 +135,7 @@ export function htmlToPlainText(html: string | null | undefined): string {
   if (!html) return '';
 
   // Étape 1: Sanitizer avec DOMPurify pour supprimer les balises HTML
-  const sanitized = DOMPurify.sanitize(html, PLAIN_TEXT_CONFIG);
+  const sanitized = String(DOMPurify.sanitize(html, PLAIN_TEXT_CONFIG));
 
   // Étape 2: Décoder les entités HTML restantes
   // Utiliser le DOM pour décoder toutes les entités HTML (y compris &nbsp;, &#39;, etc.)
@@ -340,9 +343,3 @@ export function createSafeInnerHTML(
     },
   };
 }
-
-
-
-
-
-

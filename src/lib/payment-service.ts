@@ -7,6 +7,7 @@ import {
   verifyTransactionStatus as verifyMonerooTransaction,
 } from './moneroo-payment';
 import { logger } from './logger';
+import { isSupportedCurrency, type Currency } from './currency-converter';
 
 export type PaymentProvider = 'moneroo';
 
@@ -42,7 +43,12 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
 
   try {
     logger.log('Initiating Moneroo payment', { orderId: options.orderId });
-    const monerooResult = await initiateMonerooPayment(options);
+    const currency: Currency | undefined =
+      options.currency && isSupportedCurrency(options.currency) ? options.currency : 'XOF';
+    const monerooResult = await initiateMonerooPayment({
+      ...options,
+      currency,
+    });
     const result = {
       success: monerooResult.success,
       transaction_id: monerooResult.transaction_id,
@@ -52,11 +58,10 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
     };
 
     return result;
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorObj = _error instanceof Error ? _error : new Error(String(_error));
-    const errorMessage =
-      errorObj.message || "Erreur inconnue lors de l'initiation du paiement";
-    logger.error('Payment initiation error:', errorObj);
+    const errorMessage = errorObj.message || "Erreur inconnue lors de l'initiation du paiement";
+    logger.error('Payment initiation error:', { error: errorObj });
     return {
       success: false,
       transaction_id: '',
@@ -88,9 +93,3 @@ export const verifyTransactionStatus = async (
 
   return verifyMonerooTransaction(transactionId);
 };
-
-
-
-
-
-

@@ -3,8 +3,6 @@
  * Remplace tous les `any` par des types explicites
  */
 
-import { Currency } from "./currency-converter";
-
 /**
  * Réponse de l'API Moneroo pour un checkout
  */
@@ -78,15 +76,19 @@ export interface SupabaseError {
  */
 export interface ExtractedErrorDetails {
   message: string;
+  /** Détails techniques additionnels (parsing Moneroo, etc.) */
+  details?: unknown;
   status?: number;
   statusCode?: number;
   contentType?: string;
   responseLength?: number;
   responsePreview?: string;
   hint?: string;
-  error?: string | {
-    message?: string;
-  };
+  error?:
+    | string
+    | {
+        message?: string;
+      };
   raw?: string;
   troubleshooting?: {
     step1?: string;
@@ -128,11 +130,3 @@ export interface RetryOptions {
   backoffMs?: number;
   retryableErrors?: string[];
 }
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Product Promotions Hooks
  * Date: 2025-01-28
- * 
+ *
  * Hooks for managing product promotions and discounts
  */
 
@@ -10,8 +10,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const PRODUCT_PROMOTION_FIELDS = 'id, store_id, name, description, code, discount_type, discount_value, applies_to, product_ids, category_ids, collection_ids, applies_to_variants, variant_ids, min_purchase_amount, min_quantity, max_uses, max_uses_per_customer, current_uses, starts_at, ends_at, is_active, is_automatic, created_at, updated_at';
-const PROMOTION_USAGE_FIELDS = 'id, promotion_id, order_id, customer_id, user_id, discount_amount, order_total_before_discount, order_total_after_discount, used_at';
+const PRODUCT_PROMOTION_FIELDS =
+  'id, store_id, name, description, code, discount_type, discount_value, applies_to, product_ids, category_ids, collection_ids, applies_to_variants, variant_ids, min_purchase_amount, min_quantity, max_uses, max_uses_per_customer, current_uses, starts_at, ends_at, is_active, is_automatic, created_at, updated_at';
+const PROMOTION_USAGE_FIELDS =
+  'id, promotion_id, order_id, customer_id, user_id, discount_amount, order_total_before_discount, order_total_after_discount, used_at';
+
+function promotionMutationErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const msg = (error as { message?: unknown }).message;
+    if (typeof msg === 'string' && msg) return msg;
+  }
+  return fallback;
+}
 
 // =====================================================
 // TYPES
@@ -83,9 +94,11 @@ export const usePromotions = (storeId?: string, activeOnly = false) => {
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('product_promotions')
-        .select('id,store_id,code,name,is_active,discount_type,discount_value,starts_at,ends_at,applies_to,product_ids,variant_ids,applies_to_variants,min_purchase_amount,max_uses,max_uses_per_customer,current_uses,created_at,updated_at')
+        .select(
+          'id,store_id,code,name,is_active,discount_type,discount_value,starts_at,ends_at,applies_to,product_ids,variant_ids,applies_to_variants,min_purchase_amount,max_uses,max_uses_per_customer,current_uses,created_at,updated_at'
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -116,7 +129,9 @@ export const usePromotion = (promotionId?: string) => {
 
       const { data, error } = await supabase
         .from('product_promotions')
-        .select('id,store_id,code,name,is_active,discount_type,discount_value,starts_at,ends_at,applies_to,product_ids,variant_ids,applies_to_variants,min_purchase_amount,max_uses,max_uses_per_customer,current_uses,created_at,updated_at')
+        .select(
+          'id,store_id,code,name,is_active,discount_type,discount_value,starts_at,ends_at,applies_to,product_ids,variant_ids,applies_to_variants,min_purchase_amount,max_uses,max_uses_per_customer,current_uses,created_at,updated_at'
+        )
         .eq('id', promotionId)
         .single();
 
@@ -140,7 +155,9 @@ export const useProductPromotions = (productId?: string, variantId?: string) => 
 
       const { data, error } = await supabase
         .from('product_promotions')
-        .select('id,store_id,code,name,is_active,discount_type,discount_value,starts_at,ends_at,applies_to,product_ids,variant_ids,applies_to_variants,min_purchase_amount,max_uses,max_uses_per_customer,current_uses,created_at,updated_at')
+        .select(
+          'id,store_id,code,name,is_active,discount_type,discount_value,starts_at,ends_at,applies_to,product_ids,variant_ids,applies_to_variants,min_purchase_amount,max_uses,max_uses_per_customer,current_uses,created_at,updated_at'
+        )
         .eq('is_active', true)
         .lte('starts_at', now)
         .or(`ends_at.is.null,ends_at.gte.${now}`)
@@ -149,7 +166,7 @@ export const useProductPromotions = (productId?: string, variantId?: string) => 
       if (error) throw error;
 
       // Filter promotions that apply to this product/variant
-      const applicablePromotions = (data as ProductPromotion[]).filter((promo) => {
+      const applicablePromotions = (data as ProductPromotion[]).filter(promo => {
         if (promo.applies_to === 'all_products') return true;
         if (promo.applies_to === 'specific_products' && promo.product_ids?.includes(productId)) {
           if (variantId && promo.variant_ids && promo.variant_ids.length > 0) {
@@ -195,12 +212,12 @@ export const useValidateUnifiedPromotion = (
 
       const { data, error } = await supabase.rpc('validate_unified_promotion', {
         p_code: code.toUpperCase().trim(),
-        p_store_id: options?.storeId || null,
-        p_product_ids: options?.productIds || null,
-        p_category_ids: options?.categoryIds || null,
-        p_collection_ids: options?.collectionIds || null,
+        p_store_id: options?.storeId ?? undefined,
+        p_product_ids: options?.productIds ?? undefined,
+        p_category_ids: options?.categoryIds ?? undefined,
+        p_collection_ids: options?.collectionIds ?? undefined,
         p_order_amount: options?.orderAmount || 0,
-        p_customer_id: options?.customerId || null,
+        p_customer_id: options?.customerId ?? undefined,
         p_is_first_order: options?.isFirstOrder || false,
       });
 
@@ -215,7 +232,7 @@ export const useValidateUnifiedPromotion = (
       }
 
       const result = data as Record<string, unknown>;
-      
+
       // Map the RPC result to PromotionValidationResult format
       if (result.valid === false) {
         return {
@@ -291,7 +308,7 @@ export const useValidatePromotionCode = () => {
         return {
           valid: false,
           discount_amount: 0,
-          error: 'Ce code promotionnel a atteint sa limite d\'utilisation.',
+          error: "Ce code promotionnel a atteint sa limite d'utilisation.",
         };
       }
 
@@ -324,19 +341,27 @@ export const useValidatePromotionCode = () => {
       // Vérifier que les produits du panier correspondent à la promotion
       if (productIds && productIds.length > 0) {
         // Si la promotion s'applique à des produits spécifiques
-        if (promo.applies_to === 'specific_products' && promo.product_ids && promo.product_ids.length > 0) {
+        if (
+          promo.applies_to === 'specific_products' &&
+          promo.product_ids &&
+          promo.product_ids.length > 0
+        ) {
           const hasMatchingProduct = productIds.some(id => promo.product_ids?.includes(id));
           if (!hasMatchingProduct) {
             return {
               valid: false,
               discount_amount: 0,
-              error: 'Ce code promotionnel ne s\'applique pas aux produits de votre panier.',
+              error: "Ce code promotionnel ne s'applique pas aux produits de votre panier.",
             };
           }
         }
 
         // Si la promotion s'applique à des catégories
-        if (promo.applies_to === 'categories' && promo.category_ids && promo.category_ids.length > 0) {
+        if (
+          promo.applies_to === 'categories' &&
+          promo.category_ids &&
+          promo.category_ids.length > 0
+        ) {
           // Récupérer les catégories des produits du panier
           const { data: products } = await supabase
             .from('products')
@@ -344,16 +369,10 @@ export const useValidatePromotionCode = () => {
             .in('id', productIds);
 
           if (products) {
-            const productCategoryIds = products
-              .map(p => p.category_id)
-              .filter(Boolean) as string[];
-            
-            const productCategories = products
-              .map(p => p.category)
-              .filter(Boolean) as string[];
+            const productCategoryIds = products.map(p => p.category_id).filter(Boolean) as string[];
 
             // Vérifier si au moins un produit appartient à une catégorie sélectionnée
-            const hasMatchingCategory = 
+            const hasMatchingCategory =
               productCategoryIds.some(id => promo.category_ids?.includes(id)) ||
               (categoryIds && categoryIds.some(id => promo.category_ids?.includes(id)));
 
@@ -361,14 +380,19 @@ export const useValidatePromotionCode = () => {
               return {
                 valid: false,
                 discount_amount: 0,
-                error: 'Ce code promotionnel ne s\'applique pas aux catégories de produits de votre panier.',
+                error:
+                  "Ce code promotionnel ne s'applique pas aux catégories de produits de votre panier.",
               };
             }
           }
         }
 
         // Si la promotion s'applique à des collections
-        if (promo.applies_to === 'collections' && promo.collection_ids && promo.collection_ids.length > 0) {
+        if (
+          promo.applies_to === 'collections' &&
+          promo.collection_ids &&
+          promo.collection_ids.length > 0
+        ) {
           // Récupérer les collections des produits du panier
           const { data: collectionProducts } = await supabase
             .from('collection_products')
@@ -380,7 +404,8 @@ export const useValidatePromotionCode = () => {
             return {
               valid: false,
               discount_amount: 0,
-              error: 'Ce code promotionnel ne s\'applique pas aux collections de produits de votre panier.',
+              error:
+                "Ce code promotionnel ne s'applique pas aux collections de produits de votre panier.",
             };
           }
         }
@@ -392,10 +417,13 @@ export const useValidatePromotionCode = () => {
         discount_amount: 0, // Will be calculated when applied
       };
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de valider le code promotionnel.',
+        description: promotionMutationErrorMessage(
+          error,
+          'Impossible de valider le code promotionnel.'
+        ),
         variant: 'destructive',
       });
     },
@@ -428,7 +456,7 @@ export const useCreatePromotion = () => {
       if (error) throw error;
       return data as ProductPromotion;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['promotions', data.store_id] });
       queryClient.invalidateQueries({ queryKey: ['product-promotions'] });
       toast({
@@ -437,10 +465,10 @@ export const useCreatePromotion = () => {
       });
       logger.info('Promotion created', { promotionId: data.id });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer la promotion.',
+        description: promotionMutationErrorMessage(error, 'Impossible de créer la promotion.'),
         variant: 'destructive',
       });
       logger.error('Error creating promotion', { error });
@@ -456,10 +484,7 @@ export const useUpdatePromotion = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...updates
-    }: Partial<ProductPromotion> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: Partial<ProductPromotion> & { id: string }) => {
       // Uppercase code if provided
       const updateData = {
         ...updates,
@@ -476,7 +501,7 @@ export const useUpdatePromotion = () => {
       if (error) throw error;
       return data as ProductPromotion;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['promotions', data.store_id] });
       queryClient.invalidateQueries({ queryKey: ['promotion', data.id] });
       queryClient.invalidateQueries({ queryKey: ['product-promotions'] });
@@ -485,10 +510,13 @@ export const useUpdatePromotion = () => {
         description: 'Les modifications ont été enregistrées.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour la promotion.',
+        description: promotionMutationErrorMessage(
+          error,
+          'Impossible de mettre à jour la promotion.'
+        ),
         variant: 'destructive',
       });
     },
@@ -504,10 +532,7 @@ export const useDeletePromotion = () => {
 
   return useMutation({
     mutationFn: async (promotionId: string) => {
-      const { error } = await supabase
-        .from('product_promotions')
-        .delete()
-        .eq('id', promotionId);
+      const { error } = await supabase.from('product_promotions').delete().eq('id', promotionId);
 
       if (error) throw error;
     },
@@ -520,10 +545,10 @@ export const useDeletePromotion = () => {
       });
       logger.info('Promotion deleted', { promotionId });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer la promotion.',
+        description: promotionMutationErrorMessage(error, 'Impossible de supprimer la promotion.'),
         variant: 'destructive',
       });
     },
@@ -575,12 +600,3 @@ export const calculateDiscount = (
       return 0;
   }
 };
-
-
-
-
-
-
-
-
-

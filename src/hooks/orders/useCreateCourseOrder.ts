@@ -154,7 +154,7 @@ export const useCreateCourseOrder = () => {
       }
 
       // 4. Créer/récupérer customer
-      let  customerId: string;
+      let customerId: string;
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
@@ -188,9 +188,9 @@ export const useCreateCourseOrder = () => {
       const totalPrice = basePrice * quantity;
 
       // Calculer le montant à payer selon le type de paiement
-      let  amountToPay= totalPrice;
-      let  percentagePaid= 0;
-      let  remainingAmount= 0;
+      let amountToPay = totalPrice;
+      let percentagePaid = 0;
+      let remainingAmount = 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -228,14 +228,15 @@ export const useCreateCourseOrder = () => {
           percentage_paid: percentagePaid,
           remaining_amount: remainingAmount,
           affiliate_tracking_cookie: affiliateTrackingCookie,
-          // Métadonnées spécifiques pour cours
-          notes: JSON.stringify({
+          metadata: {
             course_id: courseId,
             course_name: product.name,
-            auto_enroll: true, // Flag pour créer enrollment automatiquement
-          }),
+            auto_enroll: true,
+          },
         })
-        .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+        .select(
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+        )
         .single();
 
       if (orderError || !order) {
@@ -253,11 +254,10 @@ export const useCreateCourseOrder = () => {
           quantity,
           unit_price: basePrice,
           total_price: totalPrice - (giftCardAmount || 0),
-          // Métadonnées spécifiques
-          metadata: JSON.stringify({
+          item_metadata: {
             course_id: courseId,
             auto_enroll: true,
-          }),
+          },
         })
         .select('id')
         .single();
@@ -297,7 +297,7 @@ export const useCreateCourseOrder = () => {
           currency: order.currency || product.currency || 'XOF',
           payment_status: order.payment_status || 'pending',
           created_at: order.created_at || new Date().toISOString(),
-        }).catch( err => {
+        }).catch(err => {
           logger.error('Error triggering order created webhook', { error: err, orderId: order.id });
         });
       });
@@ -306,7 +306,7 @@ export const useCreateCourseOrder = () => {
       // Convertir currency en type Currency
       const { isSupportedCurrency } = await import('@/lib/currency-converter');
       type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';
-      const  paymentCurrency: Currency = isSupportedCurrency(product.currency)
+      const paymentCurrency: Currency = isSupportedCurrency(product.currency)
         ? (product.currency as Currency)
         : 'XOF';
 
@@ -360,9 +360,3 @@ export const useCreateCourseOrder = () => {
     },
   });
 };
-
-
-
-
-
-

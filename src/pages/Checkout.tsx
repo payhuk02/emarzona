@@ -58,6 +58,55 @@ interface ShippingAddress {
   state?: string;
 }
 
+/** Alignement DB : colonne canonique item_metadata (trigger cours + webhook artiste). */
+function orderItemInsertExtras(item: CartItem): { item_metadata?: Record<string, unknown> } {
+  const meta =
+    item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)
+      ? (item.metadata as Record<string, unknown>)
+      : {};
+
+  if (item.product_type === 'course') {
+    const courseId = meta.course_id ?? meta.courseId;
+    return {
+      item_metadata: {
+        ...meta,
+        ...(courseId != null ? { course_id: courseId } : {}),
+        auto_enroll: true,
+      },
+    };
+  }
+
+  if (item.product_type === 'artist' && Object.keys(meta).length > 0) {
+    return { item_metadata: { ...meta } };
+  }
+
+  return {};
+}
+
+type TaxBreakdownItem = {
+  type: string;
+  name: string;
+  rate: number;
+  amount: number;
+  applies_to_shipping: boolean;
+  tax_inclusive: boolean;
+  is_default?: boolean;
+};
+
+type TaxCalculationResult = {
+  tax_amount: number;
+  tax_breakdown: TaxBreakdownItem[];
+  subtotal: number;
+  shipping_amount: number;
+  total_with_tax: number;
+};
+
+function isTaxCalculationResult(value: unknown): value is TaxCalculationResult {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.tax_amount === 'number' && Array.isArray(v.tax_breakdown);
+}
+
 export default function Checkout() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -150,7 +199,7 @@ export default function Checkout() {
           if (hasMultipleStores) {
             // Grouper les items par boutique (fonction simplifiée pour l'instant)
             const groups = new Map<string, StoreGroup>();
-            const  skippedItems: CartItem[] = [];
+            const skippedItems: CartItem[] = [];
 
             for (const item of items) {
               const product = products.find(p => p.id === item.product_id);
@@ -191,8 +240,8 @@ export default function Checkout() {
             setStoreGroups(new Map());
           }
         }
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      } catch (_error: unknown) {
+        const errorMessage = _error instanceof Error ? _error.message : String(_error);
         logger.error('Error in checkMultiStore:', { error: errorMessage });
       } finally {
         setIsCheckingStores(false);
@@ -200,7 +249,7 @@ export default function Checkout() {
     };
 
     checkMultiStore();
-  }, [items]);
+  }, [items, toast]);
 
   // Restaurer le code promo depuis localStorage au chargement
   // IMPORTANT: Ne charger que si le coupon n'est pas déjà chargé
@@ -251,8 +300,8 @@ export default function Checkout() {
           });
         }
       }
-    } catch ( _error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+    } catch (_error: unknown) {
+      const errorObj = _error instanceof Error ? _error : new Error(String(_error));
       logger.warn('Error loading coupon from localStorage:', errorObj);
       try {
         localStorage.removeItem('applied_coupon');
@@ -294,7 +343,7 @@ export default function Checkout() {
 
   // Charger la carte cadeau depuis localStorage si disponible
   useEffect(() => {
-    let  savedGiftCard: string | null = null;
+    let savedGiftCard: string | null = null;
     try {
       savedGiftCard = localStorage.getItem('applied_gift_card');
     } catch {
@@ -308,7 +357,7 @@ export default function Checkout() {
         if (typeof g.id === 'string' && typeof g.code === 'string' && Number.isFinite(balance)) {
           setAppliedGiftCard({ id: g.id, balance, code: g.code });
         }
-      } catch (e) {
+      } catch (_e) {
         try {
           localStorage.removeItem('applied_gift_card');
         } catch {
@@ -339,7 +388,7 @@ export default function Checkout() {
         full_name: user.user_metadata?.full_name || '',
       }));
     }
-  }, [user]);
+  }, [user, formData.email]);
 
   // ============================================
   // CALCUL AVEC USEMEMO ET DÉPENDANCES EXPLICITES POUR GARANTIR LA MISE À JOUR
@@ -357,7 +406,7 @@ export default function Checkout() {
   const couponDiscount = useMemo(() => {
     if (!appliedCouponCode || !appliedCouponCode.discountAmount) return 0;
     return Number(appliedCouponCode.discountAmount);
-  }, [appliedCouponCode?.id, appliedCouponCode?.discountAmount, appliedCouponCode?.code]);
+  }, [appliedCouponCode]);
 
   // 3. Sous-total après remises
   // IMPORTANT: summary.subtotal = prix total - remises items (déjà calculé dans useCart)
@@ -389,32 +438,6 @@ export default function Checkout() {
   }, [formData.country, items]);
 
   // Calculer taxes automatiquement via la fonction RPC
-  type TaxBreakdownItem = {
-    type: string;
-    name: string;
-    rate: number;
-    amount: number;
-    applies_to_shipping: boolean;
-    tax_inclusive: boolean;
-    is_default?: boolean;
-  };
-
-  type TaxCalculationResult = {
-    tax_amount: number;
-    tax_breakdown: TaxBreakdownItem[];
-    subtotal: number;
-    shipping_amount: number;
-    total_with_tax: number;
-  };
-
-  const isTaxCalculationResult = (value: unknown): value is TaxCalculationResult => {
-    if (!value || typeof value !== 'object') return false;
-    const v = value as Record<string, unknown>;
-    return typeof v.tax_amount === 'number' && Array.isArray(v.tax_breakdown);
-  };
-
-  // Utilise les configurations de taxes de la base de données
-  // NOTE: Cette query doit être après la déclaration de subtotalAfterDiscounts et shippingAmount
   const { data: taxCalculation, isLoading: taxLoading } = useQuery({
     queryKey: [
       'tax-calculation',
@@ -496,7 +519,7 @@ export default function Checkout() {
   const giftCardAmount = useMemo(() => {
     if (!appliedGiftCard || !appliedGiftCard.balance) return 0;
     return Math.min(appliedGiftCard.balance, subtotalWithShipping);
-  }, [appliedGiftCard?.id, appliedGiftCard?.balance, subtotalWithShipping]);
+  }, [appliedGiftCard, subtotalWithShipping]);
 
   // 9. Total final - Calculé avec toutes les dépendances pour garantir la mise à jour
   const finalTotal = useMemo(() => {
@@ -513,6 +536,7 @@ export default function Checkout() {
       });
     }
   }, [
+    appliedCouponCode,
     appliedCouponCode?.id,
     appliedCouponCode?.discountAmount,
     appliedCouponCode?.code,
@@ -553,13 +577,13 @@ export default function Checkout() {
     appliedGiftCard: { id: string; balance: number; code: string } | null;
     selectedPaymentProvider: 'moneroo';
   }) => {
-    const  createdOrders: Array<{
+    const createdOrders: Array<{
       orderId: string;
       storeId: string;
       orderNumber: string;
       checkoutUrl?: string;
     }> = [];
-    const  errors: Array<{ storeId: string; error: string }> = [];
+    const errors: Array<{ storeId: string; error: string }> = [];
 
     // Récupérer les infos d'affiliation si disponible
     const affiliateInfo = await getAffiliateInfo();
@@ -572,7 +596,7 @@ export default function Checkout() {
 
         // Récupérer les informations de la boutique
         const { data: store } = await supabase
-          .from('stores_public' as any)
+          .from('stores_public')
           .select('id, name, slug')
           .eq('id', storeId)
           .single();
@@ -608,7 +632,7 @@ export default function Checkout() {
           groupGiftCardAmount;
 
         // Créer ou mettre à jour le client pour cette boutique
-        let  finalCustomerId: string | null = null;
+        let finalCustomerId: string | null = null;
         try {
           const { data: existingCustomer } = await supabase
             .from('customers')
@@ -678,6 +702,10 @@ export default function Checkout() {
             payment_status: 'pending',
             status: 'pending',
             shipping_address: formData,
+            metadata: {
+              multi_store: true,
+              checkout_user_id: checkoutUser?.id ?? null,
+            },
           })
           .select()
           .single();
@@ -697,6 +725,7 @@ export default function Checkout() {
           unit_price: item.unit_price,
           total_price: (item.unit_price - (item.discount_amount || 0)) * item.quantity,
           variant_id: item.variant_id,
+          ...orderItemInsertExtras(item),
         }));
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
@@ -837,7 +866,7 @@ export default function Checkout() {
           orderId: order.id,
           orderNumber,
         });
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error(`Error processing checkout for store ${storeId}:`, { error: errorMessage });
         errors.push({ storeId, error: errorMessage });
@@ -885,7 +914,7 @@ export default function Checkout() {
 
   // Validation formulaire améliorée
   const validateForm = (): boolean => {
-    const  errors: Partial<Record<keyof ShippingAddress, string>> = {};
+    const errors: Partial<Record<keyof ShippingAddress, string>> = {};
 
     if (!formData.full_name.trim()) {
       errors.full_name = 'Le nom complet est requis';
@@ -1058,7 +1087,7 @@ export default function Checkout() {
       }
 
       // 🆕 Créer ou mettre à jour le client dans la table customers
-      let  finalCustomerId: string | null = null;
+      let finalCustomerId: string | null = null;
       try {
         // Vérifier si le client existe déjà
         const { data: existingCustomer } = await supabase
@@ -1159,6 +1188,7 @@ export default function Checkout() {
         unit_price: item.unit_price,
         total_price: (item.unit_price - (item.discount_amount || 0)) * item.quantity,
         variant_id: item.variant_id,
+        ...orderItemInsertExtras(item),
       }));
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
@@ -1187,7 +1217,7 @@ export default function Checkout() {
       if (appliedCouponCode && appliedCouponCode.id && couponDiscount > 0) {
         try {
           // Récupérer le customer_id si pas encore chargé
-          let  finalCustomerId= customerId;
+          let finalCustomerId = customerId;
           if (!finalCustomerId && user?.email && storeId) {
             const { data: customer } = await supabase
               .from('customers')
@@ -1233,7 +1263,7 @@ export default function Checkout() {
                   error: rpcError,
                 });
               }
-            } catch ( _err: unknown) {
+            } catch (_err: unknown) {
               const errorMessage = err instanceof Error ? err.message : String(err);
               logger.warn('Error incrementing promotion usage counter:', { error: errorMessage });
             }
@@ -1346,7 +1376,7 @@ export default function Checkout() {
           logger.warn('Failed to mark cart as recovered', { error: recoveryError });
           // Ne pas bloquer le processus si l'erreur survient
         }
-      } catch ( _recoveryError: unknown) {
+      } catch (_recoveryError: unknown) {
         const errorMessage =
           recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
         logger.warn('Error marking cart as recovered', { error: errorMessage });
@@ -1361,7 +1391,7 @@ export default function Checkout() {
           variant: 'destructive',
         });
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Impossible de finaliser la commande';
       logger.error('Erreur lors du checkout:', { error: errorMessage });
@@ -2146,9 +2176,3 @@ export default function Checkout() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

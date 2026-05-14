@@ -34,6 +34,7 @@ interface CreateOrderDialogProps {
 interface OrderItem {
   productId: string;
   productName: string;
+  productType: string | null;
   quantity: number;
   unitPrice: number;
   currency: string;
@@ -88,6 +89,7 @@ const CreateOrderDialogComponent = ({
       {
         productId: firstActiveProduct.id,
         productName: firstActiveProduct.name,
+        productType: firstActiveProduct.product_type,
         quantity: 1,
         unitPrice: Number(firstActiveProduct.price),
         currency: firstActiveProduct.currency || 'FCFA',
@@ -110,6 +112,7 @@ const CreateOrderDialogComponent = ({
           const selectedProduct = products?.find(p => p.id === value);
           if (selectedProduct) {
             newItems[index].productName = selectedProduct.name;
+            newItems[index].productType = selectedProduct.product_type;
             newItems[index].unitPrice = Number(selectedProduct.price);
             newItems[index].currency = selectedProduct.currency || 'FCFA';
           }
@@ -124,6 +127,13 @@ const CreateOrderDialogComponent = ({
   const calculateTotal = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   }, [items]);
+
+  const resetForm = useCallback(() => {
+    setCustomerId('');
+    setItems([]);
+    setNotes('');
+    setPaymentMethod('cash');
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -157,10 +167,13 @@ const CreateOrderDialogComponent = ({
             order_number: orderNumber,
             total_amount: totalAmount,
             currency: currency,
-            payment_method: paymentMethod,
             payment_status: 'pending',
             status: 'pending',
-            notes,
+            metadata: {
+              payment_method: paymentMethod,
+              admin_order_notes: notes || null,
+              source: 'admin_create_order_dialog',
+            },
           })
           .select()
           .single();
@@ -171,10 +184,15 @@ const CreateOrderDialogComponent = ({
         const orderItems = items.map(item => ({
           order_id: order.id,
           product_id: item.productId,
+          product_type: item.productType,
           product_name: item.productName,
           quantity: item.quantity,
           unit_price: item.unitPrice,
           total_price: item.quantity * item.unitPrice,
+          item_metadata: {
+            source: 'admin_create_order_dialog',
+            product_type: item.productType,
+          },
         }));
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
@@ -193,7 +211,7 @@ const CreateOrderDialogComponent = ({
               status: order.status,
               payment_status: order.payment_status,
               created_at: order.created_at,
-            }).catch( err => {
+            }).catch(err => {
               logger.error('Error triggering webhook', { error: err, orderId: order.id });
             });
           });
@@ -207,8 +225,8 @@ const CreateOrderDialogComponent = ({
         onSuccess();
         onOpenChange(false);
         resetForm();
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+      } catch (_error: unknown) {
+        const errorMessage = _error instanceof Error ? _error.message : 'Une erreur est survenue';
         toast({
           title: 'Erreur',
           description: errorMessage,
@@ -228,15 +246,9 @@ const CreateOrderDialogComponent = ({
       onOpenChange,
       toast,
       calculateTotal,
+      resetForm,
     ]
   );
-
-  const resetForm = useCallback(() => {
-    setCustomerId('');
-    setItems([]);
-    setNotes('');
-    setPaymentMethod('cash');
-  }, []);
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('fr-FR', {
@@ -441,9 +453,3 @@ export const CreateOrderDialog = React.memo(CreateOrderDialogComponent, (prevPro
 });
 
 CreateOrderDialog.displayName = 'CreateOrderDialog';
-
-
-
-
-
-

@@ -10,7 +10,7 @@ import { logger } from './logger';
  */
 export async function extractErrorBody(error: unknown): Promise<Record<string, unknown> | null> {
   const supabaseError = error as SupabaseError;
-  
+
   // Méthode 1: error.context peut être une Response
   if (supabaseError?.context instanceof Response) {
     try {
@@ -26,19 +26,23 @@ export async function extractErrorBody(error: unknown): Promise<Record<string, u
       logger.warn('[MonerooErrorExtractor] Could not read context Response:', e);
     }
   }
-  
+
   // Méthode 2: error.data peut contenir le body parsé
   if (supabaseError?.data) {
     logger.info('[MonerooErrorExtractor] Using error.data');
     return supabaseError.data as Record<string, unknown>;
   }
-  
+
   // Méthode 3: error.context peut être un objet avec le body
-  if (supabaseError?.context && typeof supabaseError.context === 'object' && !(supabaseError.context instanceof Response)) {
+  if (
+    supabaseError?.context &&
+    typeof supabaseError.context === 'object' &&
+    !(supabaseError.context instanceof Response)
+  ) {
     logger.info('[MonerooErrorExtractor] Using error.context as object');
     return supabaseError.context as Record<string, unknown>;
   }
-  
+
   return null;
 }
 
@@ -51,7 +55,7 @@ export async function extractErrorDetails(
 ): Promise<ExtractedErrorDetails> {
   const supabaseError = error as SupabaseError;
   const errorBody = await extractErrorBody(error);
-  let  errorDetails: ExtractedErrorDetails = {
+  let errorDetails: ExtractedErrorDetails = {
     message: errorMessage,
   };
 
@@ -62,7 +66,7 @@ export async function extractErrorDetails(
       // 1. error.context (peut contenir Response)
       if (supabaseError?.context) {
         const context = supabaseError.context;
-        
+
         if (context instanceof Response) {
           try {
             const responseText = await context.text();
@@ -82,18 +86,19 @@ export async function extractErrorDetails(
       }
       // 2. error.data
       else if (supabaseError?.data) {
-        errorDetails = supabaseError.data as ExtractedErrorDetails;
+        errorDetails = supabaseError.data as unknown as ExtractedErrorDetails;
         logger.info('[MonerooErrorExtractor] Using error.data');
       }
       // 3. error.body
       else if (supabaseError?.body) {
         try {
-          errorDetails = typeof supabaseError.body === 'string' 
-            ? JSON.parse(supabaseError.body) as ExtractedErrorDetails
-            : supabaseError.body as ExtractedErrorDetails;
+          errorDetails =
+            typeof supabaseError.body === 'string'
+              ? (JSON.parse(supabaseError.body) as ExtractedErrorDetails)
+              : (supabaseError.body as unknown as ExtractedErrorDetails);
           logger.info('[MonerooErrorExtractor] Using error.body');
         } catch {
-          errorDetails = { raw: String(supabaseError.body) };
+          errorDetails = { message: String(supabaseError.body), raw: String(supabaseError.body) };
         }
       }
       // 4. Essayer de lire depuis error.message si c'est du JSON
@@ -107,7 +112,7 @@ export async function extractErrorDetails(
       }
     }
   } else {
-    errorDetails = errorBody as ExtractedErrorDetails;
+    errorDetails = errorBody as unknown as ExtractedErrorDetails;
   }
 
   return errorDetails;
@@ -123,7 +128,7 @@ export function extractDetailedMessage(
   if (errorDetails.message) {
     return errorDetails.message;
   }
-  
+
   if (errorDetails.error) {
     if (typeof errorDetails.error === 'string') {
       return errorDetails.error;
@@ -132,22 +137,14 @@ export function extractDetailedMessage(
       return errorDetails.error.message;
     }
   }
-  
+
   if (errorDetails.hint) {
     return `${defaultMessage}. ${errorDetails.hint}`;
   }
-  
+
   if (errorDetails.raw) {
     return errorDetails.raw;
   }
-  
+
   return defaultMessage;
 }
-
-
-
-
-
-
-
-

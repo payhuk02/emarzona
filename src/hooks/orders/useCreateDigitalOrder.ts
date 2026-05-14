@@ -1,7 +1,7 @@
 /**
  * Hook pour créer des commandes de produits digitaux
  * Date: 28 octobre 2025
- * 
+ *
  * Workflow complet:
  * 1. Créer/récupérer customer
  * 2. Générer licence si nécessaire
@@ -16,6 +16,7 @@ import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
+import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
@@ -25,31 +26,31 @@ const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 export interface CreateDigitalOrderOptions {
   /** ID du produit digital */
   digitalProductId: string;
-  
+
   /** ID du produit de base (pour price, etc.) */
   productId: string;
-  
+
   /** ID du store */
   storeId: string;
-  
+
   /** Email du client */
   customerEmail: string;
-  
+
   /** Nom du client (optionnel) */
   customerName?: string;
-  
+
   /** Téléphone du client (optionnel) */
   customerPhone?: string;
-  
+
   /** Générer une licence ? */
   generateLicense?: boolean;
-  
+
   /** Type de licence */
   licenseType?: 'single' | 'multi' | 'unlimited';
-  
+
   /** Nombre max d'activations (pour multi) */
   maxActivations?: number;
-  
+
   /** Durée de validité licence en jours */
   licenseExpiryDays?: number;
 
@@ -66,16 +67,16 @@ export interface CreateDigitalOrderOptions {
 export interface CreateDigitalOrderResult {
   /** ID de la commande créée */
   orderId: string;
-  
+
   /** ID de l'order_item */
   orderItemId: string;
-  
+
   /** ID de la licence générée (si applicable) */
   licenseId?: string;
-  
+
   /** URL de checkout Moneroo */
   checkoutUrl: string;
-  
+
   /** ID de transaction Moneroo */
   transactionId: string;
 }
@@ -87,10 +88,10 @@ function generateLicenseKey(): string {
   const segments = 4;
   const segmentLength = 4;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  
+
   return Array(segments)
     .fill(0)
-    .map(() => 
+    .map(() =>
       Array(segmentLength)
         .fill(0)
         .map(() => chars[Math.floor(Math.random() * chars.length)])
@@ -101,11 +102,11 @@ function generateLicenseKey(): string {
 
 /**
  * Hook pour créer une commande de produit digital
- * 
+ *
  * @example
  * ```typescript
  * const { mutateAsync: createDigitalOrder, isPending } = useCreateDigitalOrder();
- * 
+ *
  * const handleBuy = async () => {
  *   const result = await createDigitalOrder({
  *     digitalProductId: 'xxx',
@@ -115,7 +116,7 @@ function generateLicenseKey(): string {
  *     generateLicense: true,
  *     licenseType: 'single',
  *   });
- *   
+ *
  *   // Rediriger vers Moneroo
  *   window.location.href = result.checkoutUrl;
  * };
@@ -153,8 +154,8 @@ export const useCreateDigitalOrder = () => {
       }
 
       // 2. Récupérer ou créer le customer
-      let  customerId: string;
-      
+      let customerId: string;
+
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
@@ -184,12 +185,17 @@ export const useCreateDigitalOrder = () => {
       }
 
       // 3. Générer une licence si nécessaire (AFTER purchase, with correct columns)
-      let  licenseId: string | undefined;
+      let licenseId: string | undefined;
 
       if (generateLicense) {
         // Get authenticated user ID for license
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user?.id) {
+          throw new Error('Connexion requise pour acheter un produit digital avec licence');
+        }
+
         const expiresAt = licenseExpiryDays
           ? new Date(Date.now() + licenseExpiryDays * 24 * 60 * 60 * 1000).toISOString()
           : null;
@@ -198,7 +204,7 @@ export const useCreateDigitalOrder = () => {
           .from('digital_licenses')
           .insert({
             digital_product_id: digitalProductId,
-            user_id: user?.id || null, // ✅ Required for RLS
+            user_id: user.id,
             license_key: generateLicenseKey(),
             license_type: licenseType,
             max_activations: licenseType === 'unlimited' ? -1 : maxActivations, // ✅ -1 for unlimited
@@ -243,7 +249,9 @@ export const useCreateDigitalOrder = () => {
           status: 'pending',
           affiliate_tracking_cookie: affiliateTrackingCookie,
         })
-        .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+        .select(
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+        )
         .single();
 
       if (orderError || !order) {
@@ -253,54 +261,62 @@ export const useCreateDigitalOrder = () => {
       // 7. Rédimer la carte cadeau si applicable (APRÈS création commande)
       if (giftCardId && giftCardAmount && giftCardAmount > 0) {
         try {
-          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
-            p_gift_card_id: giftCardId,
-            p_order_id: order.id,
-            p_amount: giftCardAmount,
-          });
+          const { data: redeemResult, error: redeemError } = await supabase.rpc(
+            'redeem_gift_card',
+            {
+              p_gift_card_id: giftCardId,
+              p_order_id: order.id,
+              p_amount: giftCardAmount,
+            }
+          );
 
           if (redeemError) {
-            logger.error('Error redeeming gift card:', redeemError);
+            logger.error('Error redeeming gift card:', { error: redeemError });
             // Ne pas bloquer la commande
           } else if (redeemResult && redeemResult.length > 0 && !redeemResult[0].success) {
-            logger.error('Gift card redemption failed:', redeemResult[0].message);
+            logger.error('Gift card redemption failed:', {
+              message: redeemResult[0].message,
+            });
             // Ne pas bloquer la commande
           }
         } catch (giftCardError) {
-          logger.error('Error in gift card redemption:', giftCardError);
+          logger.error('Error in gift card redemption:', { error: giftCardError });
           // Ne pas bloquer la commande
         }
       }
 
       // 8. Créer automatiquement la facture
       try {
-        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
-          p_order_id: order.id,
-        });
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc(
+          'create_invoice_from_order',
+          {
+            p_order_id: order.id,
+          }
+        );
 
         if (invoiceError) {
-          logger.error('Error creating invoice:', invoiceError);
+          logger.error('Error creating invoice:', { error: invoiceError });
           // Ne pas bloquer la commande si la facture échoue
         } else {
           logger.info(`Invoice created: ${invoiceId}`);
         }
       } catch (invoiceErr) {
-        logger.error('Error in invoice creation:', invoiceErr);
+        logger.error('Error in invoice creation:', { error: invoiceErr });
         // Ne pas bloquer la commande
       }
 
       // 9. Déclencher webhook order.created (asynchrone, ne bloque pas)
       import('@/lib/webhooks').then(({ triggerOrderCreatedWebhook }) => {
         triggerOrderCreatedWebhook(order.id, {
-          store_id: order.store_id,
-          customer_id: order.customer_id,
-          order_number: order.order_number,
-          status: order.status,
-          total_amount: order.total_amount,
-          currency: order.currency,
-          payment_status: order.payment_status,
-          created_at: order.created_at,
-        }).catch((err) => {
+          store_id: order.store_id ?? storeId,
+          customer_id: order.customer_id ?? customerId,
+          order_number: order.order_number ?? orderNumber,
+          status: order.status ?? 'pending',
+          total_amount: order.total_amount ?? finalAmount,
+          currency: order.currency ?? product.currency ?? 'XOF',
+          payment_status: order.payment_status ?? 'pending',
+          created_at: order.created_at ?? new Date().toISOString(),
+        }).catch(err => {
           logger.error('Error in analytics tracking', { error: err, orderId: order.id });
         });
       });
@@ -327,17 +343,21 @@ export const useCreateDigitalOrder = () => {
         .single();
 
       if (orderItemError || !orderItem) {
-        throw new Error('Erreur lors de la création de l\'élément de commande');
+        throw new Error("Erreur lors de la création de l'élément de commande");
       }
 
       // 11. Initier le paiement Moneroo
+      const paymentCurrency: Currency = isSupportedCurrency(String(product.currency ?? 'XOF'))
+        ? (product.currency as Currency)
+        : 'XOF';
+
       const paymentResult = await initiateMonerooPayment({
         storeId,
         productId,
         orderId: order.id,
         customerId,
         amount: finalAmount,
-        currency: product.currency,
+        currency: paymentCurrency,
         description: `Achat: ${product.name}`,
         customerEmail,
         customerName: customerName || customerEmail.split('@')[0],
@@ -352,7 +372,7 @@ export const useCreateDigitalOrder = () => {
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
         // Déclencher webhook pour échec de paiement si nécessaire
-        throw new Error('Erreur lors de l\'initialisation du paiement');
+        throw new Error("Erreur lors de l'initialisation du paiement");
       }
 
       // 12. Retourner le résultat
@@ -365,7 +385,7 @@ export const useCreateDigitalOrder = () => {
       };
     },
 
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: '✅ Commande créée',
         description: 'Redirection vers le paiement...',
@@ -386,15 +406,13 @@ export const useCreateDigitalOrder = () => {
 /**
  * Hook pour vérifier si un utilisateur a déjà acheté un produit digital
  */
-export const useHasPurchasedDigitalProduct = (
-  digitalProductId: string,
-  userEmail: string
-) => {
+export const useHasPurchasedDigitalProduct = (digitalProductId: string, userEmail: string) => {
   return useMutation({
     mutationFn: async (): Promise<boolean> => {
       const { data, error } = await supabase
         .from('order_items')
-        .select(`
+        .select(
+          `
           id,
           orders!inner (
             id,
@@ -403,7 +421,8 @@ export const useHasPurchasedDigitalProduct = (
               email
             )
           )
-        `)
+        `
+        )
         .eq('digital_product_id', digitalProductId)
         .eq('orders.payment_status', 'paid')
         .eq('orders.customers.email', userEmail)
@@ -418,10 +437,3 @@ export const useHasPurchasedDigitalProduct = (
     },
   });
 };
-
-
-
-
-
-
-

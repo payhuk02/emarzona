@@ -19,7 +19,8 @@ import { logger } from '@/lib/logger';
 import { retryWithExponentialBackoff } from '@/lib/retry-utils';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
-const ARTIST_PRODUCT_FIELDS = 'id, artist_name, artwork_title, artwork_year, artwork_edition_type, edition_number, total_editions, requires_shipping, certificate_of_authenticity, signature_authenticated, shipping_fragile, shipping_insurance_required, shipping_insurance_amount, version';
+const ARTIST_PRODUCT_FIELDS =
+  'id, artist_name, artwork_title, artwork_year, artwork_edition_type, edition_number, total_editions, requires_shipping, certificate_of_authenticity, signature_authenticated, shipping_fragile, shipping_insurance_required, shipping_insurance_amount, version';
 
 /**
  * Options pour créer une commande d'œuvre d'artiste
@@ -214,7 +215,7 @@ export const useCreateArtistOrder = () => {
       }
 
       // 5. Créer/récupérer customer
-      let  customerId: string;
+      let customerId: string;
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
@@ -245,7 +246,7 @@ export const useCreateArtistOrder = () => {
 
       // 6. Calculer le prix total
       const basePrice = product.promotional_price || product.price;
-      let  totalPrice= basePrice * quantity;
+      let totalPrice = basePrice * quantity;
 
       // Ajouter l'assurance si nécessaire
       if (artistProduct.shipping_insurance_required && artistProduct.shipping_insurance_amount) {
@@ -253,9 +254,9 @@ export const useCreateArtistOrder = () => {
       }
 
       // Calculer le montant à payer selon le type de paiement
-      let  amountToPay= totalPrice;
-      let  percentagePaid= 0;
-      let  remainingAmount= 0;
+      let amountToPay = totalPrice;
+      let percentagePaid = 0;
+      let remainingAmount = 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -294,8 +295,7 @@ export const useCreateArtistOrder = () => {
           percentage_paid: percentagePaid,
           remaining_amount: remainingAmount,
           affiliate_tracking_cookie: affiliateTrackingCookie,
-          // Métadonnées spécifiques pour œuvres d'artiste
-          notes: JSON.stringify({
+          metadata: {
             artist_name: artistProduct.artist_name,
             artwork_title: artistProduct.artwork_title,
             artwork_year: artistProduct.artwork_year,
@@ -306,9 +306,11 @@ export const useCreateArtistOrder = () => {
             shipping_fragile: artistProduct.shipping_fragile,
             shipping_insurance_required: artistProduct.shipping_insurance_required,
             shipping_insurance_amount: artistProduct.shipping_insurance_amount,
-          }),
+          },
         })
-        .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+        .select(
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+        )
         .single();
 
       if (orderError || !order) {
@@ -326,8 +328,7 @@ export const useCreateArtistOrder = () => {
           quantity,
           unit_price: basePrice,
           total_price: totalPrice - (giftCardAmount || 0),
-          // Métadonnées spécifiques
-          metadata: JSON.stringify({
+          item_metadata: {
             artist_product_id: artistProductId,
             artist_name: artistProduct.artist_name,
             artwork_title: artistProduct.artwork_title,
@@ -340,7 +341,7 @@ export const useCreateArtistOrder = () => {
             shipping_fragile: artistProduct.shipping_fragile,
             shipping_insurance_required: artistProduct.shipping_insurance_required,
             shipping_insurance_amount: artistProduct.shipping_insurance_amount,
-          }),
+          },
         })
         .select('id')
         .single();
@@ -362,7 +363,7 @@ export const useCreateArtistOrder = () => {
           currency: order.currency || product.currency || 'XOF',
           payment_status: order.payment_status || 'pending',
           created_at: order.created_at || new Date().toISOString(),
-        }).catch( err => {
+        }).catch(err => {
           logger.error('Error triggering order created webhook', { error: err, orderId: order.id });
         });
       });
@@ -389,7 +390,7 @@ export const useCreateArtistOrder = () => {
       // Convertir currency en type Currency
       const { isSupportedCurrency } = await import('@/lib/currency-converter');
       type Currency = 'XOF' | 'EUR' | 'USD' | 'GBP' | 'NGN' | 'GHS' | 'KES' | 'ZAR';
-      const  paymentCurrency: Currency = isSupportedCurrency(product.currency)
+      const paymentCurrency: Currency = isSupportedCurrency(product.currency)
         ? (product.currency as Currency)
         : 'XOF';
 
@@ -473,9 +474,3 @@ export const useCreateArtistOrder = () => {
     },
   });
 };
-
-
-
-
-
-

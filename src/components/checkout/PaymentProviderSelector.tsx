@@ -44,13 +44,13 @@ export function PaymentProviderSelector({
       value: 'moneroo',
       label: 'Moneroo',
       description: 'Paiement sécurisé par Moneroo',
-      icon: <Wallet  className ="h-5 w-5" />,
+      icon: <Wallet className="h-5 w-5" />,
       available: true,
       features: ['Multi-devises', 'Remboursements', 'Notifications'],
     },
   ]);
   // (Réservé) on garde seulement l'état nécessaire
-  const [userPreference, setUserPreference] = useState<PaymentProvider | null>(null);
+  const [, setUserPreference] = useState<PaymentProvider | null>(null);
 
   // Charger les préférences de l'utilisateur
   useEffect(() => {
@@ -91,11 +91,12 @@ export function PaymentProviderSelector({
           .single();
 
         if (data?.enabled_payment_providers) {
+          const providers = data.enabled_payment_providers ?? [];
           // Désactiver les providers non autorisés
           setProviders(prev =>
             prev.map(p => ({
               ...p,
-              available: data.enabled_payment_providers.includes(p.value),
+              available: Array.isArray(providers) && providers.includes(p.value),
             }))
           );
         }
@@ -222,9 +223,3 @@ export function PaymentProviderSelector({
     </Card>
   );
 }
-
-
-
-
-
-

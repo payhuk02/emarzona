@@ -8,7 +8,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import type { NotificationType } from './unified-notifications';
 
 export type TemplateChannel = 'email' | 'sms' | 'push';
 export type TemplateLanguage = 'fr' | 'en';
@@ -65,7 +64,7 @@ export class NotificationTemplateService {
 
     try {
       // Chercher d'abord un template spécifique au store
-      let  query= supabase
+      let query = supabase
         .from('notification_templates')
         .select(NOTIFICATION_TEMPLATE_FIELDS)
         .eq('slug', slug)
@@ -111,7 +110,7 @@ export class NotificationTemplateService {
     template: Template,
     variables: TemplateVariables
   ): { subject?: string; title?: string; body: string; html?: string } {
-    const  result: { subject?: string; title?: string; body: string; html?: string } = {
+    const result: { subject?: string; title?: string; body: string; html?: string } = {
       body: this.replaceVariablesInText(template.body, variables),
     };
 
@@ -134,7 +133,7 @@ export class NotificationTemplateService {
    * Remplacer les variables dans un texte
    */
   private replaceVariablesInText(text: string, variables: TemplateVariables): string {
-    let  result= text;
+    let result = text;
 
     // Remplacer {{variable}} ou {variable}
     for (const [key, value] of Object.entries(variables)) {
@@ -195,6 +194,8 @@ export class NotificationTemplateService {
         .upsert(
           {
             ...template,
+            body: template.body ?? '',
+            name: template.name ?? template.slug,
             updated_at: new Date().toISOString(),
           },
           {
@@ -241,9 +242,3 @@ export class NotificationTemplateService {
 
 // Instance singleton
 export const notificationTemplateService = new NotificationTemplateService();
-
-
-
-
-
-

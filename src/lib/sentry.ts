@@ -85,14 +85,10 @@ export const initSentry = () => {
           // Trace les navigations
           enableInp: true, // Interaction to Next Paint
           enableLongTask: true, // Long tasks
-          enableWebVitalsInstrumentation: true, // Web Vitals
         }),
         Sentry.replayIntegration({
           maskAllText: false,
           blockAllMedia: false,
-          // Capturer les sessions avec erreurs - Réduit pour éviter 429
-          sessionSampleRate: ENV === 'production' ? 0.05 : 0.5,
-          errorSampleRate: ENV === 'production' ? 0.5 : 1.0,
         }),
         // Note: React Router integration sera ajoutée si nécessaire
         // Sentry.reactRouterV6BrowserTracingIntegration n'est pas disponible dans cette version
@@ -104,7 +100,7 @@ export const initSentry = () => {
       profilesSampleRate: ENV === 'production' ? 0.05 : 0.5, // Réduit pour éviter le rate limiting
 
       // Options avancées
-      beforeSend(event, hint) {
+      beforeSend(event, _hint) {
         // Filtrer certains types d'erreurs en production
         if (ENV === 'production') {
           // Ignorer les erreurs réseau mineures
@@ -182,16 +178,7 @@ export const initSentry = () => {
       // Options de release
       release: import.meta.env.VITE_APP_VERSION || undefined,
 
-      // Options de transport
-      transportOptions: {
-        // Timeout pour les requêtes
-        timeout: 5000,
-      },
-
-      // Rate limiting - Limiter le nombre d'événements par seconde
-      // Cela aide à éviter les erreurs 429 de Sentry
-      maxQueueSize: 30, // Limiter la taille de la queue
-      beforeBreadcrumb(breadcrumb, hint) {
+      beforeBreadcrumb(breadcrumb, _hint) {
         // Filtrer les breadcrumbs qui peuvent causer des problèmes
         // Ignorer les breadcrumbs de fetch pour les requêtes Sentry
         if (breadcrumb.category === 'fetch' && breadcrumb.data) {
@@ -348,9 +335,3 @@ export const withSentry = async <T>(
     }
   );
 };
-
-
-
-
-
-

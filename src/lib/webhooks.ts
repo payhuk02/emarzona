@@ -1,6 +1,6 @@
 /**
  * Webhook Trigger Utility
- * 
+ *
  * Utilitaire pour déclencher des webhooks de manière asynchrone
  * depuis les événements clés de l'application.
  */
@@ -11,7 +11,7 @@ import type { WebhookEventType } from '@/types/webhooks';
 
 /**
  * Déclenche un webhook pour un événement donné
- * 
+ *
  * @param eventType - Type d'événement (ex: 'order.created')
  * @param eventId - ID de l'entité qui a déclenché l'événement
  * @param eventData - Données de l'événement (sera envoyé dans le payload)
@@ -20,7 +20,7 @@ import type { WebhookEventType } from '@/types/webhooks';
 export async function triggerWebhook(
   eventType: WebhookEventType,
   eventId: string,
-  eventData: Record<string, any> = {},
+  eventData: Record<string, unknown> = {},
   storeId?: string
 ): Promise<void> {
   try {
@@ -29,7 +29,7 @@ export async function triggerWebhook(
       p_event_type: eventType,
       p_event_id: eventId,
       p_event_data: eventData,
-      p_store_id: storeId || null,
+      p_store_id: storeId ?? undefined,
     });
 
     if (error) {
@@ -42,7 +42,7 @@ export async function triggerWebhook(
       // Les deliveries ont été créées avec succès
       // L'Edge Function se chargera de les envoyer de manière asynchrone
       logger.info('Webhooks triggered', { count: data.length, eventType, eventId });
-      
+
       // Optionnel: Appeler l'Edge Function immédiatement pour traitement synchrone
       // Note: Ceci peut être fait via un trigger PostgreSQL ou un cron job
       // Pour l'instant, on laisse l'Edge Function être appelée par un cron ou manuellement
@@ -67,7 +67,7 @@ export async function triggerOrderCreatedWebhook(
     currency: string;
     payment_status: string;
     created_at: string;
-    order_items?: any[];
+    order_items?: Record<string, unknown>[];
   }
 ): Promise<void> {
   await triggerWebhook(
@@ -85,7 +85,7 @@ export async function triggerOrderCreatedWebhook(
  */
 export async function triggerOrderUpdatedWebhook(
   orderId: string,
-  orderData: Record<string, any>,
+  orderData: Record<string, unknown>,
   storeId?: string
 ): Promise<void> {
   await triggerWebhook(
@@ -103,7 +103,7 @@ export async function triggerOrderUpdatedWebhook(
  */
 export async function triggerOrderCompletedWebhook(
   orderId: string,
-  orderData: Record<string, any>,
+  orderData: Record<string, unknown>,
   storeId?: string
 ): Promise<void> {
   await triggerWebhook(
@@ -129,7 +129,7 @@ export async function triggerPaymentCompletedWebhook(
     status: string;
     payment_method: string;
     created_at: string;
-    order?: Record<string, any>;
+    order?: Record<string, unknown>;
   },
   storeId?: string
 ): Promise<void> {
@@ -148,7 +148,7 @@ export async function triggerPaymentCompletedWebhook(
  */
 export async function triggerProductCreatedWebhook(
   productId: string,
-  productData: Record<string, any>,
+  productData: Record<string, unknown>,
   storeId?: string
 ): Promise<void> {
   await triggerWebhook(
@@ -172,7 +172,7 @@ export async function triggerCourseEnrolledWebhook(
     progress_percentage: number;
     status: string;
     enrolled_at: string;
-    course?: Record<string, any>;
+    course?: Record<string, unknown>;
   },
   storeId?: string
 ): Promise<void> {
@@ -200,7 +200,7 @@ export async function triggerServiceBookingCreatedWebhook(
     status: string;
     meeting_url?: string;
     created_at: string;
-    service?: Record<string, any>;
+    service?: Record<string, unknown>;
   },
   storeId?: string
 ): Promise<void> {
@@ -239,10 +239,3 @@ export async function triggerReturnCreatedWebhook(
     returnData.store_id
   );
 }
-
-
-
-
-
-
-

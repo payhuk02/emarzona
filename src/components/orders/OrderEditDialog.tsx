@@ -38,12 +38,14 @@ interface OrderItem {
   id?: string;
   productId: string;
   productName: string;
+  productType: string | null;
   quantity: number;
   unitPrice: number;
   currency: string;
 }
 
-const ORDER_ITEM_FIELDS = 'id, order_id, product_id, product_name, quantity, unit_price, total_price';
+const ORDER_ITEM_FIELDS =
+  'id, order_id, product_id, product_name, product_type, quantity, unit_price, total_price, item_metadata';
 
 const OrderEditDialogComponent = ({
   open,
@@ -77,8 +79,16 @@ const OrderEditDialogComponent = ({
     const loadOrderData = async () => {
       if (!order || !open) return;
 
-      setNotes(order.notes || '');
-      setPaymentMethod(order.payment_method || 'cash');
+      const meta =
+        order.metadata && typeof order.metadata === 'object'
+          ? (order.metadata as Record<string, unknown>)
+          : {};
+      setNotes(String(meta.admin_order_notes ?? (order as { notes?: string }).notes ?? ''));
+      setPaymentMethod(
+        String(
+          meta.payment_method ?? (order as { payment_method?: string }).payment_method ?? 'cash'
+        )
+      );
       setStatus(order.status);
       setPaymentStatus(order.payment_status);
 
@@ -91,19 +101,20 @@ const OrderEditDialogComponent = ({
 
         if (error) throw error;
 
-        const  loadedItems: OrderItem[] = (data || []).map(item => ({
+        const loadedItems: OrderItem[] = (data || []).map(item => ({
           id: item.id,
           productId: item.product_id,
           productName: item.product_name,
+          productType: item.product_type,
           quantity: item.quantity,
           unitPrice: item.unit_price,
           currency: order.currency,
         }));
 
         setItems(loadedItems);
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage =
-          error instanceof Error ? error.message : 'Une erreur est survenue lors du chargement';
+          _error instanceof Error ? _error.message : 'Une erreur est survenue lors du chargement';
         toast({
           title: 'Erreur',
           description: errorMessage || 'Impossible de charger les articles',
@@ -113,7 +124,7 @@ const OrderEditDialogComponent = ({
     };
 
     loadOrderData();
-  }, [order, open]);
+  }, [order, open, toast]);
 
   const handleAddItem = useCallback(() => {
     if (!products || products.length === 0) {
@@ -140,12 +151,13 @@ const OrderEditDialogComponent = ({
       {
         productId: firstActiveProduct.id,
         productName: firstActiveProduct.name,
+        productType: firstActiveProduct.product_type,
         quantity: 1,
         unitPrice: Number(firstActiveProduct.price),
         currency: order?.currency || 'FCFA',
       },
     ]);
-  }, [products, order?.currency]); // Note: toast est stable
+  }, [products, order?.currency, toast]);
 
   const handleRemoveItem = useCallback((index: number) => {
     setItems(prev => prev.filter((_, i) => i !== index));
@@ -161,6 +173,7 @@ const OrderEditDialogComponent = ({
           const selectedProduct = products?.find(p => p.id === value);
           if (selectedProduct) {
             newItems[index].productName = selectedProduct.name;
+            newItems[index].productType = selectedProduct.product_type;
             newItems[index].unitPrice = Number(selectedProduct.price);
             newItems[index].currency = selectedProduct.currency || 'FCFA';
           }
@@ -195,17 +208,26 @@ const OrderEditDialogComponent = ({
       setLoading(true);
 
       try {
-        const totalAmount = calculateTotal();
+        const totalAmount = calculateTotal;
+
+        const existingMeta =
+          order.metadata && typeof order.metadata === 'object'
+            ? { ...(order.metadata as Record<string, unknown>) }
+            : {};
+        const newMetadata = {
+          ...existingMeta,
+          payment_method: paymentMethod,
+          admin_order_notes: notes || null,
+        };
 
         // Update order
         const { error: orderError } = await supabase
           .from('orders')
           .update({
             total_amount: totalAmount,
-            payment_method: paymentMethod,
             status: status,
             payment_status: paymentStatus,
-            notes,
+            metadata: newMetadata,
             updated_at: new Date().toISOString(),
           })
           .eq('id', order.id);
@@ -224,10 +246,15 @@ const OrderEditDialogComponent = ({
         const orderItems = items.map(item => ({
           order_id: order.id,
           product_id: item.productId,
+          product_type: item.productType,
           product_name: item.productName,
           quantity: item.quantity,
           unit_price: item.unitPrice,
           total_price: item.quantity * item.unitPrice,
+          item_metadata: {
+            source: 'admin_order_edit_dialog',
+            product_type: item.productType,
+          },
         }));
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
@@ -241,8 +268,8 @@ const OrderEditDialogComponent = ({
 
         onSuccess();
         onOpenChange(false);
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+      } catch (_error: unknown) {
+        const errorMessage = _error instanceof Error ? _error.message : 'Une erreur est survenue';
         toast({
           title: 'Erreur',
           description: errorMessage,
@@ -252,8 +279,19 @@ const OrderEditDialogComponent = ({
         setLoading(false);
       }
     },
-    [order, items, paymentMethod, status, paymentStatus, notes, onSuccess, onOpenChange]
-  ); // Note: toast est stable
+    [
+      order,
+      items,
+      paymentMethod,
+      status,
+      paymentStatus,
+      notes,
+      onSuccess,
+      onOpenChange,
+      toast,
+      calculateTotal,
+    ]
+  );
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('fr-FR', {
@@ -389,7 +427,7 @@ const OrderEditDialogComponent = ({
           <div className="flex justify-between items-center">
             <span className="font-semibold">Total de la commande</span>
             <span className="text-2xl font-bold">
-              {formatPrice(calculateTotal())} {order.currency}
+              {formatPrice(calculateTotal)} {order.currency}
             </span>
           </div>
         </Card>
@@ -484,9 +522,3 @@ export const OrderEditDialog = React.memo(OrderEditDialogComponent, (prevProps, 
 });
 
 OrderEditDialog.displayName = 'OrderEditDialog';
-
-
-
-
-
-

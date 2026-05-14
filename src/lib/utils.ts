@@ -1,9 +1,8 @@
-
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -13,7 +12,11 @@ export function cn(...inputs: ClassValue[]) {
  * @param locale The locale for formatting (defaults to 'fr-FR').
  * @returns A formatted currency string.
  */
-export function formatCurrency(amount: number, currency: string = 'XOF', locale: string = 'fr-FR'): string {
+export function formatCurrency(
+  amount: number,
+  currency: string = 'XOF',
+  locale: string = 'fr-FR'
+): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
@@ -30,7 +33,7 @@ export function formatCurrency(amount: number, currency: string = 'XOF', locale:
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): T {
-  let timeout: NodeJS.Timeout | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
 
   return ((...args: Parameters<T>) => {
     if (timeout) {

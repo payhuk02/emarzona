@@ -7,11 +7,31 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { logger } from '@/lib/logger';
 import { notificationRateLimiter } from './rate-limiter';
 import { notificationRetryService } from './retry-service';
 import { logNotification } from './notification-logger';
 import { notificationTemplateService } from './template-service';
+
+/** Table `user_push_tokens` absent from generated Database types */
+type UserPushTokensClient = {
+  from: (table: 'user_push_tokens') => {
+    select: (columns: string) => {
+      eq: (
+        column: string,
+        value: string
+      ) => {
+        eq: (
+          column: string,
+          value: boolean
+        ) => Promise<{
+          data: Array<{ token: string; platform: string }> | null;
+        }>;
+      };
+    };
+  };
+};
 
 export type NotificationType =
   // Produits digitaux
@@ -258,7 +278,7 @@ async function sendInAppNotification(notification: UnifiedNotification): Promise
       type: notification.type,
       title: notification.title,
       message: notification.message,
-      metadata: notification.metadata || {},
+      metadata: (notification.metadata || {}) as Json,
       action_url: notification.action_url,
       action_label: notification.action_label,
       priority: notification.priority || 'normal',
@@ -387,7 +407,7 @@ async function sendEmailNotification(notification: UnifiedNotification): Promise
     // Essayer d'utiliser le template centralisé depuis notification_templates
     let subject = notification.title;
     let htmlContent = '';
-    let templateSlug = notification.type;
+    let templateSlug: string = notification.type;
 
     try {
       const rendered = await notificationTemplateService.renderTemplate(
@@ -527,7 +547,7 @@ async function sendSMSNotification(notification: UnifiedNotification): Promise<v
 async function sendPushNotification(notification: UnifiedNotification): Promise<void> {
   try {
     // Récupérer les tokens push de l'utilisateur
-    const { data: pushTokens } = await supabase
+    const { data: pushTokens } = await (supabase as unknown as UserPushTokensClient)
       .from('user_push_tokens')
       .select('token, platform')
       .eq('user_id', notification.user_id)
@@ -657,6 +677,12 @@ function getEmailTemplate(type: NotificationType): string {
     affiliate_commission_paid: 'commission-paid',
     product_review_received: 'review-received',
     system_announcement: 'system-announcement',
+
+    vendor_message_received: 'vendor-message-received',
+    customer_message_received: 'customer-message-received',
+    vendor_conversation_started: 'vendor-conversation-started',
+    vendor_conversation_closed: 'vendor-conversation-closed',
+    order_message_received: 'order-message-received',
   };
 
   return templates[type] || 'default';
@@ -742,7 +768,7 @@ export async function notifyServiceBookingReminder(
     action_url: `/bookings/${bookingId}`,
     action_label: 'Voir la réservation',
     product_type: 'service',
-    priority: 'medium',
+    priority: 'normal',
   });
 }
 
@@ -767,7 +793,7 @@ export async function notifyCourseNewContent(
     action_label: 'Voir le cours',
     product_type: 'course',
     product_id: courseId,
-    priority: 'medium',
+    priority: 'normal',
   });
 }
 

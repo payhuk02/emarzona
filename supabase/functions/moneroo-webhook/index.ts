@@ -29,6 +29,26 @@ function sanitizeWebhookPayload(payload: Record<string, unknown>): Record<string
   };
 }
 
+/** Canonique: item_metadata (jsonb). Compat: ancienne colonne metadata si présente côté DB. */
+function parseOrderItemMetadata(item: {
+  item_metadata?: unknown;
+  metadata?: unknown;
+}): Record<string, unknown> {
+  const raw = item.item_metadata ?? item.metadata;
+  if (raw == null) return {};
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof raw === 'object' && !Array.isArray(raw)) {
+    return raw as Record<string, unknown>;
+  }
+  return {};
+}
+
 async function calculateHMACSignature(payload: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
@@ -533,7 +553,9 @@ serve(async req => {
                           confirmed_at: new Date().toISOString(),
                         },
                       })
-                      .then(null, (err: unknown) => console.error('Service booking confirmed webhook error:', err));
+                      .then(null, (err: unknown) =>
+                        console.error('Service booking confirmed webhook error:', err)
+                      );
                   }
                 }
               }
@@ -576,7 +598,7 @@ serve(async req => {
               // Récupérer les order_items pour vérifier les produits artistes
               const { data: orderItems, error: itemsError } = await supabase
                 .from('order_items')
-                .select('id, product_id, product_type, metadata')
+                .select('id, product_id, product_type, item_metadata')
                 .eq('order_id', currentOrderForCert.id)
                 .eq('product_type', 'artist');
 
@@ -593,10 +615,7 @@ serve(async req => {
                 // Générer un certificat pour chaque produit artiste
                 for (const item of orderItems) {
                   try {
-                    const metadata =
-                      typeof item.metadata === 'string'
-                        ? JSON.parse(item.metadata)
-                        : item.metadata || {};
+                    const metadata = parseOrderItemMetadata(item);
                     const artistProductId = metadata.artist_product_id;
 
                     if (artistProductId && userId) {
@@ -843,7 +862,9 @@ serve(async req => {
                   },
                 },
               })
-              .then(null, (err: unknown) => console.error('Error sending payment failed email:', err));
+              .then(null, (err: unknown) =>
+                console.error('Error sending payment failed email:', err)
+              );
           }
         } catch (emailErr) {
           console.error('Error sending payment failed email:', emailErr);

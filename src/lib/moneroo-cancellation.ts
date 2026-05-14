@@ -3,13 +3,10 @@
  * Gère l'annulation des paiements en attente
  */
 
-import { supabase } from "@/integrations/supabase/client";
-import { monerooClient } from "./moneroo-client";
+import { supabase } from '@/integrations/supabase/client';
+import { monerooClient } from './moneroo-client';
 import { logger } from './logger';
-import {
-  parseMonerooError,
-  MonerooValidationError,
-} from "./moneroo-errors";
+import { parseMonerooError, MonerooValidationError } from './moneroo-errors';
 
 export interface CancelPaymentOptions {
   transactionId: string;
@@ -33,48 +30,50 @@ export const cancelMonerooPayment = async (
   try {
     // Validation
     if (!transactionId) {
-      throw new MonerooValidationError("Transaction ID is required");
+      throw new MonerooValidationError('Transaction ID is required');
     }
 
     // Récupérer la transaction
     const { data: transaction, error: fetchError } = await supabase
-      .from("transactions")
+      .from('transactions')
       .select(
-        "id,status,order_id,payment_id,customer_id,customer_email,customer_name,amount,currency,payment_provider,moneroo_transaction_id,metadata,updated_at"
+        'id,status,order_id,store_id,payment_id,customer_id,customer_email,customer_name,amount,currency,payment_provider,moneroo_transaction_id,metadata,updated_at'
       )
-      .eq("id", transactionId)
+      .eq('id', transactionId)
       .single();
 
     if (fetchError || !transaction) {
-      throw new MonerooValidationError("Transaction not found");
+      throw new MonerooValidationError('Transaction not found');
     }
 
     // Vérifier que la transaction peut être annulée
-    if (!["pending", "processing"].includes(transaction.status)) {
+    if (!['pending', 'processing'].includes(transaction.status ?? '')) {
       throw new MonerooValidationError(
         `Cannot cancel transaction with status: ${transaction.status}. Only pending or processing transactions can be cancelled.`
       );
     }
 
     // Vérifier que c'est une transaction Moneroo
-    if (transaction.payment_provider !== "moneroo" || !transaction.moneroo_transaction_id) {
-      throw new MonerooValidationError("Transaction is not a Moneroo payment");
+    if (transaction.payment_provider !== 'moneroo' || !transaction.moneroo_transaction_id) {
+      throw new MonerooValidationError('Transaction is not a Moneroo payment');
     }
 
     // Vérifier si le paiement peut être annulé (pas déjà complété ou échoué)
-    if (["completed", "failed", "cancelled", "refunded"].includes(transaction.status)) {
+    if (['completed', 'failed', 'cancelled', 'refunded'].includes(transaction.status ?? '')) {
       throw new MonerooValidationError(
         `Transaction cannot be cancelled. Current status: ${transaction.status}`
       );
     }
 
     // Log de début d'annulation
-    await supabase.from("transaction_logs").insert([{
-      transaction_id: transactionId,
-      event_type: "cancel_initiated",
-      status: "processing",
-      request_data: { reason: reason || "User request" },
-    }]);
+    await supabase.from('transaction_logs').insert([
+      {
+        transaction_id: transactionId,
+        event_type: 'cancel_initiated',
+        status: 'processing',
+        request_data: { reason: reason || 'User request' },
+      },
+    ]);
 
     // Appeler l'API Moneroo pour annuler le paiement
     try {
@@ -82,90 +81,95 @@ export const cancelMonerooPayment = async (
     } catch (apiError) {
       // Si l'API Moneroo ne supporte pas l'annulation ou si le paiement est déjà traité,
       // on peut quand même marquer la transaction comme annulée localement
-      logger.warn("Moneroo cancel API call failed, marking as cancelled locally:", apiError);
-      
+      logger.warn('Moneroo cancel API call failed, marking as cancelled locally:', apiError);
+
       // Vérifier à nouveau le statut auprès de Moneroo
       try {
         const paymentStatus = await monerooClient.verifyPayment(transaction.moneroo_transaction_id);
-        
+
         // Si le paiement est déjà complété, on ne peut pas l'annuler
-        if (paymentStatus.status === "completed" || paymentStatus.status === "success") {
+        if (paymentStatus.status === 'completed' || paymentStatus.status === 'success') {
           throw new MonerooValidationError(
-            "Payment has already been completed and cannot be cancelled"
+            'Payment has already been completed and cannot be cancelled'
           );
         }
-        
+
         // Si le paiement a échoué, on peut le marquer comme annulé
-        if (paymentStatus.status === "failed") {
-          logger.log("Payment already failed, marking as cancelled");
+        if (paymentStatus.status === 'failed') {
+          logger.log('Payment already failed, marking as cancelled');
         }
       } catch (verifyError) {
         // Si la vérification échoue, on continue avec l'annulation locale
-        logger.warn("Could not verify payment status, proceeding with local cancellation:", verifyError);
+        logger.warn(
+          'Could not verify payment status, proceeding with local cancellation:',
+          verifyError
+        );
       }
     }
 
     // Mettre à jour la transaction comme annulée
     const cancelledAt = new Date().toISOString();
     const { error: updateError } = await supabase
-      .from("transactions")
+      .from('transactions')
       .update({
-        status: "cancelled",
+        status: 'cancelled',
         metadata: {
-          ...(transaction.metadata as Record<string, unknown> || {}),
+          ...((transaction.metadata as Record<string, unknown>) || {}),
           cancellation: {
             cancelled_at: cancelledAt,
-            reason: reason || "User request",
-            cancelled_by: "system", // Peut être amélioré pour inclure l'utilisateur
+            reason: reason || 'User request',
+            cancelled_by: 'system', // Peut être amélioré pour inclure l'utilisateur
           },
         },
         updated_at: cancelledAt,
       })
-      .eq("id", transactionId);
+      .eq('id', transactionId);
 
     if (updateError) {
-      logger.error("Error updating transaction with cancellation:", updateError);
-      throw new MonerooValidationError("Failed to update transaction status");
+      logger.error('Error updating transaction with cancellation:', updateError);
+      throw new MonerooValidationError('Failed to update transaction status');
     }
 
     // Mettre à jour la commande associée si elle existe
     if (transaction.order_id) {
-      await supabase
-        .from("orders")
+      const { error: orderCancelErr } = await supabase
+        .from('orders')
         .update({
-          payment_status: "cancelled",
-          status: "cancelled",
+          payment_status: 'cancelled',
+          status: 'cancelled',
           updated_at: cancelledAt,
         })
-        .eq("id", transaction.order_id)
-        .catch((err) => {
-          logger.warn("Error updating order status:", err);
-        });
+        .eq('id', transaction.order_id);
+      if (orderCancelErr) {
+        logger.warn('Error updating order status:', orderCancelErr);
+      }
     }
 
     // Mettre à jour le paiement associé si il existe
     if (transaction.payment_id) {
-      await supabase
-        .from("payments")
+      const { error: paymentCancelErr } = await supabase
+        .from('payments')
         .update({
-          status: "cancelled",
+          status: 'cancelled',
           updated_at: cancelledAt,
         })
-        .eq("id", transaction.payment_id)
-        .catch((err) => {
-          logger.warn("Error updating payment status:", err);
-        });
+        .eq('id', transaction.payment_id);
+      if (paymentCancelErr) {
+        logger.warn('Error updating payment status:', paymentCancelErr);
+      }
     }
 
     // Log d'annulation complétée
-    await supabase.from("transaction_logs").insert([{
-      transaction_id: transactionId,
-      event_type: "cancel_completed",
-      status: "cancelled",
-      request_data: { reason: reason || "User request" },
-    }]);
+    await supabase.from('transaction_logs').insert([
+      {
+        transaction_id: transactionId,
+        event_type: 'cancel_completed',
+        status: 'cancelled',
+        request_data: { reason: reason || 'User request' },
+      },
+    ]);
 
-    logger.log("Payment cancelled successfully:", {
+    logger.log('Payment cancelled successfully:', {
       transactionId,
       cancelledAt,
     });
@@ -180,29 +184,34 @@ export const cancelMonerooPayment = async (
       amount: transaction.amount,
       currency: transaction.currency || 'XOF',
       status: 'cancelled',
-      reason: reason || "User request",
+      reason: reason || 'User request',
       orderId: transaction.order_id || undefined,
-    }).catch((err) => logger.warn('Error sending cancellation notification:', err));
+    }).catch(err => logger.warn('Error sending cancellation notification:', err));
 
     return {
       success: true,
       cancelled_at: cancelledAt,
     };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const monerooError = parseMonerooError(_error);
-    
-    // Log de l'erreur
-    await supabase.from("transaction_logs").insert([{
-      transaction_id: transactionId,
-      event_type: "cancel_failed",
-      status: "failed",
-      error_data: {
-        error: monerooError.message,
-        code: monerooError.code,
-      },
-    }]).catch((err) => logger.error("Error logging cancellation failure", { error: err }));
 
-    logger.error("Cancellation error:", {
+    // Log de l'erreur
+    const { error: cancelLogErr } = await supabase.from('transaction_logs').insert([
+      {
+        transaction_id: transactionId,
+        event_type: 'cancel_failed',
+        status: 'failed',
+        error_data: {
+          error: monerooError.message,
+          code: monerooError.code,
+        },
+      },
+    ]);
+    if (cancelLogErr) {
+      logger.error('Error logging cancellation failure', { error: cancelLogErr });
+    }
+
+    logger.error('Cancellation error:', {
       error: monerooError.message,
       code: monerooError.code,
       transactionId,
@@ -221,9 +230,9 @@ export const cancelMonerooPayment = async (
 export const canCancelPayment = async (transactionId: string): Promise<boolean> => {
   try {
     const { data: transaction, error } = await supabase
-      .from("transactions")
-      .select("status, payment_provider, moneroo_transaction_id")
-      .eq("id", transactionId)
+      .from('transactions')
+      .select('status, payment_provider, moneroo_transaction_id')
+      .eq('id', transactionId)
       .single();
 
     if (error || !transaction) {
@@ -231,21 +240,14 @@ export const canCancelPayment = async (transactionId: string): Promise<boolean> 
     }
 
     // Vérifier que c'est une transaction Moneroo
-    if (transaction.payment_provider !== "moneroo" || !transaction.moneroo_transaction_id) {
+    if (transaction.payment_provider !== 'moneroo' || !transaction.moneroo_transaction_id) {
       return false;
     }
 
     // Vérifier le statut
-    return ["pending", "processing"].includes(transaction.status);
+    return ['pending', 'processing'].includes(transaction.status ?? '');
   } catch (error) {
-    logger.error("Error checking if payment can be cancelled:", error);
+    logger.error('Error checking if payment can be cancelled:', { error });
     return false;
   }
 };
-
-
-
-
-
-
-

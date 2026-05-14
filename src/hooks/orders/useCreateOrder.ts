@@ -1,7 +1,7 @@
 /**
  * Hook universel pour créer une commande
  * Date: 28 octobre 2025
- * 
+ *
  * Router intelligent qui détecte le type de produit et appelle le bon hook
  */
 
@@ -25,22 +25,22 @@ const GENERIC_PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, pr
 export interface CreateOrderOptions {
   /** ID du produit */
   productId: string;
-  
+
   /** ID du store */
   storeId: string;
-  
+
   /** Email du client */
   customerEmail: string;
-  
+
   /** Nom du client (optionnel) */
   customerName?: string;
-  
+
   /** Téléphone du client (optionnel) */
   customerPhone?: string;
-  
+
   /** Quantité (pour produits physiques) */
   quantity?: number;
-  
+
   /** Options spécifiques selon le type */
   digitalOptions?: Partial<CreateDigitalOrderOptions>;
   physicalOptions?: Partial<CreatePhysicalOrderOptions>;
@@ -52,11 +52,11 @@ export interface CreateOrderOptions {
 /**
  * Hook universel pour créer une commande
  * Détecte automatiquement le type de produit et appelle le bon hook
- * 
+ *
  * @example
  * ```typescript
  * const { mutateAsync: createOrder, isPending } = useCreateOrder();
- * 
+ *
  * const handleBuy = async () => {
  *   const result = await createOrder({
  *     productId: 'xxx',
@@ -64,7 +64,7 @@ export interface CreateOrderOptions {
  *     customerEmail: 'user@example.com',
  *     // Options spécifiques seront automatiquement passées selon le type
  *   });
- *   
+ *
  *   window.location.href = result.checkoutUrl;
  * };
  * ```
@@ -229,7 +229,7 @@ export const useCreateOrder = () => {
             .single();
 
           if (!artistProduct) {
-            throw new Error('Œuvre d\'artiste non trouvée');
+            throw new Error("Œuvre d'artiste non trouvée");
           }
 
           return await createArtistOrder({
@@ -255,7 +255,7 @@ export const useCreateOrder = () => {
           });
 
           // Créer customer
-          let  customerId: string;
+          let customerId: string;
           const { data: existingCustomer } = await supabase
             .from('customers')
             .select('id')
@@ -304,8 +304,15 @@ export const useCreateOrder = () => {
               payment_status: 'pending',
               status: 'pending',
               affiliate_tracking_cookie: affiliateTrackingCookie, // Inclure le cookie d'affiliation
+              metadata: {
+                product_id: productId,
+                product_type: productType,
+                flow: 'generic_product_checkout',
+              },
             })
-            .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+            .select(
+              'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+            )
             .single();
 
           if (orderError || !order) {
@@ -324,7 +331,7 @@ export const useCreateOrder = () => {
                 status: order.status,
                 payment_status: order.payment_status,
                 created_at: order.created_at,
-              }).catch((err) => {
+              }).catch(err => {
                 logger.error('Error triggering webhook', { error: err, orderId: order.id });
               });
             });
@@ -336,17 +343,21 @@ export const useCreateOrder = () => {
             .insert({
               order_id: order.id,
               product_id: productId,
-              product_type: productType,
+              product_type: productType === 'generic' ? 'generic' : productType,
               product_name: product.name,
               quantity,
               unit_price: product.promotional_price || product.price,
               total_price: totalPrice,
+              item_metadata: {
+                product_type: productType,
+                source: 'useCreateOrder_generic',
+              },
             })
             .select('id')
             .single();
 
           if (orderItemError || !orderItem) {
-            throw new Error('Erreur lors de la création de l\'élément de commande');
+            throw new Error("Erreur lors de la création de l'élément de commande");
           }
 
           // Initier paiement
@@ -368,7 +379,7 @@ export const useCreateOrder = () => {
           });
 
           if (!paymentResult.success || !paymentResult.checkout_url) {
-            throw new Error('Erreur lors de l\'initialisation du paiement');
+            throw new Error("Erreur lors de l'initialisation du paiement");
           }
 
           return {
@@ -391,10 +402,3 @@ export const useCreateOrder = () => {
     },
   });
 };
-
-
-
-
-
-
-
