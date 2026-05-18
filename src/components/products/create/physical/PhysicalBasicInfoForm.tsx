@@ -21,6 +21,7 @@ import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { generateSlug } from '@/lib/store-utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/hooks/useStore';
+import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 interface PhysicalBasicInfoFormProps {
   data: Partial<PhysicalProductFormData>;
@@ -322,6 +323,21 @@ export const PhysicalBasicInfoForm = ({
           Format recommandé: <span className="font-semibold">1536×1024 px</span> (ratio 3:2), en
           WebP ou JPEG, pour un rendu optimal sur la boutique et le marketplace.
         </p>
+        <ImageStudioField
+          context="product"
+          fieldName="images"
+          value={data.images?.[0] ?? ''}
+          exampleUrl={data.images?.[0]}
+          onChange={url => {
+            if (!url) return;
+            const existing = data.images || [];
+            const merged = existing.includes(url) ? existing : [url, ...existing];
+            onUpdate({ images: merged });
+          }}
+          label="Studio IA"
+          buttonLabel="Améliorer avec le Studio IA"
+          className="mb-3"
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {data.images?.map((image, index) => (
             <div
@@ -409,9 +425,3 @@ export const PhysicalBasicInfoForm = ({
     </div>
   );
 };
-
-
-
-
-
-

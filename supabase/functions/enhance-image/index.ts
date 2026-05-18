@@ -54,6 +54,28 @@ serve(async (req: Request) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const authHeader = req.headers.get('Authorization');
+
+    if (!authHeader?.toLowerCase().startsWith('bearer ')) {
+      return new Response(JSON.stringify({ error: 'Connexion requise' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: authData, error: authError } = await authClient.auth.getUser();
+    if (authError || !authData?.user) {
+      return new Response(JSON.stringify({ error: 'Session invalide ou expirée' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY non configurée' }), {
@@ -62,22 +84,29 @@ serve(async (req: Request) => {
       });
     }
 
-    const { imageUrl, instruction } = await req.json();
-    if (!imageUrl || typeof imageUrl !== 'string') {
+    const body = await req.json();
+    const inputImageUrl = body?.imageUrl;
+    const instruction = body?.instruction;
+
+    if (!inputImageUrl || typeof inputImageUrl !== 'string') {
       return new Response(JSON.stringify({ error: 'imageUrl manquant' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Charger la config admin
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-    let config: any = {};
+    if (inputImageUrl.length > 12_000_000) {
+      return new Response(
+        JSON.stringify({ error: 'Image trop volumineuse. Réduisez la taille du fichier.' }),
+        { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    let config: Record<string, unknown> = {};
     try {
       const sb = createClient(supabaseUrl, anonKey);
       const { data } = await sb.rpc('get_ai_management_settings');
-      config = (data as any)?.imageEnhancer ?? {};
+      config = ((data as Record<string, unknown>)?.imageEnhancer ?? {}) as Record<string, unknown>;
     } catch (e) {
       console.warn('Could not load AI config, using defaults', e);
     }
@@ -89,8 +118,14 @@ serve(async (req: Request) => {
       );
     }
 
-    const model = config?.model || 'google/gemini-3.1-flash-image-preview';
-    const finalInstruction = instruction || config?.defaultInstruction || DEFAULT_INSTRUCTION;
+    const model =
+      (typeof config.model === 'string' && config.model) || 'google/gemini-3.1-flash-image-preview';
+    const defaultInstr =
+      typeof config.defaultInstruction === 'string' ? config.defaultInstruction : '';
+    const finalInstruction =
+      (typeof instruction === 'string' && instruction.trim()) ||
+      defaultInstr ||
+      DEFAULT_INSTRUCTION;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -105,7 +140,7 @@ serve(async (req: Request) => {
             role: 'user',
             content: [
               { type: 'text', text: finalInstruction },
-              { type: 'image_url', image_url: { url: imageUrl } },
+              { type: 'image_url', image_url: { url: inputImageUrl } },
             ],
           },
         ],
@@ -144,9 +179,9 @@ serve(async (req: Request) => {
       });
     }
 
-    const imageUrl = await ensureDataUrl(out);
+    const resultImageUrl = await ensureDataUrl(out);
 
-    return new Response(JSON.stringify({ imageUrl, model }), {
+    return new Response(JSON.stringify({ imageUrl: resultImageUrl, model }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

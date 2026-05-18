@@ -28,6 +28,7 @@ import type { ArtistProductFormData, ArtistSocialLinks } from '@/types/artist-pr
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { logger } from '@/lib/logger';
 import { generateProductUrl } from '@/lib/store-utils';
+import { ImageStudioField } from '@/components/images/ImageStudioField';
 import { ArtistFormField } from './ArtistFormField';
 import { getFieldHelpHint, formatHelpHint } from '@/lib/artist-product-help-hints';
 import { generateSlug } from '@/lib/validation-utils';
@@ -154,7 +155,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
 
       // Validation préventive : vérifier tous les fichiers AVANT upload
       const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-      const  invalidFiles: string[] = [];
+      const invalidFiles: string[] = [];
 
       // Validation synchrone (type MIME et extension)
       for (const file of Array.from(files)) {
@@ -197,7 +198,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
 
         // Forcer le Content-Type selon l'extension (plus fiable que file.type qui peut être incorrect)
         // Cela garantit que Supabase Storage reçoit toujours un type MIME valide
-        let  contentType: string;
+        let contentType: string;
         if (fileExt === 'png') {
           contentType = 'image/png';
         } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
@@ -311,7 +312,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         title: '✅ Images uploadées',
         description: `${uploadedUrls.length} image(s) uploadée(s) avec succès`,
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur upload images œuvre', {
         error: errorMessage,
@@ -362,7 +363,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
       }
 
       const fileExt = file.name.split('.').pop()?.toLowerCase();
-      let  contentType: string;
+      let contentType: string;
       if (fileExt === 'png') {
         contentType = 'image/png';
       } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
@@ -429,7 +430,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         title: '✅ Photo uploadée',
         description: "La photo de l'artiste a été uploadée avec succès",
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur upload photo artiste', { error: errorMessage });
       toast({
@@ -1003,6 +1004,21 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
       {/* Artwork Images */}
       <div className="space-y-2">
         <Label>Images de l'œuvre *</Label>
+        <ImageStudioField
+          context="artist"
+          fieldName="images"
+          value={data.images?.[0] ?? ''}
+          exampleUrl={data.images?.[0]}
+          onChange={url => {
+            if (!url) return;
+            const existing = data.images || [];
+            const merged = existing.includes(url) ? existing : [url, ...existing];
+            onUpdate({ images: merged });
+          }}
+          label="Studio IA"
+          buttonLabel="Améliorer avec le Studio IA"
+          className="mb-3"
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {(data.images || []).map((imageUrl, index) => (
             <div key={index} className="relative group">
@@ -1172,9 +1188,3 @@ export const ArtistBasicInfoForm = React.memo(
     );
   }
 );
-
-
-
-
-
-

@@ -3,7 +3,7 @@
  * Accessible depuis la sidebar via /dashboard/image-studio
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Wand2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,23 @@ import { useToast } from '@/hooks/use-toast';
 import { ImageEnhancerStudio } from '@/components/images/ImageEnhancerStudio';
 import { SmartImage } from '@/components/images/SmartImage';
 
+const STORAGE_KEY = 'emarzona:image-studio:saved';
+
 const ImageStudioPage: React.FC = () => {
   const { toast } = useToast();
-  const [savedImages, setSavedImages] = useState<string[]>([]);
+  const [savedImages, setSavedImages] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedImages.slice(0, 24)));
+  }, [savedImages]);
 
   const handleCopy = async (url: string) => {
     await navigator.clipboard.writeText(url);
@@ -41,7 +54,8 @@ const ImageStudioPage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold">Studio IA d'images</h1>
           <p className="text-sm text-muted-foreground">
-            Sélectionnez une image, prévisualisez l'amélioration IA, puis enregistrez-la définitivement.
+            Sélectionnez une image, prévisualisez l'amélioration IA, puis enregistrez-la
+            définitivement.
           </p>
         </div>
       </header>
@@ -50,7 +64,9 @@ const ImageStudioPage: React.FC = () => {
         <div className="lg:col-span-2">
           <ImageEnhancerStudio
             folder="studio"
-            onSaved={(url) => setSavedImages((prev) => [url, ...prev])}
+            onSaved={url =>
+              setSavedImages(prev => [url, ...prev.filter(u => u !== url)].slice(0, 24))
+            }
           />
         </div>
 
@@ -62,23 +78,23 @@ const ImageStudioPage: React.FC = () => {
                 <li>• Utilisez des images bien éclairées au départ.</li>
                 <li>• L'IA ne change pas le sujet, elle l'améliore.</li>
                 <li>• Pour un fond blanc, choisissez le preset dédié.</li>
-                <li>• Comparez toujours avant d'enregistrer.</li>
+                <li>• Utilisez le curseur avant/après pour comparer finement.</li>
+                <li>• « Affiner à nouveau » pour enchaîner plusieurs passes IA.</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-5 space-y-3">
-              <h2 className="font-semibold text-sm">
-                Images enregistrées ({savedImages.length})
-              </h2>
+              <h2 className="font-semibold text-sm">Images enregistrées ({savedImages.length})</h2>
               {savedImages.length === 0 ? (
                 <p className="text-xs text-muted-foreground">
-                  Vos images améliorées apparaîtront ici. Copiez l'URL pour les coller dans un formulaire.
+                  Vos images améliorées apparaîtront ici. Copiez l'URL pour les coller dans un
+                  formulaire.
                 </p>
               ) : (
                 <div className="space-y-3 max-h-[500px] overflow-auto pr-1">
-                  {savedImages.map((url) => (
+                  {savedImages.map(url => (
                     <div key={url} className="space-y-2">
                       <div className="aspect-video rounded-md overflow-hidden border">
                         <SmartImage src={url} alt="Image enregistrée" width={400} height={225} />

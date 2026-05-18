@@ -42,6 +42,8 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { DEFAULT_STUDIO_PRESETS, type StudioPreset } from '@/lib/images/studio-presets';
+import { invokeEnhanceImage } from '@/lib/images/enhance-image-client';
 
 // =============================================================================
 // Types & defaults
@@ -69,6 +71,8 @@ export interface AIManagementSettings {
     enabled: boolean;
     model: string;
     defaultInstruction: string;
+    presets?: StudioPreset[];
+    inferenceMaxPx?: number;
   };
   recommendations: {
     enabled: boolean;
@@ -100,6 +104,8 @@ const DEFAULTS: AIManagementSettings = {
     model: 'google/gemini-3.1-flash-image-preview',
     defaultInstruction:
       'Improve this image for a premium e-commerce listing: enhance lighting, contrast, sharpness, balance colors. Keep the subject identical.',
+    presets: DEFAULT_STUDIO_PRESETS,
+    inferenceMaxPx: 2048,
   },
   recommendations: { enabled: true, configRef: 'ai_recommendation_settings' },
 };
@@ -137,10 +143,14 @@ function ModelSelect({
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+      <SelectTrigger className="w-full">
+        <SelectValue />
+      </SelectTrigger>
       <SelectContent>
         {options.map(o => (
-          <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>
+          <SelectItem key={o.id} value={o.id}>
+            {o.label}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>
@@ -148,15 +158,27 @@ function ModelSelect({
 }
 
 function NumberSlider({
-  label, value, onChange, min, max, step,
-}: { label: string; value: number; onChange: (v: number) => void; min: number; max: number; step: number }) {
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step: number;
+}) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <Label className="text-sm">{label}</Label>
         <Badge variant="outline">{value}</Badge>
       </div>
-      <Slider value={[value]} onValueChange={(v) => onChange(v[0])} min={min} max={max} step={step} />
+      <Slider value={[value]} onValueChange={v => onChange(v[0])} min={min} max={max} step={step} />
     </div>
   );
 }
@@ -171,10 +193,16 @@ const AIManagementPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [pingResult, setPingResult] = useState<{ ok: boolean; message: string; latencyMs?: number } | null>(null);
+  const [pingResult, setPingResult] = useState<{
+    ok: boolean;
+    message: string;
+    latencyMs?: number;
+  } | null>(null);
   const [pinging, setPinging] = useState(false);
+  const [imagePing, setImagePing] = useState<{ ok: boolean; message: string } | null>(null);
+  const [imagePinging, setImagePinging] = useState(false);
 
-  const lovableKeyConfigured = true; // Géré côté serveur, toujours présent dans Lovable Cloud
+  const _lovableKeyConfigured = true; // Géré côté serveur, toujours présent dans Lovable Cloud
 
   // Load settings
   useEffect(() => {
@@ -184,32 +212,53 @@ const AIManagementPage: React.FC = () => {
         const { data, error } = await supabase.rpc('get_ai_management_settings');
         if (error) throw error;
         if (data) {
-          setSettings({ ...DEFAULTS, ...(data as Partial<AIManagementSettings>) });
+          const partial = data as Partial<AIManagementSettings>;
+          setSettings({
+            ...DEFAULTS,
+            ...partial,
+            imageEnhancer: {
+              ...DEFAULTS.imageEnhancer,
+              ...partial.imageEnhancer,
+              presets: partial.imageEnhancer?.presets?.length
+                ? partial.imageEnhancer.presets
+                : DEFAULT_STUDIO_PRESETS,
+            },
+          });
         }
       } catch (e) {
         logger.error('Load AI settings failed', { error: e });
-        toast({ title: 'Erreur', description: 'Impossible de charger la configuration IA. Valeurs par défaut utilisées.', variant: 'destructive' });
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger la configuration IA. Valeurs par défaut utilisées.',
+          variant: 'destructive',
+        });
       } finally {
         setIsLoading(false);
       }
     })();
   }, [toast]);
 
-  const update = useCallback(<K extends keyof AIManagementSettings>(section: K, patch: Partial<AIManagementSettings[K]>) => {
-    setSettings(prev => ({ ...prev, [section]: { ...prev[section], ...patch } }));
-    setHasChanges(true);
-  }, []);
+  const update = useCallback(
+    <K extends keyof AIManagementSettings>(section: K, patch: Partial<AIManagementSettings[K]>) => {
+      setSettings(prev => ({ ...prev, [section]: { ...prev[section], ...patch } }));
+      setHasChanges(true);
+    },
+    []
+  );
 
   const save = useCallback(async () => {
     try {
       setIsSaving(true);
-      const { error } = await supabase.rpc('update_ai_management_settings', { _settings: settings as any });
+      const { error } = await supabase.rpc('update_ai_management_settings', {
+        _settings: settings as unknown as Record<string, unknown>,
+      });
       if (error) throw error;
       setHasChanges(false);
       toast({ title: 'Sauvegardé', description: 'Configuration IA mise à jour.' });
-    } catch (e: any) {
+    } catch (e: unknown) {
       logger.error('Save AI settings failed', { error: e });
-      toast({ title: 'Erreur', description: e?.message || 'Sauvegarde impossible.', variant: 'destructive' });
+      const message = e instanceof Error ? e.message : 'Sauvegarde impossible.';
+      toast({ title: 'Erreur', description: message, variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -218,7 +267,10 @@ const AIManagementPage: React.FC = () => {
   const reset = useCallback(() => {
     setSettings(DEFAULTS);
     setHasChanges(true);
-    toast({ title: 'Réinitialisé', description: 'Valeurs par défaut restaurées (non sauvegardées).' });
+    toast({
+      title: 'Réinitialisé',
+      description: 'Valeurs par défaut restaurées (non sauvegardées).',
+    });
   }, [toast]);
 
   const ping = useCallback(async () => {
@@ -226,23 +278,83 @@ const AIManagementPage: React.FC = () => {
       setPinging(true);
       setPingResult(null);
       const { data, error } = await supabase.functions.invoke('ai-chat', {
-        body: { messages: [{ role: 'user', content: 'Réponds simplement "OK" pour test de connectivité.' }] },
+        body: {
+          messages: [
+            { role: 'user', content: 'Réponds simplement "OK" pour test de connectivité.' },
+          ],
+        },
       });
       if (error) throw error;
       setPingResult({ ok: true, message: data?.content || 'OK', latencyMs: data?.latencyMs });
-    } catch (e: any) {
-      setPingResult({ ok: false, message: e?.message || 'Erreur inconnue' });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Erreur inconnue';
+      setPingResult({ ok: false, message });
     } finally {
       setPinging(false);
     }
   }, []);
 
-  const systems = useMemo(() => ([
-    { key: 'chatbot', icon: Bot, label: 'Chatbot IA', enabled: settings.chatbot.enabled, model: settings.chatbot.model, color: 'text-blue-500' },
-    { key: 'contentGenerator', icon: Sparkles, label: 'Génération de contenu', enabled: settings.contentGenerator.enabled, model: settings.contentGenerator.provider === 'lovable' ? settings.contentGenerator.model : 'Templates', color: 'text-purple-500' },
-    { key: 'imageEnhancer', icon: ImageIcon, label: "Amélioration d'image", enabled: settings.imageEnhancer.enabled, model: settings.imageEnhancer.model, color: 'text-pink-500' },
-    { key: 'recommendations', icon: Brain, label: 'Recommandations', enabled: settings.recommendations.enabled, model: 'Algorithmes pondérés', color: 'text-emerald-500' },
-  ]), [settings]);
+  const pingImageEnhancer = useCallback(async () => {
+    const testPixel =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    try {
+      setImagePinging(true);
+      setImagePing(null);
+      await invokeEnhanceImage(
+        testPixel,
+        settings.imageEnhancer.defaultInstruction || 'Slightly enhance for connectivity test.'
+      );
+      setImagePing({ ok: true, message: 'enhance-image répond correctement.' });
+    } catch (e) {
+      setImagePing({
+        ok: false,
+        message: e instanceof Error ? e.message : 'Échec du test',
+      });
+    } finally {
+      setImagePinging(false);
+    }
+  }, [settings.imageEnhancer.defaultInstruction]);
+
+  const systems = useMemo(
+    () => [
+      {
+        key: 'chatbot',
+        icon: Bot,
+        label: 'Chatbot IA',
+        enabled: settings.chatbot.enabled,
+        model: settings.chatbot.model,
+        color: 'text-blue-500',
+      },
+      {
+        key: 'contentGenerator',
+        icon: Sparkles,
+        label: 'Génération de contenu',
+        enabled: settings.contentGenerator.enabled,
+        model:
+          settings.contentGenerator.provider === 'lovable'
+            ? settings.contentGenerator.model
+            : 'Templates',
+        color: 'text-purple-500',
+      },
+      {
+        key: 'imageEnhancer',
+        icon: ImageIcon,
+        label: "Amélioration d'image",
+        enabled: settings.imageEnhancer.enabled,
+        model: settings.imageEnhancer.model,
+        color: 'text-pink-500',
+      },
+      {
+        key: 'recommendations',
+        icon: Brain,
+        label: 'Recommandations',
+        enabled: settings.recommendations.enabled,
+        model: 'Algorithmes pondérés',
+        color: 'text-emerald-500',
+      },
+    ],
+    [settings]
+  );
 
   if (isLoading) {
     return (
@@ -274,10 +386,19 @@ const AIManagementPage: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button variant="outline" onClick={reset} disabled={isSaving} className="flex-1 sm:flex-initial">
+            <Button
+              variant="outline"
+              onClick={reset}
+              disabled={isSaving}
+              className="flex-1 sm:flex-initial"
+            >
               <RotateCcw className="mr-2 h-4 w-4" /> Reset
             </Button>
-            <Button onClick={save} disabled={!hasChanges || isSaving} className="flex-1 sm:flex-initial">
+            <Button
+              onClick={save}
+              disabled={!hasChanges || isSaving}
+              className="flex-1 sm:flex-initial"
+            >
               <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
             </Button>
           </div>
@@ -331,17 +452,27 @@ const AIManagementPage: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Activity className="h-5 w-5" /> Test de connectivité Lovable AI</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" /> Test de connectivité Lovable AI
+                </CardTitle>
                 <CardDescription>Vérifie l'accès à la passerelle IA et la latence.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button onClick={ping} disabled={pinging}>
-                  {pinging ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Activity className="mr-2 h-4 w-4" />}
+                  {pinging ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Activity className="mr-2 h-4 w-4" />
+                  )}
                   Tester la connexion
                 </Button>
                 {pingResult && (
                   <Alert variant={pingResult.ok ? 'default' : 'destructive'}>
-                    {pingResult.ok ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                    {pingResult.ok ? (
+                      <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4" />
+                    )}
                     <AlertTitle>{pingResult.ok ? 'Connexion OK' : 'Échec'}</AlertTitle>
                     <AlertDescription>
                       {pingResult.message}
@@ -357,45 +488,88 @@ const AIManagementPage: React.FC = () => {
           <TabsContent value="chatbot" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Bot className="h-5 w-5" /> Chatbot IA</CardTitle>
-                <CardDescription>Assistant client (page Assistant IA + widget). Utilise des intentions règles + fallback LLM optionnel.</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5" /> Chatbot IA
+                </CardTitle>
+                <CardDescription>
+                  Assistant client (page Assistant IA + widget). Utilise des intentions règles +
+                  fallback LLM optionnel.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <Label className="font-medium">Chatbot activé</Label>
-                    <p className="text-xs text-muted-foreground">Affiche/masque le chatbot pour tous les utilisateurs.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Affiche/masque le chatbot pour tous les utilisateurs.
+                    </p>
                   </div>
-                  <Switch checked={settings.chatbot.enabled} onCheckedChange={v => update('chatbot', { enabled: v })} />
+                  <Switch
+                    checked={settings.chatbot.enabled}
+                    onCheckedChange={v => update('chatbot', { enabled: v })}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <Label className="font-medium">Fallback LLM (Lovable AI)</Label>
-                    <p className="text-xs text-muted-foreground">Si activé, utilise un modèle IA pour les questions non couvertes par les intentions.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Si activé, utilise un modèle IA pour les questions non couvertes par les
+                      intentions.
+                    </p>
                   </div>
-                  <Switch checked={settings.chatbot.useLovableAIFallback} onCheckedChange={v => update('chatbot', { useLovableAIFallback: v })} />
+                  <Switch
+                    checked={settings.chatbot.useLovableAIFallback}
+                    onCheckedChange={v => update('chatbot', { useLovableAIFallback: v })}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Modèle IA</Label>
-                  <ModelSelect value={settings.chatbot.model} onChange={v => update('chatbot', { model: v })} options={TEXT_MODELS} />
+                  <ModelSelect
+                    value={settings.chatbot.model}
+                    onChange={v => update('chatbot', { model: v })}
+                    options={TEXT_MODELS}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Prompt système</Label>
-                  <Textarea rows={5} value={settings.chatbot.systemPrompt} onChange={e => update('chatbot', { systemPrompt: e.target.value })} />
+                  <Textarea
+                    rows={5}
+                    value={settings.chatbot.systemPrompt}
+                    onChange={e => update('chatbot', { systemPrompt: e.target.value })}
+                  />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <NumberSlider label="Température" value={settings.chatbot.temperature} onChange={v => update('chatbot', { temperature: v })} min={0} max={2} step={0.1} />
-                  <NumberSlider label="Max tokens" value={settings.chatbot.maxTokens} onChange={v => update('chatbot', { maxTokens: v })} min={100} max={4000} step={100} />
+                  <NumberSlider
+                    label="Température"
+                    value={settings.chatbot.temperature}
+                    onChange={v => update('chatbot', { temperature: v })}
+                    min={0}
+                    max={2}
+                    step={0.1}
+                  />
+                  <NumberSlider
+                    label="Max tokens"
+                    value={settings.chatbot.maxTokens}
+                    onChange={v => update('chatbot', { maxTokens: v })}
+                    min={100}
+                    max={4000}
+                    step={100}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Langue par défaut</Label>
-                  <Select value={settings.chatbot.language} onValueChange={v => update('chatbot', { language: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={settings.chatbot.language}
+                    onValueChange={v => update('chatbot', { language: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="fr">Français</SelectItem>
                       <SelectItem value="en">English</SelectItem>
@@ -410,19 +584,34 @@ const AIManagementPage: React.FC = () => {
           <TabsContent value="content" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5" /> Génération de contenu produit</CardTitle>
-                <CardDescription>Descriptions, meta SEO, mots-clés générés automatiquement lors de la création de produits.</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" /> Génération de contenu produit
+                </CardTitle>
+                <CardDescription>
+                  Descriptions, meta SEO, mots-clés générés automatiquement lors de la création de
+                  produits.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <Label className="font-medium">Activé</Label>
-                  <Switch checked={settings.contentGenerator.enabled} onCheckedChange={v => update('contentGenerator', { enabled: v })} />
+                  <Switch
+                    checked={settings.contentGenerator.enabled}
+                    onCheckedChange={v => update('contentGenerator', { enabled: v })}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Provider</Label>
-                  <Select value={settings.contentGenerator.provider} onValueChange={(v: 'lovable' | 'templates') => update('contentGenerator', { provider: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={settings.contentGenerator.provider}
+                    onValueChange={(v: 'lovable' | 'templates') =>
+                      update('contentGenerator', { provider: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="lovable">Lovable AI (recommandé)</SelectItem>
                       <SelectItem value="templates">Templates statiques (sans IA)</SelectItem>
@@ -434,15 +623,37 @@ const AIManagementPage: React.FC = () => {
                   <>
                     <div className="space-y-2">
                       <Label>Modèle IA</Label>
-                      <ModelSelect value={settings.contentGenerator.model} onChange={v => update('contentGenerator', { model: v })} options={TEXT_MODELS} />
+                      <ModelSelect
+                        value={settings.contentGenerator.model}
+                        onChange={v => update('contentGenerator', { model: v })}
+                        options={TEXT_MODELS}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Prompt système</Label>
-                      <Textarea rows={4} value={settings.contentGenerator.systemPrompt} onChange={e => update('contentGenerator', { systemPrompt: e.target.value })} />
+                      <Textarea
+                        rows={4}
+                        value={settings.contentGenerator.systemPrompt}
+                        onChange={e => update('contentGenerator', { systemPrompt: e.target.value })}
+                      />
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <NumberSlider label="Température" value={settings.contentGenerator.temperature} onChange={v => update('contentGenerator', { temperature: v })} min={0} max={2} step={0.1} />
-                      <NumberSlider label="Max tokens" value={settings.contentGenerator.maxTokens} onChange={v => update('contentGenerator', { maxTokens: v })} min={500} max={4000} step={100} />
+                      <NumberSlider
+                        label="Température"
+                        value={settings.contentGenerator.temperature}
+                        onChange={v => update('contentGenerator', { temperature: v })}
+                        min={0}
+                        max={2}
+                        step={0.1}
+                      />
+                      <NumberSlider
+                        label="Max tokens"
+                        value={settings.contentGenerator.maxTokens}
+                        onChange={v => update('contentGenerator', { maxTokens: v })}
+                        min={500}
+                        max={4000}
+                        step={100}
+                      />
                     </div>
                   </>
                 )}
@@ -454,22 +665,91 @@ const AIManagementPage: React.FC = () => {
           <TabsContent value="image" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><ImageIcon className="h-5 w-5" /> Amélioration d'image</CardTitle>
-                <CardDescription>Edge function `enhance-image` — améliore les visuels produits.</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5" /> Amélioration d'image
+                </CardTitle>
+                <CardDescription>
+                  Edge function `enhance-image` — améliore les visuels produits.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <Label className="font-medium">Activé</Label>
-                  <Switch checked={settings.imageEnhancer.enabled} onCheckedChange={v => update('imageEnhancer', { enabled: v })} />
+                  <Switch
+                    checked={settings.imageEnhancer.enabled}
+                    onCheckedChange={v => update('imageEnhancer', { enabled: v })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Modèle d'image</Label>
-                  <ModelSelect value={settings.imageEnhancer.model} onChange={v => update('imageEnhancer', { model: v })} options={IMAGE_MODELS} />
+                  <ModelSelect
+                    value={settings.imageEnhancer.model}
+                    onChange={v => update('imageEnhancer', { model: v })}
+                    options={IMAGE_MODELS}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Instruction par défaut</Label>
-                  <Textarea rows={4} value={settings.imageEnhancer.defaultInstruction} onChange={e => update('imageEnhancer', { defaultInstruction: e.target.value })} />
-                  <p className="text-xs text-muted-foreground">En anglais pour de meilleurs résultats.</p>
+                  <Textarea
+                    rows={4}
+                    value={settings.imageEnhancer.defaultInstruction}
+                    onChange={e => update('imageEnhancer', { defaultInstruction: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    En anglais pour de meilleurs résultats.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Résolution max avant envoi IA (px)</Label>
+                  <Input
+                    type="number"
+                    min={1024}
+                    max={4096}
+                    step={256}
+                    value={settings.imageEnhancer.inferenceMaxPx ?? 2048}
+                    onChange={e =>
+                      update('imageEnhancer', {
+                        inferenceMaxPx: Number(e.target.value) || 2048,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 p-3 border rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Presets du Studio</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(settings.imageEnhancer.presets ?? DEFAULT_STUDIO_PRESETS).length} styles
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => update('imageEnhancer', { presets: DEFAULT_STUDIO_PRESETS })}
+                  >
+                    Restaurer les presets
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={pingImageEnhancer}
+                    disabled={imagePinging || !settings.imageEnhancer.enabled}
+                  >
+                    {imagePinging ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Activity className="h-4 w-4 mr-2" />
+                    )}
+                    Tester enhance-image
+                  </Button>
+                  {imagePing && (
+                    <Badge variant={imagePing.ok ? 'default' : 'destructive'}>
+                      {imagePing.message}
+                    </Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -479,13 +759,21 @@ const AIManagementPage: React.FC = () => {
           <TabsContent value="recommendations" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5" /> Système de recommandations</CardTitle>
-                <CardDescription>Algorithmes pondérés (collaboratif, contenu, tendances, comportemental, cross-type).</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" /> Système de recommandations
+                </CardTitle>
+                <CardDescription>
+                  Algorithmes pondérés (collaboratif, contenu, tendances, comportemental,
+                  cross-type).
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <Label className="font-medium">Activé</Label>
-                  <Switch checked={settings.recommendations.enabled} onCheckedChange={v => update('recommendations', { enabled: v })} />
+                  <Switch
+                    checked={settings.recommendations.enabled}
+                    onCheckedChange={v => update('recommendations', { enabled: v })}
+                  />
                 </div>
                 <Alert>
                   <Brain className="h-4 w-4" />
@@ -496,7 +784,8 @@ const AIManagementPage: React.FC = () => {
                 </Alert>
                 <Button asChild variant="outline">
                   <Link to="/admin/ai-settings">
-                    Ouvrir la configuration des recommandations <ExternalLink className="ml-2 h-4 w-4" />
+                    Ouvrir la configuration des recommandations{' '}
+                    <ExternalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </CardContent>
@@ -507,7 +796,9 @@ const AIManagementPage: React.FC = () => {
           <TabsContent value="keys" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5" /> Clés API & Providers</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <KeyRound className="h-5 w-5" /> Clés API & Providers
+                </CardTitle>
                 <CardDescription>Gestion centralisée des accès aux services IA.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -518,7 +809,9 @@ const AIManagementPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium">Lovable AI Gateway</p>
-                      <p className="text-xs text-muted-foreground">LOVABLE_API_KEY (managée par Lovable Cloud)</p>
+                      <p className="text-xs text-muted-foreground">
+                        LOVABLE_API_KEY (managée par Lovable Cloud)
+                      </p>
                     </div>
                   </div>
                   <Badge>Configurée</Badge>
@@ -528,8 +821,8 @@ const AIManagementPage: React.FC = () => {
                   <KeyRound className="h-4 w-4" />
                   <AlertTitle>Modèles disponibles</AlertTitle>
                   <AlertDescription>
-                    Lovable AI Gateway donne accès à Google Gemini (2.5, 3.x) et OpenAI GPT-5.x sans clé séparée.
-                    Aucune clé OpenAI ou Anthropic personnelle n'est requise.
+                    Lovable AI Gateway donne accès à Google Gemini (2.5, 3.x) et OpenAI GPT-5.x sans
+                    clé séparée. Aucune clé OpenAI ou Anthropic personnelle n'est requise.
                   </AlertDescription>
                 </Alert>
 
@@ -537,15 +830,20 @@ const AIManagementPage: React.FC = () => {
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Sécurité</AlertTitle>
                   <AlertDescription>
-                    Les anciennes clés <code>VITE_OPENAI_API_KEY</code> et <code>VITE_ANTHROPIC_API_KEY</code> exposées
-                    côté navigateur ont été retirées du générateur de contenu. Tous les appels IA passent désormais par
-                    des edge functions sécurisées.
+                    Les anciennes clés <code>VITE_OPENAI_API_KEY</code> et{' '}
+                    <code>VITE_ANTHROPIC_API_KEY</code> exposées côté navigateur ont été retirées du
+                    générateur de contenu. Tous les appels IA passent désormais par des edge
+                    functions sécurisées.
                   </AlertDescription>
                 </Alert>
 
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p><strong>Quotas & crédits :</strong> gérés dans Settings → Workspace → Usage.</p>
-                  <p><strong>Rate limits :</strong> 429 = trop de requêtes ; 402 = crédits épuisés.</p>
+                  <p>
+                    <strong>Quotas & crédits :</strong> gérés dans Settings → Workspace → Usage.
+                  </p>
+                  <p>
+                    <strong>Rate limits :</strong> 429 = trop de requêtes ; 402 = crédits épuisés.
+                  </p>
                 </div>
               </CardContent>
             </Card>

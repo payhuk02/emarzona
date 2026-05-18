@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { getCategoriesForProductType } from '@/constants/product-categories';
+import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 import type {
   DigitalProductFormData,
@@ -541,6 +542,24 @@ export const DigitalBasicInfoForm = ({
 
       {/* Images Upload - Multiple */}
       <div className="space-y-2">
+        <ImageStudioField
+          context="product"
+          fieldName="images"
+          value={formData.image_url || ''}
+          exampleUrl={formData.images?.[0]}
+          onChange={url => {
+            if (!url) return;
+            const currentImages = formData.images || [];
+            const merged = currentImages.includes(url) ? currentImages : [url, ...currentImages];
+            updateFormData({
+              images: merged,
+              image_url: merged[0] || url,
+            });
+          }}
+          label="Studio IA"
+          buttonLabel="Améliorer avec le Studio IA"
+          className="mb-2"
+        />
         <Label htmlFor="images_upload">Images du produit</Label>
         <p className="text-xs text-muted-foreground">
           Ajoutez plusieurs images pour montrer différents angles ou détails du produit.
@@ -685,7 +704,7 @@ export const DigitalBasicInfoForm = ({
             // Validation taille et type pour tous les fichiers
             const maxSize = 10 * 1024 * 1024; // 10MB
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-            const  invalidFiles: string[] = [];
+            const invalidFiles: string[] = [];
 
             for (const file of Array.from(files)) {
               if (file.size > maxSize) {
@@ -864,9 +883,3 @@ export const DigitalBasicInfoForm = ({
     </div>
   );
 };
-
-
-
-
-
-

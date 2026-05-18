@@ -27,6 +27,7 @@ import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
 import type { ServiceProductFormData } from '@/types/service-product';
 import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
+import { ImageStudioField } from '@/components/images/ImageStudioField';
 
 interface ServiceBasicInfoFormProps {
   data: Partial<ServiceProductFormData>;
@@ -369,6 +370,22 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
       {/* Images */}
       <div className="space-y-2">
         <Label>Images du service</Label>
+        <ImageStudioField
+          context="services"
+          fieldName="images"
+          value=""
+          allowClear={false}
+          exampleUrl={data.images?.[0]}
+          onChange={url => {
+            if (!url) return;
+            const existing = data.images || [];
+            if (existing.includes(url)) return;
+            onUpdate({ images: [...existing, url] });
+          }}
+          label="Studio IA"
+          buttonLabel="Créer / améliorer une image (Studio IA)"
+          className="mb-3"
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {data.images?.map((image, index) => (
             <div
@@ -456,9 +473,3 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
     </div>
   );
 };
-
-
-
-
-
-

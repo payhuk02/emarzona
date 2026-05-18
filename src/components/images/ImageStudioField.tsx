@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { ImageEnhancerStudio, STUDIO_PRESETS } from './ImageEnhancerStudio';
 import { SmartImage } from './SmartImage';
-import { detectImageContext, detectImageContextDetailed } from '@/lib/images/detectContext';
+import { detectImageContextDetailed } from '@/lib/images/detectContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -41,6 +41,8 @@ export type ImageStudioContext =
   | 'shop'
   | 'profile'
   | 'product'
+  | 'course'
+  | 'artist'
   | 'cover'
   | 'generic';
 
@@ -81,6 +83,20 @@ const CONTEXT_MAP: Record<ImageStudioContext, ContextConfig> = {
     presetIndex: 1, // Fond blanc épuré
     defaultLabel: 'Image produit',
     hint: 'Fond blanc recommandé pour un rendu e-commerce premium.',
+  },
+  course: {
+    folder: 'courses',
+    bucket: 'service-images',
+    presetIndex: 0, // Optimisation premium
+    defaultLabel: 'Image du cours',
+    hint: 'Visuel de couverture pour votre formation en ligne.',
+  },
+  artist: {
+    folder: 'artist',
+    bucket: 'service-images',
+    presetIndex: 3, // Couleurs vibrantes
+    defaultLabel: "Image de l'œuvre",
+    hint: "Mettez en valeur les couleurs et les détails de l'œuvre.",
   },
   cover: {
     folder: 'covers',
@@ -163,7 +179,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
   // Détection détaillée (pour contexte + suggestions ambiguës)
   const detection = useMemo(
     () => (fieldName ? detectImageContextDetailed(fieldName) : null),
-    [fieldName],
+    [fieldName]
   );
 
   // Contexte effectif : explicite > verrou > détecté depuis fieldName > 'generic'
@@ -232,7 +248,6 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
 
   const toggleLock = () => (lock ? unlock() : lockCurrent());
 
-
   // L'image initiale du studio = image courante OU exemple fourni
   const initialUrl = value || exampleUrl || undefined;
 
@@ -251,7 +266,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
             variant={lock ? 'default' : 'outline'}
             className={cn(
               'text-[10px] uppercase tracking-wide',
-              lock && 'bg-primary/15 text-primary border-primary/30 hover:bg-primary/20',
+              lock && 'bg-primary/15 text-primary border-primary/30 hover:bg-primary/20'
             )}
           >
             {lock && <Lock className="h-2.5 w-2.5 mr-1 inline" />}
@@ -275,7 +290,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
                 'inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] transition-colors',
                 lock
                   ? 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15'
-                  : 'border-border text-muted-foreground hover:bg-muted',
+                  : 'border-border text-muted-foreground hover:bg-muted'
               )}
               title={
                 lock
@@ -316,7 +331,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
           <span className="text-muted-foreground">
             Le champ « {fieldName} » est ambigu. Autre contexte possible :
           </span>
-          {suggestions.map((s) => (
+          {suggestions.map(s => (
             <button
               key={s}
               type="button"
@@ -333,15 +348,11 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
       <div
         className={cn(
           'relative w-full overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 flex items-center justify-center',
-          previewClassName ?? 'aspect-video',
+          previewClassName ?? 'aspect-video'
         )}
       >
         {value ? (
-          <SmartImage
-            src={value}
-            alt={cfg.label}
-            className="w-full h-full object-cover"
-          />
+          <SmartImage src={value} alt={cfg.label} className="w-full h-full object-cover" />
         ) : exampleUrl ? (
           <div className="relative w-full h-full">
             <SmartImage
@@ -359,9 +370,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
           <div className="flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
             <ImageIcon className="h-10 w-10 mb-2 opacity-40" />
             <p className="text-sm">Aucune image sélectionnée</p>
-            <p className="text-xs opacity-70">
-              Utilisez le Studio IA pour en créer une optimisée
-            </p>
+            <p className="text-xs opacity-70">Utilisez le Studio IA pour en créer une optimisée</p>
           </div>
         )}
 
@@ -377,7 +386,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
 
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-2">
-        <Dialog open={open} onOpenChange={(o) => !isSaving && setOpen(o)}>
+        <Dialog open={open} onOpenChange={o => !isSaving && setOpen(o)}>
           <DialogTrigger asChild>
             <Button
               type="button"
@@ -386,12 +395,11 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
               disabled={isSaving}
               className={cn(
                 !value &&
-                  'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:opacity-90',
+                  'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:opacity-90'
               )}
             >
               <Sparkles className="h-4 w-4 mr-2" />
-              {buttonLabel ??
-                (value ? 'Modifier avec le Studio IA' : 'Ouvrir le Studio IA')}
+              {buttonLabel ?? (value ? 'Modifier avec le Studio IA' : 'Ouvrir le Studio IA')}
             </Button>
           </DialogTrigger>
 
@@ -411,8 +419,8 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
                 </span>
                 {lock ? (
                   <span className="block text-primary">
-                    🔒 Verrouillé — à la prochaine ouverture de « {fieldName} », le Studio restaurera{' '}
-                    <strong>{lock.context}</strong>
+                    🔒 Verrouillé — à la prochaine ouverture de « {fieldName} », le Studio
+                    restaurera <strong>{lock.context}</strong>
                     {typeof lock.presetIndex === 'number' && STUDIO_PRESETS[lock.presetIndex] && (
                       <>
                         {' '}
@@ -466,6 +474,7 @@ export const ImageStudioField: React.FC<ImageStudioFieldProps> = ({
               initialUrl={initialUrl}
               initialPresetIndex={cfg.presetIndex}
               onSaved={handleSaved}
+              onSaving={setIsSaving}
             />
           </DialogContent>
         </Dialog>

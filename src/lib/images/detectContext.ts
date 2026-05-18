@@ -41,7 +41,8 @@ function normalize(name: string): string {
   // Uniformise les séparateurs
   s = s.replace(/[-\s.]+/g, '_');
   // Retire les suffixes techniques répétés (ex: image_url_src)
-  const TECH_SUFFIX = /(_?)(url|uri|src|image|img|photo|picture|pic|link|path|file|media|thumb|thumbnail|avatar_?url)$/i;
+  const TECH_SUFFIX =
+    /(_?)(url|uri|src|image|img|photo|picture|pic|link|path|file|media|thumb|thumbnail|avatar_?url)$/i;
   let prev = '';
   while (prev !== s && TECH_SUFFIX.test(s)) {
     prev = s;
@@ -63,8 +64,21 @@ const RULES: Rule[] = [
   {
     context: 'cover',
     weight: 9,
-    keywords:
-      /(cover|couverture|banner|banni[eè]re|hero|header|bandeau|billboard|splash)/i,
+    keywords: /(cover|couverture|banner|banni[eè]re|hero|header|bandeau|billboard|splash)/i,
+  },
+
+  // Cours en ligne
+  {
+    context: 'course',
+    weight: 9,
+    keywords: /(course|cours|formation|lesson|lecon|mooc|elearning|e_learning|curriculum)/i,
+  },
+
+  // Œuvre d'artiste
+  {
+    context: 'artist',
+    weight: 9,
+    keywords: /(artist|artiste|oeuvre|œuvre|artwork|painting|tableau|sculpture|galerie_art)/i,
   },
 
   // Produit / e-commerce / fond studio — spécifique
@@ -79,8 +93,7 @@ const RULES: Rule[] = [
   {
     context: 'services',
     weight: 7,
-    keywords:
-      /(service|prestation|mission|offer|offre|gig|freelance|assignment|job|booking)/i,
+    keywords: /(service|prestation|mission|offer|offre|gig|freelance|assignment|job|booking)/i,
   },
 
   // Boutique — moins prioritaire (mot parfois générique)
@@ -104,9 +117,7 @@ export interface ContextDetection {
 /**
  * Version riche qui renvoie aussi la confiance et les suggestions.
  */
-export function detectImageContextDetailed(
-  fieldName: string | undefined | null,
-): ContextDetection {
+export function detectImageContextDetailed(fieldName: string | undefined | null): ContextDetection {
   if (!fieldName) {
     return { context: 'generic', confidence: 'none', suggestions: [], normalized: '' };
   }
@@ -115,7 +126,7 @@ export function detectImageContextDetailed(
     return { context: 'generic', confidence: 'none', suggestions: [], normalized: '' };
   }
 
-  const matches: Rule[] = RULES.filter((r) => r.keywords.test(normalized));
+  const matches: Rule[] = RULES.filter(r => r.keywords.test(normalized));
   if (matches.length === 0) {
     return { context: 'generic', confidence: 'none', suggestions: [], normalized };
   }
@@ -124,7 +135,7 @@ export function detectImageContextDetailed(
   const winner = matches[0].context;
   const others = matches
     .slice(1)
-    .map((m) => m.context)
+    .map(m => m.context)
     .filter((c, i, arr) => c !== winner && arr.indexOf(c) === i);
 
   return {
@@ -136,8 +147,6 @@ export function detectImageContextDetailed(
 }
 
 /** API rétrocompatible : retourne juste le contexte. */
-export function detectImageContext(
-  fieldName: string | undefined | null,
-): ImageStudioContext {
+export function detectImageContext(fieldName: string | undefined | null): ImageStudioContext {
   return detectImageContextDetailed(fieldName).context;
 }
