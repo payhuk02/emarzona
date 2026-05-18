@@ -79,7 +79,7 @@ const MarketplaceHeader = () => {
           <div className="hidden md:flex items-center gap-2">
             <LanguageSwitcher variant="outline" showLabel={false} />
             <ThemeToggle />
-            <Link to="/auth">
+            <Link to="/login">
               <Button
                 variant="ghost"
                 size="sm"
@@ -89,7 +89,7 @@ const MarketplaceHeader = () => {
                 {t('nav.login')}
               </Button>
             </Link>
-            <Link to="/auth">
+            <Link to="/register">
               <Button
                 size="sm"
                 className="gradient-accent text-accent-foreground font-semibold hover:shadow-glow"
@@ -182,9 +182,9 @@ const MarketplaceHeader = () => {
                     </Link>
                     <div className="h-px bg-border my-4" aria-hidden="true" />
                     <Link
-                      to="/auth"
+                      to="/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      aria-label="Se connecter ou créer un compte"
+                      aria-label="Se connecter"
                     >
                       <Button
                         variant="ghost"
@@ -198,7 +198,7 @@ const MarketplaceHeader = () => {
 
                   {/* CTA Button */}
                   <div className="pt-4 border-t">
-                    <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
                       <Button className="w-full h-12 gradient-accent text-accent-foreground font-semibold touch-manipulation hover:shadow-glow">
                         {t('auth.signup.title')}
                       </Button>

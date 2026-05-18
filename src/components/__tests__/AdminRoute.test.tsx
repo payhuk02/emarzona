@@ -43,7 +43,7 @@ describe('AdminRoute', () => {
     vi.clearAllMocks();
   });
 
-  it('devrait rendre les enfants si l\'utilisateur est admin', () => {
+  it("devrait rendre les enfants si l'utilisateur est admin", () => {
     render(
       <BrowserRouter>
         <AdminRoute>
@@ -55,7 +55,7 @@ describe('AdminRoute', () => {
     expect(screen.getByText('Contenu admin')).toBeInTheDocument();
   });
 
-  it('devrait rediriger vers /auth si l\'utilisateur n\'est pas authentifié', () => {
+  it("devrait rediriger vers /login si l'utilisateur n'est pas authentifié", () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
       loading: false,
@@ -69,10 +69,10 @@ describe('AdminRoute', () => {
       </BrowserRouter>
     );
 
-    expect(mockNavigate).toHaveBeenCalledWith('/auth');
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
-  it('devrait afficher un message d\'accès refusé si l\'utilisateur n\'est pas admin', () => {
+  it("devrait afficher un message d'accès refusé si l'utilisateur n'est pas admin", () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: mockUser,
       loading: false,
@@ -135,4 +135,3 @@ describe('AdminRoute', () => {
     expect(screen.getByText(/chargement/i)).toBeInTheDocument();
   });
 });
-

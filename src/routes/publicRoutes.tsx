@@ -15,7 +15,12 @@ const Marketplace = lazy(() =>
           <div className="text-center space-y-4 max-w-md">
             <h2 className="text-xl font-semibold">Erreur de chargement</h2>
             <p className="text-muted-foreground">Impossible de charger la page Marketplace</p>
-            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white rounded">Recharger</button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-white rounded"
+            >
+              Recharger
+            </button>
           </div>
         </div>
       ),
@@ -65,7 +70,9 @@ const StyleQuizPage = lazy(() =>
   import('@/pages/personalization/StyleQuizPage').then(m => ({ default: m.default }))
 );
 const PersonalizedRecommendationsPage = lazy(() =>
-  import('@/pages/personalization/PersonalizedRecommendationsPage').then(m => ({ default: m.default }))
+  import('@/pages/personalization/PersonalizedRecommendationsPage').then(m => ({
+    default: m.default,
+  }))
 );
 
 // Pages Légales
@@ -165,9 +172,14 @@ const OldProductRouteRedirect = () => {
 export const publicRoutes = (
   <>
     <Route path="/" element={<Landing />} />
-    <Route path="/auth" element={<Auth />} />
-    <Route path="/login" element={<Navigate to="/auth" replace />} />
-    <Route path="/auth/login" element={<Navigate to="/auth" replace />} />
+    <Route path="/login" element={<Auth />} />
+    <Route path="/register" element={<Auth />} />
+    <Route path="/connexion" element={<Navigate to="/login" replace />} />
+    <Route path="/inscription" element={<Navigate to="/register" replace />} />
+    <Route path="/signup" element={<Navigate to="/register" replace />} />
+    <Route path="/auth" element={<Navigate to="/login" replace />} />
+    <Route path="/auth/login" element={<Navigate to="/login" replace />} />
+    <Route path="/auth/signup" element={<Navigate to="/register" replace />} />
     <Route path="/marketplace" element={<Marketplace />} />
     <Route path="/recommendations" element={<Recommendations />} />
     <Route path="/recommendations/history-based" element={<HistoryBasedRecommendations />} />
@@ -183,7 +195,10 @@ export const publicRoutes = (
     {/* Storefront — Redirection vers sous-domaine myemarzona.shop */}
     <Route path="/store/:slug/product/:productSlug" element={<OldProductRouteRedirect />} />
     <Route path="/stores/:slug" element={<StoreRedirectToSubdomain />} />
-    <Route path="/stores/:slug/products/:productSlug" element={<StoreProductRedirectToSubdomain />} />
+    <Route
+      path="/stores/:slug/products/:productSlug"
+      element={<StoreProductRedirectToSubdomain />}
+    />
     <Route path="/stores/:slug/legal/:page" element={<StoreLegalRedirectToSubdomain />} />
 
     {/* Légal */}

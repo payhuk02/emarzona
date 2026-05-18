@@ -1,7 +1,7 @@
 /**
  * Hook unifié pour gérer l'ajout/suppression de produits dans la wishlist
  * Date: 2025-01-28
- * 
+ *
  * Remplace le code dupliqué dans les pages de détail produit
  * Utilise la table user_favorites (table principale)
  */
@@ -15,7 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Hook pour gérer l'état et le toggle de wishlist pour un produit
- * 
+ *
  * @param productId - ID du produit à gérer
  * @returns { isInWishlist, toggle, isLoading } - État et fonction de toggle
  */
@@ -44,7 +44,7 @@ export const useWishlistToggle = (productId: string | undefined) => {
         description: 'Veuillez vous connecter pour ajouter à la wishlist',
         variant: 'destructive',
       });
-      navigate('/auth');
+      navigate('/login');
       return;
     }
 
@@ -52,7 +52,7 @@ export const useWishlistToggle = (productId: string | undefined) => {
     try {
       await toggleFavorite(productId);
       // Le toast est géré par useMarketplaceFavorites
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la gestion de la wishlist', { error, productId });
       toast({
@@ -71,10 +71,3 @@ export const useWishlistToggle = (productId: string | undefined) => {
     isLoading,
   };
 };
-
-
-
-
-
-
-

@@ -124,14 +124,14 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
   if (!order) return null;
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       processing: 'default',
       completed: 'outline',
       cancelled: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       pending: 'En attente',
       processing: 'En cours',
       completed: 'Terminée',
@@ -142,13 +142,13 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
   };
 
   const getPaymentBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'secondary',
       paid: 'outline',
       failed: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       pending: 'En attente',
       paid: 'Payée',
       failed: 'Échouée',
@@ -531,7 +531,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
               <div className="space-y-2">
                 {transactions.map(transaction => {
                   const getTransactionStatusBadge = (status: string) => {
-                    const  variants: Record<
+                    const variants: Record<
                       string,
                       'default' | 'secondary' | 'destructive' | 'outline'
                     > = {
@@ -542,7 +542,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                       cancelled: 'destructive',
                     };
 
-                    const  labels: Record<string, string> = {
+                    const labels: Record<string, string> = {
                       completed: 'Complété',
                       processing: 'En traitement',
                       pending: 'En attente',
@@ -658,14 +658,16 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                 className="border-red-500 text-red-700 hover:bg-red-50"
                 onClick={async () => {
                   // Vérifier que l'utilisateur est connecté
-                  const { data: { user } } = await supabase.auth.getUser();
+                  const {
+                    data: { user },
+                  } = await supabase.auth.getUser();
                   if (!user) {
                     toast({
                       title: 'Connexion requise',
                       description: 'Veuillez vous connecter pour ouvrir un litige.',
                       variant: 'destructive',
                     });
-                    navigate('/auth');
+                    navigate('/login');
                     return;
                   }
 
@@ -736,9 +738,3 @@ OrderDetailDialog.displayName = 'OrderDetailDialog';
 OrderDetailDialog.displayName = 'OrderDetailDialog';
 
 OrderDetailDialog.displayName = 'OrderDetailDialog';
-
-
-
-
-
-

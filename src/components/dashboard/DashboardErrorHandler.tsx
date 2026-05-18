@@ -7,15 +7,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  AlertTriangle,
-  RefreshCw,
-  LogOut,
-  Database,
-  Shield,
-  Wifi,
-  WifiOff
-} from 'lucide-react';
+import { AlertTriangle, RefreshCw, LogOut, Database, Shield, Wifi, WifiOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
@@ -36,7 +28,7 @@ type ErrorType =
 export const DashboardErrorHandler = ({
   error,
   onRetry,
-  isRetrying = false
+  isRetrying = false,
 }: DashboardErrorHandlerProps) => {
   const [errorType, setErrorType] = useState<ErrorType>('UNKNOWN');
   const navigate = useNavigate();
@@ -55,19 +47,20 @@ export const DashboardErrorHandler = ({
     //     error.includes('session') && error.includes('expir')) {
     //   setErrorType('SESSION_EXPIRED');
     // } else
-    if (error.includes('RPC_INEXISTANTE') ||
-               error.includes('function') && error.includes('does not exist')) {
+    if (
+      error.includes('RPC_INEXISTANTE') ||
+      (error.includes('function') && error.includes('does not exist'))
+    ) {
       setErrorType('RPC_INEXISTANTE');
-    } else if (error.includes('RPC_PERMISSIONS') ||
-               error.includes('permission denied')) {
+    } else if (error.includes('RPC_PERMISSIONS') || error.includes('permission denied')) {
       setErrorType('RPC_PERMISSIONS');
-    } else if (error.includes('fetch') ||
-               error.includes('network') ||
-               error.includes('Failed to fetch')) {
+    } else if (
+      error.includes('fetch') ||
+      error.includes('network') ||
+      error.includes('Failed to fetch')
+    ) {
       setErrorType('NETWORK_ERROR');
-    } else if (error.includes('GROUP BY') ||
-               error.includes('database') ||
-               error.includes('SQL')) {
+    } else if (error.includes('GROUP BY') || error.includes('database') || error.includes('SQL')) {
       setErrorType('DATABASE_ERROR');
     } else {
       setErrorType('UNKNOWN');
@@ -77,7 +70,7 @@ export const DashboardErrorHandler = ({
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/auth/login');
+      navigate('/login');
     } catch (err) {
       logger.error('Erreur lors de la déconnexion:', err);
     }
@@ -96,9 +89,13 @@ export const DashboardErrorHandler = ({
 
   const handleContactSupport = () => {
     // Ouvrir un email ou un chat de support
-    window.open('mailto:support@emarzona.com?subject=Erreur Dashboard&body=' +
-                encodeURIComponent(`Erreur rencontrée: ${error}\n\nDescription du problème: [Décrivez ce qui s'est passé]`),
-                '_blank');
+    window.open(
+      'mailto:support@emarzona.com?subject=Erreur Dashboard&body=' +
+        encodeURIComponent(
+          `Erreur rencontrée: ${error}\n\nDescription du problème: [Décrivez ce qui s'est passé]`
+        ),
+      '_blank'
+    );
   };
 
   // Ne rien afficher si pas d'erreur
@@ -110,7 +107,8 @@ export const DashboardErrorHandler = ({
         return {
           icon: <Database className="h-5 w-5" />,
           title: 'Service temporairement indisponible',
-          description: 'Le service de statistiques est en cours de mise à jour. Les données affichées peuvent ne pas être à jour.',
+          description:
+            'Le service de statistiques est en cours de mise à jour. Les données affichées peuvent ne pas être à jour.',
           variant: 'default' as const,
           actions: [
             {
@@ -118,35 +116,36 @@ export const DashboardErrorHandler = ({
               onClick: handleRetry,
               variant: 'outline' as const,
               icon: <RefreshCw className="h-4 w-4" />,
-              disabled: isRetrying
+              disabled: isRetrying,
             },
             {
               label: 'Contacter le support',
               onClick: handleContactSupport,
-              variant: 'ghost' as const
-            }
-          ]
+              variant: 'ghost' as const,
+            },
+          ],
         };
 
       case 'RPC_PERMISSIONS':
         return {
           icon: <Shield className="h-5 w-5" />,
-          title: 'Problème d\'autorisation',
-          description: 'Vous n\'avez pas les permissions nécessaires pour accéder aux statistiques. Vérifiez vos droits d\'accès.',
+          title: "Problème d'autorisation",
+          description:
+            "Vous n'avez pas les permissions nécessaires pour accéder aux statistiques. Vérifiez vos droits d'accès.",
           variant: 'destructive' as const,
           actions: [
             {
               label: 'Vérifier les paramètres',
               onClick: handleGoToSettings,
               variant: 'outline' as const,
-              icon: <Shield className="h-4 w-4" />
+              icon: <Shield className="h-4 w-4" />,
             },
             {
               label: 'Contacter le support',
               onClick: handleContactSupport,
-              variant: 'ghost' as const
-            }
-          ]
+              variant: 'ghost' as const,
+            },
+          ],
         };
 
       case 'NETWORK_ERROR':
@@ -161,22 +160,23 @@ export const DashboardErrorHandler = ({
               onClick: handleRetry,
               variant: 'outline' as const,
               icon: <RefreshCw className="h-4 w-4" />,
-              disabled: isRetrying
+              disabled: isRetrying,
             },
             {
               label: 'Vérifier la connexion',
               onClick: () => window.location.reload(),
               variant: 'ghost' as const,
-              icon: <Wifi className="h-4 w-4" />
-            }
-          ]
+              icon: <Wifi className="h-4 w-4" />,
+            },
+          ],
         };
 
       case 'DATABASE_ERROR':
         return {
           icon: <Database className="h-5 w-5" />,
           title: 'Erreur technique',
-          description: 'Un problème technique empêche le chargement des statistiques. Nos équipes ont été notifiées.',
+          description:
+            'Un problème technique empêche le chargement des statistiques. Nos équipes ont été notifiées.',
           variant: 'destructive' as const,
           actions: [
             {
@@ -184,21 +184,22 @@ export const DashboardErrorHandler = ({
               onClick: handleRetry,
               variant: 'outline' as const,
               icon: <RefreshCw className="h-4 w-4" />,
-              disabled: isRetrying
+              disabled: isRetrying,
             },
             {
               label: 'Actualiser la page',
               onClick: () => window.location.reload(),
-              variant: 'ghost' as const
-            }
-          ]
+              variant: 'ghost' as const,
+            },
+          ],
         };
 
       default:
         return {
           icon: <AlertTriangle className="h-5 w-5" />,
           title: 'Erreur inattendue',
-          description: 'Une erreur inattendue s\'est produite. Veuillez réessayer ou contacter le support.',
+          description:
+            "Une erreur inattendue s'est produite. Veuillez réessayer ou contacter le support.",
           variant: 'destructive' as const,
           actions: [
             {
@@ -206,14 +207,14 @@ export const DashboardErrorHandler = ({
               onClick: handleRetry,
               variant: 'outline' as const,
               icon: <RefreshCw className="h-4 w-4" />,
-              disabled: isRetrying
+              disabled: isRetrying,
             },
             {
               label: 'Contacter le support',
               onClick: handleContactSupport,
-              variant: 'ghost' as const
-            }
-          ]
+              variant: 'ghost' as const,
+            },
+          ],
         };
     }
   };
@@ -246,9 +247,7 @@ export const DashboardErrorHandler = ({
               disabled={action.disabled}
               className="min-h-[44px] text-xs sm:text-sm touch-manipulation"
             >
-              {action.icon && (
-                <span className="mr-2">{action.icon}</span>
-              )}
+              {action.icon && <span className="mr-2">{action.icon}</span>}
               {isRetrying && action.label === 'Réessayer' ? 'Rechargement...' : action.label}
             </Button>
           ))}

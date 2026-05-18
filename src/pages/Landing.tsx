@@ -239,7 +239,9 @@ const Landing = () => {
                 />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-                  <span className="text-[10px] sm:text-xs md:text-sm font-bold text-primary-foreground">E</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-bold text-primary-foreground">
+                    E
+                  </span>
                 </div>
               )}
             </div>
@@ -282,7 +284,7 @@ const Landing = () => {
             <div className="hidden xl:block">
               <LanguageSwitcher variant="ghost" showLabel={false} />
             </div>
-            <Link to="/auth" className="flex-shrink-0">
+            <Link to="/login" className="flex-shrink-0">
               <Button
                 variant="ghost"
                 className="text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 text-sm xl:text-base font-medium px-2 xl:px-3 2xl:px-4 whitespace-nowrap"
@@ -290,7 +292,7 @@ const Landing = () => {
                 Connexion
               </Button>
             </Link>
-            <Link to="/auth" className="flex-shrink-0">
+            <Link to="/register" className="flex-shrink-0">
               <Button className="gradient-accent text-accent-foreground font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 text-xs xl:text-sm 2xl:text-base px-3 xl:px-4 2xl:px-6 whitespace-nowrap">
                 Démarrer gratuitement
               </Button>
@@ -375,7 +377,7 @@ const Landing = () => {
                   />
                 </div>
                 <div className="border-t border-border/50 pt-2 sm:pt-3 mt-1 flex flex-col gap-2">
-                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full">
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-foreground hover:text-primary hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium"
@@ -383,7 +385,7 @@ const Landing = () => {
                       Connexion
                     </Button>
                   </Link>
-                  <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                  <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="w-full">
                     <Button className="w-full gradient-accent text-accent-foreground font-semibold shadow-glow hover:opacity-90 active:opacity-80 transition-all duration-200 min-h-[44px] text-sm sm:text-base">
                       Démarrer gratuitement
                     </Button>
@@ -443,7 +445,7 @@ const Landing = () => {
 
               {/* CTAs Premium avec meilleure hiérarchie */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5 justify-center items-stretch sm:items-center mb-8 sm:mb-10 md:mb-12 lg:mb-16 px-3 sm:px-4">
-                <Link to="/auth" className="w-full sm:w-auto group flex-shrink-0">
+                <Link to="/register" className="w-full sm:w-auto group flex-shrink-0">
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-white text-gray-900 font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 md:py-5 lg:py-6 rounded-xl shadow-2xl hover:bg-gray-50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap border-0 relative overflow-hidden group min-h-[44px] sm:min-h-[48px] md:min-h-[52px] touch-manipulation"
@@ -804,7 +806,7 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-              <Link to="/auth">
+              <Link to="/register">
                 <Button className="gradient-primary text-primary-foreground font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
                   Configurer les paiements
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -1048,7 +1050,7 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-              <Link to="/auth">
+              <Link to="/register">
                 <Button className="gradient-primary text-primary-foreground font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
                   Découvrir l'email marketing
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -1118,7 +1120,7 @@ const Landing = () => {
                 générer des étiquettes d'expédition et suivre vos colis en temps réel. Vos clients
                 reçoivent des notifications automatiques à chaque étape.
               </p>
-              <Link to="/auth">
+              <Link to="/register">
                 <Button className="gradient-primary text-primary-foreground font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
                   Configurer le shipping
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -1399,7 +1401,7 @@ const Landing = () => {
           </div>
 
           <div className="text-center mt-16 sm:mt-20 md:mt-24">
-            <Link to="/auth">
+            <Link to="/register">
               <Button
                 size="lg"
                 className="gradient-primary text-primary-foreground font-bold text-base sm:text-lg md:text-xl px-8 sm:px-10 md:px-12 py-5 sm:py-6 md:py-7 shadow-glow hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
@@ -1732,7 +1734,7 @@ const Landing = () => {
                   </span>
                 </div>
               </div>
-              <Link to="/auth">
+              <Link to="/register">
                 <Button className="gradient-primary text-primary-foreground font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
                   En savoir plus
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -1787,7 +1789,7 @@ const Landing = () => {
                   </div>
                 </div>
               </div>
-              <Link to="/auth">
+              <Link to="/register">
                 <Button className="gradient-primary text-primary-foreground font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200">
                   Contacter le support
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -1978,7 +1980,7 @@ const Landing = () => {
                   </div>
                 </div>
 
-                <Link to="/auth" className="w-full md:w-auto">
+                <Link to="/register" className="w-full md:w-auto">
                   <Button
                     size="lg"
                     className="w-full md:w-auto gradient-accent text-accent-foreground font-bold text-sm sm:text-base md:text-lg px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 lg:py-6 shadow-glow hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 inline-flex items-center justify-center gap-2 min-h-[44px] sm:min-h-[48px] md:min-h-[52px] touch-manipulation"
@@ -2014,7 +2016,7 @@ const Landing = () => {
                 gratuitement en moins de 2 minutes.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5 justify-center items-stretch sm:items-center px-3 sm:px-4 md:px-6">
-                <Link to="/auth" className="w-full sm:w-auto group flex-shrink-0">
+                <Link to="/register" className="w-full sm:w-auto group flex-shrink-0">
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-white text-gray-900 font-bold text-sm sm:text-base md:text-lg px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-4 md:py-5 lg:py-6 rounded-xl shadow-2xl hover:bg-gray-50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out whitespace-nowrap border-0 relative overflow-hidden group min-h-[44px] sm:min-h-[48px] md:min-h-[52px] touch-manipulation"
@@ -2088,7 +2090,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Fonctionnalités
@@ -2096,7 +2098,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Tarifs
@@ -2104,7 +2106,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Démo
@@ -2118,7 +2120,7 @@ const Landing = () => {
               <ul className="space-y-2.5 text-sm sm:text-base">
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Documentation
@@ -2126,7 +2128,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Guides
@@ -2134,7 +2136,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Contact
@@ -2142,7 +2144,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     FAQ
@@ -2156,7 +2158,7 @@ const Landing = () => {
               <ul className="space-y-2.5 text-sm sm:text-base">
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     À propos
@@ -2164,7 +2166,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Blog
@@ -2172,7 +2174,7 @@ const Landing = () => {
                 </li>
                 <li>
                   <Link
-                    to="/auth"
+                    to="/register"
                     className="text-gray-400 hover:text-primary hover:translate-x-1 block transition-smooth min-h-[44px] flex items-center touch-manipulation"
                   >
                     Carrières

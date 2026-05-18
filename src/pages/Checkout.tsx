@@ -1043,7 +1043,7 @@ export default function Checkout() {
           description: 'Veuillez vous connecter pour continuer',
           variant: 'destructive',
         });
-        navigate('/auth');
+        navigate('/login');
         return;
       }
 

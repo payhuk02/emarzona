@@ -68,11 +68,9 @@ const CourseAffiliate = () => {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Connexion requise</AlertTitle>
-          <AlertDescription>
-            Vous devez être connecté pour devenir affilié.
-          </AlertDescription>
+          <AlertDescription>Vous devez être connecté pour devenir affilié.</AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/auth/login')} className="mt-4">
+        <Button onClick={() => navigate('/login')} className="mt-4">
           Se connecter
         </Button>
       </div>
@@ -95,9 +93,7 @@ const CourseAffiliate = () => {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Cours introuvable</AlertTitle>
-          <AlertDescription>
-            Le cours que vous recherchez n'existe pas.
-          </AlertDescription>
+          <AlertDescription>Le cours que vous recherchez n'existe pas.</AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/courses')} className="mt-4">
           Retour aux cours
@@ -165,7 +161,8 @@ const CourseAffiliate = () => {
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5" />
               <span>
-                Commission : {affiliateSettings.commission_type === 'percentage'
+                Commission :{' '}
+                {affiliateSettings.commission_type === 'percentage'
                   ? `${affiliateSettings.commission_rate}% (≈ ${affiliateCommission.toFixed(0)} XOF)`
                   : `${affiliateSettings.fixed_commission_amount} XOF`}
               </span>
@@ -249,9 +246,7 @@ const CourseAffiliate = () => {
                   <Plus className="w-5 h-5" />
                   Créer un nouveau lien
                 </CardTitle>
-                <CardDescription>
-                  Générez un lien unique pour promouvoir ce cours
-                </CardDescription>
+                <CardDescription>Générez un lien unique pour promouvoir ce cours</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -260,7 +255,7 @@ const CourseAffiliate = () => {
                     id="customName"
                     placeholder="Ex: Blog, YouTube, Instagram..."
                     value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
+                    onChange={e => setCustomName(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
                     Donnez un nom pour identifier la source de vos clics
@@ -293,10 +288,19 @@ const CourseAffiliate = () => {
                 <CardTitle className="text-lg">💡 Conseils de promotion</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <p>✅ <strong>Blog/Articles :</strong> Créez un lien "blog" pour vos articles</p>
-                <p>✅ <strong>Réseaux sociaux :</strong> Un lien par plateforme (YouTube, Instagram, Twitter)</p>
-                <p>✅ <strong>Email :</strong> Utilisez un lien dédié pour vos newsletters</p>
-                <p>✅ <strong>Analyse :</strong> Comparez les performances de chaque source</p>
+                <p>
+                  ✅ <strong>Blog/Articles :</strong> Créez un lien "blog" pour vos articles
+                </p>
+                <p>
+                  ✅ <strong>Réseaux sociaux :</strong> Un lien par plateforme (YouTube, Instagram,
+                  Twitter)
+                </p>
+                <p>
+                  ✅ <strong>Email :</strong> Utilisez un lien dédié pour vos newsletters
+                </p>
+                <p>
+                  ✅ <strong>Analyse :</strong> Comparez les performances de chaque source
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -306,9 +310,7 @@ const CourseAffiliate = () => {
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>Mes liens ({myLinks?.length || 0})</CardTitle>
-                <CardDescription>
-                  Gérez vos liens d'affiliation
-                </CardDescription>
+                <CardDescription>Gérez vos liens d'affiliation</CardDescription>
               </CardHeader>
               <CardContent>
                 {!myLinks || myLinks.length === 0 ? (
@@ -319,7 +321,7 @@ const CourseAffiliate = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {myLinks.map((link) => {
+                    {myLinks.map(link => {
                       const url = generateAffiliateUrl(product.slug, link.affiliate_code);
                       const isCopied = copiedLink === link.affiliate_code;
 
@@ -329,7 +331,8 @@ const CourseAffiliate = () => {
                             <div className="flex items-start justify-between">
                               <div>
                                 <p className="font-semibold text-sm">
-                                  {link.custom_name || `Lien ${link.affiliate_code.substring(0, 8)}`}
+                                  {link.custom_name ||
+                                    `Lien ${link.affiliate_code.substring(0, 8)}`}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
                                   Code : {link.affiliate_code}
@@ -394,10 +397,3 @@ const CourseAffiliate = () => {
 };
 
 export default CourseAffiliate;
-
-
-
-
-
-
-

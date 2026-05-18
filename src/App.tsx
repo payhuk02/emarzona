@@ -20,18 +20,46 @@ import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 import React, { Suspense, lazy, useEffect } from 'react';
 
 // Lazy-loaded non-critical components
-const PerformanceOptimizer = lazy(() => import('@/components/optimization/PerformanceOptimizer').then(m => ({ default: m.PerformanceOptimizer })));
-const CookieConsentBanner = lazy(() => import('@/components/legal/CookieConsentBanner').then(m => ({ default: m.CookieConsentBanner })));
-const CrispChat = lazy(() => import('@/components/chat/CrispChat').then(m => ({ default: m.CrispChat })));
-const BottomNavigation = lazy(() => import('@/components/mobile/BottomNavigation').then(m => ({ default: m.BottomNavigation })));
-const Require2FABanner = lazy(() => import('@/components/auth/Require2FABanner').then(m => ({ default: m.Require2FABanner })));
-const AffiliateLinkTracker = lazy(() => import('@/components/affiliate/AffiliateLinkTracker').then(m => ({ default: m.AffiliateLinkTracker })));
-const ReferralTracker = lazy(() => import('@/components/referral/ReferralTracker').then(m => ({ default: m.ReferralTracker })));
-const CurrencyRatesInitializer = lazy(() => import('@/components/currency/CurrencyRatesInitializer').then(m => ({ default: m.CurrencyRatesInitializer })));
-const PWAInstallPrompt = lazy(() => import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt })));
+const PerformanceOptimizer = lazy(() =>
+  import('@/components/optimization/PerformanceOptimizer').then(m => ({
+    default: m.PerformanceOptimizer,
+  }))
+);
+const CookieConsentBanner = lazy(() =>
+  import('@/components/legal/CookieConsentBanner').then(m => ({ default: m.CookieConsentBanner }))
+);
+const CrispChat = lazy(() =>
+  import('@/components/chat/CrispChat').then(m => ({ default: m.CrispChat }))
+);
+const BottomNavigation = lazy(() =>
+  import('@/components/mobile/BottomNavigation').then(m => ({ default: m.BottomNavigation }))
+);
+const Require2FABanner = lazy(() =>
+  import('@/components/auth/Require2FABanner').then(m => ({ default: m.Require2FABanner }))
+);
+const AffiliateLinkTracker = lazy(() =>
+  import('@/components/affiliate/AffiliateLinkTracker').then(m => ({
+    default: m.AffiliateLinkTracker,
+  }))
+);
+const ReferralTracker = lazy(() =>
+  import('@/components/referral/ReferralTracker').then(m => ({ default: m.ReferralTracker }))
+);
+const CurrencyRatesInitializer = lazy(() =>
+  import('@/components/currency/CurrencyRatesInitializer').then(m => ({
+    default: m.CurrencyRatesInitializer,
+  }))
+);
+const PWAInstallPrompt = lazy(() =>
+  import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt }))
+);
 
-const SkipLink = lazy(() => import('@/components/accessibility/SkipLink').then(m => ({ default: m.SkipLink })));
-const DynamicFavicon = lazy(() => import('@/components/seo/DynamicFavicon').then(m => ({ default: m.DynamicFavicon })));
+const SkipLink = lazy(() =>
+  import('@/components/accessibility/SkipLink').then(m => ({ default: m.SkipLink }))
+);
+const DynamicFavicon = lazy(() =>
+  import('@/components/seo/DynamicFavicon').then(m => ({ default: m.DynamicFavicon }))
+);
 const AutoSEO = lazy(() => import('@/components/seo/AutoSEO').then(m => ({ default: m.AutoSEO })));
 
 import { initSentry } from '@/lib/sentry';
@@ -70,7 +98,12 @@ const ErrorFallbackComponent = () => {
       <div className="max-w-md w-full p-8 bg-card rounded-lg shadow-lg text-center">
         <div className="mb-4">
           <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-8 h-8 text-destructive"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <circle cx="12" cy="12" r="10" strokeWidth="2" />
               <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round" />
               <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round" />
@@ -78,23 +111,43 @@ const ErrorFallbackComponent = () => {
           </div>
         </div>
         <h1 className="text-2xl font-bold text-foreground mb-2">Oops ! Une erreur est survenue</h1>
-        <p className="text-muted-foreground mb-6">Nous avons été notifiés du problème et travaillons pour le résoudre.</p>
+        <p className="text-muted-foreground mb-6">
+          Nous avons été notifiés du problème et travaillons pour le résoudre.
+        </p>
         {isDev && (
           <div className="mb-6 p-4 bg-accent/50 border border-border rounded-lg text-left">
             <p className="text-sm font-semibold text-foreground mb-2">Mode développement</p>
-            <p className="text-xs text-muted-foreground">Vérifiez la console du navigateur pour plus de détails.</p>
+            <p className="text-xs text-muted-foreground">
+              Vérifiez la console du navigateur pour plus de détails.
+            </p>
           </div>
         )}
         <div className="flex flex-col sm:flex-row gap-3">
-          <button onClick={() => window.location.reload()} className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors">Recharger la page</button>
-          <button onClick={() => { window.location.href = '/'; }} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">Retour à l'accueil</button>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+          >
+            Recharger la page
+          </button>
+          <button
+            onClick={() => {
+              window.location.href = '/';
+            }}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Retour à l'accueil
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-const AppInitializer = ({ queryClient }: { queryClient: ReturnType<typeof createOptimizedQueryClient> }) => {
+const AppInitializer = ({
+  queryClient,
+}: {
+  queryClient: ReturnType<typeof createOptimizedQueryClient>;
+}) => {
   useEffect(() => {
     const stopAlertMonitoring = startAlertMonitoring(60000);
     const stopCacheCleanup = setupCacheCleanup(queryClient, 600000);
@@ -116,7 +169,11 @@ const AppContent = () => {
   useDarkMode();
   const isMobile = useIsMobile();
   const location = useLocation();
-  const isBottomNavVisible = isMobile && location.pathname !== '/' && location.pathname !== '/auth';
+  const isAuthPage =
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/auth';
+  const isBottomNavVisible = isMobile && location.pathname !== '/' && !isAuthPage;
 
   useBehavioralAnalytics(undefined, {
     trackPageViews: false,
@@ -130,9 +187,15 @@ const AppContent = () => {
     flushInterval: 30000,
   });
 
-
   usePrefetch({
-    routes: ['/dashboard', '/dashboard/products', '/dashboard/orders', '/dashboard/analytics', '/marketplace', '/cart'],
+    routes: [
+      '/dashboard',
+      '/dashboard/products',
+      '/dashboard/orders',
+      '/dashboard/analytics',
+      '/marketplace',
+      '/cart',
+    ],
     delay: 100,
   });
   usePrefetchRoutes();
@@ -140,9 +203,13 @@ const AppContent = () => {
   useEffect(() => {
     initSentry();
     initWebVitals();
-    import('@/lib/html-sanitizer').then(({ configureDOMPurify }) => { configureDOMPurify(); });
+    import('@/lib/html-sanitizer').then(({ configureDOMPurify }) => {
+      configureDOMPurify();
+    });
     if (import.meta.env.PROD) {
-      import('@/lib/performance-monitor').then(({ getPerformanceMonitor }) => { getPerformanceMonitor(); });
+      import('@/lib/performance-monitor').then(({ getPerformanceMonitor }) => {
+        getPerformanceMonitor();
+      });
     }
   }, []);
 
@@ -166,7 +233,11 @@ const AppContent = () => {
           <ReferralTracker />
         </Suspense>
         <Suspense fallback={<LoadingFallback />}>
-          <div className={cn(isBottomNavVisible && 'pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0')}>
+          <div
+            className={cn(
+              isBottomNavVisible && 'pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0'
+            )}
+          >
             <Routes>
               {publicRoutes}
               {customerRoutes}

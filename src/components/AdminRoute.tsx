@@ -13,7 +13,7 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate('/login');
     }
   }, [user, authLoading, navigate]);
 
@@ -35,14 +35,12 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
             </div>
             <CardTitle className="text-2xl">Accès refusé</CardTitle>
             <CardDescription className="text-base">
-              Vous n'avez pas les permissions nécessaires pour accéder à cette page.
-              Seuls les administrateurs peuvent accéder au tableau de bord administrateur.
+              Vous n'avez pas les permissions nécessaires pour accéder à cette page. Seuls les
+              administrateurs peuvent accéder au tableau de bord administrateur.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button onClick={() => navigate('/dashboard')}>
-              Retour au tableau de bord
-            </Button>
+            <Button onClick={() => navigate('/dashboard')}>Retour au tableau de bord</Button>
           </CardContent>
         </Card>
       </div>
@@ -51,9 +49,3 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
-
-
-
-
-
-

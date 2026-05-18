@@ -65,11 +65,13 @@ const EditProduct = () => {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select(`
+        .select(
+          `
           id,
           store_id,
           stores!inner(user_id)
-        `)
+        `
+        )
         .eq('id', productId)
         .eq('stores.user_id', userId)
         .single();
@@ -97,7 +99,7 @@ const EditProduct = () => {
         if (!hasOwnership) {
           toast({
             title: 'Accès refusé',
-            description: 'Vous n\'avez pas les permissions pour modifier ce produit.',
+            description: "Vous n'avez pas les permissions pour modifier ce produit.",
             variant: 'destructive',
           });
           navigate('/dashboard/products');
@@ -114,7 +116,7 @@ const EditProduct = () => {
         if (error) throw error;
         setProduct(data);
         setLoadingPhase('ready');
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = _error instanceof Error ? _error.message : String(_error);
         toast({
           title: 'Erreur',
@@ -134,7 +136,7 @@ const EditProduct = () => {
 
   if (authLoading || loading || storeLoading) {
     const getLoadingMessage = () => {
-      if (authLoading) return 'Vérification de l\'authentification...';
+      if (authLoading) return "Vérification de l'authentification...";
       if (storeLoading) return 'Chargement de la boutique...';
       if (loadingPhase === 'security') return 'Vérification des permissions...';
       if (loadingPhase === 'data') return 'Chargement des données du produit...';
@@ -216,9 +218,7 @@ const EditProduct = () => {
           <p className="text-muted-foreground mb-4">
             Vous devez être connecté pour modifier un produit.
           </p>
-          <Button onClick={() => navigate('/auth')}>
-            Se connecter
-          </Button>
+          <Button onClick={() => navigate('/login')}>Se connecter</Button>
         </div>
       </div>
     );
@@ -268,9 +268,3 @@ const EditProduct = () => {
 };
 
 export default EditProduct;
-
-
-
-
-
-

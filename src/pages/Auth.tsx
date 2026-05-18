@@ -14,7 +14,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AlertCircle, Eye, EyeOff, Mail, CheckCircle2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  AUTH_LOGIN_PATH,
+  AUTH_REGISTER_PATH,
+  getAuthPathForTab,
+  getAuthTabFromPathname,
+  type AuthTab,
+} from '@/lib/auth-routes';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,6 +58,8 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const authTab: AuthTab = getAuthTabFromPathname(location.pathname);
   const { toast } = useToast();
   const { user } = useAuth();
   const loginFormRef = useRef<HTMLFormElement>(null);
@@ -142,7 +151,7 @@ const Auth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/auth?type=reset-password`;
+      const redirectUrl = `${window.location.origin}${AUTH_LOGIN_PATH}?type=reset-password`;
 
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: redirectUrl,
@@ -402,8 +411,8 @@ const Auth = () => {
         title={`${t('nav.login')} / ${t('nav.signup')} - Emarzona`}
         description={t('auth.welcomeSubtitle')}
         keywords="emarzona, connexion, inscription, authentification, compte utilisateur"
-        url={`${baseUrl}/auth`}
-        canonical={`${baseUrl}/auth`}
+        url={`${baseUrl}${authTab === 'signup' ? AUTH_REGISTER_PATH : AUTH_LOGIN_PATH}`}
+        canonical={`${baseUrl}${authTab === 'signup' ? AUTH_REGISTER_PATH : AUTH_LOGIN_PATH}`}
         type="website"
         locale="fr_FR"
         noindex={true}
@@ -460,7 +469,15 @@ const Auth = () => {
               </Alert>
             )}
 
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs
+              value={authTab}
+              onValueChange={value => {
+                const tab = value === 'signup' ? 'signup' : 'login';
+                navigate(getAuthPathForTab(tab), { replace: true });
+                setError('');
+              }}
+              className="w-full"
+            >
               <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
                 <TabsTrigger value="login" className="min-h-[44px] shrink-0">
                   {getValue('auth.login.title') || t('nav.login')}

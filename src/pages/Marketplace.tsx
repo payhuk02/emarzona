@@ -905,7 +905,11 @@ const Marketplace = () => {
     return displayProducts.slice(0, 20).map(product => ({
       id: product.id,
       name: product.name,
-      url: generateProductUrl(product.stores?.slug || 'default', product.slug, product.stores?.subdomain),
+      url: generateProductUrl(
+        product.stores?.slug || 'default',
+        product.slug,
+        product.stores?.subdomain
+      ),
       image: product.image_url || undefined,
       description: product.short_description || product.description || undefined,
       price: product.promotional_price || product.price,
@@ -950,7 +954,7 @@ const Marketplace = () => {
         />
       )}
 
-      <div 
+      <div
         className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-x-hidden"
         role="main"
         id="main-content"
@@ -1026,7 +1030,7 @@ const Marketplace = () => {
         />
 
         {/* Section de personnalisation - Quiz de style */}
-        <section 
+        <section
           className="py-6 sm:py-8 px-3 sm:px-4 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-indigo-900/20 backdrop-blur-sm border-y border-white/5"
           role="region"
           aria-labelledby="style-quiz-title"
@@ -1035,16 +1039,13 @@ const Marketplace = () => {
           <div className="container mx-auto max-w-6xl">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
-                <h2 
+                <h2
                   id="style-quiz-title"
                   className="text-lg sm:text-xl font-semibold text-white mb-2"
                 >
                   🎨 Découvrez Votre Style Unique
                 </h2>
-                <p 
-                  id="style-quiz-description"
-                  className="text-sm text-slate-300 max-w-md"
-                >
+                <p id="style-quiz-description" className="text-sm text-slate-300 max-w-md">
                   Répondez à quelques questions et recevez des recommandations personnalisées
                   adaptées à vos goûts et préférences.
                 </p>
@@ -1332,7 +1333,7 @@ const Marketplace = () => {
               {getValue('marketplace.cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
-              <Link to="/auth" className="w-full sm:w-auto">
+              <Link to="/register" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="bg-white text-blue-600 font-semibold h-11 sm:h-14 px-6 sm:px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105 w-full sm:w-auto text-sm sm:text-base"

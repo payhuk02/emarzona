@@ -130,6 +130,16 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
   },
 
   // === Pages qui doivent être en noindex ===
+  '/login': {
+    title: 'Connexion | Emarzona',
+    description: 'Connectez-vous à votre compte Emarzona.',
+    noindex: true,
+  },
+  '/register': {
+    title: 'Inscription | Emarzona',
+    description: 'Créez votre compte Emarzona gratuitement.',
+    noindex: true,
+  },
   '/auth': {
     title: 'Connexion | Emarzona',
     description: 'Connectez-vous à votre compte Emarzona.',

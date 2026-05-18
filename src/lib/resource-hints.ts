@@ -8,7 +8,11 @@ import { logger } from './logger';
 /**
  * Ajouter un resource hint
  */
-function addResourceHint(rel: string, href: string, attributes?: Record<string, string>): HTMLLinkElement {
+function addResourceHint(
+  rel: string,
+  href: string,
+  attributes?: Record<string, string>
+): HTMLLinkElement {
   // Vérifier si déjà présent
   const existing = document.querySelector(`link[rel="${rel}"][href="${href}"]`);
   if (existing) {
@@ -33,7 +37,7 @@ function addResourceHint(rel: string, href: string, attributes?: Record<string, 
  * Preconnect : Établir une connexion précoce à un domaine
  */
 export function preconnect(href: string, crossorigin?: boolean): HTMLLinkElement {
-  const  attributes: Record<string, string> = {};
+  const attributes: Record<string, string> = {};
   if (crossorigin) {
     attributes.crossorigin = 'anonymous';
   }
@@ -61,10 +65,7 @@ export function preload(
 /**
  * Prefetch : Charger une ressource pour navigation future
  */
-export function prefetch(
-  href: string,
-  as?: string
-): HTMLLinkElement {
+export function prefetch(href: string, as?: string): HTMLLinkElement {
   const attributes = as ? { as } : undefined;
   return addResourceHint('prefetch', href, attributes);
 }
@@ -83,7 +84,7 @@ export function setupResourceHints(): void {
   // Preconnect vers les domaines externes critiques
   preconnect('https://fonts.googleapis.com');
   preconnect('https://fonts.gstatic.com', true);
-  
+
   // Supabase
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   if (supabaseUrl) {
@@ -113,7 +114,7 @@ export function setupResourceHints(): void {
  * Ajouter des hints pour la navigation future
  */
 export function addNavigationHints(routes: string[]): void {
-  routes.forEach((route) => {
+  routes.forEach(route => {
     prefetch(route, 'document');
   });
 }
@@ -122,7 +123,7 @@ export function addNavigationHints(routes: string[]): void {
  * Preload des images critiques
  */
 export function preloadCriticalImages(urls: string[]): void {
-  urls.forEach((url) => {
+  urls.forEach(url => {
     preload(url, 'image', { fetchpriority: 'high' });
   });
 }
@@ -131,7 +132,7 @@ export function preloadCriticalImages(urls: string[]): void {
  * Preload des scripts critiques
  */
 export function preloadCriticalScripts(urls: string[]): void {
-  urls.forEach((url) => {
+  urls.forEach(url => {
     if (url.endsWith('.js') && url.includes('import')) {
       modulePreload(url);
     } else {
@@ -146,7 +147,7 @@ export function preloadCriticalScripts(urls: string[]): void {
 export function setupPageHints(page: string): void {
   switch (page) {
     case 'home':
-      addNavigationHints(['/marketplace', '/auth', '/dashboard']);
+      addNavigationHints(['/marketplace', '/login', '/register', '/dashboard']);
       break;
     case 'marketplace':
       addNavigationHints(['/dashboard/products/new']);
@@ -155,11 +156,7 @@ export function setupPageHints(page: string): void {
       addNavigationHints(['/checkout', '/cart']);
       break;
     case 'dashboard':
-      addNavigationHints([
-        '/dashboard/products',
-        '/dashboard/orders',
-        '/dashboard/analytics',
-      ]);
+      addNavigationHints(['/dashboard/products', '/dashboard/orders', '/dashboard/analytics']);
       break;
     default:
       break;
@@ -171,17 +168,10 @@ export function setupPageHints(page: string): void {
  */
 export function cleanupResourceHints(): void {
   const hints = document.querySelectorAll('link[rel="prefetch"], link[rel="preload"]');
-  hints.forEach((hint) => {
+  hints.forEach(hint => {
     if (hint.parentNode) {
       hint.parentNode.removeChild(hint);
     }
   });
   logger.info('[Resource Hints] Cleaned up unused hints');
 }
-
-
-
-
-
-
-

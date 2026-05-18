@@ -82,7 +82,7 @@ const CourseDetail = () => {
   const [currentLesson, setCurrentLesson] = useState<CourseLesson | null>(null);
   const [hasTrackedView, setHasTrackedView] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
-  
+
   // Hook pour créer commande cours
   const createCourseOrder = useCreateCourseOrder();
 
@@ -185,7 +185,7 @@ const CourseDetail = () => {
           description: 'Veuillez vous connecter pour vous inscrire au cours.',
           variant: 'destructive',
         });
-        navigate('/auth');
+        navigate('/login');
         return;
       }
 
@@ -230,8 +230,9 @@ const CourseDetail = () => {
           throw new Error('URL de paiement non disponible');
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Erreur lors de l\'inscription';
-        logger.error('Erreur lors de l\'inscription au cours', { error, courseId: course.id });
+        const errorMessage =
+          error instanceof Error ? error.message : "Erreur lors de l'inscription";
+        logger.error("Erreur lors de l'inscription au cours", { error, courseId: course.id });
         toast({
           title: 'Erreur',
           description: errorMessage,
@@ -902,7 +903,7 @@ const CourseDetail = () => {
                     ) : (
                       <Button
                         className="w-full bg-green-600 hover:bg-green-700"
-                        onClick={() => navigate('/auth/login')}
+                        onClick={() => navigate('/login')}
                       >
                         <TrendingUp className="w-4 h-4 mr-2" />
                         Connectez-vous pour devenir affilié
@@ -949,9 +950,3 @@ const CourseDetail = () => {
 };
 
 export default CourseDetail;
-
-
-
-
-
-

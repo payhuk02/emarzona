@@ -88,7 +88,7 @@ const MarketplaceFooter = () => {
               </li>
               <li>
                 <Link
-                  to="/auth"
+                  to="/register"
                   className="text-muted-foreground hover:text-primary transition-colors touch-manipulation block py-1"
                 >
                   Créer ma boutique

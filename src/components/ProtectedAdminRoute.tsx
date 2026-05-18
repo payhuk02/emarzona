@@ -12,7 +12,7 @@ export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth', { replace: true });
+      navigate('/login', { replace: true });
       return;
     }
 

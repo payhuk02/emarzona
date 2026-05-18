@@ -14,7 +14,7 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Si pas d'utilisateur après le chargement, rediriger vers l'authentification
     if (!loading && !user) {
-      navigate('/auth', { replace: true });
+      navigate('/login', { replace: true });
     }
   }, [user, loading, navigate]);
 
@@ -38,9 +38,3 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   // Afficher le contenu protégé
   return <>{children}</>;
 };
-
-
-
-
-
-

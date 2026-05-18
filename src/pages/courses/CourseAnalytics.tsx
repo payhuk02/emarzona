@@ -29,11 +29,9 @@ const CourseAnalytics = () => {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>{t('courses.analytics.accessDenied')}</AlertTitle>
-          <AlertDescription>
-            {t('courses.analytics.mustBeLoggedIn')}
-          </AlertDescription>
+          <AlertDescription>{t('courses.analytics.mustBeLoggedIn')}</AlertDescription>
         </Alert>
-        <Button onClick={() => navigate('/auth/login')} className="mt-4">
+        <Button onClick={() => navigate('/login')} className="mt-4">
           {t('auth.login.button')}
         </Button>
       </div>
@@ -80,9 +78,7 @@ const CourseAnalytics = () => {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>{t('courses.analytics.accessDenied')}</AlertTitle>
-          <AlertDescription>
-            {t('courses.analytics.noPermission')}
-          </AlertDescription>
+          <AlertDescription>{t('courses.analytics.noPermission')}</AlertDescription>
         </Alert>
         <Button onClick={() => navigate('/dashboard/my-courses')} className="mt-4">
           {t('courses.analytics.backToMyCourses')}
@@ -106,7 +102,9 @@ const CourseAnalytics = () => {
             <span className="sm:hidden">Retour</span>
           </Button>
 
-          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-1 sm:mb-2">{t('courses.analytics.title')}</h1>
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-1 sm:mb-2">
+            {t('courses.analytics.title')}
+          </h1>
           <p className="text-xs sm:text-sm md:text-base lg:text-lg text-blue-100">{product.name}</p>
         </div>
       </div>
@@ -118,15 +116,13 @@ const CourseAnalytics = () => {
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="progression">Progression</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="overview" className="space-y-6">
             <CourseAnalyticsDashboard productId={product.id} />
           </TabsContent>
-          
+
           <TabsContent value="progression" className="space-y-6">
-            {course?.id && (
-              <ProgressionAnalyticsDashboard courseId={course.id} />
-            )}
+            {course?.id && <ProgressionAnalyticsDashboard courseId={course.id} />}
           </TabsContent>
         </Tabs>
       </div>
@@ -135,10 +131,3 @@ const CourseAnalytics = () => {
 };
 
 export default CourseAnalytics;
-
-
-
-
-
-
-

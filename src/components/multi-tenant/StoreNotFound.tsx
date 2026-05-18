@@ -68,7 +68,7 @@ export function StoreNotFound({ subdomain, error }: StoreNotFoundProps) {
           <div className="pt-4 border-t text-center">
             <p className="text-xs text-muted-foreground">
               Vous êtes vendeur ?{' '}
-              <Link to="/auth" className="text-primary hover:underline">
+              <Link to="/login" className="text-primary hover:underline">
                 Connectez-vous
               </Link>{' '}
               pour créer votre boutique.

@@ -29,10 +29,11 @@ const LoyaltyProgram = () => {
               <Gift className="h-16 w-16 mx-auto mb-4 text-primary" />
               <h1 className="text-2xl font-bold mb-4">Programme de Fidélité</h1>
               <p className="text-muted-foreground mb-6">
-                Connectez-vous pour accéder à votre tableau de bord fidélité et commencer à gagner des points !
+                Connectez-vous pour accéder à votre tableau de bord fidélité et commencer à gagner
+                des points !
               </p>
               <Button asChild>
-                <Link to="/auth">Se connecter</Link>
+                <Link to="/login">Se connecter</Link>
               </Button>
             </CardContent>
           </Card>

@@ -413,7 +413,7 @@ export default function CustomerMyWishlist() {
             description: 'Veuillez vous connecter pour effectuer un achat',
             variant: 'destructive',
           });
-          navigate('/auth');
+          navigate('/login');
           return;
         }
 

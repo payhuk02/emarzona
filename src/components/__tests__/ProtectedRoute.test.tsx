@@ -25,7 +25,7 @@ describe('ProtectedRoute', () => {
     vi.clearAllMocks();
   });
 
-  it('devrait rendre les enfants si l\'utilisateur est authentifié', () => {
+  it("devrait rendre les enfants si l'utilisateur est authentifié", () => {
     render(
       <BrowserRouter>
         <ProtectedRoute>
@@ -37,7 +37,7 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('Contenu protégé')).toBeInTheDocument();
   });
 
-  it('devrait rediriger vers /auth si l\'utilisateur n\'est pas authentifié', () => {
+  it("devrait rediriger vers /login si l'utilisateur n'est pas authentifié", () => {
     // Mock user as null
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
@@ -53,7 +53,7 @@ describe('ProtectedRoute', () => {
     );
 
     // Vérifier que la redirection a lieu
-    expect(window.location.pathname).toBe('/auth');
+    expect(window.location.pathname).toBe('/login');
   });
 
   it('devrait afficher un loader pendant le chargement', () => {
@@ -75,11 +75,3 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('Contenu protégé')).not.toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
