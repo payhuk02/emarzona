@@ -37,7 +37,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
@@ -49,6 +48,7 @@ import type { Order } from '@/hooks/useOrders';
 
 // Interface étendue pour Order avec relations
 interface OrderWithRelations extends Order {
+  customers?: { id: string; name: string | null; email: string | null } | null;
   order_items?: Array<{
     id: string;
     product_name: string;
@@ -61,7 +61,6 @@ interface OrderWithRelations extends Order {
 export default function PayBalanceList() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { store } = useStore();
   const { toast } = useToast();
 
   const [searchInput, setSearchInput] = useState('');
@@ -82,67 +81,99 @@ export default function PayBalanceList() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['pay-balance-orders', user?.id, store?.id],
+    queryKey: ['pay-balance-orders', user?.id, user?.email],
     queryFn: async () => {
-      let query = supabase
+      if (!user?.id) return [];
+
+      // Portail acheteur : pas d'embed PostgREST (évite 403 si RLS embed incomplet)
+      let ordersQuery = supabase
         .from('orders')
-        .select(
-          `
-          *,
-          customers (
-            id,
-            name,
-            email
-          ),
-          order_items (
-            id,
-            product_name,
-            quantity,
-            unit_price,
-            total_price
-          )
-        `
-        )
+        .select('*')
         .order('created_at', { ascending: false });
 
-      // Filter by store if store exists
-      if (store?.id) {
-        query = query.eq('store_id', store.id);
-      } else if (user?.id) {
-        // Pas de colonne buyer_id côté API : lier via customers.email ou legacy customer_id = auth uid
-        if (user.email) {
-          const { data: customerRows, error: customersError } = await supabase
-            .from('customers')
-            .select('id')
-            .eq('email', user.email);
+      if (user.email) {
+        const { data: customerRows, error: customersError } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('email', user.email);
 
-          if (customersError) throw customersError;
+        if (customersError) throw customersError;
 
-          const customerIds = (customerRows ?? []).map(c => c.id).filter(Boolean);
-          if (customerIds.length > 0) {
-            query = query.in('customer_id', customerIds);
-          } else {
-            query = query.eq('customer_id', user.id);
-          }
+        const customerIds = (customerRows ?? []).map(c => c.id).filter(Boolean);
+        if (customerIds.length > 0) {
+          ordersQuery = ordersQuery.in('customer_id', customerIds);
         } else {
-          query = query.eq('customer_id', user.id);
+          ordersQuery = ordersQuery.eq('customer_id', user.id);
         }
+      } else {
+        ordersQuery = ordersQuery.eq('customer_id', user.id);
       }
 
-      const { data, error } = await query;
+      const { data: ordersData, error: ordersError } = await ordersQuery;
+      if (ordersError) throw ordersError;
 
-      if (error) throw error;
+      const baseOrders = (ordersData ?? []) as OrderWithRelations[];
+      if (baseOrders.length === 0) return [];
 
-      // Filtrer les commandes avec solde restant
-      return (
-        (data as OrderWithRelations[] | null)?.filter(order => {
-          const percentagePaid = order.percentage_paid || 0;
-          const remainingAmount = order.remaining_amount || 0;
-          return remainingAmount > 0 || percentagePaid < 100;
-        }) || []
+      const orderIds = baseOrders.map(o => o.id);
+      const customerIds = [
+        ...new Set(baseOrders.map(o => o.customer_id).filter((id): id is string => Boolean(id))),
+      ];
+
+      const [
+        { data: itemsData, error: itemsError },
+        { data: customersData, error: customersLoadError },
+      ] = await Promise.all([
+        supabase
+          .from('order_items')
+          .select('id, order_id, product_name, quantity, unit_price, total_price')
+          .in('order_id', orderIds),
+        customerIds.length > 0
+          ? supabase.from('customers').select('id, name, email').in('id', customerIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      if (itemsError) throw itemsError;
+      if (customersLoadError) throw customersLoadError;
+
+      const itemsByOrder = new Map<string, OrderWithRelations['order_items']>();
+      for (const item of itemsData ?? []) {
+        const row = item as {
+          id: string;
+          order_id: string;
+          product_name: string;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+        };
+        const list = itemsByOrder.get(row.order_id) ?? [];
+        list.push({
+          id: row.id,
+          product_name: row.product_name,
+          quantity: row.quantity,
+          unit_price: row.unit_price,
+          total_price: row.total_price,
+        });
+        itemsByOrder.set(row.order_id, list);
+      }
+
+      const customersById = new Map(
+        (customersData ?? []).map(c => [c.id, { id: c.id, name: c.name, email: c.email }])
       );
+
+      const merged = baseOrders.map(order => ({
+        ...order,
+        order_items: itemsByOrder.get(order.id) ?? [],
+        customers: order.customer_id ? (customersById.get(order.customer_id) ?? null) : null,
+      }));
+
+      return merged.filter(order => {
+        const percentagePaid = order.percentage_paid || 0;
+        const remainingAmount = order.remaining_amount || 0;
+        return remainingAmount > 0 || percentagePaid < 100;
+      });
     },
-    enabled: !!user?.id || !!store?.id,
+    enabled: !!user?.id,
   });
 
   // Calculer le solde restant

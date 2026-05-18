@@ -10,12 +10,8 @@ CREATE POLICY "Customers can read own customer row by email"
   TO authenticated
   USING (
     email IS NOT NULL
-    AND EXISTS (
-      SELECT 1
-      FROM auth.users au
-      WHERE au.id = auth.uid()
-        AND lower(trim(au.email)) = lower(trim(customers.email))
-    )
+    AND lower(btrim(email::text)) = lower(btrim(coalesce(auth.jwt() ->> 'email', '')))
+    AND coalesce(auth.jwt() ->> 'email', '') <> ''
   );
 
 COMMENT ON POLICY "Customers can read own customer row by email" ON public.customers IS
