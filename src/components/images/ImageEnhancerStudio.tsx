@@ -12,15 +12,7 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
-import {
-  Sparkles,
-  Loader2,
-  Upload,
-  RotateCcw,
-  Check,
-  ImagePlus,
-  Wand2,
-} from 'lucide-react';
+import { Sparkles, Loader2, Upload, RotateCcw, Check, ImagePlus, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -31,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useImageOptimizer } from '@/hooks/useImageOptimizer';
 import { compressImage, blobToFile } from '@/lib/images/compress';
+import { imageUrlToBlob } from '@/lib/images/imageUrlToBlob';
 import { cn } from '@/lib/utils';
 
 interface ImageEnhancerStudioProps {
@@ -48,14 +41,14 @@ interface ImageEnhancerStudioProps {
 }
 
 export const STUDIO_PRESET_KEYS = ['premium', 'white-bg', 'studio-pro', 'vibrant'] as const;
-export type StudioPresetKey = typeof STUDIO_PRESET_KEYS[number];
+export type StudioPresetKey = (typeof STUDIO_PRESET_KEYS)[number];
 
 export const STUDIO_PRESETS: { label: string; instruction: string; emoji: string }[] = [
   {
     label: 'Optimisation premium',
     emoji: '✨',
     instruction:
-      "Improve this image for a premium e-commerce listing: enhance lighting and contrast, sharpen details, balance colors, remove visual noise. Keep the subject 100% identical.",
+      'Improve this image for a premium e-commerce listing: enhance lighting and contrast, sharpen details, balance colors, remove visual noise. Keep the subject 100% identical.',
   },
   {
     label: 'Fond blanc épuré',
@@ -116,28 +109,31 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'Format invalide',
-        description: 'Veuillez sélectionner une image (JPG, PNG, WebP).',
-        variant: 'destructive',
-      });
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: 'Image trop lourde',
-        description: 'Taille maximum: 10 MB.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setOriginalFile(file);
-    setOriginalUrl(URL.createObjectURL(file));
-    setEnhancedUrl(null);
-    setPhase('loaded');
-  }, [toast]);
+  const handleFile = useCallback(
+    (file: File) => {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: 'Format invalide',
+          description: 'Veuillez sélectionner une image (JPG, PNG, WebP).',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: 'Image trop lourde',
+          description: 'Taille maximum: 10 MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setOriginalFile(file);
+      setOriginalUrl(URL.createObjectURL(file));
+      setEnhancedUrl(null);
+      setPhase('loaded');
+    },
+    [toast]
+  );
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -167,20 +163,22 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
       });
       if (error) throw error;
       const newUrl = (data as { imageUrl?: string })?.imageUrl;
-      if (!newUrl) throw new Error('Aucune image renvoyée par l\'IA');
+      if (!newUrl) throw new Error("Aucune image renvoyée par l'IA");
 
       setEnhancedUrl(newUrl);
       setPhase('preview');
       const currentPreset = STUDIO_PRESETS[activePreset];
-      setHistory((h) => [
-        {
-          label: currentPreset?.label ?? 'Custom',
-          emoji: currentPreset?.emoji ?? '🪄',
-          instruction,
-          at: Date.now(),
-        },
-        ...h,
-      ].slice(0, 8));
+      setHistory(h =>
+        [
+          {
+            label: currentPreset?.label ?? 'Custom',
+            emoji: currentPreset?.emoji ?? '🪄',
+            instruction,
+            at: Date.now(),
+          },
+          ...h,
+        ].slice(0, 8)
+      );
       toast({
         title: '✨ Aperçu prêt',
         description: 'Comparez avant / après puis enregistrez si vous êtes satisfait.',
@@ -190,7 +188,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
       const msg = err instanceof Error ? err.message : 'Erreur inconnue';
       setLastError(msg);
       toast({
-        title: 'Échec de l\'amélioration IA',
+        title: "Échec de l'amélioration IA",
         description: msg,
         variant: 'destructive',
       });
@@ -202,9 +200,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
     setPhase('saving');
     setLastError(null);
     try {
-      // L'IA renvoie une data URL base64 → convertir en File et compresser
-      const resp = await fetch(enhancedUrl);
-      const blob = await resp.blob();
+      const blob = await imageUrlToBlob(enhancedUrl);
       const tempFile = new File([blob], `enhanced-${Date.now()}.png`, {
         type: blob.type || 'image/png',
       });
@@ -231,7 +227,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
       const msg = err instanceof Error ? err.message : 'Erreur inconnue';
       setLastError(msg);
       toast({
-        title: 'Erreur d\'enregistrement',
+        title: "Erreur d'enregistrement",
         description: msg,
         variant: 'destructive',
       });
@@ -250,7 +246,9 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
             <div>
               <h3 className="font-semibold text-base flex items-center gap-2">
                 Studio IA
-                <Badge variant="secondary" className="text-[10px]">PREMIUM</Badge>
+                <Badge variant="secondary" className="text-[10px]">
+                  PREMIUM
+                </Badge>
               </h3>
               <p className="text-xs text-muted-foreground">
                 Améliorez vos images en un clic — comparez avant d'enregistrer.
@@ -258,7 +256,12 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
             </div>
           </div>
           {phase !== 'idle' && (
-            <Button variant="ghost" size="sm" onClick={reset} disabled={phase === 'enhancing' || phase === 'saving'}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={reset}
+              disabled={phase === 'enhancing' || phase === 'saving'}
+            >
               <RotateCcw className="h-4 w-4 mr-1" />
               Réinitialiser
             </Button>
@@ -288,9 +291,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
                 <p className="text-sm font-medium text-destructive">
                   Le Studio IA a rencontré un problème
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 break-words">
-                  {lastError}
-                </p>
+                <p className="text-xs text-muted-foreground mt-1 break-words">{lastError}</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -319,7 +320,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
         {/* 1. SÉLECTION */}
         {phase === 'idle' && (
           <div
-            onDragOver={(e) => {
+            onDragOver={e => {
               e.preventDefault();
               setDragOver(true);
             }}
@@ -330,7 +331,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
               'border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors',
               dragOver
                 ? 'border-primary bg-primary/5'
-                : 'border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30',
+                : 'border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30'
             )}
           >
             <input
@@ -338,7 +339,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
               type="file"
               accept="image/*"
               hidden
-              onChange={(e) => {
+              onChange={e => {
                 const f = e.target.files?.[0];
                 if (f) handleFile(f);
               }}
@@ -375,7 +376,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
                       'text-left text-sm rounded-lg border px-3 py-2 transition-colors',
                       activePreset === i
                         ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                        : 'border-border hover:bg-muted/50',
+                        : 'border-border hover:bg-muted/50'
                     )}
                   >
                     <span className="mr-2">{p.emoji}</span>
@@ -399,7 +400,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
                       disabled={phase === 'enhancing'}
                       onClick={() => {
                         setInstruction(h.instruction);
-                        const idx = STUDIO_PRESETS.findIndex((p) => p.label === h.label);
+                        const idx = STUDIO_PRESETS.findIndex(p => p.label === h.label);
                         if (idx >= 0) setActivePreset(idx);
                       }}
                       className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 hover:bg-muted px-2.5 py-1 text-xs transition-colors disabled:opacity-50"
@@ -421,7 +422,7 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
                 id="custom-instruction"
                 rows={3}
                 value={instruction}
-                onChange={(e) => setInstruction(e.target.value)}
+                onChange={e => setInstruction(e.target.value)}
                 placeholder="Ex: replace background with white, enhance lighting, sharpen…"
                 className="resize-none text-sm"
               />
@@ -457,7 +458,9 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
                   <Label className="text-xs uppercase tracking-wide text-muted-foreground">
                     Avant
                   </Label>
-                  <Badge variant="outline" className="text-[10px]">Original</Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    Original
+                  </Badge>
                 </div>
                 <div className="rounded-lg overflow-hidden border bg-muted aspect-square flex items-center justify-center">
                   <img
