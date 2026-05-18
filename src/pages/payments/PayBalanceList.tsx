@@ -85,7 +85,28 @@ export default function PayBalanceList() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Portail acheteur : pas d'embed PostgREST (évite 403 si RLS embed incomplet)
+      // 1) RPC SECURITY DEFINER (évite 403 RLS sur GET /rest/v1/orders)
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        'list_my_pay_balance_orders' as never
+      );
+
+      if (!rpcError && rpcData != null) {
+        const rows = Array.isArray(rpcData)
+          ? rpcData
+          : typeof rpcData === 'string'
+            ? (JSON.parse(rpcData) as unknown[])
+            : (rpcData as unknown[]);
+        return rows as OrderWithRelations[];
+      }
+
+      if (rpcError) {
+        logger.warn('list_my_pay_balance_orders RPC failed, fallback REST', {
+          error: rpcError.message,
+          code: rpcError.code,
+        });
+      }
+
+      // 2) Repli REST (si la RPC n’est pas encore déployée)
       let ordersQuery = supabase
         .from('orders')
         .select('*')
@@ -161,17 +182,17 @@ export default function PayBalanceList() {
         (customersData ?? []).map(c => [c.id, { id: c.id, name: c.name, email: c.email }])
       );
 
-      const merged = baseOrders.map(order => ({
-        ...order,
-        order_items: itemsByOrder.get(order.id) ?? [],
-        customers: order.customer_id ? (customersById.get(order.customer_id) ?? null) : null,
-      }));
-
-      return merged.filter(order => {
-        const percentagePaid = order.percentage_paid || 0;
-        const remainingAmount = order.remaining_amount || 0;
-        return remainingAmount > 0 || percentagePaid < 100;
-      });
+      return baseOrders
+        .map(order => ({
+          ...order,
+          order_items: itemsByOrder.get(order.id) ?? [],
+          customers: order.customer_id ? (customersById.get(order.customer_id) ?? null) : null,
+        }))
+        .filter(order => {
+          const percentagePaid = order.percentage_paid || 0;
+          const remainingAmount = order.remaining_amount || 0;
+          return remainingAmount > 0 || percentagePaid < 100;
+        });
     },
     enabled: !!user?.id,
   });
