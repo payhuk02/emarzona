@@ -5,12 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import type { Database } from '@/integrations/supabase/types';
 import { useQuery } from '@tanstack/react-query';
-
-type Product = Database['public']['Tables']['products']['Row'];
-type User = Database['public']['Tables']['customers']['Row'];
-type Order = Database['public']['Tables']['orders']['Row'];
 
 export interface RecommendationResult {
   productId: string;
@@ -62,7 +57,6 @@ export class RecommendationEngine {
 
       // Récupérer l'historique de l'utilisateur
       const userHistory = await this.getUserPurchaseHistory(userId);
-      const userInteractions = await this.getUserInteractions(userId);
 
       const recommendations: RecommendationResult[] = [];
 
@@ -88,7 +82,7 @@ export class RecommendationEngine {
       // Exclure les produits récemment vus si demandé
       let filteredRecommendations = uniqueRecommendations;
       if (excludeRecentlyViewed) {
-        const recentlyViewed = await this.getRecentlyViewedProducts(userId);
+        const recentlyViewed = await this.getRecentlyViewedProducts();
         filteredRecommendations = uniqueRecommendations.filter(
           rec => !recentlyViewed.includes(rec.productId)
         );
@@ -140,32 +134,24 @@ export class RecommendationEngine {
       }
       const similarUserIds = similarUsers.map((u: SimilarUser) => u.user_id);
 
-      const { data: similarPurchases } = await supabase
+      const { data: similarPurchases, error: purchasesError } = await supabase
         .from('orders')
-        .select('items')
+        .select('order_items(product_id)')
         .in('customer_id', similarUserIds)
         .not('customer_id', 'eq', userId)
-        .limit(1000);
+        .limit(200);
 
-      if (!similarPurchases) return [];
+      if (purchasesError || !similarPurchases) return [];
 
-      // Compter la fréquence des produits
       const productFrequency: Record<string, number> = {};
-      interface OrderItem {
-        product_id?: string;
-      }
-      interface Order {
-        items?: string;
-      }
-      similarPurchases.forEach((order: Order) => {
-        if (order.items) {
-          JSON.parse(order.items).forEach((item: OrderItem) => {
-            if (item.product_id) {
-              productFrequency[item.product_id] = (productFrequency[item.product_id] || 0) + 1;
-            }
-          });
+      for (const order of similarPurchases) {
+        const items = (order as { order_items?: { product_id?: string }[] }).order_items ?? [];
+        for (const item of items) {
+          if (item.product_id) {
+            productFrequency[item.product_id] = (productFrequency[item.product_id] || 0) + 1;
+          }
         }
-      });
+      }
 
       // Exclure les produits déjà achetés par l'utilisateur
       const userPurchasedSet = new Set(userHistory);
@@ -369,11 +355,12 @@ export class RecommendationEngine {
   private async getPersonalizedTrending(userId: string): Promise<RecommendationResult[]> {
     try {
       // Récupérer les catégories préférées de l'utilisateur
-      const { data: userCategories } = await supabase.rpc('get_user_preferred_categories', {
-        p_user_id: userId,
-      });
+      const { data: userCategories, error: categoriesError } = await supabase.rpc(
+        'get_user_preferred_categories',
+        { p_user_id: userId }
+      );
 
-      if (!userCategories || userCategories.length === 0) {
+      if (categoriesError?.code === 'PGRST202' || !userCategories || userCategories.length === 0) {
         return this.getTrendingRecommendations(5);
       }
 
@@ -409,10 +396,20 @@ export class RecommendationEngine {
    */
   private async getTrendingRecommendations(limit: number): Promise<RecommendationResult[]> {
     try {
-      const { data: trendingProducts } = await supabase.rpc('get_trending_products', {
-        p_limit: limit,
-        p_days: 7,
-      });
+      let trendingProducts: unknown = null;
+      const { data: byBehavior, error: behaviorErr } = await supabase.rpc(
+        'get_trending_products_by_behavior',
+        { p_limit: limit, p_days: 7, p_product_type: null }
+      );
+      if (!behaviorErr && byBehavior) {
+        trendingProducts = byBehavior;
+      } else {
+        const { data: legacy } = await supabase.rpc('get_trending_products', {
+          p_limit: limit,
+          p_days: 7,
+        });
+        trendingProducts = legacy;
+      }
 
       if (!trendingProducts) return [];
 
@@ -438,27 +435,21 @@ export class RecommendationEngine {
    */
   private async getUserPurchaseHistory(userId: string): Promise<string[]> {
     try {
-      const { data: orders } = await supabase
+      const { data: orders, error } = await supabase
         .from('orders')
-        .select('items')
+        .select('order_items(product_id)')
         .eq('customer_id', userId)
         .limit(100);
 
-      if (!orders) return [];
+      if (error || !orders) return [];
 
       const productIds = new Set<string>();
-      interface OrderItem {
-        product_id?: string;
-      }
-      orders.forEach(order => {
-        if (order.items) {
-          JSON.parse(order.items).forEach((item: OrderItem) => {
-            if (item.product_id) {
-              productIds.add(item.product_id);
-            }
-          });
+      for (const order of orders) {
+        const items = (order as { order_items?: { product_id?: string }[] }).order_items ?? [];
+        for (const item of items) {
+          if (item.product_id) productIds.add(item.product_id);
         }
-      });
+      }
 
       return Array.from(productIds);
     } catch (error) {
@@ -467,29 +458,13 @@ export class RecommendationEngine {
     }
   }
 
-  private async getUserInteractions(userId: string): Promise<UserInteraction[]> {
+  private async getUserInteractions(_userId: string): Promise<UserInteraction[]> {
     // Implémentation pour récupérer les interactions utilisateur (views, wishlist, etc.)
     return [];
   }
 
-  private async getRecentlyViewedProducts(userId: string): Promise<string[]> {
-    try {
-      // Récupérer les produits récemment vus (implémentation simplifiée)
-      const { data: views } = await supabase
-        .from('orders')
-        .select('customer_id')
-        .not('customer_id', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(1000)
-        .select('product_id')
-        .eq('user_id', userId)
-        .order('viewed_at', { ascending: false })
-        .limit(20);
-
-      return views?.map(v => v.product_id).filter(Boolean) || [];
-    } catch {
-      return [];
-    }
+  private async getRecentlyViewedProducts(): Promise<string[]> {
+    return [];
   }
 
   private deduplicateAndScore(recommendations: RecommendationResult[]): RecommendationResult[] {
@@ -518,7 +493,7 @@ export class RecommendationEngine {
 
   private async addReasoningToRecommendations(
     recommendations: RecommendationResult[],
-    userId: string
+    _userId: string
   ): Promise<void> {
     // Ajouter des explications textuelles pour chaque recommandation
     for (const rec of recommendations) {

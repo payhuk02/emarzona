@@ -74,6 +74,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStore } from '@/hooks/useStore';
+import { useStoreContext } from '@/contexts/StoreContext';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
@@ -85,6 +86,7 @@ export default function PaymentManagementList() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { store } = useStore();
+  const { selectedStoreId, selectedStore } = useStoreContext();
   const { toast } = useToast();
 
   const [searchInput, setSearchInput] = useState('');
@@ -105,84 +107,78 @@ export default function PaymentManagementList() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['payment-management-orders', user?.id, store?.id],
+    queryKey: ['payment-management-orders', user?.id, store?.id, selectedStoreId],
     queryFn: async () => {
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
       if (!authUser) throw new Error('Not authenticated');
 
-      // Get user profile and store
-      let storeId = store?.id;
+      let storeId = store?.id ?? selectedStore?.id ?? selectedStoreId ?? undefined;
 
-      if (!storeId && authUser?.id) {
-        const { data: profile } = await supabase
-          .from('profiles')
+      if (!storeId) {
+        const { data: storeData } = await supabase
+          .from('stores')
           .select('id')
           .eq('user_id', authUser.id)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
-        if (profile) {
-          const { data: storeData } = await supabase
-            .from('stores')
-            .select('id')
-            .eq('owner_id', profile.id)
-            .maybeSingle();
-
-          storeId = storeData?.id;
-        }
+        storeId = storeData?.id ?? undefined;
       }
 
-      let query = supabase
-        .from('orders')
-        .select(
-          `
+      const fetchViaRest = async (): Promise<OrderWithRelations[]> => {
+        let query = supabase
+          .from('orders')
+          .select(
+            `
           *,
-          customers (
-            id,
-            name,
-            email
-          ),
-          order_items (
-            id,
-            product_name,
-            quantity,
-            unit_price,
-            total_price
-          )
+          customers ( id, name, email ),
+          order_items ( id, product_name, quantity, unit_price, total_price )
         `
-        )
-        .order('created_at', { ascending: false });
+          )
+          .order('created_at', { ascending: false });
 
-      // Filter by store if available
-      if (storeId) {
-        query = query.eq('store_id', storeId);
-      } else if (authUser?.id) {
-        // Pas de colonne buyer_id : rattacher les commandes via customers.email (ou legacy customer_id = uid auth)
-        if (authUser.email) {
+        if (storeId) {
+          query = query.eq('store_id', storeId);
+        } else if (authUser.email) {
           const { data: customerRows, error: customersError } = await supabase
             .from('customers')
             .select('id')
             .eq('email', authUser.email);
-
           if (customersError) throw customersError;
-
           const customerIds = (customerRows ?? []).map(c => c.id).filter(Boolean);
-          if (customerIds.length > 0) {
-            query = query.in('customer_id', customerIds);
-          } else {
-            query = query.eq('customer_id', authUser.id);
-          }
+          query =
+            customerIds.length > 0
+              ? query.in('customer_id', customerIds)
+              : query.eq('customer_id', authUser.id);
         } else {
           query = query.eq('customer_id', authUser.id);
         }
-      }
 
-      const { data, error: queryError } = await query;
+        const { data: restData, error: queryError } = await query;
+        if (queryError) throw queryError;
+        return (restData ?? []) as OrderWithRelations[];
+      };
 
-      if (queryError) {
-        logger.error('Error fetching payment management orders', { error: queryError.message });
-        throw queryError;
+      let data: OrderWithRelations[];
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        'list_store_payment_management_orders',
+        { p_store_id: storeId ?? null }
+      );
+
+      if (rpcError) {
+        if (rpcError.code === 'PGRST202') {
+          data = await fetchViaRest();
+        } else {
+          logger.error('Error fetching payment management orders (RPC)', {
+            error: rpcError.message,
+            code: rpcError.code,
+          });
+          throw rpcError;
+        }
+      } else {
+        data = Array.isArray(rpcData) ? (rpcData as OrderWithRelations[]) : [];
       }
 
       // Filtrer les commandes avec paiements avancés
@@ -373,7 +369,7 @@ export default function PaymentManagementList() {
       });
       logger.info('Payment management orders exported to CSV', { count: filteredOrders.length });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Error exporting orders to CSV', { error: errorMessage });
       toast({
         title: '❌ Erreur',
@@ -395,7 +391,7 @@ export default function PaymentManagementList() {
       });
       logger.info('Payment management orders refreshed');
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Error refreshing orders', { error: errorMessage });
       toast({
         title: '❌ Erreur',
