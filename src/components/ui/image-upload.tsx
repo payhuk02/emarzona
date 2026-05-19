@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { formatFileSize } from '@/lib/image-optimization';
+import { formatFileSize } from '@/lib/utils-helpers';
 import { logger } from '@/lib/logger';
 import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import type { CatalogImagePath } from '@/lib/images/product-image-upload';
