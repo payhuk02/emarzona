@@ -142,8 +142,8 @@ export default function ServiceDetail() {
       if (error) throw error;
 
       // Récupérer les produits preview/paid si ils existent
-      let  freeProduct= null;
-      let  paidProduct= null;
+      let freeProduct = null;
+      let paidProduct = null;
 
       if (productData?.free_product_id) {
         const { data: freeData } = await supabase
@@ -449,9 +449,9 @@ export default function ServiceDetail() {
           description: `Votre réservation pour ${service.name} a été confirmée`,
         });
         // Rediriger vers la page de confirmation ou les réservations
-        navigate('/dashboard/my-bookings');
+        navigate('/account/bookings');
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Erreur lors de la réservation', error);
       toast({
@@ -1138,9 +1138,3 @@ export default function ServiceDetail() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

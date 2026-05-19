@@ -200,7 +200,7 @@ const Landing = () => {
       <SEOMeta
         title="Emarzona - Plateforme E-commerce Complète avec Marketplace | Produits Digitaux, Physiques, Services & Cours"
         description="Vendez 5 types de produits sur une seule plateforme : produits digitaux, physiques, services, cours en ligne et oeuvres d'artiste. Créez votre boutique ou vendez sur notre Marketplace. Paiements multi-devises, email marketing avancé, shipping FedEx, analytics intégrés. Démarrez gratuitement."
-        keywords="emarzona, ecommerce, plateforme e-commerce, marketplace, produits digitaux, produits physiques, services, cours en ligne, paiements FCFA, PayDunya, Moneroo, email marketing, shipping FedEx"
+        keywords="emarzona, ecommerce, plateforme e-commerce, marketplace, produits digitaux, produits physiques, services, cours en ligne, paiements FCFA, Moneroo, email marketing, shipping FedEx"
         url={baseUrl}
         canonical={baseUrl}
         image={`${baseUrl}/og-landing.jpg`}
@@ -784,9 +784,8 @@ const Landing = () => {
                 Acceptez les paiements du monde entier
               </h3>
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 leading-relaxed font-normal">
-                Intégrations natives avec PayDunya, Moneroo, Stripe, PayPal et Flutterwave. Acceptez
-                les paiements en FCFA, EUR, USD et 50+ autres devises. Paiement intégral, par
-                acompte ou sécurisé (escrow).
+                Paiements sécurisés via Moneroo : FCFA, EUR, USD et de nombreuses devises. Paiement
+                intégral, par acompte ou sécurisé (escrow), avec remboursements intégrés.
               </p>
               <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="bg-card/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -799,10 +798,10 @@ const Landing = () => {
                 </div>
                 <div className="bg-card/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300">
                   <div className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent mb-1">
-                    5
+                    Moneroo
                   </div>
                   <div className="text-xs sm:text-sm text-muted-foreground font-semibold">
-                    Passerelles de paiement
+                    Passerelle de paiement
                   </div>
                 </div>
               </div>
@@ -1198,7 +1197,7 @@ const Landing = () => {
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 {[
-                  '5 passerelles de paiement (PayDunya, Moneroo, Stripe, PayPal, Flutterwave)',
+                  'Paiements Moneroo (FCFA, EUR, USD et devises internationales)',
                   '50+ devises supportées',
                   'Paiement intégral',
                   'Paiement par acompte (%)',
@@ -1833,7 +1832,7 @@ const Landing = () => {
                     Afrique de l'Ouest
                   </h3>
                   <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-normal leading-relaxed">
-                    Support natif pour le FCFA, PayDunya et Moneroo. Optimisé pour les marchés
+                    Support natif pour le FCFA et Moneroo. Optimisé pour les marchés
                     ouest-africains.
                   </p>
                 </div>
@@ -1848,8 +1847,8 @@ const Landing = () => {
                     International
                   </h3>
                   <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-normal leading-relaxed">
-                    Stripe, PayPal, Flutterwave. Acceptez les paiements de partout dans le monde
-                    avec conversion automatique.
+                    Cartes et mobile money via Moneroo. Acceptez les paiements internationaux avec
+                    conversion de devises.
                   </p>
                 </div>
               </div>

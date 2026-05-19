@@ -35,6 +35,7 @@ import CouponInput from '@/components/checkout/CouponInput';
 import { PaymentProviderSelector } from '@/components/checkout/PaymentProviderSelector';
 import { FormFieldWithValidation } from '@/components/checkout/FormFieldWithValidation';
 import type { CartItem } from '@/types/cart';
+import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import {
   ShoppingBag,
   MapPin,
@@ -56,31 +57,6 @@ interface ShippingAddress {
   postal_code: string;
   country: string;
   state?: string;
-}
-
-/** Alignement DB : colonne canonique item_metadata (trigger cours + webhook artiste). */
-function orderItemInsertExtras(item: CartItem): { item_metadata?: Record<string, unknown> } {
-  const meta =
-    item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)
-      ? (item.metadata as Record<string, unknown>)
-      : {};
-
-  if (item.product_type === 'course') {
-    const courseId = meta.course_id ?? meta.courseId;
-    return {
-      item_metadata: {
-        ...meta,
-        ...(courseId != null ? { course_id: courseId } : {}),
-        auto_enroll: true,
-      },
-    };
-  }
-
-  if (item.product_type === 'artist' && Object.keys(meta).length > 0) {
-    return { item_metadata: { ...meta } };
-  }
-
-  return {};
 }
 
 type TaxBreakdownItem = {
@@ -112,6 +88,22 @@ export default function Checkout() {
   const { toast } = useToast();
   const { items, summary, isLoading: cartLoading } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const hasServiceInCart = useMemo(
+    () => items.some(item => item.product_type === 'service'),
+    [items]
+  );
+
+  useEffect(() => {
+    if (hasServiceInCart) {
+      toast({
+        title: 'Réservation requise',
+        description:
+          'Les services ne passent pas par le panier. Ouvrez la page du service pour choisir un créneau.',
+        variant: 'destructive',
+      });
+    }
+  }, [hasServiceInCart, toast]);
 
   // State pour la carte cadeau
   const [appliedGiftCard, setAppliedGiftCard] = useState<{
@@ -715,18 +707,7 @@ export default function Checkout() {
           continue;
         }
 
-        // Créer les order_items
-        const orderItems = group.items.map(item => ({
-          order_id: order.id,
-          product_id: item.product_id,
-          product_type: item.product_type,
-          product_name: item.product_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: (item.unit_price - (item.discount_amount || 0)) * item.quantity,
-          variant_id: item.variant_id,
-          ...orderItemInsertExtras(item),
-        }));
+        const orderItems = await buildOrderItemRows(order.id, group.items);
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
 
@@ -1178,18 +1159,7 @@ export default function Checkout() {
 
       if (orderError) throw orderError;
 
-      // Créer les order_items
-      const orderItems = items.map(item => ({
-        order_id: order.id,
-        product_id: item.product_id,
-        product_type: item.product_type,
-        product_name: item.product_name,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        total_price: (item.unit_price - (item.discount_amount || 0)) * item.quantity,
-        variant_id: item.variant_id,
-        ...orderItemInsertExtras(item),
-      }));
+      const orderItems = await buildOrderItemRows(order.id, items);
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
 
@@ -1917,7 +1887,12 @@ export default function Checkout() {
                         {/* Bouton checkout pour multi-stores */}
                         <Button
                           onClick={handleCheckout}
-                          disabled={isProcessing || items.length === 0 || isCheckingStores}
+                          disabled={
+                            isProcessing ||
+                            items.length === 0 ||
+                            isCheckingStores ||
+                            hasServiceInCart
+                          }
                           className="w-full mt-4"
                           size="lg"
                           aria-label={
@@ -2133,7 +2108,12 @@ export default function Checkout() {
                         {/* Bouton checkout */}
                         <Button
                           onClick={handleCheckout}
-                          disabled={isProcessing || items.length === 0 || isCheckingStores}
+                          disabled={
+                            isProcessing ||
+                            items.length === 0 ||
+                            isCheckingStores ||
+                            hasServiceInCart
+                          }
                           className="w-full"
                           size="lg"
                           aria-label={

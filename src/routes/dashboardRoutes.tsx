@@ -4,8 +4,15 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { logger } from '@/lib/logger';
 
 // Helper pour route protégée
-const pr = (path: string, Component: React.LazyExoticComponent<any>) => (
-  <Route path={path} element={<ProtectedRoute><Component /></ProtectedRoute>} />
+const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
+  <Route
+    path={path}
+    element={
+      <ProtectedRoute>
+        <Component />
+      </ProtectedRoute>
+    }
+  />
 );
 
 // Pages Dashboard
@@ -20,7 +27,12 @@ const Dashboard = lazy(() =>
             <div className="text-center space-y-4">
               <h2 className="text-xl font-semibold">Erreur de chargement</h2>
               <p className="text-muted-foreground">Impossible de charger le tableau de bord</p>
-              <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white rounded">Recharger</button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-white rounded"
+              >
+                Recharger
+              </button>
             </div>
           </div>
         ),
@@ -35,7 +47,12 @@ const Products = lazy(() =>
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center space-y-4">
             <h2 className="text-xl font-semibold">Erreur de chargement</h2>
-            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white rounded">Recharger</button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-white rounded"
+            >
+              Recharger
+            </button>
           </div>
         </div>
       ),
@@ -51,14 +68,32 @@ const Orders = lazy(() => import('@/pages/Orders'));
 const Customers = lazy(() => import('@/pages/Customers'));
 const Marketing = lazy(() => import('@/pages/Marketing').then(m => ({ default: m.default })));
 const PromotionsPage = lazy(() => import('@/pages/Promotions').then(m => ({ default: m.default })));
-const PromotionsStatsPage = lazy(() => import('@/pages/promotions/PromotionsStatsPage').then(m => ({ default: m.PromotionsStatsPage })));
-const EmailCampaignsPage = lazy(() => import('@/pages/emails/EmailCampaignsPage').then(m => ({ default: m.EmailCampaignsPage })));
-const EmailSequencesPage = lazy(() => import('@/pages/emails/EmailSequencesPage').then(m => ({ default: m.EmailSequencesPage })));
-const EmailSegmentsPage = lazy(() => import('@/pages/emails/EmailSegmentsPage').then(m => ({ default: m.EmailSegmentsPage })));
-const EmailAnalyticsPage = lazy(() => import('@/pages/emails/EmailAnalyticsPage').then(m => ({ default: m.EmailAnalyticsPage })));
-const EmailTagsManagementPage = lazy(() => import('@/pages/emails/EmailTagsManagementPage').then(m => ({ default: m.default })));
-const EmailWorkflowsPage = lazy(() => import('@/pages/emails/EmailWorkflowsPage').then(m => ({ default: m.EmailWorkflowsPage })));
-const EmailTemplateEditorPage = lazy(() => import('@/pages/emails/EmailTemplateEditorPage').then(m => ({ default: m.EmailTemplateEditorPage })));
+const PromotionsStatsPage = lazy(() =>
+  import('@/pages/promotions/PromotionsStatsPage').then(m => ({ default: m.PromotionsStatsPage }))
+);
+const EmailCampaignsPage = lazy(() =>
+  import('@/pages/emails/EmailCampaignsPage').then(m => ({ default: m.EmailCampaignsPage }))
+);
+const EmailSequencesPage = lazy(() =>
+  import('@/pages/emails/EmailSequencesPage').then(m => ({ default: m.EmailSequencesPage }))
+);
+const EmailSegmentsPage = lazy(() =>
+  import('@/pages/emails/EmailSegmentsPage').then(m => ({ default: m.EmailSegmentsPage }))
+);
+const EmailAnalyticsPage = lazy(() =>
+  import('@/pages/emails/EmailAnalyticsPage').then(m => ({ default: m.EmailAnalyticsPage }))
+);
+const EmailTagsManagementPage = lazy(() =>
+  import('@/pages/emails/EmailTagsManagementPage').then(m => ({ default: m.default }))
+);
+const EmailWorkflowsPage = lazy(() =>
+  import('@/pages/emails/EmailWorkflowsPage').then(m => ({ default: m.EmailWorkflowsPage }))
+);
+const EmailTemplateEditorPage = lazy(() =>
+  import('@/pages/emails/EmailTemplateEditorPage').then(m => ({
+    default: m.EmailTemplateEditorPage,
+  }))
+);
 const Analytics = lazy(() => import('@/pages/Analytics'));
 const Payments = lazy(() => import('@/pages/Payments'));
 const PaymentsCustomers = lazy(() => import('@/pages/PaymentsCustomers'));
@@ -79,7 +114,9 @@ const PhysicalInventoryManagement = lazy(() => import('@/pages/admin/PhysicalInv
 const PhysicalPromotions = lazy(() => import('@/pages/admin/PhysicalPromotions'));
 const PhysicalProductsAnalytics = lazy(() => import('@/pages/admin/PhysicalProductsAnalytics'));
 const PhysicalProductsLots = lazy(() => import('@/pages/admin/PhysicalProductsLots'));
-const PhysicalProductsSerialTracking = lazy(() => import('@/pages/admin/PhysicalProductsSerialTracking'));
+const PhysicalProductsSerialTracking = lazy(
+  () => import('@/pages/admin/PhysicalProductsSerialTracking')
+);
 const PhysicalBarcodeScanner = lazy(() => import('@/pages/admin/PhysicalBarcodeScanner'));
 const PhysicalPreOrders = lazy(() => import('@/pages/admin/PhysicalPreOrders'));
 const PhysicalBackorders = lazy(() => import('@/pages/admin/PhysicalBackorders'));
@@ -105,12 +142,16 @@ const CreateCourse = lazy(() => import('@/pages/courses/CreateCourse'));
 const CourseAnalytics = lazy(() => import('@/pages/courses/CourseAnalytics'));
 const CohortsManagementPage = lazy(() => import('@/pages/courses/CohortsManagementPage'));
 const CohortDetailPage = lazy(() => import('@/pages/courses/CohortDetailPage'));
-const CourseGamificationDashboard = lazy(() => import('@/pages/courses/CourseGamificationDashboard'));
+const CourseGamificationDashboard = lazy(
+  () => import('@/pages/courses/CourseGamificationDashboard')
+);
 const LiveSessionsManagement = lazy(() => import('@/pages/dashboard/LiveSessionsManagement'));
 const AssignmentsManagement = lazy(() => import('@/pages/dashboard/AssignmentsManagement'));
 const ReviewsManagement = lazy(() => import('@/pages/dashboard/ReviewsManagement'));
 const CouponsManagement = lazy(() => import('@/pages/dashboard/CouponsManagement'));
-const AnalyticsDashboardsManagement = lazy(() => import('@/pages/dashboard/AnalyticsDashboardsManagement'));
+const AnalyticsDashboardsManagement = lazy(
+  () => import('@/pages/dashboard/AnalyticsDashboardsManagement')
+);
 const AbandonedCartsManagement = lazy(() => import('@/pages/dashboard/AbandonedCartsManagement'));
 const TaxManagement = lazy(() => import('@/pages/dashboard/TaxManagement'));
 const DigitalProductsList = lazy(() => import('@/pages/digital/DigitalProductsList'));
@@ -120,19 +161,31 @@ const CreateBundle = lazy(() => import('@/pages/digital/CreateBundle'));
 const MyLicenses = lazy(() => import('@/pages/digital/MyLicenses'));
 const LicenseManagement = lazy(() => import('@/pages/digital/LicenseManagement'));
 const DigitalProductAnalytics = lazy(() => import('@/pages/digital/DigitalProductAnalytics'));
-const DigitalProductUpdatesDashboard = lazy(() => import('@/pages/digital/DigitalProductUpdatesDashboard'));
-const DigitalProductVersionsManagement = lazy(() => import('@/pages/digital/DigitalProductVersionsManagement'));
-const PhysicalProductsLotsManagement = lazy(() => import('@/pages/dashboard/PhysicalProductsLotsManagement'));
+const DigitalProductUpdatesDashboard = lazy(
+  () => import('@/pages/digital/DigitalProductUpdatesDashboard')
+);
+const DigitalProductVersionsManagement = lazy(
+  () => import('@/pages/digital/DigitalProductVersionsManagement')
+);
+const PhysicalProductsLotsManagement = lazy(
+  () => import('@/pages/dashboard/PhysicalProductsLotsManagement')
+);
 const SuppliersManagement = lazy(() => import('@/pages/dashboard/SuppliersManagement'));
 const DemandForecasting = lazy(() => import('@/pages/dashboard/DemandForecasting'));
 const InventoryAnalytics = lazy(() => import('@/pages/dashboard/InventoryAnalytics'));
 const ServiceCalendarManagement = lazy(() => import('@/pages/service/ServiceCalendarManagement'));
 const StaffAvailabilityCalendar = lazy(() => import('@/pages/service/StaffAvailabilityCalendar'));
 const ResourceConflictManagement = lazy(() => import('@/pages/service/ResourceConflictManagement'));
-const RecurringBookingsManagement = lazy(() => import('@/pages/service/RecurringBookingsManagement'));
+const RecurringBookingsManagement = lazy(
+  () => import('@/pages/service/RecurringBookingsManagement')
+);
 const CalendarIntegrationsPage = lazy(() => import('@/pages/service/CalendarIntegrationsPage'));
-const ServiceWaitlistManagementPage = lazy(() => import('@/pages/service/ServiceWaitlistManagementPage'));
-const BookingRemindersManagementPage = lazy(() => import('@/pages/service/BookingRemindersManagementPage'));
+const ServiceWaitlistManagementPage = lazy(
+  () => import('@/pages/service/ServiceWaitlistManagementPage')
+);
+const BookingRemindersManagementPage = lazy(
+  () => import('@/pages/service/BookingRemindersManagementPage')
+);
 const OrderMessaging = lazy(() => import('@/pages/orders/OrderMessaging'));
 const PaymentManagement = lazy(() => import('@/pages/payments/PaymentManagement'));
 const PaymentManagementList = lazy(() => import('@/pages/payments/PaymentManagementList'));
@@ -150,7 +203,9 @@ const AdvancedCalendarPage = lazy(() => import('@/pages/service/AdvancedCalendar
 const RecurringBookingsPage = lazy(() => import('@/pages/service/RecurringBookingsPage'));
 const ServiceManagementPage = lazy(() => import('@/pages/service/ServiceManagementPage'));
 const GamificationPage = lazy(() => import('@/pages/gamification/GamificationPage'));
-const ArtistPortfoliosManagement = lazy(() => import('@/pages/dashboard/ArtistPortfoliosManagement'));
+const ArtistPortfoliosManagement = lazy(
+  () => import('@/pages/dashboard/ArtistPortfoliosManagement')
+);
 const AuctionsManagementPage = lazy(() => import('@/pages/artist/AuctionsManagementPage'));
 const AuctionsWatchlistPage = lazy(() => import('@/pages/artist/AuctionsWatchlistPage'));
 const IntegrationsPage = lazy(() => import('@/pages/admin/IntegrationsPage'));
@@ -202,8 +257,22 @@ export const dashboardRoutes = (
 
     {/* Webhooks */}
     {pr('/dashboard/webhooks', AdminWebhookManagement)}
-    <Route path="/dashboard/digital-webhooks" element={<ProtectedRoute><Navigate to="/dashboard/webhooks" replace /></ProtectedRoute>} />
-    <Route path="/dashboard/physical-webhooks" element={<ProtectedRoute><Navigate to="/dashboard/webhooks" replace /></ProtectedRoute>} />
+    <Route
+      path="/dashboard/digital-webhooks"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/webhooks" replace />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/dashboard/physical-webhooks"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/dashboard/webhooks" replace />
+        </ProtectedRoute>
+      }
+    />
 
     {/* Physical Products */}
     {pr('/dashboard/physical-inventory', PhysicalInventoryManagement)}
@@ -298,6 +367,14 @@ export const dashboardRoutes = (
     {pr('/vendor/messaging/:storeId/:productId?', VendorMessaging)}
     {pr('/vendor/messaging', VendorMessaging)}
     {pr('/dashboard/inventory', InventoryDashboard)}
+    <Route
+      path="/dashboard/my-bookings"
+      element={
+        <ProtectedRoute>
+          <Navigate to="/account/bookings" replace />
+        </ProtectedRoute>
+      }
+    />
     {pr('/dashboard/bookings', BookingsManagement)}
     {pr('/dashboard/advanced-calendar', AdvancedCalendarPage)}
     {pr('/dashboard/recurring-bookings', RecurringBookingsPage)}

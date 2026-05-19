@@ -16,10 +16,23 @@ const CustomerLoyaltyPage = lazy(() => import('@/pages/customer/CustomerLoyaltyP
 const CustomerMyGiftCardsPage = lazy(() => import('@/pages/customer/CustomerMyGiftCardsPage'));
 const PriceStockAlerts = lazy(() => import('@/pages/customer/PriceStockAlerts'));
 const CustomerWarranties = lazy(() => import('@/pages/customer/CustomerWarranties'));
-const MultiStoreCheckoutTracking = lazy(() => import('@/pages/checkout/MultiStoreCheckoutTracking'));
+const CustomerMyBookings = lazy(() => import('@/pages/customer/CustomerMyBookings'));
+const MultiStoreCheckoutTracking = lazy(
+  () => import('@/pages/checkout/MultiStoreCheckoutTracking')
+);
 
-const protectedRoute = (path: string, Component: React.LazyExoticComponent<any>) => (
-  <Route path={path} element={<ProtectedRoute><Component /></ProtectedRoute>} />
+const protectedRoute = (
+  path: string,
+  Component: React.LazyExoticComponent<React.ComponentType>
+) => (
+  <Route
+    path={path}
+    element={
+      <ProtectedRoute>
+        <Component />
+      </ProtectedRoute>
+    }
+  />
 );
 
 export const customerRoutes = (
@@ -31,6 +44,7 @@ export const customerRoutes = (
     {protectedRoute('/account/digital', CustomerDigitalPortal)}
     {protectedRoute('/account/physical', CustomerPhysicalPortal)}
     {protectedRoute('/account/courses', CustomerMyCourses)}
+    {protectedRoute('/account/bookings', CustomerMyBookings)}
     {protectedRoute('/account/profile', CustomerMyProfile)}
     {protectedRoute('/account/wishlist', CustomerMyWishlist)}
     {protectedRoute('/account/alerts', PriceStockAlerts)}

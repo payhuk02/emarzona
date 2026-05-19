@@ -50,42 +50,42 @@ import {
 export const StoreDashboardMockup = () => {
   // Métriques réelles inspirées du dashboard Emarzona (4 cartes principales)
   const stats = [
-    { 
-      icon: Package, 
-      value: '127', 
-      label: 'Produits', 
+    {
+      icon: Package,
+      value: '127',
+      label: 'Produits',
       subtitle: '127 actifs',
-      trend: '+12%', 
+      trend: '+12%',
       color: 'bg-green-500',
-      textColor: 'text-green-600'
+      textColor: 'text-green-600',
     },
-    { 
-      icon: ShoppingCart, 
-      value: '0', 
-      label: 'Commandes', 
+    {
+      icon: ShoppingCart,
+      value: '0',
+      label: 'Commandes',
       subtitle: '0 en attente',
-      trend: '-4%', 
+      trend: '-4%',
       color: 'bg-blue-500',
-      textColor: 'text-blue-600'
+      textColor: 'text-blue-600',
     },
-    { 
-      icon: Users, 
-      value: '0', 
-      label: 'Clients', 
+    {
+      icon: Users,
+      value: '0',
+      label: 'Clients',
       subtitle: 'Clients enregistrés',
-      trend: '+3%', 
+      trend: '+3%',
       color: 'bg-purple-500',
-      textColor: 'text-purple-600'
+      textColor: 'text-purple-600',
     },
-    { 
-      icon: DollarSign, 
-      value: '0', 
-      label: 'Revenus', 
+    {
+      icon: DollarSign,
+      value: '0',
+      label: 'Revenus',
       subtitle: 'Total des ventes',
-      trend: '+4%', 
+      trend: '+4%',
       color: 'bg-orange-500',
       textColor: 'text-orange-600',
-      currency: 'FCFA'
+      currency: 'FCFA',
     },
   ];
 
@@ -151,7 +151,9 @@ export const StoreDashboardMockup = () => {
           <div className="h-7 w-7 rounded bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
             <span className="text-white text-xs font-bold">EZ</span>
           </div>
-          <span className="text-sm md:text-base font-bold text-gray-800 hidden sm:inline">Emarzona</span>
+          <span className="text-sm md:text-base font-bold text-gray-800 hidden sm:inline">
+            Emarzona
+          </span>
         </div>
 
         {/* Navigation principale */}
@@ -176,7 +178,10 @@ export const StoreDashboardMockup = () => {
 
         {/* Actions droite */}
         <div className="flex items-center gap-2 shrink-0">
-          <button className="p-1.5 rounded-md hover:bg-gray-100 transition-colors" aria-label="Notifications">
+          <button
+            className="p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+            aria-label="Notifications"
+          >
             <Bell className="h-4 w-4 text-gray-600" />
           </button>
           <div className="px-2 py-1 bg-gray-100 rounded-md text-[10px] md:text-xs font-medium text-gray-700">
@@ -219,7 +224,9 @@ export const StoreDashboardMockup = () => {
           <div className="flex-1 overflow-y-auto py-2 px-2">
             {/* Section Principal */}
             <div className="mb-3">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">Principal</div>
+              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">
+                Principal
+              </div>
               <div className="space-y-0.5">
                 {[
                   { icon: LayoutDashboard, label: 'Tableau de bord', active: true },
@@ -246,7 +253,9 @@ export const StoreDashboardMockup = () => {
 
             {/* Section Produits & Cours */}
             <div className="mb-3">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">Produits & Cours</div>
+              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">
+                Produits & Cours
+              </div>
               <div className="space-y-0.5">
                 {[
                   { icon: Package, label: 'Produits', active: false },
@@ -270,7 +279,9 @@ export const StoreDashboardMockup = () => {
 
             {/* Section Ventes */}
             <div className="mb-3">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">Ventes</div>
+              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">
+                Ventes
+              </div>
               <div className="space-y-0.5">
                 {[
                   { icon: ShoppingCart, label: 'Commandes', active: false },
@@ -294,7 +305,9 @@ export const StoreDashboardMockup = () => {
 
             {/* Section Marketing */}
             <div className="mb-3">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">Marketing</div>
+              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">
+                Marketing
+              </div>
               <div className="space-y-0.5">
                 {[
                   { icon: Mail, label: 'Emails', active: false },
@@ -317,7 +330,9 @@ export const StoreDashboardMockup = () => {
 
             {/* Section Mon Compte */}
             <div className="mb-3">
-              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">Mon Compte</div>
+              <div className="px-2 py-1.5 text-[10px] font-semibold text-blue-200 uppercase tracking-wide">
+                Mon Compte
+              </div>
               <div className="space-y-0.5">
                 {[
                   { icon: User, label: 'Portail Client', active: false },
@@ -372,10 +387,12 @@ export const StoreDashboardMockup = () => {
                 >
                   {/* Effet de brillance au hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/30 group-hover:via-white/20 group-hover:to-white/0 transition-all duration-500"></div>
-                  
+
                   <CardContent className="relative p-3 sm:p-4 md:p-5">
                     <div className="flex items-start justify-between mb-2 sm:mb-3">
-                      <div className={`relative p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-300`}>
+                      <div
+                        className={`relative p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${stat.color} shadow-xl shadow-black/20 group-hover:scale-110 transition-transform duration-300`}
+                      >
                         <stat.icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white" />
                         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/30 to-transparent"></div>
                       </div>
@@ -384,12 +401,23 @@ export const StoreDashboardMockup = () => {
                       </Badge>
                     </div>
                     <div className="space-y-0.5 sm:space-y-1">
-                      <div className={`text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r ${stat.textColor} bg-clip-text text-transparent`}>
-                        {stat.value} {stat.currency && <span className="text-sm sm:text-base text-gray-600">{stat.currency}</span>}
+                      <div
+                        className={`text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r ${stat.textColor} bg-clip-text text-transparent`}
+                      >
+                        {stat.value}{' '}
+                        {stat.currency && (
+                          <span className="text-sm sm:text-base text-gray-600">
+                            {stat.currency}
+                          </span>
+                        )}
                       </div>
-                      <div className="text-[10px] sm:text-xs md:text-sm font-bold text-gray-800">{stat.label}</div>
+                      <div className="text-[10px] sm:text-xs md:text-sm font-bold text-gray-800">
+                        {stat.label}
+                      </div>
                       {stat.subtitle && (
-                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 font-semibold">{stat.subtitle}</div>
+                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500 font-semibold">
+                          {stat.subtitle}
+                        </div>
                       )}
                     </div>
                   </CardContent>
@@ -399,7 +427,9 @@ export const StoreDashboardMockup = () => {
 
             {/* Actions rapides Premium - Responsive */}
             <div className="mb-4 sm:mb-5">
-              <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 mb-3 sm:mb-4">Actions rapides</h2>
+              <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 mb-3 sm:mb-4">
+                Actions rapides
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
@@ -410,21 +440,26 @@ export const StoreDashboardMockup = () => {
                     >
                       {/* Effet de brillance au hover */}
                       <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/40 group-hover:via-white/25 group-hover:to-white/0 transition-all duration-300"></div>
-                      
+
                       <CardContent className="relative p-4 sm:p-5 md:p-6">
-                        <div className={`relative p-3 sm:p-4 rounded-xl bg-gradient-to-br ${action.color} shadow-xl shadow-black/20 mb-3 sm:mb-4 w-fit group-hover:scale-110 transition-transform duration-300`}>
+                        <div
+                          className={`relative p-3 sm:p-4 rounded-xl bg-gradient-to-br ${action.color} shadow-xl shadow-black/20 mb-3 sm:mb-4 w-fit group-hover:scale-110 transition-transform duration-300`}
+                        >
                           <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white" />
                           <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/30 to-transparent"></div>
                         </div>
-                        <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 mb-1.5 sm:mb-2">{action.title}</h3>
-                        <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed font-medium">{action.description}</p>
+                        <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 mb-1.5 sm:mb-2">
+                          {action.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed font-medium">
+                          {action.description}
+                        </p>
                       </CardContent>
                     </Card>
                   );
                 })}
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -437,32 +472,32 @@ export const StoreDashboardMockup = () => {
  */
 export const MultiCurrencyMockup = () => {
   const currencies = [
-    { 
-      code: 'FCFA', 
-      amount: '125,000', 
-      flag: '🇨🇮', 
-      growth: '+15%', 
+    {
+      code: 'FCFA',
+      amount: '125,000',
+      flag: '🇨🇮',
+      growth: '+15%',
       color: 'bg-orange-500',
       bgColor: 'from-orange-50 to-amber-50',
-      progress: 75
+      progress: 75,
     },
-    { 
-      code: 'EUR', 
-      amount: '190', 
-      flag: '🇪🇺', 
-      growth: '+8%', 
+    {
+      code: 'EUR',
+      amount: '190',
+      flag: '🇪🇺',
+      growth: '+8%',
       color: 'bg-blue-500',
       bgColor: 'from-blue-50 to-cyan-50',
-      progress: 60
+      progress: 60,
     },
-    { 
-      code: 'USD', 
-      amount: '210', 
-      flag: '🇺🇸', 
-      growth: '+12%', 
+    {
+      code: 'USD',
+      amount: '210',
+      flag: '🇺🇸',
+      growth: '+12%',
       color: 'bg-emerald-500',
       bgColor: 'from-emerald-50 to-teal-50',
-      progress: 85
+      progress: 85,
     },
   ];
 
@@ -470,10 +505,12 @@ export const MultiCurrencyMockup = () => {
     <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-gray-200/70 bg-gradient-to-br from-white via-slate-50/40 to-white backdrop-blur-xl">
       {/* Effet de brillance animé Premium */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent animate-shimmer rotate-12" 
-             style={{ width: '200%', height: '200%' }}></div>
+        <div
+          className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent animate-shimmer rotate-12"
+          style={{ width: '200%', height: '200%' }}
+        ></div>
       </div>
-      
+
       <div className="relative p-3 sm:p-4 md:p-5 space-y-2.5 sm:space-y-3">
         {/* Header Premium */}
         <div className="flex items-center justify-between mb-3">
@@ -486,7 +523,9 @@ export const MultiCurrencyMockup = () => {
               <h3 className="text-base md:text-lg font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
                 Paiements multi-devises
               </h3>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">Conversion automatique en temps réel</p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                Conversion automatique en temps réel
+              </p>
             </div>
           </div>
           <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
@@ -501,20 +540,28 @@ export const MultiCurrencyMockup = () => {
           >
             {/* Effet de brillance au hover Premium */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/30 group-hover:via-white/15 group-hover:to-white/0 transition-all duration-300"></div>
-            
+
             <CardContent className="relative p-3 sm:p-4 md:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="text-2xl md:text-3xl filter drop-shadow-lg">{currency.flag}</div>
+                    <div className="text-2xl md:text-3xl filter drop-shadow-lg">
+                      {currency.flag}
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent rounded-full"></div>
                   </div>
                   <div>
-                    <div className="text-sm md:text-base font-bold text-gray-900 mb-0.5">{currency.code}</div>
-                    <div className="text-xs md:text-sm font-semibold text-gray-700">{currency.amount}</div>
+                    <div className="text-sm md:text-base font-bold text-gray-900 mb-0.5">
+                      {currency.code}
+                    </div>
+                    <div className="text-xs md:text-sm font-semibold text-gray-700">
+                      {currency.amount}
+                    </div>
                   </div>
                 </div>
-                <Badge className={`${currency.color} text-white border-0 shadow-lg shadow-black/10 text-[10px] md:text-xs px-3 py-1 font-semibold group-hover:scale-110 transition-transform`}>
+                <Badge
+                  className={`${currency.color} text-white border-0 shadow-lg shadow-black/10 text-[10px] md:text-xs px-3 py-1 font-semibold group-hover:scale-110 transition-transform`}
+                >
                   <TrendingUp className="h-3 w-3 mr-1" />
                   {currency.growth}
                 </Badge>
@@ -522,14 +569,16 @@ export const MultiCurrencyMockup = () => {
               {/* Progress bar premium */}
               <div className="relative">
                 <div className="h-1.5 bg-gray-200/60 rounded-full overflow-hidden backdrop-blur-sm">
-                  <div 
+                  <div
                     className={`h-full ${currency.color} rounded-full transition-all duration-1000 shadow-md relative overflow-hidden`}
                     style={{ width: `${currency.progress}%` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
                   </div>
                 </div>
-                <div className="text-[9px] text-gray-500 mt-1 font-medium">{currency.progress}% du volume total</div>
+                <div className="text-[9px] text-gray-500 mt-1 font-medium">
+                  {currency.progress}% du volume total
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -558,33 +607,19 @@ export const MultiCurrencyMockup = () => {
  */
 export const SecurityMockup = () => {
   const integrations = [
-    { 
-      name: 'Stripe', 
-      status: 'connected', 
-      icon: '💳', 
-      color: 'bg-indigo-500',
-      bgColor: 'from-indigo-50 to-purple-50'
-    },
-    { 
-      name: 'PayDunya', 
-      status: 'connected', 
-      icon: '🔐', 
-      color: 'bg-blue-500',
-      bgColor: 'from-blue-50 to-cyan-50'
-    },
-    { 
-      name: 'Moneroo', 
-      status: 'connected', 
-      icon: '💰', 
+    {
+      name: 'Moneroo',
+      status: 'connected',
+      icon: '💰',
       color: 'bg-emerald-500',
-      bgColor: 'from-emerald-50 to-teal-50'
+      bgColor: 'from-emerald-50 to-teal-50',
     },
-    { 
-      name: 'Mailchimp', 
-      status: 'pending', 
-      icon: '📧', 
+    {
+      name: 'Mailchimp',
+      status: 'pending',
+      icon: '📧',
       color: 'bg-gray-400',
-      bgColor: 'from-gray-50 to-gray-100'
+      bgColor: 'from-gray-50 to-gray-100',
     },
   ];
 
@@ -592,10 +627,12 @@ export const SecurityMockup = () => {
     <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/60 bg-gradient-to-br from-white via-slate-50/50 to-white backdrop-blur-xl">
       {/* Effet de brillance animé */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-slate-500/5 to-transparent animate-shimmer rotate-12" 
-             style={{ width: '200%', height: '200%' }}></div>
+        <div
+          className="absolute -inset-10 bg-gradient-to-r from-transparent via-slate-500/5 to-transparent animate-shimmer rotate-12"
+          style={{ width: '200%', height: '200%' }}
+        ></div>
       </div>
-      
+
       <div className="relative p-4 md:p-5 space-y-3">
         {/* Header Premium */}
         <div className="flex items-center justify-between mb-3">
@@ -608,7 +645,9 @@ export const SecurityMockup = () => {
               <h3 className="text-base md:text-lg font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
                 Intégrations sécurisées
               </h3>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">Connexions cryptées et certifiées</p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                Connexions cryptées et certifiées
+              </p>
             </div>
           </div>
           <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 shadow-lg shadow-emerald-500/30 text-[10px] md:text-xs px-3 py-1 font-semibold">
@@ -626,14 +665,18 @@ export const SecurityMockup = () => {
           >
             {/* Effet de brillance au hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/25 group-hover:via-white/15 group-hover:to-white/0 transition-all duration-500"></div>
-            
+
             <CardContent className="relative p-4 md:p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative p-2.5 rounded-xl bg-white/80 backdrop-blur-sm shadow-md border border-white/50">
-                    <div className="text-xl md:text-2xl filter drop-shadow-md">{integration.icon}</div>
+                    <div className="text-xl md:text-2xl filter drop-shadow-md">
+                      {integration.icon}
+                    </div>
                   </div>
-                  <span className="text-sm md:text-base font-bold text-gray-900">{integration.name}</span>
+                  <span className="text-sm md:text-base font-bold text-gray-900">
+                    {integration.name}
+                  </span>
                 </div>
                 <Badge
                   className={`${
@@ -679,29 +722,29 @@ export const SecurityMockup = () => {
  */
 export const AnalyticsMockup = () => {
   const metrics = [
-    { 
-      label: 'Taux de conversion', 
-      value: 3.2, 
-      target: 5, 
+    {
+      label: 'Taux de conversion',
+      value: 3.2,
+      target: 5,
       color: 'bg-blue-500',
       bgColor: 'from-blue-50 to-cyan-50',
-      icon: TrendingUp 
+      icon: TrendingUp,
     },
-    { 
-      label: 'Panier moyen', 
-      value: 12500, 
-      target: 15000, 
+    {
+      label: 'Panier moyen',
+      value: 12500,
+      target: 15000,
       color: 'bg-purple-500',
       bgColor: 'from-purple-50 to-pink-50',
-      icon: ShoppingCart 
+      icon: ShoppingCart,
     },
-    { 
-      label: 'Taux de rebond', 
-      value: 42, 
-      target: 30, 
+    {
+      label: 'Taux de rebond',
+      value: 42,
+      target: 30,
       color: 'bg-emerald-500',
       bgColor: 'from-emerald-50 to-teal-50',
-      icon: Activity 
+      icon: Activity,
     },
   ];
 
@@ -709,10 +752,12 @@ export const AnalyticsMockup = () => {
     <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/60 bg-gradient-to-br from-white via-blue-50/30 to-white backdrop-blur-xl">
       {/* Effet de brillance animé */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent animate-shimmer rotate-12" 
-             style={{ width: '200%', height: '200%' }}></div>
+        <div
+          className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent animate-shimmer rotate-12"
+          style={{ width: '200%', height: '200%' }}
+        ></div>
       </div>
-      
+
       <div className="relative p-4 md:p-5 space-y-3">
         {/* Header Premium */}
         <div className="flex items-center justify-between mb-3">
@@ -725,7 +770,9 @@ export const AnalyticsMockup = () => {
               <h3 className="text-base md:text-lg font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
                 Analytics en temps réel
               </h3>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">Données mises à jour instantanément</p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                Données mises à jour instantanément
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-1 rounded-full border border-emerald-200/50 shadow-sm">
@@ -738,14 +785,19 @@ export const AnalyticsMockup = () => {
         </div>
 
         {metrics.map((metric, index) => (
-          <Card key={index} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/80 backdrop-blur-sm">
+          <Card
+            key={index}
+            className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/80 backdrop-blur-sm"
+          >
             {/* Effet de brillance au hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-blue-50/50 group-hover:via-white/30 group-hover:to-white/0 transition-all duration-500"></div>
-            
+
             <CardContent className="relative p-4 md:p-5">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className={`relative p-3 md:p-3.5 rounded-xl bg-gradient-to-br ${metric.color} shadow-lg shadow-black/10 flex-shrink-0`}>
+                  <div
+                    className={`relative p-3 md:p-3.5 rounded-xl bg-gradient-to-br ${metric.color} shadow-lg shadow-black/10 flex-shrink-0`}
+                  >
                     <metric.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent"></div>
                   </div>
@@ -759,7 +811,7 @@ export const AnalyticsMockup = () => {
               </div>
               <div className="relative">
                 <div className="h-2 bg-gray-200/60 rounded-full overflow-hidden backdrop-blur-sm">
-                  <div 
+                  <div
                     className={`h-full bg-gradient-to-r ${metric.color} rounded-full transition-all duration-1000 shadow-md relative overflow-hidden`}
                     style={{ width: `${Math.min((metric.value / metric.target) * 100, 100)}%` }}
                   >
@@ -767,7 +819,10 @@ export const AnalyticsMockup = () => {
                   </div>
                 </div>
                 <div className="text-[9px] text-gray-500 mt-1.5 font-medium">
-                  Objectif: {typeof metric.target === 'number' && metric.target < 100 ? `${metric.target}%` : `${metric.target.toLocaleString()} FCFA`}
+                  Objectif:{' '}
+                  {typeof metric.target === 'number' && metric.target < 100
+                    ? `${metric.target}%`
+                    : `${metric.target.toLocaleString()} FCFA`}
                 </div>
               </div>
             </CardContent>
@@ -782,9 +837,13 @@ export const AnalyticsMockup = () => {
                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md">
                   <TrendingUp className="h-3.5 w-3.5 text-white" />
                 </div>
-                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">+28%</div>
+                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  +28%
+                </div>
               </div>
-              <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">vs mois dernier</div>
+              <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                vs mois dernier
+              </div>
             </div>
           </Card>
           <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 via-pink-100/50 to-purple-50/50 p-4 backdrop-blur-sm">
@@ -793,9 +852,13 @@ export const AnalyticsMockup = () => {
                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 shadow-md">
                   <Users className="h-3.5 w-3.5 text-white" />
                 </div>
-                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">1.2K</div>
+                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  1.2K
+                </div>
               </div>
-              <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">Visiteurs/jour</div>
+              <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                Visiteurs/jour
+              </div>
             </div>
           </Card>
         </div>
@@ -812,10 +875,12 @@ export const SupportMockup = () => {
     <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/60 bg-gradient-to-br from-white via-blue-50/30 to-white backdrop-blur-xl">
       {/* Effet de brillance animé */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent animate-shimmer rotate-12" 
-             style={{ width: '200%', height: '200%' }}></div>
+        <div
+          className="absolute -inset-10 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent animate-shimmer rotate-12"
+          style={{ width: '200%', height: '200%' }}
+        ></div>
       </div>
-      
+
       <div className="relative p-4 md:p-5 space-y-3">
         {/* Header Premium */}
         <div className="flex items-center justify-between mb-3">
@@ -828,7 +893,9 @@ export const SupportMockup = () => {
               <h3 className="text-base md:text-lg font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
                 Support 24/7
               </h3>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">Assistance disponible à tout moment</p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                Assistance disponible à tout moment
+              </p>
             </div>
           </div>
           <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 shadow-lg shadow-emerald-500/30 text-[10px] md:text-xs px-3 py-1 font-semibold">
@@ -841,7 +908,7 @@ export const SupportMockup = () => {
         <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 via-indigo-50/80 to-blue-50 p-4 md:p-5 relative overflow-hidden backdrop-blur-sm">
           {/* Effet de brillance */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-white/20"></div>
-          
+
           <div className="relative flex items-start gap-3">
             <div className="relative flex-shrink-0">
               <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 flex items-center justify-center shadow-xl border-3 border-white">
@@ -853,7 +920,9 @@ export const SupportMockup = () => {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-sm md:text-base font-bold text-gray-900">Équipe Emarzona</span>
+                <span className="text-sm md:text-base font-bold text-gray-900">
+                  Équipe Emarzona
+                </span>
                 <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[9px] px-1.5 py-0 font-semibold">
                   En ligne
                 </Badge>
@@ -893,18 +962,40 @@ export const SupportMockup = () => {
         {/* Stats en grille Premium */}
         <div className="grid grid-cols-3 gap-2.5 pt-3 border-t border-gray-200/60">
           {[
-            { value: '98%', label: 'Satisfaction', color: 'from-emerald-500 to-teal-500', icon: CheckCircle2 },
-            { value: '2min', label: 'Temps réponse', color: 'from-blue-500 to-cyan-500', icon: Zap },
-            { value: '24/7', label: 'Disponibilité', color: 'from-purple-500 to-pink-500', icon: Activity },
+            {
+              value: '98%',
+              label: 'Satisfaction',
+              color: 'from-emerald-500 to-teal-500',
+              icon: CheckCircle2,
+            },
+            {
+              value: '2min',
+              label: 'Temps réponse',
+              color: 'from-blue-500 to-cyan-500',
+              icon: Zap,
+            },
+            {
+              value: '24/7',
+              label: 'Disponibilité',
+              color: 'from-purple-500 to-pink-500',
+              icon: Activity,
+            },
           ].map((stat, index) => (
-            <Card key={index} className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/80 p-3 text-center backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-              <div className={`inline-flex p-1.5 rounded-lg bg-gradient-to-br ${stat.color} shadow-md mb-2`}>
+            <Card
+              key={index}
+              className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/80 p-3 text-center backdrop-blur-sm hover:shadow-xl transition-all duration-300"
+            >
+              <div
+                className={`inline-flex p-1.5 rounded-lg bg-gradient-to-br ${stat.color} shadow-md mb-2`}
+              >
                 <stat.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
               </div>
               <div className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-1">
                 {stat.value}
               </div>
-              <div className="text-[9px] md:text-[10px] font-semibold text-gray-600 uppercase tracking-wide">{stat.label}</div>
+              <div className="text-[9px] md:text-[10px] font-semibold text-gray-600 uppercase tracking-wide">
+                {stat.label}
+              </div>
             </Card>
           ))}
         </div>
@@ -918,26 +1009,26 @@ export const SupportMockup = () => {
  */
 export const CoverageMapMockup = () => {
   const regions = [
-    { 
-      name: 'Afrique de l\'Ouest', 
-      countries: 8, 
-      flag: '🌍', 
+    {
+      name: "Afrique de l'Ouest",
+      countries: 8,
+      flag: '🌍',
       color: 'bg-orange-500',
-      bgColor: 'from-orange-50 to-amber-50'
+      bgColor: 'from-orange-50 to-amber-50',
     },
-    { 
-      name: 'Europe', 
-      countries: 27, 
-      flag: '🇪🇺', 
+    {
+      name: 'Europe',
+      countries: 27,
+      flag: '🇪🇺',
       color: 'bg-blue-500',
-      bgColor: 'from-blue-50 to-cyan-50'
+      bgColor: 'from-blue-50 to-cyan-50',
     },
-    { 
-      name: 'Amérique', 
-      countries: 15, 
-      flag: '🇺🇸', 
+    {
+      name: 'Amérique',
+      countries: 15,
+      flag: '🇺🇸',
       color: 'bg-emerald-500',
-      bgColor: 'from-emerald-50 to-teal-50'
+      bgColor: 'from-emerald-50 to-teal-50',
     },
   ];
 
@@ -945,10 +1036,12 @@ export const CoverageMapMockup = () => {
     <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200/60 bg-gradient-to-br from-white via-indigo-50/30 to-white backdrop-blur-xl">
       {/* Effet de brillance animé */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-10 bg-gradient-to-r from-transparent via-indigo-500/10 to-transparent animate-shimmer rotate-12" 
-             style={{ width: '200%', height: '200%' }}></div>
+        <div
+          className="absolute -inset-10 bg-gradient-to-r from-transparent via-indigo-500/10 to-transparent animate-shimmer rotate-12"
+          style={{ width: '200%', height: '200%' }}
+        ></div>
       </div>
-      
+
       <div className="relative p-4 md:p-5 space-y-3">
         {/* Header Premium */}
         <div className="flex items-center justify-between mb-3">
@@ -961,7 +1054,9 @@ export const CoverageMapMockup = () => {
               <h3 className="text-base md:text-lg font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
                 Couverture mondiale
               </h3>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">Présent dans plus de 50 pays</p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">
+                Présent dans plus de 50 pays
+              </p>
             </div>
           </div>
           <div className="p-1.5 rounded-lg bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
@@ -976,7 +1071,7 @@ export const CoverageMapMockup = () => {
           >
             {/* Effet de brillance au hover */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/0 group-hover:from-white/25 group-hover:via-white/15 group-hover:to-white/0 transition-all duration-500"></div>
-            
+
             <CardContent className="relative p-4 md:p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -984,13 +1079,17 @@ export const CoverageMapMockup = () => {
                     <div className="text-2xl md:text-3xl filter drop-shadow-lg">{region.flag}</div>
                   </div>
                   <div>
-                    <div className="text-sm md:text-base font-bold text-gray-900 mb-0.5">{region.name}</div>
+                    <div className="text-sm md:text-base font-bold text-gray-900 mb-0.5">
+                      {region.name}
+                    </div>
                     <div className="text-xs md:text-sm font-semibold text-gray-700">
                       {region.countries} pays couverts
                     </div>
                   </div>
                 </div>
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${region.color} shadow-lg shadow-black/10 group-hover:scale-110 transition-transform`}>
+                <div
+                  className={`p-2.5 rounded-xl bg-gradient-to-br ${region.color} shadow-lg shadow-black/10 group-hover:scale-110 transition-transform`}
+                >
                   <ArrowUpRight className="h-4 w-4 text-white" />
                 </div>
               </div>
@@ -1006,8 +1105,12 @@ export const CoverageMapMockup = () => {
                 <MapPin className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
               <div>
-                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">50+</div>
-                <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">Pays</div>
+                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  50+
+                </div>
+                <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Pays
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1015,8 +1118,12 @@ export const CoverageMapMockup = () => {
                 <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
               <div>
-                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">15+</div>
-                <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">Devises</div>
+                <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  15+
+                </div>
+                <div className="text-[10px] md:text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Devises
+                </div>
               </div>
             </div>
           </div>
@@ -1025,9 +1132,3 @@ export const CoverageMapMockup = () => {
     </div>
   );
 };
-
-
-
-
-
-

@@ -3,6 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 
+function getMutationErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
+
 export interface PriceAlert {
   id: string;
   user_id: string;
@@ -67,7 +72,8 @@ export function usePriceAlerts(userId: string | null) {
       try {
         const { data, error } = await supabase
           .from('price_alerts')
-          .select(`
+          .select(
+            `
             *,
             products!inner (
               id,
@@ -83,7 +89,8 @@ export function usePriceAlerts(userId: string | null) {
                 slug
               )
             )
-          `)
+          `
+          )
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
@@ -115,7 +122,8 @@ export function useStockAlerts(userId: string | null) {
       try {
         const { data, error } = await supabase
           .from('stock_alerts')
-          .select(`
+          .select(
+            `
             *,
             products!inner (
               id,
@@ -125,14 +133,15 @@ export function useStockAlerts(userId: string | null) {
               price,
               promotional_price,
               currency,
-              stock_quantity,
+              store_id,
               stores!inner (
                 id,
                 name,
                 slug
               )
             )
-          `)
+          `
+          )
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
@@ -189,10 +198,10 @@ export function useCreatePriceAlert() {
         description: 'Vous serez notifié lorsque le prix atteint votre objectif',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'alerte de prix',
+        description: getMutationErrorMessage(error, "Impossible de créer l'alerte de prix"),
         variant: 'destructive',
       });
     },
@@ -207,13 +216,7 @@ export function useCreateStockAlert() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      userId,
-      productId,
-    }: {
-      userId: string;
-      productId: string;
-    }) => {
+    mutationFn: async ({ userId, productId }: { userId: string; productId: string }) => {
       const { data, error } = await supabase.rpc('create_stock_alert', {
         p_user_id: userId,
         p_product_id: productId,
@@ -233,10 +236,10 @@ export function useCreateStockAlert() {
         description: 'Vous serez notifié lorsque le produit sera de nouveau en stock',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer l\'alerte de stock',
+        description: getMutationErrorMessage(error, "Impossible de créer l'alerte de stock"),
         variant: 'destructive',
       });
     },
@@ -251,13 +254,7 @@ export function useDeletePriceAlert() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      alertId,
-      userId,
-    }: {
-      alertId: string;
-      userId: string;
-    }) => {
+    mutationFn: async ({ alertId, userId }: { alertId: string; userId: string }) => {
       const { error } = await supabase
         .from('price_alerts')
         .delete()
@@ -273,13 +270,13 @@ export function useDeletePriceAlert() {
       queryClient.invalidateQueries({ queryKey: ['price-alerts', variables.userId] });
       toast({
         title: 'Alerte supprimée',
-        description: 'L\'alerte de prix a été supprimée',
+        description: "L'alerte de prix a été supprimée",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'alerte',
+        description: getMutationErrorMessage(error, "Impossible de supprimer l'alerte"),
         variant: 'destructive',
       });
     },
@@ -294,13 +291,7 @@ export function useDeleteStockAlert() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      alertId,
-      userId,
-    }: {
-      alertId: string;
-      userId: string;
-    }) => {
+    mutationFn: async ({ alertId, userId }: { alertId: string; userId: string }) => {
       const { error } = await supabase
         .from('stock_alerts')
         .delete()
@@ -316,13 +307,13 @@ export function useDeleteStockAlert() {
       queryClient.invalidateQueries({ queryKey: ['stock-alerts', variables.userId] });
       toast({
         title: 'Alerte supprimée',
-        description: 'L\'alerte de stock a été supprimée',
+        description: "L'alerte de stock a été supprimée",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de supprimer l\'alerte',
+        description: getMutationErrorMessage(error, "Impossible de supprimer l'alerte"),
         variant: 'destructive',
       });
     },
@@ -394,16 +385,3 @@ export function useHasStockAlert(userId: string | null, productId: string | null
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

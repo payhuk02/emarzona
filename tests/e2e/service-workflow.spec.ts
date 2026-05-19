@@ -328,7 +328,7 @@ test.describe('Workflow Service Complet', () => {
     await page.waitForURL('**/dashboard**');
 
     // Aller à la page "Mes Réservations"
-    await page.goto('/dashboard/my-bookings');
+    await page.goto('/account/bookings');
 
     // Vérifier qu'une réservation existe pour ce service
     await expect(page.locator(`text=${TEST_CONFIG.serviceName}`)).toBeVisible();
@@ -371,7 +371,7 @@ test.describe('Workflow Service Complet', () => {
     await page.waitForURL('**/dashboard**');
 
     // Aller à la page "Mes Réservations"
-    await page.goto('/dashboard/my-bookings');
+    await page.goto('/account/bookings');
 
     // Trouver la réservation
     const bookingCard = page.locator(`text=${TEST_CONFIG.serviceName}`).first();
@@ -490,7 +490,7 @@ test.describe('Validations services', () => {
     await page.fill('input[type="password"]', TEST_CONFIG.clientPassword);
     await page.click('button[type="submit"]');
 
-    await page.goto('/dashboard/my-bookings');
+    await page.goto('/account/bookings');
 
     // Trouver une réservation proche (< 24h)
     // Le bouton "Annuler" devrait être désactivé ou absent

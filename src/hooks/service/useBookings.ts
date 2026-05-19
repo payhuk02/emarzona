@@ -1,7 +1,7 @@
 /**
  * Service Bookings Hooks
  * Date: 28 octobre 2025
- * 
+ *
  * React Query hooks for managing service bookings
  */
 
@@ -15,18 +15,26 @@ import {
 import { createServiceRefund } from '@/lib/services/cancellation-policy';
 import { logger } from '@/lib/logger';
 
-const SERVICE_BOOKING_FIELDS = 'id, product_id, customer_id, user_id, booking_date, booking_time, status, total_price, staff_member_id, participants_count, deposit_paid, cancellation_reason, cancelled_at, meeting_url, customer_notes, internal_notes, reminder_sent_at, scheduled_date, scheduled_start_time, created_at, updated_at';
-const BOOKING_PRODUCT_FIELDS = 'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
+const SERVICE_BOOKING_FIELDS =
+  'id, product_id, user_id, provider_id, scheduled_date, scheduled_start_time, scheduled_end_time, timezone, status, staff_member_id, participants_count, meeting_url, customer_notes, internal_notes, reminder_sent_at, reminder_sent, cancelled_at, cancellation_reason, completed_at, duration_minutes, created_at, updated_at';
+const BOOKING_PRODUCT_FIELDS =
+  'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
 const BOOKING_CUSTOMER_FIELDS = 'id, name, email, phone, user_id, created_at, updated_at';
-const BOOKING_STAFF_FIELDS = 'id, product_id, name, email, phone, role, specialties, is_available, created_at, updated_at';
-const BOOKING_SERVICE_FIELDS = 'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
+const BOOKING_STAFF_FIELDS =
+  'id, product_id, name, email, phone, role, specialties, is_available, created_at, updated_at';
+const BOOKING_SERVICE_FIELDS =
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
 
 export interface ServiceBooking {
   id: string;
   product_id: string;
-  customer_id: string;
-  booking_date: string;
-  booking_time: string;
+  customer_id?: string;
+  user_id?: string;
+  booking_date?: string;
+  booking_time?: string;
+  scheduled_date?: string;
+  scheduled_start_time?: string;
+  scheduled_end_time?: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
   total_price: number;
   staff_member_id?: string;
@@ -50,12 +58,14 @@ export const useServiceBookings = (productId?: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_bookings')
-        .select(`
+        .select(
+          `
           ${SERVICE_BOOKING_FIELDS},
           product:products(${BOOKING_PRODUCT_FIELDS}),
           customer:customers(${BOOKING_CUSTOMER_FIELDS}),
           staff:service_staff_members(${BOOKING_STAFF_FIELDS})
-        `)
+        `
+        )
         .eq('product_id', productId!)
         .order('booking_date', { ascending: true })
         .order('booking_time', { ascending: true });
@@ -76,11 +86,13 @@ export const useBookingsByDate = (productId: string, date: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_bookings')
-        .select(`
+        .select(
+          `
           ${SERVICE_BOOKING_FIELDS},
           customer:customers(${BOOKING_CUSTOMER_FIELDS}),
           staff:service_staff_members(${BOOKING_STAFF_FIELDS})
-        `)
+        `
+        )
         .eq('product_id', productId)
         .eq('booking_date', date)
         .in('status', ['pending', 'confirmed'])
@@ -100,19 +112,24 @@ export const useMyBookings = () => {
   return useQuery({
     queryKey: ['my-bookings'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
         .from('service_bookings')
-        .select(`
+        .select(
+          `
           ${SERVICE_BOOKING_FIELDS},
           product:products(${BOOKING_PRODUCT_FIELDS}),
           service:service_products(${BOOKING_SERVICE_FIELDS}),
           staff:service_staff_members(${BOOKING_STAFF_FIELDS})
-        `)
-        .eq('customer.email', user.email)
-        .order('booking_date', { ascending: true });
+        `
+        )
+        .eq('user_id', user.id)
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_start_time', { ascending: true });
 
       if (error) throw error;
       return data as ServiceBooking[];
@@ -141,11 +158,7 @@ export const useCreateBooking = () => {
         try {
           // Récupérer les infos du produit et du client
           const [productResult, customerResult] = await Promise.all([
-            supabase
-              .from('products')
-              .select('name, store_id')
-              .eq('id', result.product_id)
-              .single(),
+            supabase.from('products').select('name, store_id').eq('id', result.product_id).single(),
             supabase
               .from('customers')
               .select('name, email, phone')
@@ -252,11 +265,7 @@ export const useCancelBooking = () => {
       if (result) {
         try {
           const [productResult, userProfileResult] = await Promise.all([
-            supabase
-              .from('products')
-              .select('name')
-              .eq('id', result.product_id)
-              .single(),
+            supabase.from('products').select('name').eq('id', result.product_id).single(),
             supabase
               .from('profiles')
               .select('full_name, email, phone')
@@ -288,12 +297,7 @@ export const useCancelBooking = () => {
 
             // 🆕 Créer automatiquement le remboursement selon la politique
             try {
-              await createServiceRefund(
-                result.id,
-                'original_payment',
-                reason,
-                false
-              );
+              await createServiceRefund(result.id, 'original_payment', reason, false);
             } catch (refundError) {
               // Ne pas faire échouer l'annulation si le remboursement échoue
               logger.warn('Error creating automatic refund', {
@@ -340,11 +344,7 @@ export const useConfirmBooking = () => {
       if (result) {
         try {
           const [productResult, userProfileResult] = await Promise.all([
-            supabase
-              .from('products')
-              .select('name')
-              .eq('id', result.product_id)
-              .single(),
+            supabase.from('products').select('name').eq('id', result.product_id).single(),
             supabase
               .from('profiles')
               .select('full_name, email, phone')
@@ -447,14 +447,16 @@ export const useUpcomingBookings = (productId?: string) => {
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
 
-      let  query= supabase
+      let query = supabase
         .from('service_bookings')
-        .select(`
+        .select(
+          `
           ${SERVICE_BOOKING_FIELDS},
           product:products(${BOOKING_PRODUCT_FIELDS}),
           customer:customers(${BOOKING_CUSTOMER_FIELDS}),
           staff:service_staff_members(${BOOKING_STAFF_FIELDS})
-        `)
+        `
+        )
         .gte('booking_date', today)
         .in('status', ['pending', 'confirmed'])
         .order('booking_date', { ascending: true })
@@ -480,7 +482,7 @@ export const useBookingStats = (productId: string, startDate?: string, endDate?:
   return useQuery({
     queryKey: ['booking-stats', productId, startDate, endDate],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('service_bookings')
         .select('status, total_price')
         .eq('product_id', productId);
@@ -513,10 +515,3 @@ export const useBookingStats = (productId: string, startDate?: string, endDate?:
     enabled: !!productId,
   });
 };
-
-
-
-
-
-
-

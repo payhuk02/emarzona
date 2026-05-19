@@ -42,7 +42,7 @@
 ### ✨ Points Forts
 
 - ✅ **Multi-produits** : 5 types de produits dans une seule plateforme
-- ✅ **Paiements Avancés** : Acompte, paiement sécurisé (escrow), PayDunya/Moneroo
+- ✅ **Paiements Avancés** : Acompte, paiement sécurisé (escrow), Moneroo (production)
 - ✅ **Shipping Professionnel** : Intégration FedEx pour calcul et suivi en temps réel
 - ✅ **Messaging Intégré** : Chat vendor-client avec upload de médias
 - ✅ **Système de Litiges** : Gestion professionnelle des disputes
@@ -67,7 +67,7 @@
 
 ### 💳 Paiements
 
-- [x] Intégration PayDunya & Moneroo
+- [x] Intégration Moneroo (paiements en production)
 - [x] Paiement intégral
 - [x] Paiement par acompte (%)
 - [x] Paiement sécurisé (escrow)
@@ -158,7 +158,7 @@
 
 ### Paiements & Services Externes
 
-- **Paiements** : PayDunya, Moneroo
+- **Paiements** : Moneroo
 - **Shipping** : FedEx API
 - **Analytics** : Google Analytics, Facebook Pixel, TikTok Pixel
 - **Chat** : Crisp

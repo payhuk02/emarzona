@@ -8,8 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const BOOKING_REMINDER_FIELDS = 'id, booking_id, service_id, store_id, user_id, reminder_type, reminder_scheduled_at, reminder_sent_at, reminder_sent, reminder_subject, reminder_message, reminder_template, status, delivery_status, error_message, retry_count, max_retries, metadata, created_at, updated_at';
-const REMINDER_TEMPLATE_FIELDS = 'id, store_id, template_name, template_type, reminder_timing_hours, subject_template, message_template, is_active, is_default, metadata, created_at, updated_at';
+const BOOKING_REMINDER_FIELDS =
+  'id, booking_id, service_id, store_id, user_id, reminder_type, reminder_scheduled_at, reminder_sent_at, reminder_sent, reminder_subject, reminder_message, reminder_template, status, delivery_status, error_message, retry_count, max_retries, metadata, created_at, updated_at';
+const REMINDER_TEMPLATE_FIELDS =
+  'id, store_id, template_name, template_type, reminder_timing_hours, subject_template, message_template, is_active, is_default, metadata, created_at, updated_at';
 
 export interface BookingReminder {
   id: string;
@@ -29,7 +31,7 @@ export interface BookingReminder {
   error_message?: string;
   retry_count: number;
   max_retries: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -44,7 +46,7 @@ export interface ReminderTemplate {
   message_template: string;
   is_active: boolean;
   is_default: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -109,11 +111,11 @@ export function usePendingReminders(limit: number = 100) {
       });
 
       if (error) {
-        logger.error('Error fetching pending reminders', { error });
-        throw error;
+        logger.warn('Error fetching pending reminders', { error: error.message, code: error.code });
+        return [];
       }
 
-      return data;
+      return data ?? [];
     },
     refetchInterval: 60000, // Rafraîchir toutes les minutes
   });
@@ -141,7 +143,7 @@ export function useCreateReminderTemplate() {
 
       return data as ReminderTemplate;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['reminder-templates', data.store_id] });
       toast({
         title: 'Template créé',
@@ -181,7 +183,7 @@ export function useUpdateReminderTemplate() {
 
       return data as ReminderTemplate;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['reminder-templates', data.store_id] });
       toast({
         title: 'Template mis à jour',
@@ -206,7 +208,7 @@ export function useDeleteReminderTemplate() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ templateId, storeId }: { templateId: string; storeId: string }) => {
+    mutationFn: async ({ templateId }: { templateId: string; storeId: string }) => {
       const { error } = await supabase
         .from('service_reminder_templates')
         .delete()
@@ -298,7 +300,7 @@ export function useCreateBookingReminders() {
 
       return data;
     },
-    onSuccess: (count) => {
+    onSuccess: count => {
       queryClient.invalidateQueries({ queryKey: ['booking-reminders'] });
       toast({
         title: 'Rappels créés',
@@ -314,10 +316,3 @@ export function useCreateBookingReminders() {
     },
   });
 }
-
-
-
-
-
-
-
