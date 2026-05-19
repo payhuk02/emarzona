@@ -14,7 +14,7 @@ import { Info, Gift } from '@/components/icons';
 import { Upload, Loader2, Image as ImageIcon, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
-import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
+import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
@@ -78,8 +78,11 @@ export const CourseBasicInfoForm = ({
 }: CourseBasicInfoFormProps) => {
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const { toast } = useToast();
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const {
+    uploadMany,
+    uploading: uploadingImage,
+    progress: uploadProgress,
+  } = useProductImageUpload('courses');
   const [customCategory, setCustomCategory] = useState<string>('');
 
   // Vérifier si la catégorie actuelle est "Autre" ou une valeur personnalisée
@@ -142,30 +145,8 @@ export const CourseBasicInfoForm = ({
       return;
     }
 
-    setUploadingImage(true);
-    setUploadProgress(0);
-
     try {
-      const uploadPromises = Array.from(files).map(async (file, index) => {
-        const { url, error } = await uploadToSupabaseStorage(file, {
-          bucket: 'product-images',
-          path: 'courses',
-          filePrefix: 'course',
-          onProgress: progress => {
-            // Calculer la progression globale pour tous les fichiers
-            const fileProgress = (index / files.length) * 100 + progress / files.length;
-            setUploadProgress(fileProgress);
-          },
-          maxSizeBytes: maxSize,
-          allowedTypes: validTypes,
-        });
-
-        if (error) throw error;
-        return url;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const validUrls = uploadedUrls.filter((url): url is string => !!url);
+      const validUrls = await uploadMany(Array.from(files), { maxSizeBytes: maxSize });
 
       if (validUrls.length > 0) {
         const currentImages = formData.images || [];
@@ -190,9 +171,7 @@ export const CourseBasicInfoForm = ({
         variant: 'destructive',
       });
     } finally {
-      setUploadingImage(false);
-      setUploadProgress(0);
-      e.target.value = ''; // Reset input
+      e.target.value = '';
     }
   };
 

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
-import { validateImage } from '@/components/ui/image-upload-helper';
+import { uploadCatalogImage } from '@/lib/images/product-image-upload';
+import { IMAGE_FILE_LIMITS } from '@/config/image-formats';
 
 interface ImageUploadProps {
   value: string;
@@ -22,18 +22,19 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
       const file = event.target.files?.[0];
       if (!file) return;
 
-      // Validation complète (type, poids, dimensions 1536x1024 via format produit)
-      const validation = await validateImage(file, 'product');
-      if (!validation.isValid) {
-        logger.warn('Invalid product image', {
-          errors: validation.errors,
-          fileName: file.name,
-        });
+      if (!IMAGE_FILE_LIMITS.allowedFormats.includes(file.type)) {
         toast({
           title: "Format d'image non valide",
-          description:
-            validation.errors.join(' ') ||
-            "L'image doit être en 1536×1024 (ratio 3:2) et respecter la taille maximale.",
+          description: `Formats acceptés : ${IMAGE_FILE_LIMITS.allowedExtensions.join(', ')}`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (file.size > IMAGE_FILE_LIMITS.maxFileSize) {
+        toast({
+          title: 'Image trop lourde',
+          description: `Maximum ${IMAGE_FILE_LIMITS.maxFileSizeMB} Mo`,
           variant: 'destructive',
         });
         return;
@@ -41,37 +42,23 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
 
       setUploading(true);
 
-      // Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage.from('product-images').upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false,
+      const result = await uploadCatalogImage(file, 'products', {
+        normalizeToCatalogFormat: true,
+        filePrefix: 'product',
       });
 
-      if (error) throw error;
+      if (!result.success || !result.url) {
+        throw result.error ?? new Error('Upload échoué');
+      }
 
-      // Get public URL
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from('product-images').getPublicUrl(data.path);
-
-      onChange(publicUrl);
+      onChange(result.url);
 
       toast({
         title: 'Succès',
-        description: 'Image 1536×1024 téléchargée avec succès',
+        description: 'Image optimisée 1536×1024 et téléchargée',
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (_error: unknown) {
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Error uploading image', { error: errorMessage });
       toast({
         title: 'Erreur',
@@ -111,7 +98,9 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
           <div className="flex flex-col items-center gap-2">
             <ImageIcon className="h-12 w-12 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">Téléchargez une image de produit</p>
-            <p className="text-xs text-muted-foreground">PNG, JPG, WEBP (max 5MB)</p>
+            <p className="text-xs text-muted-foreground">
+              PNG, JPG, WebP — recadrage auto 1536×1024
+            </p>
           </div>
         </div>
       )}
@@ -150,9 +139,3 @@ const ImageUpload = ({ value, onChange, disabled = false }: ImageUploadProps) =>
 };
 
 export default ImageUpload;
-
-
-
-
-
-

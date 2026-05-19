@@ -64,60 +64,67 @@ interface ProductVisualTabProps {
   storeId: string;
 }
 
-export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductVisualTabProps) => {
+export const ProductVisualTab = ({
+  formData,
+  updateFormData,
+  storeId: _storeId,
+}: ProductVisualTabProps) => {
   const [activePreview, setActivePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { toast } = useToast();
 
-  const handleImageUpload = (urls: string | string[]) => {
-    const toArray = Array.isArray(urls) ? urls : [urls];
-    const validateImage = async (url: string): Promise<boolean> => {
-      return new Promise(resolve => {
-        const img = new Image();
-        img.onload = () => {
-          const targetWidth = IMAGE_FORMATS.product.width;
-          const targetHeight = IMAGE_FORMATS.product.height;
-          const ok = img.width === targetWidth && img.height === targetHeight;
-          resolve(ok);
-        };
-        img.onerror = () => resolve(false);
-        img.src = url;
-      });
-    };
+  const validateProductDimensions = (url: string): Promise<boolean> =>
+    new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        resolve(
+          img.width === IMAGE_FORMATS.product.width && img.height === IMAGE_FORMATS.product.height
+        );
+      };
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
 
-    const apply = async () => {
-      const valids: string[] = [];
-      for (const u of toArray) {
-        if (await validateImage(u)) {
-          valids.push(u);
-        } else {
-          logger.warn('Image rejetée: dimensions non conformes au format produit requis', {
-            url: u,
-          });
-          toast({
-            title: "Format d'image non valide",
-            description: 'Veuillez utiliser une image 1536×1024 (ratio 3:2).',
-            variant: 'destructive',
-          });
-        }
-      }
-      if (Array.isArray(urls)) {
-        updateFormData('gallery_images', valids);
-        if (valids.length > 0) {
-          toast({
-            title: 'Images ajoutées',
-            description: `${valids.length} image(s) conforme(s) 1536×1024 (3:2)`,
-          });
-        }
+  /** Upload catalogue = 1536×1024 ; validation conservée pour les URLs externes. */
+  const applyImageUrls = async (urls: string | string[], target: 'main' | 'gallery') => {
+    const list = (Array.isArray(urls) ? urls : [urls]).filter(Boolean);
+    const valids: string[] = [];
+
+    for (const url of list) {
+      if (await validateProductDimensions(url)) {
+        valids.push(url);
       } else {
-        updateFormData('image_url', valids[0] || '');
-        if (valids[0]) {
-          toast({ title: 'Image principale ajoutée', description: 'Format 1536×1024 détecté' });
-        }
+        logger.warn('Image rejetée: dimensions non conformes', { url });
+        toast({
+          title: "Format d'image non valide",
+          description: 'Utilisez une image 1536×1024 (ratio 3:2) ou le téléversement fichier.',
+          variant: 'destructive',
+        });
       }
-    };
+    }
 
-    void apply();
+    if (target === 'gallery') {
+      updateFormData('gallery_images', valids);
+      if (valids.length > 0) {
+        toast({
+          title: 'Images ajoutées',
+          description: `${valids.length} image(s) au format 1536×1024`,
+        });
+      }
+    } else {
+      updateFormData('image_url', valids[0] || '');
+      if (valids[0]) {
+        toast({ title: 'Image principale ajoutée', description: 'Format 1536×1024' });
+      }
+    }
+  };
+
+  const handleMainImageUpload = (urls: string | string[]) => {
+    void applyImageUrls(urls, 'main');
+  };
+
+  const handleGalleryImageUpload = (urls: string | string[]) => {
+    void applyImageUrls(urls, 'gallery');
   };
 
   const removeImage = (index: number, type: 'main' | 'gallery') => {
@@ -236,8 +243,8 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
             <CardContent>
               <ImageUpload
                 value={formData.image_url || ''}
-                onChange={handleImageUpload}
-                storeId={storeId}
+                onChange={handleMainImageUpload}
+                catalogPath="products"
                 multiple={false}
                 maxSize={10}
               />
@@ -324,8 +331,8 @@ export const ProductVisualTab = ({ formData, updateFormData, storeId }: ProductV
             <CardContent>
               <ImageUpload
                 value={formData.gallery_images || []}
-                onChange={handleImageUpload}
-                storeId={storeId}
+                onChange={handleGalleryImageUpload}
+                catalogPath="products"
                 multiple={true}
                 maxFiles={10}
                 maxSize={10}

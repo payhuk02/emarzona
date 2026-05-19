@@ -58,56 +58,56 @@ interface ContextConfig {
 const CONTEXT_MAP: Record<ImageStudioContext, ContextConfig> = {
   services: {
     folder: 'services',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 2, // Style studio pro
     defaultLabel: 'Image du service',
     hint: 'Format paysage recommandé — sera affichée sur la fiche service.',
   },
   shop: {
     folder: 'shop',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 0, // Optimisation premium
     defaultLabel: 'Visuel de la boutique',
     hint: 'Apparaît en couverture de votre boutique.',
   },
   profile: {
     folder: 'profile',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 0, // Optimisation premium
     defaultLabel: 'Photo de profil',
     hint: 'Visible sur votre profil public et vos messages.',
   },
   product: {
     folder: 'products',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 1, // Fond blanc épuré
     defaultLabel: 'Image produit',
     hint: 'Fond blanc recommandé pour un rendu e-commerce premium.',
   },
   course: {
     folder: 'courses',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 0, // Optimisation premium
     defaultLabel: 'Image du cours',
     hint: 'Visuel de couverture pour votre formation en ligne.',
   },
   artist: {
     folder: 'artist',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 3, // Couleurs vibrantes
     defaultLabel: "Image de l'œuvre",
     hint: "Mettez en valeur les couleurs et les détails de l'œuvre.",
   },
   cover: {
     folder: 'covers',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 3, // Couleurs vibrantes
     defaultLabel: 'Image de couverture',
     hint: 'Bannière haute qualité — couleurs riches.',
   },
   generic: {
     folder: 'enhanced',
-    bucket: 'service-images',
+    bucket: 'product-images',
     presetIndex: 0,
     defaultLabel: 'Image',
     hint: 'Image optimisée par IA.',

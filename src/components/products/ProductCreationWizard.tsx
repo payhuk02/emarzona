@@ -93,7 +93,7 @@ export const ProductCreationWizard = ({
   onComplete,
   onSwitchToAdvanced,
   onCourseTypeSelected,
-  storeId,
+  storeId: _storeId,
 }: WizardProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
@@ -375,7 +375,7 @@ export const ProductCreationWizard = ({
                 <ImageUpload
                   value={formData.image_url || ''}
                   onChange={handleImageUpload}
-                  storeId={storeId}
+                  catalogPath="products"
                   maxSize={10}
                 />
                 <p className="text-xs text-gray-500 mt-2">
@@ -505,9 +505,3 @@ export const ProductCreationWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

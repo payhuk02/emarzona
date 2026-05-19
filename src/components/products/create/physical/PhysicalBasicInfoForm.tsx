@@ -4,7 +4,7 @@
  * ✅ Upload images Supabase Storage implémenté
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ImagePlus, X, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
+import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import type { PhysicalProductFormData } from '@/types/physical-product';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 import { logger } from '@/lib/logger';
@@ -36,8 +36,7 @@ export const PhysicalBasicInfoForm = ({
 }: PhysicalBasicInfoFormProps) => {
   const { toast } = useToast();
   const { store } = useStore();
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const { uploadMany, uploading, progress: uploadProgress } = useProductImageUpload('products');
   const [slugChecking, setSlugChecking] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -82,27 +81,8 @@ export const PhysicalBasicInfoForm = ({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setUploading(true);
-    setUploadProgress(0);
-
     try {
-      const uploadPromises = Array.from(files).map(async file => {
-        const { url, error } = await uploadToSupabaseStorage(file, {
-          bucket: 'product-images',
-          path: 'physical',
-          filePrefix: 'product',
-          onProgress: progress => setUploadProgress(progress),
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        return url;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const validUrls = uploadedUrls.filter((url): url is string => url !== null);
+      const validUrls = await uploadMany(Array.from(files));
 
       if (validUrls.length > 0) {
         onUpdate({ images: [...(data.images || []), ...validUrls] });
@@ -120,9 +100,6 @@ export const PhysicalBasicInfoForm = ({
         variant: 'destructive',
       });
     } finally {
-      setUploading(false);
-      setUploadProgress(0);
-      // Reset input
       e.target.value = '';
     }
   };

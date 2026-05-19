@@ -23,7 +23,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import type { ArtistProductFormData, ArtistSocialLinks } from '@/types/artist-product';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
 import { logger } from '@/lib/logger';
@@ -53,8 +53,12 @@ interface ArtistBasicInfoFormProps {
 
 const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasicInfoFormProps) => {
   const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const {
+    uploadMany,
+    uploadOne,
+    uploading,
+    progress: uploadProgress,
+  } = useProductImageUpload('artist');
   const [_imageError, setImageError] = useState(false);
   const [_imageLoading, setImageLoading] = useState(true);
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
@@ -139,20 +143,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setUploading(true);
-    setUploadProgress(0);
-
     try {
-      // Vérifier l'authentification avec getSession (plus fiable que getUser)
-      const {
-        data: { session },
-        error: authError,
-      } = await supabase.auth.getSession();
-      if (authError || !session || !session.user) {
-        logger.error('Erreur authentification upload images œuvre', { error: authError });
-        throw new Error('Non authentifié. Veuillez vous reconnecter.');
-      }
-
       // Validation préventive : vérifier tous les fichiers AVANT upload
       const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
       const invalidFiles: string[] = [];
@@ -179,132 +170,11 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
           description: `Les fichiers suivants ne sont pas des images valides : ${invalidFiles.join(', ')}. Veuillez utiliser des images (PNG, JPG, WEBP, GIF).`,
           variant: 'destructive',
         });
-        setUploading(false);
-        setUploadProgress(0);
         e.target.value = '';
         return;
       }
 
-      const uploadPromises = Array.from(files).map(async (file, index) => {
-        // Validation supplémentaire pour chaque fichier (double sécurité)
-        if (!file.type || !file.type.startsWith('image/')) {
-          throw new Error(
-            `Le fichier "${file.name}" n'est pas une image valide (type: ${file.type || 'inconnu'})`
-          );
-        }
-
-        // Générer un nom de fichier unique
-        const fileExt = file.name.split('.').pop()?.toLowerCase();
-
-        // Forcer le Content-Type selon l'extension (plus fiable que file.type qui peut être incorrect)
-        // Cela garantit que Supabase Storage reçoit toujours un type MIME valide
-        let contentType: string;
-        if (fileExt === 'png') {
-          contentType = 'image/png';
-        } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
-          contentType = 'image/jpeg';
-        } else if (fileExt === 'webp') {
-          contentType = 'image/webp';
-        } else if (fileExt === 'gif') {
-          contentType = 'image/gif';
-        } else {
-          // Fallback : utiliser file.type si disponible, sinon image/png par défaut
-          contentType = file.type && file.type.startsWith('image/') ? file.type : 'image/png';
-        }
-
-        const fileName = `artist/artwork_${Date.now()}_${index}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-
-        logger.info('Upload image œuvre - Détails', {
-          fileName: file.name,
-          fileSize: file.size,
-          originalFileType: file.type,
-          correctedContentType: contentType,
-          targetPath: fileName,
-          index,
-        });
-
-        // SOLUTION CRITIQUE : Utiliser XMLHttpRequest directement pour contrôler le Content-Type
-        // Note: session est déjà déclarée dans handleImageUpload, on la réutilise
-        if (!session) {
-          throw new Error('Non authentifié');
-        }
-
-        const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-        if (!projectUrl) {
-          throw new Error("VITE_SUPABASE_URL n'est pas définie");
-        }
-        const uploadUrl = `${projectUrl}/storage/v1/object/product-images/${fileName}`;
-
-        // Upload via XMLHttpRequest avec Content-Type explicite
-        const uploadData = await new Promise<{ path: string }>((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-
-          xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-              const progress = ((index + 1) / files.length) * 100;
-              setUploadProgress(progress);
-            }
-          });
-
-          xhr.addEventListener('load', () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                const response = JSON.parse(xhr.responseText);
-                resolve({ path: response.path || fileName });
-              } catch {
-                resolve({ path: fileName });
-              }
-            } else {
-              try {
-                const error = JSON.parse(xhr.responseText);
-                reject(
-                  new Error(
-                    error.message ||
-                      error.error ||
-                      `Erreur upload: ${xhr.statusText} (${xhr.status})`
-                  )
-                );
-              } catch {
-                reject(new Error(`Erreur upload: ${xhr.statusText} (${xhr.status})`));
-              }
-            }
-          });
-
-          xhr.addEventListener('error', () => {
-            reject(new Error("Erreur réseau lors de l'upload"));
-          });
-
-          xhr.addEventListener('abort', () => {
-            reject(new Error('Upload annulé'));
-          });
-
-          xhr.open('POST', uploadUrl);
-          xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
-          xhr.setRequestHeader('Content-Type', contentType); // CRITIQUE : Forcer le Content-Type
-          xhr.setRequestHeader('x-upsert', 'false');
-          xhr.setRequestHeader('cache-control', '3600');
-
-          xhr.send(file);
-        });
-
-        if (!uploadData || !uploadData.path)
-          throw new Error('Upload réussi mais aucun chemin retourné');
-
-        // Construire l'URL publique
-        const publicUrl = `${projectUrl}/storage/v1/object/public/product-images/${uploadData.path}`;
-
-        logger.info('Image œuvre uploadée', {
-          url: publicUrl,
-          path: uploadData.path,
-          fileName: file.name,
-          index,
-          urlFormat: 'valid',
-        });
-
-        return publicUrl;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
+      const uploadedUrls = await uploadMany(Array.from(files));
       const currentImages = data.images || [];
       onUpdate({ images: [...currentImages, ...uploadedUrls] });
 
@@ -313,19 +183,14 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         description: `${uploadedUrls.length} image(s) uploadée(s) avec succès`,
       });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Erreur upload images œuvre', {
-        error: errorMessage,
-        errorDetails: error,
-      });
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
+      logger.error('Erreur upload images œuvre', { error: errorMessage });
       toast({
         title: "❌ Erreur d'upload",
         description: errorMessage || "Une erreur est survenue lors de l'upload",
         variant: 'destructive',
       });
     } finally {
-      setUploading(false);
-      setUploadProgress(0);
       e.target.value = '';
     }
   };
@@ -350,80 +215,8 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
       return;
     }
 
-    setUploading(true);
-    setUploadProgress(0);
-
     try {
-      const {
-        data: { session },
-        error: authError,
-      } = await supabase.auth.getSession();
-      if (authError || !session || !session.user) {
-        throw new Error('Non authentifié');
-      }
-
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      let contentType: string;
-      if (fileExt === 'png') {
-        contentType = 'image/png';
-      } else if (fileExt === 'jpg' || fileExt === 'jpeg') {
-        contentType = 'image/jpeg';
-      } else if (fileExt === 'webp') {
-        contentType = 'image/webp';
-      } else {
-        contentType = file.type && file.type.startsWith('image/') ? file.type : 'image/png';
-      }
-
-      const fileName = `artist/artist-photo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-      if (!projectUrl) {
-        throw new Error("VITE_SUPABASE_URL n'est pas définie");
-      }
-      const uploadUrl = `${projectUrl}/storage/v1/object/product-images/${fileName}`;
-
-      const uploadData = await new Promise<{ path: string }>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener('progress', e => {
-          if (e.lengthComputable) {
-            setUploadProgress((e.loaded / e.total) * 100);
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const response = JSON.parse(xhr.responseText);
-              resolve({ path: response.path || fileName });
-            } catch {
-              resolve({ path: fileName });
-            }
-          } else {
-            try {
-              const error = JSON.parse(xhr.responseText);
-              reject(
-                new Error(
-                  error.message || error.error || `Erreur upload: ${xhr.statusText} (${xhr.status})`
-                )
-              );
-            } catch {
-              reject(new Error(`Erreur upload: ${xhr.statusText} (${xhr.status})`));
-            }
-          }
-        });
-
-        xhr.addEventListener('error', () => {
-          reject(new Error("Erreur réseau lors de l'upload"));
-        });
-
-        xhr.open('POST', uploadUrl);
-        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
-        xhr.setRequestHeader('Content-Type', contentType);
-        xhr.setRequestHeader('x-upsert', 'false');
-        xhr.send(file);
-      });
-
-      const publicUrl = `${projectUrl}/storage/v1/object/public/product-images/${uploadData.path}`;
+      const publicUrl = await uploadOne(file, { filePrefix: 'artist-photo' });
       onUpdate({ artist_photo_url: publicUrl });
 
       toast({
@@ -431,7 +224,7 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         description: "La photo de l'artiste a été uploadée avec succès",
       });
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Erreur upload photo artiste', { error: errorMessage });
       toast({
         title: "❌ Erreur d'upload",
@@ -439,8 +232,6 @@ const ArtistBasicInfoFormComponent = ({ data, onUpdate, storeSlug }: ArtistBasic
         variant: 'destructive',
       });
     } finally {
-      setUploading(false);
-      setUploadProgress(0);
       e.target.value = '';
     }
   };

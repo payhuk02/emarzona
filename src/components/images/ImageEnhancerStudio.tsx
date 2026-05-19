@@ -24,7 +24,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useImageOptimizer } from '@/hooks/useImageOptimizer';
 import { useImageEnhancerSettings } from '@/hooks/useImageEnhancerSettings';
-import { compressImage, blobToFile } from '@/lib/images/compress';
+import { blobToFile } from '@/lib/images/compress';
 import { imageUrlToBlob } from '@/lib/images/imageUrlToBlob';
 import { invokeEnhanceImage, prepareImageForAI } from '@/lib/images/enhance-image-client';
 import { DEFAULT_STUDIO_PRESETS, type StudioPreset } from '@/lib/images/studio-presets';
@@ -54,7 +54,7 @@ type CompareMode = 'slider' | 'side-by-side';
 
 export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
   folder = 'enhanced',
-  bucket = 'service-images',
+  bucket = 'product-images',
   onSaved,
   onSaving,
   initialUrl,
@@ -213,18 +213,10 @@ export const ImageEnhancerStudio: React.FC<ImageEnhancerStudioProps> = ({
     setLastError(null);
     try {
       const blob = await imageUrlToBlob(enhancedUrl);
-      const tempFile = new File([blob], `enhanced-${Date.now()}.png`, {
-        type: blob.type || 'image/png',
+      const tempFile = new File([blob], `enhanced-${Date.now()}.webp`, {
+        type: blob.type || 'image/webp',
       });
-
-      const { blob: compressed } = await compressImage(tempFile, {
-        maxWidth: 1920,
-        maxHeight: 1920,
-        quality: 0.88,
-        mimeType: 'image/webp',
-      });
-      const finalFile = blobToFile(compressed, tempFile.name);
-      const result = await uploadOptimized(finalFile);
+      const result = await uploadOptimized(tempFile);
 
       setSavedPublicUrl(result.publicUrl);
       onSaved?.(result.publicUrl);

@@ -29,7 +29,17 @@ import {
 } from '@/components/ui/form';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useCreateCommunityMember } from '@/hooks/community/useCommunityMembers';
-import { Upload, User, Mail, Phone, Briefcase, Globe, Linkedin, Twitter, Github } from 'lucide-react';
+import {
+  Upload,
+  User,
+  Mail,
+  Phone,
+  Briefcase,
+  Globe,
+  Linkedin,
+  Twitter,
+  Github,
+} from 'lucide-react';
 import { COUNTRIES } from '@/lib/countries';
 
 const memberFormSchema = z.object({
@@ -177,11 +187,13 @@ export function CommunityMemberForm({ onSuccess }: CommunityMemberFormProps) {
                 <FormControl>
                   <ImageUpload
                     value={profileImage || ''}
-                    onChange={(url) => {
-                      setProfileImage(url);
-                      form.setValue('profile_image_url', url);
+                    onChange={url => {
+                      const value = Array.isArray(url) ? (url[0] ?? '') : url;
+                      setProfileImage(value);
+                      form.setValue('profile_image_url', value);
                     }}
-                    folder="community/profiles"
+                    catalogPath="profile"
+                    normalizeToCatalog={false}
                   />
                 </FormControl>
                 <FormDescription>
@@ -244,9 +256,7 @@ export function CommunityMemberForm({ onSuccess }: CommunityMemberFormProps) {
                     maxLength={500}
                   />
                 </FormControl>
-                <FormDescription>
-                  {field.value?.length || 0}/500 caractères
-                </FormDescription>
+                <FormDescription>{field.value?.length || 0}/500 caractères</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -274,7 +284,7 @@ export function CommunityMemberForm({ onSuccess }: CommunityMemberFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {COUNTRIES.map((country) => (
+                      {COUNTRIES.map(country => (
                         <SelectItem key={country.code} value={country.code}>
                           {country.name}
                         </SelectItem>
@@ -374,11 +384,7 @@ export function CommunityMemberForm({ onSuccess }: CommunityMemberFormProps) {
           </div>
         </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={createMember.isPending}
-        >
+        <Button type="submit" className="w-full" disabled={createMember.isPending}>
           {createMember.isPending ? (
             <>
               <Upload className="mr-2 h-4 w-4 animate-spin" />
@@ -395,10 +401,3 @@ export function CommunityMemberForm({ onSuccess }: CommunityMemberFormProps) {
     </Form>
   );
 }
-
-
-
-
-
-
-

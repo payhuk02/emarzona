@@ -4,7 +4,6 @@
  * ✅ Upload images Supabase Storage implémenté
  */
 
-import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,7 +22,7 @@ import { CurrencySelect } from '@/components/ui/currency-select';
 import { AIContentGenerator } from '@/components/products/AIContentGenerator';
 import { ImagePlus, X, Loader2, Gift, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
+import { useProductImageUpload } from '@/hooks/useProductImageUpload';
 import type { ServiceProductFormData } from '@/types/service-product';
 import { logger } from '@/lib/logger';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
@@ -36,35 +35,15 @@ interface ServiceBasicInfoFormProps {
 
 export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormProps) => {
   const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const { uploadMany, uploading, progress: uploadProgress } = useProductImageUpload('services');
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setUploading(true);
-    setUploadProgress(0);
-
     try {
-      const uploadPromises = Array.from(files).map(async file => {
-        const { url, error } = await uploadToSupabaseStorage(file, {
-          bucket: 'product-images',
-          path: 'services',
-          filePrefix: 'service',
-          onProgress: progress => setUploadProgress(progress),
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        return url;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      const validUrls = uploadedUrls.filter((url): url is string => url !== null);
+      const validUrls = await uploadMany(Array.from(files));
 
       if (validUrls.length > 0) {
         onUpdate({ images: [...(data.images || []), ...validUrls] });
@@ -82,9 +61,6 @@ export const ServiceBasicInfoForm = ({ data, onUpdate }: ServiceBasicInfoFormPro
         variant: 'destructive',
       });
     } finally {
-      setUploading(false);
-      setUploadProgress(0);
-      // Reset input
       e.target.value = '';
     }
   };

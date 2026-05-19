@@ -1,19 +1,28 @@
 /**
- * Hook utilitaire pour gérer un upload d'image optimisé :
- * - compression côté client (WebP)
- * - upload Supabase dans le bucket choisi
- * - retourne l'URL publique
+ * Hook utilitaire pour upload d'image optimisé (catalogue ou legacy).
  */
 
 import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { compressImage, blobToFile, type CompressOptions } from '@/lib/images/compress';
+import {
+  uploadCatalogImage,
+  studioFolderToCatalogPath,
+  CATALOG_IMAGE_BUCKET,
+  type CatalogImagePath,
+} from '@/lib/images/product-image-upload';
 import { logger } from '@/lib/logger';
 
 interface UseImageOptimizerOptions {
+  /** Chemin catalogue dans product-images (recommandé). */
+  catalogPath?: CatalogImagePath;
+  /** @deprecated Préférer catalogPath. Dossier Studio → mappé en catalogPath. */
+  folder?: string;
+  /** @deprecated Toujours product-images si catalogPath/folder est défini. */
   bucket?: string;
-  folder?: string; // sous-dossier (généralement userId)
   compress?: CompressOptions;
+  /** Si true, ne pas forcer 1536×1024 (défaut: false quand catalogPath est utilisé). */
+  skipCatalogNormalize?: boolean;
 }
 
 interface OptimizedUploadResult {
@@ -26,7 +35,16 @@ interface OptimizedUploadResult {
 }
 
 export function useImageOptimizer(opts: UseImageOptimizerOptions = {}) {
-  const { bucket = 'service-images', folder, compress } = opts;
+  const {
+    catalogPath: catalogPathProp,
+    folder,
+    bucket = CATALOG_IMAGE_BUCKET,
+    compress,
+    skipCatalogNormalize = false,
+  } = opts;
+
+  const catalogPath = catalogPathProp ?? (folder ? studioFolderToCatalogPath(folder) : undefined);
+
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -40,27 +58,40 @@ export function useImageOptimizer(opts: UseImageOptimizerOptions = {}) {
         } = await supabase.auth.getUser();
         if (!user) throw new Error('Vous devez être connecté pour téléverser une image.');
 
-        // 1. Compression
         const { blob, width, height } = await compressImage(file, compress);
-        setProgress(50);
-
-        // 2. Préparation du chemin (auth.uid()/folder/uuid.webp)
+        setProgress(40);
         const optimizedFile = blobToFile(blob, file.name);
+
+        if (catalogPath) {
+          const result = await uploadCatalogImage(optimizedFile, catalogPath, {
+            normalizeToCatalogFormat: !skipCatalogNormalize,
+            onProgress: p => setProgress(40 + (p / 100) * 55),
+          });
+          if (!result.success || !result.url) {
+            throw result.error ?? new Error('Upload échoué');
+          }
+          setProgress(100);
+          return {
+            publicUrl: result.url,
+            path: result.path ?? '',
+            originalSize: file.size,
+            optimizedSize: blob.size,
+            width,
+            height,
+          };
+        }
+
         const subFolder = folder ? `${folder.replace(/^\/|\/$/g, '')}/` : '';
         const path = `${user.id}/${subFolder}${crypto.randomUUID()}-${optimizedFile.name}`;
 
-        // 3. Upload
-        const { error: upErr } = await supabase.storage
-          .from(bucket)
-          .upload(path, optimizedFile, {
-            contentType: optimizedFile.type,
-            cacheControl: '31536000',
-            upsert: false,
-          });
+        const { error: upErr } = await supabase.storage.from(bucket).upload(path, optimizedFile, {
+          contentType: optimizedFile.type,
+          cacheControl: '31536000',
+          upsert: false,
+        });
         if (upErr) throw upErr;
         setProgress(85);
 
-        // 4. URL publique
         const { data } = supabase.storage.from(bucket).getPublicUrl(path);
         setProgress(100);
 
@@ -80,7 +111,7 @@ export function useImageOptimizer(opts: UseImageOptimizerOptions = {}) {
         setTimeout(() => setProgress(0), 800);
       }
     },
-    [bucket, folder, compress],
+    [bucket, catalogPath, compress, folder, skipCatalogNormalize]
   );
 
   return { uploadOptimized, isUploading, progress };
