@@ -36,6 +36,7 @@ import { PaymentProviderSelector } from '@/components/checkout/PaymentProviderSe
 import { FormFieldWithValidation } from '@/components/checkout/FormFieldWithValidation';
 import type { CartItem } from '@/types/cart';
 import { buildOrderItemRows } from '@/lib/checkout-order-items';
+import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import {
   ShoppingBag,
   MapPin,
@@ -407,27 +408,33 @@ export default function Checkout() {
     return Math.max(0, summary.subtotal - couponDiscount);
   }, [summary.subtotal, couponDiscount]);
 
-  // Calculer shipping - Support spécialisé pour œuvres d'artiste
+  const { data: computedShipping } = useQuery({
+    queryKey: [
+      'checkout-shipping',
+      formData.country,
+      formData.city,
+      formData.postal_code,
+      items.map(i => `${i.product_id}:${i.quantity}:${i.product_type}`).join('|'),
+    ],
+    queryFn: () =>
+      resolveCheckoutShippingAmount(items, {
+        country: formData.country,
+        city: formData.city,
+        postal_code: formData.postal_code,
+      }),
+    enabled: !!formData.country && items.length > 0,
+    staleTime: 60_000,
+  });
+
   const shippingAmount = useMemo(() => {
-    // Vérifier si le panier contient des œuvres d'artiste nécessitant un shipping spécialisé
-    const artistProducts = items.filter(item => item.product_type === 'artist');
-
-    if (artistProducts.length > 0) {
-      // Pour les œuvres d'artiste, utiliser le calcul spécialisé
-      // Le calcul sera fait dynamiquement via le hook useCalculateArtistShipping
-      // Pour l'instant, estimation basique
-      if (formData.country === 'BF') {
-        return 15000; // Shipping spécialisé BF (plus cher que standard)
-      }
-      return 35000; // Shipping spécialisé international (emballage + assurance)
-    }
-
-    // Shipping standard pour autres produits
-    if (formData.country === 'BF') {
-      return 5000; // Frais de livraison Burkina Faso
-    }
-    return 15000; // International
-  }, [formData.country, items]);
+    if (computedShipping != null) return computedShipping;
+    if (!formData.country) return 0;
+    const hasArtist = items.some(i => i.product_type === 'artist');
+    if (hasArtist) return formData.country === 'BF' ? 15000 : 35000;
+    const hasPhysical = items.some(i => i.product_type === 'physical');
+    if (hasPhysical) return formData.country === 'BF' ? 5000 : 15000;
+    return 0;
+  }, [computedShipping, formData.country, items]);
 
   // Calculer taxes automatiquement via la fonction RPC
   const { data: taxCalculation, isLoading: taxLoading } = useQuery({
@@ -1007,6 +1014,16 @@ export default function Checkout() {
         variant: 'destructive',
       });
       navigate('/cart');
+      return;
+    }
+
+    if (hasServiceInCart) {
+      toast({
+        title: 'Réservation requise',
+        description:
+          'Les services ne passent pas par le panier. Retirez-les du panier pour continuer.',
+        variant: 'destructive',
+      });
       return;
     }
 

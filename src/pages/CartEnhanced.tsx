@@ -54,8 +54,8 @@ export default function CartEnhanced() {
     async (itemId: string, quantity: number) => {
       try {
         await updateItem({ item_id: itemId, quantity });
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
         toast({
           title: 'Erreur',
           description: errorMessage || 'Impossible de mettre à jour la quantité',
@@ -74,8 +74,8 @@ export default function CartEnhanced() {
           title: 'Article supprimé',
           description: "L'article a été retiré de votre panier",
         });
-      } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
         toast({
           title: 'Erreur',
           description: errorMessage || "Impossible de supprimer l'article",
@@ -95,8 +95,8 @@ export default function CartEnhanced() {
         title: 'Panier vidé',
         description: 'Tous les articles ont été retirés de votre panier',
       });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
         title: 'Erreur',
         description: errorMessage || 'Impossible de vider le panier',

@@ -98,7 +98,7 @@ const GENERIC_PRODUCT_VARIANT_FIELDS = 'id, price, promotional_price, option1_va
  * - Remplissant ses informations de livraison
  * - Appliquant un code promo éventuel
  * - Vérifiant le résumé de commande
- * - Procédant au paiement via Moneroo/PayDunya
+ * - Procédant au paiement via Moneroo
  *
  * @component
  * @returns {JSX.Element} Le composant Checkout

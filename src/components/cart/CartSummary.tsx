@@ -20,7 +20,7 @@ interface CartSummaryProps {
 }
 
 const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
-  const { applyCoupon, removeCoupon, appliedCoupon, isLoading } = useCart();
+  const { items, applyCoupon, removeCoupon, appliedCoupon, isLoading } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
@@ -57,12 +57,22 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
       return;
     }
 
+    if (items?.some(item => item.product_type === 'service')) {
+      toast({
+        title: 'Réservation requise',
+        description:
+          'Les services ne passent pas par le panier. Retirez-les ou réservez depuis la fiche du service.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (onCheckout) {
       onCheckout();
     } else {
       navigate('/checkout');
     }
-  }, [summary.item_count, onCheckout, navigate, toast]);
+  }, [summary.item_count, items, onCheckout, navigate, toast]);
 
   return (
     <Card className="sticky top-4">
@@ -111,8 +121,8 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
                 <Input
                   placeholder="Entrez le code"
                   value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  onKeyDown={(e) => {
+                  onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
                       handleApplyCoupon();
                     }
@@ -168,9 +178,7 @@ const CartSummaryComponent = ({ summary, onCheckout }: CartSummaryProps) => {
         {/* Total */}
         <div className="flex justify-between items-center text-lg font-bold">
           <span>Total</span>
-          <span className="text-2xl text-primary">
-            {summary.total.toLocaleString('fr-FR')} XOF
-          </span>
+          <span className="text-2xl text-primary">{summary.total.toLocaleString('fr-FR')} XOF</span>
         </div>
 
         {/* Bouton checkout */}
@@ -208,10 +216,3 @@ export const CartSummary = React.memo(CartSummaryComponent, (prevProps, nextProp
 });
 
 CartSummary.displayName = 'CartSummary';
-
-
-
-
-
-
-

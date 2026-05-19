@@ -614,7 +614,7 @@ export default function MyCourses() {
                               }
                             >
                               <Link
-                                to={`/courses/${enrollment.course?.product?.slug || ''}`}
+                                to={`/learn/${enrollment.course?.product?.slug || ''}`}
                                 className="flex items-center justify-center"
                               >
                                 {enrollment.progress_percentage === 100 ? (
@@ -649,9 +649,3 @@ export default function MyCourses() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

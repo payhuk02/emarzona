@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,9 +71,16 @@ import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/Pa
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import { useCreateCourseOrder } from '@/hooks/orders/useCreateCourseOrder';
 
-const CourseDetail = () => {
+interface CourseDetailProps {
+  /** Route /learn/:slug — focalise l'expérience sur le lecteur si inscrit */
+  learnMode?: boolean;
+}
+
+const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLearnRoute = learnMode || location.pathname.startsWith('/learn/');
   const { toast } = useToast();
   const { user } = useAuth();
   const { data, isLoading, error } = useCourseDetail(slug || '');
@@ -114,6 +121,19 @@ const CourseDetail = () => {
       setHasTrackedView(true);
     }
   }, [data, hasTrackedView, trackEvent, user]);
+
+  useEffect(() => {
+    if (!isLearnRoute || !data?.isEnrolled || !data.sections?.length) return;
+    const { sections, lastViewedLesson } = data;
+    const firstSection = sections.find(s => s.lessons?.length);
+    const lesson =
+      lastViewedLesson ||
+      firstSection?.lessons?.find((l: CourseLesson) => l.is_preview) ||
+      firstSection?.lessons?.[0];
+    if (lesson) setCurrentLesson(lesson);
+    const player = document.getElementById('course-player-anchor');
+    player?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [isLearnRoute, data]);
 
   if (isLoading) {
     return (
@@ -413,7 +433,7 @@ const CourseDetail = () => {
 
             {/* Video Player */}
             {displayLesson && (
-              <div className="space-y-4">
+              <div id="course-player-anchor" className="space-y-4">
                 <VideoPlayerWithNotes
                   videoType={displayLesson.video_type}
                   videoUrl={displayLesson.video_url}

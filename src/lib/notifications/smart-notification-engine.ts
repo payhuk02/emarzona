@@ -5,6 +5,22 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import {
+  sendUnifiedNotification,
+  type UnifiedNotification,
+} from '@/lib/notifications/unified-notifications';
+
+function parseJsonField<T>(value: unknown, fallback: T): T {
+  if (value == null) return fallback;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return value as T;
+}
 
 export interface NotificationRule {
   id: string;
@@ -30,7 +46,7 @@ export interface NotificationTrigger {
 export interface NotificationCondition {
   field: string;
   operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'not_contains';
-  value: any;
+  value: unknown;
   logic?: 'AND' | 'OR'; // pour combiner avec la condition suivante
 }
 
@@ -46,9 +62,9 @@ export type NotificationChannel = 'email' | 'push' | 'in_app' | 'sms';
 
 export interface NotificationContext {
   userId: string;
-  eventData?: Record<string, any>;
-  predictionData?: Record<string, any>;
-  behaviorData?: Record<string, any>;
+  eventData?: Record<string, unknown>;
+  predictionData?: Record<string, unknown>;
+  behaviorData?: Record<string, unknown>;
 }
 
 const SMART_NOTIFICATION_RULE_FIELDS =
@@ -59,11 +75,23 @@ const SMART_NOTIFICATION_RULE_FIELDS =
  */
 export class SmartNotificationEngine {
   private rules: NotificationRule[] = [];
+  private rulesLoaded = false;
+  private loadingPromise: Promise<void> | null = null;
   private readonly MAX_NOTIFICATIONS_PER_HOUR = 5;
   private readonly MAX_NOTIFICATIONS_PER_DAY = 20;
 
   constructor() {
-    this.loadRules();
+    void this.ensureRulesLoaded();
+  }
+
+  private async ensureRulesLoaded(): Promise<void> {
+    if (this.rulesLoaded) return;
+    if (!this.loadingPromise) {
+      this.loadingPromise = this.loadRules().then(() => {
+        this.rulesLoaded = true;
+      });
+    }
+    await this.loadingPromise;
   }
 
   /**
@@ -83,10 +111,14 @@ export class SmartNotificationEngine {
 
       this.rules = (data || []).map(rule => ({
         ...rule,
-        trigger: JSON.parse(rule.trigger),
-        conditions: JSON.parse(rule.conditions),
-        template: JSON.parse(rule.template),
-        channels: JSON.parse(rule.channels)
+        trigger: parseJsonField(rule.trigger, { type: 'event' as const }),
+        conditions: parseJsonField(rule.conditions, []),
+        template: parseJsonField(rule.template, {
+          title: '',
+          message: '',
+          variables: {},
+        }),
+        channels: parseJsonField(rule.channels, ['in_app'] as NotificationChannel[]),
       })) as NotificationRule[];
 
       logger.info('Loaded notification rules', { count: this.rules.length });
@@ -96,9 +128,30 @@ export class SmartNotificationEngine {
   }
 
   /**
-   * Traite un événement et déclenche les notifications appropriées
+   * Traite un événement et déclenche les notifications appropriées.
+   * Surcharge : processEvent('event_type', userId, { ...eventData })
    */
-  async processEvent(context: NotificationContext): Promise<void> {
+  async processEvent(context: NotificationContext): Promise<void>;
+  async processEvent(
+    eventType: string,
+    userId: string,
+    eventData?: Record<string, unknown>
+  ): Promise<void>;
+  async processEvent(
+    contextOrEventType: NotificationContext | string,
+    userId?: string,
+    eventData?: Record<string, unknown>
+  ): Promise<void> {
+    const context: NotificationContext =
+      typeof contextOrEventType === 'string'
+        ? {
+            userId: userId!,
+            eventData: { type: contextOrEventType, ...eventData },
+          }
+        : contextOrEventType;
+
+    await this.ensureRulesLoaded();
+
     try {
       // Vérifier les limites de fréquence
       if (!(await this.checkRateLimits(context.userId))) {
@@ -107,9 +160,10 @@ export class SmartNotificationEngine {
       }
 
       // Trouver les règles applicables
-      const applicableRules = this.rules.filter(rule =>
-        this.evaluateTrigger(rule.trigger, context) &&
-        this.evaluateConditions(rule.conditions, context)
+      const applicableRules = this.rules.filter(
+        rule =>
+          this.evaluateTrigger(rule.trigger, context) &&
+          this.evaluateConditions(rule.conditions, context)
       );
 
       if (applicableRules.length === 0) {
@@ -131,9 +185,8 @@ export class SmartNotificationEngine {
 
       logger.info('Processed smart notifications', {
         userId: context.userId,
-        rulesTriggered: rulesToProcess.length
+        rulesTriggered: rulesToProcess.length,
       });
-
     } catch (error) {
       logger.error('Error processing smart notification', { error, context });
     }
@@ -166,7 +219,10 @@ export class SmartNotificationEngine {
   /**
    * Évalue si les conditions sont remplies
    */
-  private evaluateConditions(conditions: NotificationCondition[], context: NotificationContext): boolean {
+  private evaluateConditions(
+    conditions: NotificationCondition[],
+    context: NotificationContext
+  ): boolean {
     if (conditions.length === 0) return true;
 
     let result = true;
@@ -190,7 +246,10 @@ export class SmartNotificationEngine {
   /**
    * Évalue une condition individuelle
    */
-  private evaluateCondition(condition: NotificationCondition, context: NotificationContext): boolean {
+  private evaluateCondition(
+    condition: NotificationCondition,
+    context: NotificationContext
+  ): boolean {
     const value = this.getContextValue(condition.field, context);
 
     switch (condition.operator) {
@@ -199,17 +258,29 @@ export class SmartNotificationEngine {
       case 'not_equals':
         return value !== condition.value;
       case 'greater_than':
-        return typeof value === 'number' && typeof condition.value === 'number' &&
-               value > condition.value;
+        return (
+          typeof value === 'number' &&
+          typeof condition.value === 'number' &&
+          value > condition.value
+        );
       case 'less_than':
-        return typeof value === 'number' && typeof condition.value === 'number' &&
-               value < condition.value;
+        return (
+          typeof value === 'number' &&
+          typeof condition.value === 'number' &&
+          value < condition.value
+        );
       case 'contains':
-        return typeof value === 'string' && typeof condition.value === 'string' &&
-               value.includes(condition.value);
+        return (
+          typeof value === 'string' &&
+          typeof condition.value === 'string' &&
+          value.includes(condition.value)
+        );
       case 'not_contains':
-        return typeof value === 'string' && typeof condition.value === 'string' &&
-               !value.includes(condition.value);
+        return (
+          typeof value === 'string' &&
+          typeof condition.value === 'string' &&
+          !value.includes(condition.value)
+        );
       default:
         return false;
     }
@@ -218,10 +289,10 @@ export class SmartNotificationEngine {
   /**
    * Récupère une valeur du contexte
    */
-  private getContextValue(field: string, context: NotificationContext): any {
+  private getContextValue(field: string, context: NotificationContext): unknown {
     const [source, ...path] = field.split('.');
 
-    let data: any;
+    let data: unknown;
     switch (source) {
       case 'event':
         data = context.eventData;
@@ -233,8 +304,7 @@ export class SmartNotificationEngine {
         data = context.behaviorData;
         break;
       case 'user':
-        // TODO: Récupérer les données utilisateur
-        data = {};
+        data = context.eventData?.user ?? context.eventData;
         break;
       default:
         return null;
@@ -243,58 +313,57 @@ export class SmartNotificationEngine {
     return path.reduce((obj, key) => obj?.[key], data);
   }
 
+  private mapPriority(
+    priority: NotificationRule['priority']
+  ): NonNullable<UnifiedNotification['priority']> {
+    if (priority === 'medium') return 'normal';
+    return priority;
+  }
+
   /**
-   * Envoie une notification via tous les canaux configurés
+   * Envoie une notification via le moteur unifié (email, SMS, push, in-app).
    */
-  private async sendNotification(rule: NotificationRule, context: NotificationContext): Promise<void> {
+  private async sendNotification(
+    rule: NotificationRule,
+    context: NotificationContext
+  ): Promise<void> {
     try {
-      // Générer le contenu personnalisé
       const content = this.renderTemplate(rule.template, context);
 
-      // Enregistrer la notification dans la base de données
-      const { data: notification, error } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: context.userId,
-          type: 'smart',
-          title: content.title,
-          message: content.message,
-          priority: rule.priority,
-          channels: rule.channels,
-          metadata: {
-            rule_id: rule.id,
-            context
-          }
-        })
-        .select()
-        .single();
+      const result = await sendUnifiedNotification({
+        user_id: context.userId,
+        type: 'system_announcement',
+        title: content.title,
+        message: content.message,
+        action_url: rule.template.actionUrl,
+        action_label: rule.template.actionText,
+        priority: this.mapPriority(rule.priority),
+        channels: rule.channels,
+        metadata: {
+          smart_notification: true,
+          rule_id: rule.id,
+          rule_name: rule.name,
+          context: {
+            event: context.eventData,
+            prediction: context.predictionData,
+            behavior: context.behaviorData,
+          },
+        },
+      });
 
-      if (error) {
-        logger.error('Error saving notification', { error, ruleId: rule.id });
+      if (!result.success) {
+        logger.error('Smart notification failed via unified engine', {
+          ruleId: rule.id,
+          error: result.error,
+        });
         return;
       }
 
-      // Envoyer via chaque canal
-      for (const channel of rule.channels) {
-        await this.sendViaChannel(channel, notification, content);
-      }
-
-      // Enregistrer l'envoi
-      await supabase
-        .from('notification_deliveries')
-        .insert({
-          notification_id: notification.id,
-          channel,
-          status: 'sent',
-          sent_at: new Date().toISOString()
-        });
-
       logger.info('Smart notification sent', {
-        notificationId: notification.id,
+        notificationId: result.notification_id,
         ruleId: rule.id,
-        channels: rule.channels
+        channels: rule.channels,
       });
-
     } catch (error) {
       logger.error('Error sending smart notification', { error, ruleId: rule.id });
     }
@@ -303,7 +372,10 @@ export class SmartNotificationEngine {
   /**
    * Rend le template avec les variables du contexte
    */
-  private renderTemplate(template: NotificationTemplate, context: NotificationContext): { title: string; message: string } {
+  private renderTemplate(
+    template: NotificationTemplate,
+    context: NotificationContext
+  ): { title: string; message: string } {
     let title = template.title;
     let message = template.message;
 
@@ -317,66 +389,6 @@ export class SmartNotificationEngine {
     });
 
     return { title, message };
-  }
-
-  /**
-   * Envoie une notification via un canal spécifique
-   */
-  private async sendViaChannel(
-    channel: NotificationChannel,
-    notification: any,
-    content: { title: string; message: string }
-  ): Promise<void> {
-    try {
-      switch (channel) {
-        case 'email':
-          await this.sendEmail(notification, content);
-          break;
-        case 'push':
-          await this.sendPush(notification, content);
-          break;
-        case 'in_app':
-          await this.sendInApp(notification, content);
-          break;
-        case 'sms':
-          await this.sendSMS(notification, content);
-          break;
-      }
-    } catch (error) {
-      logger.error(`Error sending notification via ${channel}`, { error, notificationId: notification.id });
-    }
-  }
-
-  /**
-   * Envoie une notification par email
-   */
-  private async sendEmail(notification: any, content: { title: string; message: string }): Promise<void> {
-    // TODO: Implémenter l'envoi d'email
-    logger.info('Email notification would be sent', { notificationId: notification.id, title: content.title });
-  }
-
-  /**
-   * Envoie une notification push
-   */
-  private async sendPush(notification: any, content: { title: string; message: string }): Promise<void> {
-    // TODO: Implémenter les notifications push
-    logger.info('Push notification would be sent', { notificationId: notification.id, title: content.title });
-  }
-
-  /**
-   * Envoie une notification in-app
-   */
-  private async sendInApp(notification: any, content: { title: string; message: string }): Promise<void> {
-    // Pour les notifications in-app, on peut utiliser un système de websockets ou simplement marquer comme lue
-    logger.info('In-app notification created', { notificationId: notification.id, title: content.title });
-  }
-
-  /**
-   * Envoie une notification SMS
-   */
-  private async sendSMS(notification: any, content: { title: string; message: string }): Promise<void> {
-    // TODO: Implémenter l'envoi SMS
-    logger.info('SMS notification would be sent', { notificationId: notification.id, title: content.title });
   }
 
   /**
@@ -398,15 +410,14 @@ export class SmartNotificationEngine {
         return false;
       }
 
-      const hourlyCount = recentNotifications?.filter(n =>
-        new Date(n.created_at) > oneHourAgo
-      ).length || 0;
+      const hourlyCount =
+        recentNotifications?.filter(n => new Date(n.created_at) > oneHourAgo).length || 0;
 
       const dailyCount = recentNotifications?.length || 0;
 
-      return hourlyCount < this.MAX_NOTIFICATIONS_PER_HOUR &&
-             dailyCount < this.MAX_NOTIFICATIONS_PER_DAY;
-
+      return (
+        hourlyCount < this.MAX_NOTIFICATIONS_PER_HOUR && dailyCount < this.MAX_NOTIFICATIONS_PER_DAY
+      );
     } catch (error) {
       logger.error('Exception checking rate limits', { error, userId });
       return false;
@@ -417,7 +428,37 @@ export class SmartNotificationEngine {
    * Recharge les règles (utile après modification)
    */
   async reloadRules(): Promise<void> {
+    this.rulesLoaded = false;
+    this.loadingPromise = null;
     await this.loadRules();
+    this.rulesLoaded = true;
+  }
+
+  /**
+   * Charge un template marketing par ID (notification_templates).
+   */
+  async getTemplate(templateId: string): Promise<{ subject?: string; body: string } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('notification_templates')
+        .select('subject, title, body, html')
+        .eq('id', templateId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error || !data) {
+        logger.warn('Marketing template not found', { templateId, error });
+        return null;
+      }
+
+      return {
+        subject: data.subject || data.title || '',
+        body: data.html || data.body,
+      };
+    } catch (error) {
+      logger.error('Error loading marketing template', { error, templateId });
+      return null;
+    }
   }
 
   /**
@@ -436,30 +477,28 @@ export const DEFAULT_NOTIFICATION_RULES: Omit<NotificationRule, 'id'>[] = [
   // Règle pour les achats réussis
   {
     name: 'Achat réussi - Points de fidélité',
-    description: 'Notifie l\'utilisateur des points gagnés après un achat',
+    description: "Notifie l'utilisateur des points gagnés après un achat",
     trigger: { type: 'event', eventType: 'purchase_completed' },
-    conditions: [
-      { field: 'event.loyaltyReward.points', operator: 'greater_than', value: 0 }
-    ],
+    conditions: [{ field: 'event.loyaltyReward.points', operator: 'greater_than', value: 0 }],
     template: {
       title: '🎉 Points de fidélité gagnés !',
       message: 'Merci pour votre achat ! Vous avez gagné {{points}} points de fidélité.',
       actionUrl: '/loyalty',
       actionText: 'Voir mes points',
       variables: {
-        points: 'event.loyaltyReward.points'
-      }
+        points: 'event.loyaltyReward.points',
+      },
     },
     priority: 'medium',
     channels: ['in_app', 'email'],
     cooldown: 0,
-    enabled: true
+    enabled: true,
   },
 
   // Règle pour les reviews publiées
   {
     name: 'Review publiée - Récompense',
-    description: 'Félicite l\'utilisateur pour son avis et mentionne les points gagnés',
+    description: "Félicite l'utilisateur pour son avis et mentionne les points gagnés",
     trigger: { type: 'event', eventType: 'review_published' },
     conditions: [],
     template: {
@@ -469,13 +508,13 @@ export const DEFAULT_NOTIFICATION_RULES: Omit<NotificationRule, 'id'>[] = [
       actionText: 'Voir mes commandes',
       variables: {
         productName: 'event.productName',
-        points: 'event.loyaltyReward.points'
-      }
+        points: 'event.loyaltyReward.points',
+      },
     },
     priority: 'low',
     channels: ['in_app'],
     cooldown: 60,
-    enabled: true
+    enabled: true,
   },
 
   // Règle pour les connexions quotidiennes
@@ -483,22 +522,21 @@ export const DEFAULT_NOTIFICATION_RULES: Omit<NotificationRule, 'id'>[] = [
     name: 'Connexion quotidienne - Streak',
     description: 'Encourage les connexions régulières avec des récompenses',
     trigger: { type: 'event', eventType: 'daily_login' },
-    conditions: [
-      { field: 'event.streakData.currentStreak', operator: 'greater_than', value: 1 }
-    ],
+    conditions: [{ field: 'event.streakData.currentStreak', operator: 'greater_than', value: 1 }],
     template: {
       title: '🔥 Série de connexion active !',
-      message: 'Vous êtes connecté depuis {{streak}} jours consécutifs. Continuez pour gagner plus de points !',
+      message:
+        'Vous êtes connecté depuis {{streak}} jours consécutifs. Continuez pour gagner plus de points !',
       actionUrl: '/loyalty',
       actionText: 'Voir mes récompenses',
       variables: {
-        streak: 'event.streakData.currentStreak'
-      }
+        streak: 'event.streakData.currentStreak',
+      },
     },
     priority: 'low',
     channels: ['in_app'],
     cooldown: 1440, // Une fois par jour
-    enabled: true
+    enabled: true,
   },
 
   // Règle pour les paniers abandonnés
@@ -507,8 +545,12 @@ export const DEFAULT_NOTIFICATION_RULES: Omit<NotificationRule, 'id'>[] = [
     description: 'Rappelle aux utilisateurs leurs paniers non finalisés',
     trigger: { type: 'schedule', schedule: 'daily_2pm' }, // Simulation
     conditions: [
-      { field: 'behavior.lastCartUpdate', operator: 'less_than', value: Date.now() - 24 * 60 * 60 * 1000 },
-      { field: 'behavior.cartItemsCount', operator: 'greater_than', value: 0 }
+      {
+        field: 'behavior.lastCartUpdate',
+        operator: 'less_than',
+        value: Date.now() - 24 * 60 * 60 * 1000,
+      },
+      { field: 'behavior.cartItemsCount', operator: 'greater_than', value: 0 },
     ],
     template: {
       title: '🛒 Votre panier vous attend',
@@ -516,23 +558,21 @@ export const DEFAULT_NOTIFICATION_RULES: Omit<NotificationRule, 'id'>[] = [
       actionUrl: '/cart',
       actionText: 'Voir mon panier',
       variables: {
-        itemCount: 'behavior.cartItemsCount'
-      }
+        itemCount: 'behavior.cartItemsCount',
+      },
     },
     priority: 'medium',
     channels: ['email', 'in_app'],
     cooldown: 1440, // Une fois par jour
-    enabled: true
+    enabled: true,
   },
 
   // Règle pour les produits recommandés
   {
     name: 'Recommandation personnalisée',
-    description: 'Suggère des produits basés sur l\'historique d\'achat',
+    description: "Suggère des produits basés sur l'historique d'achat",
     trigger: { type: 'prediction', predictionType: 'product_recommendation' },
-    conditions: [
-      { field: 'prediction.confidence', operator: 'greater_than', value: 0.7 }
-    ],
+    conditions: [{ field: 'prediction.confidence', operator: 'greater_than', value: 0.7 }],
     template: {
       title: '💡 Rien que pour vous',
       message: 'Basé sur vos achats précédents, nous pensons que {{productName}} vous plairait !',
@@ -540,12 +580,12 @@ export const DEFAULT_NOTIFICATION_RULES: Omit<NotificationRule, 'id'>[] = [
       actionText: 'Découvrir',
       variables: {
         productName: 'prediction.productName',
-        productSlug: 'prediction.productSlug'
-      }
+        productSlug: 'prediction.productSlug',
+      },
     },
     priority: 'low',
     channels: ['in_app'],
     cooldown: 7200, // Toutes les 5 jours
-    enabled: true
-  }
+    enabled: true,
+  },
 ];

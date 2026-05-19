@@ -17,6 +17,7 @@ const CustomerMyGiftCardsPage = lazy(() => import('@/pages/customer/CustomerMyGi
 const PriceStockAlerts = lazy(() => import('@/pages/customer/PriceStockAlerts'));
 const CustomerWarranties = lazy(() => import('@/pages/customer/CustomerWarranties'));
 const CustomerMyBookings = lazy(() => import('@/pages/customer/CustomerMyBookings'));
+const CustomerArtistPortal = lazy(() => import('@/pages/customer/CustomerArtistPortal'));
 const MultiStoreCheckoutTracking = lazy(
   () => import('@/pages/checkout/MultiStoreCheckoutTracking')
 );
@@ -45,6 +46,7 @@ export const customerRoutes = (
     {protectedRoute('/account/physical', CustomerPhysicalPortal)}
     {protectedRoute('/account/courses', CustomerMyCourses)}
     {protectedRoute('/account/bookings', CustomerMyBookings)}
+    {protectedRoute('/account/artist', CustomerArtistPortal)}
     {protectedRoute('/account/profile', CustomerMyProfile)}
     {protectedRoute('/account/wishlist', CustomerMyWishlist)}
     {protectedRoute('/account/alerts', PriceStockAlerts)}

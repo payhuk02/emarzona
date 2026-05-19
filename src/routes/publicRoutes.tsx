@@ -33,7 +33,7 @@ const Trending = lazy(() => import('@/pages/Trending'));
 const CommunityPage = lazy(() => import('@/pages/community/CommunityPage'));
 const Cart = lazy(() => import('@/pages/Cart'));
 const CartEnhanced = lazy(() => import('@/pages/CartEnhanced'));
-const Checkout = lazy(() => import('@/pages/checkout/Checkout'));
+const Checkout = lazy(() => import('@/pages/checkout/CheckoutPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const CourseDetail = lazy(() => import('@/pages/courses/CourseDetail'));
 const DigitalProductDetail = lazy(() => import('@/pages/digital/DigitalProductDetail'));
@@ -226,6 +226,7 @@ export const publicRoutes = (
     <Route path="/artist/:productId" element={<ArtistProductDetail />} />
     <Route path="/portfolio/:slug" element={<ArtistPortfolioPage />} />
     <Route path="/courses/:slug" element={<CourseDetail />} />
+    <Route path="/learn/:slug" element={<CourseDetail learnMode />} />
 
     {/* Collections & Enchères */}
     <Route path="/collections" element={<CollectionsPage />} />

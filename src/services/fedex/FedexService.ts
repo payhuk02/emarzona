@@ -1,58 +1,112 @@
-import { mockFedexService, type FedexRateRequest, type FedexRate, type FedexShipmentRequest, type FedexShipmentResponse, type FedexTrackingResponse } from './mockFedexService';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import { createFedexShipmentViaEdge } from '@/lib/shipping/fedex-ship-client';
+import { cancelFedexShipmentViaEdge } from '@/lib/shipping/fedex-cancel-client';
+import { fetchFedexTrackingViaEdge } from '@/lib/shipping/fedex-track-client';
+import {
+  mockFedexService,
+  type FedexRateRequest,
+  type FedexRate,
+  type FedexShipmentRequest,
+  type FedexShipmentResponse,
+  type FedexTrackingResponse,
+} from './mockFedexService';
 
 /**
  * Minimal real FedEx service wrapper (skeleton).
  * If VITE_FEDEX_API_KEY is not set, we transparently fallback to mock service.
  */
 export class FedexService {
-  // Les clés secrètes doivent résider UNIQUEMENT côté serveur (Edge Functions)
-  private readonly forceMockMode = true; // Forcé en mock en attendant l'implémentation complète via Edge Function
-
-  private get shouldUseMock(): boolean {
-    return this.forceMockMode;
-  }
-
-  private ensureOperationalMode(operation: string): void {
-    if (!this.shouldUseMock) {
-      throw new Error(`FedEx ${operation} must be implemented via a secure Supabase Edge Function.`);
-    }
+  private get useEdgeFedex(): boolean {
+    return import.meta.env.VITE_FEDEX_USE_EDGE !== 'false';
   }
 
   async getRates(request: FedexRateRequest): Promise<FedexRate[]> {
-    this.ensureOperationalMode('getRates');
-    if (this.shouldUseMock) return mockFedexService.getRates(request);
-    // TODO: Implement real API call
-    return await mockFedexService.getRates(request);
+    if (this.useEdgeFedex && request.ship_from?.zip && request.ship_to?.zip) {
+      try {
+        const { data, error } = await supabase.functions.invoke<{
+          rates: Array<{
+            service_type: string;
+            service_name: string;
+            total_cost: number;
+            currency: string;
+            estimated_days: number;
+          }>;
+        }>('fedex-rates', {
+          body: {
+            ship_from: {
+              country: request.ship_from.country,
+              postal_code: request.ship_from.zip,
+              city: request.ship_from.city,
+            },
+            ship_to: {
+              country: request.ship_to.country,
+              postal_code: request.ship_to.zip,
+              city: request.ship_to.city,
+            },
+            weight_kg: request.package.weight,
+          },
+        });
+
+        if (!error && data?.rates?.length) {
+          return data.rates.map(r => ({
+            service_type: r.service_type,
+            service_name: r.service_name,
+            total_cost: r.total_cost,
+            currency: r.currency,
+            estimated_days: r.estimated_days,
+            delivery_date: '',
+          }));
+        }
+      } catch (edgeError) {
+        logger.warn('FedEx edge rates fallback to mock', { edgeError });
+      }
+    }
+
+    return mockFedexService.getRates(request);
   }
 
   async createShipment(request: FedexShipmentRequest): Promise<FedexShipmentResponse> {
-    this.ensureOperationalMode('createShipment');
-    if (this.shouldUseMock) return mockFedexService.createShipment(request);
-    // TODO: Implement real API call
-    return await mockFedexService.createShipment(request);
+    if (
+      this.useEdgeFedex &&
+      request.ship_from?.zip &&
+      request.ship_to?.zip &&
+      request.ship_from?.address &&
+      request.ship_to?.address
+    ) {
+      try {
+        return await createFedexShipmentViaEdge(request);
+      } catch (edgeError) {
+        logger.warn('FedEx edge ship fallback to mock', { edgeError });
+      }
+    }
+
+    return mockFedexService.createShipment(request);
   }
 
   async getTracking(trackingNumber: string): Promise<FedexTrackingResponse> {
-    this.ensureOperationalMode('getTracking');
-    if (this.shouldUseMock) return mockFedexService.getTracking(trackingNumber);
-    // TODO: Implement real API call
-    return await mockFedexService.getTracking(trackingNumber);
+    if (this.useEdgeFedex && trackingNumber?.trim()) {
+      try {
+        return await fetchFedexTrackingViaEdge(trackingNumber.trim());
+      } catch (edgeError) {
+        logger.warn('FedEx edge track fallback to mock', { edgeError, trackingNumber });
+      }
+    }
+
+    return mockFedexService.getTracking(trackingNumber);
   }
 
   async cancelShipment(trackingNumber: string): Promise<{ success: boolean }> {
-    this.ensureOperationalMode('cancelShipment');
-    if (this.shouldUseMock) return mockFedexService.cancelShipment(trackingNumber);
-    // TODO: Implement real API call
-    return await mockFedexService.cancelShipment(trackingNumber);
+    if (this.useEdgeFedex && trackingNumber?.trim()) {
+      try {
+        return await cancelFedexShipmentViaEdge(trackingNumber.trim());
+      } catch (edgeError) {
+        logger.warn('FedEx edge cancel fallback to mock', { edgeError, trackingNumber });
+      }
+    }
+
+    return mockFedexService.cancelShipment(trackingNumber);
   }
 }
 
 export const fedexService = new FedexService();
-
-
-
-
-
-
-
-

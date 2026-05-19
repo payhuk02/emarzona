@@ -26,6 +26,7 @@ import {
   BookOpen,
   Calendar,
   Package,
+  Palette,
   TrendingUp,
   FileText,
   User as UserIcon,
@@ -172,6 +173,15 @@ export default function CustomerPortal() {
     [navigate]
   );
 
+  const navigateToArtist = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+      navigate('/account/artist', { replace: true });
+    },
+    [navigate]
+  );
+
   const navigateToInvoices = useCallback(
     (e?: React.MouseEvent) => {
       e?.preventDefault();
@@ -245,11 +255,14 @@ export default function CustomerPortal() {
       }
 
       // Active subscriptions (si la table existe)
-      let  subscriptionsCount= 0;
+      let subscriptionsCount = 0;
       try {
         // La table subscriptions peut ne pas être dans les types Supabase générés
         // mais elle peut exister dans la base de données. Le try-catch gère le cas où elle n'existe pas.
-        const { count } = await (supabase as any)
+        const subscriptionsClient = supabase as unknown as {
+          from: (table: string) => ReturnType<typeof supabase.from>;
+        };
+        const { count } = await subscriptionsClient
           .from('subscriptions')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id)
@@ -638,6 +651,33 @@ export default function CustomerPortal() {
                       </CardContent>
                     </Card>
 
+                    {/* Œuvres d'artiste */}
+                    <Card
+                      className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4"
+                      onClick={navigateToArtist}
+                    >
+                      <CardHeader className="pb-2 sm:pb-3 px-3 pt-3 sm:px-4 sm:pt-4">
+                        <CardTitle className="flex items-center gap-2 text-xs sm:text-sm md:text-base lg:text-lg text-gray-900 dark:text-gray-50">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-pink-500/10 to-rose-500/5 border border-pink-500/20 flex items-center justify-center">
+                            <Palette className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600 dark:text-pink-400 flex-shrink-0" />
+                          </div>
+                          <span>Mes Œuvres</span>
+                        </CardTitle>
+                        <CardDescription className="text-[10px] sm:text-xs md:text-sm mt-1 leading-snug">
+                          Achats d&apos;art et certificats d&apos;authenticité
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="px-3 pb-3 sm:px-4 sm:pb-4">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between bg-gradient-to-r from-pink-600 to-rose-600 text-white hover:from-pink-700 hover:to-rose-700 border-0 transition-all duration-300 min-h-[44px] touch-manipulation text-xs sm:text-sm"
+                        >
+                          <span className="truncate">Mon espace artiste</span>
+                          <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+
                     {/* Factures */}
                     <Card
                       className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-lg active:scale-[0.98] transition-all duration-300 cursor-pointer group touch-manipulation animate-in fade-in slide-in-from-bottom-4"
@@ -778,9 +818,3 @@ export default function CustomerPortal() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

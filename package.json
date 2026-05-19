@@ -34,7 +34,7 @@
     "test:e2e:auth": "playwright test auth",
     "test:e2e:marketplace": "playwright test marketplace",
     "test:e2e:products": "playwright test products",
-    "test:e2e:cart": "playwright test cart-checkout",
+    "test:e2e:cart": "playwright test cart-checkout-workflow",
     "test:visual": "playwright test visual-regression",
     "test:a11y": "playwright test accessibility",
     "test:a11y:check": "node scripts/check-accessibility.js",

@@ -19444,61 +19444,40 @@ export type Database = {
       };
       order_items: {
         Row: {
-          booking_id: string | null;
           created_at: string | null;
-          digital_product_id: string | null;
           id: string;
-          item_metadata: Json | null;
-          license_id: string | null;
           order_id: string | null;
-          physical_product_id: string | null;
           product_id: string | null;
           product_name: string | null;
           product_type: string | null;
           quantity: number | null;
-          service_product_id: string | null;
           total_price: number | null;
           unit_price: number | null;
           updated_at: string | null;
-          variant_id: string | null;
         };
         Insert: {
-          booking_id?: string | null;
           created_at?: string | null;
-          digital_product_id?: string | null;
           id?: string;
-          item_metadata?: Json | null;
-          license_id?: string | null;
           order_id?: string | null;
-          physical_product_id?: string | null;
           product_id?: string | null;
           product_name?: string | null;
           product_type?: string | null;
           quantity?: number | null;
-          service_product_id?: string | null;
           total_price?: number | null;
           unit_price?: number | null;
           updated_at?: string | null;
-          variant_id?: string | null;
         };
         Update: {
-          booking_id?: string | null;
           created_at?: string | null;
-          digital_product_id?: string | null;
           id?: string;
-          item_metadata?: Json | null;
-          license_id?: string | null;
           order_id?: string | null;
-          physical_product_id?: string | null;
           product_id?: string | null;
           product_name?: string | null;
           product_type?: string | null;
           quantity?: number | null;
-          service_product_id?: string | null;
           total_price?: number | null;
           unit_price?: number | null;
           updated_at?: string | null;
-          variant_id?: string | null;
         };
         Relationships: [
           {
@@ -44793,6 +44772,7 @@ export type Database = {
         Args: { p_provider: string; p_status: string; p_transaction_id: string };
         Returns: boolean;
       };
+      list_my_pay_balance_orders: { Args: never; Returns: Json };
       list_notification_cron_jobs: {
         Args: never;
         Returns: {
@@ -44805,6 +44785,10 @@ export type Database = {
           schedule: string;
           username: string;
         }[];
+      };
+      list_store_payment_management_orders: {
+        Args: { p_store_id?: string };
+        Returns: Json;
       };
       log_admin_action: {
         Args: {

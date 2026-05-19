@@ -1,6 +1,6 @@
 /**
  * Routes spécifiques pour les sous-domaines de boutiques (*.myemarzona.shop)
- * 
+ *
  * Quand l'app est accédée via un sous-domaine de boutique,
  * ces routes remplacent les routes de la plateforme.
  * Le slug n'apparaît PAS dans l'URL (il est fourni via StoreSlugContext).
@@ -15,7 +15,7 @@ const Storefront = lazy(() => import('@/pages/Storefront'));
 const ProductDetail = lazy(() => import('@/pages/ProductDetail'));
 const StoreLegalPage = lazy(() => import('@/pages/StoreLegalPage'));
 const Cart = lazy(() => import('@/pages/CartEnhanced'));
-const Checkout = lazy(() => import('@/pages/checkout/Checkout'));
+const Checkout = lazy(() => import('@/pages/checkout/CheckoutPage'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const PaymentSuccess = lazy(() => import('@/pages/payments/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('@/pages/payments/PaymentCancel'));
@@ -51,38 +51,47 @@ const LoadingFallback = () => (
   </div>
 );
 
-export function StoreSubdomainRoutes({ storeSlug, storeName, logoUrl, storeThemeColors }: StoreSubdomainRoutesProps) {
+export function StoreSubdomainRoutes({
+  storeSlug,
+  storeName,
+  logoUrl,
+  storeThemeColors,
+}: StoreSubdomainRoutesProps) {
   return (
     <StoreSlugProvider slug={storeSlug}>
-      <StoreSubdomainNav storeName={storeName} logoUrl={logoUrl || undefined} themeColors={storeThemeColors} />
+      <StoreSubdomainNav
+        storeName={storeName}
+        logoUrl={logoUrl || undefined}
+        themeColors={storeThemeColors}
+      />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Root = Storefront de la boutique */}
           <Route path="/" element={<Storefront />} />
-          
+
           {/* Produits */}
           <Route path="/products/:productSlug" element={<ProductDetail />} />
-          
+
           {/* Pages légales */}
           <Route path="/legal/:page" element={<StoreLegalPage />} />
-          
+
           {/* Panier et checkout */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          
+
           {/* Paiements */}
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
-          
+
           {/* Collections & Enchères */}
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/collections/:collectionSlug" element={<CollectionDetail />} />
           <Route path="/auctions" element={<AuctionsListPage />} />
           <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
-          
+
           {/* Portfolio */}
           <Route path="/portfolio" element={<ArtistPortfolioPage />} />
-          
+
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,27 +1,23 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { smartNotificationEngine } from '@/lib/notifications/smart-notification-engine';
+import {
+  sendUnifiedNotification,
+  type UnifiedNotification,
+} from '@/lib/notifications/unified-notifications';
 
 interface MarketingCampaign {
   id: string;
   name: string;
   type: 'email' | 'push' | 'in_app' | 'sms';
   trigger: 'behavioral' | 'time_based' | 'segment_based' | 'event_based';
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
   template_id: string;
   is_active: boolean;
   priority: number;
   cooldown_hours: number;
   max_sends_per_user: number;
   created_at: string;
-}
-
-interface UserSegment {
-  id: string;
-  name: string;
-  criteria: Record<string, any>;
-  user_count: number;
-  last_updated: string;
 }
 
 interface CampaignPerformance {
@@ -47,7 +43,7 @@ export class MarketingAutomationEngine {
   /**
    * Process user behavior and trigger relevant marketing campaigns
    */
-  async processUserBehavior(userId: string, behaviorEvent: any): Promise<void> {
+  async processUserBehavior(userId: string, behaviorEvent: Record<string, unknown>): Promise<void> {
     try {
       // Get active campaigns for this behavior type
       const campaigns = await this.getActiveCampaignsForBehavior(behaviorEvent.event_type);
@@ -58,7 +54,11 @@ export class MarketingAutomationEngine {
         }
       }
     } catch (error) {
-      logger.error('Error processing user behavior for marketing', { error, userId, behaviorEvent });
+      logger.error('Error processing user behavior for marketing', {
+        error,
+        userId,
+        behaviorEvent,
+      });
     }
   }
 
@@ -94,7 +94,7 @@ export class MarketingAutomationEngine {
   private async shouldTriggerCampaign(
     userId: string,
     campaign: MarketingCampaign,
-    behaviorEvent: any
+    behaviorEvent: Record<string, unknown>
   ): Promise<boolean> {
     try {
       // Check cooldown period
@@ -108,7 +108,8 @@ export class MarketingAutomationEngine {
         .single();
 
       if (lastSend) {
-        const hoursSinceLastSend = (Date.now() - new Date(lastSend.sent_at).getTime()) / (1000 * 60 * 60);
+        const hoursSinceLastSend =
+          (Date.now() - new Date(lastSend.sent_at).getTime()) / (1000 * 60 * 60);
         if (hoursSinceLastSend < campaign.cooldown_hours) {
           return false;
         }
@@ -136,7 +137,10 @@ export class MarketingAutomationEngine {
   /**
    * Evaluate if campaign conditions are met
    */
-  private evaluateCampaignConditions(conditions: Record<string, any>, behaviorEvent: any): boolean {
+  private evaluateCampaignConditions(
+    conditions: Record<string, unknown>,
+    behaviorEvent: Record<string, unknown>
+  ): boolean {
     try {
       // Example conditions evaluation
       if (conditions.min_cart_value && behaviorEvent.event_data?.totalAmount) {
@@ -162,13 +166,11 @@ export class MarketingAutomationEngine {
         const hour = now.getHours();
         const dayOfWeek = now.getDay();
 
-        if (conditions.time_windows.hours &&
-            !conditions.time_windows.hours.includes(hour)) {
+        if (conditions.time_windows.hours && !conditions.time_windows.hours.includes(hour)) {
           return false;
         }
 
-        if (conditions.time_windows.days &&
-            !conditions.time_windows.days.includes(dayOfWeek)) {
+        if (conditions.time_windows.days && !conditions.time_windows.days.includes(dayOfWeek)) {
           return false;
         }
       }
@@ -186,20 +188,24 @@ export class MarketingAutomationEngine {
   private async executeCampaign(
     userId: string,
     campaign: MarketingCampaign,
-    behaviorEvent: any
+    behaviorEvent: Record<string, unknown>
   ): Promise<void> {
     try {
       // Get user profile for personalization
       const { data: userProfile } = await supabase
         .from('profiles')
         .select(PROFILE_MARKETING_FIELDS)
-        .eq('id', userId)
-        .single();
+        .eq('user_id', userId)
+        .maybeSingle();
 
       if (!userProfile) {
         logger.warn('User profile not found for campaign execution', { userId });
         return;
       }
+
+      const { data: userEmail } = await supabase.rpc('get_user_email', {
+        p_user_id: userProfile.user_id,
+      });
 
       // Prepare personalized content
       const userName =
@@ -207,8 +213,9 @@ export class MarketingAutomationEngine {
         [userProfile.first_name, userProfile.last_name].filter(Boolean).join(' ') ||
         userProfile.user_id;
       const personalizedData = {
+        user_id: userProfile.user_id,
         user_name: userName,
-        user_email: undefined,
+        user_email: typeof userEmail === 'string' ? userEmail : '',
         user_phone: userProfile.phone,
         behavior_context: behaviorEvent,
         campaign_id: campaign.id,
@@ -231,83 +238,84 @@ export class MarketingAutomationEngine {
         userId,
         campaignId: campaign.id,
         campaignName: campaign.name,
-        channel: campaign.type
+        channel: campaign.type,
       });
-
     } catch (error) {
       logger.error('Error executing marketing campaign', { error, userId, campaign });
     }
   }
 
+  private mapCampaignChannels(
+    type: MarketingCampaign['type']
+  ): NonNullable<UnifiedNotification['channels']> {
+    switch (type) {
+      case 'email':
+        return ['email'];
+      case 'push':
+        return ['push'];
+      case 'sms':
+        return ['sms'];
+      case 'in_app':
+      default:
+        return ['in_app'];
+    }
+  }
+
   /**
-   * Send campaign message through appropriate channel
+   * Envoie la campagne via le moteur de notifications unifié.
    */
   private async sendCampaignMessage(
     campaign: MarketingCampaign,
-    personalizedData: Record<string, any>
+    personalizedData: Record<string, unknown>
   ): Promise<void> {
-    const template = await smartNotificationEngine.getTemplate(campaign.template_id);
+    const userId = personalizedData.user_id as string | undefined;
+    if (!userId) {
+      logger.error('Campaign send missing user_id', { campaignId: campaign.id });
+      return;
+    }
 
+    const template = await smartNotificationEngine.getTemplate(campaign.template_id);
     if (!template) {
       logger.error('Campaign template not found', { templateId: campaign.template_id });
       return;
     }
 
-    // Personalize template content
     const personalizedContent = this.personalizeTemplate(template.body, personalizedData);
-    const personalizedSubject = template.subject ?
-      this.personalizeTemplate(template.subject, personalizedData) : '';
+    const personalizedSubject = template.subject
+      ? this.personalizeTemplate(template.subject, personalizedData)
+      : campaign.name;
 
-    switch (campaign.type) {
-      case 'email':
-        // Use email service (SendGrid, etc.)
-        await this.sendEmail({
-          to: personalizedData.user_email,
-          subject: personalizedSubject,
-          html: personalizedContent,
-          campaignId: campaign.id,
-        });
-        break;
+    const result = await sendUnifiedNotification({
+      user_id: userId,
+      type: 'system_announcement',
+      title: personalizedSubject,
+      message: personalizedContent,
+      channels: this.mapCampaignChannels(campaign.type),
+      priority: 'normal',
+      metadata: {
+        marketing_campaign: true,
+        campaign_id: campaign.id,
+        campaign_name: campaign.name,
+        channel: campaign.type,
+        triggered_by: personalizedData.triggered_by,
+        user_email: personalizedData.user_email,
+        user_phone: personalizedData.user_phone,
+      },
+    });
 
-      case 'push':
-        // Use push notification service
-        await smartNotificationEngine.processEvent(
-          'custom_event',
-          personalizedData.user_id,
-          {
-            campaign_id: campaign.id,
-            message: personalizedContent,
-            title: personalizedSubject,
-          }
-        );
-        break;
-
-      case 'in_app':
-        // Insert into in-app notifications
-        await supabase.from('in_app_notifications').insert({
-          user_id: personalizedData.user_id,
-          title: personalizedSubject,
-          content: personalizedContent,
-          type: 'marketing',
-          metadata: { campaign_id: campaign.id },
-        });
-        break;
-
-      case 'sms':
-        // Use SMS service (Twilio, etc.)
-        await this.sendSMS({
-          to: personalizedData.user_phone, // Would need to get from user profile
-          message: personalizedContent,
-          campaignId: campaign.id,
-        });
-        break;
+    if (!result.success) {
+      logger.error('Marketing campaign notification failed', {
+        campaignId: campaign.id,
+        userId,
+        error: result.error,
+      });
     }
   }
 
   /**
    * Personalize template content with user data
    */
-  private personalizeTemplate(template: string, data: Record<string, any>): string {
+  private personalizeTemplate(template: string, data: Record<string, unknown>): string {
     let personalized = template;
 
     // Replace placeholders like {{user_name}}, {{user_email}}, etc.
@@ -317,22 +325,6 @@ export class MarketingAutomationEngine {
     });
 
     return personalized;
-  }
-
-  /**
-   * Send email (placeholder - integrate with actual email service)
-   */
-  private async sendEmail(data: { to: string; subject: string; html: string; campaignId: string }): Promise<void> {
-    logger.info('Sending marketing email', { to: data.to, campaignId: data.campaignId });
-    // TODO: Integrate with email service like SendGrid, Mailgun, etc.
-  }
-
-  /**
-   * Send SMS (placeholder - integrate with actual SMS service)
-   */
-  private async sendSMS(data: { to: string; message: string; campaignId: string }): Promise<void> {
-    logger.info('Sending marketing SMS', { to: data.to, campaignId: data.campaignId });
-    // TODO: Integrate with SMS service like Twilio, etc.
   }
 
   /**
@@ -385,7 +377,6 @@ export class MarketingAutomationEngine {
           sessions_last_30_days: 3,
         },
       });
-
     } catch (error) {
       logger.error('Error creating user segments', { error });
     }
@@ -394,7 +385,10 @@ export class MarketingAutomationEngine {
   /**
    * Create a user segment
    */
-  private async createSegment(segmentData: { name: string; criteria: Record<string, any> }): Promise<void> {
+  private async createSegment(segmentData: {
+    name: string;
+    criteria: Record<string, unknown>;
+  }): Promise<void> {
     try {
       const { data, error } = await supabase
         .from('user_segments')
@@ -413,7 +407,6 @@ export class MarketingAutomationEngine {
 
       // Update user count for the segment
       await this.updateSegmentUserCount(data.id);
-
     } catch (error) {
       logger.error('Exception in createSegment', { error });
     }
@@ -498,7 +491,7 @@ export class MarketingAutomationEngine {
   /**
    * Get target users for a campaign
    */
-  private async getCampaignTargetUsers(campaign: MarketingCampaign): Promise<string[]> {
+  private async getCampaignTargetUsers(_campaign: MarketingCampaign): Promise<string[]> {
     // This would involve complex queries based on campaign conditions
     // For now, return a placeholder
     return [];

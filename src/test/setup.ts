@@ -10,6 +10,31 @@ import * as matchers from '@testing-library/jest-dom/matchers';
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
+// localStorage (jsdom / Node 22+ sans --localstorage-file)
+const localStorageStore = new Map<string, string>();
+const localStorageMock = {
+  getItem: (key: string) => localStorageStore.get(key) ?? null,
+  setItem: (key: string, value: string) => {
+    localStorageStore.set(key, String(value));
+  },
+  removeItem: (key: string) => {
+    localStorageStore.delete(key);
+  },
+  clear: () => {
+    localStorageStore.clear();
+  },
+  get length() {
+    return localStorageStore.size;
+  },
+  key: (index: number) => Array.from(localStorageStore.keys())[index] ?? null,
+};
+
+Object.defineProperty(globalThis, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();
@@ -18,7 +43,7 @@ afterEach(() => {
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
@@ -36,7 +61,7 @@ global.IntersectionObserver = class IntersectionObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
-} as any;
+} as unknown as typeof IntersectionObserver;
 
 // Mock ResizeObserver (amélioré pour Radix UI)
 global.ResizeObserver = class ResizeObserver {
@@ -44,7 +69,7 @@ global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
-} as any;
+} as unknown as typeof ResizeObserver;
 
 // Mock MutationObserver (nécessaire pour Radix UI)
 global.MutationObserver = class MutationObserver {
@@ -54,7 +79,7 @@ global.MutationObserver = class MutationObserver {
   takeRecords() {
     return [];
   }
-} as any;
+} as unknown as typeof MutationObserver;
 
 // Mock hasPointerCapture pour Radix UI Select
 if (typeof Element !== 'undefined') {
@@ -96,9 +121,3 @@ beforeAll(() => {
 afterAll(() => {
   console.error = originalError;
 });
-
-
-
-
-
-

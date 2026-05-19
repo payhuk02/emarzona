@@ -19,14 +19,9 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useCreateReturn } from '@/hooks/returns/useReturns';
-import {
-  RefreshCw,
-  AlertCircle,
-  Upload,
-  X,
-  CheckCircle2,
-} from 'lucide-react';
+import { RefreshCw, AlertCircle, X, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { uploadReturnPhotos } from '@/lib/returns/upload-return-photos';
 
 interface ReturnRequestFormProps {
   orderId: string;
@@ -46,7 +41,7 @@ const RETURN_REASONS = [
   { value: 'size_fit', label: 'Problème de taille/ajustement' },
   { value: 'quality', label: 'Problème de qualité' },
   { value: 'duplicate', label: 'Commande dupliquée' },
-  { value: 'changed_mind', label: 'Changement d\'avis' },
+  { value: 'changed_mind', label: "Changement d'avis" },
   { value: 'other', label: 'Autre raison' },
 ];
 
@@ -71,7 +66,7 @@ export function ReturnRequestForm({
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+
     if (files.length + photos.length > 5) {
       toast({
         title: 'Erreur',
@@ -92,10 +87,10 @@ export function ReturnRequestForm({
   const removePhoto = (index: number) => {
     const newPhotos = photos.filter((_, i) => i !== index);
     const newPreviews = photoPreviewUrls.filter((_, i) => i !== index);
-    
+
     // Révoquer l'URL de prévisualisation
     URL.revokeObjectURL(photoPreviewUrls[index]);
-    
+
     setPhotos(newPhotos);
     setPhotoPreviewUrls(newPreviews);
   };
@@ -120,20 +115,14 @@ export function ReturnRequestForm({
     }
 
     try {
-      // Upload photos si disponibles
-      let  photoUrls: string[] = [];
-      if (photos.length > 0) {
-        // TODO: Upload vers Supabase Storage
-        // Pour l'instant, on garde un tableau vide
-        photoUrls = [];
-      }
+      const photoUrls = photos.length > 0 ? await uploadReturnPhotos(photos, user.id, orderId) : [];
 
       await createReturn.mutateAsync({
         order_id: orderId,
         order_item_id: orderItemId,
         product_id: productId,
         customer_id: user.id,
-        return_reason: returnReason as any,
+        return_reason: returnReason,
         return_reason_details: returnReasonDetails,
         quantity,
         item_price: itemPrice,
@@ -150,10 +139,12 @@ export function ReturnRequestForm({
       if (onSuccess) {
         onSuccess();
       }
-    } catch ( _error: any) {
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Impossible de créer la demande de retour';
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de créer la demande de retour',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -194,7 +185,7 @@ export function ReturnRequestForm({
               <SelectValue placeholder="Sélectionnez une raison" />
             </SelectTrigger>
             <SelectContent>
-              {RETURN_REASONS.map((reason) => (
+              {RETURN_REASONS.map(reason => (
                 <SelectItem key={reason.value} value={reason.value}>
                   {reason.label}
                 </SelectItem>
@@ -209,7 +200,7 @@ export function ReturnRequestForm({
             <Label>Détails (optionnel)</Label>
             <Textarea
               value={returnReasonDetails}
-              onChange={(e) => setReturnReasonDetails(e.target.value)}
+              onChange={e => setReturnReasonDetails(e.target.value)}
               placeholder="Décrivez plus en détail la raison de votre retour..."
               rows={3}
             />
@@ -256,7 +247,7 @@ export function ReturnRequestForm({
           <Label>Notes supplémentaires (optionnel)</Label>
           <Textarea
             value={customerNotes}
-            onChange={(e) => setCustomerNotes(e.target.value)}
+            onChange={e => setCustomerNotes(e.target.value)}
             placeholder="Toute autre information pertinente..."
             rows={3}
           />
@@ -301,10 +292,3 @@ export function ReturnRequestForm({
     </Card>
   );
 }
-
-
-
-
-
-
-
