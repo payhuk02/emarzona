@@ -67,6 +67,8 @@ import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { shouldUseAppPremiumTheme } from '@/lib/premium-theme';
+import { AppPremiumShell } from '@/components/layout/AppPremiumShell';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { startAlertMonitoring } from '@/lib/sentry-alerts';
 import {
@@ -174,6 +176,7 @@ const AppContent = () => {
     location.pathname === '/register' ||
     location.pathname === '/auth';
   const isBottomNavVisible = isMobile && location.pathname !== '/' && !isAuthPage;
+  const usePremiumTheme = shouldUseAppPremiumTheme(location.pathname);
 
   useBehavioralAnalytics(undefined, {
     trackPageViews: false,
@@ -233,18 +236,23 @@ const AppContent = () => {
           <ReferralTracker />
         </Suspense>
         <Suspense fallback={<LoadingFallback />}>
-          <div
-            className={cn(
-              isBottomNavVisible && 'pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0'
-            )}
-          >
-            <Routes>
-              {publicRoutes}
-              {customerRoutes}
-              {dashboardRoutes}
-              {adminRoutes}
-            </Routes>
-          </div>
+          {(() => {
+            const routes = (
+              <div
+                className={cn(
+                  isBottomNavVisible && 'pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0'
+                )}
+              >
+                <Routes>
+                  {publicRoutes}
+                  {customerRoutes}
+                  {dashboardRoutes}
+                  {adminRoutes}
+                </Routes>
+              </div>
+            );
+            return usePremiumTheme ? <AppPremiumShell>{routes}</AppPremiumShell> : routes;
+          })()}
         </Suspense>
         <Suspense fallback={null}>
           <CookieConsentBanner />

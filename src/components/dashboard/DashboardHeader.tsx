@@ -55,7 +55,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
           <div className="flex items-start sm:items-center gap-2 sm:gap-3">
             <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+              <h1 className="app-premium-page-title text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500 shrink-0">
                     <LayoutDashboard

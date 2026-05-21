@@ -266,7 +266,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         {/* Sidebar desktop */}
         <aside
           className={cn(
-            'fixed left-0 top-0 z-40 hidden h-screen transition-[width] bg-card border-r md:block',
+            'app-premium-admin-aside fixed left-0 top-0 z-40 hidden h-screen transition-[width] border-r md:block',
             sidebarOpen ? 'w-64' : 'w-20'
           )}
         >
@@ -362,9 +362,3 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     </AdminRoute>
   );
 };
-
-
-
-
-
-

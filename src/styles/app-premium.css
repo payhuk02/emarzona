@@ -1,0 +1,230 @@
+/**
+ * Thème application — aligné sur landing-premium
+ * Ancêtre requis : .landing-premium.app-premium
+ */
+
+.landing-premium.app-premium {
+  /* Tokens shadcn alignés sur le landing */
+  --background: 40 9% 98%;
+  --foreground: 240 6% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 6% 7%;
+  --primary: 217 91% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 6% 94%;
+  --secondary-foreground: 240 6% 12%;
+  --muted: 40 6% 96%;
+  --muted-foreground: 240 4% 40%;
+  --accent: 217 91% 53%;
+  --accent-foreground: 0 0% 100%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --ring: 217 91% 53%;
+  --radius: 0.75rem;
+
+  --sidebar-background: 240 8% 6%;
+  --sidebar-foreground: 40 10% 92%;
+  --sidebar-primary: 217 91% 58%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 6% 14%;
+  --sidebar-accent-foreground: 40 10% 95%;
+  --sidebar-border: 0 0% 100% / 0.08;
+  --sidebar-ring: 217 91% 58%;
+}
+
+/* Sidebar principale (shadcn) */
+.landing-premium.app-premium [data-sidebar='sidebar'] {
+  background: linear-gradient(180deg, var(--lp-ink-soft) 0%, var(--lp-ink) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--lp-text-on-dark);
+}
+
+.landing-premium.app-premium [data-sidebar='header'],
+.landing-premium.app-premium [data-sidebar='footer'] {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.landing-premium.app-premium [data-sidebar='group-label'] {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.landing-premium.app-premium [data-sidebar='menu-button'][data-active='true'] {
+  background: rgba(37, 99, 235, 0.22) !important;
+  color: var(--lp-blue-bright) !important;
+  font-weight: 600;
+}
+
+.landing-premium.app-premium [data-sidebar='menu-button']:hover:not([data-active='true']) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #fff !important;
+}
+
+.landing-premium.app-premium [data-sidebar='input'] {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Barre supérieure dashboard */
+.landing-premium.app-premium .app-premium-topnav {
+  background: linear-gradient(
+    180deg,
+    rgba(14, 14, 18, 0.97) 0%,
+    rgba(8, 8, 10, 0.95) 100%
+  ) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 40px -16px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+}
+
+.landing-premium.app-premium .app-premium-topnav a,
+.landing-premium.app-premium .app-premium-topnav button:not(.lp-btn-primary) {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.landing-premium.app-premium .app-premium-topnav a:hover {
+  color: #fff;
+}
+
+.landing-premium.app-premium .app-premium-topnav .text-primary,
+.landing-premium.app-premium .app-premium-topnav [class*='text-primary'] {
+  color: var(--lp-gold-bright) !important;
+}
+
+/* Zone principale */
+.landing-premium.app-premium #main-content,
+.landing-premium.app-premium main.flex-1.overflow-auto {
+  background: var(--lp-surface) !important;
+}
+
+/* Cartes dashboard / admin */
+.landing-premium.app-premium .bg-card.rounded-lg,
+.landing-premium.app-premium .rounded-lg.border.bg-card,
+.landing-premium.app-premium [class*='Card']:not([class*='card-']) {
+  /* évite sur-sélecteur — cible Card shadcn */
+}
+
+.landing-premium.app-premium .rounded-lg.border.bg-card,
+.landing-premium.app-premium div.bg-card {
+  border-radius: 1rem;
+  border-color: var(--lp-border-light) !important;
+  background: var(--lp-surface-elevated) !important;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+  transition:
+    transform 0.45s var(--lp-ease),
+    box-shadow 0.45s var(--lp-ease);
+}
+
+.landing-premium.app-premium .rounded-lg.border.bg-card:hover {
+  box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.1);
+}
+
+/* Titres de page */
+.landing-premium.app-premium h1,
+.landing-premium.app-premium .app-premium-page-title {
+  font-family: var(--lp-serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--lp-text);
+}
+
+/* Boutons primaires globaux */
+.landing-premium.app-premium
+  .bg-primary.text-primary-foreground:not(.lp-btn-outline):not([data-sidebar]) {
+  background: linear-gradient(
+    135deg,
+    var(--lp-blue-bright) 0%,
+    var(--lp-blue) 55%,
+    var(--lp-blue-deep) 100%
+  ) !important;
+  border: none;
+  box-shadow: 0 4px 20px var(--lp-blue-glow);
+}
+
+.landing-premium.app-premium .bg-primary.text-primary-foreground:hover {
+  filter: brightness(1.05);
+}
+
+/* Admin sidebar */
+.landing-premium.app-premium .app-premium-admin-aside {
+  background: linear-gradient(180deg, var(--lp-ink-soft) 0%, var(--lp-ink) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--lp-text-on-dark);
+}
+
+.landing-premium.app-premium .app-premium-admin-aside h2 {
+  font-family: var(--lp-serif);
+  color: #fff;
+}
+
+.landing-premium.app-premium .app-premium-admin-aside .bg-primary {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: var(--lp-blue-bright) !important;
+}
+
+/* Sidebars contextuelles (produits, commandes…) */
+.landing-premium.app-premium aside.fixed,
+.landing-premium.app-premium nav.fixed {
+  background: linear-gradient(180deg, #121218 0%, #0a0a0c 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--lp-text-on-dark);
+}
+
+/* Auth */
+.landing-premium.app-premium .app-premium-auth {
+  min-height: 100vh;
+  background: var(--lp-ink);
+  position: relative;
+}
+
+.landing-premium.app-premium .app-premium-auth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 30%, rgba(124, 92, 255, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 20% 20%, rgba(201, 162, 39, 0.08) 0%, transparent 50%);
+}
+
+.landing-premium.app-premium .app-premium-auth-card {
+  position: relative;
+  z-index: 1;
+  border-radius: 1.25rem;
+  border: 1px solid var(--lp-border-light);
+  background: var(--lp-surface-elevated);
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.35);
+}
+
+/* Inputs */
+.landing-premium.app-premium input:not([type='checkbox']):not([type='radio']),
+.landing-premium.app-premium textarea,
+.landing-premium.app-premium select {
+  border-radius: 0.75rem;
+  border-color: var(--lp-border-light);
+  font-family: var(--lp-sans);
+}
+
+.landing-premium.app-premium input:focus,
+.landing-premium.app-premium textarea:focus,
+.landing-premium.app-premium select:focus {
+  border-color: var(--lp-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Tables */
+.landing-premium.app-premium thead tr {
+  background: var(--lp-surface-muted);
+}
+
+/* Bottom nav mobile */
+.landing-premium.app-premium nav.fixed.bottom-0 {
+  background: var(--lp-ink-soft) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}

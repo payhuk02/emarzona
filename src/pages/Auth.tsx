@@ -405,7 +405,7 @@ const Auth = () => {
   const baseUrl = window.location.origin;
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center p-3 sm:p-4 md:p-6 relative">
+    <div className="app-premium-auth min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 relative">
       {/* SEO Meta Tags */}
       <SEOMeta
         title={`${t('nav.login')} / ${t('nav.signup')} - Emarzona`}
@@ -452,9 +452,13 @@ const Auth = () => {
           </Link>
         </div>
 
-        <Card className="shadow-large" role="main" aria-labelledby="auth-title">
+        <Card
+          className="app-premium-auth-card shadow-large"
+          role="main"
+          aria-labelledby="auth-title"
+        >
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle id="auth-title" className="text-xl sm:text-2xl">
+            <CardTitle id="auth-title" className="app-premium-page-title text-xl sm:text-2xl">
               {getValue('auth.welcome') || t('auth.welcome')}
             </CardTitle>
             <CardDescription className="text-sm sm:text-base">
