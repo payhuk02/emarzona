@@ -338,14 +338,32 @@ ${meta.type === 'product' && meta.price != null ? `    <meta property="product:p
   return out;
 }
 
-export default async function middleware(req: Request): Promise<Response> {
+/** En-tête interne pour éviter que fetch() ne relance le middleware (boucle 508). */
+const PRERENDER_BYPASS_HEADER = 'x-emarzona-prerender-bypass';
+
+export default async function middleware(req: Request): Promise<Response | undefined> {
   const ua = req.headers.get('user-agent') || '';
   const isBot = BOT_REGEX.test(ua);
 
-  // Récupérer la réponse statique
-  const res = await fetch(req);
+  // Utilisateurs réels : ne pas re-fetcher la même URL (sinon INFINITE_LOOP_DETECTED sur Vercel)
+  if (!isBot) {
+    return;
+  }
 
-  if (!isBot) return res;
+  // Requête issue du fetch interne ci-dessous → laisser atteindre index.html
+  if (req.headers.get(PRERENDER_BYPASS_HEADER) === '1') {
+    return;
+  }
+
+  const bypassHeaders = new Headers(req.headers);
+  bypassHeaders.set(PRERENDER_BYPASS_HEADER, '1');
+
+  const res = await fetch(
+    new Request(req.url, {
+      method: req.method,
+      headers: bypassHeaders,
+    })
+  );
 
   const ct = res.headers.get('content-type') || '';
   if (!ct.includes('text/html')) return res;

@@ -27,6 +27,7 @@ export interface SubdomainInfo {
  */
 const PLATFORM_DOMAINS = [
   'emarzona.com',
+  'www.emarzona.com',
   'api.emarzona.com',
   'lovable.app', // Preview Lovable
   'lovable.dev', // Lovable dev
@@ -235,7 +236,9 @@ export function detectSubdomain(): SubdomainInfo {
     // Vérifier si c'est un sous-domaine d'un domaine de boutique connu
     if (parts.length >= 3) {
       const potentialBaseDomain = parts.slice(1).join('.');
-      const isKnownStoreDomain = STORE_DOMAINS.some(d => potentialBaseDomain.includes(d.split('.')[0]));
+      const isKnownStoreDomain = STORE_DOMAINS.some(d =>
+        potentialBaseDomain.includes(d.split('.')[0])
+      );
       if (isKnownStoreDomain) {
         return {
           subdomain: parts[0],
