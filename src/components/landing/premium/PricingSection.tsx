@@ -36,7 +36,7 @@ const plans: PricingPlan[] = [
   },
   {
     icon: Layers,
-    name: 'Digital, services & créatif',
+    name: "Digital, services, cours en ligne & œuvres d'artiste",
     priceLabel: '10 %',
     period: 'par vente',
     badge: 'Sans abonnement',
@@ -65,7 +65,8 @@ export function PricingSection() {
             Tarifs transparents
           </p>
           <h2 className="lp-serif mt-3 text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl">
-            Des prix en <span className="lp-gold-text italic">FCFA</span>, sans surprise
+            Des Tarifs très compétitifs,{' '}
+            <span className="lp-gold-text italic">nulle part ailleurs</span>
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
             Un modèle adapté à chaque type de produit — abonnement pour le physique, commission pour
