@@ -12,11 +12,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { ArrowRight, Rocket, Users, Sparkles } from '@/components/icons';
+import { ArrowRight, Users, Sparkles } from '@/components/icons';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
-import MarketplaceFooter from '@/components/marketplace/MarketplaceFooter';
+import { PremiumNav } from '@/components/landing/premium/PremiumNav';
+import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
 import AdvancedFilters from '@/components/marketplace/AdvancedFilters';
 import ProductComparison from '@/components/marketplace/ProductComparison';
 import FavoritesManager from '@/components/marketplace/FavoritesManager';
@@ -31,7 +31,8 @@ import {
   useSaveSearchHistory,
   type SearchResult,
 } from '@/hooks/useProductSearch';
-import '@/styles/marketplace-professional.css';
+import '@/styles/landing-premium.css';
+import '@/styles/marketplace-premium.css';
 import { SEOMeta, WebsiteSchema, BreadcrumbSchema, ItemListSchema } from '@/components/seo';
 import { useFilteredProducts } from '@/hooks/useFilteredProducts';
 import { useCurrentUserId } from '@/hooks/useCurrentUserId';
@@ -595,7 +596,7 @@ const Marketplace = () => {
       )}
 
       <div
-        className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-x-hidden"
+        className="landing-premium marketplace-premium min-h-screen overflow-x-hidden"
         role="main"
         id="main-content"
         aria-label={t('marketplace.mainContent', 'Contenu principal de la marketplace')}
@@ -609,20 +610,20 @@ const Marketplace = () => {
           {t('marketplace.hero.skipToMain', 'Aller au contenu principal')}
         </a>
 
-        <MarketplaceHeader />
+        <PremiumNav />
 
         {/* Breadcrumb Navigation */}
-        <div className="container mx-auto max-w-6xl px-3 sm:px-4 pt-4 sm:pt-6 pb-2">
+        <div className="mp-breadcrumb container mx-auto max-w-7xl px-3 sm:px-4 lg:px-8 pb-2">
           <Breadcrumb>
             <BreadcrumbList>
               {breadcrumbItems.map((item, index) => (
                 <React.Fragment key={`${item.url}-${index}`}>
-                  {index > 0 && <BreadcrumbSeparator className="text-slate-500" />}
+                  {index > 0 && <BreadcrumbSeparator />}
                   <BreadcrumbItem>
                     {index < breadcrumbItems.length - 1 ? (
                       <BreadcrumbLink
                         href={item.url.replace(/^https?:\/\/[^/]+/, '') || '/'}
-                        className="text-xs sm:text-sm text-slate-300 hover:text-white transition-colors"
+                        className="text-xs sm:text-sm"
                       >
                         {index === 0 ? <span className="sr-only">{item.name}</span> : item.name}
                         {index === 0 && (
@@ -643,7 +644,7 @@ const Marketplace = () => {
                         )}
                       </BreadcrumbLink>
                     ) : (
-                      <BreadcrumbPage className="text-xs sm:text-sm text-white font-medium">
+                      <BreadcrumbPage className="text-xs sm:text-sm" data-current>
                         {item.name}
                       </BreadcrumbPage>
                     )}
@@ -682,21 +683,18 @@ const Marketplace = () => {
 
         {/* Section de personnalisation - Quiz de style */}
         <section
-          className="py-6 sm:py-8 px-3 sm:px-4 bg-gradient-to-r from-purple-900/20 via-blue-900/20 to-indigo-900/20 backdrop-blur-sm border-y border-white/5"
+          className="mp-quiz-banner py-6 sm:py-8 px-3 sm:px-4"
           role="region"
           aria-labelledby="style-quiz-title"
           aria-describedby="style-quiz-description"
         >
-          <div className="container mx-auto max-w-6xl">
+          <div className="container mx-auto max-w-7xl lg:px-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-center sm:text-left">
-                <h2
-                  id="style-quiz-title"
-                  className="text-lg sm:text-xl font-semibold text-white mb-2"
-                >
+                <h2 id="style-quiz-title" className="text-lg sm:text-xl mb-2">
                   🎨 Découvrez Votre Style Unique
                 </h2>
-                <p id="style-quiz-description" className="text-sm text-slate-300 max-w-md">
+                <p id="style-quiz-description" className="text-sm max-w-md">
                   Répondez à quelques questions et recevez des recommandations personnalisées
                   adaptées à vos goûts et préférences.
                 </p>
@@ -704,7 +702,7 @@ const Marketplace = () => {
               <Button
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="lp-btn-primary rounded-full px-6 py-3"
                 aria-label={t('marketplace.quiz.button', 'Commencer le quiz de style personnalisé')}
               >
                 <Link to="/personalization/quiz" className="flex items-center space-x-2">
@@ -721,23 +719,23 @@ const Marketplace = () => {
         {showFilters && (
           <section
             id="advanced-filters"
-            className="py-4 sm:py-6 lg:py-8 px-3 sm:px-4 bg-slate-800/30 backdrop-blur-sm"
+            className="mp-filters-panel py-4 sm:py-6 lg:py-8 px-3 sm:px-4"
             role="region"
             aria-label={t('marketplace.filters.advanced')}
           >
-            <div className="container mx-auto max-w-6xl">
-              <Card className="bg-slate-800/80 backdrop-blur-sm border-slate-600 border-border/50">
+            <div className="container mx-auto max-w-7xl lg:px-8">
+              <Card className="mp-filters-card border-0 shadow-none">
                 <CardContent className="p-3 sm:p-4 lg:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Catégorie */}
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2 block">
+                      <label className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                         Catégorie
                       </label>
                       <select
                         value={filters.category}
                         onChange={e => updateFilter({ category: e.target.value })}
-                        className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                        className="mp-select w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         <option value="all">Toutes les catégories</option>
                         {facetCategoryOptions.map(cat => (
@@ -753,13 +751,13 @@ const Marketplace = () => {
 
                     {/* Type de produit */}
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2 block">
+                      <label className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                         Type
                       </label>
                       <select
                         value={filters.productType}
                         onChange={e => updateFilter({ productType: e.target.value })}
-                        className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                        className="mp-select w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         <option value="all">Tous les types</option>
                         {['digital', 'physical', 'service', 'course', 'artist']
@@ -780,7 +778,7 @@ const Marketplace = () => {
 
                     {/* Type de licence */}
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2 block">
+                      <label className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                         Licence
                       </label>
                       <select
@@ -794,7 +792,7 @@ const Marketplace = () => {
                                 : (value as 'standard' | 'plr' | 'copyrighted'),
                           });
                         }}
-                        className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                        className="mp-select w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         <option value="all">Toutes</option>
                         <option value="standard">Standard</option>
@@ -805,13 +803,13 @@ const Marketplace = () => {
 
                     {/* Prix */}
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2 block">
+                      <label className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                         Prix
                       </label>
                       <select
                         value={filters.priceRange}
                         onChange={e => updateFilter({ priceRange: e.target.value })}
-                        className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                        className="mp-select w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         {PRICE_RANGES.map(range => (
                           <option key={range.value} value={range.value}>
@@ -823,13 +821,13 @@ const Marketplace = () => {
 
                     {/* Note */}
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-slate-300 mb-1.5 sm:mb-2 block">
+                      <label className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 block">
                         Note minimum
                       </label>
                       <select
                         value={filters.rating}
                         onChange={e => updateFilter({ rating: e.target.value })}
-                        className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                        className="mp-select w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         <option value="all">Toutes les notes</option>
                         <option value="4">4+ étoiles</option>
@@ -848,9 +846,9 @@ const Marketplace = () => {
                         id="verifiedOnly"
                         checked={filters.verifiedOnly}
                         onChange={e => updateFilter({ verifiedOnly: e.target.checked })}
-                        className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 h-4 w-4"
+                        className="rounded border-[var(--lp-border-light)] h-4 w-4 accent-[var(--lp-blue)]"
                       />
-                      <label htmlFor="verifiedOnly" className="text-xs sm:text-sm text-slate-300">
+                      <label htmlFor="verifiedOnly" className="text-xs sm:text-sm">
                         Boutiques vérifiées uniquement
                       </label>
                     </div>
@@ -861,9 +859,9 @@ const Marketplace = () => {
                         id="featuredOnly"
                         checked={filters.featuredOnly}
                         onChange={e => updateFilter({ featuredOnly: e.target.checked })}
-                        className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 h-4 w-4"
+                        className="rounded border-[var(--lp-border-light)] h-4 w-4 accent-[var(--lp-blue)]"
                       />
-                      <label htmlFor="featuredOnly" className="text-xs sm:text-sm text-slate-300">
+                      <label htmlFor="featuredOnly" className="text-xs sm:text-sm">
                         Produits en vedette uniquement
                       </label>
                     </div>
@@ -874,9 +872,9 @@ const Marketplace = () => {
                         id="inStock"
                         checked={filters.inStock}
                         onChange={e => updateFilter({ inStock: e.target.checked })}
-                        className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 h-4 w-4"
+                        className="rounded border-[var(--lp-border-light)] h-4 w-4 accent-[var(--lp-blue)]"
                       />
-                      <label htmlFor="inStock" className="text-xs sm:text-sm text-slate-300">
+                      <label htmlFor="inStock" className="text-xs sm:text-sm">
                         En stock uniquement
                       </label>
                     </div>
@@ -884,7 +882,7 @@ const Marketplace = () => {
 
                   {/* Tags */}
                   <div className="mt-4 sm:mt-6">
-                    <label className="text-xs sm:text-sm font-medium text-slate-300 mb-2 block">
+                    <label className="text-xs sm:text-sm font-medium mb-2 block">
                       Tags populaires
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -898,9 +896,7 @@ const Marketplace = () => {
                             updateFilter({ tags: newTags });
                           }}
                           className={`px-2 sm:px-3 py-1 rounded-full text-xs transition-all duration-300 ${
-                            filters.tags.includes(tag)
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            filters.tags.includes(tag) ? 'mp-chip mp-chip--active' : 'mp-chip'
                           }`}
                         >
                           {tag}
@@ -968,7 +964,7 @@ const Marketplace = () => {
 
         {/* Recommandations IA personnalisées */}
         {finalUserId && (
-          <section className="py-8 sm:py-12 lg:py-16 px-3 sm:px-4 bg-gradient-to-b from-background to-muted/30">
+          <section className="mp-section-muted py-8 sm:py-12 lg:py-16 px-3 sm:px-4">
             <div className="container mx-auto max-w-7xl">
               <AIProductRecommendations
                 userId={finalUserId}
@@ -983,36 +979,31 @@ const Marketplace = () => {
         )}
 
         {/* Call to Action */}
-        <section className="py-8 sm:py-12 lg:py-16 px-3 sm:px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/20"></div>
-          <div className="container mx-auto max-w-4xl text-center relative z-10">
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
-              <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-white animate-bounce" />
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                {getValue('marketplace.cta.title')}
-              </h2>
-              <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-white animate-bounce" />
-            </div>
-            <p className="text-base sm:text-lg lg:text-xl text-blue-100 mb-4 sm:mb-6 lg:mb-8 px-2">
+        <section className="mp-hero relative overflow-hidden px-3 sm:px-4 py-12 sm:py-16">
+          <div className="mp-hero__inner container mx-auto max-w-4xl text-center">
+            <p className="lp-eyebrow mb-4 self-center mx-auto">Emarzona</p>
+            <h2 className="mp-hero__title text-2xl sm:text-3xl md:text-4xl text-white mb-4">
+              {getValue('marketplace.cta.title')}
+            </h2>
+            <p className="mp-hero__subtitle text-base sm:text-lg mb-8 px-2">
               {getValue('marketplace.cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
               <Link to="/register" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="bg-white text-blue-600 font-semibold h-11 sm:h-14 px-6 sm:px-8 hover:bg-blue-50 transition-all duration-300 hover:scale-105 w-full sm:w-auto text-sm sm:text-base"
+                  className="lp-btn-primary rounded-full h-11 sm:h-12 px-8 w-full sm:w-auto"
                 >
                   {getValue('marketplace.cta.startFree')}
-                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/community" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-blue-600 h-11 sm:h-14 px-6 sm:px-8 transition-all duration-300 hover:scale-105 w-full sm:w-auto text-sm sm:text-base"
+                  className="lp-btn-outline rounded-full h-11 sm:h-12 px-8 w-full sm:w-auto"
                 >
-                  <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <Users className="mr-2 h-4 w-4" />
                   {getValue('marketplace.cta.joinCommunity')}
                 </Button>
               </Link>
@@ -1020,10 +1011,11 @@ const Marketplace = () => {
           </div>
         </section>
 
-        <MarketplaceFooter />
+        <PremiumFooter />
 
         {/* Modales */}
         <AdvancedFilters
+          theme="premium"
           isOpen={showAdvancedSearch}
           onClose={() => setShowAdvancedSearch(false)}
           filters={filters}

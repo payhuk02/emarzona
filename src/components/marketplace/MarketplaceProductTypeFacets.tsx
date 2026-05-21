@@ -66,11 +66,9 @@ export const MarketplaceProductTypeFacets = React.memo<MarketplaceProductTypeFac
               type="button"
               onClick={() => onTypeChange(type)}
               className={cn(
-                'inline-flex items-center gap-1.5 rounded-full px-3 py-2 min-h-[44px] text-xs sm:text-sm font-medium transition-all touch-manipulation',
-                'border focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-                isActive
-                  ? 'bg-blue-600 border-blue-500 text-white shadow-md'
-                  : 'bg-slate-800/80 border-slate-600 text-slate-200 hover:bg-slate-700 hover:border-slate-500'
+                'mp-chip mp-chip--dark inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-xs sm:text-sm touch-manipulation',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--lp-blue)] focus-visible:ring-offset-2',
+                isActive && 'mp-chip--active'
               )}
               aria-pressed={isActive}
               aria-label={`${label}${countStr}`}

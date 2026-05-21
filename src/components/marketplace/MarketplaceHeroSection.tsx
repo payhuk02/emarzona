@@ -8,13 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FilterState } from '@/types/marketplace';
-import { Filter, Zap, Heart, BarChart3, X, Sparkles } from 'lucide-react';
+import { Filter, Zap, Heart, BarChart3, X } from 'lucide-react';
 import { CategoryNavigationBar } from './CategoryNavigationBar';
 import { MarketplaceProductTypeFacets } from './MarketplaceProductTypeFacets';
 import { SearchAutocomplete } from './SearchAutocomplete';
 import type { MarketplaceFacetBucket } from '@/types/marketplace-facets';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { cn } from '@/lib/utils';
 
 interface MarketplaceHeroSectionProps {
   filters: FilterState;
@@ -77,46 +78,31 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
     return (
       <section
         ref={heroRef}
-        className="relative py-8 sm:py-12 lg:py-16 px-3 sm:px-4 overflow-hidden"
+        className="mp-hero relative px-3 sm:px-4 overflow-hidden"
         aria-labelledby="hero-title"
         role="banner"
       >
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 animate-pulse"
-          aria-hidden="true"
-        ></div>
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
-              <Sparkles
-                className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 animate-pulse"
-                aria-hidden="true"
-              />
-              <h1
-                id="hero-title"
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-              >
-                {getValue('marketplace.hero.title')}
-              </h1>
-              <Sparkles
-                className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 animate-pulse"
-                aria-hidden="true"
-              />
-            </div>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-slate-300 mb-3 sm:mb-4 md:mb-6 lg:mb-8 max-w-4xl mx-auto leading-relaxed px-2">
+        <div className="mp-hero__inner container mx-auto max-w-7xl lg:px-8 relative z-10">
+          <div className="text-center mb-6 sm:mb-8 lg:mb-10 pt-2">
+            <p className="lp-eyebrow mb-4 mx-auto">Marketplace</p>
+            <h1
+              id="hero-title"
+              className="mp-hero__title text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[3.25rem]"
+            >
+              {getValue('marketplace.hero.title')}
+            </h1>
+            <p className="mp-hero__subtitle text-sm sm:text-base lg:text-lg mt-4 max-w-3xl mx-auto leading-relaxed px-2">
               {getValue('marketplace.hero.subtitle')}
               <br />
-              <span className="text-blue-400 font-semibold">
-                {getValue('marketplace.hero.tagline')}
-              </span>
+              <span className="mp-hero__tagline">{getValue('marketplace.hero.tagline')}</span>
             </p>
           </div>
 
-          {/* Barre de navigation par catégories */}
           <CategoryNavigationBar
             categories={categories}
             selectedCategory={filters.category}
             onCategoryChange={category => onFilterChange({ category })}
+            theme="premium"
           />
 
           <MarketplaceProductTypeFacets
@@ -127,8 +113,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             isLoading={facetsLoading}
           />
 
-          {/* Barre de recherche avancée avec auto-complétion */}
-          <div className="max-w-4xl mx-auto mb-4 sm:mb-6 px-2">
+          <div className="max-w-4xl mx-auto mb-4 sm:mb-6 px-2 mp-search-wrap">
             <SearchAutocomplete
               value={searchInput}
               onChange={onSearchInputChange}
@@ -141,21 +126,17 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             />
           </div>
 
-          {/* Filtres actifs (tags) */}
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-2 items-center justify-center mb-3 sm:mb-4 px-2">
-              <span className="text-xs sm:text-sm text-slate-300 font-medium">
+              <span className="text-xs sm:text-sm mp-hero__subtitle font-medium">
                 {getValue('marketplace.filtersActive')}
               </span>
 
               {filters.category !== 'all' && (
-                <Badge
-                  variant="secondary"
-                  className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                >
+                <Badge className="mp-badge-filter flex items-center gap-1 text-xs sm:text-sm">
                   {getValue('marketplace.filterLabels.category')} {filters.category}
                   <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-400"
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
                     onClick={() => onFilterChange({ category: 'all' })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${filters.category}`}
                   />
@@ -163,13 +144,10 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               )}
 
               {filters.productType !== 'all' && (
-                <Badge
-                  variant="secondary"
-                  className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                >
+                <Badge className="mp-badge-filter flex items-center gap-1 text-xs sm:text-sm">
                   {getValue('marketplace.filterLabels.type')} {filters.productType}
                   <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-400"
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
                     onClick={() => onFilterChange({ productType: 'all' })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${filters.productType}`}
                   />
@@ -177,14 +155,11 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               )}
 
               {filters.priceRange !== 'all' && (
-                <Badge
-                  variant="secondary"
-                  className="bg-slate-700 text-white hover:bg-slate-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                >
+                <Badge className="mp-badge-filter flex items-center gap-1 text-xs sm:text-sm">
                   {getValue('marketplace.filterLabels.priceRange')}{' '}
                   {PRICE_RANGES.find(r => r.value === filters.priceRange)?.label}
                   <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-400"
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
                     onClick={() => onFilterChange({ priceRange: 'all' })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.priceRange')}`}
                   />
@@ -192,13 +167,10 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               )}
 
               {filters.verifiedOnly && (
-                <Badge
-                  variant="secondary"
-                  className="bg-green-700 text-white hover:bg-green-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                >
+                <Badge className="mp-badge-filter flex items-center gap-1 text-xs sm:text-sm">
                   ✓ {getValue('marketplace.filterLabels.verified')}
                   <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-400"
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
                     onClick={() => onFilterChange({ verifiedOnly: false })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.verified')}`}
                   />
@@ -206,13 +178,10 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               )}
 
               {filters.featuredOnly && (
-                <Badge
-                  variant="secondary"
-                  className="bg-yellow-700 text-white hover:bg-yellow-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
-                >
+                <Badge className="mp-badge-filter flex items-center gap-1 text-xs sm:text-sm">
                   ⭐ {getValue('marketplace.filterLabels.featured')}
                   <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-400"
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
                     onClick={() => onFilterChange({ featuredOnly: false })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.featured')}`}
                   />
@@ -222,12 +191,11 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               {filters.tags.map((tag, index) => (
                 <Badge
                   key={index}
-                  variant="secondary"
-                  className="bg-purple-700 text-white hover:bg-purple-600 transition-colors flex items-center gap-1 text-xs sm:text-sm"
+                  className="mp-badge-filter flex items-center gap-1 text-xs sm:text-sm"
                 >
                   {getValue('marketplace.filterLabels.tag')} {tag}
                   <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-400"
+                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
                     onClick={() => onFilterChange({ tags: filters.tags.filter(t => t !== tag) })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${tag}`}
                   />
@@ -238,7 +206,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
                 variant="ghost"
                 size="sm"
                 onClick={onClearFilters}
-                className="text-xs sm:text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 sm:h-8"
+                className="text-xs sm:text-sm text-red-300 hover:text-red-200 hover:bg-red-500/10 h-7 sm:h-8 rounded-full"
                 aria-label={`${getValue('marketplace.filterLabels.clear')} ${getValue('marketplace.filterLabels.all')}`}
               >
                 {getValue('marketplace.filterLabels.clear')}{' '}
@@ -247,7 +215,6 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             </div>
           )}
 
-          {/* Filtres rapides */}
           <div
             className="flex flex-wrap gap-2 sm:gap-3 justify-center px-2"
             role="toolbar"
@@ -256,7 +223,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             <Button
               variant="outline"
               onClick={onToggleFilters}
-              className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
+              className={cn('mp-btn-toolbar text-xs sm:text-sm h-8 sm:h-10 px-3 sm:px-4')}
               aria-label={`${showFilters ? t('common.hide') : t('common.show')} ${t('marketplace.filters.advanced')}`}
               aria-expanded={showFilters}
               aria-controls="advanced-filters"
@@ -267,7 +234,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               {hasActiveFilters && (
                 <Badge
                   variant="destructive"
-                  className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center text-xs animate-pulse"
+                  className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center text-xs"
                   aria-label="Filtres actifs"
                 >
                   !
@@ -278,7 +245,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             <Button
               variant="outline"
               onClick={onToggleAdvancedSearch}
-              className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
+              className="mp-btn-toolbar text-xs sm:text-sm h-8 sm:h-10 px-3 sm:px-4"
               aria-label="Ouvrir la recherche intelligente"
               aria-expanded={showAdvancedSearch}
             >
@@ -287,16 +254,12 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
               <span className="sm:hidden">Recherche</span>
             </Button>
 
-            <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-600 text-white rounded-md px-2 sm:px-4 py-1.5 sm:py-2 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <div className="mp-btn-toolbar px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm min-h-[44px] sm:min-h-0">
               <Heart className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Mes favoris</span>
               <span className="sm:hidden">Favoris</span>
               {favoritesCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-1 sm:ml-2 bg-red-600 text-white text-xs"
-                  aria-label={`${favoritesCount} favoris`}
-                >
+                <Badge className="ml-1 sm:ml-2 bg-red-600 text-white text-xs rounded-full">
                   {favoritesCount}
                 </Badge>
               )}
@@ -305,18 +268,14 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             <Button
               variant="outline"
               onClick={onToggleComparison}
-              className="bg-slate-800/80 backdrop-blur-sm border-slate-600 text-white hover:bg-slate-700 transition-all duration-300 hover:scale-105 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
+              className="mp-btn-toolbar text-xs sm:text-sm h-8 sm:h-10 px-3 sm:px-4"
               aria-label={`Comparer ${comparisonCount} produit${comparisonCount !== 1 ? 's' : ''}`}
               aria-expanded={false}
             >
               <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" aria-hidden="true" />
               <span className="hidden sm:inline">Comparer</span>
               {comparisonCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-1 sm:ml-2 bg-green-600 text-white text-xs animate-bounce"
-                  aria-label={`${comparisonCount} produits en comparaison`}
-                >
+                <Badge className="ml-1 sm:ml-2 bg-green-600 text-white text-xs rounded-full">
                   {comparisonCount}
                 </Badge>
               )}

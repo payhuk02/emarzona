@@ -176,7 +176,9 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       className={cn(
         // Base structure
         'group relative flex flex-col h-full',
-        'bg-transparent border border-gray-200',
+        variant === 'marketplace'
+          ? 'mp-product-card border-0 bg-transparent'
+          : 'bg-transparent border border-gray-200',
         'rounded-xl overflow-hidden',
 
         // Height responsive

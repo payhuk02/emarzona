@@ -1,9 +1,9 @@
 /**
  * Composant pour l'affichage des produits du marketplace
- * 
+ *
  * Gère l'affichage en grille/liste, la virtualisation, et la pagination.
  * Optimisé pour les performances avec virtualisation pour grandes listes.
- * 
+ *
  * @component
  * @param {MarketplaceProductsSectionProps} props - Propriétés du composant
  * @param {Product[]} props.products - Liste des produits à afficher
@@ -18,9 +18,9 @@
  * @param {string | null} [props.userId] - ID de l'utilisateur connecté
  * @param {boolean} props.showRecommendations - Afficher les recommandations IA
  * @param {Function} [props.onRecommendationsRender] - Callback pour le rendu des recommandations
- * 
+ *
  * @returns {JSX.Element} Le composant de section produits
- * 
+ *
  * @example
  * ```tsx
  * <MarketplaceProductsSection
@@ -37,7 +37,7 @@
  *   showRecommendations={true}
  * />
  * ```
- * 
+ *
  * @remarks
  * - **Virtualisation** : Utilise VirtualizedProductGrid pour 12+ produits
  * - **Performance** : Mémorise les transformations et rendus
@@ -184,8 +184,8 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
     return (
       <section
         ref={productsRef}
-        id="main-content"
-        className="py-4 sm:py-6 px-3 sm:px-4"
+        id="products-list"
+        className="mp-catalog py-4 sm:py-6 px-3 sm:px-4 lg:px-8"
         role="region"
         aria-labelledby="products-section-title"
         aria-describedby="products-section-description"
@@ -194,7 +194,10 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
           {t('marketplace.productList.title', 'Liste des produits')}
         </h2>
         <p id="products-section-description" className="sr-only">
-          {t('marketplace.productList.description', 'Affichage des produits disponibles sur la marketplace')}
+          {t(
+            'marketplace.productList.description',
+            'Affichage des produits disponibles sur la marketplace'
+          )}
         </p>
         <div className="w-full mx-auto max-w-7xl px-0 sm:px-4">
           {error ? (
@@ -206,15 +209,15 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
                 <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500" aria-hidden="true" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">
+              <h3 className="mp-empty-state text-xl sm:text-2xl font-semibold mb-2">
                 {t('marketplace.error.title', 'Erreur de chargement')}
               </h3>
-              <p className="text-sm sm:text-base text-slate-400 mb-4 sm:mb-6 max-w-md mx-auto">
+              <p className="text-sm sm:text-base text-[var(--lp-text-muted)] mb-4 sm:mb-6 max-w-md mx-auto">
                 {error}
               </p>
               <Button
                 onClick={onRetry}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold h-10 sm:h-12 px-4 sm:px-8 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+                className="lp-btn-primary rounded-full h-10 sm:h-12 px-4 sm:px-8 text-xs sm:text-sm"
                 aria-label={t('marketplace.error.retry', 'Réessayer')}
               >
                 {t('marketplace.error.retry', 'Réessayer')}
@@ -223,7 +226,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
             </div>
           ) : loading && !hasLoadedOnce ? (
             // ✅ OPTIMISATION: Afficher skeleton au premier chargement
-            <div 
+            <div
               className="w-full"
               role="status"
               aria-live="polite"
@@ -272,7 +275,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               {/* Pagination */}
               {totalPages > 1 && (
                 <nav
-                  className="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12"
+                  className="mp-pagination flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12"
                   role="navigation"
                   aria-label={t('marketplace.pagination.ariaLabel')}
                 >
@@ -280,7 +283,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                     variant="outline"
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                     disabled={!canGoPrevious}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 h-8 sm:h-10 w-8 sm:w-10 p-0"
+                    className="mp-chip h-8 sm:h-10 w-8 sm:w-10 p-0 disabled:opacity-50"
                     aria-label={t('marketplace.pagination.previous')}
                   >
                     <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -304,11 +307,9 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                         key={pageNum}
                         variant={pagination.currentPage === pageNum ? 'default' : 'outline'}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`${
-                          pagination.currentPage === pageNum
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-800 border-slate-600 text-white hover:bg-slate-700'
-                        } transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 h-8 sm:h-10 min-w-[32px] sm:min-w-[40px] px-2 sm:px-3`}
+                        className={`h-8 sm:h-10 min-w-[32px] sm:min-w-[40px] px-2 sm:px-3 ${
+                          pagination.currentPage === pageNum ? 'mp-chip mp-chip--active' : 'mp-chip'
+                        }`}
                         aria-label={t('marketplace.pagination.page', { page: pageNum })}
                         aria-current={pagination.currentPage === pageNum ? 'page' : undefined}
                       >
@@ -321,7 +322,7 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
                     variant="outline"
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
                     disabled={!canGoNext}
-                    className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 h-8 sm:h-10 w-8 sm:w-10 p-0"
+                    className="mp-chip h-8 sm:h-10 w-8 sm:w-10 p-0 disabled:opacity-50"
                     aria-label={t('marketplace.pagination.next')}
                   >
                     <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -330,17 +331,17 @@ export const MarketplaceProductsSection = React.memo<MarketplaceProductsSectionP
               )}
             </>
           ) : (
-            <div className="text-center py-12 sm:py-16 lg:py-20 px-2">
-              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-slate-700/50 mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+            <div className="mp-empty-state text-center py-12 sm:py-16 lg:py-20 px-2">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-[var(--lp-surface-muted)] mx-auto mb-4 sm:mb-6 flex items-center justify-center">
                 <AlertCircle
-                  className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400"
+                  className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--lp-text-muted)]"
                   aria-hidden="true"
                 />
               </div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-4">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4">
                 {t('marketplace.noProducts.title', 'Aucun produit trouvé')}
               </h3>
-              <p className="text-sm sm:text-base text-slate-400 max-w-md mx-auto">
+              <p className="text-sm sm:text-base max-w-md mx-auto">
                 {t(
                   'marketplace.noProducts.description',
                   'Essayez de modifier vos filtres ou votre recherche pour trouver plus de produits.'

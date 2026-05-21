@@ -59,6 +59,8 @@ interface AdvancedFiltersProps {
   productTypes: string[];
   priceRange: [number, number];
   onPriceRangeChange: (range: [number, number]) => void;
+  /** Aligné sur le thème landing premium */
+  theme?: 'dark' | 'premium';
 }
 
 const AdvancedFilters = ({
@@ -70,7 +72,9 @@ const AdvancedFilters = ({
   productTypes,
   priceRange,
   onPriceRangeChange,
+  theme = 'dark',
 }: AdvancedFiltersProps) => {
+  const isPremium = theme === 'premium';
   const [localFilters, setLocalFilters] = useState(filters);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -136,30 +140,48 @@ const AdvancedFilters = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
+    <div
+      className={cn(
+        'fixed inset-0 z-50 flex items-center justify-center p-4',
+        isPremium && 'landing-premium marketplace-premium'
+      )}
+    >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
       <Card
         className={cn(
-          'relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-800 border-slate-600 shadow-2xl',
+          'relative w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl',
+          isPremium ? 'mp-filters-card border' : 'bg-slate-800 border-slate-600',
           isAnimating
             ? 'animate-in zoom-in-95 duration-300'
             : 'animate-out zoom-out-95 duration-300'
         )}
       >
-        <CardHeader className="border-b border-slate-600">
+        <CardHeader
+          className={cn(
+            'border-b',
+            isPremium ? 'border-[var(--lp-border-light)]' : 'border-slate-600'
+          )}
+        >
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-400" />
+            <CardTitle
+              className={cn(
+                'flex items-center gap-2',
+                isPremium ? 'lp-serif text-[var(--lp-text)]' : 'text-white'
+              )}
+            >
+              <Sparkles
+                className={cn('h-5 w-5', isPremium ? 'text-[var(--lp-blue)]' : 'text-yellow-400')}
+              />
               Filtres avancés
             </CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-slate-400 hover:text-white"
+              className={
+                isPremium ? 'text-[var(--lp-text-muted)]' : 'text-slate-400 hover:text-white'
+              }
               aria-label="Fermer les filtres avancés"
             >
               <X className="h-4 w-4" />
@@ -170,7 +192,12 @@ const AdvancedFilters = ({
         <CardContent className="p-6 space-y-8">
           {/* Recherche avancée */}
           <div className="space-y-4">
-            <Label className="text-white font-semibold flex items-center gap-2">
+            <Label
+              className={cn(
+                'font-semibold flex items-center gap-2',
+                isPremium ? 'text-[var(--lp-text)]' : 'text-white'
+              )}
+            >
               <Search className="h-4 w-4" />
               Recherche intelligente
             </Label>
@@ -178,7 +205,11 @@ const AdvancedFilters = ({
               value={localFilters.search}
               onChange={e => setLocalFilters(prev => ({ ...prev, search: e.target.value }))}
               placeholder="Rechercher par nom, description, boutique..."
-              className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+              className={
+                isPremium
+                  ? 'mp-select rounded-lg'
+                  : 'bg-slate-700 border-slate-600 text-white placeholder-slate-400'
+              }
             />
           </div>
 
@@ -186,11 +217,22 @@ const AdvancedFilters = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Catégorie */}
             <div className="space-y-2">
-              <Label className="text-white font-medium">Catégorie</Label>
+              <Label
+                className={
+                  isPremium ? 'text-[var(--lp-text-muted)] font-medium' : 'text-white font-medium'
+                }
+              >
+                Catégorie
+              </Label>
               <select
                 value={localFilters.category}
                 onChange={e => setLocalFilters(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full px-3 py-2 min-h-[44px] bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                className={cn(
+                  'w-full px-3 py-2 min-h-[44px] rounded-md text-base sm:text-sm touch-manipulation cursor-pointer',
+                  isPremium
+                    ? 'mp-select'
+                    : 'bg-slate-700 border-slate-600 text-white focus:border-blue-500 focus:ring-blue-500'
+                )}
               >
                 <option value="all">Toutes les catégories</option>
                 {categories.map(cat => (
@@ -203,11 +245,22 @@ const AdvancedFilters = ({
 
             {/* Type de produit */}
             <div className="space-y-2">
-              <Label className="text-white font-medium">Type de produit</Label>
+              <Label
+                className={
+                  isPremium ? 'text-[var(--lp-text-muted)] font-medium' : 'text-white font-medium'
+                }
+              >
+                Type de produit
+              </Label>
               <select
                 value={localFilters.productType}
                 onChange={e => setLocalFilters(prev => ({ ...prev, productType: e.target.value }))}
-                className="w-full px-3 py-2 min-h-[44px] bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                className={cn(
+                  'w-full px-3 py-2 min-h-[44px] rounded-md text-base sm:text-sm touch-manipulation cursor-pointer',
+                  isPremium
+                    ? 'mp-select'
+                    : 'bg-slate-700 border-slate-600 text-white focus:border-blue-500 focus:ring-blue-500'
+                )}
               >
                 <option value="all">Tous les types</option>
                 {productTypes.map(type => (
@@ -220,11 +273,22 @@ const AdvancedFilters = ({
 
             {/* Note minimum */}
             <div className="space-y-2">
-              <Label className="text-white font-medium">Note minimum</Label>
+              <Label
+                className={
+                  isPremium ? 'text-[var(--lp-text-muted)] font-medium' : 'text-white font-medium'
+                }
+              >
+                Note minimum
+              </Label>
               <select
                 value={localFilters.rating}
                 onChange={e => setLocalFilters(prev => ({ ...prev, rating: e.target.value }))}
-                className="w-full px-3 py-2 min-h-[44px] bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
+                className={cn(
+                  'w-full px-3 py-2 min-h-[44px] rounded-md text-base sm:text-sm touch-manipulation cursor-pointer',
+                  isPremium
+                    ? 'mp-select'
+                    : 'bg-slate-700 border-slate-600 text-white focus:border-blue-500 focus:ring-blue-500'
+                )}
               >
                 <option value="all">Toutes les notes</option>
                 <option value="4">4+ étoiles</option>
@@ -237,7 +301,12 @@ const AdvancedFilters = ({
 
           {/* Plage de prix avec slider */}
           <div className="space-y-4">
-            <Label className="text-white font-semibold flex items-center gap-2">
+            <Label
+              className={cn(
+                'font-semibold flex items-center gap-2',
+                isPremium ? 'text-[var(--lp-text)]' : 'text-white'
+              )}
+            >
               <DollarSign className="h-4 w-4" />
               Plage de prix (XOF)
             </Label>
@@ -250,7 +319,12 @@ const AdvancedFilters = ({
                 step={1000}
                 className="w-full"
               />
-              <div className="flex justify-between text-sm text-slate-400 mt-2">
+              <div
+                className={cn(
+                  'flex justify-between text-sm mt-2',
+                  isPremium ? 'text-[var(--lp-text-muted)]' : 'text-slate-400'
+                )}
+              >
                 <span>{priceRange[0].toLocaleString()} XOF</span>
                 <span>{priceRange[1].toLocaleString()} XOF</span>
               </div>
@@ -259,7 +333,12 @@ const AdvancedFilters = ({
 
           {/* Tags */}
           <div className="space-y-4">
-            <Label className="text-white font-semibold flex items-center gap-2">
+            <Label
+              className={cn(
+                'font-semibold flex items-center gap-2',
+                isPremium ? 'text-[var(--lp-text)]' : 'text-white'
+              )}
+            >
               <Zap className="h-4 w-4" />
               Tags populaires
             </Label>
@@ -276,8 +355,12 @@ const AdvancedFilters = ({
                   className={cn(
                     'px-3 py-1 rounded-full text-xs transition-all duration-300 hover:scale-105',
                     localFilters.tags.includes(tag)
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? isPremium
+                        ? 'mp-chip mp-chip--active'
+                        : 'bg-blue-600 text-white shadow-lg'
+                      : isPremium
+                        ? 'mp-chip'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   )}
                 >
                   {tag}
@@ -288,7 +371,12 @@ const AdvancedFilters = ({
 
           {/* Filtres supplémentaires */}
           <div className="space-y-4">
-            <Label className="text-white font-semibold flex items-center gap-2">
+            <Label
+              className={cn(
+                'font-semibold flex items-center gap-2',
+                isPremium ? 'text-[var(--lp-text)]' : 'text-white'
+              )}
+            >
               <Filter className="h-4 w-4" />
               Filtres supplémentaires
             </Label>
@@ -302,7 +390,13 @@ const AdvancedFilters = ({
                   }
                   className="border-slate-600 data-[state=checked]:bg-blue-600"
                 />
-                <Label htmlFor="verifiedOnly" className="text-slate-300 flex items-center gap-2">
+                <Label
+                  htmlFor="verifiedOnly"
+                  className={cn(
+                    'flex items-center gap-2',
+                    isPremium ? 'text-[var(--lp-text-muted)]' : 'text-slate-300'
+                  )}
+                >
                   <CheckCircle2 className="h-4 w-4 text-green-400" />
                   Boutiques vérifiées uniquement
                 </Label>
@@ -317,7 +411,13 @@ const AdvancedFilters = ({
                   }
                   className="border-slate-600 data-[state=checked]:bg-blue-600"
                 />
-                <Label htmlFor="featuredOnly" className="text-slate-300 flex items-center gap-2">
+                <Label
+                  htmlFor="featuredOnly"
+                  className={cn(
+                    'flex items-center gap-2',
+                    isPremium ? 'text-[var(--lp-text-muted)]' : 'text-slate-300'
+                  )}
+                >
                   <Star className="h-4 w-4 text-yellow-400" />
                   Produits en vedette uniquement
                 </Label>
@@ -332,7 +432,13 @@ const AdvancedFilters = ({
                   }
                   className="border-slate-600 data-[state=checked]:bg-blue-600"
                 />
-                <Label htmlFor="inStock" className="text-slate-300 flex items-center gap-2">
+                <Label
+                  htmlFor="inStock"
+                  className={cn(
+                    'flex items-center gap-2',
+                    isPremium ? 'text-[var(--lp-text-muted)]' : 'text-slate-300'
+                  )}
+                >
                   <TrendingUp className="h-4 w-4 text-green-400" />
                   En stock uniquement
                 </Label>
@@ -342,7 +448,12 @@ const AdvancedFilters = ({
 
           {/* Tri */}
           <div className="space-y-4">
-            <Label className="text-white font-semibold flex items-center gap-2">
+            <Label
+              className={cn(
+                'font-semibold flex items-center gap-2',
+                isPremium ? 'text-[var(--lp-text)]' : 'text-white'
+              )}
+            >
               <Target className="h-4 w-4" />
               Trier par
             </Label>
@@ -354,8 +465,12 @@ const AdvancedFilters = ({
                   className={cn(
                     'flex items-center gap-2 p-3 rounded-lg border transition-all duration-300 hover:scale-105',
                     localFilters.sortBy === option.value
-                      ? 'bg-blue-600 border-blue-500 text-white'
-                      : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
+                      ? isPremium
+                        ? 'mp-chip mp-chip--active border'
+                        : 'bg-blue-600 border-blue-500 text-white'
+                      : isPremium
+                        ? 'mp-chip border'
+                        : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
                   )}
                 >
                   <option.icon className="h-4 w-4" />
@@ -366,11 +481,20 @@ const AdvancedFilters = ({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-between pt-6 border-t border-slate-600">
+          <div
+            className={cn(
+              'flex justify-between pt-6 border-t',
+              isPremium ? 'border-[var(--lp-border-light)]' : 'border-slate-600'
+            )}
+          >
             <Button
               variant="outline"
               onClick={handleReset}
-              className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              className={
+                isPremium
+                  ? 'lp-btn-outline-light rounded-full'
+                  : 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+              }
             >
               Réinitialiser
             </Button>
@@ -378,13 +502,21 @@ const AdvancedFilters = ({
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                className={
+                  isPremium
+                    ? 'lp-btn-outline-light rounded-full'
+                    : 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                }
               >
                 Annuler
               </Button>
               <Button
                 onClick={handleApply}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                className={
+                  isPremium
+                    ? 'lp-btn-primary rounded-full'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+                }
               >
                 Appliquer les filtres
               </Button>

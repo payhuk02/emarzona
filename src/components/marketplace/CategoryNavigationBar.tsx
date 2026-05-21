@@ -50,13 +50,17 @@ interface CategoryNavigationBarProps {
   categories: string[];
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
+  /** Aligné sur le hero sombre du landing premium */
+  theme?: 'default' | 'premium';
 }
 
 export function CategoryNavigationBar({
   categories,
   selectedCategory,
   onCategoryChange,
+  theme = 'default',
 }: CategoryNavigationBarProps) {
+  const isPremium = theme === 'premium';
   const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -64,7 +68,7 @@ export function CategoryNavigationBar({
 
   // Définition complète des catégories avec leurs icônes et labels (style comeup.com)
   // Utilise maintenant les catégories centralisées avec i18n
-  const  CATEGORY_CONFIG_BASE: CategoryOption[] = useMemo(
+  const CATEGORY_CONFIG_BASE: CategoryOption[] = useMemo(
     () => [
       {
         value: 'all',
@@ -357,28 +361,50 @@ export function CategoryNavigationBar({
   }, [availableCategories]);
 
   return (
-    <div className="sticky top-0 z-40 w-full bg-transparent">
-      {/* Container avec coins arrondis pour la barre de catégories */}
-      <div className="relative w-full bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden">
-        {/* Flèche gauche */}
+    <div className="sticky top-0 z-40 w-full bg-transparent mb-4 sm:mb-6">
+      <div
+        className={cn(
+          'relative w-full overflow-hidden rounded-2xl',
+          isPremium ? 'mp-category-bar' : 'bg-white border border-gray-200 shadow-sm'
+        )}
+      >
         {showLeftArrow && (
           <button
             onClick={scrollLeft}
-            className="absolute left-0 top-0 bottom-0 z-20 flex items-center justify-center w-12 bg-gradient-to-r from-white via-white/95 to-transparent hover:from-gray-50 transition-all duration-200 shadow-sm"
+            className={cn(
+              'absolute left-0 top-0 bottom-0 z-20 flex items-center justify-center w-12 transition-all duration-200',
+              isPremium
+                ? 'mp-category-bar__fade mp-category-bar__fade--left'
+                : 'bg-gradient-to-r from-white via-white/95 to-transparent hover:from-gray-50 shadow-sm'
+            )}
             aria-label={t('marketplace.categories.scrollLeft', 'Faire défiler vers la gauche')}
           >
-            <ChevronLeft className="w-5 h-5 text-gray-700 hover:text-gray-900" />
+            <ChevronLeft
+              className={cn(
+                'w-5 h-5',
+                isPremium ? 'text-white/85 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+              )}
+            />
           </button>
         )}
 
-        {/* Flèche droite */}
         {showRightArrow && (
           <button
             onClick={scrollRight}
-            className="absolute right-0 top-0 bottom-0 z-20 flex items-center justify-center w-12 bg-gradient-to-l from-white via-white/95 to-transparent hover:from-gray-50 transition-all duration-200 shadow-sm"
+            className={cn(
+              'absolute right-0 top-0 bottom-0 z-20 flex items-center justify-center w-12 transition-all duration-200',
+              isPremium
+                ? 'mp-category-bar__fade mp-category-bar__fade--right'
+                : 'bg-gradient-to-l from-white via-white/95 to-transparent hover:from-gray-50 shadow-sm'
+            )}
             aria-label={t('marketplace.categories.scrollRight', 'Faire défiler vers la droite')}
           >
-            <ChevronRight className="w-5 h-5 text-gray-700 hover:text-gray-900" />
+            <ChevronRight
+              className={cn(
+                'w-5 h-5',
+                isPremium ? 'text-white/85 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+              )}
+            />
           </button>
         )}
 
@@ -400,9 +426,11 @@ export function CategoryNavigationBar({
                   onClick={() => onCategoryChange(category.value)}
                   className={cn(
                     'relative flex flex-col items-center justify-center gap-1.5 sm:gap-2 min-w-[70px] sm:min-w-[85px] px-2 sm:px-3 py-2 sm:py-2.5 transition-all duration-300',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg',
-                    'hover:bg-gray-50 active:scale-95',
-                    isActive && 'bg-gray-50'
+                    'focus:outline-none focus:ring-2 focus:ring-[var(--lp-blue)] focus:ring-offset-2 rounded-lg',
+                    isPremium
+                      ? 'hover:bg-white/10 active:scale-95'
+                      : 'hover:bg-gray-50 active:scale-95',
+                    isActive && (isPremium ? 'bg-white/12' : 'bg-gray-50')
                   )}
                   role="tab"
                   aria-selected={isActive}
@@ -414,8 +442,12 @@ export function CategoryNavigationBar({
                       'relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full transition-all duration-300',
                       'transform',
                       isActive
-                        ? 'bg-gray-900 text-white scale-110 shadow-lg ring-2 ring-gray-900 ring-offset-2'
-                        : 'bg-gray-50 text-gray-600 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 hover:scale-105'
+                        ? isPremium
+                          ? 'bg-[var(--lp-blue-bright)] text-white scale-110 shadow-lg ring-2 ring-[var(--lp-blue)]/60 ring-offset-2 ring-offset-transparent'
+                          : 'bg-gray-900 text-white scale-110 shadow-lg ring-2 ring-gray-900 ring-offset-2'
+                        : isPremium
+                          ? 'bg-white/15 text-white border-2 border-white/25 hover:bg-white/22 hover:border-white/40 hover:scale-105'
+                          : 'bg-gray-50 text-gray-600 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400 hover:scale-105'
                     )}
                   >
                     <Icon
@@ -435,7 +467,13 @@ export function CategoryNavigationBar({
                   <span
                     className={cn(
                       'text-[10px] sm:text-xs font-medium text-center whitespace-nowrap transition-all duration-300 leading-tight',
-                      isActive ? 'text-gray-900 font-bold' : 'text-gray-600 font-normal'
+                      isActive
+                        ? isPremium
+                          ? 'text-white font-bold'
+                          : 'text-gray-900 font-bold'
+                        : isPremium
+                          ? 'text-white/85 font-normal'
+                          : 'text-gray-600 font-normal'
                     )}
                   >
                     {category.label}
@@ -443,7 +481,12 @@ export function CategoryNavigationBar({
 
                   {/* Ligne de soulignement épaisse pour l'élément actif */}
                   {isActive && (
-                    <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-10 sm:w-12 h-1 bg-gray-900 rounded-full" />
+                    <div
+                      className={cn(
+                        'absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-10 sm:w-12 h-1 rounded-full',
+                        isPremium ? 'bg-[var(--lp-blue-bright)]' : 'bg-gray-900'
+                      )}
+                    />
                   )}
                 </button>
               );
@@ -454,9 +497,3 @@ export function CategoryNavigationBar({
     </div>
   );
 }
-
-
-
-
-
-
