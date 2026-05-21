@@ -40,9 +40,7 @@ const DEFAULT_META: Meta = {
 
 async function fetchProductMeta(slug: string, storeId?: string): Promise<Meta | null> {
   try {
-    const filter = storeId
-      ? `slug=eq.${slug}&store_id=eq.${storeId}`
-      : `slug=eq.${slug}`;
+    const filter = storeId ? `slug=eq.${slug}&store_id=eq.${storeId}` : `slug=eq.${slug}`;
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/products?${filter}&select=name,description,image_url,price,currency,meta_title,meta_description,slug&is_active=eq.true&limit=1`,
       {
@@ -95,6 +93,63 @@ async function fetchStoreMeta(slugOrSubdomain: string): Promise<Meta | null> {
   }
 }
 
+async function fetchCollectionMeta(slug: string): Promise<Meta | null> {
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/artist_collections?collection_slug=eq.${slug}&select=collection_name,collection_description,cover_image_url&is_public=eq.true&limit=1`,
+      {
+        headers: {
+          apikey: globalThis.process?.env?.SUPABASE_ANON_KEY || '',
+          Authorization: `Bearer ${globalThis.process?.env?.SUPABASE_ANON_KEY || ''}`,
+        },
+      }
+    );
+    const data = await r.json();
+    const c = data?.[0];
+    if (!c) return null;
+    return {
+      title: `${c.collection_name} | Collection Emarzona`,
+      description: (c.collection_description || '').slice(0, 160),
+      image: c.cover_image_url || DEFAULT_META.image,
+      url: '',
+      type: 'website',
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchAuctionMeta(slug: string): Promise<Meta | null> {
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/artist_product_auctions?auction_slug=eq.${slug}&select=auction_title,auction_description,current_bid,artist_products(products(image_url))&limit=1`,
+      {
+        headers: {
+          apikey: globalThis.process?.env?.SUPABASE_ANON_KEY || '',
+          Authorization: `Bearer ${globalThis.process?.env?.SUPABASE_ANON_KEY || ''}`,
+        },
+      }
+    );
+    const data = await r.json();
+    const a = data?.[0];
+    if (!a) return null;
+
+    const image = a.artist_products?.products?.image_url || DEFAULT_META.image;
+
+    return {
+      title: `${a.auction_title} | Enchère Emarzona`,
+      description: (a.auction_description || '').slice(0, 160),
+      image: image,
+      url: '',
+      type: 'product',
+      price: a.current_bid,
+      currency: 'XOF',
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function resolveMeta(req: Request): Promise<Meta> {
   const url = new URL(req.url);
   const host = (req.headers.get('host') || '').toLowerCase();
@@ -118,8 +173,10 @@ async function resolveMeta(req: Request): Promise<Meta> {
     }
   }
 
-  // emarzona.com routes
-  const productMatch = path.match(/^\/product\/([^/]+)/);
+  // emarzona.com routes (products, courses, digital, etc.)
+  const productMatch = path.match(
+    /^\/(?:product|digital|physical|service|artist|courses|learn)\/([^/]+)/
+  );
   if (productMatch) {
     const m = await fetchProductMeta(productMatch[1]);
     if (m) {
@@ -128,7 +185,28 @@ async function resolveMeta(req: Request): Promise<Meta> {
     }
   }
 
-  const storeMatch = path.match(/^\/store\/([^/]+)/);
+  // Collections
+  const collectionMatch = path.match(/^\/collections\/([^/]+)/);
+  if (collectionMatch) {
+    const m = await fetchCollectionMeta(collectionMatch[1]);
+    if (m) {
+      m.url = `${SITE}${path}`;
+      return m;
+    }
+  }
+
+  // Auctions
+  const auctionMatch = path.match(/^\/auctions\/([^/]+)/);
+  if (auctionMatch) {
+    const m = await fetchAuctionMeta(auctionMatch[1]);
+    if (m) {
+      m.url = `${SITE}${path}`;
+      return m;
+    }
+  }
+
+  // Stores and Portfolios
+  const storeMatch = path.match(/^\/(?:store|portfolio)\/([^/]+)/);
   if (storeMatch) {
     const m = await fetchStoreMeta(storeMatch[1]);
     if (m) {
@@ -141,7 +219,10 @@ async function resolveMeta(req: Request): Promise<Meta> {
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]!));
+  return s.replace(
+    /[<>&"']/g,
+    c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' })[c]!
+  );
 }
 
 function injectMeta(html: string, meta: Meta): string {
@@ -172,7 +253,10 @@ ${meta.type === 'product' && meta.price != null ? `    <meta property="product:p
   // Supprimer title et meta existants ciblés, puis injecter le bloc avant </head>
   let out = html
     .replace(/<title>[\s\S]*?<\/title>/i, '')
-    .replace(/<meta\s+(?:name|property)=["'](?:description|og:[^"']+|twitter:[^"']+)["'][^>]*>\s*/gi, '')
+    .replace(
+      /<meta\s+(?:name|property)=["'](?:description|og:[^"']+|twitter:[^"']+)["'][^>]*>\s*/gi,
+      ''
+    )
     .replace(/<link\s+rel=["']canonical["'][^>]*>\s*/gi, '');
   out = out.replace(/<\/head>/i, `${block}\n  </head>`);
   return out;

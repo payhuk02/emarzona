@@ -48,7 +48,6 @@ import {
   Leaderboard,
   AchievementsDisplay,
 } from '@/components/courses/gamification';
-import { NotesPanel } from '@/components/courses/notes';
 import { CohortsList } from '@/components/courses/cohorts';
 import { AssignmentsList } from '@/components/courses/assignments';
 import { LiveSessionsList } from '@/components/courses/live';
@@ -60,6 +59,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { HelpCircle } from 'lucide-react';
+import { FAQSchema } from '@/components/seo/FAQSchema';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrackAnalyticsEvent, getSessionId } from '@/hooks/courses/useCourseAnalytics';
@@ -316,6 +316,8 @@ const CourseDetail = ({ learnMode = false }: CourseDetailProps) => {
         image={product.image_url || ''}
         url={`https://emarzona.vercel.app/courses/${product.slug}`}
       />
+
+      {faqs && faqs.length > 0 && <FAQSchema faqs={faqs} />}
 
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-orange-600 to-orange-800 text-white">

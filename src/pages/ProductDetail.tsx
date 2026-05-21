@@ -22,8 +22,6 @@ import {
   ClipboardList,
   Download,
   Clock,
-  RefreshCw,
-  DollarSign,
   Gift,
   Lock,
   AlertTriangle,
@@ -43,6 +41,7 @@ import { CountdownTimer } from '@/components/ui/countdown-timer';
 import { CustomFieldsDisplay } from '@/components/products/CustomFieldsDisplay';
 import { ProductVariantSelector } from '@/components/products/ProductVariantSelector';
 import { SEOMeta, ProductSchema, BreadcrumbSchema } from '@/components/seo';
+import { FAQSchema } from '@/components/seo/FAQSchema';
 import { ProductReviewsSummary } from '@/components/reviews';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -59,8 +58,7 @@ import { formatPrice, calculateDiscount } from '@/lib/product-helpers';
 import { useToast } from '@/hooks/use-toast';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { cn } from '@/lib/utils';
-import { useLCPPreload } from '@/hooks/useLCPPreload';
-import type { ProductSpecification, ProductFAQ } from '@/types/product-form';
+import type { ProductFAQ } from '@/types/product-form';
 import type { Product } from '@/types/marketplace';
 import type { Store } from '@/hooks/useStore';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
@@ -192,7 +190,7 @@ const ProductDetails = () => {
 
       // Fetch store
       const { data: storeData, error: storeError } = await supabase
-        .from('stores_public' as any)
+        .from('stores_public' as never)
         .select(STORES_PUBLIC_FIELDS)
         .eq('slug', slug)
         .limit(1);
@@ -236,10 +234,18 @@ const ProductDetails = () => {
         // Objectif: réduire la latence réseau (surtout mobile) en évitant des requêtes séquentielles.
         const [freeResult, paidResult] = await Promise.all([
           product.free_product_id
-            ? supabase.from('products').select(PRODUCT_DETAIL_COLUMNS).eq('id', product.free_product_id).single()
+            ? supabase
+                .from('products')
+                .select(PRODUCT_DETAIL_COLUMNS)
+                .eq('id', product.free_product_id)
+                .single()
             : Promise.resolve({ data: null, error: null }),
           product.paid_product_id
-            ? supabase.from('products').select(PRODUCT_DETAIL_COLUMNS).eq('id', product.paid_product_id).single()
+            ? supabase
+                .from('products')
+                .select(PRODUCT_DETAIL_COLUMNS)
+                .eq('id', product.paid_product_id)
+                .single()
             : Promise.resolve({ data: null, error: null }),
         ]);
 
@@ -289,10 +295,7 @@ const ProductDetails = () => {
 
   // Calculs et hooks AVANT les early returns
   const productUrl = useMemo(
-    () =>
-      product && store
-        ? generateProductUrl(store.slug, product.slug, store.subdomain)
-        : '',
+    () => (product && store ? generateProductUrl(store.slug, product.slug, store.subdomain) : ''),
     [product, store]
   );
 
@@ -316,18 +319,18 @@ const ProductDetails = () => {
     return {
       price: product.price,
     };
-  }, [product?.price, product?.promotional_price]);
+  }, [product]);
 
   const hasPromo = useMemo(() => {
     if (!product) return false;
     const promoPrice = product.promotional_price ?? undefined;
     return promoPrice !== undefined && promoPrice < product.price;
-  }, [product?.price, product?.promotional_price]);
+  }, [product]);
 
   const discountPercent = useMemo(() => {
     if (!hasPromo || !product || !product.promotional_price) return 0;
     return calculateDiscount(product.price, product.promotional_price);
-  }, [hasPromo, product?.price, product?.promotional_price]);
+  }, [hasPromo, product]);
 
   // Handler pour l'achat - redirection vers checkout
   const handleBuyNow = useCallback(async () => {
@@ -566,6 +569,11 @@ const ProductDetails = () => {
 
       {/* Breadcrumb Schema */}
       {breadcrumbItems.length > 0 && <BreadcrumbSchema items={breadcrumbItems} />}
+
+      {/* FAQ Schema */}
+      {product?.faqs && Array.isArray(product.faqs) && product.faqs.length > 0 && (
+        <FAQSchema faqs={product.faqs as unknown as { question: string; answer: string }[]} />
+      )}
 
       <div className="min-h-screen flex flex-col bg-background">
         {/* Header */}
