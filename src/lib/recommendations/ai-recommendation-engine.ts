@@ -5,6 +5,7 @@
 
 import { logger } from '../logger';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchUserPurchasedProductIds } from '@/lib/marketplace/user-purchase-history';
 
 export interface UserBehavior {
   userId: string;
@@ -87,7 +88,7 @@ export class AIRecommendationEngine {
         this.generateBehavioralRecommendations(context, userBehavior),
         this.generateCollaborativeRecommendations(context),
         this.generateContentBasedRecommendations(context),
-        this.generateTrendingRecommendations(context)
+        this.generateTrendingRecommendations(context),
       ]);
 
       // Fusionner et scorer les recommandations
@@ -95,7 +96,7 @@ export class AIRecommendationEngine {
         ...behavioralRecs,
         ...collaborativeRecs,
         ...contentRecs,
-        ...trendingRecs
+        ...trendingRecs,
       ]);
 
       // Trier par score et filtrer
@@ -110,16 +111,15 @@ export class AIRecommendationEngine {
         recommendations: filteredRecommendations,
         algorithm: 'hybrid-ai-v1',
         processingTime,
-        contextUsed: this.analyzeContextUsage(context)
+        contextUsed: this.analyzeContextUsage(context),
       };
-
     } catch (error) {
       logger.error('Error generating recommendations', { error, context });
       return {
         recommendations: [],
         algorithm: 'fallback',
         processingTime: Date.now() - startTime,
-        contextUsed: []
+        contextUsed: [],
       };
     }
   }
@@ -129,21 +129,18 @@ export class AIRecommendationEngine {
    */
   async trackUserBehavior(behavior: UserBehavior): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('user_behavior_tracking')
-        .insert({
-          user_id: behavior.userId,
-          product_id: behavior.productId,
-          action: behavior.action,
-          timestamp: behavior.timestamp.toISOString(),
-          duration: behavior.duration,
-          context: behavior.context
-        });
+      const { error } = await supabase.from('user_behavior_tracking').insert({
+        user_id: behavior.userId,
+        product_id: behavior.productId,
+        action: behavior.action,
+        timestamp: behavior.timestamp.toISOString(),
+        duration: behavior.duration,
+        context: behavior.context,
+      });
 
       if (error) throw error;
 
       logger.debug('User behavior tracked', { behavior });
-
     } catch (error) {
       logger.error('Error tracking user behavior', { error, behavior });
     }
@@ -171,9 +168,8 @@ export class AIRecommendationEngine {
         action: item.action,
         timestamp: new Date(item.timestamp),
         duration: item.duration,
-        context: item.context
+        context: item.context,
       }));
-
     } catch (error) {
       logger.error('Error fetching user behavior data', { error, userId });
       return [];
@@ -192,9 +188,7 @@ export class AIRecommendationEngine {
     if (!userBehavior.length) return recommendations;
 
     // Analyser les produits récemment consultés
-    const recentViews = userBehavior
-      .filter(b => b.action === 'view')
-      .slice(0, 10);
+    const recentViews = userBehavior.filter(b => b.action === 'view').slice(0, 10);
 
     // Trouver des produits similaires
     for (const behavior of recentViews) {
@@ -211,8 +205,8 @@ export class AIRecommendationEngine {
             price: product.price,
             tags: product.tags,
             productType: product.product_type,
-            reasonText: `Parce que vous avez regardé ${behavior.context?.category || 'ce type de produit'}`
-          }
+            reasonText: `Parce que vous avez regardé ${behavior.context?.category || 'ce type de produit'}`,
+          },
         });
       });
     }
@@ -223,7 +217,9 @@ export class AIRecommendationEngine {
   /**
    * Génère des recommandations collaboratives (produits populaires chez les utilisateurs similaires)
    */
-  private async generateCollaborativeRecommendations(context: RecommendationContext): Promise<ProductRecommendation[]> {
+  private async generateCollaborativeRecommendations(
+    context: RecommendationContext
+  ): Promise<ProductRecommendation[]> {
     const recommendations: ProductRecommendation[] = [];
 
     if (!context.userId) return recommendations;
@@ -231,23 +227,24 @@ export class AIRecommendationEngine {
     try {
       // Trouver les utilisateurs avec un comportement similaire
       // Utiliser la signature standardisée p_user_id et p_limit
-      const { data: similarUsers, error } = await supabase
-        .rpc('find_similar_users', {
-          p_user_id: context.userId,
-          p_limit: 50
-        });
+      const { data: similarUsers, error } = await supabase.rpc('find_similar_users', {
+        p_user_id: context.userId,
+        p_limit: 50,
+      });
 
       if (error || !similarUsers?.length) return recommendations;
 
       // Récupérer les produits populaires chez ces utilisateurs
-      const userIds = similarUsers.map((u: any) => u.user_id);
-      const { data: popularProducts, error: productsError } = await supabase
-        .rpc('get_popular_products_by_users', {
+      const userIds = similarUsers.map((u: { user_id: string }) => u.user_id);
+      const { data: popularProducts, error: productsError } = await supabase.rpc(
+        'get_popular_products_by_users',
+        {
           p_user_ids: userIds,
           p_action: 'purchase',
           p_limit: 10,
-          p_product_type: context.productType || null // Filtrer par type si spécifié
-        });
+          p_product_type: context.productType || null, // Filtrer par type si spécifié
+        }
+      );
 
       if (productsError || !popularProducts?.length) return recommendations;
 
@@ -259,8 +256,8 @@ export class AIRecommendationEngine {
           confidence: 0.7,
           metadata: {
             productType: product.product_type,
-            reasonText: 'Populaire chez les utilisateurs avec des goûts similaires'
-          }
+            reasonText: 'Populaire chez les utilisateurs avec des goûts similaires',
+          },
         });
       }
 
@@ -288,7 +285,6 @@ export class AIRecommendationEngine {
           }
         }
       }
-
     } catch (error) {
       logger.error('Error generating collaborative recommendations', { error });
     }
@@ -300,7 +296,9 @@ export class AIRecommendationEngine {
    * Génère des recommandations basées sur le contenu du produit actuel
    * Prend en compte le type de produit pour des recommandations cohérentes
    */
-  private async generateContentBasedRecommendations(context: RecommendationContext): Promise<ProductRecommendation[]> {
+  private async generateContentBasedRecommendations(
+    context: RecommendationContext
+  ): Promise<ProductRecommendation[]> {
     const recommendations: ProductRecommendation[] = [];
 
     if (!context.productId) return recommendations;
@@ -308,12 +306,12 @@ export class AIRecommendationEngine {
     try {
       // Utiliser sameTypeOnly du contexte ou true par défaut pour cohérence
       // Si productType est spécifié, on force sameTypeOnly pour cohérence
-      const sameTypeOnly = context.productType ? true : (context.sameTypeOnly !== false);
+      const sameTypeOnly = context.productType ? true : context.sameTypeOnly !== false;
       const similarProducts = await this.findSimilarProducts(context.productId, sameTypeOnly);
 
       // Calculer les scores de similarité en parallèle
       const similarityScores = await Promise.all(
-        similarProducts.map(product => 
+        similarProducts.map(product =>
           this.calculateContentSimilarity(context.productId!, product.id)
         )
       );
@@ -327,11 +325,10 @@ export class AIRecommendationEngine {
           metadata: {
             category: product.category,
             tags: product.tags,
-            reasonText: `Similaire au produit que vous consultez`
-          }
+            reasonText: `Similaire au produit que vous consultez`,
+          },
         });
       });
-
     } catch (error) {
       logger.error('Error generating content-based recommendations', { error });
     }
@@ -343,18 +340,22 @@ export class AIRecommendationEngine {
    * Génère des recommandations de produits tendance
    * Prend en compte le type de produit si spécifié
    */
-  private async generateTrendingRecommendations(context: RecommendationContext): Promise<ProductRecommendation[]> {
+  private async generateTrendingRecommendations(
+    context: RecommendationContext
+  ): Promise<ProductRecommendation[]> {
     const recommendations: ProductRecommendation[] = [];
 
     try {
       // Si un type de produit est spécifié, utiliser la fonction dédiée
       if (context.productType) {
-        const { data: trendingProducts, error } = await supabase
-          .rpc('get_recommendations_by_product_type', {
+        const { data: trendingProducts, error } = await supabase.rpc(
+          'get_recommendations_by_product_type',
+          {
             p_product_type: context.productType,
             p_user_id: context.userId || null,
-            p_limit: 15
-          });
+            p_limit: 15,
+          }
+        );
 
         if (!error && trendingProducts?.length) {
           for (const product of trendingProducts) {
@@ -367,8 +368,8 @@ export class AIRecommendationEngine {
                 category: product.category,
                 price: product.price,
                 productType: product.product_type,
-                reasonText: product.recommendation_reason || 'Tendance cette semaine'
-              }
+                reasonText: product.recommendation_reason || 'Tendance cette semaine',
+              },
             });
           }
           return recommendations;
@@ -376,12 +377,14 @@ export class AIRecommendationEngine {
       }
 
       // Sinon, utiliser la fonction générale (peut filtrer par type si spécifié)
-      const { data: trendingProducts, error } = await supabase
-        .rpc('get_trending_products_by_behavior', {
+      const { data: trendingProducts, error } = await supabase.rpc(
+        'get_trending_products_by_behavior',
+        {
           p_days: 7,
           p_limit: 15,
-          p_product_type: context.productType || null // Filtrer par type si spécifié
-        });
+          p_product_type: context.productType || null, // Filtrer par type si spécifié
+        }
+      );
 
       if (error || !trendingProducts?.length) return recommendations;
 
@@ -393,11 +396,10 @@ export class AIRecommendationEngine {
           confidence: 0.6,
           metadata: {
             productType: product.product_type,
-            reasonText: 'Tendance cette semaine'
-          }
+            reasonText: 'Tendance cette semaine',
+          },
         });
       }
-
     } catch (error) {
       logger.error('Error generating trending recommendations', { error });
     }
@@ -409,18 +411,19 @@ export class AIRecommendationEngine {
    * Trouve des produits similaires
    * Prend en compte le type de produit pour des recommandations cohérentes
    */
-  private async findSimilarProducts(productId: string, sameTypeOnly: boolean = true): Promise<any[]> {
+  private async findSimilarProducts(
+    productId: string,
+    sameTypeOnly: boolean = true
+  ): Promise<Record<string, unknown>[]> {
     try {
-      const { data, error } = await supabase
-        .rpc('find_similar_products', {
-          target_product_id: productId,
-          limit_count: 10,
-          p_same_type_only: sameTypeOnly
-        });
+      const { data, error } = await supabase.rpc('find_similar_products', {
+        target_product_id: productId,
+        limit_count: 10,
+        p_same_type_only: sameTypeOnly,
+      });
 
       if (error) throw error;
       return data || [];
-
     } catch (error) {
       logger.error('Error finding similar products', { error, productId });
       return [];
@@ -430,7 +433,10 @@ export class AIRecommendationEngine {
   /**
    * Calcule le score comportemental
    */
-  private calculateBehavioralScore(behavior: UserBehavior, product: any): number {
+  private calculateBehavioralScore(
+    behavior: UserBehavior,
+    product: Record<string, unknown>
+  ): number {
     let score = 1;
 
     // Bonus basé sur la durée de consultation
@@ -463,23 +469,33 @@ export class AIRecommendationEngine {
   /**
    * Calcule la similarité de contenu en utilisant la fonction SQL
    */
-  private async calculateContentSimilarity(sourceProductId: string, targetProductId: string): Promise<number> {
+  private async calculateContentSimilarity(
+    sourceProductId: string,
+    targetProductId: string
+  ): Promise<number> {
     try {
-      const { data, error } = await supabase
-        .rpc('calculate_content_similarity', {
-          source_product_id: sourceProductId,
-          target_product_id: targetProductId
-        });
+      const { data, error } = await supabase.rpc('calculate_content_similarity', {
+        source_product_id: sourceProductId,
+        target_product_id: targetProductId,
+      });
 
       if (error || data === null) {
-        logger.warn('Error calculating content similarity, using fallback', { error, sourceProductId, targetProductId });
+        logger.warn('Error calculating content similarity, using fallback', {
+          error,
+          sourceProductId,
+          targetProductId,
+        });
         return 2; // Score de fallback
       }
 
       // Convertir le score de 0-100 à 0-5 pour correspondre à l'échelle utilisée
       return (data as number) / 20;
     } catch (error) {
-      logger.error('Exception calculating content similarity', { error, sourceProductId, targetProductId });
+      logger.error('Exception calculating content similarity', {
+        error,
+        sourceProductId,
+        targetProductId,
+      });
       return 2; // Score de fallback
     }
   }
@@ -547,7 +563,7 @@ export const RecommendationService = {
       productId,
       userId,
       productType,
-      sameTypeOnly
+      sameTypeOnly,
     });
 
     return result.recommendations.slice(0, limit);
@@ -566,31 +582,27 @@ export const RecommendationService = {
     let favoriteTypes = preferredTypes;
     if (!favoriteTypes) {
       try {
-        const { data: purchases } = await supabase
-          .from('orders')
-          .select(`
-            order_items!inner (
-              products!inner (
-                product_type
-              )
-            )
-          `)
-          .eq('customer_id', userId)
-          .eq('payment_status', 'paid')
-          .limit(50);
+        const productIds = await fetchUserPurchasedProductIds(userId);
 
-        if (purchases) {
+        if (productIds.length > 0) {
+          const { data: products } = await supabase
+            .from('products')
+            .select('product_type')
+            .in('id', productIds.slice(0, 50));
+
           const types = new Set<string>();
-          purchases.forEach((order: any) => {
-            if (order.order_items) {
-              order.order_items.forEach((item: any) => {
-                if (item.products?.product_type) {
-                  types.add(item.products.product_type);
-                }
-              });
-            }
+          products?.forEach(p => {
+            if (p.product_type) types.add(p.product_type);
           });
-          favoriteTypes = Array.from(types) as ('digital' | 'physical' | 'service' | 'course' | 'artist')[];
+          if (types.size > 0) {
+            favoriteTypes = Array.from(types) as (
+              | 'digital'
+              | 'physical'
+              | 'service'
+              | 'course'
+              | 'artist'
+            )[];
+          }
         }
       } catch (error) {
         logger.warn('Error fetching user favorite product types', { error });
@@ -603,8 +615,8 @@ export const RecommendationService = {
         favoriteProductTypes: favoriteTypes,
         purchasedProducts: [],
         favoriteCategories: [],
-        averageOrderValue: 0
-      }
+        averageOrderValue: 0,
+      },
     });
 
     return result.recommendations.slice(0, limit);
@@ -616,9 +628,7 @@ export const RecommendationService = {
   async getTrendingRecommendations(limit: number = 8): Promise<ProductRecommendation[]> {
     const result = await recommendationEngine.generateRecommendations({});
 
-    return result.recommendations
-      .filter(rec => rec.reason === 'trending')
-      .slice(0, limit);
+    return result.recommendations.filter(rec => rec.reason === 'trending').slice(0, limit);
   },
 
   /**
@@ -635,7 +645,7 @@ export const RecommendationService = {
       productId,
       action,
       timestamp: new Date(),
-      context
+      context,
     });
-  }
+  },
 };

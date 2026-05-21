@@ -45,12 +45,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { cacheStrategies } from '@/lib/cache-optimization';
-import { centralizedQueryConfig } from '@/lib/errors/centralized-error-handling';
-import {
-  getCachedMarketplaceProducts,
-  cacheMarketplaceProducts,
-  generateCacheKey,
-} from '@/lib/marketplace-cache';
+import { getCachedMarketplaceProducts, cacheMarketplaceProducts } from '@/lib/marketplace-cache';
 
 interface MarketplaceProductsParams {
   filters: FilterState;
@@ -346,13 +341,22 @@ async function fetchMarketplaceProducts({
   }
 
   if (filters.inStock) {
-    query = applyInStockFilter(query, 'in_stock');
+    // Produits digitaux/services : stock=0 est normal ; filtrer surtout le physique
+    if (filters.productType === 'physical') {
+      query = applyInStockFilter(query, 'in_stock');
+    } else if (filters.productType === 'all') {
+      query = query.or(
+        `${PRODUCT_STOCK_COLUMN}.gt.0,${PRODUCT_STOCK_COLUMN}.is.null,product_type.in.(digital,service,course,artist),product_type.is.null`
+      );
+    } else {
+      // digital, service, course, artist : pas de filtre stock strict
+    }
   }
 
   // Appliquer le tri
   const sortByColumn =
     filters.sortBy === 'sales_count' || filters.sortBy === 'popularity'
-      ? 'purchases_count'
+      ? 'created_at'
       : filters.sortBy === 'created_at' ||
           filters.sortBy === 'newest' ||
           filters.sortBy === 'oldest'
@@ -505,11 +509,6 @@ async function fetchMarketplaceProducts({
 
   // ✅ OPTIMISATION: Mettre en cache les résultats
   if (result.products.length > 0) {
-    const cacheKey = generateCacheKey('products', {
-      ...filters,
-      page: pagination.currentPage,
-      itemsPerPage: pagination.itemsPerPage,
-    });
     cacheMarketplaceProducts(
       {
         ...filters,

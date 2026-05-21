@@ -5,6 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { fetchUserPurchasedProductIds } from '@/lib/marketplace/user-purchase-history';
 import { useQuery } from '@tanstack/react-query';
 
 export interface RecommendationResult {
@@ -132,26 +133,19 @@ export class RecommendationEngine {
       interface SimilarUser {
         user_id: string;
       }
-      const similarUserIds = similarUsers.map((u: SimilarUser) => u.user_id);
-
-      const { data: similarPurchases, error: purchasesError } = await supabase
-        .from('orders')
-        .select('order_items(product_id)')
-        .in('customer_id', similarUserIds)
-        .not('customer_id', 'eq', userId)
-        .limit(200);
-
-      if (purchasesError || !similarPurchases) return [];
+      const similarUserIds = similarUsers
+        .map((u: SimilarUser) => u.user_id)
+        .filter(id => id !== userId);
 
       const productFrequency: Record<string, number> = {};
-      for (const order of similarPurchases) {
-        const items = (order as { order_items?: { product_id?: string }[] }).order_items ?? [];
-        for (const item of items) {
-          if (item.product_id) {
-            productFrequency[item.product_id] = (productFrequency[item.product_id] || 0) + 1;
-          }
+      for (const similarUserId of similarUserIds.slice(0, 10)) {
+        const productIds = await fetchUserPurchasedProductIds(similarUserId);
+        for (const productId of productIds) {
+          productFrequency[productId] = (productFrequency[productId] || 0) + 1;
         }
       }
+
+      if (Object.keys(productFrequency).length === 0) return [];
 
       // Exclure les produits déjà achetés par l'utilisateur
       const userPurchasedSet = new Set(userHistory);
@@ -360,7 +354,12 @@ export class RecommendationEngine {
         { p_user_id: userId }
       );
 
-      if (categoriesError?.code === 'PGRST202' || !userCategories || userCategories.length === 0) {
+      if (
+        categoriesError?.code === 'PGRST202' ||
+        categoriesError?.code === '42883' ||
+        !userCategories ||
+        userCategories.length === 0
+      ) {
         return this.getTrendingRecommendations(5);
       }
 
@@ -434,28 +433,7 @@ export class RecommendationEngine {
    * Utilitaires privés
    */
   private async getUserPurchaseHistory(userId: string): Promise<string[]> {
-    try {
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select('order_items(product_id)')
-        .eq('customer_id', userId)
-        .limit(100);
-
-      if (error || !orders) return [];
-
-      const productIds = new Set<string>();
-      for (const order of orders) {
-        const items = (order as { order_items?: { product_id?: string }[] }).order_items ?? [];
-        for (const item of items) {
-          if (item.product_id) productIds.add(item.product_id);
-        }
-      }
-
-      return Array.from(productIds);
-    } catch (error) {
-      logger.error('Error getting user purchase history', { error, userId });
-      return [];
-    }
+    return fetchUserPurchasedProductIds(userId);
   }
 
   private async getUserInteractions(_userId: string): Promise<UserInteraction[]> {

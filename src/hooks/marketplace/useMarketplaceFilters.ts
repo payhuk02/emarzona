@@ -21,12 +21,12 @@ const DEFAULT_FILTERS: FilterState = {
   tags: [],
   verifiedOnly: false,
   featuredOnly: false,
-  inStock: true,
+  inStock: false,
 };
 
 /**
  * Hook pour gérer les filtres du marketplace
- * 
+ *
  * @returns Objet contenant les filtres, les fonctions de mise à jour, et les constantes
  */
 export function useMarketplaceFilters() {

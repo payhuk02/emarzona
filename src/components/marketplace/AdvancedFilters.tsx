@@ -103,7 +103,7 @@ const AdvancedFilters = ({
       tags: [],
       verifiedOnly: false,
       featuredOnly: false,
-      inStock: true,
+      inStock: false,
     };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
@@ -397,9 +397,3 @@ const AdvancedFilters = ({
 };
 
 export default AdvancedFilters;
-
-
-
-
-
-

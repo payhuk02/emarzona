@@ -1,7 +1,7 @@
--- Déploiement ciblé : RPC marketplace + recommandations (sans purchases_count si absent)
+-- Déploiement / correctif marketplace RPC
 
-DROP MATERIALIZED VIEW IF EXISTS public.marketplace_products_optimized CASCADE;
 DROP VIEW IF EXISTS public.marketplace_products_optimized CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS public.marketplace_products_optimized CASCADE;
 
 CREATE VIEW public.marketplace_products_optimized AS
 SELECT
@@ -47,6 +47,7 @@ WHERE p.is_active = true
   AND (p.is_draft IS NULL OR p.is_draft = false)
   AND s.is_active = true;
 
+-- RPC sans unpack() (compatible PostgreSQL standard)
 CREATE OR REPLACE FUNCTION public.get_marketplace_products_filtered(
   p_limit INTEGER DEFAULT 24,
   p_offset INTEGER DEFAULT 0,
@@ -93,84 +94,74 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
-DECLARE
-  query_sql TEXT;
-  count_sql TEXT;
-  order_clause TEXT;
-  where_clauses TEXT[] := ARRAY[]::TEXT[];
-  params TEXT[] := ARRAY[]::TEXT[];
-  param_count INTEGER := 0;
 BEGIN
-  CASE p_sort_by
-    WHEN 'price' THEN
-      order_clause := ' ORDER BY effective_price ' || UPPER(p_sort_order);
-    WHEN 'rating' THEN
-      order_clause := ' ORDER BY sort_rating ' || UPPER(p_sort_order) || ', sort_reviews ' || UPPER(p_sort_order);
-    WHEN 'popular' THEN
-      order_clause := ' ORDER BY sort_purchases ' || UPPER(p_sort_order) || ', sort_rating ' || UPPER(p_sort_order);
-    WHEN 'newest' THEN
-      order_clause := ' ORDER BY created_at ' || UPPER(p_sort_order);
-    WHEN 'oldest' THEN
-      order_clause := ' ORDER BY created_at ASC';
-    ELSE
-      order_clause := ' ORDER BY created_at ' || UPPER(p_sort_order);
-  END CASE;
-
-  IF p_category IS NOT NULL AND p_category != 'all' THEN
-    param_count := param_count + 1;
-    where_clauses := array_append(where_clauses, 'category = $' || param_count);
-    params := array_append(params, p_category);
-  END IF;
-
-  IF p_product_type IS NOT NULL AND p_product_type != 'all' THEN
-    param_count := param_count + 1;
-    where_clauses := array_append(where_clauses, 'product_type = $' || param_count);
-    params := array_append(params, p_product_type);
-  END IF;
-
-  IF p_min_price IS NOT NULL THEN
-    param_count := param_count + 1;
-    where_clauses := array_append(where_clauses, 'effective_price >= $' || param_count);
-    params := array_append(params, p_min_price::TEXT);
-  END IF;
-
-  IF p_max_price IS NOT NULL THEN
-    param_count := param_count + 1;
-    where_clauses := array_append(where_clauses, 'effective_price <= $' || param_count);
-    params := array_append(params, p_max_price::TEXT);
-  END IF;
-
-  IF p_min_rating IS NOT NULL THEN
-    param_count := param_count + 1;
-    where_clauses := array_append(where_clauses, 'sort_rating >= $' || param_count);
-    params := array_append(params, p_min_rating::TEXT);
-  END IF;
-
-  IF p_search_query IS NOT NULL AND TRIM(p_search_query) != '' THEN
-    param_count := param_count + 1;
-    where_clauses := array_append(where_clauses, '(name ILIKE $' || param_count || ' OR description ILIKE $' || param_count || ')');
-    params := array_append(params, '%' || TRIM(p_search_query) || '%');
-  END IF;
-
-  IF p_featured_only = true THEN
-    where_clauses := array_append(where_clauses, 'is_featured = true');
-  END IF;
-
-  count_sql := 'SELECT COUNT(*) FROM marketplace_products_optimized';
-  IF array_length(where_clauses, 1) > 0 THEN
-    count_sql := count_sql || ' WHERE ' || array_to_string(where_clauses, ' AND ');
-  END IF;
-
-  query_sql := 'SELECT *, (' || count_sql || ') as total_count FROM marketplace_products_optimized';
-  IF array_length(where_clauses, 1) > 0 THEN
-    query_sql := query_sql || ' WHERE ' || array_to_string(where_clauses, ' AND ');
-  END IF;
-  query_sql := query_sql || order_clause || ' LIMIT ' || p_limit || ' OFFSET ' || p_offset;
-
-  RETURN QUERY EXECUTE query_sql USING unpack(params);
+  RETURN QUERY
+  WITH filtered AS (
+    SELECT m.*
+    FROM marketplace_products_optimized m
+    WHERE
+      (p_category IS NULL OR p_category = 'all' OR m.category = p_category)
+      AND (p_product_type IS NULL OR p_product_type = 'all' OR m.product_type = p_product_type)
+      AND (p_min_price IS NULL OR m.effective_price >= p_min_price)
+      AND (p_max_price IS NULL OR m.effective_price <= p_max_price)
+      AND (p_min_rating IS NULL OR m.sort_rating >= p_min_rating)
+      AND (
+        p_search_query IS NULL
+        OR TRIM(p_search_query) = ''
+        OR m.name ILIKE '%' || TRIM(p_search_query) || '%'
+        OR m.description ILIKE '%' || TRIM(p_search_query) || '%'
+      )
+      AND (NOT p_featured_only OR m.is_featured = true)
+  ),
+  counted AS (
+    SELECT COUNT(*)::bigint AS cnt FROM filtered
+  )
+  SELECT
+    f.id,
+    f.name,
+    f.slug,
+    f.description,
+    f.short_description,
+    f.price,
+    f.promotional_price,
+    f.currency,
+    f.category,
+    f.product_type,
+    f.licensing_type,
+    f.license_terms,
+    f.is_featured,
+    f.rating,
+    f.reviews_count,
+    f.purchases_count,
+    f.created_at,
+    f.updated_at,
+    f.image_url,
+    f.tags,
+    f.store_id,
+    f.store_name,
+    f.store_slug,
+    f.store_logo_url,
+    f.commission_rate,
+    f.affiliate_enabled,
+    c.cnt AS total_count
+  FROM filtered f
+  CROSS JOIN counted c
+  ORDER BY
+    CASE WHEN p_sort_by = 'price' AND UPPER(p_sort_order) = 'ASC' THEN f.effective_price END ASC,
+    CASE WHEN p_sort_by = 'price' AND UPPER(p_sort_order) <> 'ASC' THEN f.effective_price END DESC,
+    CASE WHEN p_sort_by = 'rating' AND UPPER(p_sort_order) = 'ASC' THEN f.sort_rating END ASC,
+    CASE WHEN p_sort_by = 'rating' AND UPPER(p_sort_order) <> 'ASC' THEN f.sort_rating END DESC,
+    CASE WHEN p_sort_by IN ('popular', 'sales_count') AND UPPER(p_sort_order) = 'ASC' THEN f.sort_purchases END ASC,
+    CASE WHEN p_sort_by IN ('popular', 'sales_count') AND UPPER(p_sort_order) <> 'ASC' THEN f.sort_purchases END DESC,
+    CASE WHEN p_sort_by = 'oldest' THEN f.created_at END ASC,
+    CASE WHEN p_sort_by IN ('newest', 'created_at') OR p_sort_by IS NULL THEN f.created_at END DESC,
+    f.created_at DESC
+  LIMIT p_limit
+  OFFSET p_offset;
 END;
 $$;
 
+-- Catégories préférées via order_items (pas orders.items)
 CREATE OR REPLACE FUNCTION public.get_user_preferred_categories(p_user_id UUID)
 RETURNS TEXT[]
 LANGUAGE plpgsql
@@ -183,10 +174,10 @@ BEGIN
     FROM (
       SELECT
         p.category,
-        COUNT(*) AS purchase_count
+        COUNT(*)::bigint AS purchase_count
       FROM public.orders o
-      CROSS JOIN LATERAL JSONB_ARRAY_ELEMENTS(o.items) AS item
-      JOIN public.products p ON (item->>'product_id')::UUID = p.id
+      JOIN public.order_items oi ON oi.order_id = o.id
+      JOIN public.products p ON p.id = oi.product_id
       WHERE o.customer_id = p_user_id
         AND o.status = 'completed'
         AND p.category IS NOT NULL
@@ -203,3 +194,119 @@ GRANT EXECUTE ON FUNCTION public.get_marketplace_products_filtered(
   INTEGER, INTEGER, TEXT, TEXT, DECIMAL, DECIMAL, DECIMAL, TEXT, TEXT, TEXT, BOOLEAN
 ) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_preferred_categories(UUID) TO anon, authenticated;
+
+-- Historique d'achats : orders.customer_id = customers.id (pas auth.uid())
+CREATE OR REPLACE FUNCTION public.get_user_purchased_product_ids(p_user_id UUID)
+RETURNS TABLE (product_id UUID)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT oi.product_id
+  FROM public.order_items oi
+  INNER JOIN public.orders o ON o.id = oi.order_id
+  WHERE oi.product_id IS NOT NULL
+    AND (
+      o.customer_id = p_user_id
+      OR EXISTS (
+        SELECT 1
+        FROM public.customers c
+        WHERE c.id = o.customer_id
+          AND (
+            coalesce(c.metadata->>'userId', '') = p_user_id::text
+            OR coalesce(c.metadata->>'user_id', '') = p_user_id::text
+          )
+      )
+      OR (
+        o.metadata IS NOT NULL
+        AND jsonb_typeof(o.metadata) = 'object'
+        AND (
+          coalesce(o.metadata->>'userId', '') = p_user_id::text
+          OR coalesce(o.metadata->>'customerId', '') = p_user_id::text
+        )
+      )
+    );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_user_purchased_product_ids(UUID) TO authenticated;
+
+-- RLS acheteur (si pas encore appliquée)
+DROP POLICY IF EXISTS "Buyers can select their orders" ON public.orders;
+CREATE POLICY "Buyers can select their orders" ON public.orders
+  FOR SELECT
+  TO authenticated
+  USING (
+    auth.uid() IS NOT NULL
+    AND (
+      customer_id = auth.uid()
+      OR EXISTS (
+        SELECT 1
+        FROM public.customers c
+        WHERE c.id = orders.customer_id
+          AND c.email IS NOT NULL
+          AND lower(btrim(c.email::text)) = lower(btrim(coalesce(auth.jwt() ->> 'email', '')))
+          AND coalesce(auth.jwt() ->> 'email', '') <> ''
+      )
+      OR EXISTS (
+        SELECT 1
+        FROM public.customers c
+        WHERE c.id = orders.customer_id
+          AND (
+            coalesce(c.metadata->>'userId', '') = auth.uid()::text
+            OR coalesce(c.metadata->>'user_id', '') = auth.uid()::text
+          )
+      )
+      OR (
+        orders.metadata IS NOT NULL
+        AND jsonb_typeof(orders.metadata) = 'object'
+        AND (
+          coalesce(orders.metadata->>'userId', '') = auth.uid()::text
+          OR coalesce(orders.metadata->>'customerId', '') = auth.uid()::text
+        )
+      )
+    )
+  );
+
+DROP POLICY IF EXISTS "Buyers can select their order items" ON public.order_items;
+CREATE POLICY "Buyers can select their order items" ON public.order_items
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.orders o
+      WHERE o.id = order_items.order_id
+        AND auth.uid() IS NOT NULL
+        AND (
+          o.customer_id = auth.uid()
+          OR EXISTS (
+            SELECT 1
+            FROM public.customers c
+            WHERE c.id = o.customer_id
+              AND c.email IS NOT NULL
+              AND lower(btrim(c.email::text)) = lower(btrim(coalesce(auth.jwt() ->> 'email', '')))
+              AND coalesce(auth.jwt() ->> 'email', '') <> ''
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM public.customers c
+            WHERE c.id = o.customer_id
+              AND (
+                coalesce(c.metadata->>'userId', '') = auth.uid()::text
+                OR coalesce(c.metadata->>'user_id', '') = auth.uid()::text
+              )
+          )
+          OR (
+            o.metadata IS NOT NULL
+            AND jsonb_typeof(o.metadata) = 'object'
+            AND (
+              coalesce(o.metadata->>'userId', '') = auth.uid()::text
+              OR coalesce(o.metadata->>'customerId', '') = auth.uid()::text
+            )
+          )
+        )
+    )
+  );
