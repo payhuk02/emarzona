@@ -11,15 +11,11 @@ function CountryChip({ country }: { country: LandingCountry }) {
       title={country.name}
     >
       <span className="lp-country-flag-wrap shrink-0 overflow-hidden rounded-md border border-white/15 shadow-sm">
-        <img
-          src={flagSrc}
-          alt=""
-          className="lp-country-flag-img block h-7 w-10 object-cover sm:h-8 sm:w-[46px]"
-          width={46}
-          height={32}
-          loading="lazy"
-          decoding="async"
-          aria-hidden
+        <span
+          className="lp-country-flag-img block h-7 w-10 sm:h-8 sm:w-[46px]"
+          style={{ backgroundImage: `url(${flagSrc})` }}
+          role="img"
+          aria-label={country.name}
         />
       </span>
       <div className="min-w-0 pr-1">
@@ -78,21 +74,23 @@ export function CountriesMarqueeSection() {
         aria-hidden
       />
 
-      <div ref={ref} className={`relative lp-reveal ${className}`}>
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-5">
-          <p className="lp-eyebrow mx-auto mb-5 border-white/10 bg-white/[0.04] text-white/45">
-            <span className="lp-eyebrow-dot" aria-hidden />
-            Portée internationale
-          </p>
-          <h2 className="lp-serif text-2xl text-white sm:text-3xl lg:text-4xl">
-            Vendez partout.
-            <br />
-            <span className="lp-gold-text italic">Dans plus de {count} pays.</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--lp-text-dim)] sm:text-base">
-            Encaissez en FCFA et à l&apos;international — une plateforme pensée pour l&apos;Afrique
-            et connectée au monde.
-          </p>
+      <div className="relative">
+        <div ref={ref} className={`lp-reveal ${className}`}>
+          <div className="mx-auto max-w-3xl px-4 text-center sm:px-5">
+            <p className="lp-eyebrow mx-auto mb-5 border-white/10 bg-white/[0.04] text-white/45">
+              <span className="lp-eyebrow-dot" aria-hidden />
+              Portée internationale
+            </p>
+            <h2 className="lp-serif text-2xl text-white sm:text-3xl lg:text-4xl">
+              Vendez partout.
+              <br />
+              <span className="lp-gold-text italic">Dans plus de {count} pays.</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--lp-text-dim)] sm:text-base">
+              Encaissez en FCFA et à l&apos;international — une plateforme pensée pour
+              l&apos;Afrique et connectée au monde.
+            </p>
+          </div>
         </div>
 
         <div className="mt-10 space-y-5 sm:mt-12 sm:space-y-6">

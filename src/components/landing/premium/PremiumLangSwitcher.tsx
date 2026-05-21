@@ -34,7 +34,7 @@ export function PremiumLangSwitcher({ className }: PremiumLangSwitcherProps) {
   }, [open]);
 
   return (
-    <div ref={ref} className={cn('relative shrink-0', className)}>
+    <div ref={ref} className={cn('relative z-20 shrink-0', className)}>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}

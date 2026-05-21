@@ -29,8 +29,10 @@ function NavLinkItem({
   const isActive = item.route && location.pathname === item.href;
 
   const cls = cn(
-    'whitespace-nowrap text-sm transition-colors duration-300',
-    isActive ? 'text-[var(--lp-gold)]' : 'text-white/65 hover:text-white',
+    'lp-nav-link whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-medium tracking-wide transition-all duration-300 lg:px-3 lg:py-2 lg:text-[13px] xl:px-3.5',
+    isActive
+      ? 'bg-white/[0.08] text-[var(--lp-gold-bright)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+      : 'text-white/60 hover:bg-white/[0.05] hover:text-white',
     className
   );
 
@@ -59,48 +61,54 @@ export function PremiumNav() {
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#08080a]/88 backdrop-blur-xl">
-      <div className="mx-auto grid h-[4.25rem] max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:h-[4.75rem] sm:gap-4 sm:px-5 lg:h-20 lg:px-8">
-        <Link to="/" className="lp-nav-logo flex min-w-0 shrink-0 items-center py-1 pr-1">
-          <EmarzonaBrandLogo variant="nav" />
-        </Link>
-
-        <nav
-          className="hidden min-w-0 items-center justify-center gap-4 lg:flex lg:gap-6 xl:gap-7"
-          aria-label="Navigation principale"
-        >
-          {navLinks.map(item => (
-            <NavLinkItem key={item.href} item={item} />
-          ))}
-        </nav>
-
-        <div className="hidden items-center justify-end gap-2 sm:gap-3 lg:flex">
-          <PremiumLangSwitcher />
-          <Link
-            to="/login"
-            className="hidden whitespace-nowrap text-sm font-medium text-white/70 transition-colors hover:text-white md:inline"
-          >
-            Me connecter
+    <header className="lp-premium-nav fixed inset-x-0 top-0 z-50">
+      <div className="lp-premium-nav__inner mx-auto h-[4.25rem] max-w-7xl px-4 sm:h-[4.5rem] sm:px-5 lg:h-[4.75rem] lg:px-8">
+        <div className="grid h-full w-full grid-cols-[auto_1fr_auto] items-center gap-3 lg:gap-4">
+          <Link to="/" className="lp-nav-logo flex h-10 shrink-0 items-center sm:h-11">
+            <EmarzonaBrandLogo variant="nav" />
           </Link>
-          <Link
-            to="/register"
-            className="lp-btn-primary whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold sm:px-5 sm:py-2.5 sm:text-sm"
-          >
-            Démarrer gratuitement
-          </Link>
-        </div>
 
-        <div className="flex items-center justify-end gap-2 lg:hidden">
-          <PremiumLangSwitcher />
-          <button
-            type="button"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 text-white/90 transition-colors hover:border-white/20 hover:bg-white/5"
-            onClick={() => setOpen(!open)}
-            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
-            aria-expanded={open}
+          <nav
+            className="lp-nav-menu hidden min-w-0 justify-center lg:flex"
+            aria-label="Navigation principale"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+            <div className="lp-nav-menu__pill flex max-w-full items-center gap-0.5 overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.03] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+              {navLinks.map(item => (
+                <NavLinkItem key={item.href} item={item} />
+              ))}
+            </div>
+          </nav>
+
+          <div className="flex shrink-0 items-center justify-end gap-2 xl:gap-3">
+            <div className="hidden items-center gap-2 lg:flex xl:gap-3">
+              <PremiumLangSwitcher className="lp-nav-control" />
+              <Link
+                to="/login"
+                className="lp-nav-ghost inline-flex h-10 items-center whitespace-nowrap px-1"
+              >
+                Me connecter
+              </Link>
+              <Link
+                to="/register"
+                className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5"
+              >
+                <span className="hidden xl:inline">Démarrer gratuitement</span>
+                <span className="xl:hidden">Démarrer</span>
+              </Link>
+            </div>
+            <div className="flex items-center gap-2 lg:hidden">
+              <PremiumLangSwitcher className="lp-nav-control" />
+              <button
+                type="button"
+                className="lp-nav-icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90 transition-colors hover:border-white/22 hover:bg-white/[0.08]"
+                onClick={() => setOpen(!open)}
+                aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+                aria-expanded={open}
+              >
+                {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -108,18 +116,18 @@ export function PremiumNav() {
         <>
           <button
             type="button"
-            className="fixed inset-0 top-16 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 top-[4.25rem] z-40 bg-black/60 backdrop-blur-sm sm:top-[4.5rem] lg:hidden"
             aria-label="Fermer le menu"
             onClick={() => setOpen(false)}
           />
-          <div className="fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-white/10 bg-[#0a0a0c] px-5 py-6 lg:hidden">
+          <div className="lp-premium-nav__drawer fixed inset-x-0 top-[4.25rem] z-50 max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-t border-white/10 px-5 py-6 sm:top-[4.5rem] lg:hidden">
             <nav className="flex flex-col gap-1">
               {navLinks.map(item => (
                 <NavLinkItem
                   key={item.href}
                   item={item}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-3 text-base text-white/85 hover:bg-white/5"
+                  className="rounded-xl px-4 py-3 text-base"
                 />
               ))}
             </nav>

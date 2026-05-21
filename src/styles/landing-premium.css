@@ -230,6 +230,103 @@
     0 0 0 1px rgba(201, 162, 39, 0.06);
 }
 
+/* Section « Cinq façons de vendre » — icônes premium (desktop) */
+@media (min-width: 1024px) {
+  .landing-premium .lp-sell-way-card {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.landing-premium .lp-sell-way-icon {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 10px 24px -10px rgba(15, 15, 18, 0.2);
+  transition:
+    transform 0.5s var(--lp-ease),
+    box-shadow 0.5s var(--lp-ease);
+}
+
+.landing-premium .lp-sell-way-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, transparent 48%);
+  pointer-events: none;
+}
+
+.landing-premium .lp-sell-way-icon::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.35), transparent 55%);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.landing-premium .lp-sell-way-card:hover .lp-sell-way-icon {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 16px 32px -12px rgba(15, 15, 18, 0.22);
+}
+
+.landing-premium .lp-sell-way-icon--amber {
+  background: linear-gradient(145deg, #fff9eb 0%, #fdecc8 55%, #f5d78e 100%);
+  color: #b45309;
+}
+
+.landing-premium .lp-sell-way-icon--violet {
+  background: linear-gradient(145deg, #f5f3ff 0%, #e9e2ff 55%, #d4c4ff 100%);
+  color: #6d28d9;
+}
+
+.landing-premium .lp-sell-way-icon--sky {
+  background: linear-gradient(145deg, #f0f9ff 0%, #dbeafe 55%, #bae6fd 100%);
+  color: #0369a1;
+}
+
+.landing-premium .lp-sell-way-icon--emerald {
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 55%, #a7f3d0 100%);
+  color: #047857;
+}
+
+.landing-premium .lp-sell-way-icon--rose {
+  background: linear-gradient(145deg, #fff1f2 0%, #ffe4e6 55%, #fecdd3 100%);
+  color: #be123c;
+}
+
+.landing-premium .lp-sell-way-icon__svg {
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.6));
+}
+
+@media (min-width: 1024px) {
+  .landing-premium .lp-sell-way-icon {
+    height: 3.5rem;
+    width: 3.5rem;
+    border-radius: 1rem;
+  }
+
+  .landing-premium .lp-sell-way-icon__svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    stroke-width: 1.5;
+  }
+}
+
 .landing-premium .lp-feature-cell {
   padding: 1.25rem;
   border-radius: 0.875rem;
@@ -267,13 +364,11 @@
 }
 
 .landing-premium .lp-marquee-track {
-  animation: lp-marquee-scroll var(--lp-marquee-duration, 56s) linear infinite;
-}
-
-@media (max-width: 639px) {
-  .landing-premium .lp-marquee-track {
-    --lp-marquee-duration: 150s;
-  }
+  --lp-marquee-duration: 60s;
+  animation: lp-marquee-scroll var(--lp-marquee-duration) linear infinite;
+  animation-duration: var(--lp-marquee-duration) !important;
+  animation-iteration-count: infinite !important;
+  will-change: transform;
 }
 
 .landing-premium .lp-marquee-item {
@@ -307,21 +402,53 @@
 }
 
 .landing-premium .lp-countries-marquee-track {
-  animation: lp-countries-scroll var(--lp-countries-duration, 120s) linear infinite;
+  --lp-countries-duration: 280s;
+  animation: lp-countries-scroll var(--lp-countries-duration) linear infinite;
+  animation-duration: var(--lp-countries-duration) !important;
+  animation-iteration-count: infinite !important;
+  will-change: transform;
 }
 
 .landing-premium .lp-country-flag-wrap {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.75rem;
   line-height: 0;
   background: rgba(255, 255, 255, 0.06);
 }
 
 .landing-premium .lp-country-flag-img {
   display: block;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+@media (max-width: 768px) {
+  .landing-premium .lp-marquee-item img {
+    opacity: 1 !important;
+    max-width: none !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 0.75rem;
+    object-fit: cover;
+  }
+
+  .landing-premium .lp-country-chip {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 .landing-premium .lp-countries-marquee-track--reverse {
   animation-name: lp-countries-scroll-reverse;
-  --lp-countries-duration: 140s;
+  --lp-countries-duration: 220s;
+  animation-duration: var(--lp-countries-duration) !important;
+  animation-iteration-count: infinite !important;
 }
 
 .landing-premium .lp-country-chip {
@@ -357,13 +484,92 @@
   }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 768px) {
   .landing-premium .lp-countries-marquee-track {
-    --lp-countries-duration: 320s;
+    --lp-countries-duration: 72s;
   }
 
   .landing-premium .lp-countries-marquee-track--reverse {
-    --lp-countries-duration: 360s;
+    --lp-countries-duration: 82s;
+  }
+}
+
+/* Marquee devises */
+.landing-premium .lp-currencies-section {
+  isolation: isolate;
+}
+
+.landing-premium .lp-currencies-marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.landing-premium .lp-currencies-marquee-track {
+  --lp-currencies-duration: 200s;
+  animation: lp-countries-scroll var(--lp-currencies-duration) linear infinite;
+  animation-duration: var(--lp-currencies-duration) !important;
+  animation-iteration-count: infinite !important;
+  will-change: transform;
+}
+
+.landing-premium .lp-currencies-marquee-track--reverse {
+  animation-name: lp-countries-scroll-reverse;
+  --lp-currencies-duration: 220s;
+  animation-duration: var(--lp-currencies-duration) !important;
+  animation-iteration-count: infinite !important;
+}
+
+.landing-premium .lp-currency-logo-wrap {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  line-height: 0;
+}
+
+.landing-premium .lp-currency-logo-img {
+  display: block;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.landing-premium .lp-currency-chip {
+  transition:
+    transform 0.45s var(--lp-ease),
+    border-color 0.45s var(--lp-ease),
+    box-shadow 0.45s var(--lp-ease);
+}
+
+.landing-premium .lp-currency-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 162, 39, 0.35);
+  box-shadow: 0 8px 24px -8px rgba(201, 162, 39, 0.18);
+}
+
+@media (max-width: 768px) {
+  .landing-premium .lp-currencies-marquee-track {
+    --lp-currencies-duration: 65s;
+  }
+
+  .landing-premium .lp-currencies-marquee-track--reverse {
+    --lp-currencies-duration: 75s;
+  }
+
+  .landing-premium .lp-currencies-marquee-track {
+    animation: lp-countries-scroll var(--lp-currencies-duration) linear infinite !important;
+  }
+
+  .landing-premium .lp-currencies-marquee-track--reverse {
+    animation: lp-countries-scroll-reverse var(--lp-currencies-duration) linear infinite !important;
+  }
+
+  .landing-premium .lp-currency-logo-wrap {
+    width: 2.25rem;
+    height: 2.25rem;
   }
 }
 
@@ -407,8 +613,116 @@
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.35));
 }
 
+/* Navbar premium */
+.landing-premium .lp-premium-nav {
+  isolation: isolate;
+  background: linear-gradient(180deg, rgba(14, 14, 18, 0.94) 0%, rgba(8, 8, 10, 0.9) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 40px -16px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+}
+
+.landing-premium .lp-premium-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 120% at 8% -20%, rgba(201, 162, 39, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 100% at 92% -30%, rgba(37, 99, 235, 0.14) 0%, transparent 50%);
+}
+
+.landing-premium .lp-premium-nav::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 162, 39, 0.35) 22%,
+    rgba(96, 165, 250, 0.4) 50%,
+    rgba(201, 162, 39, 0.35) 78%,
+    transparent 100%
+  );
+  opacity: 0.85;
+}
+
+.landing-premium .lp-premium-nav__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-premium .lp-nav-menu {
+  padding-inline: 0.5rem;
+}
+
+.landing-premium .lp-nav-menu__pill {
+  flex-shrink: 1;
+}
+
+.landing-premium .lp-premium-nav__drawer {
+  background: linear-gradient(180deg, rgba(12, 12, 16, 0.98) 0%, rgba(8, 8, 10, 0.99) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
 .landing-premium .lp-nav-logo {
   min-width: 0;
+}
+
+.landing-premium .lp-nav-logo img {
+  display: block;
+  height: 100%;
+  max-height: 2.5rem;
+  width: auto;
+  max-width: min(100%, 200px);
+  object-fit: contain;
+  object-position: left center;
+}
+
+@media (min-width: 1024px) {
+  .landing-premium .lp-nav-logo img {
+    max-height: 2.75rem;
+    max-width: 220px;
+  }
+}
+
+.landing-premium .lp-nav-ghost {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.3s var(--lp-ease);
+}
+
+.landing-premium .lp-nav-ghost:hover {
+  color: #fff;
+}
+
+.landing-premium .lp-nav-cta {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.landing-premium .lp-nav-control .lp-lang-switcher {
+  height: 2.5rem;
+  min-height: 2.5rem;
+  border-radius: 9999px;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.landing-premium .lp-nav-icon-btn {
+  backdrop-filter: blur(8px);
 }
 
 .landing-premium .lp-footer-logo {
@@ -588,7 +902,8 @@
   }
 
   .landing-premium .lp-marquee-track,
-  .landing-premium .lp-countries-marquee-track {
+  .landing-premium .lp-countries-marquee-track,
+  .landing-premium .lp-currencies-marquee-track {
     animation: none;
   }
 

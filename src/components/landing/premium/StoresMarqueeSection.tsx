@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { usePremiumReveal } from './usePremiumReveal';
+import { useLandingMarqueeDuration } from '@/hooks/useLandingMarqueeDuration';
 import { useLandingPlatformStores } from '@/hooks/useLandingPlatformStores';
 import { generateStoreUrl } from '@/lib/store-utils';
 
@@ -54,8 +55,9 @@ function StoreChip({
           className="h-10 w-10 shrink-0 rounded-xl object-cover"
           width={40}
           height={40}
-          loading="lazy"
+          loading="eager"
           decoding="async"
+          data-no-mobile-opt
         />
       ) : (
         <div
@@ -90,6 +92,7 @@ function MarqueeSkeleton() {
 export function StoresMarqueeSection() {
   const { ref, className } = usePremiumReveal();
   const { data: stores = [], isLoading, isError } = useLandingPlatformStores();
+  const { storesSec } = useLandingMarqueeDuration(stores.length);
 
   if (!isLoading && (isError || stores.length === 0)) {
     return null;
@@ -109,11 +112,7 @@ export function StoresMarqueeSection() {
           ) : (
             <div
               className="lp-marquee-track flex w-max items-center"
-              style={
-                {
-                  '--lp-marquee-duration': `${Math.max(72, stores.length * 10)}s`,
-                } as CSSProperties
-              }
+              style={{ '--lp-marquee-duration': `${storesSec}s` } as CSSProperties}
             >
               {track.map((store, i) => (
                 <StoreChip

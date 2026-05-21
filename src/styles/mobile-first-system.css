@@ -464,8 +464,8 @@
     backface-visibility: hidden;
   }
 
-  /* Reduce animations on mobile for performance */
-  * {
+  /* Reduce animations on mobile for performance (sauf marquees landing) */
+  *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(.lp-currencies-marquee-track) {
     animation-duration: 0.2s !important;
     transition-duration: 0.2s !important;
   }

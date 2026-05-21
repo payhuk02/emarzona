@@ -193,13 +193,15 @@ select {
     height: auto;
   }
 
-  /* Lazy loading pour mobile */
-  img[loading='lazy'] {
+  /* Lazy loading pour mobile (hors landing premium) */
+  img[loading='lazy']:not([data-no-mobile-opt]) {
     opacity: 0;
     transition: opacity 0.3s;
   }
 
-  img[loading='lazy'].loaded {
+  img[loading='lazy'].loaded,
+  img[loading='lazy'][data-no-mobile-opt],
+  .landing-premium img {
     opacity: 1;
   }
 }

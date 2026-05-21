@@ -6,6 +6,7 @@ import { FeaturesGridSection } from './FeaturesGridSection';
 import { AdaptSection } from './AdaptSection';
 import { StoresMarqueeSection } from './StoresMarqueeSection';
 import { CountriesMarqueeSection } from './CountriesMarqueeSection';
+import { CurrenciesMarqueeSection } from './CurrenciesMarqueeSection';
 import { PricingSection } from './PricingSection';
 import { FinalCtaSection } from './FinalCtaSection';
 import { PremiumFooter } from './PremiumFooter';
@@ -21,6 +22,7 @@ export function PremiumLandingPage() {
         <AdaptSection />
         <StoresMarqueeSection />
         <CountriesMarqueeSection />
+        <CurrenciesMarqueeSection />
         <PricingSection />
         <FinalCtaSection />
       </main>

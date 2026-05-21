@@ -374,10 +374,14 @@ All colors MUST be HSL.
 
   /* OPTIMISATION PERFORMANCE: Réduire les animations sur mobile pour économiser la batterie */
   @media (max-width: 768px) {
-    /* Réduire la durée des animations */
-    *,
-    *::before,
-    *::after {
+    /* Réduire la durée des animations (sauf marquees landing) */
+    *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(.lp-currencies-marquee-track),
+    *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(
+        .lp-currencies-marquee-track
+      )::before,
+    *:not(.lp-marquee-track):not(.lp-countries-marquee-track):not(
+        .lp-currencies-marquee-track
+      )::after {
       animation-duration: 0.2s !important;
       transition-duration: 0.15s !important;
     }

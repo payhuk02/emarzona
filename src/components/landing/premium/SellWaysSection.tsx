@@ -6,36 +6,31 @@ const ways = [
     icon: Package,
     title: 'Produits physiques',
     desc: 'Stock, variantes, expédition et suivi logistique intégrés.',
-    color: 'text-amber-700',
-    bg: 'bg-gradient-to-br from-amber-50 to-amber-100/80',
+    tone: 'amber' as const,
   },
   {
     icon: Monitor,
     title: 'Produits digitaux',
     desc: 'Ebooks, logiciels, templates — livraison instantanée sécurisée.',
-    color: 'text-violet-700',
-    bg: 'bg-gradient-to-br from-violet-50 to-violet-100/80',
+    tone: 'violet' as const,
   },
   {
     icon: Briefcase,
     title: 'Services',
     desc: 'Réservations, devis et prestations avec calendrier connecté.',
-    color: 'text-sky-700',
-    bg: 'bg-gradient-to-br from-sky-50 to-sky-100/80',
+    tone: 'sky' as const,
   },
   {
     icon: GraduationCap,
     title: 'Cours en ligne',
     desc: 'Formations, drip content, certifications et communauté.',
-    color: 'text-emerald-700',
-    bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/80',
+    tone: 'emerald' as const,
   },
   {
     icon: Palette,
     title: "Œuvres d'artiste",
     desc: "Portfolio, éditions limitées et certificats d'authenticité.",
-    color: 'text-rose-700',
-    bg: 'bg-gradient-to-br from-rose-50 to-rose-100/80',
+    tone: 'rose' as const,
   },
 ];
 
@@ -65,13 +60,16 @@ export function SellWaysSection() {
           {ways.map((way, i) => (
             <article
               key={way.title}
-              className="lp-card group flex flex-col items-center p-6 text-center sm:items-start sm:p-7 sm:text-left"
+              className="lp-card lp-sell-way-card group flex flex-col items-center p-6 text-center sm:p-7 lg:items-center lg:text-center"
               style={{ transitionDelay: `${i * 40}ms` }}
             >
               <div
-                className={`mb-5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${way.bg} ring-1 ring-black/[0.04] sm:mx-0`}
+                className={`lp-sell-way-icon lp-sell-way-icon--${way.tone} mb-5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12`}
               >
-                <way.icon className={`h-5 w-5 ${way.color}`} strokeWidth={1.5} />
+                <way.icon
+                  className="lp-sell-way-icon__svg relative z-10 h-5 w-5"
+                  strokeWidth={1.35}
+                />
               </div>
               <h3 className="text-base font-semibold tracking-tight text-[var(--lp-text)]">
                 {way.title}
