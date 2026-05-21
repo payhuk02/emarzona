@@ -5,6 +5,7 @@ import { SellWaysSection } from './SellWaysSection';
 import { FeaturesGridSection } from './FeaturesGridSection';
 import { AdaptSection } from './AdaptSection';
 import { StoresMarqueeSection } from './StoresMarqueeSection';
+import { CountriesMarqueeSection } from './CountriesMarqueeSection';
 import { PricingSection } from './PricingSection';
 import { FinalCtaSection } from './FinalCtaSection';
 import { PremiumFooter } from './PremiumFooter';
@@ -19,6 +20,7 @@ export function PremiumLandingPage() {
         <FeaturesGridSection />
         <AdaptSection />
         <StoresMarqueeSection />
+        <CountriesMarqueeSection />
         <PricingSection />
         <FinalCtaSection />
       </main>
