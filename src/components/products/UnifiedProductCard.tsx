@@ -177,7 +177,7 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
         // Base structure
         'group relative flex flex-col h-full',
         variant === 'marketplace'
-          ? 'mp-product-card border-0 bg-transparent'
+          ? 'mp-product-card border-0'
           : 'bg-transparent border border-gray-200',
         'rounded-xl overflow-hidden',
 
@@ -192,7 +192,12 @@ const UnifiedProductCardComponent: React.FC<UnifiedProductCardProps> = ({
       tabIndex={0}
     >
       {/* Image Section - Ratio fixe 3:2 (1536×1024) aligné avec le format produit */}
-      <div className={cn('relative w-full overflow-hidden bg-muted/30 aspect-[3/2] group')}>
+      <div
+        className={cn(
+          'relative w-full overflow-hidden aspect-[3/2] group',
+          variant === 'marketplace' ? 'mp-product-card__image' : 'bg-muted/30'
+        )}
+      >
         <Link to={productUrl} className="block w-full h-full">
           <ResponsiveProductImage
             src={productImage || undefined}

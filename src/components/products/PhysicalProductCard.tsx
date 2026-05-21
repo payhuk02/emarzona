@@ -181,7 +181,9 @@ export function PhysicalProductCard({
     <Card
       className={cn(
         'group relative flex flex-col h-full',
-        'bg-transparent border border-gray-200 dark:border-gray-700',
+        variant === 'marketplace'
+          ? 'mp-product-card border-0'
+          : 'bg-transparent border border-gray-200 dark:border-gray-700',
         'rounded-xl overflow-hidden',
         'min-h-[480px] sm:min-h-[520px] lg:min-h-[560px]',
         'hover:shadow-xl hover:scale-[1.02] transition-all duration-300',
@@ -195,7 +197,12 @@ export function PhysicalProductCard({
       aria-describedby={`product-price-${product.id}`}
     >
       {/* Image - Ratio 3:2 aligné avec le format produit 1536×1024 */}
-      <div className="relative w-full overflow-hidden bg-muted/30 aspect-[3/2]">
+      <div
+        className={cn(
+          'relative w-full overflow-hidden aspect-[3/2]',
+          variant === 'marketplace' ? 'mp-product-card__image' : 'bg-muted/30'
+        )}
+      >
         <Link to={productUrl} className="block w-full h-full">
           {product.image_url ? (
             <ResponsiveProductImage
@@ -641,9 +648,3 @@ export const PhysicalProductCardSkeleton = () => {
 };
 
 export default PhysicalProductCard;
-
-
-
-
-
-
