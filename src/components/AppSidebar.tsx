@@ -1223,7 +1223,7 @@ export function AppSidebar() {
 
   return (
     <div
-      className="[&_[data-sidebar=sidebar]]:!text-white"
+      className="[&_[data-sidebar=sidebar]]:!text-white [&_[data-sidebar=menu-button]]:!text-white [&_[data-sidebar=menu-button]_*]:!text-white [&_[data-sidebar=group-label]]:!text-white [&_[data-sidebar=group-label]_*]:!text-white"
       style={
         {
           '--sidebar-background': '#282870',
@@ -1232,7 +1232,7 @@ export function AppSidebar() {
     >
       <Sidebar
         collapsible="icon"
-        className="border-r border-white/10 transition-all duration-300"
+        className="border-r border-white/10 transition-all duration-300 [&_[data-sidebar=menu-button]]:!text-white [&_[data-sidebar=menu-button]_svg]:!text-white [&_[data-sidebar=menu-button]_span]:!text-white [&_[data-sidebar=group-label]]:!text-white"
         style={
           {
             '--sidebar-background': '#282870',
@@ -1265,8 +1265,8 @@ export function AppSidebar() {
               )}
               {!isCollapsed && (
                 <span
-                  className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight leading-none whitespace-nowrap drop-shadow-lg"
-                  style={{ fontFamily: 'Times New Roman, serif', color: '#6A0DAD' }}
+                  className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight leading-none whitespace-nowrap drop-shadow-lg text-white"
+                  style={{ fontFamily: 'Times New Roman, serif' }}
                 >
                   Emarzona
                 </span>
@@ -1375,15 +1375,14 @@ export function AppSidebar() {
                     <button
                       type="button"
                       onClick={() => toggleSectionCollapse(section.label)}
-                      className="w-full flex items-center justify-between text-orange-500"
-                      style={{ color: '#FF8C00' }}
+                      className="w-full flex items-center justify-between text-white"
                       aria-expanded={!collapsedSections.includes(section.label)}
                     >
-                      <span>{section.label}</span>
+                      <span className="text-white">{section.label}</span>
                       {collapsedSections.includes(section.label) ? (
-                        <ChevronRight className="h-3.5 w-3.5 text-white/70" />
+                        <ChevronRight className="h-3.5 w-3.5 text-white" />
                       ) : (
-                        <ChevronDown className="h-3.5 w-3.5 text-white/70" />
+                        <ChevronDown className="h-3.5 w-3.5 text-white" />
                       )}
                     </button>
                   )}
@@ -1548,15 +1547,14 @@ export function AppSidebar() {
                     <button
                       type="button"
                       onClick={() => toggleSectionCollapse(section.label)}
-                      className="w-full flex items-center justify-between text-orange-500"
-                      style={{ color: '#FF8C00' }}
+                      className="w-full flex items-center justify-between text-white"
                       aria-expanded={!collapsedSections.includes(section.label)}
                     >
-                      <span>{section.label}</span>
+                      <span className="text-white">{section.label}</span>
                       {collapsedSections.includes(section.label) ? (
-                        <ChevronRight className="h-3.5 w-3.5 text-white/70" />
+                        <ChevronRight className="h-3.5 w-3.5 text-white" />
                       ) : (
-                        <ChevronDown className="h-3.5 w-3.5 text-white/70" />
+                        <ChevronDown className="h-3.5 w-3.5 text-white" />
                       )}
                     </button>
                   )}

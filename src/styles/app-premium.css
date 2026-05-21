@@ -25,50 +25,85 @@
   --radius: 0.75rem;
 
   --sidebar-background: 240 8% 6%;
-  --sidebar-foreground: 40 10% 92%;
+  --sidebar-foreground: 0 0% 100%;
   --sidebar-primary: 217 91% 58%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 240 6% 14%;
-  --sidebar-accent-foreground: 40 10% 95%;
+  --sidebar-accent-foreground: 0 0% 100%;
   --sidebar-border: 0 0% 100% / 0.08;
   --sidebar-ring: 217 91% 58%;
 }
 
-/* Sidebar principale (shadcn) */
+/* Sidebar — textes forcés en blanc */
 .landing-premium.app-premium [data-sidebar='sidebar'] {
   background: linear-gradient(180deg, var(--lp-ink-soft) 0%, var(--lp-ink) 100%) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  color: var(--lp-text-on-dark);
+  color: #fff !important;
 }
 
-.landing-premium.app-premium [data-sidebar='header'],
-.landing-premium.app-premium [data-sidebar='footer'] {
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='header'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='footer'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='content'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group-content'] {
+  color: #fff !important;
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-.landing-premium.app-premium [data-sidebar='group-label'] {
-  color: rgba(255, 255, 255, 0.45);
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='group-label'] {
+  color: rgba(255, 255, 255, 0.75) !important;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
-.landing-premium.app-premium [data-sidebar='menu-button'][data-active='true'] {
-  background: rgba(37, 99, 235, 0.22) !important;
-  color: var(--lp-blue-bright) !important;
-  font-weight: 600;
-}
-
-.landing-premium.app-premium [data-sidebar='menu-button']:hover:not([data-active='true']) {
-  background: rgba(255, 255, 255, 0.06) !important;
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'] span,
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button'] svg,
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-sub-button'],
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-sub-button'] span,
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-sub-button'] svg,
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-badge'],
+.landing-premium.app-premium [data-sidebar='sidebar'] a,
+.landing-premium.app-premium [data-sidebar='sidebar'] button:not(.bg-primary),
+.landing-premium.app-premium [data-sidebar='sidebar'] label,
+.landing-premium.app-premium [data-sidebar='sidebar'] p,
+.landing-premium.app-premium [data-sidebar='sidebar'] span:not([class*='bg-']) {
   color: #fff !important;
 }
 
-.landing-premium.app-premium [data-sidebar='input'] {
+.landing-premium.app-premium
+  [data-sidebar='sidebar']
+  [data-sidebar='menu-button'][data-active='true'],
+.landing-premium.app-premium
+  [data-sidebar='sidebar']
+  [data-sidebar='menu-button'][data-active='true']
+  span,
+.landing-premium.app-premium
+  [data-sidebar='sidebar']
+  [data-sidebar='menu-button'][data-active='true']
+  svg {
+  background: rgba(37, 99, 235, 0.28) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button']:hover,
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button']:hover span,
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='menu-button']:hover svg {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='input'] {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  color: #fff !important;
+}
+
+.landing-premium.app-premium [data-sidebar='sidebar'] [data-sidebar='input']::placeholder {
+  color: rgba(255, 255, 255, 0.55) !important;
 }
 
 /* Barre supérieure dashboard */
@@ -155,25 +190,49 @@
 .landing-premium.app-premium .app-premium-admin-aside {
   background: linear-gradient(180deg, var(--lp-ink-soft) 0%, var(--lp-ink) 100%) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  color: var(--lp-text-on-dark);
+  color: #fff !important;
+}
+
+.landing-premium.app-premium .app-premium-admin-aside h2,
+.landing-premium.app-premium .app-premium-admin-aside h3,
+.landing-premium.app-premium .app-premium-admin-aside button,
+.landing-premium.app-premium .app-premium-admin-aside span,
+.landing-premium.app-premium .app-premium-admin-aside a,
+.landing-premium.app-premium .app-premium-admin-aside svg {
+  color: #fff !important;
 }
 
 .landing-premium.app-premium .app-premium-admin-aside h2 {
   font-family: var(--lp-serif);
-  color: #fff;
 }
 
 .landing-premium.app-premium .app-premium-admin-aside .bg-primary {
-  background: rgba(37, 99, 235, 0.25) !important;
-  color: var(--lp-blue-bright) !important;
+  background: rgba(37, 99, 235, 0.28) !important;
+  color: #fff !important;
+}
+
+.landing-premium.app-premium .app-premium-admin-aside .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* Sidebars contextuelles (produits, commandes…) */
-.landing-premium.app-premium aside.fixed,
-.landing-premium.app-premium nav.fixed {
+.landing-premium.app-premium aside.fixed:not(.bottom-0),
+.landing-premium.app-premium nav.fixed:not(.bottom-0) {
   background: linear-gradient(180deg, #121218 0%, #0a0a0c 100%) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  color: var(--lp-text-on-dark);
+  color: #fff !important;
+}
+
+.landing-premium.app-premium aside.fixed:not(.bottom-0) a,
+.landing-premium.app-premium aside.fixed:not(.bottom-0) button,
+.landing-premium.app-premium aside.fixed:not(.bottom-0) span,
+.landing-premium.app-premium aside.fixed:not(.bottom-0) label,
+.landing-premium.app-premium aside.fixed:not(.bottom-0) p,
+.landing-premium.app-premium aside.fixed:not(.bottom-0) svg,
+.landing-premium.app-premium nav.fixed:not(.bottom-0) a,
+.landing-premium.app-premium nav.fixed:not(.bottom-0) button,
+.landing-premium.app-premium nav.fixed:not(.bottom-0) span {
+  color: #fff !important;
 }
 
 /* Auth */
