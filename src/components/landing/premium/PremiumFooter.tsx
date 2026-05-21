@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import { EMARZONA_DEFAULT_LOGO } from '@/lib/brand/emarzona-logo';
+import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 
 const columns = [
   {
@@ -47,20 +47,13 @@ export function PremiumFooter() {
   return (
     <footer
       id="apropos"
-      className="border-t border-white/[0.06] bg-[#060608] text-[var(--lp-text-dim)]"
+      className="relative overflow-visible border-t border-white/[0.06] bg-[#060608] text-[var(--lp-text-dim)]"
     >
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
         <div className="grid gap-10 sm:gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <Link to="/" className="inline-flex rounded-lg bg-white/95 p-2 sm:p-2.5">
-              <img
-                src={EMARZONA_DEFAULT_LOGO}
-                alt="Emarzona — plateforme e-commerce"
-                className="h-10 w-auto max-w-[180px] object-contain object-left sm:h-12 sm:max-w-[220px]"
-                width={220}
-                height={48}
-                loading="lazy"
-              />
+          <div className="relative isolate z-30 mb-1 lg:col-span-4">
+            <Link to="/" className="lp-footer-logo inline-flex max-w-full">
+              <EmarzonaBrandLogo variant="footer" />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed">
               La plateforme e-commerce tout-en-un pour vendre, gérer et développer votre activité en
@@ -83,7 +76,7 @@ export function PremiumFooter() {
           <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:col-span-6">
             {columns.map(col => (
               <div key={col.title} className="min-w-0">
-                <h4 className="text-[10px] font-semibold uppercase tracking-wider text-white/50 sm:text-xs">
+                <h4 className="text-[10px] font-semibold uppercase tracking-wider text-white sm:text-xs">
                   {col.title}
                 </h4>
                 <ul className="mt-3 space-y-2 sm:mt-4 sm:space-y-2.5">
@@ -92,14 +85,14 @@ export function PremiumFooter() {
                       {link.href.startsWith('/') ? (
                         <Link
                           to={link.href}
-                          className="text-xs transition-colors hover:text-white sm:text-sm"
+                          className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
                         >
                           {link.label}
                         </Link>
                       ) : (
                         <a
                           href={link.href}
-                          className="text-xs transition-colors hover:text-white sm:text-sm"
+                          className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
                         >
                           {link.label}
                         </a>
@@ -112,12 +105,12 @@ export function PremiumFooter() {
           </div>
 
           <div id="ressources" className="lg:col-span-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-white/50">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
               Newsletter
             </h4>
             <p className="mt-4 text-sm">Conseils e-commerce et nouveautés produit.</p>
             <form
-              className="mt-4 flex gap-2"
+              className="lp-footer-newsletter mt-4 flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-2"
               onSubmit={e => {
                 e.preventDefault();
                 setEmail('');
@@ -128,19 +121,21 @@ export function PremiumFooter() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Votre e-mail"
-                className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-[var(--lp-gold)]/50 focus:outline-none"
+                required
+                className="h-11 min-h-[44px] w-full min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-base text-white placeholder:text-white/30 focus:border-[var(--lp-blue)]/50 focus:outline-none sm:text-sm"
               />
               <button
                 type="submit"
-                className="lp-btn-primary shrink-0 rounded-lg px-4 py-2.5 text-sm font-medium"
+                className="lp-btn-primary inline-flex h-11 min-h-[44px] w-full shrink-0 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold sm:w-auto"
               >
-                →
+                S&apos;inscrire
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
               </button>
             </form>
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative z-10 mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Emarzona. Tous droits réservés.</p>
           <div className="flex flex-wrap gap-6">
             <Link to="/legal/terms" className="hover:text-white">

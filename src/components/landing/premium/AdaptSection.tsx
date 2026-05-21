@@ -29,7 +29,7 @@ export function AdaptSection() {
                 src={adaptEntrepreneurPng}
                 alt="Entrepreneure africaine souriante en costume orange, utilisant son ordinateur portable"
                 loading="eager"
-                fetchPriority="high"
+                fetchpriority="high"
                 width={900}
                 height={1125}
                 decoding="async"

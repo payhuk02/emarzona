@@ -41,7 +41,7 @@ export function PremiumHero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.85, delay: 0.08, ease }}
-            className="lp-serif text-[2rem] leading-[1.12] text-white sm:text-[2.35rem] md:text-5xl lg:text-[3.25rem] xl:text-[3.65rem]"
+            className="lp-serif text-[2.5rem] leading-[1.08] text-white sm:text-[2.85rem] md:text-[3.35rem] lg:text-[3.85rem] xl:text-[4.35rem]"
           >
             Vendez tout.
             <br />

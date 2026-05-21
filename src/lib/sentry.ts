@@ -22,9 +22,9 @@ export const initSentry = () => {
 
   // Ne pas initialiser Sentry en développement si pas de DSN configuré
   if (!SENTRY_DSN) {
-    logger.warn('Sentry DSN non configuré. Error tracking désactivé.', {
-      environment: ENV,
-    });
+    if (import.meta.env.DEV) {
+      logger.debug('Sentry DSN non configuré — error tracking désactivé en dev.');
+    }
     return;
   }
 

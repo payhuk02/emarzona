@@ -6,11 +6,17 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { initCrisp, setCrispUser, setCrispSessionData, configureCrispForRole, resetCrisp } from '@/lib/crisp';
+import {
+  initCrisp,
+  setCrispUser,
+  setCrispSessionData,
+  configureCrispForRole,
+  resetCrisp,
+} from '@/lib/crisp';
 import { useLocation } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 
-export const CrispChat : React.FC = () => {
+export const CrispChat: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   const CRISP_WEBSITE_ID = import.meta.env.VITE_CRISP_WEBSITE_ID;
@@ -18,7 +24,9 @@ export const CrispChat : React.FC = () => {
   // Initialiser Crisp au montage
   useEffect(() => {
     if (!CRISP_WEBSITE_ID) {
-      logger.warn('VITE_CRISP_WEBSITE_ID non configuré. Live Chat désactivé.');
+      if (import.meta.env.DEV) {
+        logger.debug('VITE_CRISP_WEBSITE_ID non configuré — live chat désactivé en dev.');
+      }
       return;
     }
 
@@ -76,11 +84,3 @@ export const CrispChat : React.FC = () => {
   // Composant invisible (Crisp se charge tout seul)
   return null;
 };
-
-
-
-
-
-
-
-

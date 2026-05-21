@@ -272,7 +272,7 @@
 
 @media (max-width: 639px) {
   .landing-premium .lp-marquee-track {
-    --lp-marquee-duration: 88s;
+    --lp-marquee-duration: 150s;
   }
 }
 
@@ -334,6 +334,88 @@
 
 .landing-premium .lp-adapt-phone {
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.35));
+}
+
+.landing-premium .lp-nav-logo {
+  min-width: 0;
+}
+
+.landing-premium .lp-footer-logo {
+  position: relative;
+  z-index: 30;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.landing-premium .lp-footer-logo-img {
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
+}
+
+.landing-premium .lp-footer-newsletter input {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  .landing-premium .lp-footer-newsletter input {
+    font-size: 0.875rem;
+  }
+}
+
+.landing-premium .lp-cta-globe {
+  isolation: isolate;
+  min-height: 280px;
+}
+
+.landing-premium .lp-cta-globe-halo {
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.35) 0%,
+    rgba(37, 99, 235, 0.15) 45%,
+    transparent 70%
+  );
+}
+
+.landing-premium .lp-cta-globe-sphere {
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 32% 28%, #2563eb 0%, #1e3a5f 42%, #0a0a12 100%);
+  box-shadow:
+    0 0 0 2px rgba(96, 165, 250, 0.35),
+    0 0 48px rgba(59, 130, 246, 0.45),
+    0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.landing-premium .lp-cta-globe__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: normal;
+  filter: contrast(1.12) saturate(1.2) brightness(1.08);
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 639px) {
+  .landing-premium .lp-cta-globe {
+    min-height: 300px;
+    padding: 0.5rem 0 1rem;
+  }
+
+  .landing-premium .lp-cta-globe-sphere {
+    height: 72%;
+    width: 72%;
+    min-height: 210px;
+    min-width: 210px;
+  }
+
+  .landing-premium .lp-cta-globe__img {
+    filter: contrast(1.18) saturate(1.28) brightness(1.12);
+  }
+
+  .landing-premium .lp-cta-globe-halo {
+    inset: 0;
+  }
 }
 
 .landing-premium .lp-cta-logo-panel {

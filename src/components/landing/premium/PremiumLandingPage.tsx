@@ -11,7 +11,7 @@ import { PremiumFooter } from './PremiumFooter';
 
 export function PremiumLandingPage() {
   return (
-    <div className="landing-premium min-h-screen overflow-x-hidden">
+    <div className="landing-premium min-h-screen overflow-x-clip">
       <PremiumNav />
       <main>
         <PremiumHero />

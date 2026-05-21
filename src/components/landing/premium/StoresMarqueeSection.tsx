@@ -111,7 +111,7 @@ export function StoresMarqueeSection() {
               className="lp-marquee-track flex w-max items-center"
               style={
                 {
-                  '--lp-marquee-duration': `${Math.max(56, stores.length * 8)}s`,
+                  '--lp-marquee-duration': `${Math.max(72, stores.length * 10)}s`,
                 } as CSSProperties
               }
             >

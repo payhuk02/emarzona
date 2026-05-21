@@ -43,24 +43,24 @@ i18n
   .init({
     resources,
     fallbackLng: 'fr', // Langue par défaut
-    debug: process.env.NODE_ENV === 'development',
-    
+    debug: import.meta.env.VITE_I18N_DEBUG === 'true',
+
     // Options de détection
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
       lookupLocalStorage: 'emarzona_language',
     },
-    
+
     // Options d'interpolation
     interpolation: {
       escapeValue: false, // React échappe déjà les valeurs
     },
-    
+
     // Namespaces
     ns: ['translation'],
     defaultNS: 'translation',
-    
+
     // React options
     react: {
       useSuspense: false, // Désactivé pour compatibilité avec lazy loading
@@ -83,11 +83,4 @@ export const AVAILABLE_LANGUAGES = [
 /**
  * Type pour les codes de langue
  */
-export type LanguageCode = typeof AVAILABLE_LANGUAGES[number]['code'];
-
-
-
-
-
-
-
+export type LanguageCode = (typeof AVAILABLE_LANGUAGES)[number]['code'];

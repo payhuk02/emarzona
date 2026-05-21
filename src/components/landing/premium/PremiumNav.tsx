@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { EMARZONA_DEFAULT_LOGO } from '@/lib/brand/emarzona-logo';
+import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 import { PremiumLangSwitcher } from './PremiumLangSwitcher';
 import { cn } from '@/lib/utils';
 
@@ -60,16 +60,9 @@ export function PremiumNav() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#08080a]/88 backdrop-blur-xl">
-      <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:h-[72px] sm:gap-4 sm:px-5 lg:px-8">
-        <Link to="/" className="flex shrink-0 items-center">
-          <img
-            src={EMARZONA_DEFAULT_LOGO}
-            alt="Emarzona — plateforme e-commerce"
-            className="h-11 w-auto max-w-[168px] object-contain object-left sm:h-12 sm:max-w-[200px] lg:max-w-[220px]"
-            width={220}
-            height={52}
-            fetchPriority="high"
-          />
+      <div className="mx-auto grid h-[4.25rem] max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:h-[4.75rem] sm:gap-4 sm:px-5 lg:h-20 lg:px-8">
+        <Link to="/" className="lp-nav-logo flex min-w-0 shrink-0 items-center py-1 pr-1">
+          <EmarzonaBrandLogo variant="nav" />
         </Link>
 
         <nav

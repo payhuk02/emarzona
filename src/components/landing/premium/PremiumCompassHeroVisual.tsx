@@ -219,7 +219,7 @@ export function PremiumCompassHeroVisual() {
               width={560}
               height={560}
               loading="eager"
-              fetchPriority="high"
+              fetchpriority="high"
               decoding="async"
             />
           </picture>

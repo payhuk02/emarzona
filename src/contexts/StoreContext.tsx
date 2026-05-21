@@ -194,11 +194,13 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   // ✅ FIX: Fonction pour définir la boutique sélectionnée avec moins de dépendances
   const setSelectedStoreId = useCallback(
     (storeId: string | null) => {
-      logger.info('🔄 [StoreContext] Changement de boutique', {
-        oldStoreId: selectedStoreId,
-        newStoreId: storeId,
-        storesCount: stores.length,
-      });
+      if (storeId !== null || selectedStoreId !== null) {
+        logger.debug('🔄 [StoreContext] Changement de boutique', {
+          oldStoreId: selectedStoreId,
+          newStoreId: storeId,
+          storesCount: stores.length,
+        });
+      }
 
       // Validation avec retry utilisant le ref pour éviter la stale closure
       const validateAndSet = () => {

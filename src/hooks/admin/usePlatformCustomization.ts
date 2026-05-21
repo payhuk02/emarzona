@@ -5,6 +5,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseBackendConfigured, isSupabaseNetworkError } from '@/lib/supabase-config';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { validateSection, validateCustomizationData } from '@/lib/schemas/platform-customization';
@@ -169,6 +170,11 @@ export const usePlatformCustomization = () => {
   }, []);
 
   const load = useCallback(async () => {
+    if (!isSupabaseBackendConfigured()) {
+      logger.debug('Supabase non configuré — personnalisation plateforme par défaut.');
+      return;
+    }
+
     try {
       // Utiliser la fonction RPC au lieu d'accéder directement à la table
       const { data, error } = await supabase.rpc('get_platform_customization');
@@ -185,7 +191,10 @@ export const usePlatformCustomization = () => {
           );
           return;
         }
-        // Pour les autres erreurs, on log dans Sentry
+        if (import.meta.env.DEV && isSupabaseNetworkError(error)) {
+          logger.debug('Customization: backend injoignable, valeurs par défaut.');
+          return;
+        }
         logger.error('Error loading customization settings', {
           error: error.message,
           code: error.code,
@@ -223,6 +232,10 @@ export const usePlatformCustomization = () => {
         }
       }
     } catch (error) {
+      if (import.meta.env.DEV && isSupabaseNetworkError(error)) {
+        logger.debug('Customization: exception réseau, valeurs par défaut.');
+        return;
+      }
       logger.error('Exception during customization loading', {
         error: error instanceof Error ? error.message : 'Unknown error',
         level: 'section',

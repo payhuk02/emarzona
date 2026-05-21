@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseBackendConfigured } from '@/lib/supabase-config';
 
 export interface LandingPlatformStore {
   id: string;
@@ -26,15 +27,20 @@ async function fetchActiveStores(): Promise<LandingPlatformStore[]> {
 /** Boutiques réelles actives — mise à jour en temps réel à chaque création */
 export function useLandingPlatformStores() {
   const queryClient = useQueryClient();
+  const backendReady = isSupabaseBackendConfigured();
 
   const query = useQuery({
     queryKey: QUERY_KEY,
     queryFn: fetchActiveStores,
+    enabled: backendReady,
     staleTime: 60_000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: backendReady,
+    retry: backendReady ? 2 : false,
   });
 
   useEffect(() => {
+    if (!backendReady) return;
+
     const channel = supabase
       .channel('landing-stores-marquee')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stores' }, () => {
@@ -45,7 +51,7 @@ export function useLandingPlatformStores() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [backendReady, queryClient]);
 
   return query;
 }

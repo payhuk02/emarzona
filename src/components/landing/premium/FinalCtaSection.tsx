@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { usePremiumReveal } from './usePremiumReveal';
-import { EMARZONA_CTA_LOGO } from '@/lib/brand/emarzona-logo';
+import { PremiumCtaGlobeVisual } from './PremiumCtaGlobeVisual';
 
 export function FinalCtaSection() {
   const { ref: textRef, className: textReveal } = usePremiumReveal();
@@ -13,7 +13,7 @@ export function FinalCtaSection() {
             className="pointer-events-none absolute inset-0 opacity-60"
             style={{
               background:
-                'radial-gradient(ellipse 70% 80% at 100% 50%, rgba(124,92,255,0.15) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 0% 100%, rgba(242,145,36,0.08) 0%, transparent 50%)',
+                'radial-gradient(ellipse 70% 80% at 100% 50%, rgba(124,92,255,0.15) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 0% 100%, rgba(37,99,235,0.1) 0%, transparent 50%)',
             }}
           />
 
@@ -37,32 +37,18 @@ export function FinalCtaSection() {
                 </Link>
                 <a
                   href="mailto:contact@emarzona.com"
-                  className="lp-btn-outline inline-flex rounded-full px-7 py-3.5 text-sm"
+                  className="lp-btn-primary inline-flex rounded-full border border-white/20 px-7 py-3.5 text-sm font-semibold"
                 >
                   Prendre rendez-vous
                 </a>
               </div>
             </div>
 
-            {/* Logo toujours affiché sur mobile */}
-            <div className="relative z-10 flex w-full shrink-0 items-center justify-center py-2">
-              <div className="lp-cta-logo relative w-full max-w-[300px] sm:max-w-[340px]">
-                <div
-                  className="lp-cta-logo-glow pointer-events-none absolute inset-[-12%] rounded-full"
-                  aria-hidden
-                />
-                <div className="lp-cta-logo-panel relative">
-                  <img
-                    src={EMARZONA_CTA_LOGO}
-                    alt="Emarzona — plateforme e-commerce mondiale"
-                    className="relative mx-auto block h-auto w-full max-w-[240px] object-contain sm:max-w-[280px]"
-                    width={280}
-                    height={280}
-                    loading="eager"
-                    decoding="async"
-                  />
-                </div>
-              </div>
+            <div
+              className="relative z-10 flex w-full items-center justify-center overflow-visible py-3 sm:py-4"
+              aria-label="Globe terrestre animé — vente internationale"
+            >
+              <PremiumCtaGlobeVisual />
             </div>
           </div>
         </div>
