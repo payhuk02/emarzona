@@ -1,33 +1,27 @@
 import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { formatFcfa } from '@/lib/format/fcfa';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 import adaptEntrepreneurWebp from '@/assets/landing/adapt-entrepreneur.webp';
 import adaptEntrepreneurPng from '@/assets/landing/adapt-entrepreneur.png';
 import adaptSmartphoneWebp from '@/assets/landing/adapt-smartphone.webp';
 
-const benefits = [
-  'Interface intuitive, pensée pour les créateurs',
-  'Aucune compétence technique requise',
-  'Boutique en ligne en quelques minutes',
-  'Paiements locaux et internationaux',
-  'Formation et ressources incluses',
-];
-
 export function AdaptSection() {
+  const { t } = useLandingPremiumT();
   const { ref: textRef, className: textReveal } = usePremiumReveal();
+  const benefits = t('adapt.benefits', { returnObjects: true }) as string[];
 
   return (
     <section className="lp-section-pad lp-section-muted">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:gap-12 sm:px-5 lg:grid-cols-2 lg:gap-16 lg:px-8">
-        {/* Visuel en premier sur mobile — hors lp-reveal pour affichage immédiat */}
         <div className="lp-adapt-visual relative mx-auto w-full max-w-md lg:max-w-none lg:mx-0">
           <div className="lp-adapt-photo relative overflow-hidden rounded-2xl shadow-[0_32px_64px_-32px_rgba(0,0,0,0.25)]">
             <picture>
               <source srcSet={adaptEntrepreneurWebp} type="image/webp" />
               <img
                 src={adaptEntrepreneurPng}
-                alt="Entrepreneure africaine souriante en costume orange, utilisant son ordinateur portable"
+                alt={t('adapt.photoAlt')}
                 loading="eager"
                 fetchpriority="high"
                 width={900}
@@ -52,17 +46,17 @@ export function AdaptSection() {
 
           <div className="absolute left-3 top-4 z-10 hidden rounded-xl border border-white/60 bg-white/95 p-3 shadow-xl backdrop-blur-md sm:block sm:-left-5 sm:top-8 sm:p-4">
             <p className="text-[10px] uppercase tracking-wider text-[var(--lp-text-muted)]">
-              Revenus ce mois
+              {t('adapt.cardRevenue')}
             </p>
             <p className="lp-serif mt-1 text-lg text-[var(--lp-text)] sm:text-2xl">
               {formatFcfa(18_726_000)}
             </p>
-            <p className="mt-1 text-xs font-medium text-emerald-600">+24 % vs mois dernier</p>
+            <p className="mt-1 text-xs font-medium text-emerald-600">{t('adapt.cardGrowth')}</p>
           </div>
 
           <div className="absolute bottom-20 right-3 z-10 hidden rounded-xl border border-white/60 bg-white/95 p-3 shadow-xl backdrop-blur-md sm:block sm:-right-5 sm:bottom-28 sm:p-4">
             <p className="text-[10px] uppercase tracking-wider text-[var(--lp-text-muted)]">
-              Satisfaction
+              {t('adapt.cardSatisfaction')}
             </p>
             <div className="mt-1 flex gap-0.5 text-[var(--lp-gold)]">
               {'★★★★★'.split('').map((s, i) => (
@@ -71,23 +65,17 @@ export function AdaptSection() {
                 </span>
               ))}
             </div>
-            <p className="mt-1 text-xs text-[var(--lp-text-muted)]">5,0 / 5 — 450+ avis</p>
+            <p className="mt-1 text-xs text-[var(--lp-text-muted)]">{t('adapt.cardReviews')}</p>
           </div>
         </div>
 
         <div ref={textRef} className={`min-w-0 lp-reveal ${textReveal}`}>
-          <p className="lp-eyebrow-light mb-5">
-            <span className="lp-eyebrow-dot" aria-hidden />
-            Pour tous les profils
-          </p>
+          <p className="lp-eyebrow-light mb-5">{t('adapt.eyebrow')}</p>
           <h2 className="lp-serif text-3xl text-[var(--lp-text)] sm:text-4xl lg:text-5xl">
-            Que vous soyez débutant ou expert, Emarzona{' '}
-            <span className="lp-gold-text italic">s&apos;adapte à vous.</span>
+            {t('adapt.title')}{' '}
+            <span className="lp-gold-text italic">{t('adapt.titleHighlight')}</span>
           </h2>
-          <p className="mt-5 text-[var(--lp-text-muted)] leading-relaxed">
-            Lancez votre première offre ce week-end ou industrialisez un catalogue de centaines de
-            références — la plateforme grandit avec votre ambition.
-          </p>
+          <p className="mt-5 text-[var(--lp-text-muted)] leading-relaxed">{t('adapt.subtitle')}</p>
           <ul className="mt-8 space-y-3">
             {benefits.map(b => (
               <li key={b} className="flex items-start gap-3 text-sm text-[var(--lp-text)]">
@@ -103,13 +91,13 @@ export function AdaptSection() {
               to="/register"
               className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold"
             >
-              Commencer gratuitement
+              {t('adapt.ctaPrimary')}
             </Link>
             <Link
               to="/marketplace"
               className="lp-btn-outline-light inline-flex rounded-full px-7 py-3.5 text-sm"
             >
-              Explorer le marketplace
+              {t('adapt.ctaSecondary')}
             </Link>
           </div>
         </div>

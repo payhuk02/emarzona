@@ -2,33 +2,34 @@ import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 
-const columns = [
+const footerColumns = [
   {
-    title: 'Produit',
+    colKey: 'product' as const,
     links: [
-      { label: 'Fonctionnalités', href: '#fonctionnalites' },
-      { label: 'Marketplace', href: '/marketplace' },
-      { label: 'Tarifs', href: '#tarifs' },
-      { label: 'Intégrations', href: '#ressources' },
+      { linkKey: 'features', href: '#fonctionnalites' },
+      { linkKey: 'marketplace', href: '/marketplace', route: true },
+      { linkKey: 'pricing', href: '#tarifs' },
+      { linkKey: 'integrations', href: '#ressources' },
     ],
   },
   {
-    title: 'Ressources',
+    colKey: 'resources' as const,
     links: [
-      { label: 'Blog', href: '#ressources' },
-      { label: 'Documentation', href: '#ressources' },
-      { label: "Centre d'aide", href: '#ressources' },
-      { label: 'Communauté', href: '/community' },
+      { linkKey: 'blog', href: '#ressources' },
+      { linkKey: 'docs', href: '#ressources' },
+      { linkKey: 'help', href: '#ressources' },
+      { linkKey: 'community', href: '/community', route: true },
     ],
   },
   {
-    title: 'Entreprise',
+    colKey: 'company' as const,
     links: [
-      { label: 'À propos', href: '#apropos' },
-      { label: 'Contact', href: 'mailto:contact@emarzona.com' },
-      { label: 'Carrières', href: '#apropos' },
-      { label: 'Presse', href: '#apropos' },
+      { linkKey: 'about', href: '#apropos' },
+      { linkKey: 'contact', href: 'mailto:contact@emarzona.com' },
+      { linkKey: 'careers', href: '#apropos' },
+      { linkKey: 'press', href: '#apropos' },
     ],
   },
 ];
@@ -42,6 +43,7 @@ const socials = [
 ];
 
 export function PremiumFooter() {
+  const { t } = useLandingPremiumT();
   const [email, setEmail] = useState('');
 
   return (
@@ -55,10 +57,7 @@ export function PremiumFooter() {
             <Link to="/" className="lp-footer-logo inline-flex max-w-full">
               <EmarzonaBrandLogo variant="footer" />
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed">
-              La plateforme e-commerce tout-en-un pour vendre, gérer et développer votre activité en
-              ligne.
-            </p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed">{t('footer.tagline')}</p>
             <div className="mt-6 flex gap-3">
               {socials.map(({ icon: Icon, label }) => (
                 <a
@@ -74,31 +73,34 @@ export function PremiumFooter() {
           </div>
 
           <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:col-span-6">
-            {columns.map(col => (
-              <div key={col.title} className="min-w-0">
+            {footerColumns.map(col => (
+              <div key={col.colKey} className="min-w-0">
                 <h4 className="text-[10px] font-semibold uppercase tracking-wider text-white sm:text-xs">
-                  {col.title}
+                  {t(`footer.columns.${col.colKey}.title`)}
                 </h4>
                 <ul className="mt-3 space-y-2 sm:mt-4 sm:space-y-2.5">
-                  {col.links.map(link => (
-                    <li key={link.label}>
-                      {link.href.startsWith('/') ? (
-                        <Link
-                          to={link.href}
-                          className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
-                        >
-                          {link.label}
-                        </Link>
-                      ) : (
-                        <a
-                          href={link.href}
-                          className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
-                        >
-                          {link.label}
-                        </a>
-                      )}
-                    </li>
-                  ))}
+                  {col.links.map(link => {
+                    const label = t(`footer.columns.${col.colKey}.${link.linkKey}`);
+                    return (
+                      <li key={link.linkKey}>
+                        {link.route ? (
+                          <Link
+                            to={link.href}
+                            className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
+                          >
+                            {label}
+                          </Link>
+                        ) : (
+                          <a
+                            href={link.href}
+                            className="text-xs text-white/90 transition-colors hover:text-white sm:text-sm"
+                          >
+                            {label}
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
@@ -106,9 +108,9 @@ export function PremiumFooter() {
 
           <div id="ressources" className="lg:col-span-2">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
-              Newsletter
+              {t('footer.newsletter')}
             </h4>
-            <p className="mt-4 text-sm">Conseils e-commerce et nouveautés produit.</p>
+            <p className="mt-4 text-sm">{t('footer.newsletterDesc')}</p>
             <form
               className="lp-footer-newsletter mt-4 flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-2"
               onSubmit={e => {
@@ -120,7 +122,7 @@ export function PremiumFooter() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="Votre e-mail"
+                placeholder={t('footer.emailPlaceholder')}
                 required
                 className="h-11 min-h-[44px] w-full min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-base text-white placeholder:text-white/30 focus:border-[var(--lp-blue)]/50 focus:outline-none sm:text-sm"
               />
@@ -128,7 +130,7 @@ export function PremiumFooter() {
                 type="submit"
                 className="lp-btn-primary inline-flex h-11 min-h-[44px] w-full shrink-0 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold sm:w-auto"
               >
-                S&apos;inscrire
+                {t('footer.subscribe')}
                 <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
               </button>
             </form>
@@ -136,16 +138,16 @@ export function PremiumFooter() {
         </div>
 
         <div className="relative z-10 mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Emarzona. Tous droits réservés.</p>
+          <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
           <div className="flex flex-wrap gap-6">
             <Link to="/legal/terms" className="hover:text-white">
-              Conditions d&apos;utilisation
+              {t('footer.terms')}
             </Link>
             <Link to="/legal/privacy" className="hover:text-white">
-              Confidentialité
+              {t('footer.privacy')}
             </Link>
             <Link to="/legal/cookies" className="hover:text-white">
-              Cookies
+              {t('footer.cookies')}
             </Link>
           </div>
         </div>

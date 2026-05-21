@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 import { PremiumCtaGlobeVisual } from './PremiumCtaGlobeVisual';
 
 export function FinalCtaSection() {
+  const { t } = useLandingPremiumT();
   const { ref: textRef, className: textReveal } = usePremiumReveal();
 
   return (
@@ -20,33 +22,32 @@ export function FinalCtaSection() {
           <div className="relative z-10 flex flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-10">
             <div ref={textRef} className={`text-center lp-reveal ${textReveal} lg:text-left`}>
               <h2 className="lp-serif text-2xl text-white sm:text-3xl md:text-4xl lg:text-[2.75rem]">
-                Prêt à tout vendre.
+                {t('cta.titleLine1')}
                 <br />
-                Partout. Avec Emarzona.
+                {t('cta.titleLine2')}
               </h2>
               <p className="mx-auto mt-4 max-w-md text-[var(--lp-text-dim)] lg:mx-0">
-                Rejoignez les créateurs et marques qui centralisent leurs ventes sur une
-                infrastructure pensée pour l&apos;Afrique et le monde.
+                {t('cta.subtitle')}
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <Link
                   to="/register"
                   className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold"
                 >
-                  Démarrer gratuitement
+                  {t('cta.ctaPrimary')}
                 </Link>
                 <a
                   href="mailto:contact@emarzona.com"
                   className="lp-btn-primary inline-flex rounded-full border border-white/20 px-7 py-3.5 text-sm font-semibold"
                 >
-                  Prendre rendez-vous
+                  {t('cta.ctaSecondary')}
                 </a>
               </div>
             </div>
 
             <div
               className="relative z-10 flex w-full items-center justify-center overflow-visible py-3 sm:py-4"
-              aria-label="Globe terrestre animé — vente internationale"
+              aria-label={t('cta.globeAria')}
             >
               <PremiumCtaGlobeVisual />
             </div>

@@ -1,21 +1,25 @@
 import { LANDING_CURRENCIES, type LandingCurrency } from '@/lib/landing/currencies';
 import { getCurrencyLogoUrl } from '@/lib/landing/currency-logo';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 
 function CurrencyChip({ currency }: { currency: LandingCurrency }) {
+  const { t } = useLandingPremiumT();
   const logoSrc = getCurrencyLogoUrl(currency.code);
+  const name = t(`currencies.names.${currency.code}`);
+  const region = t(`countries.regions.${currency.regionKey}`);
 
   return (
     <div
       className="lp-currency-chip mx-2 flex shrink-0 items-center gap-3 rounded-full border border-[var(--lp-border-light)] bg-white px-4 py-2.5 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] sm:mx-3 sm:gap-3.5 sm:px-5 sm:py-3"
-      title={`${currency.name} (${currency.code})`}
+      title={`${name} (${currency.code})`}
     >
       <span className="lp-currency-logo-wrap shrink-0 overflow-hidden rounded-full border border-[var(--lp-border-light)] bg-[var(--lp-surface-muted)] shadow-sm">
         <span
           className="lp-currency-logo-img block h-9 w-9 sm:h-10 sm:w-10"
           style={{ backgroundImage: `url(${logoSrc})` }}
           role="img"
-          aria-label={currency.name}
+          aria-label={name}
         />
       </span>
       <div className="min-w-0 pr-1">
@@ -24,11 +28,11 @@ function CurrencyChip({ currency }: { currency: LandingCurrency }) {
           <span className="ml-1.5 font-medium text-[var(--lp-text-muted)]">{currency.symbol}</span>
         </p>
         <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.14em] text-[var(--lp-text-muted)]">
-          {currency.name}
+          {name}
         </p>
       </div>
       <span className="sr-only">
-        {currency.name} — {currency.region}
+        {name} — {region}
       </span>
     </div>
   );
@@ -57,6 +61,7 @@ function CurrencyMarqueeRow({
 }
 
 export function CurrenciesMarqueeSection() {
+  const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
   const count = LANDING_CURRENCIES.length;
 
@@ -71,18 +76,14 @@ export function CurrenciesMarqueeSection() {
       <div className="relative">
         <div ref={ref} className={`lp-reveal ${className}`}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-5">
-            <p className="lp-eyebrow-light mx-auto mb-5">
-              <span className="lp-eyebrow-dot" aria-hidden />
-              Paiements multi-devises
-            </p>
+            <p className="lp-eyebrow-light mx-auto mb-5">{t('currencies.eyebrow')}</p>
             <h2 className="lp-serif text-2xl text-[var(--lp-text)] sm:text-3xl lg:text-4xl">
-              Encaissez dans la devise
+              {t('currencies.titleLine1')}
               <br />
-              <span className="lp-gold-text italic">de vos clients.</span>
+              <span className="lp-gold-text italic">{t('currencies.titleHighlight')}</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--lp-text-muted)] sm:text-base">
-              FCFA natif, devises africaines et internationales — {count} monnaies supportées pour
-              vendre sans friction.
+              {t('currencies.subtitle', { count })}
             </p>
           </div>
         </div>

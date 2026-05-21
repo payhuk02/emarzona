@@ -1,32 +1,36 @@
-import { LANDING_COUNTRIES, type LandingCountry } from '@/lib/landing/countries';
+import { LANDING_COUNTRIES } from '@/lib/landing/countries';
 import { getCountryFlagUrl } from '@/lib/landing/country-flag';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 
-function CountryChip({ country }: { country: LandingCountry }) {
-  const flagSrc = getCountryFlagUrl(country.code);
+function CountryChip({ code, regionKey }: { code: string; regionKey: string }) {
+  const { t } = useLandingPremiumT();
+  const flagSrc = getCountryFlagUrl(code);
+  const name = t(`countries.names.${code}`);
+  const region = t(`countries.regions.${regionKey}`);
 
   return (
     <div
       className="lp-country-chip mx-2 flex shrink-0 items-center gap-3 rounded-full border border-white/[0.12] bg-white/[0.05] px-4 py-2.5 backdrop-blur-md sm:mx-3 sm:gap-3.5 sm:px-5 sm:py-3"
-      title={country.name}
+      title={name}
     >
       <span className="lp-country-flag-wrap shrink-0 overflow-hidden rounded-md border border-white/15 shadow-sm">
         <span
           className="lp-country-flag-img block h-7 w-10 sm:h-8 sm:w-[46px]"
           style={{ backgroundImage: `url(${flagSrc})` }}
           role="img"
-          aria-label={country.name}
+          aria-label={name}
         />
       </span>
       <div className="min-w-0 pr-1">
         <p className="whitespace-nowrap text-sm font-medium tracking-tight text-white/95 sm:text-[15px]">
-          {country.name}
+          {name}
         </p>
         <p className="whitespace-nowrap text-[10px] uppercase tracking-[0.14em] text-white/40">
-          {country.region}
+          {region}
         </p>
       </div>
-      <span className="sr-only">{country.name}</span>
+      <span className="sr-only">{name}</span>
     </div>
   );
 }
@@ -35,7 +39,7 @@ function CountryMarqueeRow({
   countries,
   reverse = false,
 }: {
-  countries: LandingCountry[];
+  countries: typeof LANDING_COUNTRIES;
   reverse?: boolean;
 }) {
   const track = [...countries, ...countries];
@@ -46,7 +50,11 @@ function CountryMarqueeRow({
         className={`lp-countries-marquee-track flex w-max items-center ${reverse ? 'lp-countries-marquee-track--reverse' : ''}`}
       >
         {track.map((country, i) => (
-          <CountryChip key={`${country.code}-${i}`} country={country} />
+          <CountryChip
+            key={`${country.code}-${i}`}
+            code={country.code}
+            regionKey={country.regionKey}
+          />
         ))}
       </div>
     </div>
@@ -54,6 +62,7 @@ function CountryMarqueeRow({
 }
 
 export function CountriesMarqueeSection() {
+  const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
   const count = LANDING_COUNTRIES.length;
 
@@ -77,18 +86,16 @@ export function CountriesMarqueeSection() {
       <div className="relative">
         <div ref={ref} className={`lp-reveal ${className}`}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-5">
-            <p className="lp-eyebrow mx-auto mb-5 border-white/10 bg-white/[0.04] text-white/45">
-              <span className="lp-eyebrow-dot" aria-hidden />
-              Portée internationale
-            </p>
+            <p className="lp-eyebrow mx-auto mb-5">{t('countries.eyebrow')}</p>
             <h2 className="lp-serif text-2xl text-white sm:text-3xl lg:text-4xl">
-              Vendez partout.
+              {t('countries.titleLine1')}
               <br />
-              <span className="lp-gold-text italic">Dans plus de {count} pays.</span>
+              <span className="lp-gold-text italic">
+                {t('countries.titleHighlight', { count })}
+              </span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[var(--lp-text-dim)] sm:text-base">
-              Encaissez en FCFA et à l&apos;international — une plateforme pensée pour
-              l&apos;Afrique et connectée au monde.
+              {t('countries.subtitle')}
             </p>
           </div>
         </div>

@@ -17,7 +17,9 @@ export function useLandingMarqueeDuration(storeCount: number) {
   }, []);
 
   const count = Math.max(storeCount, 1);
-  const storesSec = isMobile ? Math.max(70, count * 7) : Math.max(50, count * 4);
+  const storesSec = isMobile
+    ? Math.max(12, Math.round((count * 3.5) / 3))
+    : Math.max(50, count * 4);
 
   return { storesSec, isMobile };
 }

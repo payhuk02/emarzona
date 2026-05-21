@@ -3,30 +3,33 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { EmarzonaBrandLogo } from './EmarzonaBrandLogo';
 import { PremiumLangSwitcher } from './PremiumLangSwitcher';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { cn } from '@/lib/utils';
 
-type NavItem = { label: string; href: string; route?: boolean };
-
-const navLinks: NavItem[] = [
-  { label: 'Marketplace', href: '/marketplace', route: true },
-  { label: 'Fonctionnalités', href: '#fonctionnalites' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Tarifs', href: '#tarifs' },
-  { label: 'Ressources', href: '#ressources' },
-  { label: 'À propos', href: '#apropos' },
-];
+const navItems = [
+  { key: 'marketplace', href: '/marketplace', route: true },
+  { key: 'features', href: '#fonctionnalites' },
+  { key: 'solutions', href: '#solutions' },
+  { key: 'pricing', href: '#tarifs' },
+  { key: 'resources', href: '#ressources' },
+  { key: 'about', href: '#apropos' },
+] as const;
 
 function NavLinkItem({
-  item,
+  label,
+  href,
+  route,
   onClick,
   className,
 }: {
-  item: NavItem;
+  label: string;
+  href: string;
+  route?: boolean;
   onClick?: () => void;
   className?: string;
 }) {
   const location = useLocation();
-  const isActive = item.route && location.pathname === item.href;
+  const isActive = route && location.pathname === href;
 
   const cls = cn(
     'lp-nav-link whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-medium tracking-wide transition-all duration-300 lg:px-3 lg:py-2 lg:text-[13px] xl:px-3.5',
@@ -36,21 +39,22 @@ function NavLinkItem({
     className
   );
 
-  if (item.route) {
+  if (route) {
     return (
-      <Link to={item.href} className={cls} onClick={onClick}>
-        {item.label}
+      <Link to={href} className={cls} onClick={onClick}>
+        {label}
       </Link>
     );
   }
   return (
-    <a href={item.href} className={cls} onClick={onClick}>
-      {item.label}
+    <a href={href} className={cls} onClick={onClick}>
+      {label}
     </a>
   );
 }
 
 export function PremiumNav() {
+  const { t } = useLandingPremiumT();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -73,8 +77,13 @@ export function PremiumNav() {
             aria-label="Navigation principale"
           >
             <div className="lp-nav-menu__pill flex max-w-full items-center gap-0.5 overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.03] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-              {navLinks.map(item => (
-                <NavLinkItem key={item.href} item={item} />
+              {navItems.map(item => (
+                <NavLinkItem
+                  key={item.key}
+                  label={t(`nav.${item.key}`)}
+                  href={item.href}
+                  route={item.route}
+                />
               ))}
             </div>
           </nav>
@@ -86,14 +95,14 @@ export function PremiumNav() {
                 to="/login"
                 className="lp-nav-ghost inline-flex h-10 items-center whitespace-nowrap px-1"
               >
-                Me connecter
+                {t('nav.login')}
               </Link>
               <Link
                 to="/register"
                 className="lp-btn-primary lp-nav-cta inline-flex h-10 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold xl:px-5"
               >
-                <span className="hidden xl:inline">Démarrer gratuitement</span>
-                <span className="xl:hidden">Démarrer</span>
+                <span className="hidden xl:inline">{t('nav.getStarted')}</span>
+                <span className="xl:hidden">{t('nav.getStartedShort')}</span>
               </Link>
             </div>
             <div className="flex items-center gap-2 lg:hidden">
@@ -102,7 +111,7 @@ export function PremiumNav() {
                 type="button"
                 className="lp-nav-icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/90 transition-colors hover:border-white/22 hover:bg-white/[0.08]"
                 onClick={() => setOpen(!open)}
-                aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+                aria-label={open ? t('nav.menuClose') : t('nav.menuOpen')}
                 aria-expanded={open}
               >
                 {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -117,15 +126,17 @@ export function PremiumNav() {
           <button
             type="button"
             className="fixed inset-0 top-[4.25rem] z-40 bg-black/60 backdrop-blur-sm sm:top-[4.5rem] lg:hidden"
-            aria-label="Fermer le menu"
+            aria-label={t('nav.menuClose')}
             onClick={() => setOpen(false)}
           />
           <div className="lp-premium-nav__drawer fixed inset-x-0 top-[4.25rem] z-50 max-h-[calc(100dvh-4.25rem)] overflow-y-auto border-t border-white/10 px-5 py-6 sm:top-[4.5rem] lg:hidden">
             <nav className="flex flex-col gap-1">
-              {navLinks.map(item => (
+              {navItems.map(item => (
                 <NavLinkItem
-                  key={item.href}
-                  item={item}
+                  key={item.key}
+                  label={t(`nav.${item.key}`)}
+                  href={item.href}
+                  route={item.route}
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-3 text-base"
                 />
@@ -137,14 +148,14 @@ export function PremiumNav() {
                 className="lp-btn-outline rounded-full py-3 text-center text-sm"
                 onClick={() => setOpen(false)}
               >
-                Me connecter
+                {t('nav.login')}
               </Link>
               <Link
                 to="/register"
                 className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
                 onClick={() => setOpen(false)}
               >
-                Démarrer gratuitement
+                {t('nav.getStarted')}
               </Link>
             </div>
           </div>

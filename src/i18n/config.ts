@@ -14,23 +14,28 @@ import translationEN from './locales/en.json';
 import translationES from './locales/es.json';
 import translationDE from './locales/de.json';
 import translationPT from './locales/pt.json';
+import landingPremiumFR from './locales/landing-premium/fr.json';
+import landingPremiumEN from './locales/landing-premium/en.json';
+import landingPremiumES from './locales/landing-premium/es.json';
+import landingPremiumDE from './locales/landing-premium/de.json';
+import landingPremiumPT from './locales/landing-premium/pt.json';
 
 // Les ressources de traduction
 const resources = {
   fr: {
-    translation: translationFR,
+    translation: { ...translationFR, landingPremium: landingPremiumFR },
   },
   en: {
-    translation: translationEN,
+    translation: { ...translationEN, landingPremium: landingPremiumEN },
   },
   es: {
-    translation: translationES,
+    translation: { ...translationES, landingPremium: landingPremiumES },
   },
   de: {
-    translation: translationDE,
+    translation: { ...translationDE, landingPremium: landingPremiumDE },
   },
   pt: {
-    translation: translationPT,
+    translation: { ...translationPT, landingPremium: landingPremiumPT },
   },
 };
 

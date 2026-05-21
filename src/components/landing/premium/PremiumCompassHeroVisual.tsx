@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Package, Monitor, Briefcase, GraduationCap, Palette } from 'lucide-react';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import heroGlobeWebp from '@/assets/landing/hero-globe.webp';
 import heroGlobeWebpSm from '@/assets/landing/hero-globe-320.webp';
 import heroGlobePng from '@/assets/landing/hero-globe.png';
 
-const orbitProducts = [
+type OrbitType = 'physical' | 'digital' | 'service' | 'course' | 'artist';
+
+const orbitProducts: {
+  type: OrbitType;
+  icon: typeof Package;
+  image: string;
+  angle: number;
+  delay: number;
+}[] = [
   {
     type: 'physical',
-    label: 'Physique',
     icon: Package,
     image:
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80&auto=format&fit=crop',
@@ -17,7 +25,6 @@ const orbitProducts = [
   },
   {
     type: 'digital',
-    label: 'Digital',
     icon: Monitor,
     image:
       'https://images.unsplash.com/photo-1544716278-e513176f20b5?w=400&q=80&auto=format&fit=crop',
@@ -26,7 +33,6 @@ const orbitProducts = [
   },
   {
     type: 'service',
-    label: 'Service',
     icon: Briefcase,
     image:
       'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400&q=80&auto=format&fit=crop',
@@ -35,7 +41,6 @@ const orbitProducts = [
   },
   {
     type: 'course',
-    label: 'Cours',
     icon: GraduationCap,
     image:
       'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80&auto=format&fit=crop',
@@ -44,7 +49,6 @@ const orbitProducts = [
   },
   {
     type: 'artist',
-    label: 'Artiste',
     icon: Palette,
     image:
       'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a6?w=400&q=80&auto=format&fit=crop',
@@ -71,10 +75,12 @@ function useOrbitRadius() {
 
 function OrbitCard({
   item,
+  label,
   reducedMotion,
   radius,
 }: {
   item: (typeof orbitProducts)[0];
+  label: string;
   reducedMotion: boolean;
   radius: number;
 }) {
@@ -117,7 +123,7 @@ function OrbitCard({
           <div className="relative aspect-[4/3] overflow-hidden">
             <img
               src={item.image}
-              alt={item.label}
+              alt={label}
               className="h-full w-full object-cover"
               loading="lazy"
               width={236}
@@ -127,7 +133,7 @@ function OrbitCard({
             <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/40 px-2 py-1 backdrop-blur-sm">
               <item.icon className="h-3 w-3 text-[var(--lp-gold)]" strokeWidth={1.5} />
               <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90">
-                {item.label}
+                {label}
               </span>
             </div>
           </div>
@@ -138,6 +144,7 @@ function OrbitCard({
 }
 
 export function PremiumCompassHeroVisual() {
+  const { t } = useLandingPremiumT();
   const reducedMotion = useReducedMotion();
   const orbitRadius = useOrbitRadius();
 
@@ -214,7 +221,7 @@ export function PremiumCompassHeroVisual() {
             <source srcSet={heroGlobeWebp} type="image/webp" />
             <img
               src={heroGlobePng}
-              alt="Globe terrestre — vendez partout avec Emarzona"
+              alt={t('compass.globeAlt')}
               className="lp-hero-globe__img h-full w-full object-cover"
               width={560}
               height={560}
@@ -232,6 +239,7 @@ export function PremiumCompassHeroVisual() {
           <OrbitCard
             key={item.type}
             item={item}
+            label={t(`compass.orbit.${item.type}`)}
             reducedMotion={!!reducedMotion}
             radius={orbitRadius}
           />

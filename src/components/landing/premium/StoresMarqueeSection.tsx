@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 import { useLandingMarqueeDuration } from '@/hooks/useLandingMarqueeDuration';
 import { useLandingPlatformStores } from '@/hooks/useLandingPlatformStores';
@@ -32,11 +33,13 @@ function StoreChip({
   slug,
   subdomain,
   logoUrl,
+  storeLabel,
 }: {
   name: string;
   slug: string;
   subdomain: string | null;
   logoUrl: string | null;
+  storeLabel: string;
 }) {
   const accent = accentFromSlug(slug);
   const href = generateStoreUrl(slug, subdomain);
@@ -70,7 +73,7 @@ function StoreChip({
       )}
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-[var(--lp-text)]">{name}</p>
-        <p className="text-[11px] text-[var(--lp-text-muted)]">Boutique Emarzona</p>
+        <p className="text-[11px] text-[var(--lp-text-muted)]">{storeLabel}</p>
       </div>
     </a>
   );
@@ -90,6 +93,7 @@ function MarqueeSkeleton() {
 }
 
 export function StoresMarqueeSection() {
+  const { t } = useLandingPremiumT();
   const { ref, className } = usePremiumReveal();
   const { data: stores = [], isLoading, isError } = useLandingPlatformStores();
   const { storesSec } = useLandingMarqueeDuration(stores.length);
@@ -104,7 +108,7 @@ export function StoresMarqueeSection() {
     <section className="overflow-hidden border-y border-[var(--lp-border-light)] bg-[var(--lp-surface)] py-12 sm:py-16">
       <div ref={ref} className={`lp-reveal ${className}`}>
         <p className="mb-8 text-center text-xs font-medium uppercase tracking-[0.22em] text-[var(--lp-text-muted)]">
-          Ils nous font confiance — boutiques sur Emarzona
+          {t('storesMarquee.title')}
         </p>
         <div className="lp-marquee-mask relative">
           {isLoading ? (
@@ -121,6 +125,7 @@ export function StoresMarqueeSection() {
                   slug={store.slug}
                   subdomain={store.subdomain}
                   logoUrl={store.logo_url}
+                  storeLabel={t('storesMarquee.storeLabel')}
                 />
               ))}
             </div>

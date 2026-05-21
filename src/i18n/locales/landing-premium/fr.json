@@ -1,0 +1,278 @@
+{
+  "nav": {
+    "marketplace": "Marketplace",
+    "features": "Fonctionnalités",
+    "solutions": "Solutions",
+    "pricing": "Tarifs",
+    "resources": "Ressources",
+    "about": "À propos",
+    "login": "Me connecter",
+    "getStarted": "Démarrer gratuitement",
+    "getStartedShort": "Démarrer",
+    "menuOpen": "Ouvrir le menu",
+    "menuClose": "Fermer le menu"
+  },
+  "hero": {
+    "eyebrow": "Plateforme e-commerce tout-en-un",
+    "titleLine1": "Vendez tout.",
+    "titleLine2": "Gérez tout.",
+    "titleHighlight": "Sans limites.",
+    "subtitle": "Produits digitaux, physiques, services, cours en ligne et œuvres d'artiste — une infrastructure premium et complète pour vendre tout et partout dans le monde.",
+    "ctaPrimary": "Démarrer gratuitement",
+    "ctaSecondary": "Voir la démo",
+    "caption": "Tous les univers produits",
+    "trust": {
+      "noCard": "Sans carte bancaire",
+      "instant": "Installation immédiate",
+      "support": "Assistance 24/7"
+    }
+  },
+  "trustLogos": {
+    "title": "Ils nous font confiance"
+  },
+  "sellWays": {
+    "eyebrow": "Modèles de vente",
+    "titleLine1": "Cinq façons de vendre.",
+    "titleLine2": "Une seule plateforme.",
+    "subtitle": "Chaque modèle économique dispose d'outils dédiés, sans plugin ni intégration fragile.",
+    "items": [
+      {
+        "title": "Produits physiques",
+        "desc": "Stock, variantes, expédition et suivi logistique intégrés."
+      },
+      {
+        "title": "Produits digitaux",
+        "desc": "Ebooks, logiciels, templates — livraison instantanée sécurisée."
+      },
+      {
+        "title": "Services",
+        "desc": "Réservations, devis et prestations avec calendrier connecté."
+      },
+      {
+        "title": "Cours en ligne",
+        "desc": "Formations, drip content, certifications et communauté."
+      },
+      {
+        "title": "Œuvres d'artiste",
+        "desc": "Portfolio, éditions limitées et certificats d'authenticité."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "Infrastructure",
+    "title": "Des outils puissants pour développer",
+    "titleHighlight": "votre business",
+    "subtitle": "De la première vente à l'échelle internationale — sans empiler dix outils différents.",
+    "items": [
+      { "title": "Parrainage", "desc": "Programme de parrainage avec commissions automatiques." },
+      { "title": "Affiliation", "desc": "Réseau d'affiliés et liens trackés pour chaque produit." },
+      {
+        "title": "Marketplace",
+        "desc": "Visibilité sur le marketplace Emarzona et votre boutique."
+      },
+      { "title": "Marketing e-mail", "desc": "Campagnes, séquences et récupération de paniers." },
+      { "title": "IA intégrée", "desc": "Recommandations et insights pour optimiser vos ventes." },
+      {
+        "title": "Paiements sécurisés",
+        "desc": "Moneroo, mobile money et cartes — conformes et fiables."
+      },
+      { "title": "Analytics", "desc": "Tableaux de bord temps réel et rapports exportables." },
+      {
+        "title": "Multi-devises",
+        "desc": "FCFA (XOF) natif — EUR, USD et mobile money à la caisse."
+      },
+      {
+        "title": "Coupons & promos",
+        "desc": "Codes promo, bundles et offres limitées dans le temps."
+      },
+      { "title": "Abonnements", "desc": "Revenus récurrents sur produits et services." },
+      { "title": "Multi-boutiques", "desc": "Gérez plusieurs marques depuis un seul compte." },
+      { "title": "Support dédié", "desc": "Accompagnement humain pour les vendeurs ambitieux." }
+    ]
+  },
+  "adapt": {
+    "eyebrow": "Pour tous les profils",
+    "title": "Que vous soyez débutant ou expert, Emarzona",
+    "titleHighlight": "s'adapte à vous.",
+    "subtitle": "Lancez votre première offre ce week-end ou industrialisez un catalogue de centaines de références — la plateforme grandit avec votre ambition.",
+    "benefits": [
+      "Interface intuitive, pensée pour les créateurs",
+      "Aucune compétence technique requise",
+      "Boutique en ligne en quelques minutes",
+      "Paiements locaux et internationaux",
+      "Formation et ressources incluses"
+    ],
+    "ctaPrimary": "Commencer gratuitement",
+    "ctaSecondary": "Explorer le marketplace",
+    "photoAlt": "Entrepreneure africaine souriante en costume orange, utilisant son ordinateur portable",
+    "cardRevenue": "Revenus ce mois",
+    "cardGrowth": "+24 % vs mois dernier",
+    "cardSatisfaction": "Satisfaction",
+    "cardReviews": "5,0 / 5 — 450+ avis"
+  },
+  "storesMarquee": {
+    "title": "Ils nous font confiance — boutiques sur Emarzona",
+    "storeLabel": "Boutique Emarzona"
+  },
+  "countries": {
+    "eyebrow": "Portée internationale",
+    "titleLine1": "Vendez partout.",
+    "titleHighlight": "Dans plus de {{count}} pays.",
+    "subtitle": "Encaissez en FCFA et à l'international — une plateforme pensée pour l'Afrique et connectée au monde.",
+    "regions": {
+      "africa": "Afrique",
+      "europe": "Europe",
+      "americas": "Amériques",
+      "middleEast": "Moyen-Orient"
+    },
+    "names": {
+      "BF": "Burkina Faso",
+      "SN": "Sénégal",
+      "CI": "Côte d'Ivoire",
+      "ML": "Mali",
+      "BJ": "Bénin",
+      "TG": "Togo",
+      "NE": "Niger",
+      "CM": "Cameroun",
+      "GN": "Guinée",
+      "GH": "Ghana",
+      "NG": "Nigeria",
+      "MA": "Maroc",
+      "TN": "Tunisie",
+      "DZ": "Algérie",
+      "ZA": "Afrique du Sud",
+      "KE": "Kenya",
+      "RW": "Rwanda",
+      "CD": "RD Congo",
+      "GA": "Gabon",
+      "FR": "France",
+      "BE": "Belgique",
+      "CH": "Suisse",
+      "DE": "Allemagne",
+      "GB": "Royaume-Uni",
+      "ES": "Espagne",
+      "IT": "Italie",
+      "PT": "Portugal",
+      "CA": "Canada",
+      "US": "États-Unis",
+      "AE": "Émirats arabes unis"
+    }
+  },
+  "currencies": {
+    "eyebrow": "Paiements multi-devises",
+    "titleLine1": "Encaissez dans la devise",
+    "titleHighlight": "de vos clients.",
+    "subtitle": "FCFA natif, devises africaines et internationales — {{count}} monnaies supportées pour vendre sans friction.",
+    "names": {
+      "XOF": "Franc CFA (UEMOA)",
+      "XAF": "Franc CFA (CEMAC)",
+      "NGN": "Naira",
+      "GHS": "Cedi",
+      "KES": "Shilling kenyan",
+      "ZAR": "Rand",
+      "UGX": "Shilling ougandais",
+      "TZS": "Shilling tanzanien",
+      "RWF": "Franc rwandais",
+      "ETB": "Birr",
+      "MAD": "Dirham marocain",
+      "EUR": "Euro",
+      "GBP": "Livre sterling",
+      "CHF": "Franc suisse",
+      "USD": "Dollar US",
+      "CAD": "Dollar canadien",
+      "AED": "Dirham des EAU"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Tarifs transparents",
+    "title": "Des Tarifs très compétitifs,",
+    "titleHighlight": "nulle part ailleurs",
+    "subtitle": "Un modèle adapté à chaque type de produit — abonnement pour le physique, commission pour le reste.",
+    "footnote": "Tous les montants sont en franc CFA (XOF). Commission de 10 % prélevée uniquement sur les ventes abouties pour les produits digitaux, cours, services et œuvres d'artistes.",
+    "periodMonth": "/ mois",
+    "periodSale": "par vente",
+    "physical": {
+      "name": "Produits physiques",
+      "badge": "1 mois d'essai gratuit",
+      "desc": "Idéal pour boutiques avec stock, logistique et expédition.",
+      "features": [
+        "Boutique en ligne complète",
+        "Gestion stock & variantes",
+        "Paiements FCFA & international",
+        "Marketplace Emarzona",
+        "Essai gratuit 30 jours"
+      ],
+      "cta": "Essayer 1 mois gratuit"
+    },
+    "digital": {
+      "name": "Digital, services, cours en ligne & œuvres d'artiste",
+      "badge": "Sans abonnement",
+      "desc": "Produits digitaux, cours en ligne, services et œuvres d'artistes.",
+      "features": [
+        "Aucun frais mensuel fixe",
+        "10 % de commission sur ventes réussies",
+        "Livraison digitale & réservations",
+        "Formations & œuvres d'artiste",
+        "Paiements sécurisés inclus"
+      ],
+      "cta": "Commencer sans abonnement"
+    }
+  },
+  "cta": {
+    "titleLine1": "Prêt à tout vendre.",
+    "titleLine2": "Partout. Avec Emarzona.",
+    "subtitle": "Rejoignez les créateurs et marques qui centralisent leurs ventes sur une infrastructure pensée pour l'Afrique et le monde.",
+    "ctaPrimary": "Démarrer gratuitement",
+    "ctaSecondary": "Prendre rendez-vous",
+    "globeAria": "Globe terrestre animé — vente internationale"
+  },
+  "footer": {
+    "tagline": "La plateforme e-commerce tout-en-un pour vendre, gérer et développer votre activité en ligne.",
+    "newsletter": "Newsletter",
+    "newsletterDesc": "Conseils e-commerce et nouveautés produit.",
+    "emailPlaceholder": "Votre e-mail",
+    "subscribe": "S'inscrire",
+    "copyright": "© {{year}} Emarzona. Tous droits réservés.",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Confidentialité",
+    "cookies": "Cookies",
+    "columns": {
+      "product": {
+        "title": "Produit",
+        "features": "Fonctionnalités",
+        "marketplace": "Marketplace",
+        "pricing": "Tarifs",
+        "integrations": "Intégrations"
+      },
+      "resources": {
+        "title": "Ressources",
+        "blog": "Blog",
+        "docs": "Documentation",
+        "help": "Centre d'aide",
+        "community": "Communauté"
+      },
+      "company": {
+        "title": "Entreprise",
+        "about": "À propos",
+        "contact": "Contact",
+        "careers": "Carrières",
+        "press": "Presse"
+      }
+    }
+  },
+  "compass": {
+    "globeAlt": "Globe terrestre — vendez partout avec Emarzona",
+    "orbit": {
+      "physical": "Physique",
+      "digital": "Digital",
+      "service": "Service",
+      "course": "Cours",
+      "artist": "Artiste"
+    }
+  },
+  "seo": {
+    "title": "Emarzona — Vendez tout. Gérez tout. Sans limites.",
+    "description": "Plateforme e-commerce premium : produits digitaux, physiques, services, cours et œuvres d'artiste. Paiements sécurisés, marketing intégré, marketplace Afrique."
+  },
+  "logoAlt": "Emarzona — plateforme e-commerce"
+}
