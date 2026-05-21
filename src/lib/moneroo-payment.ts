@@ -248,7 +248,8 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     const cleanMetadata: Record<string, unknown> = {
       transaction_id: transaction.id,
       store_id: storeId,
-      ...(productId && { product_id: productId }), // Ajouter product_id dans metadata aussi
+      ...(productId && { product_id: productId }),
+      ...(orderId && { order_id: orderId }),
     };
 
     // Ajouter les métadonnées personnalisées en filtrant les valeurs null/undefined
@@ -282,8 +283,9 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     // L'Edge Function vérifie data.productId et l'ajoute à metadata.product_id
     const checkoutDataWithIds = {
       ...checkoutData,
-      productId: productId, // Passer productId directement dans data
-      storeId: storeId, // Passer storeId directement dans data
+      productId: productId,
+      storeId: storeId,
+      ...(orderId && { orderId }),
     };
 
     logger.log('Initiating Moneroo checkout:', {

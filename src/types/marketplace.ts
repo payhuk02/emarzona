@@ -17,6 +17,7 @@ export interface Product {
   product_type: string | null;
   rating: number | null;
   reviews_count: number | null;
+  purchases_count?: number | null;
   is_active: boolean;
   is_draft: boolean | null;
   created_at: string;
@@ -83,9 +84,3 @@ export interface PaginationState {
   itemsPerPage: number;
   totalItems: number;
 }
-
-
-
-
-
-

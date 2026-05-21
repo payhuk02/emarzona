@@ -150,10 +150,86 @@ async function fetchAuctionMeta(slug: string): Promise<Meta | null> {
   }
 }
 
+const TYPE_SEO_LABELS: Record<string, string> = {
+  digital: 'Produits digitaux',
+  physical: 'Produits physiques',
+  service: 'Services',
+  course: 'Cours en ligne',
+  artist: "Œuvres d'artistes",
+};
+
+function buildMarketplaceBotMeta(searchParams: URLSearchParams, site: string): Meta {
+  const q = searchParams.get('q')?.trim();
+  const type = searchParams.get('type');
+  const category = searchParams.get('category');
+  const qs = searchParams.toString();
+  const url = `${site}/marketplace${qs ? `?${qs}` : ''}`;
+
+  if (q) {
+    return {
+      title: `Recherche « ${q} » | Marketplace Emarzona`,
+      description: `Résultats marketplace pour « ${q} » — produits digitaux, physiques, services, cours et art sur Emarzona.`,
+      image: `${site}/og-marketplace.jpg`,
+      url,
+      type: 'website',
+    };
+  }
+
+  const typeLabel = type && type !== 'all' ? TYPE_SEO_LABELS[type] : null;
+  const categoryLabel =
+    category && category !== 'all'
+      ? category === 'featured'
+        ? 'En vedette'
+        : category.replace(/[-_]/g, ' ')
+      : null;
+
+  if (typeLabel && categoryLabel) {
+    return {
+      title: `${typeLabel} — ${categoryLabel} | Marketplace Emarzona`,
+      description: `Parcourez les ${typeLabel.toLowerCase()} dans la catégorie ${categoryLabel} sur Emarzona.`,
+      image: `${site}/og-marketplace.jpg`,
+      url,
+      type: 'website',
+    };
+  }
+
+  if (typeLabel) {
+    return {
+      title: `${typeLabel} | Marketplace Emarzona`,
+      description: `Découvrez nos ${typeLabel.toLowerCase()} sur le marketplace Emarzona. Paiement sécurisé.`,
+      image: `${site}/og-marketplace.jpg`,
+      url,
+      type: 'website',
+    };
+  }
+
+  if (categoryLabel) {
+    return {
+      title: `${categoryLabel} | Marketplace Emarzona`,
+      description: `Produits et services dans la catégorie ${categoryLabel} sur Emarzona.`,
+      image: `${site}/og-marketplace.jpg`,
+      url,
+      type: 'website',
+    };
+  }
+
+  return {
+    title: 'Marketplace - Explorer les produits | Emarzona',
+    description: DEFAULT_META.description,
+    image: `${site}/og-marketplace.jpg`,
+    url,
+    type: 'website',
+  };
+}
+
 async function resolveMeta(req: Request): Promise<Meta> {
   const url = new URL(req.url);
   const host = (req.headers.get('host') || '').toLowerCase();
   const path = url.pathname;
+
+  if (path === '/marketplace' || path.startsWith('/marketplace/')) {
+    return buildMarketplaceBotMeta(url.searchParams, SITE);
+  }
 
   // Sous-domaine boutique : *.myemarzona.shop
   if (host.endsWith(`.${STORE_DOMAIN}`)) {

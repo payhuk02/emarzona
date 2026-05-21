@@ -12,17 +12,22 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
+export interface MarketplaceProductsCachePayload {
+  products: Product[];
+  totalCount: number;
+}
+
 const CACHE_PREFIX = 'marketplace_';
 const CACHE_VERSION = '1.0.0';
 const DEFAULT_TTL = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Génère une clé de cache stable basée sur les filtres
- * 
+ *
  * @param prefix - Préfixe pour la clé de cache (ex: 'products', 'categories')
  * @param params - Objet contenant les paramètres de filtrage
  * @returns Clé de cache unique et stable basée sur les paramètres
- * 
+ *
  * @example
  * ```ts
  * const key = generateCacheKey('products', { category: 'electronics', page: 1 });
@@ -33,13 +38,16 @@ export function generateCacheKey(prefix: string, params: Record<string, unknown>
   const stableParams = JSON.stringify(
     Object.keys(params)
       .sort()
-      .reduce((acc, key) => {
-        const value = params[key];
-        if (value !== null && value !== undefined && value !== '') {
-          acc[key] = value;
-        }
-        return acc;
-      }, {} as Record<string, unknown>)
+      .reduce(
+        (acc, key) => {
+          const value = params[key];
+          if (value !== null && value !== undefined && value !== '') {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {} as Record<string, unknown>
+      )
   );
   return `${CACHE_PREFIX}${prefix}_${CACHE_VERSION}_${stableParams}`;
 }
@@ -53,25 +61,21 @@ function isIndexedDBAvailable(): boolean {
 
 /**
  * Stocke les données dans le cache (localStorage pour petites données, IndexedDB pour grandes)
- * 
+ *
  * @param key - Clé unique pour identifier l'entrée de cache
  * @param data - Données à mettre en cache (seront sérialisées en JSON)
  * @param ttl - Durée de vie en millisecondes (défaut: 10 minutes)
  * @returns Promise qui se résout une fois les données mises en cache
- * 
+ *
  * @example
  * ```ts
  * await setCache('products_list', products, 5 * 60 * 1000); // Cache pour 5 minutes
  * ```
  */
-export async function setCache<T>(
-  key: string,
-  data: T,
-  ttl: number = DEFAULT_TTL
-): Promise<void> {
+export async function setCache<T>(key: string, data: T, ttl: number = DEFAULT_TTL): Promise<void> {
   if (typeof window === 'undefined') return;
 
-  const  entry: CacheEntry<T> = {
+  const entry: CacheEntry<T> = {
     data,
     timestamp: Date.now(),
     expiresAt: Date.now() + ttl,
@@ -102,10 +106,10 @@ export async function setCache<T>(
 
 /**
  * Récupère les données du cache
- * 
+ *
  * @param key - Clé unique de l'entrée de cache à récupérer
  * @returns Promise qui se résout avec les données en cache ou null si non trouvé/expiré
- * 
+ *
  * @example
  * ```ts
  * const cachedProducts = await getCache<Product[]>('products_list');
@@ -121,7 +125,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
     // Essayer localStorage d'abord
     const cached = localStorage.getItem(key);
     if (cached) {
-      const  entry: CacheEntry<T> = JSON.parse(cached);
+      const entry: CacheEntry<T> = JSON.parse(cached);
       if (Date.now() < entry.expiresAt) {
         return entry.data;
       } else {
@@ -146,9 +150,9 @@ export async function getCache<T>(key: string): Promise<T | null> {
 
 /**
  * Supprime une entrée du cache
- * 
+ *
  * @param key - Clé unique de l'entrée de cache à supprimer
- * 
+ *
  * @example
  * ```ts
  * removeCache('products_list'); // Supprime le cache des produits
@@ -170,7 +174,7 @@ export function removeCache(key: string): void {
 /**
  * Nettoie le cache expiré
  * Parcourt toutes les entrées de cache et supprime celles qui ont expiré
- * 
+ *
  * @example
  * ```ts
  * // Appeler périodiquement pour nettoyer le cache
@@ -189,7 +193,7 @@ export function cleanExpiredCache(): void {
         try {
           const cached = localStorage.getItem(key);
           if (cached) {
-            const  entry: CacheEntry<unknown> = JSON.parse(cached);
+            const entry: CacheEntry<unknown> = JSON.parse(cached);
             if (now >= entry.expiresAt) {
               localStorage.removeItem(key);
             }
@@ -207,7 +211,7 @@ export function cleanExpiredCache(): void {
 /**
  * IndexedDB helpers
  */
-let  db: IDBDatabase | null = null;
+let db: IDBDatabase | null = null;
 
 async function openDB(): Promise<IDBDatabase> {
   if (db) return db;
@@ -221,7 +225,7 @@ async function openDB(): Promise<IDBDatabase> {
       resolve(db);
     };
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = event => {
       const database = (event.target as IDBOpenDBRequest).result;
       if (!database.objectStoreNames.contains('cache')) {
         database.createObjectStore('cache', { keyPath: 'key' });
@@ -232,7 +236,7 @@ async function openDB(): Promise<IDBDatabase> {
 
 /**
  * Stocke une entrée dans IndexedDB
- * 
+ *
  * @param key - Clé unique pour l'entrée
  * @param entry - Données à stocker avec timestamp et expiration
  */
@@ -253,7 +257,7 @@ async function setIndexedDBCache<T>(key: string, entry: CacheEntry<T>): Promise<
 
 /**
  * Récupère une entrée depuis IndexedDB
- * 
+ *
  * @param key - Clé unique de l'entrée à récupérer
  * @returns Promise qui se résout avec l'entrée ou null si non trouvée
  */
@@ -283,17 +287,17 @@ async function getIndexedDBCache<T>(key: string): Promise<CacheEntry<T> | null> 
 
 /**
  * Supprime une entrée du cache IndexedDB
- * 
+ *
  * @param key - Clé unique de l'entrée à supprimer
  */
 function removeIndexedDBCache(key: string): void {
   openDB()
-    .then((database) => {
+    .then(database => {
       const transaction = database.transaction('cache', 'readwrite');
       const store = transaction.objectStore('cache');
       store.delete(key);
     })
-    .catch((error) => {
+    .catch(error => {
       logger.warn('Failed to remove IndexedDB cache', { error, key });
     });
 }
@@ -303,18 +307,24 @@ function removeIndexedDBCache(key: string): void {
  */
 export async function cacheMarketplaceProducts(
   filters: Record<string, unknown>,
-  products: Product[],
+  payload: MarketplaceProductsCachePayload,
   ttl: number = DEFAULT_TTL
 ): Promise<void> {
   const key = generateCacheKey('products', filters);
-  await setCache(key, products, ttl);
+  await setCache(key, payload, ttl);
 }
 
 export async function getCachedMarketplaceProducts(
   filters: Record<string, unknown>
-): Promise<Product[] | null> {
+): Promise<MarketplaceProductsCachePayload | null> {
   const key = generateCacheKey('products', filters);
-  return await getCache<Product[]>(key);
+  const cached = await getCache<MarketplaceProductsCachePayload | Product[]>(key);
+  if (!cached) return null;
+  // Compat ancien format (tableau seul)
+  if (Array.isArray(cached)) {
+    return { products: cached, totalCount: cached.length };
+  }
+  return cached;
 }
 
 /**
@@ -325,10 +335,3 @@ if (typeof window !== 'undefined') {
   // Nettoyer le cache toutes les 5 minutes
   setInterval(cleanExpiredCache, 5 * 60 * 1000);
 }
-
-
-
-
-
-
-

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
   Star,
@@ -18,12 +18,12 @@ import {
   MessageSquare,
   Play,
   ZoomIn,
+  Calendar,
 } from 'lucide-react';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { getMarketplaceProductCTA } from '@/lib/marketplace-product-cta';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { safeRedirect } from '@/lib/url-validator';
 import { ResponsiveProductImage } from '@/components/ui/ResponsiveProductImage';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,9 +97,11 @@ const ProductCardModernComponent = ({
   const [loading, setLoading] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [_userId, setUserId] = useState<string | null>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { addItem } = useCart();
   const isDigital = product.product_type === 'digital';
+  const cta = getMarketplaceProductCTA(product.product_type);
 
   // Hook centralisé pour favoris synchronisés
   const { favorites, toggleFavorite } = useMarketplaceFavorites();
@@ -179,73 +181,54 @@ const ProductCardModernComponent = ({
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user?.email) {
+      if (!user) {
         toast({
           title: 'Authentification requise',
           description: 'Veuillez vous connecter pour effectuer un achat',
           variant: 'destructive',
         });
-        setLoading(false);
+        navigate('/login');
         return;
       }
 
-      const result = await initiateMonerooPayment({
-        storeId: product.store_id,
-        productId: product.id,
-        amount: price,
-        currency: product.currency ?? 'XOF',
-        description: `Achat de ${product.name}`,
-        customerEmail: user.email,
-        customerName: user.user_metadata?.full_name || user.email.split('@')[0],
-        metadata: {
-          productName: product.name,
-          storeSlug: storeSlug || product.stores?.slug || '',
-          userId: user.id,
-        },
-      });
-
-      if (result.checkout_url) {
-        safeRedirect(result.checkout_url, () => {
-          toast({
-            title: 'Erreur de paiement',
-            description: 'URL de paiement invalide. Veuillez réessayer.',
-            variant: 'destructive',
-          });
-        });
+      if (cta.action === 'service') {
+        navigate(`/service/${product.id}`);
+        return;
       }
-    } catch (_error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Impossible d'initialiser le paiement";
+
+      if (cta.action === 'course') {
+        navigate(`/courses/${product.slug}`);
+        return;
+      }
+
+      const checkoutParams = new URLSearchParams({
+        productId: product.id,
+        storeId: product.store_id,
+      });
+      navigate(`/checkout?${checkoutParams.toString()}`);
+    } catch (err: unknown) {
       logger.error("Erreur lors de l'achat", {
-        error: error instanceof Error ? error : new Error(String(error)),
+        error: err instanceof Error ? err : new Error(String(err)),
       });
       toast({
-        title: 'Erreur de paiement',
-        description: errorMessage,
+        title: 'Erreur',
+        description: "Impossible d'ouvrir le checkout",
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  }, [
-    product.store_id,
-    product.id,
-    product.name,
-    product.currency,
-    product.stores?.slug,
-    price,
-    storeSlug,
-    toast,
-  ]);
+  }, [product.store_id, product.id, product.slug, cta.action, navigate, toast]);
 
   const handleAddToCart = useCallback(async () => {
+    if (!cta.showAddToCart) return;
+
     if (!product.store_id) {
       toast({
         title: 'Erreur',
@@ -271,7 +254,7 @@ const ProductCardModernComponent = ({
         error: error instanceof Error ? error : new Error(String(error)),
       });
     }
-  }, [product.store_id, product.id, product.product_type, addItem, toast]);
+  }, [cta.showAddToCart, product.store_id, product.id, product.product_type, addItem, toast]);
 
   const handleFavorite = useCallback(
     async (e: React.MouseEvent) => {
@@ -325,6 +308,7 @@ const ProductCardModernComponent = ({
 
   return (
     <article
+      data-testid="product-card"
       className="group relative flex flex-col rounded-lg bg-transparent border border-gray-200 overflow-hidden"
       role="article"
       aria-labelledby={`product-title-${product.id}`}
@@ -721,8 +705,8 @@ const ProductCardModernComponent = ({
               className="flex-1 min-h-[44px] h-11 text-xs sm:text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium disabled:opacity-50 px-3 sm:px-3 touch-manipulation active:scale-95 transition-transform"
               aria-label={
                 loading
-                  ? `Traitement de l'achat de ${product.name} en cours`
-                  : `Acheter ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
+                  ? `Traitement en cours pour ${product.name}`
+                  : `${cta.buyAriaVerb} ${product.name} pour ${formatPrice(price)} ${product.currency || 'XOF'}`
               }
             >
               {loading ? (
@@ -731,15 +715,22 @@ const ProductCardModernComponent = ({
                     className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-spin flex-shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="whitespace-nowrap">Paiement...</span>
+                  <span className="whitespace-nowrap">Chargement...</span>
                 </>
               ) : (
                 <>
-                  <ShoppingCart
-                    className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span className="whitespace-nowrap">Acheter</span>
+                  {cta.action === 'service' ? (
+                    <Calendar
+                      className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <ShoppingCart
+                      className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="whitespace-nowrap">{cta.buyLabel}</span>
                 </>
               )}
             </Button>

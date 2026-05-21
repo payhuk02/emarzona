@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { FilterState } from '@/types/marketplace';
 import { Filter, Zap, Heart, BarChart3, X, Sparkles } from 'lucide-react';
 import { CategoryNavigationBar } from './CategoryNavigationBar';
+import { MarketplaceProductTypeFacets } from './MarketplaceProductTypeFacets';
 import { SearchAutocomplete } from './SearchAutocomplete';
+import type { MarketplaceFacetBucket } from '@/types/marketplace-facets';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -27,6 +29,9 @@ interface MarketplaceHeroSectionProps {
   onToggleAdvancedSearch: () => void;
   onToggleComparison: () => void;
   categories: string[];
+  productTypeFacets?: MarketplaceFacetBucket[];
+  facetsTotal?: number;
+  facetsLoading?: boolean;
   favoritesCount: number;
   comparisonCount: number;
   PRICE_RANGES: Array<{ value: string; label: string }>;
@@ -50,6 +55,9 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
     onToggleAdvancedSearch,
     onToggleComparison,
     categories,
+    productTypeFacets = [],
+    facetsTotal,
+    facetsLoading,
     favoritesCount,
     comparisonCount,
     PRICE_RANGES,
@@ -109,6 +117,14 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
             categories={categories}
             selectedCategory={filters.category}
             onCategoryChange={category => onFilterChange({ category })}
+          />
+
+          <MarketplaceProductTypeFacets
+            selectedType={filters.productType}
+            onTypeChange={productType => onFilterChange({ productType })}
+            productTypeFacets={productTypeFacets}
+            totalCount={facetsTotal}
+            isLoading={facetsLoading}
           />
 
           {/* Barre de recherche avancée avec auto-complétion */}
@@ -212,9 +228,7 @@ export const MarketplaceHeroSection = React.memo<MarketplaceHeroSectionProps>(
                   {getValue('marketplace.filterLabels.tag')} {tag}
                   <X
                     className="h-3 w-3 cursor-pointer hover:text-red-400"
-                    onClick={() =>
-                      onFilterChange({ tags: filters.tags.filter(t => t !== tag) })
-                    }
+                    onClick={() => onFilterChange({ tags: filters.tags.filter(t => t !== tag) })}
                     aria-label={`${getValue('marketplace.filterLabels.clear')} ${tag}`}
                   />
                 </Badge>

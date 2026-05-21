@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -39,13 +39,20 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMarketplaceProducts } from '@/hooks/useMarketplaceProducts';
 import { useQueryClient } from '@tanstack/react-query';
 // ✅ REFACTORING: Imports des nouveaux hooks et composants
-import { useMarketplaceFilters, useMarketplacePagination } from '@/hooks/marketplace';
+import {
+  useMarketplaceFilters,
+  useMarketplacePagination,
+  needsTypeSpecificRpc,
+  useMarketplaceUrlSync,
+} from '@/hooks/marketplace';
 import { MarketplaceHeroSection } from '@/components/marketplace/MarketplaceHeroSection';
 import { MarketplaceControlsSection } from '@/components/marketplace/MarketplaceControlsSection';
 import { MarketplaceProductsSection } from '@/components/marketplace/MarketplaceProductsSection';
 import { AIProductRecommendations } from '@/components/recommendations/AIProductRecommendations';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
+import { useMarketplaceFacets } from '@/hooks/useMarketplaceFacets';
+import { buildMarketplaceBreadcrumbs, buildMarketplaceSEO } from '@/lib/marketplace-seo';
 
 const Marketplace = () => {
   const { t } = useTranslation();
@@ -53,14 +60,6 @@ const Marketplace = () => {
   const navigate = useNavigate();
   const { getValue } = usePageCustomization('marketplace');
   const queryClient = useQueryClient();
-
-  // ✅ DIAGNOSTIC: Log du montage du composant
-  useEffect(() => {
-    logger.info('[Marketplace] Component mounted');
-    return () => {
-      logger.info('[Marketplace] Component unmounted');
-    };
-  }, []);
 
   // ✅ PERFORMANCE: Preload images LCP pour améliorer Core Web Vitals
   // Preload la première image de produit si disponible (potentielle LCP)
@@ -88,46 +87,39 @@ const Marketplace = () => {
   const { userId: fallbackUserId } = useCurrentUserId();
   const finalUserId = userId || fallbackUserId;
 
-  // ✅ DIAGNOSTIC: Log de l'état d'authentification
-  useEffect(() => {
-    logger.info('[Marketplace] Auth state:', {
-      hasUser: !!user,
-      userId: finalUserId,
-      authLoading,
-    });
-  }, [user, finalUserId, authLoading]);
-
-  // États pour compatibilité (seront progressivement remplacés)
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-
-  // ✅ REFACTORING: Les refs sont maintenant gérées dans les composants MarketplaceHeroSection et MarketplaceProductsSection
-
-  // Note: userId est maintenant fourni par un cache global (useCurrentUserId)
-
   // ✅ REFACTORING: Utiliser les nouveaux hooks
-  const { filters, updateFilter, clearFilters, PRICE_RANGES, SORT_OPTIONS, PRODUCT_TAGS } =
-    useMarketplaceFilters();
+  const {
+    filters,
+    setFilters,
+    updateFilter,
+    clearFilters,
+    PRICE_RANGES,
+    SORT_OPTIONS,
+    PRODUCT_TAGS,
+  } = useMarketplaceFilters();
 
   const { pagination, totalPages, goToPage, resetPagination, updateTotalItems } =
     useMarketplacePagination(12);
 
-  // État local pour l'input de recherche (non debounced)
   const [searchInput, setSearchInput] = useState('');
-
-  // Valeur debounced pour éviter trop d'appels API
   const debouncedSearch = useDebounce(searchInput, 500);
+
+  useMarketplaceUrlSync({
+    filters,
+    setFilters,
+    searchInput,
+    setSearchInput,
+    pagination,
+    goToPage,
+    debouncedSearch,
+  });
 
   // Recherche full-text serveur
   const hasSearchQuery: boolean = !!(debouncedSearch && debouncedSearch.trim().length > 0);
 
-  // Utiliser les fonctions RPC optimisées si un type spécifique est sélectionné
-  const shouldUseRPCFiltering: boolean = filters.productType !== 'all' && !hasSearchQuery;
+  const useTypeSpecificRpc = needsTypeSpecificRpc(filters);
+  const shouldUseUnifiedRpc = !hasSearchQuery && !useTypeSpecificRpc;
 
-  // ✅ OPTIMISATION: Utiliser React Query pour le chargement des produits
-  // IMPORTANT: Doit être déclaré APRÈS filters, pagination, hasSearchQuery, shouldUseRPCFiltering
   const {
     products: queryProducts,
     totalCount: queryTotalCount,
@@ -139,31 +131,24 @@ const Marketplace = () => {
     filters,
     pagination,
     hasSearchQuery,
-    shouldUseRPCFiltering,
+    shouldUseRPCFiltering: shouldUseUnifiedRpc,
   });
 
-  // ✅ DIAGNOSTIC: Log des erreurs de requête
-  useEffect(() => {
-    if (queryError) {
-      logger.error('[Marketplace] Query error:', {
-        error: queryError,
-        filters,
-        pagination,
-        hasSearchQuery,
-        shouldUseRPCFiltering,
-      });
-    }
-  }, [queryError, filters, pagination, hasSearchQuery, shouldUseRPCFiltering]);
-
   const {
-    data: rpcFilteredProducts,
-    isLoading: rpcLoading,
-    isError: rpcError,
+    data: typeFilteredProducts = [],
+    isLoading: typeRpcLoading,
+    isError: typeRpcError,
   } = useFilteredProducts({
     filters,
     pagination,
-    enabled: shouldUseRPCFiltering,
+    enabled: useTypeSpecificRpc,
   });
+
+  const catalogProducts = useMemo(
+    () => (useTypeSpecificRpc ? typeFilteredProducts : queryProducts),
+    [useTypeSpecificRpc, typeFilteredProducts, queryProducts]
+  );
+
   const searchFilters = {
     category:
       filters.category !== 'all' && filters.category !== 'featured' ? filters.category : null,
@@ -208,6 +193,42 @@ const Marketplace = () => {
 
   const saveSearchHistory = useSaveSearchHistory();
 
+  const catalogLoading = hasSearchQuery
+    ? searchLoading
+    : useTypeSpecificRpc
+      ? typeRpcLoading
+      : queryIsLoading;
+
+  const catalogError = hasSearchQuery
+    ? null
+    : useTypeSpecificRpc
+      ? typeRpcError
+        ? 'Erreur lors du chargement des produits'
+        : null
+      : queryError
+        ? queryError instanceof Error
+          ? queryError.message
+          : String(queryError)
+        : null;
+
+  const hasLoadedOnce =
+    !catalogLoading || catalogProducts.length > 0 || !!catalogError || hasSearchQuery;
+
+  useEffect(() => {
+    if (hasSearchQuery) return;
+    if (useTypeSpecificRpc) {
+      updateTotalItems(typeFilteredProducts.length);
+    } else {
+      updateTotalItems(queryTotalCount);
+    }
+  }, [
+    hasSearchQuery,
+    useTypeSpecificRpc,
+    typeFilteredProducts.length,
+    queryTotalCount,
+    updateTotalItems,
+  ]);
+
   // États des modales et UI
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -239,442 +260,33 @@ const Marketplace = () => {
     }
   }, [debouncedSearch, searchResults, hasSearchQuery, saveSearchHistory]);
 
-  // Chargement des produits avec pagination côté serveur
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      // Calculer les indices de pagination
-      const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-      const endIndex = startIndex + pagination.itemsPerPage - 1;
-
-      // Construire la requête avec les jointures nécessaires selon le type
-      let selectQuery = `
-        *,
-        stores!inner (
-          id,
-          name,
-          slug,
-          logo_url,
-          created_at
-        ),
-        product_affiliate_settings!left (
-          commission_rate,
-          affiliate_enabled
-        )
-      `;
-
-      // Ajouter les jointures selon le type de produit et les filtres
-      if (filters.productType === 'digital' && filters.digitalSubType) {
-        selectQuery += `,
-          digital_products!left (
-            digital_type,
-            license_type
-          )`;
-      }
-
-      if (filters.productType === 'service' && (filters.serviceType || filters.locationType)) {
-        selectQuery += `,
-          service_products!left (
-            service_type,
-            location_type,
-            calendar_available
-          )`;
-      }
-
-      if (filters.productType === 'course' && (filters.difficulty || filters.accessType)) {
-        selectQuery += `,
-          courses!left (
-            difficulty,
-            access_type,
-            total_duration
-          )`;
-      }
-
-      if (
-        filters.productType === 'artist' &&
-        (filters.artistType || filters.editionType || filters.certificateOfAuthenticity)
-      ) {
-        selectQuery += `,
-          artist_products!left (
-            artist_type,
-            artwork_edition_type,
-            certificate_of_authenticity
-          )`;
-      }
-
-      let query = supabase
-        .from('products')
-        .select(selectQuery, { count: 'exact' }) // Obtenir le count total
-        .eq('is_active', true)
-        .eq('is_draft', false); // Seulement les produits publiés
-
-      // Appliquer les filtres
-      if (filters.category !== 'all' && filters.category !== 'featured') {
-        query = query.eq('category', filters.category);
-      }
-
-      // Filtre pour les produits en vedette
-      if (filters.category === 'featured') {
-        query = query.eq('is_featured', true);
-      }
-
-      if (filters.productType !== 'all') {
-        query = query.eq('product_type', filters.productType);
-      }
-
-      if (filters.priceRange !== 'all') {
-        const [min, max] = filters.priceRange.split('-').map(Number);
-        if (max) {
-          query = query.gte('price', min).lte('price', max);
-        } else {
-          query = query.gte('price', min);
-        }
-      }
-
-      if (filters.licensingType && filters.licensingType !== 'all') {
-        query = query.eq('licensing_type', filters.licensingType);
-      }
-
-      if (filters.rating !== 'all') {
-        query = query.gte('rating', Number(filters.rating));
-      }
-
-      // Filtres spécifiques par type de produit
-      // Note: Les filtres sur les relations (digital_products, service_products, etc.)
-      // seront appliqués côté client après récupération des données
-      // TODO: Optimiser avec des fonctions RPC pour filtrer côté serveur
-
-      if (filters.productType === 'physical') {
-        // Filtre par disponibilité stock (colonne directe dans products)
-        if (filters.stockAvailability === 'in_stock') {
-          query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
-        } else if (filters.stockAvailability === 'low_stock') {
-          query = query.gte('stock_quantity', 1).lte('stock_quantity', 10);
-        } else if (filters.stockAvailability === 'out_of_stock') {
-          query = query.eq('stock_quantity', 0);
-        }
-
-        // Filtre par type de livraison (colonne directe dans products)
-        if (filters.shippingType === 'free') {
-          query = query.eq('free_shipping', true);
-        } else if (filters.shippingType === 'paid') {
-          query = query.eq('free_shipping', false);
-        }
-        // Note: 'pickup' nécessiterait une table dédiée pour les points de retrait
-      }
-
-      if (filters.productType === 'artist') {
-        // Filtre disponibilité (basé sur stock_quantity dans products)
-        if (filters.artworkAvailability && filters.artworkAvailability !== 'all') {
-          if (filters.artworkAvailability === 'available') {
-            query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
-          } else if (filters.artworkAvailability === 'sold_out') {
-            query = query.eq('stock_quantity', 0);
-          }
-        }
-      }
-
-      // Appliquer le tri
-      if (filters.sortBy === 'sales_count') {
-        // Tri par nombre de ventes (approximatif avec reviews_count)
-        query = query.order('reviews_count', { ascending: filters.sortOrder === 'asc' });
-      } else {
-        query = query.order(filters.sortBy, { ascending: filters.sortOrder === 'asc' });
-      }
-
-      // Appliquer la pagination côté serveur
-      query = query.range(startIndex, endIndex);
-
-      const { data: productsData, error, count } = await query;
-
-      if (error) {
-        logger.error('Erreur Supabase lors du chargement des produits:', error);
-        throw error;
-      }
-
-      // Ne charger les produits que si pas de recherche active
-      if (!hasSearchQuery) {
-        // Appliquer les filtres côté client pour les relations
-        let filteredData = (productsData || []) as unknown as Product[];
-
-        if (filters.productType === 'digital' && filters.digitalSubType) {
-          filteredData = filteredData.filter(
-            (product: Product & { digital_products?: Array<{ digital_type?: string }> }) => {
-              const digitalProduct = product.digital_products?.[0];
-              return digitalProduct?.digital_type === filters.digitalSubType;
-            }
-          );
-        }
-
-        if (filters.productType === 'service') {
-          if (filters.serviceType) {
-            filteredData = filteredData.filter(
-              (product: Product & { service_products?: Array<{ service_type?: string }> }) => {
-                const serviceProduct = product.service_products?.[0];
-                return serviceProduct?.service_type === filters.serviceType;
-              }
-            );
-          }
-          if (filters.locationType && filters.locationType !== 'all') {
-            filteredData = filteredData.filter(
-              (product: Product & { service_products?: Array<{ location_type?: string }> }) => {
-                const serviceProduct = product.service_products?.[0];
-                return serviceProduct?.location_type === filters.locationType;
-              }
-            );
-          }
-          if (filters.calendarAvailable) {
-            filteredData = filteredData.filter(
-              (
-                product: Product & { service_products?: Array<{ calendar_available?: boolean }> }
-              ) => {
-                const serviceProduct = product.service_products?.[0];
-                return serviceProduct?.calendar_available === true;
-              }
-            );
-          }
-        }
-
-        if (filters.productType === 'course') {
-          if (filters.difficulty && filters.difficulty !== 'all') {
-            filteredData = filteredData.filter(
-              (product: Product & { courses?: Array<{ difficulty?: string }> }) => {
-                const course = product.courses?.[0];
-                return course?.difficulty === filters.difficulty;
-              }
-            );
-          }
-          if (filters.accessType && filters.accessType !== 'all') {
-            filteredData = filteredData.filter(
-              (product: Product & { courses?: Array<{ access_type?: string }> }) => {
-                const course = product.courses?.[0];
-                return course?.access_type === filters.accessType;
-              }
-            );
-          }
-          if (filters.courseDuration && filters.courseDuration !== 'all') {
-            filteredData = filteredData.filter(
-              (product: Product & { courses?: Array<{ total_duration?: number }> }) => {
-                const course = product.courses?.[0];
-                const duration = course?.total_duration || 0;
-                if (filters.courseDuration === '<1h') return duration < 60;
-                if (filters.courseDuration === '1-5h') return duration >= 60 && duration <= 300;
-                if (filters.courseDuration === '5-10h') return duration >= 300 && duration <= 600;
-                if (filters.courseDuration === '10h+') return duration > 600;
-                return true;
-              }
-            );
-          }
-        }
-
-        if (filters.productType === 'artist') {
-          if (filters.artistType) {
-            filteredData = filteredData.filter(
-              (product: Product & { artist_products?: Array<{ artist_type?: string }> }) => {
-                const artistProduct = product.artist_products?.[0];
-                return artistProduct?.artist_type === filters.artistType;
-              }
-            );
-          }
-          if (filters.editionType && filters.editionType !== 'all') {
-            filteredData = filteredData.filter(
-              (
-                product: Product & { artist_products?: Array<{ artwork_edition_type?: string }> }
-              ) => {
-                const artistProduct = product.artist_products?.[0];
-                return artistProduct?.artwork_edition_type === filters.editionType;
-              }
-            );
-          }
-          if (filters.certificateOfAuthenticity) {
-            filteredData = filteredData.filter(
-              (
-                product: Product & {
-                  artist_products?: Array<{ certificate_of_authenticity?: boolean }>;
-                }
-              ) => {
-                const artistProduct = product.artist_products?.[0];
-                return artistProduct?.certificate_of_authenticity === true;
-              }
-            );
-          }
-        }
-
-        logger.info(
-          `${filteredData.length} produits chargés après filtrage (page ${pagination.currentPage}/${Math.ceil((count || 0) / pagination.itemsPerPage)})`
-        );
-        setProducts((filteredData || []) as unknown as Product[]);
-        updateTotalItems(filteredData.length);
-        setError(null); // Réinitialiser l'erreur en cas de succès
-        setHasLoadedOnce(true); // Marquer qu'on a chargé au moins une fois
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('❌ Erreur lors du chargement des produits :', { error: errorMessage });
-      setError(errorMessage);
-      setHasLoadedOnce(true); // Même en cas d'erreur, on a tenté de charger
-      toast({
-        title: 'Erreur',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    filters,
-    pagination.currentPage,
-    pagination.itemsPerPage,
-    hasSearchQuery,
-    shouldUseRPCFiltering,
-    toast,
-  ]);
-
-  // ✅ OPTIMISATION: Synchroniser les produits React Query avec l'état local
-  // Version simplifiée pour éviter les boucles infinies
-  // Utiliser useMemo pour créer une clé stable basée sur les IDs
-  const queryProductsKey = useMemo(() => queryProducts.map(p => p.id).join(','), [queryProducts]);
-  const rpcProductsKey = useMemo(
-    () => (rpcFilteredProducts || []).map(p => p.id).join(','),
-    [rpcFilteredProducts]
-  );
-
-  // Ref pour stocker queryProducts et suivre toutes les valeurs précédentes
-  const queryProductsRef = useRef<Product[]>([]);
-  const rpcFilteredProductsRef = useRef<Product[]>([]);
-  const prevQueryKeyRef = useRef<string>('');
-  const prevRpcKeyRef = useRef<string>('');
-  const prevLoadingRef = useRef<boolean>(true);
-  const prevErrorRef = useRef<string | null>(null);
-  const prevTotalCountRef = useRef<number>(0);
-  const prevHasLoadedOnceRef = useRef<boolean>(false);
-
-  // Mettre à jour les refs quand les données changent
+  // Prefetch page suivante (catalogue unifié RPC)
   useEffect(() => {
-    queryProductsRef.current = queryProducts;
-  }, [queryProducts]);
-
-  useEffect(() => {
-    if (rpcFilteredProducts) {
-      rpcFilteredProductsRef.current = rpcFilteredProducts;
-    }
-  }, [rpcFilteredProducts]);
-
-  useEffect(() => {
-    // Priorité: RPC > React Query > fetchProducts legacy
-    if (shouldUseRPCFiltering && rpcFilteredProductsRef.current.length > 0) {
-      if (rpcProductsKey !== prevRpcKeyRef.current) {
-        prevRpcKeyRef.current = rpcProductsKey;
-        setProducts([...rpcFilteredProductsRef.current]);
-      }
-      if (prevLoadingRef.current !== rpcLoading) {
-        prevLoadingRef.current = rpcLoading;
-        setLoading(rpcLoading);
-      }
-      const rpcErrorMsg = rpcError ? 'Erreur lors du chargement des produits' : null;
-      if (prevErrorRef.current !== rpcErrorMsg) {
-        prevErrorRef.current = rpcErrorMsg;
-        setError(rpcErrorMsg);
-      }
-      if (!prevHasLoadedOnceRef.current) {
-        prevHasLoadedOnceRef.current = true;
-        setHasLoadedOnce(true);
-      }
-      const rpcTotalCount = rpcFilteredProductsRef.current.length;
-      if (prevTotalCountRef.current !== rpcTotalCount) {
-        prevTotalCountRef.current = rpcTotalCount;
-        updateTotalItems(rpcTotalCount);
-      }
-    } else if (!hasSearchQuery) {
-      if (queryProductsKey !== prevQueryKeyRef.current) {
-        prevQueryKeyRef.current = queryProductsKey;
-        // Utiliser le ref pour éviter d'avoir queryProducts dans les dépendances
-        setProducts([...queryProductsRef.current]);
-      }
-      if (prevLoadingRef.current !== queryIsLoading) {
-        prevLoadingRef.current = queryIsLoading;
-        setLoading(queryIsLoading);
-      }
-      const queryErrorMsg = queryError
-        ? queryError instanceof Error
-          ? queryError.message
-          : String(queryError)
-        : null;
-      if (prevErrorRef.current !== queryErrorMsg) {
-        prevErrorRef.current = queryErrorMsg;
-        setError(queryErrorMsg);
-      }
-      const shouldSetLoadedOnce = queryIsLoading === false || queryProductsRef.current.length > 0;
-      if (shouldSetLoadedOnce && !prevHasLoadedOnceRef.current) {
-        prevHasLoadedOnceRef.current = true;
-        setHasLoadedOnce(true);
-      }
-      if (prevTotalCountRef.current !== queryTotalCount) {
-        prevTotalCountRef.current = queryTotalCount;
-        updateTotalItems(queryTotalCount);
-      }
-    }
-  }, [
-    shouldUseRPCFiltering,
-    rpcFilteredProducts,
-    rpcProductsKey,
-    rpcLoading,
-    rpcError,
-    hasSearchQuery,
-    queryProductsKey,
-    queryIsLoading,
-    queryError,
-    queryTotalCount,
-    // Ne pas inclure queryProducts pour éviter la boucle
-  ]);
-
-  // ✅ OPTIMISATION: Prefetching automatique de la page suivante
-  useEffect(() => {
-    if (!queryIsLoading && queryProductsKey.length > 0 && !hasSearchQuery) {
-      // Prefetch la page suivante après un court délai
-      const timer = setTimeout(() => {
-        prefetchNextPage();
-      }, 1000);
+    if (!queryIsLoading && queryProducts.length > 0 && !hasSearchQuery && !useTypeSpecificRpc) {
+      const timer = setTimeout(() => prefetchNextPage(), 1000);
       return () => clearTimeout(timer);
     }
-  }, [queryIsLoading, queryProductsKey, hasSearchQuery, prefetchNextPage]);
+  }, [queryIsLoading, queryProducts.length, hasSearchQuery, useTypeSpecificRpc, prefetchNextPage]);
 
-  // Abonnement temps réel
+  // Realtime : invalider le cache React Query au lieu de muter l'état local
   useEffect(() => {
-    // ✅ OPTIMISATION: Ne plus appeler fetchProducts si React Query est utilisé
-    // React Query gère automatiquement le chargement via useMarketplaceProducts
-    // Ne garder fetchProducts que pour compatibilité avec RPC
-    if (shouldUseRPCFiltering && !rpcFilteredProducts) {
-      // Seulement si RPC est activé mais pas encore chargé
-      fetchProducts();
-    }
-
     const channel = supabase
       .channel('realtime:products')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-        logger.debug('🔁 Changement temps réel détecté sur products:', payload.eventType);
-
-        if (payload.eventType === 'INSERT') {
-          setProducts(prev => [payload.new as Product, ...prev]);
-          // Mettre à jour le total si nécessaire
-          updateTotalItems(pagination.totalItems + 1);
-        } else if (payload.eventType === 'UPDATE') {
-          setProducts(prev =>
-            prev.map(p => (p.id === payload.new.id ? (payload.new as Product) : p))
-          );
-        } else if (payload.eventType === 'DELETE') {
-          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
-          // Mettre à jour le total si nécessaire
-          updateTotalItems(Math.max(0, pagination.totalItems - 1));
-        }
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
+        queryClient.invalidateQueries({ queryKey: ['filtered-digital-products'] });
+        queryClient.invalidateQueries({ queryKey: ['filtered-physical-products'] });
+        queryClient.invalidateQueries({ queryKey: ['filtered-service-products'] });
+        queryClient.invalidateQueries({ queryKey: ['filtered-course-products'] });
+        queryClient.invalidateQueries({ queryKey: ['filtered-artist-products'] });
+        queryClient.invalidateQueries({ queryKey: ['marketplace-facets'] });
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [filters, pagination.currentPage, pagination.itemsPerPage, hasSearchQuery]); // ✅ Dépendances stables au lieu de fetchProducts
+  }, [queryClient]);
 
   // Utiliser les résultats de recherche full-text si une recherche est active
   // Sinon, utiliser les produits chargés normalement
@@ -715,31 +327,57 @@ const Marketplace = () => {
       })) as unknown as Product[];
     }
 
-    // Sinon, utiliser les produits chargés normalement
-    // Filtrage par tags côté client (complexe avec arrays)
-    let filtered = products;
+    let filtered = catalogProducts;
     if (filters.tags.length > 0) {
       filtered = filtered.filter(product => filters.tags.some(tag => product.tags?.includes(tag)));
     }
     return filtered;
-  }, [hasSearchQuery, searchResults, products, filters.tags]);
+  }, [hasSearchQuery, searchResults, catalogProducts, filters.tags]);
 
-  // Gérer le loading - Ne pas afficher de skeletons au premier chargement si pas de produits
-  // Afficher les skeletons seulement si on recharge (changement de filtre, pagination, etc.)
-  const isLoadingProducts = hasSearchQuery ? searchLoading : loading && hasLoadedOnce; // Seulement si on a déjà chargé une fois
+  const isLoadingProducts = catalogLoading && hasLoadedOnce;
 
-  // Catégories et types dynamiques
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[];
+    const cats = Array.from(
+      new Set(catalogProducts.map(p => p.category).filter(Boolean))
+    ) as string[];
     return cats.sort();
-  }, [products]);
+  }, [catalogProducts]);
 
   const productTypes = useMemo(() => {
     const types = Array.from(
-      new Set(products.map(p => p.product_type).filter(Boolean))
+      new Set(catalogProducts.map(p => p.product_type).filter(Boolean))
     ) as string[];
     return types.sort();
-  }, [products]);
+  }, [catalogProducts]);
+
+  const { data: marketplaceFacets, isLoading: facetsLoading } = useMarketplaceFacets({
+    filters,
+    searchQuery: debouncedSearch,
+    enabled: !hasSearchQuery,
+  });
+
+  const categoryFacetMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    marketplaceFacets?.categories.forEach(c => {
+      map[c.value] = c.count;
+    });
+    return map;
+  }, [marketplaceFacets?.categories]);
+
+  const facetCategoryOptions = useMemo(() => {
+    if (marketplaceFacets?.categories.length) {
+      return marketplaceFacets.categories.map(c => c.value);
+    }
+    return categories;
+  }, [marketplaceFacets?.categories, categories]);
+
+  const productTypeFacetCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    marketplaceFacets?.product_types.forEach(t => {
+      map[t.value] = t.count;
+    });
+    return map;
+  }, [marketplaceFacets?.product_types]);
 
   // ✅ REFACTORING: updateFilter et clearFilters sont maintenant fournis par useMarketplaceFilters
   // Réinitialiser la pagination quand les filtres changent
@@ -793,8 +431,8 @@ const Marketplace = () => {
   const favoriteProducts = useMemo(() => {
     if (!favorites || favorites.size === 0) return [];
     const favoriteIds = Array.from(favorites);
-    return products.filter(p => favoriteIds.includes(p.id));
-  }, [products, favorites]);
+    return catalogProducts.filter(p => favoriteIds.includes(p.id));
+  }, [catalogProducts, favorites]);
 
   // Fonction d'achat (utilisée par UnifiedProductCard) - Redirige vers checkout
   const handleBuyProduct = useCallback(
@@ -865,40 +503,42 @@ const Marketplace = () => {
   const stats = useMemo(
     () => ({
       totalProducts: pagination.totalItems, // Total côté serveur
-      totalStores: new Set(products.map(p => p.store_id)).size, // Approximation sur page actuelle
+      totalStores: new Set(catalogProducts.map(p => p.store_id)).size,
       averageRating:
-        products.length > 0
-          ? products.reduce((sum, p) => sum + (p.rating || 0), 0) / products.length
+        catalogProducts.length > 0
+          ? catalogProducts.reduce((sum, p) => sum + (p.rating || 0), 0) / catalogProducts.length
           : 0,
-      totalSales: products.reduce((sum, p) => sum + (p.reviews_count || 0), 0), // Approximation sur page actuelle
+      totalSales: catalogProducts.reduce(
+        (sum, p) => sum + (p.purchases_count || p.reviews_count || 0),
+        0
+      ),
       categoriesCount: categories.length,
-      featuredProducts: products.filter(p => p.promotional_price && p.promotional_price < p.price)
-        .length, // Sur page actuelle
+      featuredProducts: catalogProducts.filter(
+        p => p.promotional_price && p.promotional_price < p.price
+      ).length,
     }),
-    [products, categories, pagination.totalItems]
+    [catalogProducts, categories, pagination.totalItems]
   );
 
-  // SEO Meta dynamiques
-  const marketplaceSeoData = useMemo(
-    () => ({
-      title: `Marketplace Emarzona - ${stats.totalProducts} Produits`,
-      description: `Découvrez ${stats.totalProducts} produits sur Emarzona : digitaux, physiques, services, cours en ligne et œuvres d'art. ${stats.totalStores} boutiques actives. Note moyenne: ${stats.averageRating.toFixed(1)}/5 ⭐. Paiement sécurisé.`,
-      keywords:
-        "marketplace afrique, produits digitaux, produits physiques, services, cours en ligne, œuvres d'art, formation en ligne, ebook francophone, templates professionnels, logiciels, paiement mobile money, XOF, FCFA, ecommerce afrique, boutique en ligne, vente en ligne afrique",
-      url: `${window.location.origin}/marketplace`,
-      image: `${window.location.origin}/og-marketplace.jpg`,
-    }),
-    [stats]
-  );
+  const marketplaceSeoData = useMemo(() => {
+    const origin =
+      typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
+    return {
+      ...buildMarketplaceSEO(filters, {
+        totalProducts: stats.totalProducts,
+        searchQuery: debouncedSearch,
+        origin,
+        page: pagination.currentPage,
+      }),
+      image: `${origin}/og-marketplace.jpg`,
+    };
+  }, [filters, debouncedSearch, stats.totalProducts, pagination.currentPage]);
 
-  // Breadcrumb items pour SEO
-  const breadcrumbItems = useMemo(
-    () => [
-      { name: 'Accueil', url: `${window.location.origin}/` },
-      { name: 'Marketplace', url: `${window.location.origin}/marketplace` },
-    ],
-    []
-  );
+  const breadcrumbItems = useMemo(() => {
+    const origin =
+      typeof window !== 'undefined' ? window.location.origin : 'https://www.emarzona.com';
+    return buildMarketplaceBreadcrumbs(filters, debouncedSearch, origin);
+  }, [filters, debouncedSearch]);
 
   // Items pour ItemListSchema (premiers produits visibles)
   const itemListItems = useMemo(() => {
@@ -975,33 +615,41 @@ const Marketplace = () => {
         <div className="container mx-auto max-w-6xl px-3 sm:px-4 pt-4 sm:pt-6 pb-2">
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/"
-                  className="text-xs sm:text-sm text-slate-300 hover:text-white transition-colors"
-                >
-                  <svg
-                    className="h-3 w-3 sm:h-4 sm:w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                    />
-                  </svg>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-slate-500" />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-xs sm:text-sm text-white font-medium">
-                  Marketplace
-                </BreadcrumbPage>
-              </BreadcrumbItem>
+              {breadcrumbItems.map((item, index) => (
+                <React.Fragment key={`${item.url}-${index}`}>
+                  {index > 0 && <BreadcrumbSeparator className="text-slate-500" />}
+                  <BreadcrumbItem>
+                    {index < breadcrumbItems.length - 1 ? (
+                      <BreadcrumbLink
+                        href={item.url.replace(/^https?:\/\/[^/]+/, '') || '/'}
+                        className="text-xs sm:text-sm text-slate-300 hover:text-white transition-colors"
+                      >
+                        {index === 0 ? <span className="sr-only">{item.name}</span> : item.name}
+                        {index === 0 && (
+                          <svg
+                            className="h-3 w-3 sm:h-4 sm:w-4 inline"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                            />
+                          </svg>
+                        )}
+                      </BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbPage className="text-xs sm:text-sm text-white font-medium">
+                        {item.name}
+                      </BreadcrumbPage>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
+              ))}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
@@ -1023,6 +671,9 @@ const Marketplace = () => {
           onToggleAdvancedSearch={() => setShowAdvancedSearch(!showAdvancedSearch)}
           onToggleComparison={() => setShowComparison(true)}
           categories={categories}
+          productTypeFacets={marketplaceFacets?.product_types ?? []}
+          facetsTotal={marketplaceFacets?.total}
+          facetsLoading={facetsLoading}
           favoritesCount={favoritesCount}
           comparisonCount={comparisonProducts.length}
           PRICE_RANGES={PRICE_RANGES}
@@ -1089,9 +740,12 @@ const Marketplace = () => {
                         className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         <option value="all">Toutes les catégories</option>
-                        {categories.map(cat => (
+                        {facetCategoryOptions.map(cat => (
                           <option key={cat} value={cat}>
                             {cat}
+                            {categoryFacetMap[cat] != null
+                              ? ` (${categoryFacetMap[cat].toLocaleString('fr-FR')})`
+                              : ''}
                           </option>
                         ))}
                       </select>
@@ -1108,11 +762,19 @@ const Marketplace = () => {
                         className="w-full px-3 py-2 min-h-[44px] h-11 sm:h-10 bg-slate-700 border-slate-600 text-white rounded-md focus:border-blue-500 focus:ring-blue-500 text-base sm:text-sm touch-manipulation cursor-pointer"
                       >
                         <option value="all">Tous les types</option>
-                        {productTypes.map(type => (
-                          <option key={type} value={type}>
-                            {type}
-                          </option>
-                        ))}
+                        {['digital', 'physical', 'service', 'course', 'artist']
+                          .filter(
+                            type =>
+                              productTypeFacetCounts[type] != null || productTypes.includes(type)
+                          )
+                          .map(type => (
+                            <option key={type} value={type}>
+                              {type}
+                              {productTypeFacetCounts[type] != null
+                                ? ` (${productTypeFacetCounts[type].toLocaleString('fr-FR')})`
+                                : ''}
+                            </option>
+                          ))}
                       </select>
                     </div>
 
@@ -1276,18 +938,20 @@ const Marketplace = () => {
         {/* ✅ REFACTORING: Liste des produits remplacée par MarketplaceProductsSection */}
         <MarketplaceProductsSection
           products={displayProducts}
-          loading={loading}
-          error={error}
+          loading={catalogLoading}
+          error={catalogError}
           hasLoadedOnce={hasLoadedOnce}
           isLoadingProducts={isLoadingProducts}
           pagination={pagination}
           onRetry={() => {
-            setError(null);
-            if (!shouldUseRPCFiltering) {
-              queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
-            } else {
-              fetchProducts();
-            }
+            queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
+            queryClient.invalidateQueries({ queryKey: ['filtered-digital-products'] });
+            queryClient.invalidateQueries({ queryKey: ['filtered-physical-products'] });
+            queryClient.invalidateQueries({ queryKey: ['filtered-service-products'] });
+            queryClient.invalidateQueries({ queryKey: ['filtered-course-products'] });
+            queryClient.invalidateQueries({ queryKey: ['filtered-artist-products'] });
+            queryClient.invalidateQueries({ queryKey: ['product-search'] });
+            queryClient.invalidateQueries({ queryKey: ['marketplace-facets'] });
           }}
           onPageChange={handlePageChange}
           onBuyProduct={handleBuyProduct}

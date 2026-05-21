@@ -1,6 +1,7 @@
 /// <reference path="../deno.d.ts" />
 import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 
 // ============================================================================
 // VALIDATION - Intégrée directement pour le déploiement via Dashboard
@@ -23,6 +24,7 @@ interface CreateCheckoutData {
   return_url?: string;
   productId?: string;
   storeId?: string;
+  orderId?: string;
   metadata?: Record<string, unknown>;
   methods?: string[];
 }
@@ -84,7 +86,7 @@ function isValidAmount(amount: number, currency: string): { valid: boolean; erro
   }
 
   const limits = AMOUNT_LIMITS[currency] || AMOUNT_LIMITS.XOF;
-  
+
   if (amount < limits.min) {
     return { valid: false, error: `Le montant minimum est ${limits.min} ${currency}` };
   }
@@ -119,7 +121,11 @@ function isValidUrl(url: string): boolean {
 /**
  * Valide les données pour create_checkout
  */
-function validateCreateCheckout(data: unknown): { valid: boolean; error?: string; validated?: CreateCheckoutData } {
+function validateCreateCheckout(data: unknown): {
+  valid: boolean;
+  error?: string;
+  validated?: CreateCheckoutData;
+} {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Les données sont requises' };
   }
@@ -147,10 +153,10 @@ function validateCreateCheckout(data: unknown): { valid: boolean; error?: string
   // Valider customer_email
   const customerEmail = String(d.customer_email || '').trim();
   if (!customerEmail) {
-    return { valid: false, error: 'L\'email du client est requis' };
+    return { valid: false, error: "L'email du client est requis" };
   }
   if (!isValidEmail(customerEmail)) {
-    return { valid: false, error: 'Format d\'email invalide' };
+    return { valid: false, error: "Format d'email invalide" };
   }
 
   // Valider description (optionnel mais limité)
@@ -171,6 +177,10 @@ function validateCreateCheckout(data: unknown): { valid: boolean; error?: string
     return { valid: false, error: 'storeId doit être un UUID valide' };
   }
 
+  if (d.orderId && typeof d.orderId === 'string' && !isValidUUID(d.orderId)) {
+    return { valid: false, error: 'orderId doit être un UUID valide' };
+  }
+
   // Valider metadata (optionnel)
   if (d.metadata && typeof d.metadata !== 'object') {
     return { valid: false, error: 'metadata doit être un objet' };
@@ -187,6 +197,7 @@ function validateCreateCheckout(data: unknown): { valid: boolean; error?: string
       return_url: d.return_url ? String(d.return_url) : undefined,
       productId: d.productId ? String(d.productId) : undefined,
       storeId: d.storeId ? String(d.storeId) : undefined,
+      orderId: d.orderId ? String(d.orderId) : undefined,
       metadata: d.metadata as Record<string, unknown> | undefined,
       methods: Array.isArray(d.methods) ? d.methods.map(String) : undefined,
     },
@@ -196,7 +207,11 @@ function validateCreateCheckout(data: unknown): { valid: boolean; error?: string
 /**
  * Valide les données pour refund_payment
  */
-function validateRefundPayment(data: unknown): { valid: boolean; error?: string; validated?: RefundPaymentData } {
+function validateRefundPayment(data: unknown): {
+  valid: boolean;
+  error?: string;
+  validated?: RefundPaymentData;
+} {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Les données sont requises' };
   }
@@ -260,6 +275,126 @@ function validatePaymentId(data: unknown): { valid: boolean; error?: string; pay
 // FIN VALIDATION
 // ============================================================================
 
+function getEffectiveProductPrice(price: number, promotionalPrice: number | null): number {
+  const base = Number(price);
+  const promo = promotionalPrice != null ? Number(promotionalPrice) : null;
+  if (promo != null && !Number.isNaN(promo) && promo >= 0 && promo < base) {
+    return Math.round(promo);
+  }
+  return Math.round(base);
+}
+
+/**
+ * Recalcule le montant côté serveur à partir de la commande ou du produit.
+ * Empêche la manipulation du prix client avant Moneroo.
+ */
+async function resolveAuthorizedPaymentAmount(
+  validated: CreateCheckoutData
+): Promise<{ valid: boolean; error?: string; amount?: number; currency?: string }> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+  const orderIdFromMeta =
+    validated.orderId ||
+    (validated.metadata?.order_id as string | undefined) ||
+    (validated.metadata?.orderId as string | undefined);
+
+  const needsDbLookup = !!(
+    validated.productId ||
+    (orderIdFromMeta && isValidUUID(String(orderIdFromMeta)))
+  );
+
+  if (!needsDbLookup) {
+    return { valid: true, amount: validated.amount, currency: validated.currency };
+  }
+
+  if (!supabaseUrl || !serviceKey) {
+    console.error(
+      '[Moneroo] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY for amount resolution'
+    );
+    return {
+      valid: false,
+      error: 'Configuration serveur incomplète pour la validation du paiement',
+    };
+  }
+
+  const supabase = createClient(supabaseUrl, serviceKey);
+
+  if (orderIdFromMeta && isValidUUID(String(orderIdFromMeta))) {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('id, total_amount, currency, store_id, payment_status')
+      .eq('id', orderIdFromMeta)
+      .single();
+
+    if (error || !order) {
+      return { valid: false, error: 'Commande introuvable' };
+    }
+
+    if (validated.storeId && order.store_id !== validated.storeId) {
+      return { valid: false, error: 'La boutique ne correspond pas à la commande' };
+    }
+
+    const expected = Math.round(Number(order.total_amount));
+    if (Math.round(validated.amount) !== expected) {
+      console.warn('[Moneroo] Order amount mismatch', {
+        clientAmount: validated.amount,
+        serverAmount: expected,
+        orderId: orderIdFromMeta,
+      });
+      return { valid: false, error: 'Montant invalide pour cette commande' };
+    }
+
+    return {
+      valid: true,
+      amount: expected,
+      currency: (order.currency as string) || validated.currency,
+    };
+  }
+
+  if (validated.productId) {
+    const { data: product, error } = await supabase
+      .from('products')
+      .select('id, store_id, price, promotional_price, currency, is_active, is_draft')
+      .eq('id', validated.productId)
+      .single();
+
+    if (error || !product) {
+      return { valid: false, error: 'Produit introuvable' };
+    }
+
+    if (!product.is_active || product.is_draft) {
+      return { valid: false, error: 'Produit non disponible à la vente' };
+    }
+
+    if (validated.storeId && product.store_id !== validated.storeId) {
+      return { valid: false, error: 'La boutique ne correspond pas au produit' };
+    }
+
+    const expected = getEffectiveProductPrice(
+      Number(product.price),
+      product.promotional_price != null ? Number(product.promotional_price) : null
+    );
+
+    if (Math.round(validated.amount) !== expected) {
+      console.warn('[Moneroo] Product amount mismatch', {
+        clientAmount: validated.amount,
+        serverAmount: expected,
+        productId: validated.productId,
+      });
+      return { valid: false, error: 'Montant invalide pour ce produit' };
+    }
+
+    return {
+      valid: true,
+      amount: expected,
+      currency: (product.currency as string) || validated.currency,
+    };
+  }
+
+  return { valid: true, amount: validated.amount, currency: validated.currency };
+}
+
 // Fonction pour déterminer l'origine autorisée pour CORS
 function getCorsOrigin(req: Request): string {
   const origin = req.headers.get('origin');
@@ -288,15 +423,20 @@ function getCorsOrigin(req: Request): string {
     }
 
     // Autoriser emarzona.com et www.emarzona.com
-    if (origin === siteUrl || origin === `${siteUrl}/` || origin === `https://www.emarzona.com` || origin === `https://www.emarzona.com/`) {
+    if (
+      origin === siteUrl ||
+      origin === `${siteUrl}/` ||
+      origin === `https://www.emarzona.com` ||
+      origin === `https://www.emarzona.com/`
+    ) {
       return origin;
     }
-    
+
     // Autoriser api.emarzona.com (sous-domaine API)
     if (origin === 'https://api.emarzona.com' || origin === 'https://api.emarzona.com/') {
       return origin;
     }
-    
+
     // Autoriser strictement les sous-domaines *.emarzona.com et *.myemarzona.shop
     try {
       const parsedOrigin = new URL(origin);
@@ -422,7 +562,8 @@ serve(async req => {
     console.log('[Moneroo Edge Function] Processing request:', {
       action,
       hasData: !!data,
-      dataKeys: data && typeof data === 'object' ? Object.keys(data as Record<string, unknown>) : [],
+      dataKeys:
+        data && typeof data === 'object' ? Object.keys(data as Record<string, unknown>) : [],
     });
 
     let endpoint = '';
@@ -466,8 +607,35 @@ serve(async req => {
           );
         }
 
-        // Utiliser les données validées
         const validatedData = validation.validated!;
+
+        const amountResolution = await resolveAuthorizedPaymentAmount(validatedData);
+        if (!amountResolution.valid) {
+          return new Response(
+            JSON.stringify({
+              error: 'Montant non autorisé',
+              message: amountResolution.error || 'Montant invalide',
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        validatedData.amount = amountResolution.amount ?? validatedData.amount;
+        validatedData.currency = amountResolution.currency ?? validatedData.currency;
+
+        const amountValidationAfterResolve = isValidAmount(
+          validatedData.amount,
+          validatedData.currency
+        );
+        if (!amountValidationAfterResolve.valid) {
+          return new Response(
+            JSON.stringify({
+              error: 'Validation échouée',
+              message: amountValidationAfterResolve.error || 'Montant invalide',
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
 
         // Endpoint correct selon la documentation Moneroo : /payments/initialize
         // Documentation : https://docs.moneroo.io/
@@ -513,11 +681,17 @@ serve(async req => {
 
         // Log pour diagnostic
         console.log('[Moneroo Edge Function] Customer name processing:', {
-          originalCustomerName: typeof data === 'object' && data ? (data as Record<string, unknown>).customer_name : undefined,
+          originalCustomerName:
+            typeof data === 'object' && data
+              ? (data as Record<string, unknown>).customer_name
+              : undefined,
           processedCustomerName: customerName,
           firstName,
           lastName,
-          customerEmail: typeof data === 'object' && data ? (data as Record<string, unknown>).customer_email : undefined,
+          customerEmail:
+            typeof data === 'object' && data
+              ? (data as Record<string, unknown>).customer_email
+              : undefined,
           nameParts: customerNameParts,
         });
 

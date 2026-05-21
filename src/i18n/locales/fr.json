@@ -188,6 +188,15 @@
       "50000-100000": "50,000 - 100,000 XOF",
       "100000+": "100,000+ XOF"
     },
+    "facets": {
+      "ariaLabel": "Filtrer par type de produit",
+      "allTypes": "Tous",
+      "digital": "Digitaux",
+      "physical": "Physiques",
+      "service": "Services",
+      "course": "Cours",
+      "artist": "Artistes"
+    },
     "sort": {
       "label": "Trier par",
       "newest": "Plus récents",

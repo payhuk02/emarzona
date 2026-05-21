@@ -1,23 +1,23 @@
 /**
  * Hook optimisé pour charger les produits du marketplace avec React Query
- * 
+ *
  * Remplace fetchProducts avec cache intelligent et prefetching.
  * Utilise des fonctions RPC Supabase pour un filtrage côté serveur optimisé.
- * 
+ *
  * @hook
  * @param {MarketplaceProductsParams} params - Paramètres de chargement
  * @param {FilterState} params.filters - Filtres à appliquer
  * @param {PaginationState} params.pagination - État de pagination
  * @param {boolean} params.hasSearchQuery - Indique si une recherche est active
  * @param {boolean} params.shouldUseRPCFiltering - Utiliser le filtrage RPC côté serveur
- * 
+ *
  * @returns {Object} Objet contenant les produits et l'état de chargement
  * @returns {Product[]} returns.products - Liste des produits
  * @returns {number} returns.totalCount - Nombre total de produits
  * @returns {number} returns.filteredCount - Nombre de produits après filtrage
  * @returns {boolean} returns.isLoading - État de chargement
  * @returns {Error | null} returns.error - Erreur éventuelle
- * 
+ *
  * @example
  * ```tsx
  * const { products, totalCount, isLoading, error } = useMarketplaceProducts({
@@ -27,14 +27,14 @@
  *   shouldUseRPCFiltering: true
  * });
  * ```
- * 
+ *
  * @remarks
  * - **Performance** : Utilise React Query pour le caching intelligent
  * - **Optimisation** : Filtrage côté serveur via RPC pour grandes listes
  * - **Cache** : Mise en cache automatique avec stratégies optimisées
  * - **Prefetching** : Prefetch automatique des pages adjacentes
  * - **Fallback** : Retour vers requête standard si RPC échoue
- * 
+ *
  * @see {@link fetchMarketplaceProducts} pour la fonction de chargement
  * @see {@link cacheMarketplaceProducts} pour la gestion du cache
  */
@@ -65,6 +65,30 @@ interface MarketplaceProductsResponse {
   filteredCount: number;
 }
 
+function mapSortByForMarketplaceRpc(sortBy: string): string {
+  if (sortBy === 'sales_count' || sortBy === 'popularity') return 'popular';
+  if (sortBy === 'newest') return 'newest';
+  if (sortBy === 'oldest') return 'oldest';
+  return sortBy;
+}
+
+export function buildMarketplaceProductsQueryKey(
+  stableFiltersKey: string,
+  page: number,
+  itemsPerPage: number,
+  hasSearchQuery: boolean,
+  shouldUseRPCFiltering: boolean
+) {
+  return [
+    'marketplace-products',
+    stableFiltersKey,
+    page,
+    itemsPerPage,
+    hasSearchQuery,
+    shouldUseRPCFiltering,
+  ] as const;
+}
+
 /**
  * Fonction optimisée pour charger les produits avec sélection de colonnes spécifiques
  */
@@ -87,29 +111,36 @@ async function fetchMarketplaceProducts({
       const { data, error } = await supabase.rpc('get_marketplace_products_filtered', {
         p_limit: pagination.itemsPerPage,
         p_offset: startIndex,
-        p_category: filters.category !== 'all' && filters.category !== 'featured' ? filters.category : null,
+        p_category:
+          filters.category !== 'all' && filters.category !== 'featured' ? filters.category : null,
         p_product_type: filters.productType !== 'all' ? filters.productType : null,
-        p_min_price: filters.priceRange !== 'all' ? (() => {
-          const [min] = filters.priceRange.split('-').map(Number);
-          return min || null;
-        })() : null,
-        p_max_price: filters.priceRange !== 'all' ? (() => {
-          const parts = filters.priceRange.split('-');
-          return parts.length > 1 && parts[1] ? Number(parts[1]) : null;
-        })() : null,
+        p_min_price:
+          filters.priceRange !== 'all'
+            ? (() => {
+                const [min] = filters.priceRange.split('-').map(Number);
+                return min || null;
+              })()
+            : null,
+        p_max_price:
+          filters.priceRange !== 'all'
+            ? (() => {
+                const parts = filters.priceRange.split('-');
+                return parts.length > 1 && parts[1] ? Number(parts[1]) : null;
+              })()
+            : null,
         p_min_rating: filters.rating !== 'all' ? Number(filters.rating) : null,
-        p_sort_by: filters.sortBy || 'created_at',
+        p_sort_by: mapSortByForMarketplaceRpc(filters.sortBy || 'created_at'),
         p_sort_order: filters.sortOrder || 'desc',
-        p_search_query: hasSearchQuery && filters.searchQuery ? filters.searchQuery : null,
-        p_featured_only: filters.category === 'featured',
+        p_search_query: hasSearchQuery && filters.search ? filters.search : null,
+        p_featured_only: filters.category === 'featured' || filters.featuredOnly === true,
       });
 
       if (error) {
         logger.error('❌ Erreur RPC marketplace:', error);
         // Fallback vers la méthode standard
-      } else if (data && Array.isArray(data) && data.length > 0) {
-        const firstItem = data[0] as Record<string, unknown>;
-        const totalCount = firstItem.total_count ? Number(firstItem.total_count) : data.length;
+      } else if (data && Array.isArray(data)) {
+        const firstItem = data[0] as Record<string, unknown> | undefined;
+        const totalCount = firstItem?.total_count != null ? Number(firstItem.total_count) : 0;
 
         // Transformer les données RPC en format Product
         const products = data.map((item: unknown) => {
@@ -134,21 +165,27 @@ async function fetchMarketplaceProducts({
             created_at: product.created_at as string,
             updated_at: product.updated_at as string,
             tags: product.tags as string[],
-            stores: product.store_name ? {
-              id: product.store_id as string,
-              name: product.store_name as string,
-              slug: product.store_slug as string,
-              logo_url: product.store_logo_url as string | null,
-              created_at: product.created_at as string,
-            } : null,
-            product_affiliate_settings: product.commission_rate ? {
-              commission_rate: Number(product.commission_rate),
-              affiliate_enabled: product.affiliate_enabled as boolean,
-            } : null,
+            stores: product.store_name
+              ? {
+                  id: product.store_id as string,
+                  name: product.store_name as string,
+                  slug: product.store_slug as string,
+                  logo_url: product.store_logo_url as string | null,
+                  created_at: product.created_at as string,
+                }
+              : null,
+            product_affiliate_settings: product.commission_rate
+              ? {
+                  commission_rate: Number(product.commission_rate),
+                  affiliate_enabled: product.affiliate_enabled as boolean,
+                }
+              : null,
           } as Product;
         });
 
-        logger.info(`✅ [useMarketplaceProducts] ${products.length} produits chargés via RPC (${totalCount} total)`);
+        logger.info(
+          `✅ [useMarketplaceProducts] ${products.length} produits chargés via RPC (${totalCount} total)`
+        );
 
         return {
           products,
@@ -157,7 +194,7 @@ async function fetchMarketplaceProducts({
         };
       }
     } catch (error) {
-      logger.error('❌ Erreur lors de l\'appel RPC marketplace:', error);
+      logger.error("❌ Erreur lors de l'appel RPC marketplace:", error);
       // Continue avec la méthode standard
     }
   }
@@ -189,7 +226,7 @@ async function fetchMarketplaceProducts({
   ].join(',');
 
   // Construire la requête avec les jointures nécessaires selon le type
-  let  selectQuery= `${baseColumns},stores!inner(id,name,slug,logo_url,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
+  let selectQuery = `${baseColumns},stores!inner(id,name,slug,logo_url,created_at),product_affiliate_settings!left(commission_rate,affiliate_enabled)`;
 
   // Ajouter les jointures selon le type de produit et les filtres
   if (filters.productType === 'digital' && filters.digitalSubType) {
@@ -211,7 +248,7 @@ async function fetchMarketplaceProducts({
     selectQuery += `,artist_products!left(artist_type,artwork_edition_type,certificate_of_authenticity)`;
   }
 
-  let  query= supabase
+  let query = supabase
     .from('products')
     .select(selectQuery, { count: 'exact' }) // Obtenir le count total
     .eq('is_active', true)
@@ -251,11 +288,11 @@ async function fetchMarketplaceProducts({
   // Filtres spécifiques par type de produit
   if (filters.productType === 'physical') {
     if (filters.stockAvailability === 'in_stock') {
-      query = query.or('stock.gt.0,stock.is.null');
+      query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
     } else if (filters.stockAvailability === 'low_stock') {
-      query = query.gte('stock', 1).lte('stock', 10);
+      query = query.gte('stock_quantity', 1).lte('stock_quantity', 10);
     } else if (filters.stockAvailability === 'out_stock') {
-      query = query.eq('stock', 0);
+      query = query.eq('stock_quantity', 0);
     }
 
     // Note: free_shipping n'existe pas dans la table products
@@ -267,24 +304,32 @@ async function fetchMarketplaceProducts({
   if (filters.productType === 'artist') {
     if (filters.artworkAvailability && filters.artworkAvailability !== 'all') {
       if (filters.artworkAvailability === 'available') {
-        query = query.or('stock.gt.0,stock.is.null');
+        query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
       } else if (filters.artworkAvailability === 'sold_out') {
-        query = query.eq('stock', 0);
+        query = query.eq('stock_quantity', 0);
       }
     }
   }
 
+  if (filters.inStock) {
+    query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
+  }
+
   // Appliquer le tri
-  // Mapper les valeurs de tri vers les colonnes réelles
-  const sortByColumn = filters.sortBy === 'sales_count' 
-    ? 'reviews_count' 
-    : filters.sortBy === 'created_at' 
-    ? 'created_at'
-    : filters.sortBy === 'price'
-    ? 'price'
-    : filters.sortBy === 'rating'
-    ? 'rating'
-    : 'created_at'; // Valeur par défaut
+  const sortByColumn =
+    filters.sortBy === 'sales_count' || filters.sortBy === 'popularity'
+      ? 'purchases_count'
+      : filters.sortBy === 'created_at' ||
+          filters.sortBy === 'newest' ||
+          filters.sortBy === 'oldest'
+        ? 'created_at'
+        : filters.sortBy === 'price'
+          ? 'price'
+          : filters.sortBy === 'rating'
+            ? 'rating'
+            : filters.sortBy === 'name'
+              ? 'name'
+              : 'created_at';
 
   query = query.order(sortByColumn, { ascending: filters.sortOrder === 'asc' });
 
@@ -315,7 +360,7 @@ async function fetchMarketplaceProducts({
   }
 
   // Appliquer les filtres côté client pour les relations
-  let  filteredData= (data || []) as unknown as Product[];
+  let filteredData = (data || []) as unknown as Product[];
 
   if (filters.productType === 'digital' && filters.digitalSubType) {
     filteredData = filteredData.filter(
@@ -404,7 +449,9 @@ async function fetchMarketplaceProducts({
     }
     if (filters.certificateOfAuthenticity) {
       filteredData = filteredData.filter(
-        (product: Product & { artist_products?: Array<{ certificate_of_authenticity?: boolean }> }) => {
+        (
+          product: Product & { artist_products?: Array<{ certificate_of_authenticity?: boolean }> }
+        ) => {
           const artistProduct = product.artist_products?.[0];
           return artistProduct?.certificate_of_authenticity === true;
         }
@@ -435,8 +482,8 @@ async function fetchMarketplaceProducts({
         page: pagination.currentPage,
         itemsPerPage: pagination.itemsPerPage,
       },
-      result.products
-    ).catch((error) => {
+      { products: result.products, totalCount: result.totalCount }
+    ).catch(error => {
       logger.warn('Failed to cache marketplace products:', error);
     });
   }
@@ -487,37 +534,34 @@ export function useMarketplaceProducts({
     ]
   );
 
-  // Clé de cache basée sur les filtres et la pagination
-  const queryKey = [
-    'marketplace-products',
+  const queryKey = buildMarketplaceProductsQueryKey(
     stableFiltersKey,
     pagination.currentPage,
     pagination.itemsPerPage,
     hasSearchQuery,
-    shouldUseRPCFiltering,
-  ] as const;
+    shouldUseRPCFiltering
+  );
+
+  const cacheFilterParams = {
+    ...filters,
+    page: pagination.currentPage,
+    itemsPerPage: pagination.itemsPerPage,
+  };
 
   // Requête avec cache optimisé
   const query = useQuery({
     queryKey,
     queryFn: async () => {
-      // Vérifier le cache local d'abord
-      const cached = await getCachedMarketplaceProducts({
-        ...filters,
-        page: pagination.currentPage,
-        itemsPerPage: pagination.itemsPerPage,
-      });
+      const cached = await getCachedMarketplaceProducts(cacheFilterParams);
 
-      if (cached && cached.length > 0) {
-        // Retourner les données du cache avec le count estimé
+      if (cached && cached.products.length > 0) {
         return {
-          products: cached,
-          totalCount: cached.length * 2, // Estimation
-          filteredCount: cached.length,
+          products: cached.products,
+          totalCount: cached.totalCount,
+          filteredCount: cached.products.length,
         };
       }
 
-      // Sinon, faire la requête normale
       return fetchMarketplaceProducts({
         filters,
         pagination,
@@ -525,66 +569,53 @@ export function useMarketplaceProducts({
         shouldUseRPCFiltering,
       });
     },
+    enabled: !hasSearchQuery,
     // ✅ OPTIMISATION: Cache agressif pour les produits (changent rarement)
     staleTime: cacheStrategies.products.staleTime, // 10 minutes
     gcTime: cacheStrategies.products.gcTime, // 30 minutes
     refetchOnWindowFocus: cacheStrategies.products.refetchOnWindowFocus, // false
     // ✅ OPTIMISATION: Garder les données précédentes pendant le chargement (pagination fluide)
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
     // ✅ OPTIMISATION: Partage structurel pour éviter re-renders
     structuralSharing: true,
     // ✅ OPTIMISATION: Retry intelligent
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // ✅ OPTIMISATION: Prefetching de la page suivante
-  const prefetchNextPage = () => {
-    if (query.data && pagination.currentPage < Math.ceil(query.data.totalCount / pagination.itemsPerPage)) {
-      const nextPage = pagination.currentPage + 1;
-      queryClient.prefetchQuery({
-        queryKey: [
-          'marketplace-products',
+  const prefetchPage = (page: number) => {
+    queryClient.prefetchQuery({
+      queryKey: buildMarketplaceProductsQueryKey(
+        stableFiltersKey,
+        page,
+        pagination.itemsPerPage,
+        hasSearchQuery,
+        shouldUseRPCFiltering
+      ),
+      queryFn: () =>
+        fetchMarketplaceProducts({
           filters,
-          nextPage,
-          pagination.itemsPerPage,
+          pagination: { ...pagination, currentPage: page },
           hasSearchQuery,
           shouldUseRPCFiltering,
-        ],
-        queryFn: () =>
-          fetchMarketplaceProducts({
-            filters,
-            pagination: { ...pagination, currentPage: nextPage },
-            hasSearchQuery,
-            shouldUseRPCFiltering,
-          }),
-        staleTime: cacheStrategies.products.staleTime,
-      });
+        }),
+      staleTime: cacheStrategies.products.staleTime,
+    });
+  };
+
+  const prefetchNextPage = () => {
+    if (
+      query.data &&
+      pagination.currentPage < Math.ceil(query.data.totalCount / pagination.itemsPerPage)
+    ) {
+      prefetchPage(pagination.currentPage + 1);
     }
   };
 
-  // ✅ OPTIMISATION: Prefetching de la page précédente
   const prefetchPreviousPage = () => {
     if (query.data && pagination.currentPage > 1) {
-      const prevPage = pagination.currentPage - 1;
-      queryClient.prefetchQuery({
-        queryKey: [
-          'marketplace-products',
-          filters,
-          prevPage,
-          pagination.itemsPerPage,
-          hasSearchQuery,
-          shouldUseRPCFiltering,
-        ],
-        queryFn: () =>
-          fetchMarketplaceProducts({
-            filters,
-            pagination: { ...pagination, currentPage: prevPage },
-            hasSearchQuery,
-            shouldUseRPCFiltering,
-          }),
-        staleTime: cacheStrategies.products.staleTime,
-      });
+      prefetchPage(pagination.currentPage - 1);
     }
   };
 
@@ -600,10 +631,3 @@ export function useMarketplaceProducts({
     prefetchPreviousPage,
   };
 }
-
-
-
-
-
-
-
