@@ -34,9 +34,9 @@
   --sidebar-ring: 217 91% 58%;
 }
 
-/* Sidebar — textes forcés en blanc */
+/* Sidebar — alignée sur sidebar-optimized (fond violet, texte blanc) */
 .landing-premium.app-premium [data-sidebar='sidebar'] {
-  background: linear-gradient(180deg, var(--lp-ink-soft) 0%, var(--lp-ink) 100%) !important;
+  background: linear-gradient(180deg, #323878 0%, #282870 45%, #1a1a42 100%) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: #fff !important;
 }

@@ -1279,7 +1279,7 @@ export function AppSidebar() {
             <div className="px-3 pt-3 pb-2 border-b border-white/10">
               <label
                 htmlFor="sidebar-search"
-                className="text-[11px] uppercase tracking-wide text-white/70 font-semibold"
+                className="text-[11px] uppercase tracking-wide text-white font-semibold"
               >
                 Navigation rapide
               </label>
@@ -1319,7 +1319,7 @@ export function AppSidebar() {
             <div className="px-3 py-2 border-b border-white/10 space-y-2">
               {pinnedItems.length > 0 && (
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold mb-1">
+                  <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1">
                     Accès épinglés
                   </p>
                   <div className="space-y-1">
@@ -1340,7 +1340,7 @@ export function AppSidebar() {
               )}
               {recentItems.length > 0 && (
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold mb-1 flex items-center gap-1">
+                  <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1 flex items-center gap-1">
                     <Clock3 className="h-3 w-3" />
                     Récents
                   </p>
@@ -1351,7 +1351,7 @@ export function AppSidebar() {
                         variant="ghost"
                         size="sm"
                         onClick={() => navigate(item.url)}
-                        className="w-full justify-start h-7 px-2 text-xs text-white/80 hover:bg-white/10 hover:text-white"
+                        className="w-full justify-start h-7 px-2 text-xs text-white hover:bg-white/10 hover:text-white"
                       >
                         <item.icon className="h-3.5 w-3.5 mr-2" />
                         <span className="truncate">{item.title}</span>
@@ -1511,8 +1511,8 @@ export function AppSidebar() {
             ))}
 
           {!isCollapsed && filterSectionsBySearch.length === 0 && (
-            <div className="px-3 py-4 text-sm text-white/70">
-              Aucun résultat pour <span className="font-semibold text-white">"{navSearch}"</span>.
+            <div className="px-3 py-4 text-sm text-white">
+              Aucun résultat pour <span className="font-semibold">"{navSearch}"</span>.
             </div>
           )}
 
