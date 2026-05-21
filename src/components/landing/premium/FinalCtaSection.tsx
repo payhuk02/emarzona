@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { usePremiumReveal } from './usePremiumReveal';
-import { EMARZONA_DEFAULT_LOGO } from '@/lib/brand/emarzona-logo';
+import { EMARZONA_CTA_LOGO } from '@/lib/brand/emarzona-logo';
 
 export function FinalCtaSection() {
   const { ref: textRef, className: textReveal } = usePremiumReveal();
@@ -31,7 +31,7 @@ export function FinalCtaSection() {
               <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
                 <Link
                   to="/register"
-                  className="lp-btn-gold inline-flex rounded-full px-7 py-3.5 text-sm font-semibold"
+                  className="lp-btn-primary inline-flex rounded-full px-7 py-3.5 text-sm font-semibold"
                 >
                   Démarrer gratuitement
                 </Link>
@@ -45,21 +45,23 @@ export function FinalCtaSection() {
             </div>
 
             {/* Logo toujours affiché sur mobile */}
-            <div className="relative z-10 flex min-h-[200px] w-full shrink-0 items-center justify-center sm:min-h-[240px] lg:min-h-[280px]">
-              <div className="lp-cta-logo relative w-full max-w-[280px] sm:max-w-[320px]">
+            <div className="relative z-10 flex w-full shrink-0 items-center justify-center py-2">
+              <div className="lp-cta-logo relative w-full max-w-[300px] sm:max-w-[340px]">
                 <div
-                  className="lp-cta-logo-glow pointer-events-none absolute inset-[-15%] rounded-full"
+                  className="lp-cta-logo-glow pointer-events-none absolute inset-[-12%] rounded-full"
                   aria-hidden
                 />
-                <img
-                  src={EMARZONA_DEFAULT_LOGO}
-                  alt="Emarzona — plateforme e-commerce mondiale"
-                  className="relative mx-auto block h-auto w-full max-w-[260px] object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.5)] sm:max-w-[300px]"
-                  width={300}
-                  height={300}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <div className="lp-cta-logo-panel relative">
+                  <img
+                    src={EMARZONA_CTA_LOGO}
+                    alt="Emarzona — plateforme e-commerce mondiale"
+                    className="relative mx-auto block h-auto w-full max-w-[240px] object-contain sm:max-w-[280px]"
+                    width={280}
+                    height={280}
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -29,6 +29,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateInfo } from '@/lib/affiliation-tracking';
 import { safeRedirect } from '@/lib/url-validator';
+import { redirectToPlatformLogin } from '@/lib/auth-routes';
 import { logger } from '@/lib/logger';
 import GiftCardInput from '@/components/checkout/GiftCardInput';
 import CouponInput from '@/components/checkout/CouponInput';
@@ -1041,7 +1042,7 @@ export default function Checkout() {
           description: 'Veuillez vous connecter pour continuer',
           variant: 'destructive',
         });
-        navigate('/login');
+        redirectToPlatformLogin(navigate);
         return;
       }
 

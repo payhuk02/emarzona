@@ -28,6 +28,7 @@ import { formatPrice } from '@/lib/product-helpers';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
+import { redirectToPlatformLogin } from '@/lib/auth-routes';
 import type { Currency } from '@/lib/currency-converter';
 import { isSupportedCurrency } from '@/lib/currency-converter';
 
@@ -218,7 +219,7 @@ const Checkout = () => {
             description: 'Veuillez vous connecter pour effectuer un achat',
             variant: 'destructive',
           });
-          navigate('/login');
+          redirectToPlatformLogin(navigate);
           return;
         }
         setUser(currentUser);

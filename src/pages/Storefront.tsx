@@ -30,6 +30,7 @@ import { useAdaptiveLoading } from '@/hooks/useAdaptiveLoading';
 import { useStoreSlug } from '@/contexts/StoreSlugContext';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 import { detectSubdomain } from '@/lib/subdomain-detector';
+import { redirectToPlatformLogin } from '@/lib/auth-routes';
 
 const STOREFRONT_STORE_FIELDS =
   'id, name, slug, subdomain, description, about, logo_url, banner_url, is_active, custom_domain, domain_status, contact_email, contact_phone, facebook_url, instagram_url, twitter_url, linkedin_url, youtube_url, tiktok_url, pinterest_url, snapchat_url, discord_url, twitch_url, created_at, updated_at, marketing_content, background_color, legal_pages, info_message, info_message_color, info_message_font, address_line1, address_line2, city, state_province, postal_code, country, latitude, longitude, opening_hours';
@@ -303,7 +304,7 @@ const Storefront = () => {
           description: 'Veuillez vous connecter pour effectuer un achat',
           variant: 'destructive',
         });
-        navigate('/login');
+        redirectToPlatformLogin(navigate);
         return;
       }
 

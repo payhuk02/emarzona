@@ -50,15 +50,15 @@ export function PremiumFooter() {
       className="border-t border-white/[0.06] bg-[#060608] text-[var(--lp-text-dim)]"
     >
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-5 sm:py-16 lg:px-8">
-        <div className="grid gap-10 sm:gap-12 sm:grid-cols-2 lg:grid-cols-12">
-          <div className="sm:col-span-2 lg:col-span-4">
-            <Link to="/" className="inline-flex">
+        <div className="grid gap-10 sm:gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <Link to="/" className="inline-flex rounded-lg bg-white/95 p-2 sm:p-2.5">
               <img
                 src={EMARZONA_DEFAULT_LOGO}
                 alt="Emarzona — plateforme e-commerce"
-                className="h-12 w-auto max-w-[200px] object-contain object-left sm:h-14 sm:max-w-[240px]"
-                width={240}
-                height={56}
+                className="h-10 w-auto max-w-[180px] object-contain object-left sm:h-12 sm:max-w-[220px]"
+                width={220}
+                height={48}
                 loading="lazy"
               />
             </Link>
@@ -80,30 +80,38 @@ export function PremiumFooter() {
             </div>
           </div>
 
-          {columns.map(col => (
-            <div key={col.title} className="lg:col-span-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-white/50">
-                {col.title}
-              </h4>
-              <ul className="mt-4 space-y-2.5">
-                {col.links.map(link => (
-                  <li key={link.label}>
-                    {link.href.startsWith('/') ? (
-                      <Link to={link.href} className="text-sm transition-colors hover:text-white">
-                        {link.label}
-                      </Link>
-                    ) : (
-                      <a href={link.href} className="text-sm transition-colors hover:text-white">
-                        {link.label}
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:col-span-6">
+            {columns.map(col => (
+              <div key={col.title} className="min-w-0">
+                <h4 className="text-[10px] font-semibold uppercase tracking-wider text-white/50 sm:text-xs">
+                  {col.title}
+                </h4>
+                <ul className="mt-3 space-y-2 sm:mt-4 sm:space-y-2.5">
+                  {col.links.map(link => (
+                    <li key={link.label}>
+                      {link.href.startsWith('/') ? (
+                        <Link
+                          to={link.href}
+                          className="text-xs transition-colors hover:text-white sm:text-sm"
+                        >
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          href={link.href}
+                          className="text-xs transition-colors hover:text-white sm:text-sm"
+                        >
+                          {link.label}
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
 
-          <div id="ressources" className="sm:col-span-2 lg:col-span-2">
+          <div id="ressources" className="lg:col-span-2">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-white/50">
               Newsletter
             </h4>
@@ -124,7 +132,7 @@ export function PremiumFooter() {
               />
               <button
                 type="submit"
-                className="rounded-lg bg-[var(--lp-purple)] px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="lp-btn-primary shrink-0 rounded-lg px-4 py-2.5 text-sm font-medium"
               >
                 →
               </button>

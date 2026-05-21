@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { usePremiumReveal } from './usePremiumReveal';
 import { useLandingPlatformStores } from '@/hooks/useLandingPlatformStores';
 import { generateStoreUrl } from '@/lib/store-utils';
@@ -108,7 +109,11 @@ export function StoresMarqueeSection() {
           ) : (
             <div
               className="lp-marquee-track flex w-max items-center"
-              style={{ animationDuration: `${Math.max(28, stores.length * 4)}s` }}
+              style={
+                {
+                  '--lp-marquee-duration': `${Math.max(56, stores.length * 8)}s`,
+                } as CSSProperties
+              }
             >
               {track.map((store, i) => (
                 <StoreChip

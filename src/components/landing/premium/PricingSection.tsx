@@ -133,9 +133,7 @@ export function PricingSection() {
               <Link
                 to="/register"
                 className={`mt-8 inline-flex justify-center rounded-full py-3 text-sm font-semibold ${
-                  plan.highlight
-                    ? 'lp-btn-gold'
-                    : 'border border-[var(--lp-text)]/15 text-[var(--lp-text)] hover:border-[var(--lp-text)]/30'
+                  plan.highlight ? 'lp-btn-primary text-white' : 'lp-btn-outline-light'
                 }`}
               >
                 {plan.cta}

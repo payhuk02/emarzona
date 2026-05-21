@@ -91,7 +91,7 @@ export function PremiumNav() {
           </Link>
           <Link
             to="/register"
-            className="lp-btn-gold whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold sm:px-5 sm:py-2.5 sm:text-sm"
+            className="lp-btn-primary whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold sm:px-5 sm:py-2.5 sm:text-sm"
           >
             Démarrer gratuitement
           </Link>
@@ -133,14 +133,14 @@ export function PremiumNav() {
             <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-6">
               <Link
                 to="/login"
-                className="rounded-lg border border-white/10 py-3 text-center text-white/80"
+                className="lp-btn-outline rounded-full py-3 text-center text-sm"
                 onClick={() => setOpen(false)}
               >
                 Me connecter
               </Link>
               <Link
                 to="/register"
-                className="lp-btn-gold rounded-full py-3.5 text-center text-sm font-semibold"
+                className="lp-btn-primary rounded-full py-3.5 text-center text-sm font-semibold"
                 onClick={() => setOpen(false)}
               >
                 Démarrer gratuitement

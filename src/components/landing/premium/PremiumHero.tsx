@@ -68,7 +68,7 @@ export function PremiumHero() {
           >
             <Link
               to="/register"
-              className="lp-btn-gold inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5"
+              className="lp-btn-primary inline-flex rounded-full px-6 py-3 text-sm font-semibold sm:px-7 sm:py-3.5"
             >
               Démarrer gratuitement
             </Link>

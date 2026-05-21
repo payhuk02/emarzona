@@ -18,6 +18,10 @@
   --lp-text-on-dark: #e8e6e1;
   --lp-text-dim: #9a9890;
   --lp-purple: #7c5cff;
+  --lp-blue: #2563eb;
+  --lp-blue-bright: #3b82f6;
+  --lp-blue-deep: #1d4ed8;
+  --lp-blue-glow: rgba(37, 99, 235, 0.35);
   --lp-violet-glow: rgba(124, 92, 255, 0.35);
   --lp-gold-glow: rgba(201, 162, 39, 0.25);
   --lp-border: rgba(255, 255, 255, 0.08);
@@ -135,43 +139,62 @@
   color: var(--lp-gold);
 }
 
+.landing-premium .lp-btn-primary,
 .landing-premium .lp-btn-gold {
   background: linear-gradient(
     135deg,
-    var(--lp-gold-bright) 0%,
-    var(--lp-gold) 55%,
-    var(--lp-gold-deep) 100%
+    var(--lp-blue-bright) 0%,
+    var(--lp-blue) 55%,
+    var(--lp-blue-deep) 100%
   );
-  color: var(--lp-ink);
+  color: #fff;
   font-weight: 600;
   border: none;
   box-shadow:
-    0 4px 24px var(--lp-gold-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 4px 24px var(--lp-blue-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition:
     transform 0.45s var(--lp-ease),
     box-shadow 0.45s var(--lp-ease);
 }
 
+.landing-premium .lp-btn-primary:hover,
 .landing-premium .lp-btn-gold:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 8px 32px var(--lp-gold-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 8px 32px var(--lp-blue-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .landing-premium .lp-btn-outline {
   background: transparent;
-  color: var(--lp-text-on-dark);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border: 1px solid rgba(59, 130, 246, 0.55);
+  transition:
+    border-color 0.4s var(--lp-ease),
+    background 0.4s var(--lp-ease),
+    color 0.4s var(--lp-ease);
+}
+
+.landing-premium .lp-btn-outline:hover {
+  border-color: var(--lp-blue-bright);
+  background: rgba(37, 99, 235, 0.12);
+  color: #fff;
+}
+
+.landing-premium .lp-btn-outline-light {
+  background: transparent;
+  color: var(--lp-blue);
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  font-weight: 500;
   transition:
     border-color 0.4s var(--lp-ease),
     background 0.4s var(--lp-ease);
 }
 
-.landing-premium .lp-btn-outline:hover {
-  border-color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.04);
+.landing-premium .lp-btn-outline-light:hover {
+  border-color: var(--lp-blue);
+  background: rgba(37, 99, 235, 0.06);
 }
 
 .landing-premium .lp-reveal {
@@ -244,7 +267,13 @@
 }
 
 .landing-premium .lp-marquee-track {
-  animation: lp-marquee-scroll 42s linear infinite;
+  animation: lp-marquee-scroll var(--lp-marquee-duration, 56s) linear infinite;
+}
+
+@media (max-width: 639px) {
+  .landing-premium .lp-marquee-track {
+    --lp-marquee-duration: 88s;
+  }
 }
 
 .landing-premium .lp-marquee-item {
@@ -267,8 +296,32 @@
   }
 }
 
+.landing-premium .lp-adapt-visual {
+  order: -1;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .landing-premium .lp-adapt-visual {
+    order: 0;
+  }
+}
+
 .landing-premium .lp-adapt-photo {
   position: relative;
+  width: 100%;
+  min-height: 280px;
+}
+
+.landing-premium .lp-adapt-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 280px;
+  max-height: 520px;
+  object-fit: cover;
+  object-position: center 22%;
 }
 
 .landing-premium .lp-adapt-photo::after {
@@ -283,11 +336,19 @@
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.35));
 }
 
+.landing-premium .lp-cta-logo-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1.25rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.55);
+}
+
 .landing-premium .lp-cta-logo-glow {
   background: radial-gradient(
     circle,
-    rgba(242, 145, 36, 0.22) 0%,
-    rgba(124, 92, 255, 0.12) 40%,
+    rgba(59, 130, 246, 0.28) 0%,
+    rgba(37, 99, 235, 0.14) 40%,
     transparent 70%
   );
   animation: lp-cta-glow-pulse 5s ease-in-out infinite;
@@ -357,8 +418,10 @@
 }
 
 @media (max-width: 379px) {
+  .landing-premium .lp-btn-primary,
   .landing-premium .lp-btn-gold,
-  .landing-premium .lp-btn-outline {
+  .landing-premium .lp-btn-outline,
+  .landing-premium .lp-btn-outline-light {
     width: 100%;
     justify-content: center;
   }

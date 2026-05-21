@@ -10,6 +10,7 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import { StoreSubdomainNav } from '@/components/storefront/StoreSubdomainNav';
+import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
 
 const Storefront = lazy(() => import('@/pages/Storefront'));
 const ProductDetail = lazy(() => import('@/pages/ProductDetail'));
@@ -74,6 +75,16 @@ export function StoreSubdomainRoutes({
 
           {/* Pages légales */}
           <Route path="/legal/:page" element={<StoreLegalPage />} />
+
+          {/* Auth plateforme — jamais sur myemarzona.shop */}
+          <Route path="/login" element={<RedirectToPlatformAuth />} />
+          <Route path="/connexion" element={<RedirectToPlatformAuth />} />
+          <Route path="/register" element={<RedirectToPlatformAuth />} />
+          <Route path="/signup" element={<RedirectToPlatformAuth />} />
+          <Route path="/inscription" element={<RedirectToPlatformAuth />} />
+          <Route path="/auth" element={<RedirectToPlatformAuth />} />
+          <Route path="/auth/login" element={<RedirectToPlatformAuth />} />
+          <Route path="/auth/signup" element={<RedirectToPlatformAuth />} />
 
           {/* Panier et checkout */}
           <Route path="/cart" element={<Cart />} />

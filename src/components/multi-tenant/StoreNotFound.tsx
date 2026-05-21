@@ -8,6 +8,7 @@
  */
 
 import { Link } from 'react-router-dom';
+import { getPlatformLoginUrl, getPlatformUrl } from '@/lib/auth-routes';
 import { Store, AlertCircle, Home, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,19 +59,19 @@ export function StoreNotFound({ subdomain, error }: StoreNotFoundProps) {
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/marketplace">
+              <a href={getPlatformUrl('/marketplace')}>
                 <Search className="mr-2 h-4 w-4" />
                 Explorer le marketplace
-              </Link>
+              </a>
             </Button>
           </div>
 
           <div className="pt-4 border-t text-center">
             <p className="text-xs text-muted-foreground">
               Vous êtes vendeur ?{' '}
-              <Link to="/login" className="text-primary hover:underline">
+              <a href={getPlatformLoginUrl()} className="text-primary hover:underline">
                 Connectez-vous
-              </Link>{' '}
+              </a>{' '}
               pour créer votre boutique.
             </p>
           </div>
