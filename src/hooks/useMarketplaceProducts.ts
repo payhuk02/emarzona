@@ -72,6 +72,37 @@ function mapSortByForMarketplaceRpc(sortBy: string): string {
   return sortBy;
 }
 
+/** Colonne stock sur `products` (le schéma prod utilise `stock`, pas `stock_quantity`). */
+const PRODUCT_STOCK_COLUMN = 'stock';
+
+function applyInStockFilter<
+  T extends {
+    or: (filters: string) => T;
+    gte: (col: string, val: number) => T;
+    lte: (col: string, val: number) => T;
+    eq: (col: string, val: number) => T;
+  },
+>(query: T, mode: 'in_stock' | 'low_stock' | 'out_stock'): T {
+  const col = PRODUCT_STOCK_COLUMN;
+  if (mode === 'in_stock') {
+    return query.or(`${col}.gt.0,${col}.is.null`);
+  }
+  if (mode === 'low_stock') {
+    return query.gte(col, 1).lte(col, 10);
+  }
+  return query.eq(col, 0);
+}
+
+function mapStockToProductFields<T extends Record<string, unknown>>(product: T): Product {
+  const stock =
+    product.stock != null
+      ? Number(product.stock)
+      : product.stock_quantity != null
+        ? Number(product.stock_quantity)
+        : null;
+  return { ...product, stock_quantity: stock } as Product;
+}
+
 export function buildMarketplaceProductsQueryKey(
   stableFiltersKey: string,
   page: number,
@@ -136,7 +167,10 @@ async function fetchMarketplaceProducts({
       });
 
       if (error) {
-        logger.error('❌ Erreur RPC marketplace:', error);
+        // PGRST202 = fonction RPC absente (migrations non appliquées) — fallback silencieux
+        if (error.code !== 'PGRST202') {
+          logger.error('❌ Erreur RPC marketplace:', error);
+        }
         // Fallback vers la méthode standard
       } else if (data && Array.isArray(data)) {
         const firstItem = data[0] as Record<string, unknown> | undefined;
@@ -288,11 +322,11 @@ async function fetchMarketplaceProducts({
   // Filtres spécifiques par type de produit
   if (filters.productType === 'physical') {
     if (filters.stockAvailability === 'in_stock') {
-      query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
+      query = applyInStockFilter(query, 'in_stock');
     } else if (filters.stockAvailability === 'low_stock') {
-      query = query.gte('stock_quantity', 1).lte('stock_quantity', 10);
+      query = applyInStockFilter(query, 'low_stock');
     } else if (filters.stockAvailability === 'out_stock') {
-      query = query.eq('stock_quantity', 0);
+      query = applyInStockFilter(query, 'out_stock');
     }
 
     // Note: free_shipping n'existe pas dans la table products
@@ -304,15 +338,15 @@ async function fetchMarketplaceProducts({
   if (filters.productType === 'artist') {
     if (filters.artworkAvailability && filters.artworkAvailability !== 'all') {
       if (filters.artworkAvailability === 'available') {
-        query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
+        query = applyInStockFilter(query, 'in_stock');
       } else if (filters.artworkAvailability === 'sold_out') {
-        query = query.eq('stock_quantity', 0);
+        query = applyInStockFilter(query, 'out_stock');
       }
     }
   }
 
   if (filters.inStock) {
-    query = query.or('stock_quantity.gt.0,stock_quantity.is.null');
+    query = applyInStockFilter(query, 'in_stock');
   }
 
   // Appliquer le tri
@@ -464,7 +498,7 @@ async function fetchMarketplaceProducts({
   );
 
   const result = {
-    products: filteredData as Product[],
+    products: filteredData.map(p => mapStockToProductFields(p as Record<string, unknown>)),
     totalCount: count || 0,
     filteredCount: filteredData.length,
   };
