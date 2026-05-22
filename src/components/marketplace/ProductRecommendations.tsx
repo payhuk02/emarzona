@@ -4,12 +4,12 @@ import {
   useUserProductRecommendations,
   ProductRecommendation,
 } from '@/hooks/useProductRecommendations';
-import { useSameStoreProducts } from '@/hooks/useSameStoreProducts';
 import ProductCardModern from './ProductCardModern';
+import { SameStoreProductsSection } from './SameStoreProductsSection';
 import { ProductGrid } from '@/components/ui/ProductGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, Store, TrendingUp } from '@/components/icons';
+import { Sparkles, TrendingUp } from '@/components/icons';
 
 interface ProductRecommendationsProps {
   productId: string;
@@ -142,98 +142,9 @@ interface SameStoreProductsProps extends ProductRecommendationsProps {
 /**
  * Autres produits de la même boutique
  */
-const FrequentlyBoughtTogetherComponent: React.FC<SameStoreProductsProps> = ({
-  productId,
-  storeId,
-  storeName,
-  limit = 4,
-  className = '',
-}) => {
-  const {
-    data: recommendations,
-    isLoading,
-    error,
-  } = useSameStoreProducts(productId, storeId, limit);
-
-  const sectionTitle = storeName ? `Autres produits de ${storeName}` : 'De la même boutique';
-
-  const products = useMemo(() => {
-    if (!recommendations) return [];
-
-    return recommendations.map(rec => ({
-      id: rec.id,
-      name: rec.name,
-      slug: rec.slug,
-      image_url: rec.image_url,
-      price: rec.price,
-      promotional_price: rec.promotional_price,
-      currency: rec.currency ?? 'XOF',
-      category: rec.category,
-      product_type: rec.product_type,
-      stores: {
-        id: rec.stores.id,
-        name: rec.stores.name,
-        slug: rec.stores.slug,
-        logo_url: rec.stores.logo_url ?? null,
-      },
-      created_at: new Date().toISOString(),
-    }));
-  }, [recommendations]);
-
-  if (error) {
-    return null;
-  }
-
-  if (isLoading) {
-    return (
-      <div className={className}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Store className="h-5 w-5 text-purple-500" />
-              {sectionTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProductGrid>
-              {Array.from({ length: limit }).map((_, index) => (
-                <Skeleton key={index} className="h-96 w-full" />
-              ))}
-            </ProductGrid>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!products || products.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className={className}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Store className="h-5 w-5 text-purple-500" />
-            {sectionTitle}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductGrid>
-            {products.map(product => (
-              <ProductCardModern
-                key={product.id}
-                product={product}
-                storeSlug={product.stores?.slug || 'default'}
-              />
-            ))}
-          </ProductGrid>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+const FrequentlyBoughtTogetherComponent: React.FC<SameStoreProductsProps> = props => (
+  <SameStoreProductsSection {...props} withCard />
+);
 
 FrequentlyBoughtTogetherComponent.displayName = 'FrequentlyBoughtTogetherComponent';
 

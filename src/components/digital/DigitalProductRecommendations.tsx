@@ -17,9 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { DigitalProductCard } from './DigitalProductCard';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
-import { useSameStoreProducts } from '@/hooks/useSameStoreProducts';
-import { generateProductUrl } from '@/lib/store-utils';
-import { Store } from 'lucide-react';
+import { SameStoreProductsSection } from '@/components/marketplace/SameStoreProductsSection';
 
 interface RecommendationsProps {
   productId: string;
@@ -373,86 +371,14 @@ export const BoughtTogetherRecommendations = ({
   storeId?: string;
   storeName?: string;
   limit?: number;
-}) => {
-  const navigate = useNavigate();
-  const { data: recommendations, isLoading } = useSameStoreProducts(productId, storeId, limit);
-  const resolvedStoreName = storeName ?? recommendations?.[0]?.stores?.name;
-  const sectionTitle = resolvedStoreName
-    ? `Autres produits de ${resolvedStoreName}`
-    : 'De la même boutique';
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Store className="h-5 w-5" />
-          {sectionTitle}
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <Skeleton className="h-32 w-full" />
-              <CardContent className="p-3">
-                <Skeleton className="h-3 w-full mb-2" />
-                <Skeleton className="h-3 w-2/3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!recommendations || recommendations.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold flex items-center gap-2">
-        <Store className="h-5 w-5" />
-        {sectionTitle}
-      </h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {recommendations.map((product: ProductWithStore) => (
-          <Card
-            key={product.id}
-            className="group hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(generateProductUrl(product.stores.slug, product.slug))}
-          >
-            <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="h-12 w-12 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <CardContent className="p-3">
-              <h4 className="font-medium text-sm line-clamp-2 mb-2">{product.name}</h4>
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-sm">
-                  {product.price.toLocaleString()} {product.currency}
-                </span>
-                {product.average_rating > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs">{product.average_rating.toFixed(1)}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-};
+}) => (
+  <SameStoreProductsSection
+    productId={productId}
+    storeId={storeId}
+    storeName={storeName}
+    limit={limit}
+  />
+);
 
 /**
  * Recommandations "Vous pourriez aimer"
