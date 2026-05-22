@@ -83,6 +83,35 @@ import {
   useCompleteBooking,
   useMarkNoShow,
 } from '@/hooks/service/useBookings';
+import { useStore } from '@/hooks/useStore';
+
+/** Forme normalisée pour l'UI (alignée sur le schéma DB `scheduled_*`, `amount_paid`, `user_id`). */
+interface NormalizedServiceBooking {
+  id: string;
+  product_id: string;
+  customer_id?: string;
+  booking_date: string;
+  start_time?: string;
+  end_time?: string;
+  booking_time?: string;
+  status: string;
+  total_price: number;
+  participants_count: number;
+  deposit_paid?: number;
+  cancellation_reason?: string;
+  meeting_url?: string;
+  customer_notes?: string;
+  internal_notes?: string;
+  customer?: { full_name?: string; email?: string; phone?: string };
+  service_product?: Array<{
+    id: string;
+    product_id: string;
+    store_id?: string;
+    service_type?: string;
+    duration_minutes?: number;
+    product?: { id: string; name: string; price: number; currency?: string };
+  }>;
+}
 
 type ViewMode = 'grid' | 'list';
 type CalendarView = 'month' | 'week' | 'day';
@@ -98,6 +127,7 @@ interface VendorBookingRow {
 
 export default function BookingsManagement() {
   const { toast } = useToast();
+  const { store, loading: storeLoading } = useStore();
 
   // State management
   const [selectedEvent, setSelectedEvent] = useState<ExtendedBookingEvent | null>(null);
@@ -123,105 +153,131 @@ export default function BookingsManagement() {
   const completeBooking = useCompleteBooking();
   const markNoShow = useMarkNoShow();
 
-  // Fetch bookings with store filter
+  // Fetch bookings — schéma réel: scheduled_date, product_id → products (pas customers)
   const {
     data: bookings,
-    isLoading,
+    isLoading: bookingsLoading,
     error: bookingsError,
     refetch,
   } = useQuery({
-    queryKey: ['service-bookings'],
-    queryFn: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+    queryKey: ['service-bookings', store?.id],
+    enabled: !!store?.id && !storeLoading,
+    queryFn: async (): Promise<NormalizedServiceBooking[]> => {
+      const storeId = store!.id;
 
-      const { data: storeData } = await supabase
-        .from('stores')
+      const { data: products, error: productsError } = await supabase
+        .from('products')
         .select('id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle();
+        .eq('store_id', storeId)
+        .eq('product_type', 'service');
 
-      const storeId = storeData?.id;
+      if (productsError) {
+        logger.error('Error fetching service products for bookings', {
+          error: productsError.message,
+          storeId,
+        });
+        throw productsError;
+      }
 
-      if (!storeId) {
+      const productIds = products?.map(p => p.id) ?? [];
+      if (productIds.length === 0) {
         return [];
       }
 
-      // Type pour la réponse Supabase avec relations
-      interface ServiceBookingWithRelations {
-        id: string;
-        product_id: string;
-        customer_id: string;
-        booking_date: string;
-        start_time: string;
-        end_time?: string;
-        status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
-        total_price: number;
-        staff_member_id?: string;
-        participants_count: number;
-        deposit_paid: number;
-        cancellation_reason?: string;
-        meeting_url?: string;
-        customer_notes?: string;
-        internal_notes?: string;
-        reminder_sent_at?: string;
-        created_at: string;
-        updated_at: string;
-        service_product?: Array<{
-          id: string;
-          product_id: string;
-          store_id: string;
-          service_type: string;
-          duration_minutes: number;
-          product?: {
-            id: string;
-            name: string;
-            price: number;
-            currency: string;
-          };
-        }>;
-        customer?: {
-          full_name: string;
-          email: string;
-          phone: string;
-        };
-      }
-
-      // Requête optimisée avec relations (évite N+1)
       const { data, error } = await supabase
         .from('service_bookings')
         .select(
           `
           *,
-          service_product:service_products(
-            *,
-            product:products(id, name, price, currency)
-          ),
-          customer:customers(full_name, email, phone)
+          product:products!product_id (
+            id,
+            name,
+            price,
+            currency,
+            store_id,
+            service_product:service_products (
+              id,
+              product_id,
+              service_type,
+              duration_minutes
+            )
+          )
         `
         )
-        .order('booking_date', { ascending: false })
-        .order('start_time', { ascending: true })
-        .returns<ServiceBookingWithRelations[]>();
+        .in('product_id', productIds)
+        .order('scheduled_date', { ascending: false })
+        .order('scheduled_start_time', { ascending: true });
 
       if (error) {
-        logger.error('Error fetching bookings', { error: error.message });
+        logger.error('Error fetching bookings', { error: error.message, storeId });
         throw error;
       }
 
-      // Filtrer par store_id via service_products (côté client car relation complexe)
-      const filtered = (data || []).filter(booking => {
-        return booking.service_product?.some(sp => sp.store_id === storeId);
-      });
+      return (data ?? []).map(row => {
+        const product = row.product as {
+          id: string;
+          name: string;
+          price: number;
+          currency?: string;
+          store_id?: string;
+          service_product?: {
+            id: string;
+            product_id: string;
+            service_type?: string;
+            duration_minutes?: number;
+          } | null;
+        } | null;
 
-      return filtered;
+        const sp = product?.service_product;
+
+        return {
+          id: row.id,
+          product_id: row.product_id,
+          customer_id: row.user_id,
+          booking_date: row.scheduled_date,
+          start_time: row.scheduled_start_time,
+          end_time: row.scheduled_end_time,
+          booking_time: row.scheduled_start_time,
+          status: row.status,
+          total_price: Number(row.amount_paid ?? product?.price ?? 0),
+          participants_count: row.participants_count ?? 1,
+          deposit_paid: row.deposit_paid ?? undefined,
+          cancellation_reason: row.cancellation_reason ?? undefined,
+          meeting_url: row.meeting_url ?? undefined,
+          customer_notes: row.customer_notes ?? undefined,
+          internal_notes: row.internal_notes ?? undefined,
+          customer: {
+            full_name: row.customer_notes?.slice(0, 80) || 'Client',
+            email: '',
+            phone: '',
+          },
+          service_product: sp
+            ? [
+                {
+                  id: sp.id,
+                  product_id: sp.product_id,
+                  store_id: product?.store_id,
+                  service_type: sp.service_type,
+                  duration_minutes: sp.duration_minutes,
+                  product: product
+                    ? {
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        currency: product.currency,
+                      }
+                    : undefined,
+                },
+              ]
+            : [],
+        };
+      });
     },
-    staleTime: 30000, // 30 secondes
-    gcTime: 300000, // 5 minutes
+    staleTime: 30000,
+    gcTime: 300000,
   });
+
+  const isLoading = storeLoading || bookingsLoading;
 
   // Fetch availabilities
   // Type temporaire pour service_availability en attendant la régénération des types Supabase
@@ -654,12 +710,20 @@ export default function BookingsManagement() {
   // Error handling
   useEffect(() => {
     if (bookingsError) {
-      setError('Erreur lors du chargement des réservations');
-      logger.error('Bookings fetch error', { error: bookingsError });
+      const message =
+        bookingsError instanceof Error
+          ? bookingsError.message
+          : 'Erreur lors du chargement des réservations';
+      setError(
+        import.meta.env.DEV
+          ? `Erreur lors du chargement des réservations : ${message}`
+          : 'Erreur lors du chargement des réservations'
+      );
+      logger.error('Bookings fetch error', { error: bookingsError, storeId: store?.id });
     } else {
       setError(null);
     }
-  }, [bookingsError]);
+  }, [bookingsError, store?.id]);
 
   if (isLoading) {
     return (
