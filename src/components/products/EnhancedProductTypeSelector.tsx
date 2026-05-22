@@ -1,7 +1,7 @@
 /**
  * Enhanced Product Type Selector - Professional & Optimized
  * Date: 2025-01-01
- * 
+ *
  * Sélecteur de type de produit amélioré avec :
  * - Design moderne et visuel professionnel
  * - Statistiques par type
@@ -46,7 +46,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 interface ProductType {
   value: string;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   description: string;
   features: string[];
   color: 'blue' | 'orange' | 'green' | 'purple';
@@ -55,13 +55,12 @@ interface ProductType {
   recommended?: boolean;
   examples: string[];
   bgColorClass: string;
-  iconBgClass: string;
   iconTextClass: string;
   buttonClass: string;
   checkIconClass: string;
 }
 
-const  PRODUCT_TYPES: ProductType[] = [
+const PRODUCT_TYPES: ProductType[] = [
   {
     value: 'digital',
     label: 'Produit Digital',
@@ -78,51 +77,41 @@ const  PRODUCT_TYPES: ProductType[] = [
     popular: true,
     recommended: true,
     examples: ['Ebook', 'Template', 'Plugin', 'Logiciel'],
-    bgColorClass: 'bg-blue-500/20 group-hover:bg-blue-500/30',
-    iconTextClass: 'text-blue-500',
-    buttonClass: 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500',
-    checkIconClass: 'text-blue-500',
+    bgColorClass: 'app-icon-plain',
+    iconTextClass: 'text-black',
+    buttonClass: 'app-btn-premium-gradient text-white',
+    checkIconClass: 'text-black',
   },
   {
     value: 'course',
     label: 'Cours en ligne',
     icon: GraduationCap,
     description: 'Formations vidéo structurées avec quiz et certificats',
-    features: [
-      'Vidéos HD',
-      'Quiz & Certificats',
-      'Suivi progression',
-      'Discussions & Q&A',
-    ],
+    features: ['Vidéos HD', 'Quiz & Certificats', 'Suivi progression', 'Discussions & Q&A'],
     color: 'orange',
     gradient: 'from-orange-500 to-amber-500',
     popular: true,
     recommended: true,
     examples: ['Formation', 'Masterclass', 'Tutoriel', 'Webinar'],
-    bgColorClass: 'bg-orange-500/20 group-hover:bg-orange-500/30',
-    iconTextClass: 'text-orange-500',
-    buttonClass: 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-500',
-    checkIconClass: 'text-orange-500',
+    bgColorClass: 'app-icon-plain',
+    iconTextClass: 'text-black',
+    buttonClass: 'app-btn-premium-gradient text-white',
+    checkIconClass: 'text-black',
   },
   {
     value: 'physical',
     label: 'Produit Physique',
     icon: Package,
     description: 'Vêtements, accessoires, objets artisanaux',
-    features: [
-      'Variants & Attributs',
-      'Gestion inventaire',
-      'Suivi livraison',
-      'Options shipping',
-    ],
+    features: ['Variants & Attributs', 'Gestion inventaire', 'Suivi livraison', 'Options shipping'],
     color: 'green',
     gradient: 'from-green-500 to-emerald-500',
     popular: false,
     examples: ['Vêtements', 'Accessoires', 'Artisanat', 'Électronique'],
-    bgColorClass: 'bg-green-500/20 group-hover:bg-green-500/30',
-    iconTextClass: 'text-green-500',
-    buttonClass: 'bg-green-500 hover:bg-green-600 focus:ring-green-500',
-    checkIconClass: 'text-green-500',
+    bgColorClass: 'app-icon-plain',
+    iconTextClass: 'text-black',
+    buttonClass: 'app-btn-premium-gradient text-white',
+    checkIconClass: 'text-black',
   },
   {
     value: 'service',
@@ -139,19 +128,19 @@ const  PRODUCT_TYPES: ProductType[] = [
     gradient: 'from-purple-500 to-pink-500',
     popular: false,
     examples: ['Consultation', 'Coaching', 'Design', 'Développement'],
-    bgColorClass: 'bg-purple-500/20 group-hover:bg-purple-500/30',
-    iconTextClass: 'text-purple-500',
-    buttonClass: 'bg-purple-500 hover:bg-purple-600 focus:ring-purple-500',
-    checkIconClass: 'text-purple-500',
+    bgColorClass: 'app-icon-plain',
+    iconTextClass: 'text-black',
+    buttonClass: 'app-btn-premium-gradient text-white',
+    checkIconClass: 'text-black',
   },
   {
     value: 'artist',
-    label: 'Œuvre d\'Artiste',
+    label: "Œuvre d'Artiste",
     icon: Palette,
     description: 'Livres, musique, arts visuels, designs, créations artistiques',
     features: [
       'Portfolio artiste',
-      'Certificats d\'authenticité',
+      "Certificats d'authenticité",
       'Éditions limitées',
       'Galerie virtuelle',
     ],
@@ -160,10 +149,10 @@ const  PRODUCT_TYPES: ProductType[] = [
     popular: true,
     recommended: true,
     examples: ['Livre', 'Album', 'Peinture', 'Design', 'Photo'],
-    bgColorClass: 'bg-pink-500/20 group-hover:bg-pink-500/30',
-    iconTextClass: 'text-pink-500',
-    buttonClass: 'bg-pink-500 hover:bg-pink-600 focus:ring-pink-500',
-    checkIconClass: 'text-pink-500',
+    bgColorClass: 'app-icon-plain',
+    iconTextClass: 'text-black',
+    buttonClass: 'app-btn-premium-gradient text-white',
+    checkIconClass: 'text-black',
   },
 ];
 
@@ -184,7 +173,7 @@ type FilterType = 'all' | 'popular' | 'recommended';
 
 /**
  * Enhanced Product Type Selector
- * 
+ *
  * Affiche un sélecteur visuel avec statistiques et recommandations
  */
 export const EnhancedProductTypeSelector = ({
@@ -218,7 +207,7 @@ export const EnhancedProductTypeSelector = ({
     const loadStats = async () => {
       try {
         logger.info('Chargement des statistiques produits', { storeId });
-        
+
         const { data, error } = await supabase
           .from('products')
           .select('product_type')
@@ -226,7 +215,7 @@ export const EnhancedProductTypeSelector = ({
 
         if (error) throw error;
 
-        const  newStats: ProductStats = {
+        const newStats: ProductStats = {
           digital: 0,
           course: 0,
           physical: 0,
@@ -235,7 +224,7 @@ export const EnhancedProductTypeSelector = ({
           total: data?.length || 0,
         };
 
-        data?.forEach((product) => {
+        data?.forEach(product => {
           const type = product.product_type as keyof ProductStats;
           if (type && type in newStats) {
             newStats[type]++;
@@ -260,16 +249,17 @@ export const EnhancedProductTypeSelector = ({
    * Filter products based on search and filter
    */
   const filteredTypes = useMemo(() => {
-    let  filtered= PRODUCT_TYPES;
+    let filtered = PRODUCT_TYPES;
 
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(type =>
-        type.label.toLowerCase().includes(query) ||
-        type.description.toLowerCase().includes(query) ||
-        type.features.some(f => f.toLowerCase().includes(query)) ||
-        type.examples.some(e => e.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        type =>
+          type.label.toLowerCase().includes(query) ||
+          type.description.toLowerCase().includes(query) ||
+          type.features.some(f => f.toLowerCase().includes(query)) ||
+          type.examples.some(e => e.toLowerCase().includes(query))
       );
     }
 
@@ -286,10 +276,13 @@ export const EnhancedProductTypeSelector = ({
   /**
    * Handle product type selection
    */
-  const handleSelect = useCallback((type: string) => {
-    logger.info('Type de produit sélectionné', { type });
-    onSelect(type);
-  }, [onSelect]);
+  const handleSelect = useCallback(
+    (type: string) => {
+      logger.info('Type de produit sélectionné', { type });
+      onSelect(type);
+    },
+    [onSelect]
+  );
 
   /**
    * Keyboard shortcuts
@@ -328,7 +321,7 @@ export const EnhancedProductTypeSelector = ({
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 animate-in fade-in duration-500">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4].map(i => (
           <Card key={i} className="relative overflow-hidden">
             <CardHeader className="pb-3">
               <Skeleton className="h-6 w-3/4 mb-2" />
@@ -346,25 +339,25 @@ export const EnhancedProductTypeSelector = ({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header avec stats globales - Responsive */}
-      <Card 
+      <Card
         ref={headerRef}
         className="bg-gradient-to-r from-blue-500/10 via-primary/10 to-cyan-500/10 border-primary/20 backdrop-blur-sm shadow-lg animate-in fade-in slide-in-from-top-4 duration-700"
       >
         <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 py-4 sm:py-6 px-3 sm:px-6">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-500/30 animate-in zoom-in duration-500">
-              <Package className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 dark:text-blue-400" aria-hidden="true" />
+            <div className="app-icon-plain flex shrink-0 items-center justify-center animate-in zoom-in duration-500">
+              <Package className="h-6 w-6 sm:h-8 sm:w-8 text-black" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {stats.total}
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                {stats.total === 0 
-                  ? t('products.stats.none', 'Aucun produit') 
-                  : stats.total === 1 
-                  ? t('products.stats.one', '1 produit créé')
-                  : t('products.stats.many', '{{count}} produits créés', { count: stats.total })}
+                {stats.total === 0
+                  ? t('products.stats.none', 'Aucun produit')
+                  : stats.total === 1
+                    ? t('products.stats.one', '1 produit créé')
+                    : t('products.stats.many', '{{count}} produits créés', { count: stats.total })}
               </p>
             </div>
           </div>
@@ -373,10 +366,10 @@ export const EnhancedProductTypeSelector = ({
               if (type === 'total') return null;
               const productType = PRODUCT_TYPES.find(pt => pt.value === type);
               if (!productType || count === 0) return null;
-              
+
               return (
-                <div 
-                  key={type} 
+                <div
+                  key={type}
                   className="text-center animate-in fade-in zoom-in duration-500"
                   style={{ animationDelay: `${Object.keys(stats).indexOf(type) * 100}ms` }}
                 >
@@ -394,11 +387,14 @@ export const EnhancedProductTypeSelector = ({
       {/* Search and Filter Bar - Advanced Features */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             placeholder={t('products.search', 'Rechercher un type de produit...')}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-9 pr-9"
             aria-label={t('products.search', 'Rechercher un type de produit')}
           />
@@ -440,7 +436,9 @@ export const EnhancedProductTypeSelector = ({
             className="gap-1.5"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{t('products.filters.recommended', 'Recommandé')}</span>
+            <span className="hidden sm:inline">
+              {t('products.filters.recommended', 'Recommandé')}
+            </span>
           </Button>
           <Button
             variant="outline"
@@ -467,16 +465,28 @@ export const EnhancedProductTypeSelector = ({
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[10px]">1-4</Badge>
-                    <span className="text-muted-foreground">{t('products.shortcuts.select', 'Sélectionner un type')}</span>
+                    <Badge variant="outline" className="font-mono text-[10px]">
+                      1-4
+                    </Badge>
+                    <span className="text-muted-foreground">
+                      {t('products.shortcuts.select', 'Sélectionner un type')}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[10px]">?</Badge>
-                    <span className="text-muted-foreground">{t('products.shortcuts.help', 'Afficher l\'aide')}</span>
+                    <Badge variant="outline" className="font-mono text-[10px]">
+                      ?
+                    </Badge>
+                    <span className="text-muted-foreground">
+                      {t('products.shortcuts.help', "Afficher l'aide")}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[10px]">Esc</Badge>
-                    <span className="text-muted-foreground">{t('products.shortcuts.clear', 'Effacer la recherche')}</span>
+                    <Badge variant="outline" className="font-mono text-[10px]">
+                      Esc
+                    </Badge>
+                    <span className="text-muted-foreground">
+                      {t('products.shortcuts.clear', 'Effacer la recherche')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -495,14 +505,17 @@ export const EnhancedProductTypeSelector = ({
       )}
 
       {/* Grid des types de produits - Responsive avec animations */}
-      <div 
+      <div
         ref={gridRef}
         className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         {filteredTypes.length === 0 ? (
           <Card className="col-span-1 lg:col-span-2 p-8 sm:p-12">
             <div className="text-center animate-in fade-in zoom-in duration-500">
-              <Search className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4" aria-hidden="true" />
+              <Search
+                className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4"
+                aria-hidden="true"
+              />
               <h3 className="text-lg sm:text-xl font-semibold mb-2">
                 {t('products.noResults', 'Aucun résultat')}
               </h3>
@@ -541,7 +554,7 @@ export const EnhancedProductTypeSelector = ({
                 onMouseEnter={() => setHoveredType(type.value)}
                 onMouseLeave={() => setHoveredType(null)}
                 onClick={() => handleSelect(type.value)}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     handleSelect(type.value);
@@ -563,27 +576,31 @@ export const EnhancedProductTypeSelector = ({
                 {/* Badges */}
                 <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
                   {type.popular && (
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30 text-[10px] sm:text-xs animate-in zoom-in duration-300"
                     >
                       <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />
-                      <span className="hidden sm:inline">{t('products.badges.popular', 'Populaire')}</span>
+                      <span className="hidden sm:inline">
+                        {t('products.badges.popular', 'Populaire')}
+                      </span>
                       <span className="sm:hidden">{t('products.badges.popularShort', 'Pop')}</span>
                     </Badge>
                   )}
                   {type.recommended && (
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30 text-[10px] sm:text-xs animate-in zoom-in duration-300"
                       style={{ animationDelay: '100ms' }}
                     >
                       <Sparkles className="h-3 w-3 mr-1" aria-hidden="true" />
-                      <span className="hidden sm:inline">{t('products.badges.recommended', 'Recommandé')}</span>
-                      <span className="sm:hidden">{t('products.badges.recommendedShort', 'Rec')}</span>
-                      {count > 0 && (
-                        <span className="ml-1">({count})</span>
-                      )}
+                      <span className="hidden sm:inline">
+                        {t('products.badges.recommended', 'Recommandé')}
+                      </span>
+                      <span className="sm:hidden">
+                        {t('products.badges.recommendedShort', 'Rec')}
+                      </span>
+                      {count > 0 && <span className="ml-1">({count})</span>}
                     </Badge>
                   )}
                   {count > 0 && !type.recommended && (
@@ -595,12 +612,20 @@ export const EnhancedProductTypeSelector = ({
 
                 <CardHeader className="pb-3 sm:pb-4 pt-4 sm:pt-5">
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className={cn(
-                      'p-2.5 sm:p-3 rounded-xl transition-all duration-300',
-                      type.bgColorClass,
-                      'group-hover:scale-110 group-hover:rotate-3'
-                    )}>
-                      <Icon className={cn('h-6 w-6 sm:h-8 sm:w-8 transition-transform duration-300', type.iconTextClass)} aria-hidden="true" />
+                    <div
+                      className={cn(
+                        'flex shrink-0 items-center justify-center transition-transform duration-300',
+                        type.bgColorClass,
+                        'group-hover:scale-110'
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          'h-6 w-6 sm:h-8 sm:w-8 transition-transform duration-300',
+                          type.iconTextClass
+                        )}
+                        aria-hidden="true"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-lg sm:text-xl mb-1 sm:mb-2 font-bold group-hover:text-primary transition-colors">
@@ -617,12 +642,18 @@ export const EnhancedProductTypeSelector = ({
                   {/* Features list */}
                   <div className="space-y-1.5 sm:space-y-2">
                     {type.features.map((feature, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="flex items-center gap-2 text-xs sm:text-sm animate-in fade-in slide-in-from-left-4"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <CheckCircle2 className={cn('h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0', type.checkIconClass)} aria-hidden="true" />
+                        <CheckCircle2
+                          className={cn(
+                            'h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0',
+                            type.checkIconClass
+                          )}
+                          aria-hidden="true"
+                        />
                         <span className="text-muted-foreground">{feature}</span>
                       </div>
                     ))}
@@ -635,9 +666,9 @@ export const EnhancedProductTypeSelector = ({
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {type.examples.map((example, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="outline" 
+                        <Badge
+                          key={index}
+                          variant="outline"
                           className="text-[10px] sm:text-xs hover:bg-primary/10 transition-colors"
                         >
                           {example}
@@ -654,16 +685,21 @@ export const EnhancedProductTypeSelector = ({
                       'shadow-md hover:shadow-lg hover:scale-105 active:scale-95',
                       'text-xs sm:text-sm font-semibold'
                     )}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleSelect(type.value);
                     }}
                     size="sm"
                     aria-label={`${t('products.create', 'Créer un')} ${type.label.toLowerCase()}`}
                   >
-                    <span className="hidden sm:inline">{t('products.create', 'Créer un')} {type.label.toLowerCase()}</span>
+                    <span className="hidden sm:inline">
+                      {t('products.create', 'Créer un')} {type.label.toLowerCase()}
+                    </span>
                     <span className="sm:hidden">{t('products.createShort', 'Créer')}</span>
-                    <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                    <ArrowRight
+                      className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 group-hover:translate-x-1 transition-transform"
+                      aria-hidden="true"
+                    />
                   </Button>
                 </CardContent>
               </Card>
@@ -673,35 +709,33 @@ export const EnhancedProductTypeSelector = ({
       </div>
 
       {/* Help section - Responsive */}
-      <Card 
+      <Card
         ref={statsRef}
         className="bg-gradient-to-r from-muted/30 to-muted/20 border-border/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         <CardContent className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 py-4 sm:py-6 px-3 sm:px-6">
-          <div className="p-2 sm:p-2.5 rounded-lg bg-primary/10 flex-shrink-0">
-            <Info className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
+          <div className="app-icon-plain flex shrink-0 items-center justify-center">
+            <Info className="h-4 w-4 sm:h-5 sm:w-5 text-black" aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2">
-              {t('products.help.title', 'Besoin d\'aide pour choisir ?')}
+              {t('products.help.title', "Besoin d'aide pour choisir ?")}
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              {t('products.help.description', 'Chaque type de produit est optimisé pour un cas d\'usage spécifique.')}
-              {' '}
-              <strong>{t('products.help.courses', 'Les Cours en ligne')}</strong>
-              {' '}
-              {t('products.help.coursesDesc', 'sont parfaits pour des formations structurées avec vidéos et quiz.')}
-              {' '}
-              <strong>{t('products.help.digital', 'Les Produits digitaux')}</strong>
-              {' '}
-              {t('products.help.digitalDesc', 'pour des fichiers téléchargeables.')}
-              {' '}
-              <strong>{t('products.help.physical', 'Les Produits physiques')}</strong>
-              {' '}
-              {t('products.help.physicalDesc', 'nécessitent une livraison.')}
-              {' '}
-              <strong>{t('products.help.services', 'Les Services')}</strong>
-              {' '}
+              {t(
+                'products.help.description',
+                "Chaque type de produit est optimisé pour un cas d'usage spécifique."
+              )}{' '}
+              <strong>{t('products.help.courses', 'Les Cours en ligne')}</strong>{' '}
+              {t(
+                'products.help.coursesDesc',
+                'sont parfaits pour des formations structurées avec vidéos et quiz.'
+              )}{' '}
+              <strong>{t('products.help.digital', 'Les Produits digitaux')}</strong>{' '}
+              {t('products.help.digitalDesc', 'pour des fichiers téléchargeables.')}{' '}
+              <strong>{t('products.help.physical', 'Les Produits physiques')}</strong>{' '}
+              {t('products.help.physicalDesc', 'nécessitent une livraison.')}{' '}
+              <strong>{t('products.help.services', 'Les Services')}</strong>{' '}
               {t('products.help.servicesDesc', 'pour des prestations avec réservations.')}
             </p>
           </div>
@@ -710,9 +744,3 @@ export const EnhancedProductTypeSelector = ({
     </div>
   );
 };
-
-
-
-
-
-

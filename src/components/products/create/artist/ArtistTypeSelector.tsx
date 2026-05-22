@@ -7,29 +7,21 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  BookOpen,
-  Music,
-  Palette,
-  Brush,
-  Video,
-  Sparkles,
-  CheckCircle2,
-} from 'lucide-react';
+import { BookOpen, Music, Palette, Brush, Video, Sparkles, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ArtistType } from '@/types/artist-product';
 
 interface ArtistTypeOption {
   value: ArtistType;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   description: string;
   examples: string[];
   color: string;
   gradient: string;
 }
 
-const  ARTIST_TYPES: ArtistTypeOption[] = [
+const ARTIST_TYPES: ArtistTypeOption[] = [
   {
     value: 'writer',
     label: 'Écrivain / Auteur',
@@ -70,7 +62,7 @@ const  ARTIST_TYPES: ArtistTypeOption[] = [
     value: 'multimedia',
     label: 'Artiste Multimédia',
     icon: Video,
-    description: 'Vidéos d\'art, installations, contenus interactifs',
+    description: "Vidéos d'art, installations, contenus interactifs",
     examples: ['Vidéo', 'Installation', 'Interactive', 'NFT'],
     color: 'text-green-500',
     gradient: 'from-green-500 to-emerald-500',
@@ -102,7 +94,7 @@ const ArtistTypeSelectorComponent = ({ selectedType, onSelect }: ArtistTypeSelec
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {ARTIST_TYPES.map((type) => {
+        {ARTIST_TYPES.map(type => {
           const Icon = type.icon;
           const isSelected = selectedType === type.value;
 
@@ -117,12 +109,10 @@ const ArtistTypeSelectorComponent = ({ selectedType, onSelect }: ArtistTypeSelec
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div className={cn('p-3 rounded-lg bg-gradient-to-br', `bg-gradient-to-br ${type.gradient} opacity-20`)}>
-                    <Icon className={cn('h-6 w-6', type.color)} />
+                  <div className="app-icon-plain flex shrink-0 items-center justify-center">
+                    <Icon className="h-6 w-6 text-black" />
                   </div>
-                  {isSelected && (
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                  )}
+                  {isSelected && <CheckCircle2 className="h-5 w-5 text-black" />}
                 </div>
                 <CardTitle className="text-lg">{type.label}</CardTitle>
                 <CardDescription>{type.description}</CardDescription>
@@ -146,10 +136,3 @@ const ArtistTypeSelectorComponent = ({ selectedType, onSelect }: ArtistTypeSelec
 
 // Optimisation avec React.memo
 export const ArtistTypeSelector = React.memo(ArtistTypeSelectorComponent);
-
-
-
-
-
-
-

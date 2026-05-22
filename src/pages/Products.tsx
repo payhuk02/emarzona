@@ -482,7 +482,7 @@ const Products = () => {
   const handleImportConfirmed = useCallback(
     async (
       validatedProducts: Product[],
-      options?: { 
+      options?: {
         onProgress?: (progress: { imported: number; total: number; percentage: number }) => void;
         onCancel?: () => boolean;
       }
@@ -512,12 +512,12 @@ const Products = () => {
         for (let i = 0; i < validatedProducts.length; i += BATCH_SIZE) {
           // Vérifier si l'import a été annulé
           if (options?.onCancel && options.onCancel()) {
-            logger.info('Import annulé par l\'utilisateur', { imported: successful, failed, total });
+            logger.info("Import annulé par l'utilisateur", { imported: successful, failed, total });
             break;
           }
 
           const batch = validatedProducts.slice(i, i + BATCH_SIZE);
-          
+
           // Traiter le batch en parallèle
           const batchResults = await Promise.allSettled(
             batch.map(product =>
@@ -553,7 +553,10 @@ const Products = () => {
           }
 
           // Petit délai entre batches pour éviter surcharge DB
-          if (i + BATCH_SIZE < validatedProducts.length && (!options?.onCancel || !options.onCancel())) {
+          if (
+            i + BATCH_SIZE < validatedProducts.length &&
+            (!options?.onCancel || !options.onCancel())
+          ) {
             await new Promise(resolve => setTimeout(resolve, 100));
           }
         }
@@ -701,15 +704,15 @@ const Products = () => {
   if (storeLoading) {
     return (
       <MainLayout layoutType="products">
-        <div 
+        <div
           className="flex items-center justify-center min-h-[60vh]"
           role="status"
           aria-live="polite"
           aria-label={t('products.loadingProducts', 'Chargement des produits...')}
         >
           <div className="text-center">
-            <Loader2 
-              className="inline-block h-8 w-8 animate-spin text-primary" 
+            <Loader2
+              className="inline-block h-8 w-8 animate-spin text-primary"
               aria-hidden="true"
             />
             <p className="mt-2 text-muted-foreground">{t('products.loadingProducts')}</p>
@@ -755,15 +758,13 @@ const Products = () => {
           <div className="flex items-center gap-2 sm:gap-3">
             <div>
               <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <div className="app-icon-plain flex shrink-0 items-center justify-center animate-in zoom-in duration-500">
                   <Package
-                    className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                    className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-black"
                     aria-hidden="true"
                   />
                 </div>
-                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  {t('products.title')}
-                </span>
+                <span>{t('products.title')}</span>
               </h1>
               <p className="text-sm sm:text-xs md:text-sm lg:text-base text-muted-foreground">
                 {t('products.subtitle', 'Gérez vos produits et vendez plus efficacement')}
@@ -787,7 +788,7 @@ const Products = () => {
             </Button>
             <Button
               onClick={() => navigate('/dashboard/products/new')}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-200 group hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] text-xs sm:text-sm px-3 sm:px-4"
+              className="app-btn-premium-gradient text-white shadow-md hover:shadow-lg transition-all duration-200 group hover:scale-105 active:scale-95 touch-manipulation min-h-[44px] text-xs sm:text-sm px-3 sm:px-4"
               aria-label={t('products.addNew')}
               size="sm"
               title="Nouveau produit (Cmd/Ctrl+N)"
@@ -803,15 +804,13 @@ const Products = () => {
         </div>
         {/* États de chargement */}
         {productsLoadingState ? (
-          <div 
+          <div
             className="space-y-4"
             role="status"
             aria-live="polite"
             aria-label={t('products.loading', 'Chargement des produits...')}
           >
-            <div className="sr-only">
-              {t('products.loading', 'Chargement des produits...')}
-            </div>
+            <div className="sr-only">{t('products.loading', 'Chargement des produits...')}</div>
             <ProductGrid className="gap-3 sm:gap-4 lg:gap-6">
               {Array.from({ length: itemsPerPage }).map((_, index) => (
                 <ProductCardSkeleton key={`skeleton-${index}`} />
@@ -832,7 +831,7 @@ const Products = () => {
                 <Button
                   onClick={() => navigate('/dashboard/products/new')}
                   size="lg"
-                  className="min-h-[44px] touch-manipulation bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group"
+                  className="app-btn-premium-gradient min-h-[44px] touch-manipulation text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group"
                 >
                   <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-200" />
                   {t('products.add')}
