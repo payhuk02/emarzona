@@ -19,7 +19,11 @@ export interface MarketplaceProductsCachePayload {
 
 const CACHE_PREFIX = 'marketplace_';
 const CACHE_VERSION = '1.0.0';
-const DEFAULT_TTL = 10 * 60 * 1000; // 10 minutes
+/** TTL max en localStorage (données encore affichables). */
+export const MARKETPLACE_CACHE_HARD_TTL_MS = 10 * 60 * 1000;
+/** Au-delà de ce délai, React Query refetch en arrière-plan (SWR). */
+export const MARKETPLACE_CACHE_SOFT_STALE_MS = 90 * 1000;
+const DEFAULT_TTL = MARKETPLACE_CACHE_HARD_TTL_MS;
 
 /**
  * Génère une clé de cache stable basée sur les filtres
@@ -314,17 +318,91 @@ export async function cacheMarketplaceProducts(
   await setCache(key, payload, ttl);
 }
 
-export async function getCachedMarketplaceProducts(
-  filters: Record<string, unknown>
-): Promise<MarketplaceProductsCachePayload | null> {
-  const key = generateCacheKey('products', filters);
-  const cached = await getCache<MarketplaceProductsCachePayload | Product[]>(key);
-  if (!cached) return null;
-  // Compat ancien format (tableau seul)
+function normalizeProductsPayload(
+  cached: MarketplaceProductsCachePayload | Product[]
+): MarketplaceProductsCachePayload {
   if (Array.isArray(cached)) {
     return { products: cached, totalCount: cached.length };
   }
   return cached;
+}
+
+function readLocalStorageCacheEntry<T>(key: string): CacheEntry<T> | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const entry = JSON.parse(raw) as CacheEntry<T>;
+    if (!entry?.data || typeof entry.timestamp !== 'number') return null;
+    if (Date.now() >= entry.expiresAt) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+export interface MarketplaceCacheMeta<T> {
+  data: T;
+  fetchedAt: number;
+  /** true si âge > SOFT_STALE — déclenche un refetch React Query en arrière-plan */
+  isSoftStale: boolean;
+}
+
+/**
+ * Lecture synchrone (localStorage) pour initialData React Query — 1er paint instantané.
+ */
+export function getCachedMarketplaceProductsSync(
+  filters: Record<string, unknown>
+): MarketplaceCacheMeta<MarketplaceProductsCachePayload> | null {
+  const key = generateCacheKey('products', filters);
+  const entry = readLocalStorageCacheEntry<MarketplaceProductsCachePayload | Product[]>(key);
+  if (!entry) return null;
+  const age = Date.now() - entry.timestamp;
+  return {
+    data: normalizeProductsPayload(entry.data),
+    fetchedAt: entry.timestamp,
+    isSoftStale: age > MARKETPLACE_CACHE_SOFT_STALE_MS,
+  };
+}
+
+export async function getCachedMarketplaceProducts(
+  filters: Record<string, unknown>
+): Promise<MarketplaceProductsCachePayload | null> {
+  const meta = getCachedMarketplaceProductsSync(filters);
+  return meta?.data ?? null;
+}
+
+export interface MarketplaceFacetsCachePayload {
+  total: number;
+  product_types: Array<{ value: string; count: number }>;
+  categories: Array<{ value: string; count: number }>;
+}
+
+const FACETS_CACHE_TTL_MS = 2 * 60 * 1000;
+
+export async function cacheMarketplaceFacets(
+  params: Record<string, unknown>,
+  payload: MarketplaceFacetsCachePayload
+): Promise<void> {
+  const key = generateCacheKey('facets', params);
+  await setCache(key, payload, FACETS_CACHE_TTL_MS);
+}
+
+export function getCachedMarketplaceFacetsSync(
+  params: Record<string, unknown>
+): MarketplaceCacheMeta<MarketplaceFacetsCachePayload> | null {
+  const key = generateCacheKey('facets', params);
+  const entry = readLocalStorageCacheEntry<MarketplaceFacetsCachePayload>(key);
+  if (!entry) return null;
+  const age = Date.now() - entry.timestamp;
+  return {
+    data: entry.data,
+    fetchedAt: entry.timestamp,
+    isSoftStale: age > MARKETPLACE_CACHE_SOFT_STALE_MS,
+  };
 }
 
 /**

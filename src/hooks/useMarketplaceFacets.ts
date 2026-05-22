@@ -1,8 +1,14 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { FilterState } from '@/types/marketplace';
 import type { MarketplaceFacetsResponse } from '@/types/marketplace-facets';
+import {
+  cacheMarketplaceFacets,
+  getCachedMarketplaceFacetsSync,
+  MARKETPLACE_CACHE_SOFT_STALE_MS,
+} from '@/lib/marketplace-cache';
 
 interface UseMarketplaceFacetsParams {
   filters: FilterState;
@@ -37,6 +43,21 @@ export function useMarketplaceFacets({
   searchQuery,
   enabled = true,
 }: UseMarketplaceFacetsParams) {
+  const facetCacheParams = useMemo(
+    () => ({
+      productType: filters.productType,
+      category: filters.category,
+      search: searchQuery.trim(),
+      featuredOnly: filters.featuredOnly,
+    }),
+    [filters.productType, filters.category, searchQuery, filters.featuredOnly]
+  );
+
+  const cachedFacets = useMemo(
+    () => (enabled ? getCachedMarketplaceFacetsSync(facetCacheParams) : null),
+    [enabled, facetCacheParams]
+  );
+
   return useQuery({
     queryKey: [
       'marketplace-facets',
@@ -58,10 +79,16 @@ export function useMarketplaceFacets({
         throw error;
       }
 
-      return normalizeFacets(data);
+      const facets = normalizeFacets(data);
+      cacheMarketplaceFacets(facetCacheParams, facets).catch(err =>
+        logger.warn('[useMarketplaceFacets] cache write failed', err)
+      );
+      return facets;
     },
     enabled,
-    staleTime: 60 * 1000,
+    initialData: cachedFacets?.data,
+    initialDataUpdatedAt: cachedFacets?.fetchedAt,
+    staleTime: MARKETPLACE_CACHE_SOFT_STALE_MS,
     gcTime: 5 * 60 * 1000,
   });
 }

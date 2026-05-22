@@ -45,7 +45,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { Product, FilterState, PaginationState } from '@/types/marketplace';
 import { cacheStrategies } from '@/lib/cache-optimization';
-import { getCachedMarketplaceProducts, cacheMarketplaceProducts } from '@/lib/marketplace-cache';
+import {
+  cacheMarketplaceProducts,
+  getCachedMarketplaceProductsSync,
+  MARKETPLACE_CACHE_SOFT_STALE_MS,
+} from '@/lib/marketplace-cache';
 
 interface MarketplaceProductsParams {
   filters: FilterState;
@@ -216,11 +220,24 @@ async function fetchMarketplaceProducts({
           `✅ [useMarketplaceProducts] ${products.length} produits chargés via RPC (${totalCount} total)`
         );
 
-        return {
+        const rpcResult = {
           products,
           totalCount,
           filteredCount: totalCount,
         };
+
+        if (rpcResult.products.length > 0) {
+          cacheMarketplaceProducts(
+            {
+              ...filters,
+              page: pagination.currentPage,
+              itemsPerPage: pagination.itemsPerPage,
+            },
+            { products: rpcResult.products, totalCount: rpcResult.totalCount }
+          ).catch(err => logger.warn('Failed to cache marketplace RPC products:', err));
+        }
+
+        return rpcResult;
       }
     } catch (error) {
       logger.error("❌ Erreur lors de l'appel RPC marketplace:", error);
@@ -575,38 +592,44 @@ export function useMarketplaceProducts({
     shouldUseRPCFiltering
   );
 
-  const cacheFilterParams = {
-    ...filters,
-    page: pagination.currentPage,
-    itemsPerPage: pagination.itemsPerPage,
-  };
+  const cacheFilterParams = useMemo(
+    () => ({
+      ...filters,
+      page: pagination.currentPage,
+      itemsPerPage: pagination.itemsPerPage,
+    }),
+    [filters, pagination.currentPage, pagination.itemsPerPage]
+  );
 
-  // Requête avec cache optimisé
+  const cachedBootstrap = useMemo(
+    () => (hasSearchQuery ? null : getCachedMarketplaceProductsSync(cacheFilterParams)),
+    [cacheFilterParams, hasSearchQuery]
+  );
+
+  const initialQueryData = cachedBootstrap
+    ? {
+        products: cachedBootstrap.data.products,
+        totalCount: cachedBootstrap.data.totalCount,
+        filteredCount: cachedBootstrap.data.products.length,
+      }
+    : undefined;
+
+  // SWR : cache local pour le 1er paint, refetch RPC si données > 90s
   const query = useQuery({
     queryKey,
-    queryFn: async () => {
-      const cached = await getCachedMarketplaceProducts(cacheFilterParams);
-
-      if (cached && cached.products.length > 0) {
-        return {
-          products: cached.products,
-          totalCount: cached.totalCount,
-          filteredCount: cached.products.length,
-        };
-      }
-
-      return fetchMarketplaceProducts({
+    queryFn: () =>
+      fetchMarketplaceProducts({
         filters,
         pagination,
         hasSearchQuery,
         shouldUseRPCFiltering,
-      });
-    },
+      }),
     enabled: !hasSearchQuery,
-    // ✅ OPTIMISATION: Cache agressif pour les produits (changent rarement)
-    staleTime: cacheStrategies.products.staleTime, // 10 minutes
-    gcTime: cacheStrategies.products.gcTime, // 30 minutes
-    refetchOnWindowFocus: cacheStrategies.products.refetchOnWindowFocus, // false
+    initialData: initialQueryData,
+    initialDataUpdatedAt: cachedBootstrap?.fetchedAt,
+    staleTime: MARKETPLACE_CACHE_SOFT_STALE_MS,
+    gcTime: cacheStrategies.products.gcTime,
+    refetchOnWindowFocus: cacheStrategies.products.refetchOnWindowFocus,
     // ✅ OPTIMISATION: Garder les données précédentes pendant le chargement (pagination fluide)
     placeholderData: previousData => previousData,
     // ✅ OPTIMISATION: Partage structurel pour éviter re-renders
@@ -633,7 +656,7 @@ export function useMarketplaceProducts({
           hasSearchQuery,
           shouldUseRPCFiltering,
         }),
-      staleTime: cacheStrategies.products.staleTime,
+      staleTime: MARKETPLACE_CACHE_SOFT_STALE_MS,
     });
   };
 
