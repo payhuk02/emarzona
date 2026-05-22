@@ -194,7 +194,7 @@ export async function showNotification(
   if (Notification.permission === 'granted') {
     const registration = await navigator.serviceWorker.ready;
     await registration.showNotification(title, {
-      icon: '/icon-192.png',
+      icon: '/icon-192x192.png',
       badge: '/badge-72.png',
       ...options,
     });

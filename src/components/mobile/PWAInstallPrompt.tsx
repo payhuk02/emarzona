@@ -62,8 +62,8 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
     } catch (error) {
       logger.error('Installation failed', { error });
       toast({
-        title: 'Erreur d\'installation',
-        description: 'Impossible d\'installer l\'application.',
+        title: "Erreur d'installation",
+        description: "Impossible d'installer l'application.",
         variant: 'destructive',
       });
     } finally {
@@ -84,8 +84,8 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
 
         // Send a test notification
         sendNotification('Notifications activées !', {
-          body: 'Vous recevrez maintenant des mises à jour importantes d\'Emarzona.',
-          icon: '/favicon.ico',
+          body: "Vous recevrez maintenant des mises à jour importantes d'Emarzona.",
+          icon: '/icon-192x192.png',
         });
       } else {
         toast({
@@ -113,7 +113,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
       <div
         data-pwa-install
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 shadow-lg",
+          'fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 shadow-lg',
           className
         )}
       >
@@ -126,12 +126,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleInstall}
-              disabled={isInstalling}
-            >
+            <Button size="sm" variant="secondary" onClick={handleInstall} disabled={isInstalling}>
               {isInstalling ? 'Installation...' : 'Installer'}
             </Button>
             {dismissible && (
@@ -151,7 +146,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
   }
 
   return (
-    <Card data-pwa-install className={cn("w-full max-w-md mx-auto", className)}>
+    <Card data-pwa-install className={cn('w-full max-w-md mx-auto', className)}>
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-fit">
           <Download className="h-8 w-8 text-white" />
@@ -186,13 +181,8 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
         </div>
 
         <div className="space-y-3">
-          <Button
-            onClick={handleInstall}
-            disabled={isInstalling}
-            className="w-full"
-            size="lg"
-          >
-            {isInstalling ? 'Installation en cours...' : 'Installer l\'application'}
+          <Button onClick={handleInstall} disabled={isInstalling} className="w-full" size="lg">
+            {isInstalling ? 'Installation en cours...' : "Installer l'application"}
           </Button>
 
           {supportsNotifications && !notificationsEnabled && (

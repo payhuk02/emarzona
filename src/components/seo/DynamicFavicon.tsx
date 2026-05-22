@@ -16,7 +16,7 @@ export const DynamicFavicon = () => {
   // Utiliser le favicon personnalisé s'il existe, sinon le logo light, sinon le favicon par défaut
   // Si logoLight est null, utiliser uniquement le favicon par défaut pour éviter le clignotement
   // Note: logoLight peut être null si aucun logo personnalisé n'est configuré
-  const faviconUrl = favicon || (logoLight ? logoLight : '/favicon.ico');
+  const faviconUrl = favicon || logoLight || '/icon-32x32.png';
 
   useEffect(() => {
     // Éviter les mises à jour inutiles
@@ -93,10 +93,3 @@ export const DynamicFavicon = () => {
     </Helmet>
   );
 };
-
-
-
-
-
-
-
