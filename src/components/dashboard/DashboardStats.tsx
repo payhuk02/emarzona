@@ -45,29 +45,35 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
     {
       label: t('dashboard.stats.avgBasket', 'Panier moyen'),
       value: formatFcfa(avgBasket),
-      trend: stats.trends.orderGrowth,
+      trend: stats.trends.revenueGrowth,
       icon: Wallet,
       theme: 'orange' as const,
     },
   ];
 
+  const periodHint = stats.periodLabel;
+
   return (
-    <div
-      ref={statsRef}
-      className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
-      role="region"
-      aria-label={t('dashboard.stats.ariaLabel', 'Statistiques du tableau de bord')}
-    >
-      {cards.map(card => (
-        <DashboardMetricCard
-          key={card.label}
-          label={card.label}
-          value={card.value}
-          trendPercent={card.trend}
-          icon={card.icon}
-          theme={card.theme}
-        />
-      ))}
+    <div ref={statsRef} className="space-y-3">
+      <p className="text-xs sm:text-sm text-muted-foreground">
+        {t('dashboard.stats.periodHint', 'KPI sur la période : {{period}}', { period: periodHint })}
+      </p>
+      <div
+        className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+        role="region"
+        aria-label={t('dashboard.stats.ariaLabel', 'Statistiques du tableau de bord')}
+      >
+        {cards.map(card => (
+          <DashboardMetricCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            trendPercent={card.trend}
+            icon={card.icon}
+            theme={card.theme}
+          />
+        ))}
+      </div>
     </div>
   );
 });

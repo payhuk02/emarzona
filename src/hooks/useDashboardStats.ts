@@ -1,12 +1,9 @@
 /**
  * Hook optimisé pour les statistiques du dashboard
  * Utilise React Query pour le cache, le refetch automatique et la déduplication
- *
- * Types dans src/types/dashboard-stats.ts
- * Transformation dans src/services/dashboardStatsTransform.ts
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from './useStore';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,9 +11,23 @@ import { logger } from '@/lib/logger';
 import { transformOptimizedData } from '@/services/dashboardStatsTransform';
 import { getFallbackStats } from '@/types/dashboard-stats';
 
-// Re-export types for backward compatibility
 export type { DashboardStats, UseDashboardStatsOptions } from '@/types/dashboard-stats';
-import type { DashboardStats, UseDashboardStatsOptions, OptimizedDashboardData, RecentOrder } from '@/types/dashboard-stats';
+import type {
+  DashboardStats,
+  UseDashboardStatsOptions,
+  OptimizedDashboardData,
+  RecentOrder,
+  TopProduct,
+  ProductPerformance,
+  DashboardOperational,
+} from '@/types/dashboard-stats';
+
+interface PeriodRange {
+  start: Date;
+  end: Date;
+  days: number;
+  label: string;
+}
 
 function getPeriodDays(period?: string): number {
   if (period === '7d') return 7;
@@ -24,76 +35,352 @@ function getPeriodDays(period?: string): number {
   return 30;
 }
 
-/**
- * Fetch stats directly from individual tables
- */
-async function fetchDashboardStatsFromTables(
-  storeId: string,
-  periodDays: number
-): Promise<DashboardStats> {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - periodDays);
+function resolvePeriodRange(options?: UseDashboardStatsOptions): PeriodRange {
+  const end = options?.customEndDate ? new Date(options.customEndDate) : new Date();
+  end.setHours(23, 59, 59, 999);
 
-  const [productsResult, ordersResult, customersResult] = await Promise.all([
-    supabase.from('products').select('product_type, price, is_active').eq('store_id', storeId),
-    supabase.from('orders').select('id, status, total_amount, created_at, customer_id, order_number').eq('store_id', storeId).gte('created_at', startDate.toISOString()),
-    supabase.from('customers').select('created_at').eq('store_id', storeId),
-  ]);
-
-  const tolerateQueryError = (
-    tableName: 'products' | 'orders' | 'customers',
-    err: { code?: string; message?: string } | null
-  ): boolean => {
-    if (!err) return false;
-    const msg = (err.message || '').toLowerCase();
-    const code = err.code || '';
-    const isNonBlocking =
-      code === '42501' || // permission denied (RLS/privileges)
-      code === '42P01' || // relation does not exist
-      msg.includes('permission denied') ||
-      msg.includes('does not exist') ||
-      msg.includes('rls');
-
-    if (isNonBlocking) {
-      logger.warn(`[Dashboard] Non-blocking query error on ${tableName}`, {
-        table: tableName,
-        code,
-        message: err.message,
-      });
-    }
-    return isNonBlocking;
-  };
-
-  const productsErrorNonBlocking = tolerateQueryError('products', productsResult.error);
-  const ordersErrorNonBlocking = tolerateQueryError('orders', ordersResult.error);
-  const customersErrorNonBlocking = tolerateQueryError('customers', customersResult.error);
-
-  if (productsResult.error && !productsErrorNonBlocking) throw productsResult.error;
-  if (ordersResult.error && !ordersErrorNonBlocking) throw ordersResult.error;
-  if (customersResult.error && !customersErrorNonBlocking) throw customersResult.error;
-
-  // Si aucune source n'est exploitable, signaler une vraie erreur.
-  if (
-    (productsResult.error || !productsResult.data) &&
-    (ordersResult.error || !ordersResult.data) &&
-    (customersResult.error || !customersResult.data)
-  ) {
-    throw new Error('Aucune donnée dashboard disponible');
+  if (options?.period === 'custom' && options.customStartDate) {
+    const start = new Date(options.customStartDate);
+    start.setHours(0, 0, 0, 0);
+    const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)));
+    const label = `${start.toLocaleDateString('fr-FR')} – ${end.toLocaleDateString('fr-FR')}`;
+    return { start, end, days, label };
   }
 
-  const products = productsResult.error ? [] : (productsResult.data || []);
-  const orders = ordersResult.error ? [] : (ordersResult.data || []);
-  const customers = customersResult.error ? [] : (customersResult.data || []);
+  const days = getPeriodDays(options?.period);
+  const start = new Date(end);
+  start.setDate(start.getDate() - days);
+  start.setHours(0, 0, 0, 0);
 
-  const now = Date.now();
-  const ms = (days: number) => days * 24 * 60 * 60 * 1000;
-  const completedOrders = orders.filter(o => o.status === 'completed');
-  const revenueFor = (days: number) => completedOrders.filter(o => new Date(o.created_at).getTime() >= now - ms(days)).reduce((s, o) => s + (o.total_amount || 0), 0);
-  const ordersFor = (days: number) => orders.filter(o => new Date(o.created_at).getTime() >= now - ms(days)).length;
-  const customersFor = (days: number) => customers.filter(c => new Date(c.created_at).getTime() >= now - ms(days)).length;
+  const labels: Record<string, string> = {
+    '7d': '7 derniers jours',
+    '30d': '30 derniers jours',
+    '90d': '90 derniers jours',
+  };
+  return {
+    start,
+    end,
+    days,
+    label: labels[options?.period || '30d'] || `${days} derniers jours`,
+  };
+}
 
-  const activeProducts = products.filter(p => p.is_active);
+function isInRange(dateStr: string, start: Date, end: Date): boolean {
+  const t = new Date(dateStr).getTime();
+  return t >= start.getTime() && t <= end.getTime();
+}
+
+function tolerateQueryError(
+  tableName: string,
+  err: { code?: string; message?: string } | null
+): boolean {
+  if (!err) return false;
+  const msg = (err.message || '').toLowerCase();
+  const code = err.code || '';
+  const isNonBlocking =
+    code === '42501' ||
+    code === '42P01' ||
+    msg.includes('permission denied') ||
+    msg.includes('does not exist') ||
+    msg.includes('rls');
+
+  if (isNonBlocking) {
+    logger.warn(`[Dashboard] Non-blocking query error on ${tableName}`, {
+      table: tableName,
+      code,
+      message: err.message,
+    });
+  }
+  return isNonBlocking;
+}
+
+async function fetchOperationalCounts(storeId: string): Promise<DashboardOperational> {
+  const [pendingRes, processingRes, draftRes, lowStockRes, reviewsRes] = await Promise.all([
+    supabase
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('status', 'pending'),
+    supabase
+      .from('orders')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .in('status', ['processing', 'confirmed']),
+    supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('is_draft', true),
+    supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('product_type', 'physical')
+      .eq('is_active', true)
+      .not('stock', 'is', null)
+      .lte('stock', 5),
+    supabase
+      .from('reviews')
+      .select('id, products!inner(store_id)', { count: 'exact', head: true })
+      .eq('products.store_id', storeId)
+      .eq('is_approved', false),
+  ]);
+
+  const pendingOrders = pendingRes.count ?? 0;
+  const processingOrders = processingRes.count ?? 0;
+
+  return {
+    pendingOrders,
+    processingOrders,
+    draftProducts: draftRes.count ?? 0,
+    lowStockProducts: lowStockRes.count ?? 0,
+    pendingReviews: reviewsRes.count ?? 0,
+    ordersToFulfill: pendingOrders + processingOrders,
+  };
+}
+
+type OrderRow = {
+  id: string;
+  status: string;
+  total_amount: number | null;
+  created_at: string;
+  customer_id: string | null;
+  order_number: string | null;
+  customers: { name: string; email: string } | { name: string; email: string }[] | null;
+};
+
+type ProductRow = {
+  product_type: string;
+  price: number | null;
+  is_active: boolean | null;
+  is_draft?: boolean | null;
+};
+
+type OrderItemRow = {
+  order_id: string | null;
+  product_id: string | null;
+  quantity: number | null;
+  total_price: number | null;
+  product_type: string | null;
+  products: {
+    id: string;
+    name: string;
+    price: number | null;
+    image_url: string | null;
+    product_type: string;
+  } | null;
+};
+
+async function fetchTopProductsFromItems(
+  storeId: string,
+  completedOrderIds: string[],
+  limit = 5
+): Promise<TopProduct[]> {
+  if (completedOrderIds.length === 0) return [];
+
+  const { data: items, error } = await supabase
+    .from('order_items')
+    .select(
+      'order_id, product_id, quantity, total_price, product_type, products!inner(id, name, price, image_url, product_type, store_id)'
+    )
+    .in('order_id', completedOrderIds)
+    .eq('products.store_id', storeId);
+
+  if (error) {
+    if (!tolerateQueryError('order_items', error)) throw error;
+    return [];
+  }
+
+  const agg = new Map<
+    string,
+    {
+      product: NonNullable<OrderItemRow['products']>;
+      revenue: number;
+      quantity: number;
+      orders: Set<string>;
+    }
+  >();
+
+  for (const item of (items || []) as OrderItemRow[]) {
+    if (!item.product_id || !item.products) continue;
+    const pid = item.product_id;
+    const existing = agg.get(pid) ?? {
+      product: item.products,
+      revenue: 0,
+      quantity: 0,
+      orders: new Set<string>(),
+    };
+    existing.revenue += Number(item.total_price) || 0;
+    existing.quantity += Number(item.quantity) || 0;
+    if (item.order_id) existing.orders.add(item.order_id);
+    agg.set(pid, existing);
+  }
+
+  return [...agg.entries()]
+    .map(([id, v]) => ({
+      id,
+      name: v.product.name,
+      price: v.product.price || 0,
+      imageUrl: v.product.image_url,
+      productType: v.product.product_type,
+      revenue: v.revenue,
+      quantity: v.quantity,
+      orderCount: v.orders.size || v.quantity,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, limit);
+}
+
+async function fetchTopProductsRpc(storeId: string, limit = 5): Promise<TopProduct[]> {
+  const { data, error } = await supabase.rpc('get_top_selling_products', {
+    store_uuid: storeId,
+    limit_count: limit,
+  });
+
+  if (error) {
+    if (!tolerateQueryError('get_top_selling_products', error)) {
+      logger.warn('[Dashboard] RPC top products unavailable', { error: error.message });
+    }
+    return [];
+  }
+
+  return (data || []).map(
+    (p: {
+      id: string;
+      name: string;
+      price: number;
+      image_url: string | null;
+      product_type: string;
+      revenue: number;
+      quantity: number;
+      order_count: number;
+    }) => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      imageUrl: p.image_url,
+      productType: p.product_type,
+      revenue: Number(p.revenue) || 0,
+      quantity: Number(p.quantity) || 0,
+      orderCount: Number(p.order_count) || 0,
+    })
+  );
+}
+
+function buildProductPerformance(
+  topProducts: TopProduct[],
+  ordersByType: Record<string, number>
+): ProductPerformance[] {
+  const types = ['digital', 'physical', 'service', 'course', 'artist'] as const;
+  return types.map(type => {
+    const matching = topProducts.filter(p => p.productType === type);
+    const revenue = matching.reduce((s, p) => s + p.revenue, 0);
+    const orders = ordersByType[type] || 0;
+    return {
+      type,
+      orders,
+      revenue,
+      quantity: matching.reduce((s, p) => s + p.quantity, 0),
+      avgOrderValue: orders > 0 ? revenue / orders : 0,
+      productsSold: matching.length,
+      orders30d: orders,
+      revenue30d: revenue,
+    };
+  });
+}
+
+async function fetchDashboardStatsFromTables(
+  storeId: string,
+  range: PeriodRange
+): Promise<DashboardStats> {
+  const compareStart = new Date(range.start);
+  compareStart.setDate(compareStart.getDate() - range.days);
+
+  const [productsResult, ordersResult, customersResult, operational] = await Promise.all([
+    supabase
+      .from('products')
+      .select('product_type, price, is_active, is_draft')
+      .eq('store_id', storeId),
+    supabase
+      .from('orders')
+      .select(
+        'id, status, total_amount, created_at, customer_id, order_number, customers(name, email)'
+      )
+      .eq('store_id', storeId)
+      .gte('created_at', compareStart.toISOString())
+      .lte('created_at', range.end.toISOString())
+      .order('created_at', { ascending: false }),
+    supabase.from('customers').select('created_at').eq('store_id', storeId),
+    fetchOperationalCounts(storeId),
+  ]);
+
+  if (productsResult.error && !tolerateQueryError('products', productsResult.error)) {
+    throw productsResult.error;
+  }
+  if (ordersResult.error && !tolerateQueryError('orders', ordersResult.error)) {
+    throw ordersResult.error;
+  }
+  if (customersResult.error && !tolerateQueryError('customers', customersResult.error)) {
+    throw customersResult.error;
+  }
+
+  const products = (productsResult.data || []) as ProductRow[];
+  const allOrders = (ordersResult.data || []) as OrderRow[];
+  const customers = customersResult.data || [];
+
+  const periodOrders = allOrders.filter(o => isInRange(o.created_at, range.start, range.end));
+  const previousOrders = allOrders.filter(
+    o =>
+      isInRange(o.created_at, compareStart, range.start) &&
+      !isInRange(o.created_at, range.start, range.end)
+  );
+
+  const completedInPeriod = periodOrders.filter(o => o.status === 'completed');
+  const completedPrevious = previousOrders.filter(o => o.status === 'completed');
+
+  const periodRevenue = completedInPeriod.reduce((s, o) => s + (o.total_amount || 0), 0);
+  const previousRevenue = completedPrevious.reduce((s, o) => s + (o.total_amount || 0), 0);
+
+  const newCustomersInPeriod = customers.filter(c =>
+    isInRange(c.created_at, range.start, range.end)
+  ).length;
+  const newCustomersPrevious = customers.filter(
+    c =>
+      isInRange(c.created_at, compareStart, range.start) &&
+      !isInRange(c.created_at, range.start, range.end)
+  ).length;
+
+  const activeProducts = products.filter(p => p.is_active && !p.is_draft);
   const countType = (type: string) => activeProducts.filter(p => p.product_type === type).length;
+
+  const ordersByType: Record<string, number> = {
+    digital: 0,
+    physical: 0,
+    service: 0,
+    course: 0,
+    artist: 0,
+  };
+
+  const completedOrderIds = completedInPeriod.map(o => o.id);
+  let topProducts = await fetchTopProductsFromItems(storeId, completedOrderIds, 5);
+  if (topProducts.length === 0) {
+    topProducts = await fetchTopProductsRpc(storeId, 5);
+  }
+
+  const productPerformance = buildProductPerformance(topProducts, ordersByType);
+
+  const recentOrders: RecentOrder[] = periodOrders.slice(0, 5).map(o => {
+    const cust = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+    return {
+      id: o.id,
+      orderNumber: o.order_number || '',
+      totalAmount: o.total_amount || 0,
+      status: o.status,
+      createdAt: o.created_at,
+      customer: cust ? { id: o.customer_id || '', name: cust.name, email: cust.email } : null,
+      productTypes: [],
+    };
+  });
 
   const optimizedData: OptimizedDashboardData = {
     baseStats: {
@@ -104,42 +391,42 @@ async function fetchDashboardStatsFromTables(
       serviceProducts: countType('service'),
       courseProducts: countType('course'),
       artistProducts: countType('artist'),
-      avgProductPrice: products.length > 0 ? products.reduce((s, p) => s + (p.price || 0), 0) / products.length : 0,
+      avgProductPrice:
+        products.length > 0
+          ? products.reduce((s, p) => s + (p.price || 0), 0) / products.length
+          : 0,
     },
     ordersStats: {
-      totalOrders: orders.length,
-      completedOrders: completedOrders.length,
-      pendingOrders: orders.filter(o => o.status === 'pending').length,
-      cancelledOrders: orders.filter(o => o.status === 'cancelled').length,
-      totalRevenue: completedOrders.reduce((s, o) => s + (o.total_amount || 0), 0),
-      avgOrderValue: completedOrders.length > 0 ? completedOrders.reduce((s, o) => s + (o.total_amount || 0), 0) / completedOrders.length : 0,
-      revenue30d: revenueFor(30), orders30d: ordersFor(30),
-      revenue7d: revenueFor(7), orders7d: ordersFor(7),
-      revenue90d: revenueFor(90), orders90d: ordersFor(90),
+      totalOrders: periodOrders.length,
+      completedOrders: completedInPeriod.length,
+      pendingOrders: periodOrders.filter(o => o.status === 'pending').length,
+      cancelledOrders: periodOrders.filter(o => o.status === 'cancelled').length,
+      totalRevenue: periodRevenue,
+      avgOrderValue: completedInPeriod.length > 0 ? periodRevenue / completedInPeriod.length : 0,
+      revenue30d: periodRevenue,
+      orders30d: periodOrders.length,
+      revenue7d: periodRevenue,
+      orders7d: periodOrders.length,
+      revenue90d: periodRevenue,
+      orders90d: periodOrders.length,
+      previousPeriodRevenue: previousRevenue,
+      previousPeriodOrders: previousOrders.length,
+      previousPeriodCustomers: newCustomersPrevious,
     },
     customersStats: {
       totalCustomers: customers.length,
-      newCustomers30d: customersFor(30),
-      newCustomers7d: customersFor(7),
-      newCustomers90d: customersFor(90),
-      customersWithOrders: new Set(orders.map(o => o.customer_id).filter(Boolean)).size,
+      newCustomers30d: newCustomersInPeriod,
+      newCustomers7d: newCustomersInPeriod,
+      newCustomers90d: newCustomersInPeriod,
+      customersWithOrders: new Set(periodOrders.map(o => o.customer_id).filter(Boolean)).size,
     },
-    productPerformance: [],
-    topProducts: [],
-    recentOrders: orders
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5)
-      .map(o => ({
-        id: o.id || '',
-        orderNumber: o.order_number || '',
-        totalAmount: o.total_amount || 0,
-        status: o.status || 'pending',
-        createdAt: o.created_at || new Date().toISOString(),
-        customer: null,
-        productTypes: [],
-      })) as RecentOrder[],
+    productPerformance,
+    topProducts,
+    recentOrders,
+    operational,
     generatedAt: new Date().toISOString(),
-    periodDays,
+    periodDays: range.days,
+    periodLabel: range.label,
   };
 
   return transformOptimizedData(optimizedData);
@@ -148,23 +435,28 @@ async function fetchDashboardStatsFromTables(
 export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) => {
   const { store } = useStore();
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const periodDays = getPeriodDays(options?.period);
+  const range = resolvePeriodRange(options);
 
-  const queryKey = ['dashboard-stats', store?.id, periodDays] as const;
+  const queryKey = [
+    'dashboard-stats',
+    store?.id,
+    range.days,
+    range.start.toISOString(),
+    range.end.toISOString(),
+  ] as const;
 
   const { data, isLoading, isFetching, error, refetch } = useQuery<DashboardStats>({
     queryKey,
     queryFn: () => {
       if (!store?.id) throw new Error('No store');
-      return fetchDashboardStatsFromTables(store.id, periodDays);
+      return fetchDashboardStatsFromTables(store.id, range);
     },
     enabled: !!user && !!store?.id,
-    staleTime: 5 * 60 * 1000,      // 5 min avant de considérer les données périmées
-    gcTime: 10 * 60 * 1000,         // 10 min en cache après démontage
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 2,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
     meta: {
       errorMessage: 'Erreur de chargement des statistiques',
     },
@@ -172,9 +464,9 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
   const stats = data ?? getFallbackStats();
   const errorMessage = error
-    ? (error.message?.includes('fetch') || error.message?.includes('Network')
-        ? 'Problème de connexion temporaire.'
-        : 'Erreur de chargement des statistiques.')
+    ? error.message?.includes('fetch') || error.message?.includes('Network')
+      ? 'Problème de connexion temporaire.'
+      : 'Erreur de chargement des statistiques.'
     : null;
 
   return {
@@ -182,7 +474,9 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     loading: isLoading,
     error: errorMessage,
     isUpdating: isFetching && !isLoading,
-    refetch: () => { refetch(); },
+    refetch: () => {
+      refetch();
+    },
   };
 };
 

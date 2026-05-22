@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Eye, Package, Star } from 'lucide-react';
+import { CheckCircle2, Clock, Package, Users } from 'lucide-react';
 import { formatFcfa } from '@/lib/format-currency';
 import type { DashboardStats } from '@/hooks/useDashboardStats';
 
@@ -10,18 +10,20 @@ interface DashboardFooterMetricsProps {
 
 export const DashboardFooterMetrics = React.memo<DashboardFooterMetricsProps>(({ stats }) => {
   const { t } = useTranslation();
-  const { performanceMetrics } = stats;
+  const { performanceMetrics, operational } = stats;
+
+  const completionRate = performanceMetrics.conversionRate;
 
   const items = [
     {
-      label: t('dashboard.footer.conversion', 'Taux de conversion'),
-      value: `${performanceMetrics.conversionRate.toFixed(1)}%`,
-      icon: Target,
+      label: t('dashboard.footer.completion', 'Taux de complétion'),
+      value: `${completionRate.toFixed(1)}%`,
+      icon: CheckCircle2,
     },
     {
-      label: t('dashboard.footer.visits', 'Visites'),
-      value: performanceMetrics.pageViews.toLocaleString('fr-FR'),
-      icon: Eye,
+      label: t('dashboard.footer.toFulfill', 'À traiter'),
+      value: String(operational.ordersToFulfill),
+      icon: Clock,
     },
     {
       label: t('dashboard.footer.avgBasket', 'Panier moyen'),
@@ -29,9 +31,9 @@ export const DashboardFooterMetrics = React.memo<DashboardFooterMetricsProps>(({
       icon: Package,
     },
     {
-      label: t('dashboard.footer.products', 'Produits actifs'),
-      value: String(stats.activeProducts),
-      icon: Star,
+      label: t('dashboard.footer.retention', 'Clients avec commande'),
+      value: `${performanceMetrics.customerRetention}%`,
+      icon: Users,
     },
   ];
 

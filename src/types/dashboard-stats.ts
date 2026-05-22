@@ -2,6 +2,15 @@
  * Types pour les statistiques du dashboard
  */
 
+export interface DashboardOperational {
+  pendingOrders: number;
+  processingOrders: number;
+  draftProducts: number;
+  lowStockProducts: number;
+  pendingReviews: number;
+  ordersToFulfill: number;
+}
+
 export interface DashboardStats {
   totalProducts: number;
   activeProducts: number;
@@ -11,6 +20,8 @@ export interface DashboardStats {
   cancelledOrders: number;
   totalCustomers: number;
   totalRevenue: number;
+  operational: DashboardOperational;
+  periodLabel: string;
   recentOrders: Array<{
     id: string;
     order_number: string;
@@ -64,11 +75,14 @@ export interface DashboardStats {
   productsByType: ProductTypeCount;
   revenueByType: ProductTypeCount;
   ordersByType: ProductTypeCount;
-  performanceMetricsByType: Record<string, {
-    conversionRate: number;
-    averageOrderValue: number;
-    customerRetention: number;
-  }>;
+  performanceMetricsByType: Record<
+    string,
+    {
+      conversionRate: number;
+      averageOrderValue: number;
+      customerRetention: number;
+    }
+  >;
   revenueByTypeAndMonth: Array<{
     month: string;
     digital: number;
@@ -111,6 +125,9 @@ export interface DashboardOrdersStats {
   orders7d: number;
   revenue90d: number;
   orders90d: number;
+  previousPeriodRevenue?: number;
+  previousPeriodOrders?: number;
+  previousPeriodCustomers?: number;
 }
 
 export interface DashboardCustomersStats {
@@ -160,8 +177,10 @@ export interface OptimizedDashboardData {
   productPerformance: ProductPerformance[];
   topProducts: TopProduct[];
   recentOrders: RecentOrder[];
+  operational: DashboardOperational;
   generatedAt: string;
   periodDays: number;
+  periodLabel: string;
 }
 
 export interface UseDashboardStatsOptions {
@@ -183,20 +202,35 @@ export function getFallbackStats(): DashboardStats {
     cancelledOrders: 0,
     totalCustomers: 0,
     totalRevenue: 0,
+    operational: {
+      pendingOrders: 0,
+      processingOrders: 0,
+      draftProducts: 0,
+      lowStockProducts: 0,
+      pendingReviews: 0,
+      ordersToFulfill: 0,
+    },
+    periodLabel: '30 derniers jours',
     recentOrders: [],
     topProducts: [],
     revenueByMonth: [],
     ordersByStatus: [],
-    recentActivity: [{
-      id: 'fallback-1',
-      type: 'order',
-      message: 'Tableau de bord initialisé',
-      timestamp: new Date().toISOString(),
-      status: 'success',
-    }],
+    recentActivity: [
+      {
+        id: 'fallback-1',
+        type: 'order',
+        message: 'Tableau de bord initialisé',
+        timestamp: new Date().toISOString(),
+        status: 'success',
+      },
+    ],
     performanceMetrics: {
-      conversionRate: 0, averageOrderValue: 0, customerRetention: 0,
-      pageViews: 0, bounceRate: 0, sessionDuration: 0,
+      conversionRate: 0,
+      averageOrderValue: 0,
+      customerRetention: 0,
+      pageViews: 0,
+      bounceRate: 0,
+      sessionDuration: 0,
     },
     trends: { revenueGrowth: 0, orderGrowth: 0, customerGrowth: 0, productGrowth: 0 },
     productsByType: { digital: 0, physical: 0, service: 0, course: 0, artist: 0 },

@@ -1,10 +1,9 @@
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
 import { Activity, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
@@ -52,6 +51,8 @@ import { DashboardCategorySales } from '@/components/dashboard/DashboardCategory
 import { DashboardFooterMetrics } from '@/components/dashboard/DashboardFooterMetrics';
 import { DashboardSalesEvolution } from '@/components/dashboard/DashboardSalesEvolution';
 import { DashboardRecentActivity } from '@/components/dashboard/DashboardRecentActivity';
+import { DashboardActionCenter } from '@/components/dashboard/DashboardActionCenter';
+import { DashboardNotificationsStrip } from '@/components/dashboard/DashboardNotificationsStrip';
 import '@/styles/dashboard-premium.css';
 
 /**
@@ -108,6 +109,7 @@ const Dashboard = () => {
 };
 
 const DashboardWithStore = () => {
+  const { store } = useStore();
   const platformLogo = usePlatformLogo();
 
   useEffect(() => {
@@ -414,6 +416,24 @@ const DashboardWithStore = () => {
             ) : (
               stats && (
                 <div className="space-y-6 sm:space-y-8">
+                  <DashboardActionCenter
+                    operational={stats.operational}
+                    periodLabel={stats.periodLabel}
+                    storeName={store?.name}
+                    storeSlug={store?.slug}
+                    storeSubdomain={store?.subdomain}
+                    customDomain={store?.custom_domain}
+                    unreadNotifications={unreadCount}
+                  />
+
+                  {notificationsEnabled && (
+                    <DashboardNotificationsStrip
+                      notifications={notifications}
+                      unreadCount={unreadCount}
+                      enabled={notificationsEnabled}
+                    />
+                  )}
+
                   <DashboardStats stats={stats} />
 
                   {stats.revenueByMonth.length > 0 && (
