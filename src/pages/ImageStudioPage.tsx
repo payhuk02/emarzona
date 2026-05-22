@@ -8,9 +8,11 @@ import { Helmet } from 'react-helmet-async';
 import { Wand2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { ImageEnhancerStudio } from '@/components/images/ImageEnhancerStudio';
 import { SmartImage } from '@/components/images/SmartImage';
+import { DashboardShellLayout } from '@/components/layout/DashboardShellLayout';
 
 const STORAGE_KEY = 'emarzona:image-studio:saved';
 
@@ -38,7 +40,7 @@ const ImageStudioPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-6xl py-8 px-4">
+    <DashboardShellLayout maxWidth="wide" className="max-w-6xl">
       <Helmet>
         <title>Studio IA d'images — Emarzona</title>
         <meta
@@ -47,13 +49,14 @@ const ImageStudioPage: React.FC = () => {
         />
       </Helmet>
 
-      <header className="mb-8 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 text-white shadow-md">
-          <Wand2 className="h-6 w-6" />
+      <header className="mb-6 sm:mb-8 flex items-start gap-3">
+        <SidebarTrigger className="mt-1 shrink-0" />
+        <div className="app-icon-plain flex shrink-0 items-center justify-center">
+          <Wand2 className="h-7 w-7 text-black" aria-hidden />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Studio IA d'images</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="app-premium-page-title">Studio IA d'images</h1>
+          <p className="app-text-caption mt-1 text-muted-foreground">
             Sélectionnez une image, prévisualisez l'amélioration IA, puis enregistrez-la
             définitivement.
           </p>
@@ -73,22 +76,22 @@ const ImageStudioPage: React.FC = () => {
         <aside className="space-y-4">
           <Card>
             <CardContent className="p-5 space-y-3">
-              <h2 className="font-semibold text-sm">💡 Conseils</h2>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• Utilisez des images bien éclairées au départ.</li>
-                <li>• L'IA ne change pas le sujet, elle l'améliore.</li>
-                <li>• Pour un fond blanc, choisissez le preset dédié.</li>
-                <li>• Utilisez le curseur avant/après pour comparer finement.</li>
-                <li>• « Affiner à nouveau » pour enchaîner plusieurs passes IA.</li>
+              <h2 className="app-text-card-title">Conseils</h2>
+              <ul className="app-text-body text-muted-foreground space-y-2">
+                <li>Utilisez des images bien éclairées au départ.</li>
+                <li>L'IA ne change pas le sujet, elle l'améliore.</li>
+                <li>Pour un fond blanc, choisissez le preset dédié.</li>
+                <li>Utilisez le curseur avant/après pour comparer finement.</li>
+                <li>« Affiner à nouveau » pour enchaîner plusieurs passes IA.</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-5 space-y-3">
-              <h2 className="font-semibold text-sm">Images enregistrées ({savedImages.length})</h2>
+              <h2 className="app-text-card-title">Images enregistrées ({savedImages.length})</h2>
               {savedImages.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
+                <p className="app-text-caption text-muted-foreground">
                   Vos images améliorées apparaîtront ici. Copiez l'URL pour les coller dans un
                   formulaire.
                 </p>
@@ -102,16 +105,16 @@ const ImageStudioPage: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="w-full text-xs"
+                        className="w-full text-sm"
                         onClick={() => handleCopy(url)}
                       >
                         {copied === url ? (
                           <>
-                            <Check className="h-3 w-3 mr-1" /> Copié
+                            <Check className="h-3.5 w-3.5 mr-1" /> Copié
                           </>
                         ) : (
                           <>
-                            <Copy className="h-3 w-3 mr-1" /> Copier l'URL
+                            <Copy className="h-3.5 w-3.5 mr-1" /> Copier l'URL
                           </>
                         )}
                       </Button>
@@ -123,7 +126,7 @@ const ImageStudioPage: React.FC = () => {
           </Card>
         </aside>
       </div>
-    </div>
+    </DashboardShellLayout>
   );
 };
 

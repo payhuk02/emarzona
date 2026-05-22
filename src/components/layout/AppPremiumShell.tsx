@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import '@/styles/landing-premium.css';
 import '@/styles/app-premium.css';
 import '@/styles/app-ui-overrides.css';
+import '@/styles/app-typography.css';
+import '@/styles/dashboard-responsive.css';
 
 interface AppPremiumShellProps {
   children: ReactNode;

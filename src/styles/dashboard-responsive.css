@@ -8,11 +8,11 @@
 }
 
 .dashboard-text-responsive {
-  @apply text-xs sm:text-sm md:text-base lg:text-lg;
+  @apply text-sm md:text-base lg:text-lg font-semibold;
 }
 
 .dashboard-text-responsive-small {
-  @apply text-[10px] sm:text-[11px] md:text-xs;
+  @apply text-xs md:text-sm font-normal;
 }
 
 .dashboard-padding-responsive {
@@ -53,7 +53,7 @@
   .dashboard-card {
     will-change: transform;
   }
-  
+
   .dashboard-card:hover {
     transform: translateY(-2px);
   }
@@ -97,7 +97,7 @@
   .dashboard-icon-container {
     will-change: auto;
   }
-  
+
   .dashboard-icon-container:hover {
     transform: none;
   }
@@ -132,29 +132,29 @@
   @apply bg-background overflow-x-hidden;
 }
 
-/* Responsive Typography */
+/* Responsive Typography — échelle premium (min 12px) */
 .dashboard-title {
-  @apply text-base sm:text-lg md:text-xl lg:text-2xl font-bold truncate;
+  @apply text-2xl md:text-3xl lg:text-4xl font-bold truncate;
 }
 
 .dashboard-card-title {
-  @apply text-xs sm:text-sm font-medium text-muted-foreground;
+  @apply text-sm md:text-base font-semibold text-foreground;
 }
 
 .dashboard-stat-value {
-  @apply text-xl sm:text-2xl font-bold mb-1;
+  @apply text-xl md:text-2xl lg:text-3xl font-bold mb-1 tabular-nums;
 }
 
 .dashboard-stat-description {
-  @apply text-xs text-muted-foreground mb-2;
+  @apply text-xs md:text-sm text-muted-foreground mb-2 font-normal;
 }
 
 .dashboard-action-title {
-  @apply font-semibold text-sm sm:text-base mb-1;
+  @apply font-semibold text-sm md:text-base mb-1;
 }
 
 .dashboard-action-description {
-  @apply text-xs sm:text-sm text-muted-foreground;
+  @apply text-xs md:text-sm text-muted-foreground font-normal;
 }
 
 /* Mobile Optimizations - Unifié à 768px pour cohérence avec useIsMobile hook */
@@ -271,9 +271,9 @@
   .animate-in {
     animation: none !important;
   }
-  
+
   /* Désactiver les animations inline dans les composants React */
-  [style*="animationDelay"] {
+  [style*='animationDelay'] {
     animation: none !important;
   }
 }

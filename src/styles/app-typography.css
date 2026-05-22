@@ -1,0 +1,164 @@
+/**
+ * Typographie premium — zone application (.landing-premium.app-premium)
+ * Échelle lisible, minimum 12px, hiérarchie par taille + graisse (pas tout en gras).
+ */
+
+.landing-premium.app-premium {
+  --app-font-display: clamp(1.75rem, 1.2vw + 1.35rem, 2.5rem);
+  --app-font-h1: clamp(1.5rem, 0.8vw + 1.2rem, 2rem);
+  --app-font-h2: clamp(1.125rem, 0.4vw + 1rem, 1.375rem);
+  --app-font-h3: 1rem;
+  --app-font-body: 0.9375rem;
+  --app-font-body-lg: 1rem;
+  --app-font-small: 0.8125rem;
+  --app-font-caption: 0.75rem;
+  --app-line-tight: 1.25;
+  --app-line-normal: 1.5;
+  --app-line-relaxed: 1.625;
+}
+
+/* Base zone principale */
+.landing-premium.app-premium #main-content,
+.landing-premium.app-premium main.flex-1.overflow-auto {
+  font-family: var(--lp-sans), system-ui, sans-serif;
+  font-size: var(--app-font-body);
+  line-height: var(--app-line-normal);
+  font-weight: 400;
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 768px) {
+  .landing-premium.app-premium #main-content,
+  .landing-premium.app-premium main.flex-1.overflow-auto {
+    font-size: var(--app-font-body-lg);
+  }
+}
+
+/* Titres */
+.landing-premium.app-premium #main-content h1,
+.landing-premium.app-premium #main-content .app-premium-page-title,
+.landing-premium.app-premium main.flex-1.overflow-auto h1 {
+  font-size: var(--app-font-display) !important;
+  line-height: var(--app-line-tight);
+  font-weight: 700 !important;
+}
+
+.landing-premium.app-premium #main-content h2,
+.landing-premium.app-premium main.flex-1.overflow-auto h2 {
+  font-size: var(--app-font-h1) !important;
+  line-height: var(--app-line-tight);
+  font-weight: 600 !important;
+}
+
+.landing-premium.app-premium #main-content h3,
+.landing-premium.app-premium main.flex-1.overflow-auto h3 {
+  font-size: var(--app-font-h2) !important;
+  line-height: var(--app-line-tight);
+  font-weight: 600 !important;
+}
+
+.landing-premium.app-premium #main-content h4,
+.landing-premium.app-premium main.flex-1.overflow-auto h4 {
+  font-size: var(--app-font-h3) !important;
+  font-weight: 600 !important;
+}
+
+/* Corps & labels — poids normal */
+.landing-premium.app-premium #main-content p,
+.landing-premium.app-premium #main-content span:not([class*='font-']),
+.landing-premium.app-premium #main-content label,
+.landing-premium.app-premium #main-content li,
+.landing-premium.app-premium #main-content td,
+.landing-premium.app-premium #main-content th,
+.landing-premium.app-premium main.flex-1.overflow-auto p,
+.landing-premium.app-premium main.flex-1.overflow-auto span:not([class*='font-']),
+.landing-premium.app-premium main.flex-1.overflow-auto label {
+  font-weight: 400;
+  color: hsl(var(--foreground));
+}
+
+.landing-premium.app-premium #main-content .text-muted-foreground,
+.landing-premium.app-premium main.flex-1.overflow-auto .text-muted-foreground {
+  color: hsl(var(--muted-foreground)) !important;
+  font-weight: 400 !important;
+}
+
+/* Minimum lisible : remplace text-[8px]–text-[11px] */
+.landing-premium.app-premium #main-content [class*='text-[8px]'],
+.landing-premium.app-premium #main-content [class*='text-[9px]'],
+.landing-premium.app-premium #main-content [class*='text-[10px]'],
+.landing-premium.app-premium #main-content [class*='text-[11px]'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[8px]'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[9px]'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[10px]'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[11px]'] {
+  font-size: var(--app-font-caption) !important;
+  line-height: var(--app-line-normal) !important;
+}
+
+/* Classes sémantiques réutilisables */
+.landing-premium.app-premium .app-text-display {
+  font-family: var(--lp-serif);
+  font-size: var(--app-font-display);
+  font-weight: 700;
+  line-height: var(--app-line-tight);
+  letter-spacing: -0.02em;
+  color: #000;
+}
+
+.landing-premium.app-premium .app-text-title {
+  font-family: var(--lp-serif);
+  font-size: var(--app-font-h1);
+  font-weight: 700;
+  line-height: var(--app-line-tight);
+  color: #000;
+}
+
+.landing-premium.app-premium .app-text-section {
+  font-size: var(--app-font-h2);
+  font-weight: 600;
+  line-height: var(--app-line-tight);
+}
+
+.landing-premium.app-premium .app-text-body {
+  font-size: var(--app-font-body);
+  font-weight: 400;
+  line-height: var(--app-line-normal);
+}
+
+@media (min-width: 768px) {
+  .landing-premium.app-premium .app-text-body {
+    font-size: var(--app-font-body-lg);
+  }
+}
+
+.landing-premium.app-premium .app-text-caption {
+  font-size: var(--app-font-caption);
+  font-weight: 400;
+  line-height: var(--app-line-normal);
+  color: hsl(var(--muted-foreground));
+}
+
+.landing-premium.app-premium .app-text-stat {
+  font-size: clamp(1.25rem, 0.5vw + 1.1rem, 1.75rem);
+  font-weight: 700;
+  line-height: var(--app-line-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-premium.app-premium .app-text-card-title {
+  font-size: var(--app-font-h3);
+  font-weight: 600;
+  line-height: var(--app-line-tight);
+}
+
+/* Boutons outline / ghost — poids medium */
+.landing-premium.app-premium
+  #main-content
+  button:not([class*='bg-primary']):not([class*='destructive']):not([class*='app-btn-premium']):not(
+    [class*='from-purple']
+  ):not([class*='to-pink']),
+.landing-premium.app-premium #main-content a:not([class*='bg-primary']) {
+  font-weight: 500;
+}

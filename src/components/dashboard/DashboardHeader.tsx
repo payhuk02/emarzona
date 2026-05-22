@@ -55,7 +55,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
           <div className="flex items-start sm:items-center gap-2 sm:gap-3">
             <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
             <div className="flex-1 min-w-0">
-              <h1 className="app-premium-page-title text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+              <h1 className="app-premium-page-title flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <LayoutDashboard
                     className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 xl:h-8 xl:w-8 text-black shrink-0"
@@ -72,7 +72,7 @@ export const DashboardHeader = React.memo<DashboardHeaderProps>(
                   )}
                 </div>
               </h1>
-              <p className="text-sm sm:text-xs md:text-sm lg:text-base text-black font-bold">
+              <p className="app-text-caption md:text-sm text-muted-foreground font-normal">
                 {t('dashboard.description')}
               </p>
             </div>

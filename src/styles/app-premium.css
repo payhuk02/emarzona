@@ -189,27 +189,7 @@
   font-weight: 700 !important;
 }
 
-/* Textes zone principale — noir gras */
-.landing-premium.app-premium #main-content,
-.landing-premium.app-premium #main-content p,
-.landing-premium.app-premium #main-content span,
-.landing-premium.app-premium #main-content label,
-.landing-premium.app-premium
-  #main-content
-  button:not([class*='bg-primary']):not([class*='destructive']),
-.landing-premium.app-premium #main-content a:not([class*='bg-primary']),
-.landing-premium.app-premium main.flex-1.overflow-auto p,
-.landing-premium.app-premium main.flex-1.overflow-auto span,
-.landing-premium.app-premium main.flex-1.overflow-auto label {
-  color: #000;
-  font-weight: 700;
-}
-
-.landing-premium.app-premium #main-content .text-muted-foreground,
-.landing-premium.app-premium main.flex-1.overflow-auto .text-muted-foreground {
-  color: #000 !important;
-  font-weight: 700 !important;
-}
+/* Hiérarchie texte : voir app-typography.css (poids/tailles par rôle) */
 
 /* Icônes zone principale — sans arrière-plan, noir */
 .landing-premium.app-premium #main-content [class*='rounded-lg'][class*='bg-gradient'],

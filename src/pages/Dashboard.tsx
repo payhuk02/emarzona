@@ -59,7 +59,6 @@ import { DashboardFullSkeleton, StatsSkeleton } from '@/components/dashboard/Das
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 // import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
-import '@/styles/dashboard-responsive.css';
 
 /**
  * Page principale du Dashboard
@@ -456,7 +455,7 @@ const Dashboard = () => {
               <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
                 <CardTitle
                   id="quick-actions-title"
-                  className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg"
+                  className="flex items-center gap-1.5 sm:gap-2 dashboard-text-responsive"
                 >
                   <Zap
                     className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-black shrink-0"
@@ -521,7 +520,7 @@ const Dashboard = () => {
                               <h3 className="font-bold text-black text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 break-words">
                                 {action.title}
                               </h3>
-                              <p className="text-sm sm:text-[11px] md:text-xs lg:text-sm text-black font-bold line-clamp-2 leading-relaxed">
+                              <p className="dashboard-action-description line-clamp-2 leading-relaxed">
                                 {action.description}
                               </p>
                             </div>

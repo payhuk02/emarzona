@@ -99,7 +99,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
             <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
               <CardTitle
                 id={`stat-${index}-title`}
-                className="text-sm sm:text-xs md:text-sm font-bold text-black flex items-center gap-1 sm:gap-1.5 md:gap-2"
+                className="dashboard-card-title flex items-center gap-1.5 sm:gap-2"
               >
                 <Icon
                   className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-black"
@@ -110,21 +110,21 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div
-                className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-black mb-1 break-words"
+                className="dashboard-stat-value mb-1 break-words"
                 aria-label={`Valeur: ${stat.value}`}
               >
                 {stat.value}
               </div>
               <p
                 id={`stat-${index}-description`}
-                className="text-sm sm:text-[11px] md:text-xs text-black font-bold mb-1.5 sm:mb-2 leading-tight"
+                className="dashboard-stat-description mb-1.5 sm:mb-2 leading-tight"
               >
                 {stat.description}
               </p>
               <Badge
                 id={`stat-${index}-trend`}
                 variant="default"
-                className="text-xs sm:text-[10px] md:text-xs px-1.5 sm:px-2 py-0.5"
+                className="text-xs px-1.5 sm:px-2 py-0.5"
                 aria-label={`Tendance: ${stat.trend}`}
               >
                 {stat.trend}

@@ -32,6 +32,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 
 interface RecommendationSettings {
   // Algorithmes actifs
@@ -330,27 +331,29 @@ const AISettingsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-        <div className="space-y-4">
-          <Skeleton className="h-8 sm:h-10 w-full max-w-md" />
-          <Skeleton className="h-6 w-full max-w-lg" />
-          <div className="flex gap-2">
-            <Skeleton className="h-11 w-32" />
-            <Skeleton className="h-11 w-32" />
+      <AdminLayout>
+        <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4">
+            <Skeleton className="h-8 sm:h-10 w-full max-w-md" />
+            <Skeleton className="h-6 w-full max-w-lg" />
+            <div className="flex gap-2">
+              <Skeleton className="h-11 w-32" />
+              <Skeleton className="h-11 w-32" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-64 w-full" />
           </div>
         </div>
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-64 w-full" />
-        </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <>
+    <AdminLayout>
       {ConfirmDialog}
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
           <div className="flex-1 min-w-0">
@@ -965,7 +968,7 @@ const AISettingsPage = () => {
           </CardContent>
         </Card>
       </div>
-    </>
+    </AdminLayout>
   );
 };
 

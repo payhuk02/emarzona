@@ -7,6 +7,8 @@ import React, { Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAIChatbot } from '@/hooks/useAIChatbot';
 import { Sparkles } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { DashboardShellLayout } from '@/components/layout/DashboardShellLayout';
 
 const AIChatbot = React.lazy(() => import('@/components/ai/AIChatbot'));
 
@@ -22,14 +24,13 @@ const AIChatbotPage: React.FC = () => {
     sendMessage,
   } = useAIChatbot();
 
-  // Forcer l'ouverture sur la page dédiée
   React.useEffect(() => {
     if (!isOpen) toggleChatbot();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className="container mx-auto max-w-5xl py-8 px-4">
+    <DashboardShellLayout maxWidth="wide" className="max-w-5xl">
       <Helmet>
         <title>Assistant IA — Emarzona</title>
         <meta
@@ -38,13 +39,14 @@ const AIChatbotPage: React.FC = () => {
         />
       </Helmet>
 
-      <header className="mb-6 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Sparkles className="h-6 w-6" />
+      <header className="mb-6 flex items-start gap-3">
+        <SidebarTrigger className="mt-1 shrink-0" />
+        <div className="app-icon-plain flex shrink-0 items-center justify-center">
+          <Sparkles className="h-7 w-7 text-black" aria-hidden />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Assistant IA</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="app-premium-page-title">Assistant IA</h1>
+          <p className="app-text-caption mt-1 text-muted-foreground">
             Posez vos questions sur vos services, commandes ou la plateforme.
           </p>
         </div>
@@ -53,7 +55,7 @@ const AIChatbotPage: React.FC = () => {
       <div className="rounded-xl border bg-card shadow-sm min-h-[600px] relative">
         <Suspense
           fallback={
-            <div className="flex h-[600px] items-center justify-center text-muted-foreground">
+            <div className="flex h-[600px] items-center justify-center text-muted-foreground app-text-body">
               Chargement de l'assistant…
             </div>
           }
@@ -70,7 +72,7 @@ const AIChatbotPage: React.FC = () => {
           />
         </Suspense>
       </div>
-    </div>
+    </DashboardShellLayout>
   );
 };
 
