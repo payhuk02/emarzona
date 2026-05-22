@@ -80,6 +80,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -1001,7 +1002,32 @@ const adminMenuSections = [
 const PINNED_NAV_KEY = 'sidebarPinnedUrls';
 const RECENT_NAV_KEY = 'sidebarRecentUrls';
 const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
+const STORES_EXPANDED_KEY = 'sidebarStoresExpanded';
 const MAX_RECENT_ITEMS = 6;
+
+/** Classes navigation — barre dorée, sans translate (évite le clip horizontal) */
+const NAV_LINK_ACTIVE =
+  '!text-white font-semibold border-l-[3px] border-[#d4af37] bg-white/[0.08] [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white';
+const NAV_LINK_INACTIVE =
+  '!text-white hover:bg-white/[0.08] hover:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-90';
+
+const DEFAULT_OPEN_SECTION_LABELS = new Set(['Principal', 'Administration']);
+
+const sectionContainsPath = (section: { items: { url: string }[] }, pathname: string): boolean =>
+  section.items.some(
+    item =>
+      pathname === item.url || (item.url !== '/dashboard' && pathname.startsWith(`${item.url}/`))
+  );
+
+const buildDefaultCollapsedSections = (
+  sections: typeof menuSections,
+  pathname: string
+): string[] => {
+  const openLabels = new Set(DEFAULT_OPEN_SECTION_LABELS);
+  const activeLabel = sections.find(s => sectionContainsPath(s, pathname))?.label;
+  if (activeLabel) openLabels.add(activeLabel);
+  return sections.map(s => s.label).filter(label => !openLabels.has(label));
+};
 
 const flattenSections = (sections: typeof menuSections) =>
   sections.flatMap(section =>
@@ -1100,6 +1126,8 @@ export function AppSidebar() {
   const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
   const [recentUrls, setRecentUrls] = useState<string[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
+  const [prefsHydrated, setPrefsHydrated] = useState(false);
+  const [storesMenuOpen, setStoresMenuOpen] = useState(false);
 
   const showAdminMenu = isAdmin && isOnAdminPage;
   const showUserMenu = !showAdminMenu;
@@ -1120,14 +1148,43 @@ export function AppSidebar() {
       const storedPinned = localStorage.getItem(PINNED_NAV_KEY);
       const storedRecent = localStorage.getItem(RECENT_NAV_KEY);
       const storedCollapsed = localStorage.getItem(COLLAPSED_SECTIONS_KEY);
+      const storedStores = localStorage.getItem(STORES_EXPANDED_KEY);
 
       if (storedPinned) setPinnedUrls(JSON.parse(storedPinned));
       if (storedRecent) setRecentUrls(JSON.parse(storedRecent));
       if (storedCollapsed) setCollapsedSections(JSON.parse(storedCollapsed));
+      if (storedStores !== null) setStoresMenuOpen(JSON.parse(storedStores));
+      setPrefsHydrated(true);
     } catch (error) {
       logger.warn('Failed to restore sidebar preferences', error);
+      setPrefsHydrated(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!prefsHydrated) return;
+    if (localStorage.getItem(COLLAPSED_SECTIONS_KEY) !== null) return;
+    setCollapsedSections(buildDefaultCollapsedSections(activeSections, location.pathname));
+  }, [prefsHydrated, activeSections, location.pathname]);
+
+  useEffect(() => {
+    if (!prefsHydrated) return;
+    if (localStorage.getItem(STORES_EXPANDED_KEY) !== null) return;
+    setStoresMenuOpen(stores.length <= 1);
+  }, [prefsHydrated, stores.length]);
+
+  useEffect(() => {
+    const activeLabel = activeSections.find(s => sectionContainsPath(s, location.pathname))?.label;
+    if (!activeLabel) return;
+    setCollapsedSections(prev =>
+      prev.includes(activeLabel) ? prev.filter(l => l !== activeLabel) : prev
+    );
+  }, [location.pathname, activeSections]);
+
+  useEffect(() => {
+    if (!prefsHydrated) return;
+    localStorage.setItem(STORES_EXPANDED_KEY, JSON.stringify(storesMenuOpen));
+  }, [storesMenuOpen, prefsHydrated]);
 
   useEffect(() => {
     localStorage.setItem(PINNED_NAV_KEY, JSON.stringify(pinnedUrls));
@@ -1239,130 +1296,135 @@ export function AppSidebar() {
           } as React.CSSProperties
         }
       >
-        <SidebarContent>
-          {/* Logo */}
-          <div className="p-2 sm:p-3 md:p-4 lg:p-5 border-b border-white/10 min-h-[60px] sm:min-h-[70px] md:min-h-[80px] flex items-center">
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-1 sm:gap-1.5 md:gap-2 group transition-all duration-200 hover:opacity-90 w-full"
-              aria-label="Retour au tableau de bord Emarzona"
+        {/* En-tête fixe */}
+        <div
+          className={cn(
+            'shrink-0 flex items-center border-b border-white/10',
+            isCollapsed ? 'p-2 min-h-[3rem]' : 'p-2 sm:p-3 md:p-4 min-h-[3.5rem] sm:min-h-[4rem]'
+          )}
+        >
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1 sm:gap-1.5 md:gap-2 group transition-all duration-200 hover:opacity-90 w-full"
+            aria-label="Retour au tableau de bord Emarzona"
+          >
+            {platformLogo ? (
+              <LogoImageWithFallback
+                src={platformLogo}
+                className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 flex-shrink-0"
+              />
+            ) : (
+              <div
+                className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105"
+                style={{ minWidth: '32px', minHeight: '32px' }}
+                aria-hidden="true"
+              >
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white">
+                  E
+                </span>
+              </div>
+            )}
+            {!isCollapsed && (
+              <span
+                className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight leading-none whitespace-nowrap drop-shadow-lg text-white"
+                style={{ fontFamily: 'Times New Roman, serif' }}
+              >
+                Emarzona
+              </span>
+            )}
+          </Link>
+        </div>
+
+        {/* Recherche / épinglés — fixe sous le logo */}
+        {!isCollapsed && (
+          <div className="shrink-0 px-3 pt-3 pb-2 border-b border-white/10">
+            <label
+              htmlFor="sidebar-search"
+              className="text-[11px] uppercase tracking-wide text-white font-semibold"
             >
-              {platformLogo ? (
-                <LogoImageWithFallback
-                  src={platformLogo}
-                  className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 flex-shrink-0"
-                />
-              ) : (
-                <div
-                  className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105"
-                  style={{ minWidth: '32px', minHeight: '32px' }}
-                  aria-hidden="true"
-                >
-                  <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white">
-                    E
-                  </span>
-                </div>
-              )}
-              {!isCollapsed && (
-                <span
-                  className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight leading-none whitespace-nowrap drop-shadow-lg text-white"
-                  style={{ fontFamily: 'Times New Roman, serif' }}
-                >
-                  Emarzona
+              Navigation rapide
+            </label>
+            <div className="relative mt-2">
+              <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/60" />
+              <Input
+                id="sidebar-search"
+                value={navSearch}
+                onChange={e => setNavSearch(e.target.value)}
+                placeholder="Rechercher une page..."
+                className="h-9 pl-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/40"
+                aria-label="Rechercher dans le menu de navigation"
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={togglePinForCurrentPage}
+                disabled={!currentNavItem}
+                className="h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
+              >
+                {currentNavItem && pinnedUrls.includes(currentNavItem.url)
+                  ? 'Désépingler cette page'
+                  : 'Épingler cette page'}
+              </Button>
+              {currentNavItem && (
+                <span className="text-[11px] text-white/60 truncate max-w-[140px]">
+                  {currentNavItem.title}
                 </span>
               )}
-            </Link>
+            </div>
           </div>
+        )}
 
-          {/* Barre utilitaire de navigation */}
-          {!isCollapsed && (
-            <div className="px-3 pt-3 pb-2 border-b border-white/10">
-              <label
-                htmlFor="sidebar-search"
-                className="text-[11px] uppercase tracking-wide text-white font-semibold"
-              >
-                Navigation rapide
-              </label>
-              <div className="relative mt-2">
-                <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/60" />
-                <Input
-                  id="sidebar-search"
-                  value={navSearch}
-                  onChange={e => setNavSearch(e.target.value)}
-                  placeholder="Rechercher une page..."
-                  className="h-9 pl-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/40"
-                  aria-label="Rechercher dans le menu de navigation"
-                />
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={togglePinForCurrentPage}
-                  disabled={!currentNavItem}
-                  className="h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
-                >
-                  {currentNavItem && pinnedUrls.includes(currentNavItem.url)
-                    ? 'Désépingler cette page'
-                    : 'Épingler cette page'}
-                </Button>
-                {currentNavItem && (
-                  <span className="text-[11px] text-white/60 truncate max-w-[140px]">
-                    {currentNavItem.title}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {!isCollapsed && (pinnedItems.length > 0 || recentItems.length > 0) && (
-            <div className="px-3 py-2 border-b border-white/10 space-y-2">
-              {pinnedItems.length > 0 && (
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1">
-                    Accès épinglés
-                  </p>
-                  <div className="space-y-1">
-                    {pinnedItems.slice(0, 5).map(item => (
-                      <Button
-                        key={`pin-${item.url}`}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(item.url)}
-                        className="w-full justify-start h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
-                      >
-                        <item.icon className="h-3.5 w-3.5 mr-2" />
-                        <span className="truncate">{item.title}</span>
-                      </Button>
-                    ))}
-                  </div>
+        {!isCollapsed && (pinnedItems.length > 0 || recentItems.length > 0) && (
+          <div className="shrink-0 px-3 py-2 border-b border-white/10 space-y-2">
+            {pinnedItems.length > 0 && (
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1">
+                  Accès épinglés
+                </p>
+                <div className="space-y-1">
+                  {pinnedItems.slice(0, 5).map(item => (
+                    <Button
+                      key={`pin-${item.url}`}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.url)}
+                      className="w-full justify-start h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
+                    >
+                      <item.icon className="h-3.5 w-3.5 mr-2" />
+                      <span className="truncate">{item.title}</span>
+                    </Button>
+                  ))}
                 </div>
-              )}
-              {recentItems.length > 0 && (
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1 flex items-center gap-1">
-                    <Clock3 className="h-3 w-3" />
-                    Récents
-                  </p>
-                  <div className="space-y-1">
-                    {recentItems.slice(0, 4).map(item => (
-                      <Button
-                        key={`recent-${item.url}`}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(item.url)}
-                        className="w-full justify-start h-7 px-2 text-xs text-white hover:bg-white/10 hover:text-white"
-                      >
-                        <item.icon className="h-3.5 w-3.5 mr-2" />
-                        <span className="truncate">{item.title}</span>
-                      </Button>
-                    ))}
-                  </div>
+              </div>
+            )}
+            {recentItems.length > 0 && (
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1 flex items-center gap-1">
+                  <Clock3 className="h-3 w-3" />
+                  Récents
+                </p>
+                <div className="space-y-1">
+                  {recentItems.slice(0, 4).map(item => (
+                    <Button
+                      key={`recent-${item.url}`}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.url)}
+                      className="w-full justify-start h-7 px-2 text-xs text-white hover:bg-white/10 hover:text-white"
+                    >
+                      <item.icon className="h-3.5 w-3.5 mr-2" />
+                      <span className="truncate">{item.title}</span>
+                    </Button>
+                  ))}
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
+        )}
 
+        <SidebarContent className="app-sidebar-scroll flex-1 min-h-0 overflow-y-auto scrollbar-thin">
           {/* Menu Items - Organisé par sections */}
           {showUserMenu &&
             filterSectionsBySearch.map(section => (
@@ -1410,10 +1472,9 @@ export function AppSidebar() {
                             >
                               <SidebarMenuButton
                                 asChild
-                                className={`transition-all duration-300 group relative flex items-center ${
-                                  isDashboardActive
-                                    ? '!text-white font-semibold border-l-2 border-white/70 bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
-                                    : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
+                                tooltip={item.title}
+                                className={`transition-all duration-200 group relative flex items-center ${
+                                  isDashboardActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
                                 }`}
                               >
                                 <NavLink
@@ -1430,9 +1491,23 @@ export function AppSidebar() {
                                   )}
                                 </NavLink>
                               </SidebarMenuButton>
-                              {/* Sous-menu des boutiques - TOUJOURS VISIBLE (statique) */}
-                              {!isCollapsed && (
-                                <div className="ml-4 mt-1 space-y-1">
+                              {!isCollapsed && stores.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setStoresMenuOpen(open => !open)}
+                                  className="ml-6 mt-1 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                                  aria-expanded={storesMenuOpen}
+                                >
+                                  <span>Mes boutiques ({stores.length})</span>
+                                  {storesMenuOpen ? (
+                                    <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                                  ) : (
+                                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                                  )}
+                                </button>
+                              )}
+                              {!isCollapsed && storesMenuOpen && stores.length > 0 && (
+                                <div className="ml-4 mt-1 space-y-1 border-l border-white/15 pl-2">
                                   {stores.map(store => (
                                     <Button
                                       key={store.id}
@@ -1448,8 +1523,8 @@ export function AppSidebar() {
                                       }}
                                       className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
                                         selectedStoreId === store.id
-                                          ? '!text-white font-semibold bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100'
-                                          : 'hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white'
+                                          ? NAV_LINK_ACTIVE
+                                          : NAV_LINK_INACTIVE
                                       }`}
                                     >
                                       {selectedStoreId === store.id && (
@@ -1463,7 +1538,7 @@ export function AppSidebar() {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => navigate('/dashboard/store')}
-                                      className="w-full justify-start !text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90"
+                                      className={`w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`}
                                     >
                                       <Plus className="h-3 w-3 mr-2" />
                                       <span>Créer une boutique</span>
@@ -1478,15 +1553,13 @@ export function AppSidebar() {
                         // Menu items normaux
                         return (
                           <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                            <SidebarMenuButton asChild>
+                            <SidebarMenuButton asChild tooltip={item.title}>
                               <NavLink
                                 to={item.url}
                                 end={item.url === '/dashboard'}
                                 className={({ isActive }) =>
-                                  `transition-all duration-300 group relative flex items-center ${
-                                    isActive
-                                      ? '!text-white font-semibold border-l-2 border-white/70 bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
-                                      : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
+                                  `transition-all duration-200 group relative flex items-center ${
+                                    isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
                                   }`
                                 }
                               >
@@ -1522,10 +1595,10 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild tooltip="Retour Dashboard">
                       <NavLink
                         to="/dashboard"
-                        className="!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 transition-all duration-300 [&_svg]:!text-white [&_span]:!text-white opacity-90"
+                        className={`${NAV_LINK_INACTIVE} transition-all duration-200`}
                       >
                         <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
                         {!isCollapsed && <span>← Retour Dashboard</span>}
@@ -1570,14 +1643,12 @@ export function AppSidebar() {
                         }
                         return (
                           <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
-                            <SidebarMenuButton asChild>
+                            <SidebarMenuButton asChild tooltip={item.title}>
                               <NavLink
                                 to={item.url}
                                 className={({ isActive }) =>
-                                  `transition-all duration-300 ${
-                                    isActive
-                                      ? '!text-white font-semibold border-l-2 border-white/70 bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
-                                      : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
+                                  `transition-all duration-200 ${
+                                    isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
                                   }`
                                 }
                               >
@@ -1600,7 +1671,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* Footer */}
-        <SidebarFooter className="border-t border-blue-400/30 p-4 space-y-2">
+        <SidebarFooter className="app-sidebar-footer shrink-0 border-t border-white/10 bg-[#1e1e4a]/90 backdrop-blur-md p-3 space-y-2">
           {!isCollapsed && (
             <PremiumLangSwitcher className="app-sidebar-lang-switcher w-full" fullWidth />
           )}

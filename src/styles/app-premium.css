@@ -259,6 +259,14 @@
 .landing-premium.app-premium [data-sidebar='sidebar'] .app-sidebar-lang-switcher .lp-lang-switcher {
   width: 100%;
   justify-content: center;
+  border-radius: 0.5rem;
+}
+
+/* État actif premium — barre dorée */
+.landing-premium.app-premium [data-sidebar='sidebar'] [aria-current='page'] {
+  border-left-width: 3px !important;
+  border-left-color: #d4af37 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Boutons primaires globaux */

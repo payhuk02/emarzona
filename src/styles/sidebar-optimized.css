@@ -131,3 +131,41 @@
   outline: 2px solid hsl(var(--sidebar-ring));
   outline-offset: 2px;
 }
+
+/* Scroll menu + footer fixe (pack P0) */
+[data-sidebar='sidebar'] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+[data-sidebar='sidebar'] .app-sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+[data-sidebar='sidebar'] .app-sidebar-scroll {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 10px,
+    #000 calc(100% - 12px),
+    transparent 100%
+  );
+}
+
+[data-sidebar='sidebar'] .app-sidebar-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  z-index: 2;
+}
+
+[data-sidebar='sidebar'] .app-sidebar-footer .lp-lang-switcher {
+  width: 100%;
+  justify-content: center;
+  border-radius: 0.5rem;
+}
