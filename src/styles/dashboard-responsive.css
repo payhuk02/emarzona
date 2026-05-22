@@ -8,11 +8,43 @@
 }
 
 .dashboard-text-responsive {
-  @apply text-sm md:text-base lg:text-lg font-semibold;
+  @apply text-base md:text-lg font-semibold;
 }
 
 .dashboard-text-responsive-small {
-  @apply text-xs md:text-sm font-normal;
+  @apply text-sm md:text-base font-normal;
+}
+
+/* ——— Sections tableau de bord (séparation claire) ——— */
+.dashboard-section {
+  @apply rounded-2xl border border-border/60 bg-card/80 shadow-sm;
+  @apply p-4 sm:p-5 md:p-6 lg:p-8;
+}
+
+.dashboard-section + .dashboard-section {
+  @apply mt-6 sm:mt-8 md:mt-10;
+}
+
+.dashboard-section-header {
+  @apply mb-4 sm:mb-5 md:mb-6 pb-4 border-b border-border/50;
+}
+
+.dashboard-section-title {
+  font-family: var(--lp-serif, Georgia, serif);
+  @apply text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-section-description {
+  @apply mt-1.5 sm:mt-2 text-sm md:text-base text-muted-foreground font-normal leading-relaxed max-w-3xl;
+}
+
+.dashboard-section-body {
+  @apply space-y-4 sm:space-y-5 md:space-y-6;
+}
+
+.dashboard-section-body > .dashboard-inner-card {
+  @apply rounded-xl border border-border/40 bg-background/60 shadow-none;
 }
 
 .dashboard-padding-responsive {
@@ -138,23 +170,23 @@
 }
 
 .dashboard-card-title {
-  @apply text-sm md:text-base font-semibold text-foreground;
+  @apply text-base md:text-lg font-semibold text-foreground;
 }
 
 .dashboard-stat-value {
-  @apply text-xl md:text-2xl lg:text-3xl font-bold mb-1 tabular-nums;
+  @apply text-2xl md:text-3xl lg:text-4xl font-bold mb-1 tabular-nums;
 }
 
 .dashboard-stat-description {
-  @apply text-xs md:text-sm text-muted-foreground mb-2 font-normal;
+  @apply text-sm md:text-base text-muted-foreground mb-2 font-normal;
 }
 
 .dashboard-action-title {
-  @apply font-semibold text-sm md:text-base mb-1;
+  @apply font-semibold text-base md:text-lg mb-1;
 }
 
 .dashboard-action-description {
-  @apply text-xs md:text-sm text-muted-foreground font-normal;
+  @apply text-sm md:text-base text-muted-foreground font-normal leading-relaxed;
 }
 
 /* Mobile Optimizations - Unifié à 768px pour cohérence avec useIsMobile hook */

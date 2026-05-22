@@ -90,25 +90,22 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
         return (
           <Card
             key={stat.label}
-            className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+            className="dashboard-inner-card border-border/50 hover:shadow-md transition-all duration-300 hover:scale-[1.01] animate-in fade-in slide-in-from-bottom-4"
             style={{ animationDelay: `${index * 100}ms` }}
             role="article"
             aria-labelledby={`stat-${index}-title`}
             aria-describedby={`stat-${index}-description stat-${index}-trend`}
           >
-            <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
+            <CardHeader className="pb-2 md:pb-3 p-4 sm:p-5">
               <CardTitle
                 id={`stat-${index}-title`}
                 className="dashboard-card-title flex items-center gap-1.5 sm:gap-2"
               >
-                <Icon
-                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-black"
-                  aria-hidden="true"
-                />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-black shrink-0" aria-hidden="true" />
                 {stat.label}
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
               <div
                 className="dashboard-stat-value mb-1 break-words"
                 aria-label={`Valeur: ${stat.value}`}
@@ -124,7 +121,7 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
               <Badge
                 id={`stat-${index}-trend`}
                 variant="default"
-                className="text-xs px-1.5 sm:px-2 py-0.5"
+                className="text-sm px-2 py-0.5"
                 aria-label={`Tendance: ${stat.trend}`}
               >
                 {stat.trend}

@@ -41,18 +41,16 @@ const RecentOrdersCardComponent = ({ orders }: RecentOrdersCardProps) => {
 
   if (orders.length === 0) {
     return (
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-soft">
-        <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
-            Commandes récentes
-          </CardTitle>
-          <CardDescription className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">
+      <Card className="dashboard-inner-card border-border/50 shadow-none">
+        <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+          <CardTitle className="dashboard-text-responsive">Commandes récentes</CardTitle>
+          <CardDescription className="dashboard-text-responsive-small mt-1">
             Vos dernières commandes apparaîtront ici
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+        <CardContent className="p-4 sm:p-5 md:p-6 pt-0">
           <div className="text-center py-4 sm:py-6">
-            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+            <p className="text-sm md:text-base text-muted-foreground">
               Aucune commande pour le moment
             </p>
           </div>
@@ -62,14 +60,12 @@ const RecentOrdersCardComponent = ({ orders }: RecentOrdersCardProps) => {
   }
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-soft">
-      <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-        <div className="flex items-center justify-between">
+    <Card className="dashboard-inner-card border-border/50 shadow-none">
+      <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
-              Commandes récentes
-            </CardTitle>
-            <CardDescription className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">
+            <CardTitle className="dashboard-text-responsive">Commandes récentes</CardTitle>
+            <CardDescription className="dashboard-text-responsive-small mt-1">
               Les 5 dernières commandes
             </CardDescription>
           </div>
@@ -169,9 +165,3 @@ export const RecentOrdersCard = React.memo(RecentOrdersCardComponent, (prevProps
 });
 
 RecentOrdersCard.displayName = 'RecentOrdersCard';
-
-
-
-
-
-

@@ -3,7 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { PieChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { PRODUCT_TYPE_CONFIG, getAllProductTypes, type ProductType } from '@/constants/product-types';
+import {
+  PRODUCT_TYPE_CONFIG,
+  getAllProductTypes,
+  type ProductType,
+} from '@/constants/product-types';
 
 interface ProductTypeBreakdownProps {
   productsByType: {
@@ -56,16 +60,14 @@ export const ProductTypeBreakdown = React.memo<ProductTypeBreakdownProps>(
 
     return (
       <Card className={cn('border-border/50 bg-card/50 backdrop-blur-sm', className)}>
-        <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
-              <PieChart className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500 dark:text-blue-400" />
-            </div>
+        <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3">
+            <PieChart className="h-6 w-6 sm:h-7 sm:w-7 text-black shrink-0" aria-hidden />
             <div>
-              <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
+              <CardTitle className="dashboard-text-responsive text-foreground">
                 Répartition par Type
               </CardTitle>
-              <CardDescription className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">
+              <CardDescription className="dashboard-text-responsive-small mt-1">
                 Vue d'ensemble de vos produits par catégorie
               </CardDescription>
             </div>
@@ -138,9 +140,3 @@ export const ProductTypeBreakdown = React.memo<ProductTypeBreakdownProps>(
 );
 
 ProductTypeBreakdown.displayName = 'ProductTypeBreakdown';
-
-
-
-
-
-

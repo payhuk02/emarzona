@@ -26,12 +26,10 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
 
   if (products.length === 0) {
     return (
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-soft">
-        <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
-            Produits populaires
-          </CardTitle>
-          <CardDescription className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">
+      <Card className="dashboard-inner-card border-border/50 shadow-none">
+        <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+          <CardTitle className="dashboard-text-responsive">Produits populaires</CardTitle>
+          <CardDescription className="dashboard-text-responsive-small mt-1">
             Vos produits les plus vendus
           </CardDescription>
         </CardHeader>
@@ -48,14 +46,12 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
   }
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-soft">
-      <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-        <div className="flex items-center justify-between">
+    <Card className="dashboard-inner-card border-border/50 shadow-none">
+      <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
-              Produits populaires
-            </CardTitle>
-            <CardDescription className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">
+            <CardTitle className="dashboard-text-responsive">Produits populaires</CardTitle>
+            <CardDescription className="dashboard-text-responsive-small mt-1">
               Top 5 des produits les plus vendus
             </CardDescription>
           </div>
@@ -63,7 +59,7 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
             variant="ghost"
             size="sm"
             onClick={() => navigate('/dashboard/products')}
-            className="gap-1 h-8 sm:h-9 text-[10px] sm:text-xs"
+            className="gap-1 h-9 sm:h-10 text-sm shrink-0"
           >
             Voir tout
             <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -101,7 +97,7 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
                   <p className="text-[10px] sm:text-xs md:text-sm font-medium truncate">
                     {product.name}
                   </p>
-                  {product.product_type && (
+                  {product.product_type &&
                     (() => {
                       const productType = product.product_type as ProductType;
                       const config = PRODUCT_TYPE_CONFIG[productType];
@@ -120,8 +116,7 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
                           <span>{config.label}</span>
                         </Badge>
                       );
-                    })()
-                  )}
+                    })()}
                 </div>
                 <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
                   {product.orderCount} vente{product.orderCount > 1 ? 's' : ''}
@@ -157,9 +152,3 @@ export const TopProductsCard = React.memo(TopProductsCardComponent, (prevProps, 
 });
 
 TopProductsCard.displayName = 'TopProductsCard';
-
-
-
-
-
-

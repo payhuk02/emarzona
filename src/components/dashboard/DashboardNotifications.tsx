@@ -40,7 +40,7 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
     return (
       <div
         ref={bottomRef}
-        className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
         role="region"
         aria-label={t('dashboard.bottomSection.ariaLabel', 'Notifications et activité récente')}
       >
@@ -48,21 +48,16 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
         {notificationsEnabled && (
           <Card
             id="notifications-section"
-            className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
+            className="dashboard-inner-card border-border/50 hover:shadow-md transition-all duration-300"
             role="region"
             aria-labelledby="notifications-title"
           >
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
               <CardTitle
                 id="notifications-title"
-                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg"
+                className="flex items-center gap-2 dashboard-text-responsive"
               >
-                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 backdrop-blur-sm border border-blue-500/20">
-                  <Bell
-                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-500 dark:text-blue-400"
-                    aria-hidden="true"
-                  />
-                </div>
+                <Bell className="h-6 w-6 text-black shrink-0" aria-hidden="true" />
                 {t('dashboard.notifications.title')}
               </CardTitle>
             </CardHeader>
@@ -138,12 +133,10 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
         )}
 
         {/* Recent Activity */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-          <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-            <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 backdrop-blur-sm border border-green-500/20">
-                <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500 dark:text-green-400" />
-              </div>
+        <Card className="dashboard-inner-card border-border/50 hover:shadow-md transition-all duration-300">
+          <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+            <CardTitle className="flex items-center gap-2 dashboard-text-responsive">
+              <Activity className="h-6 w-6 text-black shrink-0" aria-hidden="true" />
               {t('dashboard.recentActivity.title')}
             </CardTitle>
           </CardHeader>
@@ -207,12 +200,10 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
         </Card>
 
         {/* Quick Settings */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-          <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-            <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-gray-500/10 to-gray-500/5 backdrop-blur-sm border border-gray-500/20">
-                <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-gray-500 dark:text-gray-400" />
-              </div>
+        <Card className="dashboard-inner-card border-border/50 hover:shadow-md transition-all duration-300">
+          <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+            <CardTitle className="flex items-center gap-2 dashboard-text-responsive">
+              <Settings className="h-6 w-6 text-black shrink-0" aria-hidden="true" />
               {t('dashboard.quickSettings.title')}
             </CardTitle>
           </CardHeader>
@@ -224,7 +215,9 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                 onClick={onViewStore}
               >
                 <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
-                <span className="hidden sm:inline">{t('dashboard.quickSettings.storeSettings')}</span>
+                <span className="hidden sm:inline">
+                  {t('dashboard.quickSettings.storeSettings')}
+                </span>
                 <span className="sm:hidden">{t('dashboard.quickSettings.storeSettingsShort')}</span>
               </Button>
               <Button
@@ -233,8 +226,12 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                 onClick={onManageCustomers}
               >
                 <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
-                <span className="hidden sm:inline">{t('dashboard.quickSettings.manageCustomers')}</span>
-                <span className="sm:hidden">{t('dashboard.quickSettings.manageCustomersShort')}</span>
+                <span className="hidden sm:inline">
+                  {t('dashboard.quickSettings.manageCustomers')}
+                </span>
+                <span className="sm:hidden">
+                  {t('dashboard.quickSettings.manageCustomersShort')}
+                </span>
               </Button>
               <Button
                 variant="outline"
@@ -242,7 +239,9 @@ export const DashboardNotifications = React.memo<DashboardNotificationsProps>(
                 onClick={onSettings}
               >
                 <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1.5 sm:mr-2 md:mr-3" />
-                <span className="hidden sm:inline">{t('dashboard.quickSettings.configuration')}</span>
+                <span className="hidden sm:inline">
+                  {t('dashboard.quickSettings.configuration')}
+                </span>
                 <span className="sm:hidden">{t('dashboard.quickSettings.configurationShort')}</span>
               </Button>
             </div>

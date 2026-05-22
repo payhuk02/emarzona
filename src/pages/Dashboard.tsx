@@ -1,20 +1,12 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
-import {
-  Activity,
-  Zap,
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Users,
-  DollarSign,
-} from 'lucide-react';
+import { Activity, LayoutDashboard, Package, ShoppingCart, Users, DollarSign } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
@@ -59,6 +51,7 @@ import { DashboardFullSkeleton, StatsSkeleton } from '@/components/dashboard/Das
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 // import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
+import { DashboardSection } from '@/components/dashboard/DashboardSection';
 
 /**
  * Page principale du Dashboard
@@ -424,198 +417,191 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* ✅ SILENCIEUX: Session gérée automatiquement via useSessionHealth */}
-            {/* <SessionExpiryWarning /> */}
+          <div className="container mx-auto max-w-[90rem] p-4 sm:p-5 lg:p-8 pb-10">
+            <div className="mb-6 sm:mb-8">
+              <DashboardHeader {...dashboardHeaderProps} />
+            </div>
 
-            {/* Header - Responsive & Animated */}
-            <DashboardHeader {...dashboardHeaderProps} />
-
-            {/* ✅ ACCESSIBILITÉ: Aria-live region pour les mises à jour dynamiques */}
             <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
               {statusMessage}
             </div>
 
-            {/* Gestion d'erreurs améliorée */}
             <DashboardErrorHandler
               error={error || hookError}
               onRetry={handleRefresh}
               isRetrying={isRefreshing}
             />
-            {/* Stats Cards - Responsive & Animated */}
-            {loading ? <StatsSkeleton /> : stats && <DashboardStats stats={stats} />}
 
-            {/* Quick Actions - Responsive & Animated */}
-            <Card
-              ref={actionsRef}
-              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
-              role="region"
-              aria-labelledby="quick-actions-title"
+            <DashboardSection
+              id="dashboard-overview"
+              title={t('dashboard.sections.overview', "Vue d'ensemble")}
+              description={t(
+                'dashboard.sections.overviewDesc',
+                'Indicateurs clés de votre boutique en un coup d’œil'
+              )}
+              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
-              <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4 md:p-6">
-                <CardTitle
-                  id="quick-actions-title"
-                  className="flex items-center gap-1.5 sm:gap-2 dashboard-text-responsive"
-                >
-                  <Zap
-                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-black shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span className="text-black font-bold">{t('dashboard.quickActions.title')}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-                <div
-                  className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                  role="list"
-                  aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides disponibles')}
-                >
-                  {[
-                    {
-                      title: t('dashboard.quickActions.newProduct'),
-                      description: t('dashboard.quickActions.newProductDesc'),
-                      icon: Package,
-                      color: 'from-green-600 to-emerald-600',
-                      onClick: handleCreateProduct,
-                    },
-                    {
-                      title: t('dashboard.quickActions.newOrder'),
-                      description: t('dashboard.quickActions.newOrderDesc'),
-                      icon: ShoppingCart,
-                      color: 'from-blue-600 to-cyan-600',
-                      onClick: handleCreateOrder,
-                    },
-                    {
-                      title: t('dashboard.quickActions.analytics'),
-                      description: t('dashboard.quickActions.analyticsDesc'),
-                      icon: Activity,
-                      color: 'from-purple-600 to-pink-600',
-                      onClick: handleViewAnalytics,
-                    },
-                  ].map((action, index) => {
-                    const Icon = action.icon;
-                    return (
-                      <Card
-                        key={action.title}
-                        className="cursor-pointer border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group touch-manipulation min-h-[100px] sm:min-h-[120px] md:min-h-[140px] animate-in fade-in slide-in-from-bottom-4"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                        onClick={action.onClick}
-                        role="listitem"
-                        aria-label={action.title}
-                        tabIndex={0}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            action.onClick();
-                          }
-                        }}
-                      >
-                        <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 h-full flex flex-col justify-center">
-                          <div className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
-                            <Icon
-                              className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-black shrink-0"
-                              aria-hidden="true"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-black text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 break-words">
-                                {action.title}
-                              </h3>
-                              <p className="dashboard-action-description line-clamp-2 leading-relaxed">
-                                {action.description}
-                              </p>
-                            </div>
+              {loading ? <StatsSkeleton /> : stats && <DashboardStats stats={stats} />}
+            </DashboardSection>
+
+            <DashboardSection
+              id="dashboard-quick-actions"
+              title={t('dashboard.quickActions.title', 'Actions rapides')}
+              description={t(
+                'dashboard.sections.quickActionsDesc',
+                'Accédez aux tâches les plus fréquentes en un clic'
+              )}
+              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+            >
+              <div
+                ref={actionsRef}
+                className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                role="list"
+                aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides disponibles')}
+              >
+                {[
+                  {
+                    title: t('dashboard.quickActions.newProduct'),
+                    description: t('dashboard.quickActions.newProductDesc'),
+                    icon: Package,
+                    onClick: handleCreateProduct,
+                  },
+                  {
+                    title: t('dashboard.quickActions.newOrder'),
+                    description: t('dashboard.quickActions.newOrderDesc'),
+                    icon: ShoppingCart,
+                    onClick: handleCreateOrder,
+                  },
+                  {
+                    title: t('dashboard.quickActions.analytics'),
+                    description: t('dashboard.quickActions.analyticsDesc'),
+                    icon: Activity,
+                    onClick: handleViewAnalytics,
+                  },
+                ].map((action, index) => {
+                  const Icon = action.icon;
+                  return (
+                    <Card
+                      key={action.title}
+                      className="dashboard-inner-card cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] touch-manipulation min-h-[120px] sm:min-h-[132px] animate-in fade-in slide-in-from-bottom-4"
+                      style={{ animationDelay: `${index * 80}ms` }}
+                      onClick={action.onClick}
+                      role="listitem"
+                      aria-label={action.title}
+                      tabIndex={0}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          action.onClick();
+                        }
+                      }}
+                    >
+                      <CardContent className="p-4 sm:p-5 md:p-6 h-full flex flex-col justify-center">
+                        <div className="flex items-start gap-3 md:gap-4">
+                          <Icon
+                            className="h-6 w-6 sm:h-7 sm:w-7 text-black shrink-0 mt-0.5"
+                            aria-hidden="true"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="dashboard-action-title text-foreground break-words">
+                              {action.title}
+                            </h3>
+                            <p className="dashboard-action-description line-clamp-2 mt-1">
+                              {action.description}
+                            </p>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Core Web Vitals Monitor - Métriques de performance */}
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <CoreWebVitalsMonitor />
-            </div>
-
-            {/* Charts Section - Graphiques de visualisation */}
-            {stats && <DashboardCharts stats={stats} />}
-
-            {/* Product Type Quick Filters */}
-            {stats && (
-              <div
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-                role="region"
-                aria-labelledby="product-type-filters-title"
-              >
-                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                  <CardContent className="p-3 sm:p-4 md:p-6">
-                    <h2 id="product-type-filters-title" className="sr-only">
-                      {t('dashboard.filters.productType.title', 'Filtres par type de produit')}
-                    </h2>
-                    <ProductTypeQuickFilters
-                      selectedType={selectedProductType}
-                      onTypeChange={setSelectedProductType}
-                      stats={stats}
-                    />
-                  </CardContent>
-                </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
-            )}
+            </DashboardSection>
 
-            {/* Product Type Breakdown */}
+            <DashboardSection
+              id="dashboard-performance"
+              title={t('dashboard.sections.performance', 'Performance du site')}
+              description={t(
+                'dashboard.sections.performanceDesc',
+                'Core Web Vitals et qualité d’expérience en temps réel'
+              )}
+              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+            >
+              <CoreWebVitalsMonitor />
+            </DashboardSection>
+
             {stats && (
-              <div
+              <DashboardSection
+                id="dashboard-analytics"
+                title={t('dashboard.sections.analytics', 'Analyses & répartition')}
+                description={t(
+                  'dashboard.sections.analyticsDesc',
+                  'Graphiques, filtres et performance par type de produit'
+                )}
                 className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-                role="region"
-                aria-labelledby="product-type-breakdown-title"
               >
-                <h2 id="product-type-breakdown-title" className="sr-only">
-                  {t('dashboard.breakdown.title', 'Répartition par type de produit')}
-                </h2>
+                <DashboardCharts stats={stats} />
+                <div className="dashboard-inner-card rounded-xl border border-border/40 p-4 sm:p-5 md:p-6">
+                  <ProductTypeQuickFilters
+                    selectedType={selectedProductType}
+                    onTypeChange={setSelectedProductType}
+                    stats={stats}
+                  />
+                </div>
                 <ProductTypeBreakdown
+                  className="dashboard-inner-card shadow-none"
                   productsByType={stats.productsByType}
                   revenueByType={stats.revenueByType}
                   ordersByType={stats.ordersByType}
                 />
-              </div>
-            )}
-
-            {/* Product Type Charts */}
-            {stats && stats.revenueByTypeAndMonth && stats.revenueByTypeAndMonth.length > 0 && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-lg" />}>
-                  <ProductTypeCharts
-                    revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
-                    ordersByType={stats.ordersByType}
-                    selectedType={selectedProductType}
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Product Type Performance Metrics */}
-            {stats && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}>
+                {stats.revenueByTypeAndMonth && stats.revenueByTypeAndMonth.length > 0 && (
+                  <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
+                    <ProductTypeCharts
+                      revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
+                      ordersByType={stats.ordersByType}
+                      selectedType={selectedProductType}
+                    />
+                  </Suspense>
+                )}
+                <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
                   <ProductTypePerformanceMetrics
                     performanceMetricsByType={stats.performanceMetricsByType}
                     selectedType={selectedProductType}
                   />
                 </Suspense>
-              </div>
+              </DashboardSection>
             )}
 
-            {/* Top Products & Recent Orders */}
             {stats && (stats.topProducts.length > 0 || stats.recentOrders.length > 0) && (
-              <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <DashboardSection
+                id="dashboard-activity"
+                title={t('dashboard.sections.activity', 'Activité récente')}
+                description={t(
+                  'dashboard.sections.activityDesc',
+                  'Vos meilleures ventes et dernières commandes'
+                )}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                contentClassName="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2"
+              >
                 {stats.topProducts.length > 0 && <TopProductsCard products={stats.topProducts} />}
                 {stats.recentOrders.length > 0 && <RecentOrdersCard orders={stats.recentOrders} />}
-              </div>
+              </DashboardSection>
             )}
 
-            {/* Bottom Row - Notifications, Activity & Quick Settings */}
-            {stats && <DashboardNotifications {...dashboardNotificationsProps} />}
+            {stats && (
+              <DashboardSection
+                id="dashboard-notifications"
+                title={t('dashboard.sections.notifications', 'Notifications & raccourcis')}
+                description={t(
+                  'dashboard.sections.notificationsDesc',
+                  'Alertes, activité et accès rapide aux paramètres'
+                )}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                contentClassName="!space-y-0"
+              >
+                <DashboardNotifications {...dashboardNotificationsProps} />
+              </DashboardSection>
+            )}
           </div>
         </main>
       </div>
