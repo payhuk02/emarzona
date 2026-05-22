@@ -37,6 +37,8 @@ export const useNotifications = (options?: {
   return useQuery({
     queryKey: ['notifications', page, pageSize, includeArchived],
     enabled: queryEnabled,
+    refetchInterval: () =>
+      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 90_000 : false,
     queryFn: async (): Promise<{ data: Notification[]; count: number }> => {
       let query = supabase
         .from('notifications')
@@ -85,7 +87,8 @@ export const useUnreadCount = () => {
 
       return data || 0;
     },
-    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes
+    refetchInterval: () =>
+      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 60_000 : false,
   });
 };
 

@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { logger } from '@/lib/logger';
 
-const PRODUCT_ANALYTICS_FIELDS = 'id, product_id, store_id, total_views, total_clicks, total_conversions, total_revenue, conversion_rate, bounce_rate, avg_session_duration, returning_visitors, views_today, clicks_today, conversions_today, revenue_today, views_yesterday, clicks_yesterday, conversions_yesterday, revenue_yesterday, tracking_enabled, track_views, track_clicks, track_conversions, track_time_spent, track_errors, advanced_tracking, custom_events, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id, pinterest_pixel_id, linkedin_insight_tag, goal_views, goal_revenue, goal_conversions, goal_conversion_rate, email_alerts, last_updated, created_at, updated_at';
-const USER_SESSION_FIELDS = 'id, session_id, product_id, store_id, user_id, start_time, end_time, duration, page_views, clicks, conversions, country, city, ip_address, user_agent, device_type, browser, os, referrer, utm_source, utm_medium, utm_campaign, created_at, updated_at';
-const ANALYTICS_REPORT_FIELDS = 'id, product_id, store_id, user_id, report_type, report_format, start_date, end_date, include_charts, report_data, file_url, file_size, status, error_message, created_at, completed_at';
-const ANALYTICS_EVENT_FIELDS = 'id, product_id, store_id, user_id, event_type, event_data, session_id, page_url, referrer, user_agent, ip_address, country, city, device_type, browser, os, duration, revenue, created_at';
+const PRODUCT_ANALYTICS_FIELDS =
+  'id, product_id, store_id, total_views, total_clicks, total_conversions, total_revenue, conversion_rate, bounce_rate, avg_session_duration, returning_visitors, views_today, clicks_today, conversions_today, revenue_today, views_yesterday, clicks_yesterday, conversions_yesterday, revenue_yesterday, tracking_enabled, track_views, track_clicks, track_conversions, track_time_spent, track_errors, advanced_tracking, custom_events, google_analytics_id, facebook_pixel_id, google_tag_manager_id, tiktok_pixel_id, pinterest_pixel_id, linkedin_insight_tag, goal_views, goal_revenue, goal_conversions, goal_conversion_rate, email_alerts, last_updated, created_at, updated_at';
+const USER_SESSION_FIELDS =
+  'id, session_id, product_id, store_id, user_id, start_time, end_time, duration, page_views, clicks, conversions, country, city, ip_address, user_agent, device_type, browser, os, referrer, utm_source, utm_medium, utm_campaign, created_at, updated_at';
+const ANALYTICS_REPORT_FIELDS =
+  'id, product_id, store_id, user_id, report_type, report_format, start_date, end_date, include_charts, report_data, file_url, file_size, status, error_message, created_at, completed_at';
+const ANALYTICS_EVENT_FIELDS =
+  'id, product_id, store_id, user_id, event_type, event_data, session_id, page_url, referrer, user_agent, ip_address, country, city, device_type, browser, os, duration, revenue, created_at';
 
 // Types pour les analytics
 export interface ProductAnalytics {
@@ -58,8 +63,16 @@ export interface AnalyticsEvent {
   product_id: string;
   store_id: string;
   user_id?: string;
-  event_type: 'view' | 'click' | 'conversion' | 'purchase' | 'session_start' | 'session_end' | 'error' | 'custom';
-  event_data: Record<string, any>;
+  event_type:
+    | 'view'
+    | 'click'
+    | 'conversion'
+    | 'purchase'
+    | 'session_start'
+    | 'session_end'
+    | 'error'
+    | 'custom';
+  event_data: Record<string, unknown>;
   session_id?: string;
   page_url?: string;
   referrer?: string;
@@ -112,7 +125,7 @@ export interface AnalyticsReport {
   start_date: string;
   end_date: string;
   include_charts: boolean;
-  report_data: Record<string, any>;
+  report_data: Record<string, unknown>;
   file_url?: string;
   file_size?: number;
   status: 'pending' | 'generating' | 'completed' | 'failed';
@@ -150,7 +163,7 @@ export const useProductAnalytics = (productId: string) => {
       if (!data) {
         // Initialiser les analytics pour ce produit
         const { error: initError } = await supabase.rpc('initialize_product_analytics', {
-          p_product_id: productId
+          p_product_id: productId,
         });
 
         if (initError) {
@@ -181,60 +194,38 @@ export const useProductAnalytics = (productId: string) => {
   }, [productId, user]);
 
   // Mettre à jour les analytics
-  const updateAnalytics = useCallback(async (updates: Partial<ProductAnalytics>) => {
-    if (!analytics || !user) return;
+  const updateAnalytics = useCallback(
+    async (updates: Partial<ProductAnalytics>) => {
+      if (!analytics || !user) return;
 
-    try {
-      const { data, error } = await supabase
-        .from('product_analytics')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', analytics.id)
-        .select()
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('product_analytics')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', analytics.id)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setAnalytics(data);
-    } catch (err) {
-      logger.error('Error updating product analytics', { error: err, productId, updates });
-      throw err;
-    }
-  }, [analytics, user]);
+        setAnalytics(data);
+      } catch (err) {
+        logger.error('Error updating product analytics', { error: err, productId, updates });
+        throw err;
+      }
+    },
+    [analytics, user]
+  );
 
   // Charger les analytics au montage
   useEffect(() => {
     loadAnalytics();
   }, [loadAnalytics]);
 
-  // Abonnement en temps réel
-  useEffect(() => {
-    if (!productId || !isRealTimeActive) return;
-
-    const subscription = supabase
-      .channel(`product_analytics_${productId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'product_analytics',
-          filter: `product_id=eq.${productId}`
-        },
-        (payload) => {
-          if (payload.new) {
-            setAnalytics(payload.new as ProductAnalytics);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [productId, isRealTimeActive]);
+  useVisibilityAwarePolling(loadAnalytics, 60_000, !!productId && isRealTimeActive);
 
   // Calculer les pourcentages de changement
   const changePercentages = useMemo(() => {
@@ -249,7 +240,7 @@ export const useProductAnalytics = (productId: string) => {
       views: calculateChange(analytics.views_today, analytics.views_yesterday),
       clicks: calculateChange(analytics.clicks_today, analytics.clicks_yesterday),
       conversions: calculateChange(analytics.conversions_today, analytics.conversions_yesterday),
-      revenue: calculateChange(analytics.revenue_today, analytics.revenue_yesterday)
+      revenue: calculateChange(analytics.revenue_today, analytics.revenue_yesterday),
     };
   }, [analytics]);
 
@@ -261,7 +252,7 @@ export const useProductAnalytics = (productId: string) => {
     setIsRealTimeActive,
     loadAnalytics,
     updateAnalytics,
-    changePercentages
+    changePercentages,
   };
 };
 
@@ -269,87 +260,112 @@ export const useProductAnalytics = (productId: string) => {
 export const useAnalyticsTracking = () => {
   const { user } = useAuth();
 
-  const trackEvent = useCallback(async (
-    productId: string,
-    eventType: AnalyticsEvent['event_type'],
-    eventData: Record<string, any> = {},
-    revenue?: number
-  ) => {
-    try {
-      // Générer un session_id unique si pas déjà présent
-      let  sessionId= eventData.session_id;
-      if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const trackEvent = useCallback(
+    async (
+      productId: string,
+      eventType: AnalyticsEvent['event_type'],
+      eventData: Record<string, unknown> = {},
+      revenue?: number
+    ) => {
+      try {
+        // Générer un session_id unique si pas déjà présent
+        let sessionId = eventData.session_id;
+        if (!sessionId) {
+          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+
+        // Détecter les informations du navigateur
+        const userAgent = navigator.userAgent;
+        const deviceType = /Mobile|Android|iPhone|iPad/.test(userAgent)
+          ? 'mobile'
+          : /Tablet|iPad/.test(userAgent)
+            ? 'tablet'
+            : 'desktop';
+
+        const eventPayload = {
+          product_id: productId,
+          user_id: user?.id || null,
+          event_type: eventType,
+          event_data: eventData,
+          session_id: sessionId,
+          page_url: window.location.href,
+          referrer: document.referrer || null,
+          user_agent: userAgent,
+          device_type: deviceType,
+          revenue: revenue || null,
+          created_at: new Date().toISOString(),
+        };
+
+        const { error } = await supabase.from('analytics_events').insert(eventPayload);
+
+        if (error) throw error;
+
+        return sessionId;
+      } catch (err) {
+        logger.error('Error tracking product analytics event', {
+          error: err,
+          productId,
+          eventType,
+        });
+        throw err;
       }
+    },
+    [user]
+  );
 
-      // Détecter les informations du navigateur
-      const userAgent = navigator.userAgent;
-      const deviceType = /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 
-                        /Tablet|iPad/.test(userAgent) ? 'tablet' : 'desktop';
+  const trackView = useCallback(
+    (productId: string, additionalData: Record<string, unknown> = {}) => {
+      return trackEvent(productId, 'view', {
+        ...additionalData,
+        timestamp: Date.now(),
+      });
+    },
+    [trackEvent]
+  );
 
-      const eventPayload = {
-        product_id: productId,
-        user_id: user?.id || null,
-        event_type: eventType,
-        event_data: eventData,
-        session_id: sessionId,
-        page_url: window.location.href,
-        referrer: document.referrer || null,
-        user_agent: userAgent,
-        device_type: deviceType,
-        revenue: revenue || null,
-        created_at: new Date().toISOString()
-      };
+  const trackClick = useCallback(
+    (productId: string, elementId: string, additionalData: Record<string, unknown> = {}) => {
+      return trackEvent(productId, 'click', {
+        element_id: elementId,
+        ...additionalData,
+        timestamp: Date.now(),
+      });
+    },
+    [trackEvent]
+  );
 
-      const { error } = await supabase
-        .from('analytics_events')
-        .insert(eventPayload);
+  const trackConversion = useCallback(
+    (productId: string, revenue: number, additionalData: Record<string, unknown> = {}) => {
+      return trackEvent(
+        productId,
+        'conversion',
+        {
+          ...additionalData,
+          timestamp: Date.now(),
+        },
+        revenue
+      );
+    },
+    [trackEvent]
+  );
 
-      if (error) throw error;
-
-      return sessionId;
-    } catch (err) {
-      logger.error('Error tracking product analytics event', { error: err, productId, eventType });
-      throw err;
-    }
-  }, [user]);
-
-  const trackView = useCallback((productId: string, additionalData: Record<string, any> = {}) => {
-    return trackEvent(productId, 'view', {
-      ...additionalData,
-      timestamp: Date.now()
-    });
-  }, [trackEvent]);
-
-  const trackClick = useCallback((productId: string, elementId: string, additionalData: Record<string, any> = {}) => {
-    return trackEvent(productId, 'click', {
-      element_id: elementId,
-      ...additionalData,
-      timestamp: Date.now()
-    });
-  }, [trackEvent]);
-
-  const trackConversion = useCallback((productId: string, revenue: number, additionalData: Record<string, any> = {}) => {
-    return trackEvent(productId, 'conversion', {
-      ...additionalData,
-      timestamp: Date.now()
-    }, revenue);
-  }, [trackEvent]);
-
-  const trackCustomEvent = useCallback((productId: string, eventName: string, eventData: Record<string, any> = {}) => {
-    return trackEvent(productId, 'custom', {
-      custom_event_name: eventName,
-      ...eventData,
-      timestamp: Date.now()
-    });
-  }, [trackEvent]);
+  const trackCustomEvent = useCallback(
+    (productId: string, eventName: string, eventData: Record<string, unknown> = {}) => {
+      return trackEvent(productId, 'custom', {
+        custom_event_name: eventName,
+        ...eventData,
+        timestamp: Date.now(),
+      });
+    },
+    [trackEvent]
+  );
 
   return {
     trackEvent,
     trackView,
     trackClick,
     trackConversion,
-    trackCustomEvent
+    trackCustomEvent,
   };
 };
 
@@ -359,86 +375,99 @@ export const useUserSessions = (productId: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadSessions = useCallback(async (limit = 50) => {
-    if (!productId) return;
+  const loadSessions = useCallback(
+    async (limit = 50) => {
+      if (!productId) return;
 
-    try {
-      setLoading(true);
-      setError(null);
+      try {
+        setLoading(true);
+        setError(null);
 
-      const { data, error: fetchError } = await supabase
-        .from('user_sessions')
-        .select(USER_SESSION_FIELDS)
-        .eq('product_id', productId)
-        .order('start_time', { ascending: false })
-        .limit(limit);
+        const { data, error: fetchError } = await supabase
+          .from('user_sessions')
+          .select(USER_SESSION_FIELDS)
+          .eq('product_id', productId)
+          .order('start_time', { ascending: false })
+          .limit(limit);
 
-      if (fetchError) throw fetchError;
+        if (fetchError) throw fetchError;
 
-      setSessions(data || []);
-    } catch (err) {
-      logger.error('Error loading product analytics sessions', { error: err, productId });
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
-    } finally {
-      setLoading(false);
-    }
-  }, [productId]);
+        setSessions(data || []);
+      } catch (err) {
+        logger.error('Error loading product analytics sessions', { error: err, productId });
+        setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [productId]
+  );
 
-  const startSession = useCallback(async (productId: string, additionalData: Record<string, any> = {}) => {
-    try {
-      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      const sessionData = {
-        session_id: sessionId,
-        product_id: productId,
-        start_time: new Date().toISOString(),
-        duration: 0,
-        page_views: 1,
-        clicks: 0,
-        conversions: 0,
-        ...additionalData,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+  const startSession = useCallback(
+    async (productId: string, additionalData: Record<string, unknown> = {}) => {
+      try {
+        const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      const { data, error } = await supabase
-        .from('user_sessions')
-        .insert(sessionData)
-        .select()
-        .single();
+        const sessionData = {
+          session_id: sessionId,
+          product_id: productId,
+          start_time: new Date().toISOString(),
+          duration: 0,
+          page_views: 1,
+          clicks: 0,
+          conversions: 0,
+          ...additionalData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
 
-      if (error) throw error;
+        const { data, error } = await supabase
+          .from('user_sessions')
+          .insert(sessionData)
+          .select()
+          .single();
 
-      return data;
-    } catch (err) {
-      logger.error('Error starting product analytics session', { error: err, productId });
-      throw err;
-    }
-  }, []);
+        if (error) throw error;
 
-  const endSession = useCallback(async (sessionId: string, additionalData: Record<string, any> = {}) => {
-    try {
-      const endTime = new Date().toISOString();
-      
-      const { data, error } = await supabase
-        .from('user_sessions')
-        .update({
-          end_time: endTime,
-          updated_at: endTime,
-          ...additionalData
-        })
-        .eq('session_id', sessionId)
-        .select()
-        .single();
+        return data;
+      } catch (err) {
+        logger.error('Error starting product analytics session', { error: err, productId });
+        throw err;
+      }
+    },
+    []
+  );
 
-      if (error) throw error;
+  const endSession = useCallback(
+    async (sessionId: string, additionalData: Record<string, unknown> = {}) => {
+      try {
+        const endTime = new Date().toISOString();
 
-      return data;
-    } catch (err) {
-      logger.error('Error ending product analytics session', { error: err, productId, sessionId });
-      throw err;
-    }
-  }, []);
+        const { data, error } = await supabase
+          .from('user_sessions')
+          .update({
+            end_time: endTime,
+            updated_at: endTime,
+            ...additionalData,
+          })
+          .eq('session_id', sessionId)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        return data;
+      } catch (err) {
+        logger.error('Error ending product analytics session', {
+          error: err,
+          productId,
+          sessionId,
+        });
+        throw err;
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     loadSessions();
@@ -450,7 +479,7 @@ export const useUserSessions = (productId: string) => {
     error,
     loadSessions,
     startSession,
-    endSession
+    endSession,
   };
 };
 
@@ -486,45 +515,52 @@ export const useAnalyticsReports = (productId: string) => {
     }
   }, [productId, user]);
 
-  const generateReport = useCallback(async (
-    reportType: AnalyticsReport['report_type'],
-    reportFormat: AnalyticsReport['report_format'],
-    startDate: string,
-    endDate: string,
-    includeCharts: boolean = true
-  ) => {
-    if (!productId || !user) return;
+  const generateReport = useCallback(
+    async (
+      reportType: AnalyticsReport['report_type'],
+      reportFormat: AnalyticsReport['report_format'],
+      startDate: string,
+      endDate: string,
+      includeCharts: boolean = true
+    ) => {
+      if (!productId || !user) return;
 
-    try {
-      const reportData = {
-        product_id: productId,
-        user_id: user.id,
-        report_type: reportType,
-        report_format: reportFormat,
-        start_date: startDate,
-        end_date: endDate,
-        include_charts: includeCharts,
-        status: 'pending' as const,
-        created_at: new Date().toISOString()
-      };
+      try {
+        const reportData = {
+          product_id: productId,
+          user_id: user.id,
+          report_type: reportType,
+          report_format: reportFormat,
+          start_date: startDate,
+          end_date: endDate,
+          include_charts: includeCharts,
+          status: 'pending' as const,
+          created_at: new Date().toISOString(),
+        };
 
-      const { data, error } = await supabase
-        .from('analytics_reports')
-        .insert(reportData)
-        .select()
-        .single();
+        const { data, error } = await supabase
+          .from('analytics_reports')
+          .insert(reportData)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Recharger la liste des rapports
-      await loadReports();
+        // Recharger la liste des rapports
+        await loadReports();
 
-      return data;
-    } catch (err) {
-      logger.error('Error generating product analytics report', { error: err, productId, reportType });
-      throw err;
-    }
-  }, [productId, user, loadReports]);
+        return data;
+      } catch (err) {
+        logger.error('Error generating product analytics report', {
+          error: err,
+          productId,
+          reportType,
+        });
+        throw err;
+      }
+    },
+    [productId, user, loadReports]
+  );
 
   useEffect(() => {
     loadReports();
@@ -535,7 +571,7 @@ export const useAnalyticsReports = (productId: string) => {
     loading,
     error,
     loadReports,
-    generateReport
+    generateReport,
   };
 };
 
@@ -575,13 +611,16 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
 
   // Grouper les données par jour pour les graphiques
   const dailyData = useMemo(() => {
-    const  grouped: Record<string, {
-      date: string;
-      views: number;
-      clicks: number;
-      conversions: number;
-      revenue: number;
-    }> = {};
+    const grouped: Record<
+      string,
+      {
+        date: string;
+        views: number;
+        clicks: number;
+        conversions: number;
+        revenue: number;
+      }
+    > = {};
 
     history.forEach(event => {
       const date = event.created_at.split('T')[0];
@@ -591,7 +630,7 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
           views: 0,
           clicks: 0,
           conversions: 0,
-          revenue: 0
+          revenue: 0,
         };
       }
 
@@ -621,12 +660,6 @@ export const useAnalyticsHistory = (productId: string, days: number = 30) => {
     dailyData,
     loading,
     error,
-    loadHistory
+    loadHistory,
   };
 };
-
-
-
-
-
-

@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { logger } from '@/lib/logger';
 import {
   AdvancedPayment,
@@ -35,7 +36,10 @@ export const useAdvancedPayments = (
   const pageSize = pagination?.pageSize || 50;
 
   const fetchPayments = useCallback(async () => {
-    if (!storeId) { setLoading(false); return; }
+    if (!storeId) {
+      setLoading(false);
+      return;
+    }
     try {
       const result = await fetchAndMergePayments(storeId, filters, page, pageSize);
       setPayments(result.payments);
@@ -45,8 +49,10 @@ export const useAdvancedPayments = (
       const err = _error instanceof Error ? _error : new Error(String(_error));
       setError(err);
       logger.error('Error fetching advanced payments:', { error: err.message, storeId });
-      const isConnectionError = err.message.includes('upstream connect error') ||
-        err.message.includes('connection timeout') || err.message.includes('network') ||
+      const isConnectionError =
+        err.message.includes('upstream connect error') ||
+        err.message.includes('connection timeout') ||
+        err.message.includes('network') ||
         err.message.includes('fetch failed');
       if (!isConnectionError) {
         toast({ title: 'Erreur', description: err.message, variant: 'destructive' });
@@ -74,27 +80,36 @@ export const useAdvancedPayments = (
     try {
       const { data, error } = await supabase
         .from('payments')
-        .insert([{
-          store_id: options.storeId,
-          order_id: options.orderId || null,
-          customer_id: options.customerId || null,
-          payment_method: options.paymentMethod || 'mobile_money',
-          amount: options.amount,
-          currency: options.currency || 'XOF',
-          status: 'pending',
-          payment_type: options.paymentType || 'full',
-          transaction_id: options.transactionId || null,
-          notes: options.notes || null,
-          metadata: options.metadata as unknown,
-        }] as unknown)
-        .select().limit(1);
+        .insert([
+          {
+            store_id: options.storeId,
+            order_id: options.orderId || null,
+            customer_id: options.customerId || null,
+            payment_method: options.paymentMethod || 'mobile_money',
+            amount: options.amount,
+            currency: options.currency || 'XOF',
+            status: 'pending',
+            payment_type: options.paymentType || 'full',
+            transaction_id: options.transactionId || null,
+            notes: options.notes || null,
+            metadata: options.metadata as unknown,
+          },
+        ] as unknown)
+        .select()
+        .limit(1);
 
       if (error) throw error;
       await fetchPayments();
       await fetchStats();
       return {
         success: true,
-        data: data?.[0] ? { ...data[0], order_id: data[0].order_id || undefined, customer_id: data[0].customer_id || undefined } as AdvancedPayment : undefined,
+        data: data?.[0]
+          ? ({
+              ...data[0],
+              order_id: data[0].order_id || undefined,
+              customer_id: data[0].customer_id || undefined,
+            } as AdvancedPayment)
+          : undefined,
       };
     } catch (_error: unknown) {
       const msg = _error instanceof Error ? _error.message : String(_error);
@@ -104,38 +119,65 @@ export const useAdvancedPayments = (
   };
 
   // Create percentage payment
-  const createPercentagePayment = async (options: PercentagePaymentOptions): Promise<PaymentResponse> => {
+  const createPercentagePayment = async (
+    options: PercentagePaymentOptions
+  ): Promise<PaymentResponse> => {
     try {
       const percentageAmount = options.amount * (options.percentageRate / 100);
       const { data, error } = await supabase
         .from('payments')
-        .insert([{
-          store_id: options.storeId, order_id: options.orderId, customer_id: options.customerId,
-          payment_method: options.paymentMethod || 'mobile_money', amount: percentageAmount,
-          currency: options.currency || 'XOF', status: 'completed', payment_type: 'percentage',
-          percentage_amount: percentageAmount, percentage_rate: options.percentageRate,
-          remaining_amount: options.remainingAmount, transaction_id: options.transactionId,
-          notes: options.notes, metadata: options.metadata,
-        }]).select().limit(1);
+        .insert([
+          {
+            store_id: options.storeId,
+            order_id: options.orderId,
+            customer_id: options.customerId,
+            payment_method: options.paymentMethod || 'mobile_money',
+            amount: percentageAmount,
+            currency: options.currency || 'XOF',
+            status: 'completed',
+            payment_type: 'percentage',
+            percentage_amount: percentageAmount,
+            percentage_rate: options.percentageRate,
+            remaining_amount: options.remainingAmount,
+            transaction_id: options.transactionId,
+            notes: options.notes,
+            metadata: options.metadata,
+          },
+        ])
+        .select()
+        .limit(1);
 
       if (error) throw error;
 
       if (options.orderId) {
         try {
-          await supabase.from('partial_payments' as unknown as 'payments').insert([{
-            order_id: options.orderId, payment_id: data[0].id, amount: percentageAmount,
-            percentage: options.percentageRate, status: 'completed',
-            payment_method: options.paymentMethod || 'mobile_money',
-            transaction_id: options.transactionId || undefined,
-          }]);
-        } catch { /* table may not exist */ }
+          await supabase.from('partial_payments' as unknown as 'payments').insert([
+            {
+              order_id: options.orderId,
+              payment_id: data[0].id,
+              amount: percentageAmount,
+              percentage: options.percentageRate,
+              status: 'completed',
+              payment_method: options.paymentMethod || 'mobile_money',
+              transaction_id: options.transactionId || undefined,
+            },
+          ]);
+        } catch {
+          /* table may not exist */
+        }
       }
 
       await fetchPayments();
       await fetchStats();
       return {
         success: true,
-        data: data?.[0] ? { ...data[0], order_id: data[0].order_id || undefined, customer_id: data[0].customer_id || undefined } as AdvancedPayment : undefined,
+        data: data?.[0]
+          ? ({
+              ...data[0],
+              order_id: data[0].order_id || undefined,
+              customer_id: data[0].customer_id || undefined,
+            } as AdvancedPayment)
+          : undefined,
       };
     } catch (_error: unknown) {
       const msg = _error instanceof Error ? _error.message : String(_error);
@@ -149,32 +191,59 @@ export const useAdvancedPayments = (
     try {
       const { data, error } = await supabase
         .from('payments')
-        .insert([{
-          store_id: options.storeId, order_id: options.orderId || null, customer_id: options.customerId || null,
-          payment_method: options.paymentMethod || 'mobile_money', amount: options.amount,
-          currency: options.currency || 'XOF', status: 'held', payment_type: 'delivery_secured',
-          is_held: true, held_until: options.heldUntil || null,
-          release_conditions: options.releaseConditions, transaction_id: options.transactionId || null,
-          notes: options.notes || null, metadata: options.metadata,
-        }]).select().limit(1);
+        .insert([
+          {
+            store_id: options.storeId,
+            order_id: options.orderId || null,
+            customer_id: options.customerId || null,
+            payment_method: options.paymentMethod || 'mobile_money',
+            amount: options.amount,
+            currency: options.currency || 'XOF',
+            status: 'held',
+            payment_type: 'delivery_secured',
+            is_held: true,
+            held_until: options.heldUntil || null,
+            release_conditions: options.releaseConditions,
+            transaction_id: options.transactionId || null,
+            notes: options.notes || null,
+            metadata: options.metadata,
+          },
+        ])
+        .select()
+        .limit(1);
 
       if (error) throw error;
 
       if (options.orderId) {
         try {
-          await supabase.from('secured_payments' as unknown as 'payments').insert([{
-            order_id: options.orderId, payment_id: data[0].id, total_amount: options.amount,
-            held_amount: options.amount, status: 'held', hold_reason: options.holdReason,
-            release_conditions: options.releaseConditions as unknown, held_until: options.heldUntil || undefined,
-          }]);
-        } catch { /* table may not exist */ }
+          await supabase.from('secured_payments' as unknown as 'payments').insert([
+            {
+              order_id: options.orderId,
+              payment_id: data[0].id,
+              total_amount: options.amount,
+              held_amount: options.amount,
+              status: 'held',
+              hold_reason: options.holdReason,
+              release_conditions: options.releaseConditions as unknown,
+              held_until: options.heldUntil || undefined,
+            },
+          ]);
+        } catch {
+          /* table may not exist */
+        }
       }
 
       await fetchPayments();
       await fetchStats();
       return {
         success: true,
-        data: data?.[0] ? { ...data[0], order_id: data[0].order_id || undefined, customer_id: data[0].customer_id || undefined } as AdvancedPayment : undefined,
+        data: data?.[0]
+          ? ({
+              ...data[0],
+              order_id: data[0].order_id || undefined,
+              customer_id: data[0].customer_id || undefined,
+            } as AdvancedPayment)
+          : undefined,
       };
     } catch (_error: unknown) {
       const msg = _error instanceof Error ? _error.message : String(_error);
@@ -184,22 +253,45 @@ export const useAdvancedPayments = (
   };
 
   // Release held payment
-  const releasePayment = async (paymentId: string, releasedBy: string): Promise<PaymentResponse> => {
+  const releasePayment = async (
+    paymentId: string,
+    releasedBy: string
+  ): Promise<PaymentResponse> => {
     try {
       const { data, error } = await supabase
         .from('payments')
-        .update({ status: 'released', is_held: false, delivery_confirmed_at: new Date().toISOString(), delivery_confirmed_by: releasedBy })
-        .eq('id', paymentId).select().limit(1);
+        .update({
+          status: 'released',
+          is_held: false,
+          delivery_confirmed_at: new Date().toISOString(),
+          delivery_confirmed_by: releasedBy,
+        })
+        .eq('id', paymentId)
+        .select()
+        .limit(1);
 
       if (error) throw error;
 
-      await supabase.from('secured_payments').update({ status: 'released', released_at: new Date().toISOString(), released_by: releasedBy }).eq('payment_id', paymentId);
+      await supabase
+        .from('secured_payments')
+        .update({
+          status: 'released',
+          released_at: new Date().toISOString(),
+          released_by: releasedBy,
+        })
+        .eq('payment_id', paymentId);
       await fetchPayments();
       await fetchStats();
       toast({ title: 'Succès', description: 'Paiement libéré avec succès' });
       return {
         success: true,
-        data: data?.[0] ? { ...data[0], order_id: data[0].order_id || undefined, customer_id: data[0].customer_id || undefined } as AdvancedPayment : undefined,
+        data: data?.[0]
+          ? ({
+              ...data[0],
+              order_id: data[0].order_id || undefined,
+              customer_id: data[0].customer_id || undefined,
+            } as AdvancedPayment)
+          : undefined,
       };
     } catch (_error: unknown) {
       const msg = _error instanceof Error ? _error.message : String(_error);
@@ -209,22 +301,36 @@ export const useAdvancedPayments = (
   };
 
   // Open dispute
-  const openDispute = async (paymentId: string, reason: string, description: string): Promise<PaymentResponse> => {
+  const openDispute = async (
+    paymentId: string,
+    reason: string,
+    description: string
+  ): Promise<PaymentResponse> => {
     try {
       const { data, error } = await supabase
         .from('payments')
         .update({ status: 'disputed', dispute_opened_at: new Date().toISOString() })
-        .eq('id', paymentId).select().limit(1);
+        .eq('id', paymentId)
+        .select()
+        .limit(1);
 
       if (error) throw error;
 
       if (data[0].order_id) {
         try {
-          await supabase.from('disputes').insert([{
-            order_id: data[0].order_id, initiator_id: data[0].customer_id || '',
-            initiator_type: 'customer', subject: reason, description, status: 'open',
-          }]);
-        } catch (e) { logger.warn('Error creating dispute (non-critical)', { error: e }); }
+          await supabase.from('disputes').insert([
+            {
+              order_id: data[0].order_id,
+              initiator_id: data[0].customer_id || '',
+              initiator_type: 'customer',
+              subject: reason,
+              description,
+              status: 'open',
+            },
+          ]);
+        } catch (e) {
+          logger.warn('Error creating dispute (non-critical)', { error: e });
+        }
       }
 
       await fetchPayments();
@@ -232,7 +338,13 @@ export const useAdvancedPayments = (
       toast({ title: 'Litige ouvert', description: 'Un litige a été ouvert pour ce paiement' });
       return {
         success: true,
-        data: data?.[0] ? { ...data[0], order_id: data[0].order_id || undefined, customer_id: data[0].customer_id || undefined } as AdvancedPayment : undefined,
+        data: data?.[0]
+          ? ({
+              ...data[0],
+              order_id: data[0].order_id || undefined,
+              customer_id: data[0].customer_id || undefined,
+            } as AdvancedPayment)
+          : undefined,
       };
     } catch (_error: unknown) {
       const msg = _error instanceof Error ? _error.message : String(_error);
@@ -242,21 +354,37 @@ export const useAdvancedPayments = (
   };
 
   // Update payment
-  const updatePayment = async (id: string, updates: Partial<AdvancedPayment>): Promise<PaymentResponse> => {
+  const updatePayment = async (
+    id: string,
+    updates: Partial<AdvancedPayment>
+  ): Promise<PaymentResponse> => {
     try {
       const supabaseUpdates: Record<string, unknown> = {
         ...updates,
         order_id: updates.order_id !== undefined ? updates.order_id || null : undefined,
         customer_id: updates.customer_id !== undefined ? updates.customer_id || null : undefined,
-        release_conditions: updates.release_conditions ? (updates.release_conditions as unknown) : undefined,
+        release_conditions: updates.release_conditions
+          ? (updates.release_conditions as unknown)
+          : undefined,
       };
-      const { data, error } = await supabase.from('payments').update(supabaseUpdates).eq('id', id).select().limit(1);
+      const { data, error } = await supabase
+        .from('payments')
+        .update(supabaseUpdates)
+        .eq('id', id)
+        .select()
+        .limit(1);
       if (error) throw error;
       await fetchPayments();
       await fetchStats();
       return {
         success: true,
-        data: data?.[0] ? { ...data[0], order_id: data[0].order_id || undefined, customer_id: data[0].customer_id || undefined } as AdvancedPayment : undefined,
+        data: data?.[0]
+          ? ({
+              ...data[0],
+              order_id: data[0].order_id || undefined,
+              customer_id: data[0].customer_id || undefined,
+            } as AdvancedPayment)
+          : undefined,
       };
     } catch (_error: unknown) {
       const msg = _error instanceof Error ? _error.message : String(_error);
@@ -284,27 +412,30 @@ export const useAdvancedPayments = (
   useEffect(() => {
     fetchPayments();
     fetchStats();
-
-    const paymentsChannel = supabase
-      .channel('advanced-payments-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments', filter: storeId ? `store_id=eq.${storeId}` : undefined }, () => { fetchPayments(); fetchStats(); })
-      .subscribe();
-
-    const transactionsChannel = supabase
-      .channel('advanced-transactions-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: storeId ? `store_id=eq.${storeId}` : undefined }, () => { fetchPayments(); fetchStats(); })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(paymentsChannel);
-      supabase.removeChannel(transactionsChannel);
-    };
   }, [fetchPayments, fetchStats]);
 
+  useVisibilityAwarePolling(
+    () => {
+      fetchPayments();
+      fetchStats();
+    },
+    90_000,
+    true
+  );
+
   return {
-    payments, loading, stats, error, totalCount,
+    payments,
+    loading,
+    stats,
+    error,
+    totalCount,
     refetch: fetchPayments,
-    createPayment, createPercentagePayment, createSecuredPayment,
-    releasePayment, openDispute, updatePayment, deletePayment,
+    createPayment,
+    createPercentagePayment,
+    createSecuredPayment,
+    releasePayment,
+    openDispute,
+    updatePayment,
+    deletePayment,
   };
 };

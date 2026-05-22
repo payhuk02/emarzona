@@ -4,20 +4,20 @@
  * Date: 2025-01-31
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { StoreEarnings } from '@/types/store-withdrawals';
 import { logger } from '@/lib/logger';
 
-const STORE_EARNINGS_FIELDS = 'id, store_id, available_balance, pending_balance, total_earned, total_withdrawn, total_refunded, last_calculated_at, created_at, updated_at';
+const STORE_EARNINGS_FIELDS =
+  'id, store_id, available_balance, pending_balance, total_earned, total_withdrawn, total_refunded, last_calculated_at, created_at, updated_at';
 
 export const useStoreEarnings = (storeId: string | undefined) => {
   const [earnings, setEarnings] = useState<StoreEarnings | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const channelRef = useRef<any>(null);
-
   const fetchEarnings = useCallback(async () => {
     if (!storeId) {
       setLoading(false);
@@ -84,23 +84,28 @@ export const useStoreEarnings = (storeId: string | undefined) => {
           }
         }
       }
-    } catch ( _error: any) {
-      logger.error('Error fetching store earnings', { error });
-      
-      // Vérifier si c'est une erreur de table/fonction manquante
-      const isMissingTable = error?.code === '42P01' || error?.message?.includes('does not exist');
-      const isMissingFunction = error?.code === '42883' || error?.message?.includes('function') && error?.message?.includes('does not exist');
-      
+    } catch (_error: unknown) {
+      const err = _error as { code?: string; message?: string };
+      logger.error('Error fetching store earnings', { error: _error });
+
+      const isMissingTable = err?.code === '42P01' || err?.message?.includes('does not exist');
+      const isMissingFunction =
+        err?.code === '42883' ||
+        (err?.message?.includes('function') && err?.message?.includes('does not exist'));
+
       if (isMissingTable || isMissingFunction) {
         toast({
           title: 'Migration requise',
-          description: 'La migration SQL pour les retraits n\'a pas été exécutée. Veuillez exécuter la migration 20250131_store_withdrawals_system.sql dans Supabase.',
+          description:
+            "La migration SQL pour les retraits n'a pas été exécutée. Veuillez exécuter la migration 20250131_store_withdrawals_system.sql dans Supabase.",
           variant: 'destructive',
         });
       } else {
         toast({
           title: 'Erreur',
-          description: error?.message || 'Impossible de charger les revenus du store',
+          description:
+            (_error instanceof Error ? _error.message : err?.message) ||
+            'Impossible de charger les revenus du store',
           variant: 'destructive',
         });
       }
@@ -122,8 +127,8 @@ export const useStoreEarnings = (storeId: string | undefined) => {
 
       // Récupérer les revenus mis à jour
       await fetchEarnings();
-    } catch ( _error: any) {
-      logger.error('Error refreshing store earnings', { error });
+    } catch (_error: unknown) {
+      logger.error('Error refreshing store earnings', { error: _error });
       toast({
         title: 'Erreur',
         description: 'Impossible de rafraîchir les revenus',
@@ -136,44 +141,7 @@ export const useStoreEarnings = (storeId: string | undefined) => {
     fetchEarnings();
   }, [fetchEarnings]);
 
-  // Synchronisation en temps réel avec Supabase Realtime
-  useEffect(() => {
-    if (!storeId) return;
-
-    // Nettoyer le channel précédent
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
-
-    // Créer un nouveau channel pour écouter les changements sur store_earnings
-    channelRef.current = supabase
-      .channel(`store-earnings-${storeId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'store_earnings',
-          filter: `store_id=eq.${storeId}`,
-        },
-        (payload) => {
-          logger.info('🔔 Store earnings updated in real-time', { eventType: payload.eventType });
-          
-          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            // Mettre à jour les revenus avec les nouvelles données
-            setEarnings(payload.new as StoreEarnings);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [storeId]);
+  useVisibilityAwarePolling(fetchEarnings, 120_000, !!storeId);
 
   return {
     earnings,
@@ -182,10 +150,3 @@ export const useStoreEarnings = (storeId: string | undefined) => {
     refetch: fetchEarnings,
   };
 };
-
-
-
-
-
-
-

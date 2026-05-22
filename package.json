@@ -100,7 +100,8 @@
     "verify:before-execution": "node scripts/verify-before-execution.js",
     "execute:rls-migrations": "node scripts/execute-rls-migrations.js",
     "verify:unsubscribe-css": "node scripts/verify-unsubscribe-css.js",
-    "loyalty:integrate": "node scripts/integrate-loyalty-events.js"
+    "loyalty:integrate": "node scripts/integrate-loyalty-events.js",
+    "load:test:marketplace": "k6 run scripts/k6/marketplace-rpc.js"
   },
   "vercel": {
     "buildCommand": "npm run build",

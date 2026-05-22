@@ -1,88 +1,43 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  ArrowLeft,
-  Loader2,
-  ShoppingBag,
-  User,
-  CreditCard,
-  AlertCircle,
-  Shield,
-  Tag,
-} from 'lucide-react';
-import CouponInput from '@/components/checkout/CouponInput';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { loadMonerooPayment } from '@/lib/moneroo-lazy';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
-import { formatPrice } from '@/lib/product-helpers';
-import { htmlToPlainText } from '@/lib/html-sanitizer';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
-import type { Currency } from '@/lib/currency-converter';
 import { isSupportedCurrency } from '@/lib/currency-converter';
+import type {
+  AppliedBuyNowCoupon,
+  CheckoutFormData,
+  CheckoutProduct,
+  CheckoutStore,
+  CheckoutUser,
+  CheckoutVariant,
+} from '@/pages/checkout/buy-now/checkout-buy-now-types';
+import { validateBuyNowForm } from '@/pages/checkout/buy-now/checkout-buy-now-validation';
+import { calculateBuyNowPrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
 
-interface CheckoutFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  country: string;
-  postalCode: string;
+const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
+const BuyNowCustomerForm = lazy(() => import('@/components/checkout/buy-now/BuyNowCustomerForm'));
+
+function BuyNowSectionFallback() {
+  return (
+    <Card>
+      <CardContent className="py-8 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-32 w-full" />
+      </CardContent>
+    </Card>
+  );
 }
-
-type CheckoutUser = {
-  id: string;
-  email?: string | null;
-  user_metadata?: Record<string, unknown>;
-} | null;
-type CheckoutStore = {
-  id: string;
-  name?: string | null;
-  slug?: string | null;
-  subdomain?: string | null;
-  default_currency?: string | null;
-} | null;
-type CheckoutProduct = {
-  id: string;
-  store_id?: string;
-  slug?: string | null;
-  name?: string | null;
-  price?: number | null;
-  promotional_price?: number | null;
-  currency?: string | null;
-  description?: string | null;
-  short_description?: string | null;
-  image_url?: string | null;
-  product_type?: string | null;
-  stores?: CheckoutStore | CheckoutStore[] | null;
-} | null;
-type CheckoutVariant = {
-  id: string;
-  price?: number | null;
-  promotional_price?: number | null;
-  option1_value?: string | null;
-  name?: string | null;
-} | null;
-
-type LooseSupabaseQuery = {
-  select: (columns: string) => LooseSupabaseQuery;
-  eq: (column: string, value: unknown) => LooseSupabaseQuery;
-  single: () => Promise<{ data: unknown | null }>;
-};
-type LooseSupabaseClient = { from: (table: string) => LooseSupabaseQuery };
 
 const CHECKOUT_PRODUCT_FIELDS =
   'id, store_id, slug, name, description, short_description, price, promotional_price, currency, image_url, product_type';
@@ -149,11 +104,7 @@ const Checkout = () => {
   const [selectedVariant, setSelectedVariant] = useState<CheckoutVariant>(null);
 
   // State pour le code promo
-  const [appliedCouponCode, setAppliedCouponCode] = useState<{
-    id: string;
-    discountAmount: number;
-    code: string;
-  } | null>(null);
+  const [appliedCouponCode, setAppliedCouponCode] = useState<AppliedBuyNowCoupon | null>(null);
 
   // Formulaire
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -351,29 +302,38 @@ const Checkout = () => {
    * - Retourne true uniquement si aucune erreur
    */
   const validateForm = useCallback((): boolean => {
-    const errors: Partial<Record<keyof CheckoutFormData, string>> = {};
-
-    if (!formData.firstName.trim()) {
-      errors.firstName = 'Le prénom est requis';
-    }
-
-    if (!formData.lastName.trim()) {
-      errors.lastName = 'Le nom est requis';
-    }
-
-    if (!formData.email.trim()) {
-      errors.email = "L'email est requis";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Email invalide';
-    }
-
-    if (!formData.phone.trim()) {
-      errors.phone = 'Le téléphone est requis';
-    }
-
+    const errors = validateBuyNowForm(formData);
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData, setFormErrors]);
+  }, [formData]);
+
+  const handleCouponApply = useCallback(
+    (couponId: string, discountAmount: number, code: string) => {
+      setAppliedCouponCode({
+        id: couponId,
+        discountAmount,
+        code: code || '',
+      });
+      localStorage.setItem(
+        'applied_coupon',
+        JSON.stringify({ id: couponId, discountAmount, code: code || '' })
+      );
+      toast({
+        title: '✅ Code promo appliqué',
+        description: `Réduction de ${discountAmount.toLocaleString('fr-FR')} XOF appliquée`,
+      });
+    },
+    [toast]
+  );
+
+  const handleCouponRemove = useCallback(() => {
+    setAppliedCouponCode(null);
+    localStorage.removeItem('applied_coupon');
+    toast({
+      title: 'Code promo retiré',
+      description: 'Le code promo a été retiré de votre commande',
+    });
+  }, [toast]);
 
   /**
    * Calcule le prix final de la commande
@@ -393,32 +353,10 @@ const Checkout = () => {
    * // Retourne : 7000 XOF
    * ```
    */
-  const calculatePrice = useCallback((): number => {
-    if (!product) return 0;
-
-    // Si une variante est sélectionnée, utiliser son prix
-    if (selectedVariant?.price) {
-      const variantPrice = Number(selectedVariant.price);
-      const couponDiscount = appliedCouponCode?.discountAmount || 0;
-      return Math.max(0, variantPrice - couponDiscount);
-    }
-
-    // IMPORTANT: Utiliser le prix promo si disponible, sinon le prix normal
-    const promoPrice = product.promotional_price;
-    const basePrice = Number(product.price) || 0;
-
-    // Déterminer le prix de base (promo ou normal)
-    let finalBasePrice: number;
-    if (promoPrice && Number(promoPrice) < basePrice && Number(promoPrice) > 0) {
-      finalBasePrice = Number(promoPrice);
-    } else {
-      finalBasePrice = basePrice;
-    }
-
-    // Appliquer la réduction du code promo sur le prix de base
-    const couponDiscount = appliedCouponCode?.discountAmount || 0;
-    return Math.max(0, finalBasePrice - couponDiscount);
-  }, [product, selectedVariant, appliedCouponCode]);
+  const calculatePrice = useCallback(
+    (): number => calculateBuyNowPrice(product, selectedVariant, appliedCouponCode),
+    [product, selectedVariant, appliedCouponCode]
+  );
 
   // Gérer le changement de champ
   const handleFieldChange = (field: keyof CheckoutFormData, value: string) => {
@@ -676,371 +614,34 @@ const Checkout = () => {
             role="complementary"
             aria-label="Résumé de la commande"
           >
-            <Card className="lg:sticky lg:top-4">
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                  Résumé de la commande
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 space-y-4">
-                {/* Produit */}
-                <div className="flex gap-4">
-                  {product.image_url && (
-                    <img
-                      src={product.image_url}
-                      alt={product.name ? htmlToPlainText(product.name) : 'Produit'}
-                      className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm line-clamp-2">
-                      {product.name ? htmlToPlainText(product.name) : 'Produit sans nom'}
-                    </h3>
-                    {selectedVariant && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Variante:{' '}
-                        {htmlToPlainText(
-                          selectedVariant.option1_value ||
-                            selectedVariant.name ||
-                            'Variante sélectionnée'
-                        )}
-                      </p>
-                    )}
-                    {product.product_type && (
-                      <Badge variant="outline" className="mt-1 text-xs">
-                        {product.product_type}
-                      </Badge>
-                    )}
-                    {product.description && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {htmlToPlainText(product.description).substring(0, 100)}
-                        {htmlToPlainText(product.description).length > 100 ? '...' : ''}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Code promo - Visible et proéminent */}
-                <div className="space-y-3 py-3 border-t border-b border-border/50 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 rounded-lg p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-primary/10">
-                      <Tag className="h-4 w-4 text-primary" />
-                    </div>
-                    <Label htmlFor="coupon-code" className="text-sm font-semibold text-foreground">
-                      Avez-vous un code promo ?
-                    </Label>
-                  </div>
-                  <CouponInput
-                    storeId={storeId || undefined}
-                    productId={productId || undefined}
-                    productType={product?.product_type}
-                    customerId={user?.id || undefined}
-                    orderAmount={(() => {
-                      // Calculer le prix de base sans coupon pour la validation
-                      if (!product) return 0;
-                      if (selectedVariant?.price) return Number(selectedVariant.price);
-                      const promoPrice = product.promotional_price;
-                      const normalPrice = Number(product.price) || 0;
-                      if (
-                        promoPrice &&
-                        Number(promoPrice) < normalPrice &&
-                        Number(promoPrice) > 0
-                      ) {
-                        return Number(promoPrice);
-                      }
-                      return normalPrice;
-                    })()}
-                    onApply={(couponId, discountAmount, code) => {
-                      setAppliedCouponCode({
-                        id: couponId,
-                        discountAmount,
-                        code: code || '',
-                      });
-                      localStorage.setItem(
-                        'applied_coupon',
-                        JSON.stringify({
-                          id: couponId,
-                          discountAmount,
-                          code: code || '',
-                        })
-                      );
-                      toast({
-                        title: '✅ Code promo appliqué',
-                        description: `Réduction de ${discountAmount.toLocaleString('fr-FR')} XOF appliquée`,
-                      });
-                    }}
-                    onRemove={() => {
-                      setAppliedCouponCode(null);
-                      localStorage.removeItem('applied_coupon');
-                      toast({
-                        title: 'Code promo retiré',
-                        description: 'Le code promo a été retiré de votre commande',
-                      });
-                    }}
-                    appliedCouponId={appliedCouponCode?.id || null}
-                    appliedCouponCode={appliedCouponCode?.code || null}
-                    appliedDiscountAmount={appliedCouponCode?.discountAmount || null}
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Prix */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Sous-total</span>
-                    <span className="font-semibold">
-                      {formatPrice(
-                        (() => {
-                          // Prix de base sans coupon
-                          if (!product) return 0;
-                          if (selectedVariant?.price) return Number(selectedVariant.price);
-                          const promoPrice = product.promotional_price;
-                          const normalPrice = Number(product.price) || 0;
-                          if (
-                            promoPrice &&
-                            Number(promoPrice) < normalPrice &&
-                            Number(promoPrice) > 0
-                          ) {
-                            return Number(promoPrice);
-                          }
-                          return normalPrice;
-                        })(),
-                        currency
-                      )}
-                    </span>
-                  </div>
-                  {appliedCouponCode && appliedCouponCode.discountAmount > 0 && (
-                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                      <span>Code promo ({appliedCouponCode.code})</span>
-                      <span className="font-semibold">
-                        -{formatPrice(appliedCouponCode.discountAmount, currency)}
-                      </span>
-                    </div>
-                  )}
-                  {(() => {
-                    // Vérifier si une promotion existe
-                    const promoPrice = product.promotional_price;
-                    const originalPrice = Number(product.price) || 0;
-                    const hasPromo =
-                      promoPrice && Number(promoPrice) < originalPrice && Number(promoPrice) > 0;
-
-                    if (hasPromo) {
-                      return (
-                        <>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>Prix original</span>
-                            <span className="line-through">
-                              {formatPrice(originalPrice, currency)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-xs text-green-600 dark:text-green-400">
-                            <span>Économie</span>
-                            <span className="font-semibold">
-                              {formatPrice(originalPrice - Number(promoPrice), currency)}
-                            </span>
-                          </div>
-                        </>
-                      );
-                    }
-                    return null;
-                  })()}
-                </div>
-
-                <Separator />
-
-                {/* Total */}
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="font-bold text-lg">Total</span>
-                  <span className="font-bold text-lg">
-                    {formatPrice(Number(displayPrice) || 0, currency)}
-                  </span>
-                </div>
-
-                {/* Sécurité */}
-                <div className="pt-4 border-t">
-                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <p>Paiement sécurisé par Moneroo. Vos informations sont protégées.</p>
-                  </div>
-                </div>
-
-                {/* Bouton de soumission */}
-                <div className="pt-6 border-t">
-                  <Button
-                    type="submit"
-                    form="checkout-form"
-                    size="lg"
-                    className="w-full min-h-[44px] text-base sm:text-lg"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                        <span className="text-sm sm:text-base">Traitement en cours...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-sm sm:text-base">Procéder au paiement</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <Suspense fallback={<BuyNowSectionFallback />}>
+              <BuyNowOrderSummary
+                product={product}
+                store={store}
+                selectedVariant={selectedVariant}
+                appliedCouponCode={appliedCouponCode}
+                displayPrice={displayPrice}
+                currency={currency}
+                storeId={storeId}
+                productId={productId}
+                user={user}
+                submitting={submitting}
+                onCouponApply={handleCouponApply}
+                onCouponRemove={handleCouponRemove}
+              />
+            </Suspense>
           </aside>
 
           {/* Formulaire principal - En bas sur mobile, à gauche sur desktop */}
           <div className="order-1 lg:order-1 lg:col-span-2 space-y-6">
-            {/* Informations client */}
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Informations client
-                </CardTitle>
-                <CardDescription className="text-sm">
-                  Vos informations de contact pour la commande
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4">
-                  {/* Nom et Prénom */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">
-                        Prénom <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={e => handleFieldChange('firstName', e.target.value)}
-                        placeholder="Votre prénom"
-                        className={`min-h-[44px] text-base ${formErrors.firstName ? 'border-destructive' : ''}`}
-                        required
-                      />
-                      {formErrors.firstName && (
-                        <p className="text-sm text-destructive">{formErrors.firstName}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">
-                        Nom <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        data-testid="checkout-lastname"
-                        value={formData.lastName}
-                        onChange={e => handleFieldChange('lastName', e.target.value)}
-                        placeholder="Votre nom"
-                        className={`min-h-[44px] text-base ${formErrors.lastName ? 'border-destructive' : ''}`}
-                        required
-                      />
-                      {formErrors.lastName && (
-                        <p className="text-sm text-destructive">{formErrors.lastName}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email">
-                      Email <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      data-testid="checkout-email"
-                      value={formData.email}
-                      onChange={e => handleFieldChange('email', e.target.value)}
-                      placeholder="votre@email.com"
-                      className={`min-h-[44px] text-base ${formErrors.email ? 'border-destructive' : ''}`}
-                      required
-                    />
-                    {formErrors.email && (
-                      <p className="text-sm text-destructive">{formErrors.email}</p>
-                    )}
-                  </div>
-
-                  {/* Téléphone */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">
-                      Téléphone <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      data-testid="checkout-phone"
-                      value={formData.phone}
-                      onChange={e => handleFieldChange('phone', e.target.value)}
-                      placeholder="+226 XX XX XX XX"
-                      className={`min-h-[44px] text-base ${formErrors.phone ? 'border-destructive' : ''}`}
-                      required
-                    />
-                    {formErrors.phone && (
-                      <p className="text-sm text-destructive">{formErrors.phone}</p>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  {/* Adresse */}
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Adresse</Label>
-                    <Input
-                      id="address"
-                      value={formData.address}
-                      onChange={e => handleFieldChange('address', e.target.value)}
-                      placeholder="123 Rue Example"
-                      className="min-h-[44px] text-base"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">Ville</Label>
-                      <Input
-                        id="city"
-                        value={formData.city}
-                        onChange={e => handleFieldChange('city', e.target.value)}
-                        placeholder="Ouagadougou"
-                        className="min-h-[44px] text-base"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="postalCode">Code postal</Label>
-                      <Input
-                        id="postalCode"
-                        value={formData.postalCode}
-                        onChange={e => handleFieldChange('postalCode', e.target.value)}
-                        placeholder="01 BP"
-                        className="min-h-[44px] text-base"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Pays</Label>
-                    <Input
-                      id="country"
-                      value={formData.country}
-                      onChange={e => handleFieldChange('country', e.target.value)}
-                      placeholder="Burkina Faso"
-                      className="min-h-[44px] text-base"
-                    />
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+            <Suspense fallback={<BuyNowSectionFallback />}>
+              <BuyNowCustomerForm
+                formData={formData}
+                formErrors={formErrors}
+                onFieldChange={handleFieldChange}
+                onSubmit={handleSubmit}
+              />
+            </Suspense>
           </div>
         </div>
       </div>

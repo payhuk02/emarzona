@@ -70,6 +70,7 @@ export class SyncService {
   private batchInterval: NodeJS.Timeout | null = null;
   private queueProcessor: NodeJS.Timeout | null = null;
   private connectivityMonitor: NodeJS.Timeout | null = null;
+  private visibilityListenerBound = false;
 
   constructor() {
     this.loadConfig();
@@ -120,6 +121,7 @@ export class SyncService {
     switch (this.config.mode) {
       case 'realtime':
         this.startRealtimeSync();
+        this.bindVisibilityAwareRealtime();
         break;
       case 'batch':
         this.startBatchSync();
@@ -135,6 +137,9 @@ export class SyncService {
    */
   private startRealtimeSync(): void {
     if (this.realtimeSubscription) return;
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+      return;
+    }
 
     try {
       this.realtimeSubscription = supabase
@@ -749,8 +754,24 @@ export class SyncService {
    */
   private resumeRealtimeSync(): void {
     if (!this.realtimeSubscription && this.config.mode === 'realtime') {
-      this.startRealtimeSync();
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        this.startRealtimeSync();
+      }
     }
+  }
+
+  /** Pause Realtime quand l’onglet est en arrière-plan (admin storage). */
+  bindVisibilityAwareRealtime(): void {
+    if (typeof document === 'undefined' || this.visibilityListenerBound) return;
+    this.visibilityListenerBound = true;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        this.pauseRealtimeSync();
+      } else if (this.config.mode === 'realtime') {
+        this.resumeRealtimeSync();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
   }
 
   /**

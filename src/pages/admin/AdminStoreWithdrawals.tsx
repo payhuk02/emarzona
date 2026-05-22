@@ -4,7 +4,7 @@
  * Date: 2025-01-31
  */
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -76,6 +76,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { WithdrawalHistoryDialog } from '@/components/store/WithdrawalHistoryDialog';
 import { WithdrawalStatsCard } from '@/components/store/WithdrawalStatsCard';
 
@@ -85,58 +86,11 @@ const AdminStoreWithdrawals = () => {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<StoreWithdrawalStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const channelRef = useRef<RealtimeChannel | null>(null);
-
   const { withdrawals, loading, refetch } = useStoreWithdrawals({
     status: statusFilter !== 'all' ? statusFilter : undefined,
   });
 
-  // Synchronisation en temps réel pour les admins
-  useEffect(() => {
-    if (!isAdmin) return;
-
-    // Nettoyer le channel précédent
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
-
-    // Créer un channel pour écouter tous les retraits (admin voit tout)
-    channelRef.current = supabase
-      .channel('admin-store-withdrawals')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'store_withdrawals',
-        },
-        payload => {
-          logger.info('🔔 Admin: Store withdrawal updated in real-time', {
-            eventType: payload.eventType,
-          });
-
-          // Rafraîchir la liste
-          refetch();
-
-          // Notifier l'admin d'un nouveau retrait
-          if (payload.eventType === 'INSERT') {
-            const newWithdrawal = payload.new as StoreWithdrawal;
-            toast({
-              title: 'Nouveau retrait 📤',
-              description: `Nouvelle demande de retrait de ${formatCurrency(newWithdrawal.amount)} de ${newWithdrawal.store?.name || 'N/A'}`,
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [isAdmin, refetch, toast]);
+  useVisibilityAwarePolling(refetch, 90_000, isAdmin);
 
   // Dialog states
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<StoreWithdrawal | null>(null);
@@ -198,7 +152,7 @@ const AdminStoreWithdrawals = () => {
         await refetch();
         setShowApproveDialog(false);
         setSelectedWithdrawal(null);
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error approving withdrawal', { error });
         toast({
@@ -235,7 +189,7 @@ const AdminStoreWithdrawals = () => {
       setShowRejectDialog(false);
       setRejectReason('');
       setSelectedWithdrawal(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error rejecting withdrawal', { error });
       toast({
@@ -273,7 +227,7 @@ const AdminStoreWithdrawals = () => {
       setTransactionReference('');
       setProofUrl('');
       setSelectedWithdrawal(null);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error completing withdrawal', { error });
       toast({
@@ -286,7 +240,7 @@ const AdminStoreWithdrawals = () => {
 
   const getStatusBadge = (status: StoreWithdrawalStatus) => {
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const  variants: Record<
+    const variants: Record<
       StoreWithdrawalStatus,
       {
         variant: 'default' | 'secondary' | 'destructive' | 'outline';
@@ -313,7 +267,7 @@ const AdminStoreWithdrawals = () => {
   };
 
   const getPaymentMethodLabel = (method: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       mobile_money: 'Mobile Money',
       bank_card: 'Carte bancaire',
       bank_transfer: 'Virement bancaire',
@@ -330,7 +284,7 @@ const AdminStoreWithdrawals = () => {
   }>({});
 
   const filteredWithdrawals = useMemo(() => {
-    let  filtered= [...withdrawals];
+    let filtered = [...withdrawals];
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -367,7 +321,7 @@ const AdminStoreWithdrawals = () => {
 
   const handleQuickFilter = useCallback((period: 'week' | 'month' | 'year' | 'all') => {
     const now = new Date();
-    let  dateFrom: Date | undefined;
+    let dateFrom: Date | undefined;
 
     switch (period) {
       case 'week':
@@ -515,7 +469,7 @@ const AdminStoreWithdrawals = () => {
                 </div>
               ) : filteredWithdrawals.length === 0 ? (
                 <div className="text-center py-8 sm:py-12 text-muted-foreground">
-                  <Wallet  className ="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
+                  <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
                   <p className="text-sm sm:text-base">Aucun retrait trouvé</p>
                 </div>
               ) : isMobile ? (
@@ -963,9 +917,3 @@ const AdminStoreWithdrawals = () => {
 };
 
 export default AdminStoreWithdrawals;
-
-
-
-
-
-

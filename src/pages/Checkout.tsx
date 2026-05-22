@@ -12,16 +12,12 @@
  * - Support 4 types produits
  */
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCart } from '@/hooks/cart/useCart';
 import { useToast } from '@/hooks/use-toast';
@@ -31,58 +27,37 @@ import { getAffiliateInfo } from '@/lib/affiliation-tracking';
 import { safeRedirect } from '@/lib/url-validator';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
 import { logger } from '@/lib/logger';
-import GiftCardInput from '@/components/checkout/GiftCardInput';
-import CouponInput from '@/components/checkout/CouponInput';
 import { PaymentProviderSelector } from '@/components/checkout/PaymentProviderSelector';
-import { FormFieldWithValidation } from '@/components/checkout/FormFieldWithValidation';
 import type { CartItem } from '@/types/cart';
+import type {
+  AppliedCoupon,
+  AppliedGiftCard,
+  CheckoutStoreGroup,
+  ShippingAddress,
+} from '@/pages/checkout/cart/checkout-types';
+import { isTaxCalculationResult } from '@/pages/checkout/cart/checkout-types';
+import { validateShippingForm } from '@/pages/checkout/cart/checkout-validation';
 import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
-import {
-  ShoppingBag,
-  MapPin,
-  CreditCard,
-  ArrowRight,
-  AlertCircle,
-  Loader2,
-  Tag,
-} from 'lucide-react';
+import { ShoppingBag, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
-interface ShippingAddress {
-  full_name: string;
-  email: string;
-  phone: string;
-  address_line1: string;
-  address_line2?: string;
-  city: string;
-  postal_code: string;
-  country: string;
-  state?: string;
-}
+const CheckoutShippingSection = lazy(
+  () => import('@/components/checkout/cart/CheckoutShippingSection')
+);
+const CheckoutOrderSummary = lazy(() => import('@/components/checkout/cart/CheckoutOrderSummary'));
 
-type TaxBreakdownItem = {
-  type: string;
-  name: string;
-  rate: number;
-  amount: number;
-  applies_to_shipping: boolean;
-  tax_inclusive: boolean;
-  is_default?: boolean;
-};
-
-type TaxCalculationResult = {
-  tax_amount: number;
-  tax_breakdown: TaxBreakdownItem[];
-  subtotal: number;
-  shipping_amount: number;
-  total_with_tax: number;
-};
-
-function isTaxCalculationResult(value: unknown): value is TaxCalculationResult {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return typeof v.tax_amount === 'number' && Array.isArray(v.tax_breakdown);
+function CheckoutSectionFallback() {
+  return (
+    <Card>
+      <CardContent className="py-8 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function Checkout() {
@@ -108,18 +83,10 @@ export default function Checkout() {
   }, [hasServiceInCart, toast]);
 
   // State pour la carte cadeau
-  const [appliedGiftCard, setAppliedGiftCard] = useState<{
-    id: string;
-    balance: number;
-    code: string;
-  } | null>(null);
+  const [appliedGiftCard, setAppliedGiftCard] = useState<AppliedGiftCard | null>(null);
 
   // State pour le coupon (nouveau système)
-  const [appliedCouponCode, setAppliedCouponCode] = useState<{
-    id: string;
-    discountAmount: number;
-    code: string;
-  } | null>(null);
+  const [appliedCouponCode, setAppliedCouponCode] = useState<AppliedCoupon | null>(null);
 
   // State pour charger le store_id (nécessaire pour la carte cadeau et coupon)
   const [storeId, setStoreId] = useState<string | null>(null);
@@ -131,16 +98,7 @@ export default function Checkout() {
 
   // State pour la gestion multi-stores
   const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
-  interface StoreGroup {
-    items: CartItem[];
-    store_name?: string;
-    subtotal?: number;
-    tax_amount?: number;
-    shipping_amount?: number;
-    discount_amount?: number;
-    total?: number;
-  }
-  const [storeGroups, setStoreGroups] = useState<Map<string, StoreGroup>>(new Map());
+  const [storeGroups, setStoreGroups] = useState<Map<string, CheckoutStoreGroup>>(new Map());
   const [isCheckingStores, setIsCheckingStores] = useState<boolean>(false);
 
   // Récupérer l'utilisateur pour pré-remplir le formulaire
@@ -192,7 +150,7 @@ export default function Checkout() {
 
           if (hasMultipleStores) {
             // Grouper les items par boutique (fonction simplifiée pour l'instant)
-            const groups = new Map<string, StoreGroup>();
+            const groups = new Map<string, CheckoutStoreGroup>();
             const skippedItems: CartItem[] = [];
 
             for (const item of items) {
@@ -901,101 +859,66 @@ export default function Checkout() {
     navigate(`/checkout/multi-store-tracking?orders=${orderIds}`);
   };
 
-  // Validation formulaire améliorée
   const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof ShippingAddress, string>> = {};
-
-    if (!formData.full_name.trim()) {
-      errors.full_name = 'Le nom complet est requis';
-    } else if (formData.full_name.trim().length < 2) {
-      errors.full_name = 'Le nom doit contenir au moins 2 caractères';
-    }
-
-    if (!formData.email.trim()) {
-      errors.email = "L'email est requis";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Format d'email invalide (ex: jean@example.com)";
-    }
-
-    if (!formData.phone.trim()) {
-      errors.phone = 'Le téléphone est requis';
-    } else if (
-      !/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(
-        formData.phone.replace(/\s/g, '')
-      )
-    ) {
-      errors.phone = 'Format de téléphone invalide (ex: +225 07 12 34 56 78)';
-    }
-
-    if (!formData.address_line1.trim()) {
-      errors.address_line1 = "L'adresse est requise";
-    } else if (formData.address_line1.trim().length < 5) {
-      errors.address_line1 = "L'adresse doit contenir au moins 5 caractères";
-    }
-
-    if (!formData.city.trim()) {
-      errors.city = 'La ville est requise';
-    } else if (formData.city.trim().length < 2) {
-      errors.city = 'La ville doit contenir au moins 2 caractères';
-    }
-
-    if (!formData.postal_code.trim()) {
-      errors.postal_code = 'Le code postal est requis';
-    } else if (formData.postal_code.trim().length < 3) {
-      errors.postal_code = 'Le code postal doit contenir au moins 3 caractères';
-    }
-
-    if (!formData.country.trim()) {
-      errors.country = 'Le pays est requis';
-    }
-
+    const errors = validateShippingForm(formData);
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // Validation d'un champ spécifique
-  const validateField = useCallback(
-    (field: keyof ShippingAddress, value: string): string | null => {
-      switch (field) {
-        case 'full_name':
-          if (!value.trim()) return 'Le nom complet est requis';
-          if (value.trim().length < 2) return 'Le nom doit contenir au moins 2 caractères';
-          return null;
-        case 'email':
-          if (!value.trim()) return "L'email est requis";
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Format d'email invalide";
-          return null;
-        case 'phone':
-          if (!value.trim()) return 'Le téléphone est requis';
-          if (
-            !/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(
-              value.replace(/\s/g, '')
-            )
-          ) {
-            return 'Format de téléphone invalide';
-          }
-          return null;
-        case 'address_line1':
-          if (!value.trim()) return "L'adresse est requise";
-          if (value.trim().length < 5) return "L'adresse doit contenir au moins 5 caractères";
-          return null;
-        case 'city':
-          if (!value.trim()) return 'La ville est requise';
-          if (value.trim().length < 2) return 'La ville doit contenir au moins 2 caractères';
-          return null;
-        case 'postal_code':
-          if (!value.trim()) return 'Le code postal est requis';
-          if (value.trim().length < 3) return 'Le code postal doit contenir au moins 3 caractères';
-          return null;
-        case 'country':
-          if (!value.trim()) return 'Le pays est requis';
-          return null;
-        default:
-          return null;
+  const handleGiftCardApply = useCallback((id: string, balance: number, code: string) => {
+    setAppliedGiftCard({ id, balance, code: code || '' });
+    try {
+      localStorage.setItem('applied_gift_card', JSON.stringify({ id, balance, code: code || '' }));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleGiftCardRemove = useCallback(() => {
+    setAppliedGiftCard(null);
+    try {
+      localStorage.removeItem('applied_gift_card');
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleCouponApply = useCallback(
+    (promotionId: string, discountAmount: number, code: string) => {
+      const newCoupon: AppliedCoupon = {
+        id: promotionId,
+        discountAmount: Number(discountAmount),
+        code: code || '',
+      };
+      setAppliedCouponCode(newCoupon);
+      try {
+        localStorage.setItem(
+          'applied_coupon',
+          JSON.stringify({ ...newCoupon, appliedAt: new Date().toISOString() })
+        );
+      } catch {
+        // ignore
       }
+      toast({
+        title: '✅ Code promo appliqué',
+        description: `Réduction de ${discountAmount.toLocaleString('fr-FR')} XOF appliquée`,
+      });
     },
-    []
+    [toast]
   );
+
+  const handleCouponRemove = useCallback(() => {
+    setAppliedCouponCode(null);
+    try {
+      localStorage.removeItem('applied_coupon');
+    } catch {
+      // ignore
+    }
+    toast({
+      title: 'Code promo retiré',
+      description: 'Le code promo a été retiré de votre commande',
+    });
+  }, [toast]);
 
   // Traitement de la commande
   const handleCheckout = async () => {
@@ -1460,296 +1383,18 @@ export default function Checkout() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Formulaire (2/3) */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Informations de livraison */}
-                <Card
-                  role="region"
-                  aria-labelledby="shipping-title"
-                  aria-describedby="shipping-description"
-                >
-                  <CardHeader>
-                    <CardTitle
-                      id="shipping-title"
-                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg"
-                    >
-                      <MapPin className="h-5 w-5" aria-hidden="true" />
-                      Informations de livraison
-                    </CardTitle>
-                    <CardDescription id="shipping-description">
-                      Où souhaitez-vous recevoir votre commande ?
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormFieldWithValidation
-                        label="Nom complet"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={value => {
-                          setFormData(prev => ({ ...prev, full_name: value }));
-                          if (formErrors.full_name) {
-                            const error = validateField('full_name', value);
-                            setFormErrors(prev => ({ ...prev, full_name: error || undefined }));
-                          }
-                        }}
-                        onBlur={() => {
-                          const error = validateField('full_name', formData.full_name);
-                          setFormErrors(prev => ({ ...prev, full_name: error || undefined }));
-                        }}
-                        error={formErrors.full_name}
-                        placeholder="Jean Dupont"
-                        required
-                        autoComplete="name"
-                        validationRules={[
-                          value => (!value.trim() ? 'Le nom complet est requis' : null),
-                          value =>
-                            value.trim().length < 2
-                              ? 'Le nom doit contenir au moins 2 caractères'
-                              : null,
-                        ]}
-                      />
-
-                      <FormFieldWithValidation
-                        label="Email"
-                        name="email"
-                        value={formData.email}
-                        onChange={value => {
-                          setFormData(prev => ({ ...prev, email: value }));
-                          if (formErrors.email) {
-                            const error = validateField('email', value);
-                            setFormErrors(prev => ({ ...prev, email: error || undefined }));
-                          }
-                        }}
-                        onBlur={() => {
-                          const error = validateField('email', formData.email);
-                          setFormErrors(prev => ({ ...prev, email: error || undefined }));
-                        }}
-                        error={formErrors.email}
-                        type="email"
-                        placeholder="jean@example.com"
-                        required
-                        autoComplete="email"
-                        validationRules={[
-                          value => (!value.trim() ? "L'email est requis" : null),
-                          value =>
-                            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-                              ? "Format d'email invalide"
-                              : null,
-                        ]}
-                      />
-                    </div>
-
-                    <FormFieldWithValidation
-                      label="Téléphone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={value => {
-                        setFormData(prev => ({ ...prev, phone: value }));
-                        if (formErrors.phone) {
-                          const error = validateField('phone', value);
-                          setFormErrors(prev => ({ ...prev, phone: error || undefined }));
-                        }
-                      }}
-                      onBlur={() => {
-                        const error = validateField('phone', formData.phone);
-                        setFormErrors(prev => ({ ...prev, phone: error || undefined }));
-                      }}
-                      error={formErrors.phone}
-                      type="tel"
-                      placeholder="+225 07 12 34 56 78"
-                      required
-                      autoComplete="tel"
-                      validationRules={[
-                        value => (!value.trim() ? 'Le téléphone est requis' : null),
-                        value =>
-                          !/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/.test(
-                            value.replace(/\s/g, '')
-                          )
-                            ? 'Format de téléphone invalide'
-                            : null,
-                      ]}
-                    />
-
-                    <Separator />
-
-                    <FormFieldWithValidation
-                      label="Adresse"
-                      name="address_line1"
-                      value={formData.address_line1}
-                      onChange={value => {
-                        setFormData(prev => ({ ...prev, address_line1: value }));
-                        if (formErrors.address_line1) {
-                          const error = validateField('address_line1', value);
-                          setFormErrors(prev => ({ ...prev, address_line1: error || undefined }));
-                        }
-                      }}
-                      onBlur={() => {
-                        const error = validateField('address_line1', formData.address_line1);
-                        setFormErrors(prev => ({ ...prev, address_line1: error || undefined }));
-                      }}
-                      error={formErrors.address_line1}
-                      placeholder="123 Rue principale"
-                      required
-                      autoComplete="street-address"
-                      validationRules={[
-                        value => (!value.trim() ? "L'adresse est requise" : null),
-                        value =>
-                          value.trim().length < 5
-                            ? "L'adresse doit contenir au moins 5 caractères"
-                            : null,
-                      ]}
-                    />
-
-                    <div className="space-y-2">
-                      <Label htmlFor="address_line2">Complément d'adresse (optionnel)</Label>
-                      <Input
-                        id="address_line2"
-                        value={formData.address_line2}
-                        onChange={e =>
-                          setFormData(prev => ({ ...prev, address_line2: e.target.value }))
-                        }
-                        placeholder="Appartement, étage, etc."
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormFieldWithValidation
-                        label="Ville"
-                        name="city"
-                        value={formData.city}
-                        onChange={value => {
-                          setFormData(prev => ({ ...prev, city: value }));
-                          if (formErrors.city) {
-                            const error = validateField('city', value);
-                            setFormErrors(prev => ({ ...prev, city: error || undefined }));
-                          }
-                        }}
-                        onBlur={() => {
-                          const error = validateField('city', formData.city);
-                          setFormErrors(prev => ({ ...prev, city: error || undefined }));
-                        }}
-                        error={formErrors.city}
-                        placeholder="Ouagadougou"
-                        required
-                        autoComplete="address-level2"
-                        validationRules={[
-                          value => (!value.trim() ? 'La ville est requise' : null),
-                          value =>
-                            value.trim().length < 2
-                              ? 'La ville doit contenir au moins 2 caractères'
-                              : null,
-                        ]}
-                      />
-
-                      <FormFieldWithValidation
-                        label="Code postal"
-                        name="postal_code"
-                        value={formData.postal_code}
-                        onChange={value => {
-                          setFormData(prev => ({ ...prev, postal_code: value }));
-                          if (formErrors.postal_code) {
-                            const error = validateField('postal_code', value);
-                            setFormErrors(prev => ({ ...prev, postal_code: error || undefined }));
-                          }
-                        }}
-                        onBlur={() => {
-                          const error = validateField('postal_code', formData.postal_code);
-                          setFormErrors(prev => ({ ...prev, postal_code: error || undefined }));
-                        }}
-                        error={formErrors.postal_code}
-                        placeholder="01 BP 1234"
-                        required
-                        autoComplete="postal-code"
-                        validationRules={[
-                          value => (!value.trim() ? 'Le code postal est requis' : null),
-                          value =>
-                            value.trim().length < 3
-                              ? 'Le code postal doit contenir au moins 3 caractères'
-                              : null,
-                        ]}
-                      />
-
-                      <div className="space-y-2">
-                        <Label htmlFor="country">
-                          Pays <span className="text-red-500">*</span>
-                        </Label>
-                        <select
-                          id="country"
-                          value={formData.country}
-                          onChange={e =>
-                            setFormData(prev => ({ ...prev, country: e.target.value }))
-                          }
-                          className={`flex min-h-[44px] h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base touch-manipulation cursor-pointer ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${formErrors.country ? 'border-red-500' : ''}`}
-                          aria-invalid={!!formErrors.country}
-                          aria-describedby={formErrors.country ? 'country-error' : undefined}
-                          autoComplete="country"
-                        >
-                          <option value="BF">Burkina Faso</option>
-                          <option value="CI">Côte d'Ivoire</option>
-                          <option value="SN">Sénégal</option>
-                          <option value="ML">Mali</option>
-                          <option value="BJ">Bénin</option>
-                          <option value="TG">Togo</option>
-                          <option value="GN">Guinée</option>
-                          <option value="NE">Niger</option>
-                          <option value="CM">Cameroun</option>
-                          <option value="GA">Gabon</option>
-                          <option value="CD">Congo</option>
-                          <option value="CG">Congo-Brazzaville</option>
-                          <option value="TD">Tchad</option>
-                          <option value="CF">Centrafrique</option>
-                          <option value="FR">France</option>
-                          <option value="BE">Belgique</option>
-                          <option value="CA">Canada</option>
-                          <option value="US">États-Unis</option>
-                        </select>
-                        {formErrors.country && (
-                          <p id="country-error" className="text-sm text-red-500" role="alert">
-                            {formErrors.country}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Carte cadeau */}
-                    {storeId && (
-                      <div className="space-y-2 mt-4">
-                        <GiftCardInput
-                          storeId={storeId}
-                          onApply={(giftCardId, balance, code) => {
-                            setAppliedGiftCard({
-                              id: giftCardId,
-                              balance,
-                              code: code || '',
-                            });
-                            try {
-                              localStorage.setItem(
-                                'applied_gift_card',
-                                JSON.stringify({
-                                  id: giftCardId,
-                                  balance,
-                                  code: code || '',
-                                })
-                              );
-                            } catch {
-                              // ignore
-                            }
-                          }}
-                          onRemove={() => {
-                            setAppliedGiftCard(null);
-                            try {
-                              localStorage.removeItem('applied_gift_card');
-                            } catch {
-                              // ignore
-                            }
-                          }}
-                          appliedGiftCardId={appliedGiftCard?.id || null}
-                          appliedGiftCardBalance={appliedGiftCard?.balance || null}
-                          appliedGiftCardCode={appliedGiftCard?.code || null}
-                        />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <Suspense fallback={<CheckoutSectionFallback />}>
+                  <CheckoutShippingSection
+                    formData={formData}
+                    setFormData={setFormData}
+                    formErrors={formErrors}
+                    setFormErrors={setFormErrors}
+                    storeId={storeId}
+                    appliedGiftCard={appliedGiftCard}
+                    onGiftCardApply={handleGiftCardApply}
+                    onGiftCardRemove={handleGiftCardRemove}
+                  />
+                </Suspense>
 
                 {/* Méthode de paiement */}
                 <PaymentProviderSelector
@@ -1760,412 +1405,34 @@ export default function Checkout() {
                 />
               </div>
 
-              {/* Récapitulatif (1/3) */}
               <aside className="lg:col-span-1" aria-label="Récapitulatif de la commande">
-                <Card className="sticky top-4" role="region" aria-labelledby="summary-title">
-                  <CardHeader>
-                    <CardTitle id="summary-title">
-                      Récapitulatif
-                      {isMultiStore && storeGroups.size > 1 && (
-                        <span className="ml-2 text-sm text-orange-600 font-normal">
-                          ({storeGroups.size} boutique{storeGroups.size > 1 ? 's' : ''})
-                        </span>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isCheckingStores ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : isMultiStore && storeGroups.size > 1 ? (
-                      // Affichage multi-stores
-                      <div className="space-y-4">
-                        {Array.from(storeGroups.entries()).map(([storeId, group]) => (
-                          <div key={storeId} className="border rounded-lg p-3 space-y-2">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-semibold text-sm">
-                                {group.store_name || `Boutique ${storeId.substring(0, 8)}`}
-                              </h4>
-                              <span className="text-xs text-muted-foreground">
-                                {group.items.length} article{group.items.length > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
-                              {group.items.map(item => (
-                                <div
-                                  key={item.id || item.product_id}
-                                  className="flex gap-2 text-xs"
-                                >
-                                  <div className="w-8 h-8 rounded border overflow-hidden flex-shrink-0">
-                                    <img
-                                      src={item.product_image_url || '/placeholder-product.png'}
-                                      alt={item.product_name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-medium truncate text-xs">
-                                      {item.product_name}
-                                    </p>
-                                    {item.variant_name && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {item.variant_name}
-                                      </p>
-                                    )}
-                                    <p className="text-xs text-muted-foreground">
-                                      {item.quantity} × {item.unit_price.toLocaleString('fr-FR')}{' '}
-                                      XOF
-                                    </p>
-                                  </div>
-                                  <p className="font-medium whitespace-nowrap text-xs">
-                                    {(
-                                      (item.unit_price - (item.discount_amount || 0)) *
-                                      item.quantity
-                                    ).toLocaleString('fr-FR')}{' '}
-                                    XOF
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                            <Separator />
-                            <div className="space-y-1 text-xs pt-1">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Sous-total:</span>
-                                <span>{(group.subtotal || 0).toLocaleString('fr-FR')} XOF</span>
-                              </div>
-                              {(group.tax_amount || 0) > 0 && (
-                                <div className="flex justify-between text-muted-foreground">
-                                  <span>Taxes:</span>
-                                  <span>{(group.tax_amount || 0).toLocaleString('fr-FR')} XOF</span>
-                                </div>
-                              )}
-                              {(group.shipping_amount || 0) > 0 && (
-                                <div className="flex justify-between text-muted-foreground">
-                                  <span>Livraison:</span>
-                                  <span>
-                                    {(group.shipping_amount || 0).toLocaleString('fr-FR')} XOF
-                                  </span>
-                                </div>
-                              )}
-                              {(group.discount_amount || 0) > 0 && (
-                                <div className="flex justify-between text-green-600">
-                                  <span>Réduction panier:</span>
-                                  <span>
-                                    -{(group.discount_amount || 0).toLocaleString('fr-FR')} XOF
-                                  </span>
-                                </div>
-                              )}
-                              {appliedCouponCode && couponDiscount > 0 && (
-                                <div className="flex justify-between text-green-600">
-                                  <span>Code promo ({appliedCouponCode.code}):</span>
-                                  <span>-{couponDiscount.toLocaleString('fr-FR')} XOF</span>
-                                </div>
-                              )}
-                              <div className="flex justify-between font-semibold pt-1 border-t">
-                                <span>Total:</span>
-                                <span>{(group.total || 0).toLocaleString('fr-FR')} XOF</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        <Alert>
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription className="text-xs">
-                            Votre commande sera divisée en {storeGroups.size} commande(s)
-                            distincte(s), une par boutique.
-                          </AlertDescription>
-                        </Alert>
-                        <Separator />
-                        <div className="space-y-2 text-sm pt-2">
-                          {appliedCouponCode && couponDiscount > 0 && (
-                            <div className="flex justify-between text-green-600">
-                              <span>Code promo ({appliedCouponCode.code}):</span>
-                              <span>-{couponDiscount.toLocaleString('fr-FR')} XOF</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between items-center text-lg font-bold pt-2 border-t">
-                            <span>Total Général:</span>
-                            <span className="text-base sm:text-xl md:text-2xl text-primary">
-                              {Math.max(
-                                0,
-                                Array.from(storeGroups.values()).reduce(
-                                  (sum, group) => sum + (group.total || 0),
-                                  0
-                                ) - (appliedCouponCode ? couponDiscount : 0)
-                              ).toLocaleString('fr-FR')}{' '}
-                              XOF
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground text-center">
-                          Réparti sur {storeGroups.size} commande{storeGroups.size > 1 ? 's' : ''}
-                        </p>
-
-                        {/* Bouton checkout pour multi-stores */}
-                        <Button
-                          onClick={handleCheckout}
-                          disabled={
-                            isProcessing ||
-                            items.length === 0 ||
-                            isCheckingStores ||
-                            hasServiceInCart
-                          }
-                          className="w-full mt-4"
-                          size="lg"
-                          aria-label={
-                            isProcessing
-                              ? 'Traitement de la commande en cours'
-                              : `Finaliser les commandes pour ${Array.from(storeGroups.values())
-                                  .reduce((sum, group) => sum + (group.total || 0), 0)
-                                  .toLocaleString('fr-FR')} XOF`
-                          }
-                        >
-                          {isProcessing ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                              Traitement...
-                            </>
-                          ) : isCheckingStores ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                              Vérification des boutiques...
-                            </>
-                          ) : (
-                            <>
-                              <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
-                              Payer{' '}
-                              {Array.from(storeGroups.values())
-                                .reduce((sum, group) => sum + (group.total || 0), 0)
-                                .toLocaleString('fr-FR')}{' '}
-                              XOF
-                              <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                            </>
-                          )}
-                        </Button>
-
-                        <p className="text-xs text-center text-muted-foreground mt-2">
-                          {items.length} {items.length > 1 ? 'articles' : 'article'}
-                        </p>
-                      </div>
-                    ) : (
-                      // Affichage normal (un seul store)
-                      <>
-                        {/* Articles */}
-                        <div className="space-y-3 max-h-64 overflow-y-auto">
-                          {items.map(item => (
-                            <div key={item.id} className="flex gap-3 text-sm">
-                              <div className="w-12 h-12 rounded border overflow-hidden flex-shrink-0">
-                                <img
-                                  src={item.product_image_url || '/placeholder-product.png'}
-                                  alt={item.product_name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{item.product_name}</p>
-                                {item.variant_name && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {item.variant_name}
-                                  </p>
-                                )}
-                                <p className="text-xs text-muted-foreground">
-                                  Quantité: {item.quantity}
-                                </p>
-                              </div>
-                              <p className="font-medium whitespace-nowrap">
-                                {(
-                                  (item.unit_price - (item.discount_amount || 0)) *
-                                  item.quantity
-                                ).toLocaleString('fr-FR')}{' '}
-                                XOF
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-
-                        <Separator />
-
-                        {/* Code promo - Visible et proéminent dans le récapitulatif */}
-                        <div className="space-y-3 py-3 border-t border-b border-border/50 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 rounded-lg p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-primary/10">
-                              <Tag className="h-4 w-4 text-primary" />
-                            </div>
-                            <Label
-                              htmlFor="coupon-code"
-                              className="text-sm font-semibold text-foreground"
-                            >
-                              Avez-vous un code promo ?
-                            </Label>
-                          </div>
-                          <CouponInput
-                            storeId={storeId || undefined}
-                            productIds={items.map(item => item.product_id)}
-                            customerId={customerId || undefined}
-                            orderAmount={summary.subtotal}
-                            isFirstOrder={isFirstOrder}
-                            onApply={(promotionId, discountAmount, code) => {
-                              // Forcer la mise à jour en créant un nouvel objet avec discountAmount converti en nombre
-                              const newCoupon = {
-                                id: promotionId,
-                                discountAmount: Number(discountAmount),
-                                code: code || '',
-                              };
-                              setAppliedCouponCode(newCoupon);
-                              try {
-                                localStorage.setItem(
-                                  'applied_coupon',
-                                  JSON.stringify({
-                                    ...newCoupon,
-                                    appliedAt: new Date().toISOString(),
-                                  })
-                                );
-                              } catch {
-                                // ignore
-                              }
-                              toast({
-                                title: '✅ Code promo appliqué',
-                                description: `Réduction de ${discountAmount.toLocaleString('fr-FR')} XOF appliquée`,
-                              });
-                            }}
-                            onRemove={() => {
-                              setAppliedCouponCode(null);
-                              try {
-                                localStorage.removeItem('applied_coupon');
-                              } catch {
-                                // ignore
-                              }
-                              toast({
-                                title: 'Code promo retiré',
-                                description: 'Le code promo a été retiré de votre commande',
-                              });
-                            }}
-                            appliedCouponId={appliedCouponCode?.id || null}
-                            appliedCouponCode={appliedCouponCode?.code || null}
-                            appliedDiscountAmount={appliedCouponCode?.discountAmount || null}
-                          />
-                        </div>
-
-                        <Separator />
-
-                        {/* Détails prix */}
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Sous-total</span>
-                            <span>{summary.subtotal.toLocaleString('fr-FR')} XOF</span>
-                          </div>
-
-                          {itemDiscounts > 0 && (
-                            <div className="flex justify-between text-green-600">
-                              <span>Remise panier</span>
-                              <span>-{itemDiscounts.toLocaleString('fr-FR')} XOF</span>
-                            </div>
-                          )}
-
-                          {appliedCouponCode && couponDiscount > 0 && (
-                            <div className="flex justify-between text-green-600">
-                              <span>Code promo ({appliedCouponCode.code})</span>
-                              <span>-{couponDiscount.toLocaleString('fr-FR')} XOF</span>
-                            </div>
-                          )}
-
-                          {appliedGiftCard && giftCardAmount > 0 && (
-                            <div className="flex justify-between text-green-600">
-                              <span>Carte cadeau ({appliedGiftCard.code})</span>
-                              <span>-{giftCardAmount.toLocaleString('fr-FR')} XOF</span>
-                            </div>
-                          )}
-
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Livraison</span>
-                            <span>{shippingAmount.toLocaleString('fr-FR')} XOF</span>
-                          </div>
-
-                          {/* Affichage détaillé des taxes */}
-                          {taxLoading ? (
-                            <div className="flex justify-between items-center">
-                              <span className="text-muted-foreground">Taxes</span>
-                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            </div>
-                          ) : taxBreakdown.length > 0 ? (
-                            <div className="space-y-1">
-                              {taxBreakdown.map((tax, index) => (
-                                <div key={index} className="flex justify-between text-xs">
-                                  <span className="text-muted-foreground">
-                                    {tax.name} ({tax.rate}%)
-                                    {tax.applies_to_shipping && ' + Livraison'}
-                                    {tax.is_default && ' (par défaut)'}
-                                  </span>
-                                  <span>{Number(tax.amount).toLocaleString('fr-FR')} XOF</span>
-                                </div>
-                              ))}
-                              <div className="flex justify-between font-medium pt-1 border-t">
-                                <span className="text-muted-foreground">Total Taxes</span>
-                                <span>{taxAmount.toLocaleString('fr-FR')} XOF</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Taxes</span>
-                              <span>{taxAmount.toLocaleString('fr-FR')} XOF</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <Separator />
-
-                        {/* Total */}
-                        <div className="flex justify-between items-center text-lg font-bold">
-                          <span>Total</span>
-                          <span className="text-2xl text-primary">
-                            {finalTotal.toLocaleString('fr-FR')} XOF
-                          </span>
-                        </div>
-
-                        {/* Bouton checkout */}
-                        <Button
-                          onClick={handleCheckout}
-                          disabled={
-                            isProcessing ||
-                            items.length === 0 ||
-                            isCheckingStores ||
-                            hasServiceInCart
-                          }
-                          className="w-full"
-                          size="lg"
-                          aria-label={
-                            isProcessing
-                              ? 'Traitement de la commande en cours'
-                              : `Finaliser la commande pour ${finalTotal.toLocaleString('fr-FR')} XOF`
-                          }
-                        >
-                          {isProcessing ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                              Traitement...
-                            </>
-                          ) : isCheckingStores ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                              Vérification des boutiques...
-                            </>
-                          ) : (
-                            <>
-                              <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
-                              Payer {finalTotal.toLocaleString('fr-FR')} XOF
-                              <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                            </>
-                          )}
-                        </Button>
-
-                        <p className="text-xs text-center text-muted-foreground">
-                          {summary.item_count} {summary.item_count > 1 ? 'articles' : 'article'}
-                        </p>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                <Suspense fallback={<CheckoutSectionFallback />}>
+                  <CheckoutOrderSummary
+                    items={items}
+                    summary={summary}
+                    isCheckingStores={isCheckingStores}
+                    isMultiStore={isMultiStore}
+                    storeGroups={storeGroups}
+                    appliedCouponCode={appliedCouponCode}
+                    couponDiscount={couponDiscount}
+                    giftCardAmount={giftCardAmount}
+                    appliedGiftCard={appliedGiftCard}
+                    taxLoading={taxLoading}
+                    taxBreakdown={taxBreakdown}
+                    taxAmount={taxAmount}
+                    itemDiscounts={itemDiscounts}
+                    shippingAmount={shippingAmount}
+                    finalTotal={finalTotal}
+                    storeId={storeId}
+                    customerId={customerId}
+                    isFirstOrder={isFirstOrder}
+                    isProcessing={isProcessing}
+                    hasServiceInCart={hasServiceInCart}
+                    handleCheckout={handleCheckout}
+                    onCouponApply={handleCouponApply}
+                    onCouponRemove={handleCouponRemove}
+                  />
+                </Suspense>
               </aside>
             </div>
           </div>

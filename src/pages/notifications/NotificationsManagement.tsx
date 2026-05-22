@@ -83,7 +83,6 @@ import {
   useDeleteNotification,
   useNotificationPreferences,
   useUpdateNotificationPreferences,
-  useRealtimeNotifications,
 } from '@/hooks/useNotifications';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -120,9 +119,6 @@ export default function NotificationsManagement() {
   const deleteNotification = useDeleteNotification();
   const { data: preferences } = useNotificationPreferences();
   const updatePreferences = useUpdateNotificationPreferences();
-
-  // Realtime notifications
-  useRealtimeNotifications();
 
   // Animations
   const headerRef = useScrollAnimation<HTMLDivElement>();

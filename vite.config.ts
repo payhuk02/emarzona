@@ -159,6 +159,12 @@ export default defineConfig(({ mode }) => {
         preserveEntrySignatures: 'strict',
         output: {
           manualChunks: id => {
+            if (id.includes('/src/components/checkout/cart/')) {
+              return 'checkout-cart';
+            }
+            if (id.includes('/src/components/checkout/buy-now/')) {
+              return 'checkout-buy-now';
+            }
             if (!id.includes('node_modules/')) return undefined;
 
             // Lucide: seul Loader2 reste dans le principal

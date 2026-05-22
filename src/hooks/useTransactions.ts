@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useVisibilityAwarePolling } from '@/hooks/useVisibilityAwarePolling';
 import { logger } from '@/lib/logger';
 
 const TRANSACTION_FIELDS =
-  "id, store_id, customer_id, product_id, order_id, payment_id, moneroo_transaction_id, moneroo_checkout_url, moneroo_payment_method, amount, currency, status, customer_email, customer_name, customer_phone, metadata, moneroo_response, created_at, updated_at, completed_at, failed_at, error_message, retry_count";
+  'id, store_id, customer_id, product_id, order_id, payment_id, moneroo_transaction_id, moneroo_checkout_url, moneroo_payment_method, amount, currency, status, customer_email, customer_name, customer_phone, metadata, moneroo_response, created_at, updated_at, completed_at, failed_at, error_message, retry_count';
 
 export interface Transaction {
   id: string;
@@ -22,8 +23,8 @@ export interface Transaction {
   customer_email: string | null;
   customer_name: string | null;
   customer_phone: string | null;
-  metadata: any;
-  moneroo_response: any;
+  metadata: Record<string, unknown> | null;
+  moneroo_response: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
   completed_at: string | null;
@@ -44,113 +45,94 @@ export const useTransactions = (storeId?: string, status?: string) => {
     }
 
     try {
-      let  query= supabase
-        .from("transactions")
+      let query = supabase
+        .from('transactions')
         .select(TRANSACTION_FIELDS)
-        .eq("store_id", storeId)
-        .order("created_at", { ascending: false });
+        .eq('store_id', storeId)
+        .order('created_at', { ascending: false });
 
       if (status) {
-        query = query.eq("status", status);
+        query = query.eq('status', status);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
       setTransactions(data || []);
-    } catch ( _error: any) {
-      logger.error("Error fetching transactions:", _error);
+    } catch (_error: unknown) {
+      const msg =
+        _error instanceof Error ? _error.message : 'Impossible de charger les transactions';
+      logger.error('Error fetching transactions:', _error);
       toast({
-        title: "Erreur",
-        description: _error?.message || "Impossible de charger les transactions",
-        variant: "destructive",
+        title: 'Erreur',
+        description: msg,
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
   }, [storeId, status, toast]);
 
-  const createTransaction = async (transactionData: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'retry_count'>) => {
+  const createTransaction = async (
+    transactionData: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'retry_count'>
+  ) => {
     try {
-      const { data, error} = await supabase
-        .from("transactions")
+      const { data, error } = await supabase
+        .from('transactions')
         .insert([transactionData])
         .select()
         .limit(1);
 
       if (error) throw error;
-      
+
       await fetchTransactions();
       return data && data.length > 0 ? data[0] : null;
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
+      const msg = _error instanceof Error ? _error.message : 'Erreur';
       toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erreur',
+        description: msg,
+        variant: 'destructive',
       });
-      throw error;
+      throw _error;
     }
   };
 
   const updateTransaction = async (id: string, updates: Partial<Transaction>) => {
     try {
       const { data, error } = await supabase
-        .from("transactions")
+        .from('transactions')
         .update(updates)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .limit(1);
 
       if (error) throw error;
-      
+
       await fetchTransactions();
       return data && data.length > 0 ? data[0] : null;
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
+      const msg = _error instanceof Error ? _error.message : 'Erreur';
       toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
+        title: 'Erreur',
+        description: msg,
+        variant: 'destructive',
       });
-      throw error;
+      throw _error;
     }
   };
 
   useEffect(() => {
     fetchTransactions();
-
-    // Subscribe to realtime updates
-    const channel = supabase
-      .channel('transactions-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'transactions',
-          filter: storeId ? `store_id=eq.${storeId}` : undefined,
-        },
-        () => {
-          fetchTransactions();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [fetchTransactions]);
 
-  return { 
-    transactions, 
-    loading, 
+  useVisibilityAwarePolling(fetchTransactions, 90_000, true);
+
+  return {
+    transactions,
+    loading,
     refetch: fetchTransactions,
     createTransaction,
-    updateTransaction
+    updateTransaction,
   };
 };
-
-
-
-
-
-
