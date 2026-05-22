@@ -1,21 +1,18 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
-import { Activity, LayoutDashboard, Package, ShoppingCart } from 'lucide-react';
+import { Activity, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { useSessionHealth } from '@/hooks/useSessionHealth';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
-import { usePageCustomization } from '@/hooks/usePageCustomization';
 import type { Notification } from '@/types/notifications';
 // ✅ PHASE 2: Lazy load des composants analytics lourds (utilisent recharts)
 const ProductTypeCharts = lazy(() =>
@@ -47,6 +44,7 @@ import {
   useRealtimeNotifications,
 } from '@/hooks/useNotifications';
 import { DashboardFullSkeleton, StatsSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import { DashboardOnboarding } from '@/components/dashboard/DashboardOnboarding';
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 // import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
@@ -83,8 +81,33 @@ import '@/styles/dashboard-premium.css';
  * <Route path="/dashboard" element={<Dashboard />} />
  * ```
  */
+/** Route /dashboard : oriente vers onboarding ou tableau de bord complet */
 const Dashboard = () => {
-  // ✅ PERFORMANCE: Preload logo platform (potentielle LCP sur dashboard)
+  const { store, loading: storeLoading } = useStore();
+
+  if (storeLoading) {
+    return (
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full bg-background">
+          <AppSidebar />
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+              <DashboardFullSkeleton />
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+  if (!store) {
+    return <DashboardOnboarding />;
+  }
+
+  return <DashboardWithStore />;
+};
+
+const DashboardWithStore = () => {
   const platformLogo = usePlatformLogo();
 
   useEffect(() => {
@@ -103,8 +126,6 @@ const Dashboard = () => {
     }
   }, [platformLogo]);
   const { t } = useTranslation();
-  const { getValue } = usePageCustomization('dashboard');
-  const { store, loading: storeLoading } = useStore();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
@@ -364,54 +385,6 @@ const Dashboard = () => {
       handleSettings,
     ]
   );
-
-  // Store loading: afficher des skeletons pendant le chargement
-  if (storeLoading) {
-    return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6">
-              <DashboardFullSkeleton />
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
-    );
-  }
-
-  // No store state - seulement après le chargement complet
-  if (!store) {
-    return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6">
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
-                <CardContent className="pt-8 sm:pt-12 pb-8 sm:pb-12 text-center">
-                  <LayoutDashboard className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-muted-foreground mb-4 animate-in zoom-in-95 duration-500" />
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                    {getValue('dashboard.welcome')}
-                  </p>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-6">
-                    {t('dashboard.createStorePrompt')}
-                  </p>
-                  <Button
-                    onClick={() => navigate('/dashboard/store')}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white min-h-[44px] text-sm sm:text-base touch-manipulation"
-                  >
-                    {getValue('dashboard.createStoreButton')}
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
-    );
-  }
 
   return (
     <SidebarProvider>

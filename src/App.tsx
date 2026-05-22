@@ -95,8 +95,22 @@ const LoadingFallback = () => (
   </div>
 );
 
-const ErrorFallbackComponent = () => {
+type ErrorFallbackProps = {
+  error?: unknown;
+  onRetry?: () => void;
+};
+
+const ErrorFallbackComponent = ({ error, onRetry }: ErrorFallbackProps) => {
   const isDev = import.meta.env.DEV;
+  const showDetails = isDev || new URLSearchParams(window.location.search).has('debug');
+
+  const errorMessage =
+    error instanceof Error ? error.message : error != null ? String(error) : null;
+
+  if (errorMessage) {
+    console.error('[Emarzona] Erreur interface:', error);
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="max-w-md w-full p-8 bg-card rounded-lg shadow-lg text-center">
@@ -118,17 +132,23 @@ const ErrorFallbackComponent = () => {
         <p className="text-muted-foreground mb-6">
           Nous avons été notifiés du problème et travaillons pour le résoudre.
         </p>
-        {isDev && (
+        {showDetails && errorMessage && (
+          <div className="mb-6 p-4 bg-accent/50 border border-border rounded-lg text-left max-h-40 overflow-auto">
+            <p className="text-sm font-semibold text-foreground mb-2">Détail technique</p>
+            <p className="text-xs text-muted-foreground font-mono break-all">{errorMessage}</p>
+          </div>
+        )}
+        {showDetails && !errorMessage && isDev && (
           <div className="mb-6 p-4 bg-accent/50 border border-border rounded-lg text-left">
             <p className="text-sm font-semibold text-foreground mb-2">Mode développement</p>
             <p className="text-xs text-muted-foreground">
-              Vérifiez la console du navigateur pour plus de détails.
+              Ajoutez ?debug=1 à l&apos;URL ou ouvrez la console (F12).
             </p>
           </div>
         )}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => (onRetry ? onRetry() : window.location.reload())}
             className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
           >
             Recharger la page
@@ -217,7 +237,12 @@ const AppContent = () => {
 
   return (
     <ErrorBoundary>
-      <SentryErrorBoundary fallback={<ErrorFallbackComponent />} showDialog>
+      <SentryErrorBoundary
+        fallback={({ error, resetError }) => (
+          <ErrorFallbackComponent error={error} onRetry={resetError} />
+        )}
+        showDialog
+      >
         <Suspense fallback={null}>
           <SkipLink />
           <DynamicFavicon />
