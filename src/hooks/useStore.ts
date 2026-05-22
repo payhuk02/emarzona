@@ -39,6 +39,7 @@ export const useStore = () => {
     selectedStoreId,
     selectedStore: contextStore,
     loading: contextLoading,
+    setSelectedStoreId,
   } = useStoreContext();
   const { toast } = useToast();
 

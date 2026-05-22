@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
-import { Activity, Package, ShoppingCart } from 'lucide-react';
+import { Activity, LayoutDashboard, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
