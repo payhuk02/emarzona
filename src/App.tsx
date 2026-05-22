@@ -13,7 +13,9 @@ import { LoadingBar } from '@/components/navigation/LoadingBar';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { usePrefetch } from '@/hooks/usePrefetch';
-import { usePrefetchRoutes } from '@/hooks/usePrefetchRoutes';
+import { useAuth } from '@/contexts/AuthContext';
+import { useStoreContext } from '@/contexts/StoreContext';
+import { getRoutePrefetchConfig } from '@/lib/route-prefetch-config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 
@@ -169,6 +171,9 @@ const AppInitializer = ({
 const AppContent = () => {
   useScrollRestoration();
   useDarkMode();
+  const { user, loading: authLoading } = useAuth();
+  const { stores, loading: storeLoading } = useStoreContext();
+  const routePrefetch = getRoutePrefetchConfig(authLoading, storeLoading, user?.id, stores.length);
   const isMobile = useIsMobile();
   const location = useLocation();
   const isAuthPage =
@@ -191,17 +196,11 @@ const AppContent = () => {
   });
 
   usePrefetch({
-    routes: [
-      '/dashboard',
-      '/dashboard/products',
-      '/dashboard/orders',
-      '/dashboard/analytics',
-      '/marketplace',
-      '/cart',
-    ],
-    delay: 100,
+    enabled: routePrefetch.enabled,
+    idleRoutes: routePrefetch.idleRoutes,
+    hoverRoutes: routePrefetch.hoverRoutes,
+    idleDelayMs: routePrefetch.idleDelayMs,
   });
-  usePrefetchRoutes();
 
   useEffect(() => {
     initSentry();

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -269,25 +268,8 @@ const Marketplace = () => {
     }
   }, [queryIsLoading, queryProducts.length, hasSearchQuery, useTypeSpecificRpc, prefetchNextPage]);
 
-  // Realtime : invalider le cache React Query au lieu de muter l'état local
-  useEffect(() => {
-    const channel = supabase
-      .channel('realtime:products')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
-        queryClient.invalidateQueries({ queryKey: ['marketplace-products'] });
-        queryClient.invalidateQueries({ queryKey: ['filtered-digital-products'] });
-        queryClient.invalidateQueries({ queryKey: ['filtered-physical-products'] });
-        queryClient.invalidateQueries({ queryKey: ['filtered-service-products'] });
-        queryClient.invalidateQueries({ queryKey: ['filtered-course-products'] });
-        queryClient.invalidateQueries({ queryKey: ['filtered-artist-products'] });
-        queryClient.invalidateQueries({ queryKey: ['marketplace-facets'] });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Catalogue : cache React Query (staleTime ~10 min). Pas de Realtime global sur `products`
+  // (évite des milliers d'invalidations/refetch RPC à chaque mise à jour vendeur à l'échelle).
 
   // Utiliser les résultats de recherche full-text si une recherche est active
   // Sinon, utiliser les produits chargés normalement

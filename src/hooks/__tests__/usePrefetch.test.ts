@@ -6,20 +6,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { usePrefetch } from '@/hooks/usePrefetch';
 
-// Mock React Router
 vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: '/dashboard' }),
-  useNavigate: () => vi.fn(),
 }));
 
-// Mock React Query
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
     prefetchQuery: vi.fn(),
   }),
 }));
 
-// Mock logger
 vi.mock('@/lib/logger', () => ({
   logger: {
     debug: vi.fn(),
@@ -28,34 +24,33 @@ vi.mock('@/lib/logger', () => ({
 
 describe('usePrefetch', () => {
   beforeEach(() => {
-    // Reset DOM
     document.head.innerHTML = '';
     document.body.innerHTML = '';
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('initializes without errors', () => {
-    const { result } = renderHook(() => usePrefetch());
+    const { result } = renderHook(() => usePrefetch({ enabled: false }));
     expect(result.error).toBeUndefined();
   });
 
-  it('creates prefetch links for frequent routes', () => {
-    renderHook(() => usePrefetch({
-      routes: ['/dashboard/products', '/marketplace'],
-    }));
+  it('creates prefetch links for idle routes when enabled', () => {
+    renderHook(() =>
+      usePrefetch({
+        enabled: true,
+        idleRoutes: ['/marketplace'],
+        idleDelayMs: 0,
+      })
+    );
 
-    // Vérifier que les liens de prefetch sont créés
+    vi.runAllTimers();
+
     const links = document.head.querySelectorAll('link[rel="prefetch"]');
     expect(links.length).toBeGreaterThan(0);
   });
 });
-
-
-
-
-
-
-
