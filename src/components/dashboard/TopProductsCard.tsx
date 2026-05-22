@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PRODUCT_TYPE_CONFIG, type ProductType } from '@/constants/product-types';
 import { LazyImage } from '@/components/ui/lazy-image';
+import { formatFcfa } from '@/lib/format-currency';
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  revenue?: number;
   image_url: string | null;
   orderCount: number;
   product_type?: string;
@@ -19,14 +21,19 @@ interface Product {
 
 interface TopProductsCardProps {
   products: Product[];
+  variant?: 'default' | 'premium';
 }
 
-const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
+const TopProductsCardComponent = ({ products, variant = 'default' }: TopProductsCardProps) => {
+  const isPremium = variant === 'premium';
+  const shellClass = isPremium
+    ? 'dashboard-premium-panel h-full flex flex-col'
+    : 'dashboard-inner-card border-border/50 shadow-none';
   const navigate = useNavigate();
 
   if (products.length === 0) {
     return (
-      <Card className="dashboard-inner-card border-border/50 shadow-none">
+      <Card className={shellClass}>
         <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
           <CardTitle className="dashboard-text-responsive">Produits populaires</CardTitle>
           <CardDescription className="dashboard-text-responsive-small mt-1">
@@ -45,15 +52,28 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
     );
   }
 
+  const Wrap = isPremium ? 'div' : Card;
+  const HeaderWrap = isPremium ? 'div' : CardHeader;
+  const ContentWrap = isPremium ? 'div' : CardContent;
+
   return (
-    <Card className="dashboard-inner-card border-border/50 shadow-none">
-      <CardHeader className="pb-3 p-4 sm:p-5 md:p-6">
+    <Wrap className={shellClass}>
+      <HeaderWrap className={cn(!isPremium && 'pb-3 p-4 sm:p-5 md:p-6', isPremium && 'mb-5')}>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="dashboard-text-responsive">Produits populaires</CardTitle>
-            <CardDescription className="dashboard-text-responsive-small mt-1">
-              Top 5 des produits les plus vendus
-            </CardDescription>
+            {isPremium ? (
+              <>
+                <h2 className="dashboard-premium-panel-title">Top produits</h2>
+                <p className="dashboard-premium-panel-subtitle">Les 5 meilleures ventes</p>
+              </>
+            ) : (
+              <>
+                <CardTitle className="dashboard-text-responsive">Produits populaires</CardTitle>
+                <CardDescription className="dashboard-text-responsive-small mt-1">
+                  Top 5 des produits les plus vendus
+                </CardDescription>
+              </>
+            )}
           </div>
           <Button
             variant="ghost"
@@ -65,17 +85,29 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
             <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-        <div className="space-y-4">
+      </HeaderWrap>
+      <ContentWrap
+        className={cn(!isPremium && 'p-3 sm:p-4 md:p-6 pt-0', isPremium && 'flex-1 space-y-0')}
+      >
+        <div className={isPremium ? 'divide-y divide-border/40' : 'space-y-4'}>
           {products.map((product, index) => (
             <div
               key={product.id}
-              className="flex items-center gap-2 sm:gap-2.5 md:gap-3 p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 transition-colors touch-manipulation min-h-[50px] sm:min-h-[60px] cursor-pointer"
+              className={cn(
+                'flex items-center gap-3 cursor-pointer transition-colors touch-manipulation',
+                isPremium
+                  ? 'py-3.5 hover:bg-muted/30'
+                  : 'p-2 sm:p-3 md:p-4 rounded-lg border hover:bg-muted/50 min-h-[50px] sm:min-h-[60px]'
+              )}
               style={{ willChange: 'transform' }}
               onClick={() => navigate('/dashboard/products')}
             >
-              <div className="flex items-center justify-center h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0 text-[10px] sm:text-xs md:text-sm">
+              <div
+                className={cn(
+                  'flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold shrink-0 text-sm',
+                  isPremium ? 'bg-violet-500/15 text-violet-700' : 'bg-primary/10 text-primary'
+                )}
+              >
                 {index + 1}
               </div>
               {product.image_url ? (
@@ -94,7 +126,12 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-0.5 sm:mb-1">
-                  <p className="text-[10px] sm:text-xs md:text-sm font-medium truncate">
+                  <p
+                    className={cn(
+                      'font-medium truncate',
+                      isPremium ? 'text-sm sm:text-base' : 'text-sm'
+                    )}
+                  >
                     {product.name}
                   </p>
                   {product.product_type &&
@@ -118,20 +155,30 @@ const TopProductsCardComponent = ({ products }: TopProductsCardProps) => {
                       );
                     })()}
                 </div>
-                <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                <p
+                  className={cn(
+                    'text-muted-foreground',
+                    isPremium ? 'text-xs sm:text-sm' : 'text-xs'
+                  )}
+                >
                   {product.orderCount} vente{product.orderCount > 1 ? 's' : ''}
                 </p>
               </div>
-              <div className="text-right flex-shrink-0 ml-2">
-                <p className="text-[10px] sm:text-xs md:text-sm font-semibold">
-                  {product.price.toLocaleString()} FCFA
+              <div className="text-right shrink-0">
+                <p
+                  className={cn(
+                    'font-bold tabular-nums',
+                    isPremium ? 'text-sm sm:text-base' : 'text-sm'
+                  )}
+                >
+                  {formatFcfa(product.revenue ?? product.price)}
                 </p>
               </div>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </ContentWrap>
+    </Wrap>
   );
 };
 

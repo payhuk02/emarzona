@@ -1,12 +1,11 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
-import { Activity, LayoutDashboard, Package, ShoppingCart, Users, DollarSign } from 'lucide-react';
+import { Activity, Package, ShoppingCart } from 'lucide-react';
 import { useDashboardStatsOptimized as useDashboardStats } from '@/hooks/useDashboardStats';
 import { useStore } from '@/hooks/useStore';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
@@ -37,7 +36,7 @@ import {
   ProductTypeQuickFilters,
   type ProductTypeFilter,
 } from '@/components/dashboard/ProductTypeQuickFilters';
-import { PeriodFilter, PeriodType } from '@/components/dashboard/PeriodFilter';
+import { PeriodType } from '@/components/dashboard/PeriodFilter';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
@@ -51,7 +50,11 @@ import { DashboardFullSkeleton, StatsSkeleton } from '@/components/dashboard/Das
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 // import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
 import { DashboardErrorHandler } from '@/components/dashboard/DashboardErrorHandler';
-import { DashboardSection } from '@/components/dashboard/DashboardSection';
+import { DashboardCategorySales } from '@/components/dashboard/DashboardCategorySales';
+import { DashboardFooterMetrics } from '@/components/dashboard/DashboardFooterMetrics';
+import { DashboardSalesEvolution } from '@/components/dashboard/DashboardSalesEvolution';
+import { DashboardRecentActivity } from '@/components/dashboard/DashboardRecentActivity';
+import '@/styles/dashboard-premium.css';
 
 /**
  * Page principale du Dashboard
@@ -417,7 +420,7 @@ const Dashboard = () => {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
-          <div className="container mx-auto max-w-[90rem] p-4 sm:p-5 lg:p-8 pb-10">
+          <div className="dashboard-premium container mx-auto max-w-[90rem] p-4 sm:p-5 lg:p-8 pb-10">
             <div className="mb-6 sm:mb-8">
               <DashboardHeader {...dashboardHeaderProps} />
             </div>
@@ -432,175 +435,128 @@ const Dashboard = () => {
               isRetrying={isRefreshing}
             />
 
-            <DashboardSection
-              id="dashboard-overview"
-              title={t('dashboard.sections.overview', "Vue d'ensemble")}
-              description={t(
-                'dashboard.sections.overviewDesc',
-                'Indicateurs clés de votre boutique en un coup d’œil'
-              )}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              {loading ? <StatsSkeleton /> : stats && <DashboardStats stats={stats} />}
-            </DashboardSection>
+            {loading ? (
+              <StatsSkeleton />
+            ) : (
+              stats && (
+                <div className="space-y-6 sm:space-y-8">
+                  <DashboardStats stats={stats} />
 
-            <DashboardSection
-              id="dashboard-quick-actions"
-              title={t('dashboard.quickActions.title', 'Actions rapides')}
-              description={t(
-                'dashboard.sections.quickActionsDesc',
-                'Accédez aux tâches les plus fréquentes en un clic'
-              )}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              <div
-                ref={actionsRef}
-                className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                role="list"
-                aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides disponibles')}
-              >
-                {[
-                  {
-                    title: t('dashboard.quickActions.newProduct'),
-                    description: t('dashboard.quickActions.newProductDesc'),
-                    icon: Package,
-                    onClick: handleCreateProduct,
-                  },
-                  {
-                    title: t('dashboard.quickActions.newOrder'),
-                    description: t('dashboard.quickActions.newOrderDesc'),
-                    icon: ShoppingCart,
-                    onClick: handleCreateOrder,
-                  },
-                  {
-                    title: t('dashboard.quickActions.analytics'),
-                    description: t('dashboard.quickActions.analyticsDesc'),
-                    icon: Activity,
-                    onClick: handleViewAnalytics,
-                  },
-                ].map((action, index) => {
-                  const Icon = action.icon;
-                  return (
-                    <Card
-                      key={action.title}
-                      className="dashboard-inner-card cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] touch-manipulation min-h-[120px] sm:min-h-[132px] animate-in fade-in slide-in-from-bottom-4"
-                      style={{ animationDelay: `${index * 80}ms` }}
-                      onClick={action.onClick}
-                      role="listitem"
-                      aria-label={action.title}
-                      tabIndex={0}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          action.onClick();
-                        }
-                      }}
-                    >
-                      <CardContent className="p-4 sm:p-5 md:p-6 h-full flex flex-col justify-center">
-                        <div className="flex items-start gap-3 md:gap-4">
-                          <Icon
-                            className="h-6 w-6 sm:h-7 sm:w-7 text-black shrink-0 mt-0.5"
-                            aria-hidden="true"
+                  {stats.revenueByMonth.length > 0 && (
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
+                      <div className="xl:col-span-2">
+                        <DashboardSalesEvolution data={stats.revenueByMonth} />
+                      </div>
+                      <DashboardCategorySales
+                        revenueByType={stats.revenueByType}
+                        onViewAll={handleViewAnalytics}
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+                    {stats.recentOrders.length > 0 ? (
+                      <RecentOrdersCard orders={stats.recentOrders} variant="premium" />
+                    ) : (
+                      <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                        {t('dashboard.orders.empty', 'Aucune commande récente')}
+                      </div>
+                    )}
+                    {stats.topProducts.length > 0 ? (
+                      <TopProductsCard products={stats.topProducts} variant="premium" />
+                    ) : (
+                      <div className="dashboard-premium-panel flex items-center justify-center min-h-[200px] text-muted-foreground text-sm">
+                        {t('dashboard.products.empty', 'Aucun produit vendu')}
+                      </div>
+                    )}
+                    <DashboardRecentActivity activities={stats.recentActivity} />
+                  </div>
+
+                  <DashboardFooterMetrics stats={stats} />
+
+                  <div
+                    ref={actionsRef}
+                    className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3"
+                    role="list"
+                    aria-label={t('dashboard.quickActions.ariaLabel', 'Actions rapides')}
+                  >
+                    {[
+                      {
+                        title: t('dashboard.quickActions.newProduct'),
+                        icon: Package,
+                        onClick: handleCreateProduct,
+                        theme: 'border-emerald-200/80 hover:bg-emerald-50/50',
+                      },
+                      {
+                        title: t('dashboard.quickActions.newOrder'),
+                        icon: ShoppingCart,
+                        onClick: handleCreateOrder,
+                        theme: 'border-blue-200/80 hover:bg-blue-50/50',
+                      },
+                      {
+                        title: t('dashboard.quickActions.analytics'),
+                        icon: Activity,
+                        onClick: handleViewAnalytics,
+                        theme: 'border-violet-200/80 hover:bg-violet-50/50',
+                      },
+                    ].map(action => {
+                      const Icon = action.icon;
+                      return (
+                        <button
+                          key={action.title}
+                          type="button"
+                          onClick={action.onClick}
+                          className={`dashboard-premium-panel flex items-center justify-center gap-2 text-sm sm:text-base font-semibold transition-colors ${action.theme}`}
+                        >
+                          <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                          {action.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <details className="dashboard-premium-panel group">
+                    <summary className="cursor-pointer list-none dashboard-premium-panel-title flex items-center justify-between gap-2">
+                      {t('dashboard.sections.advanced', 'Analyses avancées')}
+                      <span className="text-sm font-normal text-muted-foreground group-open:hidden">
+                        {t('common.expand', 'Afficher')}
+                      </span>
+                    </summary>
+                    <div className="mt-6 space-y-6 border-t border-border/50 pt-6">
+                      <CoreWebVitalsMonitor />
+                      <DashboardCharts stats={stats} />
+                      <div className="rounded-xl border border-border/40 p-4 sm:p-5 bg-muted/20">
+                        <ProductTypeQuickFilters
+                          selectedType={selectedProductType}
+                          onTypeChange={setSelectedProductType}
+                          stats={stats}
+                        />
+                      </div>
+                      <ProductTypeBreakdown
+                        productsByType={stats.productsByType}
+                        revenueByType={stats.revenueByType}
+                        ordersByType={stats.ordersByType}
+                      />
+                      {stats.revenueByTypeAndMonth.length > 0 && (
+                        <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
+                          <ProductTypeCharts
+                            revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
+                            ordersByType={stats.ordersByType}
+                            selectedType={selectedProductType}
                           />
-                          <div className="flex-1 min-w-0">
-                            <h3 className="dashboard-action-title text-foreground break-words">
-                              {action.title}
-                            </h3>
-                            <p className="dashboard-action-description line-clamp-2 mt-1">
-                              {action.description}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </DashboardSection>
-
-            <DashboardSection
-              id="dashboard-performance"
-              title={t('dashboard.sections.performance', 'Performance du site')}
-              description={t(
-                'dashboard.sections.performanceDesc',
-                'Core Web Vitals et qualité d’expérience en temps réel'
-              )}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              <CoreWebVitalsMonitor />
-            </DashboardSection>
-
-            {stats && (
-              <DashboardSection
-                id="dashboard-analytics"
-                title={t('dashboard.sections.analytics', 'Analyses & répartition')}
-                description={t(
-                  'dashboard.sections.analyticsDesc',
-                  'Graphiques, filtres et performance par type de produit'
-                )}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-              >
-                <DashboardCharts stats={stats} />
-                <div className="dashboard-inner-card rounded-xl border border-border/40 p-4 sm:p-5 md:p-6">
-                  <ProductTypeQuickFilters
-                    selectedType={selectedProductType}
-                    onTypeChange={setSelectedProductType}
-                    stats={stats}
-                  />
+                        </Suspense>
+                      )}
+                      <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
+                        <ProductTypePerformanceMetrics
+                          performanceMetricsByType={stats.performanceMetricsByType}
+                          selectedType={selectedProductType}
+                        />
+                      </Suspense>
+                      <DashboardNotifications {...dashboardNotificationsProps} />
+                    </div>
+                  </details>
                 </div>
-                <ProductTypeBreakdown
-                  className="dashboard-inner-card shadow-none"
-                  productsByType={stats.productsByType}
-                  revenueByType={stats.revenueByType}
-                  ordersByType={stats.ordersByType}
-                />
-                {stats.revenueByTypeAndMonth && stats.revenueByTypeAndMonth.length > 0 && (
-                  <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
-                    <ProductTypeCharts
-                      revenueByTypeAndMonth={stats.revenueByTypeAndMonth}
-                      ordersByType={stats.ordersByType}
-                      selectedType={selectedProductType}
-                    />
-                  </Suspense>
-                )}
-                <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
-                  <ProductTypePerformanceMetrics
-                    performanceMetricsByType={stats.performanceMetricsByType}
-                    selectedType={selectedProductType}
-                  />
-                </Suspense>
-              </DashboardSection>
-            )}
-
-            {stats && (stats.topProducts.length > 0 || stats.recentOrders.length > 0) && (
-              <DashboardSection
-                id="dashboard-activity"
-                title={t('dashboard.sections.activity', 'Activité récente')}
-                description={t(
-                  'dashboard.sections.activityDesc',
-                  'Vos meilleures ventes et dernières commandes'
-                )}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-                contentClassName="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2"
-              >
-                {stats.topProducts.length > 0 && <TopProductsCard products={stats.topProducts} />}
-                {stats.recentOrders.length > 0 && <RecentOrdersCard orders={stats.recentOrders} />}
-              </DashboardSection>
-            )}
-
-            {stats && (
-              <DashboardSection
-                id="dashboard-notifications"
-                title={t('dashboard.sections.notifications', 'Notifications & raccourcis')}
-                description={t(
-                  'dashboard.sections.notificationsDesc',
-                  'Alertes, activité et accès rapide aux paramètres'
-                )}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-                contentClassName="!space-y-0"
-              >
-                <DashboardNotifications {...dashboardNotificationsProps} />
-              </DashboardSection>
+              )
             )}
           </div>
         </main>

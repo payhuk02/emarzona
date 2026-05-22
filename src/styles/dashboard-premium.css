@@ -1,0 +1,194 @@
+/**
+ * Tableau de bord premium — cartes colorées (inspiré maquette)
+ */
+
+.dashboard-premium {
+  --dash-purple: 139 92 246;
+  --dash-blue: 59 130 246;
+  --dash-green: 16 185 129;
+  --dash-orange: 249 115 22;
+}
+
+.landing-premium.app-premium #main-content:has(.dashboard-premium) {
+  background: #f3f4f6 !important;
+}
+
+.dashboard-premium .dashboard-metric-icon-wrap svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* Carte KPI colorée */
+.dashboard-metric-card {
+  @apply relative overflow-hidden rounded-2xl border bg-white p-5 sm:p-6 shadow-sm transition-shadow duration-300;
+  @apply hover:shadow-md;
+}
+
+.dashboard-metric-card--purple {
+  border-color: rgb(var(--dash-purple) / 0.15);
+}
+.dashboard-metric-card--blue {
+  border-color: rgb(var(--dash-blue) / 0.15);
+}
+.dashboard-metric-card--green {
+  border-color: rgb(var(--dash-green) / 0.15);
+}
+.dashboard-metric-card--orange {
+  border-color: rgb(var(--dash-orange) / 0.15);
+}
+
+.dashboard-metric-icon-wrap {
+  @apply flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full shrink-0;
+}
+
+.dashboard-metric-card--purple .dashboard-metric-icon-wrap {
+  background: rgb(var(--dash-purple) / 0.12);
+  color: rgb(var(--dash-purple));
+}
+.dashboard-metric-card--blue .dashboard-metric-icon-wrap {
+  background: rgb(var(--dash-blue) / 0.12);
+  color: rgb(var(--dash-blue));
+}
+.dashboard-metric-card--green .dashboard-metric-icon-wrap {
+  background: rgb(var(--dash-green) / 0.12);
+  color: rgb(var(--dash-green));
+}
+.dashboard-metric-card--orange .dashboard-metric-icon-wrap {
+  background: rgb(var(--dash-orange) / 0.12);
+  color: rgb(var(--dash-orange));
+}
+
+.dashboard-metric-icon-wrap svg {
+  @apply h-5 w-5 sm:h-6 sm:w-6;
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.dashboard-metric-trend {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs sm:text-sm font-semibold tabular-nums;
+}
+
+.dashboard-metric-trend--up {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.dashboard-metric-trend--down {
+  @apply bg-red-50 text-red-600;
+}
+
+.dashboard-metric-label {
+  @apply mt-4 text-sm sm:text-base font-medium text-muted-foreground;
+}
+
+.dashboard-metric-value {
+  font-family: var(--lp-serif, Georgia, serif);
+  @apply mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight tabular-nums;
+}
+
+.dashboard-metric-sub {
+  @apply mt-1 text-xs sm:text-sm text-muted-foreground;
+}
+
+.dashboard-metric-wave {
+  pointer-events: none;
+  position: absolute;
+  right: -10%;
+  bottom: -2px;
+  left: -10%;
+  height: 72px;
+  opacity: 0.55;
+}
+
+.dashboard-metric-card--purple .dashboard-metric-wave {
+  background: radial-gradient(
+    ellipse 80% 100% at 50% 100%,
+    rgb(var(--dash-purple) / 0.18),
+    transparent 70%
+  );
+}
+.dashboard-metric-card--blue .dashboard-metric-wave {
+  background: radial-gradient(
+    ellipse 80% 100% at 50% 100%,
+    rgb(var(--dash-blue) / 0.18),
+    transparent 70%
+  );
+}
+.dashboard-metric-card--green .dashboard-metric-wave {
+  background: radial-gradient(
+    ellipse 80% 100% at 50% 100%,
+    rgb(var(--dash-green) / 0.18),
+    transparent 70%
+  );
+}
+.dashboard-metric-card--orange .dashboard-metric-wave {
+  background: radial-gradient(
+    ellipse 80% 100% at 50% 100%,
+    rgb(var(--dash-orange) / 0.18),
+    transparent 70%
+  );
+}
+
+/* Panneau blanc (graphiques, listes) */
+.dashboard-premium-panel {
+  @apply rounded-2xl border border-border/50 bg-white p-5 sm:p-6 lg:p-7 shadow-sm;
+}
+
+.dashboard-premium-panel-title {
+  font-family: var(--lp-serif, Georgia, serif);
+  @apply text-lg sm:text-xl font-bold text-foreground tracking-tight;
+}
+
+.dashboard-premium-panel-subtitle {
+  @apply text-sm sm:text-base text-muted-foreground mt-0.5;
+}
+
+/* Barre de progression catégories */
+.dashboard-category-bar {
+  @apply h-2 rounded-full bg-muted/60 overflow-hidden;
+}
+
+.dashboard-category-bar-fill {
+  @apply h-full rounded-full transition-all duration-500;
+}
+
+/* Mini métriques footer */
+.dashboard-mini-metric {
+  @apply rounded-xl border border-border/40 bg-white p-4 sm:p-5 shadow-sm;
+}
+
+.dashboard-mini-metric-value {
+  @apply text-xl sm:text-2xl font-bold text-foreground tabular-nums mt-1;
+}
+
+.dashboard-mini-metric-label {
+  @apply text-sm font-medium text-muted-foreground;
+}
+
+/* Liste commandes premium */
+.dashboard-order-row {
+  @apply flex items-center gap-3 sm:gap-4 py-3 sm:py-3.5 border-b border-border/40 last:border-0;
+}
+
+.dashboard-order-avatar {
+  @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground;
+}
+
+.dashboard-status-badge {
+  @apply inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
+
+.dashboard-status-badge--completed,
+.dashboard-status-badge--delivered {
+  @apply bg-emerald-50 text-emerald-700;
+}
+.dashboard-status-badge--pending,
+.dashboard-status-badge--processing,
+.dashboard-status-badge--confirmed {
+  @apply bg-blue-50 text-blue-700;
+}
+.dashboard-status-badge--shipped {
+  @apply bg-amber-50 text-amber-800;
+}
+.dashboard-status-badge--cancelled {
+  @apply bg-red-50 text-red-600;
+}
