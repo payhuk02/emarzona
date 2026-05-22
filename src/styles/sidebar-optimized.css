@@ -169,3 +169,45 @@
   justify-content: center;
   border-radius: 0.5rem;
 }
+
+/* Pack P1 — accordéon, palette, rail icônes */
+[data-sidebar='sidebar'] .app-sidebar-section-header {
+  border-left: 2px solid transparent;
+}
+
+[data-sidebar='sidebar'] .app-sidebar-section-header:hover,
+[data-sidebar='sidebar'] .app-sidebar-section-header[aria-expanded='true'] {
+  border-left-color: rgba(212, 175, 55, 0.55);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-sidebar='sidebar'] .app-sidebar-section-header[aria-expanded='true'] span {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+[data-sidebar='sidebar'] .app-sidebar-command-trigger:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.6);
+  outline-offset: 2px;
+}
+
+[data-sidebar='sidebar'] .app-sidebar-rail-separator {
+  flex-shrink: 0;
+}
+
+[data-sidebar='sidebar'] .app-sidebar-pinned-rail button:hover {
+  color: #fff;
+}
+
+/* Sidebars contextuelles — alignées sur AppSidebar */
+aside.fixed.app-context-sidebar,
+aside.fixed[class*='border-white'] {
+  background: linear-gradient(180deg, #323878 0%, #282870 45%, #1e1e4a 100%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+aside.fixed.app-context-sidebar label,
+aside.fixed.app-context-sidebar .text-blue-100,
+aside.fixed.app-context-sidebar .text-blue-100\/70 {
+  color: rgba(255, 255, 255, 0.75) !important;
+}

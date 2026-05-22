@@ -158,7 +158,7 @@ export const BaseContextSidebar = ({
   const desktopSidebar = (
     <aside
       className={cn(
-        'hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)]',
+        'app-context-sidebar hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)]',
         'border-r border-white/10',
         'text-white',
         'overflow-y-auto z-40',
@@ -168,11 +168,6 @@ export const BaseContextSidebar = ({
         'backdrop-blur-sm',
         className
       )}
-      style={
-        {
-          backgroundColor: '#282870',
-        } as React.CSSProperties
-      }
       aria-label="Navigation contextuelle"
     >
       <div className="p-3 sm:p-4 md:p-5 space-y-4 md:space-y-5">
@@ -184,7 +179,7 @@ export const BaseContextSidebar = ({
           <div>
             <label
               htmlFor="context-sidebar-search"
-              className="text-[11px] uppercase tracking-wide text-blue-100/70 font-semibold"
+              className="text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
             >
               Navigation rapide
             </label>

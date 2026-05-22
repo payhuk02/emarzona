@@ -63,6 +63,9 @@ import { Database, Brain, Clock3, ChevronDown, ChevronRight } from 'lucide-react
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { PremiumLangSwitcher } from '@/components/landing/premium/PremiumLangSwitcher';
+import { SidebarCollapsibleSection } from '@/components/sidebar/SidebarCollapsibleSection';
+import { SidebarNavCommandPalette } from '@/components/sidebar/SidebarNavCommandPalette';
+import { NAV_LINK_ACTIVE, NAV_LINK_INACTIVE } from '@/components/sidebar/sidebar-nav-shared';
 import { useState, useEffect, useMemo } from 'react';
 import React from 'react';
 import {
@@ -70,7 +73,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -78,7 +80,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -1005,12 +1006,6 @@ const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
 const STORES_EXPANDED_KEY = 'sidebarStoresExpanded';
 const MAX_RECENT_ITEMS = 6;
 
-/** Classes navigation — barre dorée, sans translate (évite le clip horizontal) */
-const NAV_LINK_ACTIVE =
-  '!text-white font-semibold border-l-[3px] border-[#d4af37] bg-white/[0.08] [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white';
-const NAV_LINK_INACTIVE =
-  '!text-white hover:bg-white/[0.08] hover:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-90';
-
 const DEFAULT_OPEN_SECTION_LABELS = new Set(['Principal', 'Administration']);
 
 const sectionContainsPath = (section: { items: { url: string }[] }, pathname: string): boolean =>
@@ -1122,7 +1117,7 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed';
   // Détecte si on est sur une page admin
   const isOnAdminPage = location.pathname.startsWith('/admin');
-  const [navSearch, setNavSearch] = useState('');
+  const [commandOpen, setCommandOpen] = useState(false);
   const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
   const [recentUrls, setRecentUrls] = useState<string[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
@@ -1238,23 +1233,24 @@ export function AppSidebar() {
     [allCurrentEntries, recentUrls, pinnedUrls]
   );
 
-  const filterSectionsBySearch = useMemo(() => {
-    const normalizedSearch = navSearch.trim().toLowerCase();
-    const sections = activeSections;
+  const navCommandEntries = useMemo(
+    () =>
+      flattenSections(activeSections).map(entry => ({
+        title: entry.title,
+        url: entry.url,
+        icon: entry.icon,
+        sectionLabel: entry.sectionLabel,
+      })),
+    [activeSections]
+  );
 
-    if (!normalizedSearch) {
-      return sections;
-    }
+  const collapseAllSections = () => {
+    setCollapsedSections(activeSections.map(s => s.label));
+  };
 
-    return sections
-      .map(section => ({
-        ...section,
-        items: section.items.filter(item =>
-          `${item.title} ${item.url}`.toLowerCase().includes(normalizedSearch)
-        ),
-      }))
-      .filter(section => section.items.length > 0);
-  }, [navSearch, activeSections]);
+  const expandAllSections = () => {
+    setCollapsedSections([]);
+  };
 
   const handleLogout = async () => {
     try {
@@ -1296,66 +1292,77 @@ export function AppSidebar() {
           } as React.CSSProperties
         }
       >
-        {/* En-tête fixe */}
-        <div
-          className={cn(
-            'shrink-0 flex items-center border-b border-white/10',
-            isCollapsed ? 'p-2 min-h-[3rem]' : 'p-2 sm:p-3 md:p-4 min-h-[3.5rem] sm:min-h-[4rem]'
-          )}
-        >
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-1 sm:gap-1.5 md:gap-2 group transition-all duration-200 hover:opacity-90 w-full"
-            aria-label="Retour au tableau de bord Emarzona"
-          >
-            {platformLogo ? (
-              <LogoImageWithFallback
-                src={platformLogo}
-                className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 flex-shrink-0"
-              />
-            ) : (
-              <div
-                className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105"
-                style={{ minWidth: '32px', minHeight: '32px' }}
-                aria-hidden="true"
-              >
-                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white">
-                  E
-                </span>
-              </div>
-            )}
-            {!isCollapsed && (
-              <span
-                className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight leading-none whitespace-nowrap drop-shadow-lg text-white"
-                style={{ fontFamily: 'Times New Roman, serif' }}
-              >
-                Emarzona
-              </span>
-            )}
-          </Link>
-        </div>
+        <SidebarNavCommandPalette
+          entries={navCommandEntries}
+          open={commandOpen}
+          onOpenChange={setCommandOpen}
+        />
 
-        {/* Recherche / épinglés — fixe sous le logo */}
-        {!isCollapsed && (
-          <div className="shrink-0 px-3 pt-3 pb-2 border-b border-white/10">
-            <label
-              htmlFor="sidebar-search"
-              className="text-[11px] uppercase tracking-wide text-white font-semibold"
+        {/* En-tête compact : logo + palette */}
+        <div
+          className={cn('shrink-0 border-b border-white/10', isCollapsed ? 'p-2' : 'px-3 py-2.5')}
+        >
+          <div className="flex items-center gap-2 min-h-[2.75rem]">
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
+              aria-label="Retour au tableau de bord Emarzona"
             >
-              Navigation rapide
-            </label>
-            <div className="relative mt-2">
-              <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/60" />
-              <Input
-                id="sidebar-search"
-                value={navSearch}
-                onChange={e => setNavSearch(e.target.value)}
-                placeholder="Rechercher une page..."
-                className="h-9 pl-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/40"
-                aria-label="Rechercher dans le menu de navigation"
-              />
-            </div>
-            <div className="mt-2 flex items-center justify-between gap-2">
+              {platformLogo ? (
+                <LogoImageWithFallback
+                  src={platformLogo}
+                  className={cn(
+                    'flex-shrink-0',
+                    isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'
+                  )}
+                />
+              ) : (
+                <div
+                  className={cn(
+                    'flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md',
+                    isCollapsed ? 'h-8 w-8' : 'h-9 w-9 sm:h-10 sm:w-10'
+                  )}
+                  aria-hidden="true"
+                >
+                  <span className="text-sm font-bold text-white">E</span>
+                </div>
+              )}
+              {!isCollapsed && (
+                <span
+                  className="hidden sm:inline text-lg font-extrabold tracking-tight text-white"
+                  style={{ fontFamily: 'Times New Roman, serif' }}
+                >
+                  Emarzona
+                </span>
+              )}
+            </Link>
+            {isCollapsed ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-white hover:bg-white/10 shrink-0"
+                onClick={() => setCommandOpen(true)}
+                aria-label="Rechercher (Ctrl+K)"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setCommandOpen(true)}
+                className="app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-white/12 bg-white/[0.05] px-2.5 text-left text-sm text-white/70 hover:border-[#d4af37]/35 hover:bg-white/[0.08] hover:text-white transition-all duration-200 min-w-0"
+                aria-label="Ouvrir la palette de navigation (Ctrl+K)"
+              >
+                <Search className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
+                <span className="flex-1 truncate text-xs">Rechercher…</span>
+                <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-white/15 bg-white/5 px-1.5 text-[10px] font-medium text-white/50">
+                  Ctrl+K
+                </kbd>
+              </button>
+            )}
+          </div>
+          {!isCollapsed && (
+            <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
               <Button
                 variant="ghost"
                 size="sm"
@@ -1364,15 +1371,50 @@ export function AppSidebar() {
                 className="h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
               >
                 {currentNavItem && pinnedUrls.includes(currentNavItem.url)
-                  ? 'Désépingler cette page'
-                  : 'Épingler cette page'}
+                  ? 'Désépingler'
+                  : 'Épingler'}
               </Button>
-              {currentNavItem && (
-                <span className="text-[11px] text-white/60 truncate max-w-[140px]">
-                  {currentNavItem.title}
-                </span>
-              )}
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={expandAllSections}
+                  className="h-7 px-2 text-[10px] text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  Tout ouvrir
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={collapseAllSections}
+                  className="h-7 px-2 text-[10px] text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  Tout replier
+                </Button>
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* Épinglés en mode rail */}
+        {isCollapsed && pinnedItems.length > 0 && (
+          <div className="app-sidebar-pinned-rail shrink-0 flex flex-col items-center gap-1 py-2 border-b border-white/10">
+            {pinnedItems.slice(0, 3).map(item => {
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={`rail-pin-${item.url}`}
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-white hover:bg-white/10"
+                  onClick={() => navigate(item.url)}
+                  title={item.title}
+                  aria-label={item.title}
+                >
+                  <Icon className="h-4 w-4" />
+                </Button>
+              );
+            })}
           </div>
         )}
 
@@ -1427,29 +1469,20 @@ export function AppSidebar() {
         <SidebarContent className="app-sidebar-scroll flex-1 min-h-0 overflow-y-auto scrollbar-thin">
           {/* Menu Items - Organisé par sections */}
           {showUserMenu &&
-            filterSectionsBySearch.map(section => (
-              <SidebarGroup key={section.label}>
-                <SidebarGroupLabel
-                  className="font-semibold opacity-90"
-                  aria-label={`Section ${section.label}`}
+            activeSections.map((section, sectionIndex) => (
+              <React.Fragment key={section.label}>
+                {isCollapsed && sectionIndex > 0 && (
+                  <div
+                    className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-white/15"
+                    role="separator"
+                  />
+                )}
+                <SidebarCollapsibleSection
+                  label={section.label}
+                  isOpen={isCollapsed || !collapsedSections.includes(section.label)}
+                  onToggle={() => toggleSectionCollapse(section.label)}
+                  hideHeader={isCollapsed}
                 >
-                  {!isCollapsed && (
-                    <button
-                      type="button"
-                      onClick={() => toggleSectionCollapse(section.label)}
-                      className="w-full flex items-center justify-between text-white"
-                      aria-expanded={!collapsedSections.includes(section.label)}
-                    >
-                      <span className="text-white">{section.label}</span>
-                      {collapsedSections.includes(section.label) ? (
-                        <ChevronRight className="h-3.5 w-3.5 text-white" />
-                      ) : (
-                        <ChevronDown className="h-3.5 w-3.5 text-white" />
-                      )}
-                    </button>
-                  )}
-                </SidebarGroupLabel>
-                {!collapsedSections.includes(section.label) && (
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {section.items.map(item => {
@@ -1506,44 +1539,51 @@ export function AppSidebar() {
                                   )}
                                 </button>
                               )}
-                              {!isCollapsed && storesMenuOpen && stores.length > 0 && (
-                                <div className="ml-4 mt-1 space-y-1 border-l border-white/15 pl-2">
-                                  {stores.map(store => (
-                                    <Button
-                                      key={store.id}
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        switchStore(store.id);
-                                        navigate('/dashboard');
-                                        toast({
-                                          title: 'Boutique changée',
-                                          description: `Vous consultez maintenant les données de "${store.name}"`,
-                                        });
-                                      }}
-                                      className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
-                                        selectedStoreId === store.id
-                                          ? NAV_LINK_ACTIVE
-                                          : NAV_LINK_INACTIVE
-                                      }`}
-                                    >
-                                      {selectedStoreId === store.id && (
-                                        <Check className="h-3 w-3 mr-2" />
-                                      )}
-                                      <span className="truncate">{store.name}</span>
-                                    </Button>
-                                  ))}
-                                  {canCreateStore() && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => navigate('/dashboard/store')}
-                                      className={`w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`}
-                                    >
-                                      <Plus className="h-3 w-3 mr-2" />
-                                      <span>Créer une boutique</span>
-                                    </Button>
+                              {!isCollapsed && stores.length > 0 && (
+                                <div
+                                  className={cn(
+                                    'ml-4 grid transition-[grid-template-rows] duration-300 ease-out',
+                                    storesMenuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
                                   )}
+                                >
+                                  <div className="overflow-hidden min-h-0 space-y-1 border-l border-white/15 pl-2 mt-1">
+                                    {stores.map(store => (
+                                      <Button
+                                        key={store.id}
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          switchStore(store.id);
+                                          navigate('/dashboard');
+                                          toast({
+                                            title: 'Boutique changée',
+                                            description: `Vous consultez maintenant les données de "${store.name}"`,
+                                          });
+                                        }}
+                                        className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
+                                          selectedStoreId === store.id
+                                            ? NAV_LINK_ACTIVE
+                                            : NAV_LINK_INACTIVE
+                                        }`}
+                                      >
+                                        {selectedStoreId === store.id && (
+                                          <Check className="h-3 w-3 mr-2" />
+                                        )}
+                                        <span className="truncate">{store.name}</span>
+                                      </Button>
+                                    ))}
+                                    {canCreateStore() && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => navigate('/dashboard/store')}
+                                        className={`w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`}
+                                      >
+                                        <Plus className="h-3 w-3 mr-2" />
+                                        <span>Créer une boutique</span>
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                             </SidebarMenuItem>
@@ -1579,15 +1619,9 @@ export function AppSidebar() {
                       })}
                     </SidebarMenu>
                   </SidebarGroupContent>
-                )}
-              </SidebarGroup>
+                </SidebarCollapsibleSection>
+              </React.Fragment>
             ))}
-
-          {!isCollapsed && filterSectionsBySearch.length === 0 && (
-            <div className="px-3 py-4 text-sm text-white">
-              Aucun résultat pour <span className="font-semibold">"{navSearch}"</span>.
-            </div>
-          )}
 
           {/* Bouton Retour Dashboard (visible uniquement sur pages admin) */}
           {showAdminMenu && (
@@ -1613,26 +1647,20 @@ export function AppSidebar() {
 
           {/* Admin Menu Items - Organisé par sections */}
           {showAdminMenu &&
-            filterSectionsBySearch.map(section => (
-              <SidebarGroup key={section.label}>
-                <SidebarGroupLabel className="font-semibold opacity-90">
-                  {!isCollapsed && (
-                    <button
-                      type="button"
-                      onClick={() => toggleSectionCollapse(section.label)}
-                      className="w-full flex items-center justify-between text-white"
-                      aria-expanded={!collapsedSections.includes(section.label)}
-                    >
-                      <span className="text-white">{section.label}</span>
-                      {collapsedSections.includes(section.label) ? (
-                        <ChevronRight className="h-3.5 w-3.5 text-white" />
-                      ) : (
-                        <ChevronDown className="h-3.5 w-3.5 text-white" />
-                      )}
-                    </button>
-                  )}
-                </SidebarGroupLabel>
-                {!collapsedSections.includes(section.label) && (
+            activeSections.map((section, sectionIndex) => (
+              <React.Fragment key={section.label}>
+                {isCollapsed && sectionIndex > 0 && (
+                  <div
+                    className="app-sidebar-rail-separator mx-auto my-1 h-px w-6 bg-white/15"
+                    role="separator"
+                  />
+                )}
+                <SidebarCollapsibleSection
+                  label={section.label}
+                  isOpen={isCollapsed || !collapsedSections.includes(section.label)}
+                  onToggle={() => toggleSectionCollapse(section.label)}
+                  hideHeader={isCollapsed}
+                >
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {section.items.map(item => {
@@ -1665,8 +1693,8 @@ export function AppSidebar() {
                       })}
                     </SidebarMenu>
                   </SidebarGroupContent>
-                )}
-              </SidebarGroup>
+                </SidebarCollapsibleSection>
+              </React.Fragment>
             ))}
         </SidebarContent>
 
