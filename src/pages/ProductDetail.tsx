@@ -1346,10 +1346,15 @@ const ProductDetails = () => {
               </div>
             )}
 
-            {/* Produits fréquemment achetés ensemble */}
-            {product && (
+            {/* Autres produits de la même boutique */}
+            {product && product.store_id && (
               <div className="mb-8 sm:mb-10 md:mb-12">
-                <FrequentlyBoughtTogether productId={product.id} limit={4} />
+                <FrequentlyBoughtTogether
+                  productId={product.id}
+                  storeId={product.store_id}
+                  storeName={store?.name}
+                  limit={4}
+                />
               </div>
             )}
 

@@ -1,7 +1,7 @@
 /**
  * Physical Product Recommendations Component
  * Date: 29 janvier 2025
- * 
+ *
  * Système de recommandations intelligentes pour produits physiques
  * Basé sur : catégories similaires, tags, achats précédents, popularité
  */
@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Users,
   Package,
+  Store,
   Star,
   ArrowRight,
   Loader2,
@@ -25,6 +26,8 @@ import { useNavigate } from 'react-router-dom';
 import { PhysicalProductCard } from './PhysicalProductCard';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { useSameStoreProducts, type SameStoreProduct } from '@/hooks/useSameStoreProducts';
+import { generateProductUrl } from '@/lib/store-utils';
 
 // Type pour les produits recommandés
 interface RecommendedProduct {
@@ -71,14 +74,17 @@ const useProductRecommendations = (
     queryKey: ['physicalProductRecommendations', productId, category, tags, limit],
     queryFn: async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
         // 1. Recommandations basées sur la catégorie
-        let  categoryRecommendations: RecommendedProduct[] = [];
+        let categoryRecommendations: RecommendedProduct[] = [];
         if (category) {
           const { data: categoryProducts } = await supabase
             .from('products')
-            .select(`
+            .select(
+              `
               *,
               stores!inner (
                 id,
@@ -88,7 +94,8 @@ const useProductRecommendations = (
               physical_products (
                 *
               )
-            `)
+            `
+            )
             .eq('product_type', 'physical')
             .eq('is_active', true)
             .eq('is_draft', false)
@@ -101,12 +108,13 @@ const useProductRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let  tagRecommendations: RecommendedProduct[] = [];
+        let tagRecommendations: RecommendedProduct[] = [];
         if (tags && tags.length > 0) {
           // Rechercher produits avec tags similaires
           const { data: tagProducts } = await supabase
             .from('products')
-            .select(`
+            .select(
+              `
               *,
               stores!inner (
                 id,
@@ -116,7 +124,8 @@ const useProductRecommendations = (
               physical_products (
                 *
               )
-            `)
+            `
+            )
             .eq('product_type', 'physical')
             .eq('is_active', true)
             .eq('is_draft', false)
@@ -126,9 +135,9 @@ const useProductRecommendations = (
           if (tagProducts) {
             // Filtrer ceux qui ont des tags en commun
             tagRecommendations = tagProducts
-              .filter((p) => {
+              .filter(p => {
                 const productTags = p.tags || [];
-                return tags.some((tag) => productTags.includes(tag));
+                return tags.some(tag => productTags.includes(tag));
               })
               .sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0))
               .slice(0, limit);
@@ -136,12 +145,13 @@ const useProductRecommendations = (
         }
 
         // 3. Recommandations basées sur les achats précédents (si utilisateur connecté)
-        let  purchaseBasedRecommendations: RecommendedProduct[] = [];
+        let purchaseBasedRecommendations: RecommendedProduct[] = [];
         if (user) {
           // Récupérer les produits achetés par l'utilisateur
           const { data: purchasedProducts } = await supabase
             .from('order_items')
-            .select(`
+            .select(
+              `
               product_id,
               orders!inner (
                 customer_id,
@@ -149,15 +159,16 @@ const useProductRecommendations = (
                   email
                 )
               )
-            `)
+            `
+            )
             .eq('orders.customers.email', user.email)
             .eq('orders.payment_status', 'paid')
             .eq('orders.status', 'completed')
             .eq('product_type', 'physical');
 
           if (purchasedProducts && purchasedProducts.length > 0) {
-            const purchasedIds = purchasedProducts.map((p) => p.product_id);
-            
+            const purchasedIds = purchasedProducts.map(p => p.product_id);
+
             // Obtenir les catégories des produits achetés
             const { data: purchasedCategories } = await supabase
               .from('products')
@@ -166,13 +177,14 @@ const useProductRecommendations = (
               .not('category', 'is', null);
 
             const categories = Array.from(
-              new Set(purchasedCategories?.map((p) => p.category).filter(Boolean))
+              new Set(purchasedCategories?.map(p => p.category).filter(Boolean))
             ) as string[];
 
             if (categories.length > 0) {
               const { data: similarProducts } = await supabase
                 .from('products')
-                .select(`
+                .select(
+                  `
                   *,
                   stores!inner (
                     id,
@@ -182,7 +194,8 @@ const useProductRecommendations = (
                   physical_products (
                     *
                   )
-                `)
+                `
+                )
                 .eq('product_type', 'physical')
                 .eq('is_active', true)
                 .eq('is_draft', false)
@@ -192,9 +205,9 @@ const useProductRecommendations = (
                 .limit(limit * 2); // Récupérer plus pour filtrer après
 
               // Filtrer les produits déjà achetés
-              purchaseBasedRecommendations = (similarProducts || []).filter(
-                (p) => !purchasedIds.includes(p.id)
-              ).slice(0, limit);
+              purchaseBasedRecommendations = (similarProducts || [])
+                .filter(p => !purchasedIds.includes(p.id))
+                .slice(0, limit);
             }
           }
         }
@@ -202,7 +215,8 @@ const useProductRecommendations = (
         // 4. Recommandations populaires (fallback)
         const { data: popularProducts } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             stores!inner (
               id,
@@ -212,7 +226,8 @@ const useProductRecommendations = (
             physical_products (
               *
             )
-          `)
+          `
+          )
           .eq('product_type', 'physical')
           .eq('is_active', true)
           .eq('is_draft', false)
@@ -231,19 +246,19 @@ const useProductRecommendations = (
 
         // Dédupliquer par ID
         const uniqueRecommendations = Array.from(
-          new Map(allRecommendations.map((p) => [p.id, p])).values()
+          new Map(allRecommendations.map(p => [p.id, p])).values()
         );
 
         // Trier par score de recommandation
-        const scored = uniqueRecommendations.map((product) => {
-          let  score= 0;
+        const scored = uniqueRecommendations.map(product => {
+          let score = 0;
 
           // Score basé sur la catégorie
           if (category && product.category === category) score += 10;
 
           // Score basé sur les tags
           if (tags && product.tags) {
-            const commonTags = tags.filter((tag) => product.tags.includes(tag));
+            const commonTags = tags.filter(tag => product.tags.includes(tag));
             score += commonTags.length * 5;
           }
 
@@ -255,10 +270,8 @@ const useProductRecommendations = (
         });
 
         // Trier par score et retourner les meilleurs
-        return scored
-          .sort((a, b) => b.recommendationScore - a.recommendationScore)
-          .slice(0, limit);
-      } catch ( _error: unknown) {
+        return scored.sort((a, b) => b.recommendationScore - a.recommendationScore).slice(0, limit);
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         logger.error('Error fetching physical product recommendations', { error: errorMessage });
         return [];
@@ -331,11 +344,7 @@ export const PhysicalProductRecommendations = ({
             <h2 className="text-2xl font-bold">{title}</h2>
             <Badge variant="secondary">{recommendations.length}</Badge>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/marketplace')}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace')}>
             Voir plus
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -349,7 +358,7 @@ export const PhysicalProductRecommendations = ({
           variant === 'compact' && 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
         )}
       >
-        {recommendations.map((product: any) => (
+        {recommendations.map((product: RecommendedProduct) => (
           <Card
             key={product.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
@@ -387,9 +396,7 @@ export const PhysicalProductRecommendations = ({
               {product.physical_products?.[0] && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Package className="h-3 w-3" />
-                  <span>
-                    Stock: {product.physical_products[0].total_stock || 0}
-                  </span>
+                  <span>Stock: {product.physical_products[0].total_stock || 0}</span>
                 </div>
               )}
             </CardContent>
@@ -401,87 +408,32 @@ export const PhysicalProductRecommendations = ({
 };
 
 /**
- * Recommandations basées sur "Achetés ensemble"
+ * Autres produits de la même boutique (produits physiques)
  */
 export const BoughtTogetherPhysicalRecommendations = ({
   productId,
+  storeId,
+  storeName,
   limit = 4,
 }: {
   productId: string;
+  storeId?: string;
+  storeName?: string;
   limit?: number;
 }) => {
   const navigate = useNavigate();
-  const { data: recommendations, isLoading } = useQuery({
-    queryKey: ['boughtTogetherPhysical', productId],
-    queryFn: async () => {
-      try {
-        // Récupérer les commandes qui contiennent ce produit
-        const { data: ordersWithProduct } = await supabase
-          .from('order_items')
-          .select('order_id')
-          .eq('product_id', productId)
-          .eq('product_type', 'physical')
-          .limit(100);
-
-        if (!ordersWithProduct || ordersWithProduct.length === 0) return [];
-
-        const orderIds = ordersWithProduct.map((o) => o.order_id);
-
-        // Récupérer les autres produits dans ces commandes
-        const { data: otherProducts } = await supabase
-          .from('order_items')
-          .select('product_id')
-          .in('order_id', orderIds)
-          .neq('product_id', productId)
-          .eq('product_type', 'physical');
-
-        if (!otherProducts || otherProducts.length === 0) return [];
-
-        // Compter les occurrences
-        const productCounts = otherProducts.reduce((acc, item) => {
-          acc[item.product_id] = (acc[item.product_id] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-
-        // Trier par fréquence
-        const sortedProductIds = Object.entries(productCounts)
-          .sort(([, a], [, b]) => b - a)
-          .slice(0, limit)
-          .map(([id]) => id);
-
-        // Récupérer les détails des produits
-        const { data: products } = await supabase
-          .from('products')
-          .select(`
-            *,
-            stores!inner (
-              id,
-              name,
-              slug
-            ),
-            physical_products (
-              *
-            )
-          `)
-          .in('id', sortedProductIds)
-          .eq('product_type', 'physical')
-          .eq('is_active', true);
-
-        return products || [];
-      } catch ( _error: any) {
-        logger.error('Error fetching bought together physical recommendations', { error });
-        return [];
-      }
-    },
-    enabled: !!productId,
-  });
+  const { data: recommendations, isLoading } = useSameStoreProducts(productId, storeId, limit);
+  const resolvedStoreName = storeName ?? recommendations?.[0]?.stores?.name;
+  const sectionTitle = resolvedStoreName
+    ? `Autres produits de ${resolvedStoreName}`
+    : 'De la même boutique';
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          Achetés ensemble
+          <Store className="h-5 w-5" />
+          {sectionTitle}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -505,15 +457,15 @@ export const BoughtTogetherPhysicalRecommendations = ({
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold flex items-center gap-2">
-        <Package className="h-5 w-5" />
-        Achetés ensemble
+        <Store className="h-5 w-5" />
+        {sectionTitle}
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {recommendations.map((product: any) => (
+        {recommendations.map((product: SameStoreProduct) => (
           <Card
             key={product.id}
             className="group hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => navigate(`/physical/${product.id}`)}
+            onClick={() => navigate(generateProductUrl(product.stores.slug, product.slug))}
           >
             <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
               {product.image_url ? (
@@ -532,14 +484,9 @@ export const BoughtTogetherPhysicalRecommendations = ({
               <h4 className="font-medium text-sm line-clamp-2 mb-2">{product.name}</h4>
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm">
-                  {product.promotional_price || product.price} {product.currency}
+                  {(product.promotional_price ?? product.price).toLocaleString()}{' '}
+                  {product.currency ?? 'XOF'}
                 </span>
-                {product.average_rating > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs">{product.average_rating.toFixed(1)}</span>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -548,10 +495,3 @@ export const BoughtTogetherPhysicalRecommendations = ({
     </div>
   );
 };
-
-
-
-
-
-
-

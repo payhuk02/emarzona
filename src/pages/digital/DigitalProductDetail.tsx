@@ -219,7 +219,7 @@ export default function DigitalProductDetail() {
       } else {
         throw new Error('URL de paiement non disponible');
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error initiating purchase', {
         error: errorMessage,
@@ -742,15 +742,15 @@ export default function DigitalProductDetail() {
             title="Produits similaires"
           />
 
-          <BoughtTogetherRecommendations productId={productId || ''} limit={4} />
+          {digitalProduct?.product?.store_id && (
+            <BoughtTogetherRecommendations
+              productId={productId || ''}
+              storeId={digitalProduct.product.store_id}
+              limit={4}
+            />
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-

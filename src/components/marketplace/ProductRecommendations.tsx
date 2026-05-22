@@ -1,10 +1,15 @@
 import React, { useMemo } from 'react';
-import { useProductRecommendations, useFrequentlyBoughtTogether, useUserProductRecommendations, ProductRecommendation, FrequentlyBoughtTogether } from '@/hooks/useProductRecommendations';
+import {
+  useProductRecommendations,
+  useUserProductRecommendations,
+  ProductRecommendation,
+} from '@/hooks/useProductRecommendations';
+import { useSameStoreProducts } from '@/hooks/useSameStoreProducts';
 import ProductCardModern from './ProductCardModern';
 import { ProductGrid } from '@/components/ui/ProductGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, ShoppingBag, TrendingUp } from '@/components/icons';
+import { Sparkles, Store, TrendingUp } from '@/components/icons';
 
 interface ProductRecommendationsProps {
   productId: string;
@@ -18,17 +23,17 @@ interface ProductRecommendationsProps {
 /**
  * Composant pour afficher les recommandations de produits similaires
  */
-const  ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = ({
+const ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = ({
   productId,
   limit = 6,
-  title = "Produits similaires",
-  className = "",
+  title = 'Produits similaires',
+  className = '',
 }) => {
-  const { data: recommendations, isLoading, error } = useProductRecommendations(
-    productId,
-    limit,
-    true
-  );
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+  } = useProductRecommendations(productId, limit, true);
 
   // Transformer les recommandations en format ProductCardModern
   const products = useMemo(() => {
@@ -98,7 +103,7 @@ const  ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = 
         </CardHeader>
         <CardContent>
           <ProductGrid>
-            {products.map((product) => (
+            {products.map(product => (
               <ProductCardModern
                 key={product.id}
                 product={product}
@@ -110,58 +115,66 @@ const  ProductRecommendationsComponent: React.FC<ProductRecommendationsProps> = 
       </Card>
     </div>
   );
-}
+};
 
 ProductRecommendationsComponent.displayName = 'ProductRecommendationsComponent';
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const ProductRecommendations = React.memo(ProductRecommendationsComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.productId === nextProps.productId &&
-    prevProps.limit === nextProps.limit &&
-    prevProps.title === nextProps.title &&
-    prevProps.className === nextProps.className
-  );
-});
+export const ProductRecommendations = React.memo(
+  ProductRecommendationsComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.productId === nextProps.productId &&
+      prevProps.limit === nextProps.limit &&
+      prevProps.title === nextProps.title &&
+      prevProps.className === nextProps.className
+    );
+  }
+);
 
 ProductRecommendations.displayName = 'ProductRecommendations';
 
-/**
- * Composant pour afficher les produits fréquemment achetés ensemble
- */
-const  FrequentlyBoughtTogetherComponent: React.FC<ProductRecommendationsProps> = ({
-  productId,
-  limit = 4,
-  className = "",
-}) => {
-  const { data: recommendations, isLoading, error } = useFrequentlyBoughtTogether(
-    productId,
-    limit,
-    true
-  );
+interface SameStoreProductsProps extends ProductRecommendationsProps {
+  storeId?: string;
+  storeName?: string;
+}
 
-  // Transformer les recommandations en format ProductCardModern
+/**
+ * Autres produits de la même boutique
+ */
+const FrequentlyBoughtTogetherComponent: React.FC<SameStoreProductsProps> = ({
+  productId,
+  storeId,
+  storeName,
+  limit = 4,
+  className = '',
+}) => {
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+  } = useSameStoreProducts(productId, storeId, limit);
+
+  const sectionTitle = storeName ? `Autres produits de ${storeName}` : 'De la même boutique';
+
   const products = useMemo(() => {
     if (!recommendations) return [];
 
-    return recommendations.map((rec: FrequentlyBoughtTogether) => ({
-      id: rec.product_id,
-      name: rec.product_name,
-      slug: rec.product_slug,
+    return recommendations.map(rec => ({
+      id: rec.id,
+      name: rec.name,
+      slug: rec.slug,
       image_url: rec.image_url,
       price: rec.price,
       promotional_price: rec.promotional_price,
-      currency: rec.currency,
+      currency: rec.currency ?? 'XOF',
       category: rec.category,
       product_type: rec.product_type,
-      rating: rec.rating,
-      reviews_count: rec.reviews_count,
-      purchases_count: rec.purchases_count,
       stores: {
-        id: rec.store_id,
-        name: rec.store_name,
-        slug: rec.store_slug,
-        logo_url: null,
+        id: rec.stores.id,
+        name: rec.stores.name,
+        slug: rec.stores.slug,
+        logo_url: rec.stores.logo_url ?? null,
       },
       created_at: new Date().toISOString(),
     }));
@@ -177,8 +190,8 @@ const  FrequentlyBoughtTogetherComponent: React.FC<ProductRecommendationsProps> 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 text-purple-500" />
-              Achetés ensemble
+              <Store className="h-5 w-5 text-purple-500" />
+              {sectionTitle}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -202,18 +215,13 @@ const  FrequentlyBoughtTogetherComponent: React.FC<ProductRecommendationsProps> 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-purple-500" />
-            Achetés ensemble
-            {recommendations && recommendations.length > 0 && (
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                ({recommendations[0].times_bought_together} clients ont acheté ces produits ensemble)
-              </span>
-            )}
+            <Store className="h-5 w-5 text-purple-500" />
+            {sectionTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <ProductGrid>
-            {products.map((product) => (
+            {products.map(product => (
               <ProductCardModern
                 key={product.id}
                 product={product}
@@ -225,18 +233,23 @@ const  FrequentlyBoughtTogetherComponent: React.FC<ProductRecommendationsProps> 
       </Card>
     </div>
   );
-}
+};
 
 FrequentlyBoughtTogetherComponent.displayName = 'FrequentlyBoughtTogetherComponent';
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const FrequentlyBoughtTogether = React.memo(FrequentlyBoughtTogetherComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.productId === nextProps.productId &&
-    prevProps.limit === nextProps.limit &&
-    prevProps.className === nextProps.className
-  );
-});
+export const FrequentlyBoughtTogether = React.memo(
+  FrequentlyBoughtTogetherComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.productId === nextProps.productId &&
+      prevProps.storeId === nextProps.storeId &&
+      prevProps.storeName === nextProps.storeName &&
+      prevProps.limit === nextProps.limit &&
+      prevProps.className === nextProps.className
+    );
+  }
+);
 
 FrequentlyBoughtTogether.displayName = 'FrequentlyBoughtTogether';
 
@@ -249,16 +262,16 @@ interface PersonalizedRecommendationsProps {
 /**
  * Composant pour afficher les recommandations personnalisées pour l'utilisateur
  */
-const  PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendationsProps> = ({
+const PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendationsProps> = ({
   userId,
   limit = 6,
-  className = "",
+  className = '',
 }) => {
-  const { data: recommendations, isLoading, error } = useUserProductRecommendations(
-    userId,
-    limit,
-    !!userId
-  );
+  const {
+    data: recommendations,
+    isLoading,
+    error,
+  } = useUserProductRecommendations(userId, limit, !!userId);
 
   // Transformer les recommandations en format ProductCardModern
   const products = useMemo(() => {
@@ -291,7 +304,7 @@ const  PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendation
   if (!userId) {
     return null;
   }
-  
+
   // Si erreur, ne pas afficher mais ne pas bloquer le reste de la page
   if (error) {
     return null;
@@ -334,7 +347,7 @@ const  PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendation
         </CardHeader>
         <CardContent>
           <ProductGrid>
-            {products.map((product) => (
+            {products.map(product => (
               <ProductCardModern
                 key={product.id}
                 product={product}
@@ -346,24 +359,20 @@ const  PersonalizedRecommendationsComponent: React.FC<PersonalizedRecommendation
       </Card>
     </div>
   );
-}
+};
 
 PersonalizedRecommendationsComponent.displayName = 'PersonalizedRecommendationsComponent';
 
 // Optimisation avec React.memo pour éviter les re-renders inutiles
-export const PersonalizedRecommendations = React.memo(PersonalizedRecommendationsComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.userId === nextProps.userId &&
-    prevProps.limit === nextProps.limit &&
-    prevProps.className === nextProps.className
-  );
-});
+export const PersonalizedRecommendations = React.memo(
+  PersonalizedRecommendationsComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.userId === nextProps.userId &&
+      prevProps.limit === nextProps.limit &&
+      prevProps.className === nextProps.className
+    );
+  }
+);
 
 PersonalizedRecommendations.displayName = 'PersonalizedRecommendations';
-
-
-
-
-
-
-

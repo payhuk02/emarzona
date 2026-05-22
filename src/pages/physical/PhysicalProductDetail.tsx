@@ -97,9 +97,13 @@ export default function PhysicalProductDetail() {
   const [selectedVariant, setSelectedVariant] = useState<PhysicalProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  
+
   // Utiliser le hook unifié pour la wishlist
-  const { isInWishlist, toggle: handleWishlistToggle, isLoading: isCheckingWishlist } = useWishlistToggle(productId);
+  const {
+    isInWishlist,
+    toggle: handleWishlistToggle,
+    isLoading: isCheckingWishlist,
+  } = useWishlistToggle(productId);
 
   // Track analytics event
   const { trackView } = useAnalyticsTracking();
@@ -126,12 +130,19 @@ export default function PhysicalProductDetail() {
 
       // Fetch all related data in parallel (instead of sequential)
       const [physicalResult, variantsResult, inventoryResult, sizeChartResult] = await Promise.all([
-        supabase.from('physical_products').select(PHYSICAL_PRODUCT_FIELDS).eq('product_id', productId).single(),
+        supabase
+          .from('physical_products')
+          .select(PHYSICAL_PRODUCT_FIELDS)
+          .eq('product_id', productId)
+          .single(),
         supabase
           .from('physical_product_variants')
           .select(PHYSICAL_VARIANT_FIELDS)
           .eq('physical_product_id', productData?.id), // Use productData.id if physical_products.id is not available
-        supabase.from('physical_product_inventory').select(PHYSICAL_INVENTORY_FIELDS).eq('product_id', productId), // Use product_id directly if available
+        supabase
+          .from('physical_product_inventory')
+          .select(PHYSICAL_INVENTORY_FIELDS)
+          .eq('product_id', productId), // Use product_id directly if available
         supabase
           .from('product_size_charts')
           .select('size_chart_id')
@@ -145,8 +156,8 @@ export default function PhysicalProductDetail() {
       const physicalId = physicalData?.id;
 
       // If variants/inventory need physical_product_id, refetch with correct ID
-      let  variants= variantsResult.data || [];
-      let  inventory= inventoryResult.data || [];
+      let variants = variantsResult.data || [];
+      let inventory = inventoryResult.data || [];
 
       if (physicalId && (!variants.length || !inventory.length)) {
         // Refetch with physical_product_id if initial query didn't work
@@ -327,7 +338,7 @@ export default function PhysicalProductDetail() {
 
       // Optionnel : Rediriger vers le panier ou réinitialiser la quantité
       setQuantity(1);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Erreur lors de l'ajout au panier", error);
       toast({
@@ -736,7 +747,14 @@ export default function PhysicalProductDetail() {
             title="Produits similaires"
           />
 
-          <BoughtTogetherPhysicalRecommendations productId={productId!} limit={4} />
+          {product?.store_id && (
+            <BoughtTogetherPhysicalRecommendations
+              productId={productId!}
+              storeId={product.store_id}
+              storeName={product.store?.name}
+              limit={4}
+            />
+          )}
 
           {/* Reviews Summary (outside tabs for visibility) */}
           <ProductReviewsSummary productId={productId!} productType="physical" />
@@ -745,9 +763,3 @@ export default function PhysicalProductDetail() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

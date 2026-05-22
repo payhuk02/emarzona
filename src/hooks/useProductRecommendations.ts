@@ -43,19 +43,21 @@ export function useProductRecommendations() {
           p_user_id: user?.id || null,
           p_style_profile: profile,
           p_filters: filters,
-          p_limit: limit
+          p_limit: limit,
         });
 
         if (!error && data) {
           logger.info('Personalized recommendations fetched via RPC', {
             count: data?.length || 0,
             profile,
-            userId: user?.id
+            userId: user?.id,
           });
           return data || [];
         }
       } catch (rpcError) {
-        logger.warn('RPC get_personalized_recommendations not available, using fallback', { rpcError });
+        logger.warn('RPC get_personalized_recommendations not available, using fallback', {
+          rpcError,
+        });
       }
 
       // Fallback: retourner des produits populaires
@@ -73,7 +75,7 @@ export function useProductRecommendations() {
     data: recommendations,
     isLoading,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['personalized-recommendations', user?.id],
     queryFn: async (): Promise<RecommendationResult | null> => {
@@ -94,7 +96,7 @@ export function useProductRecommendations() {
         products,
         reasoning: generateRecommendationReasoning(preferences.profile),
         confidence: calculateConfidenceScore(preferences.profile),
-        categories: extractProductCategories(products)
+        categories: extractProductCategories(products),
       };
     },
     enabled: !!user?.id,
@@ -103,15 +105,12 @@ export function useProductRecommendations() {
   });
 
   // Recommandations similaires à un produit
-  const getSimilarProducts = async (
-    productId: string,
-    limit: number = 8
-  ): Promise<Product[]> => {
+  const getSimilarProducts = async (productId: string, limit: number = 8): Promise<Product[]> => {
     try {
       const { data, error } = await supabase.rpc('get_similar_products', {
         p_product_id: productId,
         p_user_id: user?.id || null,
-        p_limit: limit
+        p_limit: limit,
       });
 
       if (error) {
@@ -133,7 +132,7 @@ export function useProductRecommendations() {
     try {
       const { data, error } = await supabase.rpc('get_history_based_recommendations', {
         p_user_id: user.id,
-        p_limit: limit
+        p_limit: limit,
       });
 
       if (error) {
@@ -153,7 +152,7 @@ export function useProductRecommendations() {
     try {
       const { data, error } = await supabase.rpc('get_trending_recommendations', {
         p_limit: limit,
-        p_user_id: user?.id || null
+        p_user_id: user?.id || null,
       });
 
       if (error) {
@@ -178,7 +177,7 @@ export function useProductRecommendations() {
     getHistoryBasedRecommendations,
     getTrendingRecommendations,
     hasPreferences: !!recommendations?.products?.length,
-    confidenceScore: recommendations?.confidence || 0
+    confidenceScore: recommendations?.confidence || 0,
   };
 }
 
@@ -279,44 +278,19 @@ function extractProductCategories(products: Product[]): string[] {
   return Array.from(categories);
 }
 
-// Hook pour les produits fréquemment achetés ensemble
-export function useFrequentlyBoughtTogether(productId: string, limit: number = 4) {
-  return useQuery({
-    queryKey: ['frequently-bought-together', productId, limit],
-    queryFn: async (): Promise<Product[]> => {
-      try {
-        // Pour le moment, retourner des produits similaires
-        // TODO: Implémenter la vraie logique de produits fréquemment achetés ensemble
-        const { data, error } = await supabase
-          .from('products')
-          .select(`
-            *,
-            store:stores(*)
-          `)
-          .eq('is_active', true)
-          .neq('id', productId)
-          .limit(limit);
-
-        if (error) throw error;
-        return (data || []) as Product[];
-      } catch (error) {
-        logger.error('Error fetching frequently bought together', { error, productId });
-        return [];
-      }
-    },
-    enabled: !!productId
-  });
-}
+export { useSameStoreProducts } from '@/hooks/useSameStoreProducts';
 
 async function getFallbackRecommendations(limit: number): Promise<Product[]> {
   // Fallback: produits populaires quand la personnalisation échoue
   try {
     const { data, error } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         *,
         stores(*)
-      `)
+      `
+      )
       .eq('is_active', true)
       .order('created_at', { ascending: false }) // Utiliser created_at au lieu de total_sales
       .limit(limit);
@@ -330,7 +304,7 @@ async function getFallbackRecommendations(limit: number): Promise<Product[]> {
 }
 
 // Types et exports supplémentaires pour compatibilité
-export interface ProductRecommendation extends Product {}
+export type ProductRecommendation = Product;
 
 export function useUserProductRecommendations(userId: string, limit: number = 8) {
   return useQuery({
@@ -340,10 +314,12 @@ export function useUserProductRecommendations(userId: string, limit: number = 8)
         // TODO: Implémenter les vraies recommandations utilisateur
         const { data, error } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             store:stores(*)
-          `)
+          `
+          )
           .eq('is_active', true)
           .limit(limit);
 
@@ -354,6 +330,6 @@ export function useUserProductRecommendations(userId: string, limit: number = 8)
         return [];
       }
     },
-    enabled: !!userId
+    enabled: !!userId,
   });
 }
