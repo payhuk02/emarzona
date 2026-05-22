@@ -26,7 +26,9 @@ export const useSEOAnalysis = (userId?: string) => {
       // Fetch user's stores
       const { data: stores, error: storesError } = await supabase
         .from('stores')
-        .select('*')
+        .select(
+          'id, name, slug, description, about, meta_title, meta_description, meta_keywords, logo_url'
+        )
         .eq('user_id', userId);
 
       if (storesError) throw storesError;

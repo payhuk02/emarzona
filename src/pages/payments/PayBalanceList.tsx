@@ -109,7 +109,9 @@ export default function PayBalanceList() {
       // 2) Repli REST (si la RPC n’est pas encore déployée)
       let ordersQuery = supabase
         .from('orders')
-        .select('*')
+        .select(
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, payment_method, notes, created_at, updated_at, payment_type, percentage_paid, remaining_amount, delivery_status, shipping_address, metadata'
+        )
         .order('created_at', { ascending: false });
 
       if (user.email) {

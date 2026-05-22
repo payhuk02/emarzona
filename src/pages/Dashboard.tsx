@@ -187,13 +187,14 @@ const DashboardWithStore = () => {
   // Récupérer les vraies notifications depuis Supabase (inclut les messages) - Déferré
   const { data: notificationsResult } = useNotifications({
     page: 1,
-    pageSize: 5, // Afficher les 5 dernières notifications
+    pageSize: 5,
     includeArchived: false,
+    enabled: notificationsEnabled,
   });
   const { data: unreadCount = 0 } = useUnreadCount();
 
-  // S'abonner aux notifications en temps réel - Déferré (seulement si activé)
-  useRealtimeNotifications();
+  // S'abonner aux notifications en temps réel — seulement après defer (évite canal inutile au 1er paint)
+  useRealtimeNotifications({ enabled: notificationsEnabled });
 
   // ✅ VALIDATION: Type-safe transformation des notifications Supabase
   interface DashboardNotification {

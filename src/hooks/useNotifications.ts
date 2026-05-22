@@ -25,15 +25,18 @@ export const useNotifications = (options?: {
   page?: number;
   pageSize?: number;
   includeArchived?: boolean;
+  enabled?: boolean;
 }) => {
   const page = options?.page || 1;
   const pageSize = options?.pageSize || 20;
   const includeArchived = options?.includeArchived ?? false;
+  const queryEnabled = options?.enabled ?? true;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   return useQuery({
     queryKey: ['notifications', page, pageSize, includeArchived],
+    enabled: queryEnabled,
     queryFn: async (): Promise<{ data: Notification[]; count: number }> => {
       let query = supabase
         .from('notifications')
@@ -283,14 +286,17 @@ export const useUpdateNotificationPreferences = () => {
 /**
  * Hook pour s'abonner aux notifications en temps réel
  */
-export const useRealtimeNotifications = () => {
+export const useRealtimeNotifications = (options?: { enabled?: boolean }) => {
   const queryClient = useQueryClient();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const subscriptionEnabled = options?.enabled ?? true;
 
   // Récupérer les préférences utilisateur pour les sons et vibrations
   const { data: preferences } = useNotificationPreferences();
 
   useEffect(() => {
+    if (!subscriptionEnabled) return;
+
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let isMounted = true;
 
@@ -390,7 +396,12 @@ export const useRealtimeNotifications = () => {
       }
       setIsSubscribed(false);
     };
-  }, [queryClient]);
+  }, [
+    queryClient,
+    subscriptionEnabled,
+    preferences?.sound_notifications,
+    preferences?.vibration_notifications,
+  ]);
 
   return { isSubscribed };
 };

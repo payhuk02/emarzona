@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { isSupabaseBackendConfigured } from '@/lib/supabase-config';
 
@@ -13,6 +12,9 @@ export interface LandingPlatformStore {
 
 const QUERY_KEY = ['landing', 'platform-stores'] as const;
 
+/** Rafraîchissement périodique (pas de Realtime sur toute la table `stores` à l'échelle). */
+const LANDING_STORES_REFETCH_MS = 120_000;
+
 async function fetchActiveStores(): Promise<LandingPlatformStore[]> {
   const { data, error } = await supabase
     .from('stores')
@@ -24,34 +26,18 @@ async function fetchActiveStores(): Promise<LandingPlatformStore[]> {
   return (data ?? []) as LandingPlatformStore[];
 }
 
-/** Boutiques réelles actives — mise à jour en temps réel à chaque création */
+/** Boutiques actives pour le bandeau landing — cache + polling léger. */
 export function useLandingPlatformStores() {
-  const queryClient = useQueryClient();
   const backendReady = isSupabaseBackendConfigured();
 
-  const query = useQuery({
+  return useQuery({
     queryKey: QUERY_KEY,
     queryFn: fetchActiveStores,
     enabled: backendReady,
     staleTime: 60_000,
+    refetchInterval: backendReady ? LANDING_STORES_REFETCH_MS : false,
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: backendReady,
     retry: backendReady ? 2 : false,
   });
-
-  useEffect(() => {
-    if (!backendReady) return;
-
-    const channel = supabase
-      .channel('landing-stores-marquee')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'stores' }, () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [backendReady, queryClient]);
-
-  return query;
 }
