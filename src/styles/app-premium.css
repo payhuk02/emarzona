@@ -134,7 +134,9 @@
 
 /* Zone principale */
 .landing-premium.app-premium #main-content,
-.landing-premium.app-premium main.flex-1.overflow-auto {
+.landing-premium.app-premium main.flex-1.overflow-auto,
+.landing-premium.app-premium main.flex-1.flex-col,
+.landing-premium.app-premium main.flex-1 {
   background: var(--lp-surface) !important;
 }
 
@@ -160,12 +162,15 @@
   box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.1);
 }
 
-/* Titres de page — noir gras (plus de dégradé violet/rose) */
+/* Titres de page — noir gras (plus de dégradé violet/rose / magenta) */
 .landing-premium.app-premium #main-content h1,
 .landing-premium.app-premium #main-content h2,
 .landing-premium.app-premium #main-content h3,
 .landing-premium.app-premium #main-content h4,
 .landing-premium.app-premium #main-content .app-premium-page-title,
+.landing-premium.app-premium main.flex-1 h1,
+.landing-premium.app-premium main.flex-1 h2,
+.landing-premium.app-premium main.flex-1 h3,
 .landing-premium.app-premium main.flex-1.overflow-auto h1,
 .landing-premium.app-premium main.flex-1.overflow-auto h2,
 .landing-premium.app-premium main.flex-1.overflow-auto h3 {
@@ -179,6 +184,7 @@
 }
 
 .landing-premium.app-premium #main-content [class*='bg-clip-text'],
+.landing-premium.app-premium main.flex-1 [class*='bg-clip-text'],
 .landing-premium.app-premium main.flex-1.overflow-auto [class*='bg-clip-text'] {
   background: none !important;
   background-image: none !important;
@@ -191,28 +197,7 @@
 
 /* Hiérarchie texte : voir app-typography.css (poids/tailles par rôle) */
 
-/* Icônes zone principale — sans arrière-plan, noir */
-.landing-premium.app-premium #main-content [class*='rounded-lg'][class*='bg-gradient'],
-.landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-gradient'],
-.landing-premium.app-premium #main-content [class*='rounded-lg'][class*='from-'][class*='to-'],
-.landing-premium.app-premium #main-content [class*='rounded-xl'][class*='from-'],
-.landing-premium.app-premium main.flex-1.overflow-auto [class*='rounded-lg'][class*='bg-gradient'],
-.landing-premium.app-premium main.flex-1.overflow-auto [class*='rounded-xl'][class*='from-'] {
-  background: transparent !important;
-  background-image: none !important;
-  border: none !important;
-  backdrop-filter: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-
-.landing-premium.app-premium #main-content svg.lucide,
-.landing-premium.app-premium #main-content svg[class*='lucide'],
-.landing-premium.app-premium main.flex-1.overflow-auto svg.lucide,
-.landing-premium.app-premium main.flex-1.overflow-auto svg[class*='lucide'] {
-  color: #000 !important;
-  stroke: #000 !important;
-}
+/* Icônes : voir app-ui-overrides.css (scope #main-content + main.flex-1) */
 
 /* Badges / boutons primaires — conserver le contraste */
 .landing-premium.app-premium #main-content .bg-primary,

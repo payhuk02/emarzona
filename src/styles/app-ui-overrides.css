@@ -2,6 +2,9 @@
  * Overrides UI plateforme (zone app premium)
  * - Icônes sans arrière-plan, en noir
  * - Boutons dégradé violet/rose → bleu landing
+ * - Titres dégradé violet/rose → noir
+ *
+ * Scope : #main-content ET tout <main class="flex-1"> (ex. portail client)
  */
 
 .landing-premium.app-premium {
@@ -13,17 +16,42 @@
   );
 }
 
-/* Bouton primaire bleu (remplace violet→rose) */
+/* Zone de contenu principale (hors sidebar) */
+.landing-premium.app-premium #main-content,
+.landing-premium.app-premium main.flex-1 {
+  /* anchor pour has() si besoin */
+}
+
+/* ——— Titres dégradé (ex. « Mon Espace Client » violet→rose) → noir ——— */
+.landing-premium.app-premium #main-content [class*='bg-clip-text'],
+.landing-premium.app-premium
+  #main-content
+  [class*='from-purple-600'][class*='to-pink-600']:not(button):not([role='tab']),
+.landing-premium.app-premium #main-content h1 span[class*='bg-gradient'],
+.landing-premium.app-premium #main-content h2 span[class*='bg-gradient'],
+.landing-premium.app-premium main.flex-1 [class*='bg-clip-text'],
+.landing-premium.app-premium
+  main.flex-1
+  [class*='from-purple-600'][class*='to-pink-600']:not(button):not([role='tab']),
+.landing-premium.app-premium main.flex-1 h1 span[class*='bg-gradient'],
+.landing-premium.app-premium main.flex-1 h2 span[class*='bg-gradient'] {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #000 !important;
+  color: #000 !important;
+}
+
+/* ——— Bouton primaire bleu (remplace violet→rose) ——— */
 .landing-premium.app-premium #main-content .app-btn-premium-gradient,
 .landing-premium.app-premium #main-content .bg-gradient-to-r.from-purple-600.to-pink-600,
 .landing-premium.app-premium #main-content [class*='from-purple-600'][class*='to-pink-600'],
 .landing-premium.app-premium #main-content [class*='from-purple-500'][class*='to-pink-500'],
 .landing-premium.app-premium #main-content [class*='from-\[#7851A9\]'][class*='to-\[#FF69B4\]'],
 .landing-premium.app-premium #main-content [class*='from-\[#7851A9\]'],
-.landing-premium.app-premium main.flex-1.overflow-auto .app-btn-premium-gradient,
-.landing-premium.app-premium
-  main.flex-1.overflow-auto
-  [class*='from-purple-600'][class*='to-pink-600'] {
+.landing-premium.app-premium main.flex-1 .app-btn-premium-gradient,
+.landing-premium.app-premium main.flex-1 [class*='from-purple-600'][class*='to-pink-600'] {
   background-image: var(--app-btn-blue) !important;
   background-color: transparent !important;
   color: #fff !important;
@@ -33,9 +61,7 @@
 
 .landing-premium.app-premium #main-content .app-btn-premium-gradient:hover,
 .landing-premium.app-premium #main-content [class*='from-purple-600'][class*='to-pink-600']:hover,
-.landing-premium.app-premium
-  main.flex-1.overflow-auto
-  [class*='from-purple-600'][class*='to-pink-600']:hover {
+.landing-premium.app-premium main.flex-1 [class*='from-purple-600'][class*='to-pink-600']:hover {
   filter: brightness(1.06);
 }
 
@@ -43,19 +69,21 @@
 .landing-premium.app-premium #main-content .app-btn-premium-gradient span,
 .landing-premium.app-premium #main-content [class*='from-purple-600'][class*='to-pink-600'] svg,
 .landing-premium.app-premium #main-content [class*='from-purple-600'][class*='to-pink-600'] span,
-.landing-premium.app-premium
-  main.flex-1.overflow-auto
-  [class*='from-purple-600'][class*='to-pink-600']
-  svg {
+.landing-premium.app-premium main.flex-1 [class*='from-purple-600'][class*='to-pink-600'] svg {
   color: #fff !important;
   stroke: #fff !important;
 }
 
-/* Conteneurs d'icônes — fond transparent */
+/* ——— Conteneurs d'icônes : fond transparent, pas de bordure colorée ——— */
 .landing-premium.app-premium #main-content .app-icon-plain,
-.landing-premium.app-premium main.flex-1.overflow-auto .app-icon-plain,
+.landing-premium.app-premium main.flex-1 .app-icon-plain,
 .landing-premium.app-premium
   #main-content
+  [class*='500/10']:not(button):not(a):not([class*='bg-card']):not([class*='bg-white']):not(
+    [class*='bg-background']
+  ):not([class*='bg-muted']):not([class*='bg-popover']):not([class*='TabsList']),
+.landing-premium.app-premium
+  main.flex-1
   [class*='500/10']:not(button):not(a):not([class*='bg-card']):not([class*='bg-white']):not(
     [class*='bg-background']
   ):not([class*='bg-muted']):not([class*='bg-popover']),
@@ -65,35 +93,109 @@
     [class*='bg-background']
   ):not([class*='bg-muted']),
 .landing-premium.app-premium
+  main.flex-1
+  [class*='500/20']:not(button):not(a):not([class*='bg-card']):not([class*='bg-white']):not(
+    [class*='bg-background']
+  ):not([class*='bg-muted']),
+.landing-premium.app-premium
   #main-content
   [class*='500/5']:not(button):not(a):not([class*='bg-card']):not([class*='bg-white']):not(
     [class*='bg-background']
   ),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='500/5']:not(button):not(a):not([class*='bg-card']):not([class*='bg-white']):not(
+    [class*='bg-background']
+  ),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='bg-gradient']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='bg-gradient']:not(button):not([class*='bg-card']),
 .landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-blue-']:not(button),
 .landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-orange-']:not(button),
 .landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-green-']:not(button),
 .landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-purple-']:not(button),
 .landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-pink-']:not(button),
+.landing-premium.app-premium main.flex-1 [class*='rounded-xl'][class*='bg-blue-']:not(button),
+.landing-premium.app-premium main.flex-1 [class*='rounded-xl'][class*='bg-orange-']:not(button),
+.landing-premium.app-premium main.flex-1 [class*='rounded-xl'][class*='bg-green-']:not(button),
+.landing-premium.app-premium main.flex-1 [class*='rounded-xl'][class*='bg-purple-']:not(button),
+.landing-premium.app-premium main.flex-1 [class*='rounded-xl'][class*='bg-pink-']:not(button),
 .landing-premium.app-premium
   #main-content
-  [class*='rounded-lg'][class*='bg-gradient-to-br']:not(button):not([class*='bg-card']),
+  [class*='rounded-lg'][class*='from-'][class*='to-']:not(button):not([class*='bg-card']),
 .landing-premium.app-premium
-  main.flex-1.overflow-auto
-  [class*='rounded-lg'][class*='bg-gradient-to-br']:not(button) {
+  main.flex-1
+  [class*='rounded-lg'][class*='from-'][class*='to-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='border-blue-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='border-green-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='border-purple-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='border-orange-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='border-pink-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  [class*='rounded-lg'][class*='border-red-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='border-blue-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='border-green-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='border-purple-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='border-orange-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='border-pink-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  main.flex-1
+  [class*='rounded-lg'][class*='border-red-']:not(button):not([class*='bg-card']),
+.landing-premium.app-premium
+  #main-content
+  div[class*='justify-center'][class*='rounded-lg']:has(svg):not(button):not(a),
+.landing-premium.app-premium
+  main.flex-1
+  div[class*='justify-center'][class*='rounded-lg']:has(svg):not(button):not(a) {
   background: transparent !important;
   background-image: none !important;
   border: none !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+  padding: 0 !important;
+  min-width: unset;
+  min-height: unset;
 }
 
-/* Icônes décoratives — noir (sauf boutons bleus / primaires) */
+/* ——— Icônes Lucide / SVG décoratives → noir ——— */
 .landing-premium.app-premium #main-content svg.lucide,
 .landing-premium.app-premium #main-content svg[class*='lucide'],
-.landing-premium.app-premium #main-content :is(svg, [class*='lucide']) svg,
-.landing-premium.app-premium main.flex-1.overflow-auto svg.lucide,
-.landing-premium.app-premium main.flex-1.overflow-auto svg {
+.landing-premium.app-premium main.flex-1 svg.lucide,
+.landing-premium.app-premium main.flex-1 svg {
   color: #000 !important;
+  stroke: currentColor !important;
+}
+
+/* Icônes dans boutons / liens colorés : héritent la couleur du bouton */
+.landing-premium.app-premium #main-content button svg,
+.landing-premium.app-premium #main-content a[class*='bg-gradient'] svg,
+.landing-premium.app-premium main.flex-1 button svg,
+.landing-premium.app-premium main.flex-1 a[class*='bg-gradient'] svg {
+  color: inherit !important;
   stroke: currentColor !important;
 }
 
@@ -101,19 +203,51 @@
 .landing-premium.app-premium #main-content [class*='from-purple-600'][class*='to-pink-600'] svg,
 .landing-premium.app-premium #main-content .bg-primary svg,
 .landing-premium.app-premium #main-content [class*='text-primary-foreground'] svg,
-.landing-premium.app-premium
-  main.flex-1.overflow-auto
-  [class*='from-purple-600'][class*='to-pink-600']
-  svg {
+.landing-premium.app-premium main.flex-1 [class*='from-purple-600'][class*='to-pink-600'] svg,
+.landing-premium.app-premium main.flex-1 .bg-primary svg,
+.landing-premium.app-premium main.flex-1 [class*='text-white'] svg {
   color: #fff !important;
   stroke: #fff !important;
 }
 
-/* Checkmarks listes produits — noir */
+/* Classes texte colorées sur icônes → noir */
 .landing-premium.app-premium #main-content [class*='text-blue-500'],
+.landing-premium.app-premium #main-content [class*='text-blue-600'],
 .landing-premium.app-premium #main-content [class*='text-orange-500'],
+.landing-premium.app-premium #main-content [class*='text-orange-600'],
 .landing-premium.app-premium #main-content [class*='text-green-500'],
+.landing-premium.app-premium #main-content [class*='text-green-600'],
 .landing-premium.app-premium #main-content [class*='text-purple-500'],
-.landing-premium.app-premium #main-content [class*='text-pink-500'] {
+.landing-premium.app-premium #main-content [class*='text-purple-600'],
+.landing-premium.app-premium #main-content [class*='text-pink-500'],
+.landing-premium.app-premium #main-content [class*='text-pink-600'],
+.landing-premium.app-premium #main-content [class*='text-red-500'],
+.landing-premium.app-premium #main-content [class*='text-red-600'],
+.landing-premium.app-premium #main-content [class*='text-cyan-'],
+.landing-premium.app-premium #main-content [class*='text-emerald-'],
+.landing-premium.app-premium main.flex-1 [class*='text-blue-500'],
+.landing-premium.app-premium main.flex-1 [class*='text-blue-600'],
+.landing-premium.app-premium main.flex-1 [class*='text-orange-500'],
+.landing-premium.app-premium main.flex-1 [class*='text-orange-600'],
+.landing-premium.app-premium main.flex-1 [class*='text-green-500'],
+.landing-premium.app-premium main.flex-1 [class*='text-green-600'],
+.landing-premium.app-premium main.flex-1 [class*='text-purple-500'],
+.landing-premium.app-premium main.flex-1 [class*='text-purple-600'],
+.landing-premium.app-premium main.flex-1 [class*='text-pink-500'],
+.landing-premium.app-premium main.flex-1 [class*='text-pink-600'],
+.landing-premium.app-premium main.flex-1 [class*='text-red-500'],
+.landing-premium.app-premium main.flex-1 [class*='text-red-600'],
+.landing-premium.app-premium main.flex-1 [class*='text-cyan-'],
+.landing-premium.app-premium main.flex-1 [class*='text-emerald-'] {
   color: #000 !important;
+}
+
+/* fill sur icônes (ex. cœur wishlist) */
+.landing-premium.app-premium #main-content [class*='fill-purple'],
+.landing-premium.app-premium #main-content [class*='fill-pink'],
+.landing-premium.app-premium #main-content [class*='fill-blue'],
+.landing-premium.app-premium main.flex-1 [class*='fill-purple'],
+.landing-premium.app-premium main.flex-1 [class*='fill-pink'],
+.landing-premium.app-premium main.flex-1 [class*='fill-blue'] {
+  fill: #000 !important;
 }

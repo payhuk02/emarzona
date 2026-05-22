@@ -19,6 +19,7 @@
 
 /* Base zone principale */
 .landing-premium.app-premium #main-content,
+.landing-premium.app-premium main.flex-1,
 .landing-premium.app-premium main.flex-1.overflow-auto {
   font-family: var(--lp-sans), system-ui, sans-serif;
   font-size: var(--app-font-body);
@@ -30,6 +31,7 @@
 
 @media (min-width: 768px) {
   .landing-premium.app-premium #main-content,
+  .landing-premium.app-premium main.flex-1,
   .landing-premium.app-premium main.flex-1.overflow-auto {
     font-size: var(--app-font-body-lg);
   }
@@ -38,6 +40,7 @@
 /* Titres */
 .landing-premium.app-premium #main-content h1,
 .landing-premium.app-premium #main-content .app-premium-page-title,
+.landing-premium.app-premium main.flex-1 h1,
 .landing-premium.app-premium main.flex-1.overflow-auto h1 {
   font-size: var(--app-font-display) !important;
   line-height: var(--app-line-tight);
@@ -45,6 +48,7 @@
 }
 
 .landing-premium.app-premium #main-content h2,
+.landing-premium.app-premium main.flex-1 h2,
 .landing-premium.app-premium main.flex-1.overflow-auto h2 {
   font-size: var(--app-font-h1) !important;
   line-height: var(--app-line-tight);
@@ -52,6 +56,7 @@
 }
 
 .landing-premium.app-premium #main-content h3,
+.landing-premium.app-premium main.flex-1 h3,
 .landing-premium.app-premium main.flex-1.overflow-auto h3 {
   font-size: var(--app-font-h2) !important;
   line-height: var(--app-line-tight);
@@ -59,6 +64,7 @@
 }
 
 .landing-premium.app-premium #main-content h4,
+.landing-premium.app-premium main.flex-1 h4,
 .landing-premium.app-premium main.flex-1.overflow-auto h4 {
   font-size: var(--app-font-h3) !important;
   font-weight: 600 !important;
@@ -71,6 +77,9 @@
 .landing-premium.app-premium #main-content li,
 .landing-premium.app-premium #main-content td,
 .landing-premium.app-premium #main-content th,
+.landing-premium.app-premium main.flex-1 p,
+.landing-premium.app-premium main.flex-1 span:not([class*='font-']),
+.landing-premium.app-premium main.flex-1 label,
 .landing-premium.app-premium main.flex-1.overflow-auto p,
 .landing-premium.app-premium main.flex-1.overflow-auto span:not([class*='font-']),
 .landing-premium.app-premium main.flex-1.overflow-auto label {
@@ -79,6 +88,7 @@
 }
 
 .landing-premium.app-premium #main-content .text-muted-foreground,
+.landing-premium.app-premium main.flex-1 .text-muted-foreground,
 .landing-premium.app-premium main.flex-1.overflow-auto .text-muted-foreground {
   color: hsl(var(--muted-foreground)) !important;
   font-weight: 400 !important;
@@ -89,6 +99,10 @@
 .landing-premium.app-premium #main-content [class*='text-[9px]'],
 .landing-premium.app-premium #main-content [class*='text-[10px]'],
 .landing-premium.app-premium #main-content [class*='text-[11px]'],
+.landing-premium.app-premium main.flex-1 [class*='text-[8px]'],
+.landing-premium.app-premium main.flex-1 [class*='text-[9px]'],
+.landing-premium.app-premium main.flex-1 [class*='text-[10px]'],
+.landing-premium.app-premium main.flex-1 [class*='text-[11px]'],
 .landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[8px]'],
 .landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[9px]'],
 .landing-premium.app-premium main.flex-1.overflow-auto [class*='text-[10px]'],

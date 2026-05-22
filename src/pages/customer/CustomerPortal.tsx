@@ -292,7 +292,12 @@ export default function CustomerPortal() {
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-gray-50 dark:bg-gray-900">
           <AppSidebar />
-          <main className="flex-1 flex flex-col min-w-0">
+          <main
+            id="main-content"
+            className="flex-1 flex flex-col min-w-0"
+            role="main"
+            tabIndex={-1}
+          >
             {/* Mobile Header avec SidebarTrigger et Icône - Loading State */}
             <header className="sticky top-0 z-50 border-b bg-white dark:bg-gray-900 shadow-sm lg:hidden">
               <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 px-3 sm:px-4">
@@ -330,7 +335,7 @@ export default function CustomerPortal() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50 dark:bg-gray-900">
         <AppSidebar />
-        <main className="flex-1 flex flex-col min-w-0">
+        <main id="main-content" className="flex-1 flex flex-col min-w-0" role="main" tabIndex={-1}>
           {/* Mobile Header avec Hamburger et Icône */}
           <MobileHeader />
 
@@ -342,13 +347,11 @@ export default function CustomerPortal() {
                 ref={headerRef}
                 className="hidden lg:block space-y-2 animate-in fade-in slide-in-from-top-4"
               >
-                <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 md:gap-3 text-gray-900 dark:text-gray-50">
-                  <div className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 flex items-center justify-center">
-                    <UserIcon className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
+                <h1 className="app-premium-page-title flex items-center gap-1.5 sm:gap-2 md:gap-3">
+                  <div className="app-icon-plain flex shrink-0 items-center justify-center">
+                    <UserIcon className="h-5 w-5 sm:h-6 sm:w-6 text-black" aria-hidden />
                   </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Mon Espace Client
-                  </span>
+                  <span>Mon Espace Client</span>
                 </h1>
                 <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-400">
                   Gérez vos achats, téléchargements et informations personnelles
