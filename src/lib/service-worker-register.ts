@@ -7,9 +7,10 @@ import { logger } from './logger';
 export function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
+      const swUrl = `/sw.js?v=${import.meta.env.VITE_BUILD_ID || 'dev'}`;
       navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
+        .register(swUrl, { scope: '/', updateViaCache: 'none' })
+        .then(registration => {
           logger.info('Service Worker enregistré avec succès', { scope: registration.scope });
 
           // Vérifier les mises à jour périodiquement
@@ -23,9 +24,8 @@ export function registerServiceWorker() {
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // Nouveau Service Worker disponible
                   logger.info('Nouveau Service Worker disponible');
-                  // Optionnel: Afficher une notification à l'utilisateur
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
                   if (confirm('Une nouvelle version est disponible. Recharger la page ?')) {
                     window.location.reload();
                   }
@@ -34,17 +34,9 @@ export function registerServiceWorker() {
             }
           });
         })
-        .catch((error) => {
-          logger.error('Erreur lors de l\'enregistrement du Service Worker', { error });
+        .catch(error => {
+          logger.error("Erreur lors de l'enregistrement du Service Worker", { error });
         });
     });
   }
 }
-
-
-
-
-
-
-
-

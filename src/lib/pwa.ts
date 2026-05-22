@@ -11,33 +11,35 @@ import { logger } from './logger';
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if ('serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      const swUrl = `/sw.js?v=${import.meta.env.VITE_BUILD_ID || 'dev'}`;
+      const registration = await navigator.serviceWorker.register(swUrl, {
         scope: '/',
+        updateViaCache: 'none',
       });
-      
+
       logger.info('Service Worker registered', { scope: registration.scope });
-      
+
       // Vérifier les mises à jour
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Nouvelle version disponible
               logger.info('Service Worker new version available');
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
               notifyNewVersion();
             }
           });
         }
       });
-      
+
       return registration;
     } catch (error) {
       logger.error('Service Worker registration failed', { error });
       return null;
     }
   }
-  
+
   return null;
 }
 
@@ -45,7 +47,9 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
  * Notifier l'utilisateur d'une nouvelle version
  */
 function notifyNewVersion() {
-  if (window.confirm('Une nouvelle version de l\'application est disponible. Recharger maintenant ?')) {
+  if (
+    window.confirm("Une nouvelle version de l'application est disponible. Recharger maintenant ?")
+  ) {
     window.location.reload();
   }
 }
@@ -84,9 +88,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
 export async function clearCache(): Promise<void> {
   if ('caches' in window) {
     const cacheNames = await caches.keys();
-    await Promise.all(
-      cacheNames.map((cacheName) => caches.delete(cacheName))
-    );
+    await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
     logger.info('PWA cache cleared');
   }
 }
@@ -99,17 +101,17 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
     logger.warn('PWA notifications not supported');
     return 'denied';
   }
-  
+
   if (Notification.permission === 'granted') {
     return 'granted';
   }
-  
+
   if (Notification.permission !== 'denied') {
     const permission = await Notification.requestPermission();
     logger.debug('PWA notification permission', { permission });
     return permission;
   }
-  
+
   return Notification.permission;
 }
 
@@ -119,19 +121,17 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
 export async function subscribeToPushNotifications(): Promise<PushSubscription | null> {
   try {
     const registration = await navigator.serviceWorker.ready;
-    
+
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
-      ),
+      applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY || ''),
     });
-    
+
     logger.info('PWA push subscription', { subscription });
-    
+
     // Envoyer la subscription au serveur
     await sendSubscriptionToServer(subscription);
-    
+
     return subscription;
   } catch (error) {
     logger.error('PWA error subscribing to push', { error });
@@ -146,13 +146,13 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
   try {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
-    
+
     if (subscription) {
       await subscription.unsubscribe();
       logger.info('PWA unsubscribed from push');
       return true;
     }
-    
+
     return false;
   } catch (error) {
     logger.error('PWA error unsubscribing from push', { error });
@@ -167,7 +167,7 @@ async function sendSubscriptionToServer(subscription: PushSubscription): Promise
   try {
     // TODO: Implémenter l'envoi au backend
     logger.debug('PWA sending subscription to server', { subscription });
-    
+
     // Exemple:
     // await fetch('/api/push/subscribe', {
     //   method: 'POST',
@@ -190,7 +190,7 @@ export async function showNotification(
     logger.warn('PWA notifications not supported');
     return;
   }
-  
+
   if (Notification.permission === 'granted') {
     const registration = await navigator.serviceWorker.ready;
     await registration.showNotification(title, {
@@ -211,13 +211,10 @@ export function isOnline(): boolean {
 /**
  * Écouter les changements de connexion
  */
-export function watchNetworkStatus(
-  onOnline: () => void,
-  onOffline: () => void
-): () => void {
+export function watchNetworkStatus(onOnline: () => void, onOffline: () => void): () => void {
   window.addEventListener('online', onOnline);
   window.addEventListener('offline', onOffline);
-  
+
   // Retourner une fonction de nettoyage
   return () => {
     window.removeEventListener('online', onOnline);
@@ -254,17 +251,15 @@ export function sendMessageToSW(message: unknown): void {
  */
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-  
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
-  
-  for (let  i= 0; i < rawData.length; ++i) {
+
+  for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
   }
-  
+
   return outputArray;
 }
 
@@ -273,8 +268,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
  */
 export function isAppInstalled(): boolean {
   const navigatorWithStandalone = navigator as typeof navigator & { standalone?: boolean };
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         navigatorWithStandalone.standalone === true;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    navigatorWithStandalone.standalone === true
+  );
 }
 
 /**
@@ -283,10 +280,3 @@ export function isAppInstalled(): boolean {
 export function canInstallApp(): boolean {
   return 'BeforeInstallPromptEvent' in window;
 }
-
-
-
-
-
-
-

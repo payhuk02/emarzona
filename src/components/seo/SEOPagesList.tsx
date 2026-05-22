@@ -47,7 +47,6 @@ import {
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
 
-import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 
 interface SEOPagesListProps {

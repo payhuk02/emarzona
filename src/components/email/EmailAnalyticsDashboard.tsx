@@ -21,16 +21,7 @@ import {
   XCircle,
   DollarSign,
 } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import { Badge } from '@/components/ui/badge';
 
 interface StoreAnalytics {
@@ -80,10 +71,12 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
 
       setAnalytics(analyticsData);
       setCampaigns(campaignsData);
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
+      const message =
+        _error instanceof Error ? _error.message : 'Erreur lors du chargement des analytics';
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du chargement des analytics',
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -95,10 +88,11 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
     loadAnalytics();
   }, [storeId, startDate, endDate]);
 
-  const chartData = campaigns.slice(0, 10).map((campaign) => ({
-    name: campaign.campaign_name.length > 20
-      ? campaign.campaign_name.substring(0, 20) + '...'
-      : campaign.campaign_name,
+  const chartData = campaigns.slice(0, 10).map(campaign => ({
+    name:
+      campaign.campaign_name.length > 20
+        ? campaign.campaign_name.substring(0, 20) + '...'
+        : campaign.campaign_name,
     Envoyés: campaign.sent,
     Livrés: campaign.delivered,
     Ouverts: campaign.opened,
@@ -124,7 +118,7 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
               id="start-date"
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={e => setStartDate(e.target.value)}
               className="w-40"
             />
           </div>
@@ -136,7 +130,7 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
               id="end-date"
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={e => setEndDate(e.target.value)}
               className="w-40"
             />
           </div>
@@ -227,19 +221,23 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
                       Aucune campagne trouvée
                     </p>
                   ) : (
-                    <ResponsiveContainer width="100%" height={400}>
-                      <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="Envoyés" fill="#8884d8" />
-                        <Bar dataKey="Livrés" fill="#82ca9d" />
-                        <Bar dataKey="Ouverts" fill="#ffc658" />
-                        <Bar dataKey="Clics" fill="#ff7300" />
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <LazyRechartsWrapper>
+                      {R => (
+                        <R.ResponsiveContainer width="100%" height={400}>
+                          <R.BarChart data={chartData}>
+                            <R.CartesianGrid strokeDasharray="3 3" />
+                            <R.XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                            <R.YAxis />
+                            <R.Tooltip />
+                            <R.Legend />
+                            <R.Bar dataKey="Envoyés" fill="#8884d8" />
+                            <R.Bar dataKey="Livrés" fill="#82ca9d" />
+                            <R.Bar dataKey="Ouverts" fill="#ffc658" />
+                            <R.Bar dataKey="Clics" fill="#ff7300" />
+                          </R.BarChart>
+                        </R.ResponsiveContainer>
+                      )}
+                    </LazyRechartsWrapper>
                   )}
                 </CardContent>
               </Card>
@@ -254,11 +252,8 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {campaigns.map((campaign) => (
-                        <div
-                          key={campaign.campaign_id}
-                          className="p-4 border rounded-lg space-y-2"
-                        >
+                      {campaigns.map(campaign => (
+                        <div key={campaign.campaign_id} className="p-4 border rounded-lg space-y-2">
                           <div className="flex items-center justify-between">
                             <h4 className="font-medium">{campaign.campaign_name}</h4>
                             {campaign.revenue > 0 && (
@@ -301,9 +296,3 @@ export function EmailAnalyticsDashboard({ storeId }: { storeId: string }) {
     </div>
   );
 }
-
-
-
-
-
-

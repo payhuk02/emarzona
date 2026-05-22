@@ -1,7 +1,7 @@
 /**
  * Page de Détail d'un Cohort
  * Date: 1 Février 2025
- * 
+ *
  * Interface complète pour gérer un cohort :
  * - Informations du cohort
  * - Gestion des inscriptions
@@ -17,9 +17,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users,
@@ -49,18 +62,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 
 export default function CohortDetailPage() {
   const { cohortId } = useParams<{ cohortId: string }>();
@@ -132,10 +134,10 @@ export default function CohortDetailPage() {
   const latestAnalytics = analytics?.[0];
   const enrollmentStats = {
     total: enrollments?.length || 0,
-    active: enrollments?.filter((e) => e.enrollment_status === 'active').length || 0,
-    completed: enrollments?.filter((e) => e.enrollment_status === 'completed').length || 0,
-    dropped: enrollments?.filter((e) => e.enrollment_status === 'dropped').length || 0,
-    pending: enrollments?.filter((e) => e.enrollment_status === 'pending').length || 0,
+    active: enrollments?.filter(e => e.enrollment_status === 'active').length || 0,
+    completed: enrollments?.filter(e => e.enrollment_status === 'completed').length || 0,
+    dropped: enrollments?.filter(e => e.enrollment_status === 'dropped').length || 0,
+    pending: enrollments?.filter(e => e.enrollment_status === 'pending').length || 0,
   };
 
   return (
@@ -175,7 +177,9 @@ export default function CohortDetailPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{enrollmentStats.total}</div>
                   <p className="text-xs text-muted-foreground">
-                    {cohort.max_students ? `${cohort.current_students}/${cohort.max_students}` : 'Sans limite'}
+                    {cohort.max_students
+                      ? `${cohort.current_students}/${cohort.max_students}`
+                      : 'Sans limite'}
                   </p>
                 </CardContent>
               </Card>
@@ -194,7 +198,9 @@ export default function CohortDetailPage() {
                   <Award className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{enrollmentStats.completed}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {enrollmentStats.completed}
+                  </div>
                 </CardContent>
               </Card>
               <Card>
@@ -214,7 +220,9 @@ export default function CohortDetailPage() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-                <TabsTrigger value="enrollments">Inscriptions ({enrollmentStats.total})</TabsTrigger>
+                <TabsTrigger value="enrollments">
+                  Inscriptions ({enrollmentStats.total})
+                </TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
 
@@ -286,7 +294,8 @@ export default function CohortDetailPage() {
                     <CardHeader>
                       <CardTitle>Analytics Récentes</CardTitle>
                       <CardDescription>
-                        Dernière mise à jour: {format(new Date(latestAnalytics.analytics_date), 'PP', { locale: fr })}
+                        Dernière mise à jour:{' '}
+                        {format(new Date(latestAnalytics.analytics_date), 'PP', { locale: fr })}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -343,7 +352,7 @@ export default function CohortDetailPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {enrollments.map((enrollment) => (
+                          {enrollments.map(enrollment => (
                             <TableRow key={enrollment.id}>
                               <TableCell>
                                 <div>
@@ -363,10 +372,10 @@ export default function CohortDetailPage() {
                                     enrollment.enrollment_status === 'active'
                                       ? 'default'
                                       : enrollment.enrollment_status === 'completed'
-                                      ? 'default'
-                                      : enrollment.enrollment_status === 'dropped'
-                                      ? 'destructive'
-                                      : 'secondary'
+                                        ? 'default'
+                                        : enrollment.enrollment_status === 'dropped'
+                                          ? 'destructive'
+                                          : 'secondary'
                                   }
                                 >
                                   {enrollment.enrollment_status}
@@ -387,7 +396,9 @@ export default function CohortDetailPage() {
                               </TableCell>
                               <TableCell>
                                 {enrollment.final_grade ? (
-                                  <span className="font-semibold">{enrollment.final_grade.toFixed(1)}/20</span>
+                                  <span className="font-semibold">
+                                    {enrollment.final_grade.toFixed(1)}/20
+                                  </span>
                                 ) : (
                                   <span className="text-muted-foreground">-</span>
                                 )}
@@ -457,7 +468,7 @@ function CohortAnalyticsTab({
   const chartData = analytics
     .slice()
     .reverse()
-    .map((a) => ({
+    .map(a => ({
       date: format(new Date(a.analytics_date), 'dd/MM', { locale: fr }),
       progression: a.average_progress,
       actifs: a.active_enrollments,
@@ -490,17 +501,31 @@ function CohortAnalyticsTab({
           <CardTitle>Progression dans le temps</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="progression" stroke="#8884d8" name="Progression moyenne %" />
-              <Line type="monotone" dataKey="rétention" stroke="#82ca9d" name="Taux de rétention %" />
-            </LineChart>
-          </ResponsiveContainer>
+          <LazyRechartsWrapper>
+            {R => (
+              <R.ResponsiveContainer width="100%" height={300}>
+                <R.LineChart data={chartData}>
+                  <R.CartesianGrid strokeDasharray="3 3" />
+                  <R.XAxis dataKey="date" />
+                  <R.YAxis />
+                  <R.Tooltip />
+                  <R.Legend />
+                  <R.Line
+                    type="monotone"
+                    dataKey="progression"
+                    stroke="#8884d8"
+                    name="Progression moyenne %"
+                  />
+                  <R.Line
+                    type="monotone"
+                    dataKey="rétention"
+                    stroke="#82ca9d"
+                    name="Taux de rétention %"
+                  />
+                </R.LineChart>
+              </R.ResponsiveContainer>
+            )}
+          </LazyRechartsWrapper>
         </CardContent>
       </Card>
 
@@ -509,17 +534,21 @@ function CohortAnalyticsTab({
           <CardTitle>Inscriptions par statut</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="actifs" fill="#8884d8" name="Actifs" />
-              <Bar dataKey="terminés" fill="#82ca9d" name="Terminés" />
-            </BarChart>
-          </ResponsiveContainer>
+          <LazyRechartsWrapper>
+            {R => (
+              <R.ResponsiveContainer width="100%" height={300}>
+                <R.BarChart data={chartData}>
+                  <R.CartesianGrid strokeDasharray="3 3" />
+                  <R.XAxis dataKey="date" />
+                  <R.YAxis />
+                  <R.Tooltip />
+                  <R.Legend />
+                  <R.Bar dataKey="actifs" fill="#8884d8" name="Actifs" />
+                  <R.Bar dataKey="terminés" fill="#82ca9d" name="Terminés" />
+                </R.BarChart>
+              </R.ResponsiveContainer>
+            )}
+          </LazyRechartsWrapper>
         </CardContent>
       </Card>
     </div>
@@ -540,9 +569,7 @@ function EnrollmentStatusDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Modifier le statut de l'inscription</DialogTitle>
-          <DialogDescription>
-            Changez le statut de l'inscription de l'étudiant
-          </DialogDescription>
+          <DialogDescription>Changez le statut de l'inscription de l'étudiant</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
@@ -559,7 +586,9 @@ function EnrollmentStatusDialog({
             <Label>Nouveau statut</Label>
             <Select
               defaultValue={enrollment.enrollment_status}
-              onValueChange={(value) => onUpdate(enrollment.id, value as any)}
+              onValueChange={value =>
+                onUpdate(enrollment.id, value as CohortEnrollment['enrollment_status'])
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -582,10 +611,3 @@ function EnrollmentStatusDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

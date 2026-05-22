@@ -46,15 +46,17 @@ const cleanupHostedServiceWorkerArtifacts = async () => {
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       await Promise.all(
-        cacheNames
-          .filter(name => name.startsWith('emarzona-'))
-          .map(name => caches.delete(name))
+        cacheNames.filter(name => name.startsWith('emarzona-')).map(name => caches.delete(name))
       );
     }
 
-    import('./lib/logger').then(({ logger }) => logger.info('Hosted SW artifacts cleared (lovable.app)'));
+    import('./lib/logger').then(({ logger }) =>
+      logger.info('Hosted SW artifacts cleared (lovable.app)')
+    );
   } catch (error) {
-    import('./lib/logger').then(({ logger }) => logger.warn('Unable to clear hosted SW artifacts', { error }));
+    import('./lib/logger').then(({ logger }) =>
+      logger.warn('Unable to clear hosted SW artifacts', { error })
+    );
   }
 };
 
@@ -130,22 +132,38 @@ if (typeof window !== 'undefined') {
       if (isLovableHosted) {
         void cleanupHostedServiceWorkerArtifacts();
       } else {
-        window.addEventListener('load', () => {
+        const swUrl = `/sw.js?v=${import.meta.env.VITE_BUILD_ID || 'dev'}`;
+
+        const registerServiceWorker = () => {
           navigator.serviceWorker
-            .register('/sw.js', {
+            .register(swUrl, {
               scope: '/',
-              updateViaCache: 'none', // Toujours récupérer la dernière version du SW
+              updateViaCache: 'none',
             })
-            .catch( error => {
-              // Logger silencieusement
+            .then(registration => {
+              registration.addEventListener('updatefound', () => {
+                const worker = registration.installing;
+                if (!worker) return;
+                worker.addEventListener('statechange', () => {
+                  if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                    worker.postMessage({ type: 'SKIP_WAITING' });
+                    import('./lib/logger').then(({ logger }) => {
+                      logger.info('Service Worker update — reloading app');
+                    });
+                    window.location.reload();
+                  }
+                });
+              });
+            })
+            .catch(error => {
               import('./lib/logger').then(({ logger }) => {
                 logger.warn('Service Worker registration failed', { error });
               });
             });
-        });
+        };
+
+        window.addEventListener('load', registerServiceWorker);
       }
     }
   });
 }
-
-

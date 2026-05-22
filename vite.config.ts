@@ -3,13 +3,19 @@ import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import { compression } from 'vite-plugin-compression2';
 import type { Plugin } from 'vite';
 import { inlineCriticalCSS } from './vite-plugins/inline-critical-css';
+import { injectSwCacheVersion } from './vite-plugins/inject-sw-cache-version';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
   const hasSentryToken = !!env.SENTRY_AUTH_TOKEN;
+  const buildId =
+    env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
+    env.VITE_BUILD_ID ||
+    `build-${Date.now().toString(36)}`;
   const publicBackendUrl = env.VITE_SUPABASE_URL || 'https://mock.supabase.co';
   const publicBackendKey =
     env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY || 'mock-key';
@@ -23,7 +29,8 @@ export default defineConfig(({ mode }) => {
       handler(html) {
         if (!isProduction) return html;
 
-        const scriptRegex = /<script[^>]*type=["']module["'][^>]*src=["']([^"']+)["'][^>]*><\/script>/g;
+        const scriptRegex =
+          /<script[^>]*type=["']module["'][^>]*src=["']([^"']+)["'][^>]*><\/script>/g;
         const scripts: Array<{ src: string; fullTag: string }> = [];
         let match;
         while ((match = scriptRegex.exec(html)) !== null) {
@@ -34,20 +41,30 @@ export default defineConfig(({ mode }) => {
         const indexScript = scripts.find(s => s.src.includes('index-'));
         if (!indexScript) return html;
 
+        const vendorPreloads = scripts
+          .filter(s => /\/js\/vendor-(react|supabase|radix|query)-/.test(s.src))
+          .map(s => `\n    <link rel="modulepreload" href="${s.src}">`)
+          .join('');
+
         let newHtml = html;
-        scripts.forEach(s => { newHtml = newHtml.replace(s.fullTag, ''); });
+        scripts.forEach(s => {
+          newHtml = newHtml.replace(s.fullTag, '');
+        });
 
         const headStart = newHtml.indexOf('<head>');
         if (headStart !== -1) {
           const headAfterTag = newHtml.indexOf('>', headStart) + 1;
-          newHtml = newHtml.slice(0, headAfterTag) +
+          newHtml =
+            newHtml.slice(0, headAfterTag) +
+            vendorPreloads +
             `\n    <link rel="modulepreload" href="${indexScript.src}">` +
             newHtml.slice(headAfterTag);
         }
 
         let headEnd = newHtml.indexOf('</head>');
         if (headEnd !== -1) {
-          newHtml = newHtml.slice(0, headEnd) + `\n    ${indexScript.fullTag}` + newHtml.slice(headEnd);
+          newHtml =
+            newHtml.slice(0, headEnd) + `\n    ${indexScript.fullTag}` + newHtml.slice(headEnd);
         }
 
         scripts.forEach(s => {
@@ -64,8 +81,17 @@ export default defineConfig(({ mode }) => {
     },
   });
 
+  // Vendors critiques (parallélisables, hors entry index)
+  const VENDOR_CHUNKS: Record<string, string[]> = {
+    'vendor-react': ['react-dom/', 'react/', 'scheduler/', 'react-router-dom/', 'react-router/'],
+    'vendor-supabase': ['@supabase/supabase-js/'],
+    'vendor-radix': ['@radix-ui/'],
+    'vendor-query': ['@tanstack/react-query/', '@tanstack/query-core/'],
+  };
+
   // Chunks dédiés pour les dépendances lourdes non-critiques
   const SEPARATED_CHUNKS: Record<string, string[]> = {
+    three: ['three/', '@react-three/'],
     charts: ['recharts'],
     editor: ['@tiptap'],
     forms: ['react-hook-form', '@hookform'],
@@ -86,21 +112,42 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(publicBackendUrl),
       'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(publicBackendKey),
       'import.meta.env.VITE_SUPABASE_PROJECT_ID': JSON.stringify(publicBackendProjectId),
+      'import.meta.env.VITE_BUILD_ID': JSON.stringify(buildId),
     },
     server: { host: '::', port: 8080 },
     plugins: [
       react(),
       isProduction && inlineCriticalCSS(),
       isProduction && ensureChunkOrderPlugin(),
-      mode === 'analyze' && visualizer({ filename: './dist/stats.html', open: true, gzipSize: true, brotliSize: true }),
-      isProduction && hasSentryToken && sentryVitePlugin({
-        org: env.VITE_SENTRY_ORG,
-        project: env.VITE_SENTRY_PROJECT,
-        authToken: env.SENTRY_AUTH_TOKEN,
-        sourcemaps: { assets: './dist/**', ignore: ['node_modules/**'], filesToDeleteAfterUpload: './dist/**/*.map' },
-        release: { name: env.VERCEL_GIT_COMMIT_SHA || `emarzona-${Date.now()}`, deploy: { env: env.VERCEL_ENV || 'production' } },
-        telemetry: false, silent: false, debug: false,
-      }),
+      mode === 'analyze' &&
+        visualizer({ filename: './dist/stats.html', open: true, gzipSize: true, brotliSize: true }),
+      isProduction &&
+        hasSentryToken &&
+        sentryVitePlugin({
+          org: env.VITE_SENTRY_ORG,
+          project: env.VITE_SENTRY_PROJECT,
+          authToken: env.SENTRY_AUTH_TOKEN,
+          sourcemaps: {
+            assets: './dist/**',
+            ignore: ['node_modules/**'],
+            filesToDeleteAfterUpload: './dist/**/*.map',
+          },
+          release: {
+            name: env.VERCEL_GIT_COMMIT_SHA || `emarzona-${Date.now()}`,
+            deploy: { env: env.VERCEL_ENV || 'production' },
+          },
+          telemetry: false,
+          silent: false,
+          debug: false,
+        }),
+      isProduction &&
+        compression({
+          algorithms: ['gzip', 'brotliCompress'],
+          threshold: 1024,
+          skipIfLargerOrEqual: true,
+          deleteOriginalAssets: false,
+        }),
+      isProduction && injectSwCacheVersion(buildId),
     ].filter(Boolean),
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') },
@@ -119,6 +166,12 @@ export default defineConfig(({ mode }) => {
               return id.includes('icons/loader-2') ? undefined : 'icons';
             }
 
+            for (const [chunkName, patterns] of Object.entries(VENDOR_CHUNKS)) {
+              if (patterns.some(p => id.includes(`node_modules/${p}`))) {
+                return chunkName;
+              }
+            }
+
             // Chunks séparés pour dépendances lourdes
             for (const [chunkName, patterns] of Object.entries(SEPARATED_CHUNKS)) {
               if (chunkName === 'icons') continue; // déjà géré
@@ -127,7 +180,6 @@ export default defineConfig(({ mode }) => {
               }
             }
 
-            // Tout le reste dans le chunk principal (React, Radix, Supabase, etc.)
             return undefined;
           },
           chunkFileNames: 'js/[name]-[hash].js',
@@ -160,23 +212,45 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: [
-        'react', 'react-dom', 'scheduler', 'react-router-dom',
-        '@tanstack/react-query', '@supabase/supabase-js', 'lucide-react',
-        'date-fns', 'zod', 'react-hook-form', '@hookform/resolvers',
-        'embla-carousel-autoplay', 'embla-carousel-react',
-        '@radix-ui/react-accordion', '@radix-ui/react-alert-dialog',
-        '@radix-ui/react-aspect-ratio', '@radix-ui/react-avatar',
-        '@radix-ui/react-checkbox', '@radix-ui/react-collapsible',
-        '@radix-ui/react-context-menu', '@radix-ui/react-dialog',
-        '@radix-ui/react-dropdown-menu', '@radix-ui/react-hover-card',
-        '@radix-ui/react-label', '@radix-ui/react-menubar',
-        '@radix-ui/react-navigation-menu', '@radix-ui/react-popover',
-        '@radix-ui/react-progress', '@radix-ui/react-radio-group',
-        '@radix-ui/react-scroll-area', '@radix-ui/react-select',
-        '@radix-ui/react-separator', '@radix-ui/react-slider',
-        '@radix-ui/react-slot', '@radix-ui/react-switch',
-        '@radix-ui/react-tabs', '@radix-ui/react-toast',
-        '@radix-ui/react-toggle', '@radix-ui/react-toggle-group',
+        'react',
+        'react-dom',
+        'scheduler',
+        'react-router-dom',
+        '@tanstack/react-query',
+        '@supabase/supabase-js',
+        'lucide-react',
+        'date-fns',
+        'zod',
+        'react-hook-form',
+        '@hookform/resolvers',
+        'embla-carousel-autoplay',
+        'embla-carousel-react',
+        '@radix-ui/react-accordion',
+        '@radix-ui/react-alert-dialog',
+        '@radix-ui/react-aspect-ratio',
+        '@radix-ui/react-avatar',
+        '@radix-ui/react-checkbox',
+        '@radix-ui/react-collapsible',
+        '@radix-ui/react-context-menu',
+        '@radix-ui/react-dialog',
+        '@radix-ui/react-dropdown-menu',
+        '@radix-ui/react-hover-card',
+        '@radix-ui/react-label',
+        '@radix-ui/react-menubar',
+        '@radix-ui/react-navigation-menu',
+        '@radix-ui/react-popover',
+        '@radix-ui/react-progress',
+        '@radix-ui/react-radio-group',
+        '@radix-ui/react-scroll-area',
+        '@radix-ui/react-select',
+        '@radix-ui/react-separator',
+        '@radix-ui/react-slider',
+        '@radix-ui/react-slot',
+        '@radix-ui/react-switch',
+        '@radix-ui/react-tabs',
+        '@radix-ui/react-toast',
+        '@radix-ui/react-toggle',
+        '@radix-ui/react-toggle-group',
         '@radix-ui/react-tooltip',
       ],
       exclude: ['@sentry/react'],

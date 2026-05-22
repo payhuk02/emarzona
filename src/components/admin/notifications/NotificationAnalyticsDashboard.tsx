@@ -18,16 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import { getNotificationStats } from '@/lib/notifications/notification-logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, TrendingUp, AlertCircle, CheckCircle2, BarChart3 } from 'lucide-react';
@@ -115,17 +106,19 @@ export const NotificationAnalyticsDashboard = () => {
 
       const channels = ['in_app', 'email', 'sms', 'push'];
       const parsedChannelLogs = (channelLogs ?? []) as NotificationLogRow[];
-      const computedChannelStats: ChannelStats[] = channels.map((channel) => {
-        const channelEntries = parsedChannelLogs.filter((log) => log.channel === channel);
+      const computedChannelStats: ChannelStats[] = channels.map(channel => {
+        const channelEntries = parsedChannelLogs.filter(log => log.channel === channel);
         return {
           channel,
           sent: channelEntries.length,
-          delivered: channelEntries.filter((log) =>
+          delivered: channelEntries.filter(log =>
             ['delivered', 'opened', 'clicked'].includes(log.status ?? '')
           ).length,
-          opened: channelEntries.filter((log) => ['opened', 'clicked'].includes(log.status ?? '')).length,
-          clicked: channelEntries.filter((log) => log.status === 'clicked').length,
-          failed: channelEntries.filter((log) => ['failed', 'bounced'].includes(log.status ?? '')).length,
+          opened: channelEntries.filter(log => ['opened', 'clicked'].includes(log.status ?? ''))
+            .length,
+          clicked: channelEntries.filter(log => log.status === 'clicked').length,
+          failed: channelEntries.filter(log => ['failed', 'bounced'].includes(log.status ?? ''))
+            .length,
         };
       });
 
@@ -144,7 +137,7 @@ export const NotificationAnalyticsDashboard = () => {
 
       const typeMap = new Map<string, { count: number; delivered: number; opened: number }>();
       const parsedTypeLogs = (typeLogs ?? []) as NotificationLogRow[];
-      parsedTypeLogs.forEach((log) => {
+      parsedTypeLogs.forEach(log => {
         const type = log.notification_type ?? 'unknown';
         if (!typeMap.has(type)) {
           typeMap.set(type, { count: 0, delivered: 0, opened: 0 });
@@ -167,7 +160,8 @@ export const NotificationAnalyticsDashboard = () => {
         .map(([type, currentStats]) => ({
           type,
           count: currentStats.count,
-          deliveryRate: currentStats.count > 0 ? (currentStats.delivered / currentStats.count) * 100 : 0,
+          deliveryRate:
+            currentStats.count > 0 ? (currentStats.delivered / currentStats.count) * 100 : 0,
           openRate: currentStats.count > 0 ? (currentStats.opened / currentStats.count) * 100 : 0,
         }))
         .sort((a, b) => b.count - a.count)
@@ -309,19 +303,23 @@ export const NotificationAnalyticsDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={channelStats}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="channel" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="sent" fill="#0088FE" name="Envoyées" />
-                  <Bar dataKey="delivered" fill="#00C49F" name="Livrées" />
-                  <Bar dataKey="opened" fill="#FFBB28" name="Ouvertes" />
-                  <Bar dataKey="clicked" fill="#FF8042" name="Cliquées" />
-                </BarChart>
-              </ResponsiveContainer>
+              <LazyRechartsWrapper>
+                {R => (
+                  <R.ResponsiveContainer width="100%" height={300}>
+                    <R.BarChart data={channelStats}>
+                      <R.CartesianGrid strokeDasharray="3 3" />
+                      <R.XAxis dataKey="channel" />
+                      <R.YAxis />
+                      <R.Tooltip />
+                      <R.Legend />
+                      <R.Bar dataKey="sent" fill="#0088FE" name="Envoyées" />
+                      <R.Bar dataKey="delivered" fill="#00C49F" name="Livrées" />
+                      <R.Bar dataKey="opened" fill="#FFBB28" name="Ouvertes" />
+                      <R.Bar dataKey="clicked" fill="#FF8042" name="Cliquées" />
+                    </R.BarChart>
+                  </R.ResponsiveContainer>
+                )}
+              </LazyRechartsWrapper>
             </CardContent>
           </Card>
         </TabsContent>
@@ -333,16 +331,20 @@ export const NotificationAnalyticsDashboard = () => {
               <CardDescription>Types de notifications les plus envoyés</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={typeStats} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="type" type="category" width={150} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#0088FE" name="Nombre" />
-                </BarChart>
-              </ResponsiveContainer>
+              <LazyRechartsWrapper>
+                {R => (
+                  <R.ResponsiveContainer width="100%" height={400}>
+                    <R.BarChart data={typeStats} layout="vertical">
+                      <R.CartesianGrid strokeDasharray="3 3" />
+                      <R.XAxis type="number" />
+                      <R.YAxis dataKey="type" type="category" width={150} />
+                      <R.Tooltip />
+                      <R.Legend />
+                      <R.Bar dataKey="count" fill="#0088FE" name="Nombre" />
+                    </R.BarChart>
+                  </R.ResponsiveContainer>
+                )}
+              </LazyRechartsWrapper>
             </CardContent>
           </Card>
         </TabsContent>
@@ -354,15 +356,19 @@ export const NotificationAnalyticsDashboard = () => {
                 <CardTitle>Taux de Livraison par Type</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={typeStats}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="type" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="deliveryRate" fill="#00C49F" name="Taux de livraison (%)" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <LazyRechartsWrapper>
+                  {R => (
+                    <R.ResponsiveContainer width="100%" height={300}>
+                      <R.BarChart data={typeStats}>
+                        <R.CartesianGrid strokeDasharray="3 3" />
+                        <R.XAxis dataKey="type" angle={-45} textAnchor="end" height={100} />
+                        <R.YAxis />
+                        <R.Tooltip />
+                        <R.Bar dataKey="deliveryRate" fill="#00C49F" name="Taux de livraison (%)" />
+                      </R.BarChart>
+                    </R.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
               </CardContent>
             </Card>
 
@@ -371,15 +377,19 @@ export const NotificationAnalyticsDashboard = () => {
                 <CardTitle>Taux d'Ouverture par Type</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={typeStats}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="type" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="openRate" fill="#FFBB28" name="Taux d'ouverture (%)" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <LazyRechartsWrapper>
+                  {R => (
+                    <R.ResponsiveContainer width="100%" height={300}>
+                      <R.BarChart data={typeStats}>
+                        <R.CartesianGrid strokeDasharray="3 3" />
+                        <R.XAxis dataKey="type" angle={-45} textAnchor="end" height={100} />
+                        <R.YAxis />
+                        <R.Tooltip />
+                        <R.Bar dataKey="openRate" fill="#FFBB28" name="Taux d'ouverture (%)" />
+                      </R.BarChart>
+                    </R.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
               </CardContent>
             </Card>
           </div>

@@ -6,7 +6,7 @@
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import Papa from 'papaparse';
+import { loadPapaParse } from '@/lib/papaparse-loader';
 
 export interface InventoryCSVRow {
   sku: string;
@@ -59,6 +59,7 @@ export function useExportInventoryCSV() {
       }
 
       try {
+        const Papa = await loadPapaParse();
         const headers = [
           'SKU',
           'Nom Produit',
@@ -74,13 +75,13 @@ export function useExportInventoryCSV() {
           'Date Mise à Jour',
         ];
 
-        const rows = inventoryItems.map((item) => {
+        const rows = inventoryItems.map(item => {
           const productName =
             item.physical_product?.product?.name ||
             item.variant?.physical_product?.product?.name ||
             'N/A';
 
-          let  status= 'Disponible';
+          let status = 'Disponible';
           if (item.quantity_available === 0) {
             status = 'Rupture';
           } else if (item.quantity_available <= (item.reorder_point || 0)) {
@@ -127,8 +128,9 @@ export function useExportInventoryCSV() {
           title: 'Export réussi',
           description: `${inventoryItems.length} article(s) exporté(s)`,
         });
-      } catch ( _error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Impossible d\'exporter le CSV';
+      } catch (_error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Impossible d'exporter le CSV";
         toast({
           title: 'Erreur export',
           description: errorMessage,
@@ -158,184 +160,180 @@ export function useImportInventoryCSV() {
         dryRun?: boolean;
       }
     ): Promise<CSVImportResult> => {
-      const {
-        updateExisting = true,
-        createMissing = false,
-        dryRun = false,
-      } = options || {};
+      const { updateExisting = true, createMissing = false, dryRun = false } = options || {};
 
-      return new Promise((resolve, reject) => {
-        const  result: CSVImportResult = {
-          success: 0,
-          failed: 0,
-          errors: [],
-          warnings: [],
-        };
+      return loadPapaParse().then(
+        Papa =>
+          new Promise<CSVImportResult>((resolve, reject) => {
+            const result: CSVImportResult = {
+              success: 0,
+              failed: 0,
+              errors: [],
+              warnings: [],
+            };
 
-        Papa.parse(file, {
-          header: true,
-          skipEmptyLines: true,
-          complete: async (results) => {
-            try {
-              type CSVRow = Record<string, string>;
-              const rows = results.data as CSVRow[];
-              const  errors: Array<{ row: number; sku: string; error: string }> = [];
-              const  warnings: Array<{ row: number; sku: string; warning: string }> = [];
-
-              // Validation et traitement de chaque ligne
-              for (let  i= 0; i < rows.length; i++) {
-                const row = rows[i];
-                const rowNumber = i + 2; // +2 car ligne 1 = header, index 0-based
-
-                // Validation des champs requis
-                if (!row.SKU && !row.sku) {
-                  errors.push({
-                    row: rowNumber,
-                    sku: '',
-                    error: 'SKU manquant',
-                  });
-                  result.failed++;
-                  continue;
-                }
-
-                const sku = row.SKU || row.sku;
-                const quantity = parseInt(row['Quantité Disponible'] || row.quantity_available || '0', 10);
-
-                if (isNaN(quantity) || quantity < 0) {
-                  errors.push({
-                    row: rowNumber,
-                    sku,
-                    error: 'Quantité invalide',
-                  });
-                  result.failed++;
-                  continue;
-                }
-
-                if (dryRun) {
-                  // Mode test : validation uniquement
-                  result.success++;
-                  continue;
-                }
-
+            Papa.parse(file, {
+              header: true,
+              skipEmptyLines: true,
+              complete: async results => {
                 try {
-                  // Rechercher l'inventory_item par SKU
-                  const { data: inventoryItem, error: findError } = await supabase
-                    .from('inventory_items')
-                    .select('id, sku, quantity_available')
-                    .eq('sku', sku)
-                    .maybeSingle();
+                  type CSVRow = Record<string, string>;
+                  const rows = results.data as CSVRow[];
+                  const errors: Array<{ row: number; sku: string; error: string }> = [];
+                  const warnings: Array<{ row: number; sku: string; warning: string }> = [];
 
-                  if (findError) {
-                    errors.push({
-                      row: rowNumber,
-                      sku,
-                      error: `Erreur recherche: ${findError.message}`,
-                    });
-                    result.failed++;
-                    continue;
-                  }
+                  // Validation et traitement de chaque ligne
+                  for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    const rowNumber = i + 2; // +2 car ligne 1 = header, index 0-based
 
-                  if (!inventoryItem) {
-                    if (createMissing) {
-                      warnings.push({
+                    // Validation des champs requis
+                    if (!row.SKU && !row.sku) {
+                      errors.push({
                         row: rowNumber,
-                        sku,
-                        warning: 'Article non trouvé - création non supportée automatiquement',
+                        sku: '',
+                        error: 'SKU manquant',
                       });
                       result.failed++;
-                    } else {
+                      continue;
+                    }
+
+                    const sku = row.SKU || row.sku;
+                    const quantity = parseInt(
+                      row['Quantité Disponible'] || row.quantity_available || '0',
+                      10
+                    );
+
+                    if (isNaN(quantity) || quantity < 0) {
                       errors.push({
                         row: rowNumber,
                         sku,
-                        error: 'Article non trouvé',
+                        error: 'Quantité invalide',
+                      });
+                      result.failed++;
+                      continue;
+                    }
+
+                    if (dryRun) {
+                      // Mode test : validation uniquement
+                      result.success++;
+                      continue;
+                    }
+
+                    try {
+                      // Rechercher l'inventory_item par SKU
+                      const { data: inventoryItem, error: findError } = await supabase
+                        .from('inventory_items')
+                        .select('id, sku, quantity_available')
+                        .eq('sku', sku)
+                        .maybeSingle();
+
+                      if (findError) {
+                        errors.push({
+                          row: rowNumber,
+                          sku,
+                          error: `Erreur recherche: ${findError.message}`,
+                        });
+                        result.failed++;
+                        continue;
+                      }
+
+                      if (!inventoryItem) {
+                        if (createMissing) {
+                          warnings.push({
+                            row: rowNumber,
+                            sku,
+                            warning: 'Article non trouvé - création non supportée automatiquement',
+                          });
+                          result.failed++;
+                        } else {
+                          errors.push({
+                            row: rowNumber,
+                            sku,
+                            error: 'Article non trouvé',
+                          });
+                          result.failed++;
+                        }
+                        continue;
+                      }
+
+                      if (!updateExisting) {
+                        warnings.push({
+                          row: rowNumber,
+                          sku,
+                          warning: 'Mise à jour ignorée (option désactivée)',
+                        });
+                        continue;
+                      }
+
+                      // Mise à jour de la quantité
+                      const updates: {
+                        quantity_available: number;
+                        updated_at: string;
+                        warehouse_location?: string;
+                        reorder_point?: number;
+                      } = {
+                        quantity_available: quantity,
+                        updated_at: new Date().toISOString(),
+                      };
+
+                      // Mise à jour optionnelle des autres champs
+                      if (row['Emplacement Entrepôt'] || row.warehouse_location) {
+                        updates.warehouse_location =
+                          row['Emplacement Entrepôt'] || row.warehouse_location;
+                      }
+
+                      if (row['Point Réapprovisionnement'] || row.reorder_point) {
+                        const reorderPoint = parseInt(
+                          row['Point Réapprovisionnement'] || row.reorder_point || '0',
+                          10
+                        );
+                        if (!isNaN(reorderPoint)) {
+                          updates.reorder_point = reorderPoint;
+                        }
+                      }
+
+                      const { error: updateError } = await supabase
+                        .from('inventory_items')
+                        .update(updates)
+                        .eq('id', inventoryItem.id);
+
+                      if (updateError) {
+                        errors.push({
+                          row: rowNumber,
+                          sku,
+                          error: `Erreur mise à jour: ${updateError.message}`,
+                        });
+                        result.failed++;
+                      } else {
+                        result.success++;
+                      }
+                    } catch (_error: unknown) {
+                      const errorMessage =
+                        error instanceof Error ? error.message : 'Erreur inconnue';
+                      errors.push({
+                        row: rowNumber,
+                        sku,
+                        error: errorMessage,
                       });
                       result.failed++;
                     }
-                    continue;
                   }
 
-                  if (!updateExisting) {
-                    warnings.push({
-                      row: rowNumber,
-                      sku,
-                      warning: 'Mise à jour ignorée (option désactivée)',
-                    });
-                    continue;
-                  }
-
-                  // Mise à jour de la quantité
-                  const  updates: {
-                    quantity_available: number;
-                    updated_at: string;
-                    warehouse_location?: string;
-                    reorder_point?: number;
-                  } = {
-                    quantity_available: quantity,
-                    updated_at: new Date().toISOString(),
-                  };
-
-                  // Mise à jour optionnelle des autres champs
-                  if (row['Emplacement Entrepôt'] || row.warehouse_location) {
-                    updates.warehouse_location =
-                      row['Emplacement Entrepôt'] || row.warehouse_location;
-                  }
-
-                  if (row['Point Réapprovisionnement'] || row.reorder_point) {
-                    const reorderPoint = parseInt(
-                      row['Point Réapprovisionnement'] || row.reorder_point || '0',
-                      10
-                    );
-                    if (!isNaN(reorderPoint)) {
-                      updates.reorder_point = reorderPoint;
-                    }
-                  }
-
-                  const { error: updateError } = await supabase
-                    .from('inventory_items')
-                    .update(updates)
-                    .eq('id', inventoryItem.id);
-
-                  if (updateError) {
-                    errors.push({
-                      row: rowNumber,
-                      sku,
-                      error: `Erreur mise à jour: ${updateError.message}`,
-                    });
-                    result.failed++;
-                  } else {
-                    result.success++;
-                  }
-                } catch ( _error: unknown) {
-                  const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-                  errors.push({
-                    row: rowNumber,
-                    sku,
-                    error: errorMessage,
-                  });
-                  result.failed++;
+                  resolve(result);
+                } catch (_error: unknown) {
+                  reject(error);
                 }
-              }
-
-              resolve(result);
-            } catch ( _error: unknown) {
-              reject(error);
-            }
-          },
-          error: (error) => {
-            reject(new Error(`Erreur parsing CSV: ${error.message}`));
-          },
-        });
-      });
+              },
+              error: error => {
+                reject(new Error(`Erreur parsing CSV: ${error.message}`));
+              },
+            });
+          })
+      );
     },
     [toast]
   );
 
   return { importFromCSV };
 }
-
-
-
-
-
-
-

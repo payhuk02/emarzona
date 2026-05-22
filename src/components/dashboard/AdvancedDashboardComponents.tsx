@@ -17,15 +17,15 @@ import {
   LazyPieChart,
   LazyBarChart,
   LazyResponsiveContainer,
-  Line,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  Pie,
-  Cell,
+  LazyLine,
+  LazyBar,
+  LazyXAxis,
+  LazyYAxis,
+  LazyCartesianGrid,
+  LazyTooltip,
+  LazyLegend,
+  LazyPie,
+  LazyCell,
 } from '@/components/charts/LazyCharts';
 import React, { useMemo } from 'react';
 
@@ -165,14 +165,14 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
         <div className="h-80">
           <LazyResponsiveContainer width="100%" height="100%">
             <LazyLineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
-              <YAxis
+              <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <LazyXAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
+              <LazyYAxis
                 className="text-xs"
                 tick={{ fontSize: 12 }}
                 tickFormatter={value => `${value.toLocaleString()} FCFA`}
               />
-              <Tooltip
+              <LazyTooltip
                 formatter={(value: unknown, name: string) => [
                   name === 'revenue' ? `${Number(value).toLocaleString()} FCFA` : value,
                   name === 'revenue' ? 'Revenus' : name === 'orders' ? 'Commandes' : 'Clients',
@@ -180,7 +180,7 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
                 labelStyle={{ fontSize: 12 }}
                 contentStyle={{ fontSize: 12 }}
               />
-              <Line
+              <LazyLine
                 type="monotone"
                 dataKey="revenue"
                 stroke="#3b82f6"
@@ -221,7 +221,7 @@ export const OrdersChart = ({ data }: OrdersChartProps) => {
         <div className="h-80">
           <LazyResponsiveContainer width="100%" height="100%">
             <LazyPieChart>
-              <Pie
+              <LazyPie
                 data={data}
                 cx="50%"
                 cy="50%"
@@ -234,10 +234,10 @@ export const OrdersChart = ({ data }: OrdersChartProps) => {
                 dataKey="count"
               >
                 {data.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <LazyCell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
-              </Pie>
-              <Tooltip />
+              </LazyPie>
+              <LazyTooltip />
             </LazyPieChart>
           </LazyResponsiveContainer>
         </div>
@@ -475,15 +475,15 @@ export const OrdersTrendChart = ({ data }: OrdersTrendChartProps) => {
         <div className="h-80">
           <LazyResponsiveContainer width="100%" height="100%">
             <LazyLineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
-              <YAxis className="text-xs" tick={{ fontSize: 12 }} />
-              <Tooltip
+              <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <LazyXAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
+              <LazyYAxis className="text-xs" tick={{ fontSize: 12 }} />
+              <LazyTooltip
                 formatter={(value: unknown) => [value, 'Commandes']}
                 labelStyle={{ fontSize: 12 }}
                 contentStyle={{ fontSize: 12 }}
               />
-              <Line
+              <LazyLine
                 type="monotone"
                 dataKey="orders"
                 stroke="#10b981"
@@ -531,21 +531,21 @@ export const RevenueVsOrdersChart = ({ data }: RevenueVsOrdersChartProps) => {
         <div className="h-80">
           <LazyResponsiveContainer width="100%" height="100%">
             <LazyBarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
-              <YAxis
+              <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <LazyXAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
+              <LazyYAxis
                 yAxisId="left"
                 className="text-xs"
                 tick={{ fontSize: 12 }}
                 tickFormatter={value => `${(value / 1000).toFixed(0)}k FCFA`}
               />
-              <YAxis
+              <LazyYAxis
                 yAxisId="right"
                 orientation="right"
                 className="text-xs"
                 tick={{ fontSize: 12 }}
               />
-              <Tooltip
+              <LazyTooltip
                 formatter={(value: unknown, name: string) => [
                   name === 'revenue'
                     ? `${Number(value).toLocaleString()} FCFA`
@@ -555,9 +555,9 @@ export const RevenueVsOrdersChart = ({ data }: RevenueVsOrdersChartProps) => {
                 labelStyle={{ fontSize: 12 }}
                 contentStyle={{ fontSize: 12 }}
               />
-              <Legend />
-              <Bar yAxisId="left" dataKey="revenue" fill="#3b82f6" name="Revenus (FCFA)" />
-              <Bar yAxisId="right" dataKey="orders" fill="#10b981" name="Commandes" />
+              <LazyLegend />
+              <LazyBar yAxisId="left" dataKey="revenue" fill="#3b82f6" name="Revenus (FCFA)" />
+              <LazyBar yAxisId="right" dataKey="orders" fill="#10b981" name="Commandes" />
             </LazyBarChart>
           </LazyResponsiveContainer>
         </div>
@@ -596,15 +596,15 @@ export const CustomersTrendChart = ({ data }: CustomersTrendChartProps) => {
         <div className="h-80">
           <LazyResponsiveContainer width="100%" height="100%">
             <LazyLineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
-              <YAxis className="text-xs" tick={{ fontSize: 12 }} />
-              <Tooltip
+              <LazyCartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <LazyXAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
+              <LazyYAxis className="text-xs" tick={{ fontSize: 12 }} />
+              <LazyTooltip
                 formatter={(value: unknown) => [`${value} clients`, 'Clients']}
                 labelStyle={{ fontSize: 12 }}
                 contentStyle={{ fontSize: 12 }}
               />
-              <Line
+              <LazyLine
                 type="monotone"
                 dataKey="customers"
                 stroke="#8b5cf6"
@@ -619,9 +619,3 @@ export const CustomersTrendChart = ({ data }: CustomersTrendChartProps) => {
     </Card>
   );
 };
-
-
-
-
-
-

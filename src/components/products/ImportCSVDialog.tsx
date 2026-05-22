@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,13 +6,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   FileSpreadsheet,
   Upload,
@@ -32,24 +32,29 @@ import {
   Eye,
   ChevronLeft,
   FileDown,
-} from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import Papa from "papaparse";
-import { validateProductsImport } from "@/lib/validation/productSchemas";
+} from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import type { ParseResult } from 'papaparse';
+import { loadPapaParse } from '@/lib/papaparse-loader';
+import { validateProductsImport } from '@/lib/validation/productSchemas';
 import {
   previewImport,
   ImportPreviewResult,
   exportImportErrorsToCSV,
-  exportPreviewResultsToCSV
-} from "@/lib/import-export/import-export";
-import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@/hooks/useProducts";
-import type { z } from "zod";
-import type { ProductImportSchema } from "@/lib/validation/productSchemas";
+  exportPreviewResultsToCSV,
+} from '@/lib/import-export/import-export';
+import { useToast } from '@/hooks/use-toast';
+import type { Product } from '@/hooks/useProducts';
+import type { z } from 'zod';
+import type { ProductImportSchema } from '@/lib/validation/productSchemas';
 
 type ValidatedProduct = z.infer<typeof ProductImportSchema>;
 type ValidationSuccess = { index: number; data: ValidatedProduct };
-type ValidationError = { index: number; errors: Array<{ path: (string | number)[]; message: string }>; originalData: unknown };
+type ValidationError = {
+  index: number;
+  errors: Array<{ path: (string | number)[]; message: string }>;
+  originalData: unknown;
+};
 type ValidationResult = {
   successes: ValidationSuccess[];
   errors: ValidationError[];
@@ -62,8 +67,8 @@ interface ImportCSVDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImportConfirmed: (
-    products: Product[], 
-    options?: { 
+    products: Product[],
+    options?: {
       onProgress?: (progress: { imported: number; total: number; percentage: number }) => void;
       onCancel?: () => boolean;
     }
@@ -81,8 +86,12 @@ const ImportCSVDialogComponent = ({
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [previewing, setPreviewing] = useState(false);
-  const [importProgress, setImportProgress] = useState<{ imported: number; total: number; percentage: number } | null>(null);
-  const [parsedData, setParsedData] = useState<Papa.ParseResult<unknown> | null>(null);
+  const [importProgress, setImportProgress] = useState<{
+    imported: number;
+    total: number;
+    percentage: number;
+  } | null>(null);
+  const [parsedData, setParsedData] = useState<ParseResult<unknown> | null>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [previewResult, setPreviewResult] = useState<ImportPreviewResult | null>(null);
   const [step, setStep] = useState<'upload' | 'preview' | 'confirm'>('upload');
@@ -97,9 +106,9 @@ const ImportCSVDialogComponent = ({
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_FILE_SIZE) {
       toast({
-        title: "Fichier trop volumineux",
+        title: 'Fichier trop volumineux',
         description: `La taille maximum est de ${MAX_FILE_SIZE / 1024 / 1024}MB. Votre fichier fait ${(file.size / 1024 / 1024).toFixed(2)}MB`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
@@ -107,51 +116,53 @@ const ImportCSVDialogComponent = ({
     setParsing(true);
     setStep('preview');
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => header.trim(),
-      complete: (results) => {
-        setParsedData(results);
-        
-        // Validation nombre de produits (1000 max)
-        const MAX_PRODUCTS = 1000;
-        if (results.data.length > MAX_PRODUCTS) {
+    void loadPapaParse().then(Papa => {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: header => header.trim(),
+        complete: results => {
+          setParsedData(results);
+
+          // Validation nombre de produits (1000 max)
+          const MAX_PRODUCTS = 1000;
+          if (results.data.length > MAX_PRODUCTS) {
+            setParsing(false);
+            toast({
+              title: 'Trop de produits',
+              description: `Maximum ${MAX_PRODUCTS} produits par import. Votre fichier contient ${results.data.length} produits`,
+              variant: 'destructive',
+            });
+            return;
+          }
+
+          // Valider les données
+          const validation = validateProductsImport(results.data);
+          setValidationResult(validation);
+          setParsing(false);
+
+          if (validation.errorCount === 0) {
+            toast({
+              title: 'Fichier valide',
+              description: `${validation.successCount} produit(s) prêt(s) à être importé(s)`,
+            });
+          } else {
+            toast({
+              title: 'Erreurs détectées',
+              description: `${validation.successCount} valide(s), ${validation.errorCount} erreur(s)`,
+              variant: 'destructive',
+            });
+          }
+        },
+        error: error => {
           setParsing(false);
           toast({
-            title: "Trop de produits",
-            description: `Maximum ${MAX_PRODUCTS} produits par import. Votre fichier contient ${results.data.length} produits`,
-            variant: "destructive",
+            title: 'Erreur de parsing',
+            description: error.message,
+            variant: 'destructive',
           });
-          return;
-        }
-        
-        // Valider les données
-        const validation = validateProductsImport(results.data);
-        setValidationResult(validation);
-        setParsing(false);
-
-        if (validation.errorCount === 0) {
-          toast({
-            title: "Fichier valide",
-            description: `${validation.successCount} produit(s) prêt(s) à être importé(s)`,
-          });
-        } else {
-          toast({
-            title: "Erreurs détectées",
-            description: `${validation.successCount} valide(s), ${validation.errorCount} erreur(s)`,
-            variant: "destructive",
-          });
-        }
-      },
-      error: (error) => {
-        setParsing(false);
-        toast({
-          title: "Erreur de parsing",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
+        },
+      });
     });
   }, []); // Note: toast est stable, setParsing, setStep, setParsedData, setValidationResult sont stables
 
@@ -160,9 +171,9 @@ const ImportCSVDialogComponent = ({
     setImportCancelled(true);
     setImporting(false);
     toast({
-      title: "Import annulé",
+      title: 'Import annulé',
       description: "L'import a été annulé. Les produits déjà importés ont été sauvegardés.",
-      variant: "default",
+      variant: 'default',
     });
   }, [toast]);
 
@@ -177,14 +188,14 @@ const ImportCSVDialogComponent = ({
       setStep('confirm');
 
       toast({
-        title: "Analyse terminée",
+        title: 'Analyse terminée',
         description: `${result.validRows} valide(s), ${result.invalidRows} erreur(s)`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erreur d'analyse",
-        description: error.message,
-        variant: "destructive",
+        description: error instanceof Error ? error.message : 'Erreur inconnue',
+        variant: 'destructive',
       });
     } finally {
       setPreviewing(false);
@@ -207,7 +218,7 @@ const ImportCSVDialogComponent = ({
 
       // Passer le callback de progression et le flag d'annulation
       await onImportConfirmed(validProducts, {
-        onProgress: (progress) => {
+        onProgress: progress => {
           if (!importCancelledRef.current) {
             setImportProgress(progress);
           }
@@ -221,7 +232,7 @@ const ImportCSVDialogComponent = ({
       }
 
       toast({
-        title: "Import réussi",
+        title: 'Import réussi',
         description: `${validProducts.length} produit(s) importé(s) avec succès`,
       });
 
@@ -231,11 +242,12 @@ const ImportCSVDialogComponent = ({
         return; // Ne pas afficher d'erreur si annulé
       }
 
-      const errorMessage = error instanceof Error ? error.message : "Impossible d'importer les produits";
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'importer les produits";
       toast({
         title: "Erreur d'import",
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setImporting(false);
@@ -256,10 +268,70 @@ const ImportCSVDialogComponent = ({
 
   const handleDownloadTemplate = useCallback(() => {
     const template = [
-      ['name', 'slug', 'description', 'price', 'currency', 'product_type', 'category', 'licensing_type', 'license_terms', 'is_active', 'stock_quantity', 'sku', 'promotional_price', 'image_url'],
-      ['Mon Produit', 'mon-produit', 'Description du produit', '10000', 'XOF', 'digital', 'Formation', 'standard', '', 'true', '100', 'SKU-001', '', ''],
-      ['Pack PLR Marketing', 'pack-plr-marketing', 'Ressources marketing réutilisables', '30000', 'XOF', 'digital', 'Template', 'plr', 'Peut être revendu/modifié avec attribution.', 'true', '0', 'PLR-001', '', ''],
-      ['Formation React', 'formation-react', 'Apprenez React de A à Z', '50000', 'XOF', 'digital', 'Formation', 'copyrighted', 'Usage personnel. Revente/interdite.', 'true', '0', 'REACT-001', '45000', ''],
+      [
+        'name',
+        'slug',
+        'description',
+        'price',
+        'currency',
+        'product_type',
+        'category',
+        'licensing_type',
+        'license_terms',
+        'is_active',
+        'stock_quantity',
+        'sku',
+        'promotional_price',
+        'image_url',
+      ],
+      [
+        'Mon Produit',
+        'mon-produit',
+        'Description du produit',
+        '10000',
+        'XOF',
+        'digital',
+        'Formation',
+        'standard',
+        '',
+        'true',
+        '100',
+        'SKU-001',
+        '',
+        '',
+      ],
+      [
+        'Pack PLR Marketing',
+        'pack-plr-marketing',
+        'Ressources marketing réutilisables',
+        '30000',
+        'XOF',
+        'digital',
+        'Template',
+        'plr',
+        'Peut être revendu/modifié avec attribution.',
+        'true',
+        '0',
+        'PLR-001',
+        '',
+        '',
+      ],
+      [
+        'Formation React',
+        'formation-react',
+        'Apprenez React de A à Z',
+        '50000',
+        'XOF',
+        'digital',
+        'Formation',
+        'copyrighted',
+        'Usage personnel. Revente/interdite.',
+        'true',
+        '0',
+        'REACT-001',
+        '45000',
+        '',
+      ],
     ];
 
     const csv = template.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
@@ -270,8 +342,8 @@ const ImportCSVDialogComponent = ({
     link.click();
 
     toast({
-      title: "Template téléchargé",
-      description: "Utilisez ce fichier comme modèle pour votre import",
+      title: 'Template téléchargé',
+      description: 'Utilisez ce fichier comme modèle pour votre import',
     });
   }, []); // Note: toast est stable
 
@@ -284,11 +356,9 @@ const ImportCSVDialogComponent = ({
             Importer des produits depuis CSV
           </DialogTitle>
           <DialogDescription>
-            {step === 'upload' ? (
-              "Importez vos produits depuis un fichier CSV. Téléchargez le template pour voir le format attendu."
-            ) : (
-              "Vérifiez les produits avant de confirmer l'import"
-            )}
+            {step === 'upload'
+              ? 'Importez vos produits depuis un fichier CSV. Téléchargez le template pour voir le format attendu.'
+              : "Vérifiez les produits avant de confirmer l'import"}
           </DialogDescription>
         </DialogHeader>
 
@@ -311,10 +381,16 @@ const ImportCSVDialogComponent = ({
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 Le fichier doit être au format CSV avec les colonnes suivantes :
-                <strong> name, slug, price, currency, product_type</strong> (obligatoires) et 
-                <strong> description, category, is_active, stock_quantity, sku, promotional_price, image_url, licensing_type, license_terms</strong> (optionnels)
+                <strong> name, slug, price, currency, product_type</strong> (obligatoires) et
+                <strong>
+                  {' '}
+                  description, category, is_active, stock_quantity, sku, promotional_price,
+                  image_url, licensing_type, license_terms
+                </strong>{' '}
+                (optionnels)
                 <br />
-                licensing_type accepté: <code>standard</code>, <code>plr</code>, <code>copyrighted</code>
+                licensing_type accepté: <code>standard</code>, <code>plr</code>,{' '}
+                <code>copyrighted</code>
               </AlertDescription>
             </Alert>
 
@@ -323,7 +399,7 @@ const ImportCSVDialogComponent = ({
             <div className="space-y-3">
               <h4 className="font-medium text-sm">Format du fichier CSV :</h4>
               <code className="block bg-muted p-3 rounded text-xs overflow-x-auto whitespace-pre">
-{`name,slug,description,price,currency,product_type,category,licensing_type,license_terms
+                {`name,slug,description,price,currency,product_type,category,licensing_type,license_terms
 "Mon Produit","mon-produit","Description",10000,XOF,digital,"Formation",plr,"Peut être revendu et modifié avec attribution."`}
               </code>
               <Button
@@ -355,11 +431,15 @@ const ImportCSVDialogComponent = ({
                     <div className="text-xs text-muted-foreground">Total lignes</div>
                   </div>
                   <div className="p-4 bg-green-500/10 rounded-lg text-center border border-green-500/20">
-                    <div className="text-2xl font-bold text-green-600">{validationResult.successCount}</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {validationResult.successCount}
+                    </div>
                     <div className="text-xs text-green-600">Valides</div>
                   </div>
                   <div className="p-4 bg-red-500/10 rounded-lg text-center border border-red-500/20">
-                    <div className="text-2xl font-bold text-red-600">{validationResult.errorCount}</div>
+                    <div className="text-2xl font-bold text-red-600">
+                      {validationResult.errorCount}
+                    </div>
                     <div className="text-xs text-red-600">Erreurs</div>
                   </div>
                 </div>
@@ -385,23 +465,36 @@ const ImportCSVDialogComponent = ({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {validationResult.successes.slice(0, 10).map((item: ValidationSuccess, idx: number) => (
-                            <TableRow key={idx}>
-                              <TableCell className="font-mono text-xs">{item.index + 1}</TableCell>
-                              <TableCell className="font-medium">{item.data.name}</TableCell>
-                              <TableCell>{item.data.price.toLocaleString()} {item.data.currency}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-xs">{item.data.product_type}</Badge>
-                              </TableCell>
-                              <TableCell>{item.data.category || '-'}</TableCell>
-                              <TableCell>
-                                <Badge variant={item.data.is_active ? "default" : "secondary"} className="text-xs">
-                                  {item.data.is_active ? 'Actif' : 'Inactif'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-xs">{item.data.licensing_type || '-'}</TableCell>
-                            </TableRow>
-                          ))}
+                          {validationResult.successes
+                            .slice(0, 10)
+                            .map((item: ValidationSuccess, idx: number) => (
+                              <TableRow key={idx}>
+                                <TableCell className="font-mono text-xs">
+                                  {item.index + 1}
+                                </TableCell>
+                                <TableCell className="font-medium">{item.data.name}</TableCell>
+                                <TableCell>
+                                  {item.data.price.toLocaleString()} {item.data.currency}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="text-xs">
+                                    {item.data.product_type}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>{item.data.category || '-'}</TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant={item.data.is_active ? 'default' : 'secondary'}
+                                    className="text-xs"
+                                  >
+                                    {item.data.is_active ? 'Actif' : 'Inactif'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  {item.data.licensing_type || '-'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
                         </TableBody>
                       </Table>
                     </div>
@@ -430,23 +523,34 @@ const ImportCSVDialogComponent = ({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {validationResult.errors.slice(0, 5).map((item: ValidationError, idx: number) => (
-                            <TableRow key={idx}>
-                              <TableCell className="font-mono text-xs">{item.index + 1}</TableCell>
-                              <TableCell className="text-xs">
-                                {JSON.stringify(item.originalData).substring(0, 50)}...
-                              </TableCell>
-                              <TableCell>
-                                <div className="space-y-1">
-                                  {item.errors.slice(0, 2).map((error: { path: (string | number)[]; message: string }, i: number) => (
-                                    <Badge key={i} variant="destructive" className="text-xs">
-                                      {error.path.join('.')}: {error.message}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {validationResult.errors
+                            .slice(0, 5)
+                            .map((item: ValidationError, idx: number) => (
+                              <TableRow key={idx}>
+                                <TableCell className="font-mono text-xs">
+                                  {item.index + 1}
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  {JSON.stringify(item.originalData).substring(0, 50)}...
+                                </TableCell>
+                                <TableCell>
+                                  <div className="space-y-1">
+                                    {item.errors
+                                      .slice(0, 2)
+                                      .map(
+                                        (
+                                          error: { path: (string | number)[]; message: string },
+                                          i: number
+                                        ) => (
+                                          <Badge key={i} variant="destructive" className="text-xs">
+                                            {error.path.join('.')}: {error.message}
+                                          </Badge>
+                                        )
+                                      )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
                         </TableBody>
                       </Table>
                     </div>
@@ -463,15 +567,21 @@ const ImportCSVDialogComponent = ({
                   <div className="space-y-4">
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">{previewResult.validRows}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {previewResult.validRows}
+                        </div>
                         <div className="text-sm text-green-800">Valides</div>
                       </div>
                       <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">{previewResult.invalidRows}</div>
+                        <div className="text-2xl font-bold text-red-600">
+                          {previewResult.invalidRows}
+                        </div>
                         <div className="text-sm text-red-800">Erreurs</div>
                       </div>
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">{previewResult.categoriesFound.length}</div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {previewResult.categoriesFound.length}
+                        </div>
                         <div className="text-sm text-blue-800">Catégories</div>
                       </div>
                     </div>
@@ -484,7 +594,10 @@ const ImportCSVDialogComponent = ({
                             .filter(r => !r.isValid)
                             .slice(0, 5)
                             .map(result => (
-                              <div key={result.row} className="text-sm text-red-700 bg-red-50 p-2 rounded">
+                              <div
+                                key={result.row}
+                                className="text-sm text-red-700 bg-red-50 p-2 rounded"
+                              >
                                 Ligne {result.row}: {result.errors.map(e => e.message).join(', ')}
                               </div>
                             ))}
@@ -504,11 +617,10 @@ const ImportCSVDialogComponent = ({
                           {previewResult.categoriesFound.map(cat => (
                             <Badge
                               key={cat.name}
-                              variant={cat.categoryId ? "default" : "secondary"}
+                              variant={cat.categoryId ? 'default' : 'secondary'}
                               className="text-xs"
                             >
-                              {cat.name} ({cat.count})
-                              {cat.categoryId ? ' ✓' : ' ⚠'}
+                              {cat.name} ({cat.count}){cat.categoryId ? ' ✓' : ' ⚠'}
                             </Badge>
                           ))}
                         </div>
@@ -522,7 +634,10 @@ const ImportCSVDialogComponent = ({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Import en cours...</span>
-                      <span className="font-medium">{importProgress.imported} / {importProgress.total} ({importProgress.percentage}%)</span>
+                      <span className="font-medium">
+                        {importProgress.imported} / {importProgress.total} (
+                        {importProgress.percentage}%)
+                      </span>
                     </div>
                     <Progress value={importProgress.percentage} className="w-full" />
                   </div>
@@ -552,18 +667,16 @@ const ImportCSVDialogComponent = ({
                 Annuler
               </Button>
               {importing ? (
-                <Button
-                  onClick={handleCancelImport}
-                  variant="destructive"
-                  disabled={!importing}
-                >
+                <Button onClick={handleCancelImport} variant="destructive" disabled={!importing}>
                   <X className="h-4 w-4 mr-2" />
                   Annuler l'import
                 </Button>
               ) : (
                 <Button
                   onClick={handleConfirmImport}
-                  disabled={parsing || importing || !validationResult || validationResult.successCount === 0}
+                  disabled={
+                    parsing || importing || !validationResult || validationResult.successCount === 0
+                  }
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Importer {validationResult?.successCount || 0} produit(s)
@@ -589,10 +702,3 @@ export const ImportCSVDialog = React.memo(ImportCSVDialogComponent, (prevProps, 
 });
 
 ImportCSVDialog.displayName = 'ImportCSVDialog';
-
-
-
-
-
-
-

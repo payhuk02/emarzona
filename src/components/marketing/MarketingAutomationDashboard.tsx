@@ -4,19 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 import {
   Mail,
   Smartphone,
@@ -95,7 +83,13 @@ export const MarketingAutomationDashboard: React.FC = () => {
   const { data: behavioralData, isLoading: behavioralLoading } = useQuery({
     queryKey: ['behavioral-analytics', selectedTimeframe],
     queryFn: async () => {
-      return [] as Array<{ date: string; page_views: number; product_views: number; cart_adds: number; purchases: number }>;
+      return [] as Array<{
+        date: string;
+        page_views: number;
+        product_views: number;
+        cart_adds: number;
+        purchases: number;
+      }>;
     },
   });
 
@@ -299,34 +293,43 @@ export const MarketingAutomationDashboard: React.FC = () => {
                 <CardTitle>Évolution des performances</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="pageViews"
-                      stroke="#8884d8"
-                      name="Vues de page"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="productViews"
-                      stroke="#82ca9d"
-                      name="Vues produit"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="cartAdds"
-                      stroke="#ffc658"
-                      name="Ajouts panier"
-                    />
-                    <Line type="monotone" dataKey="purchases" stroke="#ff7300" name="Achats" />
-                  </LineChart>
-                </ResponsiveContainer>
+                <LazyRechartsWrapper>
+                  {R => (
+                    <R.ResponsiveContainer width="100%" height={300}>
+                      <R.LineChart data={performanceData}>
+                        <R.CartesianGrid strokeDasharray="3 3" />
+                        <R.XAxis dataKey="date" />
+                        <R.YAxis />
+                        <R.Tooltip />
+                        <R.Legend />
+                        <R.Line
+                          type="monotone"
+                          dataKey="pageViews"
+                          stroke="#8884d8"
+                          name="Vues de page"
+                        />
+                        <R.Line
+                          type="monotone"
+                          dataKey="productViews"
+                          stroke="#82ca9d"
+                          name="Vues produit"
+                        />
+                        <R.Line
+                          type="monotone"
+                          dataKey="cartAdds"
+                          stroke="#ffc658"
+                          name="Ajouts panier"
+                        />
+                        <R.Line
+                          type="monotone"
+                          dataKey="purchases"
+                          stroke="#ff7300"
+                          name="Achats"
+                        />
+                      </R.LineChart>
+                    </R.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
               </CardContent>
             </Card>
 
@@ -336,24 +339,28 @@ export const MarketingAutomationDashboard: React.FC = () => {
                 <CardTitle>Répartition par canal</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={channelDistribution}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {channelDistribution.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                <LazyRechartsWrapper>
+                  {R => (
+                    <R.ResponsiveContainer width="100%" height={300}>
+                      <R.PieChart>
+                        <R.Pie
+                          data={channelDistribution}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {channelDistribution.map((_, index) => (
+                            <R.Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </R.Pie>
+                        <R.Tooltip />
+                      </R.PieChart>
+                    </R.ResponsiveContainer>
+                  )}
+                </LazyRechartsWrapper>
               </CardContent>
             </Card>
           </div>

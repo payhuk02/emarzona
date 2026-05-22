@@ -4,14 +4,14 @@ import {
   LazyLineChart,
   LazyBarChart,
   LazyResponsiveContainer,
-  Line,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  Cell,
+  LazyLine,
+  LazyBar,
+  LazyXAxis,
+  LazyYAxis,
+  LazyCartesianGrid,
+  LazyTooltip,
+  LazyLegend,
+  LazyCell,
 } from '@/components/charts/LazyCharts';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -121,18 +121,18 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
               <div className="h-64 sm:h-80 md:h-96">
                 <LazyResponsiveContainer width="100%" height="100%">
                   <LazyLineChart data={revenueChartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
+                    <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <LazyXAxis
                       dataKey="month"
                       className="text-[10px] sm:text-xs"
                       tick={{ fill: 'currentColor' }}
                     />
-                    <YAxis
+                    <LazyYAxis
                       className="text-[10px] sm:text-xs"
                       tick={{ fill: 'currentColor' }}
                       tickFormatter={value => `${(value / 1000).toFixed(0)}k`}
                     />
-                    <Tooltip
+                    <LazyTooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
@@ -141,38 +141,38 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
                       }}
                       formatter={(value: number) => `${value.toLocaleString()} FCFA`}
                     />
-                    <Legend />
+                    <LazyLegend />
                     {selectedType === 'all' ? (
                       <>
-                        <Line
+                        <LazyLine
                           type="monotone"
                           dataKey="Digitaux"
                           stroke={PRODUCT_TYPE_COLORS.digital}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
-                        <Line
+                        <LazyLine
                           type="monotone"
                           dataKey="Physiques"
                           stroke={PRODUCT_TYPE_COLORS.physical}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
-                        <Line
+                        <LazyLine
                           type="monotone"
                           dataKey="Services"
                           stroke={PRODUCT_TYPE_COLORS.service}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
-                        <Line
+                        <LazyLine
                           type="monotone"
                           dataKey="Cours"
                           stroke={PRODUCT_TYPE_COLORS.course}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
-                        <Line
+                        <LazyLine
                           type="monotone"
                           dataKey="Artistes"
                           stroke={PRODUCT_TYPE_COLORS.artist}
@@ -181,7 +181,7 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
                         />
                       </>
                     ) : (
-                      <Line
+                      <LazyLine
                         type="monotone"
                         dataKey={PRODUCT_TYPE_LABELS[selectedType]}
                         stroke={PRODUCT_TYPE_COLORS[selectedType]}
@@ -212,14 +212,14 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
               <div className="h-64 sm:h-80 md:h-96">
                 <LazyResponsiveContainer width="100%" height="100%">
                   <LazyBarChart data={ordersChartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
+                    <LazyCartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <LazyXAxis
                       dataKey="type"
                       className="text-[10px] sm:text-xs"
                       tick={{ fill: 'currentColor' }}
                     />
-                    <YAxis className="text-[10px] sm:text-xs" tick={{ fill: 'currentColor' }} />
-                    <Tooltip
+                    <LazyYAxis className="text-[10px] sm:text-xs" tick={{ fill: 'currentColor' }} />
+                    <LazyTooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
                         border: '1px solid hsl(var(--border))',
@@ -227,11 +227,11 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
                         fontSize: '12px',
                       }}
                     />
-                    <Bar dataKey="commandes" radius={[8, 8, 0, 0]}>
+                    <LazyBar dataKey="commandes" radius={[8, 8, 0, 0]}>
                       {ordersChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.couleur} />
+                        <LazyCell key={`cell-${index}`} fill={entry.couleur} />
                       ))}
-                    </Bar>
+                    </LazyBar>
                   </LazyBarChart>
                 </LazyResponsiveContainer>
               </div>
@@ -244,9 +244,3 @@ export const ProductTypeCharts = React.memo<ProductTypeChartsProps>(
 );
 
 ProductTypeCharts.displayName = 'ProductTypeCharts';
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 /**
  * Optimisations de requêtes et caching
  * Date: 1 Février 2025
- * 
+ *
  * Utilitaires pour optimiser les requêtes lourdes avec :
  * - Caching intelligent
  * - Préchargement de données
@@ -33,19 +33,19 @@ export const cacheConfig = {
     staleTime: 1000 * 60 * 60 * 24, // 24 heures
     cacheTime: 1000 * 60 * 60 * 24 * 7, // 7 jours
   },
-  
+
   // Données qui changent occasionnellement - cache moyen
   semiStatic: {
     staleTime: 1000 * 60 * 30, // 30 minutes
     cacheTime: 1000 * 60 * 60 * 2, // 2 heures
   },
-  
+
   // Données qui changent fréquemment - cache court
   dynamic: {
     staleTime: 1000 * 60 * 5, // 5 minutes
     cacheTime: 1000 * 60 * 15, // 15 minutes
   },
-  
+
   // Données en temps réel - pas de cache
   realtime: {
     staleTime: 0,
@@ -85,8 +85,8 @@ export function createDebouncedQuery<T>(
   queryFn: () => Promise<T>,
   delay: number = 300
 ): () => Promise<T> {
-  let  timeoutId: NodeJS.Timeout | null = null;
-  let  cachedPromise: Promise<T> | null = null;
+  let timeoutId: NodeJS.Timeout | null = null;
+  let cachedPromise: Promise<T> | null = null;
 
   return () => {
     return new Promise((resolve, reject) => {
@@ -118,14 +118,14 @@ export async function batchQueries<T>(
   queries: Array<() => Promise<T>>,
   batchSize: number = 5
 ): Promise<T[]> {
-  const  results: T[] = [];
-  
-  for (let  i= 0; i < queries.length; i += batchSize) {
+  const results: T[] = [];
+
+  for (let i = 0; i < queries.length; i += batchSize) {
     const batch = queries.slice(i, i + batchSize);
     const batchResults = await Promise.all(batch.map(query => query()));
     results.push(...batchResults);
   }
-  
+
   return results;
 }
 
@@ -139,7 +139,7 @@ export function invalidateRelatedQueries(
 ) {
   // Invalider la requête principale
   queryClient.invalidateQueries({ queryKey });
-  
+
   // Invalider les requêtes liées
   relatedKeys.forEach(key => {
     queryClient.invalidateQueries({ queryKey: key });
@@ -152,7 +152,7 @@ export function invalidateRelatedQueries(
 export interface PaginatedQueryOptions {
   page: number;
   pageSize: number;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -176,50 +176,32 @@ export function createPaginatedQueryKey(
  */
 export function cleanupStaleCache(queryClient: QueryClient) {
   const now = Date.now();
-  const cache = (queryClient as any).queryCache;
-  
-  if (!cache) return;
-  
+  const cache = queryClient.getQueryCache();
+
   const queries = cache.getAll();
-  let  cleaned= 0;
-  
-  queries.forEach((query: any) => {
-    const cacheTime = query.meta?.cacheTime || 0;
+  let cleaned = 0;
+
+  queries.forEach(query => {
+    const cacheTime =
+      (query.options as { gcTime?: number }).gcTime ??
+      (query.meta as { cacheTime?: number })?.cacheTime ??
+      0;
     const lastUpdated = query.state.dataUpdatedAt || 0;
-    
+
     // Si les données sont plus anciennes que le cacheTime, les supprimer
     if (now - lastUpdated > cacheTime && cacheTime > 0) {
       queryClient.removeQueries({ queryKey: query.queryKey });
       cleaned++;
     }
   });
-  
+
   if (cleaned > 0) {
     logger.info('Cache cleanup', { cleaned, total: queries.length });
   }
 }
 
-/**
- * Configure le QueryClient avec des optimisations
- */
-export function createOptimizedQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: cacheConfig.semiStatic.staleTime,
-        cacheTime: cacheConfig.semiStatic.cacheTime,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: true,
-        retry: 2,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      },
-      mutations: {
-        retry: 1,
-        retryDelay: 1000,
-      },
-    },
-  });
-}
+/** @deprecated Utiliser `createOptimizedQueryClient` depuis `@/lib/cache-optimization` */
+export { createOptimizedQueryClient } from './cache-optimization';
 
 /**
  * Précharge les données d'une route avant la navigation
@@ -229,7 +211,7 @@ export async function prefetchRouteData(
   route: string,
   params?: Record<string, string>
 ) {
-  const  prefetchMap: Record<string, () => Promise<any>> = {
+  const prefetchMap: Record<string, () => Promise<void>> = {
     '/dashboard/products': async () => {
       // Précharger la liste des produits
       // Implémentation spécifique selon vos hooks
@@ -255,10 +237,3 @@ export async function prefetchRouteData(
     }
   }
 }
-
-
-
-
-
-
-

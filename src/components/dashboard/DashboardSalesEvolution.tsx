@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import {
   LazyLineChart,
   LazyResponsiveContainer,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
+  LazyLine,
+  LazyXAxis,
+  LazyYAxis,
+  LazyCartesianGrid,
+  LazyTooltip,
 } from '@/components/charts/LazyCharts';
 import { cn } from '@/lib/utils';
 
@@ -53,20 +53,20 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
         <div className="h-[280px] sm:h-[320px] lg:h-[360px] flex-1 min-h-[240px]">
           <LazyResponsiveContainer width="100%" height="100%">
             <LazyLineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis
+              <LazyCartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+              <LazyXAxis
                 dataKey="month"
                 tick={{ fontSize: 13, fill: '#6b7280' }}
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis
+              <LazyYAxis
                 tick={{ fontSize: 13, fill: '#6b7280' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={v => `${Number(v).toLocaleString('fr-FR')}`}
               />
-              <Tooltip
+              <LazyTooltip
                 formatter={(value: unknown) => [
                   `${Number(value).toLocaleString('fr-FR')} FCFA`,
                   'Revenus',
@@ -77,7 +77,7 @@ export const DashboardSalesEvolution = React.memo<DashboardSalesEvolutionProps>(
                   fontSize: 14,
                 }}
               />
-              <Line
+              <LazyLine
                 type="monotone"
                 dataKey="revenue"
                 stroke="#8b5cf6"

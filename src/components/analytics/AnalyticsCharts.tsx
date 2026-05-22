@@ -1,9 +1,20 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
-import { LineChart as LineChartIcon, AreaChart as AreaChartIcon, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import {
+  LineChart as LineChartIcon,
+  AreaChart as AreaChartIcon,
+  BarChart3,
+  PieChart as PieChartIcon,
+} from 'lucide-react';
+import { LazyRechartsWrapper } from '@/components/charts/LazyRechartsWrapper';
 
 interface ChartData {
   date: string;
@@ -28,10 +39,10 @@ const COLORS = {
   views: '#3b82f6', // blue
   clicks: '#10b981', // green
   conversions: '#8b5cf6', // purple
-  revenue: '#f59e0b' // orange
+  revenue: '#f59e0b', // orange
 };
 
-export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
+export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
   data,
   chartType,
   onChartTypeChange,
@@ -39,17 +50,17 @@ export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
   onPeriodChange,
   title,
   description,
-  loading = false
+  loading = false,
 }) => {
   const chartData = useMemo(() => {
     if (!data || data.length === 0) return [];
-    
+
     return data.map(item => ({
       ...item,
-      date: new Date(item.date).toLocaleDateString('fr-FR', { 
-        month: 'short', 
-        day: 'numeric' 
-      })
+      date: new Date(item.date).toLocaleDateString('fr-FR', {
+        month: 'short',
+        day: 'numeric',
+      }),
     }));
   }, [data]);
 
@@ -76,54 +87,47 @@ export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
 
     const commonProps = {
       data: chartData,
-      margin: { top: 5, right: 30, left: 20, bottom: 5 }
+      margin: { top: 5, right: 30, left: 20, bottom: 5 },
     };
 
     switch (chartType) {
       case 'line':
         return (
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={256}>
                 <recharts.LineChart {...commonProps}>
                   <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <recharts.XAxis 
-                    dataKey="date" 
-                    stroke="#9ca3af"
-                    fontSize={12}
-                  />
-                  <recharts.YAxis 
-                    stroke="#9ca3af"
-                    fontSize={12}
-                  />
-                  <recharts.Tooltip 
+                  <recharts.XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
+                  <recharts.YAxis stroke="#9ca3af" fontSize={12} />
+                  <recharts.Tooltip
                     contentStyle={{
                       backgroundColor: '#1f2937',
                       border: '1px solid #374151',
                       borderRadius: '8px',
-                      color: '#f9fafb'
+                      color: '#f9fafb',
                     }}
                   />
-                  <recharts.Line 
-                    type="monotone" 
-                    dataKey="views" 
-                    stroke={COLORS.views} 
+                  <recharts.Line
+                    type="monotone"
+                    dataKey="views"
+                    stroke={COLORS.views}
                     strokeWidth={2}
                     dot={{ fill: COLORS.views, strokeWidth: 2, r: 4 }}
                     name="Vues"
                   />
-                  <recharts.Line 
-                    type="monotone" 
-                    dataKey="clicks" 
-                    stroke={COLORS.clicks} 
+                  <recharts.Line
+                    type="monotone"
+                    dataKey="clicks"
+                    stroke={COLORS.clicks}
                     strokeWidth={2}
                     dot={{ fill: COLORS.clicks, strokeWidth: 2, r: 4 }}
                     name="Clics"
                   />
-                  <recharts.Line 
-                    type="monotone" 
-                    dataKey="conversions" 
-                    stroke={COLORS.conversions} 
+                  <recharts.Line
+                    type="monotone"
+                    dataKey="conversions"
+                    stroke={COLORS.conversions}
                     strokeWidth={2}
                     dot={{ fill: COLORS.conversions, strokeWidth: 2, r: 4 }}
                     name="Conversions"
@@ -137,50 +141,43 @@ export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
       case 'area':
         return (
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={256}>
                 <recharts.AreaChart {...commonProps}>
                   <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <recharts.XAxis 
-                    dataKey="date" 
-                    stroke="#9ca3af"
-                    fontSize={12}
-                  />
-                  <recharts.YAxis 
-                    stroke="#9ca3af"
-                    fontSize={12}
-                  />
-                  <recharts.Tooltip 
+                  <recharts.XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
+                  <recharts.YAxis stroke="#9ca3af" fontSize={12} />
+                  <recharts.Tooltip
                     contentStyle={{
                       backgroundColor: '#1f2937',
                       border: '1px solid #374151',
                       borderRadius: '8px',
-                      color: '#f9fafb'
+                      color: '#f9fafb',
                     }}
                   />
-                  <recharts.Area 
-                    type="monotone" 
-                    dataKey="views" 
+                  <recharts.Area
+                    type="monotone"
+                    dataKey="views"
                     stackId="1"
-                    stroke={COLORS.views} 
+                    stroke={COLORS.views}
                     fill={COLORS.views}
                     fillOpacity={0.6}
                     name="Vues"
                   />
-                  <recharts.Area 
-                    type="monotone" 
-                    dataKey="clicks" 
+                  <recharts.Area
+                    type="monotone"
+                    dataKey="clicks"
                     stackId="2"
-                    stroke={COLORS.clicks} 
+                    stroke={COLORS.clicks}
                     fill={COLORS.clicks}
                     fillOpacity={0.6}
                     name="Clics"
                   />
-                  <recharts.Area 
-                    type="monotone" 
-                    dataKey="conversions" 
+                  <recharts.Area
+                    type="monotone"
+                    dataKey="conversions"
                     stackId="3"
-                    stroke={COLORS.conversions} 
+                    stroke={COLORS.conversions}
                     fill={COLORS.conversions}
                     fillOpacity={0.6}
                     name="Conversions"
@@ -194,41 +191,34 @@ export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
       case 'bar':
         return (
           <LazyRechartsWrapper>
-            {(recharts) => (
+            {recharts => (
               <recharts.ResponsiveContainer width="100%" height={256}>
                 <recharts.BarChart {...commonProps}>
                   <recharts.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <recharts.XAxis 
-                    dataKey="date" 
-                    stroke="#9ca3af"
-                    fontSize={12}
-                  />
-                  <recharts.YAxis 
-                    stroke="#9ca3af"
-                    fontSize={12}
-                  />
-                  <recharts.Tooltip 
+                  <recharts.XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
+                  <recharts.YAxis stroke="#9ca3af" fontSize={12} />
+                  <recharts.Tooltip
                     contentStyle={{
                       backgroundColor: '#1f2937',
                       border: '1px solid #374151',
                       borderRadius: '8px',
-                      color: '#f9fafb'
+                      color: '#f9fafb',
                     }}
                   />
-                  <recharts.Bar 
-                    dataKey="views" 
+                  <recharts.Bar
+                    dataKey="views"
                     fill={COLORS.views}
                     name="Vues"
                     radius={[2, 2, 0, 0]}
                   />
-                  <recharts.Bar 
-                    dataKey="clicks" 
+                  <recharts.Bar
+                    dataKey="clicks"
                     fill={COLORS.clicks}
                     name="Clics"
                     radius={[2, 2, 0, 0]}
                   />
-                  <recharts.Bar 
-                    dataKey="conversions" 
+                  <recharts.Bar
+                    dataKey="conversions"
                     fill={COLORS.conversions}
                     name="Conversions"
                     radius={[2, 2, 0, 0]}
@@ -284,17 +274,21 @@ export const AnalyticsChart : React.FC<AnalyticsChartProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-600">
-                <SelectItem value="7d" className="text-white hover:bg-gray-700">7j</SelectItem>
-                <SelectItem value="30d" className="text-white hover:bg-gray-700">30j</SelectItem>
-                <SelectItem value="90d" className="text-white hover:bg-gray-700">90j</SelectItem>
+                <SelectItem value="7d" className="text-white hover:bg-gray-700">
+                  7j
+                </SelectItem>
+                <SelectItem value="30d" className="text-white hover:bg-gray-700">
+                  30j
+                </SelectItem>
+                <SelectItem value="90d" className="text-white hover:bg-gray-700">
+                  90j
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {renderChart()}
-      </CardContent>
+      <CardContent>{renderChart()}</CardContent>
     </Card>
   );
 };
@@ -311,9 +305,9 @@ interface TrafficSourceChartProps {
   loading?: boolean;
 }
 
-export const TrafficSourceChart : React.FC<TrafficSourceChartProps> = ({
+export const TrafficSourceChart: React.FC<TrafficSourceChartProps> = ({
   data,
-  loading = false
+  loading = false,
 }) => {
   const renderChart = () => {
     if (loading) {
@@ -338,40 +332,41 @@ export const TrafficSourceChart : React.FC<TrafficSourceChartProps> = ({
 
     return (
       <div className="space-y-4">
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={100}
-              paddingAngle={5}
-              dataKey="value"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: '#1f2937',
-                border: '1px solid #374151',
-                borderRadius: '8px',
-                color: '#f9fafb'
-              }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-        
+        <LazyRechartsWrapper>
+          {R => (
+            <R.ResponsiveContainer width="100%" height={200}>
+              <R.PieChart>
+                <R.Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <R.Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </R.Pie>
+                <R.Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1f2937',
+                    border: '1px solid #374151',
+                    borderRadius: '8px',
+                    color: '#f9fafb',
+                  }}
+                />
+              </R.PieChart>
+            </R.ResponsiveContainer>
+          )}
+        </LazyRechartsWrapper>
+
         <div className="space-y-2">
           {data.map((item, index) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: item.color }}
-                ></div>
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
                 <span className="text-sm text-gray-300">{item.name}</span>
               </div>
               <span className="text-sm font-medium text-white">{item.value}%</span>
@@ -397,9 +392,7 @@ export const TrafficSourceChart : React.FC<TrafficSourceChartProps> = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {renderChart()}
-      </CardContent>
+      <CardContent>{renderChart()}</CardContent>
     </Card>
   );
 };
@@ -432,11 +425,11 @@ interface RealtimeMetricsProps {
   onToggleRealTime: () => void;
 }
 
-export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
+export const RealtimeMetrics: React.FC<RealtimeMetricsProps> = ({
   analytics,
   changePercentages,
   isRealTimeActive: _isRealTimeActive,
-  onToggleRealTime: _onToggleRealTime
+  onToggleRealTime: _onToggleRealTime,
 }) => {
   const getChangeIcon = (change: number) => {
     return change >= 0 ? (
@@ -447,13 +440,13 @@ export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
   };
 
   const getChangeColor = (change: number) => {
-    return change >= 0 ? "text-green-500" : "text-red-500";
+    return change >= 0 ? 'text-green-500' : 'text-red-500';
   };
 
   if (!analytics) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4].map(i => (
           <Card key={i} className="border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="animate-pulse">
@@ -488,8 +481,9 @@ export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
               {changePercentages && (
                 <div className="flex items-center gap-1">
                   {getChangeIcon(viewsChange)}
-                  <span className={cn("text-sm font-medium", getChangeColor(viewsChange))}>
-                    {viewsChange >= 0 ? '+' : ''}{viewsChange.toFixed(1)}%
+                  <span className={cn('text-sm font-medium', getChangeColor(viewsChange))}>
+                    {viewsChange >= 0 ? '+' : ''}
+                    {viewsChange.toFixed(1)}%
                   </span>
                   <span className="text-xs text-gray-500">vs hier</span>
                 </div>
@@ -511,8 +505,9 @@ export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
               {changePercentages && (
                 <div className="flex items-center gap-1">
                   {getChangeIcon(clicksChange)}
-                  <span className={cn("text-sm font-medium", getChangeColor(clicksChange))}>
-                    {clicksChange >= 0 ? '+' : ''}{clicksChange.toFixed(1)}%
+                  <span className={cn('text-sm font-medium', getChangeColor(clicksChange))}>
+                    {clicksChange >= 0 ? '+' : ''}
+                    {clicksChange.toFixed(1)}%
                   </span>
                   <span className="text-xs text-gray-500">vs hier</span>
                 </div>
@@ -534,8 +529,9 @@ export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
               {changePercentages && (
                 <div className="flex items-center gap-1">
                   {getChangeIcon(conversionsChange)}
-                  <span className={cn("text-sm font-medium", getChangeColor(conversionsChange))}>
-                    {conversionsChange >= 0 ? '+' : ''}{conversionsChange.toFixed(1)}%
+                  <span className={cn('text-sm font-medium', getChangeColor(conversionsChange))}>
+                    {conversionsChange >= 0 ? '+' : ''}
+                    {conversionsChange.toFixed(1)}%
                   </span>
                   <span className="text-xs text-gray-500">vs hier</span>
                 </div>
@@ -557,8 +553,9 @@ export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
               {changePercentages && (
                 <div className="flex items-center gap-1">
                   {getChangeIcon(conversionsChange)}
-                  <span className={cn("text-sm font-medium", getChangeColor(conversionsChange))}>
-                    {conversionsChange >= 0 ? '+' : ''}{conversionsChange.toFixed(1)}%
+                  <span className={cn('text-sm font-medium', getChangeColor(conversionsChange))}>
+                    {conversionsChange >= 0 ? '+' : ''}
+                    {conversionsChange.toFixed(1)}%
                   </span>
                   <span className="text-xs text-gray-500">vs hier</span>
                 </div>
@@ -577,10 +574,3 @@ export const RealtimeMetrics : React.FC<RealtimeMetricsProps> = ({
 // Import des icônes nécessaires
 import { Eye, MousePointer, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-
-
-
-
-
-

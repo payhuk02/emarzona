@@ -13,9 +13,6 @@ const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
   </div>
 );
 
-// Lazy import de recharts
-const RechartsModule = lazy(() => import('recharts'));
-
 // Types pour les props des composants
 type RechartsComponents = typeof import('recharts');
 
@@ -45,24 +42,21 @@ export const LazyAreaChart = createLazyChartComponent('AreaChart');
 export const LazyRadarChart = createLazyChartComponent('RadarChart');
 export const LazyComposedChart = createLazyChartComponent('ComposedChart');
 
-// Export des composants utilitaires (légers, pas besoin de lazy)
-export { 
-  Line, 
-  Bar, 
-  Pie, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  Cell,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-} from 'recharts';
+// Primitives lazy (évite import statique de recharts dans le bundle dashboard)
+export const LazyLine = createLazyChartComponent('Line');
+export const LazyBar = createLazyChartComponent('Bar');
+export const LazyPie = createLazyChartComponent('Pie');
+export const LazyArea = createLazyChartComponent('Area');
+export const LazyXAxis = createLazyChartComponent('XAxis');
+export const LazyYAxis = createLazyChartComponent('YAxis');
+export const LazyCartesianGrid = createLazyChartComponent('CartesianGrid');
+export const LazyTooltip = createLazyChartComponent('Tooltip');
+export const LazyLegend = createLazyChartComponent('Legend');
+export const LazyCell = createLazyChartComponent('Cell');
+export const LazyRadar = createLazyChartComponent('Radar');
+export const LazyPolarGrid = createLazyChartComponent('PolarGrid');
+export const LazyPolarAngleAxis = createLazyChartComponent('PolarAngleAxis');
+export const LazyPolarRadiusAxis = createLazyChartComponent('PolarRadiusAxis');
 
 // Hook pour charger recharts à la demande
 export const useRechartsLoader = () => {
@@ -70,16 +64,14 @@ export const useRechartsLoader = () => {
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
-    import('recharts')
-      .then(() => setIsLoaded(true))
-      .catch (setError);
+    import('recharts').then(() => setIsLoaded(true)).catch(setError);
   }, []);
 
   return { isLoaded, error };
 };
 
 // Wrapper pour ResponsiveContainer avec lazy loading
-export const LazyResponsiveContainer : React.FC<{
+export const LazyResponsiveContainer: React.FC<{
   width?: string | number;
   height?: string | number;
   children: React.ReactNode;
@@ -91,7 +83,7 @@ export const LazyResponsiveContainer : React.FC<{
   }> | null>(null);
 
   React.useEffect(() => {
-    import('recharts').then((mod) => {
+    import('recharts').then(mod => {
       setRespContainer(() => mod.ResponsiveContainer);
     });
   }, []);
@@ -106,11 +98,3 @@ export const LazyResponsiveContainer : React.FC<{
     </RespContainer>
   );
 };
-
-
-
-
-
-
-
-
