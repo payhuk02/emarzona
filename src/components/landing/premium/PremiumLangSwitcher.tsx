@@ -6,9 +6,11 @@ import { cn } from '@/lib/utils';
 
 interface PremiumLangSwitcherProps {
   className?: string;
+  /** Pleine largeur (sidebar) */
+  fullWidth?: boolean;
 }
 
-export function PremiumLangSwitcher({ className }: PremiumLangSwitcherProps) {
+export function PremiumLangSwitcher({ className, fullWidth = false }: PremiumLangSwitcherProps) {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -40,6 +42,7 @@ export function PremiumLangSwitcher({ className }: PremiumLangSwitcherProps) {
         onClick={() => setOpen(v => !v)}
         className={cn(
           'lp-lang-switcher flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-sm transition-all duration-300',
+          fullWidth && 'w-full justify-center',
           open
             ? 'border-[var(--lp-gold)]/45 bg-white/[0.08] text-white'
             : 'border-white/12 bg-white/[0.04] text-white/80 hover:border-[var(--lp-gold)]/30 hover:bg-white/[0.06] hover:text-white'

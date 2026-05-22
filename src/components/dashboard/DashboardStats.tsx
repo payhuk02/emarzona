@@ -1,21 +1,21 @@
 /**
  * Composant Stats Cards du Dashboard
- * 
+ *
  * Affiche les 4 cartes principales de statistiques du tableau de bord :
  * - Produits (total et actifs)
  * - Commandes (total et en attente)
  * - Clients (total enregistrés)
  * - Revenus (total et tendance)
- * 
+ *
  * @component
  * @param {DashboardStatsType} stats - Les statistiques à afficher
  * @returns {JSX.Element} Le composant de statistiques
- * 
+ *
  * @example
  * ```tsx
  * <DashboardStats stats={dashboardStats} />
  * ```
- * 
+ *
  * @remarks
  * - Utilise React.memo pour éviter les re-renders inutiles
  * - Supporte l'internationalisation via react-i18next
@@ -97,24 +97,27 @@ export const DashboardStats = React.memo<DashboardStatsProps>(({ stats }) => {
             aria-describedby={`stat-${index}-description stat-${index}-trend`}
           >
             <CardHeader className="pb-1.5 sm:pb-2 md:pb-3 p-2.5 sm:p-3 md:p-4">
-              <CardTitle 
+              <CardTitle
                 id={`stat-${index}-title`}
-                className="text-sm sm:text-xs md:text-sm font-medium text-muted-foreground flex items-center gap-1 sm:gap-1.5 md:gap-2"
+                className="text-sm sm:text-xs md:text-sm font-bold text-black flex items-center gap-1 sm:gap-1.5 md:gap-2"
               >
-                <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" aria-hidden="true" />
+                <Icon
+                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 text-black"
+                  aria-hidden="true"
+                />
                 {stat.label}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
               <div
-                className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1 break-words`}
+                className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-black mb-1 break-words"
                 aria-label={`Valeur: ${stat.value}`}
               >
                 {stat.value}
               </div>
-              <p 
+              <p
                 id={`stat-${index}-description`}
-                className="text-sm sm:text-[11px] md:text-xs text-muted-foreground mb-1.5 sm:mb-2 leading-tight"
+                className="text-sm sm:text-[11px] md:text-xs text-black font-bold mb-1.5 sm:mb-2 leading-tight"
               >
                 {stat.description}
               </p>

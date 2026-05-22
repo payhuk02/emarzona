@@ -3,14 +3,7 @@
  * Utilisée dans tous les composants du dashboard
  */
 
-import {
-  FileText,
-  Package,
-  Wrench,
-  GraduationCap,
-  Palette,
-  type LucideIcon,
-} from 'lucide-react';
+import { FileText, Package, Wrench, GraduationCap, Palette, type LucideIcon } from 'lucide-react';
 
 import type { ProductType } from '@/types/unified-product';
 export type { ProductType } from '@/types/unified-product';
@@ -29,51 +22,43 @@ export interface ProductTypeConfig {
  * Configuration complète pour tous les types de produits
  * Utilisée pour l'affichage, les filtres, les graphiques, etc.
  */
+const NEUTRAL_UI = {
+  textColor: 'text-black font-bold',
+  bgColor: 'bg-transparent',
+  hoverColor: 'hover:bg-black/5',
+  borderColor: 'border-black/25',
+} as const;
+
 export const PRODUCT_TYPE_CONFIG: Record<ProductType, ProductTypeConfig> = {
   digital: {
     label: 'Digitaux',
     icon: FileText,
-    color: 'bg-blue-500',
-    textColor: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-500/10',
-    hoverColor: 'hover:bg-blue-500/20',
-    borderColor: 'border-blue-500/20',
+    color: 'bg-transparent',
+    ...NEUTRAL_UI,
   },
   physical: {
     label: 'Physiques',
     icon: Package,
-    color: 'bg-green-500',
-    textColor: 'text-green-600 dark:text-green-400',
-    bgColor: 'bg-green-500/10',
-    hoverColor: 'hover:bg-green-500/20',
-    borderColor: 'border-green-500/20',
+    color: 'bg-transparent',
+    ...NEUTRAL_UI,
   },
   service: {
     label: 'Services',
     icon: Wrench,
-    color: 'bg-purple-500',
-    textColor: 'text-purple-600 dark:text-purple-400',
-    bgColor: 'bg-purple-500/10',
-    hoverColor: 'hover:bg-purple-500/20',
-    borderColor: 'border-purple-500/20',
+    color: 'bg-transparent',
+    ...NEUTRAL_UI,
   },
   course: {
     label: 'Cours',
     icon: GraduationCap,
-    color: 'bg-orange-500',
-    textColor: 'text-orange-600 dark:text-orange-400',
-    bgColor: 'bg-orange-500/10',
-    hoverColor: 'hover:bg-orange-500/20',
-    borderColor: 'border-orange-500/20',
+    color: 'bg-transparent',
+    ...NEUTRAL_UI,
   },
   artist: {
     label: 'Artistes',
     icon: Palette,
-    color: 'bg-pink-500',
-    textColor: 'text-pink-600 dark:text-pink-400',
-    bgColor: 'bg-pink-500/10',
-    hoverColor: 'hover:bg-pink-500/20',
-    borderColor: 'border-pink-500/20',
+    color: 'bg-transparent',
+    ...NEUTRAL_UI,
   },
 } as const;
 

@@ -62,7 +62,7 @@ import {
 import { Database, Brain, Clock3, ChevronDown, ChevronRight } from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { PremiumLangSwitcher } from '@/components/landing/premium/PremiumLangSwitcher';
 import { useState, useEffect, useMemo } from 'react';
 import React from 'react';
 import {
@@ -1412,7 +1412,7 @@ export function AppSidebar() {
                                 asChild
                                 className={`transition-all duration-300 group relative flex items-center ${
                                   isDashboardActive
-                                    ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
+                                    ? '!text-white font-semibold border-l-2 border-white/70 bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
                                     : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
                                 }`}
                               >
@@ -1448,7 +1448,7 @@ export function AppSidebar() {
                                       }}
                                       className={`w-full justify-start !text-white transition-all duration-200 [&_svg]:!text-white [&_span]:!text-white opacity-90 ${
                                         selectedStoreId === store.id
-                                          ? 'bg-white/20 !text-white font-semibold [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100'
+                                          ? '!text-white font-semibold bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white opacity-100'
                                           : 'hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:hover:!text-white [&_span]:hover:!text-white'
                                       }`}
                                     >
@@ -1485,7 +1485,7 @@ export function AppSidebar() {
                                 className={({ isActive }) =>
                                   `transition-all duration-300 group relative flex items-center ${
                                     isActive
-                                      ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
+                                      ? '!text-white font-semibold border-l-2 border-white/70 bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
                                       : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
                                   }`
                                 }
@@ -1576,7 +1576,7 @@ export function AppSidebar() {
                                 className={({ isActive }) =>
                                   `transition-all duration-300 ${
                                     isActive
-                                      ? 'bg-white/20 !text-white font-semibold border-l-2 border-white/50 [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
+                                      ? '!text-white font-semibold border-l-2 border-white/70 bg-transparent [&_*]:!text-white [&_svg]:!text-white [&_span]:!text-white'
                                       : '!text-white hover:bg-white/10 hover:!text-white hover:translate-x-1 [&_svg]:!text-white [&_span]:!text-white opacity-90'
                                   }`
                                 }
@@ -1602,12 +1602,7 @@ export function AppSidebar() {
         {/* Footer */}
         <SidebarFooter className="border-t border-blue-400/30 p-4 space-y-2">
           {!isCollapsed && (
-            <LanguageSwitcher
-              variant="default"
-              showLabel={true}
-              className="w-full"
-              buttonClassName="w-full bg-gradient-to-r from-[#7851A9] to-[#FF69B4] text-white hover:opacity-90 border-0 [&_svg]:text-white [&_span]:text-white transition-all duration-300"
-            />
+            <PremiumLangSwitcher className="app-sidebar-lang-switcher w-full" fullWidth />
           )}
           <Button
             variant="ghost"

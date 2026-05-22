@@ -160,13 +160,105 @@
   box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.1);
 }
 
-/* Titres de page */
-.landing-premium.app-premium h1,
-.landing-premium.app-premium .app-premium-page-title {
+/* Titres de page — noir gras (plus de dégradé violet/rose) */
+.landing-premium.app-premium #main-content h1,
+.landing-premium.app-premium #main-content h2,
+.landing-premium.app-premium #main-content h3,
+.landing-premium.app-premium #main-content h4,
+.landing-premium.app-premium #main-content .app-premium-page-title,
+.landing-premium.app-premium main.flex-1.overflow-auto h1,
+.landing-premium.app-premium main.flex-1.overflow-auto h2,
+.landing-premium.app-premium main.flex-1.overflow-auto h3 {
   font-family: var(--lp-serif);
-  font-weight: 500;
+  font-weight: 700 !important;
   letter-spacing: -0.02em;
-  color: var(--lp-text);
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+.landing-premium.app-premium #main-content [class*='bg-clip-text'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='bg-clip-text'] {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #000 !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+/* Textes zone principale — noir gras */
+.landing-premium.app-premium #main-content,
+.landing-premium.app-premium #main-content p,
+.landing-premium.app-premium #main-content span,
+.landing-premium.app-premium #main-content label,
+.landing-premium.app-premium
+  #main-content
+  button:not([class*='bg-primary']):not([class*='destructive']),
+.landing-premium.app-premium #main-content a:not([class*='bg-primary']),
+.landing-premium.app-premium main.flex-1.overflow-auto p,
+.landing-premium.app-premium main.flex-1.overflow-auto span,
+.landing-premium.app-premium main.flex-1.overflow-auto label {
+  color: #000;
+  font-weight: 700;
+}
+
+.landing-premium.app-premium #main-content .text-muted-foreground,
+.landing-premium.app-premium main.flex-1.overflow-auto .text-muted-foreground {
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+/* Icônes zone principale — sans arrière-plan, noir */
+.landing-premium.app-premium #main-content [class*='rounded-lg'][class*='bg-gradient'],
+.landing-premium.app-premium #main-content [class*='rounded-xl'][class*='bg-gradient'],
+.landing-premium.app-premium #main-content [class*='rounded-lg'][class*='from-'][class*='to-'],
+.landing-premium.app-premium #main-content [class*='rounded-xl'][class*='from-'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='rounded-lg'][class*='bg-gradient'],
+.landing-premium.app-premium main.flex-1.overflow-auto [class*='rounded-xl'][class*='from-'] {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.landing-premium.app-premium #main-content svg.lucide,
+.landing-premium.app-premium #main-content svg[class*='lucide'],
+.landing-premium.app-premium main.flex-1.overflow-auto svg.lucide,
+.landing-premium.app-premium main.flex-1.overflow-auto svg[class*='lucide'] {
+  color: #000 !important;
+  stroke: #000 !important;
+}
+
+/* Badges / boutons primaires — conserver le contraste */
+.landing-premium.app-premium #main-content .bg-primary,
+.landing-premium.app-premium #main-content .bg-destructive,
+.landing-premium.app-premium #main-content [class*='text-primary-foreground'] {
+  color: inherit;
+  font-weight: inherit;
+}
+
+/* Filtres type produit — style neutre */
+.landing-premium.app-premium #main-content button[class*='bg-'][class*='500/10'],
+.landing-premium.app-premium #main-content button[class*='border-'][class*='500'] {
+  background: transparent !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+/* Sélecteur de langue sidebar — style landing navbar */
+.landing-premium.app-premium [data-sidebar='sidebar'] .app-sidebar-lang-switcher {
+  width: 100%;
+}
+
+.landing-premium.app-premium [data-sidebar='sidebar'] .app-sidebar-lang-switcher .lp-lang-switcher {
+  width: 100%;
+  justify-content: center;
 }
 
 /* Boutons primaires globaux */

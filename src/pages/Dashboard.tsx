@@ -458,13 +458,11 @@ const Dashboard = () => {
                   id="quick-actions-title"
                   className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg"
                 >
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
-                    <Zap
-                      className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-purple-500 dark:text-purple-400"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  {t('dashboard.quickActions.title')}
+                  <Zap
+                    className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-black shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-black font-bold">{t('dashboard.quickActions.title')}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -515,19 +513,15 @@ const Dashboard = () => {
                       >
                         <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 h-full flex flex-col justify-center">
                           <div className="flex items-start gap-1.5 sm:gap-2 md:gap-3">
-                            <div
-                              className={`p-2 sm:p-2.5 md:p-3 rounded-xl bg-gradient-to-br ${action.color === 'from-green-600 to-emerald-600' ? 'from-green-500/10 to-emerald-500/10' : action.color === 'from-blue-600 to-cyan-600' ? 'from-blue-500/10 to-cyan-500/10' : 'from-purple-500/10 to-pink-500/10'} group-hover:opacity-80 transition-colors shrink-0`}
-                            >
-                              <Icon
-                                className={`h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 ${action.color === 'from-green-600 to-emerald-600' ? 'text-green-500' : action.color === 'from-blue-600 to-cyan-600' ? 'text-blue-500' : 'text-purple-500'}`}
-                                aria-hidden="true"
-                              />
-                            </div>
+                            <Icon
+                              className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-black shrink-0"
+                              aria-hidden="true"
+                            />
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 break-words">
+                              <h3 className="font-bold text-black text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 break-words">
                                 {action.title}
                               </h3>
-                              <p className="text-sm sm:text-[11px] md:text-xs lg:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                              <p className="text-sm sm:text-[11px] md:text-xs lg:text-sm text-black font-bold line-clamp-2 leading-relaxed">
                                 {action.description}
                               </p>
                             </div>
