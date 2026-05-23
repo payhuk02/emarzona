@@ -1,146 +1,33 @@
-import {
-  Layout, Package, ShoppingCart, Users,
-} from 'lucide-react';
+import { Layout, Package, ShoppingCart, Users } from 'lucide-react';
 import type { PageConfig } from './types';
+import {
+  LANDING_PREMIUM_PAGE_ID,
+  LANDING_PREMIUM_SECTIONS,
+} from '@/lib/admin/landingPremiumCustomization';
+
+const landingPremiumPage: PageConfig = {
+  id: LANDING_PREMIUM_PAGE_ID,
+  name: "Page d'accueil",
+  route: '/',
+  description: "Personnalisez la page d'accueil premium (textes, SEO, tarifs, footer…)",
+  icon: Layout,
+  sections: LANDING_PREMIUM_SECTIONS.map(section => ({
+    id: section.id,
+    name: section.name,
+    type: 'content' as const,
+    elements: section.elements.map(element => ({
+      id: element.id,
+      label: element.label,
+      type: element.type,
+      key: `landingPremium.${element.id}`,
+      defaultValue: element.defaultValue,
+      description: element.description,
+    })),
+  })),
+};
 
 export const publicPagesConfig: PageConfig[] = [
-  {
-    id: 'landing',
-    name: "Page d'accueil",
-    route: '/',
-    description: "Personnalisez tous les éléments de la page d'accueil",
-    icon: Layout,
-    sections: [
-      {
-        id: 'hero',
-        name: 'Section Hero',
-        type: 'hero',
-        elements: [
-          {
-            id: 'badge',
-            label: 'Badge',
-            type: 'text',
-            key: 'landing.hero.badge',
-            defaultValue: "La plateforme e-commerce tout-en-un pour l'Afrique",
-          },
-          {
-            id: 'title',
-            label: 'Titre principal',
-            type: 'textarea',
-            key: 'landing.hero.title',
-            defaultValue: 'Créez votre boutique en ligne en quelques minutes',
-          },
-          {
-            id: 'subtitle',
-            label: 'Sous-titre',
-            type: 'textarea',
-            key: 'landing.hero.subtitle',
-            defaultValue:
-              'Vendez vos produits digitaux et physiques avec une plateforme complète, sécurisée et facile à utiliser.',
-          },
-          {
-            id: 'ctaPrimary',
-            label: 'Bouton principal',
-            type: 'text',
-            key: 'landing.hero.ctaPrimary',
-            defaultValue: 'Créer ma boutique gratuitement',
-          },
-          {
-            id: 'ctaSecondary',
-            label: 'Bouton secondaire',
-            type: 'text',
-            key: 'landing.hero.ctaSecondary',
-            defaultValue: 'Voir la démo',
-          },
-          {
-            id: 'bgColor',
-            label: 'Couleur de fond',
-            type: 'color',
-            key: 'landing.hero.bgColor',
-            defaultValue: '#1e293b',
-          },
-          {
-            id: 'textColor',
-            label: 'Couleur du texte',
-            type: 'color',
-            key: 'landing.hero.textColor',
-            defaultValue: '#ffffff',
-          },
-          { id: 'bgImage', label: 'Image de fond', type: 'image', key: 'landing.hero.bgImage' },
-        ],
-      },
-      {
-        id: 'stats',
-        name: 'Statistiques',
-        type: 'content',
-        elements: [
-          {
-            id: 'usersLabel',
-            label: 'Label utilisateurs',
-            type: 'text',
-            key: 'landing.stats.users',
-            defaultValue: 'Utilisateurs',
-          },
-          {
-            id: 'salesLabel',
-            label: 'Label ventes',
-            type: 'text',
-            key: 'landing.stats.sales',
-            defaultValue: 'Ventes',
-          },
-          {
-            id: 'storesLabel',
-            label: 'Label boutiques',
-            type: 'text',
-            key: 'landing.stats.stores',
-            defaultValue: 'Boutiques',
-          },
-        ],
-      },
-      {
-        id: 'features',
-        name: 'Section Fonctionnalités',
-        type: 'features',
-        elements: [
-          {
-            id: 'title',
-            label: 'Titre',
-            type: 'text',
-            key: 'landing.features.title',
-            defaultValue: 'Fonctionnalités clés',
-          },
-          {
-            id: 'subtitle',
-            label: 'Sous-titre',
-            type: 'textarea',
-            key: 'landing.features.subtitle',
-            defaultValue: 'Tout ce dont vous avez besoin pour réussir en ligne',
-          },
-        ],
-      },
-      {
-        id: 'testimonials',
-        name: 'Témoignages',
-        type: 'testimonials',
-        elements: [
-          {
-            id: 'title',
-            label: 'Titre',
-            type: 'text',
-            key: 'landing.testimonials.title',
-            defaultValue: 'Ils réussissent avec Emarzona',
-          },
-          {
-            id: 'subtitle',
-            label: 'Sous-titre',
-            type: 'textarea',
-            key: 'landing.testimonials.subtitle',
-            defaultValue: "Rejoignez des centaines d'entrepreneurs qui développent leur activité",
-          },
-        ],
-      },
-    ],
-  },
+  landingPremiumPage,
   {
     id: 'marketplace',
     name: 'Marketplace',

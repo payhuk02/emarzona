@@ -19,16 +19,11 @@ interface PagesCustomizationSectionProps {
 }
 
 export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectionProps) => {
-  const [selectedPage, setSelectedPage] = useState<string>('landing');
+  const [selectedPage, setSelectedPage] = useState<string>('landingPremium');
   const [selectedSection, setSelectedSection] = useState<string>('');
 
-  const {
-    uploadingImages,
-    isSyncing,
-    handleElementChange,
-    handleImageUpload,
-    getElementValue,
-  } = usePageCustomization(onChange);
+  const { uploadingImages, isSyncing, handleElementChange, handleImageUpload, getElementValue } =
+    usePageCustomization(onChange);
 
   const selectedPageConfig = useMemo(
     () => PAGES_CONFIG.find(p => p.id === selectedPage),
