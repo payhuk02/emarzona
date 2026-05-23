@@ -439,7 +439,7 @@ export default function DigitalProductDetail() {
                 ) : (
                   <Button
                     size="lg"
-                    className="w-full"
+                    className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start px-6 sm:px-8 rounded-full font-semibold shadow-md hover:shadow-lg"
                     onClick={handlePurchase}
                     disabled={
                       isPurchasing ||

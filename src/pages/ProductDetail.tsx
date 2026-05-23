@@ -964,24 +964,23 @@ const ProductDetails = () => {
                     />
                   )}
 
-                {/* Boutons d'action - Responsive optimisé */}
-                <div className="space-y-2 sm:space-y-0">
-                  {/* Bouton principal - Acheter maintenant */}
+                {/* Boutons d'action */}
+                <div className="flex flex-col gap-2 sm:gap-3">
                   <Button
                     size="lg"
-                    className="w-full touch-manipulation min-h-[44px] text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-shadow"
+                    className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start touch-manipulation min-h-[44px] px-6 sm:px-8 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-shadow"
                     onClick={handleBuyNow}
                     disabled={isPurchasing || !product || !product.is_active}
                   >
                     {isPurchasing ? (
                       <>
-                        <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin shrink-0" />
                         <span className="hidden sm:inline">Traitement...</span>
                         <span className="sm:hidden">Chargement...</span>
                       </>
                     ) : (
                       <>
-                        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-2 shrink-0" />
                         <span className="hidden sm:inline">
                           {getValue('productDetail.cta.buyNow') || 'Acheter maintenant'}
                         </span>
@@ -990,7 +989,7 @@ const ProductDetails = () => {
                         </span>
                         {selectedVariantPrice &&
                           selectedVariantPrice !== (displayPriceInfo?.price ?? product.price) && (
-                            <span className="ml-2 hidden sm:inline">
+                            <span className="ml-1 hidden lg:inline text-sm font-medium opacity-90">
                               ({formatPrice(selectedVariantPrice, product.currency || 'FCFA')})
                             </span>
                           )}
@@ -998,8 +997,7 @@ const ProductDetails = () => {
                     )}
                   </Button>
 
-                  {/* Boutons secondaires - Ligne horizontale sur desktop */}
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:max-w-xl">
                     {/* Bouton Contacter le vendeur */}
                     {product.store_id && (
                       <Button
