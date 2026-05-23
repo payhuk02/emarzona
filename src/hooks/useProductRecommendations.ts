@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import type { StyleProfile } from '@/components/personalization/StyleQuiz';
+import { getBudgetPriceFilters } from '@/lib/quiz-budget-ranges';
 import type { Database } from '@/integrations/supabase/types';
 
 type Product = Database['public']['Tables']['products']['Row'] & {
@@ -186,23 +187,10 @@ export function useProductRecommendations() {
 function buildRecommendationFilters(profile: StyleProfile) {
   const filters: Record<string, string | number | boolean> = {};
 
-  // Filtres basés sur le budget
-  switch (profile.budgetRange) {
-    case 'budget':
-      filters.max_price = 50;
-      break;
-    case 'midrange':
-      filters.min_price = 30;
-      filters.max_price = 200;
-      break;
-    case 'premium':
-      filters.min_price = 150;
-      filters.max_price = 1000;
-      break;
-    case 'luxury':
-      filters.min_price = 500;
-      break;
-  }
+  // Filtres basés sur le budget (montants en FCFA / XOF)
+  const budgetFilters = getBudgetPriceFilters(profile.budgetRange);
+  if (budgetFilters.min_price !== undefined) filters.min_price = budgetFilters.min_price;
+  if (budgetFilters.max_price !== undefined) filters.max_price = budgetFilters.max_price;
 
   // Filtres basés sur les préférences de couleur et style
   filters.style_tags = [profile.aesthetic, profile.colorPalette];

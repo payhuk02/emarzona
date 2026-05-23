@@ -132,25 +132,19 @@ export function convertRatesToXOF(
     }
   }
 
-  // Générer tous les taux de conversion entre les devises supportées
-  const supportedCurrencies: Currency[] = ['XOF', 'EUR', 'USD', 'GBP', 'NGN', 'GHS', 'KES', 'ZAR'];
-
+  // Taux XOF ↔ toutes les devises renvoyées par l’API (quiz, affichage multi-devises)
   const conversionRates: Record<string, number> = {};
+  const allCurrencies = Object.keys(baseRates);
 
-  for (const from of supportedCurrencies) {
-    for (const to of supportedCurrencies) {
+  for (const from of allCurrencies) {
+    for (const to of allCurrencies) {
       if (from === to) continue;
 
-      const key = `${from}_${to}`;
-
-      // Obtenir les taux de base en XOF
       const fromRateInXof = from === 'XOF' ? 1 : baseRates[from];
       const toRateInXof = to === 'XOF' ? 1 : baseRates[to];
 
-      if (fromRateInXof && toRateInXof && fromRateInXof > 0) {
-        // Taux de conversion = (Taux de destination en XOF) / (Taux de source en XOF)
-        // Exemple: XOF vers USD = (Taux USD en XOF) / (Taux XOF) = USD_rate / 1
-        conversionRates[key] = toRateInXof / fromRateInXof;
+      if (fromRateInXof && toRateInXof && toRateInXof > 0) {
+        conversionRates[`${from}_${to}`] = fromRateInXof / toRateInXof;
       }
     }
   }

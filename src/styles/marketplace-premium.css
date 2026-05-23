@@ -54,7 +54,7 @@
 }
 
 .marketplace-premium .mp-hero__tagline {
-  color: var(--lp-blue-bright);
+  color: var(--lp-orange, #f97316);
   font-weight: 600;
 }
 

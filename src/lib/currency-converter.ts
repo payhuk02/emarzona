@@ -102,48 +102,49 @@ async function initializeRates(): Promise<void> {
 }
 
 /**
- * Récupère le taux de change entre deux devises (priorité: API > Fallback)
+ * Taux de change entre deux codes ISO (API, paires générées, ou repli XOF/EUR).
  */
-function getRate(from: Currency, to: Currency): number {
+export function getRateBetween(from: string, to: string): number {
+  if (from === to) return 1;
+
+  const rates = DYNAMIC_RATES || FALLBACK_RATES;
   const rateKey = `${from}_${to}`;
 
-  // Essayer d'abord les taux dynamiques (API)
-  if (DYNAMIC_RATES && DYNAMIC_RATES[rateKey]) {
-    return DYNAMIC_RATES[rateKey];
+  if (rates[rateKey]) {
+    return rates[rateKey];
   }
 
-  // Fallback sur les taux statiques
-  if (FALLBACK_RATES[rateKey]) {
-    return FALLBACK_RATES[rateKey];
+  const fromRateInXof = from === 'XOF' ? 1 : rates[from];
+  const toRateInXof = to === 'XOF' ? 1 : rates[to];
+  if (fromRateInXof && toRateInXof && toRateInXof > 0) {
+    return fromRateInXof / toRateInXof;
   }
 
-  // Si pas de taux direct, essayer de calculer via une devise intermédiaire (EUR)
   if (from !== 'EUR' && to !== 'EUR') {
-    const fromToEurKey = `${from}_EUR`;
-    const eurToToKey = `EUR_${to}`;
-
-    let fromToEur: number | undefined;
-    let eurToTo: number | undefined;
-
-    // Essayer depuis les taux dynamiques
-    if (DYNAMIC_RATES) {
-      fromToEur = DYNAMIC_RATES[fromToEurKey];
-      eurToTo = DYNAMIC_RATES[eurToToKey];
-    }
-
-    // Si pas trouvé, essayer depuis les taux de fallback
-    if (!fromToEur) fromToEur = FALLBACK_RATES[fromToEurKey];
-    if (!eurToTo) eurToTo = FALLBACK_RATES[eurToToKey];
-
-    // Si on a les deux taux, calculer le taux de conversion
+    const fromToEur = rates[`${from}_EUR`];
+    const eurToTo = rates[`EUR_${to}`];
     if (fromToEur && eurToTo) {
       return fromToEur * eurToTo;
     }
   }
 
-  // Si toujours pas de taux, retourner 1 (pas de conversion)
   logger.warn(`Exchange rate not found for ${from} to ${to}, using 1:1`);
   return 1;
+}
+
+function getRate(from: Currency, to: Currency): number {
+  return getRateBetween(from, to);
+}
+
+/** Convertit un montant exprimé en XOF (FCFA) vers une autre devise ISO. */
+export function convertAmountFromXof(amountXof: number, toCurrency: string): number {
+  if (toCurrency === 'XOF') return amountXof;
+  if (!ratesInitialized) {
+    initializeRates().catch(error => {
+      logger.error('Failed to initialize rates', { error });
+    });
+  }
+  return amountXof * getRateBetween('XOF', toCurrency);
 }
 
 /**
@@ -170,14 +171,24 @@ export function convertCurrency(amount: number, from: Currency, to: Currency): n
  * Formate un montant selon la devise
  */
 export function formatCurrency(amount: number, currency: Currency): string {
-  const formatter = new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: currency === 'XOF' ? 0 : 2,
-    maximumFractionDigits: currency === 'XOF' ? 0 : 2,
-  });
+  return formatCurrencyCode(amount, currency);
+}
 
-  return formatter.format(amount);
+/** Formate un montant pour tout code ISO 4217 supporté par Intl. */
+export function formatCurrencyCode(amount: number, currencyCode: string): string {
+  const zeroDecimal = ['XOF', 'XAF', 'XPF', 'JPY', 'KRW', 'VND', 'CLP', 'UGX', 'RWF'];
+  const fractionDigits = zeroDecimal.includes(currencyCode) ? 0 : 2;
+
+  try {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(amount);
+  } catch {
+    return `${amount.toLocaleString('fr-FR')} ${currencyCode}`;
+  }
 }
 
 /**

@@ -21,6 +21,8 @@
   --lp-blue: #2563eb;
   --lp-blue-bright: #3b82f6;
   --lp-blue-deep: #1d4ed8;
+  --lp-orange: #f97316;
+  --lp-orange-deep: #ea580c;
   --lp-blue-glow: rgba(37, 99, 235, 0.35);
   --lp-violet-glow: rgba(124, 92, 255, 0.35);
   --lp-gold-glow: rgba(201, 162, 39, 0.25);
@@ -58,14 +60,14 @@
   padding-bottom: var(--lp-section-py);
 }
 
-/* Eyebrow — libellés de section */
-.landing-premium .lp-eyebrow,
-.landing-premium .lp-eyebrow-light {
+/* Eyebrow — libellés de section (landing uniquement) */
+.landing-premium:not(.marketplace-premium) .lp-eyebrow,
+.landing-premium:not(.marketplace-premium) .lp-eyebrow-light {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 1px solid var(--lp-blue-deep);
-  background: var(--lp-blue);
+  border: 1px solid var(--lp-orange-deep);
+  background: var(--lp-orange);
   padding: 0.375rem 0.875rem;
   font-size: 0.625rem;
   font-weight: 700;
@@ -75,8 +77,8 @@
 }
 
 @media (min-width: 640px) {
-  .landing-premium .lp-eyebrow,
-  .landing-premium .lp-eyebrow-light {
+  .landing-premium:not(.marketplace-premium) .lp-eyebrow,
+  .landing-premium:not(.marketplace-premium) .lp-eyebrow-light {
     font-size: 0.75rem;
   }
 }
