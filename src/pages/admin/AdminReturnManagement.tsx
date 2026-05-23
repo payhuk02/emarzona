@@ -3,7 +3,7 @@
  * Date: 26 Janvier 2025
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,8 +78,12 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { findCompletedTransactionForOrder } from '@/lib/payments/find-order-transaction';
+import { getPaymentProviderLabel } from '@/lib/payments/payment-provider-labels';
 
 export default function AdminReturnManagement() {
   const { store } = useStore();
@@ -94,6 +98,55 @@ export default function AdminReturnManagement() {
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [refundAmount, setRefundAmount] = useState('');
   const [refundMethod, setRefundMethod] = useState('original_payment');
+  const [refundReason, setRefundReason] = useState('');
+  const [pspRefundPreview, setPspRefundPreview] = useState<{
+    providerLabel: string;
+    maxAmount: number;
+    currency: string;
+  } | null>(null);
+  const [pspPreviewLoading, setPspPreviewLoading] = useState(false);
+
+  useEffect(() => {
+    if (!refundDialogOpen || !selectedReturnId || refundMethod !== 'original_payment') {
+      setPspRefundPreview(null);
+      return;
+    }
+
+    let cancelled = false;
+    setPspPreviewLoading(true);
+
+    (async () => {
+      const { data: returnRow } = await supabase
+        .from('product_returns')
+        .select('order_id')
+        .eq('id', selectedReturnId)
+        .single();
+
+      if (cancelled || !returnRow?.order_id) {
+        setPspRefundPreview(null);
+        setPspPreviewLoading(false);
+        return;
+      }
+
+      const tx = await findCompletedTransactionForOrder(returnRow.order_id);
+      if (cancelled) return;
+
+      if (tx) {
+        setPspRefundPreview({
+          providerLabel: getPaymentProviderLabel(tx.payment_provider),
+          maxAmount: tx.amount,
+          currency: tx.currency,
+        });
+      } else {
+        setPspRefundPreview(null);
+      }
+      setPspPreviewLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refundDialogOpen, selectedReturnId, refundMethod]);
 
   const filteredReturns = (returns || []).filter(r => {
     const returnTyped = r as ReturnWithRelations;
@@ -147,10 +200,12 @@ export default function AdminReturnManagement() {
           | 'store_credit'
           | 'bank_transfer'
           | 'check',
+        reason: refundReason.trim() || undefined,
       });
       setRefundDialogOpen(false);
       setSelectedReturnId(null);
       setRefundAmount('');
+      setRefundReason('');
     } catch (error) {
       // Error handled by hook
     }
@@ -159,7 +214,7 @@ export default function AdminReturnManagement() {
   const getStatusBadge = (status: string) => {
     type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
     type IconComponent = React.ComponentType<{ className?: string }>;
-    const  statusConfig: Record<
+    const statusConfig: Record<
       string,
       { label: string; variant: BadgeVariant; icon: IconComponent }
     > = {
@@ -547,10 +602,8 @@ export default function AdminReturnManagement() {
                                 <TableCell>
                                   <Select>
                                     <SelectTrigger className="min-h-[44px] min-w-[44px]">
-
-                                        <MoreVertical className="h-4 w-4" />
-                                      
-</SelectTrigger>
+                                      <MoreVertical className="h-4 w-4" />
+                                    </SelectTrigger>
                                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                                       <SelectItem value="edit" onSelect asChild>
                                         <Dialog>
@@ -581,12 +634,16 @@ export default function AdminReturnManagement() {
                                       </SelectItem>
                                       {returnTyped.status === 'requested' && (
                                         <>
-                                          <SelectItem value="delete" onSelect={() => handleApprove(returnTyped.id)}
+                                          <SelectItem
+                                            value="delete"
+                                            onSelect={() => handleApprove(returnTyped.id)}
                                           >
                                             <CheckCircle2 className="h-4 w-4 mr-2" />
                                             Approuver
                                           </SelectItem>
-                                          <SelectItem value="copy" onSelect={() => {
+                                          <SelectItem
+                                            value="copy"
+                                            onSelect={() => {
                                               const reason = prompt('Raison du rejet:');
                                               if (reason) {
                                                 handleReject(returnTyped.id, reason);
@@ -600,7 +657,9 @@ export default function AdminReturnManagement() {
                                         </>
                                       )}
                                       {returnTyped.status === 'received' && (
-                                        <SelectItem value="view" onSelect={() => {
+                                        <SelectItem
+                                          value="view"
+                                          onSelect={() => {
                                             setSelectedReturnId(returnTyped.id);
                                             setRefundAmount(returnTyped.total_amount.toString());
                                             setRefundDialogOpen(true);
@@ -664,6 +723,37 @@ export default function AdminReturnManagement() {
                       </SelectContent>
                     </Select>
                   </div>
+                  {refundMethod === 'original_payment' && (
+                    <div className="space-y-2">
+                      {pspPreviewLoading ? (
+                        <p className="text-sm text-muted-foreground">Vérification du PSP…</p>
+                      ) : pspRefundPreview ? (
+                        <Alert>
+                          <AlertDescription>
+                            Remboursement via <strong>{pspRefundPreview.providerLabel}</strong>{' '}
+                            (max. {pspRefundPreview.maxAmount.toLocaleString()}{' '}
+                            {pspRefundPreview.currency}).
+                          </AlertDescription>
+                        </Alert>
+                      ) : (
+                        <Alert variant="destructive">
+                          <AlertDescription>
+                            Aucune transaction payée trouvée pour cette commande. Choisissez un
+                            autre mode de remboursement.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label>Motif (optionnel)</Label>
+                    <Textarea
+                      value={refundReason}
+                      onChange={e => setRefundReason(e.target.value)}
+                      placeholder="Retour produit, demande client…"
+                      rows={2}
+                    />
+                  </div>
                   <div className="flex justify-end gap-2 pt-4">
                     <Button
                       variant="outline"
@@ -675,7 +765,17 @@ export default function AdminReturnManagement() {
                     >
                       Annuler
                     </Button>
-                    <Button onClick={handleRefund}>Traiter le remboursement</Button>
+                    <Button
+                      onClick={handleRefund}
+                      disabled={
+                        processRefund.isPending ||
+                        (refundMethod === 'original_payment' &&
+                          !pspPreviewLoading &&
+                          !pspRefundPreview)
+                      }
+                    >
+                      {processRefund.isPending ? 'Traitement…' : 'Traiter le remboursement'}
+                    </Button>
                   </div>
                 </div>
               </DialogContent>
@@ -823,9 +923,3 @@ function ReturnDetailView({
     </div>
   );
 }
-
-
-
-
-
-

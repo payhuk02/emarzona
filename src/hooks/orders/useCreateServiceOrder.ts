@@ -29,15 +29,17 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
-const SERVICE_PRODUCT_FIELDS = 'id, duration_minutes, max_participants, advance_booking_days, max_bookings_per_day, timezone, pricing_type, buffer_time_before, buffer_time_after';
+const SERVICE_PRODUCT_FIELDS =
+  'id, duration_minutes, max_participants, advance_booking_days, max_bookings_per_day, timezone, pricing_type, buffer_time_before, buffer_time_after';
 const SERVICE_STAFF_FIELDS = 'id, service_product_id, is_active';
-const SERVICE_BOOKING_FIELDS = 'id, scheduled_date, scheduled_start_time, scheduled_end_time, status';
+const SERVICE_BOOKING_FIELDS =
+  'id, scheduled_date, scheduled_start_time, scheduled_end_time, status';
 
 /**
  * Options pour créer une commande service
@@ -306,19 +308,21 @@ export const useCreateServiceOrder = () => {
           );
         }
 
-      // Fallback côté client si la fonction SQL n'est pas disponible
-      if (maxBookingsError) {
-        const { data: existingBookingsForDay, error: bookingsCountError } = await supabase
-          .from('service_bookings')
-          .select('id', { count: 'exact', head: true })
-          .eq('product_id', productId)
-          .eq('scheduled_date', bookingDate)
-          .in('status', ['pending', 'confirmed', 'rescheduled']);
+        // Fallback côté client si la fonction SQL n'est pas disponible
+        if (maxBookingsError) {
+          const { data: existingBookingsForDay, error: bookingsCountError } = await supabase
+            .from('service_bookings')
+            .select('id', { count: 'exact', head: true })
+            .eq('product_id', productId)
+            .eq('scheduled_date', bookingDate)
+            .in('status', ['pending', 'confirmed', 'rescheduled']);
 
-        if (bookingsCountError) {
-          logger.error('Erreur lors de la vérification max_bookings_per_day', { error: bookingsCountError });
-          // Ne pas bloquer si erreur de comptage, mais logger
-        } else {
+          if (bookingsCountError) {
+            logger.error('Erreur lors de la vérification max_bookings_per_day', {
+              error: bookingsCountError,
+            });
+            // Ne pas bloquer si erreur de comptage, mais logger
+          } else {
             const currentBookingsCount = existingBookingsForDay?.length || 0;
             if (currentBookingsCount >= serviceProduct.max_bookings_per_day) {
               throw new Error(
@@ -479,7 +483,7 @@ export const useCreateServiceOrder = () => {
       }
 
       // 5. Récupérer ou créer le customer
-      let  customerId: string;
+      let customerId: string;
 
       const { data: existingCustomer } = await supabase
         .from('customers')
@@ -557,7 +561,7 @@ export const useCreateServiceOrder = () => {
             created_at: booking.created_at || new Date().toISOString(),
           },
           storeId
-        ).catch( err => {
+        ).catch(err => {
           logger.error('Error in analytics tracking for booking', {
             error: err,
             bookingId: booking.id,
@@ -566,7 +570,7 @@ export const useCreateServiceOrder = () => {
       });
 
       // 7. Calculer le prix (peut dépendre du nombre de participants ou de la durée)
-      let  totalPrice= product.promotional_price || product.price;
+      let totalPrice = product.promotional_price || product.price;
 
       // Si pricing_type est 'per_participant', multiplier par le nombre de participants
       if (serviceProduct.pricing_type === 'per_participant') {
@@ -580,9 +584,9 @@ export const useCreateServiceOrder = () => {
       }
 
       // Calculer le montant à payer selon le type de paiement
-      let  amountToPay= totalPrice;
-      let  percentagePaid= 0;
-      let  remainingAmount= 0;
+      let amountToPay = totalPrice;
+      let percentagePaid = 0;
+      let remainingAmount = 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -621,7 +625,9 @@ export const useCreateServiceOrder = () => {
           remaining_amount: remainingAmount,
           affiliate_tracking_cookie: affiliateTrackingCookie,
         })
-        .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+        .select(
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+        )
         .single();
 
       if (orderError || !order) {
@@ -690,7 +696,7 @@ export const useCreateServiceOrder = () => {
           currency: order.currency,
           payment_status: order.payment_status,
           created_at: order.created_at,
-        }).catch( err => {
+        }).catch(err => {
           logger.error('Error in analytics tracking for order', { error: err, orderId: order.id });
         });
       });
@@ -760,7 +766,7 @@ export const useCreateServiceOrder = () => {
             ? `Paiement sécurisé: ${product.name} - ${formattedBookingDate}`
             : `Réservation: ${product.name} - ${formattedBookingDate}`;
 
-      const paymentResult = await initiateMonerooPayment({
+      const paymentResult = await initiatePayment({
         storeId,
         productId,
         orderId: order.id,
@@ -879,7 +885,7 @@ export const useCheckTimeSlotAvailability = () => {
       const checkEndTime = endDateTime.toTimeString().slice(0, 8);
 
       // Chercher les bookings qui se chevauchent
-      let  query= supabase
+      let query = supabase
         .from('service_bookings')
         .select('id, scheduled_date, scheduled_start_time, scheduled_end_time')
         .eq('product_id', serviceProductId)
@@ -919,9 +925,3 @@ export const useCheckTimeSlotAvailability = () => {
     },
   });
 };
-
-
-
-
-
-

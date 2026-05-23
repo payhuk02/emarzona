@@ -99,6 +99,7 @@ const Payments = lazy(() => import('@/pages/Payments'));
 const PaymentsCustomers = lazy(() => import('@/pages/PaymentsCustomers'));
 const Withdrawals = lazy(() => import('@/pages/Withdrawals'));
 const PaymentMethods = lazy(() => import('@/pages/PaymentMethods'));
+const PaymentConnectionsPage = lazy(() => import('@/pages/dashboard/PaymentConnectionsPage'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const CreateProduct = lazy(() => import('@/pages/CreateProduct'));
 const EditProduct = lazy(() => import('@/pages/EditProduct'));
@@ -222,6 +223,7 @@ export const dashboardRoutes = (
     {pr('/dashboard/orders', Orders)}
     {pr('/dashboard/withdrawals', Withdrawals)}
     {pr('/dashboard/payment-methods', PaymentMethods)}
+    {pr('/dashboard/payment-connections', PaymentConnectionsPage)}
     {pr('/dashboard/advanced-orders', AdvancedOrderManagement)}
     {pr('/dashboard/advanced-orders-test', AdvancedOrderManagementSimple)}
     {pr('/dashboard/customers', Customers)}

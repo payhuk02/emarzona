@@ -1,6 +1,6 @@
 /**
  * Service de paiement unifié
- * Supporte Moneroo
+ * Moneroo (legacy) ou orchestrateur V2 (feature flag)
  */
 import {
   initiateMonerooPayment,
@@ -8,8 +8,11 @@ import {
 } from './moneroo-payment';
 import { logger } from './logger';
 import { isSupportedCurrency, type Currency } from './currency-converter';
+import { isPaymentOrchestrationV2Enabled, createOrchestratedPayment } from './payments';
+import type { PaymentProviderCode } from '@/types/store-payment-connection';
 
-export type PaymentProvider = 'moneroo';
+/** Type checkout — `moneroo` legacy UI ; codes orchestrateur après migration UI */
+export type PaymentProvider = 'moneroo' | PaymentProviderCode;
 
 export interface PaymentOptions {
   storeId: string;
@@ -23,7 +26,7 @@ export interface PaymentOptions {
   customerName?: string;
   customerPhone?: string;
   metadata?: Record<string, unknown>;
-  provider?: PaymentProvider; // Si non spécifié, utilise Moneroo par défaut
+  provider?: PaymentProvider;
 }
 
 export interface PaymentResult {
@@ -35,29 +38,71 @@ export interface PaymentResult {
   error?: string;
 }
 
+function toOrchestratorPreferred(provider?: PaymentProvider): PaymentProviderCode | undefined {
+  if (!provider || provider === 'moneroo') {
+    return 'moneroo_platform';
+  }
+  if (provider === 'moneroo_platform') {
+    return 'moneroo_platform';
+  }
+  return provider as PaymentProviderCode;
+}
+
+function toCheckoutProvider(provider: PaymentProviderCode): PaymentProvider {
+  return provider === 'moneroo_platform' ? 'moneroo' : provider;
+}
+
 /**
  * Initie un paiement avec le provider spécifié (ou Moneroo par défaut)
  */
 export const initiatePayment = async (options: PaymentOptions): Promise<PaymentResult> => {
-  const provider = options.provider || 'moneroo';
+  if (isPaymentOrchestrationV2Enabled()) {
+    try {
+      const orchestrated = await createOrchestratedPayment({
+        storeId: options.storeId,
+        productId: options.productId,
+        orderId: options.orderId,
+        customerId: options.customerId,
+        amount: options.amount,
+        currency: options.currency,
+        description: options.description,
+        customerEmail: options.customerEmail,
+        customerName: options.customerName,
+        customerPhone: options.customerPhone,
+        metadata: options.metadata,
+        preferredProvider: toOrchestratorPreferred(options.provider),
+      });
+
+      return {
+        success: orchestrated.success,
+        transaction_id: orchestrated.transaction_id,
+        checkout_url: orchestrated.checkout_url,
+        provider: toCheckoutProvider(orchestrated.provider),
+        provider_transaction_id: orchestrated.provider_transaction_id,
+        error: orchestrated.error,
+      };
+    } catch (error: unknown) {
+      logger.error('Orchestrator initiatePayment failed, falling back to Moneroo', { error });
+    }
+  }
 
   try {
     logger.log('Initiating Moneroo payment', { orderId: options.orderId });
     const currency: Currency | undefined =
       options.currency && isSupportedCurrency(options.currency) ? options.currency : 'XOF';
+
     const monerooResult = await initiateMonerooPayment({
       ...options,
       currency,
     });
-    const result = {
+
+    return {
       success: monerooResult.success,
       transaction_id: monerooResult.transaction_id,
       checkout_url: monerooResult.checkout_url,
-      provider: 'moneroo' as const,
+      provider: 'moneroo',
       provider_transaction_id: monerooResult.moneroo_transaction_id,
     };
-
-    return result;
   } catch (_error: unknown) {
     const errorObj = _error instanceof Error ? _error : new Error(String(_error));
     const errorMessage = errorObj.message || "Erreur inconnue lors de l'initiation du paiement";
@@ -66,7 +111,7 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
       success: false,
       transaction_id: '',
       checkout_url: '',
-      provider,
+      provider: options.provider ?? 'moneroo',
       error: errorMessage,
     };
   }
@@ -79,7 +124,6 @@ export const verifyTransactionStatus = async (
   transactionId: string,
   provider?: PaymentProvider
 ) => {
-  // Si le provider n'est pas spécifié, le récupérer depuis la transaction
   if (!provider) {
     const { supabase } = await import('@/integrations/supabase/client');
     const { data: transaction } = await supabase

@@ -1,0 +1,85 @@
+/**
+ * Options de paiement checkout via RPC get_store_payment_options
+ */
+
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import type { PaymentProviderCode, StorePaymentOption } from '@/types/store-payment-connection';
+import { logger } from '@/lib/logger';
+
+/** Valeur utilisée par le checkout (legacy moneroo + codes orchestrateur) */
+export type CheckoutPaymentProvider = 'moneroo' | PaymentProviderCode;
+
+export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider {
+  if (provider === 'moneroo_platform') return 'moneroo';
+  if (
+    provider === 'stripe_connect' ||
+    provider === 'paypal_commerce' ||
+    provider === 'flutterwave_connect'
+  ) {
+    return provider;
+  }
+  return 'moneroo';
+}
+
+export function checkoutProviderToRpc(provider: CheckoutPaymentProvider): PaymentProviderCode {
+  if (provider === 'moneroo') return 'moneroo_platform';
+  return provider;
+}
+
+function parsePaymentOptions(data: unknown): StorePaymentOption[] {
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter(
+      (row): row is StorePaymentOption =>
+        row != null &&
+        typeof row === 'object' &&
+        'provider' in row &&
+        typeof (row as StorePaymentOption).provider === 'string'
+    )
+    .map(row => ({
+      provider: row.provider as PaymentProviderCode,
+      connection_id: row.connection_id ?? null,
+      label: row.label ?? row.provider,
+    }));
+}
+
+export function useStorePaymentOptions(params: {
+  storeId?: string | null;
+  currency?: string;
+  buyerCountry?: string | null;
+  enabled?: boolean;
+}) {
+  const { storeId, currency = 'XOF', buyerCountry, enabled = true } = params;
+
+  return useQuery({
+    queryKey: ['store-payment-options', storeId, currency, buyerCountry],
+    enabled: enabled && !!storeId,
+    staleTime: 60_000,
+    queryFn: async (): Promise<StorePaymentOption[]> => {
+      if (!storeId) return [];
+
+      const { data, error } = await supabase.rpc('get_store_payment_options' as never, {
+        p_store_id: storeId,
+        p_currency: currency,
+        p_buyer_country: buyerCountry ?? null,
+      });
+
+      if (error) {
+        logger.error('get_store_payment_options failed', { error, storeId });
+        return [
+          {
+            provider: 'moneroo_platform',
+            connection_id: null,
+            label: 'Moneroo',
+          },
+        ];
+      }
+
+      const options = parsePaymentOptions(data);
+      return options.length > 0
+        ? options
+        : [{ provider: 'moneroo_platform', connection_id: null, label: 'Moneroo' }];
+    },
+  });
+}

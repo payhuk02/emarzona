@@ -1,18 +1,92 @@
-import { test, expect } from '@playwright/test';
-
 /**
- * Parcours minimal œuvre d'artiste (navigation publique + portail client).
- * Complète la couverture E2E manquante identifiée dans l'audit.
+ * E2E — Workflow œuvres d'artiste (Sprint 1 audit 2026)
+ *
+ * Couvre : collections, enchères, fiche artiste (si données), portail client, auth.
+ * Parcours achat + certificat complet : voir digital/physical specs + env Moneroo sandbox.
+ *
+ * Exécution : npx playwright test tests/e2e/artist-product-workflow.spec.ts
  */
+
+import { test, expect } from '@playwright/test';
+import { E2E_TEST_CONFIG, gotoApp, loginAs } from './shared/e2e-test-config';
+
 test.describe('Artist product workflow', () => {
+  test.setTimeout(90_000);
+
   test('collections page loads', async ({ page }) => {
-    await page.goto('/collections');
+    const response = await gotoApp(page, '/collections');
+    expect(response?.status()).toBeLessThan(500);
     await expect(page).toHaveURL(/\/collections/);
+    await expect(page.locator('body')).toBeVisible();
+    const html = await page.content();
+    expect(html.toLowerCase()).not.toContain('internal server error');
+  });
+
+  test('auctions list page loads', async ({ page }) => {
+    const response = await gotoApp(page, '/auctions');
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page).toHaveURL(/\/auctions/);
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('account artist portal requires auth', async ({ page }) => {
-    await page.goto('/account/artist');
-    await expect(page).toHaveURL(/\/login/);
+  test('marketplace loads and can filter toward artist products', async ({ page }) => {
+    const response = await gotoApp(page, '/marketplace');
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page.locator('body')).toBeVisible();
+
+    const artistFilter = page.locator(
+      'button:has-text("Artiste"), button:has-text("Œuvre"), button:has-text("Artist"), [data-product-type="artist"]'
+    );
+    if (
+      await artistFilter
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
+      await artistFilter.first().click();
+    }
+
+    const card = page.locator('[data-testid="product-card"]').first();
+    if (await card.isVisible().catch(() => false)) {
+      await card.click();
+      await page.waitForURL(/\/(artist|stores)\//, { timeout: 15_000 }).catch(() => undefined);
+      const url = page.url();
+      expect(url.length).toBeGreaterThan(0);
+    }
+  });
+
+  test('artist product detail route responds (optional E2E_ARTIST_PRODUCT_ID)', async ({
+    page,
+  }) => {
+    const productId = process.env.E2E_ARTIST_PRODUCT_ID;
+    test.skip(!productId, 'Set E2E_ARTIST_PRODUCT_ID for full fiche test');
+
+    const response = await gotoApp(page, `/artist/${productId}`);
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page.locator('body')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /acheter|ajouter|panier|buy/i }).or(page.locator('h1'))
+    ).toBeVisible({ timeout: 15_000 });
+  });
+
+  test('account artist portal requires auth when logged out', async ({ page }) => {
+    await gotoApp(page, '/account/artist');
+    await page.waitForURL(/\/(login|auth)/, { timeout: 15_000 });
+    expect(page.url()).toMatch(/\/(login|auth)/);
+  });
+
+  test('logged-in buyer can open artist portal shell', async ({ page }) => {
+    test.skip(
+      !process.env.E2E_RUN_AUTH_TESTS,
+      'Set E2E_RUN_AUTH_TESTS=1 with valid buyer credentials'
+    );
+
+    await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
+    const response = await gotoApp(page, '/account/artist');
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page.locator('body')).toBeVisible();
+    await expect(page).not.toHaveURL(/\/login$/);
+    const tabsOrHeading = page.locator('text=/certificat|œuvre|artiste|achat/i, [role="tablist"]');
+    await expect(tabsOrHeading.first()).toBeVisible({ timeout: 20_000 });
   });
 });

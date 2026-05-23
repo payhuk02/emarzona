@@ -60,6 +60,11 @@ const salesNavItems = [
     icon: CreditCard,
   },
   {
+    label: 'Connexions paiement',
+    path: '/dashboard/payment-connections',
+    icon: Globe,
+  },
+  {
     label: 'Commandes Avancées',
     path: '/dashboard/advanced-orders',
     icon: MessageSquare,

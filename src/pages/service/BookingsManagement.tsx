@@ -279,76 +279,41 @@ export default function BookingsManagement() {
 
   const isLoading = storeLoading || bookingsLoading;
 
-  // Fetch availabilities
-  // Type temporaire pour service_availability en attendant la régénération des types Supabase
-  // TODO: Ajouter service_availability aux types Supabase générés (voir docs/TODOS.md)
-  interface ServiceAvailability {
+  type ServiceAvailabilityRow = {
     id: string;
-    service_product_id: string;
-    staff_id: string | null;
-    date: string;
+    day_of_week: number;
     start_time: string;
     end_time: string;
-    is_available: boolean;
-    created_at: string;
-    updated_at: string;
-    service_products?: {
-      id: string;
-      product_id: string;
-      products?: {
-        name: string;
-      } | null;
-    } | null;
-  }
+    is_active: boolean | null;
+    product_id: string;
+    products: { name: string } | null;
+  };
 
-  const { data: availabilities } = useQuery<ServiceAvailability[]>({
+  const { data: availabilities } = useQuery<ServiceAvailabilityRow[]>({
     queryKey: ['service-availabilities'],
     queryFn: async () => {
-      // Type assertion nécessaire car service_availability n'est pas dans les types générés
-      const { data, error } = await (
-        supabase as unknown as {
-          from: (table: string) => {
-            select: (query: string) => Promise<{
-              data: ServiceAvailability[] | null;
-              error: { message: string } | null;
-            }>;
-          };
-        }
-      )
+      const { data, error } = await supabase
         .from('service_availability')
         .select(
           `
-          *,
-          service_product:service_products(
-            *,
-            product:products(name)
-          )
+          id,
+          day_of_week,
+          start_time,
+          end_time,
+          is_active,
+          product_id,
+          products ( name )
         `
         )
-        .eq('is_available', true);
+        .eq('is_active', true);
 
       if (error) {
         logger.error('Error fetching availabilities', { error: error.message });
         throw error;
       }
-      return data || [];
+      return (data ?? []) as ServiceAvailabilityRow[];
     },
   });
-
-  // Type pour les availabilities
-  interface ServiceAvailabilityWithRelations {
-    id: string;
-    day_of_week: number;
-    start_time: string;
-    end_time: string;
-    is_available: boolean;
-    service_product?: Array<{
-      id: string;
-      product?: {
-        name: string;
-      };
-    }>;
-  }
 
   // Transform bookings to calendar events
   const events = useMemo((): ExtendedBookingEvent[] => {
@@ -405,16 +370,16 @@ export default function BookingsManagement() {
         currentDate.setDate(now.getDate() + i);
         const dayOfWeek = currentDate.getDay();
 
-        (availabilities as ServiceAvailabilityWithRelations[] | null)?.forEach(availability => {
+        availabilities?.forEach(availability => {
           if (availability.day_of_week === dayOfWeek) {
             const [startHour, startMinute] = availability.start_time.split(':');
             const [endHour, endMinute] = availability.end_time.split(':');
 
             const start = new Date(currentDate);
-            start.setHours(parseInt(startHour), parseInt(startMinute), 0);
+            start.setHours(parseInt(startHour, 10), parseInt(startMinute, 10), 0);
 
             const end = new Date(currentDate);
-            end.setHours(parseInt(endHour), parseInt(endMinute), 0);
+            end.setHours(parseInt(endHour, 10), parseInt(endMinute, 10), 0);
 
             const isBooked = bookingEvents.some(
               event => event.type === 'booked' && event.start >= start && event.start < end
@@ -423,7 +388,7 @@ export default function BookingsManagement() {
             if (!isBooked && start > now) {
               bookingEvents.push({
                 id: `availability-${availability.id}-${format(currentDate, 'yyyy-MM-dd')}`,
-                title: `Disponible - ${availability.service_product?.product?.name || 'Service'}`,
+                title: `Disponible - ${availability.products?.name || 'Service'}`,
                 start,
                 end,
                 type: 'available',

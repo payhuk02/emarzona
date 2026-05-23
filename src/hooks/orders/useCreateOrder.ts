@@ -13,7 +13,7 @@ import { useCreatePhysicalOrder, type CreatePhysicalOrderOptions } from './useCr
 import { useCreateServiceOrder, type CreateServiceOrderOptions } from './useCreateServiceOrder';
 import { useCreateCourseOrder, type CreateCourseOrderOptions } from './useCreateCourseOrder';
 import { useCreateArtistOrder, type CreateArtistOrderOptions } from './useCreateArtistOrder';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiatePayment } from '@/lib/payment-service';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 
@@ -361,7 +361,7 @@ export const useCreateOrder = () => {
           }
 
           // Initier paiement
-          const paymentResult = await initiateMonerooPayment({
+          const paymentResult = await initiatePayment({
             storeId,
             productId,
             orderId: order.id,

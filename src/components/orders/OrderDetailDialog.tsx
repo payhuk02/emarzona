@@ -31,6 +31,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUnreadCount } from '@/hooks/useUnreadCount';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { RefundTransactionButton } from '@/components/payments/RefundTransactionButton';
+import { getPaymentProviderLabel } from '@/lib/payments/payment-provider-labels';
 
 interface OrderDetailDialogProps {
   open: boolean;
@@ -80,7 +82,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
           .select(
-            'id, moneroo_transaction_id, amount, currency, status, moneroo_payment_method, created_at, completed_at'
+            'id, moneroo_transaction_id, amount, currency, status, payment_provider, moneroo_payment_method, created_at, completed_at'
           )
           .eq('order_id', order.id)
           .order('created_at', { ascending: false });
@@ -98,7 +100,8 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
               amount: Number(t.amount || 0),
               currency: t.currency || 'XOF',
               status: t.status || 'pending',
-              payment_method: t.moneroo_payment_method,
+              payment_provider: t.payment_provider ?? null,
+              payment_method: t.moneroo_payment_method ?? t.payment_provider,
               created_at: t.created_at,
               completed_at: t.completed_at,
             }))
@@ -540,6 +543,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                       pending: 'secondary',
                       failed: 'destructive',
                       cancelled: 'destructive',
+                      refunded: 'secondary',
                     };
 
                     const labels: Record<string, string> = {
@@ -548,6 +552,7 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                       pending: 'En attente',
                       failed: 'Échoué',
                       cancelled: 'Annulé',
+                      refunded: 'Remboursé',
                     };
 
                     return (
@@ -557,24 +562,56 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                     );
                   };
 
+                  const reloadTransactions = () => {
+                    if (!order?.id) return;
+                    void supabase
+                      .from('transactions')
+                      .select(
+                        'id, moneroo_transaction_id, amount, currency, status, payment_provider, moneroo_payment_method, created_at, completed_at'
+                      )
+                      .eq('order_id', order.id)
+                      .order('created_at', { ascending: false })
+                      .then(({ data }) => {
+                        if (data) {
+                          setTransactions(
+                            data.map(t => ({
+                              id: t.id,
+                              moneroo_transaction_id: t.moneroo_transaction_id,
+                              amount: Number(t.amount || 0),
+                              currency: t.currency || 'XOF',
+                              status: t.status || 'pending',
+                              payment_provider: t.payment_provider ?? null,
+                              payment_method: t.moneroo_payment_method ?? t.payment_provider,
+                              created_at: t.created_at,
+                              completed_at: t.completed_at,
+                            }))
+                          );
+                        }
+                      });
+                  };
+
                   return (
                     <div
                       key={transaction.id}
-                      className="flex justify-between items-center p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
-                      onClick={() => {
-                        navigate('/dashboard/payments-customers');
-                        onOpenChange(false);
-                      }}
+                      className="flex justify-between items-center gap-2 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                     >
-                      <div className="flex-1">
+                      <div
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => {
+                          navigate('/dashboard/payments-customers');
+                          onOpenChange(false);
+                        }}
+                      >
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-sm">
                             {transaction.amount.toLocaleString('fr-FR')} {transaction.currency}
                           </span>
                           {getTransactionStatusBadge(transaction.status)}
-                          {transaction.payment_method && (
+                          {(transaction.payment_provider || transaction.payment_method) && (
                             <Badge variant="outline" className="text-xs">
-                              {transaction.payment_method}
+                              {getPaymentProviderLabel(
+                                transaction.payment_provider ?? transaction.payment_method
+                              )}
                             </Badge>
                           )}
                         </div>
@@ -601,7 +638,17 @@ const OrderDetailDialogComponent = ({ open, onOpenChange, order }: OrderDetailDi
                           )}
                         </div>
                       </div>
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <RefundTransactionButton
+                          transactionId={transaction.id}
+                          amount={transaction.amount}
+                          currency={transaction.currency}
+                          paymentProvider={transaction.payment_provider}
+                          status={transaction.status}
+                          onRefunded={reloadTransactions}
+                        />
+                        <CreditCard className="h-4 w-4 text-muted-foreground hidden sm:block" />
+                      </div>
                     </div>
                   );
                 })}

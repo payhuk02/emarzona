@@ -1,22 +1,28 @@
 /**
- * Composant de sélection du provider de paiement
+ * Sélection dynamique du moyen de paiement (RPC get_store_payment_options)
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, CheckCircle2, AlertCircle } from '@/components/icons';
+import { Wallet, CreditCard, CheckCircle2, AlertCircle, Loader2 } from '@/components/icons';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  useStorePaymentOptions,
+  rpcProviderToCheckout,
+  type CheckoutPaymentProvider,
+} from '@/hooks/payments/useStorePaymentOptions';
+import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 
-export type PaymentProvider = 'moneroo';
+export type PaymentProvider = CheckoutPaymentProvider;
 
 interface PaymentProviderOption {
-  value: PaymentProvider;
+  value: CheckoutPaymentProvider;
   label: string;
   description: string;
   icon: React.ReactNode;
@@ -24,11 +30,43 @@ interface PaymentProviderOption {
   features: string[];
 }
 
+const PROVIDER_META: Record<
+  CheckoutPaymentProvider,
+  Omit<PaymentProviderOption, 'value' | 'available'>
+> = {
+  moneroo: {
+    label: 'Moneroo',
+    description: 'Mobile money et paiements locaux (XOF, Afrique)',
+    icon: <Wallet className="h-5 w-5" />,
+    features: ['Mobile Money', 'XOF / XAF', 'Paiement local'],
+  },
+  stripe_connect: {
+    label: 'Carte bancaire (Stripe)',
+    description: 'Visa, Mastercard, Apple Pay — paiement international',
+    icon: <CreditCard className="h-5 w-5" />,
+    features: ['Cartes internationales', 'USD / EUR / GBP'],
+  },
+  paypal_commerce: {
+    label: 'PayPal',
+    description: 'Compte PayPal ou carte via PayPal',
+    icon: <Wallet className="h-5 w-5" />,
+    features: ['PayPal', 'Protection acheteur'],
+  },
+  flutterwave_connect: {
+    label: 'Flutterwave',
+    description: 'Paiements Afrique anglophone et cartes',
+    icon: <CreditCard className="h-5 w-5" />,
+    features: ['NGN, GHS, KES', 'Cartes'],
+  },
+};
+
 interface PaymentProviderSelectorProps {
   value?: PaymentProvider;
   onChange: (provider: PaymentProvider) => void;
   storeId?: string;
   amount?: number;
+  currency?: string;
+  buyerCountry?: string | null;
 }
 
 export function PaymentProviderSelector({
@@ -36,27 +74,52 @@ export function PaymentProviderSelector({
   onChange,
   storeId,
   amount,
+  currency = 'XOF',
+  buyerCountry,
 }: PaymentProviderSelectorProps) {
   const { user } = useAuth();
+  const orchestrationV2 = isPaymentOrchestrationV2Enabled();
 
-  const [providers, setProviders] = useState<PaymentProviderOption[]>([
-    {
-      value: 'moneroo',
-      label: 'Moneroo',
-      description: 'Paiement sécurisé par Moneroo',
-      icon: <Wallet className="h-5 w-5" />,
-      available: true,
-      features: ['Multi-devises', 'Remboursements', 'Notifications'],
-    },
-  ]);
-  // (Réservé) on garde seulement l'état nécessaire
-  const [, setUserPreference] = useState<PaymentProvider | null>(null);
+  const {
+    data: rpcOptions,
+    isLoading,
+    isError,
+  } = useStorePaymentOptions({
+    storeId,
+    currency,
+    buyerCountry,
+    enabled: orchestrationV2 && !!storeId,
+  });
 
-  // Charger les préférences de l'utilisateur
+  const providers = useMemo((): PaymentProviderOption[] => {
+    if (!orchestrationV2 || !storeId) {
+      return [
+        {
+          value: 'moneroo',
+          ...PROVIDER_META.moneroo,
+          available: true,
+        },
+      ];
+    }
+
+    const source = rpcOptions ?? [];
+    return source.map(opt => {
+      const checkoutValue = rpcProviderToCheckout(opt.provider);
+      const meta = PROVIDER_META[checkoutValue] ?? PROVIDER_META.moneroo;
+      return {
+        value: checkoutValue,
+        label: opt.label || meta.label,
+        description: meta.description,
+        icon: meta.icon,
+        features: meta.features,
+        available: true,
+      };
+    });
+  }, [orchestrationV2, storeId, rpcOptions]);
+
   useEffect(() => {
     const loadUserPreference = async () => {
-      if (!user) return;
-
+      if (!user || value) return;
       try {
         const { data } = await supabase
           .from('profiles')
@@ -64,68 +127,68 @@ export function PaymentProviderSelector({
           .eq('user_id', user.id)
           .single();
 
-        if (data?.payment_provider_preference) {
-          setUserPreference(data.payment_provider_preference as PaymentProvider);
-          if (!value) {
-            onChange(data.payment_provider_preference as PaymentProvider);
-          }
-        }
+        const pref = data?.payment_provider_preference;
+        if (!pref) return;
+
+        const checkoutPref =
+          pref === 'moneroo' || pref === 'moneroo_platform'
+            ? 'moneroo'
+            : (pref as CheckoutPaymentProvider);
+
+        const match = providers.find(p => p.value === checkoutPref);
+        if (match) onChange(match.value);
       } catch (error) {
         logger.error('Error loading user preference:', { error });
       }
     };
 
     loadUserPreference();
-  }, [user, value, onChange]);
+  }, [user, value, onChange, providers]);
 
-  // Charger les paramètres de la boutique
-  useEffect(() => {
-    const loadStoreSettings = async () => {
-      if (!storeId) return;
-
-      try {
-        const { data } = await supabase
-          .from('stores')
-          .select('enabled_payment_providers')
-          .eq('id', storeId)
-          .single();
-
-        if (data?.enabled_payment_providers) {
-          const providers = data.enabled_payment_providers ?? [];
-          // Désactiver les providers non autorisés
-          setProviders(prev =>
-            prev.map(p => ({
-              ...p,
-              available: Array.isArray(providers) && providers.includes(p.value),
-            }))
-          );
-        }
-      } catch (error) {
-        logger.error('Error loading store settings:', { error });
-      }
-    };
-
-    loadStoreSettings();
-  }, [storeId]);
-
-  // Sauvegarder la préférence de l'utilisateur
-  const handleProviderChange = async (provider: PaymentProvider) => {
+  const handleProviderChange = async (provider: CheckoutPaymentProvider) => {
     onChange(provider);
 
-    if (user) {
+    if (user && (provider === 'moneroo' || provider === 'stripe_connect')) {
       try {
+        const dbPref = provider === 'moneroo' ? 'moneroo' : 'moneroo';
         await supabase
           .from('profiles')
-          .update({ payment_provider_preference: provider })
+          .update({ payment_provider_preference: dbPref })
           .eq('user_id', user.id);
       } catch (error) {
-        logger.error('Error saving user preference:', { error });
+        logger.debug('Could not save payment preference (schema may be moneroo-only)', { error });
       }
     }
   };
 
   const availableProviders = providers.filter(p => p.available);
   const selectedProvider = providers.find(p => p.value === value);
+
+  useEffect(() => {
+    if (availableProviders.length === 1 && value !== availableProviders[0].value) {
+      handleProviderChange(availableProviders[0].value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-select single option
+  }, [availableProviders.length, availableProviders[0]?.value]);
+
+  if (isLoading && orchestrationV2 && storeId) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError && availableProviders.length === 0) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>Impossible de charger les moyens de paiement.</AlertDescription>
+      </Alert>
+    );
+  }
 
   if (availableProviders.length === 0) {
     return (
@@ -137,21 +200,20 @@ export function PaymentProviderSelector({
   }
 
   if (availableProviders.length === 1) {
-    // Si un seul provider est disponible, le sélectionner automatiquement
-    if (value !== availableProviders[0].value) {
-      handleProviderChange(availableProviders[0].value);
-    }
-    return null; // Ne pas afficher le sélecteur
+    return null;
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Moyen de paiement</CardTitle>
-        <CardDescription>Choisissez votre moyen de paiement préféré</CardDescription>
+        <CardDescription>Choisissez comment vous souhaitez payer</CardDescription>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={value} onValueChange={handleProviderChange}>
+        <RadioGroup
+          value={value}
+          onValueChange={v => handleProviderChange(v as CheckoutPaymentProvider)}
+        >
           <div className="space-y-3">
             {providers.map(provider => (
               <div
@@ -169,13 +231,13 @@ export function PaymentProviderSelector({
               >
                 <RadioGroupItem
                   value={provider.value}
-                  id={provider.value}
+                  id={`payment-${provider.value}`}
                   disabled={!provider.available}
                   className="mt-1"
                 />
                 <div className="flex-1">
                   <Label
-                    htmlFor={provider.value}
+                    htmlFor={`payment-${provider.value}`}
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <div className="text-primary">{provider.icon}</div>
@@ -184,11 +246,6 @@ export function PaymentProviderSelector({
                         <span className="font-medium">{provider.label}</span>
                         {value === provider.value && (
                           <CheckCircle2 className="h-4 w-4 text-primary" />
-                        )}
-                        {!provider.available && (
-                          <Badge variant="secondary" className="text-xs">
-                            Non disponible
-                          </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">{provider.description}</p>
@@ -209,10 +266,15 @@ export function PaymentProviderSelector({
           </div>
         </RadioGroup>
 
-        {selectedProvider && amount && (
+        {selectedProvider && amount != null && amount > 0 && (
           <div className="mt-4 p-3 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground">
-              <strong>Montant à payer:</strong> {amount.toLocaleString()} XOF
+              <strong>Montant à payer :</strong>{' '}
+              {amount.toLocaleString(undefined, {
+                style: 'currency',
+                currency: currency.length === 3 ? currency : 'XOF',
+                maximumFractionDigits: 0,
+              })}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Vous serez redirigé vers {selectedProvider.label} pour finaliser votre paiement.

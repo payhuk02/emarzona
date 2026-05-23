@@ -12,7 +12,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -310,7 +310,7 @@ export const useCreateCourseOrder = () => {
         ? (product.currency as Currency)
         : 'XOF';
 
-      const paymentResult = await initiateMonerooPayment({
+      const paymentResult = await initiatePayment({
         storeId,
         productId,
         orderId: order.id,

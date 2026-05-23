@@ -1,6 +1,7 @@
 import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -27,26 +28,6 @@ function sanitizeWebhookPayload(payload: Record<string, unknown>): Record<string
     has_metadata: !!payload.metadata,
     provider_reference: payload.reference ?? null,
   };
-}
-
-/** Canonique: item_metadata (jsonb). Compat: ancienne colonne metadata si présente côté DB. */
-function parseOrderItemMetadata(item: {
-  item_metadata?: unknown;
-  metadata?: unknown;
-}): Record<string, unknown> {
-  const raw = item.item_metadata ?? item.metadata;
-  if (raw == null) return {};
-  if (typeof raw === 'string') {
-    try {
-      return JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  }
-  if (typeof raw === 'object' && !Array.isArray(raw)) {
-    return raw as Record<string, unknown>;
-  }
-  return {};
 }
 
 async function calculateHMACSignature(payload: string, secret: string): Promise<string> {
@@ -107,88 +88,6 @@ async function verifyWebhookSignature(
   } catch (error) {
     console.error('Error verifying webhook signature:', error);
     return false;
-  }
-}
-
-/**
- * Envoie les emails de confirmation de commande après paiement
- */
-async function sendOrderConfirmationEmail(supabase: any, order: any): Promise<void> {
-  try {
-    // Récupérer les informations du client
-    let customerEmail = order.customer_email;
-    let customerName = order.customer_name || 'Client';
-    let customerId = order.customer_id;
-
-    // Si pas d'email dans l'order, chercher dans la table customers
-    if (!customerEmail && order.customer_id) {
-      const { data: customer } = await supabase
-        .from('customers')
-        .select('email, name, full_name')
-        .eq('id', order.customer_id)
-        .single();
-
-      if (customer) {
-        customerEmail = customer.email;
-        customerName = customer.full_name || customer.name || 'Client';
-      }
-    }
-
-    // Si toujours pas d'email, chercher dans auth.users via profiles
-    if (!customerEmail && order.customer_id) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, full_name, first_name, last_name')
-        .eq('id', order.customer_id)
-        .single();
-
-      if (profile) {
-        const { data: user } = await supabase.auth.admin.getUserById(order.customer_id);
-        if (user?.user?.email) {
-          customerEmail = user.user.email;
-          customerName =
-            profile.full_name ||
-            `${profile.first_name || ''} ${profile.last_name || ''}`.trim() ||
-            'Client';
-        }
-      }
-    }
-
-    // Si on a toujours pas d'email, on ne peut pas envoyer d'email
-    if (!customerEmail) {
-      console.warn(`Cannot send confirmation email for order ${order.id}: no customer email found`);
-      return;
-    }
-
-    // Appeler l'Edge Function pour envoyer les emails
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-order-confirmation-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${supabaseServiceKey}`,
-      },
-      body: JSON.stringify({
-        order_id: order.id,
-        customer_email: customerEmail,
-        customer_name: customerName,
-        customer_id: customerId,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to send order confirmation emails for order ${order.id}:`, errorText);
-      throw new Error(`Email service returned ${response.status}: ${errorText}`);
-    }
-
-    const result = await response.json();
-    console.log(`Order confirmation emails sent for order ${order.id}:`, result);
-  } catch (error) {
-    console.error(`Error sending order confirmation emails for order ${order.id}:`, error);
-    // Ne pas propager l'erreur pour ne pas bloquer le webhook
   }
 }
 
@@ -457,11 +356,19 @@ serve(async req => {
       // Update associated order if exists
       let order = null;
       if (transaction.order_id) {
+        const { data: prevOrder } = await supabase
+          .from('orders')
+          .select('payment_status')
+          .eq('id', transaction.order_id)
+          .single();
+        const wasAlreadyPaid = prevOrder?.payment_status === 'paid';
+
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .update({
             payment_status: 'paid',
             status: 'confirmed',
+            payment_provider_used: transaction.payment_provider || 'moneroo_platform',
           })
           .eq('id', transaction.order_id)
           .select(
@@ -473,272 +380,8 @@ serve(async req => {
           console.error('Error updating order:', orderError);
         } else if (orderData) {
           order = orderData;
-          // TypeScript assertion: orderData est non-null ici
-          const currentOrder = orderData;
-          // Déclencher webhook order.completed via la nouvelle fonction
-          await supabase
-            .rpc('trigger_webhook', {
-              p_store_id: currentOrder.store_id,
-              p_event_type: 'order.completed',
-              p_payload: {
-                order_id: currentOrder.id,
-                order_number: currentOrder.order_number,
-                customer_id: currentOrder.customer_id,
-                total_amount: currentOrder.total_amount,
-                currency: currentOrder.currency,
-                status: 'confirmed',
-                payment_status: 'paid',
-                created_at: currentOrder.created_at,
-              },
-            })
-            .then(null, (err: unknown) => console.error('Webhook error:', err));
-
-          // Déclencher aussi payment.completed
-          await supabase
-            .rpc('trigger_webhook', {
-              p_store_id: currentOrder.store_id,
-              p_event_type: 'payment.completed',
-              p_payload: {
-                transaction_id: transaction.id,
-                order_id: currentOrder.id,
-                order_number: currentOrder.order_number,
-                amount: transaction.amount,
-                currency: transaction.currency,
-                payment_method: transaction.payment_method,
-                customer_id: currentOrder.customer_id,
-              },
-            })
-            .then(null, (err: unknown) => console.error('Payment webhook error:', err));
-
-          // 🆕 Confirmer automatiquement les bookings de service après paiement
-          try {
-            const { data: serviceOrderItems, error: serviceItemsError } = await supabase
-              .from('order_items')
-              .select('id, booking_id, product_type')
-              .eq('order_id', currentOrder.id)
-              .eq('product_type', 'service')
-              .not('booking_id', 'is', null);
-
-            if (!serviceItemsError && serviceOrderItems && serviceOrderItems.length > 0) {
-              // Confirmer tous les bookings associés
-              for (const item of serviceOrderItems) {
-                if (item.booking_id) {
-                  const { error: bookingUpdateError } = await supabase
-                    .from('service_bookings')
-                    .update({
-                      status: 'confirmed',
-                      updated_at: new Date().toISOString(),
-                    })
-                    .eq('id', item.booking_id)
-                    .eq('status', 'pending'); // Seulement si encore pending
-
-                  if (bookingUpdateError) {
-                    console.error(
-                      `Error confirming booking ${item.booking_id}:`,
-                      bookingUpdateError
-                    );
-                  } else {
-                    console.log(`Booking ${item.booking_id} confirmed after payment`);
-
-                    // Déclencher webhook service.booking_confirmed
-                    await supabase
-                      .rpc('trigger_webhook', {
-                        p_store_id: currentOrder.store_id,
-                        p_event_type: 'service.booking_confirmed',
-                        p_payload: {
-                          booking_id: item.booking_id,
-                          order_id: currentOrder.id,
-                          order_number: currentOrder.order_number,
-                          status: 'confirmed',
-                          confirmed_at: new Date().toISOString(),
-                        },
-                      })
-                      .then(null, (err: unknown) =>
-                        console.error('Service booking confirmed webhook error:', err)
-                      );
-                  }
-                }
-              }
-            }
-          } catch (serviceBookingError) {
-            console.error('Error confirming service bookings:', serviceBookingError);
-            // Ne pas bloquer le webhook si la confirmation échoue
-          }
-
-          // 🆕 Vérifier si toutes les commandes du groupe multi-stores sont payées
-          // La fonction SQL check_and_notify_multi_store_group_completion sera appelée
-          // automatiquement par le trigger, mais on peut aussi l'appeler manuellement pour être sûr
-          if (
-            currentOrder.metadata &&
-            typeof currentOrder.metadata === 'object' &&
-            (currentOrder.metadata as any).multi_store === true &&
-            (currentOrder.metadata as any).group_id
-          ) {
-            await supabase
-              .rpc('check_and_notify_multi_store_group_completion', {
-                p_order_id: currentOrder.id,
-              })
-              .then(null, (err: unknown) => {
-                console.error('Error checking multi-store group completion:', err);
-              });
-          }
-
-          // 🆕 Envoyer les emails de confirmation de commande
-          if (order) {
-            await sendOrderConfirmationEmail(supabase, order).then(null, (err: unknown) => {
-              console.error('Error sending order confirmation emails:', err);
-              // Ne pas bloquer le webhook si l'envoi d'email échoue
-            });
-          }
-
-          // 🆕 Générer automatiquement les certificats pour les œuvres d'artiste
-          if (orderData) {
-            const currentOrderForCert = orderData; // Variable locale pour TypeScript
-            try {
-              // Récupérer les order_items pour vérifier les produits artistes
-              const { data: orderItems, error: itemsError } = await supabase
-                .from('order_items')
-                .select('id, product_id, product_type, item_metadata')
-                .eq('order_id', currentOrderForCert.id)
-                .eq('product_type', 'artist');
-
-              if (!itemsError && orderItems && orderItems.length > 0) {
-                // Récupérer le customer_id pour obtenir le user_id
-                const { data: customer } = await supabase
-                  .from('customers')
-                  .select('id, user_id')
-                  .eq('id', currentOrderForCert.customer_id)
-                  .single();
-
-                const userId = customer?.user_id || transaction.customer_id;
-
-                // Générer un certificat pour chaque produit artiste
-                for (const item of orderItems) {
-                  try {
-                    const metadata = parseOrderItemMetadata(item);
-                    const artistProductId = metadata.artist_product_id;
-
-                    if (artistProductId && userId) {
-                      // Vérifier si un certificat doit être généré
-                      const { data: artistProduct } = await supabase
-                        .from('artist_products')
-                        .select('certificate_of_authenticity, artwork_edition_type')
-                        .eq('id', artistProductId)
-                        .single();
-
-                      const shouldGenerate =
-                        artistProduct &&
-                        (artistProduct.certificate_of_authenticity === true ||
-                          artistProduct.artwork_edition_type === 'limited_edition');
-
-                      if (shouldGenerate) {
-                        // Appeler l'Edge Function pour générer le certificat
-                        const certResponse = await fetch(
-                          `${supabaseUrl}/functions/v1/generate-artist-certificate`,
-                          {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${supabaseServiceKey}`,
-                            },
-                            body: JSON.stringify({
-                              order_id: currentOrderForCert.id,
-                              order_item_id: item.id,
-                              product_id: item.product_id,
-                              artist_product_id: artistProductId,
-                              user_id: userId,
-                            }),
-                          }
-                        ).catch(certErr => {
-                          console.error('Error calling certificate generation function:', certErr);
-                          return null;
-                        });
-
-                        if (certResponse && !certResponse.ok) {
-                          const errorText = await certResponse.text();
-                          console.error('Error generating artist certificate:', errorText);
-                        }
-                      }
-
-                      // 🆕 Créer automatiquement un enregistrement de provenance pour le transfert de propriété
-                      try {
-                        // Récupérer les informations du produit artiste
-                        const { data: fullArtistProduct } = await supabase
-                          .from('artist_products')
-                          .select('store_id, artist_name, artwork_title')
-                          .eq('id', artistProductId)
-                          .single();
-
-                        if (fullArtistProduct) {
-                          // Récupérer les informations du client/acheteur
-                          const { data: buyerInfo } = await supabase
-                            .from('customers')
-                            .select('name, full_name, email')
-                            .eq('id', currentOrderForCert.customer_id)
-                            .single();
-
-                          const buyerName =
-                            buyerInfo?.full_name ||
-                            buyerInfo?.name ||
-                            currentOrderForCert.customer_email ||
-                            'Acheteur';
-
-                          // Récupérer le propriétaire précédent (vendeur/store owner)
-                          const { data: storeInfo } = await supabase
-                            .from('stores')
-                            .select('name, owner_id')
-                            .eq('id', fullArtistProduct.store_id)
-                            .single();
-
-                          const previousOwnerName = storeInfo?.name || 'Vendeur';
-
-                          // Créer l'enregistrement de provenance
-                          const { error: provenanceError } = await supabase
-                            .from('artwork_provenance')
-                            .insert({
-                              product_id: item.product_id,
-                              store_id: fullArtistProduct.store_id,
-                              provenance_type: 'ownership',
-                              event_date: new Date().toISOString().split('T')[0],
-                              previous_owner_name: previousOwnerName,
-                              current_owner_id: userId,
-                              current_owner_name: buyerName,
-                              description: `Transfert de propriété suite à la vente - Commande #${currentOrderForCert.order_number || currentOrderForCert.id}`,
-                              is_verified: true,
-                              metadata: {
-                                order_id: currentOrderForCert.id,
-                                order_item_id: item.id,
-                                transaction_id: transaction.id,
-                                purchase_date: new Date().toISOString(),
-                              },
-                            });
-
-                          if (provenanceError) {
-                            console.error('Error creating provenance record:', provenanceError);
-                          } else {
-                            console.log(
-                              'Provenance record created successfully for artist product',
-                              {
-                                product_id: item.product_id,
-                                order_id: currentOrderForCert.id,
-                              }
-                            );
-                          }
-                        }
-                      } catch (provErr) {
-                        console.error('Error creating provenance record:', provErr);
-                        // Ne pas bloquer le webhook si la création de provenance échoue
-                      }
-                    }
-                  } catch (itemErr) {
-                    console.error('Error processing order item for certificate:', itemErr);
-                  }
-                }
-              }
-            } catch (certError) {
-              console.error('Error in certificate generation process:', certError);
-              // Ne pas bloquer le webhook si la génération échoue
-            }
+          if (!wasAlreadyPaid) {
+            await runPostOrderPaymentFulfillment(supabase, orderData.id, transaction.id);
           }
         }
       }

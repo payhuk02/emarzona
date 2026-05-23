@@ -7,6 +7,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { refundPayment } from '@/lib/payments/refund-payment';
+import { findCompletedTransactionForOrder } from '@/lib/payments/find-order-transaction';
 
 const PRODUCT_RETURN_FIELDS =
   'id, order_id, order_item_id, product_id, customer_id, store_id, return_number, return_reason, return_reason_details, status, quantity, item_price, total_amount, refund_amount, refund_type, refund_method, refund_status, refunded_at, requested_at, approved_at, rejected_at, received_at, customer_photos, customer_notes, store_notes, return_tracking_number, created_at, updated_at';
@@ -216,7 +218,7 @@ export function useCreateReturn() {
           status: data.status,
           refund_amount: data.refund_amount || 0,
           created_at: data.created_at,
-        }).catch( error => {
+        }).catch(error => {
           logger.error('Error in useReturns mutation', { error });
         });
       });
@@ -314,11 +316,13 @@ export function useProcessRefund() {
       refundAmount,
       refundMethod,
       refundTransactionId,
+      reason,
     }: {
       returnId: string;
       refundAmount: number;
       refundMethod: string;
       refundTransactionId?: string;
+      reason?: string;
     }): Promise<void> => {
       const {
         data: { user },
@@ -328,12 +332,45 @@ export function useProcessRefund() {
         throw new Error('Non authentifié');
       }
 
+      const { data: returnRow, error: returnError } = await supabase
+        .from('product_returns')
+        .select('id, order_id, return_number')
+        .eq('id', returnId)
+        .single();
+
+      if (returnError || !returnRow?.order_id) {
+        throw new Error('Retour ou commande associée introuvable');
+      }
+
+      let linkedTransactionId = refundTransactionId;
+
+      if (refundMethod === 'original_payment') {
+        const tx = await findCompletedTransactionForOrder(returnRow.order_id);
+        if (!tx) {
+          throw new Error(
+            'Aucune transaction payée trouvée pour cette commande. Utilisez un autre mode de remboursement.'
+          );
+        }
+
+        const pspResult = await refundPayment({
+          transactionId: tx.id,
+          amount: refundAmount,
+          reason: reason || `Remboursement retour ${returnRow.return_number || returnId}`,
+        });
+
+        if (!pspResult.success) {
+          throw new Error(pspResult.error || 'Échec du remboursement via le PSP');
+        }
+
+        linkedTransactionId = tx.id;
+      }
+
       const { error } = await supabase.rpc('process_refund', {
         p_return_id: returnId,
         p_refund_amount: refundAmount,
         p_refund_method: refundMethod,
         p_performed_by: user.id,
-        p_refund_transaction_id: refundTransactionId || null,
+        p_refund_transaction_id: linkedTransactionId || null,
       });
 
       if (error) {
@@ -360,9 +397,3 @@ export function useProcessRefund() {
     },
   });
 }
-
-
-
-
-
-

@@ -22,6 +22,7 @@ export interface OrderTransaction {
   currency: string;
   status: string;
   payment_method: string | null;
+  payment_provider: string | null;
   created_at: string;
   completed_at: string | null;
 }
@@ -283,9 +284,3 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
     fetchOrderTransactions,
   };
 };
-
-
-
-
-
-

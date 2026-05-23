@@ -295,6 +295,11 @@ const menuSections = [
         icon: CreditCard,
       },
       {
+        title: 'Connexions paiement',
+        url: '/dashboard/payment-connections',
+        icon: CreditCard,
+      },
+      {
         title: 'Commandes Avancées',
         url: '/dashboard/advanced-orders',
         icon: MessageSquare,

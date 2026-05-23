@@ -12,7 +12,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -396,7 +396,7 @@ export const useCreateArtistOrder = () => {
 
       const paymentResult = await retryWithExponentialBackoff(
         async () => {
-          return await initiateMonerooPayment({
+          return await initiatePayment({
             storeId,
             productId,
             orderId: order.id,

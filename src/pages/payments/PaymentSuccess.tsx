@@ -15,9 +15,18 @@ const PaymentSuccess = () => {
   const [purchasedProductType, setPurchasedProductType] = useState<string>('digital');
 
   useEffect(() => {
-    // Récupérer les infos de la commande depuis les paramètres URL
     const orderId = searchParams.get('order_id');
-    
+    const provider = searchParams.get('provider');
+    const sessionId = searchParams.get('session_id');
+
+    if (provider === 'stripe' && sessionId) {
+      logger.log('Stripe checkout success', { sessionId, orderId });
+    }
+    if (provider === 'paypal') {
+      const token = searchParams.get('token');
+      logger.log('PayPal checkout success', { token, orderId });
+    }
+
     if (orderId) {
       loadOrderInfo(orderId);
     }
@@ -61,9 +70,7 @@ const PaymentSuccess = () => {
           </div>
 
           <div>
-            <h1 className="text-3xl font-bold text-green-600 mb-2">
-              Paiement réussi ! 🎉
-            </h1>
+            <h1 className="text-3xl font-bold text-green-600 mb-2">Paiement réussi ! 🎉</h1>
             <p className="text-lg text-muted-foreground">
               Merci pour votre achat ! Votre paiement a été confirmé.
             </p>
@@ -111,9 +118,3 @@ const PaymentSuccess = () => {
 };
 
 export default PaymentSuccess;
-
-
-
-
-
-

@@ -27,7 +27,10 @@ import { getAffiliateInfo } from '@/lib/affiliation-tracking';
 import { safeRedirect } from '@/lib/url-validator';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
 import { logger } from '@/lib/logger';
-import { PaymentProviderSelector } from '@/components/checkout/PaymentProviderSelector';
+import {
+  PaymentProviderSelector,
+  type PaymentProvider,
+} from '@/components/checkout/PaymentProviderSelector';
 import type { CartItem } from '@/types/cart';
 import type {
   AppliedCoupon,
@@ -94,7 +97,8 @@ export default function Checkout() {
   const [isFirstOrder, setIsFirstOrder] = useState<boolean>(false);
 
   // State pour le provider de paiement sélectionné
-  const [selectedPaymentProvider, setSelectedPaymentProvider] = useState<'moneroo'>('moneroo');
+  const [selectedPaymentProvider, setSelectedPaymentProvider] =
+    useState<PaymentProvider>('moneroo');
 
   // State pour la gestion multi-stores
   const [isMultiStore, setIsMultiStore] = useState<boolean>(false);
@@ -1402,6 +1406,12 @@ export default function Checkout() {
                   onChange={setSelectedPaymentProvider}
                   storeId={storeId || undefined}
                   amount={finalTotal}
+                  currency={
+                    items[0]?.currency && items[0].currency.length === 3
+                      ? items[0].currency.toUpperCase()
+                      : 'XOF'
+                  }
+                  buyerCountry={formData.country || null}
                 />
               </div>
 

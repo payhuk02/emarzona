@@ -29,7 +29,8 @@ Modèle unifié : `products.product_type` + `order_items` avec FK spécialisées
 
 ## Paiements
 
-- **Production :** Moneroo uniquement (`payment-service.ts`).
+- **Production (aujourd’hui) :** Moneroo uniquement (`payment-service.ts`).
+- **Cible :** orchestration multi-PSP (Moneroo plateforme + Stripe Connect + PayPal Commerce par vendeur) — voir [`PAYMENT_ORCHESTRATION_IMPLEMENTATION_PLAN.md`](./PAYMENT_ORCHESTRATION_IMPLEMENTATION_PLAN.md).
 - Webhook `moneroo-webhook` : confirmation commande, bookings service, certificats artiste, emails.
 - Trigger SQL `fulfill_digital_order_items_on_paid` : licences digitales après paiement (panier inclus).
 
@@ -85,5 +86,9 @@ Modèle unifié : `products.product_type` + `order_items` avec FK spécialisées
 ## Documentation complémentaire
 
 - `README.md` — installation et scripts
+- `docs/AUDIT_ECOMMERCE_2026.md` — audit 5 verticaux, checklist QA, plan 30/60/90
+- `docs/PAYMENT_ORCHESTRATION_IMPLEMENTATION_PLAN.md` — plan global Stripe Connect / PayPal / multi-PSP
+- `docs/STRIPE_CONNECT_SETUP.md` — configuration Stripe (secrets, webhook, tests)
+- `docs/PAYPAL_COMMERCE_SETUP.md` — Phase 3 PayPal (planifié)
 - `supabase/migrations/` — schéma et triggers
 - `SECURE_DEPLOY_CHECKLIST.md` — déploiement sécurisé

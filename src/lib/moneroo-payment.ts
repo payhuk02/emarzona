@@ -618,8 +618,10 @@ export const refundMonerooPayment = async (options: RefundOptions): Promise<Refu
       );
     }
 
-    // Vérifier que c'est une transaction Moneroo
-    if (transaction.payment_provider !== 'moneroo' || !transaction.moneroo_transaction_id) {
+    const provider = transaction.payment_provider ?? 'moneroo';
+    const isMoneroo =
+      provider === 'moneroo' || provider === 'moneroo_platform' || !transaction.payment_provider;
+    if (!isMoneroo || !transaction.moneroo_transaction_id) {
       throw new MonerooValidationError('Transaction is not a Moneroo payment');
     }
 

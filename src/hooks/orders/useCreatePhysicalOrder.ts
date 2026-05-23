@@ -1,7 +1,7 @@
 /**
  * Hook pour créer des commandes de produits physiques
  * Date: 28 octobre 2025
- * 
+ *
  * Workflow complet:
  * 1. Créer/récupérer customer
  * 2. Vérifier disponibilité stock
@@ -13,7 +13,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { initiatePayment } from '@/lib/payment-service';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -21,7 +21,8 @@ import { logger } from '@/lib/logger';
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const PHYSICAL_PRODUCT_FIELDS = 'id, product_id';
 const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, is_available, price_adjustment';
-const PHYSICAL_INVENTORY_FIELDS = 'id, physical_product_id, quantity_available, quantity_reserved, track_inventory, location_name';
+const PHYSICAL_INVENTORY_FIELDS =
+  'id, physical_product_id, quantity_available, quantity_reserved, track_inventory, location_name';
 
 /**
  * Options pour créer une commande physical
@@ -29,22 +30,22 @@ const PHYSICAL_INVENTORY_FIELDS = 'id, physical_product_id, quantity_available, 
 export interface CreatePhysicalOrderOptions {
   /** ID du produit physical */
   physicalProductId: string;
-  
+
   /** ID du produit de base (pour price, etc.) */
   productId: string;
-  
+
   /** ID du store */
   storeId: string;
-  
+
   /** Email du client */
   customerEmail: string;
-  
+
   /** Nom du client (optionnel) */
   customerName?: string;
-  
+
   /** Téléphone du client (optionnel) */
   customerPhone?: string;
-  
+
   /** Adresse de livraison */
   shippingAddress: {
     street: string;
@@ -53,13 +54,13 @@ export interface CreatePhysicalOrderOptions {
     postal_code: string;
     country: string;
   };
-  
+
   /** ID de la variante sélectionnée (optionnel) */
   variantId?: string;
-  
+
   /** Quantité commandée */
   quantity?: number;
-  
+
   /** ID de location inventaire (optionnel, sinon prend la première) */
   inventoryLocationId?: string;
 
@@ -76,27 +77,27 @@ export interface CreatePhysicalOrderOptions {
 export interface CreatePhysicalOrderResult {
   /** ID de la commande créée */
   orderId: string;
-  
+
   /** ID de l'order_item */
   orderItemId: string;
-  
+
   /** ID de l'inventaire réservé */
   inventoryId: string;
-  
+
   /** URL de checkout Moneroo */
   checkoutUrl: string;
-  
+
   /** ID de transaction Moneroo */
   transactionId: string;
 }
 
 /**
  * Hook pour créer une commande de produit physique
- * 
+ *
  * @example
  * ```typescript
  * const { mutateAsync: createPhysicalOrder, isPending } = useCreatePhysicalOrder();
- * 
+ *
  * const handleBuy = async () => {
  *   const result = await createPhysicalOrder({
  *     physicalProductId: 'xxx',
@@ -111,7 +112,7 @@ export interface CreatePhysicalOrderResult {
  *     },
  *     quantity: 2,
  *   });
- *   
+ *
  *   // Rediriger vers Moneroo
  *   window.location.href = result.checkoutUrl;
  * };
@@ -149,7 +150,10 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // Récupérer les options de paiement configurées
-      const paymentOptions = (product.payment_options as { payment_type?: string; percentage_rate?: number } | null) || { payment_type: 'full', percentage_rate: 30 };
+      const paymentOptions = (product.payment_options as {
+        payment_type?: string;
+        percentage_rate?: number;
+      } | null) || { payment_type: 'full', percentage_rate: 30 };
       const paymentType = paymentOptions.payment_type || 'full';
       const percentageRate = paymentOptions.percentage_rate || 30;
 
@@ -165,7 +169,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // 3. Récupérer la variante si spécifiée
-      let  variantPrice= 0;
+      let variantPrice = 0;
       if (variantId) {
         const { data: variant, error: variantError } = await supabase
           .from('physical_product_variants')
@@ -178,7 +182,7 @@ export const useCreatePhysicalOrder = () => {
         }
 
         if (!variant.is_available) {
-          throw new Error('Cette variante n\'est pas disponible');
+          throw new Error("Cette variante n'est pas disponible");
         }
 
         variantPrice = variant.price_adjustment || 0;
@@ -197,9 +201,7 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // Trouver l'inventaire avec stock suffisant
-      let  selectedInventory= inventories?.find(inv => 
-        (inv.quantity_available || 0) >= quantity
-      );
+      let selectedInventory = inventories?.find(inv => (inv.quantity_available || 0) >= quantity);
 
       // Si un inventoryLocationId est spécifié, utiliser celui-là
       if (inventoryLocationId) {
@@ -223,8 +225,8 @@ export const useCreatePhysicalOrder = () => {
       }
 
       // 5. Récupérer ou créer le customer
-      let  customerId: string;
-      
+      let customerId: string;
+
       const { data: existingCustomer } = await supabase
         .from('customers')
         .select('id')
@@ -234,7 +236,7 @@ export const useCreatePhysicalOrder = () => {
 
       if (existingCustomer) {
         customerId = existingCustomer.id;
-        
+
         // Mettre à jour l'adresse
         await supabase
           .from('customers')
@@ -264,10 +266,10 @@ export const useCreatePhysicalOrder = () => {
           await supabase
             .from('physical_product_inventory')
             .update({
-              quantity_reserved: (selectedInventory.quantity_reserved || 0),
+              quantity_reserved: selectedInventory.quantity_reserved || 0,
             })
             .eq('id', selectedInventory.id);
-            
+
           throw new Error('Erreur lors de la création du client');
         }
 
@@ -279,9 +281,9 @@ export const useCreatePhysicalOrder = () => {
       const totalPrice = unitPrice * quantity;
 
       // Calculer le montant à payer selon le type de paiement
-      let  amountToPay= totalPrice;
-      let  percentagePaid= 0;
-      let  remainingAmount= 0;
+      let amountToPay = totalPrice;
+      let percentagePaid = 0;
+      let remainingAmount = 0;
 
       if (paymentType === 'percentage') {
         // Paiement partiel : calculer l'acompte
@@ -321,7 +323,9 @@ export const useCreatePhysicalOrder = () => {
           remaining_amount: remainingAmount,
           affiliate_tracking_cookie: affiliateTrackingCookie,
         })
-        .select('id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at')
+        .select(
+          'id, store_id, customer_id, order_number, total_amount, currency, status, payment_status, created_at'
+        )
         .single();
 
       if (orderError || !order) {
@@ -329,21 +333,24 @@ export const useCreatePhysicalOrder = () => {
         await supabase
           .from('physical_product_inventory')
           .update({
-            quantity_reserved: (selectedInventory.quantity_reserved || 0),
+            quantity_reserved: selectedInventory.quantity_reserved || 0,
           })
           .eq('id', selectedInventory.id);
-          
+
         throw new Error('Erreur lors de la création de la commande');
       }
 
       // 8a. Rédimer la carte cadeau si applicable (APRÈS création commande)
       if (giftCardId && giftCardAmount && giftCardAmount > 0) {
         try {
-          const { data: redeemResult, error: redeemError } = await supabase.rpc('redeem_gift_card', {
-            p_gift_card_id: giftCardId,
-            p_order_id: order.id,
-            p_amount: giftCardAmount,
-          });
+          const { data: redeemResult, error: redeemError } = await supabase.rpc(
+            'redeem_gift_card',
+            {
+              p_gift_card_id: giftCardId,
+              p_order_id: order.id,
+              p_amount: giftCardAmount,
+            }
+          );
 
           if (redeemError) {
             logger.error('Error redeeming gift card:', redeemError);
@@ -360,9 +367,12 @@ export const useCreatePhysicalOrder = () => {
 
       // 9. Créer automatiquement la facture
       try {
-        const { data: invoiceId, error: invoiceError } = await supabase.rpc('create_invoice_from_order', {
-          p_order_id: order.id,
-        });
+        const { data: invoiceId, error: invoiceError } = await supabase.rpc(
+          'create_invoice_from_order',
+          {
+            p_order_id: order.id,
+          }
+        );
 
         if (invoiceError) {
           logger.error('Error creating invoice:', invoiceError);
@@ -386,7 +396,7 @@ export const useCreatePhysicalOrder = () => {
           currency: order.currency,
           payment_status: order.payment_status,
           created_at: order.created_at,
-        }).catch((err) => {
+        }).catch(err => {
           logger.error('Error in analytics tracking', { error: err, orderId: order.id });
         });
       });
@@ -419,38 +429,37 @@ export const useCreatePhysicalOrder = () => {
         await supabase
           .from('physical_product_inventory')
           .update({
-            quantity_reserved: (selectedInventory.quantity_reserved || 0),
+            quantity_reserved: selectedInventory.quantity_reserved || 0,
           })
           .eq('id', selectedInventory.id);
-          
-        throw new Error('Erreur lors de la création de l\'élément de commande');
+
+        throw new Error("Erreur lors de la création de l'élément de commande");
       }
 
       // 10. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
-        await supabase
-          .from('secured_payments')
-          .insert({
-            order_id: order.id,
-            total_amount: totalPrice,
-            held_amount: amountToPay,
-            status: 'held',
-            hold_reason: 'delivery_confirmation',
-            release_conditions: {
-              requires_delivery_confirmation: true,
-              auto_release_days: 7,
-            },
-          });
+        await supabase.from('secured_payments').insert({
+          order_id: order.id,
+          total_amount: totalPrice,
+          held_amount: amountToPay,
+          status: 'held',
+          hold_reason: 'delivery_confirmation',
+          release_conditions: {
+            requires_delivery_confirmation: true,
+            auto_release_days: 7,
+          },
+        });
       }
 
       // 11. Initier le paiement Moneroo (avec amountToPay adapté)
-      const paymentDescription = paymentType === 'percentage' 
-        ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
-        : paymentType === 'delivery_secured'
-        ? `Paiement sécurisé: ${product.name} x${quantity}`
-        : `Achat: ${product.name} x${quantity}`;
+      const paymentDescription =
+        paymentType === 'percentage'
+          ? `Acompte ${percentageRate}%: ${product.name} x${quantity}`
+          : paymentType === 'delivery_secured'
+            ? `Paiement sécurisé: ${product.name} x${quantity}`
+            : `Achat: ${product.name} x${quantity}`;
 
-      const paymentResult = await initiateMonerooPayment({
+      const paymentResult = await initiatePayment({
         storeId,
         productId,
         orderId: order.id,
@@ -482,11 +491,11 @@ export const useCreatePhysicalOrder = () => {
         await supabase
           .from('physical_product_inventory')
           .update({
-            quantity_reserved: (selectedInventory.quantity_reserved || 0),
+            quantity_reserved: selectedInventory.quantity_reserved || 0,
           })
           .eq('id', selectedInventory.id);
-          
-        throw new Error('Erreur lors de l\'initialisation du paiement');
+
+        throw new Error("Erreur lors de l'initialisation du paiement");
       }
 
       // 12. Retourner le résultat
@@ -499,7 +508,7 @@ export const useCreatePhysicalOrder = () => {
       };
     },
 
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       toast({
         title: '✅ Commande créée',
         description: 'Stock réservé. Redirection vers le paiement...',
@@ -517,29 +526,25 @@ export const useCreatePhysicalOrder = () => {
               .single()
               .then(({ data: orderData }) => {
                 if (orderData) {
-                  triggerPurchaseWebhook(
-                    storeId,
-                    orderData.id,
-                    {
-                      order_id: orderData.id,
-                      order_number: orderData.order_number || data.orderId,
-                      customer_id: orderData.customer_id,
-                      total_amount: orderData.total_amount,
-                      currency: orderData.currency,
-                      payment_status: orderData.payment_status,
-                      status: orderData.status,
-                      items: orderData.order_items || [],
-                    }
-                  ).catch((error) => {
+                  triggerPurchaseWebhook(storeId, orderData.id, {
+                    order_id: orderData.id,
+                    order_number: orderData.order_number || data.orderId,
+                    customer_id: orderData.customer_id,
+                    total_amount: orderData.total_amount,
+                    currency: orderData.currency,
+                    payment_status: orderData.payment_status,
+                    status: orderData.status,
+                    items: orderData.order_items || [],
+                  }).catch(error => {
                     logger.error('Error triggering purchase webhook', { error });
                   });
                 }
               })
-              .catch((error) => {
+              .catch(error => {
                 logger.error('Error fetching order for webhook', { error });
               });
           })
-          .catch((error) => {
+          .catch(error => {
             logger.error('Error loading unified webhook service', { error });
           });
       }
@@ -578,10 +583,11 @@ export const useCheckStockAvailability = () => {
         throw error;
       }
 
-      const totalAvailable = inventories?.reduce(
-        (sum, inv) => sum + ((inv.quantity_available || 0) - (inv.quantity_reserved || 0)),
-        0
-      ) || 0;
+      const totalAvailable =
+        inventories?.reduce(
+          (sum, inv) => sum + ((inv.quantity_available || 0) - (inv.quantity_reserved || 0)),
+          0
+        ) || 0;
 
       return {
         available: totalAvailable >= quantity,
@@ -590,10 +596,3 @@ export const useCheckStockAvailability = () => {
     },
   });
 };
-
-
-
-
-
-
-
