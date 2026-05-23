@@ -1,11 +1,11 @@
 /**
  * Hook pour forcer l'activation du 2FA pour les utilisateurs admin
- * 
+ *
  * Vérifie si :
  * 1. L'utilisateur est admin/superadmin
  * 2. Le 2FA est activé ou non
  * 3. Force la redirection vers Settings si 2FA manquant
- * 
+ *
  * @module useRequire2FA
  */
 
@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { isPrincipalAdminEmail } from '@/lib/principal-admin';
 
 interface Require2FAResult {
   /** Le 2FA est-il activé ? */
@@ -28,28 +29,24 @@ interface Require2FAResult {
 }
 
 const GRACE_PERIOD_DAYS = 7; // 7 jours pour activer le 2FA
-const WHITELISTED_ROUTES = [
-  '/dashboard/settings',
-  '/logout',
-  '/profile'
-];
+const WHITELISTED_ROUTES = ['/dashboard/settings', '/logout', '/profile'];
 
 /**
  * Hook principal pour vérifier et forcer le 2FA
- * 
+ *
  * @param options Configuration optionnelle
  * @returns État du 2FA et obligations
- * 
+ *
  * @example
  * ```tsx
  * function AdminDashboard() {
  *   const { requires2FA, daysRemaining } = useRequire2FA();
- *   
+ *
  *   if (requires2FA && daysRemaining === 0) {
  *     // Utilisateur sera redirigé automatiquement
  *     return <RequireTwoFactorAuthBanner />;
  *   }
- *   
+ *
  *   return <Dashboard />
  * }
  * ```
@@ -66,7 +63,7 @@ export function useRequire2FA(options?: {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  
+
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,13 +83,22 @@ export function useRequire2FA(options?: {
     }
 
     try {
+      // Administrateur principal : pas de bannière, redirection ni obligation 2FA
+      if (isPrincipalAdminEmail(user.email)) {
+        setIs2FAEnabled(true);
+        setRequires2FA(false);
+        setDaysRemaining(null);
+        setIsLoading(false);
+        return;
+      }
+
       // 1. Vérifier si l'utilisateur est admin via user_roles
       const { data: isAdminRole } = await supabase.rpc('has_role', {
         _user_id: user.id,
         _role: 'admin',
       });
       const isAdmin = !!isAdminRole;
-      
+
       if (!isAdmin) {
         // Pas admin, 2FA pas obligatoire
         setRequires2FA(false);
@@ -101,8 +107,11 @@ export function useRequire2FA(options?: {
       }
 
       // 2. Vérifier si le 2FA est activé via Supabase MFA
-      const { data: { factors }, error } = await supabase.auth.mfa.listFactors();
-      
+      const {
+        data: { factors },
+        error,
+      } = await supabase.auth.mfa.listFactors();
+
       if (error) {
         logger.error('Error checking MFA factors', { error, userId: user?.id });
         setIsLoading(false);
@@ -110,9 +119,7 @@ export function useRequire2FA(options?: {
       }
 
       // Vérifier s'il y a au moins un facteur vérifié
-      const hasVerifiedFactor = factors?.some(
-        (factor: any) => factor.status === 'verified'
-      ) || false;
+      const hasVerifiedFactor = factors?.some(factor => factor.status === 'verified') || false;
 
       setIs2FAEnabled(hasVerifiedFactor);
 
@@ -169,9 +176,7 @@ export function useRequire2FA(options?: {
 
   const handleRequiredRedirect = () => {
     // Ne pas rediriger si déjà sur une route whitelistée
-    const isWhitelisted = WHITELISTED_ROUTES.some(route => 
-      location.pathname.startsWith(route)
-    );
+    const isWhitelisted = WHITELISTED_ROUTES.some(route => location.pathname.startsWith(route));
 
     if (isWhitelisted) {
       return;
@@ -180,7 +185,8 @@ export function useRequire2FA(options?: {
     // Afficher notification
     toast({
       title: '🔒 2FA Obligatoire',
-      description: 'Vous devez activer l\'authentification à deux facteurs pour accéder à cette page.',
+      description:
+        "Vous devez activer l'authentification à deux facteurs pour accéder à cette page.",
       variant: 'destructive',
       duration: 0, // Persistent
     });
@@ -211,8 +217,10 @@ export function useIs2FAEnabled(): boolean {
 
   const checkStatus = async () => {
     try {
-      const { data: { factors } } = await supabase.auth.mfa.listFactors();
-      const hasVerified = factors?.some((f: any) => f.status === 'verified') || false;
+      const {
+        data: { factors },
+      } = await supabase.auth.mfa.listFactors();
+      const hasVerified = factors?.some(f => f.status === 'verified') || false;
       setIsEnabled(hasVerified);
     } catch (error) {
       logger.error('Error in useIs2FAEnabled', { error, userId: user?.id });
@@ -221,10 +229,3 @@ export function useIs2FAEnabled(): boolean {
 
   return isEnabled;
 }
-
-
-
-
-
-
-

@@ -455,6 +455,8 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
+    /** Évite le flash skeleton → contenu lors d’un changement de période */
+    placeholderData: previousData => previousData,
     retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
     meta: {
@@ -462,6 +464,7 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
     },
   });
 
+  const hasData = data != null;
   const stats = data ?? getFallbackStats();
   const errorMessage = error
     ? error.message?.includes('fetch') || error.message?.includes('Network')
@@ -471,9 +474,11 @@ export const useDashboardStatsOptimized = (options?: UseDashboardStatsOptions) =
 
   return {
     stats,
-    loading: isLoading,
+    hasData,
+    /** Premier chargement uniquement — pas lors des refetch / changement de période */
+    loading: isLoading && !hasData,
     error: errorMessage,
-    isUpdating: isFetching && !isLoading,
+    isUpdating: isFetching && hasData,
     refetch: () => {
       refetch();
     },

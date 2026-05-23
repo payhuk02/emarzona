@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +34,7 @@ export interface Store {
 export const useStore = () => {
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
+  const hydratedStoreIdRef = useRef<string | null>(null);
   const { user, loading: authLoading } = useAuth();
   const {
     selectedStoreId,
@@ -109,7 +110,10 @@ export const useStore = () => {
         contextStoreId: contextStore?.id,
       });
 
-      setLoading(true);
+      const isNewSelection = !selectedStoreId || hydratedStoreIdRef.current !== selectedStoreId;
+      if (isNewSelection) {
+        setLoading(true);
+      }
 
       // Le contextStore du StoreContext ne contient que id/name/slug/created_at/updated_at
       // et manque les champs essentiels (description, logo_url, etc.)
@@ -131,14 +135,17 @@ export const useStore = () => {
         } else {
           logger.info('✅ [useStore] Boutique récupérée:', data.id);
           setStore(data);
+          hydratedStoreIdRef.current = data.id;
         }
       } else {
         logger.info('⚠️ [useStore] Aucune boutique sélectionnée');
         setStore(null);
+        hydratedStoreIdRef.current = null;
       }
     } catch (error) {
       logger.error('💥 [useStore] Exception:', error);
       setStore(null);
+      hydratedStoreIdRef.current = null;
       toast({
         title: 'Erreur',
         description: 'Impossible de charger votre boutique',
@@ -331,6 +338,7 @@ export const useStore = () => {
         } else if (data && data.length > 0) {
           logger.info('✅ [useStore] Boutique trouvée automatiquement:', data[0].id);
           setStore(data[0]);
+          hydratedStoreIdRef.current = data[0].id;
           // Mettre à jour le contexte via setSelectedStoreId (évite la désynchronisation)
           try {
             setSelectedStoreId(data[0].id);
@@ -341,10 +349,12 @@ export const useStore = () => {
         } else {
           logger.info('ℹ️ [useStore] Aucune boutique existante');
           setStore(null);
+          hydratedStoreIdRef.current = null;
         }
       } catch (err) {
         logger.error('💥 [useStore] Exception recherche auto:', err);
         setStore(null);
+        hydratedStoreIdRef.current = null;
       } finally {
         setLoading(false);
       }

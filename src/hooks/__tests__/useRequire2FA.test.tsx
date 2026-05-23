@@ -7,6 +7,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { useRequire2FA } from '@/hooks/useRequire2FA';
+import { useAuth } from '@/contexts/AuthContext';
+
+type AuthContextValue = ReturnType<typeof useAuth>;
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -21,6 +24,7 @@ vi.mock('@/integrations/supabase/client', () => ({
         }),
       },
     },
+    rpc: vi.fn().mockResolvedValue({ data: true, error: null }),
   },
 }));
 
@@ -100,7 +104,6 @@ describe('useRequire2FA', () => {
   });
 
   it('should handle non-admin users', async () => {
-    const { useAuth } = await import('@/contexts/AuthContext');
     vi.mocked(useAuth).mockReturnValueOnce({
       user: {
         id: 'test-user-id',
@@ -111,7 +114,7 @@ describe('useRequire2FA', () => {
         role: 'customer',
         created_at: new Date().toISOString(),
       },
-    } as any);
+    } as unknown as AuthContextValue);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <BrowserRouter>{children}</BrowserRouter>
@@ -126,12 +129,41 @@ describe('useRequire2FA', () => {
     expect(result.current.requires2FA).toBe(false);
   });
 
+  it('should exempt principal admin from 2FA requirements', async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: {
+        id: 'principal-admin-id',
+        email: 'contact@edigit-agence.com',
+        created_at: new Date().toISOString(),
+      },
+      profile: {
+        role: 'admin',
+        created_at: new Date().toISOString(),
+      },
+    } as unknown as AuthContextValue);
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <BrowserRouter>{children}</BrowserRouter>
+    );
+
+    const { result } = renderHook(() => useRequire2FA(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.requires2FA).toBe(false);
+    expect(result.current.is2FAEnabled).toBe(true);
+    expect(result.current.daysRemaining).toBeNull();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
   it('should handle errors gracefully', async () => {
     const { supabase } = await import('@/integrations/supabase/client');
     vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValueOnce({
-      data: { factors: [] },
-      error: { message: 'Test error' },
-    } as any);
+      data: { factors: [], totp: [], phone: [], all: [] },
+      error: { message: 'Test error', name: 'AuthError', status: 500 },
+    });
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <BrowserRouter>{children}</BrowserRouter>

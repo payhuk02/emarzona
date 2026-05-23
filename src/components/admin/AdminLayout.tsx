@@ -6,6 +6,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAdminMFA } from '@/hooks/useAdminMFA';
+import { useAuth } from '@/contexts/AuthContext';
+import { isPrincipalAdminEmail } from '@/lib/principal-admin';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -161,7 +163,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const { isAAL2 } = useAdminMFA();
+  const showMfaStatus = !isPrincipalAdminEmail(user?.email);
 
   // Sur mobile: sidebar desktop par défaut fermée (sinon elle écrase le contenu).
   useEffect(() => {
@@ -196,12 +200,14 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold">{activeLabel}</div>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant={isAAL2 ? 'default' : 'destructive'}
-                    className="text-[10px] uppercase tracking-wide"
-                  >
-                    {isAAL2 ? 'AAL2' : 'AAL1'}
-                  </Badge>
+                  {showMfaStatus && (
+                    <Badge
+                      variant={isAAL2 ? 'default' : 'destructive'}
+                      className="text-[10px] uppercase tracking-wide"
+                    >
+                      {isAAL2 ? 'AAL2' : 'AAL1'}
+                    </Badge>
+                  )}
                   <span className="truncate text-xs text-muted-foreground">Admin</span>
                 </div>
               </div>
@@ -215,23 +221,25 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             <SheetHeader className="p-4 border-b">
               <SheetTitle className="flex items-center gap-2">
                 <span>Administration</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <Badge
-                          variant={isAAL2 ? 'default' : 'destructive'}
-                          className="text-[10px] uppercase tracking-wide"
-                        >
-                          {isAAL2 ? 'AAL2' : 'AAL1'}
-                        </Badge>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isAAL2 ? '2FA active (AAL2)' : '2FA inactive - activez la 2FA'}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {showMfaStatus && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Badge
+                            variant={isAAL2 ? 'default' : 'destructive'}
+                            className="text-[10px] uppercase tracking-wide"
+                          >
+                            {isAAL2 ? 'AAL2' : 'AAL1'}
+                          </Badge>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isAAL2 ? '2FA active (AAL2)' : '2FA inactive - activez la 2FA'}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </SheetTitle>
             </SheetHeader>
             <nav className="max-h-[calc(100vh-64px)] overflow-y-auto space-y-4 p-4">
@@ -278,23 +286,25 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                   <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                     Administration
                   </h2>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
-                          <Badge
-                            variant={isAAL2 ? 'default' : 'destructive'}
-                            className="text-[10px] uppercase tracking-wide"
-                          >
-                            {isAAL2 ? 'AAL2' : 'AAL1'}
-                          </Badge>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isAAL2 ? '2FA active (AAL2)' : '2FA inactive - activez la 2FA'}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {showMfaStatus && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Badge
+                              variant={isAAL2 ? 'default' : 'destructive'}
+                              className="text-[10px] uppercase tracking-wide"
+                            >
+                              {isAAL2 ? 'AAL2' : 'AAL1'}
+                            </Badge>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isAAL2 ? '2FA active (AAL2)' : '2FA inactive - activez la 2FA'}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               )}
               <Button

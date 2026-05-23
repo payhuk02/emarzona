@@ -7,6 +7,7 @@ import { useStore } from '@/hooks/useStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useCallback, lazy, Suspense, useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -42,7 +43,7 @@ import {
   useUnreadCount,
   useRealtimeNotifications,
 } from '@/hooks/useNotifications';
-import { DashboardFullSkeleton, StatsSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import { DashboardFullSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { DashboardOnboarding } from '@/components/dashboard/DashboardOnboarding';
 import { CoreWebVitalsMonitor } from '@/components/dashboard/CoreWebVitalsMonitor';
 // import { SessionExpiryWarning } from '@/components/auth/SessionExpiryWarning'; // ✅ Supprimé pour gestion silencieuse
@@ -86,29 +87,14 @@ import '@/styles/dashboard-premium.css';
 const Dashboard = () => {
   const { store, loading: storeLoading } = useStore();
 
-  if (storeLoading) {
-    return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6">
-              <DashboardFullSkeleton />
-            </div>
-          </main>
-        </div>
-      </SidebarProvider>
-    );
-  }
-
-  if (!store) {
+  if (!storeLoading && !store) {
     return <DashboardOnboarding />;
   }
 
-  return <DashboardWithStore />;
+  return <DashboardWithStore storeHydrating={storeLoading && !store} />;
 };
 
-const DashboardWithStore = () => {
+const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => {
   const { store } = useStore();
   const platformLogo = usePlatformLogo();
 
@@ -146,7 +132,8 @@ const DashboardWithStore = () => {
   navigateRef.current = navigate;
   const {
     stats,
-    loading,
+    loading: statsInitialLoading,
+    hasData: hasStatsData,
     error: hookError,
     isUpdating,
     refetch,
@@ -157,6 +144,8 @@ const DashboardWithStore = () => {
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedProductType, setSelectedProductType] = useState<ProductTypeFilter>('all');
+
+  const showStatsSkeleton = storeHydrating || (statsInitialLoading && !hasStatsData);
 
   // ✅ PHASE 2: Déferrer les notifications (non-critique pour le premier render)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -411,11 +400,16 @@ const DashboardWithStore = () => {
               isRetrying={isRefreshing}
             />
 
-            {loading ? (
-              <StatsSkeleton />
+            {showStatsSkeleton ? (
+              <DashboardFullSkeleton />
             ) : (
               stats && (
-                <div className="space-y-6 sm:space-y-8">
+                <div
+                  className={cn(
+                    'space-y-6 sm:space-y-8 transition-opacity duration-200',
+                    isUpdating && 'opacity-70 pointer-events-none'
+                  )}
+                >
                   <DashboardActionCenter
                     operational={stats.operational}
                     periodLabel={stats.periodLabel}

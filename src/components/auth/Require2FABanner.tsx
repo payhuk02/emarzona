@@ -1,13 +1,15 @@
 /**
  * Banner d'avertissement pour forcer l'activation du 2FA
- * 
+ *
  * Affiche un bandeau persistant en haut de l'application
  * pour les admins qui n'ont pas encore activé le 2FA
- * 
+ *
  * @module Require2FABanner
  */
 
 import { useRequire2FA } from '@/hooks/useRequire2FA';
+import { useAuth } from '@/contexts/AuthContext';
+import { isPrincipalAdminEmail } from '@/lib/principal-admin';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Shield, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
@@ -25,7 +27,7 @@ interface Require2FABannerProps {
 
 /**
  * Composant Banner pour encourager/forcer l'activation du 2FA
- * 
+ *
  * @example
  * ```tsx
  * // Dans App.tsx ou Layout principal
@@ -39,15 +41,20 @@ interface Require2FABannerProps {
  * }
  * ```
  */
-export const Require2FABanner = ({ 
-  className, 
+export const Require2FABanner = ({
+  className,
   position = 'top',
-  variant 
+  variant,
 }: Require2FABannerProps) => {
+  const { user } = useAuth();
   const { requires2FA, daysRemaining, isLoading, is2FAEnabled } = useRequire2FA({
     disableRedirect: position === 'inline', // Ne pas rediriger si banner inline
   });
   const navigate = useNavigate();
+
+  if (isPrincipalAdminEmail(user?.email)) {
+    return null;
+  }
 
   // Ne rien afficher si :
   // - Loading en cours
@@ -59,7 +66,7 @@ export const Require2FABanner = ({
 
   // Déterminer la variante
   const autoVariant = variant || (daysRemaining && daysRemaining > 0 ? 'warning' : 'danger');
-  
+
   // Couleurs selon variante
   const colors = {
     warning: {
@@ -86,7 +93,8 @@ export const Require2FABanner = ({
       return {
         icon: <AlertTriangle className="h-5 w-5" />,
         title: '🔒 Activation 2FA Obligatoire',
-        description: 'Pour des raisons de sécurité, l\'authentification à deux facteurs est désormais requise pour votre compte admin. Vous devez l\'activer maintenant pour continuer.',
+        description:
+          "Pour des raisons de sécurité, l'authentification à deux facteurs est désormais requise pour votre compte admin. Vous devez l'activer maintenant pour continuer.",
         cta: 'Activer maintenant',
         urgent: true,
       };
@@ -106,7 +114,7 @@ export const Require2FABanner = ({
   };
 
   const message = getMessage();
-  
+
   if (!message) return null;
 
   const handleActivate = () => {
@@ -114,31 +122,18 @@ export const Require2FABanner = ({
   };
 
   // Style selon position
-  const positionClass = position === 'top' 
-    ? 'fixed top-0 left-0 right-0 z-50 shadow-lg' 
-    : 'relative';
+  const positionClass =
+    position === 'top' ? 'fixed top-0 left-0 right-0 z-50 shadow-lg' : 'relative';
 
   return (
-    <div 
-      className={cn(
-        positionClass,
-        style.bg,
-        style.border,
-        'border-b',
-        className
-      )}
-    >
+    <div className={cn(positionClass, style.bg, style.border, 'border-b', className)}>
       <Alert className={cn('border-0 rounded-none', style.bg)}>
         <div className="flex items-center justify-between gap-4 w-full">
           {/* Icône + Message */}
           <div className="flex items-start gap-3 flex-1">
-            <div className={cn('mt-0.5', style.icon)}>
-              {message.icon}
-            </div>
+            <div className={cn('mt-0.5', style.icon)}>{message.icon}</div>
             <div className="flex-1">
-              <div className={cn('font-semibold text-sm mb-1', style.text)}>
-                {message.title}
-              </div>
+              <div className={cn('font-semibold text-sm mb-1', style.text)}>{message.title}</div>
               <AlertDescription className={cn('text-sm', style.text)}>
                 {message.description}
               </AlertDescription>
@@ -148,17 +143,18 @@ export const Require2FABanner = ({
           {/* CTA */}
           <div className="flex items-center gap-2">
             {message.urgent && (
-              <div className={cn('text-xs font-medium px-2 py-1 rounded-full', 
-                autoVariant === 'danger' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-              )}>
+              <div
+                className={cn(
+                  'text-xs font-medium px-2 py-1 rounded-full',
+                  autoVariant === 'danger'
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-orange-100 text-orange-700'
+                )}
+              >
                 URGENT
               </div>
             )}
-            <Button 
-              onClick={handleActivate}
-              className={style.button}
-              size="sm"
-            >
+            <Button onClick={handleActivate} className={style.button} size="sm">
               <Shield className="h-4 w-4 mr-2" />
               {message.cta}
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -174,31 +170,33 @@ export const Require2FABanner = ({
  * Version compacte du banner pour dashboard cards
  */
 export const Require2FACard = () => {
+  const { user } = useAuth();
   const { requires2FA, daysRemaining, is2FAEnabled } = useRequire2FA({
     disableRedirect: true,
   });
   const navigate = useNavigate();
+
+  if (isPrincipalAdminEmail(user?.email)) {
+    return null;
+  }
 
   if (is2FAEnabled || (!requires2FA && daysRemaining === null)) {
     return null;
   }
 
   return (
-    <div 
+    <div
       className="p-4 rounded-lg border-2 border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors"
       onClick={() => navigate('/dashboard/settings?tab=security&action=enable2fa')}
     >
       <div className="flex items-center gap-3">
         <Shield className="h-8 w-8 text-orange-600" />
         <div className="flex-1">
-          <div className="font-semibold text-orange-900">
-            Sécurisez votre compte
-          </div>
+          <div className="font-semibold text-orange-900">Sécurisez votre compte</div>
           <div className="text-sm text-orange-700">
             {daysRemaining !== null && daysRemaining > 0
               ? `Activez le 2FA (${daysRemaining} jour${daysRemaining > 1 ? 's' : ''} restant${daysRemaining > 1 ? 's' : ''})`
-              : 'Activation 2FA requise maintenant'
-            }
+              : 'Activation 2FA requise maintenant'}
           </div>
         </div>
         <ArrowRight className="h-5 w-5 text-orange-600" />
@@ -206,10 +204,3 @@ export const Require2FACard = () => {
     </div>
   );
 };
-
-
-
-
-
-
-
