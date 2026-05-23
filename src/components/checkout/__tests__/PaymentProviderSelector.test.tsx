@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PaymentProviderSelector } from '../PaymentProviderSelector';
-import { supabase } from '@/integrations/supabase/client';
+import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
 
 vi.mock('@/lib/payments/feature-flags', () => ({
   isPaymentOrchestrationV2Enabled: vi.fn(() => false),
@@ -52,16 +52,34 @@ describe('PaymentProviderSelector', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(false);
   });
 
-  it('should render Moneroo when orchestration V2 is off', () => {
-    render(<PaymentProviderSelector value="moneroo" onChange={mockOnChange} />);
-    expect(screen.getByText('Moneroo')).toBeInTheDocument();
+  it('auto-selects moneroo when V2 off and single provider (no visible card)', async () => {
+    render(<PaymentProviderSelector onChange={mockOnChange} />);
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith('moneroo');
+    });
+    expect(screen.queryByText('Moyen de paiement')).not.toBeInTheDocument();
   });
 
-  it('should call onChange when provider is selected (moneroo)', async () => {
+  it('calls onChange when user selects moneroo with multiple providers', async () => {
+    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
     const user = userEvent.setup();
-    render(<PaymentProviderSelector value="moneroo" onChange={mockOnChange} />);
+
+    render(
+      <PaymentProviderSelector
+        value="stripe_connect"
+        onChange={mockOnChange}
+        storeId="store-123"
+        currency="EUR"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Moneroo')).toBeInTheDocument();
+    });
 
     const monerooOption = screen.getByLabelText(/moneroo/i);
     await user.click(monerooOption);
@@ -71,20 +89,25 @@ describe('PaymentProviderSelector', () => {
     });
   });
 
-  it('should display amount when provided', () => {
+  it('displays amount when multiple providers and value selected', async () => {
+    vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
+
     render(
       <PaymentProviderSelector
         value="moneroo"
         onChange={mockOnChange}
+        storeId="store-123"
         amount={50000}
         currency="XOF"
       />
     );
-    expect(screen.getByText(/montant à payer/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText(/montant à payer/i)).toBeInTheDocument();
+    });
   });
 
-  it('should show multiple providers when V2 enabled and storeId set', async () => {
-    const { isPaymentOrchestrationV2Enabled } = await import('@/lib/payments/feature-flags');
+  it('shows multiple providers when V2 enabled and storeId set', async () => {
     vi.mocked(isPaymentOrchestrationV2Enabled).mockReturnValue(true);
 
     render(
@@ -102,8 +125,8 @@ describe('PaymentProviderSelector', () => {
     });
   });
 
-  it('should auto-select when only one provider (V2 off)', async () => {
-    render(<PaymentProviderSelector onChange={mockOnChange} storeId="store-123" />);
+  it('auto-selects when only one provider and no value', async () => {
+    render(<PaymentProviderSelector onChange={mockOnChange} />);
 
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith('moneroo');
