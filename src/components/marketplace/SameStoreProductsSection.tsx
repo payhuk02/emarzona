@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+import '@/styles/landing-premium.css';
+import '@/styles/marketplace-premium.css';
 import { useSameStoreProducts } from '@/hooks/useSameStoreProducts';
 import { ProductGrid } from '@/components/ui/ProductGrid';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
@@ -64,12 +66,16 @@ export const SameStoreProductsSection: React.FC<SameStoreProductsSectionProps> =
     return null;
   }
 
+  const cardsBandClass = 'landing-premium mp-product-cards-band';
+
   const loadingGrid = (
-    <ProductGrid>
-      {Array.from({ length: limit }).map((_, index) => (
-        <Skeleton key={index} className="h-96 w-full" />
-      ))}
-    </ProductGrid>
+    <div className={cardsBandClass}>
+      <ProductGrid>
+        {Array.from({ length: limit }).map((_, index) => (
+          <Skeleton key={index} className="h-96 w-full rounded-xl bg-[#132a4a]/40" />
+        ))}
+      </ProductGrid>
+    </div>
   );
 
   if (isLoading) {
@@ -105,17 +111,19 @@ export const SameStoreProductsSection: React.FC<SameStoreProductsSectionProps> =
   }
 
   const grid = (
-    <ProductGrid>
-      {products.map(product => (
-        <UnifiedProductCard
-          key={product.id}
-          product={product}
-          variant="marketplace"
-          showAffiliate={true}
-          showActions={true}
-        />
-      ))}
-    </ProductGrid>
+    <div className={cardsBandClass}>
+      <ProductGrid>
+        {products.map(product => (
+          <UnifiedProductCard
+            key={product.id}
+            product={product}
+            variant="marketplace"
+            showAffiliate={true}
+            showActions={true}
+          />
+        ))}
+      </ProductGrid>
+    </div>
   );
 
   if (withCard) {
