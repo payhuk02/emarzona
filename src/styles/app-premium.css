@@ -132,6 +132,20 @@
   color: var(--lp-gold-bright) !important;
 }
 
+/* Boutons icône topnav (notifications, thème) — pas de fond blanc du Select */
+.landing-premium.app-premium .app-premium-topnav .topnav-icon-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.landing-premium.app-premium .app-premium-topnav .topnav-icon-btn:hover,
+.landing-premium.app-premium .app-premium-topnav .topnav-icon-btn[data-state='open'] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
 /* Zone principale */
 .landing-premium.app-premium #main-content,
 .landing-premium.app-premium main.flex-1.overflow-auto,

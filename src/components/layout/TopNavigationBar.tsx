@@ -184,35 +184,40 @@ export const TopNavigationBar = () => {
                   })}
                 </nav>
                 {/* Language Switcher dans le menu mobile */}
-                <div className="p-4 border-t">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">{t('common.language', 'Langue')}</span>
+                <div className="p-4 border-t space-y-4">
+                  <div>
+                    <span className="text-sm font-medium mb-2 block">
+                      {t('common.theme', 'Thème')}
+                    </span>
+                    <ThemeSelectorCompact variant="select" />
                   </div>
-                  <LanguageSwitcher variant="outline" showLabel={true} className="w-full" />
+                  <div>
+                    <span className="text-sm font-medium mb-2 block">
+                      {t('common.language', 'Langue')}
+                    </span>
+                    <LanguageSwitcher variant="outline" showLabel={true} className="w-full" />
+                  </div>
                 </div>
               </div>
             </SheetContent>
           </Sheet>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Notifications */}
-            <div className="hidden sm:block">
-              <NotificationBell />
-            </div>
-
-            {/* Theme Selector (compact) */}
-            <div className="hidden md:block w-32">
-              <ThemeSelectorCompact />
-            </div>
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+            <NotificationBell />
+            <ThemeSelectorCompact variant="nav" className="hidden sm:inline-flex" />
 
             {/* Language Switcher - Visible sur desktop et tablette */}
-            <div className="hidden sm:block">
-              <LanguageSwitcher variant="outline" showLabel={false} />
+            <div className="hidden md:block">
+              <LanguageSwitcher
+                variant="ghost"
+                showLabel={false}
+                buttonClassName="topnav-icon-btn h-9 w-9 min-h-9 min-w-9 p-0"
+              />
             </div>
 
             {/* Loyalty Badge */}
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               <LoyaltyBadge />
             </div>
 
@@ -222,7 +227,7 @@ export const TopNavigationBar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-accent touch-manipulation min-h-[44px] min-w-[44px]"
+                  className="topnav-icon-btn h-9 w-9 min-h-9 min-w-9 touch-manipulation"
                   aria-label="Menu utilisateur"
                 >
                   <User className="h-5 w-5" />
