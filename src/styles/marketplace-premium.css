@@ -268,6 +268,16 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+/* Grille « Autres produits » — même largeur de colonne que le catalogue Marketplace */
+.mp-product-cards-band [aria-label='Grille de produits'] {
+  width: 100%;
+}
+
+.mp-product-cards-band [aria-label='Grille de produits'] > * {
+  min-width: 0;
+  width: 100%;
+}
+
 /* Cartes produit — fond bleu sombre (marketplace + détail produit « Autres produits ») */
 .marketplace-premium .mp-product-card,
 .mp-product-cards-band.landing-premium .mp-product-card {

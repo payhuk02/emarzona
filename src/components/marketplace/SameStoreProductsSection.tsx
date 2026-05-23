@@ -6,8 +6,8 @@ import { ProductGrid } from '@/components/ui/ProductGrid';
 import UnifiedProductCard from '@/components/products/UnifiedProductCard';
 import { transformToUnifiedProduct } from '@/lib/product-transform';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Store } from '@/components/icons';
+import { cn } from '@/lib/utils';
 
 export interface SameStoreProductsSectionProps {
   productId: string;
@@ -66,44 +66,48 @@ export const SameStoreProductsSection: React.FC<SameStoreProductsSectionProps> =
     return null;
   }
 
-  const cardsBandClass = 'landing-premium mp-product-cards-band';
+  /** Même conteneur que MarketplaceProductsSection (max-w-7xl, pleine largeur utile) */
+  const catalogOuterClass = 'w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2';
+  const catalogInnerClass = 'w-full mx-auto max-w-7xl px-3 sm:px-4 lg:px-8';
+  const cardsBandClass = 'landing-premium marketplace-premium mp-product-cards-band';
+
+  const sectionTitleClass = cn(
+    'flex items-center gap-2 font-semibold',
+    withCard ? 'text-lg sm:text-xl text-foreground mb-4 sm:mb-6' : 'text-lg text-foreground'
+  );
+
+  const renderSection = (content: React.ReactNode) => (
+    <section
+      className={cn('mp-same-store-products', className)}
+      aria-labelledby="same-store-products-heading"
+    >
+      <div className={catalogOuterClass}>
+        <div className={catalogInnerClass}>
+          <h2 id="same-store-products-heading" className={sectionTitleClass}>
+            <Store className={cn('h-5 w-5', withCard && 'text-purple-500')} aria-hidden />
+            {sectionTitle}
+          </h2>
+          {content}
+        </div>
+      </div>
+    </section>
+  );
 
   const loadingGrid = (
     <div className={cardsBandClass}>
       <ProductGrid>
         {Array.from({ length: limit }).map((_, index) => (
-          <Skeleton key={index} className="h-96 w-full rounded-xl bg-[#132a4a]/40" />
+          <Skeleton
+            key={index}
+            className="h-[400px] sm:h-[450px] w-full min-w-0 rounded-xl bg-[#132a4a]/40"
+          />
         ))}
       </ProductGrid>
     </div>
   );
 
   if (isLoading) {
-    if (withCard) {
-      return (
-        <div className={className}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Store className="h-5 w-5 text-purple-500" />
-                {sectionTitle}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>{loadingGrid}</CardContent>
-          </Card>
-        </div>
-      );
-    }
-
-    return (
-      <div className={`space-y-4 ${className}`}>
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Store className="h-5 w-5" />
-          {sectionTitle}
-        </h3>
-        {loadingGrid}
-      </div>
-    );
+    return renderSection(loadingGrid);
   }
 
   if (!products.length) {
@@ -120,37 +124,14 @@ export const SameStoreProductsSection: React.FC<SameStoreProductsSectionProps> =
             variant="marketplace"
             showAffiliate={true}
             showActions={true}
+            className="w-full min-w-0"
           />
         ))}
       </ProductGrid>
     </div>
   );
 
-  if (withCard) {
-    return (
-      <div className={className}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Store className="h-5 w-5 text-purple-500" />
-              {sectionTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>{grid}</CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`space-y-4 ${className}`}>
-      <h3 className="text-lg font-semibold flex items-center gap-2">
-        <Store className="h-5 w-5" />
-        {sectionTitle}
-      </h3>
-      {grid}
-    </div>
-  );
+  return renderSection(grid);
 };
 
 SameStoreProductsSection.displayName = 'SameStoreProductsSection';
