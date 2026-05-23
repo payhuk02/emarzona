@@ -24,6 +24,7 @@ import type {
 } from '@/pages/checkout/buy-now/checkout-buy-now-types';
 import { validateBuyNowForm } from '@/pages/checkout/buy-now/checkout-buy-now-validation';
 import { calculateBuyNowPrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
+import { htmlToPlainText } from '@/lib/html-sanitizer';
 
 const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
 const BuyNowCustomerForm = lazy(() => import('@/components/checkout/buy-now/BuyNowCustomerForm'));
