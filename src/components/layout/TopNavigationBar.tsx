@@ -87,7 +87,10 @@ export const TopNavigationBar = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <NavLink to="/dashboard" className="flex items-center gap-2 shrink-0">
+          <NavLink
+            to="/dashboard"
+            className="topnav-brand flex items-center gap-2 shrink-0 text-white hover:text-white"
+          >
             {platformLogo ? (
               <div className="h-8 w-8 flex-shrink-0">
                 <LazyImage
@@ -97,13 +100,11 @@ export const TopNavigationBar = () => {
                 />
               </div>
             ) : (
-              <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
-                <span className="text-sm font-bold text-primary">E</span>
+              <div className="h-8 w-8 rounded bg-white/10 flex items-center justify-center">
+                <span className="text-sm font-bold text-white">E</span>
               </div>
             )}
-            <span className="hidden sm:inline-block text-lg font-bold text-foreground">
-              Emarzona
-            </span>
+            <span className="hidden sm:inline-block text-lg font-bold">Emarzona</span>
           </NavLink>
 
           {/* Desktop Navigation */}
@@ -209,11 +210,7 @@ export const TopNavigationBar = () => {
 
             {/* Language Switcher - Visible sur desktop et tablette */}
             <div className="hidden md:block">
-              <LanguageSwitcher
-                variant="ghost"
-                showLabel={false}
-                buttonClassName="topnav-icon-btn h-9 w-9 min-h-9 min-w-9 p-0"
-              />
+              <LanguageSwitcher display="nav" />
             </div>
 
             {/* Loyalty Badge */}

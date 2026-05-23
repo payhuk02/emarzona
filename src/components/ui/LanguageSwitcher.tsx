@@ -17,11 +17,22 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { MOBILE_SIDE_OFFSET, DESKTOP_SIDE_OFFSET } from '@/constants/mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useBodyScrollLock } from '@/hooks/use-body-scroll-lock';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const topNavIconBtnClass =
+  'topnav-icon-btn h-9 min-h-9 shrink-0 border-0 bg-transparent px-2 shadow-none hover:bg-accent/50';
 
 interface LanguageSwitcherProps {
   className?: string;
   buttonClassName?: string;
   variant?: 'default' | 'ghost' | 'outline';
+  /** `nav` : icône compacte pour la topnav sombre (sans Select blanc) */
+  display?: 'default' | 'nav';
   showLabel?: boolean;
   /**
    * État contrôlé d'ouverture du menu
@@ -37,6 +48,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   className,
   buttonClassName,
   variant = 'ghost',
+  display = 'default',
   showLabel = false,
   open: controlledOpen,
   onOpenChange,
@@ -120,6 +132,51 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     </span>
   );
 
+  // Topnav : menu déroulant sans SelectTrigger (évite le fond blanc)
+  if (display === 'nav' && !isMobile) {
+    return (
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={cn(topNavIconBtnClass, 'gap-1.5', buttonClassName)}
+            aria-label={`Changer la langue (actuelle : ${currentLanguage.name})`}
+            disabled={isChanging}
+          >
+            {isChanging ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Globe className="h-4 w-4 shrink-0" aria-hidden="true" />
+            )}
+            <span className="text-sm font-medium uppercase" aria-hidden="true">
+              {currentLanguage.code}
+            </span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[10rem]">
+          {AVAILABLE_LANGUAGES.map(lang => (
+            <DropdownMenuItem
+              key={lang.code}
+              onClick={() => changeLanguage(lang.code)}
+              className={cn(
+                'gap-2 cursor-pointer min-h-[44px]',
+                currentLanguage.code === lang.code && 'bg-accent'
+              )}
+            >
+              <span className="text-lg">{lang.flag}</span>
+              <span>{lang.name}</span>
+              {currentLanguage.code === lang.code && (
+                <span className="ml-auto text-xs text-muted-foreground">✓</span>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
   // Sur mobile, utiliser un vrai bottom sheet basé sur Dialog (comme pour d'autres overlays critiques)
   if (isMobile) {
     return (
@@ -160,7 +217,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   return (
     <MobileDropdown
       trigger={desktopTriggerContent}
-      onValueChange={(value) => changeLanguage(value)}
+      onValueChange={value => changeLanguage(value)}
       className={className}
       contentClassName="min-w-[180px]"
     >
@@ -188,7 +245,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 /**
  * Version compacte avec juste le flag
  */
-export const LanguageSwitcherCompact : React.FC<{ className?: string }> = ({ className }) => {
+export const LanguageSwitcherCompact: React.FC<{ className?: string }> = ({ className }) => {
   const { i18n } = useTranslation();
 
   const currentLanguage =
@@ -218,10 +275,3 @@ export const LanguageSwitcherCompact : React.FC<{ className?: string }> = ({ cla
     </Button>
   );
 };
-
-
-
-
-
-
-

@@ -127,6 +127,11 @@
   color: #fff;
 }
 
+.landing-premium.app-premium .app-premium-topnav .topnav-brand,
+.landing-premium.app-premium .app-premium-topnav .topnav-brand span {
+  color: #fff !important;
+}
+
 .landing-premium.app-premium .app-premium-topnav .text-primary,
 .landing-premium.app-premium .app-premium-topnav [class*='text-primary'] {
   color: var(--lp-gold-bright) !important;
@@ -144,6 +149,17 @@
 .landing-premium.app-premium .app-premium-topnav .topnav-icon-btn[data-state='open'] {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #fff !important;
+}
+
+/* Fallback : tout Select/combobox résiduel dans la topnav */
+.landing-premium.app-premium .app-premium-topnav button[role='combobox'] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  min-height: 2.25rem;
+  height: 2.25rem;
+  width: auto;
 }
 
 /* Zone principale */
