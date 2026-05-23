@@ -1,16 +1,23 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
-import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
+import 'https://deno.land/x/xhr@0.1.0/mod.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts';
+import { z } from 'https://esm.sh/zod@3.22.4';
 
 async function createHmacSignature(key: string, data: string): Promise<string> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(key);
   const cryptoKey = await crypto.subtle.importKey(
-    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
   );
   const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(data));
-  return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
@@ -27,7 +34,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Max-Age': '86400',
@@ -79,7 +86,11 @@ interface Webhook {
   timeout_seconds: number;
 }
 
-function logEvent(level: 'info' | 'warn' | 'error', message: string, context: Record<string, unknown>) {
+function logEvent(
+  level: 'info' | 'warn' | 'error',
+  message: string,
+  context: Record<string, unknown>
+) {
   const payload = JSON.stringify({ level, message, ...context });
   if (level === 'error') {
     console.error(payload);
@@ -99,19 +110,19 @@ async function generateSignature(payload: string, secret: string): Promise<strin
   const encoder = new TextEncoder();
   const key = encoder.encode(secret);
   const data = encoder.encode(payload);
-  
+
   const hashBuffer = await crypto.subtle.importKey(
-    "raw",
+    'raw',
     key,
-    { name: "HMAC", hash: "SHA-256" },
+    { name: 'HMAC', hash: 'SHA-256' },
     false,
-    ["sign"]
+    ['sign']
   );
-  
-  const signature = await crypto.subtle.sign("HMAC", hashBuffer, data);
+
+  const signature = await crypto.subtle.sign('HMAC', hashBuffer, data);
   const hashArray = Array.from(new Uint8Array(signature));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
+
   return hashHex;
 }
 
@@ -144,11 +155,11 @@ async function deliverWebhook(
   durationMs: number;
 }> {
   const startTime = Date.now();
-  
+
   try {
     const payload = preparePayload(delivery);
     const payloadString = JSON.stringify(payload);
-    
+
     // Préparer les headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -157,49 +168,47 @@ async function deliverWebhook(
       'X-Emarzona-Delivery-Id': delivery.id,
       ...webhook.custom_headers,
     };
-    
+
     // Ajouter signature HMAC si secret disponible
     if (webhook.secret) {
       const signature = await generateSignature(payloadString, webhook.secret);
       headers['X-Emarzona-Signature'] = `sha256=${signature}`;
     }
-    
+
     // Configuration fetch
     const fetchOptions: RequestInit = {
       method: 'POST',
       headers,
       body: payloadString,
     };
-    
+
     // Désactiver vérification SSL si demandé (non recommandé en production)
     if (!webhook.verify_ssl && Deno.env.get('DENO_ENV') !== 'production') {
       // Note: Deno fetch ne supporte pas l'option rejectUnauthorized
       // Cette fonctionnalité serait mieux gérée avec un agent HTTP custom
       console.warn('SSL verification disabled (non-production only)');
     }
-    
+
     // Contrôle de timeout via AbortController
     const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      webhook.timeout_seconds * 1000
-    );
-    
+    const timeoutId = setTimeout(() => controller.abort(), webhook.timeout_seconds * 1000);
+
     try {
       const response = await fetch(webhook.url, {
         ...fetchOptions,
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
       const durationMs = Date.now() - startTime;
-      
+
       // Lire le body de la réponse (limité à 10KB pour éviter la mémoire)
       const responseBody = await response.text();
-      const truncatedBody = responseBody.length > 10000 
-        ? responseBody.substring(0, 10000) + '...[truncated]'
-        : responseBody;
-      
+      const truncatedBody =
+        responseBody.length > 10000
+          ? responseBody.substring(0, 10000) + '...[truncated]'
+          : responseBody;
+
       return {
         success: response.ok,
         statusCode: response.status,
@@ -209,7 +218,7 @@ async function deliverWebhook(
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
       const durationMs = Date.now() - startTime;
-      
+
       if (fetchError.name === 'AbortError') {
         return {
           success: false,
@@ -217,7 +226,7 @@ async function deliverWebhook(
           durationMs,
         };
       }
-      
+
       throw fetchError;
     }
   } catch (error: any) {
@@ -243,17 +252,14 @@ function calculateNextRetry(attemptNumber: number): Date {
 /**
  * Traite une livraison webhook
  */
-async function processDelivery(
-  supabase: any,
-  delivery: WebhookDelivery
-): Promise<void> {
+async function processDelivery(supabase: any, delivery: WebhookDelivery): Promise<void> {
   // Récupérer le webhook
   const { data: webhook, error: webhookError } = await supabase
     .from('webhooks')
     .select('id,status,url,secret,custom_headers,verify_ssl,timeout_seconds')
     .eq('id', delivery.webhook_id)
     .single();
-  
+
   if (webhookError || !webhook) {
     console.error('Webhook not found:', webhookError);
     await supabase.rpc('update_webhook_delivery_status', {
@@ -264,7 +270,7 @@ async function processDelivery(
     });
     return;
   }
-  
+
   // Vérifier si le webhook est actif
   if (webhook.status !== 'active') {
     console.log('Webhook is not active, skipping');
@@ -276,10 +282,10 @@ async function processDelivery(
     });
     return;
   }
-  
+
   // Envoyer le webhook
   const result = await deliverWebhook(delivery, webhook);
-  
+
   // Mettre à jour le statut
   if (result.success) {
     await supabase.rpc('update_webhook_delivery_status', {
@@ -293,7 +299,7 @@ async function processDelivery(
     // Vérifier si on peut retry
     if (delivery.attempt_number < delivery.max_attempts) {
       const nextRetry = calculateNextRetry(delivery.attempt_number);
-      
+
       await supabase
         .from('webhook_deliveries')
         .update({
@@ -318,7 +324,7 @@ async function processDelivery(
   }
 }
 
-serve(async (req) => {
+serve(async req => {
   const requestStart = Date.now();
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
@@ -351,11 +357,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    import { z } from "https://esm.sh/zod@3.22.4";
-
-    const RequestSchema = z.object({
-      delivery_id: z.string().uuid().optional(),
-    }).catchall(z.unknown()); // Permet d'ignorer les autres champs optionnels en toute sécurité
+    const RequestSchema = z
+      .object({
+        delivery_id: z.string().uuid().optional(),
+      })
+      .catchall(z.unknown()); // Permet d'ignorer les autres champs optionnels en toute sécurité
 
     let payload;
     try {
@@ -371,7 +377,7 @@ serve(async (req) => {
         requestStart
       );
     }
-    
+
     // Récupérer le delivery_id depuis la requête validée (optionnel)
     const { delivery_id } = payload;
 
@@ -381,7 +387,9 @@ serve(async (req) => {
       // Traiter un delivery spécifique
       const { data: delivery, error } = await supabase
         .from('webhook_deliveries')
-        .select('id,webhook_id,event_type,event_id,event_data,status,attempt_number,max_attempts,next_retry_at')
+        .select(
+          'id,webhook_id,event_type,event_id,event_data,status,attempt_number,max_attempts,next_retry_at'
+        )
         .eq('id', delivery_id)
         .eq('status', 'pending')
         .single();
@@ -401,7 +409,9 @@ serve(async (req) => {
       // Traiter tous les deliveries en attente (pending ou retrying)
       const { data, error } = await supabase
         .from('webhook_deliveries')
-        .select('id,webhook_id,event_type,event_id,event_data,status,attempt_number,max_attempts,next_retry_at')
+        .select(
+          'id,webhook_id,event_type,event_id,event_data,status,attempt_number,max_attempts,next_retry_at'
+        )
         .in('status', ['pending', 'retrying'])
         .or('next_retry_at.is.null,next_retry_at.lte.' + new Date().toISOString())
         .limit(50) // Limiter pour éviter la surcharge
@@ -416,11 +426,11 @@ serve(async (req) => {
 
     // Traiter chaque delivery
     const results = await Promise.allSettled(
-      deliveries.map((delivery) => processDelivery(supabase, delivery))
+      deliveries.map(delivery => processDelivery(supabase, delivery))
     );
 
-    const successful = results.filter((r) => r.status === 'fulfilled').length;
-    const failed = results.filter((r) => r.status === 'rejected').length;
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
 
     return jsonResponse(
       corsHeaders,
@@ -449,4 +459,3 @@ serve(async (req) => {
     );
   }
 });
-

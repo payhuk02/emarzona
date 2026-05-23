@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Section Personnalisation Page d'Accueil (landing premium)
  */
 

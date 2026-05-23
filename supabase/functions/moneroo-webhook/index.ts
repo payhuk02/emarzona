@@ -419,13 +419,17 @@ serve(async req => {
               .invoke('send-email', {
                 body: {
                   to: user.user.email,
-                  subject: '✅ Paiement confirmé - Emarzona',
-                  template: 'payment-received',
+                  template: 'payment_success',
                   data: {
-                    order_number: (order as any)?.order_number || transaction.order_id,
+                    customerName:
+                      user.user.user_metadata?.full_name ||
+                      user.user.email.split('@')[0] ||
+                      'Client',
+                    orderNumber:
+                      (order as { order_number?: string })?.order_number || transaction.order_id,
                     amount: transaction.amount,
                     currency: transaction.currency,
-                    transaction_id: transaction.id,
+                    transactionId: transaction.id,
                   },
                 },
               })
@@ -494,14 +498,17 @@ serve(async req => {
               .invoke('send-email', {
                 body: {
                   to: user.user.email,
-                  subject: '❌ Paiement échoué - Emarzona',
-                  template: 'payment-failed',
+                  template: 'payment_failed',
                   data: {
-                    order_number: currentOrder?.order_number,
+                    customerName:
+                      user.user.user_metadata?.full_name ||
+                      user.user.email.split('@')[0] ||
+                      'Client',
+                    orderNumber: currentOrder?.order_number,
                     amount: transaction.amount,
                     currency: transaction.currency,
-                    error_message: payload.error_message,
-                    transaction_id: transaction.id,
+                    reason: payload.error_message,
+                    transactionId: transaction.id,
                   },
                 },
               })

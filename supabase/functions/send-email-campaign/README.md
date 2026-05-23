@@ -1,6 +1,6 @@
 # Send Email Campaign Edge Function
 
-Edge Function Supabase pour envoyer des campagnes email marketing via SendGrid.
+Edge Function Supabase pour envoyer des campagnes email marketing via Resend.
 
 ## Configuration
 
@@ -14,9 +14,9 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-### Obtenir une clé API SendGrid
+### Obtenir une clé API Resend
 
-1. Créez un compte sur [SendGrid](https://sendgrid.com)
+1. Créez un compte sur [Resend](https://sendgrid.com)
 2. Obtenez votre clé API depuis le dashboard
 3. Ajoutez-la dans les secrets Supabase
 
@@ -78,8 +78,8 @@ if (result1.data.has_more) {
 La fonction met à jour automatiquement les métriques de la campagne:
 
 - `sent`: Nombre d'emails envoyés
-- `delivered`: Nombre d'emails livrés (mise à jour via webhook SendGrid)
-- `opened`: Nombre d'ouvertures (mise à jour via webhook SendGrid)
-- `clicked`: Nombre de clics (mise à jour via webhook SendGrid)
-- `bounced`: Nombre de rebonds (mise à jour via webhook SendGrid)
+- `delivered`: Nombre d'emails livrés (mise à jour via webhook Resend)
+- `opened`: Nombre d'ouvertures (mise à jour via webhook Resend)
+- `clicked`: Nombre de clics (mise à jour via webhook Resend)
+- `bounced`: Nombre de rebonds (mise à jour via webhook Resend)
 - `unsubscribed`: Nombre de désabonnements

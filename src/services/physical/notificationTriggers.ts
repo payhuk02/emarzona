@@ -1,7 +1,7 @@
 /**
  * Physical Products Notification Triggers
  * Date: 2025-01-27
- * 
+ *
  * Service centralisé pour déclencher les notifications automatiques
  */
 
@@ -47,7 +47,7 @@ export async function triggerPriceChangeNotifications(
     // Récupérer les informations du produit
     const { data: product } = await supabase
       .from('products')
-      .select('name, slug, price, currency')
+      .select('name, slug, price, currency, store_id')
       .eq('id', productId)
       .single();
 
@@ -57,7 +57,7 @@ export async function triggerPriceChangeNotifications(
     }
 
     // Récupérer les informations des variants si nécessaire
-    let  variantName: string | undefined;
+    let variantName: string | undefined;
     if (variantId) {
       const { data: variant } = await supabase
         .from('physical_product_variants')
@@ -92,7 +92,7 @@ export async function triggerPriceChangeNotifications(
         .select('email, name')
         .eq('id', alert.user_id)
         .single();
-      
+
       if (!customer || !customer.email) {
         logger.warn('Customer not found for price notification', { userId: alert.user_id });
         continue;
@@ -114,6 +114,7 @@ export async function triggerPriceChangeNotifications(
         userId: alert.user_id,
         userEmail: customer.email,
         userName: customer.name || customer.email.split('@')[0],
+        storeId: product.store_id,
         productId: product.id,
         productName: product.name,
         productSlug: product.slug,
@@ -132,7 +133,7 @@ export async function triggerPriceChangeNotifications(
         priceDropPercentage,
       });
     }
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     logger.error('Error triggering price change notifications', { error, productId, variantId });
   }
 }
@@ -148,19 +149,11 @@ export async function triggerStockChangeNotifications(
 ): Promise<void> {
   try {
     // Déterminer le statut précédent et actuel
-    const  previousStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
-      previousQuantity === 0
-        ? 'out_of_stock'
-        : previousQuantity < 10
-          ? 'low_stock'
-          : 'in_stock';
+    const previousStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
+      previousQuantity === 0 ? 'out_of_stock' : previousQuantity < 10 ? 'low_stock' : 'in_stock';
 
-    const  currentStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
-      currentQuantity === 0
-        ? 'out_of_stock'
-        : currentQuantity < 10
-          ? 'low_stock'
-          : 'in_stock';
+    const currentStatus: 'out_of_stock' | 'low_stock' | 'in_stock' =
+      currentQuantity === 0 ? 'out_of_stock' : currentQuantity < 10 ? 'low_stock' : 'in_stock';
 
     // Si le statut n'a pas changé, pas de notification
     if (previousStatus === currentStatus) {
@@ -182,7 +175,7 @@ export async function triggerStockChangeNotifications(
     // Récupérer les informations du produit
     const { data: product } = await supabase
       .from('products')
-      .select('name, slug')
+      .select('id, name, slug, store_id')
       .eq('id', productId)
       .single();
 
@@ -201,7 +194,7 @@ export async function triggerStockChangeNotifications(
     }
 
     // Récupérer les informations des variants si nécessaire
-    let  variantName: string | undefined;
+    let variantName: string | undefined;
     if (variantId) {
       const { data: variant } = await supabase
         .from('physical_product_variants')
@@ -236,7 +229,7 @@ export async function triggerStockChangeNotifications(
         .select('email, name')
         .eq('id', alert.user_id)
         .single();
-      
+
       if (!customer || !customer.email) {
         logger.warn('Customer not found for stock notification', { userId: alert.user_id });
         continue;
@@ -258,6 +251,7 @@ export async function triggerStockChangeNotifications(
         userId: alert.user_id,
         userEmail: customer.email,
         userName: customer.name || customer.email.split('@')[0],
+        storeId: product.store_id,
         productId: product.id,
         productName: product.name,
         productSlug: product.slug,
@@ -274,7 +268,7 @@ export async function triggerStockChangeNotifications(
         currentStatus,
       });
     }
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     logger.error('Error triggering stock change notifications', { error, productId, variantId });
   }
 }
@@ -284,7 +278,14 @@ export async function triggerStockChangeNotifications(
  */
 export async function triggerShipmentNotification(
   orderId: string,
-  shipmentStatus: 'preparing' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'exception' | 'returned',
+  shipmentStatus:
+    | 'preparing'
+    | 'shipped'
+    | 'in_transit'
+    | 'out_for_delivery'
+    | 'delivered'
+    | 'exception'
+    | 'returned',
   trackingNumber?: string,
   carrierName?: string,
   estimatedDeliveryDate?: string
@@ -293,7 +294,7 @@ export async function triggerShipmentNotification(
     // Récupérer les informations de la commande
     const { data: order } = await supabase
       .from('orders')
-      .select('*, customer_id, customers(*, email)')
+      .select('*, store_id, customer_id, customers(*, email)')
       .eq('id', orderId)
       .single();
 
@@ -364,15 +365,14 @@ export async function triggerShipmentNotification(
       userId: userId,
       userEmail: userEmail,
       userName: userName,
+      storeId: order.store_id,
       orderId: order.id,
       orderNumber: order.order_number || order.id,
       shipmentStatus,
       trackingNumber,
       carrierName,
       estimatedDeliveryDate,
-      trackingUrl: trackingNumber
-        ? `https://tracking.fedex.com/${trackingNumber}`
-        : undefined,
+      trackingUrl: trackingNumber ? `https://tracking.fedex.com/${trackingNumber}` : undefined,
       productName,
       productImageUrl,
     });
@@ -382,7 +382,7 @@ export async function triggerShipmentNotification(
       orderId,
       shipmentStatus,
     });
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     logger.error('Error triggering shipment notification', { error, orderId });
   }
 }
@@ -392,13 +392,21 @@ export async function triggerShipmentNotification(
  */
 export async function triggerReturnNotification(
   returnId: string,
-  returnStatus: 'requested' | 'approved' | 'rejected' | 'received' | 'processing' | 'refunded' | 'completed' | 'cancelled'
+  returnStatus:
+    | 'requested'
+    | 'approved'
+    | 'rejected'
+    | 'received'
+    | 'processing'
+    | 'refunded'
+    | 'completed'
+    | 'cancelled'
 ): Promise<void> {
   try {
     // Récupérer les informations du retour
     const { data: returnData } = await supabase
       .from('product_returns')
-      .select('*, order_id, orders(*, order_number, customer_id, customers(*, email))')
+      .select('*, order_id, orders(*, store_id, order_number, customer_id, customers(*, email))')
       .eq('id', returnId)
       .single();
 
@@ -466,6 +474,7 @@ export async function triggerReturnNotification(
       userId: userId,
       userEmail: userEmail,
       userName: userName,
+      storeId: order.store_id,
       returnId: returnData.id,
       orderId: order.id,
       orderNumber: order.order_number || order.id,
@@ -481,14 +490,7 @@ export async function triggerReturnNotification(
       returnId,
       returnStatus,
     });
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     logger.error('Error triggering return notification', { error, returnId });
   }
 }
-
-
-
-
-
-
-

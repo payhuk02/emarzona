@@ -4,83 +4,37 @@
  * Supporte: Digital, Physical, Service, Course, Artist
  */
 
-import type {
-  SendEmailPayload,
-  EmailTemplate,
-} from '@/types/email';
+import type { SendEmailPayload, EmailTemplate } from '@/types/email';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { emailRateLimiter } from '@/lib/email/email-rate-limiter';
 import { emailRetryService } from '@/lib/email/email-retry-service';
+import { invokeSendEmail } from '@/lib/email/invoke-send-email';
 
 /**
  * Envoyer un email via SendGrid (fonction interne avec retry)
  */
-const sendEmailInternal = async (payload: SendEmailPayload): Promise<{
+const sendEmailInternal = async (
+  payload: SendEmailPayload
+): Promise<{
   success: boolean;
   messageId?: string;
   error?: string;
 }> => {
-  const startTime = Date.now();
-  const securityBlockMessage =
-    'Client-side SendGrid is disabled for security. Use server-side Edge Function.';
-  logger.error(
-    'Blocked insecure client-side email send. Use Supabase Edge Functions with server-side secrets.',
-    {
-      payload: { to: payload.to, subject: payload.subject, templateSlug: payload.templateSlug },
-    }
-  );
-
-  // 1. Récupérer le template
-  const template = await getTemplate(payload.templateSlug, payload.productType);
-  if (!template) {
-    return {
-      success: false,
-      error: `Template not found: ${payload.templateSlug}`,
-    };
-  }
-
-  // 2. Déterminer la langue
   const language = payload.language || (await getUserLanguage(payload.userId)) || 'fr';
 
-  // 3. Remplacer les variables dans le contenu
-  const subject = replaceVariables(template.subject[language] || template.subject['fr'], payload.variables);
-  const htmlContent = replaceVariables(template.html_content[language] || template.html_content['fr'], payload.variables);
-
-  const processingTime = Date.now() - startTime;
-  const messageId: string | undefined = undefined;
-  const errorText = securityBlockMessage;
-  await logEmail({
-    template_id: template.id,
-    template_slug: template.slug,
-    recipient_email: payload.to,
-    recipient_name: payload.toName,
-    user_id: payload.userId,
-    subject,
-    html_content: htmlContent,
-    product_type: payload.productType,
-    product_id: payload.productId,
-    product_name: payload.productName,
-    order_id: payload.orderId,
-    store_id: payload.storeId,
-    variables: payload.variables,
-    sendgrid_message_id: messageId || undefined,
-    sendgrid_status: 'failed',
-    error_message: errorText,
-    error_code: 'SECURITY_BLOCKED',
-    processing_time_ms: processingTime,
+  return invokeSendEmail({
+    ...payload,
+    language,
   });
-  return {
-    success: false,
-    messageId,
-    error: errorText,
-  };
 };
 
 /**
  * Envoyer un email via SendGrid avec rate limiting et retry automatique
  */
-export const sendEmail = async (payload: SendEmailPayload): Promise<{
+export const sendEmail = async (
+  payload: SendEmailPayload
+): Promise<{
   success: boolean;
   messageId?: string;
   error?: string;
@@ -210,32 +164,30 @@ interface EmailLogData {
 /**
  * Logger un email envoyé
  */
-const logEmail = async (logData: EmailLogData) => {
+const _logEmail = async (logData: EmailLogData) => {
   try {
-    const { error } = await supabase
-      .from('email_logs')
-      .insert({
-        ...logData,
-        sent_at: new Date().toISOString(),
-      });
+    const { error } = await supabase.from('email_logs').insert({
+      ...logData,
+      sent_at: new Date().toISOString(),
+    });
 
     if (error) {
       logger.error('Error logging email', {
         error: error.message,
-        emailData: { 
-          to: logData.recipient_email, 
-          subject: logData.subject, 
-          templateId: logData.template_id 
+        emailData: {
+          to: logData.recipient_email,
+          subject: logData.subject,
+          templateId: logData.template_id,
         },
       });
     }
   } catch (error) {
     logger.error('Error in logEmail', {
       error: error instanceof Error ? error.message : String(error),
-      emailData: { 
-        to: logData.recipient_email, 
-        subject: logData.subject, 
-        templateId: logData.template_id 
+      emailData: {
+        to: logData.recipient_email,
+        subject: logData.subject,
+        templateId: logData.template_id,
       },
     });
   }
@@ -244,8 +196,11 @@ const logEmail = async (logData: EmailLogData) => {
 /**
  * Remplacer les variables dans le contenu
  */
-const replaceVariables = (content: string, variables: Record<string, string | number | boolean | null | undefined>): string => {
-  let  result= content;
+const _replaceVariables = (
+  content: string,
+  variables: Record<string, string | number | boolean | null | undefined>
+): string => {
+  let result = content;
 
   Object.entries(variables).forEach(([key, value]) => {
     const placeholder = `{{${key}}}`;
@@ -514,8 +469,8 @@ export const sendTrackingUpdateEmail = async (params: {
   };
 }) => {
   // Déterminer le template selon le statut
-  let  templateSlug= 'shipment-tracking-update';
-  
+  let templateSlug = 'shipment-tracking-update';
+
   if (params.status === 'delivered') {
     templateSlug = 'shipment-delivered';
   } else if (params.status === 'out_for_delivery') {
@@ -539,16 +494,9 @@ export const sendTrackingUpdateEmail = async (params: {
       estimated_delivery: params.estimatedDelivery,
       latest_event_description: params.latestEvent?.description,
       latest_event_location: params.latestEvent?.location,
-      latest_event_timestamp: params.latestEvent?.timestamp 
+      latest_event_timestamp: params.latestEvent?.timestamp
         ? new Date(params.latestEvent.timestamp).toLocaleString('fr-FR')
         : undefined,
     },
   });
 };
-
-
-
-
-
-
-

@@ -17,7 +17,8 @@ function getCorsHeaders(req: Request) {
 
   return {
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type, x-internal-secret',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     Vary: 'Origin',
   };
@@ -30,7 +31,33 @@ interface EmailPayload {
   customer_id?: string;
 }
 
-serve(async (req) => {
+const EDGE_INTERNAL_SECRET = Deno.env.get('EDGE_INTERNAL_SECRET');
+
+async function invokeSendEmail(
+  supabase: ReturnType<typeof createClient>,
+  body: Record<string, unknown>
+): Promise<{ ok: boolean; error?: string }> {
+  const headers: Record<string, string> = {};
+  if (EDGE_INTERNAL_SECRET) {
+    headers['x-internal-secret'] = EDGE_INTERNAL_SECRET;
+  }
+
+  const { data, error } = await supabase.functions.invoke('send-email', { body, headers });
+
+  if (error) {
+    console.error('send-email invoke error:', error);
+    return { ok: false, error: error.message };
+  }
+
+  const result = data as { success?: boolean; error?: string } | null;
+  if (result?.success === false || result?.error) {
+    return { ok: false, error: result.error || 'send-email failed' };
+  }
+
+  return { ok: true };
+}
+
+serve(async req => {
   const corsHeaders = getCorsHeaders(req);
   // Handle CORS
   if (req.method === 'OPTIONS') {
@@ -53,14 +80,15 @@ serve(async (req) => {
     if (expectedInternalSecret && internalSecret?.trim() === expectedInternalSecret.trim()) {
       isAuthorized = true;
     }
-    if (!isAuthorized) {
-      const authHeader = req.headers.get('authorization');
-      const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-      if (token) {
-        const { data: userData, error: userError } = await authClient.auth.getUser(token);
-        if (!userError && userData.user) {
-          isAuthorized = true;
-        }
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    if (!isAuthorized && token && token === supabaseServiceKey) {
+      isAuthorized = true;
+    }
+    if (!isAuthorized && token) {
+      const { data: userData, error: userError } = await authClient.auth.getUser(token);
+      if (!userError && userData.user) {
+        isAuthorized = true;
       }
     }
     if (!isAuthorized) {
@@ -75,13 +103,10 @@ serve(async (req) => {
     const payload: EmailPayload = await req.json();
 
     if (!payload.order_id || !payload.customer_email) {
-      return new Response(
-        JSON.stringify({ error: 'order_id and customer_email are required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'order_id and customer_email are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     console.log(`Processing order confirmation emails for order ${payload.order_id}...`);
@@ -89,7 +114,8 @@ serve(async (req) => {
     // Récupérer la commande avec tous les détails
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select(`
+      .select(
+        `
         *,
         order_items (
           *,
@@ -105,7 +131,8 @@ serve(async (req) => {
           full_name,
           phone
         )
-      `)
+      `
+      )
       .eq('id', payload.order_id)
       .single();
 
@@ -122,7 +149,7 @@ serve(async (req) => {
 
     // Grouper les items par type de produit
     const itemsByType: Record<string, typeof order.order_items> = {};
-    
+
     (order.order_items || []).forEach((item: any) => {
       const productType = item.product_type || 'generic';
       if (!itemsByType[productType]) {
@@ -143,23 +170,23 @@ serve(async (req) => {
             case 'digital':
               emailSent = await sendDigitalEmail(supabase, order, item, payload);
               break;
-            
+
             case 'physical':
               emailSent = await sendPhysicalEmail(supabase, order, item, payload);
               break;
-            
+
             case 'service':
               emailSent = await sendServiceEmail(supabase, order, item, payload);
               break;
-            
+
             case 'course':
               emailSent = await sendCourseEmail(supabase, order, item, payload);
               break;
-            
+
             case 'artist':
               emailSent = await sendArtistEmail(supabase, order, item, payload);
               break;
-            
+
             default:
               console.log(`Skipping email for product type: ${productType}`);
           }
@@ -187,7 +214,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         orderId: payload.order_id,
-        emailsSent: emailResults.filter((r) => r.emailSent).length,
+        emailsSent: emailResults.filter(r => r.emailSent).length,
         totalItems: emailResults.length,
         results: emailResults,
       }),
@@ -211,7 +238,12 @@ serve(async (req) => {
 });
 
 // Helper functions pour chaque type de produit
-async function sendDigitalEmail(supabase: any, order: any, item: any, payload: EmailPayload): Promise<boolean> {
+async function sendDigitalEmail(
+  supabase: any,
+  order: any,
+  item: any,
+  payload: EmailPayload
+): Promise<boolean> {
   // Récupérer les détails du produit digital
   const { data: digitalProduct } = await supabase
     .from('digital_products')
@@ -224,105 +256,100 @@ async function sendDigitalEmail(supabase: any, order: any, item: any, payload: E
     return false;
   }
 
-  // Récupérer le template depuis la base de données
-  const { data: template } = await supabase
-    .from('email_templates')
-    .select('id')
-    .eq('slug', 'order-confirmation-digital')
-    .eq('is_active', true)
-    .single();
-
-  if (!template) {
-    console.warn('Template order-confirmation-digital not found');
-    return false;
-  }
-
-  // Envoyer l'email via la fonction send-email
-  const { error } = await supabase.functions.invoke('send-email', {
-    body: {
-      templateSlug: 'order-confirmation-digital',
-      to: payload.customer_email,
-      toName: payload.customer_name,
-      userId: payload.customer_id,
-      productType: 'digital',
-      productId: item.product_id,
-      productName: item.product_name,
-      orderId: order.id,
-      variables: {
-        user_name: payload.customer_name,
-        order_id: order.id,
-        product_name: item.product_name,
-        download_link: digitalProduct.download_url || '#',
-        file_format: digitalProduct.file_format,
-        file_size: digitalProduct.file_size,
-        licensing_type: digitalProduct.license_type,
-      },
+  const result = await invokeSendEmail(supabase, {
+    templateSlug: 'order-confirmation-digital',
+    to: payload.customer_email,
+    toName: payload.customer_name,
+    userId: payload.customer_id,
+    productType: 'digital',
+    productId: item.product_id,
+    productName: item.product_name,
+    orderId: order.id,
+    variables: {
+      user_name: payload.customer_name,
+      order_id: order.id,
+      product_name: item.product_name,
+      download_link: digitalProduct.download_url || '#',
+      file_format: digitalProduct.file_format,
+      file_size: digitalProduct.file_size,
+      licensing_type: digitalProduct.license_type,
     },
   });
 
-  return !error;
+  return result.ok;
 }
 
-async function sendPhysicalEmail(supabase: any, order: any, item: any, payload: EmailPayload): Promise<boolean> {
+async function sendPhysicalEmail(
+  supabase: any,
+  order: any,
+  item: any,
+  payload: EmailPayload
+): Promise<boolean> {
   // Récupérer l'adresse de livraison
   const shippingAddress = order.shipping_address || order.customer?.address || 'Non spécifiée';
 
-  const { error } = await supabase.functions.invoke('send-email', {
-    body: {
-      templateSlug: 'order-confirmation-physical',
-      to: payload.customer_email,
-      toName: payload.customer_name,
-      userId: payload.customer_id,
-      productType: 'physical',
-      productId: item.product_id,
-      productName: item.product_name,
-      orderId: order.id,
-      variables: {
-        user_name: payload.customer_name,
-        order_id: order.id,
-        product_name: item.product_name,
-        shipping_address: shippingAddress,
-        delivery_date: order.expected_delivery_date || 'À déterminer',
-        tracking_number: order.tracking_number,
-        tracking_link: order.tracking_link,
-      },
+  const result = await invokeSendEmail(supabase, {
+    templateSlug: 'order-confirmation-physical',
+    to: payload.customer_email,
+    toName: payload.customer_name,
+    userId: payload.customer_id,
+    productType: 'physical',
+    productId: item.product_id,
+    productName: item.product_name,
+    orderId: order.id,
+    variables: {
+      user_name: payload.customer_name,
+      order_id: order.id,
+      product_name: item.product_name,
+      shipping_address: shippingAddress,
+      delivery_date: order.expected_delivery_date || 'À déterminer',
+      tracking_number: order.tracking_number,
+      tracking_link: order.tracking_link,
     },
   });
 
-  return !error;
+  return result.ok;
 }
 
-async function sendServiceEmail(supabase: any, order: any, item: any, payload: EmailPayload): Promise<boolean> {
+async function sendServiceEmail(
+  supabase: any,
+  order: any,
+  item: any,
+  payload: EmailPayload
+): Promise<boolean> {
   // Récupérer les détails de la réservation
   const bookingDate = item.item_metadata?.booking_date || 'À déterminer';
   const bookingTime = item.item_metadata?.booking_time || 'À déterminer';
 
-  const { error } = await supabase.functions.invoke('send-email', {
-    body: {
-      templateSlug: 'order-confirmation-service',
-      to: payload.customer_email,
-      toName: payload.customer_name,
-      userId: payload.customer_id,
-      productType: 'service',
-      productId: item.product_id,
-      productName: item.product_name,
-      orderId: order.id,
-      variables: {
-        user_name: payload.customer_name,
-        order_id: order.id,
-        service_name: item.product_name,
-        booking_date: bookingDate,
-        booking_time: bookingTime,
-        booking_link: item.item_metadata?.booking_link || '#',
-        provider_name: item.item_metadata?.provider_name || 'Notre équipe',
-      },
+  const result = await invokeSendEmail(supabase, {
+    templateSlug: 'order-confirmation-service',
+    to: payload.customer_email,
+    toName: payload.customer_name,
+    userId: payload.customer_id,
+    productType: 'service',
+    productId: item.product_id,
+    productName: item.product_name,
+    orderId: order.id,
+    variables: {
+      user_name: payload.customer_name,
+      order_id: order.id,
+      service_name: item.product_name,
+      booking_date: bookingDate,
+      booking_time: bookingTime,
+      booking_link: item.item_metadata?.booking_link || '#',
+      provider_name: item.item_metadata?.provider_name || 'Notre équipe',
     },
   });
 
-  return !error;
+  return result.ok;
 }
 
-async function sendCourseEmail(supabase: any, order: any, item: any, payload: EmailPayload): Promise<boolean> {
+async function sendCourseEmail(
+  supabase: any,
+  order: any,
+  item: any,
+  payload: EmailPayload
+): Promise<boolean> {
   // Récupérer les détails du cours
   const { data: course } = await supabase
     .from('course_products')
@@ -335,31 +362,34 @@ async function sendCourseEmail(supabase: any, order: any, item: any, payload: Em
     return false;
   }
 
-  const { error } = await supabase.functions.invoke('send-email', {
-    body: {
-      templateSlug: 'course-enrollment-confirmation',
-      to: payload.customer_email,
-      toName: payload.customer_name,
-      userId: payload.customer_id,
-      productType: 'course',
-      productId: item.product_id,
-      productName: item.product_name,
-      variables: {
-        user_name: payload.customer_name,
-        course_name: item.product_name,
-        enrollment_date: new Date().toLocaleDateString('fr-FR'),
-        course_link: course.enrollment_url || '#',
-        instructor_name: course.instructor?.full_name || 'Notre équipe',
-        course_duration: course.duration,
-        certificate_available: course.certificate_available || false,
-      },
+  const result = await invokeSendEmail(supabase, {
+    templateSlug: 'course-enrollment-confirmation',
+    to: payload.customer_email,
+    toName: payload.customer_name,
+    userId: payload.customer_id,
+    productType: 'course',
+    productId: item.product_id,
+    productName: item.product_name,
+    variables: {
+      user_name: payload.customer_name,
+      course_name: item.product_name,
+      enrollment_date: new Date().toLocaleDateString('fr-FR'),
+      course_link: course.enrollment_url || '#',
+      instructor_name: course.instructor?.full_name || 'Notre équipe',
+      course_duration: course.duration,
+      certificate_available: course.certificate_available || false,
     },
   });
 
-  return !error;
+  return result.ok;
 }
 
-async function sendArtistEmail(supabase: any, order: any, item: any, payload: EmailPayload): Promise<boolean> {
+async function sendArtistEmail(
+  supabase: any,
+  order: any,
+  item: any,
+  payload: EmailPayload
+): Promise<boolean> {
   // Récupérer les détails de l'œuvre d'artiste
   const { data: artistProduct } = await supabase
     .from('artist_products')
@@ -372,33 +402,30 @@ async function sendArtistEmail(supabase: any, order: any, item: any, payload: Em
     return false;
   }
 
-  const { error } = await supabase.functions.invoke('send-email', {
-    body: {
-      templateSlug: 'order-confirmation-artist',
-      to: payload.customer_email,
-      toName: payload.customer_name,
-      userId: payload.customer_id,
-      productType: 'artist',
-      productId: item.product_id,
-      productName: item.product_name,
-      orderId: order.id,
-      variables: {
-        user_name: payload.customer_name,
-        order_id: order.id,
-        product_name: item.product_name,
-        artist_name: artistProduct.artist?.full_name || artistProduct.artist_name || 'Artiste',
-        edition_number: item.item_metadata?.edition_number,
-        total_editions: artistProduct.total_editions,
-        certificate_available: artistProduct.certificate_available || false,
-        authenticity_certificate_link: item.item_metadata?.certificate_link,
-        shipping_address: order.shipping_address || 'À déterminer',
-        delivery_date: order.expected_delivery_date || 'À déterminer',
-        tracking_number: order.tracking_number,
-        tracking_link: order.tracking_link,
-      },
+  const result = await invokeSendEmail(supabase, {
+    templateSlug: 'order-confirmation-artist',
+    to: payload.customer_email,
+    toName: payload.customer_name,
+    userId: payload.customer_id,
+    productType: 'artist',
+    productId: item.product_id,
+    productName: item.product_name,
+    orderId: order.id,
+    variables: {
+      user_name: payload.customer_name,
+      order_id: order.id,
+      product_name: item.product_name,
+      artist_name: artistProduct.artist?.full_name || artistProduct.artist_name || 'Artiste',
+      edition_number: item.item_metadata?.edition_number,
+      total_editions: artistProduct.total_editions,
+      certificate_available: artistProduct.certificate_available || false,
+      authenticity_certificate_link: item.item_metadata?.certificate_link,
+      shipping_address: order.shipping_address || 'À déterminer',
+      delivery_date: order.expected_delivery_date || 'À déterminer',
+      tracking_number: order.tracking_number,
+      tracking_link: order.tracking_link,
     },
   });
 
-  return !error;
+  return result.ok;
 }
-

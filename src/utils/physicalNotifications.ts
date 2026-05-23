@@ -1,11 +1,12 @@
 /**
  * Physical Product Email Notifications
  * Date: 2025-01-27
- * 
+ *
  * Système de notifications email automatiques pour produits physiques
  */
 
 import { sendEmail } from '@/lib/sendgrid';
+import { resolveStoreId } from '@/lib/email/resolve-store-id';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
@@ -17,6 +18,7 @@ export interface PriceDropNotification {
   userId: string;
   userEmail: string;
   userName: string;
+  storeId?: string;
   productId: string;
   productName: string;
   productSlug?: string;
@@ -33,6 +35,7 @@ export interface StockAlertNotification {
   userId: string;
   userEmail: string;
   userName: string;
+  storeId?: string;
   productId: string;
   productName: string;
   productSlug?: string;
@@ -47,6 +50,7 @@ export interface PromotionAlertNotification {
   userId: string;
   userEmail: string;
   userName: string;
+  storeId?: string;
   productId: string;
   productName: string;
   productSlug?: string;
@@ -62,9 +66,17 @@ export interface ShipmentNotification {
   userId: string;
   userEmail: string;
   userName: string;
+  storeId?: string;
   orderId: string;
   orderNumber?: string;
-  shipmentStatus: 'preparing' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'exception' | 'returned';
+  shipmentStatus:
+    | 'preparing'
+    | 'shipped'
+    | 'in_transit'
+    | 'out_for_delivery'
+    | 'delivered'
+    | 'exception'
+    | 'returned';
   trackingNumber?: string;
   carrierName?: string;
   estimatedDeliveryDate?: string;
@@ -77,10 +89,19 @@ export interface ReturnNotification {
   userId: string;
   userEmail: string;
   userName: string;
+  storeId?: string;
   returnId: string;
   orderId: string;
   orderNumber?: string;
-  returnStatus: 'requested' | 'approved' | 'rejected' | 'received' | 'processing' | 'refunded' | 'completed' | 'cancelled';
+  returnStatus:
+    | 'requested'
+    | 'approved'
+    | 'rejected'
+    | 'received'
+    | 'processing'
+    | 'refunded'
+    | 'completed'
+    | 'cancelled';
   productName?: string;
   refundAmount?: number;
   refundMethod?: string;
@@ -98,11 +119,16 @@ export const sendPriceDropNotification = async (
   notification: PriceDropNotification
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    const storeId = await resolveStoreId({
+      storeId: notification.storeId,
+      productId: notification.productId,
+    });
     const result = await sendEmail({
       templateSlug: 'price-drop-alert-physical',
       to: notification.userEmail,
       toName: notification.userName,
       userId: notification.userId,
+      storeId,
       productType: 'physical',
       productId: notification.productId,
       productName: notification.productName,
@@ -151,7 +177,7 @@ export const sendPriceDropNotification = async (
       .eq('variant_id', notification.variantId || null);
 
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending price drop notification', { error, notification });
     return { success: false, error: errorMessage };
@@ -165,6 +191,10 @@ export const sendStockAlertNotification = async (
   notification: StockAlertNotification
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    const storeId = await resolveStoreId({
+      storeId: notification.storeId,
+      productId: notification.productId,
+    });
     const statusMessages = {
       out_of_stock: 'Rupture de stock',
       low_stock: 'Stock faible',
@@ -176,6 +206,7 @@ export const sendStockAlertNotification = async (
       to: notification.userEmail,
       toName: notification.userName,
       userId: notification.userId,
+      storeId,
       productType: 'physical',
       productId: notification.productId,
       productName: notification.productName,
@@ -216,7 +247,7 @@ export const sendStockAlertNotification = async (
       .eq('variant_id', notification.variantId || null);
 
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending stock alert notification', { error, notification });
     return { success: false, error: errorMessage };
@@ -230,11 +261,16 @@ export const sendPromotionAlertNotification = async (
   notification: PromotionAlertNotification
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    const storeId = await resolveStoreId({
+      storeId: notification.storeId,
+      productId: notification.productId,
+    });
     const result = await sendEmail({
       templateSlug: 'promotion-alert-physical',
       to: notification.userEmail,
       toName: notification.userName,
       userId: notification.userId,
+      storeId,
       productType: 'physical',
       productId: notification.productId,
       productName: notification.productName,
@@ -282,7 +318,7 @@ export const sendPromotionAlertNotification = async (
       .eq('product_id', notification.productId);
 
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending promotion alert notification', { error, notification });
     return { success: false, error: errorMessage };
@@ -296,6 +332,10 @@ export const sendShipmentNotification = async (
   notification: ShipmentNotification
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    const storeId = await resolveStoreId({
+      storeId: notification.storeId,
+      orderId: notification.orderId,
+    });
     const statusMessages = {
       preparing: 'En préparation',
       shipped: 'Expédié',
@@ -311,6 +351,7 @@ export const sendShipmentNotification = async (
       to: notification.userEmail,
       toName: notification.userName,
       userId: notification.userId,
+      storeId,
       productType: 'physical',
       orderId: notification.orderId,
       variables: {
@@ -347,7 +388,7 @@ export const sendShipmentNotification = async (
       .eq('shipment_status', notification.shipmentStatus);
 
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending shipment notification', { error, notification });
     return { success: false, error: errorMessage };
@@ -361,6 +402,10 @@ export const sendReturnNotification = async (
   notification: ReturnNotification
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    const storeId = await resolveStoreId({
+      storeId: notification.storeId,
+      orderId: notification.orderId,
+    });
     const statusMessages = {
       requested: 'Demandé',
       approved: 'Approuvé',
@@ -377,6 +422,7 @@ export const sendReturnNotification = async (
       to: notification.userEmail,
       toName: notification.userName,
       userId: notification.userId,
+      storeId,
       productType: 'physical',
       orderId: notification.orderId,
       variables: {
@@ -416,16 +462,9 @@ export const sendReturnNotification = async (
       .eq('return_status', notification.returnStatus);
 
     return { success: true };
-  } catch ( _error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Error sending return notification', { error, notification });
     return { success: false, error: errorMessage };
   }
 };
-
-
-
-
-
-
-

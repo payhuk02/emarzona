@@ -4,7 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import { sendNewVersionNotification } from '@/utils/digitalNotifications';
 import { logger } from '@/lib/logger';
 
-const PRODUCT_VERSION_FIELDS = 'id, product_id, store_id, version_number, version_name, status, download_url, file_size_mb, file_checksum, changelog_title, changelog_markdown, whats_new, bug_fixes, breaking_changes, release_date, download_count, is_major_update, is_security_update, minimum_version, notify_customers, notification_sent_at, customers_notified, created_at, updated_at, is_beta, rollback_threshold_percentage, rollback_min_downloads, rollback_status, rolled_back_at, rollback_reason, rollback_metrics, previous_version_id, rolled_back_to_version_id';
+const PRODUCT_VERSION_FIELDS =
+  'id, product_id, store_id, version_number, version_name, status, download_url, file_size_mb, file_checksum, changelog_title, changelog_markdown, whats_new, bug_fixes, breaking_changes, release_date, download_count, is_major_update, is_security_update, minimum_version, notify_customers, notification_sent_at, customers_notified, created_at, updated_at, is_beta, rollback_threshold_percentage, rollback_min_downloads, rollback_status, rolled_back_at, rollback_reason, rollback_metrics, previous_version_id, rolled_back_to_version_id';
 
 // ============================================================================
 // TYPES
@@ -44,7 +45,7 @@ export interface ProductVersion {
   rollback_status?: 'none' | 'monitoring' | 'rolled_back' | 'rollback_failed';
   rolled_back_at?: string;
   rollback_reason?: string;
-  rollback_metrics?: Record<string, any>;
+  rollback_metrics?: Record<string, unknown>;
   previous_version_id?: string;
   rolled_back_to_version_id?: string;
 }
@@ -119,13 +120,15 @@ export function useStoreVersions(storeId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('product_versions')
-        .select(`
+        .select(
+          `
           *,
           products (
             name,
             slug
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -197,10 +200,10 @@ export function useCreateVersion() {
       if (error) throw error;
       return data as ProductVersion;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: versionKeys.byProduct(data.product_id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byStore(data.store_id) });
-      
+
       toast({
         title: '✅ Version créée !',
         description: `Version ${data.version_number} créée avec succès.`,
@@ -225,7 +228,13 @@ export function useUpdateVersion() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ versionId, updates }: { versionId: string; updates: Partial<CreateVersionInput> }) => {
+    mutationFn: async ({
+      versionId,
+      updates,
+    }: {
+      versionId: string;
+      updates: Partial<CreateVersionInput>;
+    }) => {
       const { data, error } = await supabase
         .from('product_versions')
         .update(updates)
@@ -236,11 +245,11 @@ export function useUpdateVersion() {
       if (error) throw error;
       return data as ProductVersion;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: versionKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byProduct(data.product_id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byStore(data.store_id) });
-      
+
       toast({
         title: '✅ Version mise à jour !',
         description: `Version ${data.version_number} modifiée avec succès.`,
@@ -266,16 +275,13 @@ export function useDeleteVersion() {
 
   return useMutation({
     mutationFn: async (versionId: string) => {
-      const { error } = await supabase
-        .from('product_versions')
-        .delete()
-        .eq('id', versionId);
+      const { error } = await supabase.from('product_versions').delete().eq('id', versionId);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: versionKeys.all });
-      
+
       toast({
         title: '✅ Version supprimée !',
         description: 'La version a été supprimée avec succès.',
@@ -324,14 +330,16 @@ export function useNotifyCustomers() {
       // Récupérer les informations de la version
       const { data: version, error: versionError } = await supabase
         .from('product_versions')
-        .select(`
+        .select(
+          `
           *,
           product:products (
             id,
             name,
             slug
           )
-        `)
+        `
+        )
         .eq('id', versionId)
         .single();
 
@@ -346,10 +354,11 @@ export function useNotifyCustomers() {
       }
 
       // Construire les notes de version depuis le changelog
-      const versionNotes = version.changelog_markdown 
-        || version.changelog_title 
-        || (version.whats_new && version.whats_new.length > 0 
-          ? `Nouveautés: ${version.whats_new.join(', ')}` 
+      const versionNotes =
+        version.changelog_markdown ||
+        version.changelog_title ||
+        (version.whats_new && version.whats_new.length > 0
+          ? `Nouveautés: ${version.whats_new.join(', ')}`
           : 'Nouvelle version disponible');
 
       // Envoyer les notifications à tous les clients qui ont acheté ce produit
@@ -360,6 +369,7 @@ export function useNotifyCustomers() {
         userId: '', // Non utilisé - la fonction récupère tous les clients
         userEmail: '', // Non utilisé
         userName: '', // Non utilisé
+        storeId: version.store_id,
         productId: product.id,
         productName: product.name,
         productSlug: product.slug || undefined,
@@ -370,7 +380,7 @@ export function useNotifyCustomers() {
       });
 
       if (!notificationResult.success) {
-        throw new Error(notificationResult.error || 'Erreur lors de l\'envoi des notifications');
+        throw new Error(notificationResult.error || "Erreur lors de l'envoi des notifications");
       }
 
       // Récupérer le nombre de clients notifiés (tous les clients qui ont acheté le produit)
@@ -387,7 +397,7 @@ export function useNotifyCustomers() {
         } | null;
       }
       const uniqueCustomers = new Set<string>();
-      (orderItems as OrderItemWithOrder[] | null)?.forEach((item) => {
+      (orderItems as OrderItemWithOrder[] | null)?.forEach(item => {
         if (item.orders?.customer_id) {
           uniqueCustomers.add(item.orders.customer_id);
         }
@@ -407,16 +417,18 @@ export function useNotifyCustomers() {
         .single();
 
       if (updateError) {
-        logger.error('Erreur lors de la mise à jour du timestamp de notification', { error: updateError });
+        logger.error('Erreur lors de la mise à jour du timestamp de notification', {
+          error: updateError,
+        });
         // Ne pas throw car les notifications ont été envoyées
       }
 
       return updatedVersion || version;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: versionKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byProduct(data.product_id) });
-      
+
       toast({
         title: '📧 Notifications envoyées !',
         description: 'Les clients seront notifiés de la nouvelle version.',
@@ -427,15 +439,8 @@ export function useNotifyCustomers() {
       toast({
         variant: 'destructive',
         title: '❌ Erreur',
-        description: errorMessage || 'Impossible d\'envoyer les notifications.',
+        description: errorMessage || "Impossible d'envoyer les notifications.",
       });
     },
   });
 }
-
-
-
-
-
-
-

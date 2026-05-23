@@ -14,6 +14,12 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
+import { logEmailSend } from '../_shared/email-template-utils.ts';
+
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@emarzona.com';
+const RESEND_FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'Emarzona';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -29,7 +35,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null) {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
@@ -136,38 +142,54 @@ serve(async req => {
 
       emailBody += `\nRetourner au panier: ${returnUrl}\n\nÀ bientôt,\nL'équipe Emarzona`;
 
-      // Envoyer l'email via SendGrid (ou autre service)
-      // TODO: Intégrer avec SendGrid API
-      const sendGridApiKey = Deno.env.get('SENDGRID_API_KEY');
-      const sendGridFromEmail = Deno.env.get('SENDGRID_FROM_EMAIL') || 'noreply@emarzona.com';
-
-      if (sendGridApiKey && cart.customer_email) {
+      if (RESEND_API_KEY && cart.customer_email) {
         try {
-          const emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+          const eligibility = await canSendEmailToRecipient(
+            supabase,
+            cart.customer_email,
+            'marketing',
+            cart.user_id || undefined
+          );
+
+          if (!eligibility.allowed) {
+            results.push({
+              cart_id: cart.id,
+              email: cart.customer_email,
+              status: 'skipped',
+              reason: eligibility.reason || 'compliance',
+            });
+            continue;
+          }
+
+          const htmlBody = `<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.6">${emailBody.replace(/</g, '&lt;')}</pre>`;
+
+          const emailResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${sendGridApiKey}`,
+              Authorization: `Bearer ${RESEND_API_KEY}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              personalizations: [
-                {
-                  to: [{ email: cart.customer_email }],
-                  subject: emailSubject,
-                },
-              ],
-              from: { email: sendGridFromEmail },
-              content: [
-                {
-                  type: 'text/plain',
-                  value: emailBody,
-                },
-              ],
+              from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
+              to: [cart.customer_email],
+              subject: emailSubject,
+              html: htmlBody,
+              tags: [{ name: 'type', value: 'abandoned_cart' }],
             }),
           });
 
           if (emailResponse.ok) {
-            // Marquer comme envoyé
+            const sent = await emailResponse.json();
+            await logEmailSend(supabase, {
+              template_slug: 'abandoned-cart-recovery',
+              recipient_email: cart.customer_email,
+              user_id: cart.user_id || undefined,
+              subject: emailSubject,
+              html_content: htmlBody,
+              sendgrid_message_id: sent.id,
+              sendgrid_status: 'sent',
+            });
+
             await supabase.rpc('mark_recovery_email_sent', {
               p_abandoned_cart_id: cart.id,
             });
@@ -186,7 +208,7 @@ serve(async req => {
               error: await emailResponse.text(),
             });
           }
-      } catch (error: unknown) {
+        } catch (error: unknown) {
           results.push({
             cart_id: cart.id,
             email: cart.customer_email,
@@ -195,13 +217,12 @@ serve(async req => {
           });
         }
       } else {
-        // Log si pas de SendGrid configuré
-        console.log('SendGrid not configured, skipping email:', cart.id);
+        console.log('RESEND_API_KEY not configured, skipping email:', cart.id);
         results.push({
           cart_id: cart.id,
           email: cart.customer_email,
           status: 'skipped',
-          reason: 'SendGrid not configured',
+          reason: 'RESEND_API_KEY not configured',
         });
       }
     }

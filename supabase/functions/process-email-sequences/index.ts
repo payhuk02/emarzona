@@ -6,9 +6,10 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
+import { sendMarketingEmailViaResend } from '../_shared/resend-send-utils.ts';
 
-const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
-const SENDGRID_API_URL = 'https://api.sendgrid.com/v3/mail/send';
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
   .split(',')
@@ -23,7 +24,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   };
@@ -90,96 +91,6 @@ async function getSequenceInfo(supabase: any, sequenceId: string): Promise<any |
 }
 
 /**
- * Envoie un email via SendGrid
- */
-async function sendEmailViaSendGrid(
-  recipient: { email: string; name?: string },
-  template: EmailTemplate,
-  sequenceId: string,
-  userId: string,
-  context: Record<string, any>
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  if (!SENDGRID_API_KEY) {
-    return { success: false, error: 'SendGrid API Key not configured' };
-  }
-
-  try {
-    // Déterminer la langue (par défaut: français)
-    const language = 'fr';
-    const subject = template.subject[language] || template.subject['fr'] || template.name;
-    const htmlContent = template.html_content[language] || template.html_content['fr'] || '';
-
-    // Préparer les variables pour le template
-    const variables = {
-      user_name: recipient.name || 'Client',
-      sequence_name: template.name,
-      ...context,
-    };
-
-    // Remplacer les variables dans le contenu (simple remplacement)
-    let processedHtml = htmlContent;
-    let processedSubject = subject;
-    Object.entries(variables).forEach(([key, value]) => {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      processedHtml = processedHtml.replace(regex, String(value));
-      processedSubject = processedSubject.replace(regex, String(value));
-    });
-
-    // Préparer la requête SendGrid
-    const sendGridRequest = {
-      personalizations: [
-        {
-          to: [{ email: recipient.email, name: recipient.name }],
-          subject: processedSubject,
-          custom_args: {
-            sequence_id: sequenceId,
-            user_id: userId,
-            template_id: template.id,
-          },
-        },
-      ],
-      from: {
-        email: template.from_email,
-        name: template.from_name,
-      },
-      content: [
-        {
-          type: 'text/html',
-          value: processedHtml,
-        },
-      ],
-      tracking_settings: {
-        click_tracking: { enable: true },
-        open_tracking: { enable: true },
-      },
-    };
-
-    // Envoyer via SendGrid
-    const response = await fetch(SENDGRID_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sendGridRequest),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('SendGrid error:', errorText);
-      return { success: false, error: `SendGrid error: ${response.status}` };
-    }
-
-    const messageId = response.headers.get('X-Message-Id') || undefined;
-
-    return { success: true, messageId };
-  } catch (error: any) {
-    console.error('Error sending email:', error);
-    return { success: false, error: error.message };
-  }
-}
-
-/**
  * Fait avancer l'enrollment après l'envoi de l'email
  */
 async function advanceEnrollment(supabase: any, enrollmentId: string): Promise<boolean> {
@@ -200,7 +111,7 @@ async function advanceEnrollment(supabase: any, enrollmentId: string): Promise<b
   }
 }
 
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
   // Gérer les requêtes CORS
@@ -211,15 +122,11 @@ serve(async (req) => {
   }
 
   try {
-    // Vérifier la clé API SendGrid
-    if (!SENDGRID_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: 'SendGrid API Key not configured' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    if (!RESEND_API_KEY) {
+      return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Parser la requête
@@ -297,32 +204,39 @@ serve(async (req) => {
           };
         }
 
-        // Envoyer l'email
-        const result = await sendEmailViaSendGrid(
-          {
-            email: emailData.recipient_email,
-            name: emailData.context?.user_name,
-          },
-          template,
-          emailData.sequence_id,
-          emailData.user_id,
-          emailData.context || {}
+        const eligibility = await canSendEmailToRecipient(
+          supabase,
+          emailData.recipient_email,
+          'marketing',
+          emailData.user_id
         );
+
+        if (!eligibility.allowed) {
+          console.log(
+            `Skipping sequence email to ${emailData.recipient_email}: ${eligibility.reason}`
+          );
+          continue;
+        }
+
+        const sequenceInfo = await getSequenceInfo(supabase, emailData.sequence_id);
+
+        const result = await sendMarketingEmailViaResend({
+          supabase,
+          to: emailData.recipient_email,
+          toName: emailData.context?.user_name as string | undefined,
+          template,
+          variables: {
+            sequence_name: template.name,
+            ...(emailData.context || {}),
+          },
+          userId: emailData.user_id,
+          storeId: sequenceInfo?.store_id,
+          sequenceId: emailData.sequence_id,
+          templateSlug: template.name,
+        });
 
         if (result.success) {
           sentCount++;
-
-          // Logger l'email
-          await supabase.from('email_logs').insert({
-            to: emailData.recipient_email,
-            subject: template.subject['fr'] || template.name,
-            template_id: template.id,
-            sequence_id: emailData.sequence_id,
-            status: 'sent',
-            sent_at: new Date().toISOString(),
-          });
-
-          // Faire avancer l'enrollment
           await advanceEnrollment(supabase, emailData.enrollment_id);
         } else {
           errorCount++;
@@ -330,21 +244,10 @@ serve(async (req) => {
             enrollment_id: emailData.enrollment_id,
             error: result.error || 'Unknown error',
           });
-
-          // Logger l'erreur
-          await supabase.from('email_logs').insert({
-            to: emailData.recipient_email,
-            subject: template.subject['fr'] || template.name,
-            template_id: template.id,
-            sequence_id: emailData.sequence_id,
-            status: 'failed',
-            error_message: result.error,
-            sent_at: new Date().toISOString(),
-          });
         }
 
         // Petit délai pour éviter le rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error: any) {
         console.error(`Error processing email for enrollment ${emailData.enrollment_id}:`, error);
         errorCount++;
@@ -373,16 +276,12 @@ serve(async (req) => {
     );
   } catch (error: any) {
     console.error('Error in process-email-sequences function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
+    });
   }
 });
-

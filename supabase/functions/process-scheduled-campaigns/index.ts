@@ -2,7 +2,7 @@
  * Supabase Edge Function: Process Scheduled Campaigns
  * Vérifie et envoie automatiquement les campagnes programmées
  * Date: 1er Février 2025
- * 
+ *
  * Cette fonction doit être appelée par un cron job (toutes les 5 minutes)
  * ou via Supabase Cron Jobs
  */
@@ -10,7 +10,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
   .split(',')
@@ -25,7 +25,7 @@ function resolveCorsOrigin(originHeader: string | null): string {
 function buildCorsHeaders(originHeader: string | null): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
-    'Vary': 'Origin',
+    Vary: 'Origin',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers':
       'authorization, x-client-info, apikey, content-type, x-cron-secret',
@@ -39,10 +39,7 @@ interface ProcessScheduledCampaignsRequest {
 /**
  * Récupère les campagnes programmées qui doivent être envoyées
  */
-async function getScheduledCampaignsToSend(
-  supabase: any,
-  limit: number = 10
-): Promise<any[]> {
+async function getScheduledCampaignsToSend(supabase: any, limit: number = 10): Promise<any[]> {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
@@ -73,7 +70,7 @@ async function sendCampaign(
     // Utiliser supabase.functions.invoke() pour les appels internes
     // Cette méthode gère automatiquement l'authentification
     console.log('Calling send-email-campaign for campaign:', campaignId);
-    
+
     const { data, error } = await supabase.functions.invoke('send-email-campaign', {
       body: {
         campaign_id: campaignId,
@@ -105,7 +102,7 @@ async function sendCampaign(
   }
 }
 
-serve(async (req) => {
+serve(async req => {
   const corsHeaders = buildCorsHeaders(req.headers.get('origin'));
 
   // Gérer les requêtes CORS
@@ -144,9 +141,9 @@ serve(async (req) => {
         cronSecretMatch: cronSecret === expectedCronSecret,
       });
       return new Response(
-        JSON.stringify({ 
-          error: 'Unauthorized', 
-          message: 'Missing or invalid authentication'
+        JSON.stringify({
+          error: 'Unauthorized',
+          message: 'Missing or invalid authentication',
         }),
         {
           status: 401,
@@ -155,25 +152,20 @@ serve(async (req) => {
       );
     }
 
-    // Vérifier la clé API SendGrid (optionnel, mais recommandé)
-    if (!SENDGRID_API_KEY) {
-      console.warn('SENDGRID_API_KEY is not set. Campaigns will not be sent.');
+    if (!RESEND_API_KEY) {
+      console.warn('RESEND_API_KEY is not set. Campaigns will not be sent.');
     }
 
     // Créer le client Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
-
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('Missing Supabase configuration');
-      return new Response(
-        JSON.stringify({ error: 'Supabase configuration missing' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -209,10 +201,7 @@ serve(async (req) => {
     for (const campaign of campaigns) {
       console.log(`Processing scheduled campaign: ${campaign.id} - ${campaign.name}`);
 
-      const result = await sendCampaign(
-        supabase,
-        campaign.id
-      );
+      const result = await sendCampaign(supabase, campaign.id);
       results.push({
         campaign_id: campaign.id,
         campaign_name: campaign.name,
@@ -221,11 +210,11 @@ serve(async (req) => {
       });
 
       // Petite pause entre les envois pour éviter la surcharge
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    const successCount = results.filter((r) => r.success).length;
-    const errorCount = results.filter((r) => !r.success).length;
+    const successCount = results.filter(r => r.success).length;
+    const errorCount = results.filter(r => !r.success).length;
 
     return new Response(
       JSON.stringify({
@@ -255,4 +244,3 @@ serve(async (req) => {
     );
   }
 });
-
