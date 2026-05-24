@@ -162,6 +162,12 @@
   width: auto;
 }
 
+.landing-premium.app-premium .app-premium-topnav .topnav-loyalty-badge {
+  border-color: rgba(251, 191, 36, 0.35) !important;
+  color: #fde68a !important;
+  background: rgba(251, 191, 36, 0.12) !important;
+}
+
 /* Zone principale */
 .landing-premium.app-premium #main-content,
 .landing-premium.app-premium main.flex-1.overflow-auto,

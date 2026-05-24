@@ -83,9 +83,9 @@ export const TopNavigationBar = () => {
   };
 
   return (
-    <header className="app-premium-topnav fixed top-0 left-0 right-0 z-50 border-b shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
+    <header className="app-premium-topnav fixed top-0 left-0 right-0 z-50 border-b shadow-sm overflow-visible">
+      <div className="mx-auto w-full max-w-[100vw] px-3 sm:px-4 lg:px-5">
+        <div className="flex h-16 items-center justify-between gap-2 sm:gap-3 min-w-0">
           {/* Logo */}
           <NavLink
             to="/dashboard"
@@ -108,7 +108,7 @@ export const TopNavigationBar = () => {
           </NavLink>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center max-w-4xl">
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center max-w-4xl overflow-hidden">
             {mainNavItems.map(item => {
               const Icon = item.icon;
               const active = isActive(item.path);
@@ -117,7 +117,7 @@ export const TopNavigationBar = () => {
                   key={item.path}
                   to={item.path}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                    flex items-center gap-1.5 xl:gap-2 px-2 xl:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap
                     ${
                       active
                         ? 'bg-primary text-primary-foreground'
@@ -125,8 +125,8 @@ export const TopNavigationBar = () => {
                     }
                   `}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden xl:inline">{item.label}</span>
                 </NavLink>
               );
             })}
@@ -204,7 +204,7 @@ export const TopNavigationBar = () => {
           </Sheet>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-1 sm:ml-2">
             <NotificationBell />
             <ThemeSelectorCompact variant="nav" className="hidden sm:inline-flex" />
 
@@ -213,9 +213,9 @@ export const TopNavigationBar = () => {
               <LanguageSwitcher display="nav" />
             </div>
 
-            {/* Loyalty Badge */}
-            <div className="hidden md:block">
-              <LoyaltyBadge />
+            {/* Loyalty Badge — compact en topnav, visible dès lg */}
+            <div className="hidden lg:flex shrink-0">
+              <LoyaltyBadge display="nav" />
             </div>
 
             {/* User Menu */}

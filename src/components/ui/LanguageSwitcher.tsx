@@ -141,7 +141,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             type="button"
             variant="ghost"
             size="sm"
-            className={cn(topNavIconBtnClass, 'gap-1.5', buttonClassName)}
+            className={cn(
+              topNavIconBtnClass,
+              'gap-1.5 xl:gap-1.5 w-9 xl:w-auto px-0 xl:px-2',
+              buttonClassName
+            )}
             aria-label={`Changer la langue (actuelle : ${currentLanguage.name})`}
             disabled={isChanging}
           >
@@ -150,7 +154,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             ) : (
               <Globe className="h-4 w-4 shrink-0" aria-hidden="true" />
             )}
-            <span className="text-sm font-medium uppercase" aria-hidden="true">
+            <span className="hidden xl:inline text-sm font-medium uppercase" aria-hidden="true">
               {currentLanguage.code}
             </span>
           </Button>
