@@ -105,6 +105,11 @@ self.addEventListener('fetch', event => {
 
   if (url.pathname.includes('/realtime/')) return;
 
+  // Ne jamais intercepter les API Supabase (auth, REST, Edge Functions)
+  if (url.hostname.includes('supabase.co')) {
+    return;
+  }
+
   const externalDomains = [
     'fonts.googleapis.com',
     'fonts.gstatic.com',
@@ -121,7 +126,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  if (url.origin !== self.location.origin && !url.hostname.includes('supabase.co')) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 

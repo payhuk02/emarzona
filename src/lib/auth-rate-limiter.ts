@@ -1,9 +1,9 @@
 /**
  * Rate Limiter spécialisé pour les actions d'authentification
- * Protège contre les attaques par force brute et les abus
+ * Compteur local (sessionStorage) — ne dépend pas de l'Edge Function rate-limiter
  */
 
-import { checkRateLimit } from './rate-limiter';
+import { useState } from 'react';
 import { logger } from './logger';
 
 export type AuthAction =
@@ -13,85 +13,84 @@ export type AuthAction =
   | 'verify-2fa'
   | 'resend-verification';
 
-/**
- * Limites spécifiques pour chaque action d'authentification
- */
 const AUTH_RATE_LIMITS: Record<AuthAction, { maxRequests: number; windowSeconds: number }> = {
-  login: { maxRequests: 5, windowSeconds: 300 }, // 5 tentatives par 5 minutes
-  register: { maxRequests: 3, windowSeconds: 3600 }, // 3 inscriptions par heure
-  'reset-password': { maxRequests: 3, windowSeconds: 3600 }, // 3 réinitialisations par heure
-  'verify-2fa': { maxRequests: 5, windowSeconds: 300 }, // 5 vérifications par 5 minutes
-  'resend-verification': { maxRequests: 3, windowSeconds: 600 }, // 3 renvois par 10 minutes
+  login: { maxRequests: 5, windowSeconds: 300 },
+  register: { maxRequests: 3, windowSeconds: 3600 },
+  'reset-password': { maxRequests: 3, windowSeconds: 3600 },
+  'verify-2fa': { maxRequests: 5, windowSeconds: 300 },
+  'resend-verification': { maxRequests: 3, windowSeconds: 600 },
 };
+
+const STORAGE_KEY = 'emarzona_auth_rate_limits';
+
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+function loadEntries(): Record<string, RateLimitEntry> {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, RateLimitEntry>;
+    return typeof parsed === 'object' && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveEntries(entries: Record<string, RateLimitEntry>): void {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  } catch {
+    // sessionStorage indisponible (mode privé strict) — fail open
+  }
+}
 
 /**
  * Vérifie si une action d'authentification est autorisée selon le rate limit
- *
- * @param action - Type d'action d'authentification
- * @param identifier - Identifiant unique (email, userId, ou IP)
- * @returns Promise avec le résultat (allowed, remaining, resetAt)
- *
- * @example
- * ```typescript
- * const result = await checkAuthRateLimit('login', email);
- * if (!result.allowed) {
- *   toast.error('Trop de tentatives. Réessayez dans quelques minutes.');
- *   return;
- * }
- * ```
  */
 export async function checkAuthRateLimit(
   action: AuthAction,
   identifier: string
 ): Promise<{ allowed: boolean; remaining: number; resetAt: string; message?: string }> {
-  // Utiliser l'endpoint 'auth' avec l'identifiant comme userId
-  const result = await checkRateLimit('auth', identifier);
+  const limits = AUTH_RATE_LIMITS[action];
+  const key = `${action}:${identifier.trim().toLowerCase()}`;
+  const now = Date.now();
+  const entries = loadEntries();
 
-  // Logger les violations de rate limit pour sécurité
-  if (!result.allowed) {
+  let entry = entries[key];
+  if (!entry || entry.resetAt <= now) {
+    entry = { count: 0, resetAt: now + limits.windowSeconds * 1000 };
+  }
+
+  entry = { ...entry, count: entry.count + 1 };
+  entries[key] = entry;
+  saveEntries(entries);
+
+  const allowed = entry.count <= limits.maxRequests;
+  const remaining = Math.max(0, limits.maxRequests - entry.count);
+  const resetAt = new Date(entry.resetAt).toISOString();
+
+  let message: string | undefined;
+  if (!allowed) {
+    const minutes = Math.max(1, Math.ceil((entry.resetAt - now) / 60000));
+    message = `Trop de tentatives. Réessayez dans ${minutes} minute(s).`;
     logger.warn('[AuthRateLimit] Rate limit exceeded', {
       action,
-      identifier: identifier.substring(0, 3) + '***', // Masquer l'identifiant complet
-      remaining: result.remaining,
-      resetAt: result.resetAt,
+      identifier: identifier.substring(0, 3) + '***',
+      remaining,
+      resetAt,
     });
   }
 
-  // Message personnalisé selon l'action
-  let message: string | undefined;
-  if (!result.allowed) {
-    const limits = AUTH_RATE_LIMITS[action];
-    const minutes = Math.ceil(limits.windowSeconds / 60);
-    message = `Trop de tentatives pour ${action}. Réessayez dans ${minutes} minutes.`;
-  }
-
   return {
-    ...result,
+    allowed,
+    remaining,
+    resetAt,
     message,
   };
 }
-
-/**
- * Hook React pour vérifier le rate limit d'authentification
- *
- * @param action - Type d'action d'authentification
- * @returns Fonction pour vérifier le rate limit et état
- *
- * @example
- * ```typescript
- * const { check, isAllowed, remaining } = useAuthRateLimit('login');
- *
- * const handleLogin = async () => {
- *   const result = await check(email);
- *   if (!result.allowed) {
- *     toast.error(result.message);
- *     return;
- *   }
- *   // Procéder avec le login
- * };
- * ```
- */
-import { useState } from 'react';
 
 export function useAuthRateLimit(action: AuthAction) {
   const [isChecking, setIsChecking] = useState(false);

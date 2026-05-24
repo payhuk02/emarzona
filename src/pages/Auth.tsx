@@ -37,7 +37,11 @@ import {
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 import { resolvePostAuthRedirectPath } from '@/lib/auth-redirect';
-import { getCaughtErrorMessage, mapAuthErrorMessage } from '@/lib/auth-error-messages';
+import {
+  coerceToErrorString,
+  formatAuthErrorForUi,
+  getCaughtErrorMessage,
+} from '@/lib/auth-error-messages';
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -136,20 +140,21 @@ const Auth = () => {
     // Vérifier le rate limit pour la réinitialisation de mot de passe
     try {
       const { checkAuthRateLimit } = await import('@/lib/auth-rate-limiter');
-      const rateLimitResult = await checkAuthRateLimit('password-reset', resetEmail);
+      const rateLimitResult = await checkAuthRateLimit('reset-password', resetEmail);
 
       if (!rateLimitResult.allowed) {
-        setResetError(
-          rateLimitResult.message ||
-            t(
-              'auth.forgotPassword.rateLimitExceeded',
-              'Trop de demandes de réinitialisation. Réessayez plus tard.'
-            )
+        const rateLimitMsg = coerceToErrorString(
+          rateLimitResult.message,
+          t(
+            'auth.forgotPassword.rateLimitExceeded',
+            'Trop de demandes de réinitialisation. Réessayez plus tard.'
+          )
         );
+        setResetError(rateLimitMsg);
         setIsResetLoading(false);
         toast({
           title: t('auth.forgotPassword.rateLimitTitle', 'Limite atteinte'),
-          description: rateLimitResult.message || t('auth.forgotPassword.rateLimitExceeded'),
+          description: rateLimitMsg,
           variant: 'destructive',
         });
         return;
@@ -177,16 +182,16 @@ const Auth = () => {
         ),
       });
     } catch (caught: unknown) {
-      const raw = getCaughtErrorMessage(caught);
-      const errorMessage = mapAuthErrorMessage(raw, 'reset') || raw;
+      const errorMessage = formatAuthErrorForUi(
+        caught,
+        'reset',
+        t('auth.forgotPassword.error', "Une erreur est survenue lors de l'envoi de l'email")
+      );
       logger.error('Reset password error', {
         error: errorMessage,
         email: resetEmail,
       });
-      setResetError(
-        errorMessage ||
-          t('auth.forgotPassword.error', "Une erreur est survenue lors de l'envoi de l'email")
-      );
+      setResetError(errorMessage);
       toast({
         title: t('auth.forgotPassword.errorTitle', 'Erreur'),
         description: errorMessage || t('auth.forgotPassword.error', 'Une erreur est survenue'),
@@ -225,17 +230,18 @@ const Auth = () => {
       const rateLimitResult = await checkAuthRateLimit('register', email);
 
       if (!rateLimitResult.allowed) {
-        setError(
-          rateLimitResult.message ||
-            t(
-              'auth.signup.rateLimitExceeded',
-              "Trop de tentatives d'inscription. Réessayez plus tard."
-            )
+        const rateLimitMsg = coerceToErrorString(
+          rateLimitResult.message,
+          t(
+            'auth.signup.rateLimitExceeded',
+            "Trop de tentatives d'inscription. Réessayez plus tard."
+          )
         );
+        setError(rateLimitMsg);
         setIsLoading(false);
         toast({
           title: t('auth.signup.rateLimitTitle', 'Limite atteinte'),
-          description: rateLimitResult.message || t('auth.signup.rateLimitExceeded'),
+          description: rateLimitMsg,
           variant: 'destructive',
         });
         return;
@@ -343,13 +349,17 @@ const Auth = () => {
         await redirectAfterAuth();
       }
     } catch (caught: unknown) {
-      const raw = getCaughtErrorMessage(caught);
-      const errorMessage = mapAuthErrorMessage(raw, 'signup') || raw;
+      const errorMessage = formatAuthErrorForUi(
+        caught,
+        'signup',
+        t('auth.signup.error', 'Erreur lors de la création du compte')
+      );
       logger.error('Signup error', {
-        error: raw || errorMessage,
+        error: errorMessage,
         email: signupEmail,
+        raw: caught,
       });
-      setError(errorMessage || t('auth.signup.error'));
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -375,17 +385,18 @@ const Auth = () => {
       const rateLimitResult = await checkAuthRateLimit('login', email);
 
       if (!rateLimitResult.allowed) {
-        setError(
-          rateLimitResult.message ||
-            t(
-              'auth.login.rateLimitExceeded',
-              'Trop de tentatives de connexion. Réessayez dans quelques minutes.'
-            )
+        const rateLimitMsg = coerceToErrorString(
+          rateLimitResult.message,
+          t(
+            'auth.login.rateLimitExceeded',
+            'Trop de tentatives de connexion. Réessayez dans quelques minutes.'
+          )
         );
+        setError(rateLimitMsg);
         setIsLoading(false);
         toast({
           title: t('auth.login.rateLimitTitle', 'Limite atteinte'),
-          description: rateLimitResult.message || t('auth.login.rateLimitExceeded'),
+          description: rateLimitMsg,
           variant: 'destructive',
         });
         return;
@@ -411,13 +422,17 @@ const Auth = () => {
         await redirectAfterAuth();
       }
     } catch (caught: unknown) {
-      const raw = getCaughtErrorMessage(caught);
-      const errorMessage = mapAuthErrorMessage(raw, 'login') || raw;
+      const errorMessage = formatAuthErrorForUi(
+        caught,
+        'login',
+        t('auth.login.error', 'Email ou mot de passe incorrect')
+      );
       logger.error('Login error', {
-        error: raw || errorMessage,
+        error: errorMessage,
         email: loginEmail,
+        raw: caught,
       });
-      setError(errorMessage || t('auth.login.error'));
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

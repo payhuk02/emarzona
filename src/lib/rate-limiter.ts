@@ -8,7 +8,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
 import * as Sentry from '@sentry/react';
 
-export type RateLimitEndpoint = 'default' | 'auth' | 'api' | 'webhook' | 'payment' | 'upload' | 'search';
+export type RateLimitEndpoint =
+  | 'default'
+  | 'auth'
+  | 'api'
+  | 'webhook'
+  | 'payment'
+  | 'upload'
+  | 'search';
 
 interface RateLimitResponse {
   allowed: boolean;
@@ -27,7 +34,7 @@ interface RateLimitCache {
 }
 
 // Cache local pour éviter les appels répétés
-const  rateLimitCache: RateLimitCache = {};
+const rateLimitCache: RateLimitCache = {};
 const CACHE_TTL = 1000; // 1 seconde de cache
 
 /**
@@ -61,15 +68,15 @@ const getCacheKey = (endpoint: RateLimitEndpoint, userId?: string): string => {
 
 /**
  * Vérifie si la requête est autorisée par le rate limiter
- * 
+ *
  * Cette fonction vérifie les limites de taux pour différents types d'endpoints.
  * Utilise un cache local pour éviter les appels répétés au serveur.
- * 
+ *
  * @param endpoint - Type d'endpoint à vérifier (auth, api, webhook, default, payment, upload, search)
  * @param userId - ID de l'utilisateur (optionnel, pour un rate limiting par utilisateur)
  * @param bypassCache - Forcer un appel serveur même si un résultat est en cache (par défaut: false)
  * @returns Promise avec le résultat du rate limiting (allowed, remaining, resetAt, limit)
- * 
+ *
  * @example
  * ```typescript
  * const result = await checkRateLimit('api', userId);
@@ -94,7 +101,7 @@ export async function checkRateLimit(
   if (!bypassCache && rateLimitCache[cacheKey]) {
     const cached = rateLimitCache[cacheKey];
     const now = Date.now();
-    
+
     // Si le cache est encore valide, retourner la réponse mise en cache
     if (now - cached.timestamp < CACHE_TTL) {
       return cached.response;
@@ -103,16 +110,16 @@ export async function checkRateLimit(
 
   try {
     const { data, error } = await supabase.functions.invoke('rate-limiter', {
-      body: { 
+      body: {
         endpoint,
         userId,
         timestamp: Date.now(),
-      }
+      },
     });
 
     if (error) {
       logger.error('[RateLimiter] Error:', error);
-      
+
       // Envoyer à Sentry pour monitoring
       Sentry.captureException(error, {
         tags: {
@@ -125,25 +132,29 @@ export async function checkRateLimit(
       });
 
       // En cas d'erreur, autoriser par défaut (fail open) mais avec limite réduite
-      const  fallbackResponse: RateLimitResponse = {
+      const fallbackResponse: RateLimitResponse = {
         allowed: true,
         remaining: 10, // Limite réduite en cas d'erreur
         limit: 10,
-        resetAt: new Date(Date.now() + 60000).toISOString()
+        resetAt: new Date(Date.now() + 60000).toISOString(),
       };
-      
+
       // Mettre en cache la réponse de fallback
       rateLimitCache[cacheKey] = {
         response: fallbackResponse,
         timestamp: Date.now(),
       };
-      
+
       return fallbackResponse;
     }
 
-    const  response: RateLimitResponse = {
-      ...data,
-      limit: data.limit || 100,
+    const response: RateLimitResponse = {
+      allowed: Boolean(data?.allowed ?? true),
+      remaining: typeof data?.remaining === 'number' ? data.remaining : 0,
+      resetAt: typeof data?.resetAt === 'string' ? data.resetAt : new Date().toISOString(),
+      limit: typeof data?.limit === 'number' ? data.limit : 100,
+      message: typeof data?.message === 'string' ? data.message : undefined,
+      error: typeof data?.error === 'string' ? data.error : undefined,
     };
 
     // Mettre en cache la réponse
@@ -180,7 +191,7 @@ export async function checkRateLimit(
   } catch (_error: unknown) {
     const errorObj = _error instanceof Error ? _error : new Error('Unknown error');
     logger.error('[RateLimiter] Exception:', errorObj);
-    
+
     // Envoyer à Sentry
     Sentry.captureException(errorObj, {
       tags: {
@@ -193,18 +204,18 @@ export async function checkRateLimit(
     });
 
     // En cas d'exception, autoriser par défaut mais avec limite réduite
-    const  fallbackResponse: RateLimitResponse = {
+    const fallbackResponse: RateLimitResponse = {
       allowed: true,
       remaining: 10,
       limit: 10,
-      resetAt: new Date(Date.now() + 60000).toISOString()
+      resetAt: new Date(Date.now() + 60000).toISOString(),
     };
-    
+
     rateLimitCache[cacheKey] = {
       response: fallbackResponse,
       timestamp: Date.now(),
     };
-    
+
     return fallbackResponse;
   }
 }
@@ -227,9 +238,9 @@ export function useRateLimit(endpoint: RateLimitEndpoint = 'default') {
     }
   };
 
-  return { 
-    check, 
-    isChecking, 
+  return {
+    check,
+    isChecking,
     lastResult,
     isAllowed: lastResult?.allowed ?? true,
     remaining: lastResult?.remaining ?? 100,
@@ -238,10 +249,10 @@ export function useRateLimit(endpoint: RateLimitEndpoint = 'default') {
 
 /**
  * Middleware rate limiting pour protéger les actions sensibles
- * 
+ *
  * Wrapper qui vérifie le rate limit avant d'exécuter une action.
  * Supporte le retry automatique avec exponential backoff en cas de rate limit.
- * 
+ *
  * @param endpoint - Type d'endpoint à protéger
  * @param action - Fonction à exécuter si le rate limit est respecté
  * @param options - Options de configuration
@@ -250,7 +261,7 @@ export function useRateLimit(endpoint: RateLimitEndpoint = 'default') {
  * @param options.maxRetries - Nombre maximum de tentatives (par défaut: 3)
  * @param options.retryDelay - Délai initial entre les tentatives en ms (par défaut: 1000)
  * @returns Promise avec le résultat de l'action, ou throw une erreur si rate limit dépassé
- * 
+ *
  * @example
  * ```typescript
  * const result = await withRateLimit('payment', async () => {
@@ -261,7 +272,7 @@ export function useRateLimit(endpoint: RateLimitEndpoint = 'default') {
  *   maxRetries: 3
  * });
  * ```
- * 
+ *
  * @throws {Error} Si le rate limit est dépassé et retry est désactivé ou maxRetries atteint
  */
 export async function withRateLimit<T>(
@@ -274,14 +285,9 @@ export async function withRateLimit<T>(
     retryDelay?: number;
   }
 ): Promise<T> {
-  const {
-    userId,
-    retry = false,
-    maxRetries = 3,
-    retryDelay = 1000,
-  } = options || {};
+  const { userId, retry = false, maxRetries = 3, retryDelay = 1000 } = options || {};
 
-  let  attempts= 0;
+  let attempts = 0;
 
   while (attempts < maxRetries) {
     const result = await checkRateLimit(endpoint, userId, attempts > 0);
@@ -328,24 +334,13 @@ export function rateLimited(
 
     descriptor.value = async function (...args: unknown[]) {
       const userId = options?.userId?.call(this);
-      
-      return withRateLimit(
-        endpoint,
-        () => originalMethod.apply(this, args),
-        {
-          userId,
-          retry: options?.retry,
-        }
-      );
+
+      return withRateLimit(endpoint, () => originalMethod.apply(this, args), {
+        userId,
+        retry: options?.retry,
+      });
     };
 
     return descriptor;
   };
 }
-
-
-
-
-
-
-
