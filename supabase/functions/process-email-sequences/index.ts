@@ -199,7 +199,7 @@ serve(async req => {
             name: sequenceInfo?.name || 'Séquence Email',
             subject: { fr: sequenceInfo?.name || 'Email de séquence' },
             html_content: { fr: '<p>Bonjour,</p><p>Voici votre email de séquence.</p>' },
-            from_email: 'noreply@emarzona.com',
+            from_email: 'noreply@mail.emarzona.com',
             from_name: 'Emarzona',
           };
         }

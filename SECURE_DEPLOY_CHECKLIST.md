@@ -4,7 +4,7 @@
 
 - Set `EDGE_INTERNAL_SECRET` for all internal Edge Functions.
 - Verify `SUPABASE_SERVICE_ROLE_KEY` is only present in server-side runtimes.
-- Verify `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_FROM_NAME`.
+- Verify `RESEND_API_KEY`, `RESEND_FROM_EMAIL=noreply@mail.emarzona.com`, and `RESEND_FROM_NAME`.
 - Confirm `ALLOWED_ORIGINS` includes only trusted domains.
 
 ## 2) Edge Functions security gates

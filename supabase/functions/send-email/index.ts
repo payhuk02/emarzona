@@ -13,7 +13,7 @@ import {
 import { logEmailSend, renderDbTemplate } from '../_shared/email-template-utils.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@emarzona.com';
+const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';
 const RESEND_FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'Emarzona';
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')

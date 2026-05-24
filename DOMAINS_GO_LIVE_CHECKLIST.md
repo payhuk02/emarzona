@@ -1,6 +1,7 @@
 # Emarzona Domains Go-Live Checklist
 
 Platform domains:
+
 - Main platform: `emarzona.com`
 - Store wildcard domain: `myemarzona.shop`
 - User custom domains: customer-owned domains
@@ -37,6 +38,7 @@ Platform domains:
 ## 4. Supabase Edge Functions Env
 
 Set these secrets in Supabase Edge Functions:
+
 - `ALLOWED_ORIGINS=https://emarzona.com,https://www.emarzona.com,https://myemarzona.shop`
 - `CRON_SECRET=<strong-secret>`
 - `EDGE_INTERNAL_SECRET=<strong-secret>`
@@ -45,7 +47,8 @@ Set these secrets in Supabase Edge Functions:
 - `CUSTOM_DOMAIN_CNAME_TARGETS=<comma-separated expected CNAME targets>` (optional, recommended)
 
 Email functions:
-- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` configured for `send-email`.
+
+- `RESEND_API_KEY` / `RESEND_FROM_EMAIL=noreply@mail.emarzona.com` configured for `send-email` (domaine Resend : `mail.emarzona.com`).
 - `SENDGRID_API_KEY` configured only in server-side contexts where still used.
 
 ## 5. Security Controls
@@ -72,6 +75,7 @@ Run:
 `supabase/scripts/verify-domain-go-live.sql`
 
 Expected:
+
 - Required RPCs/tables/policies exist.
 - No duplicate active subdomains.
 - Active custom domains resolve in smoke tests.
@@ -82,4 +86,3 @@ Expected:
 - Keep `myemarzona.shop` paths as fallback if custom domain fails.
 - If custom domain fails verification, force status `pending/error` and keep storefront reachable by subdomain.
 - Maintain DNS rollback instructions per registrar.
-

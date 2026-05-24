@@ -276,7 +276,7 @@ serve(async req => {
         name: campaign.name,
         subject: { fr: campaign.name },
         html_content: { fr: campaign.description || '' },
-        from_email: 'noreply@emarzona.com',
+        from_email: 'noreply@mail.emarzona.com',
         from_name: 'Emarzona',
       };
     }

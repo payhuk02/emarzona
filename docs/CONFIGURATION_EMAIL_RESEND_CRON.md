@@ -16,10 +16,11 @@
 npx supabase secrets set \
   RESEND_API_KEY=re_VOTRE_CLE \
   RESEND_WEBHOOK_SECRET=whsec_VOTRE_SECRET \
+  RESEND_FROM_EMAIL=noreply@mail.emarzona.com \
   --project-ref hbdnzajbyjakdhuavrvb
 ```
 
-Optionnel : `RESEND_FROM_EMAIL` si différent du défaut.
+Domaine d'envoi vérifié dans Resend : **`mail.emarzona.com`** (pas la racine `emarzona.com`). Le fallback code utilise `noreply@mail.emarzona.com` si `RESEND_FROM_EMAIL` est absent.
 
 ## 2. Webhook Resend
 

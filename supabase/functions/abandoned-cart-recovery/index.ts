@@ -18,7 +18,7 @@ import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
 import { logEmailSend } from '../_shared/email-template-utils.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@emarzona.com';
+const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';
 const RESEND_FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'Emarzona';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
