@@ -37,6 +37,7 @@ import {
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
 import { resolvePostAuthRedirectPath } from '@/lib/auth-redirect';
+import { getCaughtErrorMessage, mapAuthErrorMessage } from '@/lib/auth-error-messages';
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -175,8 +176,9 @@ const Auth = () => {
           `Un email de réinitialisation a été envoyé à ${resetEmail}. Vérifiez votre boîte de réception.`
         ),
       });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (caught: unknown) {
+      const raw = getCaughtErrorMessage(caught);
+      const errorMessage = mapAuthErrorMessage(raw, 'reset') || raw;
       logger.error('Reset password error', {
         error: errorMessage,
         email: resetEmail,
@@ -324,10 +326,9 @@ const Auth = () => {
                 referredId: data.user.id,
               });
             }
-          } catch (_referralError: unknown) {
+          } catch (referralCaught: unknown) {
             // Ne pas bloquer l'inscription si l'erreur est sur le parrainage
-            const referralErrorMessage =
-              referralError instanceof Error ? referralError.message : String(referralError);
+            const referralErrorMessage = getCaughtErrorMessage(referralCaught);
             logger.error('Error processing referral on signup', {
               error: referralErrorMessage,
               referralCode,
@@ -341,10 +342,11 @@ const Auth = () => {
         });
         await redirectAfterAuth();
       }
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (caught: unknown) {
+      const raw = getCaughtErrorMessage(caught);
+      const errorMessage = mapAuthErrorMessage(raw, 'signup') || raw;
       logger.error('Signup error', {
-        error: errorMessage,
+        error: raw || errorMessage,
         email: signupEmail,
       });
       setError(errorMessage || t('auth.signup.error'));
@@ -408,17 +410,14 @@ const Auth = () => {
         });
         await redirectAfterAuth();
       }
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (caught: unknown) {
+      const raw = getCaughtErrorMessage(caught);
+      const errorMessage = mapAuthErrorMessage(raw, 'login') || raw;
       logger.error('Login error', {
-        error: errorMessage,
+        error: raw || errorMessage,
         email: loginEmail,
       });
-      if (errorMessage.includes('Invalid login credentials')) {
-        setError(t('auth.login.error'));
-      } else {
-        setError(errorMessage || t('auth.login.error'));
-      }
+      setError(errorMessage || t('auth.login.error'));
     } finally {
       setIsLoading(false);
     }
