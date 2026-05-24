@@ -42,6 +42,7 @@ import {
   formatAuthErrorForUi,
   getCaughtErrorMessage,
 } from '@/lib/auth-error-messages';
+import { isSupabaseBackendConfigured } from '@/lib/supabase-config';
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -206,6 +207,14 @@ const Auth = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+
+    if (!isSupabaseBackendConfigured()) {
+      setError(
+        'Backend Supabase non configuré en local. Créez un fichier .env avec VITE_SUPABASE_URL=https://hbdnzajbyjakdhuavrvb.supabase.co et VITE_SUPABASE_ANON_KEY (clé anon du dashboard), puis redémarrez le serveur de dev.'
+      );
+      setIsLoading(false);
+      return;
+    }
 
     const email = signupEmail;
     const password = signupPassword;

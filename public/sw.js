@@ -53,7 +53,12 @@ function staleWhileRevalidate(request, cacheName) {
     cache.match(request).then(cached => {
       const networkUpdate = fetch(request)
         .then(response => {
-          cacheImageResponse(cache, request, response);
+          if (response.status === 200) {
+            const clone = response.clone();
+            void cache.put(request, clone).then(() =>
+              trimImageCache(cacheName, IMAGE_CACHE_MAX_ENTRIES)
+            );
+          }
           return response;
         })
         .catch(() => undefined);

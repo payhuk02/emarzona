@@ -2,6 +2,7 @@
  * Messages d'erreur Auth (Supabase) pour l'UI
  */
 import { getErrorMessage } from '@/types/errors';
+import { isSupabaseBackendConfigured, isSupabaseNetworkError } from '@/lib/supabase-config';
 
 const AUTH_CODE_MESSAGES: Record<string, string> = {
   user_already_exists:
@@ -24,8 +25,29 @@ function readAuthCode(caught: unknown): string | undefined {
   return typeof code === 'string' ? code : undefined;
 }
 
+function readAuthStatus(caught: unknown): number | undefined {
+  if (typeof caught !== 'object' || caught === null) return undefined;
+  const status = (caught as { status?: unknown }).status;
+  return typeof status === 'number' ? status : undefined;
+}
+
+const LOCAL_SUPABASE_CONFIG_HINT =
+  'Backend Supabase non configuré en local. Ajoutez VITE_SUPABASE_URL=https://hbdnzajbyjakdhuavrvb.supabase.co et VITE_SUPABASE_ANON_KEY dans un fichier .env à la racine du projet, puis redémarrez npm run dev.';
+
 /** Extrait un message lisible depuis toute erreur Auth / Supabase */
 export function getCaughtErrorMessage(caught: unknown): string {
+  if (isSupabaseNetworkError(caught)) {
+    if (!isSupabaseBackendConfigured()) {
+      return LOCAL_SUPABASE_CONFIG_HINT;
+    }
+    return 'Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.';
+  }
+
+  const status = readAuthStatus(caught);
+  if (status === 504 || status === 522 || status === 524) {
+    return AUTH_CODE_MESSAGES.unexpected_failure;
+  }
+
   const code = readAuthCode(caught);
   if (code && AUTH_CODE_MESSAGES[code]) {
     return AUTH_CODE_MESSAGES[code];
@@ -97,6 +119,21 @@ export function mapAuthErrorMessage(
 
   if (lower.includes('invalid email')) {
     return AUTH_CODE_MESSAGES.email_address_invalid;
+  }
+
+  if (
+    lower.includes('gateway timeout') ||
+    lower.includes('504') ||
+    lower.includes('timed out') ||
+    lower.includes('timeout')
+  ) {
+    return AUTH_CODE_MESSAGES.unexpected_failure;
+  }
+
+  if (lower.includes('failed to fetch')) {
+    return !isSupabaseBackendConfigured()
+      ? LOCAL_SUPABASE_CONFIG_HINT
+      : 'Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.';
   }
 
   return trimmed;
