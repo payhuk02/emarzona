@@ -1,27 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/lib/logger';
+import { useAuth } from '@/contexts/AuthContext';
+import { checkUserIsAdmin } from '@/lib/auth-redirect';
 
 export const useAdmin = () => {
+  const { user } = useAuth();
+
   const { data: isAdmin, isLoading } = useQuery({
-    queryKey: ['user-is-admin'],
+    queryKey: ['user-is-admin', user?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
-
-      // Vérifier dans user_roles via la fonction sécurisée has_role
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin',
-      });
-
-      if (error) {
-        logger.error('Error checking admin status:', error);
-        return false;
-      }
-
-      return !!data;
+      return checkUserIsAdmin(user.id, user.email);
     },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {

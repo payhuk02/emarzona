@@ -1,25 +1,26 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 
 export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const authContext = useAuth();
   const { user, loading } = authContext || { user: null, loading: true };
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/login', { replace: true });
+      navigate('/login', { replace: true, state: { from: location.pathname } });
       return;
     }
 
     if (!loading && !isAdminLoading && user && !isAdmin) {
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
-  }, [user, loading, isAdmin, isAdminLoading, navigate]);
+  }, [user, loading, isAdmin, isAdminLoading, navigate, location.pathname]);
 
   if (loading || isAdminLoading) {
     return (

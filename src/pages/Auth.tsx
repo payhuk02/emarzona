@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,7 @@ import {
 } from '@/components/referral/ReferralTracker';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { useAdvancedLoyalty } from '@/hooks/useAdvancedLoyalty';
+import { resolvePostAuthRedirectPath } from '@/lib/auth-redirect';
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -65,12 +66,19 @@ const Auth = () => {
   const loginFormRef = useRef<HTMLFormElement>(null);
   const signupFormRef = useRef<HTMLFormElement>(null);
 
-  // Redirect if already logged in
+  const returnTo = (location.state as { from?: string } | null)?.from;
+
+  const redirectAfterAuth = useCallback(async () => {
+    const path = await resolvePostAuthRedirectPath(returnTo);
+    navigate(path, { replace: true });
+  }, [navigate, returnTo]);
+
+  // Redirect if already logged in (admins → /admin, vendeurs → /dashboard)
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      void redirectAfterAuth();
     }
-  }, [user, navigate]);
+  }, [user, redirectAfterAuth]);
 
   // Check for password reset token in URL
   useEffect(() => {
@@ -317,7 +325,7 @@ const Auth = () => {
           title: t('auth.signup.success'),
           description: t('auth.signup.successDescription'),
         });
-        navigate('/dashboard');
+        await redirectAfterAuth();
       }
     } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -384,7 +392,7 @@ const Auth = () => {
           title: t('auth.login.success'),
           description: t('auth.login.successDescription'),
         });
-        navigate('/dashboard');
+        await redirectAfterAuth();
       }
     } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
