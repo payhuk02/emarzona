@@ -36,7 +36,6 @@ import {
   DollarSign,
   FileText,
   Sparkles,
-  Key,
   Shield,
   RotateCcw,
   Webhook,
@@ -47,6 +46,18 @@ import {
   Activity,
   Accessibility,
   Bot,
+  Wallet,
+  Megaphone,
+  GitCompare,
+  Factory,
+  Layers,
+  LineChart,
+  Calculator,
+  PackageCheck,
+  Database,
+  WifiOff,
+  AlertTriangle,
+  HardDrive,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -62,7 +73,6 @@ const menuSections = [
       { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
       { icon: Store, label: 'Boutiques', path: '/admin/stores' },
       { icon: Users, label: 'Communauté', path: '/admin/community' },
-      { icon: Key, label: 'Licences', path: '/dashboard/license-management' },
     ],
   },
   {
@@ -71,6 +81,7 @@ const menuSections = [
       { icon: Package, label: 'Produits', path: '/admin/products' },
       { icon: GraduationCap, label: 'Cours', path: '/admin/courses' },
       { icon: FileText, label: 'Avis', path: '/admin/reviews' },
+      { icon: Layers, label: 'Kits produits', path: '/admin/product-kits' },
     ],
   },
   {
@@ -79,7 +90,10 @@ const menuSections = [
       { icon: ShoppingCart, label: 'Ventes', path: '/admin/sales' },
       { icon: BoxIcon, label: 'Commandes', path: '/admin/orders' },
       { icon: Warehouse, label: 'Inventaire', path: '/admin/inventory' },
+      { icon: Factory, label: 'Fournisseurs', path: '/admin/suppliers' },
+      { icon: Warehouse, label: 'Entrepôts', path: '/admin/warehouses' },
       { icon: Truck, label: 'Expéditions', path: '/admin/shipping' },
+      { icon: PackageCheck, label: 'Expédition groupée', path: '/admin/batch-shipping' },
       {
         icon: MessageSquare,
         label: 'Conversations Livraison',
@@ -91,6 +105,8 @@ const menuSections = [
         path: '/admin/vendor-conversations',
       },
       { icon: RotateCcw, label: 'Retours', path: '/admin/returns' },
+      { icon: LineChart, label: 'Prévisions demande', path: '/admin/demand-forecasting' },
+      { icon: Calculator, label: 'Optimisation coûts', path: '/admin/cost-optimization' },
     ],
   },
   {
@@ -98,8 +114,14 @@ const menuSections = [
     items: [
       { icon: DollarSign, label: 'Revenus', path: '/admin/revenue' },
       { icon: CreditCard, label: 'Paiements', path: '/admin/payments' },
+      { icon: Wallet, label: 'Retraits boutiques', path: '/admin/store-withdrawals' },
       { icon: Percent, label: 'Taxes', path: '/admin/taxes' },
       { icon: Scale, label: 'Litiges', path: '/admin/disputes' },
+      {
+        icon: GitCompare,
+        label: 'Réconciliation transactions',
+        path: '/admin/transaction-reconciliation',
+      },
       { icon: BarChart3, label: 'Statistiques Moneroo', path: '/admin/moneroo-analytics' },
       { icon: RotateCcw, label: 'Réconciliation Moneroo', path: '/admin/moneroo-reconciliation' },
     ],
@@ -107,6 +129,7 @@ const menuSections = [
   {
     label: 'Marketing & Engagement',
     items: [
+      { icon: Megaphone, label: 'Marketing automation', path: '/admin/marketing' },
       { icon: UserPlus, label: 'Parrainages', path: '/admin/referrals' },
       { icon: TrendingUp, label: 'Affiliation', path: '/admin/affiliates' },
       { icon: Star, label: 'Programme de Fidélité', path: '/admin/loyalty' },
@@ -117,8 +140,10 @@ const menuSections = [
     label: 'Systèmes & Intégrations',
     items: [
       { icon: Settings, label: 'Intégrations', path: '/admin/integrations' },
-      { icon: Webhook, label: 'Webhooks', path: '/dashboard/webhooks' },
-      // Système unifié pour tous les types de webhooks
+      { icon: Webhook, label: 'Webhooks', path: '/admin/webhooks' },
+      { icon: Database, label: 'Stockage données', path: '/admin/data-storage' },
+      { icon: HardDrive, label: 'Diagnostic stockage', path: '/admin/storage-diagnostic' },
+      { icon: WifiOff, label: 'File offline', path: '/admin/offline-queue' },
     ],
   },
   {
@@ -127,6 +152,7 @@ const menuSections = [
       { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
       { icon: BarChart3, label: 'Monitoring Transactions', path: '/admin/transaction-monitoring' },
       { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
+      { icon: AlertTriangle, label: 'Monitoring erreurs', path: '/admin/error-monitoring' },
     ],
   },
   {

@@ -59,7 +59,21 @@ import {
   Workflow,
   Gavel,
 } from '@/components/icons';
-import { Database, Brain, Clock3, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  Database,
+  Brain,
+  Clock3,
+  ChevronDown,
+  ChevronRight,
+  Accessibility,
+  Bot,
+  Megaphone,
+  GitCompare,
+  Activity,
+  WifiOff,
+  HardDrive,
+  MessageSquare as LucideMessageSquare,
+} from 'lucide-react';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { PremiumLangSwitcher } from '@/components/landing/premium/PremiumLangSwitcher';
@@ -109,6 +123,11 @@ const menuSections = [
         url: '/marketplace',
         icon: ShoppingCart,
       },
+      {
+        title: 'Enchères Publiques',
+        url: '/auctions',
+        icon: Gavel,
+      },
     ],
   },
   {
@@ -138,6 +157,36 @@ const menuSections = [
         title: 'Mes Retours',
         url: '/account/returns',
         icon: RotateCcw,
+      },
+      {
+        title: 'Mes Garanties',
+        url: '/account/warranties',
+        icon: ShieldCheck,
+      },
+      {
+        title: 'Mes Réservations',
+        url: '/account/bookings',
+        icon: Calendar,
+      },
+      {
+        title: 'Portail Artiste',
+        url: '/account/artist',
+        icon: Camera,
+      },
+      {
+        title: 'Programme Fidélité',
+        url: '/account/loyalty',
+        icon: Star,
+      },
+      {
+        title: 'Mes Cartes Cadeaux',
+        url: '/account/gift-cards',
+        icon: Gift,
+      },
+      {
+        title: 'Suivi Multi-boutiques',
+        url: '/checkout/multi-store-tracking',
+        icon: Truck,
       },
       {
         title: 'Ma Liste de Souhaits',
@@ -195,6 +244,11 @@ const menuSections = [
         icon: Package,
       },
       {
+        title: 'Créer un Produit',
+        url: '/dashboard/products/new',
+        icon: Package,
+      },
+      {
         title: 'Créer un Cours',
         url: '/dashboard/courses/new',
         icon: GraduationCap,
@@ -225,6 +279,21 @@ const menuSections = [
         icon: Download,
       },
       {
+        title: 'Recherche Produits Digitaux',
+        url: '/digital/search',
+        icon: Search,
+      },
+      {
+        title: 'Comparer Produits Digitaux',
+        url: '/digital/compare',
+        icon: Layers,
+      },
+      {
+        title: 'Comparer Produits',
+        url: '/products/compare',
+        icon: Layers,
+      },
+      {
         title: 'Mes Licences',
         url: '/dashboard/my-licenses',
         icon: Key,
@@ -238,6 +307,16 @@ const menuSections = [
         title: 'Bundles Produits Digitaux',
         url: '/dashboard/digital-products/bundles',
         icon: Layers,
+      },
+      {
+        title: 'Créer un Bundle Digital',
+        url: '/dashboard/digital-products/bundles/create',
+        icon: Layers,
+      },
+      {
+        title: 'Mes Téléchargements (Vendeur)',
+        url: '/dashboard/my-downloads',
+        icon: Download,
       },
       {
         title: 'Mises à jour Digitales',
@@ -315,6 +394,16 @@ const menuSections = [
         icon: Calendar,
       },
       {
+        title: 'Calendrier Services',
+        url: '/dashboard/services/calendar',
+        icon: Calendar,
+      },
+      {
+        title: 'Réservations Récurrentes (Services)',
+        url: '/dashboard/services/recurring-bookings',
+        icon: Repeat,
+      },
+      {
         title: 'Calendrier Avancé',
         url: '/dashboard/advanced-calendar',
         icon: Calendar,
@@ -360,8 +449,18 @@ const menuSections = [
         icon: Warehouse,
       },
       {
+        title: 'Inventaire (raccourci)',
+        url: '/inventory',
+        icon: Warehouse,
+      },
+      {
         title: 'Expéditions',
         url: '/dashboard/shipping',
+        icon: Truck,
+      },
+      {
+        title: 'Expéditions (raccourci)',
+        url: '/shipping',
         icon: Truck,
       },
       {
@@ -570,6 +669,11 @@ const menuSections = [
         icon: TrendingUp,
       },
       {
+        title: 'Affiliation Boutique',
+        url: '/dashboard/store-affiliates',
+        icon: TrendingUp,
+      },
+      {
         title: 'Tableau de bord Affilié',
         url: '/affiliate/dashboard',
         icon: TrendingUp,
@@ -590,6 +694,11 @@ const menuSections = [
         icon: BarChart3,
       },
       {
+        title: 'Tableaux de bord Analytics',
+        url: '/dashboard/analytics/dashboards',
+        icon: GanttChart,
+      },
+      {
         title: 'Mes Pixels',
         url: '/dashboard/pixels',
         icon: Target,
@@ -597,6 +706,11 @@ const menuSections = [
       {
         title: 'Mon SEO',
         url: '/dashboard/seo',
+        icon: Search,
+      },
+      {
+        title: 'Inspecteur SEO',
+        url: '/dashboard/seo/inspector',
         icon: Search,
       },
     ],
@@ -623,6 +737,16 @@ const menuSections = [
         title: 'Basé sur mon Historique',
         url: '/recommendations/history-based',
         icon: History,
+      },
+      {
+        title: 'Quiz Style',
+        url: '/personalization/quiz',
+        icon: Sparkles,
+      },
+      {
+        title: 'Recommandations Personnalisées',
+        url: '/personalization/recommendations',
+        icon: Sparkles,
       },
       {
         title: 'Assistant IA',
@@ -681,6 +805,11 @@ const menuSections = [
         icon: Settings,
       },
       {
+        title: 'Notifications',
+        url: '/settings/notifications',
+        icon: Bell,
+      },
+      {
         title: 'IA Recommandations',
         url: '/admin/ai-settings',
         icon: Brain,
@@ -716,6 +845,11 @@ const adminMenuSections = [
         title: 'Boutiques',
         url: '/admin/stores',
         icon: Store,
+      },
+      {
+        title: 'Communauté',
+        url: '/admin/community',
+        icon: Users,
       },
     ],
   },
@@ -781,6 +915,16 @@ const adminMenuSections = [
         title: 'Expéditions',
         url: '/admin/shipping',
         icon: Truck,
+      },
+      {
+        title: 'Conversations Livraison',
+        url: '/admin/shipping-conversations',
+        icon: LucideMessageSquare,
+      },
+      {
+        title: 'Conversations Clients-Vendeurs',
+        url: '/admin/vendor-conversations',
+        icon: LucideMessageSquare,
       },
       {
         title: 'Retours',
@@ -873,6 +1017,11 @@ const adminMenuSections = [
         icon: Scale,
       },
       {
+        title: 'Réconciliation Transactions',
+        url: '/admin/transaction-reconciliation',
+        icon: GitCompare,
+      },
+      {
         title: 'Statistiques Moneroo',
         url: '/admin/moneroo-analytics',
         icon: BarChart3,
@@ -881,11 +1030,6 @@ const adminMenuSections = [
         title: 'Réconciliation Moneroo',
         url: '/admin/moneroo-reconciliation',
         icon: RotateCcw,
-      },
-      {
-        title: 'Monitoring Transactions',
-        url: '/admin/transaction-monitoring',
-        icon: BarChart, // Utiliser BarChart au lieu de AlertCircle pour éviter les problèmes de bundling
       },
     ],
   },
@@ -913,11 +1057,26 @@ const adminMenuSections = [
         url: '/admin/gift-cards',
         icon: Gift,
       },
+      {
+        title: 'Stockage Données',
+        url: '/admin/data-storage',
+        icon: HardDrive,
+      },
+      {
+        title: 'File Offline',
+        url: '/admin/offline-queue',
+        icon: WifiOff,
+      },
     ],
   },
   {
     label: 'Croissance',
     items: [
+      {
+        title: 'Marketing Automation',
+        url: '/admin/marketing',
+        icon: Megaphone,
+      },
       {
         title: 'Parrainages',
         url: '/admin/referrals',
@@ -928,10 +1087,30 @@ const adminMenuSections = [
         url: '/admin/affiliates',
         icon: TrendingUp,
       },
+    ],
+  },
+  {
+    label: 'Analytics & Monitoring',
+    items: [
       {
         title: 'Analytics',
         url: '/admin/analytics',
         icon: BarChart3,
+      },
+      {
+        title: 'Monitoring',
+        url: '/admin/monitoring',
+        icon: Activity,
+      },
+      {
+        title: 'Monitoring Erreurs',
+        url: '/admin/error-monitoring',
+        icon: AlertTriangle,
+      },
+      {
+        title: 'Monitoring Transactions',
+        url: '/admin/transaction-monitoring',
+        icon: BarChart,
       },
     ],
   },
@@ -969,6 +1148,11 @@ const adminMenuSections = [
         icon: Bell,
       },
       {
+        title: 'Accessibilité',
+        url: '/admin/accessibility',
+        icon: Accessibility,
+      },
+      {
         title: 'Diagnostic Storage',
         url: '/admin/storage-diagnostic',
         icon: Database,
@@ -982,6 +1166,16 @@ const adminMenuSections = [
         title: 'Paramètres',
         url: '/admin/settings',
         icon: Settings,
+      },
+      {
+        title: 'Centre AI',
+        url: '/admin/ai-management',
+        icon: Bot,
+      },
+      {
+        title: 'IA Recommandations',
+        url: '/admin/ai-settings',
+        icon: Brain,
       },
       {
         title: 'Commissions',
