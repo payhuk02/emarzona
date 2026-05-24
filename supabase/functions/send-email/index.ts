@@ -11,6 +11,7 @@ import {
   type EmailCategory,
 } from '../_shared/email-compliance-utils.ts';
 import { logEmailSend, renderDbTemplate } from '../_shared/email-template-utils.ts';
+import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';
@@ -251,6 +252,12 @@ serve(async req => {
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
 
     if (!isAuthorized && token && token === supabaseServiceKey) {
+      isAuthorized = true;
+      isInternalCall = true;
+    }
+
+    const projectRef = getProjectRefFromSupabaseUrl(supabaseUrl);
+    if (!isAuthorized && token && isServiceRoleJwt(token, projectRef)) {
       isAuthorized = true;
       isInternalCall = true;
     }

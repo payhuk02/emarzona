@@ -49,6 +49,8 @@ Set these secrets in Supabase Edge Functions:
 Email functions:
 
 - `RESEND_API_KEY` / `RESEND_FROM_EMAIL=noreply@mail.emarzona.com` configured for `send-email` (domaine Resend : `mail.emarzona.com`).
+- Auth SMTP Resend + confirmation email : voir [docs/CONFIGURATION_AUTH_EMAIL_RESEND.md](docs/CONFIGURATION_AUTH_EMAIL_RESEND.md).
+- `send-welcome-email` déployée ; Postgres `app.settings.supabase_url` + `service_role_key` pour le trigger welcome.
 - `SENDGRID_API_KEY` configured only in server-side contexts where still used.
 
 ## 5. Security Controls

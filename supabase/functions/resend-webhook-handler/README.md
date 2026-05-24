@@ -4,7 +4,9 @@ Reçoit les webhooks Resend pour mettre à jour `email_logs` et les métriques d
 
 ## Configuration
 
-1. Déployer la fonction : `supabase functions deploy resend-webhook-handler`
+1. Déployer la fonction (**sans JWT Supabase** — Resend n'envoie pas de Bearer) :
+   `supabase functions deploy resend-webhook-handler --no-verify-jwt`
+   (ou `[functions.resend-webhook-handler] verify_jwt = false` dans `supabase/config.toml`)
 2. Secret Edge : `RESEND_WEBHOOK_SECRET` (valeur aléatoire forte)
 3. Dans [Resend Webhooks](https://resend.com/webhooks), créer un endpoint :
    - URL : `https://<project>.supabase.co/functions/v1/resend-webhook-handler`

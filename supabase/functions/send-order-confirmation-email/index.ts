@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -83,6 +84,10 @@ serve(async req => {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
     if (!isAuthorized && token && token === supabaseServiceKey) {
+      isAuthorized = true;
+    }
+    const projectRef = getProjectRefFromSupabaseUrl(supabaseUrl);
+    if (!isAuthorized && token && isServiceRoleJwt(token, projectRef)) {
       isAuthorized = true;
     }
     if (!isAuthorized && token) {

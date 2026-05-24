@@ -30,11 +30,16 @@
    - Access Token : 3600 secondes (1 heure)
    - Refresh Token : 604800 secondes (7 jours)
 
-5. **Email Templates (optionnel)**
-   - Site URL : https://emarzona.com
-   - From Email : noreply@emarzona.com
+5. **Confirm email** : activé (voir docs/CONFIGURATION_AUTH_EMAIL_RESEND.md)
 
-6. **Social Providers (si utilisés)**
+6. **SMTP Resend (mail.emarzona.com)**
+   - Host smtp.resend.com, user resend, pass = RESEND_API_KEY
+   - Sender : noreply@mail.emarzona.com
+
+7. **Email Templates Auth (optionnel)**
+   - Site URL : https://emarzona.com
+
+8. **Social Providers (si utilisés)**
    - Google OAuth : Authorized redirect URIs
      * https://emarzona.com/auth/callback
    - GitHub OAuth : Authorization callback URL

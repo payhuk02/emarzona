@@ -12,8 +12,6 @@ import { logger } from '@/lib/logger';
 import { notificationRateLimiter } from './rate-limiter';
 import { notificationRetryService } from './retry-service';
 import { logNotification } from './notification-logger';
-import { notificationTemplateService } from './template-service';
-
 /** Table `user_push_tokens` absent from generated Database types */
 type UserPushTokensClient = {
   from: (table: 'user_push_tokens') => {
@@ -393,109 +391,42 @@ function mapPreferenceKeyToNotificationType(key: string): NotificationType | nul
  */
 async function sendEmailNotification(notification: UnifiedNotification): Promise<void> {
   try {
-    // Récupérer l'email de l'utilisateur
-    const { data: user } = await supabase.auth.admin.getUserById(notification.user_id);
-    if (!user?.user?.email) {
-      logger.warn('User email not found for email notification', { userId: notification.user_id });
-      return;
-    }
-
-    // Récupérer la langue de l'utilisateur (par défaut 'fr')
     const { notificationI18nService } = await import('./i18n-service');
     const language = (await notificationI18nService.getUserLanguage(notification.user_id)) || 'fr';
 
-    // Essayer d'utiliser le template centralisé depuis notification_templates
-    let subject = notification.title;
-    let htmlContent = '';
-    let templateSlug: string = notification.type;
-
-    try {
-      const rendered = await notificationTemplateService.renderTemplate(
-        notification.type,
-        'email',
-        {
-          title: notification.title,
-          message: notification.message,
-          action_url: notification.action_url || '',
-          action_label: notification.action_label || '',
-          user_name: user.user.email.split('@')[0], // Nom par défaut depuis email
-          platform_name: 'Emarzona',
-          ...notification.metadata,
-        },
-        {
-          language: language as 'fr' | 'en',
-          storeId: notification.metadata?.store_id as string | undefined,
-        }
-      );
-
-      if (rendered) {
-        subject = rendered.subject || notification.title;
-        htmlContent = rendered.html || rendered.body;
-      } else {
-        // Fallback : utiliser le template basique de l'Edge Function
-        const template = getEmailTemplate(notification.type);
-        htmlContent = ''; // L'Edge Function générera le HTML
-        templateSlug = template;
-      }
-    } catch (templateError) {
-      logger.warn('Error rendering template, using fallback', {
-        error: templateError,
+    const { data, error } = await supabase.functions.invoke('send-notification-email', {
+      body: {
+        user_id: notification.user_id,
         type: notification.type,
-      });
-      // Fallback : utiliser le template basique
-      const template = getEmailTemplate(notification.type);
-      templateSlug = template;
+        title: notification.title,
+        message: notification.message,
+        action_url: notification.action_url,
+        action_label: notification.action_label,
+        metadata: notification.metadata,
+        language,
+        store_id: notification.metadata?.store_id as string | undefined,
+      },
+    });
+
+    if (error) {
+      throw error;
     }
 
-    // Si on a un HTML rendu, l'envoyer directement via Resend
-    // Sinon, utiliser l'Edge Function avec template basique
-    if (htmlContent) {
-      // Envoyer directement via Resend (via Edge Function avec HTML)
-      const { error } = await supabase.functions.invoke('send-email', {
-        body: {
-          to: user.user.email,
-          subject: subject,
-          html: htmlContent, // HTML rendu depuis template
-          template: 'custom', // Template custom
-          data: {
-            title: notification.title,
-            message: notification.message,
-            action_url: notification.action_url,
-            action_label: notification.action_label,
-            ...notification.metadata,
-          },
-        },
+    const result = data as { success?: boolean; skipped?: boolean; error?: string } | null;
+    if (result?.skipped) {
+      logger.info('Email notification skipped', {
+        userId: notification.user_id,
+        type: notification.type,
       });
-
-      if (error) {
-        throw error;
-      }
-    } else {
-      // Utiliser l'Edge Function avec template basique
-      const { error } = await supabase.functions.invoke('send-email', {
-        body: {
-          to: user.user.email,
-          subject: notification.title,
-          template: templateSlug,
-          data: {
-            title: notification.title,
-            message: notification.message,
-            action_url: notification.action_url,
-            action_label: notification.action_label,
-            ...notification.metadata,
-          },
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
+      return;
+    }
+    if (result?.success === false || result?.error) {
+      throw new Error(result.error || 'send-notification-email failed');
     }
 
     logger.info('Email notification sent', {
       userId: notification.user_id,
       type: notification.type,
-      templateUsed: htmlContent ? 'centralized' : 'fallback',
     });
   } catch (caughtError: unknown) {
     const errorMessage = caughtError instanceof Error ? caughtError.message : 'Unknown error';
@@ -623,69 +554,6 @@ async function sendPushNotification(notification: UnifiedNotification): Promise<
     logger.error('Error sending push notification', { error: errorMessage, notification });
     throw caughtError;
   }
-}
-
-/**
- * Obtenir le template email selon le type de notification
- */
-function getEmailTemplate(type: NotificationType): string {
-  const templates: Record<NotificationType, string> = {
-    // Digital
-    digital_product_purchased: 'digital-product-purchased',
-    digital_product_download_ready: 'digital-download-ready',
-    digital_product_version_update: 'digital-version-update',
-    digital_product_license_expiring: 'license-expiring',
-    digital_product_license_expired: 'license-expired',
-
-    // Physical
-    physical_product_order_placed: 'order-placed',
-    physical_product_order_confirmed: 'order-confirmed',
-    physical_product_order_shipped: 'order-shipped',
-    physical_product_order_delivered: 'order-delivered',
-    physical_product_order_cancelled: 'order-cancelled',
-    physical_product_low_stock: 'low-stock',
-    physical_product_out_of_stock: 'out-of-stock',
-    physical_product_back_in_stock: 'back-in-stock',
-
-    // Service
-    service_booking_confirmed: 'booking-confirmed',
-    service_booking_reminder: 'booking-reminder',
-    service_booking_cancelled: 'booking-cancelled',
-    service_booking_completed: 'booking-completed',
-    service_payment_required: 'payment-required',
-
-    // Course
-    course_enrollment: 'course-enrollment',
-    course_lesson_complete: 'lesson-complete',
-    course_complete: 'course-complete',
-    course_certificate_ready: 'certificate-ready',
-    course_new_content: 'new-content',
-    course_quiz_passed: 'quiz-passed',
-    course_quiz_failed: 'quiz-failed',
-
-    // Artist
-    artist_product_purchased: 'artist-product-purchased',
-    artist_product_certificate_ready: 'certificate-ready',
-    artist_product_edition_sold_out: 'edition-sold-out',
-    artist_product_shipping_update: 'shipping-update',
-
-    // General
-    order_payment_received: 'payment-received',
-    order_payment_failed: 'payment-failed',
-    order_refund_processed: 'refund-processed',
-    affiliate_commission_earned: 'commission-earned',
-    affiliate_commission_paid: 'commission-paid',
-    product_review_received: 'review-received',
-    system_announcement: 'system-announcement',
-
-    vendor_message_received: 'vendor-message-received',
-    customer_message_received: 'customer-message-received',
-    vendor_conversation_started: 'vendor-conversation-started',
-    vendor_conversation_closed: 'vendor-conversation-closed',
-    order_message_received: 'order-message-received',
-  };
-
-  return templates[type] || 'default';
 }
 
 /**

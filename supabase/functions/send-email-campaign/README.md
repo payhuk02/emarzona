@@ -9,16 +9,18 @@ Edge Function Supabase pour envoyer des campagnes email marketing via Resend.
 Ajoutez ces variables dans Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 
 ```
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxx
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+RESEND_FROM_EMAIL=noreply@mail.emarzona.com
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+EDGE_INTERNAL_SECRET=your-internal-secret
 ```
 
 ### Obtenir une clé API Resend
 
-1. Créez un compte sur [Resend](https://sendgrid.com)
-2. Obtenez votre clé API depuis le dashboard
-3. Ajoutez-la dans les secrets Supabase
+1. Créez un compte sur [Resend](https://resend.com)
+2. Vérifiez le domaine `mail.emarzona.com` et obtenez votre clé API
+3. Ajoutez `RESEND_API_KEY` et `RESEND_FROM_EMAIL` dans les secrets Supabase Edge
 
 ## Utilisation
 

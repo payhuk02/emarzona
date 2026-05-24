@@ -26,8 +26,44 @@ function buildCorsHeaders(originHeader: string | null): Record<string, string> {
     'Access-Control-Allow-Origin': resolveCorsOrigin(originHeader),
     Vary: 'Origin',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type, x-cron-secret',
   };
+}
+
+/** Fail-closed: requires x-cron-secret matching CRON_SECRET (pg_cron / internal jobs). */
+function assertCronAuthorized(req: Request, corsHeaders: Record<string, string>): Response | null {
+  const expectedCronSecret = Deno.env.get('CRON_SECRET');
+  if (!expectedCronSecret) {
+    console.error('CRON_SECRET is not configured');
+    return new Response(
+      JSON.stringify({
+        error: 'Server misconfiguration',
+        message: 'CRON_SECRET is not configured',
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
+  const cronSecret = req.headers.get('x-cron-secret');
+  if (!cronSecret || cronSecret.trim() !== expectedCronSecret.trim()) {
+    console.warn('Unauthorized process-email-sequences request');
+    return new Response(
+      JSON.stringify({
+        error: 'Unauthorized',
+        message: 'Missing or invalid authentication',
+      }),
+      {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
+  return null;
 }
 
 interface ProcessSequencesRequest {
@@ -122,6 +158,9 @@ serve(async req => {
   }
 
   try {
+    const authError = assertCronAuthorized(req, corsHeaders);
+    if (authError) return authError;
+
     if (!RESEND_API_KEY) {
       return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), {
         status: 500,

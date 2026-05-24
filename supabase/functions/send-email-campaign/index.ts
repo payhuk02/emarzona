@@ -8,6 +8,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCampaignRecipients } from '../_shared/campaign-recipients.ts';
 import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
 import { sendMarketingEmailViaResend } from '../_shared/resend-send-utils.ts';
+import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
@@ -200,6 +201,10 @@ serve(async req => {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
     if (!isAuthorized && token && token === supabaseKey) {
+      isAuthorized = true;
+    }
+    const projectRef = getProjectRefFromSupabaseUrl(supabaseUrl);
+    if (!isAuthorized && token && isServiceRoleJwt(token, projectRef)) {
       isAuthorized = true;
     }
     if (!isAuthorized && token) {

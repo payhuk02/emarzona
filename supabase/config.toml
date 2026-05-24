@@ -1,1 +1,37 @@
 project_id = "hbdnzajbyjakdhuavrvb"
+
+# Resend appelle cette URL sans JWT Supabase (signature Svix uniquement)
+[functions.resend-webhook-handler]
+verify_jwt = false
+
+# send-welcome-email : appelé par pg_net (Bearer service_role) ou EDGE_INTERNAL_SECRET
+[functions.send-welcome-email]
+verify_jwt = true
+
+# ---------------------------------------------------------------------------
+# Auth — confirmation email + SMTP Resend (mail.emarzona.com)
+# Production : configurer aussi le Dashboard Supabase (voir docs/CONFIGURATION_AUTH_EMAIL_RESEND.md)
+# ---------------------------------------------------------------------------
+[auth]
+enabled = true
+site_url = "https://emarzona.com"
+additional_redirect_urls = [
+  "https://emarzona.com/auth/callback",
+  "https://emarzona.com/dashboard",
+  "http://localhost:5173/auth/callback",
+  "http://localhost:5173/dashboard",
+]
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(RESEND_API_KEY)"
+admin_email = "noreply@mail.emarzona.com"
+sender_name = "Emarzona"

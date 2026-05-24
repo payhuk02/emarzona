@@ -27,25 +27,28 @@ interface ResendWebhookPayload {
 
 async function findEmailLog(emailId: string): Promise<{
   id: string;
-  variables: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  campaign_id: string | null;
 } | null> {
   const { data } = await supabase
     .from('email_logs')
-    .select('id, variables')
+    .select('id, metadata, campaign_id')
     .eq('sendgrid_message_id', emailId)
     .maybeSingle();
   if (!data) return null;
   return {
     id: data.id,
-    variables: (data.variables || {}) as Record<string, unknown>,
+    metadata: (data.metadata || {}) as Record<string, unknown>,
+    campaign_id: data.campaign_id,
   };
 }
 
 async function incrementCampaignMetricFromLog(
-  log: { variables: Record<string, unknown> } | null,
+  log: { metadata: Record<string, unknown>; campaign_id: string | null } | null,
   metric: string
 ): Promise<void> {
-  const campaignId = log?.variables?.campaign_id as string | undefined;
+  const campaignId =
+    log?.campaign_id || (log?.metadata?.campaign_id as string | undefined) || undefined;
   if (!campaignId) return;
   await supabase.rpc('increment_campaign_metric', {
     p_campaign_id: campaignId,
@@ -68,32 +71,35 @@ async function processResendEvent(payload: ResendWebhookPayload): Promise<void> 
 
   switch (payload.type) {
     case 'email.sent':
-      updateData.sendgrid_status = 'sent';
+      updateData.status = 'sent';
       break;
     case 'email.delivered':
-      updateData.sendgrid_status = 'delivered';
-      updateData.delivered_at = timestamp;
+      updateData.status = 'delivered';
       await incrementCampaignMetricFromLog(emailLog, 'delivered');
       break;
     case 'email.opened':
+      updateData.status = 'opened';
       updateData.opened_at = timestamp;
       await incrementCampaignMetricFromLog(emailLog, 'opened');
       break;
     case 'email.clicked':
+      updateData.status = 'clicked';
       updateData.clicked_at = timestamp;
-      if (payload.data.click?.link) {
-        updateData.clicked_url = payload.data.click.link;
+      if (payload.data.click?.link && emailLog?.id) {
+        updateData.metadata = {
+          ...emailLog.metadata,
+          clicked_url: payload.data.click.link,
+        };
       }
       await incrementCampaignMetricFromLog(emailLog, 'clicked');
       break;
     case 'email.bounced':
-      updateData.sendgrid_status = 'bounced';
-      updateData.bounced_at = timestamp;
-      updateData.bounce_reason = payload.data.bounce?.message || 'bounced';
+      updateData.status = 'bounced';
+      updateData.error_message = payload.data.bounce?.message || 'bounced';
       await incrementCampaignMetricFromLog(emailLog, 'bounced');
       break;
     case 'email.complained':
-      updateData.sendgrid_status = 'spam';
+      updateData.status = 'spam';
       if (recipientEmail) {
         await supabase.from('email_unsubscribes').upsert(
           {

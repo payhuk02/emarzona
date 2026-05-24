@@ -40,20 +40,43 @@ function isServiceRoleJwt(token: string, projectRef: string): boolean {
   }
 }
 
-async function setupCron(
+async function setupCronJobs(
   supabase: ReturnType<typeof createClient>,
-  cronSecret: string
+  cronSecret: string,
+  anonKey: string
 ): Promise<Record<string, unknown>> {
-  const { data, error } = await supabase.rpc('setup_email_campaigns_cron_job', {
+  const campaigns = await supabase.rpc('setup_email_campaigns_cron_job', {
     p_project_ref: PROJECT_REF,
     p_cron_secret: cronSecret,
+    p_anon_key: anonKey,
   });
-
-  if (error) {
-    throw new Error(`Cron setup failed: ${error.message}`);
+  if (campaigns.error) {
+    throw new Error(`Campaigns cron setup failed: ${campaigns.error.message}`);
   }
 
-  return (data as Record<string, unknown>) || { success: true };
+  const sequences = await supabase.rpc('setup_email_sequences_cron_job', {
+    p_project_ref: PROJECT_REF,
+    p_cron_secret: cronSecret,
+    p_anon_key: anonKey,
+  });
+  if (sequences.error) {
+    throw new Error(`Sequences cron setup failed: ${sequences.error.message}`);
+  }
+
+  const abandonedCart = await supabase.rpc('setup_abandoned_cart_recovery_cron_job', {
+    p_project_ref: PROJECT_REF,
+    p_cron_secret: cronSecret,
+    p_anon_key: anonKey,
+  });
+  if (abandonedCart.error) {
+    throw new Error(`Abandoned cart cron setup failed: ${abandonedCart.error.message}`);
+  }
+
+  return {
+    campaigns: campaigns.data,
+    sequences: sequences.data,
+    abandoned_cart: abandonedCart.data,
+  };
 }
 
 async function setupResendWebhook(
@@ -127,7 +150,7 @@ serve(async req => {
   }
 
   try {
-    let body: { cron_secret?: string } = {};
+    let body: { cron_secret?: string; anon_key?: string } = {};
     try {
       body = await req.json();
     } catch {
@@ -137,6 +160,12 @@ serve(async req => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const cronSecret = (body.cron_secret ?? Deno.env.get('CRON_SECRET') ?? '').trim();
+    const anonKey = (
+      body.anon_key ??
+      Deno.env.get('SUPABASE_ANON_KEY') ??
+      Deno.env.get('VITE_SUPABASE_PUBLISHABLE_KEY') ??
+      ''
+    ).trim();
     const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? '';
     const resendWebhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET') ?? '';
     const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET') ?? '';
@@ -172,10 +201,16 @@ serve(async req => {
       });
     }
 
+    if (!anonKey) {
+      return json(500, {
+        error: 'SUPABASE_ANON_KEY not configured — required for pg_cron → Edge gateway auth',
+      });
+    }
+
     const supabase = createClient(supabaseUrl, serviceKey);
     const result: Record<string, unknown> = { project_ref: PROJECT_REF };
 
-    result.cron = await setupCron(supabase, cronSecret);
+    result.cron = await setupCronJobs(supabase, cronSecret, anonKey);
 
     if (resendApiKey) {
       result.resend_webhook = await setupResendWebhook(resendApiKey, !!resendWebhookSecret);

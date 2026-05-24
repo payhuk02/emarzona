@@ -8,9 +8,9 @@ export interface DbEmailTemplate {
   slug: string;
   name: string;
   category?: string;
-  subject: Record<string, string>;
-  html_content: Record<string, string>;
-  text_content?: Record<string, string> | null;
+  subject: Record<string, string> | string;
+  html_content: Record<string, string> | string;
+  text_content?: Record<string, string> | string | null;
   from_email?: string;
   from_name?: string;
   product_type?: string | null;
@@ -27,20 +27,50 @@ export interface RenderedEmail {
   fromName?: string;
 }
 
+/** Legacy slug aliases → templates en base */
+/** Fallback uniquement si le slug dédié n'existe pas en base */
+export const EMAIL_TEMPLATE_SLUG_ALIASES: Record<string, string> = {
+  'welcome-user': 'welcome',
+};
+
+export function resolveEmailTemplateSlug(slug: string): string {
+  return EMAIL_TEMPLATE_SLUG_ALIASES[slug] ?? slug;
+}
+
+function isTruthyVariable(value: unknown): boolean {
+  if (value === null || value === undefined || value === false) return false;
+  if (value === '' || value === 'false' || value === '0') return false;
+  return true;
+}
+
+/** Remplace {{var}} et évalue les blocs simples {{#if var}}...{{/if}} */
 export function replaceVariables(content: string, variables: Record<string, unknown>): string {
   let result = content;
+
+  result = result.replace(
+    /\{\{#if\s+([\w.]+)\s*\}\}([\s\S]*?)\{\{\/if\}\}/g,
+    (_, key: string, block: string) => (isTruthyVariable(variables[key]) ? block : '')
+  );
+  result = result.replace(
+    /\{\{#unless\s+([\w.]+)\s*\}\}([\s\S]*?)\{\{\/unless\}\}/g,
+    (_, key: string, block: string) => (!isTruthyVariable(variables[key]) ? block : '')
+  );
+
   for (const [key, value] of Object.entries(variables)) {
     const safe = value === null || value === undefined ? '' : String(value);
     result = result.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), safe);
   }
-  return result;
+
+  return result.replace(/\{\{#[^}]+\}\}[\s\S]*?\{\{\/[^}]+\}\}/g, '');
 }
 
 export function pickLocalized(
-  field: Record<string, string> | null | undefined,
+  field: Record<string, string> | string | null | undefined,
   language: string
 ): string {
-  if (!field || typeof field !== 'object') return '';
+  if (!field) return '';
+  if (typeof field === 'string') return field;
+  if (typeof field !== 'object') return String(field);
   return field[language] || field['fr'] || field['en'] || Object.values(field)[0] || '';
 }
 
@@ -49,13 +79,15 @@ export async function fetchEmailTemplate(
   slug: string,
   productType?: string | null
 ): Promise<DbEmailTemplate | null> {
+  const resolvedSlug = resolveEmailTemplateSlug(slug);
+
   if (productType) {
     const { data } = await supabase
       .from('email_templates')
       .select(
         'id,slug,name,category,subject,html_content,text_content,from_email,from_name,product_type'
       )
-      .eq('slug', slug)
+      .eq('slug', resolvedSlug)
       .eq('product_type', productType)
       .eq('is_active', true)
       .maybeSingle();
@@ -67,7 +99,7 @@ export async function fetchEmailTemplate(
     .select(
       'id,slug,name,category,subject,html_content,text_content,from_email,from_name,product_type'
     )
-    .eq('slug', slug)
+    .eq('slug', resolvedSlug)
     .is('product_type', null)
     .eq('is_active', true)
     .maybeSingle();
@@ -144,10 +176,31 @@ export async function logEmailSend(
     error_code?: string;
   }
 ): Promise<void> {
+  const variables = log.variables ?? {};
+  const metadata: Record<string, unknown> = {
+    template_slug: log.template_slug,
+    recipient_name: log.recipient_name,
+    product_type: log.product_type,
+    product_id: log.product_id,
+    product_name: log.product_name,
+    order_id: log.order_id,
+    store_id: log.store_id,
+    error_code: log.error_code,
+    ...variables,
+  };
+
   const { error } = await supabase.from('email_logs').insert({
-    ...log,
-    variables: log.variables ?? {},
-    sent_at: new Date().toISOString(),
+    template_id: log.template_id,
+    user_id: log.user_id,
+    to_email: log.recipient_email,
+    subject: log.subject,
+    status: log.sendgrid_status,
+    sendgrid_message_id: log.sendgrid_message_id,
+    campaign_id: (variables.campaign_id as string) || null,
+    sequence_id: (variables.sequence_id as string) || null,
+    error_message: log.error_message,
+    metadata,
+    created_at: new Date().toISOString(),
   });
   if (error) {
     console.error(

@@ -16,12 +16,63 @@ import type {
   SendEmailPayload,
   ProductType,
   EmailCategory,
+  SendGridStatus,
 } from '@/types/email';
 import { sendEmail } from '@/lib/sendgrid';
 
-const EMAIL_TEMPLATE_FIELDS = 'id, name, slug, category, product_type, subject, html_content, text_content, variables, is_active, is_default, created_at, updated_at';
-const EMAIL_LOG_FIELDS = 'id, user_id, order_id, product_id, product_type, template_slug, recipient_email, subject, sendgrid_message_id, sendgrid_status, sent_at, delivered_at, opened_at, clicked_at, bounced_at, error_message, metadata, created_at';
-const EMAIL_PREFERENCES_FIELDS = 'id, user_id, marketing_emails, transactional_emails, order_updates, product_updates, newsletter, promotional_offers, reminder_emails, frequency, unsubscribed_at, created_at, updated_at';
+const EMAIL_TEMPLATE_FIELDS =
+  'id, name, slug, category, product_type, subject, html_content, text_content, variables, is_active, is_default, created_at, updated_at';
+const EMAIL_LOG_FIELDS =
+  'id, user_id, template_id, campaign_id, sequence_id, to_email, subject, status, sendgrid_message_id, error_message, opened_at, clicked_at, metadata, created_at, updated_at';
+
+type EmailLogRow = {
+  id: string;
+  user_id: string | null;
+  template_id: string | null;
+  campaign_id: string | null;
+  sequence_id: string | null;
+  to_email: string;
+  subject: string;
+  status: string | null;
+  sendgrid_message_id: string | null;
+  error_message: string | null;
+  opened_at: string | null;
+  clicked_at: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+function mapEmailLogRow(row: EmailLogRow): EmailLog {
+  const meta = (row.metadata ?? {}) as Record<string, unknown>;
+  return {
+    id: row.id,
+    template_id: row.template_id ?? undefined,
+    template_slug: String(meta.template_slug ?? ''),
+    recipient_email: row.to_email,
+    recipient_name: typeof meta.recipient_name === 'string' ? meta.recipient_name : undefined,
+    user_id: row.user_id ?? undefined,
+    subject: row.subject,
+    product_type: meta.product_type as ProductType | undefined,
+    product_id: typeof meta.product_id === 'string' ? meta.product_id : undefined,
+    product_name: typeof meta.product_name === 'string' ? meta.product_name : undefined,
+    order_id: typeof meta.order_id === 'string' ? meta.order_id : undefined,
+    store_id: typeof meta.store_id === 'string' ? meta.store_id : undefined,
+    variables: meta,
+    sendgrid_message_id: row.sendgrid_message_id ?? undefined,
+    sendgrid_status: (row.status ?? 'sent') as SendGridStatus,
+    sent_at: row.created_at ?? '',
+    opened_at: row.opened_at ?? undefined,
+    clicked_at: row.clicked_at ?? undefined,
+    error_message: row.error_message ?? undefined,
+    created_at: row.created_at ?? '',
+    updated_at: row.updated_at ?? row.created_at ?? '',
+    open_count: 0,
+    click_count: 0,
+  };
+}
+const EMAIL_PREFERENCES_FIELDS =
+  'id, user_id, marketing_emails, transactional_emails, order_updates, product_updates, newsletter, promotional_offers, reminder_emails, frequency, unsubscribed_at, created_at, updated_at';
 
 // ============================================================
 // EMAIL TEMPLATES
@@ -37,7 +88,7 @@ export const useEmailTemplates = (options?: {
   return useQuery({
     queryKey: ['email-templates', options?.category, options?.productType],
     queryFn: async (): Promise<EmailTemplate[]> => {
-      let  query= supabase
+      let query = supabase
         .from('email_templates')
         .select(EMAIL_TEMPLATE_FIELDS)
         .eq('is_active', true)
@@ -71,7 +122,7 @@ export const useEmailTemplate = (slug: string, productType?: ProductType) => {
   return useQuery({
     queryKey: ['email-template', slug, productType],
     queryFn: async (): Promise<EmailTemplate | null> => {
-      let  query= supabase
+      let query = supabase
         .from('email_templates')
         .select(EMAIL_TEMPLATE_FIELDS)
         .eq('slug', slug)
@@ -112,7 +163,7 @@ export const useUserEmailLogs = (userId?: string, limit: number = 50) => {
         .from('email_logs')
         .select(EMAIL_LOG_FIELDS)
         .eq('user_id', userId)
-        .order('sent_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
@@ -120,7 +171,7 @@ export const useUserEmailLogs = (userId?: string, limit: number = 50) => {
         throw error;
       }
 
-      return data as EmailLog[];
+      return (data as EmailLogRow[]).map(mapEmailLogRow);
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -139,15 +190,15 @@ export const useOrderEmailLogs = (orderId?: string) => {
       const { data, error } = await supabase
         .from('email_logs')
         .select(EMAIL_LOG_FIELDS)
-        .eq('order_id', orderId)
-        .order('sent_at', { ascending: false });
+        .filter('metadata->>order_id', 'eq', orderId)
+        .order('created_at', { ascending: false });
 
       if (error) {
         logger.error('Error fetching order email logs', { error, orderId });
         throw error;
       }
 
-      return data as EmailLog[];
+      return (data as EmailLogRow[]).map(mapEmailLogRow);
     },
     enabled: !!orderId,
     staleTime: 1000 * 60 * 5,
@@ -166,8 +217,8 @@ export const useProductEmailLogs = (productId?: string) => {
       const { data, error } = await supabase
         .from('email_logs')
         .select(EMAIL_LOG_FIELDS)
-        .eq('product_id', productId)
-        .order('sent_at', { ascending: false })
+        .filter('metadata->>product_id', 'eq', productId)
+        .order('created_at', { ascending: false })
         .limit(100);
 
       if (error) {
@@ -175,7 +226,7 @@ export const useProductEmailLogs = (productId?: string) => {
         throw error;
       }
 
-      return data as EmailLog[];
+      return (data as EmailLogRow[]).map(mapEmailLogRow);
     },
     enabled: !!productId,
     staleTime: 1000 * 60 * 10,
@@ -220,7 +271,10 @@ export const useEmailPreferences = () => {
           .single();
 
         if (insertError) {
-          logger.error('Error creating email preferences', { error: insertError, userId: user?.id });
+          logger.error('Error creating email preferences', {
+            error: insertError,
+            userId: user?.id,
+          });
           throw insertError;
         }
 
@@ -267,10 +321,10 @@ export const useUpdateEmailPreferences = () => {
         description: 'Vos préférences email ont été enregistrées.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Erreur inconnue',
         variant: 'destructive',
       });
     },
@@ -300,13 +354,13 @@ export const useSendEmail = () => {
     onSuccess: () => {
       toast({
         title: 'Email envoyé',
-        description: 'L\'email a été envoyé avec succès.',
+        description: "L'email a été envoyé avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
-        title: 'Erreur d\'envoi',
-        description: error.message,
+        title: "Erreur d'envoi",
+        description: error instanceof Error ? error.message : "Erreur d'envoi",
         variant: 'destructive',
       });
     },
@@ -330,28 +384,18 @@ export const useEmailAnalytics = (options?: {
   return useQuery({
     queryKey: ['email-analytics', options],
     queryFn: async () => {
-      let  query= supabase
-        .from('email_logs')
-        .select(EMAIL_LOG_FIELDS);
+      let query = supabase.from('email_logs').select(EMAIL_LOG_FIELDS);
 
       if (options?.userId) {
         query = query.eq('user_id', options.userId);
       }
 
-      if (options?.productId) {
-        query = query.eq('product_id', options.productId);
-      }
-
-      if (options?.productType) {
-        query = query.eq('product_type', options.productType);
-      }
-
       if (options?.dateFrom) {
-        query = query.gte('sent_at', options.dateFrom);
+        query = query.gte('created_at', options.dateFrom);
       }
 
       if (options?.dateTo) {
-        query = query.lte('sent_at', options.dateTo);
+        query = query.lte('created_at', options.dateTo);
       }
 
       const { data, error } = await query;
@@ -361,15 +405,21 @@ export const useEmailAnalytics = (options?: {
         throw error;
       }
 
-      const logs = data as EmailLog[];
+      let logs = (data as EmailLogRow[]).map(mapEmailLogRow);
+      if (options?.productType) {
+        logs = logs.filter(l => l.product_type === options.productType);
+      }
+      if (options?.productId) {
+        logs = logs.filter(l => l.product_id === options.productId);
+      }
 
       // Calculer les statistiques
       const stats = {
         total_sent: logs.length,
-        total_delivered: logs.filter((l) => l.sendgrid_status === 'delivered').length,
-        total_opened: logs.filter((l) => l.opened_at).length,
-        total_clicked: logs.filter((l) => l.clicked_at).length,
-        total_bounced: logs.filter((l) => l.bounced_at).length,
+        total_delivered: logs.filter(l => l.sendgrid_status === 'delivered').length,
+        total_opened: logs.filter(l => l.opened_at).length,
+        total_clicked: logs.filter(l => l.clicked_at).length,
+        total_bounced: logs.filter(l => l.bounced_at).length,
         open_rate: 0,
         click_rate: 0,
         bounce_rate: 0,
@@ -384,7 +434,7 @@ export const useEmailAnalytics = (options?: {
       }
 
       // Grouper par product_type
-      logs.forEach((log) => {
+      logs.forEach(log => {
         if (log.product_type) {
           stats.by_product_type[log.product_type] =
             (stats.by_product_type[log.product_type] || 0) + 1;
@@ -392,10 +442,9 @@ export const useEmailAnalytics = (options?: {
       });
 
       // Grouper par template
-      logs.forEach((log) => {
+      logs.forEach(log => {
         if (log.template_slug) {
-          stats.by_template[log.template_slug] =
-            (stats.by_template[log.template_slug] || 0) + 1;
+          stats.by_template[log.template_slug] = (stats.by_template[log.template_slug] || 0) + 1;
         }
       });
 
@@ -404,10 +453,3 @@ export const useEmailAnalytics = (options?: {
     staleTime: 1000 * 60 * 5,
   });
 };
-
-
-
-
-
-
-

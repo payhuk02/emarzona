@@ -18,7 +18,7 @@ export interface EmailCampaign {
   scheduledAt?: string;
   targetAudience?: {
     segment?: string;
-    filters?: Record<string, any>;
+    filters?: Record<string, unknown>;
   };
   metrics?: {
     sent: number;
@@ -34,12 +34,12 @@ export interface WorkflowTrigger {
   type: 'event' | 'schedule' | 'condition';
   event?: string;
   schedule?: string;
-  condition?: Record<string, any>;
+  condition?: Record<string, unknown>;
 }
 
 export interface WorkflowAction {
   type: 'send_email' | 'send_sms' | 'update_tag' | 'add_to_segment' | 'webhook';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface MarketingWorkflow {
@@ -63,7 +63,7 @@ export class MarketingAutomation {
   async sendTransactionalEmail(
     to: string,
     template: string,
-    data: Record<string, any>
+    data: Record<string, unknown>
   ): Promise<boolean> {
     try {
       const result = await sendEmailViaSendGrid({
@@ -96,7 +96,7 @@ export class MarketingAutomation {
   async sendMarketingEmail(
     to: string,
     campaignId: string,
-    data: Record<string, any>
+    data: Record<string, unknown>
   ): Promise<boolean> {
     try {
       // Vérifier si l'utilisateur a désabonné
@@ -118,9 +118,10 @@ export class MarketingAutomation {
         templateSlug: campaign.template,
         variables: {
           ...data,
-          unsubscribeUrl: typeof window !== 'undefined' 
-            ? `${window.location.origin}/unsubscribe?email=${encodeURIComponent(to)}&campaign=${campaignId}`
-            : `/unsubscribe?email=${encodeURIComponent(to)}&campaign=${campaignId}`,
+          unsubscribeUrl:
+            typeof window !== 'undefined'
+              ? `${window.location.origin}/unsubscribe?email=${encodeURIComponent(to)}&campaign=${campaignId}`
+              : `/unsubscribe?email=${encodeURIComponent(to)}&campaign=${campaignId}`,
         },
         type: 'marketing',
       } as SendEmailPayload);
@@ -151,7 +152,10 @@ export class MarketingAutomation {
   /**
    * Envoyer un email d'abandon de panier
    */
-  async sendAbandonedCartEmail(userId: string, cartItems: any[]): Promise<boolean> {
+  async sendAbandonedCartEmail(
+    userId: string,
+    cartItems: Record<string, unknown>[]
+  ): Promise<boolean> {
     try {
       // Récupérer les informations utilisateur depuis profiles
       const { data: profile } = await supabase
@@ -283,12 +287,12 @@ export class MarketingAutomation {
       const created = await EmailCampaignService.createCampaign({
         store_id: campaign.targetAudience?.segment || '', // Nécessite store_id
         name: campaign.name,
-        type: campaign.type as any,
-        template_id: campaign.template as any,
-        status: campaign.status as any,
+        type: campaign.type as EmailCampaign['type'],
+        template_id: campaign.template,
+        status: campaign.status as EmailCampaign['status'],
         scheduled_at: campaign.scheduledAt,
-        audience_type: 'segment' as any,
-        segment_id: campaign.targetAudience?.segment as any,
+        audience_type: 'segment',
+        segment_id: campaign.targetAudience?.segment,
         audience_filters: campaign.targetAudience?.filters || {},
       });
       return created.id;
@@ -301,7 +305,7 @@ export class MarketingAutomation {
   /**
    * Exécuter un workflow
    */
-  async executeWorkflow(workflowId: string, context: Record<string, any>): Promise<boolean> {
+  async executeWorkflow(workflowId: string, context: Record<string, unknown>): Promise<boolean> {
     try {
       const workflow = await this.getWorkflow(workflowId);
       if (!workflow || workflow.status !== 'active') {
@@ -362,10 +366,10 @@ export class MarketingAutomation {
       return {
         id: campaign.id,
         name: campaign.name,
-        type: campaign.type as any,
+        type: campaign.type as EmailCampaign['type'],
         subject: '', // Non disponible dans le nouveau format
         template: campaign.template_id || '',
-        status: campaign.status as any,
+        status: campaign.status as EmailCampaign['status'],
         scheduledAt: campaign.scheduled_at || undefined,
         targetAudience: {
           segment: campaign.segment_id,
@@ -397,16 +401,16 @@ export class MarketingAutomation {
         name: workflow.name,
         description: workflow.description,
         trigger: {
-          type: workflow.trigger_type as any,
+          type: workflow.trigger_type as WorkflowTrigger['type'],
           event: workflow.trigger_config?.event,
           schedule: workflow.trigger_config?.schedule,
           condition: workflow.conditions,
         },
-        actions: workflow.actions.map((action) => ({
-          type: action.type as any,
+        actions: workflow.actions.map(action => ({
+          type: action.type as WorkflowAction['type'],
           config: action.config,
         })),
-        status: workflow.status as any,
+        status: workflow.status as MarketingWorkflow['status'],
         createdAt: workflow.created_at,
         updatedAt: workflow.updated_at,
       };
@@ -419,7 +423,10 @@ export class MarketingAutomation {
   /**
    * Vérifier un trigger
    */
-  private async checkTrigger(trigger: WorkflowTrigger, context: Record<string, any>): Promise<boolean> {
+  private async checkTrigger(
+    trigger: WorkflowTrigger,
+    context: Record<string, unknown>
+  ): Promise<boolean> {
     switch (trigger.type) {
       case 'event':
         return context.event === trigger.event;
@@ -437,7 +444,10 @@ export class MarketingAutomation {
   /**
    * Exécuter une action
    */
-  private async executeAction(action: WorkflowAction, context: Record<string, any>): Promise<void> {
+  private async executeAction(
+    action: WorkflowAction,
+    context: Record<string, unknown>
+  ): Promise<void> {
     switch (action.type) {
       case 'send_email':
         await this.sendMarketingEmail(
@@ -468,7 +478,10 @@ export class MarketingAutomation {
   /**
    * Mettre à jour un tag (ajouter ou supprimer)
    */
-  private async updateTag(context: Record<string, any>, config: Record<string, any>): Promise<void> {
+  private async updateTag(
+    context: Record<string, unknown>,
+    config: Record<string, unknown>
+  ): Promise<void> {
     try {
       const { emailTagService } = await import('@/lib/email/email-tag-service');
       const userId = context.userId || context.user_id || context.user?.id;
@@ -508,18 +521,21 @@ export class MarketingAutomation {
     userId?: string;
     template?: string;
     status: string;
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
   }): Promise<void> {
     try {
       // Utiliser email_logs au lieu de email_events
       // @ts-expect-error - email_logs table not in generated types
       await supabase.from('email_logs').insert({
-        recipient_email: event.email,
-        template_slug: event.template,
+        to_email: event.email,
         user_id: event.userId,
         campaign_id: event.campaignId,
-        sendgrid_status: event.status,
-        variables: event.data,
+        status: event.status,
+        subject: event.type,
+        metadata: {
+          template_slug: event.template,
+          ...(event.data ?? {}),
+        },
       });
     } catch (error) {
       logger.error('MarketingAutomation.logEmailEvent error', { error, event });
@@ -540,17 +556,14 @@ export class MarketingAutomation {
         p_increment: 1,
       });
     } catch (error) {
-      logger.error('MarketingAutomation.updateCampaignMetrics error', { error, campaignId, metric });
+      logger.error('MarketingAutomation.updateCampaignMetrics error', {
+        error,
+        campaignId,
+        metric,
+      });
     }
   }
 }
 
 // Instance singleton
 export const marketingAutomation = new MarketingAutomation();
-
-
-
-
-
-
-

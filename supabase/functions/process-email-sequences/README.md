@@ -9,21 +9,21 @@ Edge Function Supabase pour traiter et envoyer automatiquement les emails des s�
 Ajoutez ces variables dans Supabase Dashboard → Project Settings → Edge Functions → Secrets:
 
 ```
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxx
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+CRON_SECRET=<same as other pg_cron jobs>
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
+
+Les appels doivent inclure l'en-tête `x-cron-secret: <CRON_SECRET>` (fail-closed si absent ou invalide).
 
 ## Utilisation
 
 ### Appel manuel
 
 ```typescript
-const { data, error } = await supabase.functions.invoke('process-email-sequences', {
-  body: {
-    limit: 100, // Optionnel, défaut: 100
-  },
-});
+// Depuis pg_cron : utiliser net.http_post avec header x-cron-secret (voir process-scheduled-campaigns).
+// L'invoke client sans secret renverra 401.
 ```
 
 ### Appel automatique (Cron)

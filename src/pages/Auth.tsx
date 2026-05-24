@@ -259,6 +259,20 @@ const Auth = () => {
 
       if (signUpError) throw signUpError;
 
+      // Confirmation email activée : pas de session tant que le lien n'est pas validé
+      if (data.user && !data.session) {
+        toast({
+          title: t('auth.signup.confirmEmailTitle', 'Vérifiez votre email'),
+          description: t(
+            'auth.signup.confirmEmailDescription',
+            'Un lien de confirmation a été envoyé à {{email}}. Cliquez dessus pour activer votre compte, puis connectez-vous.',
+            { email }
+          ),
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (data.user) {
         // Traiter le code de parrainage si présent
         const referralCode = getStoredReferralCode();
