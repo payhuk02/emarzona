@@ -168,6 +168,35 @@
   background: rgba(251, 191, 36, 0.12) !important;
 }
 
+.landing-premium.app-premium .app-premium-topnav .topnav-main-link {
+  max-height: 2.25rem;
+}
+
+.landing-premium.app-premium .app-premium-topnav .topnav-main-link.bg-primary {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* Sidebar contextuelle */
+.landing-premium.app-premium .app-context-sidebar {
+  background: linear-gradient(180deg, #323878 0%, #282870 45%, #1e1e4a 100%) !important;
+}
+
+.landing-premium.app-premium .app-context-sidebar input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+.landing-premium.app-premium .app-context-sidebar .overflow-x-auto,
+.landing-premium.app-premium .app-context-sidebar nav[aria-label='Breadcrumb'] {
+  scrollbar-width: none;
+}
+
+.landing-premium.app-premium .app-context-sidebar .overflow-x-auto::-webkit-scrollbar,
+.landing-premium.app-premium .app-context-sidebar nav[aria-label='Breadcrumb']::-webkit-scrollbar {
+  display: none;
+}
+
 /* Zone principale */
 .landing-premium.app-premium #main-content,
 .landing-premium.app-premium main.flex-1.overflow-auto,

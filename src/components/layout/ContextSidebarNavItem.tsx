@@ -79,14 +79,14 @@ export const ContextSidebarNavItem = ({
       to={path}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-2.5 sm:gap-3 px-2.5 sm:px-3 py-2.5 sm:py-3',
-        'rounded-lg text-xs sm:text-sm font-medium',
-        'transition-all duration-200 ease-in-out',
-        'min-h-[44px] touch-manipulation',
+        'flex items-center gap-2 sm:gap-2.5 px-2 sm:px-2.5 py-2',
+        'rounded-md text-xs sm:text-sm font-medium',
+        'transition-colors duration-200 ease-in-out',
+        'min-h-[40px] touch-manipulation',
         'group relative',
         isActive
-          ? 'bg-blue-600/40 text-white shadow-md shadow-blue-600/20 border-l-2 border-blue-300'
-          : 'text-blue-100 hover:bg-blue-600/40 hover:text-white hover:translate-x-1 hover:shadow-sm'
+          ? 'bg-blue-600/45 text-white shadow-sm border-l-2 border-blue-200 pl-[calc(0.5rem-2px)] sm:pl-[calc(0.625rem-2px)]'
+          : 'text-blue-100/90 hover:bg-white/10 hover:text-white'
       )}
     >
       <Icon
@@ -95,9 +95,12 @@ export const ContextSidebarNavItem = ({
           isActive ? 'text-white' : 'text-blue-100 group-hover:text-white'
         )}
       />
-      <span className="truncate flex-1">{label}</span>
+      <span className="truncate flex-1 min-w-0">{label}</span>
       {isActive && (
-        <div className="absolute right-2 h-2 w-2 rounded-full bg-blue-300 animate-pulse" />
+        <span
+          className="hidden sm:block h-1.5 w-1.5 shrink-0 rounded-full bg-blue-200"
+          aria-hidden="true"
+        />
       )}
     </NavLink>
   );

@@ -288,7 +288,7 @@ export const MainLayout = ({ children, layoutType, showTopNav = true }: MainLayo
             className={cn(
               'flex-1 overflow-auto bg-background transition-all duration-300',
               // Marge pour sidebar (AppSidebar OU ContextSidebar - 16rem = 256px = 64 en Tailwind)
-              hasFixedSidebar ? 'md:ml-56 lg:ml-64' : 'lg:ml-64',
+              hasFixedSidebar ? 'md:ml-[15rem] lg:ml-60 xl:ml-64' : 'lg:ml-64',
               // Marge en bas sur mobile pour la barre de navigation horizontale (64px = 16 en Tailwind)
               hasFixedSidebar ? 'pb-16 md:pb-0' : ''
             )}
@@ -302,9 +302,3 @@ export const MainLayout = ({ children, layoutType, showTopNav = true }: MainLayo
     </SidebarProvider>
   );
 };
-
-
-
-
-
-

@@ -22,7 +22,7 @@ export const Breadcrumb = ({ items, className }: BreadcrumbProps) => {
     <nav
       aria-label="Breadcrumb"
       className={cn(
-        'flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-300 pb-3 sm:pb-4 border-b border-blue-800/30 overflow-x-auto',
+        'flex items-center gap-1 sm:gap-1.5 text-xs text-slate-300 pb-2.5 sm:pb-3 border-b border-white/10 overflow-x-auto scrollbar-hide min-w-0',
         className
       )}
     >
@@ -41,7 +41,9 @@ export const Breadcrumb = ({ items, className }: BreadcrumbProps) => {
           <div key={index} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-400/60 flex-shrink-0" />
             {isLast ? (
-              <span className="text-blue-200 font-semibold whitespace-nowrap">{item.label}</span>
+              <span className="text-blue-100 font-semibold whitespace-nowrap truncate max-w-[9rem] md:max-w-[11rem] lg:max-w-none">
+                {item.label}
+              </span>
             ) : item.path ? (
               <Link
                 to={item.path}
@@ -58,9 +60,3 @@ export const Breadcrumb = ({ items, className }: BreadcrumbProps) => {
     </nav>
   );
 };
-
-
-
-
-
-

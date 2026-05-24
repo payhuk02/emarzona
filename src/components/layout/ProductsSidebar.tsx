@@ -102,7 +102,7 @@ export const ProductsSidebar = () => {
 
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
-      <nav className="space-y-4 md:space-y-6" aria-label="Navigation produits et cours">
+      <nav className="space-y-3 md:space-y-4" aria-label="Navigation produits et cours">
         {productsNavGroups.map((group, groupIndex) => (
           <div key={groupIndex} className="space-y-2">
             <button
@@ -114,7 +114,7 @@ export const ProductsSidebar = () => {
                     : [...prev, group.label]
                 )
               }
-              className="w-full flex items-center justify-between px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-blue-200/80 uppercase tracking-wider border-b border-blue-800/30"
+              className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] sm:text-xs font-semibold text-white/70 uppercase tracking-wider border-b border-white/10 hover:text-white transition-colors"
               aria-expanded={!collapsedGroups.includes(group.label)}
             >
               <span>{group.label}</span>

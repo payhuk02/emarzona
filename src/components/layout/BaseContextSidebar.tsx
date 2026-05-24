@@ -6,7 +6,7 @@
 import { ReactNode, isValidElement, Children, useMemo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, Search, Clock3, Pin } from 'lucide-react';
+import { Menu, Search, Clock3, Pin, ChevronDown } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
 import { cn } from '@/lib/utils';
@@ -80,6 +80,7 @@ export const BaseContextSidebar = ({
   const [navSearch, setNavSearch] = useState('');
   const [pinnedUrls, setPinnedUrls] = useState<string[]>([]);
   const [recentUrls, setRecentUrls] = useState<string[]>([]);
+  const [quickNavOpen, setQuickNavOpen] = useState(false);
 
   // Mémoriser les items de navigation pour éviter les re-renders inutiles
   const navItems = useMemo(() => {
@@ -158,10 +159,10 @@ export const BaseContextSidebar = ({
   const desktopSidebar = (
     <aside
       className={cn(
-        'app-context-sidebar hidden md:block fixed left-0 top-16 w-56 md:w-64 h-[calc(100vh-4rem)]',
+        'app-context-sidebar hidden md:block fixed left-0 top-16 w-[15rem] lg:w-60 xl:w-64 h-[calc(100vh-4rem)]',
         'border-r border-white/10',
         'text-white',
-        'overflow-y-auto z-40',
+        'overflow-y-auto overflow-x-hidden z-40',
         'transition-all duration-300 ease-in-out',
         'scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent',
         'shadow-[4px_0_12px_rgba(0,0,0,0.15)]',
@@ -170,32 +171,43 @@ export const BaseContextSidebar = ({
       )}
       aria-label="Navigation contextuelle"
     >
-      <div className="p-3 sm:p-4 md:p-5 space-y-4 md:space-y-5">
+      <div className="p-3 lg:p-4 space-y-3 lg:space-y-4 min-w-0">
         {/* Breadcrumb horizontal en haut */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Outils navigation (recherche + favoris/récents) */}
-        <div className="space-y-3 pb-3 border-b border-white/10">
-          <div>
+        <div className="space-y-2.5 pb-2 lg:pb-3 border-b border-white/10">
+          <button
+            type="button"
+            onClick={() => setQuickNavOpen(prev => !prev)}
+            className="lg:hidden w-full flex items-center justify-between py-1 text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
+            aria-expanded={quickNavOpen}
+          >
+            <span>Navigation rapide</span>
+            <ChevronDown
+              className={cn('h-3.5 w-3.5 transition-transform', quickNavOpen && 'rotate-180')}
+            />
+          </button>
+
+          <div className={cn('space-y-2.5', !quickNavOpen && 'hidden lg:block')}>
             <label
               htmlFor="context-sidebar-search"
-              className="text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
+              className="hidden lg:block text-[10px] uppercase tracking-[0.14em] text-white/75 font-bold"
             >
               Navigation rapide
             </label>
-            <div className="relative mt-1.5">
-              <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-blue-100/60" />
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none" />
               <Input
                 id="context-sidebar-search"
                 value={navSearch}
                 onChange={e => setNavSearch(e.target.value)}
-                placeholder="Rechercher une page..."
-                className="h-9 pl-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white/40"
+                placeholder="Rechercher..."
+                className="h-8 lg:h-9 pl-8 text-sm bg-white/10 border-white/15 text-white placeholder:text-white/50 focus-visible:ring-white/30"
                 aria-label="Rechercher dans la navigation contextuelle"
               />
             </div>
             {searchResults.length > 0 && (
-              <div className="mt-1.5 space-y-1 max-h-40 overflow-auto">
+              <div className="mt-1 space-y-1 max-h-36 overflow-auto scrollbar-hide">
                 {searchResults.map(item => (
                   <Button
                     key={`search-${item.path}`}
@@ -215,7 +227,12 @@ export const BaseContextSidebar = ({
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-2">
+          <div
+            className={cn(
+              'flex items-center justify-between gap-2',
+              !quickNavOpen && 'hidden lg:flex'
+            )}
+          >
             <Button
               variant="ghost"
               size="sm"
@@ -229,14 +246,14 @@ export const BaseContextSidebar = ({
                 : 'Épingler'}
             </Button>
             {currentNavItem && (
-              <span className="text-[11px] text-blue-100/70 truncate max-w-[130px]">
+              <span className="text-[11px] text-blue-100/70 truncate min-w-0 max-w-[7rem] lg:max-w-[9rem]">
                 {currentNavItem.label}
               </span>
             )}
           </div>
 
           {(pinnedItems.length > 0 || recentItems.length > 0) && (
-            <div className="space-y-2">
+            <div className={cn('space-y-2', !quickNavOpen && 'hidden lg:block')}>
               {pinnedItems.length > 0 && (
                 <div className="space-y-1">
                   <p className="text-[11px] uppercase tracking-wide text-blue-100/70 font-semibold">
