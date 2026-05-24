@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MainLayout } from '@/components/layout';
@@ -24,6 +25,7 @@ import { AlertCircle } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { useProductsOptimized } from '@/hooks/useProducts';
 import { useProductManagement } from '@/hooks/useProductManagement';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ProductListView from '@/components/products/ProductListView';
@@ -76,6 +78,7 @@ const PAGINATION_OPTIONS = [12, 24, 36, 48];
 const Products = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { store, loading: storeLoading } = useStore();
   const { deleteProduct, updateProduct, createProduct } = useProductManagement(store?.id || '');
   const { toast } = useToast();
@@ -444,6 +447,7 @@ const Products = () => {
           throw error;
         }
 
+        invalidateCatalogCaches(queryClient);
         await refetch();
         logger.info('Produit dupliqué avec succès', {
           originalId: productId,
@@ -475,7 +479,7 @@ const Products = () => {
         });
       }
     },
-    [products, toast, refetch]
+    [products, toast, refetch, queryClient]
   );
 
   // Import CSV avec validation et batch processing optimisé

@@ -203,12 +203,78 @@ export function cleanExpiredCache(): void {
             }
           }
         } catch {
-          // Ignorer les erreurs de parsing
+          localStorage.removeItem(key);
         }
       }
     }
   } catch (error) {
     logger.warn('Failed to clean cache', { error });
+  }
+
+  void cleanExpiredIndexedDBCache();
+}
+
+/**
+ * Supprime toutes les entrées marketplace (localStorage + IndexedDB).
+ * Utilisé après mutations catalogue et à la déconnexion.
+ */
+export async function clearAllMarketplaceCache(): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(CACHE_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (error) {
+    logger.warn('Failed to clear marketplace localStorage cache', { error });
+  }
+
+  try {
+    if (isIndexedDBAvailable()) {
+      const database = await openDB();
+      const transaction = database.transaction('cache', 'readwrite');
+      const store = transaction.objectStore('cache');
+      await new Promise<void>((resolve, reject) => {
+        const request = store.clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+  } catch (error) {
+    logger.warn('Failed to clear marketplace IndexedDB cache', { error });
+  }
+}
+
+async function cleanExpiredIndexedDBCache(): Promise<void> {
+  if (!isIndexedDBAvailable()) return;
+
+  try {
+    const database = await openDB();
+    const transaction = database.transaction('cache', 'readwrite');
+    const store = transaction.objectStore('cache');
+    const now = Date.now();
+
+    await new Promise<void>((resolve, reject) => {
+      const request = store.openCursor();
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) {
+          resolve();
+          return;
+        }
+        const row = cursor.value as { key: string; expiresAt?: number };
+        if (row.expiresAt != null && now >= row.expiresAt) {
+          cursor.delete();
+        }
+        cursor.continue();
+      };
+    });
+  } catch (error) {
+    logger.warn('Failed to clean expired IndexedDB marketplace cache', { error });
   }
 }
 

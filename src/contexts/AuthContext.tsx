@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { setSentryUser, clearSentryUser } from '@/lib/sentry';
 import { logger } from '@/lib/logger';
+import { clearSessionBrowserCaches } from '@/lib/session-cache';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -99,6 +102,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     clearSentryUser();
+    queryClient.clear();
+    await clearSessionBrowserCaches();
     await supabase.auth.signOut();
     navigate('/');
   };

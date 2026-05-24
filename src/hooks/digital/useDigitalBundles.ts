@@ -1,16 +1,18 @@
 /**
  * Digital Product Bundles Hooks
  * Date: 27 Janvier 2025
- * 
+ *
  * Hooks pour gérer les bundles de produits digitaux
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const DIGITAL_BUNDLE_FIELDS = 'id, store_id, product_id, name, description, short_description, slug, bundle_price, currency, promotional_price, discount_percentage, digital_product_ids, image_url, is_featured, display_order, is_active, is_draft, total_sales, total_revenue, total_downloads, metadata, created_at, updated_at';
+const DIGITAL_BUNDLE_FIELDS =
+  'id, store_id, product_id, name, description, short_description, slug, bundle_price, currency, promotional_price, discount_percentage, digital_product_ids, image_url, is_featured, display_order, is_active, is_draft, total_sales, total_revenue, total_downloads, metadata, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -80,10 +82,12 @@ export const useDigitalBundles = (storeId?: string) => {
   return useQuery({
     queryKey: ['digitalBundles', storeId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      let  query= supabase
+      let query = supabase
         .from('digital_product_bundles')
         .select(DIGITAL_BUNDLE_FIELDS)
         .eq('is_draft', false)
@@ -94,13 +98,13 @@ export const useDigitalBundles = (storeId?: string) => {
         query = query.eq('store_id', storeId);
       } else {
         // Récupérer tous les stores de l'utilisateur
-        const { data: stores } = await supabase
-          .from('stores')
-          .select('id')
-          .eq('user_id', user.id);
+        const { data: stores } = await supabase.from('stores').select('id').eq('user_id', user.id);
 
         if (stores && stores.length > 0) {
-          query = query.in('store_id', stores.map(s => s.id));
+          query = query.in(
+            'store_id',
+            stores.map(s => s.id)
+          );
         } else {
           return [];
         }
@@ -130,7 +134,8 @@ export const useDigitalBundle = (bundleId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('digital_product_bundles')
-        .select(`
+        .select(
+          `
           *,
           products:products!digital_product_bundles_product_id_fkey (
             id,
@@ -138,7 +143,8 @@ export const useDigitalBundle = (bundleId: string | undefined) => {
             price,
             image_url
           )
-        `)
+        `
+        )
         .eq('id', bundleId)
         .single();
 
@@ -173,7 +179,7 @@ export const useActiveBundles = (limit: number = 6, storeId?: string) => {
   return useQuery({
     queryKey: ['activeBundles', storeId, limit],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('digital_product_bundles')
         .select(DIGITAL_BUNDLE_FIELDS)
         .eq('is_active', true)
@@ -205,7 +211,7 @@ export const useFeaturedBundles = (storeId?: string, limit: number = 6) => {
   return useQuery({
     queryKey: ['featuredBundles', storeId, limit],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('digital_product_bundles')
         .select(DIGITAL_BUNDLE_FIELDS)
         .eq('is_active', true)
@@ -254,7 +260,8 @@ export const useBundleProducts = (bundleId: string | undefined) => {
       // Récupérer les produits avec leurs détails digitaux
       const { data: products, error: productsError } = await supabase
         .from('products')
-        .select(`
+        .select(
+          `
           id, name, slug, price, image_url, description, store_id, product_type, is_active, created_at, updated_at,
           digital_products!inner (
             id,
@@ -263,7 +270,8 @@ export const useBundleProducts = (bundleId: string | undefined) => {
             total_downloads,
             average_rating
           )
-        `)
+        `
+        )
         .in('id', bundle.digital_product_ids);
 
       if (productsError) {
@@ -290,7 +298,9 @@ export const useCreateBundle = () => {
 
   return useMutation({
     mutationFn: async (bundleData: CreateBundleData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Vérifier que le store appartient à l'utilisateur
@@ -363,6 +373,7 @@ export const useCreateBundle = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['digitalBundles'] });
       queryClient.invalidateQueries({ queryKey: ['featuredBundles'] });
+      invalidateCatalogCaches(queryClient);
       toast({
         title: '✅ Bundle créé',
         description: 'Le bundle a été créé avec succès',
@@ -388,7 +399,9 @@ export const useUpdateBundle = () => {
 
   return useMutation({
     mutationFn: async ({ bundleId, updates }: { bundleId: string; updates: UpdateBundleData }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Vérifier les permissions
@@ -422,15 +435,12 @@ export const useUpdateBundle = () => {
 
       // Mettre à jour le produit associé si nécessaire
       if (updates.name || updates.description || updates.bundle_price) {
-        const  updateProduct: { name?: string; description?: string; price?: number } = {};
+        const updateProduct: { name?: string; description?: string; price?: number } = {};
         if (updates.name) updateProduct.name = updates.name;
         if (updates.description) updateProduct.description = updates.description;
         if (updates.bundle_price) updateProduct.price = updates.bundle_price;
 
-        await supabase
-          .from('products')
-          .update(updateProduct)
-          .eq('id', updatedBundle.product_id);
+        await supabase.from('products').update(updateProduct).eq('id', updatedBundle.product_id);
       }
 
       return updatedBundle as DigitalProductBundle;
@@ -439,6 +449,7 @@ export const useUpdateBundle = () => {
       queryClient.invalidateQueries({ queryKey: ['digitalBundles'] });
       queryClient.invalidateQueries({ queryKey: ['digitalBundle', variables.bundleId] });
       queryClient.invalidateQueries({ queryKey: ['featuredBundles'] });
+      invalidateCatalogCaches(queryClient);
       toast({
         title: '✅ Bundle mis à jour',
         description: 'Le bundle a été mis à jour avec succès',
@@ -464,7 +475,9 @@ export const useDeleteBundle = () => {
 
   return useMutation({
     mutationFn: async (bundleId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Vérifier les permissions et récupérer le product_id
@@ -481,10 +494,7 @@ export const useDeleteBundle = () => {
       }
 
       // Supprimer le bundle (cascade supprimera aussi le produit associé si configuré)
-      const { error } = await supabase
-        .from('digital_product_bundles')
-        .delete()
-        .eq('id', bundleId);
+      const { error } = await supabase.from('digital_product_bundles').delete().eq('id', bundleId);
 
       if (error) {
         logger.error('Error deleting bundle', { error, bundleId });
@@ -497,6 +507,7 @@ export const useDeleteBundle = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['digitalBundles'] });
       queryClient.invalidateQueries({ queryKey: ['featuredBundles'] });
+      invalidateCatalogCaches(queryClient);
       toast({
         title: '✅ Bundle supprimé',
         description: 'Le bundle a été supprimé avec succès',
@@ -571,9 +582,3 @@ export const useCreateBundleOrder = () => {
     },
   });
 };
-
-
-
-
-
-

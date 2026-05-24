@@ -38,14 +38,14 @@ vi.mock('@/hooks/use-store', () => ({
 }));
 
 describe('useDashboardStats', () => {
-  let  queryClient: QueryClient;
+  let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
       },
     });
@@ -53,11 +53,7 @@ describe('useDashboardStats', () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   };
 
   it('returns initial state when no user/store', () => {
@@ -81,17 +77,13 @@ describe('useDashboardStats', () => {
   it('returns stats structure with default values', async () => {
     const { result } = renderHook(() => useDashboardStats(), { wrapper });
 
-    await waitFor(() => {
-      expect(result.current.stats).toBeDefined();
-      expect(result.current.stats.totalProducts).toBeDefined();
-      expect(result.current.stats.totalOrders).toBeDefined();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(result.current.stats).toBeDefined();
+        expect(result.current.stats.totalProducts).toBeDefined();
+        expect(result.current.stats.totalOrders).toBeDefined();
+      },
+      { timeout: 3000 }
+    );
   });
 });
-
-
-
-
-
-
-

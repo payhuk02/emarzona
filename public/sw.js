@@ -9,6 +9,8 @@ const CACHE_VERSION = '__EMARZONA_BUILD_ID__';
 const STATIC_CACHE_NAME = `emarzona-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `emarzona-dynamic-${CACHE_VERSION}`;
 const IMAGE_CACHE_NAME = `emarzona-images-${CACHE_VERSION}`;
+/** Limite d'entrées images pour éviter de saturer le quota Cache Storage */
+const IMAGE_CACHE_MAX_ENTRIES = 150;
 
 const STATIC_ASSETS = ['/', '/index.html', '/manifest.json'];
 
@@ -27,6 +29,41 @@ function networkFirst(request, cacheName, { cacheOk = true } = {}) {
       return response;
     })
     .catch(() => caches.match(request));
+}
+
+async function trimImageCache(cacheName, maxEntries) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length <= maxEntries) return;
+  const excess = keys.length - maxEntries;
+  for (let i = 0; i < excess; i++) {
+    await cache.delete(keys[i]);
+  }
+}
+
+function cacheImageResponse(cache, request, response) {
+  if (response.status !== 200) return;
+  const clone = response.clone();
+  cache.put(request, clone).then(() => trimImageCache(IMAGE_CACHE_NAME, IMAGE_CACHE_MAX_ENTRIES));
+}
+
+/** Stale-while-revalidate : affiche le cache, met à jour en arrière-plan. */
+function staleWhileRevalidate(request, cacheName) {
+  return caches.open(cacheName).then(cache =>
+    cache.match(request).then(cached => {
+      const networkUpdate = fetch(request)
+        .then(response => {
+          cacheImageResponse(cache, request, response);
+          return response;
+        })
+        .catch(() => undefined);
+      if (cached) {
+        void networkUpdate;
+        return cached;
+      }
+      return networkUpdate;
+    })
+  );
 }
 
 /** Network-only pour JS/CSS hashés — jamais servir un vieux chunk depuis le cache SW. */
@@ -118,25 +155,31 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Images : cache-first
+  // Images Supabase : stale-while-revalidate (affiche le cache, met à jour en arrière-plan)
+  if (url.pathname.includes('/storage/v1/object/public/')) {
+    event.respondWith(
+      staleWhileRevalidate(request, IMAGE_CACHE_NAME).catch(() =>
+        caches.match('/placeholder.svg')
+      )
+    );
+    return;
+  }
+
+  // Images statiques locales : cache-first
   if (
     url.pathname.startsWith('/images/') ||
     url.pathname.endsWith('.png') ||
     url.pathname.endsWith('.jpg') ||
     url.pathname.endsWith('.jpeg') ||
     url.pathname.endsWith('.webp') ||
-    url.pathname.endsWith('.svg') ||
-    url.pathname.includes('/storage/v1/object/public/')
+    url.pathname.endsWith('.svg')
   ) {
     event.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;
         return fetch(request)
           .then(response => {
-            if (response.status === 200) {
-              const clone = response.clone();
-              caches.open(IMAGE_CACHE_NAME).then(cache => cache.put(request, clone));
-            }
+            caches.open(IMAGE_CACHE_NAME).then(cache => cacheImageResponse(cache, request, response));
             return response;
           })
           .catch(() => caches.match('/placeholder.svg'));

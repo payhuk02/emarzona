@@ -56,12 +56,12 @@ vi.mock('@/lib/cache-invalidation', () => ({
 }));
 
 vi.mock('@/hooks/useMutationWithRetry', () => ({
-  useMutationWithRetry: vi.fn((config) => {
+  useMutationWithRetry: vi.fn(config => {
     const { mutationFn, onMutate, onError, onSuccess, onSettled } = config;
     const [isPending, setIsPending] = React.useState(false);
     const [error, setError] = React.useState<Error | null>(null);
 
-    const mutateAsync = async (...args: any[]) => {
+    const mutateAsync = async (...args: unknown[]) => {
       setIsPending(true);
       setError(null);
       try {
@@ -114,7 +114,7 @@ describe('useUpdateProductOptimistic', () => {
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
         mutations: {
           retry: false,
@@ -232,7 +232,7 @@ describe('useDeleteProductOptimistic', () => {
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
         mutations: {
           retry: false,

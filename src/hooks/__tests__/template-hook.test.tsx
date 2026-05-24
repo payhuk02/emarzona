@@ -1,9 +1,9 @@
 /**
  * TEMPLATE DE TEST POUR HOOKS
- * 
+ *
  * Ce fichier sert de template pour créer des tests pour les hooks personnalisés.
  * Copiez ce fichier et adaptez-le selon vos besoins.
- * 
+ *
  * Instructions:
  * 1. Remplacez "useExampleHook" par le nom de votre hook
  * 2. Adaptez les mocks selon les dépendances de votre hook
@@ -70,7 +70,7 @@ describe('useExampleHook', () => {
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
         mutations: {
           retry: false,
@@ -100,30 +100,30 @@ describe('useExampleHook', () => {
 
   it('should fetch data successfully', async () => {
     // const mockData = { id: '1', name: 'Test' };
-    // 
+    //
     // // Configurez vos mocks
-    // 
+    //
     // const { result } = renderHook(() => useExampleHook('1'), { wrapper });
-    // 
+    //
     // await waitFor(() => {
     //   expect(result.current.isLoading).toBe(false);
     // });
-    // 
+    //
     // expect(result.current.data).toEqual(mockData);
     // expect(result.current.error).toBeNull();
   });
 
   it('should handle errors correctly', async () => {
     // const mockError = new Error('Test error');
-    // 
+    //
     // // Configurez vos mocks pour retourner une erreur
-    // 
+    //
     // const { result } = renderHook(() => useExampleHook('1'), { wrapper });
-    // 
+    //
     // await waitFor(() => {
     //   expect(result.current.isError).toBe(true);
     // });
-    // 
+    //
     // expect(result.current.error).toBe(mockError);
   });
 

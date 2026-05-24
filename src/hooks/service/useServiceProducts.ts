@@ -1,18 +1,24 @@
 /**
  * Service Products Hooks
  * Date: 28 octobre 2025
- * 
+ *
  * React Query hooks for managing service products
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { supabase } from '@/integrations/supabase/client';
 
-const SERVICE_PRODUCT_FIELDS = 'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
-const SERVICE_PRODUCT_ITEM_FIELDS = 'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
-const SERVICE_AVAILABILITY_SLOT_FIELDS = 'id, service_product_id, day_of_week, start_time, end_time, is_available, max_bookings, created_at, updated_at';
-const SERVICE_STAFF_MEMBER_FIELDS = 'id, product_id, name, email, phone, role, specialties, is_available, created_at, updated_at';
-const SERVICE_RESOURCE_FIELDS = 'id, service_product_id, name, description, resource_type, quantity, is_active, created_at, updated_at';
+const SERVICE_PRODUCT_FIELDS =
+  'id, product_id, service_type, duration_minutes, location_type, location_address, meeting_url, timezone, requires_staff, max_participants, pricing_type, deposit_required, deposit_amount, deposit_type, allow_booking_cancellation, cancellation_deadline_hours, require_approval, buffer_time_before, buffer_time_after, max_bookings_per_day, advance_booking_days, total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating, created_at, updated_at';
+const SERVICE_PRODUCT_ITEM_FIELDS =
+  'id, store_id, name, description, price, status, product_type, image_url, created_at, updated_at';
+const SERVICE_AVAILABILITY_SLOT_FIELDS =
+  'id, service_product_id, day_of_week, start_time, end_time, is_available, max_bookings, created_at, updated_at';
+const SERVICE_STAFF_MEMBER_FIELDS =
+  'id, product_id, name, email, phone, role, specialties, is_available, created_at, updated_at';
+const SERVICE_RESOURCE_FIELDS =
+  'id, service_product_id, name, description, resource_type, quantity, is_active, created_at, updated_at';
 
 export interface ServiceProduct {
   id: string;
@@ -60,12 +66,14 @@ export const useServiceProducts = (storeId?: string) => {
   return useQuery({
     queryKey: ['service-products', storeId],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('service_products')
-        .select(`
+        .select(
+          `
           ${SERVICE_PRODUCT_FIELDS},
           product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (storeId) {
@@ -90,13 +98,15 @@ export const useServiceProduct = (productId?: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_products')
-        .select(`
+        .select(
+          `
           ${SERVICE_PRODUCT_FIELDS},
           product:products(${SERVICE_PRODUCT_ITEM_FIELDS}),
           availability_slots:service_availability_slots(${SERVICE_AVAILABILITY_SLOT_FIELDS}),
           staff:service_staff_members(${SERVICE_STAFF_MEMBER_FIELDS}),
           resources:service_resources(${SERVICE_RESOURCE_FIELDS})
-        `)
+        `
+        )
         .eq('product_id', productId!)
         .single();
 
@@ -126,6 +136,7 @@ export const useCreateServiceProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-products'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -151,6 +162,7 @@ export const useUpdateServiceProduct = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['service-products'] });
       queryClient.invalidateQueries({ queryKey: ['service-product', variables.id] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -163,15 +175,13 @@ export const useDeleteServiceProduct = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('service_products')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('service_products').delete().eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-products'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -185,7 +195,9 @@ export const useServiceStats = (serviceProductId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_products')
-        .select('total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating')
+        .select(
+          'total_bookings, total_completed_bookings, total_cancelled_bookings, total_revenue, average_rating'
+        )
         .eq('id', serviceProductId)
         .single();
 
@@ -205,10 +217,12 @@ export const usePopularServices = (storeId: string, limit = 5) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_products')
-        .select(`
+        .select(
+          `
           ${SERVICE_PRODUCT_FIELDS},
           product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
-        `)
+        `
+        )
         .eq('product.store_id', storeId)
         .order('total_bookings', { ascending: false })
         .limit(limit);
@@ -229,10 +243,12 @@ export const useTopRatedServices = (storeId: string, limit = 5) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_products')
-        .select(`
+        .select(
+          `
           ${SERVICE_PRODUCT_FIELDS},
           product:products(${SERVICE_PRODUCT_ITEM_FIELDS})
-        `)
+        `
+        )
         .eq('product.store_id', storeId)
         .gte('average_rating', 4.0)
         .order('average_rating', { ascending: false })
@@ -244,10 +260,3 @@ export const useTopRatedServices = (storeId: string, limit = 5) => {
     enabled: !!storeId,
   });
 };
-
-
-
-
-
-
-

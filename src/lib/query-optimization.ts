@@ -17,7 +17,9 @@ import { logger } from './logger';
  */
 export interface QueryOptimizationConfig {
   staleTime?: number;
+  /** @deprecated Utiliser gcTime (TanStack Query v5) */
   cacheTime?: number;
+  gcTime?: number;
   refetchOnWindowFocus?: boolean;
   refetchOnReconnect?: boolean;
   retry?: number;
@@ -31,25 +33,25 @@ export const cacheConfig = {
   // Données qui changent rarement - cache long
   static: {
     staleTime: 1000 * 60 * 60 * 24, // 24 heures
-    cacheTime: 1000 * 60 * 60 * 24 * 7, // 7 jours
+    gcTime: 1000 * 60 * 60 * 24 * 7, // 7 jours
   },
 
   // Données qui changent occasionnellement - cache moyen
   semiStatic: {
     staleTime: 1000 * 60 * 30, // 30 minutes
-    cacheTime: 1000 * 60 * 60 * 2, // 2 heures
+    gcTime: 1000 * 60 * 60 * 2, // 2 heures
   },
 
   // Données qui changent fréquemment - cache court
   dynamic: {
     staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 15, // 15 minutes
   },
 
   // Données en temps réel - pas de cache
   realtime: {
     staleTime: 0,
-    cacheTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
   },
 };
 
@@ -171,34 +173,8 @@ export function createPaginatedQueryKey(
   ];
 }
 
-/**
- * Nettoie le cache des données obsolètes
- */
-export function cleanupStaleCache(queryClient: QueryClient) {
-  const now = Date.now();
-  const cache = queryClient.getQueryCache();
-
-  const queries = cache.getAll();
-  let cleaned = 0;
-
-  queries.forEach(query => {
-    const cacheTime =
-      (query.options as { gcTime?: number }).gcTime ??
-      (query.meta as { cacheTime?: number })?.cacheTime ??
-      0;
-    const lastUpdated = query.state.dataUpdatedAt || 0;
-
-    // Si les données sont plus anciennes que le cacheTime, les supprimer
-    if (now - lastUpdated > cacheTime && cacheTime > 0) {
-      queryClient.removeQueries({ queryKey: query.queryKey });
-      cleaned++;
-    }
-  });
-
-  if (cleaned > 0) {
-    logger.info('Cache cleanup', { cleaned, total: queries.length });
-  }
-}
+/** @deprecated Utiliser `cleanupStaleQueryCache` depuis `@/lib/cache-optimization` */
+export { cleanupStaleQueryCache as cleanupStaleCache } from './cache-optimization';
 
 /** @deprecated Utiliser `createOptimizedQueryClient` depuis `@/lib/cache-optimization` */
 export { createOptimizedQueryClient } from './cache-optimization';

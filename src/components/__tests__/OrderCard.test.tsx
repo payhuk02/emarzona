@@ -33,12 +33,12 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 vi.mock('../orders/OrderDetailDialog', () => ({
-  OrderDetailDialog: ({ open, onOpenChange, order }: any) =>
+  OrderDetailDialog: ({ open, order }: { open: boolean; order: { order_number: string } }) =>
     open ? <div data-testid="order-detail-dialog">Order Detail: {order.order_number}</div> : null,
 }));
 
 vi.mock('../orders/OrderEditDialog', () => ({
-  OrderEditDialog: ({ open, onOpenChange, order }: any) =>
+  OrderEditDialog: ({ open, order }: { open: boolean; order: { order_number: string } }) =>
     open ? <div data-testid="order-edit-dialog">Edit Order: {order.order_number}</div> : null,
 }));
 
@@ -51,7 +51,7 @@ function createWrapper() {
     defaultOptions: {
       queries: {
         retry: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
       mutations: {
         retry: false,
@@ -90,10 +90,7 @@ describe('OrderCard', () => {
 
   it('should render order correctly', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     expect(screen.getByText('ORD-001')).toBeInTheDocument();
     expect(screen.getByText(/99.99/)).toBeInTheDocument();
@@ -101,30 +98,21 @@ describe('OrderCard', () => {
 
   it('should display order status', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     expect(screen.getByText(/pending/i)).toBeInTheDocument();
   });
 
   it('should display payment status', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     expect(screen.getByText(/pending/i)).toBeInTheDocument();
   });
 
   it('should handle status change', async () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const statusSelect = screen.getByRole('combobox', { name: /statut/i });
     fireEvent.click(statusSelect);
@@ -140,10 +128,7 @@ describe('OrderCard', () => {
 
   it('should handle payment status change', async () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const paymentStatusSelect = screen.getByRole('combobox', { name: /paiement/i });
     fireEvent.click(paymentStatusSelect);
@@ -159,10 +144,7 @@ describe('OrderCard', () => {
 
   it('should open detail dialog when view button is clicked', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const viewButton = screen.getByRole('button', { name: /voir|view/i });
     fireEvent.click(viewButton);
@@ -172,10 +154,7 @@ describe('OrderCard', () => {
 
   it('should open edit dialog when edit button is clicked', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const editButton = screen.getByRole('button', { name: /éditer|edit/i });
     fireEvent.click(editButton);
@@ -185,10 +164,7 @@ describe('OrderCard', () => {
 
   it('should open delete confirmation dialog', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const deleteButton = screen.getByRole('button', { name: /supprimer|delete/i });
     fireEvent.click(deleteButton);
@@ -198,10 +174,7 @@ describe('OrderCard', () => {
 
   it('should handle delete confirmation', async () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const deleteButton = screen.getByRole('button', { name: /supprimer|delete/i });
     fireEvent.click(deleteButton);
@@ -217,10 +190,7 @@ describe('OrderCard', () => {
 
   it('should display formatted date', () => {
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     // La date devrait être formatée
     expect(screen.getByText('ORD-001')).toBeInTheDocument();
@@ -233,10 +203,7 @@ describe('OrderCard', () => {
     });
 
     const wrapper = createWrapper();
-    render(
-      <OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />,
-      { wrapper }
-    );
+    render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     const statusSelect = screen.getByRole('combobox', { name: /statut/i });
     fireEvent.click(statusSelect);

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
@@ -136,7 +137,7 @@ export const useDigitalProducts = (
         }
 
         // Étape 1: Obtenir les product_ids pertinents
-        let  productIds: string[] = [];
+        let productIds: string[] = [];
 
         if (effectiveStoreId) {
           // Si storeId est fourni (explicitement ou via contexte), obtenir tous les products de ce store
@@ -209,7 +210,7 @@ export const useDigitalProducts = (
         const endIndex = startIndex + itemsPerPage - 1;
 
         // Construire la requête avec tri
-        let  query= supabase
+        let query = supabase
           .from('digital_products')
           .select(
             `
@@ -293,7 +294,7 @@ export const useDigitalProducts = (
           const mappedAltData = (altData || [])
             .map((item: DigitalProductWithJoin): MappedDigitalProduct | null => {
               const productData = item.products;
-              let  product: ProductFromJoin | null = null;
+              let product: ProductFromJoin | null = null;
 
               if (productData) {
                 if (Array.isArray(productData)) {
@@ -372,7 +373,7 @@ export const useDigitalProducts = (
           .map((item: DigitalProductWithJoin): MappedDigitalProduct | null => {
             // S'assurer que products n'est pas null
             const productData = item.products;
-            let  product= null;
+            let product = null;
 
             if (productData) {
               if (Array.isArray(productData)) {
@@ -433,7 +434,7 @@ export const useDigitalProducts = (
           itemsPerPage,
           totalPages: Math.ceil((totalCount || 0) / itemsPerPage),
         };
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         // Logger l'erreur avec contexte
         logger.error('Erreur dans useDigitalProducts', {
           error: error instanceof Error ? error.message : String(error),
@@ -470,7 +471,9 @@ export const useDigitalProduct = (productId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('digital_products')
-        .select('id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at')
+        .select(
+          'id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at'
+        )
         .eq('id', productId)
         .single();
 
@@ -514,6 +517,7 @@ export const useCreateDigitalProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['digitalProducts'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -548,6 +552,7 @@ export const useUpdateDigitalProduct = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['digitalProducts'] });
       queryClient.invalidateQueries({ queryKey: ['digitalProduct', variables.productId] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -566,6 +571,7 @@ export const useDeleteDigitalProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['digitalProducts'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -604,6 +610,7 @@ export const useBulkUpdateDigitalProducts = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['digitalProducts'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -667,6 +674,7 @@ export const useBulkDeleteDigitalProducts = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['digitalProducts'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -736,9 +744,11 @@ export const useDigitalProductsByCategory = (category: string | undefined) => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      let  query= supabase
+      let query = supabase
         .from('digital_products')
-        .select('id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at')
+        .select(
+          'id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at'
+        )
         .eq('user_id', user.id);
 
       if (category) {
@@ -766,9 +776,11 @@ export const useDigitalProductsByStatus = (status: DigitalProduct['status'] | un
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      let  query= supabase
+      let query = supabase
         .from('digital_products')
-        .select('id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at')
+        .select(
+          'id,product_id,user_id,category,status,protection_level,tags,max_licenses,current_licenses,total_downloads,revenue,created_at,updated_at'
+        )
         .eq('user_id', user.id);
 
       if (status) {
@@ -945,9 +957,9 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
       const productId = digitalProduct.product_id;
 
       // Étape 2: Méthode 1 - Vérification par customer_id (plus fiable)
-      let  hasAccessByCustomer= false;
-      let  purchaseCountByCustomer= 0;
-      let  paymentStatusByCustomer= 'unknown';
+      let hasAccessByCustomer = false;
+      let purchaseCountByCustomer = 0;
+      let paymentStatusByCustomer = 'unknown';
 
       // Récupérer le customer_id pour ce store
       const { data: stores } = await supabase
@@ -998,9 +1010,9 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
       }
 
       // Étape 3: Méthode 2 - Vérification par email (fallback)
-      let  hasAccessByEmail= false;
-      let  purchaseCountByEmail= 0;
-      let  paymentStatusByEmail= 'unknown';
+      let hasAccessByEmail = false;
+      let purchaseCountByEmail = 0;
+      let paymentStatusByEmail = 'unknown';
 
       if (!hasAccessByCustomer) {
         const { data: orderItemsByEmail, error: emailError } = await supabase
@@ -1036,8 +1048,8 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
       }
 
       // Étape 4: Méthode 3 - Vérification par user_id dans order_items metadata (si disponible)
-      let  hasAccessByUserId= false;
-      let  purchaseCountByUserId= 0;
+      let hasAccessByUserId = false;
+      let purchaseCountByUserId = 0;
 
       if (!hasAccessByCustomer && !hasAccessByEmail) {
         // Récupérer tous les order_items pour ce produit et filtrer côté client
@@ -1131,9 +1143,3 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
     retryDelay: 1000,
   });
 };
-
-
-
-
-
-

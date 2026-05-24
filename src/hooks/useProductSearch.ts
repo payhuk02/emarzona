@@ -98,7 +98,7 @@ export function useProductSearch(
     },
     enabled: enabled && searchQuery.trim().length > 0,
     staleTime: 30 * 1000, // 30 secondes
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -132,7 +132,7 @@ export function useSearchSuggestions(query: string, limit: number = 10, enabled:
     },
     enabled: enabled && query.trim().length >= 2,
     staleTime: 60 * 1000, // 1 minute
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -161,7 +161,7 @@ export function usePopularSearches(limit: number = 10, days: number = 30) {
       }
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 }
 
@@ -221,9 +221,3 @@ export function useSearchHistory(limit: number = 10) {
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
-
-
-
-
-
-

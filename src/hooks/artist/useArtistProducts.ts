@@ -1,29 +1,37 @@
 /**
  * Artist Products Hooks
  * Date: 28 Février 2025
- * 
+ *
  * React Query hooks for managing artist products (œuvres d'artistes)
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { supabase } from '@/integrations/supabase/client';
 import type { ArtistProduct } from '@/types/artist-product';
 import { logger } from '@/lib/logger';
 
-const ARTIST_PRODUCT_FIELDS = 'id, product_id, store_id, artist_type, artist_name, artist_bio, artist_website, artist_social_links, artwork_title, artwork_year, artwork_medium, artwork_dimensions, artwork_weight, artwork_style, artwork_subject, artwork_dominant_colors, artwork_techniques, artwork_materials, artwork_framed, artwork_signature, artwork_condition, artwork_certificate_of_authenticity, artwork_provenance, artwork_location, artwork_shipping_info, artwork_returns_policy, artwork_tags, artwork_meta_title, artwork_meta_description, artwork_slug, created_at, updated_at';
-const PRODUCT_CORE_FIELDS = 'id, name, slug, description, short_description, price, compare_at_price, currency, image_url, images, is_active, is_draft, created_at, updated_at';
+const ARTIST_PRODUCT_FIELDS =
+  'id, product_id, store_id, artist_type, artist_name, artist_bio, artist_website, artist_social_links, artwork_title, artwork_year, artwork_medium, artwork_dimensions, artwork_weight, artwork_style, artwork_subject, artwork_dominant_colors, artwork_techniques, artwork_materials, artwork_framed, artwork_signature, artwork_condition, artwork_certificate_of_authenticity, artwork_provenance, artwork_location, artwork_shipping_info, artwork_returns_policy, artwork_tags, artwork_meta_title, artwork_meta_description, artwork_slug, created_at, updated_at';
+const PRODUCT_CORE_FIELDS =
+  'id, name, slug, description, short_description, price, compare_at_price, currency, image_url, images, is_active, is_draft, created_at, updated_at';
 
 // ✅ SÉCURITÉ: Fonction de validation de propriété du produit artiste
-const validateArtistProductOwnership = async (productId: string, userId?: string): Promise<boolean> => {
+const validateArtistProductOwnership = async (
+  productId: string,
+  userId?: string
+): Promise<boolean> => {
   if (!userId) return false;
 
   try {
     const { data, error } = await supabase
       .from('products')
-      .select(`
+      .select(
+        `
         id,
         stores!inner(user_id)
-      `)
+      `
+      )
       .eq('id', productId)
       .eq('stores.user_id', userId)
       .single();
@@ -69,9 +77,10 @@ export const useArtistProducts = (storeId?: string) => {
     queryKey: ['artist-products', storeId],
     queryFn: async () => {
       try {
-        let  query= supabase
+        let query = supabase
           .from('artist_products')
-          .select(`
+          .select(
+            `
             *,
             product:products(
               id,
@@ -89,7 +98,8 @@ export const useArtistProducts = (storeId?: string) => {
               created_at,
               updated_at
             )
-          `)
+          `
+          )
           .order('created_at', { ascending: false });
 
         if (storeId) {
@@ -101,9 +111,7 @@ export const useArtistProducts = (storeId?: string) => {
         if (error) throw error;
 
         // Calculate sales stats from orders
-        const productIds = (data || [])
-          .map(ap => ap.product_id)
-          .filter((id): id is string => !!id);
+        const productIds = (data || []).map(ap => ap.product_id).filter((id): id is string => !!id);
 
         if (productIds.length > 0) {
           // Get order items for artist products
@@ -113,11 +121,11 @@ export const useArtistProducts = (storeId?: string) => {
             .select('id')
             .in('id', productIds)
             .eq('product_type', 'artist');
-          
+
           if (productsError) throw productsError;
-          
+
           const artistProductIds = (artistProducts || []).map(p => p.id);
-          
+
           if (artistProductIds.length > 0) {
             const { data: orderItems, error: orderItemsError } = await supabase
               .from('order_items')
@@ -134,7 +142,7 @@ export const useArtistProducts = (storeId?: string) => {
                 salesMap.set(item.product_id, existing);
               });
 
-              return (data || []).map((artistProduct) => {
+              return (data || []).map(artistProduct => {
                 const sales = salesMap.get(artistProduct.product_id) || { quantity: 0, revenue: 0 };
                 return {
                   ...artistProduct,
@@ -147,7 +155,7 @@ export const useArtistProducts = (storeId?: string) => {
         }
 
         // Fallback if no orders found
-        return (data || []).map((artistProduct) => ({
+        return (data || []).map(artistProduct => ({
           ...artistProduct,
           total_quantity_sold: 0,
           total_revenue: 0,
@@ -183,10 +191,14 @@ export const useArtistProduct = (productId?: string, userId?: string) => {
         // 🚀 PERFORMANCE: Requêtes parallèles optimisées
         const [
           { data: product, error: productError },
-          { data: artistProduct, error: artistError }
+          { data: artistProduct, error: artistError },
         ] = await Promise.all([
           supabase.from('products').select(PRODUCT_CORE_FIELDS).eq('id', productId).single(),
-          supabase.from('artist_products').select(ARTIST_PRODUCT_FIELDS).eq('product_id', productId).single()
+          supabase
+            .from('artist_products')
+            .select(ARTIST_PRODUCT_FIELDS)
+            .eq('product_id', productId)
+            .single(),
         ]);
 
         if (productError) throw productError;
@@ -219,10 +231,12 @@ export const useArtistProductById = (artistProductId?: string) => {
       try {
         const { data, error } = await supabase
           .from('artist_products')
-          .select(`
+          .select(
+            `
             *,
             product:products(${PRODUCT_CORE_FIELDS})
-          `)
+          `
+          )
           .eq('id', artistProductId)
           .single();
 
@@ -249,10 +263,12 @@ export const useCreateArtistProduct = () => {
         const { data: result, error } = await supabase
           .from('artist_products')
           .insert(data)
-          .select(`
+          .select(
+            `
             *,
             product:products(${PRODUCT_CORE_FIELDS})
-          `)
+          `
+          )
           .single();
 
         if (error) throw error;
@@ -264,6 +280,7 @@ export const useCreateArtistProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artist-products'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -275,22 +292,18 @@ export const useUpdateArtistProduct = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      data 
-    }: { 
-      id: string; 
-      data: Partial<ArtistProduct> 
-    }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ArtistProduct> }) => {
       try {
         const { data: result, error } = await supabase
           .from('artist_products')
           .update(data)
           .eq('id', id)
-          .select(`
+          .select(
+            `
             *,
             product:products(${PRODUCT_CORE_FIELDS})
-          `)
+          `
+          )
           .single();
 
         if (error) throw error;
@@ -304,6 +317,7 @@ export const useUpdateArtistProduct = () => {
       queryClient.invalidateQueries({ queryKey: ['artist-products'] });
       queryClient.invalidateQueries({ queryKey: ['artist-product'] });
       queryClient.invalidateQueries({ queryKey: ['artist-product-by-id', variables.id] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -317,10 +331,7 @@ export const useDeleteArtistProduct = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       try {
-        const { error } = await supabase
-          .from('artist_products')
-          .delete()
-          .eq('id', id);
+        const { error } = await supabase.from('artist_products').delete().eq('id', id);
 
         if (error) throw error;
       } catch (error) {
@@ -330,6 +341,7 @@ export const useDeleteArtistProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artist-products'] });
+      invalidateCatalogCaches(queryClient);
     },
   });
 };
@@ -337,20 +349,19 @@ export const useDeleteArtistProduct = () => {
 /**
  * Get artist products by artist type
  */
-export const useArtistProductsByType = (
-  storeId: string, 
-  artistType: string
-) => {
+export const useArtistProductsByType = (storeId: string, artistType: string) => {
   return useQuery({
     queryKey: ['artist-products', storeId, 'type', artistType],
     queryFn: async () => {
       try {
         const { data, error } = await supabase
           .from('artist_products')
-          .select(`
+          .select(
+            `
             *,
             product:products(${PRODUCT_CORE_FIELDS})
-          `)
+          `
+          )
           .eq('store_id', storeId)
           .eq('artist_type', artistType)
           .order('created_at', { ascending: false });
@@ -381,15 +392,15 @@ export const usePopularArtistProducts = (storeId: string, limit = 5) => {
           .eq('store_id', storeId)
           .eq('product_type', 'artist')
           .eq('is_active', true);
-        
+
         if (artistError) throw artistError;
-        
+
         const artistProductIds = (artistProducts || []).map(p => p.id);
-        
+
         if (artistProductIds.length === 0) {
           return [];
         }
-        
+
         // Get order items for these artist products
         const { data: orderItems, error: orderError } = await supabase
           .from('order_items')
@@ -410,10 +421,12 @@ export const usePopularArtistProducts = (storeId: string, limit = 5) => {
         // Get all artist products for the store
         const { data: artistProductsData, error: artistProductsError } = await supabase
           .from('artist_products')
-          .select(`
+          .select(
+            `
             *,
             product:products(${PRODUCT_CORE_FIELDS})
-          `)
+          `
+          )
           .eq('store_id', storeId)
           .in('product_id', artistProductIds);
 
@@ -437,10 +450,3 @@ export const usePopularArtistProducts = (storeId: string, limit = 5) => {
     enabled: !!storeId,
   });
 };
-
-
-
-
-
-
-

@@ -3,6 +3,7 @@ import {
   generateCacheKey,
   getCachedMarketplaceProductsSync,
   setCache,
+  clearAllMarketplaceCache,
   MARKETPLACE_CACHE_SOFT_STALE_MS,
 } from '@/lib/marketplace-cache';
 
@@ -39,5 +40,17 @@ describe('marketplace-cache SWR', () => {
     const stale = getCachedMarketplaceProductsSync(filters);
     expect(stale?.isSoftStale).toBe(true);
     expect(stale?.data.products).toHaveLength(1);
+  });
+
+  it('clearAllMarketplaceCache supprime les entrées marketplace', async () => {
+    const filters = { page: 1, itemsPerPage: 12 };
+    await setCache(
+      generateCacheKey('products', filters),
+      { products: [], totalCount: 0 },
+      10 * 60 * 1000
+    );
+    expect(getCachedMarketplaceProductsSync(filters)).not.toBeNull();
+    await clearAllMarketplaceCache();
+    expect(getCachedMarketplaceProductsSync(filters)).toBeNull();
   });
 });

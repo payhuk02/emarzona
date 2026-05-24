@@ -55,7 +55,7 @@ describe('useCreateServiceOrder', () => {
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
         mutations: {
           retry: false,
@@ -92,11 +92,11 @@ describe('useCreateServiceOrder', () => {
     //   scheduledStartTime: '10:00:00',
     //   scheduledEndTime: '11:00:00',
     // };
-    // 
+    //
     // const { result } = renderHook(() => useCreateServiceOrder(), { wrapper });
-    // 
+    //
     // await result.current.mutateAsync(mockOrderData);
-    // 
+    //
     // await waitFor(() => {
     //   expect(result.current.isSuccess).toBe(true);
     // });

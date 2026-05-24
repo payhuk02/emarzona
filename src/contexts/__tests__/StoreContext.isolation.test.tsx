@@ -1,6 +1,6 @@
 /**
  * Tests d'isolation pour StoreContext
- * 
+ *
  * Objectif : Valider que le StoreContext gère correctement
  * la sélection et l'isolation des boutiques
  */
@@ -45,16 +45,16 @@ vi.mock('../AuthContext', () => ({
 }));
 
 describe('StoreContext Isolation', () => {
-  let  queryClient: QueryClient;
-  let  mockQuery: ReturnType<typeof vi.fn>;
-  let  localStorageMock: Storage;
+  let queryClient: QueryClient;
+  let mockQuery: ReturnType<typeof vi.fn>;
+  let localStorageMock: Storage;
 
   beforeEach(() => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
       },
     });
@@ -319,10 +319,3 @@ describe('StoreContext Isolation', () => {
     });
   });
 });
-
-
-
-
-
-
-

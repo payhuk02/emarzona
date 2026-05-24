@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sendNewVersionNotification } from '@/utils/digitalNotifications';
@@ -203,6 +204,7 @@ export function useCreateVersion() {
     onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: versionKeys.byProduct(data.product_id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byStore(data.store_id) });
+      invalidateCatalogCaches(queryClient);
 
       toast({
         title: '✅ Version créée !',
@@ -249,6 +251,7 @@ export function useUpdateVersion() {
       queryClient.invalidateQueries({ queryKey: versionKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byProduct(data.product_id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byStore(data.store_id) });
+      invalidateCatalogCaches(queryClient);
 
       toast({
         title: '✅ Version mise à jour !',
@@ -281,6 +284,7 @@ export function useDeleteVersion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: versionKeys.all });
+      invalidateCatalogCaches(queryClient);
 
       toast({
         title: '✅ Version supprimée !',
@@ -314,6 +318,7 @@ export function useIncrementVersionDownload() {
     },
     onSuccess: (_, versionId) => {
       queryClient.invalidateQueries({ queryKey: versionKeys.detail(versionId) });
+      invalidateCatalogCaches(queryClient);
     },
   });
 }
@@ -428,6 +433,7 @@ export function useNotifyCustomers() {
     onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: versionKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: versionKeys.byProduct(data.product_id) });
+      invalidateCatalogCaches(queryClient);
 
       toast({
         title: '📧 Notifications envoyées !',

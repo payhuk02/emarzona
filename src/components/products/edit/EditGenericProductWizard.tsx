@@ -11,6 +11,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -47,7 +49,8 @@ import { generateSlug } from '@/lib/store-utils';
 import { uploadToSupabaseStorage } from '@/utils/uploadToSupabase';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const PRODUCT_FIELDS = 'id, name, slug, description, short_description, price, currency, image_url, category, is_active, meta_title, meta_description, og_image, faqs, payment_options';
+const PRODUCT_FIELDS =
+  'id, name, slug, description, short_description, price, currency, image_url, category, is_active, meta_title, meta_description, og_image, faqs, payment_options';
 
 const STEPS = [
   {
@@ -454,6 +457,7 @@ export const EditGenericProductWizard = ({
 }: EditGenericProductWizardProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { store } = useStore();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -502,7 +506,7 @@ export const EditGenericProductWizard = ({
   const handleNext = useCallback(() => {
     // Validate current step
     if (currentStep === 1) {
-      const  errors: string[] = [];
+      const errors: string[] = [];
       if (!formData.name?.trim()) errors.push('Le nom est requis');
       if (!formData.slug?.trim()) errors.push('Le slug est requis');
       if (!formData.price || formData.price < 0) errors.push('Le prix doit être positif');
@@ -530,7 +534,7 @@ export const EditGenericProductWizard = ({
     setSaving(true);
     try {
       // Prepare update data
-      const  updateData: {
+      const updateData: {
         name?: string;
         slug?: string;
         description?: string;
@@ -568,6 +572,9 @@ export const EditGenericProductWizard = ({
 
       if (error) throw error;
 
+      invalidateCatalogCaches(queryClient);
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
+
       logger.info('Produit générique mis à jour', { productId });
       toast({
         title: 'Succès',
@@ -589,7 +596,7 @@ export const EditGenericProductWizard = ({
     } finally {
       setSaving(false);
     }
-  }, [formData, productId, toast, onSuccess, navigate]);
+  }, [formData, productId, toast, onSuccess, navigate, queryClient]);
 
   const CurrentStep = STEPS[currentStep - 1];
   const progress = useMemo(() => (currentStep / STEPS.length) * 100, [currentStep]);
@@ -802,9 +809,3 @@ export const EditGenericProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

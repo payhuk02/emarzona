@@ -55,7 +55,7 @@ describe('useProfile', () => {
       defaultOptions: {
         queries: {
           retry: false,
-          cacheTime: 0,
+          gcTime: 0,
         },
         mutations: {
           retry: false,
@@ -79,22 +79,22 @@ describe('useProfile', () => {
 
   it('should fetch profile successfully', async () => {
     // const { result } = renderHook(() => useProfile(), { wrapper });
-    // 
+    //
     // await waitFor(() => {
     //   expect(result.current.isLoading).toBe(false);
     // });
-    // 
+    //
     // expect(result.current.data).toBeDefined();
     // expect(result.current.data?.email).toBe('test@example.com');
   });
 
   it('should handle errors correctly', async () => {
     // const mockError = new Error('Profile not found');
-    // 
+    //
     // // Configurez vos mocks pour retourner une erreur
-    // 
+    //
     // const { result } = renderHook(() => useProfile(), { wrapper });
-    // 
+    //
     // await waitFor(() => {
     //   expect(result.current.isError).toBe(true);
     // });

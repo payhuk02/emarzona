@@ -1,9 +1,9 @@
 /**
  * TEMPLATE DE TEST POUR COMPOSANTS
- * 
+ *
  * Ce fichier sert de template pour créer des tests pour les composants React.
  * Copiez ce fichier et adaptez-le selon vos besoins.
- * 
+ *
  * Instructions:
  * 1. Remplacez "ExampleComponent" par le nom de votre composant
  * 2. Adaptez les mocks selon les dépendances de votre composant
@@ -60,7 +60,7 @@ function createWrapper() {
     defaultOptions: {
       queries: {
         retry: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
       mutations: {
         retry: false,
@@ -93,14 +93,14 @@ describe('ExampleComponent', () => {
   it('should render correctly', () => {
     // const wrapper = createWrapper();
     // render(<ExampleComponent />, { wrapper });
-    // 
+    //
     // expect(screen.getByText('Example')).toBeInTheDocument();
   });
 
   it('should render with props', () => {
     // const wrapper = createWrapper();
     // render(<ExampleComponent title="Test Title" />, { wrapper });
-    // 
+    //
     // expect(screen.getByText('Test Title')).toBeInTheDocument();
   });
 
@@ -111,10 +111,10 @@ describe('ExampleComponent', () => {
   it('should handle user interactions', async () => {
     // const wrapper = createWrapper();
     // render(<ExampleComponent />, { wrapper });
-    // 
+    //
     // const button = screen.getByRole('button', { name: /click/i });
     // fireEvent.click(button);
-    // 
+    //
     // await waitFor(() => {
     //   expect(screen.getByText('Clicked')).toBeInTheDocument();
     // });
@@ -135,7 +135,7 @@ describe('ExampleComponent', () => {
   it('should have proper ARIA labels', () => {
     // const wrapper = createWrapper();
     // render(<ExampleComponent />, { wrapper });
-    // 
+    //
     // const button = screen.getByRole('button');
     // expect(button).toHaveAttribute('aria-label');
   });

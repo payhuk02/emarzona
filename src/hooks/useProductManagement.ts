@@ -1,14 +1,17 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { generateSlug } from '@/lib/store-utils';
 import { withRateLimit } from '@/lib/rate-limiter';
 import { useAuth } from '@/contexts/AuthContext';
+import { invalidateCatalogCaches } from '@/lib/cache-invalidation';
 
 export const useProductManagement = (storeId: string) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const checkSlugAvailability = async (
     slug: string,
@@ -77,6 +80,9 @@ export const useProductManagement = (storeId: string) => {
 
           if (error) throw error;
 
+          invalidateCatalogCaches(queryClient);
+          queryClient.invalidateQueries({ queryKey: ['products', storeId] });
+
           toast({
             title: 'Succès',
             description: 'Produit créé avec succès',
@@ -136,6 +142,10 @@ export const useProductManagement = (storeId: string) => {
 
       if (error) throw error;
 
+      invalidateCatalogCaches(queryClient);
+      queryClient.invalidateQueries({ queryKey: ['products', storeId] });
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
+
       toast({
         title: 'Succès',
         description: 'Produit mis à jour',
@@ -160,6 +170,10 @@ export const useProductManagement = (storeId: string) => {
       const { error } = await supabase.from('products').delete().eq('id', productId);
 
       if (error) throw error;
+
+      invalidateCatalogCaches(queryClient);
+      queryClient.invalidateQueries({ queryKey: ['products', storeId] });
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
 
       toast({
         title: 'Succès',
