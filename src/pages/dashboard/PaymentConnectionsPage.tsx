@@ -3,8 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { MainLayout } from '@/components/layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -123,85 +122,84 @@ export default function PaymentConnectionsPage() {
 
   if (storeLoading || !store) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <MainLayout layoutType="finance">
+        <div className="container mx-auto flex min-h-[40vh] items-center justify-center p-4 md:p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden p-4 md:p-8 max-w-4xl">
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold">Connexions paiement</h1>
-            <p className="text-muted-foreground mt-1">
-              Connectez vos comptes pour encaisser dans le monde entier. Moneroo reste disponible
-              pour l&apos;Afrique (XOF).
+    <MainLayout layoutType="finance">
+      <div className="container mx-auto overflow-x-hidden p-4 md:p-8 max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold">Connexions paiement</h1>
+          <p className="text-muted-foreground mt-1">
+            Connectez vos comptes pour encaisser dans le monde entier. Moneroo reste disponible pour
+            l&apos;Afrique (XOF).
+          </p>
+          {!orchestrationEnabled && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+              Orchestration V2 désactivée en environnement — activez{' '}
+              <code className="text-xs">VITE_PAYMENT_ORCHESTRATION_V2=true</code> pour le checkout
+              Stripe.
             </p>
-            {!orchestrationEnabled && (
-              <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
-                Orchestration V2 désactivée en environnement — activez{' '}
-                <code className="text-xs">VITE_PAYMENT_ORCHESTRATION_V2=true</code> pour le checkout
-                Stripe.
-              </p>
-            )}
-          </div>
-
-          {isLoading ? (
-            <Skeleton className="h-48 w-full" />
-          ) : (
-            <div className="space-y-6">
-              <StripeConnectCard
-                connection={stripeConnection}
-                isConnecting={connectStripe.isPending}
-                isSyncing={syncStripe.isPending}
-                onConnect={handleConnectStripe}
-                onSync={() => syncStripe.mutate()}
-              />
-
-              <PayPalConnectCard
-                connection={paypalConnection}
-                isConnecting={connectPayPal.isPending}
-                isSyncing={syncPayPal.isPending}
-                onConnect={handleConnectPayPal}
-                onSync={() => syncPayPal.mutate()}
-              />
-
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <Wallet className="h-5 w-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-lg">Moneroo (plateforme Emarzona)</CardTitle>
-                      <CardDescription>
-                        Mobile money et paiements locaux — toujours actif pour votre boutique.
-                      </CardDescription>
-                    </div>
-                    <Badge className="ml-auto">Inclus</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Statut :{' '}
-                    {monerooConnection?.external_account_status === 'active'
-                      ? 'Actif'
-                      : 'Configuration plateforme'}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
           )}
+        </div>
 
-          <button
-            type="button"
-            className="sr-only"
-            onClick={() => refetch()}
-            aria-label="Rafraîchir"
-          />
-        </main>
+        {isLoading ? (
+          <Skeleton className="h-48 w-full" />
+        ) : (
+          <div className="space-y-6">
+            <StripeConnectCard
+              connection={stripeConnection}
+              isConnecting={connectStripe.isPending}
+              isSyncing={syncStripe.isPending}
+              onConnect={handleConnectStripe}
+              onSync={() => syncStripe.mutate()}
+            />
+
+            <PayPalConnectCard
+              connection={paypalConnection}
+              isConnecting={connectPayPal.isPending}
+              isSyncing={syncPayPal.isPending}
+              onConnect={handleConnectPayPal}
+              onSync={() => syncPayPal.mutate()}
+            />
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Wallet className="h-5 w-5 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg">Moneroo (plateforme Emarzona)</CardTitle>
+                    <CardDescription>
+                      Mobile money et paiements locaux — toujours actif pour votre boutique.
+                    </CardDescription>
+                  </div>
+                  <Badge className="ml-auto">Inclus</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Statut :{' '}
+                  {monerooConnection?.external_account_status === 'active'
+                    ? 'Actif'
+                    : 'Configuration plateforme'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="sr-only"
+          onClick={() => refetch()}
+          aria-label="Rafraîchir"
+        />
       </div>
-    </SidebarProvider>
+    </MainLayout>
   );
 }

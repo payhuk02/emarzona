@@ -137,7 +137,8 @@ const detectLayoutType = (pathname: string): LayoutType => {
     pathname.includes('/pay-balance') ||
     pathname.includes('/payment-management') ||
     pathname.includes('/withdrawals') ||
-    pathname.includes('/payment-methods')
+    pathname.includes('/payment-methods') ||
+    pathname.includes('/payment-connections')
   )
     return 'finance';
   if (

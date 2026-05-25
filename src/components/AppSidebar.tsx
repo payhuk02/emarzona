@@ -54,6 +54,7 @@ import {
   AlertTriangle,
   Phone,
   Wallet,
+  Link2,
   Scale,
   Headphones,
   Workflow,
@@ -371,12 +372,12 @@ const menuSections = [
       {
         title: 'Méthodes de paiement',
         url: '/dashboard/payment-methods',
-        icon: CreditCard,
+        icon: Wallet,
       },
       {
         title: 'Connexions paiement',
         url: '/dashboard/payment-connections',
-        icon: CreditCard,
+        icon: Link2,
       },
       {
         title: 'Commandes Avancées',
@@ -587,6 +588,16 @@ const menuSections = [
         title: 'Gestion Paiements',
         url: '/dashboard/payment-management',
         icon: FileText,
+      },
+      {
+        title: 'Méthodes de paiement',
+        url: '/dashboard/payment-methods',
+        icon: Wallet,
+      },
+      {
+        title: 'Connexions paiement',
+        url: '/dashboard/payment-connections',
+        icon: Link2,
       },
     ],
   },

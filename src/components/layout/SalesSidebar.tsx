@@ -13,7 +13,8 @@ import {
   Users,
   GanttChart,
   DollarSign,
-  CreditCard,
+  Wallet,
+  Link2,
   MessageSquare,
   Calendar,
   Truck,
@@ -57,12 +58,12 @@ const salesNavItems = [
   {
     label: 'Méthodes de paiement',
     path: '/dashboard/payment-methods',
-    icon: CreditCard,
+    icon: Wallet,
   },
   {
     label: 'Connexions paiement',
     path: '/dashboard/payment-connections',
-    icon: Globe,
+    icon: Link2,
   },
   {
     label: 'Commandes Avancées',

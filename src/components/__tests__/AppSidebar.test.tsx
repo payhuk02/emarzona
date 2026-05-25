@@ -1,7 +1,7 @@
 /**
  * Tests unitaires pour AppSidebar
  * Composant critique pour la navigation
- * 
+ *
  * Couverture :
  * - Affichage du logo
  * - Affichage des sections de menu
@@ -16,16 +16,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppSidebar } from '../AppSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import * as StoreContext from '@/contexts/StoreContext';
 import * as AuthContext from '@/contexts/AuthContext';
 import * as AdminHook from '@/hooks/useAdmin';
 
+vi.mock('@/contexts/StoreContext', () => ({
+  useStoreContext: vi.fn(),
+}));
+
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock('@/hooks/useAdmin', () => ({
+  useAdmin: vi.fn(),
+}));
+
 // Mock des dépendances
 vi.mock('@/hooks/usePlatformLogo', () => ({
-  usePlatformLogo: vi.fn(() => ({
-    platformLogo: null,
-    loading: false,
-  })),
+  usePlatformLogo: vi.fn(() => '/emarzona-logo.png'),
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
@@ -42,12 +52,14 @@ vi.mock('@/integrations/supabase/client', () => ({
   },
 }));
 
+const mockLocation = { pathname: '/dashboard' };
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
     useNavigate: () => vi.fn(),
-    useLocation: () => ({ pathname: '/dashboard' }),
+    useLocation: () => mockLocation,
   };
 });
 
@@ -62,10 +74,20 @@ const mockUser = {
   role: 'vendor',
 };
 
+const renderAppSidebar = () =>
+  render(
+    <BrowserRouter>
+      <SidebarProvider>
+        <AppSidebar />
+      </SidebarProvider>
+    </BrowserRouter>
+  );
+
 describe('AppSidebar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+    mockLocation.pathname = '/dashboard';
+
     // Mock StoreContext
     vi.mocked(StoreContext.useStoreContext).mockReturnValue({
       stores: mockStores,
@@ -89,11 +111,7 @@ describe('AppSidebar', () => {
   });
 
   it('should render the sidebar with logo', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
     // Vérifier que le logo ou le placeholder est présent
     const logoElement = screen.getByText('Emarzona') || screen.getByLabelText(/logo/i);
@@ -101,113 +119,72 @@ describe('AppSidebar', () => {
   });
 
   it('should display menu sections', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
     // Vérifier que les sections principales sont présentes
     expect(screen.getByText('Principal')).toBeInTheDocument();
   });
 
   it('should display dashboard link', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
-    const dashboardLink = screen.getByRole('link', { name: /tableau de bord/i });
-    expect(dashboardLink).toBeInTheDocument();
+    const dashboardLink = screen.getAllByRole('link', { name: /tableau de bord/i })[0];
     expect(dashboardLink).toHaveAttribute('href', '/dashboard');
   });
 
   it('should display products link', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
-    const productsLink = screen.getByRole('link', { name: /produits/i });
-    expect(productsLink).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /^produits$/i }).length).toBeGreaterThan(0);
   });
 
   it('should display orders link', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
-    const ordersLink = screen.getByRole('link', { name: /commandes/i });
-    expect(ordersLink).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /commandes/i }).length).toBeGreaterThan(0);
   });
 
   it('should display logout button', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
     const logoutButton = screen.getByRole('button', { name: /déconnexion/i });
     expect(logoutButton).toBeInTheDocument();
   });
 
-  it('should display store selection when user has multiple stores', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+  it('should display store selection when user has multiple stores', async () => {
+    renderAppSidebar();
 
-    // Vérifier que les boutiques sont affichées dans le sous-menu
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText('Boutique 1')).toBeInTheDocument();
       expect(screen.getByText('Boutique 2')).toBeInTheDocument();
     });
   });
 
   it('should not display admin menu items for non-admin users', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
     // Les éléments admin ne devraient pas être visibles
     expect(screen.queryByText(/administration/i)).not.toBeInTheDocument();
   });
 
-  it('should display admin menu items for admin users', () => {
+  it('should display admin menu items for admin users', async () => {
+    mockLocation.pathname = '/admin/dashboard';
     vi.mocked(AdminHook.useAdmin).mockReturnValue({
       isAdmin: true,
       loading: false,
     } as ReturnType<typeof AdminHook.useAdmin>);
 
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
-    // Vérifier que les éléments admin sont visibles
-    waitFor(() => {
+    await waitFor(() => {
       expect(screen.getByText(/administration/i)).toBeInTheDocument();
     });
   });
 
   it('should display language switcher in footer', () => {
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
-    const languageButton = screen.getByRole('button', { name: /change language/i });
-    expect(languageButton).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Langue :/i)).toBeInTheDocument();
   });
 
   it('should handle store switching', async () => {
@@ -220,23 +197,10 @@ describe('AppSidebar', () => {
       canCreateStore: () => true,
     } as ReturnType<typeof StoreContext.useStoreContext>);
 
-    render(
-      <BrowserRouter>
-        <AppSidebar />
-      </BrowserRouter>
-    );
+    renderAppSidebar();
 
-    // Simuler le clic sur une boutique
-    waitFor(() => {
-      const boutique2Button = screen.getByText('Boutique 2');
-      expect(boutique2Button).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Boutique 2')).toBeInTheDocument();
     });
   });
 });
-
-
-
-
-
-
-

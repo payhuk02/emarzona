@@ -4,14 +4,10 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
-import {
-  CreditCard,
-  DollarSign,
-  FileText,
-} from 'lucide-react';
+import { CreditCard, DollarSign, FileText, Wallet, Link2 } from 'lucide-react';
 
 const financeNavItems = [
   {
@@ -29,6 +25,16 @@ const financeNavItems = [
     path: '/dashboard/payment-management',
     icon: FileText,
   },
+  {
+    label: 'Méthodes de paiement',
+    path: '/dashboard/payment-methods',
+    icon: Wallet,
+  },
+  {
+    label: 'Connexions paiement',
+    path: '/dashboard/payment-connections',
+    icon: Link2,
+  },
 ];
 
 export const FinanceSidebar = () => {
@@ -36,16 +42,14 @@ export const FinanceSidebar = () => {
 
   const getActiveSection = () => {
     const activeItem = financeNavItems.find(
-      (item) =>
-        location.pathname === item.path ||
-        location.pathname.startsWith(item.path)
+      item => location.pathname === item.path || location.pathname.startsWith(item.path)
     );
     return activeItem?.label || 'Finance & Paiements';
   };
 
   const activeSection = getActiveSection();
 
-  const  breadcrumbItems: BreadcrumbItem[] = [
+  const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Finance & Paiements', path: '/dashboard/payments' },
     { label: activeSection },
   ];
@@ -53,10 +57,9 @@ export const FinanceSidebar = () => {
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
       <nav className="space-y-1" aria-label="Navigation finance">
-        {financeNavItems.map((item) => {
+        {financeNavItems.map(item => {
           const isActive =
-            location.pathname === item.path ||
-            location.pathname.startsWith(item.path);
+            location.pathname === item.path || location.pathname.startsWith(item.path);
 
           return (
             <ContextSidebarNavItem
@@ -80,10 +83,3 @@ export const FinanceSidebar = () => {
     </BaseContextSidebar>
   );
 };
-
-
-
-
-
-
-
