@@ -14,22 +14,13 @@ import {
 } from '@/components/ui/dialog';
 import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { MobileFormField } from '@/components/ui/mobile-form-field';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Info } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SegmentCriteriaBuilder, type SegmentCriteria } from './SegmentCriteriaBuilder';
 import { useCreateEmailSegment, useUpdateEmailSegment } from '@/hooks/email/useEmailSegments';
 import { useResponsiveModal } from '@/hooks/use-responsive-modal';
-import type { 
-  EmailSegment, 
-  CreateSegmentPayload, 
+import type {
+  EmailSegment,
+  CreateSegmentPayload,
   SegmentType,
 } from '@/lib/email/email-segment-service';
 import { Loader2 } from 'lucide-react';
@@ -53,7 +44,7 @@ export const EmailSegmentBuilder = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<SegmentType>('dynamic');
-  const [criteria, setCriteria] = useState<Record<string, any>>({});
+  const [criteria, setCriteria] = useState<SegmentCriteria>({});
 
   const createSegment = useCreateEmailSegment();
   const updateSegment = useUpdateEmailSegment();
@@ -78,7 +69,7 @@ export const EmailSegmentBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const  payload: CreateSegmentPayload = {
+    const payload: CreateSegmentPayload = {
       store_id: storeId,
       name,
       description,
@@ -97,7 +88,7 @@ export const EmailSegmentBuilder = ({
       }
       onSuccess?.();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // Error handling is done in the hooks
     }
   };
@@ -115,7 +106,7 @@ export const EmailSegmentBuilder = ({
           onChange={setName}
           required
           fieldProps={{
-            placeholder: "Clients VIP",
+            placeholder: 'Clients VIP',
           }}
         />
 
@@ -126,7 +117,7 @@ export const EmailSegmentBuilder = ({
           value={description}
           onChange={setDescription}
           fieldProps={{
-            placeholder: "Description du segment...",
+            placeholder: 'Description du segment...',
             rows: 3,
           }}
         />
@@ -136,11 +127,11 @@ export const EmailSegmentBuilder = ({
           name="type"
           type="select"
           value={type}
-          onChange={(value) => setType(value as SegmentType)}
+          onChange={value => setType(value as SegmentType)}
           required
           description={
             type === 'static'
-              ? 'Un segment statique contient une liste manuelle d\'utilisateurs'
+              ? "Un segment statique contient une liste manuelle d'utilisateurs"
               : 'Un segment dynamique est calculé automatiquement selon des critères'
           }
           selectOptions={[
@@ -150,53 +141,40 @@ export const EmailSegmentBuilder = ({
         />
       </div>
 
-          {/* Configuration des critères */}
-          {type === 'dynamic' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Critères de segmentation</CardTitle>
-                <CardDescription>
-                  Définissez les critères pour calculer automatiquement les membres du segment
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    La configuration avancée des critères sera disponible dans une prochaine mise à jour.
-                    Pour l'instant, vous pouvez créer un segment dynamique de base.
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    Les critères complexes (achats, comportement, démographie) seront configurables via
-                    l'interface avancée de segmentation dans une prochaine version.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      {/* Configuration des critères */}
+      {type === 'dynamic' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Critères de segmentation</CardTitle>
+            <CardDescription>
+              Filtrez les clients de votre boutique (tags, commandes, montant dépensé).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SegmentCriteriaBuilder criteria={criteria} onChange={setCriteria} />
+          </CardContent>
+        </Card>
+      )}
 
-          {type === 'static' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Segment statique</CardTitle>
-                <CardDescription>
-                  Un segment statique permet d'ajouter manuellement des utilisateurs
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    Après la création, vous pourrez ajouter des utilisateurs à ce segment depuis
-                    la page de prévisualisation.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-          )}
+      {type === 'static' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Segment statique</CardTitle>
+            <CardDescription>
+              Un segment statique permet d'ajouter manuellement des utilisateurs
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Après la création, vous pourrez ajouter des utilisateurs à ce segment depuis la page
+                de prévisualisation.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
         <Button
@@ -224,8 +202,8 @@ export const EmailSegmentBuilder = ({
             title={isEditing ? 'Modifier le segment' : 'Nouveau segment'}
             description={
               isEditing
-                ? 'Modifiez les informations de votre segment d\'audience'
-                : 'Créez un nouveau segment d\'audience pour vos campagnes email'
+                ? "Modifiez les informations de votre segment d'audience"
+                : "Créez un nouveau segment d'audience pour vos campagnes email"
             }
             className="max-h-[90vh] overflow-y-auto"
           >
@@ -236,13 +214,11 @@ export const EmailSegmentBuilder = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
-                {isEditing ? 'Modifier le segment' : 'Nouveau segment'}
-              </DialogTitle>
+              <DialogTitle>{isEditing ? 'Modifier le segment' : 'Nouveau segment'}</DialogTitle>
               <DialogDescription>
                 {isEditing
-                  ? 'Modifiez les informations de votre segment d\'audience'
-                  : 'Créez un nouveau segment d\'audience pour vos campagnes email'}
+                  ? "Modifiez les informations de votre segment d'audience"
+                  : "Créez un nouveau segment d'audience pour vos campagnes email"}
               </DialogDescription>
             </DialogHeader>
             {formContent}
@@ -252,10 +228,3 @@ export const EmailSegmentBuilder = ({
     </>
   );
 };
-
-
-
-
-
-
-

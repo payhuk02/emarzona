@@ -14,8 +14,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { X, GripVertical } from 'lucide-react';
 import type { WorkflowAction, WorkflowActionType } from '@/lib/email/email-workflow-service';
+import { useEmailTemplates } from '@/hooks/useEmail';
 
 interface WorkflowActionEditorProps {
   action: WorkflowAction;
@@ -24,7 +32,7 @@ interface WorkflowActionEditorProps {
   onRemove: () => void;
 }
 
-const  ACTION_TYPE_LABELS: Record<WorkflowActionType, string> = {
+const ACTION_TYPE_LABELS: Record<WorkflowActionType, string> = {
   send_email: 'Envoyer un email',
   wait: 'Attendre',
   add_tag: 'Ajouter un tag',
@@ -38,11 +46,13 @@ export const WorkflowActionEditor = ({
   onUpdate,
   onRemove,
 }: WorkflowActionEditorProps) => {
+  const { data: templates } = useEmailTemplates({ category: 'marketing' });
+
   const updateAction = (updates: Partial<WorkflowAction>) => {
     onUpdate({ ...action, ...updates });
   };
 
-  const updateConfig = (key: string, value: any) => {
+  const updateConfig = (key: string, value: unknown) => {
     updateAction({
       config: { ...action.config, [key]: value },
     });
@@ -54,9 +64,7 @@ export const WorkflowActionEditor = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GripVertical className="h-4 w-4 text-muted-foreground" />
-            <CardTitle className="text-base">
-              Action {index + 1}
-            </CardTitle>
+            <CardTitle className="text-base">Action {index + 1}</CardTitle>
           </div>
           <Button
             type="button"
@@ -97,14 +105,37 @@ export const WorkflowActionEditor = ({
           <>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor={`templateId-${index}`} className="text-right">
-                Template ID
+                Template
+              </Label>
+              <div className="col-span-3">
+                <Select
+                  value={(action.config.template_id as string) || '__none__'}
+                  onValueChange={v => updateConfig('template_id', v === '__none__' ? '' : v)}
+                >
+                  <SelectTrigger id={`templateId-${index}`}>
+                    <SelectValue placeholder="Choisir un template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Sélectionner…</SelectItem>
+                    {templates?.map(tpl => (
+                      <SelectItem key={tpl.id} value={tpl.id}>
+                        {tpl.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={`subject-${index}`} className="text-right">
+                Sujet (opt.)
               </Label>
               <Input
-                id={`templateId-${index}`}
-                value={action.config.template_id || ''}
-                onChange={(e) => updateConfig('template_id', e.target.value)}
+                id={`subject-${index}`}
+                value={(action.config.subject as string) || ''}
+                onChange={e => updateConfig('subject', e.target.value)}
                 className="col-span-3"
-                placeholder="UUID du template"
+                placeholder="Remplace le sujet du template"
               />
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
@@ -114,7 +145,7 @@ export const WorkflowActionEditor = ({
               <textarea
                 id={`variables-${index}`}
                 value={JSON.stringify(action.config.variables || {}, null, 2)}
-                onChange={(e) => {
+                onChange={e => {
                   try {
                     const parsed = JSON.parse(e.target.value);
                     updateConfig('variables', parsed);
@@ -138,7 +169,7 @@ export const WorkflowActionEditor = ({
               id={`waitDuration-${index}`}
               type="number"
               value={action.config.duration || ''}
-              onChange={(e) => updateConfig('duration', parseInt(e.target.value) || 0)}
+              onChange={e => updateConfig('duration', (parseInt(e.target.value, 10) || 0) * 60)}
               className="col-span-3"
               placeholder="60"
             />
@@ -153,7 +184,7 @@ export const WorkflowActionEditor = ({
             <Input
               id={`tagName-${index}`}
               value={action.config.tag || ''}
-              onChange={(e) => updateConfig('tag', e.target.value)}
+              onChange={e => updateConfig('tag', e.target.value)}
               className="col-span-3"
               placeholder="ex: vip, newsletter"
             />
@@ -168,7 +199,7 @@ export const WorkflowActionEditor = ({
             <Input
               id={`segmentId-${index}`}
               value={action.config.segment_id || ''}
-              onChange={(e) => updateConfig('segment_id', e.target.value)}
+              onChange={e => updateConfig('segment_id', e.target.value)}
               className="col-span-3"
               placeholder="UUID du segment"
             />
@@ -178,10 +209,3 @@ export const WorkflowActionEditor = ({
     </Card>
   );
 };
-
-
-
-
-
-
-

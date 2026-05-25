@@ -85,7 +85,7 @@ export const useCreateEmailSequence = () => {
     mutationFn: async (payload: CreateSequencePayload): Promise<EmailSequence> => {
       return EmailSequenceService.createSequence(payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequences', data.store_id] });
       queryClient.setQueryData(['email-sequence', data.id], data);
       toast({
@@ -93,11 +93,13 @@ export const useCreateEmailSequence = () => {
         description: 'La séquence a été créée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error creating sequence', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la création de la séquence.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          'Erreur lors de la création de la séquence.',
         variant: 'destructive',
       });
     },
@@ -121,7 +123,7 @@ export const useUpdateEmailSequence = () => {
     }): Promise<EmailSequence> => {
       return EmailSequenceService.updateSequence(sequenceId, payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequences', data.store_id] });
       queryClient.setQueryData(['email-sequence', data.id], data);
       queryClient.invalidateQueries({ queryKey: ['email-sequence-steps', data.id] });
@@ -130,11 +132,13 @@ export const useUpdateEmailSequence = () => {
         description: 'La séquence a été mise à jour avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error updating sequence', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour de la séquence.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          'Erreur lors de la mise à jour de la séquence.',
         variant: 'destructive',
       });
     },
@@ -167,11 +171,13 @@ export const useDeleteEmailSequence = () => {
         description: 'La séquence a été supprimée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error deleting sequence', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la suppression de la séquence.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          'Erreur lors de la suppression de la séquence.',
         variant: 'destructive',
       });
     },
@@ -189,19 +195,19 @@ export const useAddSequenceStep = () => {
     mutationFn: async (payload: CreateSequenceStepPayload): Promise<EmailSequenceStep> => {
       return EmailSequenceService.addStep(payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-steps', data.sequence_id] });
       queryClient.invalidateQueries({ queryKey: ['email-sequence', data.sequence_id] });
       toast({
         title: 'Étape ajoutée',
-        description: 'L\'étape a été ajoutée avec succès.',
+        description: "L'étape a été ajoutée avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error adding step', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'ajout de l\'étape.',
+        description: error instanceof Error ? error.message : "Erreur lors de l'ajout de l'étape.",
         variant: 'destructive',
       });
     },
@@ -227,18 +233,20 @@ export const useUpdateSequenceStep = () => {
     }): Promise<EmailSequenceStep> => {
       return EmailSequenceService.updateStep(stepId, payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-steps', data.sequence_id] });
       toast({
         title: 'Étape mise à jour',
-        description: 'L\'étape a été mise à jour avec succès.',
+        description: "L'étape a été mise à jour avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error updating step', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour de l\'étape.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          "Erreur lors de la mise à jour de l'étape.",
         variant: 'destructive',
       });
     },
@@ -267,14 +275,16 @@ export const useDeleteSequenceStep = () => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence', variables.sequenceId] });
       toast({
         title: 'Étape supprimée',
-        description: 'L\'étape a été supprimée avec succès.',
+        description: "L'étape a été supprimée avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error deleting step', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la suppression de l\'étape.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          "Erreur lors de la suppression de l'étape.",
         variant: 'destructive',
       });
     },
@@ -304,6 +314,46 @@ export const useEmailSequenceEnrollments = (
 };
 
 /**
+ * Hook pour inscrire un contact par email
+ */
+export const useEnrollByEmailInSequence = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({
+      sequenceId,
+      storeId,
+      email,
+      context,
+    }: {
+      sequenceId: string;
+      storeId: string;
+      email: string;
+      context?: Record<string, unknown>;
+    }) => EmailSequenceService.enrollByEmail(sequenceId, storeId, email, context),
+    onSuccess: data => {
+      queryClient.invalidateQueries({ queryKey: ['email-sequence-enrollments', data.sequence_id] });
+      queryClient.invalidateQueries({ queryKey: ['email-sequence', data.sequence_id] });
+      queryClient.invalidateQueries({ queryKey: ['email-sequences'] });
+      toast({
+        title: 'Contact inscrit',
+        description: 'Le contact a été inscrit à la séquence.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Erreur',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          "Impossible d'inscrire ce contact.",
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
+/**
  * Hook pour inscrire un utilisateur dans une séquence
  */
 export const useEnrollUserInSequence = () => {
@@ -314,19 +364,21 @@ export const useEnrollUserInSequence = () => {
     mutationFn: async (payload: EnrollUserPayload): Promise<EmailSequenceEnrollment> => {
       return EmailSequenceService.enrollUser(payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-enrollments', data.sequence_id] });
       queryClient.invalidateQueries({ queryKey: ['email-sequence', data.sequence_id] });
       toast({
         title: 'Utilisateur inscrit',
-        description: 'L\'utilisateur a été inscrit dans la séquence avec succès.',
+        description: "L'utilisateur a été inscrit dans la séquence avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error enrolling user', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'inscription de l\'utilisateur.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          "Erreur lors de l'inscription de l'utilisateur.",
         variant: 'destructive',
       });
     },
@@ -350,18 +402,20 @@ export const usePauseSequenceEnrollment = () => {
     }): Promise<EmailSequenceEnrollment> => {
       return EmailSequenceService.pauseEnrollment(sequenceId, userId);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-enrollments', data.sequence_id] });
       toast({
         title: 'Inscription mise en pause',
-        description: 'L\'inscription a été mise en pause.',
+        description: "L'inscription a été mise en pause.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error pausing enrollment', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise en pause.',
+        description:
+          (error instanceof Error ? error.message : undefined) ||
+          'Erreur lors de la mise en pause.',
         variant: 'destructive',
       });
     },
@@ -385,28 +439,22 @@ export const useCancelSequenceEnrollment = () => {
     }): Promise<EmailSequenceEnrollment> => {
       return EmailSequenceService.cancelEnrollment(sequenceId, userId);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-sequence-enrollments', data.sequence_id] });
       queryClient.invalidateQueries({ queryKey: ['email-sequence', data.sequence_id] });
       toast({
         title: 'Inscription annulée',
-        description: 'L\'inscription a été annulée avec succès.',
+        description: "L'inscription a été annulée avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error cancelling enrollment', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'annulation.',
+        description:
+          (error instanceof Error ? error.message : undefined) || "Erreur lors de l'annulation.",
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

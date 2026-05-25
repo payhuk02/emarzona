@@ -8,6 +8,12 @@ verify_jwt = false
 [functions.send-welcome-email]
 verify_jwt = true
 
+[functions.trigger-email-workflows]
+verify_jwt = false
+
+[functions.execute-email-workflow]
+verify_jwt = true
+
 # ---------------------------------------------------------------------------
 # Auth — confirmation email + SMTP Resend (mail.emarzona.com)
 # Production : configurer aussi le Dashboard Supabase (voir docs/CONFIGURATION_AUTH_EMAIL_RESEND.md)

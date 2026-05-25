@@ -10,6 +10,7 @@ import {
   EmailSequenceBuilder,
   SequenceStepsList,
   SequenceStepEditor,
+  SequenceEnrollmentsPanel,
   EmailDashboardLayout,
 } from '@/components/email';
 import { useStore } from '@/hooks/useStore';
@@ -28,7 +29,7 @@ export const EmailSequencesPage = () => {
   const [editingSequence, setEditingSequence] = useState<EmailSequence | null>(null);
   const [viewingSequenceId, setViewingSequenceId] = useState<string | null>(null);
   const [editingStep, setEditingStep] = useState<EmailSequenceStep | null>(null);
-  const [currentTab, setCurrentTab] = useState<'list' | 'steps'>('list');
+  const [currentTab, setCurrentTab] = useState<'list' | 'steps' | 'enrollments'>('list');
   const tabsRef = useScrollAnimation<HTMLDivElement>();
 
   const { data: viewingSequence } = useEmailSequence(viewingSequenceId);
@@ -97,8 +98,15 @@ export const EmailSequencesPage = () => {
         <>
           {/* Main Content with Tabs */}
           <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Tabs value={currentTab} onValueChange={v => setCurrentTab(v as 'list' | 'steps')}>
-              <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto">
+            <Tabs
+              value={currentTab}
+              onValueChange={v => setCurrentTab(v as 'list' | 'steps' | 'enrollments')}
+            >
+              <TabsList
+                className={`grid w-full h-auto p-1 bg-muted/50 backdrop-blur-sm gap-1.5 sm:gap-2 sm:inline-flex sm:w-auto ${
+                  viewingSequenceId ? 'grid-cols-3' : 'grid-cols-1'
+                }`}
+              >
                 <TabsTrigger
                   value="list"
                   className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
@@ -106,13 +114,21 @@ export const EmailSequencesPage = () => {
                   {t('emails.sequences.tabs.list')}
                 </TabsTrigger>
                 {viewingSequenceId && (
-                  <TabsTrigger
-                    value="steps"
-                    className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
-                  >
-                    <span className="hidden sm:inline">{t('emails.sequences.tabs.steps')}: </span>
-                    <span className="truncate">{viewingSequence?.name || '...'}</span>
-                  </TabsTrigger>
+                  <>
+                    <TabsTrigger
+                      value="steps"
+                      className="flex-1 sm:flex-none gap-1 sm:gap-1.5 lg:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-1.5 md:py-2 text-[10px] xs:text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+                    >
+                      <span className="hidden sm:inline">{t('emails.sequences.tabs.steps')}: </span>
+                      <span className="truncate">{viewingSequence?.name || '...'}</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="enrollments"
+                      className="flex-1 sm:flex-none px-2 sm:px-3 py-2 text-xs sm:text-sm min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white"
+                    >
+                      {t('emails.sequences.tabs.enrollments', 'Inscriptions')}
+                    </TabsTrigger>
+                  </>
                 )}
               </TabsList>
 
@@ -153,6 +169,15 @@ export const EmailSequencesPage = () => {
                     onAddStep={handleAddStep}
                     onEditStep={handleEditStep}
                   />
+                </TabsContent>
+              )}
+
+              {viewingSequenceId && viewingSequence && (
+                <TabsContent
+                  value="enrollments"
+                  className="space-y-4 sm:space-y-6 mt-3 sm:mt-4 lg:mt-6"
+                >
+                  <SequenceEnrollmentsPanel sequence={viewingSequence} storeId={store.id} />
                 </TabsContent>
               )}
             </Tabs>

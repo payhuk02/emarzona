@@ -60,7 +60,7 @@ export interface CreateSequencePayload {
   name: string;
   description?: string;
   trigger_type: SequenceTriggerType;
-  trigger_config: Record<string, any>;
+  trigger_config: Record<string, unknown>;
   status?: SequenceStatus;
 }
 
@@ -114,7 +114,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequence;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('EmailSequenceService.createSequence error', { error, payload });
       throw error;
     }
@@ -140,7 +140,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequence;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getSequence error', { error, sequenceId });
       throw error;
@@ -159,7 +159,7 @@ export class EmailSequenceService {
     }
   ): Promise<EmailSequence[]> {
     try {
-      let  query= supabase
+      let query = supabase
         .from('email_sequences')
         .select(EMAIL_SEQUENCE_FIELDS)
         .eq('store_id', storeId)
@@ -174,10 +174,7 @@ export class EmailSequenceService {
       }
 
       if (filters?.offset) {
-        query = query.range(
-          filters.offset,
-          (filters.offset || 0) + (filters.limit || 10) - 1
-        );
+        query = query.range(filters.offset, (filters.offset || 0) + (filters.limit || 10) - 1);
       }
 
       const { data, error } = await query;
@@ -188,7 +185,7 @@ export class EmailSequenceService {
       }
 
       return (data || []) as EmailSequence[];
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getSequences error', { error, storeId, filters });
       throw error;
@@ -216,7 +213,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequence;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.updateSequence error', { error, sequenceId, payload });
       throw error;
@@ -228,10 +225,7 @@ export class EmailSequenceService {
    */
   static async deleteSequence(sequenceId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('email_sequences')
-        .delete()
-        .eq('id', sequenceId);
+      const { error } = await supabase.from('email_sequences').delete().eq('id', sequenceId);
 
       if (error) {
         logger.error('Error deleting sequence', { error, sequenceId });
@@ -239,7 +233,7 @@ export class EmailSequenceService {
       }
 
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.deleteSequence error', { error, sequenceId });
       throw error;
@@ -266,7 +260,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceStep;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.addStep error', { error, payload });
       throw error;
@@ -290,7 +284,7 @@ export class EmailSequenceService {
       }
 
       return (data || []) as EmailSequenceStep[];
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getSteps error', { error, sequenceId });
       throw error;
@@ -318,7 +312,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceStep;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.updateStep error', { error, stepId, payload });
       throw error;
@@ -330,10 +324,7 @@ export class EmailSequenceService {
    */
   static async deleteStep(stepId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('email_sequence_steps')
-        .delete()
-        .eq('id', stepId);
+      const { error } = await supabase.from('email_sequence_steps').delete().eq('id', stepId);
 
       if (error) {
         logger.error('Error deleting step', { error, stepId });
@@ -341,7 +332,7 @@ export class EmailSequenceService {
       }
 
       return true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.deleteStep error', { error, stepId });
       throw error;
@@ -349,11 +340,40 @@ export class EmailSequenceService {
   }
 
   /**
+   * Inscrire un contact par email (résout user_id via RPC)
+   */
+  static async enrollByEmail(
+    sequenceId: string,
+    storeId: string,
+    email: string,
+    context?: Record<string, unknown>
+  ): Promise<EmailSequenceEnrollment> {
+    const normalized = email.trim().toLowerCase();
+    // @ts-expect-error - RPC not in generated types yet
+    const { data: resolvedUserId, error: resolveError } = await supabase.rpc(
+      'resolve_user_id_for_store_email',
+      { p_store_id: storeId, p_email: normalized }
+    );
+
+    if (resolveError || !resolvedUserId) {
+      throw new Error(
+        'Aucun compte utilisateur associé à cet email. Le contact doit avoir un compte ou être lié à un client.'
+      );
+    }
+
+    return this.enrollUser({
+      sequence_id: sequenceId,
+      user_id: resolvedUserId as string,
+      context: { ...context, email: normalized, store_id: storeId },
+    });
+  }
+
+  /**
    * Inscrire un utilisateur dans une séquence
    */
   static async enrollUser(payload: EnrollUserPayload): Promise<EmailSequenceEnrollment> {
     try {
-      const { data, error } = await supabase.rpc('enroll_user_in_sequence', {
+      const { error } = await supabase.rpc('enroll_user_in_sequence', {
         p_sequence_id: payload.sequence_id,
         p_user_id: payload.user_id,
         p_context: payload.context || {},
@@ -371,10 +391,9 @@ export class EmailSequenceService {
       }
 
       return enrollment;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailSequenceService.enrollUser error', { error, payload });
-      throw error;
+    } catch (err: unknown) {
+      logger.error('EmailSequenceService.enrollUser error', { error: err, payload });
+      throw err instanceof Error ? err : new Error('Erreur inconnue');
     }
   }
 
@@ -402,7 +421,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceEnrollment;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getEnrollment error', { error, sequenceId, userId });
       throw error;
@@ -421,7 +440,7 @@ export class EmailSequenceService {
     }
   ): Promise<EmailSequenceEnrollment[]> {
     try {
-      let  query= supabase
+      let query = supabase
         .from('email_sequence_enrollments')
         .select(EMAIL_SEQUENCE_ENROLLMENT_FIELDS)
         .eq('sequence_id', sequenceId)
@@ -436,10 +455,7 @@ export class EmailSequenceService {
       }
 
       if (filters?.offset) {
-        query = query.range(
-          filters.offset,
-          (filters.offset || 0) + (filters.limit || 10) - 1
-        );
+        query = query.range(filters.offset, (filters.offset || 0) + (filters.limit || 10) - 1);
       }
 
       const { data, error } = await query;
@@ -450,7 +466,7 @@ export class EmailSequenceService {
       }
 
       return (data || []) as EmailSequenceEnrollment[];
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getEnrollments error', { error, sequenceId, filters });
       throw error;
@@ -479,7 +495,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceEnrollment;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.pauseEnrollment error', { error, sequenceId, userId });
       throw error;
@@ -508,7 +524,7 @@ export class EmailSequenceService {
       }
 
       return data as EmailSequenceEnrollment;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.cancelEnrollment error', { error, sequenceId, userId });
       throw error;
@@ -530,7 +546,7 @@ export class EmailSequenceService {
       }
 
       return data || [];
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.getNextEmailsToSend error', { error, limit });
       throw error;
@@ -552,7 +568,7 @@ export class EmailSequenceService {
       }
 
       return data === true;
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('EmailSequenceService.advanceEnrollment error', { error, enrollmentId });
       throw error;
@@ -562,10 +578,3 @@ export class EmailSequenceService {
 
 // Export instance singleton
 export const emailSequenceService = EmailSequenceService;
-
-
-
-
-
-
-
