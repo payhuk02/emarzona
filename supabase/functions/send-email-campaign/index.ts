@@ -9,6 +9,12 @@ import { getCampaignRecipients } from '../_shared/campaign-recipients.ts';
 import { canSendEmailToRecipient } from '../_shared/email-compliance-utils.ts';
 import { sendMarketingEmailViaResend } from '../_shared/resend-send-utils.ts';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
+import {
+  applySubjectOverride,
+  getActiveABTestForCampaign,
+  incrementABTestSent,
+  pickABVariant,
+} from '../_shared/campaign-ab-test.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
@@ -264,19 +270,18 @@ serve(async req => {
       );
     }
 
-    // Récupérer le template
-    let template: EmailTemplate | null = null;
+    // Template par défaut de la campagne
+    let defaultTemplate: EmailTemplate | null = null;
     if (campaign.template_id) {
-      template = await getTemplate(supabase, campaign.template_id);
-      if (!template) {
+      defaultTemplate = await getTemplate(supabase, campaign.template_id);
+      if (!defaultTemplate) {
         return new Response(JSON.stringify({ error: 'Template not found' }), {
           status: 404,
           headers: { 'Content-Type': 'application/json' },
         });
       }
     } else {
-      // Template par défaut si aucun template spécifié
-      template = {
+      defaultTemplate = {
         id: 'default',
         name: campaign.name,
         subject: { fr: campaign.name },
@@ -285,6 +290,60 @@ serve(async req => {
         from_name: 'Emarzona',
       };
     }
+
+    const abTest = await getActiveABTestForCampaign(supabase, campaign_id);
+    const templateCache = new Map<string, EmailTemplate>();
+    templateCache.set(defaultTemplate.id, defaultTemplate);
+
+    if (abTest) {
+      if (batch_index === 0) {
+        await supabase
+          .from('email_ab_tests')
+          .update({ test_started_at: new Date().toISOString() })
+          .eq('id', abTest.id)
+          .is('test_started_at', null);
+      }
+      for (const variant of [abTest.variant_a, abTest.variant_b]) {
+        if (variant.template_id && !templateCache.has(variant.template_id)) {
+          const variantTemplate = await getTemplate(supabase, variant.template_id);
+          if (variantTemplate) {
+            templateCache.set(variant.template_id, variantTemplate);
+          }
+        }
+      }
+    }
+
+    const resolveTemplateForRecipient = (
+      email: string
+    ): {
+      template: EmailTemplate;
+      subjectOverride?: string;
+      abVariant?: 'variant_a' | 'variant_b';
+    } => {
+      if (!abTest) {
+        return { template: defaultTemplate! };
+      }
+
+      const pctA = Number(abTest.variant_a.send_percentage ?? 50);
+      const variantKey = pickABVariant(email, campaign_id, pctA);
+      const variantConfig = variantKey === 'variant_a' ? abTest.variant_a : abTest.variant_b;
+
+      let template = defaultTemplate!;
+      if (variantConfig.template_id) {
+        const cached = templateCache.get(variantConfig.template_id);
+        if (cached) template = cached;
+      }
+
+      if (variantConfig.subject) {
+        template = applySubjectOverride(template, variantConfig.subject);
+      }
+
+      return {
+        template,
+        subjectOverride: variantConfig.subject,
+        abVariant: variantKey,
+      };
+    };
 
     // Mettre à jour le statut à "sending"
     if (batch_index === 0) {
@@ -330,11 +389,18 @@ serve(async req => {
         continue;
       }
 
+      const {
+        template: recipientTemplate,
+        subjectOverride,
+        abVariant,
+      } = resolveTemplateForRecipient(recipient.email);
+
       const result = await sendMarketingEmailViaResend({
         supabase,
         to: recipient.email,
         toName: recipient.name,
-        template,
+        template: recipientTemplate,
+        subjectOverride,
         variables: {
           campaign_name: campaign.name,
           ...(recipient.variables || {}),
@@ -342,11 +408,15 @@ serve(async req => {
         userId: recipient.user_id,
         storeId: campaign.store_id,
         campaignId: campaign_id,
-        templateSlug: template.name,
+        templateSlug: recipientTemplate.name,
+        abVariantTag: abVariant,
       });
 
       if (result.success) {
         sentCount++;
+        if (abTest && abVariant) {
+          await incrementABTestSent(supabase, abTest.id, abVariant);
+        }
       } else {
         errorCount++;
         console.error(`Failed to send email to ${recipient.email}:`, result.error);

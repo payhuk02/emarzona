@@ -12,22 +12,36 @@ import {
   EmailDashboardLayout,
 } from '@/components/email';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Blocks, Eye } from 'lucide-react';
+import { FileText, Blocks, Eye, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { EmailTemplate } from '@/types/email';
 import { useQueryClient } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useEmailTemplates } from '@/hooks/useEmail';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const EmailTemplateEditorPage = () => {
   const { t } = useTranslation();
   const [htmlContent, setHtmlContent] = useState('');
   const [subject, setSubject] = useState('');
   const [activeTab, setActiveTab] = useState<'editor' | 'blocks' | 'preview'>('editor');
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('__new__');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const tabsRef = useScrollAnimation<HTMLDivElement>();
+  const { data: templates, isLoading: templatesLoading } = useEmailTemplates();
 
   const handleSave = async (templateData: Partial<EmailTemplate>) => {
     try {
@@ -47,6 +61,13 @@ export const EmailTemplateEditorPage = () => {
       }
 
       queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+      if (templateData.slug) {
+        const saved = templates?.find(tpl => tpl.slug === templateData.slug);
+        if (saved) {
+          setEditingTemplate(saved);
+          setSelectedTemplateId(saved.id);
+        }
+      }
       toast({
         title: t('emails.templateEditor.toast.saved'),
         description: t('emails.templateEditor.toast.savedDescription'),
@@ -97,6 +118,74 @@ export const EmailTemplateEditorPage = () => {
         description: t('emails.templateEditor.alert.description'),
       }}
     >
+      <Card className="mb-4 sm:mb-6">
+        <CardContent className="pt-6 flex flex-col sm:flex-row gap-4 sm:items-end">
+          <div className="flex-1 space-y-2">
+            <Label htmlFor="template-picker">
+              {t('emails.templateEditor.selectTemplate', 'Template à modifier')}
+            </Label>
+            <Select
+              value={selectedTemplateId}
+              onValueChange={value => {
+                setSelectedTemplateId(value);
+                if (value === '__new__') {
+                  setEditingTemplate(null);
+                  setHtmlContent('');
+                  setSubject('');
+                  return;
+                }
+                const tpl = templates?.find(item => item.id === value);
+                if (tpl) {
+                  setEditingTemplate(tpl);
+                  setHtmlContent(
+                    tpl.html_content?.fr || Object.values(tpl.html_content || {})[0] || ''
+                  );
+                  setSubject(tpl.subject?.fr || Object.values(tpl.subject || {})[0] || '');
+                }
+              }}
+            >
+              <SelectTrigger id="template-picker">
+                <SelectValue
+                  placeholder={t(
+                    'emails.templateEditor.selectTemplatePlaceholder',
+                    'Choisir un template'
+                  )}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__new__">
+                  {t('emails.templateEditor.newTemplate', '+ Nouveau template')}
+                </SelectItem>
+                {templates?.map(tpl => (
+                  <SelectItem key={tpl.id} value={tpl.id}>
+                    {tpl.name} ({tpl.category})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {templatesLoading && (
+              <p className="text-sm text-muted-foreground">
+                {t('common.loading', 'Chargement...')}
+              </p>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setSelectedTemplateId('__new__');
+              setEditingTemplate(null);
+              setHtmlContent('');
+              setSubject('');
+              setActiveTab('editor');
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {t('emails.templateEditor.newTemplate', 'Nouveau')}
+          </Button>
+        </CardContent>
+      </Card>
+
       <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <Tabs
           value={activeTab}
@@ -136,7 +225,8 @@ export const EmailTemplateEditorPage = () => {
             className="mt-3 sm:mt-4 lg:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700"
           >
             <EmailTemplateEditor
-              template={null}
+              key={editingTemplate?.id ?? 'new'}
+              template={editingTemplate}
               onSave={handleSave}
               onChange={data => {
                 setHtmlContent(data.htmlContent);

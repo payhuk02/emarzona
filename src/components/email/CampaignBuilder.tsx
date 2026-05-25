@@ -37,9 +37,12 @@ import type {
   CampaignType,
   AudienceType,
 } from '@/lib/email/email-campaign-service';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useEmailSegments } from '@/hooks/email/useEmailSegments';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface CampaignBuilderProps {
   open: boolean;
@@ -65,10 +68,13 @@ export const CampaignBuilder = ({
   const [type, setType] = useState<CampaignType>('newsletter');
   const [templateId, setTemplateId] = useState<string>('');
   const [audienceType, setAudienceType] = useState<AudienceType>('filter');
+  const [segmentId, setSegmentId] = useState('');
+  const [filterHasPurchased, setFilterHasPurchased] = useState(false);
   const [scheduledAt, setScheduledAt] = useState('');
   const [timezone, setTimezone] = useState('Africa/Dakar');
 
   const { data: templates } = useEmailTemplates({ category: 'marketing' });
+  const { data: segments } = useEmailSegments(storeId);
   const [testEmail, setTestEmail] = useState('');
   const createCampaign = useCreateEmailCampaign();
   const updateCampaign = useUpdateEmailCampaign();
@@ -83,6 +89,11 @@ export const CampaignBuilder = ({
       setType(campaign.type);
       setTemplateId(campaign.template_id || '');
       setAudienceType(campaign.audience_type);
+      setSegmentId(campaign.segment_id || '');
+      setFilterHasPurchased(
+        campaign.audience_filters?.has_purchased === true ||
+          campaign.audience_filters?.has_purchased === 'true'
+      );
       setScheduledAt(
         campaign.scheduled_at ? new Date(campaign.scheduled_at).toISOString().slice(0, 16) : ''
       );
@@ -94,6 +105,8 @@ export const CampaignBuilder = ({
       setType('newsletter');
       setTemplateId('');
       setAudienceType('filter');
+      setSegmentId('');
+      setFilterHasPurchased(false);
       setScheduledAt('');
       setTimezone('Africa/Dakar');
     }
@@ -172,6 +185,23 @@ export const CampaignBuilder = ({
       scheduledIso = parsed.toISOString();
     }
 
+    if (safeAudienceType === 'segment' && !segmentId) {
+      toast({
+        title: t('common.error', 'Erreur'),
+        description: t(
+          'emails.campaigns.segmentRequired',
+          "Sélectionnez un segment pour ce type d'audience."
+        ),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const audienceFilters: Record<string, boolean> = {};
+    if (safeAudienceType === 'filter' && filterHasPurchased) {
+      audienceFilters.has_purchased = true;
+    }
+
     const payload: CreateCampaignPayload = {
       store_id: storeId,
       name: trimmedName,
@@ -179,9 +209,10 @@ export const CampaignBuilder = ({
       type: safeType,
       template_id: templateId || undefined,
       audience_type: safeAudienceType,
+      segment_id: safeAudienceType === 'segment' ? segmentId : undefined,
       scheduled_at: scheduledIso,
       send_at_timezone: safeTimezone,
-      audience_filters: {},
+      audience_filters: audienceFilters,
     };
 
     try {
@@ -282,14 +313,78 @@ export const CampaignBuilder = ({
         name="audienceType"
         type="select"
         value={audienceType || 'filter'}
-        onChange={value => setAudienceType((value || 'filter') as AudienceType)}
+        onChange={value => {
+          const next = (value || 'filter') as AudienceType;
+          setAudienceType(next);
+          if (next !== 'segment') setSegmentId('');
+        }}
         required
         selectOptions={[
           { value: 'segment', label: t('emails.campaigns.audienceTypes.segment', 'Segment') },
-          { value: 'list', label: t('emails.campaigns.audienceTypes.list', 'Liste') },
+          { value: 'list', label: t('emails.campaigns.audienceTypes.list', 'Tous les clients') },
           { value: 'filter', label: t('emails.campaigns.audienceTypes.filter', 'Filtres') },
         ]}
       />
+
+      {audienceType === 'segment' && (
+        <div>
+          <Label htmlFor="segment">{t('emails.campaigns.segment', 'Segment')}</Label>
+          <Select
+            modal={false}
+            value={segmentId || '__none__'}
+            onValueChange={value => setSegmentId(value === '__none__' ? '' : value)}
+          >
+            <SelectTrigger id="segment" className="mt-1.5 sm:mt-2">
+              <SelectValue
+                placeholder={t('emails.campaigns.selectSegment', 'Choisir un segment')}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">
+                {t('emails.campaigns.selectSegment', 'Choisir un segment')}
+              </SelectItem>
+              {segments?.map(seg => (
+                <SelectItem key={seg.id} value={seg.id}>
+                  {seg.name} ({seg.member_count ?? 0})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {audienceType === 'list' && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            {t(
+              'emails.campaigns.listAudienceHint',
+              'Tous les clients de la boutique ayant une adresse email recevront cette campagne.'
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {audienceType === 'filter' && (
+        <div className="flex items-start gap-3 rounded-lg border p-4 bg-muted/30">
+          <Checkbox
+            id="filter-has-purchased"
+            checked={filterHasPurchased}
+            onCheckedChange={checked => setFilterHasPurchased(checked === true)}
+          />
+          <div className="space-y-1">
+            <Label htmlFor="filter-has-purchased" className="cursor-pointer">
+              {t('emails.campaigns.filterHasPurchased', 'Clients ayant déjà commandé')}
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              {t(
+                'emails.campaigns.filterHasPurchasedHint',
+                'Sinon, tous les clients avec email sont ciblés (comme une liste complète).'
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       <MobileFormField
         label={t('emails.campaigns.scheduledAt', "Date et heure d'envoi")}

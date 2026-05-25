@@ -21,7 +21,16 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { emailTagService, type TagCategory } from '@/lib/email/email-tag-service';
 import { emailAnalyticsService } from '@/lib/email/email-analytics-service';
-import { Loader2, Trash2, RefreshCw, TrendingUp, Users, Tag, AlertTriangle, Mail } from 'lucide-react';
+import {
+  Loader2,
+  Trash2,
+  RefreshCw,
+  TrendingUp,
+  Users,
+  Tag,
+  AlertTriangle,
+  Mail,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -90,13 +99,15 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
         } else if (cronData) {
           setCronJobs(cronData as CronJobStatus[]);
         }
-      } catch ( _error: any) {
-        logger.error('Error fetching cron jobs status', { error });
+      } catch (cronErr: unknown) {
+        logger.error('Error fetching cron jobs status', { error: cronErr });
       }
-    } catch ( _error: any) {
+    } catch (loadErr: unknown) {
+      const message =
+        loadErr instanceof Error ? loadErr.message : 'Erreur lors du chargement des données';
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du chargement des données',
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -118,10 +129,11 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
         description: `${result.deleted_count} tags expirés ont été supprimés`,
       });
       await loadData();
-    } catch ( _error: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur lors du nettoyage';
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du nettoyage',
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -139,10 +151,11 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
         description: `${result.deleted_count} tags non utilisés ont été supprimés`,
       });
       await loadData();
-    } catch ( _error: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur lors du nettoyage';
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du nettoyage',
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -168,17 +181,19 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
       });
 
       await loadData();
-    } catch ( _error: any) {
-      logger.error('Error toggling cron job', { error, jobName });
+    } catch (err: unknown) {
+      logger.error('Error toggling cron job', { error: err, jobName });
+      const message =
+        err instanceof Error ? err.message : 'Erreur lors de la mise à jour du cron job';
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour du cron job',
+        description: message,
         variant: 'destructive',
       });
     }
   };
 
-  const  categoryColors: Record<TagCategory, string> = {
+  const categoryColors: Record<TagCategory, string> = {
     behavior: 'bg-blue-100 text-blue-800',
     segment: 'bg-purple-100 text-purple-800',
     custom: 'bg-gray-100 text-gray-800',
@@ -190,7 +205,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
     const totalTags = tags.length;
     const totalUsers = tags.reduce((sum, t) => sum + t.user_count, 0);
     const expiringCount = expiringTags.length;
-    const activeCronJobs = cronJobs.filter((j) => j.active).length;
+    const activeCronJobs = cronJobs.filter(j => j.active).length;
     const totalCronJobs = cronJobs.length;
 
     return {
@@ -205,11 +220,17 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
   return (
     <>
       {/* Header avec animation - Style Inventaire */}
-      <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+      <div
+        ref={headerRef}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+      >
         <div>
           <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
             <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-              <Mail className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
+              <Mail
+                className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                aria-hidden="true"
+              />
             </div>
             <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Gestion des Tags Email
@@ -219,28 +240,50 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
             Gérez et surveillez les tags utilisateurs pour la segmentation
           </p>
         </div>
-        <Button 
-          onClick={loadData} 
-          disabled={loading} 
+        <Button
+          onClick={loadData}
+          disabled={loading}
           size="sm"
           className="min-h-[44px] h-9 sm:h-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
         >
-          <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${loading ? 'animate-spin' : ''}`}
+          />
           <span className="hidden sm:inline">Rafraîchir</span>
           <span className="sm:hidden">Raf.</span>
         </Button>
       </div>
 
       {/* Stats Cards - Style Inventaire (Purple-Pink Gradient) */}
-      <div 
+      <div
         ref={statsRef}
         className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
       >
         {[
-          { label: 'Total Tags', value: stats.totalTags, icon: Tag, color: "from-purple-600 to-pink-600" },
-          { label: 'Utilisateurs Taggués', value: stats.totalUsers, icon: Users, color: "from-blue-600 to-cyan-600" },
-          { label: 'Tags Expirant', value: stats.expiringCount, icon: AlertTriangle, color: "from-yellow-600 to-orange-600" },
-          { label: 'Cron Jobs Actifs', value: `${stats.activeCronJobs}/${stats.totalCronJobs}`, icon: TrendingUp, color: "from-green-600 to-emerald-600" },
+          {
+            label: 'Total Tags',
+            value: stats.totalTags,
+            icon: Tag,
+            color: 'from-purple-600 to-pink-600',
+          },
+          {
+            label: 'Utilisateurs Taggués',
+            value: stats.totalUsers,
+            icon: Users,
+            color: 'from-blue-600 to-cyan-600',
+          },
+          {
+            label: 'Tags Expirant',
+            value: stats.expiringCount,
+            icon: AlertTriangle,
+            color: 'from-yellow-600 to-orange-600',
+          },
+          {
+            label: 'Cron Jobs Actifs',
+            value: `${stats.activeCronJobs}/${stats.totalCronJobs}`,
+            icon: TrendingUp,
+            color: 'from-green-600 to-emerald-600',
+          },
         ].map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -256,7 +299,9 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
-                <div className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent break-words`}>
+                <div
+                  className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent break-words`}
+                >
                   {stat.value}
                 </div>
               </CardContent>
@@ -266,255 +311,245 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
       </div>
 
       {/* Contenu principal */}
-      <div ref={tabsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+      <div
+        ref={tabsRef}
+        className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300"
+      >
         <Tabs defaultValue="tags" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="tags">Tags</TabsTrigger>
-          <TabsTrigger value="expiring">Tags Expirant</TabsTrigger>
-          <TabsTrigger value="cleanup">Nettoyage</TabsTrigger>
-          <TabsTrigger value="cron">Cron Jobs</TabsTrigger>
-        </TabsList>
+          <TabsList>
+            <TabsTrigger value="tags">Tags</TabsTrigger>
+            <TabsTrigger value="expiring">Tags Expirant</TabsTrigger>
+            <TabsTrigger value="cleanup">Nettoyage</TabsTrigger>
+            <TabsTrigger value="cron">Cron Jobs</TabsTrigger>
+          </TabsList>
 
-        {/* Onglet Tags */}
-        <TabsContent value="tags" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Liste des Tags</CardTitle>
-                  <CardDescription>Tous les tags utilisés dans votre store</CardDescription>
-                </div>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={(value) => setSelectedCategory(value as TagCategory | 'all')}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filtrer par catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Toutes les catégories</SelectItem>
-                    <SelectItem value="behavior">Comportement</SelectItem>
-                    <SelectItem value="segment">Segmentation</SelectItem>
-                    <SelectItem value="custom">Personnalisé</SelectItem>
-                    <SelectItem value="system">Système</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : tags.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Aucun tag trouvé</p>
-              ) : (
-                <div className="space-y-2">
-                  {tags.map((tag) => (
-                    <div
-                      key={`${tag.tag}-${tag.category}`}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Badge className={categoryColors[tag.category]}>{tag.category}</Badge>
-                        <span className="font-medium">{tag.tag}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{tag.user_count} utilisateurs</span>
-                        <span>
-                          Dernière utilisation:{' '}
-                          {new Date(tag.last_used_at).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Onglet Tags Expirant */}
-        <TabsContent value="expiring" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tags Expirant Bientôt</CardTitle>
-              <CardDescription>
-                Tags qui vont expirer dans les 7 prochains jours
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : expiringTags.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  Aucun tag n'expire dans les 7 prochains jours
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {expiringTags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Badge className={categoryColors[tag.category as TagCategory]}>
-                          {tag.category}
-                        </Badge>
-                        <span className="font-medium">{tag.tag}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm">
-                        <Badge variant={tag.days_until_expiry <= 3 ? 'destructive' : 'secondary'}>
-                          {tag.days_until_expiry} jour{tag.days_until_expiry > 1 ? 's' : ''}
-                        </Badge>
-                        <span className="text-muted-foreground">
-                          Expire le {new Date(tag.expires_at).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Onglet Nettoyage */}
-        <TabsContent value="cleanup" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          {/* Onglet Tags */}
+          <TabsContent value="tags" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Nettoyer les Tags Expirés</CardTitle>
-                <CardDescription>
-                  Supprime tous les tags dont la date d'expiration est passée
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button
-                  onClick={handleCleanupExpired}
-                  disabled={loading}
-                  variant="destructive"
-                  className="w-full"
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="mr-2 h-4 w-4" />
-                  )}
-                  Nettoyer les Tags Expirés
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Nettoyer les Tags Non Utilisés</CardTitle>
-                <CardDescription>
-                  Supprime les tags qui n'ont pas été utilisés depuis X jours
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cleanup-days">Jours d'inactivité</Label>
-                  <Input
-                    id="cleanup-days"
-                    type="number"
-                    min="1"
-                    value={cleanupDays}
-                    onChange={(e) => setCleanupDays(parseInt(e.target.value) || 90)}
-                  />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Liste des Tags</CardTitle>
+                    <CardDescription>Tous les tags utilisés dans votre store</CardDescription>
+                  </div>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={value => setSelectedCategory(value as TagCategory | 'all')}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filtrer par catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les catégories</SelectItem>
+                      <SelectItem value="behavior">Comportement</SelectItem>
+                      <SelectItem value="segment">Segmentation</SelectItem>
+                      <SelectItem value="custom">Personnalisé</SelectItem>
+                      <SelectItem value="system">Système</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Button
-                  onClick={handleCleanupUnused}
-                  disabled={loading}
-                  variant="destructive"
-                  className="w-full"
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="mr-2 h-4 w-4" />
-                  )}
-                  Nettoyer les Tags Non Utilisés
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Onglet Cron Jobs */}
-        <TabsContent value="cron" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tâches Automatiques (Cron Jobs)</CardTitle>
-              <CardDescription>
-                Gérer les tâches de nettoyage automatique programmées
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : cronJobs.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  Aucun cron job configuré
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {cronJobs.map((job) => (
-                    <div
-                      key={job.job_name}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{job.job_name}</span>
-                          <Badge variant={job.active ? 'default' : 'secondary'}>
-                            {job.active ? 'Actif' : 'Inactif'}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Planification: {job.schedule}
-                        </p>
-                        {job.last_run && (
-                          <p className="text-xs text-muted-foreground">
-                            Dernière exécution:{' '}
-                            {new Date(job.last_run).toLocaleString('fr-FR')}
-                          </p>
-                        )}
-                        {job.next_run && (
-                          <p className="text-xs text-muted-foreground">
-                            Prochaine exécution:{' '}
-                            {new Date(job.next_run).toLocaleString('fr-FR')}
-                          </p>
-                        )}
-                      </div>
-                      <Button
-                        variant={job.active ? 'outline' : 'default'}
-                        size="sm"
-                        onClick={() => handleToggleCronJob(job.job_name, job.active)}
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : tags.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Aucun tag trouvé</p>
+                ) : (
+                  <div className="space-y-2">
+                    {tags.map(tag => (
+                      <div
+                        key={`${tag.tag}-${tag.category}`}
+                        className="flex items-center justify-between p-3 border rounded-lg"
                       >
-                        {job.active ? 'Désactiver' : 'Activer'}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                        <div className="flex items-center gap-3">
+                          <Badge className={categoryColors[tag.category]}>{tag.category}</Badge>
+                          <span className="font-medium">{tag.tag}</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{tag.user_count} utilisateurs</span>
+                          <span>
+                            Dernière utilisation:{' '}
+                            {new Date(tag.last_used_at).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Onglet Tags Expirant */}
+          <TabsContent value="expiring" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tags Expirant Bientôt</CardTitle>
+                <CardDescription>Tags qui vont expirer dans les 7 prochains jours</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : expiringTags.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    Aucun tag n'expire dans les 7 prochains jours
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {expiringTags.map((tag, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Badge className={categoryColors[tag.category as TagCategory]}>
+                            {tag.category}
+                          </Badge>
+                          <span className="font-medium">{tag.tag}</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <Badge variant={tag.days_until_expiry <= 3 ? 'destructive' : 'secondary'}>
+                            {tag.days_until_expiry} jour{tag.days_until_expiry > 1 ? 's' : ''}
+                          </Badge>
+                          <span className="text-muted-foreground">
+                            Expire le {new Date(tag.expires_at).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Onglet Nettoyage */}
+          <TabsContent value="cleanup" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Nettoyer les Tags Expirés</CardTitle>
+                  <CardDescription>
+                    Supprime tous les tags dont la date d'expiration est passée
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    onClick={handleCleanupExpired}
+                    disabled={loading}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    {loading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Nettoyer les Tags Expirés
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Nettoyer les Tags Non Utilisés</CardTitle>
+                  <CardDescription>
+                    Supprime les tags qui n'ont pas été utilisés depuis X jours
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cleanup-days">Jours d'inactivité</Label>
+                    <Input
+                      id="cleanup-days"
+                      type="number"
+                      min="1"
+                      value={cleanupDays}
+                      onChange={e => setCleanupDays(parseInt(e.target.value) || 90)}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleCleanupUnused}
+                    disabled={loading}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    {loading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Nettoyer les Tags Non Utilisés
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Onglet Cron Jobs */}
+          <TabsContent value="cron" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tâches Automatiques (Cron Jobs)</CardTitle>
+                <CardDescription>
+                  Gérer les tâches de nettoyage automatique programmées
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : cronJobs.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Aucun cron job configuré</p>
+                ) : (
+                  <div className="space-y-4">
+                    {cronJobs.map(job => (
+                      <div
+                        key={job.job_name}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{job.job_name}</span>
+                            <Badge variant={job.active ? 'default' : 'secondary'}>
+                              {job.active ? 'Actif' : 'Inactif'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Planification: {job.schedule}
+                          </p>
+                          {job.last_run && (
+                            <p className="text-xs text-muted-foreground">
+                              Dernière exécution: {new Date(job.last_run).toLocaleString('fr-FR')}
+                            </p>
+                          )}
+                          {job.next_run && (
+                            <p className="text-xs text-muted-foreground">
+                              Prochaine exécution: {new Date(job.next_run).toLocaleString('fr-FR')}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          variant={job.active ? 'outline' : 'default'}
+                          size="sm"
+                          onClick={() => handleToggleCronJob(job.job_name, job.active)}
+                        >
+                          {job.active ? 'Désactiver' : 'Activer'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   );
 }
-
-
-
-
-
-
-

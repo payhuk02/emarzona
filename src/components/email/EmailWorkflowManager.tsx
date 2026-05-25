@@ -15,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,19 +55,19 @@ interface EmailWorkflowManagerProps {
   onEditWorkflow?: (workflow: EmailWorkflow) => void;
 }
 
-const  STATUS_LABELS: Record<WorkflowStatus, string> = {
+const STATUS_LABELS: Record<WorkflowStatus, string> = {
   active: 'Actif',
   paused: 'En pause',
   archived: 'Archivé',
 };
 
-const  STATUS_COLORS: Record<WorkflowStatus, string> = {
+const STATUS_COLORS: Record<WorkflowStatus, string> = {
   active: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
   paused: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
   archived: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const  TRIGGER_TYPE_LABELS: Record<string, string> = {
+const TRIGGER_TYPE_LABELS: Record<string, string> = {
   event: 'Événement',
   time: 'Temps',
   condition: 'Condition',
@@ -116,12 +115,27 @@ export const EmailWorkflowManager = ({
   };
 
   const handleToggleStatus = async (workflow: EmailWorkflow) => {
-    const  newStatus: WorkflowStatus = workflow.status === 'active' ? 'paused' : 'active';
+    const newStatus: WorkflowStatus = workflow.status === 'active' ? 'paused' : 'active';
     await updateWorkflow.mutateAsync({
       workflowId: workflow.id,
       payload: { status: newStatus, is_active: newStatus === 'active' },
     });
     refetch();
+  };
+
+  const handleMenuAction = (action: string, workflow: EmailWorkflow) => {
+    switch (action) {
+      case 'edit':
+        onEditWorkflow?.(workflow);
+        break;
+      case 'toggle':
+        void handleToggleStatus(workflow);
+        break;
+      case 'delete':
+        setWorkflowToDelete(workflow.id);
+        setDeleteDialogOpen(true);
+        break;
+    }
   };
 
   if (isLoading) {
@@ -219,82 +233,82 @@ export const EmailWorkflowManager = ({
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Type de déclencheur</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Exécutions</TableHead>
-                  <TableHead>Dernière exécution</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredWorkflows.map(workflow => (
-                  <TableRow key={workflow.id}>
-                    <TableCell className="font-medium">{workflow.name}</TableCell>
-                    <TableCell>
-                      {TRIGGER_TYPE_LABELS[workflow.trigger_type] || workflow.trigger_type}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn(STATUS_COLORS[workflow.status])}>
-                        {STATUS_LABELS[workflow.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{workflow.execution_count}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {workflow.success_count} réussies, {workflow.error_count} erreurs
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {workflow.last_executed_at
-                        ? format(new Date(workflow.last_executed_at), 'dd MMM yyyy HH:mm', {
-                            locale: fr,
-                          })
-                        : 'Jamais'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Select>
-                        <SelectTrigger className="h-8 w-8 p-0">
-
-                            <span className="sr-only">Ouvrir le menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          
-</SelectTrigger>
-                        <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                          <SelectItem value="edit" onSelect={() => onEditWorkflow?.(workflow)}>
-                            <Edit className="mr-2 h-4 w-4" /> Modifier
-                          </SelectItem>
-                          <SelectItem value="delete" onSelect={() => handleToggleStatus(workflow)}>
-                            {workflow.status === 'active' ? (
-                              <>
-                                <Pause className="mr-2 h-4 w-4" /> Mettre en pause
-                              </>
-                            ) : (
-                              <>
-                                <Play className="mr-2 h-4 w-4" /> Activer
-                              </>
-                            )}
-                          </SelectItem>
-                          <SelectItem value="copy" onSelect={() => {
-                              setWorkflowToDelete(workflow.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Type de déclencheur</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Exécutions</TableHead>
+                    <TableHead>Dernière exécution</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredWorkflows.map(workflow => (
+                    <TableRow key={workflow.id}>
+                      <TableCell className="font-medium">{workflow.name}</TableCell>
+                      <TableCell>
+                        {TRIGGER_TYPE_LABELS[workflow.trigger_type] || workflow.trigger_type}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn(STATUS_COLORS[workflow.status])}>
+                          {STATUS_LABELS[workflow.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{workflow.execution_count}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {workflow.success_count} réussies, {workflow.error_count} erreurs
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {workflow.last_executed_at
+                          ? format(new Date(workflow.last_executed_at), 'dd MMM yyyy HH:mm', {
+                              locale: fr,
+                            })
+                          : 'Jamais'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Select onValueChange={action => handleMenuAction(action, workflow)}>
+                          <SelectTrigger
+                            className="h-8 w-8 min-h-[44px] min-w-[44px] border-0 bg-transparent p-0 shadow-none hover:bg-accent [&_svg.opacity-50]:hidden"
+                            aria-label={`Actions pour ${workflow.name}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem value="edit">
+                              <Edit className="mr-2 h-4 w-4" /> Modifier
+                            </SelectItem>
+                            <SelectItem value="toggle">
+                              {workflow.status === 'active' ? (
+                                <>
+                                  <Pause className="mr-2 h-4 w-4" /> Mettre en pause
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="mr-2 h-4 w-4" /> Activer
+                                </>
+                              )}
+                            </SelectItem>
+                            <SelectItem
+                              value="delete"
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -319,9 +333,3 @@ export const EmailWorkflowManager = ({
     </>
   );
 };
-
-
-
-
-
-

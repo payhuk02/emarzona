@@ -7,13 +7,15 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,12 +41,12 @@ interface EmailSegmentManagerProps {
   onPreviewSegment?: (segment: EmailSegment) => void;
 }
 
-const  TYPE_COLORS: Record<SegmentType, string> = {
+const TYPE_COLORS: Record<SegmentType, string> = {
   static: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   dynamic: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
 };
 
-const  TYPE_LABELS: Record<SegmentType, string> = {
+const TYPE_LABELS: Record<SegmentType, string> = {
   static: 'Statique',
   dynamic: 'Dynamique',
 };
@@ -76,6 +78,21 @@ export const EmailSegmentManager = ({
   const handleRefreshCount = async (segmentId: string) => {
     await updateMemberCount.mutateAsync(segmentId);
     refetch();
+  };
+
+  const handleMenuAction = (action: string, segment: EmailSegment) => {
+    switch (action) {
+      case 'preview':
+        onPreviewSegment?.(segment);
+        break;
+      case 'edit':
+        onEditSegment?.(segment);
+        break;
+      case 'delete':
+        setSegmentToDelete(segment.id);
+        setDeleteDialogOpen(true);
+        break;
+    }
   };
 
   if (isLoading) {
@@ -128,7 +145,7 @@ export const EmailSegmentManager = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {segments.map((segment) => (
+                  {segments.map(segment => (
                     <TableRow key={segment.id}>
                       <TableCell>
                         <div>
@@ -150,9 +167,7 @@ export const EmailSegmentManager = ({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
-                            {segment.member_count || 0}
-                          </span>
+                          <span className="text-sm font-medium">{segment.member_count || 0}</span>
                           {segment.type === 'dynamic' && (
                             <Button
                               variant="ghost"
@@ -177,46 +192,30 @@ export const EmailSegmentManager = ({
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Select>
+                        <Select onValueChange={action => handleMenuAction(action, segment)}>
                           <SelectTrigger
-                            className="w-auto"
+                            className="h-8 w-8 min-h-[44px] min-w-[44px] border-0 bg-transparent p-0 shadow-none hover:bg-accent [&_svg.opacity-50]:hidden"
                             aria-label={`Actions pour le segment ${segment.name}`}
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             {onPreviewSegment && (
-                              <SelectItem
-                                value="preview"
-                                onSelect={() => onPreviewSegment(segment)}
-                              >
-                                <div className="flex items-center">
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Prévisualiser
-                                </div>
+                              <SelectItem value="preview">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Prévisualiser
                               </SelectItem>
                             )}
-                            <SelectItem
-                              value="edit"
-                              onSelect={() => onEditSegment?.(segment)}
-                            >
-                              <div className="flex items-center">
-                                <Edit className="h-4 w-4 mr-2" />
-                                Modifier
-                              </div>
+                            <SelectItem value="edit">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Modifier
                             </SelectItem>
                             <SelectItem
                               value="delete"
-                              onSelect={() => {
-                                setSegmentToDelete(segment.id);
-                                setDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive"
+                              className="text-destructive focus:text-destructive"
                             >
-                              <div className="flex items-center">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Supprimer
-                              </div>
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Supprimer
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -253,10 +252,3 @@ export const EmailSegmentManager = ({
     </>
   );
 };
-
-
-
-
-
-
-

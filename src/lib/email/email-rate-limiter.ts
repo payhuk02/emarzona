@@ -11,9 +11,9 @@ import { logger } from '@/lib/logger';
 // ============================================================
 
 interface QueuedEmail {
-  payload: any;
-  resolve: (value: any) => void;
-  reject: (error: any) => void;
+  payload: () => Promise<unknown>;
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
   retryCount: number;
   maxRetries: number;
 }
@@ -55,9 +55,9 @@ export class EmailRateLimiter {
    * Ajouter un email à la queue
    */
   static async enqueue(
-    sendEmailFn: () => Promise<any>,
+    sendEmailFn: () => Promise<unknown>,
     maxRetries: number = 3
-  ): Promise<any> {
+  ): Promise<unknown> {
     return new Promise((resolve, reject) => {
       this.queue.push({
         payload: sendEmailFn,
@@ -106,9 +106,7 @@ export class EmailRateLimiter {
           const batch = this.queue.splice(0, batchSize);
 
           // Traiter le batch en parallèle
-          await Promise.allSettled(
-            batch.map((item) => this.processEmail(item))
-          );
+          await Promise.allSettled(batch.map(item => this.processEmail(item)));
         }
 
         // Attendre 1 seconde avant le prochain batch
@@ -136,9 +134,10 @@ export class EmailRateLimiter {
 
       // Résoudre la promesse
       item.resolve(result);
-    } catch ( _error: any) {
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
       // Si erreur récupérable et retries disponibles, réessayer
-      if (this.isRecoverableError(error) && item.retryCount < item.maxRetries) {
+      if (this.isRecoverableError(err) && item.retryCount < item.maxRetries) {
         item.retryCount++;
         const backoffDelay = Math.pow(2, item.retryCount) * 1000; // Backoff exponentiel
 
@@ -146,7 +145,7 @@ export class EmailRateLimiter {
           retryCount: item.retryCount,
           maxRetries: item.maxRetries,
           backoffDelay,
-          error: error.message,
+          error: err.message,
         });
 
         // Réinsérer dans la queue après le délai
@@ -159,9 +158,9 @@ export class EmailRateLimiter {
         logger.error('Email failed permanently', {
           retryCount: item.retryCount,
           maxRetries: item.maxRetries,
-          error: error.message,
+          error: err.message,
         });
-        item.reject(error);
+        item.reject(err);
       }
     }
   }
@@ -255,11 +254,17 @@ export class EmailRateLimiter {
   /**
    * Vérifier si une erreur est récupérable
    */
-  private static isRecoverableError(error: any): boolean {
+  private static isRecoverableError(error: unknown): boolean {
     if (!error) return false;
 
-    const errorMessage = error.message || String(error);
-    const errorCode = error.code || error.status || error.statusCode;
+    const err = error as {
+      message?: string;
+      code?: number | string;
+      status?: number;
+      statusCode?: number;
+    };
+    const errorMessage = err.message || String(error);
+    const errorCode = err.code || err.status || err.statusCode;
 
     // Erreurs récupérables
     const recoverableErrors = [
@@ -290,16 +295,14 @@ export class EmailRateLimiter {
       'service unavailable',
     ];
 
-    return recoverableMessages.some((msg) =>
-      errorMessage.toLowerCase().includes(msg)
-    );
+    return recoverableMessages.some(msg => errorMessage.toLowerCase().includes(msg));
   }
 
   /**
    * Sleep helper
    */
   private static sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -340,10 +343,3 @@ export class EmailRateLimiter {
 
 // Export instance singleton
 export const emailRateLimiter = EmailRateLimiter;
-
-
-
-
-
-
-

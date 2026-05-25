@@ -15,12 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/stable-dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Copy, Mail } from 'lucide-react';
+import { Plus, MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
 import { useEmailSequences } from '@/hooks/email/useEmailSequences';
 import { useDeleteEmailSequence } from '@/hooks/email/useEmailSequences';
 import type {
@@ -87,6 +82,21 @@ export const EmailSequenceManager = ({
     setDeleteDialogOpen(false);
     setSequenceToDelete(null);
     refetch();
+  };
+
+  const handleMenuAction = (action: string, sequence: EmailSequence) => {
+    switch (action) {
+      case 'steps':
+        onViewSteps?.(sequence);
+        break;
+      case 'edit':
+        onEditSequence?.(sequence);
+        break;
+      case 'delete':
+        setSequenceToDelete(sequence.id);
+        setDeleteDialogOpen(true);
+        break;
+    }
   };
 
   if (isLoading) {
@@ -169,39 +179,33 @@ export const EmailSequenceManager = ({
                         <span className="text-sm font-medium">{sequence.completed_count || 0}</span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`Actions pour la séquence ${sequence.name || sequence.id}`}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                        <Select onValueChange={action => handleMenuAction(action, sequence)}>
+                          <SelectTrigger
+                            className="h-8 w-8 min-h-[44px] min-w-[44px] border-0 bg-transparent p-0 shadow-none hover:bg-accent [&_svg.opacity-50]:hidden"
+                            aria-label={`Actions pour la séquence ${sequence.name || sequence.id}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                             {onViewSteps && (
-                              <DropdownMenuItem onClick={() => onViewSteps(sequence)}>
+                              <SelectItem value="steps">
                                 <Eye className="h-4 w-4 mr-2" />
                                 Voir les étapes
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
-                            <DropdownMenuItem onClick={() => onEditSequence?.(sequence)}>
+                            <SelectItem value="edit">
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSequenceToDelete(sequence.id);
-                                setDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive"
+                            </SelectItem>
+                            <SelectItem
+                              value="delete"
+                              className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}
