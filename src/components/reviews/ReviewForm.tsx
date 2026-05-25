@@ -15,10 +15,22 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ReviewStars } from './ReviewStars';
 import { Upload, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ProductType } from '@/types/product';
+import type { ProductType } from '@/types/unified-product';
 import type { CreateReviewPayload } from '@/types/review';
 import { getDetailedRatingFields, getDetailedRatingLabel } from '@/types/review';
 import { useSpaceInputFix } from '@/hooks/useSpaceInputFix';
+
+type ReviewFormValues = {
+  rating: number;
+  title?: string;
+  content: string;
+  quality_rating?: number;
+  value_rating?: number;
+  service_rating?: number;
+  delivery_rating?: number;
+  course_content_rating?: number;
+  instructor_rating?: number;
+};
 
 interface ReviewFormProps {
   productId: string;
@@ -29,7 +41,7 @@ interface ReviewFormProps {
   isLoading?: boolean;
 }
 
-export const ReviewForm : React.FC<ReviewFormProps> = ({
+export const ReviewForm: React.FC<ReviewFormProps> = ({
   productId,
   productType,
   orderId,
@@ -37,7 +49,13 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
   onCancel,
   isLoading,
 }) => {
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<any>();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ReviewFormValues>();
   const { handleKeyDown: handleSpaceKeyDown } = useSpaceInputFix();
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
@@ -64,8 +82,8 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
     setMediaPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const onFormSubmit = (data: any) => {
-    const  payload: CreateReviewPayload = {
+  const onFormSubmit = (data: ReviewFormValues) => {
+    const payload: CreateReviewPayload = {
       product_id: productId,
       product_type: productType,
       order_id: orderId,
@@ -87,7 +105,7 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
       delivery_rating?: number;
       [key: string]: unknown;
     }
-    const  reviewPayload: ReviewPayload = {
+    const reviewPayload: ReviewPayload = {
       product_id: data.product_id,
       rating: data.rating,
       comment: data.comment,
@@ -117,11 +135,9 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
               rating={rating}
               size="xl"
               interactive
-              onChange={(value) => setValue('rating', value)}
+              onChange={value => setValue('rating', value)}
             />
-            {errors.rating && (
-              <p className="text-sm text-destructive">La note est requise</p>
-            )}
+            {errors.rating && <p className="text-sm text-destructive">La note est requise</p>}
           </div>
 
           {/* Ratings détaillés */}
@@ -131,14 +147,12 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {detailedFields.map(field => (
                   <div key={field} className="space-y-1">
-                    <Label className="text-sm font-normal">
-                      {getDetailedRatingLabel(field)}
-                    </Label>
+                    <Label className="text-sm font-normal">{getDetailedRatingLabel(field)}</Label>
                     <ReviewStars
                       rating={watch(field, 0)}
                       size="md"
                       interactive
-                      onChange={(value) => setValue(field, value)}
+                      onChange={value => setValue(field, value)}
                     />
                   </div>
                 ))}
@@ -223,9 +237,7 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
                     onChange={handleMediaUpload}
                   />
                   <Upload className="w-5 h-5 text-muted-foreground mb-1" />
-                  <span className="text-xs text-muted-foreground text-center px-1">
-                    Ajouter
-                  </span>
+                  <span className="text-xs text-muted-foreground text-center px-1">Ajouter</span>
                 </label>
               )}
             </div>
@@ -242,18 +254,10 @@ export const ReviewForm : React.FC<ReviewFormProps> = ({
             </Button>
           )}
           <Button type="submit" disabled={isLoading || !rating}>
-            {isLoading ? 'Publication...' : 'Publier l\'avis'}
+            {isLoading ? 'Publication...' : "Publier l'avis"}
           </Button>
         </CardFooter>
       </form>
     </Card>
   );
 };
-
-
-
-
-
-
-
-

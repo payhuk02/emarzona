@@ -22,7 +22,8 @@ import {
   useCreateReview,
   useProductReviews,
 } from '@/hooks/useReviews';
-import type { ProductType } from '@/types/product';
+import type { ProductType } from '@/types/unified-product';
+import type { CreateReviewPayload } from '@/types/review';
 import { ReviewsErrorBoundary, FormErrorBoundary, ReviewsPlaceholder } from '@/components/errors';
 
 interface ProductReviewsSummaryProps {
@@ -30,7 +31,7 @@ interface ProductReviewsSummaryProps {
   productType: ProductType;
 }
 
-export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
+export const ProductReviewsSummary: React.FC<ProductReviewsSummaryProps> = ({
   productId,
   productType,
 }) => {
@@ -43,7 +44,7 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
   const { data: reviews } = useProductReviews(productId);
   const createReview = useCreateReview();
 
-  const handleCreateReview = (data: any) => {
+  const handleCreateReview = (data: CreateReviewPayload) => {
     createReview.mutate(data, {
       onSuccess: () => {
         setShowReviewForm(false);
@@ -57,9 +58,7 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Avis clients</h2>
         <div className="flex items-center gap-2">
-          {reviews && reviews.length > 0 && (
-            <ExportReviewsButton reviews={reviews} />
-          )}
+          {reviews && reviews.length > 0 && <ExportReviewsButton reviews={reviews} />}
           {canReview?.can_review && (
             <Button onClick={() => setShowReviewForm(true)}>
               <Star className="w-4 h-4 mr-2" />
@@ -73,9 +72,7 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
       {canReview && !canReview.can_review && canReview.reason === 'No purchase found' && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Vous devez acheter ce produit pour laisser un avis
-          </AlertDescription>
+          <AlertDescription>Vous devez acheter ce produit pour laisser un avis</AlertDescription>
         </Alert>
       )}
 
@@ -83,9 +80,7 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
       {canReview && !canReview.can_review && canReview.reason === 'Already reviewed' && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Vous avez déjà laissé un avis pour ce produit
-          </AlertDescription>
+          <AlertDescription>Vous avez déjà laissé un avis pour ce produit</AlertDescription>
         </Alert>
       )}
 
@@ -94,33 +89,20 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Statistiques */}
           <div className="lg:col-span-1">
-            <ReviewsStats
-              stats={stats}
-              onFilterByRating={setSelectedRating}
-            />
+            <ReviewsStats stats={stats} onFilterByRating={setSelectedRating} />
           </div>
 
           {/* Liste des avis */}
           <div className="lg:col-span-2">
-            <ReviewsList
-              productId={productId}
-              onReplyToReview={setReplyToReviewId}
-            />
+            <ReviewsList productId={productId} onReplyToReview={setReplyToReviewId} />
           </div>
         </div>
       </ReviewsErrorBoundary>
 
       {/* Dialog formulaire de review */}
       {useResponsiveModal().useBottomSheet ? (
-        <BottomSheet
-          open={showReviewForm}
-          onOpenChange={setShowReviewForm}
-          title="Laisser un avis"
-        >
-          <FormErrorBoundary
-            formName="Review Form"
-            onReset={() => setShowReviewForm(false)}
-          >
+        <BottomSheet open={showReviewForm} onOpenChange={setShowReviewForm} title="Laisser un avis">
+          <FormErrorBoundary formName="Review Form" onReset={() => setShowReviewForm(false)}>
             <ReviewForm
               productId={productId}
               productType={productType}
@@ -136,10 +118,7 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
             <DialogHeader>
               <DialogTitle>Laisser un avis</DialogTitle>
             </DialogHeader>
-            <FormErrorBoundary
-              formName="Review Form"
-              onReset={() => setShowReviewForm(false)}
-            >
+            <FormErrorBoundary formName="Review Form" onReset={() => setShowReviewForm(false)}>
               <ReviewForm
                 productId={productId}
                 productType={productType}
@@ -196,11 +175,3 @@ export const ProductReviewsSummary : React.FC<ProductReviewsSummaryProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-

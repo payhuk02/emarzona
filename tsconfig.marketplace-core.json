@@ -12,14 +12,10 @@
   },
   "include": [
     "src/vite-env.d.ts",
-    "src/pages/Marketplace.tsx",
-    "src/pages/Products.tsx",
-    "src/pages/ProductDetail.tsx",
-    "src/pages/Storefront.tsx",
-    "src/hooks/cart/useCart.ts",
-    "src/hooks/useMarketplaceProducts.ts",
-    "src/components/storefront/ProductCard.tsx",
-    "src/components/marketplace/ProductCard.tsx"
+    "src/components/marketplace/ProductCard.tsx",
+    "src/components/marketplace/ProductCardModern.tsx",
+    "src/components/marketplace/ProductComparison.tsx",
+    "src/components/storefront/ProductCard.tsx"
   ],
   "exclude": ["src/**/__tests__/**", "src/**/*.test.*", "src/**/*.spec.*", "src/test/**"]
 }

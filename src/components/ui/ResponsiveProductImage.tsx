@@ -205,7 +205,7 @@ export const ResponsiveProductImage = ({
             objectFit: fit,
             objectPosition: 'center',
             // Qualité d'affichage optimisée
-            imageRendering: 'high-quality',
+            imageRendering: 'auto',
             // Coins arrondis hérités du parent
             borderRadius: 'inherit',
             // Stabilité garantie - pas de transformations
@@ -284,9 +284,3 @@ export const ProductBanner = ({
     </div>
   );
 };
-
-
-
-
-
-

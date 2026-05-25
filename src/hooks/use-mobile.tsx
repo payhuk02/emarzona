@@ -16,7 +16,7 @@ export function useIsMobile() {
 
   React.useEffect(() => {
     // Debounce pour éviter trop de re-renders lors du resize
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
 

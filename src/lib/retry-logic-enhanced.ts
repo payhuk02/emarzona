@@ -1,7 +1,7 @@
 /**
  * Système de retry amélioré avec stratégies avancées
  * Date: 1 Février 2025
- * 
+ *
  * Améliore la gestion des erreurs avec :
  * - Retry avec backoff exponentiel
  * - Retry conditionnel selon le type d'erreur
@@ -36,42 +36,58 @@ export interface RetryConfig {
   shouldRetry?: (error: Error, attempt: number) => boolean;
 }
 
+type RetryableErrorLike = {
+  message?: string;
+  code?: string;
+  status?: number;
+  statusCode?: number;
+  response?: { status?: number };
+};
+
+function asRetryableErrorLike(error: unknown): RetryableErrorLike {
+  if (error && typeof error === 'object') {
+    return error as RetryableErrorLike;
+  }
+  return {};
+}
+
 /**
  * Détecte le type d'erreur
  */
-export function detectErrorType(error: any): ErrorType {
+export function detectErrorType(error: unknown): ErrorType {
   if (!error) return ErrorType.UNKNOWN;
+  const e = asRetryableErrorLike(error);
 
   // Erreur réseau
   if (
-    error.message?.includes('network') ||
-    error.message?.includes('timeout') ||
-    error.message?.includes('fetch failed') ||
-    error.code === 'ECONNREFUSED' ||
-    error.code === 'ETIMEDOUT'
+    e.message?.includes('network') ||
+    e.message?.includes('timeout') ||
+    e.message?.includes('fetch failed') ||
+    e.code === 'ECONNREFUSED' ||
+    e.code === 'ETIMEDOUT'
   ) {
     return ErrorType.NETWORK;
   }
 
   // Rate limiting
-  if (error.status === 429 || error.statusCode === 429) {
+  if (e.status === 429 || e.statusCode === 429) {
     return ErrorType.RATE_LIMIT;
   }
 
   // Erreur serveur
   if (
-    error.status >= 500 ||
-    error.statusCode >= 500 ||
-    (error.response && error.response.status >= 500)
+    (e.status ?? 0) >= 500 ||
+    (e.statusCode ?? 0) >= 500 ||
+    (e.response && (e.response.status ?? 0) >= 500)
   ) {
     return ErrorType.SERVER;
   }
 
   // Erreur client
   if (
-    error.status >= 400 ||
-    error.statusCode >= 400 ||
-    (error.response && error.response.status >= 400)
+    (e.status ?? 0) >= 400 ||
+    (e.statusCode ?? 0) >= 400 ||
+    (e.response && (e.response.status ?? 0) >= 400)
   ) {
     return ErrorType.CLIENT;
   }
@@ -82,10 +98,11 @@ export function detectErrorType(error: any): ErrorType {
 /**
  * Détermine si une erreur est retryable
  */
-export function isRetryableError(error: any, attempt: number, maxRetries: number): boolean {
+export function isRetryableError(error: unknown, attempt: number, maxRetries: number): boolean {
   if (attempt >= maxRetries) return false;
 
   const errorType = detectErrorType(error);
+  const e = asRetryableErrorLike(error);
 
   // Les erreurs réseau sont toujours retryables
   if (errorType === ErrorType.NETWORK) return true;
@@ -99,7 +116,7 @@ export function isRetryableError(error: any, attempt: number, maxRetries: number
   // Les erreurs client ne sont généralement pas retryables
   if (errorType === ErrorType.CLIENT) {
     // Sauf pour certaines erreurs spécifiques
-    const status = error.status || error.statusCode || error.response?.status;
+    const status = e.status || e.statusCode || e.response?.status;
     if (status === 408 || status === 409) return true; // Timeout ou conflit
     return false;
   }
@@ -110,15 +127,8 @@ export function isRetryableError(error: any, attempt: number, maxRetries: number
 /**
  * Calcule le délai avant le prochain retry avec backoff exponentiel
  */
-export function calculateRetryDelay(
-  attempt: number,
-  config: RetryConfig
-): number {
-  const {
-    initialDelay = 1000,
-    maxDelay = 30000,
-    backoffMultiplier = 2,
-  } = config;
+export function calculateRetryDelay(attempt: number, config: RetryConfig): number {
+  const { initialDelay = 1000, maxDelay = 30000, backoffMultiplier = 2 } = config;
 
   // Pour rate limiting, utiliser un délai plus long
   const errorType = detectErrorType({});
@@ -141,18 +151,14 @@ export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   config: RetryConfig = {}
 ): Promise<T> {
-  const {
-    maxRetries = 3,
-    onRetry,
-    shouldRetry,
-  } = config;
+  const { maxRetries = 3, onRetry, shouldRetry } = config;
 
-  let  lastError: Error | null = null;
+  let lastError: Error | null = null;
 
-  for (let  attempt= 0; attempt <= maxRetries; attempt++) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const result = await fn();
-      
+
       // Si succès après retry, logger
       if (attempt > 0) {
         logger.info('Retry successful', {
@@ -163,23 +169,23 @@ export async function retryWithBackoff<T>(
       }
 
       return result;
-    } catch ( _error: any) {
-      lastError = error;
+    } catch (_error: unknown) {
+      lastError = _error instanceof Error ? _error : new Error(String(_error));
 
       // Vérifier si on doit retry
       const shouldRetryThis = shouldRetry
-        ? shouldRetry(error, attempt)
-        : isRetryableError(error, attempt, maxRetries);
+        ? shouldRetry(lastError, attempt)
+        : isRetryableError(_error, attempt, maxRetries);
 
       if (!shouldRetryThis || attempt >= maxRetries) {
         // Ne plus retry, lancer l'erreur
         logger.error('Retry exhausted', {
           attempt,
           maxRetries,
-          errorType: detectErrorType(error),
-          error: error.message,
+          errorType: detectErrorType(_error),
+          error: lastError.message,
         });
-        throw error;
+        throw lastError;
       }
 
       // Calculer le délai
@@ -190,13 +196,13 @@ export async function retryWithBackoff<T>(
         attempt: attempt + 1,
         maxRetries,
         delay,
-        errorType: detectErrorType(error),
-        error: error.message,
+        errorType: detectErrorType(_error),
+        error: lastError.message,
       });
 
       // Callback onRetry
       if (onRetry) {
-        onRetry(attempt + 1, error);
+        onRetry(attempt + 1, lastError);
       }
 
       // Attendre avant de retry
@@ -236,7 +242,7 @@ export class CircuitBreaker {
 
     try {
       const result = await fn();
-      
+
       // Succès : réinitialiser le circuit
       if (this.state === 'half-open') {
         this.state = 'closed';
@@ -288,24 +294,20 @@ export class RateLimiter {
 
   async waitIfNeeded(): Promise<void> {
     const now = Date.now();
-    
+
     // Nettoyer les requêtes anciennes
-    this.requests = this.requests.filter(
-      timestamp => now - timestamp < this.windowMs
-    );
+    this.requests = this.requests.filter(timestamp => now - timestamp < this.windowMs);
 
     // Si on a atteint la limite, attendre
     if (this.requests.length >= this.maxRequests) {
       const oldestRequest = this.requests[0];
       const waitTime = this.windowMs - (now - oldestRequest);
-      
+
       if (waitTime > 0) {
         logger.info('Rate limiter: waiting', { waitTime });
         await new Promise(resolve => setTimeout(resolve, waitTime));
         // Nettoyer à nouveau après l'attente
-        this.requests = this.requests.filter(
-          timestamp => Date.now() - timestamp < this.windowMs
-        );
+        this.requests = this.requests.filter(timestamp => Date.now() - timestamp < this.windowMs);
       }
     }
 
@@ -340,10 +342,3 @@ export async function executeWithResilience<T>(
   // Sinon, juste retry
   return retryWithBackoff(fn, retryConfig);
 }
-
-
-
-
-
-
-

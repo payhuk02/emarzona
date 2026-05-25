@@ -150,7 +150,7 @@ export function useStockAlerts(userId: string | null) {
           throw error;
         }
 
-        return (data || []) as StockAlert[];
+        return (data || []) as unknown as StockAlert[];
       } catch (error) {
         logger.error('Error in useStockAlerts:', error);
         return [];

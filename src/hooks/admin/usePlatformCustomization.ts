@@ -362,16 +362,18 @@ export const usePlatformCustomization = () => {
         setIsSaving(false);
         return true;
       } catch (_error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = _error instanceof Error ? _error.message : String(_error);
         logger.error('Error saving customization', {
           error: errorMessage,
           section,
           level: 'section',
-          extra: { error },
+          extra: { error: _error },
         });
         toast({
           title: 'Erreur de sauvegarde',
-          description: error.message || 'Impossible de sauvegarder les modifications',
+          description:
+            (_error instanceof Error ? _error.message : null) ||
+            'Impossible de sauvegarder les modifications',
           variant: 'destructive',
         });
         setIsSaving(false);
@@ -482,13 +484,13 @@ export const usePlatformCustomization = () => {
 
       return true;
     } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = _error instanceof Error ? _error.message : String(_error);
       logger.error('Error saving all customization', {
         error: errorMessage,
         level: 'section',
-        extra: { error },
+        extra: { error: _error },
       });
-      throw error;
+      throw _error;
     } finally {
       setIsSaving(false);
     }

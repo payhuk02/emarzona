@@ -7,6 +7,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from './logger';
+import type { Json } from '@/integrations/supabase/types';
 import type { WebhookEventType } from '@/types/webhooks';
 
 /**
@@ -28,7 +29,7 @@ export async function triggerWebhook(
     const { data, error } = await supabase.rpc('trigger_webhook', {
       p_event_type: eventType,
       p_event_id: eventId,
-      p_event_data: eventData,
+      p_event_data: eventData as Json,
       p_store_id: storeId ?? undefined,
     });
 

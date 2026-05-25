@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Crown, Eye, Package, Share2, Star, X } from 'lucide-react';
+import { BarChart3, CheckCircle2, Crown, Eye, Package, Share2, Star, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/types/marketplace';
@@ -141,7 +141,7 @@ const ProductComparison = ({
                           -{getDiscountPercent(product)}%
                         </Badge>
                       )}
-                      {product.is_featured && (
+                      {(product as { is_featured?: boolean }).is_featured && (
                         <Badge className="bg-yellow-600 text-white text-xs">
                           <Crown className="h-3 w-3 mr-1" />
                           Vedette
@@ -169,7 +169,7 @@ const ProductComparison = ({
 
                   <div className="text-sm text-slate-400 mb-2">
                     Par {product.stores?.name}
-                    {product.stores?.verified && (
+                    {(product.stores as { verified?: boolean } | undefined)?.verified && (
                       <CheckCircle2 className="h-3 w-3 inline ml-1 text-green-400" />
                     )}
                   </div>
@@ -214,10 +214,12 @@ const ProductComparison = ({
                           {item.type === 'text' && (
                             <span className="text-white">
                               {item.key.includes('.')
-                                ? product.stores?.[
-                                    item.key.split('.')[1] as keyof typeof product.stores
-                                  ] || 'N/A'
-                                : product[item.key as keyof Product] || 'N/A'}
+                                ? String(
+                                    product.stores?.[
+                                      item.key.split('.')[1] as keyof typeof product.stores
+                                    ] ?? 'N/A'
+                                  )
+                                : String(product[item.key as keyof Product] ?? 'N/A')}
                             </span>
                           )}
 
@@ -237,7 +239,7 @@ const ProductComparison = ({
 
                           {item.type === 'number' && (
                             <span className="text-white">
-                              {product[item.key as keyof Product] || 0}
+                              {String(product[item.key as keyof Product] ?? 0)}
                             </span>
                           )}
 
@@ -316,9 +318,3 @@ const ProductComparison = ({
 };
 
 export default ProductComparison;
-
-
-
-
-
-

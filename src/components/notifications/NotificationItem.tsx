@@ -26,14 +26,22 @@ interface NotificationItemProps {
 }
 
 // Mapping type → icône + couleur
+const defaultMeta = {
+  icon: Bell,
+  color: 'text-gray-600',
+  bgColor: 'bg-gray-50',
+};
+
 const getNotificationMeta = (type: NotificationType) => {
-  const  meta: Record<NotificationType, { icon: any; color: string; bgColor: string }> = {
+  const meta: Partial<
+    Record<NotificationType, { icon: typeof Bell; color: string; bgColor: string }>
+  > = {
     course_enrollment: {
       icon: GraduationCap,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
-    lesson_complete: {
+    course_lesson_complete: {
       icon: CheckCircle2,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
@@ -43,59 +51,51 @@ const getNotificationMeta = (type: NotificationType) => {
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
-    certificate_ready: {
+    course_certificate_ready: {
       icon: Award,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
     },
-    new_course: {
+    course_new_content: {
       icon: GraduationCap,
       color: 'text-cyan-600',
       bgColor: 'bg-cyan-50',
     },
-    course_update: {
-      icon: Bell,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-    },
-    quiz_passed: {
+    course_quiz_passed: {
       icon: CheckCircle2,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
-    quiz_failed: {
+    course_quiz_failed: {
       icon: AlertCircle,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
     },
-    affiliate_sale: {
+    affiliate_commission_earned: {
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
-    affiliate_commission: {
+    affiliate_commission_paid: {
       icon: TrendingUp,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
-    comment_reply: {
+    system_announcement: defaultMeta,
+    product_review_received: {
       icon: MessageCircle,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
-    instructor_message: {
+    vendor_message_received: {
       icon: MessageCircle,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
-    system: {
-      icon: Bell,
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
-    },
+    customer_message_received: defaultMeta,
   };
 
-  return meta[type] || meta.system;
+  return meta[type] ?? defaultMeta;
 };
 
 const NotificationItemComponent = ({ notification, onClick }: NotificationItemProps) => {
@@ -134,9 +134,7 @@ const NotificationItemComponent = ({ notification, onClick }: NotificationItemPr
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-            {notification.message}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{notification.message}</p>
 
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-muted-foreground">{timeAgo}</span>
@@ -166,10 +164,3 @@ export const NotificationItem = React.memo(NotificationItemComponent, (prevProps
 });
 
 NotificationItem.displayName = 'NotificationItem';
-
-
-
-
-
-
-

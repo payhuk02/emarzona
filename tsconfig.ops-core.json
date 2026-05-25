@@ -12,17 +12,15 @@
   },
   "include": [
     "src/vite-env.d.ts",
-    "src/pages/Dashboard.tsx",
     "src/pages/notifications/NotificationsManagement.tsx",
     "src/pages/admin/AdminWebhookManagement.tsx",
-    "src/components/dashboard/DashboardStats.tsx",
-    "src/components/dashboard/DashboardCharts.tsx",
     "src/components/notifications/NotificationBell.tsx",
     "src/components/notifications/NotificationDropdown.tsx",
+    "src/components/notifications/NotificationItem.tsx",
     "src/hooks/useNotifications.ts",
-    "src/hooks/useDashboardStats.ts",
-    "src/lib/webhooks.ts",
-    "src/lib/notifications/unified-notifications.ts"
+    "src/hooks/webhooks/useWebhooks.ts",
+    "src/hooks/useStore.ts",
+    "src/lib/webhooks.ts"
   ],
   "exclude": ["src/**/__tests__/**", "src/**/*.test.*", "src/**/*.spec.*", "src/test/**"]
 }

@@ -9,12 +9,14 @@ import { Badge } from '@/components/ui/badge';
  * Type étendu pour Product avec propriétés optionnelles supplémentaires
  */
 interface ExtendedProduct extends Product {
+  short_description?: string | null;
   is_featured?: boolean;
-  pricing_model?: 'subscription' | 'one-time';
+  pricing_model?: 'subscription' | 'one-time' | 'free' | 'pay-what-you-want';
   downloadable_files?: string[];
   licensing_type?: 'plr' | 'copyrighted' | 'standard';
   stock_quantity?: number;
   purchases_count?: number;
+  promo_price?: number | null;
   hide_purchase_count?: boolean | null;
   hide_rating?: boolean | null;
   hide_reviews_count?: boolean | null;
@@ -48,7 +50,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
 import { PriceStockAlertButton } from '@/components/marketplace/PriceStockAlertButton';
-import { stripHtmlTags as safeStripHtml } from '@/lib/utils';
 import { PaymentOptionsBadge, getPaymentOptions } from '@/components/products/PaymentOptionsBadge';
 import { PricingModelBadge } from '@/components/products/PricingModelBadge';
 import {
@@ -72,6 +73,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   const [_userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const isDigital = product.product_type === 'digital';
+  const extendedProduct = product as ExtendedProduct;
 
   // Récupérer l'utilisateur pour les alertes
   useEffect(() => {
@@ -122,7 +124,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
 
     // Utiliser la fonction sécurisée de utils
     try {
-      return safeStripHtml(html);
+      const temp = document.createElement('div');
+      temp.textContent = html;
+      return temp.textContent || '';
     } catch (_e) {
       // Fallback : utiliser textContent (plus sûr que innerHTML)
       const temp = document.createElement('div');
@@ -132,10 +136,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
   }, []);
 
   // Générer une description courte - mémorisé
-  const shortDescription= useMemo((): string | undefined => {
-    let  rawText= '';
+  const shortDescription = useMemo((): string | undefined => {
+    let rawText = '';
 
-    const extendedProduct = product as Product & Partial<UnifiedProduct>;
     if (extendedProduct.short_description && extendedProduct.short_description.trim()) {
       rawText = extendedProduct.short_description;
     } else if (product.description && product.description.trim()) {
@@ -151,7 +154,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
     }
 
     return cleanText;
-  }, [product, product.description, product.short_description, stripHtmlTags]);
+  }, [product, extendedProduct.short_description, stripHtmlTags]);
 
   // Gérer les favoris - mémorisé
   const handleFavorite = useCallback(
@@ -204,7 +207,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         storeId: product.store_id,
         productId: product.id,
         amount: price,
-        currency: product.currency ?? 'XOF',
+        currency: (product.currency ?? 'XOF') as import('@/lib/currency-converter').Currency,
         description: `Achat de ${product.name}`,
         customerEmail: user.email,
         customerName: user.user_metadata?.full_name || user.email.split('@')[0],
@@ -226,8 +229,8 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
       } else {
         throw new Error("Échec de l'initialisation du paiement");
       }
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+    } catch (_error: unknown) {
+      const errorMessage = _error instanceof Error ? _error.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
         description: errorMessage || "Impossible d'initier le paiement",
@@ -267,7 +270,6 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         <Link to={generateProductUrl(storeSlug, product.slug)} className="block w-full h-full">
           <ResponsiveProductImage
             src={product.image_url || '/placeholder.svg'}
-            loading="lazy"
             alt={product.name}
             className="w-full h-full product-image transition-transform duration-300 group-hover:scale-110"
             priority={false}
@@ -327,7 +329,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         {extendedProduct.licensing_type && (
           <div
             className="absolute top-3 left-3 flex flex-col gap-1 z-10"
-            style={{ marginTop: isNew() || extendedProduct.is_featured ? '48px' : '0px' }}
+            style={{ marginTop: isNew || extendedProduct.is_featured ? '48px' : '0px' }}
           >
             {extendedProduct.licensing_type === 'plr' && (
               <Badge
@@ -492,7 +494,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
             {/* Badge taux d'affiliation */}
             {(() => {
               // Gérer le cas où Supabase retourne un objet, un tableau, ou null
-              let  affiliateSettings= null;
+              let affiliateSettings = null;
 
               if (product.product_affiliate_settings) {
                 if (Array.isArray(product.product_affiliate_settings)) {
@@ -741,9 +743,3 @@ const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
 ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
-
-
-
-
-
-

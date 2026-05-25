@@ -181,7 +181,9 @@ export const useProductsOptimized = (
                     affiliate_enabled: product.affiliate_enabled as boolean,
                   }
                 : null,
-            } as Product & {
+              store_id: (product.store_id as string) ?? '',
+              digital_file_url: (product.digital_file_url as string | null) ?? null,
+            } as unknown as Product & {
               effective_price: number;
               sales_last_30_days: number;
               revenue_last_30_days: number;

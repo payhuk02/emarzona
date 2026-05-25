@@ -13,7 +13,21 @@ import { logger } from '@/lib/logger';
 import { useLCPPreload } from '@/hooks/useLCPPreload';
 import { generateProductUrl } from '@/lib/store-utils';
 import { redirectToPlatformLogin } from '@/lib/auth-routes';
-import { isSupportedCurrency } from '@/lib/currency-converter';
+import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
+
+/** Client Supabase assoupli pour tables absentes du schéma généré */
+type LooseSupabaseClient = {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (
+        column: string,
+        value: string
+      ) => {
+        single: () => Promise<{ data: unknown; error: unknown }>;
+      };
+    };
+  };
+};
 import type {
   AppliedBuyNowCoupon,
   CheckoutFormData,
@@ -244,7 +258,7 @@ const Checkout = () => {
               .single();
 
             if (physicalVariant) {
-              setSelectedVariant(physicalVariant as CheckoutVariant);
+              setSelectedVariant(physicalVariant as unknown as CheckoutVariant);
             } else {
               // Si pas trouvé, essayer product_variants (relation générique si elle existe)
               const { data: genericVariant } = await supabaseLoose
@@ -254,7 +268,7 @@ const Checkout = () => {
                 .single();
 
               if (genericVariant) {
-                setSelectedVariant(genericVariant as CheckoutVariant);
+                setSelectedVariant(genericVariant as unknown as CheckoutVariant);
               }
             }
           } catch (variantError) {

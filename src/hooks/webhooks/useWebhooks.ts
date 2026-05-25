@@ -14,8 +14,10 @@ import type {
   WebhookDeliveryFilters,
 } from '@/types/webhooks';
 
-const WEBHOOK_FIELDS = 'id, store_id, name, description, url, secret, events, status, retry_count, timeout_seconds, rate_limit_per_minute, custom_headers, verify_ssl, include_payload, total_deliveries, successful_deliveries, failed_deliveries, last_triggered_at, created_at, updated_at';
-const WEBHOOK_DELIVERY_FIELDS = 'id, webhook_id, event_type, event_id, status, request_headers, request_body, response_status, response_headers, response_body, response_time_ms, error_message, retry_attempt, max_retries, next_retry_at, triggered_at, completed_at, created_at';
+const WEBHOOK_FIELDS =
+  'id, store_id, name, description, url, secret, events, status, retry_count, timeout_seconds, rate_limit_per_minute, custom_headers, verify_ssl, include_payload, total_deliveries, successful_deliveries, failed_deliveries, last_triggered_at, created_at, updated_at';
+const WEBHOOK_DELIVERY_FIELDS =
+  'id, webhook_id, event_type, event_id, status, request_headers, request_body, response_status, response_headers, response_body, response_time_ms, error_message, retry_attempt, max_retries, next_retry_at, triggered_at, completed_at, created_at';
 
 // ============================================================================
 // useWebhooks: Liste tous les webhooks d'un store
@@ -27,7 +29,7 @@ export const useWebhooks = (storeId: string | undefined, filters?: WebhookFilter
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('webhooks')
         .select(WEBHOOK_FIELDS)
         .eq('store_id', storeId)
@@ -42,7 +44,9 @@ export const useWebhooks = (storeId: string | undefined, filters?: WebhookFilter
       }
 
       if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,url.ilike.%${filters.search}%`);
+        query = query.or(
+          `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,url.ilike.%${filters.search}%`
+        );
       }
 
       const { data, error } = await query;
@@ -88,9 +92,10 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: async (form: CreateWebhookForm & { store_id: string }) => {
       // Générer un secret si non fourni
-      let  secret= form.secret;
+      let secret = form.secret;
       if (!secret) {
-        const { data: secretData, error: secretError } = await supabase.rpc('generate_webhook_secret');
+        const { data: secretData, error: secretError } =
+          await supabase.rpc('generate_webhook_secret');
         if (secretError) throw secretError;
         secret = secretData;
       }
@@ -118,7 +123,7 @@ export const useCreateWebhook = () => {
       if (error) throw error;
       return data as Webhook;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['webhooks', data.store_id] });
       toast({
         title: 'Webhook créé',
@@ -155,7 +160,8 @@ export const useUpdateWebhook = () => {
       if (form.status !== undefined) updates.status = form.status;
       if (form.retry_count !== undefined) updates.retry_count = form.retry_count;
       if (form.timeout_seconds !== undefined) updates.timeout_seconds = form.timeout_seconds;
-      if (form.rate_limit_per_minute !== undefined) updates.rate_limit_per_minute = form.rate_limit_per_minute;
+      if (form.rate_limit_per_minute !== undefined)
+        updates.rate_limit_per_minute = form.rate_limit_per_minute;
       if (form.custom_headers !== undefined) updates.custom_headers = form.custom_headers;
       if (form.verify_ssl !== undefined) updates.verify_ssl = form.verify_ssl;
       if (form.include_payload !== undefined) updates.include_payload = form.include_payload;
@@ -170,7 +176,7 @@ export const useUpdateWebhook = () => {
       if (error) throw error;
       return data as Webhook;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['webhook', data.id] });
       queryClient.invalidateQueries({ queryKey: ['webhooks', data.store_id] });
       toast({
@@ -205,15 +211,12 @@ export const useDeleteWebhook = () => {
         .eq('id', webhookId)
         .single();
 
-      const { error } = await supabase
-        .from('webhooks')
-        .delete()
-        .eq('id', webhookId);
+      const { error } = await supabase.from('webhooks').delete().eq('id', webhookId);
 
       if (error) throw error;
       return { webhookId, storeId: webhook?.store_id };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['webhooks', data.storeId] });
       toast({
         title: 'Webhook supprimé',
@@ -247,11 +250,11 @@ export const useTestWebhook = () => {
       if (error) throw error;
       return deliveryId as string;
     },
-    onSuccess: (deliveryId) => {
+    onSuccess: deliveryId => {
       queryClient.invalidateQueries({ queryKey: ['webhook-deliveries'] });
       toast({
         title: 'Test envoyé',
-        description: 'Le webhook de test a été envoyé. Vérifiez l\'historique des livraisons.',
+        description: "Le webhook de test a été envoyé. Vérifiez l'historique des livraisons.",
       });
       // Poll pour voir le résultat
       setTimeout(() => {
@@ -261,7 +264,7 @@ export const useTestWebhook = () => {
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'envoi du test',
+        description: error.message || "Erreur lors de l'envoi du test",
         variant: 'destructive',
       });
     },
@@ -281,7 +284,7 @@ export const useWebhookDeliveries = (
     queryFn: async () => {
       if (!webhookId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('webhook_deliveries')
         .select(WEBHOOK_DELIVERY_FIELDS)
         .eq('webhook_id', webhookId)
@@ -289,7 +292,7 @@ export const useWebhookDeliveries = (
         .limit(100);
 
       if (filters?.event_type) {
-        query = query.eq('event_type', filters.event_type);
+        query = query.eq('event_type', filters.event_type as never);
       }
 
       if (filters?.status) {
@@ -307,7 +310,7 @@ export const useWebhookDeliveries = (
       const { data, error } = await query;
 
       if (error) throw error;
-      return (data || []) as WebhookDelivery[];
+      return (data || []) as unknown as WebhookDelivery[];
     },
     enabled: !!webhookId,
   });
@@ -330,7 +333,7 @@ export const useWebhookDelivery = (deliveryId: string | undefined) => {
         .single();
 
       if (error) throw error;
-      return data as WebhookDelivery;
+      return data as unknown as WebhookDelivery;
     },
     enabled: !!deliveryId,
   });
@@ -355,10 +358,11 @@ export const useWebhookStats = (storeId: string | undefined) => {
 
       const stats = {
         total_webhooks: webhooks?.length || 0,
-        active_webhooks: webhooks?.filter((w) => w.status === 'active').length || 0,
-        inactive_webhooks: webhooks?.filter((w) => w.status !== 'active').length || 0,
+        active_webhooks: webhooks?.filter(w => w.status === 'active').length || 0,
+        inactive_webhooks: webhooks?.filter(w => w.status !== 'active').length || 0,
         total_deliveries: webhooks?.reduce((sum, w) => sum + (w.total_deliveries || 0), 0) || 0,
-        successful_deliveries: webhooks?.reduce((sum, w) => sum + (w.successful_deliveries || 0), 0) || 0,
+        successful_deliveries:
+          webhooks?.reduce((sum, w) => sum + (w.successful_deliveries || 0), 0) || 0,
         failed_deliveries: webhooks?.reduce((sum, w) => sum + (w.failed_deliveries || 0), 0) || 0,
       };
 
@@ -376,10 +380,3 @@ export const useWebhookStats = (storeId: string | undefined) => {
     enabled: !!storeId,
   });
 };
-
-
-
-
-
-
-

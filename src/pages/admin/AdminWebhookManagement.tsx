@@ -87,11 +87,10 @@ import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { MoreVertical, X } from 'lucide-react';
 
 // Événements webhook disponibles, groupés par catégorie
-const  WEBHOOK_EVENTS: { category: string; events: { value: WebhookEventType; label: string }[] }[] =
+const WEBHOOK_EVENTS: { category: string; events: { value: WebhookEventType; label: string }[] }[] =
   [
     {
       category: 'Commandes',
@@ -644,17 +643,19 @@ export default function AdminWebhookManagement() {
                               key: 'name',
                               label: 'Nom',
                               priority: 'high',
-                              render: (row: Webhook) => (
-                                <span className="font-semibold text-sm">{row.name}</span>
+                              render: (_value, row) => (
+                                <span className="font-semibold text-sm">
+                                  {(row as unknown as Webhook).name}
+                                </span>
                               ),
                             },
                             {
                               key: 'url',
                               label: 'URL',
                               priority: 'high',
-                              render: (row: Webhook) => (
+                              render: (_value, row) => (
                                 <code className="text-xs bg-muted/50 px-2 py-1 rounded truncate max-w-full font-mono block">
-                                  {row.url}
+                                  {(row as unknown as Webhook).url}
                                 </code>
                               ),
                             },
@@ -662,9 +663,9 @@ export default function AdminWebhookManagement() {
                               key: 'events',
                               label: 'Événements',
                               priority: 'medium',
-                              render: (row: Webhook) => (
+                              render: (_value, row) => (
                                 <Badge variant="outline" className="text-xs">
-                                  {row.events.length} événement(s)
+                                  {(row as unknown as Webhook).events.length} événement(s)
                                 </Badge>
                               ),
                             },
@@ -672,16 +673,21 @@ export default function AdminWebhookManagement() {
                               key: 'status',
                               label: 'Statut',
                               priority: 'high',
-                              render: (row: Webhook) => getStatusBadge(row.status),
+                              render: (_value, row) =>
+                                getStatusBadge((row as unknown as Webhook).status),
                             },
                             {
                               key: 'stats',
                               label: 'Statistiques',
                               priority: 'medium',
-                              render: (row: Webhook) => (
+                              render: (_value, row) => (
                                 <div className="text-xs text-muted-foreground">
-                                  <div>✓ {row.successful_deliveries} réussies</div>
-                                  <div>✗ {row.failed_deliveries} échecs</div>
+                                  <div>
+                                    ✓ {(row as unknown as Webhook).successful_deliveries} réussies
+                                  </div>
+                                  <div>
+                                    ✗ {(row as unknown as Webhook).failed_deliveries} échecs
+                                  </div>
                                 </div>
                               ),
                             },
@@ -689,21 +695,27 @@ export default function AdminWebhookManagement() {
                               key: 'last_triggered',
                               label: 'Dernière livraison',
                               priority: 'low',
-                              render: (row: Webhook) => (
+                              render: (_value, row) => (
                                 <span className="text-xs text-muted-foreground">
-                                  {row.last_triggered_at
-                                    ? format(new Date(row.last_triggered_at), 'PPp', { locale: fr })
+                                  {(row as unknown as Webhook).last_triggered_at
+                                    ? format(
+                                        new Date((row as unknown as Webhook).last_triggered_at!),
+                                        'PPp',
+                                        { locale: fr }
+                                      )
                                     : 'Jamais'}
                                 </span>
                               ),
                             },
                           ]}
-                          actions={(row: Webhook) => (
+                          actions={row => (
                             <div className="flex flex-col gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onSelect={() => setSelectedWebhookId(row.id)}
+                                onSelect={() =>
+                                  setSelectedWebhookId((row as unknown as Webhook).id)
+                                }
                                 className="min-h-[44px] w-full"
                               >
                                 <Activity className="h-4 w-4 mr-2" />
@@ -712,7 +724,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onSelect={() => handleTest(row)}
+                                onSelect={() => handleTest(row as unknown as Webhook)}
                                 disabled={testWebhook.isPending}
                                 className="min-h-[44px] w-full"
                               >
@@ -722,7 +734,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onSelect={() => handleOpenDialog(row)}
+                                onSelect={() => handleOpenDialog(row as unknown as Webhook)}
                                 className="min-h-[44px] w-full"
                               >
                                 <Edit className="h-4 w-4 mr-2" />
@@ -731,7 +743,7 @@ export default function AdminWebhookManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onSelect={() => handleDelete(row)}
+                                onSelect={() => handleDelete(row as unknown as Webhook)}
                                 disabled={deleteWebhook.isPending}
                                 className="min-h-[44px] w-full text-destructive"
                               >
@@ -763,27 +775,34 @@ export default function AdminWebhookManagement() {
                                   </div>
                                   <Select>
                                     <SelectTrigger className="h-8 w-8">
-
-                                        <MoreVertical className="h-4 w-4" aria-hidden="true" />
-                                      
-</SelectTrigger>
+                                      <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                                    </SelectTrigger>
                                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                                      <SelectItem value="edit" onSelect={() => setSelectedWebhookId(webhook.id)}
+                                      <SelectItem
+                                        value="edit"
+                                        onSelect={() => setSelectedWebhookId(webhook.id)}
                                       >
                                         <Activity className="h-4 w-4 mr-2" />
                                         Historique
                                       </SelectItem>
-                                      <SelectItem value="delete" onSelect={() => handleTest(webhook)}
+                                      <SelectItem
+                                        value="delete"
+                                        onSelect={() => handleTest(webhook)}
                                         disabled={testWebhook.isPending}
                                       >
                                         <TestTube className="h-4 w-4 mr-2" />
                                         Tester
                                       </SelectItem>
-                                      <SelectItem value="copy" onSelect={() => handleOpenDialog(webhook)}>
+                                      <SelectItem
+                                        value="copy"
+                                        onSelect={() => handleOpenDialog(webhook)}
+                                      >
                                         <Edit className="h-4 w-4 mr-2" />
                                         Modifier
                                       </SelectItem>
-                                      <SelectItem value="view" onSelect={() => handleDelete(webhook)}
+                                      <SelectItem
+                                        value="view"
+                                        onSelect={() => handleDelete(webhook)}
                                         disabled={deleteWebhook.isPending}
                                         className="text-destructive"
                                       >
@@ -1343,9 +1362,3 @@ export default function AdminWebhookManagement() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

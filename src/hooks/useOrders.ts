@@ -185,7 +185,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
         throw queryError;
       }
 
-      setOrders(data || []);
+      setOrders((data || []) as unknown as Order[]);
       setTotalCount(count || 0);
       setError(null);
     } catch (_err: unknown) {
@@ -266,6 +266,7 @@ export const useOrders = (storeId?: string, options: UseOrdersOptions = {}) => {
         currency: t.currency || 'XOF',
         status: t.status || 'pending',
         payment_method: t.moneroo_payment_method,
+        payment_provider: (t as { payment_provider?: string | null }).payment_provider ?? 'moneroo',
         created_at: t.created_at,
         completed_at: t.completed_at,
       }));

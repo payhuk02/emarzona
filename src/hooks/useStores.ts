@@ -3,6 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import type { Database } from '@/integrations/supabase/types';
+
+type StoreInsert = Database['public']['Tables']['stores']['Insert'];
+type StoreUpdate = Database['public']['Tables']['stores']['Update'];
 
 // Lecture : utiliser uniquement les colonnes réellement présentes en base (évite
 // « column … does not exist » quand la prod n’a pas encore toutes les migrations).
@@ -274,7 +278,7 @@ export const useStores = () => {
             ...storeData,
             user_id: authUser.id,
             is_active: true,
-          },
+          } as unknown as StoreInsert,
         ])
         .select()
         .single();
@@ -307,7 +311,7 @@ export const useStores = () => {
     mutationFn: async ({ storeId, updates }: { storeId: string; updates: Partial<Store> }) => {
       const { data, error } = await supabase
         .from('stores')
-        .update(updates)
+        .update(updates as unknown as StoreUpdate)
         .eq('id', storeId)
         .select()
         .single();

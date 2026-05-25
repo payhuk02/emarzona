@@ -1,7 +1,7 @@
 /**
  * Hook useCart - Gestion complète du panier
  * Date: 26 Janvier 2025
- * 
+ *
  * Fonctionnalités:
  * - Ajout/Modification/Suppression produits
  * - Support variants (physiques)
@@ -16,16 +16,22 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import type { User } from '@supabase/supabase-js';
 import type { CartItem, CartSummary, AddToCartOptions, UpdateCartItemOptions } from '@/types/cart';
+import type { Database, Json } from '@/integrations/supabase/types';
+
+type CartItemInsert = Database['public']['Tables']['cart_items']['Insert'];
+type CartItemUpdate = Database['public']['Tables']['cart_items']['Update'];
 
 const CART_QUERY_KEY = ['cart'];
-const CART_ITEM_FIELDS = 'id, user_id, session_id, product_id, product_type, product_name, product_image_url, variant_id, variant_name, quantity, unit_price, discount_amount, coupon_code, metadata, currency, added_at, updated_at';
+const CART_ITEM_FIELDS =
+  'id, user_id, session_id, product_id, product_type, product_name, product_image_url, variant_id, variant_name, quantity, unit_price, discount_amount, coupon_code, metadata, currency, added_at, updated_at';
 
 /**
  * Génère ou récupère un session ID pour paniers anonymes
  */
 function getSessionId(): string {
-  let  sessionId= localStorage.getItem('cart_session_id');
+  let sessionId = localStorage.getItem('cart_session_id');
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     localStorage.setItem('cart_session_id', sessionId);
@@ -50,10 +56,14 @@ export function useCart() {
   }, []);
 
   // Fetch cart items
-  const { data: items = [], isLoading, error } = useQuery({
+  const {
+    data: items = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: CART_QUERY_KEY,
     queryFn: async (): Promise<CartItem[]> => {
-      let  query= supabase
+      let query = supabase
         .from('cart_items')
         .select(CART_ITEM_FIELDS)
         .order('added_at', { ascending: false });
@@ -88,7 +98,7 @@ export function useCart() {
   // Calculer uniquement les remises sur items (sans coupons)
   const itemDiscounts = items.reduce((sum, item) => (item.discount_amount || 0) * item.quantity, 0);
 
-  const  summary: CartSummary = {
+  const summary: CartSummary = {
     subtotal,
     discount_amount: itemDiscounts, // Uniquement les remises sur items, pas les coupons
     tax_amount: 0, // Calculé côté checkout selon pays
@@ -97,7 +107,10 @@ export function useCart() {
     item_count: items.length,
   };
 
-  summary.total = Math.max(0, summary.subtotal - summary.discount_amount + summary.tax_amount + summary.shipping_amount);
+  summary.total = Math.max(
+    0,
+    summary.subtotal - summary.discount_amount + summary.tax_amount + summary.shipping_amount
+  );
 
   /**
    * Ajouter un produit au panier
@@ -119,7 +132,7 @@ export function useCart() {
       const finalPrice = product.promotional_price || product.price;
 
       // Vérifier si le produit existe déjà dans le panier
-      let  query= supabase
+      let query = supabase
         .from('cart_items')
         .select(CART_ITEM_FIELDS)
         .eq('product_id', options.product_id);
@@ -155,7 +168,7 @@ export function useCart() {
       }
 
       // Sinon, créer un nouvel item
-      const  newItem: Partial<CartItem> = {
+      const newItem: CartItemInsert = {
         user_id: user?.id || null,
         session_id: user ? null : sessionId,
         product_id: options.product_id,
@@ -168,7 +181,7 @@ export function useCart() {
         unit_price: finalPrice,
         currency: product.currency || 'XOF',
         coupon_code: options.coupon_code || null,
-        metadata: options.metadata || {},
+        metadata: (options.metadata ?? null) as Json,
       };
 
       const { data: inserted, error: insertError } = await supabase
@@ -189,7 +202,8 @@ export function useCart() {
       });
     },
     onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible d\'ajouter au panier';
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible d'ajouter au panier";
       logger.error('Error adding to cart:', error);
       toast({
         title: '❌ Erreur',
@@ -204,7 +218,7 @@ export function useCart() {
    */
   const updateItem = useMutation({
     mutationFn: async (options: UpdateCartItemOptions) => {
-      const  updates: Partial<CartItem> = {};
+      const updates: CartItemUpdate = {};
 
       if (options.quantity !== undefined) {
         if (options.quantity <= 0) {
@@ -246,10 +260,7 @@ export function useCart() {
    */
   const removeItem = useMutation({
     mutationFn: async (itemId: string) => {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('id', itemId);
+      const { error } = await supabase.from('cart_items').delete().eq('id', itemId);
 
       if (error) throw error;
     },
@@ -257,14 +268,14 @@ export function useCart() {
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
       toast({
         title: '✅ Retiré du panier',
-        description: 'L\'article a été retiré',
+        description: "L'article a été retiré",
       });
     },
     onError: (error: unknown) => {
       logger.error('Error removing cart item:', error);
       toast({
         title: '❌ Erreur',
-        description: 'Impossible de retirer l\'article',
+        description: "Impossible de retirer l'article",
         variant: 'destructive',
       });
     },
@@ -275,7 +286,7 @@ export function useCart() {
    */
   const clearCart = useMutation({
     mutationFn: async () => {
-      let  query= supabase.from('cart_items').delete();
+      let query = supabase.from('cart_items').delete();
 
       if (user) {
         query = query.eq('user_id', user.id);
@@ -320,10 +331,3 @@ export function useCart() {
     isEmpty: items.length === 0,
   };
 }
-
-
-
-
-
-
-

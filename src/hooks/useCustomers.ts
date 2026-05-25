@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "@/lib/logger";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export interface Customer {
   id: string;
@@ -38,21 +38,34 @@ export const useCustomers = (
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ['customers', storeId, page, pageSize, options?.searchQuery, options?.sortBy, options?.sortOrder],
+    queryKey: [
+      'customers',
+      storeId,
+      page,
+      pageSize,
+      options?.searchQuery,
+      options?.sortBy,
+      options?.sortOrder,
+    ],
     queryFn: async (): Promise<{ data: Customer[]; count: number }> => {
       if (!storeId) {
         return { data: [], count: 0 };
       }
 
       try {
-        let  query= supabase
+        let query = supabase
           .from('customers')
-          .select('id,store_id,name,full_name,email,phone,address,city,country,notes,total_orders,total_spent,metadata,created_at,updated_at', { count: 'exact' })
+          .select(
+            'id,store_id,name,full_name,email,phone,address,city,country,notes,total_orders,total_spent,metadata,created_at,updated_at',
+            { count: 'exact' }
+          )
           .eq('store_id', storeId);
 
         // Apply search query filter
         if (options?.searchQuery) {
-          query = query.or(`name.ilike.%${options.searchQuery}%,email.ilike.%${options.searchQuery}%,phone.ilike.%${options.searchQuery}%`);
+          query = query.or(
+            `name.ilike.%${options.searchQuery}%,email.ilike.%${options.searchQuery}%,phone.ilike.%${options.searchQuery}%`
+          );
         }
 
         // Apply sorting
@@ -71,9 +84,9 @@ export const useCustomers = (
         }
 
         return { data: (data as Customer[]) || [], count: count || 0 };
-      } catch ( _error: any) {
-        logger.error('Error in useCustomers', { error, storeId });
-        throw error;
+      } catch (_error: unknown) {
+        logger.error('Error in useCustomers', { error: _error, storeId });
+        throw _error;
       }
     },
     enabled: !!storeId,
@@ -98,13 +111,10 @@ export const useCustomersLegacy = (storeId?: string) => {
     },
     setCustomers: (customers: Customer[]) => {
       // Pour compatibilité avec realtime updates
-      queryClient.setQueryData(['customers', storeId, 1, 1000], { data: customers, count: customers.length });
+      queryClient.setQueryData(['customers', storeId, 1, 1000], {
+        data: customers,
+        count: customers.length,
+      });
     },
   };
 };
-
-
-
-
-
-
