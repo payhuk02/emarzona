@@ -1,5 +1,8 @@
 # Configuration email — Resend, webhooks et cron campagnes
 
+> **SendGrid** : déprécié — voir [DEPRECATED_SENDGRID_WEBHOOK.md](./DEPRECATED_SENDGRID_WEBHOOK.md).  
+> **Clés front** : utiliser `sb_publishable_...` — voir [DEPLOIEMENT_FRONT_SUPABASE_KEYS.md](./DEPLOIEMENT_FRONT_SUPABASE_KEYS.md).
+
 ## État actuel (projet `hbdnzajbyjakdhuavrvb`)
 
 | Composant                                                                  | Statut                                                                     |

@@ -316,6 +316,7 @@ export const CampaignBuilder = ({
         </p>
         <Input
           type="email"
+          data-testid="email-campaign-test-email"
           value={testEmail}
           onChange={e => setTestEmail(e.target.value)}
           placeholder={user?.email ?? 'vous@exemple.com'}
@@ -324,6 +325,7 @@ export const CampaignBuilder = ({
           type="button"
           variant="secondary"
           className="w-full sm:w-auto"
+          data-testid="email-campaign-send-test"
           disabled={!templateId || sendTestEmail.isPending}
           onClick={handleSendTest}
         >
@@ -375,6 +377,7 @@ export const CampaignBuilder = ({
       {useBottomSheet ? (
         <BottomSheet open={open} onOpenChange={onOpenChange}>
           <BottomSheetContent
+            data-testid="email-campaign-builder"
             title={
               isEditing
                 ? t('emails.campaigns.editCampaign', 'Modifier la campagne')
@@ -398,7 +401,10 @@ export const CampaignBuilder = ({
         </BottomSheet>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent
+            data-testid="email-campaign-builder"
+            className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+          >
             <DialogHeader>
               <DialogTitle>
                 {isEditing

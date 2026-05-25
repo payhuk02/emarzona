@@ -87,7 +87,7 @@ export const UnsubscribePage = () => {
                 <CheckCircle2 className="h-8 w-8 text-green-600" />
               </div>
             </div>
-            <CardTitle className="text-center">
+            <CardTitle className="text-center" data-testid="email-unsubscribe-success">
               {t('emails.unsubscribe.success.title', 'Désabonnement confirmé')}
             </CardTitle>
             <CardDescription className="text-center">
@@ -141,13 +141,14 @@ export const UnsubscribePage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="email-unsubscribe-form">
             <div>
               <Label htmlFor="email">
                 {t('emails.unsubscribe.emailLabel', 'Votre adresse email *')}
               </Label>
               <Input
                 id="email"
+                data-testid="email-unsubscribe-email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -210,7 +211,12 @@ export const UnsubscribePage = () => {
               </Alert>
             )}
 
-            <Button type="submit" disabled={isSubmitting} className="w-full">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+              data-testid="email-unsubscribe-submit"
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

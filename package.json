@@ -35,6 +35,8 @@
     "test:e2e:marketplace": "playwright test marketplace",
     "test:e2e:products": "playwright test products",
     "test:e2e:cart": "playwright test cart-checkout-workflow",
+    "test:e2e:email": "playwright test email-unsubscribe email-campaign-test-send --project=chromium",
+    "verify:supabase-keys": "node scripts/verify-supabase-publishable-key.mjs",
     "test:visual": "playwright test visual-regression",
     "test:a11y": "playwright test accessibility",
     "test:a11y:check": "node scripts/check-accessibility.js",

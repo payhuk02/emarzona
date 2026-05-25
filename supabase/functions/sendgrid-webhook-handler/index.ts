@@ -1,5 +1,6 @@
 /**
- * SendGrid Webhook Handler
+ * @deprecated Use resend-webhook-handler. SendGrid is no longer the production email provider.
+ * SendGrid Webhook Handler (legacy)
  * Edge Function pour recevoir et traiter les webhooks SendGrid
  * Date: 1er Février 2025
  */
@@ -34,7 +35,18 @@ function sanitizeEventForLog(event: SendGridEvent): Record<string, unknown> {
 interface SendGridEvent {
   email: string;
   timestamp: number;
-  event: 'processed' | 'delivered' | 'deferred' | 'bounce' | 'dropped' | 'open' | 'click' | 'spamreport' | 'unsubscribe' | 'group_unsubscribe' | 'group_resubscribe';
+  event:
+    | 'processed'
+    | 'delivered'
+    | 'deferred'
+    | 'bounce'
+    | 'dropped'
+    | 'open'
+    | 'click'
+    | 'spamreport'
+    | 'unsubscribe'
+    | 'group_unsubscribe'
+    | 'group_resubscribe';
   sg_event_id: string;
   sg_message_id: string;
   category?: string[];
@@ -53,7 +65,7 @@ interface SendGridEvent {
   };
 }
 
-serve(async (req) => {
+serve(async req => {
   try {
     const { method } = req;
 
@@ -104,16 +116,22 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ message: `Successfully processed ${events.length} events` }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ message: `Successfully processed ${events.length} events` }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error: unknown) {
     console.error('Global error in sendgrid-webhook-handler:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 });
 
@@ -190,27 +208,25 @@ async function processSendGridEvent(event: SendGridEvent): Promise<void> {
       case 'unsubscribe':
       case 'group_unsubscribe':
         // Enregistrer le désabonnement
-        await supabase
-          .from('email_unsubscribes')
-          .upsert({
+        await supabase.from('email_unsubscribes').upsert(
+          {
             email: email.toLowerCase(),
             unsubscribe_type: 'marketing',
             unsubscribed_at: new Date(timestamp * 1000).toISOString(),
             campaign_id: campaign_id || custom_args?.campaign_id || null,
             ip_address: ip,
             user_agent: useragent,
-          }, {
+          },
+          {
             onConflict: 'email,unsubscribe_type',
-          });
+          }
+        );
         break;
     }
 
     // Mettre à jour l'email_log
     if (Object.keys(updateData).length > 0) {
-      await supabase
-        .from('email_logs')
-        .update(updateData)
-        .eq('id', emailLogId);
+      await supabase.from('email_logs').update(updateData).eq('id', emailLogId);
     }
   }
 
@@ -287,4 +303,3 @@ async function updateSequenceMetrics(
   // Logique similaire pour les séquences si nécessaire
   console.log(`Updating sequence metrics for ${sequenceId}: ${eventType}`);
 }
-

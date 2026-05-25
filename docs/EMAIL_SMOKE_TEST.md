@@ -47,7 +47,19 @@ chmod +x scripts/email-smoke-test.sh
 | Désabonnement | `/unsubscribe?email=vous@test.com&type=marketing` (sans login) |
 | Préférences   | `/settings/notifications`                                      |
 
-## 5. Résultats attendus (prod vérifié)
+## 5. Clés front (publishable)
+
+Voir [DEPLOIEMENT_FRONT_SUPABASE_KEYS.md](./DEPLOIEMENT_FRONT_SUPABASE_KEYS.md) et `npm run verify:supabase-keys`.
+
+## 6. Tests E2E Playwright
+
+```bash
+npm run test:e2e:email
+```
+
+Fichiers : `tests/e2e/email-unsubscribe.spec.ts`, `tests/e2e/email-campaign-test-send.spec.ts`.
+
+## 7. Résultats attendus (prod vérifié)
 
 - RPC `record_email_unsubscribe` : **présent**
 - Crons actifs : `process-scheduled-email-campaigns` (_/5), `process-email-sequences` (_/15), `abandoned-cart-recovery` (horaire)

@@ -638,15 +638,20 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* SendGrid */}
+            {/* Resend (clé stockée sous integrations.sendgrid pour compatibilité JSON existant) */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      SendGrid
+                      Resend
                     </CardTitle>
+                    <CardDescription className="text-xs mt-1">
+                      Envoi production : secrets Edge{' '}
+                      <code className="text-[10px]">RESEND_API_KEY</code> (mail.emarzona.com).
+                      Référence admin optionnelle ci-dessous.
+                    </CardDescription>
                   </div>
                   <Switch
                     checked={integrations.sendgrid.enabled}
@@ -659,12 +664,12 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
               {integrations.sendgrid.enabled && (
                 <CardContent>
                   <div className="space-y-2">
-                    <Label className="text-xs">API Key</Label>
+                    <Label className="text-xs">Clé API Resend</Label>
                     <Input
-                      type={showSecrets.sendgrid_apiKey ? 'text' : 'password'}
+                      type={showSecrets.resend_apiKey ? 'text' : 'password'}
                       value={integrations.sendgrid.apiKey}
                       onChange={e => handleIntegrationChange('sendgrid', 'apiKey', e.target.value)}
-                      placeholder="SG.xxx..."
+                      placeholder="re_xxx..."
                       className="text-xs"
                     />
                   </div>
@@ -761,9 +766,3 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
     </div>
   );
 };
-
-
-
-
-
-

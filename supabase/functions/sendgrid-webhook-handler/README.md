@@ -1,6 +1,8 @@
-# SendGrid Webhook Handler
+# SendGrid Webhook Handler — DÉPRÉCIÉ
 
-Edge Function pour recevoir et traiter les webhooks SendGrid.
+> **Ne plus utiliser.** Le provider production est **Resend**. Configurez le webhook Resend vers `resend-webhook-handler` et consultez [docs/DEPRECATED_SENDGRID_WEBHOOK.md](../../../docs/DEPRECATED_SENDGRID_WEBHOOK.md).
+
+Edge Function legacy pour recevoir et traiter les webhooks SendGrid (maintenance uniquement).
 
 ## Configuration
 
