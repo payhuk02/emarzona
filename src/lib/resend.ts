@@ -212,16 +212,12 @@ const getUserLanguage = async (userId?: string): Promise<string | null> => {
   if (!userId) return null;
 
   try {
-    const { data, error } = await supabase
-      .from('email_preferences')
-      .select('preferred_language')
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (error || !data) return null;
-
-    return data.preferred_language;
-  } catch (_error) {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user || data.user.id !== userId) return null;
+    const meta = data.user.user_metadata as Record<string, unknown> | undefined;
+    const lang = meta?.preferred_language ?? meta?.locale;
+    return typeof lang === 'string' ? lang : null;
+  } catch {
     return null;
   }
 };

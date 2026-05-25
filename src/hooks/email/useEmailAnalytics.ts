@@ -70,11 +70,12 @@ export const useCalculateDailyAnalytics = () => {
         description: 'Les analytics ont été recalculées avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error calculating daily analytics', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors du calcul des analytics.',
+        description:
+          error instanceof Error ? error.message : 'Erreur lors du calcul des analytics.',
         variant: 'destructive',
       });
     },
@@ -110,10 +111,3 @@ export const useSequenceAnalytics = (sequenceId: string | undefined) => {
     staleTime: 1000 * 60 * 5,
   });
 };
-
-
-
-
-
-
-

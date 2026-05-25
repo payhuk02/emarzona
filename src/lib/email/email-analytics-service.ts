@@ -138,7 +138,99 @@ export interface CampaignPerformance {
 // SERVICE
 // ============================================================
 
+function storeAnalyticsToSummary(analytics: EmailAnalytics, revenue = 0): EmailAnalyticsSummary {
+  return {
+    total_sent: analytics.total_sent,
+    total_delivered: analytics.total_delivered,
+    total_opened: analytics.total_opened,
+    total_clicked: analytics.total_clicked,
+    delivery_rate: analytics.delivery_rate,
+    open_rate: analytics.open_rate,
+    click_rate: analytics.click_rate,
+    click_to_open_rate:
+      analytics.total_opened > 0 ? (analytics.total_clicked / analytics.total_opened) * 100 : 0,
+    bounce_rate: analytics.bounce_rate,
+    unsubscribe_rate: analytics.unsubscribe_rate,
+    revenue,
+  };
+}
+
 export class EmailAnalyticsService {
+  /**
+   * Lignes quotidiennes agrégées (table email_analytics_daily)
+   */
+  static async getDailyAnalytics(filters: EmailAnalyticsFilters): Promise<EmailAnalyticsDaily[]> {
+    try {
+      let query = supabase
+        .from('email_analytics_daily')
+        .select('date, store_id, total_sent, total_delivered, open_rate')
+        .eq('store_id', filters.storeId)
+        .is('campaign_id', null)
+        .is('sequence_id', null)
+        .order('date', { ascending: true });
+
+      if (filters.startDate) {
+        query = query.gte('date', filters.startDate);
+      }
+      if (filters.endDate) {
+        query = query.lte('date', filters.endDate);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        logger.error('Error fetching daily analytics', { error, filters });
+        throw error;
+      }
+
+      return (data || []).map(row => ({
+        date: row.date,
+        store_id: row.store_id ?? undefined,
+        total_sent: row.total_sent ?? 0,
+        total_delivered: row.total_delivered ?? 0,
+        open_rate: Number(row.open_rate ?? 0),
+      }));
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
+      throw new Error(`Failed to get daily analytics: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Résumé store sur une période (agrégat campagnes)
+   */
+  static async getAnalyticsSummary(filters: EmailAnalyticsFilters): Promise<EmailAnalyticsSummary> {
+    const store = await this.getStoreAnalytics(filters.storeId, filters.startDate, filters.endDate);
+    const campaigns = await this.getCampaignPerformance(
+      filters.storeId,
+      filters.startDate,
+      filters.endDate
+    );
+    const revenue = campaigns.reduce((sum, c) => sum + (c.revenue || 0), 0);
+    return storeAnalyticsToSummary(store, revenue);
+  }
+
+  /**
+   * Recalcule et persiste les agrégations quotidiennes (RPC SQL)
+   */
+  static async calculateDailyAnalytics(date?: string, storeId?: string): Promise<boolean> {
+    try {
+      const pDate = date || new Date().toISOString().split('T')[0];
+      const { error } = await supabase.rpc('aggregate_daily_email_analytics', {
+        p_date: pDate,
+        p_store_id: storeId ?? null,
+      });
+
+      if (error) {
+        logger.error('Error aggregating daily analytics', { error, date: pDate, storeId });
+        throw error;
+      }
+      return true;
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
+      throw new Error(`Failed to calculate daily analytics: ${errorMessage}`);
+    }
+  }
+
   /**
    * Obtenir les analytics globales pour un store
    */

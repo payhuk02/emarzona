@@ -114,21 +114,17 @@ export class EmailPreferencesService {
   static async recordUnsubscribe(params: RecordUnsubscribeParams): Promise<void> {
     const email = this.normalizeEmail(params.email);
 
-    const { error: insertError } = await supabase.from('email_unsubscribes').upsert(
-      {
-        email,
-        unsubscribe_type: params.unsubscribeType,
-        reason: params.reason || null,
-        campaign_id: params.campaignId || null,
-        user_id: params.userId || null,
-        unsubscribed_at: new Date().toISOString(),
-      },
-      { onConflict: 'email,unsubscribe_type' }
-    );
+    const { error: rpcError } = await supabase.rpc('record_email_unsubscribe', {
+      p_email: email,
+      p_unsubscribe_type: params.unsubscribeType,
+      p_reason: params.reason || null,
+      p_campaign_id: params.campaignId || null,
+      p_user_id: params.userId || null,
+    });
 
-    if (insertError) {
-      logger.error('Error recording unsubscribe', { error: insertError, email });
-      throw insertError;
+    if (rpcError) {
+      logger.error('Error recording unsubscribe', { error: rpcError, email });
+      throw rpcError;
     }
 
     await this.syncAuthUserPreferences(email, params.unsubscribeType);
