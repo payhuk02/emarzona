@@ -3,9 +3,22 @@
  * Date : 27 octobre 2025
  */
 
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { QueryClient } from '@tanstack/react-query';
+
+const testQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+});
+
+vi.mock('@tanstack/react-query', async importOriginal => {
+  const actual = await importOriginal<typeof import('@tanstack/react-query')>();
+  return {
+    ...actual,
+    useQueryClient: () => testQueryClient,
+  };
+});
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);

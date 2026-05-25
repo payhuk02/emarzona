@@ -513,7 +513,7 @@ export const OrderEditDialog = React.memo(OrderEditDialogComponent, (prevProps, 
     prevProps.storeId === nextProps.storeId &&
     prevProps.order?.id === nextProps.order?.id &&
     prevProps.order?.status === nextProps.order?.status &&
-    prevProps.order?.total === nextProps.order?.total
+    prevProps.order?.total_amount === nextProps.order?.total_amount
   );
 });
 

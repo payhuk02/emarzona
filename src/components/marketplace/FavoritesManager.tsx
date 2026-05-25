@@ -16,6 +16,7 @@ import {
   SortDesc,
   Trash2,
   Download,
+  Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -82,8 +83,8 @@ const FavoritesManager = ({
         product.category?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      let  aValue: string | number;
-      let  bValue: string | number;
+      let aValue: string | number;
+      let bValue: string | number;
 
       switch (sortBy) {
         case 'name':
@@ -353,7 +354,7 @@ const FavoritesManager = ({
                               -{getDiscountPercent(product)}%
                             </Badge>
                           )}
-                          {product.is_featured && (
+                          {(product as { is_featured?: boolean }).is_featured && (
                             <Badge className="bg-yellow-600 text-white text-xs">
                               <Crown className="h-3 w-3 mr-1" />
                               Vedette
@@ -384,7 +385,7 @@ const FavoritesManager = ({
                               {product.category}
                             </Badge>
                           )}
-                          {product.stores?.verified && (
+                          {(product.stores as { verified?: boolean } | undefined)?.verified && (
                             <Badge className="bg-green-600 text-white text-xs">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
                               Vérifié
@@ -403,8 +404,10 @@ const FavoritesManager = ({
                         <div className="flex items-center justify-between mb-3">
                           <div className="text-sm text-slate-400">Par {product.stores?.name}</div>
                           <div className="text-sm text-slate-400">
-                            {product.sales_count || 0} vente
-                            {(product.sales_count || 0) !== 1 ? 's' : ''}
+                            {(product as { sales_count?: number }).sales_count || 0} vente
+                            {((product as { sales_count?: number }).sales_count || 0) !== 1
+                              ? 's'
+                              : ''}
                           </div>
                         </div>
 
@@ -467,9 +470,3 @@ const FavoritesManager = ({
 };
 
 export default FavoritesManager;
-
-
-
-
-
-

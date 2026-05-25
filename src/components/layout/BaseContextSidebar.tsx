@@ -360,7 +360,7 @@ export const BaseContextSidebar = ({
                 key={`mobile-context-${item.path}`}
                 label={item.label}
                 path={item.path}
-                icon={item.icon}
+                icon={item.icon as import('lucide-react').LucideIcon}
                 horizontal
               />
             ))}

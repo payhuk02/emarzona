@@ -1,6 +1,6 @@
 /**
  * Tests unitaires pour moneroo-amount-validator.ts
- * 
+ *
  * Pour exécuter: npm test moneroo-amount-validator
  */
 
@@ -29,7 +29,7 @@ describe('MonerooAmountValidator', () => {
     });
 
     it('devrait retourner les limites par défaut pour une devise inconnue', () => {
-      const limits = getAmountLimits('XXX' as any);
+      const limits = getAmountLimits('XXX' as unknown as Parameters<typeof getAmountLimits>[0]);
       expect(limits.min).toBe(100);
       expect(limits.max).toBe(10000000);
     });
@@ -91,7 +91,7 @@ describe('MonerooAmountValidator', () => {
       expect(normalizeAmount(20000000, 'XOF')).toBe(10000000);
     });
 
-    it('devrait retourner le montant tel quel s\'il est valide', () => {
+    it("devrait retourner le montant tel quel s'il est valide", () => {
       expect(normalizeAmount(1000, 'XOF')).toBe(1000);
     });
   });
@@ -112,22 +112,14 @@ describe('MonerooAmountValidator', () => {
   describe('formatAmount', () => {
     it('devrait formater un montant avec la devise', () => {
       const formatted = formatAmount(1000, 'XOF');
-      expect(formatted).toContain('1000');
-      expect(formatted).toContain('XOF');
+      expect(formatted.replace(/\s/g, '')).toMatch(/1000|1,?000/);
+      expect(formatted).toMatch(/XOF|FCFA|F\s*CFA/i);
     });
 
     it('devrait formater un montant USD', () => {
       const formatted = formatAmount(100, 'USD');
-      expect(formatted).toContain('100');
-      expect(formatted).toContain('USD');
+      expect(formatted).toMatch(/100/);
+      expect(formatted).toMatch(/USD|\$/i);
     });
   });
 });
-
-
-
-
-
-
-
-

@@ -10,51 +10,62 @@ import type {
   GiftCardValidationResult,
   GiftCardRedemptionResult,
   CreateGiftCardInput,
-  UpdateGiftCardInput
+  UpdateGiftCardInput,
 } from '@/types/giftCards';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Json } from '@/integrations/supabase/types';
 
 const GIFT_CARD_FIELDS =
-  'id, store_id, code, initial_amount, current_balance, currency, status, expires_at, recipient_email, recipient_name, recipient_message, purchased_by, min_purchase_amount, applicable_to_product_types, applicable_to_products, applicable_to_stores, can_be_partially_used, auto_activate, metadata, notes, created_at, updated_at';
+  'id, store_id, code, initial_amount, current_balance, status, expires_at, recipient_email, recipient_name, recipient_message, purchased_by, min_purchase_amount, applicable_to_product_types, applicable_to_products, applicable_to_stores, can_be_partially_used, auto_activate, metadata, notes, created_at, updated_at';
 const GIFT_CARD_TX_FIELDS =
   'id, gift_card_id, order_id, transaction_type, amount, balance_before, balance_after, description, metadata, created_at';
 
 /**
  * Récupérer toutes les cartes cadeaux d'un store
  */
-export const useGiftCards = (storeId?: string, filters?: {
-  status?: string;
-  search?: string;
-}) => {
+export const useGiftCards = (
+  storeId?: string,
+  filters?: {
+    status?: string;
+    search?: string;
+  }
+) => {
   return useQuery({
     queryKey: ['giftCards', storeId, filters],
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('gift_cards')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_FIELDS},
           store:stores(id, name, slug),
           purchased_by_user:profiles!gift_cards_purchased_by_fkey(id, email, full_name)
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
       if (filters?.status) {
-        query = query.eq('status', filters.status);
+        query = query.eq(
+          'status',
+          filters.status as 'active' | 'expired' | 'redeemed' | 'cancelled' | 'pending'
+        );
       }
 
       if (filters?.search) {
-        query = query.or(`code.ilike.%${filters.search}%,recipient_email.ilike.%${filters.search}%,recipient_name.ilike.%${filters.search}%`);
+        query = query.or(
+          `code.ilike.%${filters.search}%,recipient_email.ilike.%${filters.search}%,recipient_name.ilike.%${filters.search}%`
+        );
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as GiftCard[];
+      return data as unknown as GiftCard[];
     },
-    enabled: !!storeId
+    enabled: !!storeId,
   });
 };
 
@@ -69,18 +80,20 @@ export const useGiftCard = (giftCardId?: string) => {
 
       const { data, error } = await supabase
         .from('gift_cards')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_FIELDS},
           store:stores(id, name, slug),
           purchased_by_user:profiles!gift_cards_purchased_by_fkey(id, email, full_name)
-        `)
+        `
+        )
         .eq('id', giftCardId)
         .single();
 
       if (error) throw error;
-      return data as GiftCard;
+      return data as unknown as GiftCard;
     },
-    enabled: !!giftCardId
+    enabled: !!giftCardId,
   });
 };
 
@@ -91,39 +104,47 @@ export const useMyGiftCards = () => {
   return useQuery({
     queryKey: ['myGiftCards'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       // Cartes achetées par l'utilisateur
       const { data: purchasedCards, error: purchasedError } = await supabase
         .from('gift_cards')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_FIELDS},
           store:stores(id, name, slug)
-        `)
+        `
+        )
         .eq('purchased_by', user.id)
         .order('created_at', { ascending: false });
 
       if (purchasedError) throw purchasedError;
 
       // Cartes reçues (par email)
-      const { data: { user: userData } } = await supabase.auth.getUser();
+      const {
+        data: { user: userData },
+      } = await supabase.auth.getUser();
       if (!userData?.email) return purchasedCards || [];
 
       const { data: receivedCards, error: receivedError } = await supabase
         .from('gift_cards')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_FIELDS},
           store:stores(id, name, slug)
-        `)
+        `
+        )
         .eq('recipient_email', userData.email)
         .neq('purchased_by', user.id) // Exclure celles qu'il a achetées
         .order('created_at', { ascending: false });
 
       if (receivedError) throw receivedError;
 
-      return [...(purchasedCards || []), ...(receivedCards || [])] as GiftCard[];
-    }
+      return [...(purchasedCards || []), ...(receivedCards || [])] as unknown as GiftCard[];
+    },
   });
 };
 
@@ -135,7 +156,7 @@ export const useValidateGiftCard = () => {
     mutationFn: async ({ storeId, code }: { storeId: string; code: string }) => {
       const { data, error } = await supabase.rpc('validate_gift_card', {
         p_store_id: storeId,
-        p_code: code
+        p_code: code,
       });
 
       if (error) throw error;
@@ -146,7 +167,7 @@ export const useValidateGiftCard = () => {
       }
 
       return result;
-    }
+    },
   });
 };
 
@@ -158,12 +179,12 @@ export const useGiftCardBalance = () => {
     mutationFn: async ({ storeId, code }: { storeId: string; code: string }) => {
       const { data, error } = await supabase.rpc('get_gift_card_balance', {
         p_store_id: storeId,
-        p_code: code
+        p_code: code,
       });
 
       if (error) throw error;
       return data as number;
-    }
+    },
   });
 };
 
@@ -174,19 +195,19 @@ export const useRedeemGiftCard = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      giftCardId, 
-      orderId, 
-      amount 
-    }: { 
-      giftCardId: string; 
-      orderId: string; 
+    mutationFn: async ({
+      giftCardId,
+      orderId,
+      amount,
+    }: {
+      giftCardId: string;
+      orderId: string;
       amount: number;
     }) => {
       const { data, error } = await supabase.rpc('redeem_gift_card', {
         p_gift_card_id: giftCardId,
         p_order_id: orderId,
-        p_amount: amount
+        p_amount: amount,
       });
 
       if (error) throw error;
@@ -202,7 +223,7 @@ export const useRedeemGiftCard = () => {
       queryClient.invalidateQueries({ queryKey: ['giftCards'] });
       queryClient.invalidateQueries({ queryKey: ['myGiftCards'] });
       queryClient.invalidateQueries({ queryKey: ['giftCardTransactions'] });
-    }
+    },
   });
 };
 
@@ -238,9 +259,9 @@ export const useCreateGiftCard = () => {
           applicable_to_stores: input.applicable_to_stores || null,
           can_be_partially_used: input.can_be_partially_used ?? true,
           auto_activate: input.auto_activate ?? true,
-          metadata: input.metadata || {},
+          metadata: (input.metadata || {}) as Json,
           notes: input.notes || null,
-          status: input.auto_activate ? 'active' : 'pending'
+          status: input.auto_activate ? 'active' : 'pending',
         })
         .select()
         .single();
@@ -248,23 +269,21 @@ export const useCreateGiftCard = () => {
       if (error) throw error;
 
       // Créer la transaction initiale (purchase)
-      await supabase
-        .from('gift_card_transactions')
-        .insert({
-          gift_card_id: data.id,
-          transaction_type: 'purchase',
-          amount: input.initial_amount,
-          balance_before: 0,
-          balance_after: input.initial_amount,
-          description: 'Création de la carte cadeau',
-          metadata: {}
-        });
+      await supabase.from('gift_card_transactions').insert({
+        gift_card_id: data.id,
+        transaction_type: 'purchase',
+        amount: input.initial_amount,
+        balance_before: 0,
+        balance_after: input.initial_amount,
+        description: 'Création de la carte cadeau',
+        metadata: {},
+      });
 
-      return data as GiftCard;
+      return data as unknown as GiftCard;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['giftCards'] });
-    }
+    },
   });
 };
 
@@ -275,11 +294,11 @@ export const useUpdateGiftCard = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      giftCardId, 
-      input 
-    }: { 
-      giftCardId: string; 
+    mutationFn: async ({
+      giftCardId,
+      input,
+    }: {
+      giftCardId: string;
       input: UpdateGiftCardInput;
     }) => {
       const { data, error } = await supabase
@@ -290,13 +309,13 @@ export const useUpdateGiftCard = () => {
         .single();
 
       if (error) throw error;
-      return data as GiftCard;
+      return data as unknown as GiftCard;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['giftCards'] });
       queryClient.invalidateQueries({ queryKey: ['giftCard'] });
       queryClient.invalidateQueries({ queryKey: ['myGiftCards'] });
-    }
+    },
   });
 };
 
@@ -311,18 +330,20 @@ export const useGiftCardTransactions = (giftCardId?: string) => {
 
       const { data, error } = await supabase
         .from('gift_card_transactions')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_TX_FIELDS},
           gift_card:gift_cards(${GIFT_CARD_FIELDS}),
           order:orders(id, order_number, total_amount)
-        `)
+        `
+        )
         .eq('gift_card_id', giftCardId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as GiftCardTransaction[];
+      return data as unknown as GiftCardTransaction[];
     },
-    enabled: !!giftCardId
+    enabled: !!giftCardId,
   });
 };
 
@@ -337,18 +358,20 @@ export const useStoreGiftCardTransactions = (storeId?: string) => {
 
       const { data, error } = await supabase
         .from('gift_card_transactions')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_TX_FIELDS},
           gift_card:gift_cards!inner(${GIFT_CARD_FIELDS}, store:stores!inner(id)),
           order:orders(id, order_number, total_amount)
-        `)
+        `
+        )
         .eq('gift_card.store_id', storeId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as GiftCardTransaction[];
+      return data as unknown as GiftCardTransaction[];
     },
-    enabled: !!storeId
+    enabled: !!storeId,
   });
 };
 
@@ -371,9 +394,9 @@ export const useCustomerGiftCards = (customerId?: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as GiftCard[];
+      return (data || []) as unknown as GiftCard[];
     },
-    enabled: !!customerId && !!user?.email
+    enabled: !!customerId && !!user?.email,
   });
 };
 
@@ -400,11 +423,13 @@ export const useCustomerGiftCardTransactions = (customerId?: string) => {
 
       const { data: transactions, error } = await supabase
         .from('gift_card_transactions')
-        .select(`
+        .select(
+          `
           ${GIFT_CARD_TX_FIELDS},
           gift_card:gift_cards(id, code),
           order:orders(id, order_number)
-        `)
+        `
+        )
         .in('gift_card_id', giftCardIds)
         .order('created_at', { ascending: false });
 
@@ -417,13 +442,6 @@ export const useCustomerGiftCardTransactions = (customerId?: string) => {
         order_number: t.order?.order_number || null,
       })) as (GiftCardTransaction & { gift_card_code: string; order_number: string | null })[];
     },
-    enabled: !!customerId && !!user?.email
+    enabled: !!customerId && !!user?.email,
   });
 };
-
-
-
-
-
-
-

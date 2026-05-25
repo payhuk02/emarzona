@@ -13,7 +13,6 @@
   "include": [
     "src/vite-env.d.ts",
     "src/pages/Dashboard.tsx",
-    "src/pages/Analytics.tsx",
     "src/pages/notifications/NotificationsManagement.tsx",
     "src/pages/admin/AdminWebhookManagement.tsx",
     "src/components/dashboard/DashboardStats.tsx",

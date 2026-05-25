@@ -14,6 +14,7 @@ import {
 } from '@/components/icons';
 import { Heart, Play, ZoomIn } from 'lucide-react';
 import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -146,7 +147,9 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         storeId: product.store_id,
         productId: product.id,
         amount: price,
-        currency: product.currency ?? 'XOF',
+        currency: (isSupportedCurrency(product.currency ?? '')
+          ? product.currency
+          : 'XOF') as Currency,
         description: `Achat de ${product.name}`,
         customerEmail: 'client@example.com',
         metadata: { productName: product.name, storeSlug },
@@ -161,10 +164,10 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
           });
         });
       }
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Impossible d'initialiser le paiement";
-      logger.error('Erreur Moneroo', { error, productId: product.id });
+        _error instanceof Error ? _error.message : "Impossible d'initialiser le paiement";
+      logger.error('Erreur Moneroo', { error: _error, productId: product.id });
       toast({
         title: 'Erreur de paiement',
         description: errorMessage,
@@ -187,10 +190,7 @@ const ProductCardComponent = ({ product, storeSlug }: ProductCardProps) => {
         {/* ✅ Ratio 3:2 (1536×1024) aligné avec le format produit, évite les hauteurs variables / CLS */}
         {/* ✅ Bordures bien définies comme sur le Marketplace : border-2 avec couleurs cohérentes */}
         <div className="relative w-full aspect-[3/2] overflow-hidden bg-muted/30 border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300">
-          <Link
-            to={generateProductUrl(storeSlug, product.slug)}
-            className="block w-full h-full"
-          >
+          <Link to={generateProductUrl(storeSlug, product.slug)} className="block w-full h-full">
             <ResponsiveProductImage
               src={product.image_url}
               alt={`Image du produit ${product.name}`}
@@ -605,9 +605,3 @@ const ProductCard = React.memo(ProductCardComponent, (prevProps, nextProps) => {
 ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
-
-
-
-
-
-
