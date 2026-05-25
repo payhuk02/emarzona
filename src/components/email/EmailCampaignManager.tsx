@@ -147,6 +147,39 @@ export const EmailCampaignManager = ({
     refetch();
   };
 
+  const handleMenuAction = (action: string, campaign: EmailCampaign) => {
+    switch (action) {
+      case 'report':
+        openDetail(campaign, 'report');
+        break;
+      case 'metrics':
+        openDetail(campaign, 'metrics');
+        break;
+      case 'abtest':
+        openDetail(campaign, 'abtest');
+        break;
+      case 'edit':
+        onEditCampaign?.(campaign);
+        break;
+      case 'send':
+        void handleSend(campaign.id);
+        break;
+      case 'duplicate':
+        void handleDuplicate(campaign.id);
+        break;
+      case 'resume':
+        void handleResume(campaign.id);
+        break;
+      case 'pause':
+        void handlePause(campaign.id);
+        break;
+      case 'delete':
+        setCampaignToDelete(campaign.id);
+        setDeleteDialogOpen(true);
+        break;
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -258,7 +291,7 @@ export const EmailCampaignManager = ({
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Select>
+                        <Select onValueChange={action => handleMenuAction(action, campaign)}>
                           <SelectTrigger
                             className="h-8 w-8 min-h-[44px] min-w-[44px] border-0 bg-transparent p-0 shadow-none hover:bg-accent [&_svg.opacity-50]:hidden"
                             aria-label="Actions campagne"
@@ -266,66 +299,44 @@ export const EmailCampaignManager = ({
                             <MoreHorizontal className="h-4 w-4" />
                           </SelectTrigger>
                           <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem
-                              value="report"
-                              onSelect={() => openDetail(campaign, 'report')}
-                            >
+                            <SelectItem value="report">
                               <BarChart3 className="h-4 w-4 mr-2" />
                               Rapport & analytics
                             </SelectItem>
-                            <SelectItem
-                              value="metrics"
-                              onSelect={() => openDetail(campaign, 'metrics')}
-                            >
+                            <SelectItem value="metrics">
                               <Eye className="h-4 w-4 mr-2" />
                               Voir métriques
                             </SelectItem>
-                            <SelectItem
-                              value="abtest"
-                              onSelect={() => openDetail(campaign, 'abtest')}
-                            >
+                            <SelectItem value="abtest">
                               <Sparkles className="h-4 w-4 mr-2" />
                               Test A/B
                             </SelectItem>
                             <SelectSeparator />
-                            <SelectItem value="edit" onSelect={() => onEditCampaign?.(campaign)}>
+                            <SelectItem value="edit">
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </SelectItem>
                             {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
                               <SelectItem
                                 value="send"
-                                onSelect={() => handleSend(campaign.id)}
                                 disabled={sendCampaign.isPending || !campaign.template_id}
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Envoyer
                               </SelectItem>
                             )}
-                            <SelectItem
-                              value="duplicate"
-                              onSelect={() => handleDuplicate(campaign.id)}
-                              disabled={duplicateCampaign.isPending}
-                            >
+                            <SelectItem value="duplicate" disabled={duplicateCampaign.isPending}>
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliquer
                             </SelectItem>
                             {campaign.status === 'paused' && (
-                              <SelectItem
-                                value="resume"
-                                onSelect={() => handleResume(campaign.id)}
-                                disabled={resumeCampaign.isPending}
-                              >
+                              <SelectItem value="resume" disabled={resumeCampaign.isPending}>
                                 <Play className="h-4 w-4 mr-2" />
                                 Reprendre
                               </SelectItem>
                             )}
                             {(campaign.status === 'scheduled' || campaign.status === 'sending') && (
-                              <SelectItem
-                                value="pause"
-                                onSelect={() => handlePause(campaign.id)}
-                                disabled={pauseCampaign.isPending}
-                              >
+                              <SelectItem value="pause" disabled={pauseCampaign.isPending}>
                                 <Pause className="h-4 w-4 mr-2" />
                                 Mettre en pause
                               </SelectItem>
@@ -334,10 +345,6 @@ export const EmailCampaignManager = ({
                             <SelectItem
                               value="delete"
                               className="text-destructive focus:text-destructive"
-                              onSelect={() => {
-                                setCampaignToDelete(campaign.id);
-                                setDeleteDialogOpen(true);
-                              }}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
