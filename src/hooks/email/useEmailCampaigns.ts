@@ -349,3 +349,40 @@ export const useSendEmailCampaign = () => {
     },
   });
 };
+
+export interface SendCampaignTestPayload {
+  templateId: string;
+  storeId: string;
+  to: string;
+  toName?: string;
+  userId?: string;
+  campaignName?: string;
+}
+
+/** Envoi d'un email de test (template sélectionné dans le builder) */
+export const useSendCampaignTestEmail = () => {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (payload: SendCampaignTestPayload) => {
+      const result = await EmailCampaignService.sendCampaignTestEmail(payload);
+      if (!result.success) {
+        throw new Error(result.error || "Échec de l'envoi du test");
+      }
+      return result;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Email de test envoyé',
+        description: 'Vérifiez votre boîte de réception (et les spams).',
+      });
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: 'Erreur',
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      });
+    },
+  });
+};

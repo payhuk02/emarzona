@@ -7,8 +7,21 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/stable-dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +32,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Eye, Edit, Trash2, Play, Pause, Copy, Calendar, Send } from '@/components/icons';
+import {
+  Plus,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  Play,
+  Pause,
+  Copy,
+  Calendar,
+  Send,
+  BarChart3,
+  Sparkles,
+} from '@/components/icons';
 import { useEmailCampaigns } from '@/hooks/email/useEmailCampaigns';
 import {
   useDeleteEmailCampaign,
@@ -28,7 +54,7 @@ import {
   useDuplicateEmailCampaign,
   useSendEmailCampaign,
 } from '@/hooks/email/useEmailCampaigns';
-import { CampaignMetrics } from './CampaignMetrics';
+import { CampaignDetailDialog } from './CampaignDetailDialog';
 import type { EmailCampaign, CampaignStatus } from '@/lib/email/email-campaign-service';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -40,7 +66,7 @@ interface EmailCampaignManagerProps {
   onEditCampaign?: (campaign: EmailCampaign) => void;
 }
 
-const  STATUS_COLORS: Record<CampaignStatus, string> = {
+const STATUS_COLORS: Record<CampaignStatus, string> = {
   draft: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
   scheduled: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
   sending: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
@@ -49,7 +75,7 @@ const  STATUS_COLORS: Record<CampaignStatus, string> = {
   cancelled: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
 };
 
-const  STATUS_LABELS: Record<CampaignStatus, string> = {
+const STATUS_LABELS: Record<CampaignStatus, string> = {
   draft: 'Brouillon',
   scheduled: 'Programmée',
   sending: 'Envoi en cours',
@@ -58,7 +84,7 @@ const  STATUS_LABELS: Record<CampaignStatus, string> = {
   cancelled: 'Annulée',
 };
 
-const  TYPE_LABELS: Record<string, string> = {
+const TYPE_LABELS: Record<string, string> = {
   newsletter: 'Newsletter',
   promotional: 'Promotionnelle',
   transactional: 'Transactionnelle',
@@ -72,7 +98,8 @@ export const EmailCampaignManager = ({
   onEditCampaign,
 }: EmailCampaignManagerProps) => {
   const [selectedCampaign, setSelectedCampaign] = useState<EmailCampaign | null>(null);
-  const [showMetrics, setShowMetrics] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailTab, setDetailTab] = useState<'report' | 'metrics' | 'abtest'>('report');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<string | null>(null);
 
@@ -82,6 +109,12 @@ export const EmailCampaignManager = ({
   const resumeCampaign = useResumeEmailCampaign();
   const duplicateCampaign = useDuplicateEmailCampaign();
   const sendCampaign = useSendEmailCampaign();
+
+  const openDetail = (campaign: EmailCampaign, tab: 'report' | 'metrics' | 'abtest' = 'report') => {
+    setSelectedCampaign(campaign);
+    setDetailTab(tab);
+    setDetailOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!campaignToDelete) return;
@@ -165,7 +198,7 @@ export const EmailCampaignManager = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {campaigns.map((campaign) => (
+                  {campaigns.map(campaign => (
                     <TableRow key={campaign.id}>
                       <TableCell>
                         <div>
@@ -178,7 +211,9 @@ export const EmailCampaignManager = ({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{TYPE_LABELS[campaign.type] || campaign.type}</Badge>
+                        <Badge variant="outline">
+                          {TYPE_LABELS[campaign.type] || campaign.type}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -208,9 +243,14 @@ export const EmailCampaignManager = ({
                       <TableCell>
                         <div className="text-sm">
                           <div>
-                            Ouvert: {campaign.metrics.opened} ({campaign.metrics.delivered > 0 
-                              ? ((campaign.metrics.opened / campaign.metrics.delivered) * 100).toFixed(1)
-                              : 0}%)
+                            Ouvert: {campaign.metrics.opened} (
+                            {campaign.metrics.delivered > 0
+                              ? (
+                                  (campaign.metrics.opened / campaign.metrics.delivered) *
+                                  100
+                                ).toFixed(1)
+                              : 0}
+                            %)
                           </div>
                           <div className="text-muted-foreground">
                             Clics: {campaign.metrics.clicked}
@@ -218,67 +258,77 @@ export const EmailCampaignManager = ({
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Select>
-                          <SelectTrigger>
-
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" aria-label="Actions campagne">
                               <MoreHorizontal className="h-4 w-4" />
-                            
-</SelectTrigger>
-                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                            <SelectItem value="edit" onSelect={() => {
-                                setSelectedCampaign(campaign);
-                                setShowMetrics(true);
-                              }}
-                            >
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="min-w-[200px]">
+                            <DropdownMenuItem onClick={() => openDetail(campaign, 'report')}>
+                              <BarChart3 className="h-4 w-4 mr-2" />
+                              Rapport & analytics
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openDetail(campaign, 'metrics')}>
                               <Eye className="h-4 w-4 mr-2" />
                               Voir métriques
-                            </SelectItem>
-                            <SelectItem value="delete" onSelect={() => onEditCampaign?.(campaign)}
-                            >
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openDetail(campaign, 'abtest')}>
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Test A/B
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onEditCampaign?.(campaign)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
-                            </SelectItem>
+                            </DropdownMenuItem>
                             {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
-                              <SelectItem value="copy" onSelect={() => handleSend(campaign.id)}
+                              <DropdownMenuItem
+                                onClick={() => handleSend(campaign.id)}
                                 disabled={sendCampaign.isPending || !campaign.template_id}
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Envoyer
-                              </SelectItem>
+                              </DropdownMenuItem>
                             )}
-                            <SelectItem value="view" onSelect={() => handleDuplicate(campaign.id)}
+                            <DropdownMenuItem
+                              onClick={() => handleDuplicate(campaign.id)}
                               disabled={duplicateCampaign.isPending}
                             >
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliquer
-                            </SelectItem>
+                            </DropdownMenuItem>
                             {campaign.status === 'paused' && (
-                              <SelectItem value="export" onSelect={() => handleResume(campaign.id)}
+                              <DropdownMenuItem
+                                onClick={() => handleResume(campaign.id)}
                                 disabled={resumeCampaign.isPending}
                               >
                                 <Play className="h-4 w-4 mr-2" />
                                 Reprendre
-                              </SelectItem>
+                              </DropdownMenuItem>
                             )}
                             {(campaign.status === 'scheduled' || campaign.status === 'sending') && (
-                              <SelectItem value="duplicate" onSelect={() => handlePause(campaign.id)}
+                              <DropdownMenuItem
+                                onClick={() => handlePause(campaign.id)}
                                 disabled={pauseCampaign.isPending}
                               >
                                 <Pause className="h-4 w-4 mr-2" />
                                 Mettre en pause
-                              </SelectItem>
+                              </DropdownMenuItem>
                             )}
-                            <SelectItem value="toggle" onSelect={() => {
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => {
                                 setCampaignToDelete(campaign.id);
                                 setDeleteDialogOpen(true);
                               }}
-                              className="text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -289,34 +339,16 @@ export const EmailCampaignManager = ({
         </CardContent>
       </Card>
 
-      {/* Dialog pour afficher les métriques */}
-      {showMetrics && selectedCampaign && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <Card className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Métriques: {selectedCampaign.name}</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setShowMetrics(false);
-                    setSelectedCampaign(null);
-                  }}
-                  aria-label="Fermer les métriques"
-                >
-                  ×
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <CampaignMetrics campaign={selectedCampaign} />
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <CampaignDetailDialog
+        campaign={selectedCampaign}
+        open={detailOpen}
+        onOpenChange={open => {
+          setDetailOpen(open);
+          if (!open) setSelectedCampaign(null);
+        }}
+        defaultTab={detailTab}
+      />
 
-      {/* Dialog de confirmation de suppression */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -328,7 +360,7 @@ export const EmailCampaignManager = ({
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onSelect={handleDelete}
+              onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer
@@ -339,10 +371,3 @@ export const EmailCampaignManager = ({
     </>
   );
 };
-
-
-
-
-
-
-

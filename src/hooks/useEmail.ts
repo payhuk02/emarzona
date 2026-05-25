@@ -18,7 +18,8 @@ import type {
   EmailCategory,
   SendGridStatus,
 } from '@/types/email';
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/resend';
+import { EmailPreferencesService } from '@/lib/email/email-preferences-service';
 
 const EMAIL_TEMPLATE_FIELDS =
   'id, name, slug, category, product_type, subject, html_content, text_content, variables, is_active, is_default, created_at, updated_at';
@@ -71,9 +72,6 @@ function mapEmailLogRow(row: EmailLogRow): EmailLog {
     click_count: 0,
   };
 }
-const EMAIL_PREFERENCES_FIELDS =
-  'id, user_id, marketing_emails, transactional_emails, order_updates, product_updates, newsletter, promotional_offers, reminder_emails, frequency, unsubscribed_at, created_at, updated_at';
-
 // ============================================================
 // EMAIL TEMPLATES
 // ============================================================
@@ -247,41 +245,7 @@ export const useEmailPreferences = () => {
     queryKey: ['email-preferences', user?.id],
     queryFn: async (): Promise<EmailPreferences | null> => {
       if (!user) return null;
-
-      const { data, error } = await supabase
-        .from('email_preferences')
-        .select(EMAIL_PREFERENCES_FIELDS)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') {
-        // Ignorer "row not found"
-        logger.error('Error fetching email preferences', { error, userId: user?.id });
-        throw error;
-      }
-
-      // Créer préférences par défaut si elles n'existent pas
-      if (!data) {
-        const { data: newPrefs, error: insertError } = await supabase
-          .from('email_preferences')
-          .insert({
-            user_id: user.id,
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          logger.error('Error creating email preferences', {
-            error: insertError,
-            userId: user?.id,
-          });
-          throw insertError;
-        }
-
-        return newPrefs as EmailPreferences;
-      }
-
-      return data as EmailPreferences;
+      return EmailPreferencesService.getOrCreateForUser(user.id);
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 10,
@@ -300,19 +264,7 @@ export const useUpdateEmailPreferences = () => {
     mutationFn: async (preferences: Partial<EmailPreferences>) => {
       if (!user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
-        .from('email_preferences')
-        .update(preferences)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (error) {
-        logger.error('Error updating email preferences', { error, userId: user?.id });
-        throw error;
-      }
-
-      return data as EmailPreferences;
+      return EmailPreferencesService.updateForUser(user.id, preferences);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['email-preferences', user?.id] });

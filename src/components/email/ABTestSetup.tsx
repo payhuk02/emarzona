@@ -17,18 +17,21 @@ import {
 } from '@/components/ui/select';
 import { useEmailTemplates } from '@/hooks/useEmail';
 import { useCreateEmailABTest } from '@/hooks/email/useEmailABTests';
+import { useToast } from '@/hooks/use-toast';
 import type { ABTestVariant, CreateABTestPayload } from '@/lib/email/email-ab-test-service';
 import { Loader2 } from 'lucide-react';
-import { logger } from '@/lib/logger';
 
 interface ABTestSetupProps {
   campaignId: string;
+  /** Sujet ou nom de campagne pour préremplir la variante A */
+  subjectHint?: string;
   onSuccess?: () => void;
 }
 
-export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
+export const ABTestSetup = ({ campaignId, subjectHint, onSuccess }: ABTestSetupProps) => {
+  const { toast } = useToast();
   const [variantAName, setVariantAName] = useState('Variante A');
-  const [variantASubject, setVariantASubject] = useState('');
+  const [variantASubject, setVariantASubject] = useState(subjectHint ?? '');
   const [variantATemplateId, setVariantATemplateId] = useState('');
   const [variantAPercentage, setVariantAPercentage] = useState(50);
 
@@ -48,25 +51,29 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
 
     // Valider que les pourcentages totalisent 100
     if (variantAPercentage + variantBPercentage !== 100) {
-      alert('Les pourcentages doivent totaliser 100%');
+      toast({
+        title: 'Répartition invalide',
+        description: 'Les pourcentages des variantes doivent totaliser 100%.',
+        variant: 'destructive',
+      });
       return;
     }
 
-    const  variantA: ABTestVariant = {
+    const variantA: ABTestVariant = {
       name: variantAName,
       subject: variantASubject,
       template_id: variantATemplateId || undefined,
       send_percentage: variantAPercentage,
     };
 
-    const  variantB: ABTestVariant = {
+    const variantB: ABTestVariant = {
       name: variantBName,
       subject: variantBSubject,
       template_id: variantBTemplateId || undefined,
       send_percentage: variantBPercentage,
     };
 
-    const  payload: CreateABTestPayload = {
+    const payload: CreateABTestPayload = {
       campaign_id: campaignId,
       variant_a: variantA,
       variant_b: variantB,
@@ -74,12 +81,8 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
       min_recipients_per_variant: minRecipients,
     };
 
-    try {
-      await createABTest.mutateAsync(payload);
-      onSuccess?.();
-    } catch (error) {
-      logger.error('Failed to create AB test', { error });
-    }
+    await createABTest.mutateAsync(payload);
+    onSuccess?.();
   };
 
   return (
@@ -97,7 +100,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
               <Input
                 id="variantA-name"
                 value={variantAName}
-                onChange={(e) => setVariantAName(e.target.value)}
+                onChange={e => setVariantAName(e.target.value)}
                 placeholder="ex: Sujet avec emoji"
               />
             </div>
@@ -106,7 +109,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
               <Input
                 id="variantA-subject"
                 value={variantASubject}
-                onChange={(e) => setVariantASubject(e.target.value)}
+                onChange={e => setVariantASubject(e.target.value)}
                 placeholder="Sujet de l'email variante A"
                 required
               />
@@ -117,8 +120,8 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un template" />
                 </SelectTrigger>
-                <SelectContent>
-                  {templates?.map((template) => (
+                <SelectContent modal={false}>
+                  {templates?.map(template => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
@@ -136,7 +139,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
                 min="0"
                 max="100"
                 value={variantAPercentage}
-                onChange={(e) => {
+                onChange={e => {
                   const value = parseInt(e.target.value);
                   setVariantAPercentage(value);
                   setVariantBPercentage(100 - value);
@@ -158,7 +161,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
               <Input
                 id="variantB-name"
                 value={variantBName}
-                onChange={(e) => setVariantBName(e.target.value)}
+                onChange={e => setVariantBName(e.target.value)}
                 placeholder="ex: Sujet sans emoji"
               />
             </div>
@@ -167,7 +170,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
               <Input
                 id="variantB-subject"
                 value={variantBSubject}
-                onChange={(e) => setVariantBSubject(e.target.value)}
+                onChange={e => setVariantBSubject(e.target.value)}
                 placeholder="Sujet de l'email variante B"
                 required
               />
@@ -178,8 +181,8 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un template" />
                 </SelectTrigger>
-                <SelectContent>
-                  {templates?.map((template) => (
+                <SelectContent modal={false}>
+                  {templates?.map(template => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
@@ -197,7 +200,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
                 min="0"
                 max="100"
                 value={variantBPercentage}
-                onChange={(e) => {
+                onChange={e => {
                   const value = parseInt(e.target.value);
                   setVariantBPercentage(value);
                   setVariantAPercentage(100 - value);
@@ -217,7 +220,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
                   id="test-duration"
                   type="number"
                   value={testDurationHours}
-                  onChange={(e) => setTestDurationHours(parseInt(e.target.value) || 24)}
+                  onChange={e => setTestDurationHours(parseInt(e.target.value) || 24)}
                   min="1"
                 />
               </div>
@@ -227,7 +230,7 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
                   id="min-recipients"
                   type="number"
                   value={minRecipients}
-                  onChange={(e) => setMinRecipients(parseInt(e.target.value) || 100)}
+                  onChange={e => setMinRecipients(parseInt(e.target.value) || 100)}
                   min="10"
                 />
               </div>
@@ -237,9 +240,9 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
           {/* Avertissement */}
           <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-lg p-4">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>Note :</strong> Les pourcentages doivent totaliser 100%. 
-              Le gagnant sera déterminé automatiquement après la période de test 
-              basé sur les taux d&apos;ouverture, de clic et les revenus générés.
+              <strong>Note :</strong> Les pourcentages doivent totaliser 100%. Le gagnant sera
+              déterminé automatiquement après la période de test basé sur les taux d&apos;ouverture,
+              de clic et les revenus générés.
             </p>
           </div>
 
@@ -256,10 +259,3 @@ export const ABTestSetup = ({ campaignId, onSuccess }: ABTestSetupProps) => {
     </Card>
   );
 };
-
-
-
-
-
-
-

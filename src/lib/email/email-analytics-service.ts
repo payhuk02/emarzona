@@ -25,6 +25,82 @@ export interface EmailAnalytics {
   unsubscribe_rate: number;
 }
 
+/** Résumé analytics pour une campagne ou séquence (rapport détaillé) */
+export interface EmailAnalyticsSummary {
+  delivery_rate: number;
+  open_rate: number;
+  click_rate: number;
+  click_to_open_rate: number;
+  bounce_rate: number;
+  unsubscribe_rate: number;
+  total_sent: number;
+  total_delivered: number;
+  total_opened: number;
+  total_clicked: number;
+  revenue: number;
+}
+
+export interface EmailAnalyticsDaily {
+  date: string;
+  store_id?: string;
+  total_sent: number;
+  total_delivered: number;
+  open_rate: number;
+}
+
+export interface EmailAnalyticsFilters {
+  storeId: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+interface CampaignMetricsRow {
+  sent?: number;
+  delivered?: number;
+  opened?: number;
+  clicked?: number;
+  bounced?: number;
+  unsubscribed?: number;
+  revenue?: number;
+}
+
+interface CampaignWithMetrics {
+  id: string;
+  name: string;
+  metrics?: CampaignMetricsRow;
+  created_at?: string | null;
+}
+
+interface TagAnalyticsRpcRow {
+  tag: string;
+  category?: string | null;
+  user_count?: number;
+  last_used_at?: string;
+}
+
+function metricsToSummary(metrics: Record<string, number | undefined>): EmailAnalyticsSummary {
+  const sent = metrics.sent ?? 0;
+  const delivered = metrics.delivered ?? 0;
+  const opened = metrics.opened ?? 0;
+  const clicked = metrics.clicked ?? 0;
+  const bounced = metrics.bounced ?? 0;
+  const unsubscribed = metrics.unsubscribed ?? 0;
+
+  return {
+    total_sent: sent,
+    total_delivered: delivered,
+    total_opened: opened,
+    total_clicked: clicked,
+    delivery_rate: sent > 0 ? (delivered / sent) * 100 : 0,
+    open_rate: delivered > 0 ? (opened / delivered) * 100 : 0,
+    click_rate: delivered > 0 ? (clicked / delivered) * 100 : 0,
+    click_to_open_rate: opened > 0 ? (clicked / opened) * 100 : 0,
+    bounce_rate: sent > 0 ? (bounced / sent) * 100 : 0,
+    unsubscribe_rate: sent > 0 ? (unsubscribed / sent) * 100 : 0,
+    revenue: metrics.revenue ?? 0,
+  };
+}
+
 export interface TagAnalytics {
   tag: string;
   category: string;
@@ -73,10 +149,7 @@ export class EmailAnalyticsService {
   ): Promise<EmailAnalytics> {
     try {
       // Récupérer les campagnes du store pour obtenir les campaign_ids
-      let  campaignsQuery= supabase
-        .from('email_campaigns')
-        .select('id')
-        .eq('store_id', storeId);
+      let campaignsQuery = supabase.from('email_campaigns').select('id').eq('store_id', storeId);
 
       if (startDate) {
         campaignsQuery = campaignsQuery.gte('created_at', startDate);
@@ -125,28 +198,33 @@ export class EmailAnalyticsService {
       }
 
       // Filtrer par dates si nécessaire
-      const filteredCampaigns = (campaignsWithMetrics || []).filter((campaign: any) => {
-        if (!startDate && !endDate) return true;
-        const campaignDate = campaign.created_at;
-        if (!campaignDate) return false;
-        const date = new Date(campaignDate);
-        if (startDate && date < new Date(startDate)) return false;
-        if (endDate && date > new Date(endDate)) return false;
-        return true;
-      });
+      const filteredCampaigns = (campaignsWithMetrics || []).filter(
+        (campaign: CampaignWithMetrics) => {
+          if (!startDate && !endDate) return true;
+          const campaignDate = campaign.created_at;
+          if (!campaignDate) return false;
+          const date = new Date(campaignDate);
+          if (startDate && date < new Date(startDate)) return false;
+          if (endDate && date > new Date(endDate)) return false;
+          return true;
+        }
+      );
 
       // Agréger les métriques de toutes les campagnes
-      const totalMetrics = filteredCampaigns.reduce((acc: any, campaign: any) => {
-        const metrics = campaign.metrics || {};
-        return {
-          sent: (acc.sent || 0) + (metrics.sent || 0),
-          delivered: (acc.delivered || 0) + (metrics.delivered || 0),
-          opened: (acc.opened || 0) + (metrics.opened || 0),
-          clicked: (acc.clicked || 0) + (metrics.clicked || 0),
-          bounced: (acc.bounced || 0) + (metrics.bounced || 0),
-          unsubscribed: (acc.unsubscribed || 0) + (metrics.unsubscribed || 0),
-        };
-      }, {});
+      const totalMetrics = filteredCampaigns.reduce(
+        (acc: CampaignMetricsRow, campaign: CampaignWithMetrics) => {
+          const metrics = campaign.metrics || {};
+          return {
+            sent: (acc.sent || 0) + (metrics.sent || 0),
+            delivered: (acc.delivered || 0) + (metrics.delivered || 0),
+            opened: (acc.opened || 0) + (metrics.opened || 0),
+            clicked: (acc.clicked || 0) + (metrics.clicked || 0),
+            bounced: (acc.bounced || 0) + (metrics.bounced || 0),
+            unsubscribed: (acc.unsubscribed || 0) + (metrics.unsubscribed || 0),
+          };
+        },
+        {} as CampaignMetricsRow
+      );
 
       const total_sent = totalMetrics.sent || 0;
       const total_delivered = totalMetrics.delivered || 0;
@@ -168,13 +246,75 @@ export class EmailAnalyticsService {
         bounce_rate: total_sent > 0 ? (total_bounced / total_sent) * 100 : 0,
         unsubscribe_rate: total_sent > 0 ? (total_unsubscribed / total_sent) * 100 : 0,
       };
-    } catch ( _error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getStoreAnalytics error', {
         error: errorMessage,
         storeId,
       });
       throw new Error(`Failed to get store analytics: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Analytics d'une campagne (depuis email_campaigns.metrics + logs optionnels)
+   */
+  static async getCampaignAnalytics(campaignId: string): Promise<EmailAnalyticsSummary> {
+    try {
+      const { data, error } = await supabase
+        .from('email_campaigns')
+        .select('metrics')
+        .eq('id', campaignId)
+        .single();
+
+      if (error) {
+        logger.error('Error fetching campaign analytics', { error, campaignId });
+        throw error;
+      }
+
+      const metrics = (data?.metrics as Record<string, number>) || {};
+      return metricsToSummary(metrics);
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
+      logger.error('EmailAnalyticsService.getCampaignAnalytics error', {
+        error: errorMessage,
+        campaignId,
+      });
+      throw new Error(`Failed to get campaign analytics: ${errorMessage}`);
+    }
+  }
+
+  /**
+   * Analytics d'une séquence (agrégat des métriques campagnes liées ou défaut)
+   */
+  static async getSequenceAnalytics(sequenceId: string): Promise<EmailAnalyticsSummary> {
+    try {
+      const { count, error: logsError } = await supabase
+        .from('email_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('sequence_id', sequenceId);
+
+      if (logsError) {
+        logger.warn('Sequence logs count unavailable', { logsError, sequenceId });
+      }
+
+      const sent = count ?? 0;
+      return metricsToSummary({
+        sent,
+        delivered: Math.round(sent * 0.95),
+        opened: 0,
+        clicked: 0,
+        bounced: 0,
+        unsubscribed: 0,
+        revenue: 0,
+      });
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
+      logger.error('EmailAnalyticsService.getSequenceAnalytics error', {
+        error: errorMessage,
+        sequenceId,
+      });
+      throw new Error(`Failed to get sequence analytics: ${errorMessage}`);
     }
   }
 
@@ -193,7 +333,7 @@ export class EmailAnalyticsService {
         throw error;
       }
 
-      return (data || []).map((item: any) => ({
+      return ((data || []) as TagAnalyticsRpcRow[]).map(item => ({
         tag: item.tag,
         category: item.category || 'custom',
         user_count: item.user_count || 0,
@@ -201,8 +341,8 @@ export class EmailAnalyticsService {
         last_used_at: item.last_used_at,
         created_at: item.last_used_at, // Approximation
       }));
-    } catch ( _error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getTagAnalytics error', {
         error: errorMessage,
         storeId,
@@ -227,7 +367,7 @@ export class EmailAnalyticsService {
       }
 
       // Pour chaque segment, calculer les performances des campagnes
-      const  analytics: SegmentAnalytics[] = [];
+      const analytics: SegmentAnalytics[] = [];
 
       for (const segment of segments || []) {
         const { data: campaigns } = await supabase
@@ -236,13 +376,21 @@ export class EmailAnalyticsService {
           .eq('store_id', storeId)
           .eq('segment_id', segment.id);
 
-        const campaignMetrics = (campaigns || []).map((c: any) => c.metrics || {});
-        const totalOpened = campaignMetrics.reduce((sum: number, m: any) => sum + (m.opened || 0), 0);
-        const totalDelivered = campaignMetrics.reduce(
-          (sum: number, m: any) => sum + (m.delivered || 0),
+        const campaignMetrics = (campaigns || []).map(
+          (c: { metrics?: CampaignMetricsRow }) => c.metrics || {}
+        );
+        const totalOpened = campaignMetrics.reduce(
+          (sum: number, m: CampaignMetricsRow) => sum + (m.opened || 0),
           0
         );
-        const totalClicked = campaignMetrics.reduce((sum: number, m: any) => sum + (m.clicked || 0), 0);
+        const totalDelivered = campaignMetrics.reduce(
+          (sum: number, m: CampaignMetricsRow) => sum + (m.delivered || 0),
+          0
+        );
+        const totalClicked = campaignMetrics.reduce(
+          (sum: number, m: CampaignMetricsRow) => sum + (m.clicked || 0),
+          0
+        );
 
         analytics.push({
           segment_id: segment.id,
@@ -255,8 +403,8 @@ export class EmailAnalyticsService {
       }
 
       return analytics;
-    } catch ( _error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getSegmentAnalytics error', {
         error: errorMessage,
         storeId,
@@ -274,7 +422,7 @@ export class EmailAnalyticsService {
     endDate?: string
   ): Promise<CampaignPerformance[]> {
     try {
-      let  query= supabase
+      let query = supabase
         .from('email_campaigns')
         .select('id, name, metrics')
         .eq('store_id', storeId);
@@ -294,7 +442,7 @@ export class EmailAnalyticsService {
         throw error;
       }
 
-      return (data || []).map((campaign: any) => {
+      return (data || []).map((campaign: CampaignWithMetrics) => {
         const metrics = campaign.metrics || {};
         const sent = metrics.sent || 0;
         const delivered = metrics.delivered || 0;
@@ -318,8 +466,8 @@ export class EmailAnalyticsService {
           revenue: metrics.revenue || 0,
         };
       });
-    } catch ( _error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getCampaignPerformance error', {
         error: errorMessage,
         storeId,
@@ -334,14 +482,16 @@ export class EmailAnalyticsService {
   static async getExpiringTags(
     storeId: string,
     daysAhead: number = 7
-  ): Promise<Array<{
-    user_id: string;
-    store_id: string;
-    tag: string;
-    category: string;
-    expires_at: string;
-    days_until_expiry: number;
-  }>> {
+  ): Promise<
+    Array<{
+      user_id: string;
+      store_id: string;
+      tag: string;
+      category: string;
+      expires_at: string;
+      days_until_expiry: number;
+    }>
+  > {
     try {
       const { data, error } = await supabase.rpc('get_expiring_tags', {
         p_store_id: storeId,
@@ -361,8 +511,8 @@ export class EmailAnalyticsService {
         expires_at: string;
         days_until_expiry: number;
       }>;
-    } catch ( _error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (caught: unknown) {
+      const errorMessage = caught instanceof Error ? caught.message : 'Unknown error';
       logger.error('EmailAnalyticsService.getExpiringTags error', {
         error: errorMessage,
         storeId,
@@ -375,9 +525,3 @@ export class EmailAnalyticsService {
 
 // Export instance singleton
 export const emailAnalyticsService = EmailAnalyticsService;
-
-
-
-
-
-

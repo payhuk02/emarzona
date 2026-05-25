@@ -33,10 +33,10 @@ export class EmailValidationService {
    */
   static validateEmailFormat(email: string): EmailValidationResult {
     const trimmedEmail = email.trim().toLowerCase();
-    
+
     // Regex basique pour validation email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!emailRegex.test(trimmedEmail)) {
       return {
         valid: false,
@@ -48,7 +48,7 @@ export class EmailValidationService {
     // Vérifier les domaines invalides courants
     const invalidDomains = ['example.com', 'test.com', 'invalid.com'];
     const domain = trimmedEmail.split('@')[1];
-    
+
     if (invalidDomains.includes(domain)) {
       return {
         valid: false,
@@ -75,7 +75,11 @@ export class EmailValidationService {
         .from('email_unsubscribes')
         .select('unsubscribe_type')
         .eq('email', email.toLowerCase().trim())
-        .or(unsubscribeType ? `unsubscribe_type.eq.${unsubscribeType},unsubscribe_type.eq.all` : 'unsubscribe_type.eq.all');
+        .or(
+          unsubscribeType
+            ? `unsubscribe_type.eq.${unsubscribeType},unsubscribe_type.eq.all`
+            : 'unsubscribe_type.eq.all'
+        );
 
       if (error) {
         logger.error('Error checking unsubscribe status', { error, email });
@@ -84,8 +88,11 @@ export class EmailValidationService {
       }
 
       return (data && data.length > 0) || false;
-    } catch ( _error: any) {
-      logger.error('EmailValidationService.isUnsubscribed error', { error, email });
+    } catch (caught: unknown) {
+      logger.error('EmailValidationService.isUnsubscribed error', {
+        error: caught instanceof Error ? caught.message : String(caught),
+        email,
+      });
       return false;
     }
   }
@@ -94,8 +101,9 @@ export class EmailValidationService {
    * Vérifier si un email peut recevoir des emails marketing
    */
   static async canReceiveMarketing(email: string): Promise<boolean> {
-    return !(await this.isUnsubscribed(email, 'marketing')) && 
-           !(await this.isUnsubscribed(email, 'all'));
+    return (
+      !(await this.isUnsubscribed(email, 'marketing')) && !(await this.isUnsubscribed(email, 'all'))
+    );
   }
 
   /**
@@ -105,7 +113,7 @@ export class EmailValidationService {
     emails: string[],
     unsubscribeType?: 'all' | 'marketing' | 'newsletter' | 'transactional'
   ): Promise<string[]> {
-    const  cleanedEmails: string[] = [];
+    const cleanedEmails: string[] = [];
 
     for (const email of emails) {
       // Valider le format
@@ -145,9 +153,13 @@ export class EmailValidationService {
       }
 
       return (data || []) as UnsubscribeInfo[];
-    } catch ( _error: any) {
-      logger.error('EmailValidationService.getUnsubscribeInfo error', { error, email });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to fetch unsubscribe info');
+      logger.error('EmailValidationService.getUnsubscribeInfo error', {
+        error: err.message,
+        email,
+      });
+      throw err;
     }
   }
 
@@ -156,7 +168,7 @@ export class EmailValidationService {
    */
   static deduplicateEmails(emails: string[]): string[] {
     const seen = new Set<string>();
-    const  deduplicated: string[] = [];
+    const deduplicated: string[] = [];
 
     for (const email of emails) {
       const normalized = email.trim().toLowerCase();
@@ -172,10 +184,3 @@ export class EmailValidationService {
 
 // Export instance singleton
 export const emailValidationService = EmailValidationService;
-
-
-
-
-
-
-

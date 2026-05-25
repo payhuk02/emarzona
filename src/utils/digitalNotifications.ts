@@ -5,7 +5,7 @@
  * Système de notifications email automatiques pour produits digitaux
  */
 
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/resend';
 import { resolveStoreId } from '@/lib/email/resolve-store-id';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';

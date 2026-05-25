@@ -17,6 +17,7 @@ export * from './EmailSegmentBuilder';
 export * from './SegmentPreview';
 export * from './EmailAnalyticsDashboard';
 export * from './CampaignReport';
+export * from './CampaignDetailDialog';
 export * from './EmailWorkflowManager';
 export * from './EmailWorkflowBuilder';
 export * from './WorkflowTriggerEditor';

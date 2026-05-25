@@ -83,9 +83,10 @@ export class EmailABTestService {
         throw error;
       }
       return data as EmailABTest;
-    } catch ( _error: any) {
-      logger.error('EmailABTestService.createABTest error', { error, payload });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to create AB test');
+      logger.error('EmailABTestService.createABTest error', { error: err.message, payload });
+      throw err;
     }
   }
 
@@ -106,9 +107,10 @@ export class EmailABTestService {
         throw error;
       }
       return data as EmailABTest;
-    } catch ( _error: any) {
-      logger.error('EmailABTestService.getABTest error', { error, abTestId });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to fetch AB test');
+      logger.error('EmailABTestService.getABTest error', { error: err.message, abTestId });
+      throw err;
     }
   }
 
@@ -128,9 +130,13 @@ export class EmailABTestService {
         throw error;
       }
       return (data || []) as EmailABTest[];
-    } catch ( _error: any) {
-      logger.error('EmailABTestService.getABTestsByCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to fetch AB tests');
+      logger.error('EmailABTestService.getABTestsByCampaign error', {
+        error: err.message,
+        campaignId,
+      });
+      throw err;
     }
   }
 
@@ -150,7 +156,8 @@ export class EmailABTestService {
       }
 
       // Fusionner les résultats
-      const currentResults = variant === 'variant_a' ? test.variant_a_results : test.variant_b_results;
+      const currentResults =
+        variant === 'variant_a' ? test.variant_a_results : test.variant_b_results;
       const updatedResults = { ...currentResults, ...results };
 
       const { error } = await supabase.rpc('update_ab_test_results', {
@@ -164,9 +171,14 @@ export class EmailABTestService {
         throw error;
       }
       return true;
-    } catch ( _error: any) {
-      logger.error('EmailABTestService.updateABTestResults error', { error, abTestId, variant, results });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to update AB test results');
+      logger.error('EmailABTestService.updateABTestResults error', {
+        error: err.message,
+        abTestId,
+        variant,
+      });
+      throw err;
     }
   }
 
@@ -184,9 +196,10 @@ export class EmailABTestService {
         throw error;
       }
       return data as 'variant_a' | 'variant_b' | null;
-    } catch ( _error: any) {
-      logger.error('EmailABTestService.calculateWinner error', { error, abTestId });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to calculate winner');
+      logger.error('EmailABTestService.calculateWinner error', { error: err.message, abTestId });
+      throw err;
     }
   }
 
@@ -195,29 +208,20 @@ export class EmailABTestService {
    */
   static async deleteABTest(abTestId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('email_ab_tests')
-        .delete()
-        .eq('id', abTestId);
+      const { error } = await supabase.from('email_ab_tests').delete().eq('id', abTestId);
 
       if (error) {
         logger.error('Error deleting AB test', { error, abTestId });
         throw error;
       }
       return true;
-    } catch ( _error: any) {
-      logger.error('EmailABTestService.deleteABTest error', { error, abTestId });
-      throw error;
+    } catch (caught: unknown) {
+      const err = caught instanceof Error ? caught : new Error('Failed to delete AB test');
+      logger.error('EmailABTestService.deleteABTest error', { error: err.message, abTestId });
+      throw err;
     }
   }
 }
 
 // Export instance singleton
 export const emailABTestService = EmailABTestService;
-
-
-
-
-
-
-

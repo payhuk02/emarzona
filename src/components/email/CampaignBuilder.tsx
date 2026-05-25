@@ -24,7 +24,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useEmailTemplates } from '@/hooks/useEmail';
-import { useCreateEmailCampaign, useUpdateEmailCampaign } from '@/hooks/email/useEmailCampaigns';
+import {
+  useCreateEmailCampaign,
+  useUpdateEmailCampaign,
+  useSendCampaignTestEmail,
+} from '@/hooks/email/useEmailCampaigns';
+import { useAuth } from '@/contexts/AuthContext';
 import { useResponsiveModal } from '@/hooks/use-responsive-modal';
 import type {
   EmailCampaign,
@@ -32,7 +37,8 @@ import type {
   CampaignType,
   AudienceType,
 } from '@/lib/email/email-campaign-service';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 
 interface CampaignBuilderProps {
@@ -52,6 +58,7 @@ export const CampaignBuilder = ({
 }: CampaignBuilderProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { useBottomSheet } = useResponsiveModal();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -62,8 +69,10 @@ export const CampaignBuilder = ({
   const [timezone, setTimezone] = useState('Africa/Dakar');
 
   const { data: templates } = useEmailTemplates({ category: 'marketing' });
+  const [testEmail, setTestEmail] = useState('');
   const createCampaign = useCreateEmailCampaign();
   const updateCampaign = useUpdateEmailCampaign();
+  const sendTestEmail = useSendCampaignTestEmail();
 
   const isEditing = !!campaign;
 
@@ -89,6 +98,46 @@ export const CampaignBuilder = ({
       setTimezone('Africa/Dakar');
     }
   }, [campaign, open]);
+
+  useEffect(() => {
+    if (open && user?.email && !testEmail) {
+      setTestEmail(user.email);
+    }
+  }, [open, user?.email, testEmail]);
+
+  const handleSendTest = async () => {
+    if (!templateId) {
+      toast({
+        title: t('common.error', 'Erreur'),
+        description: t(
+          'emails.campaigns.testNeedsTemplate',
+          "Sélectionnez un template avant d'envoyer un test."
+        ),
+        variant: 'destructive',
+      });
+      return;
+    }
+    const to = testEmail.trim() || user?.email;
+    if (!to) {
+      toast({
+        title: t('common.error', 'Erreur'),
+        description: t(
+          'emails.campaigns.testNeedsEmail',
+          'Indiquez une adresse email pour recevoir le test.'
+        ),
+        variant: 'destructive',
+      });
+      return;
+    }
+    await sendTestEmail.mutateAsync({
+      templateId,
+      storeId,
+      to,
+      toName: user?.user_metadata?.full_name as string | undefined,
+      userId: user?.id,
+      campaignName: name.trim() || undefined,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,6 +305,36 @@ export const CampaignBuilder = ({
           placeholder: t('emails.campaigns.scheduledAtPlaceholder', "Programmer l'envoi"),
         }}
       />
+
+      <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
+        <Label>{t('emails.campaigns.testEmail', 'Email de test')}</Label>
+        <p className="text-sm text-muted-foreground">
+          {t(
+            'emails.campaigns.testEmailHint',
+            "Recevez un aperçu du template sélectionné avant d'envoyer la campagne."
+          )}
+        </p>
+        <Input
+          type="email"
+          value={testEmail}
+          onChange={e => setTestEmail(e.target.value)}
+          placeholder={user?.email ?? 'vous@exemple.com'}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full sm:w-auto"
+          disabled={!templateId || sendTestEmail.isPending}
+          onClick={handleSendTest}
+        >
+          {sendTestEmail.isPending ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4 mr-2" />
+          )}
+          {t('emails.campaigns.sendTest', 'Envoyer un email de test')}
+        </Button>
+      </div>
 
       <MobileFormField
         label={t('emails.campaigns.timezone', 'Fuseau horaire')}

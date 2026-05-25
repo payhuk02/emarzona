@@ -1,7 +1,7 @@
 /**
  * Système de Tracking Automatique pour les Colis
  * Date: 31 Janvier 2025
- * 
+ *
  * Polling automatique des APIs transporteurs pour mettre à jour le statut des colis
  * Support: FedEx, DHL, UPS, Chronopost (à venir)
  */
@@ -48,7 +48,10 @@ const SHIPPING_TRACKING_EVENT_FIELDS =
  */
 interface CarrierAdapter {
   name: string;
-  track: (trackingNumber: string, carrierConfig?: Record<string, unknown>) => Promise<CarrierTrackingResponse>;
+  track: (
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ) => Promise<CarrierTrackingResponse>;
 }
 
 /**
@@ -62,7 +65,10 @@ class FedExAdapter implements CarrierAdapter {
     this.adapter = new FedExAdapterImpl(config);
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     return this.adapter.track(trackingNumber, carrierConfig);
   }
 }
@@ -78,7 +84,10 @@ class DHLAdapter implements CarrierAdapter {
     this.adapter = new DHLAdapterImpl(config);
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     return this.adapter.track(trackingNumber, carrierConfig);
   }
 }
@@ -94,7 +103,10 @@ class UPSAdapter implements CarrierAdapter {
     this.adapter = new UPSAdapterImpl(config);
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     return this.adapter.track(trackingNumber, carrierConfig);
   }
 }
@@ -110,7 +122,10 @@ class ChronopostAdapter implements CarrierAdapter {
     this.adapter = new ChronopostAdapterImpl(config);
   }
 
-  async track(trackingNumber: string, carrierConfig?: Record<string, unknown>): Promise<CarrierTrackingResponse> {
+  async track(
+    trackingNumber: string,
+    carrierConfig?: Record<string, unknown>
+  ): Promise<CarrierTrackingResponse> {
     return this.adapter.track(trackingNumber, carrierConfig);
   }
 }
@@ -118,12 +133,15 @@ class ChronopostAdapter implements CarrierAdapter {
 /**
  * Factory pour obtenir l'adaptateur approprié
  */
-function getCarrierAdapter(carrierName: string, config?: Record<string, unknown>): CarrierAdapter | null {
-  const  adapters: Record<string, (config?: Record<string, unknown>) => CarrierAdapter> = {
-    FedEx: (cfg) => new FedExAdapter(cfg),
-    DHL: (cfg) => new DHLAdapter(cfg),
-    UPS: (cfg) => new UPSAdapter(cfg),
-    Chronopost: (cfg) => new ChronopostAdapter(cfg),
+function getCarrierAdapter(
+  carrierName: string,
+  config?: Record<string, unknown>
+): CarrierAdapter | null {
+  const adapters: Record<string, (config?: Record<string, unknown>) => CarrierAdapter> = {
+    FedEx: cfg => new FedExAdapter(cfg),
+    DHL: cfg => new DHLAdapter(cfg),
+    UPS: cfg => new UPSAdapter(cfg),
+    Chronopost: cfg => new ChronopostAdapter(cfg),
   };
 
   const adapterFactory = adapters[carrierName];
@@ -141,7 +159,7 @@ async function updateShipmentStatus(
 ): Promise<void> {
   try {
     // Mettre à jour le shipment
-    const  updateData: Record<string, unknown> = {
+    const updateData: Record<string, unknown> = {
       status,
       last_tracking_update: new Date().toISOString(),
     };
@@ -158,18 +176,16 @@ async function updateShipmentStatus(
         .eq('shipment_id', shipmentId);
 
       const existingEventKeys = new Set(
-        (existingEvents || []).map(
-          (e) => `${e.event_timestamp}_${e.event_type}`
-        )
+        (existingEvents || []).map(e => `${e.event_timestamp}_${e.event_type}`)
       );
 
       // Insérer uniquement les nouveaux événements
       const newEvents = events.filter(
-        (e) => !existingEventKeys.has(`${e.event_timestamp}_${e.event_type}`)
+        e => !existingEventKeys.has(`${e.event_timestamp}_${e.event_type}`)
       );
 
       if (newEvents.length > 0) {
-        const eventsToInsert = newEvents.map((event) => ({
+        const eventsToInsert = newEvents.map(event => ({
           shipment_id: shipmentId,
           event_type: event.event_type,
           event_code: event.event_code,
@@ -205,14 +221,16 @@ export async function trackShipment(shipmentId: string): Promise<boolean> {
     // Récupérer les informations du shipment
     const { data: shipment, error: shipmentError } = await supabase
       .from('shipments')
-      .select(`
+      .select(
+        `
         *,
         carrier:shipping_carriers (
           id,
           name,
           api_config
         )
-      `)
+      `
+      )
       .eq('id', shipmentId)
       .single();
 
@@ -226,7 +244,10 @@ export async function trackShipment(shipmentId: string): Promise<boolean> {
       return false;
     }
 
-    const carrier = shipment.carrier as { name: string; api_config?: Record<string, unknown> } | null;
+    const carrier = shipment.carrier as {
+      name: string;
+      api_config?: Record<string, unknown>;
+    } | null;
 
     if (!carrier) {
       logger.warn('No carrier for shipment', { shipmentId });
@@ -277,7 +298,8 @@ export async function trackPendingShipments(): Promise<{ success: number; failed
     // (en transit, pas livrés, avec tracking number)
     const { data: shipments, error } = await supabase
       .from('shipments')
-      .select(`
+      .select(
+        `
         id,
         tracking_number,
         status,
@@ -287,7 +309,8 @@ export async function trackPendingShipments(): Promise<{ success: number; failed
           name,
           api_config
         )
-      `)
+      `
+      )
       .in('status', ['label_created', 'picked_up', 'in_transit', 'out_for_delivery'])
       .not('tracking_number', 'is', null);
 
@@ -300,8 +323,8 @@ export async function trackPendingShipments(): Promise<{ success: number; failed
       return { success: 0, failed: 0 };
     }
 
-    let  successCount= 0;
-    let  failedCount= 0;
+    let successCount = 0;
+    let failedCount = 0;
 
     // Tracker chaque shipment
     for (const shipment of shipments) {
@@ -313,10 +336,14 @@ export async function trackPendingShipments(): Promise<{ success: number; failed
       }
 
       // Petite pause pour éviter de surcharger les APIs
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    logger.info('Tracking batch completed', { total: shipments.length, success: successCount, failed: failedCount });
+    logger.info('Tracking batch completed', {
+      total: shipments.length,
+      success: successCount,
+      failed: failedCount,
+    });
 
     return { success: successCount, failed: failedCount };
   } catch (error) {
@@ -333,7 +360,8 @@ export async function sendTrackingNotifications(shipmentId: string): Promise<voi
     // Récupérer le shipment avec la commande et le client
     const { data: shipment, error } = await supabase
       .from('shipments')
-      .select(`
+      .select(
+        `
         *,
         order:orders (
           id,
@@ -344,7 +372,8 @@ export async function sendTrackingNotifications(shipmentId: string): Promise<voi
             full_name
           )
         )
-      `)
+      `
+      )
       .eq('id', shipmentId)
       .single();
 
@@ -372,8 +401,8 @@ export async function sendTrackingNotifications(shipmentId: string): Promise<voi
 
     // Envoyer l'email de notification via SendGrid
     try {
-      const { sendTrackingUpdateEmail } = await import('@/lib/sendgrid');
-      
+      const { sendTrackingUpdateEmail } = await import('@/lib/resend');
+
       await sendTrackingUpdateEmail({
         userEmail: order.customer.email,
         userName: order.customer.full_name || 'Client',
@@ -383,16 +412,19 @@ export async function sendTrackingNotifications(shipmentId: string): Promise<voi
         trackingUrl: shipment.tracking_url || '',
         status: shipment.status,
         carrierName: shipment.carrier?.name || 'Transporteur',
-        estimatedDelivery: shipment.estimated_delivery 
+        estimatedDelivery: shipment.estimated_delivery
           ? new Date(shipment.estimated_delivery).toLocaleDateString('fr-FR')
           : undefined,
-        latestEvent: events && events.length > 0 ? {
-          description: events[0].description,
-          location: events[0].location 
-            ? `${events[0].location.city || ''}${events[0].location.city && events[0].location.country ? ', ' : ''}${events[0].location.country || ''}`
+        latestEvent:
+          events && events.length > 0
+            ? {
+                description: events[0].description,
+                location: events[0].location
+                  ? `${events[0].location.city || ''}${events[0].location.city && events[0].location.country ? ', ' : ''}${events[0].location.country || ''}`
+                  : undefined,
+                timestamp: events[0].event_timestamp,
+              }
             : undefined,
-          timestamp: events[0].event_timestamp,
-        } : undefined,
       });
 
       logger.info('Tracking notification email sent', {
@@ -412,10 +444,3 @@ export async function sendTrackingNotifications(shipmentId: string): Promise<voi
     logger.error('Error sending tracking notifications', { error, shipmentId });
   }
 }
-
-
-
-
-
-
-

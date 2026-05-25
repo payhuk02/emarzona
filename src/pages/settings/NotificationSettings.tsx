@@ -26,6 +26,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import type { NotificationPreferences } from '@/types/notifications';
+import { EmailPreferencesSettings } from '@/components/settings/EmailPreferencesSettings';
 
 const NotificationSettings = () => {
   const { toast } = useToast();
@@ -120,16 +121,12 @@ const NotificationSettings = () => {
                         ? 'Vous êtes abonné aux notifications push'
                         : 'Permission accordée mais non abonné'
                       : pushPermission.permission === 'denied'
-                      ? 'Notifications push désactivées'
-                      : 'Demander la permission pour les notifications push'}
+                        ? 'Notifications push désactivées'
+                        : 'Demander la permission pour les notifications push'}
                   </p>
                 </div>
                 {isPushSubscribed ? (
-                  <Button
-                    onClick={unsubscribePush}
-                    disabled={isPushLoading}
-                    variant="destructive"
-                  >
+                  <Button onClick={unsubscribePush} disabled={isPushLoading} variant="destructive">
                     Désactiver
                   </Button>
                 ) : (
@@ -144,7 +141,8 @@ const NotificationSettings = () => {
               </div>
               {pushPermission.permission === 'denied' && (
                 <p className="text-sm text-red-600 dark:text-red-400">
-                  Les notifications push ont été désactivées. Activez-les dans les paramètres de votre navigateur.
+                  Les notifications push ont été désactivées. Activez-les dans les paramètres de
+                  votre navigateur.
                 </p>
               )}
             </CardContent>
@@ -172,16 +170,16 @@ const NotificationSettings = () => {
           </Card>
         )}
 
-        {/* Notifications Email */}
+        <EmailPreferencesSettings />
+
+        {/* Notifications Email (préférences in-app / notification_preferences) */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="w-5 h-5" />
               Notifications par Email
             </CardTitle>
-            <CardDescription>
-              Recevez des emails pour les événements suivants
-            </CardDescription>
+            <CardDescription>Recevez des emails pour les événements suivants</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
@@ -194,21 +192,19 @@ const NotificationSettings = () => {
               <Switch
                 id="email_course_enrollment"
                 checked={localPrefs.email_course_enrollment}
-                onCheckedChange={(checked) => handleToggle('email_course_enrollment', checked)}
+                onCheckedChange={checked => handleToggle('email_course_enrollment', checked)}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="email_course_complete">Cours terminé</Label>
-                <p className="text-sm text-muted-foreground">
-                  Quand vous terminez un cours
-                </p>
+                <p className="text-sm text-muted-foreground">Quand vous terminez un cours</p>
               </div>
               <Switch
                 id="email_course_complete"
                 checked={localPrefs.email_course_complete}
-                onCheckedChange={(checked) => handleToggle('email_course_complete', checked)}
+                onCheckedChange={checked => handleToggle('email_course_complete', checked)}
               />
             </div>
 
@@ -222,7 +218,7 @@ const NotificationSettings = () => {
               <Switch
                 id="email_certificate_ready"
                 checked={localPrefs.email_certificate_ready}
-                onCheckedChange={(checked) => handleToggle('email_certificate_ready', checked)}
+                onCheckedChange={checked => handleToggle('email_certificate_ready', checked)}
               />
             </div>
 
@@ -236,7 +232,7 @@ const NotificationSettings = () => {
               <Switch
                 id="email_new_course"
                 checked={localPrefs.email_new_course}
-                onCheckedChange={(checked) => handleToggle('email_new_course', checked)}
+                onCheckedChange={checked => handleToggle('email_new_course', checked)}
               />
             </div>
 
@@ -250,21 +246,19 @@ const NotificationSettings = () => {
               <Switch
                 id="email_affiliate_sale"
                 checked={localPrefs.email_affiliate_sale}
-                onCheckedChange={(checked) => handleToggle('email_affiliate_sale', checked)}
+                onCheckedChange={checked => handleToggle('email_affiliate_sale', checked)}
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="email_quiz_result">Résultats quiz</Label>
-                <p className="text-sm text-muted-foreground">
-                  Quand vous passez un quiz
-                </p>
+                <p className="text-sm text-muted-foreground">Quand vous passez un quiz</p>
               </div>
               <Switch
                 id="email_quiz_result"
                 checked={localPrefs.email_quiz_result}
-                onCheckedChange={(checked) => handleToggle('email_quiz_result', checked)}
+                onCheckedChange={checked => handleToggle('email_quiz_result', checked)}
               />
             </div>
           </CardContent>
@@ -289,7 +283,7 @@ const NotificationSettings = () => {
               <Switch
                 id="app_course_enrollment"
                 checked={localPrefs.app_course_enrollment}
-                onCheckedChange={(checked) => handleToggle('app_course_enrollment', checked)}
+                onCheckedChange={checked => handleToggle('app_course_enrollment', checked)}
               />
             </div>
 
@@ -300,7 +294,7 @@ const NotificationSettings = () => {
               <Switch
                 id="app_lesson_complete"
                 checked={localPrefs.app_lesson_complete}
-                onCheckedChange={(checked) => handleToggle('app_lesson_complete', checked)}
+                onCheckedChange={checked => handleToggle('app_lesson_complete', checked)}
               />
             </div>
 
@@ -311,7 +305,7 @@ const NotificationSettings = () => {
               <Switch
                 id="app_course_complete"
                 checked={localPrefs.app_course_complete}
-                onCheckedChange={(checked) => handleToggle('app_course_complete', checked)}
+                onCheckedChange={checked => handleToggle('app_course_complete', checked)}
               />
             </div>
 
@@ -322,7 +316,7 @@ const NotificationSettings = () => {
               <Switch
                 id="app_affiliate_sale"
                 checked={localPrefs.app_affiliate_sale}
-                onCheckedChange={(checked) => handleToggle('app_affiliate_sale', checked)}
+                onCheckedChange={checked => handleToggle('app_affiliate_sale', checked)}
               />
             </div>
           </CardContent>
@@ -370,10 +364,3 @@ const NotificationSettings = () => {
 };
 
 export default NotificationSettings;
-
-
-
-
-
-
-

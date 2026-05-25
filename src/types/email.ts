@@ -20,30 +20,30 @@ export interface EmailTemplate {
   name: string;
   category: EmailCategory;
   product_type: ProductType | null; // null = universel
-  
+
   // Contenu multilingue
   subject: { [key: string]: string }; // {"fr": "...", "en": "..."}
   html_content: { [key: string]: string };
   text_content?: { [key: string]: string };
-  
+
   // Variables
   variables: string[]; // ["{{user_name}}", "{{order_id}}"]
-  
+
   // SendGrid
   sendgrid_template_id?: string;
   from_email: string;
   from_name: string;
   reply_to?: string;
-  
+
   // Statut
   is_active: boolean;
   is_default: boolean;
-  
+
   // Stats
   sent_count: number;
   open_rate: number;
   click_rate: number;
-  
+
   // Metadata
   created_at: string;
   updated_at: string;
@@ -52,77 +52,65 @@ export interface EmailTemplate {
 
 export interface EmailLog {
   id: string;
-  
+
   // Template
   template_id?: string;
   template_slug: string;
-  
+
   // Destinataire
   recipient_email: string;
   recipient_name?: string;
   user_id?: string;
-  
+
   // Contenu
   subject: string;
   html_content?: string;
   text_content?: string;
-  
+
   // Contexte métier (universel)
   product_type?: ProductType;
   product_id?: string;
   product_name?: string;
   order_id?: string;
   store_id?: string;
-  
+
   // Variables utilisées
   variables: Record<string, unknown>;
-  
+
   // SendGrid
   sendgrid_message_id?: string;
   sendgrid_status: SendGridStatus;
-  
+
   // Tracking
   sent_at: string;
   delivered_at?: string;
   opened_at?: string;
   clicked_at?: string;
   bounced_at?: string;
-  
+
   // Stats
   open_count: number;
   click_count: number;
-  
+
   // Erreurs
   error_message?: string;
   error_code?: string;
-  
+
   // Timestamps
   created_at: string;
   updated_at: string;
 }
 
 export interface EmailPreferences {
-  id: string;
   user_id: string;
-  
-  // Préférences globales
-  transactional_emails: boolean; // Toujours true (légal)
+  transactional_emails: boolean;
   marketing_emails: boolean;
   notification_emails: boolean;
-  
-  // Préférences spécifiques
   order_updates: boolean;
   product_updates: boolean;
-  promotional_emails: boolean;
-  newsletter: boolean;
-  
-  // Fréquence
-  email_frequency: EmailFrequency;
-  
-  // Langue
-  preferred_language: string; // 'fr' | 'en' | 'es' | 'pt'
-  
-  // Metadata
+  affiliate_updates?: boolean | null;
+  course_updates?: boolean | null;
+  unsubscribed_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -134,25 +122,25 @@ export interface EmailPreferences {
 export interface SendEmailPayload {
   // Template
   templateSlug: string;
-  
+
   // Destinataire
   to: string;
   toName?: string;
   userId?: string;
-  
+
   // Variables dynamiques
   variables: RecordString;
-  
+
   // Contexte métier (optionnel)
   productType?: ProductType;
   productId?: string;
   productName?: string;
   orderId?: string;
   storeId?: string;
-  
+
   // Langue (auto-détecté si non fourni)
   language?: string;
-  
+
   // Options avancées
   replyTo?: string;
   attachments?: EmailAttachment[];
@@ -272,10 +260,3 @@ export interface SendGridWebhookEvent {
   url?: string; // Pour les clics
   reason?: string; // Pour les bounces
 }
-
-
-
-
-
-
-

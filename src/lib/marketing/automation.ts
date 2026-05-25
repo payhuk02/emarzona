@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
-import { sendEmail as sendEmailViaSendGrid } from '@/lib/sendgrid';
+import { sendEmail as sendEmailViaResend } from '@/lib/resend';
 import type { SendEmailPayload } from '@/types/email';
 
 export interface EmailCampaign {
@@ -66,7 +66,7 @@ export class MarketingAutomation {
     data: Record<string, unknown>
   ): Promise<boolean> {
     try {
-      const result = await sendEmailViaSendGrid({
+      const result = await sendEmailViaResend({
         to,
         templateSlug: template,
         variables: data,
@@ -113,7 +113,7 @@ export class MarketingAutomation {
         return false;
       }
 
-      const result = await sendEmailViaSendGrid({
+      const result = await sendEmailViaResend({
         to,
         templateSlug: campaign.template,
         variables: {
@@ -191,7 +191,7 @@ export class MarketingAutomation {
       }
 
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const result = await sendEmailViaSendGrid({
+      const result = await sendEmailViaResend({
         to: userEmail,
         templateSlug: 'abandoned_cart',
         variables: {
@@ -250,7 +250,7 @@ export class MarketingAutomation {
       }
 
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const result = await sendEmailViaSendGrid({
+      const result = await sendEmailViaResend({
         to: userEmail,
         templateSlug: 'welcome',
         variables: {

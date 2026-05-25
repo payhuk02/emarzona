@@ -6,9 +6,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
-import { sendEmail } from '@/lib/sendgrid';
+import { sendEmail } from '@/lib/resend';
 import { getErrorMessage } from '@/types/errors';
-import type { SendEmailPayload } from '@/types/email';
 
 // ============================================================
 // TYPES
@@ -483,7 +482,13 @@ export class EmailCampaignService {
         throw new Error('Campaign not found');
       }
 
-      const { id, created_at, updated_at, metrics, ...campaignData } = campaign;
+      const {
+        id: _id,
+        created_at: _createdAt,
+        updated_at: _updatedAt,
+        metrics: _metrics,
+        ...campaignData
+      } = campaign;
 
       return await this.createCampaign({
         ...campaignData,
@@ -550,6 +555,41 @@ export class EmailCampaignService {
       logger.error('EmailCampaignService.sendCampaign error', { error: caught, campaignId });
       throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
+  }
+
+  /**
+   * Envoyer un email de test (template de la campagne → adresse du marchand)
+   */
+  static async sendCampaignTestEmail(params: {
+    templateId: string;
+    storeId: string;
+    to: string;
+    toName?: string;
+    userId?: string;
+    campaignName?: string;
+  }): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { data: template, error: tplError } = await supabase
+      .from('email_templates')
+      .select('slug, name')
+      .eq('id', params.templateId)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (tplError || !template?.slug) {
+      throw new Error('Template introuvable ou inactif pour le test');
+    }
+
+    return sendEmail({
+      templateSlug: template.slug,
+      to: params.to.trim(),
+      toName: params.toName,
+      userId: params.userId,
+      storeId: params.storeId,
+      variables: {
+        campaign_name: params.campaignName ?? template.name ?? 'Test campagne',
+        is_test: 'true',
+      },
+    });
   }
 }
 
