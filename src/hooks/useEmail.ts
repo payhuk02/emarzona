@@ -419,7 +419,9 @@ export const useEmailAnalytics = (options?: {
         total_delivered: logs.filter(l => l.sendgrid_status === 'delivered').length,
         total_opened: logs.filter(l => l.opened_at).length,
         total_clicked: logs.filter(l => l.clicked_at).length,
-        total_bounced: logs.filter(l => l.bounced_at).length,
+        total_bounced: logs.filter(
+          l => l.sendgrid_status === 'bounced' || l.sendgrid_status === 'failed'
+        ).length,
         open_rate: 0,
         click_rate: 0,
         bounce_rate: 0,

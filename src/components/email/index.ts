@@ -4,6 +4,7 @@
  * Date: 1er Février 2025
  */
 
+export * from './EmailDashboardLayout';
 export * from './EmailCampaignManager';
 export * from './CampaignBuilder';
 export * from './CampaignMetrics';
@@ -29,10 +30,3 @@ export * from './TemplatePreview';
 export * from './ABTestSetup';
 export * from './ABTestResults';
 // UnsubscribePage est exporté depuis src/pages/UnsubscribePage.tsx, pas depuis ici
-
-
-
-
-
-
-
