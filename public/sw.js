@@ -41,12 +41,6 @@ async function trimImageCache(cacheName, maxEntries) {
   }
 }
 
-function cacheImageResponse(cache, request, response) {
-  if (response.status !== 200) return;
-  const clone = response.clone();
-  cache.put(request, clone).then(() => trimImageCache(IMAGE_CACHE_NAME, IMAGE_CACHE_MAX_ENTRIES));
-}
-
 /** Stale-while-revalidate : affiche le cache, met à jour en arrière-plan. */
 function staleWhileRevalidate(request, cacheName) {
   return caches.open(cacheName).then(cache =>
@@ -189,7 +183,15 @@ self.addEventListener('fetch', event => {
         if (cached) return cached;
         return fetch(request)
           .then(response => {
-            caches.open(IMAGE_CACHE_NAME).then(cache => cacheImageResponse(cache, request, response));
+            // Clone synchronously before the page consumes the body
+            if (response.status === 200) {
+              const clone = response.clone();
+              void caches.open(IMAGE_CACHE_NAME).then(cache =>
+                cache
+                  .put(request, clone)
+                  .then(() => trimImageCache(IMAGE_CACHE_NAME, IMAGE_CACHE_MAX_ENTRIES))
+              );
+            }
             return response;
           })
           .catch(() => caches.match('/placeholder.svg'));
