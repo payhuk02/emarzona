@@ -1214,7 +1214,7 @@ const PINNED_NAV_KEY = 'sidebarPinnedUrls';
 const RECENT_NAV_KEY = 'sidebarRecentUrls';
 const COLLAPSED_SECTIONS_KEY = 'sidebarCollapsedSections';
 const STORES_EXPANDED_KEY = 'sidebarStoresExpanded';
-const MAX_RECENT_ITEMS = 6;
+const MAX_RECENT_ITEMS = 2;
 
 const DEFAULT_OPEN_SECTION_LABELS = new Set(['Principal', 'Administration']);
 
@@ -1356,7 +1356,10 @@ export function AppSidebar() {
       const storedStores = localStorage.getItem(STORES_EXPANDED_KEY);
 
       if (storedPinned) setPinnedUrls(JSON.parse(storedPinned));
-      if (storedRecent) setRecentUrls(JSON.parse(storedRecent));
+      if (storedRecent) {
+        const parsed = JSON.parse(storedRecent) as string[];
+        setRecentUrls(Array.isArray(parsed) ? parsed.slice(0, MAX_RECENT_ITEMS) : []);
+      }
       if (storedCollapsed) setCollapsedSections(JSON.parse(storedCollapsed));
       if (storedStores !== null) setStoresMenuOpen(JSON.parse(storedStores));
       setPrefsHydrated(true);
@@ -1439,7 +1442,8 @@ export function AppSidebar() {
       recentUrls
         .map(url => allCurrentEntries.find(item => item.url === url))
         .filter((item): item is (typeof allCurrentEntries)[number] => Boolean(item))
-        .filter(item => !pinnedUrls.includes(item.url)),
+        .filter(item => !pinnedUrls.includes(item.url))
+        .slice(0, MAX_RECENT_ITEMS),
     [allCurrentEntries, recentUrls, pinnedUrls]
   );
 
@@ -1658,7 +1662,7 @@ export function AppSidebar() {
                   Récents
                 </p>
                 <div className="space-y-1">
-                  {recentItems.slice(0, 4).map(item => (
+                  {recentItems.slice(0, MAX_RECENT_ITEMS).map(item => (
                     <Button
                       key={`recent-${item.url}`}
                       variant="ghost"

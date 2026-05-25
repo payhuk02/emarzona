@@ -1,12 +1,13 @@
-import React, { lazy, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { lazyPage } from '@/routes/lazyPage';
 import { Route, Navigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { generateStoreUrl, generateProductUrl } from '@/lib/store-utils';
 
 // Pages publiques
-const Landing = lazy(() => import('@/pages/Landing'));
-const Auth = lazy(() => import('@/pages/Auth'));
-const Marketplace = lazy(() =>
+const Landing = lazyPage(() => import('@/pages/Landing'));
+const Auth = lazyPage(() => import('@/pages/Auth'));
+const Marketplace = lazyPage(() =>
   import('@/pages/Marketplace')
     .then(m => ({ default: m.default }))
     .catch(error => ({
@@ -26,75 +27,75 @@ const Marketplace = lazy(() =>
       ),
     }))
 );
-const Recommendations = lazy(() => import('@/pages/Recommendations'));
-const HistoryBasedRecommendations = lazy(() => import('@/pages/HistoryBasedRecommendations'));
-const Discover = lazy(() => import('@/pages/Discover'));
-const Trending = lazy(() => import('@/pages/Trending'));
-const CommunityPage = lazy(() => import('@/pages/community/CommunityPage'));
-const Cart = lazy(() => import('@/pages/Cart'));
-const CartEnhanced = lazy(() => import('@/pages/CartEnhanced'));
-const Checkout = lazy(() => import('@/pages/checkout/CheckoutPage'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
-const CourseDetail = lazy(() => import('@/pages/courses/CourseDetail'));
-const DigitalProductDetail = lazy(() => import('@/pages/digital/DigitalProductDetail'));
-const DigitalProductsSearch = lazy(() =>
+const Recommendations = lazyPage(() => import('@/pages/Recommendations'));
+const HistoryBasedRecommendations = lazyPage(() => import('@/pages/HistoryBasedRecommendations'));
+const Discover = lazyPage(() => import('@/pages/Discover'));
+const Trending = lazyPage(() => import('@/pages/Trending'));
+const CommunityPage = lazyPage(() => import('@/pages/community/CommunityPage'));
+const Cart = lazyPage(() => import('@/pages/Cart'));
+const CartEnhanced = lazyPage(() => import('@/pages/CartEnhanced'));
+const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
+const NotFound = lazyPage(() => import('@/pages/NotFound'));
+const CourseDetail = lazyPage(() => import('@/pages/courses/CourseDetail'));
+const DigitalProductDetail = lazyPage(() => import('@/pages/digital/DigitalProductDetail'));
+const DigitalProductsSearch = lazyPage(() =>
   import('@/pages/digital/DigitalProductsSearch').then(
     (m: { DigitalProductsSearch: React.ComponentType<Record<string, unknown>> }) => ({
       default: m.DigitalProductsSearch,
     })
   )
 );
-const DigitalProductsCompare = lazy(() =>
+const DigitalProductsCompare = lazyPage(() =>
   import('@/pages/digital/DigitalProductsCompare').then(
     (m: { DigitalProductsCompare: React.ComponentType<Record<string, unknown>> }) => ({
       default: m.DigitalProductsCompare,
     })
   )
 );
-const SharedWishlist = lazy(() => import('@/pages/customer/SharedWishlist'));
-const BundleDetail = lazy(() => import('@/pages/digital/BundleDetail'));
-const ProductsCompare = lazy(() => import('@/pages/ProductsCompare'));
-const PhysicalProductDetail = lazy(() => import('@/pages/physical/PhysicalProductDetail'));
-const ServiceDetail = lazy(() => import('@/pages/service/ServiceDetail'));
-const ArtistProductDetail = lazy(() => import('@/pages/artist/ArtistProductDetail'));
-const ArtistPortfolioPage = lazy(() => import('@/pages/artist/ArtistPortfolioPage'));
-const CollectionsPage = lazy(() =>
+const SharedWishlist = lazyPage(() => import('@/pages/customer/SharedWishlist'));
+const BundleDetail = lazyPage(() => import('@/pages/digital/BundleDetail'));
+const ProductsCompare = lazyPage(() => import('@/pages/ProductsCompare'));
+const PhysicalProductDetail = lazyPage(() => import('@/pages/physical/PhysicalProductDetail'));
+const ServiceDetail = lazyPage(() => import('@/pages/service/ServiceDetail'));
+const ArtistProductDetail = lazyPage(() => import('@/pages/artist/ArtistProductDetail'));
+const ArtistPortfolioPage = lazyPage(() => import('@/pages/artist/ArtistPortfolioPage'));
+const CollectionsPage = lazyPage(() =>
   import('@/pages/artist/CollectionsPage').then(m => ({ default: m.default }))
 );
-const CollectionDetail = lazy(() =>
+const CollectionDetail = lazyPage(() =>
   import('@/components/artist/CollectionDetail').then(m => ({ default: m.CollectionDetail }))
 );
-const AuctionsListPage = lazy(() => import('@/pages/artist/AuctionsListPage'));
-const AuctionDetailPage = lazy(() => import('@/pages/artist/AuctionDetailPage'));
-const StyleQuizPage = lazy(() =>
+const AuctionsListPage = lazyPage(() => import('@/pages/artist/AuctionsListPage'));
+const AuctionDetailPage = lazyPage(() => import('@/pages/artist/AuctionDetailPage'));
+const StyleQuizPage = lazyPage(() =>
   import('@/pages/personalization/StyleQuizPage').then(m => ({ default: m.default }))
 );
-const PersonalizedRecommendationsPage = lazy(() =>
+const PersonalizedRecommendationsPage = lazyPage(() =>
   import('@/pages/personalization/PersonalizedRecommendationsPage').then(m => ({
     default: m.default,
   }))
 );
 
 // Pages Légales
-const TermsOfService = lazy(() => import('@/pages/legal/TermsOfService'));
-const PrivacyPolicy = lazy(() => import('@/pages/legal/PrivacyPolicy'));
-const CookiePolicy = lazy(() => import('@/pages/legal/CookiePolicy'));
-const RefundPolicy = lazy(() => import('@/pages/legal/RefundPolicy'));
+const TermsOfService = lazyPage(() => import('@/pages/legal/TermsOfService'));
+const PrivacyPolicy = lazyPage(() => import('@/pages/legal/PrivacyPolicy'));
+const CookiePolicy = lazyPage(() => import('@/pages/legal/CookiePolicy'));
+const RefundPolicy = lazyPage(() => import('@/pages/legal/RefundPolicy'));
 
 // Pages Moneroo
-const PaymentSuccess = lazy(() => import('@/pages/payments/PaymentSuccess'));
-const PaymentCancel = lazy(() => import('@/pages/payments/PaymentCancel'));
+const PaymentSuccess = lazyPage(() => import('@/pages/payments/PaymentSuccess'));
+const PaymentCancel = lazyPage(() => import('@/pages/payments/PaymentCancel'));
 
 // Pages Email publiques
-const UnsubscribePage = lazy(() => import('@/pages/UnsubscribePage'));
+const UnsubscribePage = lazyPage(() => import('@/pages/UnsubscribePage'));
 
 // Affiliation publique
-const ShortLinkRedirect = lazy(() =>
+const ShortLinkRedirect = lazyPage(() =>
   import('@/pages/affiliate/ShortLinkRedirect').then(m => ({ default: m.ShortLinkRedirect }))
 );
 
 // Page test i18n
-const I18nTest = lazy(() => import('@/pages/I18nTest'));
+const I18nTest = lazyPage(() => import('@/pages/I18nTest'));
 
 // Redirection /stores/:slug → sous-domaine myemarzona.shop
 const StoreRedirectToSubdomain = () => {

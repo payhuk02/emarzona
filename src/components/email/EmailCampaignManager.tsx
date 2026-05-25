@@ -16,12 +16,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/stable-dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -258,77 +258,92 @@ export const EmailCampaignManager = ({
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label="Actions campagne">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="min-w-[200px]">
-                            <DropdownMenuItem onClick={() => openDetail(campaign, 'report')}>
+                        <Select>
+                          <SelectTrigger
+                            className="h-8 w-8 min-h-[44px] min-w-[44px] border-0 bg-transparent p-0 shadow-none hover:bg-accent [&_svg.opacity-50]:hidden"
+                            aria-label="Actions campagne"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </SelectTrigger>
+                          <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                            <SelectItem
+                              value="report"
+                              onSelect={() => openDetail(campaign, 'report')}
+                            >
                               <BarChart3 className="h-4 w-4 mr-2" />
                               Rapport & analytics
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openDetail(campaign, 'metrics')}>
+                            </SelectItem>
+                            <SelectItem
+                              value="metrics"
+                              onSelect={() => openDetail(campaign, 'metrics')}
+                            >
                               <Eye className="h-4 w-4 mr-2" />
                               Voir métriques
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openDetail(campaign, 'abtest')}>
+                            </SelectItem>
+                            <SelectItem
+                              value="abtest"
+                              onSelect={() => openDetail(campaign, 'abtest')}
+                            >
                               <Sparkles className="h-4 w-4 mr-2" />
                               Test A/B
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => onEditCampaign?.(campaign)}>
+                            </SelectItem>
+                            <SelectSeparator />
+                            <SelectItem value="edit" onSelect={() => onEditCampaign?.(campaign)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
-                            </DropdownMenuItem>
+                            </SelectItem>
                             {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
-                              <DropdownMenuItem
-                                onClick={() => handleSend(campaign.id)}
+                              <SelectItem
+                                value="send"
+                                onSelect={() => handleSend(campaign.id)}
                                 disabled={sendCampaign.isPending || !campaign.template_id}
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Envoyer
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
-                            <DropdownMenuItem
-                              onClick={() => handleDuplicate(campaign.id)}
+                            <SelectItem
+                              value="duplicate"
+                              onSelect={() => handleDuplicate(campaign.id)}
                               disabled={duplicateCampaign.isPending}
                             >
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliquer
-                            </DropdownMenuItem>
+                            </SelectItem>
                             {campaign.status === 'paused' && (
-                              <DropdownMenuItem
-                                onClick={() => handleResume(campaign.id)}
+                              <SelectItem
+                                value="resume"
+                                onSelect={() => handleResume(campaign.id)}
                                 disabled={resumeCampaign.isPending}
                               >
                                 <Play className="h-4 w-4 mr-2" />
                                 Reprendre
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
                             {(campaign.status === 'scheduled' || campaign.status === 'sending') && (
-                              <DropdownMenuItem
-                                onClick={() => handlePause(campaign.id)}
+                              <SelectItem
+                                value="pause"
+                                onSelect={() => handlePause(campaign.id)}
                                 disabled={pauseCampaign.isPending}
                               >
                                 <Pause className="h-4 w-4 mr-2" />
                                 Mettre en pause
-                              </DropdownMenuItem>
+                              </SelectItem>
                             )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
+                            <SelectSeparator />
+                            <SelectItem
+                              value="delete"
                               className="text-destructive focus:text-destructive"
-                              onClick={() => {
+                              onSelect={() => {
                                 setCampaignToDelete(campaign.id);
                                 setDeleteDialogOpen(true);
                               }}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}

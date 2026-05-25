@@ -1,23 +1,31 @@
-import React, { lazy } from 'react';
+import React from 'react';
+import { lazyPage } from '@/routes/lazyPage';
 import { Route } from 'react-router-dom';
 import { ProtectedAdminRoute } from '@/components/ProtectedAdminRoute';
 import { logger } from '@/lib/logger';
 
-const pr = (path: string, Component: React.LazyExoticComponent<any>) => (
-  <Route path={path} element={<ProtectedAdminRoute><Component /></ProtectedAdminRoute>} />
+const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentType>) => (
+  <Route
+    path={path}
+    element={
+      <ProtectedAdminRoute>
+        <Component />
+      </ProtectedAdminRoute>
+    }
+  />
 );
 
-const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
-const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
-const AdminStores = lazy(() => import('@/pages/admin/AdminStores'));
-const AdminProducts = lazy(() => import('@/pages/admin/AdminProducts'));
-const AdminSales = lazy(() => import('@/pages/admin/AdminSales'));
-const AdminReferrals = lazy(() => import('@/pages/admin/AdminReferrals'));
-const AdminActivity = lazy(() => import('@/pages/admin/AdminActivity'));
-const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
-const AdminCommunity = lazy(() => import('@/pages/admin/AdminCommunity'));
-const AdminCommissionSettings = lazy(() => import('@/pages/admin/AdminCommissionSettings'));
-const PlatformCustomization = lazy(() =>
+const AdminDashboard = lazyPage(() => import('@/pages/admin/AdminDashboard'));
+const AdminUsers = lazyPage(() => import('@/pages/admin/AdminUsers'));
+const AdminStores = lazyPage(() => import('@/pages/admin/AdminStores'));
+const AdminProducts = lazyPage(() => import('@/pages/admin/AdminProducts'));
+const AdminSales = lazyPage(() => import('@/pages/admin/AdminSales'));
+const AdminReferrals = lazyPage(() => import('@/pages/admin/AdminReferrals'));
+const AdminActivity = lazyPage(() => import('@/pages/admin/AdminActivity'));
+const AdminSettings = lazyPage(() => import('@/pages/admin/AdminSettings'));
+const AdminCommunity = lazyPage(() => import('@/pages/admin/AdminCommunity'));
+const AdminCommissionSettings = lazyPage(() => import('@/pages/admin/AdminCommissionSettings'));
+const PlatformCustomization = lazyPage(() =>
   import('@/pages/admin/PlatformCustomization')
     .then(m => ({ default: m.PlatformCustomization }))
     .catch(error => {
@@ -27,57 +35,70 @@ const PlatformCustomization = lazy(() =>
           <div className="flex min-h-screen items-center justify-center">
             <div className="text-center space-y-4">
               <h2 className="text-xl font-semibold">Erreur de chargement</h2>
-              <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-white rounded">Recharger</button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-white rounded"
+              >
+                Recharger
+              </button>
             </div>
           </div>
         ),
       };
     })
 );
-const AdminCommissionPayments = lazy(() => import('@/pages/admin/AdminCommissionPayments'));
-const MonerooAnalytics = lazy(() => import('@/pages/admin/MonerooAnalytics'));
-const MonerooReconciliation = lazy(() => import('@/pages/admin/MonerooReconciliation'));
-const TransactionMonitoring = lazy(() => import('@/pages/admin/TransactionMonitoring'));
-const AdminNotifications = lazy(() => import('@/pages/admin/AdminNotifications'));
-const AdminDisputes = lazy(() => import('@/pages/admin/AdminDisputes'));
-const AdminAffiliates = lazy(() => import('@/pages/admin/AdminAffiliates'));
-const AdminStoreWithdrawals = lazy(() => import('@/pages/admin/AdminStoreWithdrawals'));
-const AdminReviews = lazy(() => import('@/pages/admin/AdminReviews').then(m => ({ default: m.AdminReviews })));
-const AdminInventory = lazy(() => import('@/pages/admin/AdminInventory'));
-const AdminSupport = lazy(() => import('@/pages/admin/AdminSupport'));
-const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
-const AISettingsPage = lazy(() => import('@/pages/admin/AISettingsPage'));
-const AIManagementPage = lazy(() => import('@/pages/admin/AIManagementPage'));
-const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments'));
-const AdminTransactionReconciliation = lazy(() => import('@/pages/admin/AdminTransactionReconciliation'));
-const AdminShipping = lazy(() => import('@/pages/admin/AdminShipping'));
-const AdminShippingConversations = lazy(() => import('@/pages/admin/AdminShippingConversations'));
-const AdminVendorConversations = lazy(() => import('@/pages/admin/AdminVendorConversations'));
-const AdminCourses = lazy(() => import('@/pages/admin/AdminCourses'));
-const AdminSecurity = lazy(() => import('@/pages/admin/AdminSecurity'));
-const AdminAudit = lazy(() => import('@/pages/admin/AdminAudit'));
-const AdminTaxManagement = lazy(() => import('@/pages/admin/AdminTaxManagement'));
-const AdminReturnManagement = lazy(() => import('@/pages/admin/AdminReturnManagement'));
-const AdminWebhookManagement = lazy(() => import('@/pages/admin/AdminWebhookManagement'));
-const AdminLoyaltyManagement = lazy(() => import('@/pages/admin/AdminLoyaltyManagement'));
-const AdminGiftCardManagement = lazy(() => import('@/pages/admin/AdminGiftCardManagement'));
-const AdminSuppliersManagement = lazy(() => import('@/pages/admin/AdminSuppliersManagement'));
-const AdminWarehousesManagement = lazy(() => import('@/pages/admin/AdminWarehousesManagement'));
-const AdminProductKitsManagement = lazy(() => import('@/pages/admin/AdminProductKitsManagement'));
-const AdminDemandForecasting = lazy(() => import('@/pages/admin/AdminDemandForecasting'));
-const AdminCostOptimization = lazy(() => import('@/pages/admin/AdminCostOptimization'));
-const AdminBatchShipping = lazy(() => import('@/pages/admin/AdminBatchShipping'));
-const AdminOrders = lazy(() => import('@/pages/admin/AdminOrders'));
-const AdminErrorMonitoring = lazy(() => import('@/pages/admin/AdminErrorMonitoring'));
-const AdminMonitoring = lazy(() => import('@/pages/admin/AdminMonitoring'));
-const AdminAccessibilityReport = lazy(() => import('@/pages/admin/AdminAccessibilityReport'));
-const AdminDataStorage = lazy(() => import('@/pages/admin/AdminDataStorage'));
-const OfflineQueueManager = lazy(() => import('@/pages/admin/OfflineQueueManager'));
-const StorageDiagnosticPage = lazy(() => import('@/pages/admin/StorageDiagnosticPage'));
-const IntegrationsPage = lazy(() => import('@/pages/admin/IntegrationsPage'));
-const PlatformRevenue = lazy(() => import('@/pages/PlatformRevenue'));
-const AdminKYC = lazy(() => import('@/pages/AdminKYC'));
-const MarketingAutomationDashboard = lazy(() =>
+const AdminCommissionPayments = lazyPage(() => import('@/pages/admin/AdminCommissionPayments'));
+const MonerooAnalytics = lazyPage(() => import('@/pages/admin/MonerooAnalytics'));
+const MonerooReconciliation = lazyPage(() => import('@/pages/admin/MonerooReconciliation'));
+const TransactionMonitoring = lazyPage(() => import('@/pages/admin/TransactionMonitoring'));
+const AdminNotifications = lazyPage(() => import('@/pages/admin/AdminNotifications'));
+const AdminDisputes = lazyPage(() => import('@/pages/admin/AdminDisputes'));
+const AdminAffiliates = lazyPage(() => import('@/pages/admin/AdminAffiliates'));
+const AdminStoreWithdrawals = lazyPage(() => import('@/pages/admin/AdminStoreWithdrawals'));
+const AdminReviews = lazyPage(() =>
+  import('@/pages/admin/AdminReviews').then(m => ({ default: m.AdminReviews }))
+);
+const AdminInventory = lazyPage(() => import('@/pages/admin/AdminInventory'));
+const AdminSupport = lazyPage(() => import('@/pages/admin/AdminSupport'));
+const AdminAnalytics = lazyPage(() => import('@/pages/admin/AdminAnalytics'));
+const AISettingsPage = lazyPage(() => import('@/pages/admin/AISettingsPage'));
+const AIManagementPage = lazyPage(() => import('@/pages/admin/AIManagementPage'));
+const AdminPayments = lazyPage(() => import('@/pages/admin/AdminPayments'));
+const AdminTransactionReconciliation = lazyPage(
+  () => import('@/pages/admin/AdminTransactionReconciliation')
+);
+const AdminShipping = lazyPage(() => import('@/pages/admin/AdminShipping'));
+const AdminShippingConversations = lazyPage(
+  () => import('@/pages/admin/AdminShippingConversations')
+);
+const AdminVendorConversations = lazyPage(() => import('@/pages/admin/AdminVendorConversations'));
+const AdminCourses = lazyPage(() => import('@/pages/admin/AdminCourses'));
+const AdminSecurity = lazyPage(() => import('@/pages/admin/AdminSecurity'));
+const AdminAudit = lazyPage(() => import('@/pages/admin/AdminAudit'));
+const AdminTaxManagement = lazyPage(() => import('@/pages/admin/AdminTaxManagement'));
+const AdminReturnManagement = lazyPage(() => import('@/pages/admin/AdminReturnManagement'));
+const AdminWebhookManagement = lazyPage(() => import('@/pages/admin/AdminWebhookManagement'));
+const AdminLoyaltyManagement = lazyPage(() => import('@/pages/admin/AdminLoyaltyManagement'));
+const AdminGiftCardManagement = lazyPage(() => import('@/pages/admin/AdminGiftCardManagement'));
+const AdminSuppliersManagement = lazyPage(() => import('@/pages/admin/AdminSuppliersManagement'));
+const AdminWarehousesManagement = lazyPage(() => import('@/pages/admin/AdminWarehousesManagement'));
+const AdminProductKitsManagement = lazyPage(
+  () => import('@/pages/admin/AdminProductKitsManagement')
+);
+const AdminDemandForecasting = lazyPage(() => import('@/pages/admin/AdminDemandForecasting'));
+const AdminCostOptimization = lazyPage(() => import('@/pages/admin/AdminCostOptimization'));
+const AdminBatchShipping = lazyPage(() => import('@/pages/admin/AdminBatchShipping'));
+const AdminOrders = lazyPage(() => import('@/pages/admin/AdminOrders'));
+const AdminErrorMonitoring = lazyPage(() => import('@/pages/admin/AdminErrorMonitoring'));
+const AdminMonitoring = lazyPage(() => import('@/pages/admin/AdminMonitoring'));
+const AdminAccessibilityReport = lazyPage(() => import('@/pages/admin/AdminAccessibilityReport'));
+const AdminDataStorage = lazyPage(() => import('@/pages/admin/AdminDataStorage'));
+const OfflineQueueManager = lazyPage(() => import('@/pages/admin/OfflineQueueManager'));
+const StorageDiagnosticPage = lazyPage(() => import('@/pages/admin/StorageDiagnosticPage'));
+const IntegrationsPage = lazyPage(() => import('@/pages/admin/IntegrationsPage'));
+const PlatformRevenue = lazyPage(() => import('@/pages/PlatformRevenue'));
+const AdminKYC = lazyPage(() => import('@/pages/AdminKYC'));
+const MarketingAutomationDashboard = lazyPage(() =>
   import('@/components/marketing/MarketingAutomationDashboard').then(m => ({
     default: m.MarketingAutomationDashboard,
   }))

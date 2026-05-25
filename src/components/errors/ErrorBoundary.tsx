@@ -1,7 +1,7 @@
 /**
  * Error Boundary Component
  * Date: 28 Janvier 2025
- * 
+ *
  * Composant pour capturer et afficher les erreurs React
  */
 
@@ -18,6 +18,8 @@ interface Props {
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   showDetails?: boolean;
+  /** Change à chaque navigation pour effacer un état d'erreur obsolète */
+  resetKey?: string;
 }
 
 interface State {
@@ -42,6 +44,16 @@ export class ErrorBoundary extends Component<Props, State> {
       error,
       errorInfo: null,
     };
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({
+        hasError: false,
+        error: null,
+        errorInfo: null,
+      });
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -86,12 +98,12 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      const normalized = this.state.error 
-        ? normalizeError(this.state.error)
-        : null;
+      const normalized = this.state.error ? normalizeError(this.state.error) : null;
 
       const isDev = import.meta.env.DEV;
-      const showDetails = this.props.showDetails !== false && (isDev || normalized?.severity === ErrorSeverity.CRITICAL);
+      const showDetails =
+        this.props.showDetails !== false &&
+        (isDev || normalized?.severity === ErrorSeverity.CRITICAL);
 
       return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
@@ -104,7 +116,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <div>
                   <CardTitle className="text-2xl">Une erreur est survenue</CardTitle>
                   <CardDescription>
-                    {normalized?.userMessage || 'Une erreur inattendue s\'est produite.'}
+                    {normalized?.userMessage || "Une erreur inattendue s'est produite."}
                   </CardDescription>
                 </div>
               </div>
@@ -181,10 +193,3 @@ export function useErrorHandler() {
     });
   };
 }
-
-
-
-
-
-
-

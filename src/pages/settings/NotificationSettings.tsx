@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import type { NotificationPreferences } from '@/types/notifications';
 import { EmailPreferencesSettings } from '@/components/settings/EmailPreferencesSettings';
+import { MainLayout } from '@/components/layout';
 
 const NotificationSettings = () => {
   const { toast } = useToast();
@@ -52,14 +53,16 @@ const NotificationSettings = () => {
 
   if (isLoading || !localPrefs) {
     return (
-      <div className="container mx-auto py-8 max-w-4xl">
-        <Skeleton className="h-12 w-64 mb-6" />
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full" />
-          ))}
+      <MainLayout layoutType="settings">
+        <div className="container mx-auto py-8 max-w-4xl">
+          <Skeleton className="h-12 w-64 mb-6" />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-48 w-full" />
+            ))}
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
@@ -89,7 +92,7 @@ const NotificationSettings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <MainLayout layoutType="settings">
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
@@ -359,7 +362,7 @@ const NotificationSettings = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

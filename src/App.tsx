@@ -100,6 +100,23 @@ type ErrorFallbackProps = {
   onRetry?: () => void;
 };
 
+/** Réinitialise l'ErrorBoundary Sentry à chaque navigation (évite l'écran d'erreur bloqué). */
+const SentryFallbackWithNavReset = ({
+  error,
+  resetError,
+}: {
+  error: unknown;
+  resetError: () => void;
+}) => {
+  const location = useLocation();
+
+  useEffect(() => {
+    resetError();
+  }, [location.pathname, resetError]);
+
+  return <ErrorFallbackComponent error={error} onRetry={resetError} />;
+};
+
 const ErrorFallbackComponent = ({ error, onRetry }: ErrorFallbackProps) => {
   const isDev = import.meta.env.DEV;
   const showDetails = isDev || new URLSearchParams(window.location.search).has('debug');
@@ -236,10 +253,10 @@ const AppContent = () => {
   }, []);
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary resetKey={location.pathname}>
       <SentryErrorBoundary
         fallback={({ error, resetError }) => (
-          <ErrorFallbackComponent error={error} onRetry={resetError} />
+          <SentryFallbackWithNavReset error={error} resetError={resetError} />
         )}
         showDialog
       >

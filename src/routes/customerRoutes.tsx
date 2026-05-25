@@ -1,24 +1,25 @@
-import React, { lazy } from 'react';
+import React from 'react';
+import { lazyPage } from '@/routes/lazyPage';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
-const CustomerPortal = lazy(() => import('@/pages/customer/CustomerPortal'));
-const CustomerMyOrders = lazy(() => import('@/pages/customer/MyOrders'));
-const CustomerMyDownloads = lazy(() => import('@/pages/customer/MyDownloads'));
-const CustomerMyCourses = lazy(() => import('@/pages/customer/MyCourses'));
-const CustomerMyProfile = lazy(() => import('@/pages/customer/MyProfile'));
-const CustomerMyWishlist = lazy(() => import('@/pages/customer/CustomerMyWishlist'));
-const CustomerDigitalPortal = lazy(() => import('@/pages/customer/CustomerDigitalPortal'));
-const CustomerPhysicalPortal = lazy(() => import('@/pages/customer/CustomerPhysicalPortal'));
-const CustomerMyInvoices = lazy(() => import('@/pages/customer/CustomerMyInvoices'));
-const CustomerMyReturns = lazy(() => import('@/pages/customer/CustomerMyReturns'));
-const CustomerLoyaltyPage = lazy(() => import('@/pages/customer/CustomerLoyaltyPage'));
-const CustomerMyGiftCardsPage = lazy(() => import('@/pages/customer/CustomerMyGiftCardsPage'));
-const PriceStockAlerts = lazy(() => import('@/pages/customer/PriceStockAlerts'));
-const CustomerWarranties = lazy(() => import('@/pages/customer/CustomerWarranties'));
-const CustomerMyBookings = lazy(() => import('@/pages/customer/CustomerMyBookings'));
-const CustomerArtistPortal = lazy(() => import('@/pages/customer/CustomerArtistPortal'));
-const MultiStoreCheckoutTracking = lazy(
+const CustomerPortal = lazyPage(() => import('@/pages/customer/CustomerPortal'));
+const CustomerMyOrders = lazyPage(() => import('@/pages/customer/MyOrders'));
+const CustomerMyDownloads = lazyPage(() => import('@/pages/customer/MyDownloads'));
+const CustomerMyCourses = lazyPage(() => import('@/pages/customer/MyCourses'));
+const CustomerMyProfile = lazyPage(() => import('@/pages/customer/MyProfile'));
+const CustomerMyWishlist = lazyPage(() => import('@/pages/customer/CustomerMyWishlist'));
+const CustomerDigitalPortal = lazyPage(() => import('@/pages/customer/CustomerDigitalPortal'));
+const CustomerPhysicalPortal = lazyPage(() => import('@/pages/customer/CustomerPhysicalPortal'));
+const CustomerMyInvoices = lazyPage(() => import('@/pages/customer/CustomerMyInvoices'));
+const CustomerMyReturns = lazyPage(() => import('@/pages/customer/CustomerMyReturns'));
+const CustomerLoyaltyPage = lazyPage(() => import('@/pages/customer/CustomerLoyaltyPage'));
+const CustomerMyGiftCardsPage = lazyPage(() => import('@/pages/customer/CustomerMyGiftCardsPage'));
+const PriceStockAlerts = lazyPage(() => import('@/pages/customer/PriceStockAlerts'));
+const CustomerWarranties = lazyPage(() => import('@/pages/customer/CustomerWarranties'));
+const CustomerMyBookings = lazyPage(() => import('@/pages/customer/CustomerMyBookings'));
+const CustomerArtistPortal = lazyPage(() => import('@/pages/customer/CustomerArtistPortal'));
+const MultiStoreCheckoutTracking = lazyPage(
   () => import('@/pages/checkout/MultiStoreCheckoutTracking')
 );
 

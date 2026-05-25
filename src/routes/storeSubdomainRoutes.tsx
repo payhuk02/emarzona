@@ -6,29 +6,30 @@
  * Le slug n'apparaît PAS dans l'URL (il est fourni via StoreSlugContext).
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
+import { lazyPage } from '@/routes/lazyPage';
 import { Routes, Route } from 'react-router-dom';
 import { StoreSlugProvider } from '@/contexts/StoreSlugContext';
 import { StoreSubdomainNav } from '@/components/storefront/StoreSubdomainNav';
 import { RedirectToPlatformAuth } from '@/components/auth/RedirectToPlatformAuth';
 
-const Storefront = lazy(() => import('@/pages/Storefront'));
-const ProductDetail = lazy(() => import('@/pages/ProductDetail'));
-const StoreLegalPage = lazy(() => import('@/pages/StoreLegalPage'));
-const Cart = lazy(() => import('@/pages/CartEnhanced'));
-const Checkout = lazy(() => import('@/pages/checkout/CheckoutPage'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
-const PaymentSuccess = lazy(() => import('@/pages/payments/PaymentSuccess'));
-const PaymentCancel = lazy(() => import('@/pages/payments/PaymentCancel'));
-const CollectionsPage = lazy(() =>
+const Storefront = lazyPage(() => import('@/pages/Storefront'));
+const ProductDetail = lazyPage(() => import('@/pages/ProductDetail'));
+const StoreLegalPage = lazyPage(() => import('@/pages/StoreLegalPage'));
+const Cart = lazyPage(() => import('@/pages/CartEnhanced'));
+const Checkout = lazyPage(() => import('@/pages/checkout/CheckoutPage'));
+const NotFound = lazyPage(() => import('@/pages/NotFound'));
+const PaymentSuccess = lazyPage(() => import('@/pages/payments/PaymentSuccess'));
+const PaymentCancel = lazyPage(() => import('@/pages/payments/PaymentCancel'));
+const CollectionsPage = lazyPage(() =>
   import('@/pages/artist/CollectionsPage').then(m => ({ default: m.default }))
 );
-const CollectionDetail = lazy(() =>
+const CollectionDetail = lazyPage(() =>
   import('@/components/artist/CollectionDetail').then(m => ({ default: m.CollectionDetail }))
 );
-const AuctionsListPage = lazy(() => import('@/pages/artist/AuctionsListPage'));
-const AuctionDetailPage = lazy(() => import('@/pages/artist/AuctionDetailPage'));
-const ArtistPortfolioPage = lazy(() => import('@/pages/artist/ArtistPortfolioPage'));
+const AuctionsListPage = lazyPage(() => import('@/pages/artist/AuctionsListPage'));
+const AuctionDetailPage = lazyPage(() => import('@/pages/artist/AuctionDetailPage'));
+const ArtistPortfolioPage = lazyPage(() => import('@/pages/artist/ArtistPortfolioPage'));
 
 interface StoreSubdomainRoutesProps {
   storeSlug: string;

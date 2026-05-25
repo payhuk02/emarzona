@@ -20,6 +20,7 @@ loadNonCriticalCSS();
 
 // ✅ PERFORMANCE: Initialisations critiques uniquement (nécessaires pour le fonctionnement de base)
 import { setupGlobalErrorHandlers } from './lib/error-logger';
+import { installChunkLoadRecovery } from './lib/chunk-load-recovery';
 import { installConsoleGuard } from './lib/console-guard';
 import { validateEnv } from './lib/env-validator';
 
@@ -65,6 +66,7 @@ installConsoleGuard();
 
 // Setup global error handlers (critique pour la gestion d'erreurs)
 setupGlobalErrorHandlers();
+installChunkLoadRecovery();
 
 // ✅ PERFORMANCE: Render immédiat pour améliorer FCP
 // Les initialisations non-critiques seront effectuées après le render
