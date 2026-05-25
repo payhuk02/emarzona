@@ -6,7 +6,22 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { WorkflowTriggerType } from '@/lib/email/email-workflow-service';
+
+const WORKFLOW_EVENTS = [
+  { value: 'order.paid', label: 'Commande payée' },
+  { value: 'order.completed', label: 'Commande terminée' },
+  { value: 'customer.created', label: 'Nouveau client' },
+  { value: 'cart.abandoned', label: 'Panier abandonné' },
+  { value: 'user.registered', label: 'Inscription utilisateur' },
+] as const;
 
 interface WorkflowTriggerEditorProps {
   triggerType: WorkflowTriggerType;
@@ -29,14 +44,34 @@ export const WorkflowTriggerEditor = ({
         <div className="space-y-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="eventName" className="text-right">
-              Nom de l'événement *
+              Événement *
+            </Label>
+            <Select
+              value={(config.event_name as string) || (config.event as string) || ''}
+              onValueChange={v => updateConfig('event_name', v)}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Choisir un événement" />
+              </SelectTrigger>
+              <SelectContent>
+                {WORKFLOW_EVENTS.map(ev => (
+                  <SelectItem key={ev.value} value={ev.value}>
+                    {ev.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="eventCustom" className="text-right text-muted-foreground">
+              Ou personnalisé
             </Label>
             <Input
-              id="eventName"
-              value={config.event_name || ''}
+              id="eventCustom"
+              value={(config.event_name as string) || ''}
               onChange={e => updateConfig('event_name', e.target.value)}
               className="col-span-3"
-              placeholder="ex: order.completed, cart.abandoned"
+              placeholder="ex: product.reviewed"
             />
           </div>
           <div className="grid grid-cols-4 items-start gap-4">
@@ -151,9 +186,3 @@ export const WorkflowTriggerEditor = ({
       );
   }
 };
-
-
-
-
-
-

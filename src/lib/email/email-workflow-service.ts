@@ -13,7 +13,12 @@ import { logger } from '@/lib/logger';
 
 export type WorkflowTriggerType = 'event' | 'time' | 'condition';
 export type WorkflowStatus = 'active' | 'paused' | 'archived';
-export type WorkflowActionType = 'send_email' | 'wait' | 'add_tag' | 'remove_tag' | 'update_segment';
+export type WorkflowActionType =
+  | 'send_email'
+  | 'wait'
+  | 'add_tag'
+  | 'remove_tag'
+  | 'update_segment';
 
 export interface EmailWorkflow {
   id: string;
@@ -21,9 +26,9 @@ export interface EmailWorkflow {
   name: string;
   description?: string;
   trigger_type: WorkflowTriggerType;
-  trigger_config: Record<string, any>;
+  trigger_config: Record<string, unknown>;
   actions: WorkflowAction[];
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   status: WorkflowStatus;
   is_active: boolean;
   execution_count: number;
@@ -37,7 +42,7 @@ export interface EmailWorkflow {
 
 export interface WorkflowAction {
   type: WorkflowActionType;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   order: number;
 }
 
@@ -46,9 +51,9 @@ export interface CreateWorkflowPayload {
   name: string;
   description?: string;
   trigger_type: WorkflowTriggerType;
-  trigger_config?: Record<string, any>;
+  trigger_config?: Record<string, unknown>;
   actions?: WorkflowAction[];
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
   status?: WorkflowStatus;
 }
 
@@ -66,7 +71,7 @@ export class EmailWorkflowService {
   static async createWorkflow(payload: CreateWorkflowPayload): Promise<EmailWorkflow> {
     try {
       const { data, error } = await (supabase
-        .from('email_workflows' as any)
+        .from('email_workflows' as never)
         .insert({
           ...payload,
           actions: payload.actions || [],
@@ -76,14 +81,14 @@ export class EmailWorkflowService {
           is_active: true,
         })
         .select()
-        .single() as any);
+        .single() as never);
 
       if (error) {
         logger.error('Error creating workflow', { error, payload });
         throw error;
       }
       return data as EmailWorkflow;
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
       logger.error('EmailWorkflowService.createWorkflow error', { error, payload });
       throw error;
     }
@@ -95,10 +100,10 @@ export class EmailWorkflowService {
   static async getWorkflow(workflowId: string): Promise<EmailWorkflow | null> {
     try {
       const { data, error } = await (supabase
-        .from('email_workflows' as any)
+        .from('email_workflows' as never)
         .select(EMAIL_WORKFLOW_FIELDS)
         .eq('id', workflowId)
-        .single() as any);
+        .single() as never);
 
       if (error) {
         if (error.code === 'PGRST116') return null;
@@ -106,7 +111,7 @@ export class EmailWorkflowService {
         throw error;
       }
       return data as EmailWorkflow;
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
       logger.error('EmailWorkflowService.getWorkflow error', { error, workflowId });
       throw error;
     }
@@ -120,11 +125,11 @@ export class EmailWorkflowService {
     filters?: { status?: WorkflowStatus; limit?: number; offset?: number }
   ): Promise<EmailWorkflow[]> {
     try {
-      let  query= (supabase
-        .from('email_workflows' as any)
+      let query = supabase
+        .from('email_workflows' as never)
         .select(EMAIL_WORKFLOW_FIELDS)
         .eq('store_id', storeId)
-        .order('created_at', { ascending: false }) as any);
+        .order('created_at', { ascending: false }) as never;
 
       if (filters?.status) {
         query = query.eq('status', filters.status);
@@ -139,7 +144,12 @@ export class EmailWorkflowService {
       const { data, error } = await query;
       if (error) {
         // Si la table n'existe pas (404), retourner un tableau vide
-        if (error.code === 'PGRST116' || error.message?.includes('404') || error.message?.includes('does not exist') || error.code === '42P01') {
+        if (
+          error.code === 'PGRST116' ||
+          error.message?.includes('404') ||
+          error.message?.includes('does not exist') ||
+          error.code === '42P01'
+        ) {
           logger.warn('Table email_workflows does not exist. Returning empty array.', { storeId });
           return [];
         }
@@ -147,9 +157,14 @@ export class EmailWorkflowService {
         throw error;
       }
       return (data || []) as EmailWorkflow[];
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
       // Si la table n'existe pas, retourner un tableau vide au lieu de throw
-      if (error?.code === 'PGRST116' || error?.message?.includes('404') || error?.message?.includes('does not exist') || error?.code === '42P01') {
+      if (
+        error?.code === 'PGRST116' ||
+        error?.message?.includes('404') ||
+        error?.message?.includes('does not exist') ||
+        error?.code === '42P01'
+      ) {
         logger.warn('Table email_workflows does not exist. Returning empty array.', { storeId });
         return [];
       }
@@ -167,18 +182,18 @@ export class EmailWorkflowService {
   ): Promise<EmailWorkflow> {
     try {
       const { data, error } = await (supabase
-        .from('email_workflows' as any)
+        .from('email_workflows' as never)
         .update(payload)
         .eq('id', workflowId)
         .select()
-        .single() as any);
+        .single() as never);
 
       if (error) {
         logger.error('Error updating workflow', { error, workflowId, payload });
         throw error;
       }
       return data as EmailWorkflow;
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
       logger.error('EmailWorkflowService.updateWorkflow error', { error, workflowId, payload });
       throw error;
     }
@@ -190,16 +205,16 @@ export class EmailWorkflowService {
   static async deleteWorkflow(workflowId: string): Promise<boolean> {
     try {
       const { error } = await (supabase
-        .from('email_workflows' as any)
+        .from('email_workflows' as never)
         .delete()
-        .eq('id', workflowId) as any);
+        .eq('id', workflowId) as never);
 
       if (error) {
         logger.error('Error deleting workflow', { error, workflowId });
         throw error;
       }
       return true;
-    } catch ( _error: any) {
+    } catch (_error: unknown) {
       logger.error('EmailWorkflowService.deleteWorkflow error', { error, workflowId });
       throw error;
     }
@@ -208,17 +223,24 @@ export class EmailWorkflowService {
   /**
    * Exécuter un workflow
    */
-  static async executeWorkflow(workflowId: string, context?: Record<string, any>): Promise<boolean> {
+  static async executeWorkflow(
+    workflowId: string,
+    context?: Record<string, unknown>
+  ): Promise<boolean> {
     try {
-      // S'assurer que le contexte contient les informations nécessaires
       const enrichedContext = {
         ...context,
-        // Si user_id n'est pas présent, essayer de l'extraire d'autres champs
-        user_id: context?.user_id || context?.userId || context?.user?.id,
-        email: context?.email || context?.user?.email,
+        user_id: context?.user_id || context?.userId || (context?.user as { id?: string })?.id,
+        email: context?.email || (context?.user as { email?: string })?.email,
       };
 
-       
+      const { invokeExecuteEmailWorkflow } = await import('@/lib/email/invoke-workflow');
+      const edgeSuccess = await invokeExecuteEmailWorkflow(workflowId, enrichedContext);
+      if (edgeSuccess) {
+        logger.info('Workflow executed via edge', { workflowId });
+        return true;
+      }
+
       // @ts-expect-error - execute_email_workflow function not in generated types
       const { data, error } = await supabase.rpc('execute_email_workflow', {
         p_workflow_id: workflowId,
@@ -230,20 +252,13 @@ export class EmailWorkflowService {
         throw error;
       }
 
-      const success = data as boolean;
-      if (success) {
-        logger.info('Workflow executed successfully', { workflowId });
-      } else {
-        logger.warn('Workflow execution returned false', { workflowId });
-      }
-
-      return success;
-    } catch ( _error: any) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('EmailWorkflowService.executeWorkflow error', { 
-        error: errorMessage, 
-        workflowId, 
-        context 
+      return data === true;
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      logger.error('EmailWorkflowService.executeWorkflow error', {
+        error: errorMessage,
+        workflowId,
+        context,
       });
       throw new Error(`Failed to execute workflow: ${errorMessage}`);
     }
@@ -252,10 +267,3 @@ export class EmailWorkflowService {
 
 // Export instance singleton
 export const emailWorkflowService = EmailWorkflowService;
-
-
-
-
-
-
-

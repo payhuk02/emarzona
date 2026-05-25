@@ -4,6 +4,7 @@
  */
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 
 const ORDER_SELECT =
   'id, store_id, order_number, customer_id, total_amount, currency, status, payment_status, created_at, metadata, customer_email, shipping_address, expected_delivery_date, tracking_number, tracking_link';
@@ -307,6 +308,55 @@ async function checkMultiStoreGroup(
     .then(null, (err: unknown) => console.error('multi-store group check:', err));
 }
 
+async function triggerMarketingWorkflowsAfterOrder(
+  supabase: SupabaseClient,
+  order: Record<string, unknown>,
+  transaction: { amount?: number; customer_id?: string } | null
+): Promise<void> {
+  const storeId = order.store_id as string | undefined;
+  if (!storeId) return;
+
+  let email = order.customer_email as string | undefined;
+  let customerName = (order.customer_name as string) || 'Client';
+  const customerId = order.customer_id as string | undefined;
+
+  if (!email && customerId) {
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('email, name, full_name, user_id')
+      .eq('id', customerId)
+      .maybeSingle();
+    if (customer) {
+      email = customer.email ?? undefined;
+      customerName = customer.full_name || customer.name || customerName;
+    }
+  }
+
+  const context = {
+    store_id: storeId,
+    order_id: order.id as string,
+    customer_id: customerId,
+    email,
+    customer_name: customerName,
+    order_total: order.total_amount ?? transaction?.amount,
+    currency: order.currency as string | undefined,
+  };
+
+  const events = ['order.paid', 'order.completed'];
+  for (const event of events) {
+    try {
+      const result = await triggerEmailWorkflowsForEvent(supabase, storeId, event, context);
+      if (result.triggered > 0) {
+        console.log(
+          `Email workflows [${event}]: ${result.succeeded}/${result.triggered} succeeded for order ${order.id}`
+        );
+      }
+    } catch (err) {
+      console.error(`triggerEmailWorkflowsForEvent ${event}:`, err);
+    }
+  }
+}
+
 /**
  * Exécute le fulfillment métier après passage commande en paid.
  * Les triggers SQL (digital licenses, course enrollment) restent actifs sur UPDATE orders.
@@ -340,6 +390,11 @@ export async function runPostOrderPaymentFulfillment(
   await confirmServiceBookings(supabase, order as Record<string, unknown>);
   await checkMultiStoreGroup(supabase, order as Record<string, unknown>);
   await sendOrderConfirmationEmail(supabase, order as Record<string, unknown>);
+  await triggerMarketingWorkflowsAfterOrder(
+    supabase,
+    order as Record<string, unknown>,
+    transaction
+  );
   const paymentProvider = (transaction?.payment_provider as string) || 'moneroo_platform';
   await processArtistOrderItems(
     supabase,
