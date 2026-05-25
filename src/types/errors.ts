@@ -155,7 +155,8 @@ const POSTGRES_CODE_MESSAGES: Record<string, string> = {
   '22P02':
     'Données invalides (identifiant incorrect). Si un template est sélectionné, réessayez sans template ou rechargez la page.',
   '23503': 'Référence introuvable (template, segment ou boutique). Vérifiez vos sélections.',
-  '23514': 'Valeur non autorisée pour ce champ (type, statut ou audience).',
+  '23514':
+    "Valeur non autorisée (type de campagne, type d'audience ou statut). Vérifiez les listes déroulantes.",
   PGRST116: 'Enregistrement introuvable.',
 };
 

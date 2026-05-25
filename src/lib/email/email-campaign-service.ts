@@ -103,6 +103,34 @@ const EMAIL_CAMPAIGN_FIELDS =
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const CAMPAIGN_TYPES = new Set<CampaignType>([
+  'newsletter',
+  'promotional',
+  'transactional',
+  'abandon_cart',
+  'nurture',
+]);
+
+const AUDIENCE_TYPES = new Set<AudienceType>(['segment', 'list', 'filter']);
+
+function normalizeCampaignType(value?: string): CampaignType {
+  return value && CAMPAIGN_TYPES.has(value as CampaignType)
+    ? (value as CampaignType)
+    : 'newsletter';
+}
+
+function normalizeAudienceType(value?: string): AudienceType {
+  return value && AUDIENCE_TYPES.has(value as AudienceType) ? (value as AudienceType) : 'filter';
+}
+
+function toIsoTimestamp(value?: string): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  const date = new Date(trimmed);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString();
+}
+
 function optionalUuid(value?: string | null): string | undefined {
   const trimmed = value?.trim();
   if (!trimmed || !UUID_RE.test(trimmed)) return undefined;
@@ -110,12 +138,22 @@ function optionalUuid(value?: string | null): string | undefined {
 }
 
 function buildCampaignInsertRow(payload: CreateCampaignPayload): Record<string, unknown> {
-  const scheduledAt = payload.scheduled_at?.trim();
+  const storeId = optionalUuid(payload.store_id);
+  if (!storeId) {
+    throw new Error('Boutique invalide. Rechargez la page et réessayez.');
+  }
+
+  const name = payload.name?.trim();
+  if (!name) {
+    throw new Error('Le nom de la campagne est obligatoire.');
+  }
+
+  const scheduledAt = toIsoTimestamp(payload.scheduled_at);
   const row: Record<string, unknown> = {
-    store_id: payload.store_id,
-    name: payload.name.trim(),
-    type: payload.type,
-    audience_type: payload.audience_type,
+    store_id: storeId,
+    name,
+    type: normalizeCampaignType(payload.type),
+    audience_type: normalizeAudienceType(payload.audience_type),
     status: scheduledAt ? 'scheduled' : 'draft',
     send_at_timezone: payload.send_at_timezone?.trim() || 'Africa/Dakar',
     audience_filters: payload.audience_filters ?? {},
@@ -158,8 +196,14 @@ function sanitizeCampaignUpdatePayload(payload: UpdateCampaignPayload): UpdateCa
     const segmentId = optionalUuid(next.segment_id);
     next.segment_id = segmentId ?? null;
   }
-  if ('scheduled_at' in next && next.scheduled_at === '') {
-    next.scheduled_at = undefined;
+  if ('type' in next) {
+    next.type = normalizeCampaignType(next.type);
+  }
+  if ('audience_type' in next) {
+    next.audience_type = normalizeAudienceType(next.audience_type);
+  }
+  if ('scheduled_at' in next) {
+    next.scheduled_at = toIsoTimestamp(next.scheduled_at);
   }
 
   return next;

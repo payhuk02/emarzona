@@ -33,6 +33,7 @@ import type {
   AudienceType,
 } from '@/lib/email/email-campaign-service';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface CampaignBuilderProps {
   open: boolean;
@@ -50,6 +51,7 @@ export const CampaignBuilder = ({
   onSuccess,
 }: CampaignBuilderProps) => {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { useBottomSheet } = useResponsiveModal();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -91,15 +93,45 @@ export const CampaignBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      toast({
+        title: t('common.error', 'Erreur'),
+        description: t('emails.campaigns.nameRequired', 'Le nom de la campagne est obligatoire.'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const safeType = type || 'newsletter';
+    const safeAudienceType = audienceType || 'filter';
+    const safeTimezone = timezone || 'Africa/Dakar';
+    let scheduledIso: string | undefined;
+    if (scheduledAt?.trim()) {
+      const parsed = new Date(scheduledAt);
+      if (Number.isNaN(parsed.getTime())) {
+        toast({
+          title: t('common.error', 'Erreur'),
+          description: t(
+            'emails.campaigns.invalidSchedule',
+            "Date d'envoi invalide. Vérifiez la date et l'heure."
+          ),
+          variant: 'destructive',
+        });
+        return;
+      }
+      scheduledIso = parsed.toISOString();
+    }
+
     const payload: CreateCampaignPayload = {
       store_id: storeId,
-      name,
+      name: trimmedName,
       description,
-      type,
+      type: safeType,
       template_id: templateId || undefined,
-      audience_type: audienceType,
-      scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
-      send_at_timezone: timezone,
+      audience_type: safeAudienceType,
+      scheduled_at: scheduledIso,
+      send_at_timezone: safeTimezone,
       audience_filters: {},
     };
 
@@ -154,8 +186,8 @@ export const CampaignBuilder = ({
         label={t('emails.campaigns.campaignType', 'Type de campagne')}
         name="type"
         type="select"
-        value={type}
-        onChange={value => setType(value as CampaignType)}
+        value={type || 'newsletter'}
+        onChange={value => setType((value || 'newsletter') as CampaignType)}
         required
         selectOptions={[
           { value: 'newsletter', label: t('emails.campaigns.types.newsletter', 'Newsletter') },
@@ -200,8 +232,8 @@ export const CampaignBuilder = ({
         label={t('emails.campaigns.audienceType', "Type d'audience")}
         name="audienceType"
         type="select"
-        value={audienceType}
-        onChange={value => setAudienceType(value as AudienceType)}
+        value={audienceType || 'filter'}
+        onChange={value => setAudienceType((value || 'filter') as AudienceType)}
         required
         selectOptions={[
           { value: 'segment', label: t('emails.campaigns.audienceTypes.segment', 'Segment') },
@@ -229,8 +261,8 @@ export const CampaignBuilder = ({
         label={t('emails.campaigns.timezone', 'Fuseau horaire')}
         name="timezone"
         type="select"
-        value={timezone}
-        onChange={setTimezone}
+        value={timezone || 'Africa/Dakar'}
+        onChange={value => setTimezone(value || 'Africa/Dakar')}
         selectOptions={[
           { value: 'Africa/Dakar', label: 'Africa/Dakar (GMT+0)' },
           { value: 'Africa/Abidjan', label: 'Africa/Abidjan (GMT+0)' },

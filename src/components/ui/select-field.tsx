@@ -172,7 +172,13 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
             </SelectContent>
           </MobileSelect>
         ) : (
-          <Select value={value} onValueChange={onValueChange} disabled={disabled || loading}>
+          <Select
+            value={value?.trim() ? value : undefined}
+            onValueChange={next => {
+              if (next?.trim()) onValueChange?.(next);
+            }}
+            disabled={disabled || loading}
+          >
             <SelectTrigger
               ref={ref}
               id={finalId}
@@ -222,9 +228,3 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
 );
 
 SelectField.displayName = 'SelectField';
-
-
-
-
-
-
