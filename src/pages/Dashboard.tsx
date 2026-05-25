@@ -536,7 +536,35 @@ const DashboardWithStore = ({ storeHydrating }: { storeHydrating: boolean }) => 
                       )}
                       <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-xl" />}>
                         <ProductTypePerformanceMetrics
-                          performanceMetricsByType={stats.performanceMetricsByType}
+                          performanceMetricsByType={
+                            stats.performanceMetricsByType as {
+                              digital: {
+                                conversionRate: number;
+                                averageOrderValue: number;
+                                customerRetention: number;
+                              };
+                              physical: {
+                                conversionRate: number;
+                                averageOrderValue: number;
+                                customerRetention: number;
+                              };
+                              service: {
+                                conversionRate: number;
+                                averageOrderValue: number;
+                                customerRetention: number;
+                              };
+                              course: {
+                                conversionRate: number;
+                                averageOrderValue: number;
+                                customerRetention: number;
+                              };
+                              artist: {
+                                conversionRate: number;
+                                averageOrderValue: number;
+                                customerRetention: number;
+                              };
+                            }
+                          }
                           selectedType={selectedProductType}
                         />
                       </Suspense>

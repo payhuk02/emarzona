@@ -8,7 +8,7 @@ import type { PaymentProviderCode, StorePaymentOption } from '@/types/store-paym
 import { logger } from '@/lib/logger';
 
 /** Valeur utilisée par le checkout (legacy moneroo + codes orchestrateur) */
-export type CheckoutPaymentProvider = 'moneroo' | PaymentProviderCode;
+export type CheckoutPaymentProvider = 'moneroo' | Exclude<PaymentProviderCode, 'moneroo_platform'>;
 
 export function rpcProviderToCheckout(provider: string): CheckoutPaymentProvider {
   if (provider === 'moneroo_platform') return 'moneroo';

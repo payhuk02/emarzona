@@ -45,7 +45,7 @@ interface OrderItem {
 }
 
 const ORDER_ITEM_FIELDS =
-  'id, order_id, product_id, product_name, product_type, quantity, unit_price, total_price, item_metadata';
+  'id, order_id, product_id, product_name, product_type, quantity, unit_price, total_price';
 
 const OrderEditDialogComponent = ({
   open,
@@ -251,10 +251,6 @@ const OrderEditDialogComponent = ({
           quantity: item.quantity,
           unit_price: item.unitPrice,
           total_price: item.quantity * item.unitPrice,
-          item_metadata: {
-            source: 'admin_order_edit_dialog',
-            product_type: item.productType,
-          },
         }));
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);

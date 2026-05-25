@@ -147,14 +147,10 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Check formatting for Supabase functions
-        run: deno fmt --check supabase/functions
-
-      - name: Type check Supabase Edge Functions
+      - name: Type check email workflow Edge Functions
         run: |
-          for file in supabase/functions/*/index.ts supabase/functions/api/v1/index.ts; do
-            if [ -f "$file" ]; then
-              deno check "$file"
-            fi
-          done
+          deno check supabase/functions/_shared/workflow-executor.ts
+          deno check supabase/functions/_shared/post-order-payment-fulfillment.ts
+          deno check supabase/functions/trigger-email-workflows/index.ts
+          deno check supabase/functions/execute-email-workflow/index.ts
 

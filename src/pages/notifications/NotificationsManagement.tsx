@@ -741,7 +741,14 @@ export default function NotificationsManagement() {
                               : 'bg-muted/30 hover:bg-muted/50',
                           notification.action_url && 'cursor-pointer'
                         )}
-                        onSelect={() => handleNotificationClick(notification)}
+                        onSelect={() =>
+                          handleNotificationClick({
+                            ...notification,
+                            id: notification.id,
+                            is_read: notification.is_read,
+                            type: notification.type,
+                          })
+                        }
                       >
                         <Checkbox
                           checked={selectedNotifications.includes(notification.id)}

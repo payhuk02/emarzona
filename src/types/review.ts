@@ -4,24 +4,24 @@
  * Universel : Digital, Physical, Service, Course
  */
 
-import type { ProductType } from './product';
+import type { ProductType } from './unified-product';
 
 export interface Review {
   id: string;
-  
+
   // Relations
   product_id: string;
   user_id: string;
   order_id?: string;
-  
+
   // Contenu
   rating: number; // 1-5
   title?: string;
   content: string;
-  
+
   // Type produit
   product_type: ProductType;
-  
+
   // Ratings détaillés (optionnels)
   quality_rating?: number;
   value_rating?: number;
@@ -29,26 +29,26 @@ export interface Review {
   delivery_rating?: number; // Pour physical
   course_content_rating?: number; // Pour courses
   instructor_rating?: number; // Pour courses
-  
+
   // Metadata
   verified_purchase: boolean;
   is_featured: boolean;
   is_approved: boolean;
   is_flagged: boolean;
-  
+
   // Stats
   helpful_count: number;
   not_helpful_count: number;
   reply_count: number;
-  
+
   // Reviewer info
   reviewer_name?: string;
   reviewer_avatar?: string;
-  
+
   // Timestamps
   created_at: string;
   updated_at: string;
-  
+
   // Relations chargées (optionnel)
   replies?: ReviewReply[];
   media?: ReviewMedia[];
@@ -64,7 +64,7 @@ export interface ReviewReply {
   is_official: boolean;
   created_at: string;
   updated_at: string;
-  
+
   // Relations chargées (optionnel)
   user?: {
     id: string;
@@ -97,18 +97,18 @@ export interface ReviewMedia {
 
 export interface ProductReviewStats {
   product_id: string;
-  
+
   // Stats globales
   total_reviews: number;
   average_rating: number;
-  
+
   // Distribution des notes
   rating_5_count: number;
   rating_4_count: number;
   rating_3_count: number;
   rating_2_count: number;
   rating_1_count: number;
-  
+
   // Ratings détaillés moyens
   avg_quality_rating?: number;
   avg_value_rating?: number;
@@ -116,11 +116,11 @@ export interface ProductReviewStats {
   avg_delivery_rating?: number;
   avg_course_content_rating?: number;
   avg_instructor_rating?: number;
-  
+
   // Stats supplémentaires
   verified_purchases_count: number;
   featured_reviews_count: number;
-  
+
   // Timestamp
   last_updated: string;
 }
@@ -136,7 +136,7 @@ export interface CreateReviewPayload {
   title?: string;
   content: string;
   product_type: ProductType;
-  
+
   // Ratings détaillés (optionnels)
   quality_rating?: number;
   value_rating?: number;
@@ -144,7 +144,7 @@ export interface CreateReviewPayload {
   delivery_rating?: number;
   course_content_rating?: number;
   instructor_rating?: number;
-  
+
   // Media
   media_files?: File[];
 }
@@ -220,7 +220,7 @@ export interface CourseReview extends Review {
 // HELPERS
 // ============================================================
 
-export const RATING_LABELS : Record<number, string> = {
+export const RATING_LABELS: Record<number, string> = {
   5: 'Excellent',
   4: 'Très bon',
   3: 'Moyen',
@@ -244,7 +244,7 @@ export const getDetailedRatingFields = (productType: ProductType): string[] => {
 };
 
 export const getDetailedRatingLabel = (field: string): string => {
-  const  labels: Record<string, string> = {
+  const labels: Record<string, string> = {
     quality_rating: 'Qualité',
     value_rating: 'Rapport qualité/prix',
     service_rating: 'Service',
@@ -254,11 +254,3 @@ export const getDetailedRatingLabel = (field: string): string => {
   };
   return labels[field] || field;
 };
-
-
-
-
-
-
-
-

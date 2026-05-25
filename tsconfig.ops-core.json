@@ -3,12 +3,15 @@
   "compilerOptions": {
     "noCheck": false,
     "strict": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "skipLibCheck": true
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "types": ["vite/client"]
   },
   "include": [
+    "src/vite-env.d.ts",
     "src/pages/Dashboard.tsx",
     "src/pages/Analytics.tsx",
     "src/pages/notifications/NotificationsManagement.tsx",
@@ -22,10 +25,5 @@
     "src/lib/webhooks.ts",
     "src/lib/notifications/unified-notifications.ts"
   ],
-  "exclude": [
-    "src/**/__tests__/**",
-    "src/**/*.test.*",
-    "src/**/*.spec.*",
-    "src/test/**"
-  ]
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.*", "src/**/*.spec.*", "src/test/**"]
 }

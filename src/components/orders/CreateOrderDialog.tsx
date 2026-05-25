@@ -23,6 +23,7 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { useProductsOptimized } from '@/hooks/useProducts';
 import { Plus, Trash2 } from '@/components/icons';
 import { Card } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -189,10 +190,6 @@ const CreateOrderDialogComponent = ({
           quantity: item.quantity,
           unit_price: item.unitPrice,
           total_price: item.quantity * item.unitPrice,
-          item_metadata: {
-            source: 'admin_create_order_dialog',
-            product_type: item.productType,
-          },
         }));
 
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);

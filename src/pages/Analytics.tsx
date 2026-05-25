@@ -9,15 +9,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useProductsOptimized } from '@/hooks/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  TrendingUp,
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Package,
-  BarChart3,
-  Plus,
-} from 'lucide-react';
+import { DollarSign, ShoppingCart, Users, Package, BarChart3, Plus } from 'lucide-react';
 import { SalesChart } from '@/components/analytics/SalesChart';
 import { TopProducts } from '@/components/analytics/TopProducts';
 import { RecentOrders } from '@/components/analytics/RecentOrders';

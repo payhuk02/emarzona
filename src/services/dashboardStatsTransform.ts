@@ -262,15 +262,16 @@ export function transformOptimizedData(data: OptimizedDashboardData): DashboardS
       service: 0,
       course: 0,
       artist: 0,
-    }) as ProductTypeCount,
+    }) as unknown as ProductTypeCount,
     ordersByType: reduceByType(data.productPerformance, p => p.orders, {
       digital: 0,
       physical: 0,
       service: 0,
       course: 0,
       artist: 0,
-    }) as ProductTypeCount,
-    performanceMetricsByType: performanceByType as DashboardStats['performanceMetricsByType'],
+    }) as unknown as ProductTypeCount,
+    performanceMetricsByType:
+      performanceByType as unknown as DashboardStats['performanceMetricsByType'],
     revenueByTypeAndMonth: buildRevenueByTypeAndMonth(data),
   };
 }

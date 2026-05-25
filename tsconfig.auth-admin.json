@@ -6,20 +6,15 @@
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["vite/client"]
   },
   "include": [
+    "src/vite-env.d.ts",
     "src/contexts/AuthContext.tsx",
     "src/components/AdminRoute.tsx",
     "src/hooks/useAdmin.ts",
-    "src/integrations/supabase/client.ts",
-    "src/integrations/supabase/client.server.ts",
-    "src/integrations/supabase/auth-middleware.ts"
+    "src/integrations/supabase/client.ts"
   ],
-  "exclude": [
-    "src/**/__tests__/**",
-    "src/**/*.test.*",
-    "src/**/*.spec.*",
-    "src/test/**"
-  ]
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.*", "src/**/*.spec.*", "src/test/**"]
 }

@@ -26,7 +26,7 @@ interface FormFieldWithValidationProps {
   validationRules?: Array<(value: string) => string | null>;
 }
 
-export const FormFieldWithValidation : React.FC<FormFieldWithValidationProps> = ({
+export const FormFieldWithValidation: React.FC<FormFieldWithValidationProps> = ({
   label,
   name,
   value,
@@ -51,7 +51,7 @@ export const FormFieldWithValidation : React.FC<FormFieldWithValidationProps> = 
 
     setIsValidating(true);
     const timer = setTimeout(() => {
-      let  validationError: string | null = null;
+      let validationError: string | null = null;
 
       // Validation required
       if (required && !value.trim()) {
@@ -99,20 +99,20 @@ export const FormFieldWithValidation : React.FC<FormFieldWithValidationProps> = 
           name={name}
           type={type}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onBlur={handleBlur}
           placeholder={placeholder}
           required={required}
           disabled={disabled}
           autoComplete={autoComplete}
           className={cn(
-            "transition-all duration-200",
-            showError && "border-destructive focus-visible:ring-destructive",
-            showSuccess && "border-green-500 focus-visible:ring-green-500",
-            isValidating && "opacity-70"
+            'transition-all duration-200',
+            showError && 'border-destructive focus-visible:ring-destructive',
+            showSuccess && 'border-green-500 focus-visible:ring-green-500',
+            isValidating && 'opacity-70'
           )}
-          aria-invalid={showError}
-          aria-describedby={showError ? `${name}-error` : undefined}
+          aria-invalid={showError ? true : undefined}
+          {...(showError ? { 'aria-describedby': `${name}-error` } : {})}
         />
         {showSuccess && (
           <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
@@ -127,11 +127,3 @@ export const FormFieldWithValidation : React.FC<FormFieldWithValidationProps> = 
     </div>
   );
 };
-
-
-
-
-
-
-
-

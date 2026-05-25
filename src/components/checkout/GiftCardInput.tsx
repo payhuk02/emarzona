@@ -28,7 +28,7 @@ export default function GiftCardInput({
   onRemove,
   appliedGiftCardId,
   appliedGiftCardBalance,
-  appliedGiftCardCode
+  appliedGiftCardCode,
 }: GiftCardInputProps) {
   const { toast } = useToast();
   const [code, setCode] = useState('');
@@ -39,7 +39,7 @@ export default function GiftCardInput({
       toast({
         title: 'Code requis',
         description: 'Veuillez entrer un code de carte cadeau',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -47,14 +47,14 @@ export default function GiftCardInput({
     try {
       const validation = await validateMutation.mutateAsync({
         storeId,
-        code: code.trim()
+        code: code.trim(),
       });
 
       if (!validation.is_valid) {
         toast({
           title: 'Carte cadeau invalide',
           description: validation.message,
-          variant: 'destructive'
+          variant: 'destructive',
         });
         return;
       }
@@ -63,7 +63,7 @@ export default function GiftCardInput({
         toast({
           title: 'Erreur',
           description: 'Données de carte cadeau incomplètes',
-          variant: 'destructive'
+          variant: 'destructive',
         });
         return;
       }
@@ -75,19 +75,24 @@ export default function GiftCardInput({
         .eq('id', validation.gift_card_id)
         .single();
 
-      onApply(validation.gift_card_id, validation.current_balance, giftCardData?.code || code.trim());
+      onApply(
+        validation.gift_card_id,
+        validation.current_balance,
+        giftCardData?.code || code.trim()
+      );
       setCode('');
-      
+
       toast({
         title: 'Carte cadeau appliquée',
         description: `Solde disponible : ${formatCurrency(validation.current_balance)}`,
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible de valider la carte cadeau';
+    } catch (_error: unknown) {
+      const errorMessage =
+        _error instanceof Error ? _error.message : 'Impossible de valider la carte cadeau';
       toast({
         title: 'Erreur',
         description: errorMessage,
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   };
@@ -100,7 +105,11 @@ export default function GiftCardInput({
     });
   };
 
-  if (appliedGiftCardId && appliedGiftCardBalance !== null && appliedGiftCardBalance !== undefined) {
+  if (
+    appliedGiftCardId &&
+    appliedGiftCardBalance !== null &&
+    appliedGiftCardBalance !== undefined
+  ) {
     return (
       <div className="space-y-2">
         <Label>Carte cadeau appliquée</Label>
@@ -138,8 +147,8 @@ export default function GiftCardInput({
           type="text"
           placeholder="ABCD-EFGH-IJKL-MNOP"
           value={code}
-          onChange={(e) => setCode(e.target.value.toUpperCase())}
-          onKeyDown={(e) => {
+          onChange={e => setCode(e.target.value.toUpperCase())}
+          onKeyDown={e => {
             if (e.key === 'Enter') {
               e.preventDefault();
               handleApply();
@@ -171,10 +180,3 @@ export default function GiftCardInput({
     </div>
   );
 }
-
-
-
-
-
-
-

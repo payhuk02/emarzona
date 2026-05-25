@@ -82,7 +82,7 @@ export function PremiumNav() {
                   key={item.key}
                   label={t(`nav.${item.key}`)}
                   href={item.href}
-                  route={item.route}
+                  route={'route' in item ? item.route : undefined}
                 />
               ))}
             </div>
@@ -136,7 +136,7 @@ export function PremiumNav() {
                   key={item.key}
                   label={t(`nav.${item.key}`)}
                   href={item.href}
-                  route={item.route}
+                  route={'route' in item ? item.route : undefined}
                   onClick={() => setOpen(false)}
                   className="rounded-xl px-4 py-3 text-base"
                 />
