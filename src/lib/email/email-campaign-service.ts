@@ -101,6 +101,70 @@ export interface UpdateCampaignPayload {
 const EMAIL_CAMPAIGN_FIELDS =
   'id,store_id,name,description,type,template_id,status,scheduled_at,send_at_timezone,recurrence,recurrence_end_at,audience_type,segment_id,audience_filters,estimated_recipients,ab_test_enabled,ab_test_variants,ab_test_winner,metrics,created_by,created_at,updated_at';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function optionalUuid(value?: string | null): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed || !UUID_RE.test(trimmed)) return undefined;
+  return trimmed;
+}
+
+function buildCampaignInsertRow(payload: CreateCampaignPayload): Record<string, unknown> {
+  const scheduledAt = payload.scheduled_at?.trim();
+  const row: Record<string, unknown> = {
+    store_id: payload.store_id,
+    name: payload.name.trim(),
+    type: payload.type,
+    audience_type: payload.audience_type,
+    status: scheduledAt ? 'scheduled' : 'draft',
+    send_at_timezone: payload.send_at_timezone?.trim() || 'Africa/Dakar',
+    audience_filters: payload.audience_filters ?? {},
+  };
+
+  const description = payload.description?.trim();
+  if (description) row.description = description;
+
+  const templateId = optionalUuid(payload.template_id);
+  if (templateId) row.template_id = templateId;
+
+  const segmentId = optionalUuid(payload.segment_id);
+  if (segmentId) row.segment_id = segmentId;
+
+  if (scheduledAt) row.scheduled_at = scheduledAt;
+  if (payload.recurrence) row.recurrence = payload.recurrence;
+  if (payload.recurrence_end_at) row.recurrence_end_at = payload.recurrence_end_at;
+  if (payload.estimated_recipients != null) row.estimated_recipients = payload.estimated_recipients;
+  if (payload.ab_test_enabled != null) row.ab_test_enabled = payload.ab_test_enabled;
+  if (payload.ab_test_variants) row.ab_test_variants = payload.ab_test_variants;
+
+  return row;
+}
+
+function sanitizeCampaignUpdatePayload(payload: UpdateCampaignPayload): UpdateCampaignPayload {
+  const next: UpdateCampaignPayload = { ...payload };
+
+  if ('name' in next && typeof next.name === 'string') {
+    next.name = next.name.trim();
+  }
+  if ('description' in next) {
+    const description = next.description?.trim();
+    next.description = description || undefined;
+  }
+  if ('template_id' in next) {
+    const templateId = optionalUuid(next.template_id);
+    next.template_id = templateId ?? null;
+  }
+  if ('segment_id' in next) {
+    const segmentId = optionalUuid(next.segment_id);
+    next.segment_id = segmentId ?? null;
+  }
+  if ('scheduled_at' in next && next.scheduled_at === '') {
+    next.scheduled_at = undefined;
+  }
+
+  return next;
+}
+
 // ============================================================
 // SERVICE
 // ============================================================
@@ -113,22 +177,8 @@ export class EmailCampaignService {
     try {
       const { data, error } = await supabase
         .from('email_campaigns')
-        .insert({
-          ...payload,
-          status: payload.scheduled_at ? 'scheduled' : 'draft',
-          send_at_timezone: payload.send_at_timezone || 'Africa/Dakar',
-          audience_filters: payload.audience_filters || {},
-          metrics: {
-            sent: 0,
-            delivered: 0,
-            opened: 0,
-            clicked: 0,
-            bounced: 0,
-            unsubscribed: 0,
-            revenue: 0,
-          },
-        })
-        .select()
+        .insert(buildCampaignInsertRow(payload))
+        .select(EMAIL_CAMPAIGN_FIELDS)
         .single();
 
       if (error) {
@@ -228,9 +278,9 @@ export class EmailCampaignService {
     try {
       const { data, error } = await supabase
         .from('email_campaigns')
-        .update(payload)
+        .update(sanitizeCampaignUpdatePayload(payload))
         .eq('id', campaignId)
-        .select()
+        .select(EMAIL_CAMPAIGN_FIELDS)
         .single();
 
       if (error) {

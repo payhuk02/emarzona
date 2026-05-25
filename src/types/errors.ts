@@ -1,7 +1,7 @@
 /**
  * Error Types
  * Date: 28 Janvier 2025
- * 
+ *
  * Types TypeScript pour remplacer les 'any' dans la gestion d'erreurs
  */
 
@@ -151,6 +151,14 @@ export type AppError =
   | Error
   | TypedError;
 
+const POSTGRES_CODE_MESSAGES: Record<string, string> = {
+  '22P02':
+    'Données invalides (identifiant incorrect). Si un template est sélectionné, réessayez sans template ou rechargez la page.',
+  '23503': 'Référence introuvable (template, segment ou boutique). Vérifiez vos sélections.',
+  '23514': 'Valeur non autorisée pour ce champ (type, statut ou audience).',
+  PGRST116: 'Enregistrement introuvable.',
+};
+
 /**
  * Helper pour extraire le message d'erreur de manière type-safe
  */
@@ -159,6 +167,9 @@ export function getErrorMessage(error: unknown): string {
     return error.message;
   }
   if (isSupabaseError(error)) {
+    if (error.code && POSTGRES_CODE_MESSAGES[error.code]) {
+      return POSTGRES_CODE_MESSAGES[error.code];
+    }
     return error.message;
   }
   if (isNetworkError(error)) {
@@ -176,7 +187,7 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  return 'Une erreur inattendue s\'est produite';
+  return "Une erreur inattendue s'est produite";
 }
 
 /**
@@ -200,10 +211,3 @@ export function getErrorCode(error: unknown): string | undefined {
   }
   return undefined;
 }
-
-
-
-
-
-
-

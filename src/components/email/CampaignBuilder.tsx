@@ -178,6 +178,7 @@ export const CampaignBuilder = ({
       <div>
         <Label htmlFor="template">{t('emails.template', 'Template email')}</Label>
         <Select
+          modal={false}
           value={templateId || '__none__'}
           onValueChange={value => setTemplateId(value === '__none__' ? '' : value)}
         >
