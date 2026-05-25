@@ -14,6 +14,7 @@ import {
   type CampaignStatus,
   type CampaignType,
 } from '@/lib/email/email-campaign-service';
+import { getErrorMessage } from '@/types/errors';
 
 // ============================================================
 // HOOKS
@@ -68,7 +69,7 @@ export const useCreateEmailCampaign = () => {
     mutationFn: async (payload: CreateCampaignPayload): Promise<EmailCampaign> => {
       return EmailCampaignService.createCampaign(payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -76,11 +77,11 @@ export const useCreateEmailCampaign = () => {
         description: 'La campagne a été créée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error creating campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la création de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -104,7 +105,7 @@ export const useUpdateEmailCampaign = () => {
     }): Promise<EmailCampaign> => {
       return EmailCampaignService.updateCampaign(campaignId, payload);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -112,11 +113,11 @@ export const useUpdateEmailCampaign = () => {
         description: 'La campagne a été mise à jour avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error updating campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise à jour de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -133,7 +134,7 @@ export const useDeleteEmailCampaign = () => {
   return useMutation({
     mutationFn: async ({
       campaignId,
-      storeId,
+      storeId: _storeId,
     }: {
       campaignId: string;
       storeId: string;
@@ -148,11 +149,11 @@ export const useDeleteEmailCampaign = () => {
         description: 'La campagne a été supprimée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error deleting campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la suppression de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -176,7 +177,7 @@ export const useScheduleEmailCampaign = () => {
     }): Promise<EmailCampaign> => {
       return EmailCampaignService.scheduleCampaign(campaignId, scheduledAt);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -184,11 +185,11 @@ export const useScheduleEmailCampaign = () => {
         description: 'La campagne a été programmée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error scheduling campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la programmation de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -206,7 +207,7 @@ export const usePauseEmailCampaign = () => {
     mutationFn: async (campaignId: string): Promise<EmailCampaign> => {
       return EmailCampaignService.pauseCampaign(campaignId);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -214,11 +215,11 @@ export const usePauseEmailCampaign = () => {
         description: 'La campagne a été mise en pause.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error pausing campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la mise en pause de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -236,7 +237,7 @@ export const useResumeEmailCampaign = () => {
     mutationFn: async (campaignId: string): Promise<EmailCampaign> => {
       return EmailCampaignService.resumeCampaign(campaignId);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -244,11 +245,11 @@ export const useResumeEmailCampaign = () => {
         description: 'La campagne a été reprise avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error resuming campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la reprise de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -266,7 +267,7 @@ export const useCancelEmailCampaign = () => {
     mutationFn: async (campaignId: string): Promise<EmailCampaign> => {
       return EmailCampaignService.cancelCampaign(campaignId);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -274,11 +275,11 @@ export const useCancelEmailCampaign = () => {
         description: 'La campagne a été annulée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error cancelling campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'annulation de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -296,7 +297,7 @@ export const useDuplicateEmailCampaign = () => {
     mutationFn: async (campaignId: string): Promise<EmailCampaign> => {
       return EmailCampaignService.duplicateCampaign(campaignId);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['email-campaigns', data.store_id] });
       queryClient.setQueryData(['email-campaign', data.id], data);
       toast({
@@ -304,11 +305,11 @@ export const useDuplicateEmailCampaign = () => {
         description: 'La campagne a été dupliquée avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error duplicating campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la duplication de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
@@ -335,23 +336,16 @@ export const useSendEmailCampaign = () => {
       }
       toast({
         title: 'Campagne envoyée',
-        description: 'La campagne est en cours d\'envoi.',
+        description: "La campagne est en cours d'envoi.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       logger.error('Error sending campaign', { error });
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'envoi de la campagne.',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     },
   });
 };
-
-
-
-
-
-
-

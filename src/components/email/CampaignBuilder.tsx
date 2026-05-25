@@ -26,7 +26,12 @@ import {
 import { useEmailTemplates } from '@/hooks/useEmail';
 import { useCreateEmailCampaign, useUpdateEmailCampaign } from '@/hooks/email/useEmailCampaigns';
 import { useResponsiveModal } from '@/hooks/use-responsive-modal';
-import type { EmailCampaign, CreateCampaignPayload, CampaignType, AudienceType } from '@/lib/email/email-campaign-service';
+import type {
+  EmailCampaign,
+  CreateCampaignPayload,
+  CampaignType,
+  AudienceType,
+} from '@/lib/email/email-campaign-service';
 import { Loader2 } from 'lucide-react';
 
 interface CampaignBuilderProps {
@@ -67,7 +72,9 @@ export const CampaignBuilder = ({
       setType(campaign.type);
       setTemplateId(campaign.template_id || '');
       setAudienceType(campaign.audience_type);
-      setScheduledAt(campaign.scheduled_at ? new Date(campaign.scheduled_at).toISOString().slice(0, 16) : '');
+      setScheduledAt(
+        campaign.scheduled_at ? new Date(campaign.scheduled_at).toISOString().slice(0, 16) : ''
+      );
       setTimezone(campaign.send_at_timezone);
     } else {
       // Reset form
@@ -84,14 +91,14 @@ export const CampaignBuilder = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const  payload: CreateCampaignPayload = {
+    const payload: CreateCampaignPayload = {
       store_id: storeId,
       name,
       description,
       type,
       template_id: templateId || undefined,
       audience_type: audienceType,
-      scheduled_at: scheduledAt || undefined,
+      scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
       send_at_timezone: timezone,
       audience_filters: {},
     };
@@ -107,7 +114,7 @@ export const CampaignBuilder = ({
       }
       onSuccess?.();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // Error handling is done in the hooks
     }
   };
@@ -135,7 +142,10 @@ export const CampaignBuilder = ({
         value={description}
         onChange={setDescription}
         fieldProps={{
-          placeholder: t('emails.campaigns.campaignDescriptionPlaceholder', 'Description de la campagne...'),
+          placeholder: t(
+            'emails.campaigns.campaignDescriptionPlaceholder',
+            'Description de la campagne...'
+          ),
           rows: 3,
         }}
       />
@@ -145,26 +155,38 @@ export const CampaignBuilder = ({
         name="type"
         type="select"
         value={type}
-        onChange={(value) => setType(value as CampaignType)}
+        onChange={value => setType(value as CampaignType)}
         required
         selectOptions={[
           { value: 'newsletter', label: t('emails.campaigns.types.newsletter', 'Newsletter') },
-          { value: 'promotional', label: t('emails.campaigns.types.promotional', 'Promotionnelle') },
-          { value: 'transactional', label: t('emails.campaigns.types.transactional', 'Transactionnelle') },
-          { value: 'abandon_cart', label: t('emails.campaigns.types.abandonCart', 'Panier abandonné') },
+          {
+            value: 'promotional',
+            label: t('emails.campaigns.types.promotional', 'Promotionnelle'),
+          },
+          {
+            value: 'transactional',
+            label: t('emails.campaigns.types.transactional', 'Transactionnelle'),
+          },
+          {
+            value: 'abandon_cart',
+            label: t('emails.campaigns.types.abandonCart', 'Panier abandonné'),
+          },
           { value: 'nurture', label: t('emails.campaigns.types.nurture', 'Nurture') },
         ]}
       />
 
       <div>
         <Label htmlFor="template">{t('emails.template', 'Template email')}</Label>
-        <Select value={templateId || "__none__"} onValueChange={(value) => setTemplateId(value === "__none__" ? "" : value)}>
+        <Select
+          value={templateId || '__none__'}
+          onValueChange={value => setTemplateId(value === '__none__' ? '' : value)}
+        >
           <SelectTrigger id="template" className="mt-1.5 sm:mt-2">
             <SelectValue placeholder={t('emails.selectTemplate', 'Sélectionner un template')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__none__">{t('emails.noTemplate', 'Aucun template')}</SelectItem>
-            {templates?.map((template) => (
+            {templates?.map(template => (
               <SelectItem key={template.id} value={template.id}>
                 {template.name}
               </SelectItem>
@@ -174,11 +196,11 @@ export const CampaignBuilder = ({
       </div>
 
       <MobileFormField
-        label={t('emails.campaigns.audienceType', 'Type d\'audience')}
+        label={t('emails.campaigns.audienceType', "Type d'audience")}
         name="audienceType"
         type="select"
         value={audienceType}
-        onChange={(value) => setAudienceType(value as AudienceType)}
+        onChange={value => setAudienceType(value as AudienceType)}
         required
         selectOptions={[
           { value: 'segment', label: t('emails.campaigns.audienceTypes.segment', 'Segment') },
@@ -188,14 +210,17 @@ export const CampaignBuilder = ({
       />
 
       <MobileFormField
-        label={t('emails.campaigns.scheduledAt', 'Date et heure d\'envoi')}
+        label={t('emails.campaigns.scheduledAt', "Date et heure d'envoi")}
         name="scheduledAt"
         type="datetime-local"
         value={scheduledAt}
         onChange={setScheduledAt}
-        description={t('emails.campaigns.scheduledAtDescription', 'Laissez vide pour envoyer immédiatement ou créer un brouillon')}
+        description={t(
+          'emails.campaigns.scheduledAtDescription',
+          'Laissez vide pour envoyer immédiatement ou créer un brouillon'
+        )}
         fieldProps={{
-          placeholder: t('emails.campaigns.scheduledAtPlaceholder', 'Programmer l\'envoi'),
+          placeholder: t('emails.campaigns.scheduledAtPlaceholder', "Programmer l'envoi"),
         }}
       />
 
@@ -225,7 +250,9 @@ export const CampaignBuilder = ({
         </Button>
         <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          {isEditing ? t('common.save', 'Enregistrer') : t('emails.campaigns.createCampaign', 'Créer la campagne')}
+          {isEditing
+            ? t('common.save', 'Enregistrer')
+            : t('emails.campaigns.createCampaign', 'Créer la campagne')}
         </Button>
       </div>
     </form>
@@ -236,11 +263,21 @@ export const CampaignBuilder = ({
       {useBottomSheet ? (
         <BottomSheet open={open} onOpenChange={onOpenChange}>
           <BottomSheetContent
-            title={isEditing ? t('emails.campaigns.editCampaign', 'Modifier la campagne') : t('emails.campaigns.newCampaign', 'Nouvelle campagne')}
+            title={
+              isEditing
+                ? t('emails.campaigns.editCampaign', 'Modifier la campagne')
+                : t('emails.campaigns.newCampaign', 'Nouvelle campagne')
+            }
             description={
               isEditing
-                ? t('emails.campaigns.editCampaignDescription', 'Modifiez les informations de votre campagne email')
-                : t('emails.campaigns.newCampaignDescription', 'Créez une nouvelle campagne email marketing pour votre boutique')
+                ? t(
+                    'emails.campaigns.editCampaignDescription',
+                    'Modifiez les informations de votre campagne email'
+                  )
+                : t(
+                    'emails.campaigns.newCampaignDescription',
+                    'Créez une nouvelle campagne email marketing pour votre boutique'
+                  )
             }
             className="max-h-[90vh] overflow-y-auto"
           >
@@ -252,12 +289,20 @@ export const CampaignBuilder = ({
           <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {isEditing ? t('emails.campaigns.editCampaign', 'Modifier la campagne') : t('emails.campaigns.newCampaign', 'Nouvelle campagne')}
+                {isEditing
+                  ? t('emails.campaigns.editCampaign', 'Modifier la campagne')
+                  : t('emails.campaigns.newCampaign', 'Nouvelle campagne')}
               </DialogTitle>
               <DialogDescription>
                 {isEditing
-                  ? t('emails.campaigns.editCampaignDescription', 'Modifiez les informations de votre campagne email')
-                  : t('emails.campaigns.newCampaignDescription', 'Créez une nouvelle campagne email marketing pour votre boutique')}
+                  ? t(
+                      'emails.campaigns.editCampaignDescription',
+                      'Modifiez les informations de votre campagne email'
+                    )
+                  : t(
+                      'emails.campaigns.newCampaignDescription',
+                      'Créez une nouvelle campagne email marketing pour votre boutique'
+                    )}
               </DialogDescription>
             </DialogHeader>
             {formContent}
@@ -267,10 +312,3 @@ export const CampaignBuilder = ({
     </>
   );
 };
-
-
-
-
-
-
-

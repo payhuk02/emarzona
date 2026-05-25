@@ -7,14 +7,26 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { sendEmail } from '@/lib/sendgrid';
+import { getErrorMessage } from '@/types/errors';
 import type { SendEmailPayload } from '@/types/email';
 
 // ============================================================
 // TYPES
 // ============================================================
 
-export type CampaignType = 'newsletter' | 'promotional' | 'transactional' | 'abandon_cart' | 'nurture';
-export type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'paused' | 'completed' | 'cancelled';
+export type CampaignType =
+  | 'newsletter'
+  | 'promotional'
+  | 'transactional'
+  | 'abandon_cart'
+  | 'nurture';
+export type CampaignStatus =
+  | 'draft'
+  | 'scheduled'
+  | 'sending'
+  | 'paused'
+  | 'completed'
+  | 'cancelled';
 export type AudienceType = 'segment' | 'list' | 'filter';
 
 export interface EmailCampaign {
@@ -125,10 +137,9 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.createCampaign error', { error, payload });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.createCampaign error', { error: caught, payload });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -152,24 +163,26 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.getCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.getCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
   /**
    * Récupérer toutes les campagnes d'un store
    */
-  static async getCampaigns(storeId: string, filters?: {
-    status?: CampaignStatus;
-    type?: CampaignType;
-    limit?: number;
-    offset?: number;
-  }): Promise<EmailCampaign[]> {
+  static async getCampaigns(
+    storeId: string,
+    filters?: {
+      status?: CampaignStatus;
+      type?: CampaignType;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<EmailCampaign[]> {
     try {
-      let  query= supabase
+      let query = supabase
         .from('email_campaigns')
         .select(EMAIL_CAMPAIGN_FIELDS)
         .eq('store_id', storeId)
@@ -199,10 +212,9 @@ export class EmailCampaignService {
       }
 
       return (data || []) as EmailCampaign[];
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.getCampaigns error', { error, storeId, filters });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.getCampaigns error', { error: caught, storeId, filters });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -227,10 +239,13 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.updateCampaign error', { error, campaignId, payload });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.updateCampaign error', {
+        error: caught,
+        campaignId,
+        payload,
+      });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -239,10 +254,7 @@ export class EmailCampaignService {
    */
   static async deleteCampaign(campaignId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('email_campaigns')
-        .delete()
-        .eq('id', campaignId);
+      const { error } = await supabase.from('email_campaigns').delete().eq('id', campaignId);
 
       if (error) {
         logger.error('Error deleting campaign', { error, campaignId });
@@ -250,29 +262,28 @@ export class EmailCampaignService {
       }
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.deleteCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.deleteCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
   /**
    * Programmer une campagne
    */
-  static async scheduleCampaign(
-    campaignId: string,
-    scheduledAt: string
-  ): Promise<EmailCampaign> {
+  static async scheduleCampaign(campaignId: string, scheduledAt: string): Promise<EmailCampaign> {
     try {
       return await this.updateCampaign(campaignId, {
         status: 'scheduled',
         scheduled_at: scheduledAt,
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.scheduleCampaign error', { error, campaignId, scheduledAt });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.scheduleCampaign error', {
+        error: caught,
+        campaignId,
+        scheduledAt,
+      });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -284,10 +295,9 @@ export class EmailCampaignService {
       return await this.updateCampaign(campaignId, {
         status: 'paused',
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.pauseCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.pauseCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -308,10 +318,9 @@ export class EmailCampaignService {
       return await this.updateCampaign(campaignId, {
         status: newStatus,
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.resumeCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.resumeCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -323,10 +332,9 @@ export class EmailCampaignService {
       return await this.updateCampaign(campaignId, {
         status: 'cancelled',
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.cancelCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.cancelCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -361,10 +369,13 @@ export class EmailCampaignService {
       }
 
       return data as EmailCampaign;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.updateCampaignMetrics error', { error, campaignId, metrics });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.updateCampaignMetrics error', {
+        error: caught,
+        campaignId,
+        metrics,
+      });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -386,10 +397,9 @@ export class EmailCampaignService {
         status: 'draft' as CampaignStatus,
         scheduled_at: undefined,
       });
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.duplicateCampaign error', { error, campaignId });
-      throw error;
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.duplicateCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 
@@ -442,20 +452,12 @@ export class EmailCampaignService {
 
       logger.info('Campaign sent successfully', { campaignId, data });
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      logger.error('EmailCampaignService.sendCampaign error', { error, campaignId });
-      throw new Error(errorMessage);
+    } catch (caught: unknown) {
+      logger.error('EmailCampaignService.sendCampaign error', { error: caught, campaignId });
+      throw caught instanceof Error ? caught : new Error(getErrorMessage(caught));
     }
   }
 }
 
 // Export instance singleton
 export const emailCampaignService = EmailCampaignService;
-
-
-
-
-
-
-

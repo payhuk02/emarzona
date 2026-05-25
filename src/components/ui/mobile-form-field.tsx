@@ -8,14 +8,7 @@ import { cn } from '@/lib/utils';
 import { Label } from './label';
 import { Input } from './input';
 import { Textarea } from './textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectField,
-} from './select';
+import { SelectItem, SelectField } from './select';
 
 interface MobileFormFieldProps {
   /**
@@ -67,7 +60,7 @@ interface MobileFormFieldProps {
 /**
  * Composant de champ de formulaire mobile-first
  */
-export const MobileFormField : React.FC<MobileFormFieldProps> = ({
+export const MobileFormField: React.FC<MobileFormFieldProps> = ({
   label,
   name,
   error,
@@ -107,6 +100,7 @@ export const MobileFormField : React.FC<MobileFormFieldProps> = ({
         );
 
       case 'select':
+        // SelectField affiche déjà label + description (évite doublon)
         return (
           <SelectField
             label={label}
@@ -137,6 +131,10 @@ export const MobileFormField : React.FC<MobileFormFieldProps> = ({
         );
     }
   };
+
+  if (type === 'select') {
+    return <div className={cn('w-full', className)}>{renderField()}</div>;
+  }
 
   return (
     <div className={cn('space-y-2 w-full', className)}>
@@ -189,7 +187,7 @@ interface MobileFormSectionProps {
   className?: string;
 }
 
-export const MobileFormSection : React.FC<MobileFormSectionProps> = ({
+export const MobileFormSection: React.FC<MobileFormSectionProps> = ({
   title,
   description,
   children,
@@ -207,10 +205,3 @@ export const MobileFormSection : React.FC<MobileFormSectionProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-
