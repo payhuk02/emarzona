@@ -22,10 +22,12 @@ npx supabase db query --linked -f supabase/scripts/email-smoke-verify.sql -o tab
 ### Windows (PowerShell)
 
 ```powershell
-$env:SUPABASE_ANON_KEY = "<anon JWT depuis Dashboard → API>"
+$env:SUPABASE_ANON_KEY = "sb_publishable_..."  # pas le JWT legacy anon (desactive)
 $env:CRON_SECRET = "<Edge secret CRON_SECRET>"
 .\scripts\email-smoke-test.ps1
 ```
+
+Les tests **curl** des crons peuvent afficher 401 depuis Internet ; les jobs **pg_cron** sont verifies via `net._http_response` (HTTP 200).
 
 ### Linux / macOS
 
