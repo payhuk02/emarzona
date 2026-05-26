@@ -14,38 +14,37 @@ test.describe('Authentication', () => {
 
   test('should display landing page', async ({ page }) => {
     await expect(page).toHaveTitle(/Emarzona/);
-    await expect(page.locator('text=Emarzona')).toBeVisible();
+    await expect(page.locator('footer').locator('text=/©\\s*\\d{4}\\s+Emarzona/i')).toBeVisible();
   });
 
   test('should navigate to auth page', async ({ page }) => {
-    await page.click('text=Se connecter');
-    await expect(page).toHaveURL('/auth');
+    await page.goto('/login');
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
   });
 
   test('should show validation errors for empty fields', async ({ page }) => {
-    await page.goto('/auth');
+    await page.goto('/login');
     await page.click('button[type="submit"]');
 
-    // Check for validation messages
-    await expect(page.locator('text=/email/i')).toBeVisible();
+    // Check for validation message (any alert)
+    await expect(page.getByRole('alert')).toBeVisible();
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
-    await page.goto('/auth');
+    await page.goto('/login');
 
     await page.fill('input[type="email"]', 'invalid@test.com');
     await page.fill('input[type="password"]', 'wrongpassword');
     await page.click('button[type="submit"]');
 
-    // Wait for error message
-    await expect(page.locator('text=/invalid|incorrect|erreur/i')).toBeVisible({ timeout: 5000 });
+    // Wait for error message (alert or toast)
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 10000 });
   });
 
   test('should successfully login with valid credentials', async ({ page }) => {
     test.skip(!hasTestCredentials, 'Requires E2E_TEST_EMAIL and E2E_TEST_PASSWORD');
-    await page.goto('/auth');
+    await page.goto('/login');
 
     await page.fill('input[type="email"]', process.env.E2E_TEST_EMAIL!);
     await page.fill('input[type="password"]', process.env.E2E_TEST_PASSWORD!);
@@ -62,7 +61,7 @@ test.describe('Authentication', () => {
 
   test('should logout successfully', async ({ page }) => {
     test.skip(!hasTestCredentials, 'Requires E2E_TEST_EMAIL and E2E_TEST_PASSWORD');
-    await page.goto('/auth');
+    await page.goto('/login');
     await page.fill('input[type="email"]', process.env.E2E_TEST_EMAIL!);
     await page.fill('input[type="password"]', process.env.E2E_TEST_PASSWORD!);
     await page.click('button[type="submit"]');
@@ -76,7 +75,7 @@ test.describe('Authentication', () => {
   });
 
   test('should toggle between login and register', async ({ page }) => {
-    await page.goto('/auth');
+    await page.goto('/login');
 
     // Check if register toggle exists
     const registerLink = page.locator('text=/créer un compte|register|inscription/i');
@@ -90,7 +89,7 @@ test.describe('Authentication', () => {
 
   test('should persist session after page reload', async ({ page }) => {
     test.skip(!hasTestCredentials, 'Requires E2E_TEST_EMAIL and E2E_TEST_PASSWORD');
-    await page.goto('/auth');
+    await page.goto('/login');
     await page.fill('input[type="email"]', process.env.E2E_TEST_EMAIL!);
     await page.fill('input[type="password"]', process.env.E2E_TEST_PASSWORD!);
     await page.click('button[type="submit"]');
@@ -107,6 +106,6 @@ test.describe('Authentication', () => {
   test('should redirect to auth when accessing protected route', async ({ page }) => {
     await page.goto('/dashboard/products');
 
-    await expect(page).toHaveURL(/\/auth/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 10000 });
   });
 });

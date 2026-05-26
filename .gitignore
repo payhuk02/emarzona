@@ -31,5 +31,10 @@ dist-ssr
 
 .vercel
 
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+
 # Backups
 emarzona-backup*/
