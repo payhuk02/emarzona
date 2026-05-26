@@ -42,6 +42,7 @@ import { isTaxCalculationResult } from '@/pages/checkout/cart/checkout-types';
 import { validateShippingForm } from '@/pages/checkout/cart/checkout-validation';
 import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
+import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
 import { ShoppingBag, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -546,6 +547,10 @@ export default function Checkout() {
       checkoutUrl?: string;
     }> = [];
     const errors: Array<{ storeId: string; error: string }> = [];
+
+    // Éditions limitées : verrou inventaire avant toute création de commande (évite survente panier)
+    const allCartItems = Array.from(storeGroups.values()).flatMap(g => g.items);
+    await reserveArtistLimitedEditionsForCart(allCartItems);
 
     // Récupérer les infos d'affiliation si disponible
     const affiliateInfo = await getAffiliateInfo();
@@ -1081,6 +1086,9 @@ export default function Checkout() {
         logger.warn('Error in customer creation/update:', { error: customerErr });
         // Ne pas bloquer le processus
       }
+
+      // Éditions limitées : verrou inventaire (même logique que useCreateArtistOrder)
+      await reserveArtistLimitedEditionsForCart(items);
 
       // Générer numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');

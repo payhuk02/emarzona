@@ -1,232 +1,259 @@
 /**
- * Détail d'une Collection d'Œuvres
- * Affichage d'une collection avec ses œuvres
- * Date : 4 Février 2025
+ * Détail d'une collection d'œuvres — marketplace (UUID ou slug + ?store=)
  */
 
-import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Package, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Package, ImageIcon, Store } from 'lucide-react';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { ArtistProductCard } from '@/components/products/ArtistProductCard';
+import { ArtistPublicPageShell } from '@/components/artist/ArtistPublicPageShell';
+import { SEOMeta } from '@/components/seo/SEOMeta';
+import { fetchPublicArtistCollection, isArtistCollectionId } from '@/lib/artist-collection-resolve';
+import { transformToUnifiedProduct } from '@/lib/product-transform';
+import type { CollectionItem } from '@/hooks/artist/useCollections';
 
-const ARTIST_COLLECTION_FIELDS = 'id, collection_name, collection_slug, collection_description, collection_type, cover_image_url, cover_image_alt, tags, is_public, is_featured, created_at, updated_at';
-const ARTIST_COLLECTION_ITEM_FIELDS = 'id, collection_id, product_id, display_order, created_at';
-const COLLECTION_PRODUCT_FIELDS = 'id, store_id, category_id, name, description, price, currency, image_url, product_type, status, is_active, created_at, updated_at';
-const ARTIST_PRODUCT_FIELDS = 'id, product_id, artist_name, artist_bio, artist_statement, medium, dimensions, weight, year_created, certificate_of_authenticity, edition_number, total_editions, framing_options, shipping_details, created_at, updated_at';
+const COLLECTION_PRODUCT_FIELDS =
+  'id, store_id, name, slug, description, short_description, price, compare_at_price, currency, image_url, images, product_type, is_active, is_draft, created_at, updated_at';
+const ARTIST_PRODUCT_FIELDS =
+  'id, product_id, store_id, artist_type, artist_name, artist_bio, artwork_title, artwork_year, artwork_medium, artwork_dimensions, artwork_edition_type, edition_number, total_editions, requires_shipping, shipping_fragile, shipping_insurance_required, certificate_of_authenticity, signature_authenticated, created_at, updated_at';
+
+const collectionTypeLabels: Record<string, string> = {
+  thematic: 'Thématique',
+  chronological: 'Chronologique',
+  series: 'Série',
+  exhibition: 'Exposition',
+  custom: 'Personnalisée',
+};
 
 export const CollectionDetail = () => {
   const { collectionSlug } = useParams<{ collectionSlug: string }>();
-  
-  // Note: useCollection nécessite un collectionId, donc on récupère directement par slug
-  // useCollection n'est pas utilisé ici car on cherche par slug, pas par ID
+  const [searchParams] = useSearchParams();
+  const storeSlug = searchParams.get('store');
 
-  // Récupérer la collection par slug
-  const { data: collectionBySlug, isLoading: isLoadingBySlug } = useQuery({
-    queryKey: ['collection-by-slug', collectionSlug],
-    queryFn: async () => {
-      if (!collectionSlug) return null;
-
-      const { data, error } = await supabase
-        .from('artist_collections')
-        .select(ARTIST_COLLECTION_FIELDS)
-        .eq('collection_slug', collectionSlug)
-        .eq('is_public', true)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116' || error.code === '42P01') {
-          return null;
-        }
-        throw error;
-      }
-
-      // Récupérer les items
-      const { data: items } = await supabase
-        .from('artist_collection_items')
-        .select(ARTIST_COLLECTION_ITEM_FIELDS)
-        .eq('collection_id', data.id)
-        .order('display_order', { ascending: true });
-
-      return {
-        ...data,
-        items: items || [],
-        items_count: items?.length || 0,
-      } as CollectionWithItems;
-    },
+  const {
+    data: collection,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['public-artist-collection', collectionSlug, storeSlug],
+    queryFn: () => fetchPublicArtistCollection(collectionSlug ?? '', storeSlug),
     enabled: !!collectionSlug,
   });
 
-  const finalCollection = collectionBySlug;
-  const finalIsLoading = isLoadingBySlug;
-
-  // Récupérer les produits pour les items
-  const { data: products } = useQuery({
-    queryKey: ['collection-products', finalCollection?.items?.map((i) => i.product_id)],
+  const { data: store } = useQuery({
+    queryKey: ['collection-store', collection?.store_id],
     queryFn: async () => {
-      if (!finalCollection?.items || finalCollection.items.length === 0) return [];
+      if (!collection?.store_id) return null;
+      const { data, error: storeError } = await supabase
+        .from('stores_public')
+        .select('id, name, slug, logo_url')
+        .eq('id', collection.store_id)
+        .maybeSingle();
+      if (storeError) throw storeError;
+      return data;
+    },
+    enabled: !!collection?.store_id,
+  });
 
-      const productIds = finalCollection.items.map((item) => item.product_id);
+  const { data: products, isLoading: productsLoading } = useQuery({
+    queryKey: ['collection-products', collection?.id, collection?.items?.map(i => i.product_id)],
+    queryFn: async () => {
+      if (!collection?.items?.length) return [];
 
-      const { data, error } = await supabase
+      const productIds = collection.items.map((item: CollectionItem) => item.product_id);
+
+      const { data, error: productsError } = await supabase
         .from('products')
         .select(
           `
           ${COLLECTION_PRODUCT_FIELDS},
           artist_products(${ARTIST_PRODUCT_FIELDS}),
-          stores(id, name, slug, logo_url)
+          stores:stores_public(id, name, slug, logo_url)
         `
         )
         .in('id', productIds)
         .eq('is_active', true);
 
-      if (error) throw error;
+      if (productsError) throw productsError;
 
-      // Mapper avec les items pour préserver l'ordre
-      return finalCollection.items
-        .map((item) => {
-          const product = data?.find((p) => p.id === item.product_id);
-          return product ? { ...product, collection_item: item } : null;
+      return collection.items
+        .map(item => {
+          const row = data?.find(p => p.id === item.product_id);
+          if (!row) return null;
+          return transformToUnifiedProduct({
+            ...row,
+            product_type: 'artist',
+            stores: row.stores ?? store ?? undefined,
+          });
         })
-        .filter((p): p is NonNullable<typeof p> => p !== null);
+        .filter((p): p is NonNullable<typeof p> => p !== null && p.type === 'artist');
     },
-    enabled: !!finalCollection && (finalCollection.items?.length || 0) > 0,
+    enabled: !!collection && (collection.items?.length ?? 0) > 0,
   });
 
-  if (finalIsLoading) {
+  const canonicalPath = collection
+    ? isArtistCollectionId(collectionSlug ?? '')
+      ? `/collections/${collection.id}`
+      : store?.slug
+        ? `/collections/${collection.collection_slug}?store=${encodeURIComponent(store.slug)}`
+        : `/collections/${collection.id}`
+    : undefined;
+
+  if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-64 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-96" />
-          ))}
+      <ArtistPublicPageShell>
+        <div className="space-y-6">
+          <Skeleton className="h-64 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-96" />
+            ))}
+          </div>
         </div>
-      </div>
+      </ArtistPublicPageShell>
     );
   }
 
-  if (!finalCollection) {
+  if (error instanceof Error && error.message.includes('Plusieurs collections')) {
     return (
-      <div className="text-center py-12">
-        <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-        <p className="text-muted-foreground">Collection non trouvée</p>
-        <Button asChild className="mt-4">
-          <Link to="/collections">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux collections
-          </Link>
-        </Button>
-      </div>
+      <ArtistPublicPageShell>
+        <div className="text-center py-12 max-w-lg mx-auto">
+          <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+          <p className="text-muted-foreground">{error.message}</p>
+          <Button asChild className="mt-4">
+            <Link to="/collections">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voir toutes les collections
+            </Link>
+          </Button>
+        </div>
+      </ArtistPublicPageShell>
     );
   }
 
-  const  collectionTypeLabels: Record<string, string> = {
-    thematic: 'Thématique',
-    chronological: 'Chronologique',
-    series: 'Série',
-    exhibition: 'Exposition',
-    custom: 'Personnalisée',
-  };
+  if (!collection) {
+    return (
+      <ArtistPublicPageShell>
+        <div className="text-center py-12">
+          <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+          <p className="text-muted-foreground">Collection non trouvée</p>
+          <Button asChild className="mt-4">
+            <Link to="/collections">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour aux collections
+            </Link>
+          </Button>
+        </div>
+      </ArtistPublicPageShell>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/collections">
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline">
-              {collectionTypeLabels[finalCollection.collection_type] ||
-                finalCollection.collection_type}
-            </Badge>
-            {finalCollection.is_featured && (
-              <Badge variant="default">À la une</Badge>
+    <ArtistPublicPageShell>
+      <SEOMeta
+        title={collection.collection_name}
+        description={
+          collection.collection_description ||
+          `Collection d'œuvres d'artiste — ${collection.collection_name}`
+        }
+        url={
+          canonicalPath
+            ? `https://www.emarzona.com${canonicalPath}`
+            : `https://www.emarzona.com/collections/${collection.id}`
+        }
+        canonical={canonicalPath ? `https://www.emarzona.com${canonicalPath}` : undefined}
+      />
+      <div className="space-y-6">
+        <div className="flex items-start gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/collections" aria-label="Retour aux collections">
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+          </Button>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <Badge variant="outline">
+                {collectionTypeLabels[collection.collection_type] || collection.collection_type}
+              </Badge>
+              {collection.is_featured && <Badge variant="default">À la une</Badge>}
+              {store?.name && store.slug && (
+                <Link
+                  to={`/store/${store.slug}`}
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Store className="w-3.5 h-3.5" />
+                  {store.name}
+                </Link>
+              )}
+            </div>
+            <h1 className="text-3xl font-bold">{collection.collection_name}</h1>
+            {collection.collection_description && (
+              <p className="text-muted-foreground mt-2">{collection.collection_description}</p>
             )}
           </div>
-          <h1 className="text-3xl font-bold">{finalCollection.collection_name}</h1>
-          {finalCollection.collection_description && (
-            <p className="text-muted-foreground mt-2">{finalCollection.collection_description}</p>
-          )}
         </div>
-      </div>
 
-      {/* Cover Image */}
-      {finalCollection.cover_image_url && (
-        <Card className="overflow-hidden">
-          <div className="relative aspect-video overflow-hidden">
-            <OptimizedImage
-              src={finalCollection.cover_image_url}
-              alt={finalCollection.cover_image_alt || finalCollection.collection_name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </Card>
-      )}
+        {collection.cover_image_url && (
+          <Card className="overflow-hidden">
+            <div className="relative aspect-video overflow-hidden">
+              <OptimizedImage
+                src={collection.cover_image_url}
+                alt={collection.cover_image_alt || collection.collection_name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </Card>
+        )}
 
-      <Separator />
+        <Separator />
 
-      {/* Collection Info */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <Package className="w-4 h-4" />
-          <span>{finalCollection.items_count || 0} œuvres</span>
-        </div>
-        {finalCollection.tags && finalCollection.tags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span>Tags :</span>
-            <div className="flex gap-1">
-              {finalCollection.tags.map((tag) => (
+            <Package className="w-4 h-4" />
+            <span>{collection.items_count ?? 0} œuvres</span>
+          </div>
+          {collection.tags && collection.tags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span>Tags :</span>
+              {collection.tags.map(tag => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   {tag}
                 </Badge>
               ))}
             </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {productsLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-96" />
+            ))}
           </div>
+        ) : products && products.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map(product => (
+              <ArtistProductCard key={product.id} product={product} variant="marketplace" />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+              <p className="text-muted-foreground">Aucune œuvre dans cette collection</p>
+            </CardContent>
+          </Card>
         )}
       </div>
-
-      <Separator />
-
-      {/* Products Grid */}
-      {products && products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <ArtistProductCard
-              key={product.id}
-              product={{
-                ...product,
-                artist: product.artist_products?.[0],
-              }}
-              variant="marketplace"
-            />
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <ImageIcon className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-            <p className="text-muted-foreground">Aucune œuvre dans cette collection</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    </ArtistPublicPageShell>
   );
 };
-
-
-
-
-
-
-

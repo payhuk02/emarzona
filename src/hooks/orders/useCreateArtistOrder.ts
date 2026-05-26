@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { retryWithExponentialBackoff } from '@/lib/retry-utils';
+import { reserveArtistLimitedEdition } from '@/lib/artist-edition-reservation';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const ARTIST_PRODUCT_FIELDS =
@@ -170,44 +171,8 @@ export const useCreateArtistOrder = () => {
         throw new Error("Œuvre d'artiste non trouvée");
       }
 
-      // 3. Vérifier les éditions limitées avec optimistic locking
-      if (
-        artistProduct.artwork_edition_type === 'limited_edition' &&
-        artistProduct.total_editions
-      ) {
-        // Utiliser la fonction optimisée avec optimistic locking
-        const currentVersion = artistProduct.version || 1;
-
-        const { data: lockResult, error: lockError } = await supabase.rpc(
-          'check_and_increment_artist_product_version',
-          {
-            p_product_id: productId,
-            p_expected_version: currentVersion,
-            p_quantity: quantity,
-          }
-        );
-
-        if (lockError) {
-          logger.error('Erreur optimistic locking', { error: lockError });
-          throw new Error('Erreur lors de la vérification de disponibilité');
-        }
-
-        const result = Array.isArray(lockResult) ? lockResult[0] : lockResult;
-
-        if (!result?.success) {
-          throw new Error(
-            result?.message ||
-              `Seulement ${result?.available_editions || 0} exemplaire(s) disponible(s)`
-          );
-        }
-
-        // Version mise à jour, continuer avec la nouvelle version
-        logger.info('Optimistic locking réussi', {
-          oldVersion: currentVersion,
-          newVersion: result.current_version,
-          available: result.available_editions,
-        });
-      }
+      // 3. Vérifier les éditions limitées avec optimistic locking (panier + achat direct)
+      await reserveArtistLimitedEdition(productId, quantity);
 
       // 4. Vérifier l'adresse de livraison si nécessaire
       if (artistProduct.requires_shipping && !shippingAddress) {

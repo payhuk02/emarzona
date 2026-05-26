@@ -8,8 +8,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const ARTIST_COLLECTION_FIELDS = 'id, store_id, artist_product_id, collection_name, collection_slug, collection_description, collection_short_description, collection_type, cover_image_url, cover_image_alt, display_order, is_featured, is_public, tags, metadata, created_at, updated_at';
-const ARTIST_COLLECTION_ITEM_FIELDS = 'id, collection_id, product_id, artist_product_id, display_order, is_featured_in_collection, collection_notes, added_at';
+const ARTIST_COLLECTION_FIELDS =
+  'id, store_id, artist_product_id, collection_name, collection_slug, collection_description, collection_short_description, collection_type, cover_image_url, cover_image_alt, display_order, is_featured, is_public, tags, metadata, created_at, updated_at';
+const ARTIST_COLLECTION_ITEM_FIELDS =
+  'id, collection_id, product_id, artist_product_id, display_order, is_featured_in_collection, collection_notes, added_at';
 
 // Types
 export interface ArtistCollection {
@@ -48,6 +50,17 @@ export interface CollectionWithItems extends ArtistCollection {
   items?: CollectionItem[];
 }
 
+export interface PublicArtistCollectionStore {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url?: string | null;
+}
+
+export interface PublicArtistCollection extends CollectionWithItems {
+  store?: PublicArtistCollectionStore | null;
+}
+
 export interface CreateCollectionData {
   store_id: string;
   artist_product_id?: string;
@@ -77,6 +90,67 @@ export interface AddItemToCollectionData {
   is_featured_in_collection?: boolean;
   collection_notes?: string;
 }
+
+/**
+ * Collections publiques marketplace (toutes boutiques).
+ */
+export const usePublicArtistCollections = (options?: { limit?: number; enabled?: boolean }) => {
+  return useQuery({
+    queryKey: ['public-artist-collections', options?.limit],
+    enabled: options?.enabled !== false,
+    queryFn: async (): Promise<PublicArtistCollection[]> => {
+      let query = supabase
+        .from('artist_collections')
+        .select(ARTIST_COLLECTION_FIELDS)
+        .eq('is_public', true)
+        .order('is_featured', { ascending: false })
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: false });
+
+      if (options?.limit) {
+        query = query.limit(options.limit);
+      }
+
+      const { data: collections, error } = await query;
+
+      if (error) {
+        if (error.code === '42P01') return [];
+        throw error;
+      }
+
+      const rows = (collections || []) as ArtistCollection[];
+      if (rows.length === 0) return [];
+
+      const collectionIds = rows.map(c => c.id);
+      const storeIds = [...new Set(rows.map(c => c.store_id))];
+
+      const [{ data: itemRows, error: itemsError }, { data: stores, error: storesError }] =
+        await Promise.all([
+          supabase
+            .from('artist_collection_items')
+            .select('collection_id')
+            .in('collection_id', collectionIds),
+          supabase.from('stores_public').select('id, name, slug, logo_url').in('id', storeIds),
+        ]);
+
+      if (itemsError && itemsError.code !== '42P01') throw itemsError;
+      if (storesError) throw storesError;
+
+      const countMap = new Map<string, number>();
+      (itemRows || []).forEach(row => {
+        countMap.set(row.collection_id, (countMap.get(row.collection_id) ?? 0) + 1);
+      });
+
+      const storeMap = new Map((stores || []).map(s => [s.id, s]));
+
+      return rows.map(collection => ({
+        ...collection,
+        items_count: countMap.get(collection.id) ?? 0,
+        store: storeMap.get(collection.store_id) ?? null,
+      }));
+    },
+  });
+};
 
 /**
  * Hook pour récupérer toutes les collections d'un store
@@ -410,9 +484,3 @@ export const useReorderCollectionItems = () => {
     },
   });
 };
-
-
-
-
-
-

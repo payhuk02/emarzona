@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CountdownTimer } from '@/components/artist/AuctionCountdownTimer';
-import { MainLayout } from '@/components/layout';
+import { MarketplaceHeader } from '@/components/marketplace/MarketplaceHeader';
 
 export default function AuctionsListPage() {
   const navigate = useNavigate();
@@ -75,8 +75,9 @@ export default function AuctionsListPage() {
 
   if (isLoading) {
     return (
-      <MainLayout>
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <div className="min-h-screen bg-background">
+        <MarketplaceHeader />
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
           <Skeleton className="h-8 w-64 mb-4" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
@@ -84,7 +85,7 @@ export default function AuctionsListPage() {
             ))}
           </div>
         </div>
-      </MainLayout>
+      </div>
     );
   }
 
@@ -96,8 +97,9 @@ export default function AuctionsListPage() {
         url="https://www.emarzona.com/auctions"
         canonical="https://www.emarzona.com/auctions"
       />
-      <MainLayout>
-        <div className="bg-background">
+      <div className="min-h-screen bg-background">
+        <MarketplaceHeader />
+        <div>
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -267,7 +269,7 @@ export default function AuctionsListPage() {
             )}
           </div>
         </div>
-      </MainLayout>
+      </div>
     </>
   );
 }

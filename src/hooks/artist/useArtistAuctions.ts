@@ -30,6 +30,9 @@ export interface ArtistProductAuction {
   allow_automatic_extension: boolean;
   extension_minutes: number;
   require_verification: boolean;
+  winning_bid_id?: string | null;
+  winner_checkout_order_id?: string | null;
+  winner_payment_deadline?: string | null;
   created_at: string;
   updated_at: string;
   artist_products?: {
@@ -85,9 +88,10 @@ export function useActiveAuctions(storeId?: string) {
   return useQuery({
     queryKey: ['auctions', 'active', storeId],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('artist_product_auctions')
-        .select(`
+        .select(
+          `
           *,
           artist_products (
             id,
@@ -101,7 +105,8 @@ export function useActiveAuctions(storeId?: string) {
               price
             )
           )
-        `)
+        `
+        )
         .eq('status', 'active')
         .order('end_date', { ascending: true });
 
@@ -130,7 +135,8 @@ export function useAuction(auctionId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('artist_product_auctions')
-        .select(`
+        .select(
+          `
           *,
           artist_products (
             id,
@@ -144,7 +150,8 @@ export function useAuction(auctionId: string) {
               price
             )
           )
-        `)
+        `
+        )
         .eq('id', auctionId)
         .single();
 
@@ -168,7 +175,8 @@ export function useAuctionBySlug(slug: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('artist_product_auctions')
-        .select(`
+        .select(
+          `
           *,
           artist_products (
             id,
@@ -182,7 +190,8 @@ export function useAuctionBySlug(slug: string) {
               price
             )
           )
-        `)
+        `
+        )
         .eq('auction_slug', slug)
         .single();
 
@@ -206,14 +215,16 @@ export function useAuctionBids(auctionId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('auction_bids')
-        .select(`
+        .select(
+          `
           *,
           bidder:bidder_id (
             id,
             email,
             user_metadata
           )
-        `)
+        `
+        )
         .eq('auction_id', auctionId)
         .order('bid_amount', { ascending: false })
         .order('created_at', { ascending: false });
@@ -238,7 +249,8 @@ export function useStoreAuctions(storeId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('artist_product_auctions')
-        .select(`
+        .select(
+          `
           *,
           artist_products (
             id,
@@ -252,7 +264,8 @@ export function useStoreAuctions(storeId: string) {
               price
             )
           )
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -317,11 +330,11 @@ export function useCreateAuction() {
       queryClient.invalidateQueries({ queryKey: ['store-auctions'] });
       toast({
         title: '✅ Enchère créée',
-        description: 'L\'enchère a été créée avec succès',
+        description: "L'enchère a été créée avec succès",
       });
     },
     onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer l\'enchère';
+      const errorMessage = error instanceof Error ? error.message : "Impossible de créer l'enchère";
       toast({
         title: '❌ Erreur',
         description: errorMessage,
@@ -340,15 +353,32 @@ export function usePlaceBid() {
 
   return useMutation({
     mutationFn: async (bidData: {
-      auction_id: string;
-      bid_amount: number;
+      auction_id?: string;
+      auctionId?: string;
+      bid_amount?: number;
+      bidAmount?: number;
       bid_type?: 'manual' | 'auto' | 'buy_now';
       max_bid_amount?: number;
     }) => {
+      const auctionId = bidData.auction_id ?? bidData.auctionId;
+      const bidAmount = bidData.bid_amount ?? bidData.bidAmount;
+
+      if (!auctionId) {
+        throw new Error("Identifiant d'enchère manquant");
+      }
+      if (bidAmount == null || Number.isNaN(bidAmount) || bidAmount <= 0) {
+        throw new Error("Montant d'offre invalide");
+      }
+
+      const bidderId = (await supabase.auth.getUser()).data.user?.id;
+      if (!bidderId) {
+        throw new Error('Vous devez être connecté pour enchérir');
+      }
+
       const { data, error } = await supabase.rpc('place_auction_bid', {
-        p_auction_id: bidData.auction_id,
-        p_bidder_id: (await supabase.auth.getUser()).data.user?.id,
-        p_bid_amount: bidData.bid_amount,
+        p_auction_id: auctionId,
+        p_bidder_id: bidderId,
+        p_bid_amount: bidAmount,
         p_bid_type: bidData.bid_type || 'manual',
         p_max_bid_amount: bidData.max_bid_amount || null,
       });
@@ -361,8 +391,10 @@ export function usePlaceBid() {
       return data;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['auction', variables.auction_id] });
-      queryClient.invalidateQueries({ queryKey: ['auction-bids', variables.auction_id] });
+      const auctionId = variables.auction_id ?? variables.auctionId;
+      if (!auctionId) return;
+      queryClient.invalidateQueries({ queryKey: ['auction', auctionId] });
+      queryClient.invalidateQueries({ queryKey: ['auction-bids', auctionId] });
       queryClient.invalidateQueries({ queryKey: ['auctions'] });
       toast({
         title: '✅ Offre placée',
@@ -372,7 +404,7 @@ export function usePlaceBid() {
     onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de placer l\'offre',
+        description: error.message || "Impossible de placer l'offre",
         variant: 'destructive',
       });
     },
@@ -417,7 +449,7 @@ export function useProxyBid() {
     onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de placer l\'enchère proxy',
+        description: error.message || "Impossible de placer l'enchère proxy",
         variant: 'destructive',
       });
     },
@@ -433,7 +465,9 @@ export function useToggleWatchlist() {
 
   return useMutation({
     mutationFn: async ({ auction_id, add }: { auction_id: string; add: boolean }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non connecté');
 
       if (add) {
@@ -473,8 +507,8 @@ export function useToggleWatchlist() {
       toast({
         title: variables.add ? '✅ Ajouté à la liste' : '✅ Retiré de la liste',
         description: variables.add
-          ? 'L\'enchère a été ajoutée à votre liste de surveillance'
-          : 'L\'enchère a été retirée de votre liste de surveillance',
+          ? "L'enchère a été ajoutée à votre liste de surveillance"
+          : "L'enchère a été retirée de votre liste de surveillance",
       });
     },
     onError: (error: Error) => {
@@ -523,7 +557,8 @@ export function useUserWatchlist(userId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('auction_watchlist')
-        .select(`
+        .select(
+          `
           *,
           auctions:auction_id (
             *,
@@ -540,7 +575,8 @@ export function useUserWatchlist(userId: string) {
               )
             )
           )
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -572,7 +608,9 @@ export function useUpdateWatchlistPreferences() {
       notify_on_ending_soon?: boolean;
       notify_on_ending?: boolean;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
@@ -617,7 +655,9 @@ export function useRemoveFromWatchlist() {
 
   return useMutation({
     mutationFn: async (auctionId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       const { error } = await supabase
@@ -636,7 +676,7 @@ export function useRemoveFromWatchlist() {
       queryClient.invalidateQueries({ queryKey: ['auction-watchlist'] });
       toast({
         title: 'Retiré de la watchlist',
-        description: 'L\'enchère a été retirée de votre watchlist.',
+        description: "L'enchère a été retirée de votre watchlist.",
       });
     },
     onError: (error: Error) => {
@@ -661,10 +701,7 @@ export function useDeleteAuction() {
 
   return useMutation({
     mutationFn: async (auctionId: string) => {
-      const { error } = await supabase
-        .from('artist_product_auctions')
-        .delete()
-        .eq('id', auctionId);
+      const { error } = await supabase.from('artist_product_auctions').delete().eq('id', auctionId);
 
       if (error) {
         logger.error('Error deleting auction', { error });
@@ -676,14 +713,14 @@ export function useDeleteAuction() {
       queryClient.invalidateQueries({ queryKey: ['auction', auctionId] });
       toast({
         title: 'Enchère supprimée',
-        description: 'L\'enchère a été supprimée avec succès.',
+        description: "L'enchère a été supprimée avec succès.",
       });
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('Error deleting auction', { error });
       toast({
         title: 'Erreur',
-        description: 'Impossible de supprimer l\'enchère.',
+        description: "Impossible de supprimer l'enchère.",
         variant: 'destructive',
       });
     },
@@ -695,10 +732,7 @@ export function useUpdateAuction() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...updates
-    }: Partial<ArtistProductAuction> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: Partial<ArtistProductAuction> & { id: string }) => {
       const { data, error } = await supabase
         .from('artist_product_auctions')
         .update(updates)
@@ -719,13 +753,13 @@ export function useUpdateAuction() {
       queryClient.invalidateQueries({ queryKey: ['store-auctions'] });
       toast({
         title: '✅ Enchère mise à jour',
-        description: 'L\'enchère a été mise à jour avec succès',
+        description: "L'enchère a été mise à jour avec succès",
       });
     },
     onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de mettre à jour l\'enchère',
+        description: error.message || "Impossible de mettre à jour l'enchère",
         variant: 'destructive',
       });
     },
@@ -735,6 +769,41 @@ export function useUpdateAuction() {
 /**
  * Terminer une enchère
  */
+/**
+ * Paiement Moneroo pour l'enchérisseur gagnant (H-03).
+ */
+export function usePayAuctionWin() {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (params: {
+      auctionId: string;
+      customerEmail: string;
+      customerName?: string;
+      customerPhone?: string;
+    }) => {
+      const { startAuctionWinnerPayment } = await import('@/lib/auction-winner-checkout');
+      return startAuctionWinnerPayment(params.auctionId, {
+        customerEmail: params.customerEmail,
+        customerName: params.customerName,
+        customerPhone: params.customerPhone,
+      });
+    },
+    onSuccess: result => {
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Paiement impossible',
+        description: error.message || "Impossible de lancer le paiement de l'enchère",
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 export function useEndAuction() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -758,22 +827,15 @@ export function useEndAuction() {
       queryClient.invalidateQueries({ queryKey: ['store-auctions'] });
       toast({
         title: '✅ Enchère terminée',
-        description: 'L\'enchère a été terminée avec succès',
+        description: "L'enchère a été terminée avec succès",
       });
     },
     onError: (error: Error) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Impossible de terminer l\'enchère',
+        description: error.message || "Impossible de terminer l'enchère",
         variant: 'destructive',
       });
     },
   });
 }
-
-
-
-
-
-
-

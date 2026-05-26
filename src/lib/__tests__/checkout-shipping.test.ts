@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { resolveCheckoutShippingAmount } from '../checkout-shipping';
+import { calculateArtistShipping } from '@/lib/shipping/artist-shipping';
 import type { CartItem } from '@/types/cart';
 
 vi.mock('@/lib/shipping/artist-shipping', () => ({
@@ -13,6 +14,7 @@ vi.mock('@/lib/shipping/artist-shipping', () => ({
       currency: 'XOF',
       estimated_delivery_days: 7,
       carrier_recommendations: [],
+      quote_source: 'fedex',
     })
   ),
 }));
@@ -20,6 +22,15 @@ vi.mock('@/lib/shipping/artist-shipping', () => ({
 vi.mock('@/lib/shipping/fedex-rates-client', () => ({
   fetchCheapestFedexShippingCost: vi.fn(() => Promise.resolve(7500)),
 }));
+
+const artistItem = (): CartItem => ({
+  product_id: 'art-1',
+  product_type: 'artist',
+  product_name: 'Oeuvre',
+  quantity: 1,
+  unit_price: 200000,
+  currency: 'XOF',
+});
 
 const physicalItem = (): CartItem => ({
   product_id: 'p1',
@@ -49,5 +60,14 @@ describe('resolveCheckoutShippingAmount', () => {
       postal_code: '01',
     });
     expect(amount).toBe(7500);
+  });
+
+  it('agrège le shipping artiste via calculateArtistShipping', async () => {
+    const amount = await resolveCheckoutShippingAmount([artistItem()], {
+      country: 'FR',
+      postal_code: '75001',
+    });
+    expect(calculateArtistShipping).toHaveBeenCalled();
+    expect(amount).toBe(12000);
   });
 });

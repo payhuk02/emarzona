@@ -9,7 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,7 +28,10 @@ interface ArtistShippingCalculatorProps {
   artworkValue: number;
 }
 
-export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShippingCalculatorProps) {
+export function ArtistShippingCalculator({
+  productId,
+  artworkValue,
+}: ArtistShippingCalculatorProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [destination, setDestination] = useState<{
@@ -31,11 +40,11 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
     postal_code?: string;
   } | null>(null);
 
-  const { data: quote, isLoading, error } = useCalculateArtistShipping(
-    productId,
-    destination,
-    artworkValue
-  );
+  const {
+    data: quote,
+    isLoading,
+    error,
+  } = useCalculateArtistShipping(productId, destination, artworkValue);
 
   const handleCalculate = () => {
     const country = (document.getElementById('shipping-country') as HTMLSelectElement)?.value;
@@ -66,7 +75,10 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
           {t('shipping.artistCalculator.title', 'Calcul du Shipping Spécialisé')}
         </CardTitle>
         <CardDescription>
-          {t('shipping.artistCalculator.description', 'Calculez les frais de livraison spécialisés pour cette œuvre d\'artiste')}
+          {t(
+            'shipping.artistCalculator.description',
+            "Calculez les frais de livraison spécialisés pour cette œuvre d'artiste"
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -79,7 +91,7 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="SN">{t('countries.SN', 'Sénégal')}</SelectItem>
-                <SelectItem value="CI">{t('countries.CI', 'Côte d\'Ivoire')}</SelectItem>
+                <SelectItem value="CI">{t('countries.CI', "Côte d'Ivoire")}</SelectItem>
                 <SelectItem value="ML">{t('countries.ML', 'Mali')}</SelectItem>
                 <SelectItem value="BF">{t('countries.BF', 'Burkina Faso')}</SelectItem>
                 <SelectItem value="FR">{t('countries.FR', 'France')}</SelectItem>
@@ -90,13 +102,20 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="shipping-city">{t('shipping.city', 'Ville')} ({t('common.optional', 'optionnel')})</Label>
+            <Label htmlFor="shipping-city">
+              {t('shipping.city', 'Ville')} ({t('common.optional', 'optionnel')})
+            </Label>
             <Input id="shipping-city" placeholder={t('shipping.cityPlaceholder', 'Ex: Dakar')} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="shipping-postal-code">{t('shipping.postalCode', 'Code postal')} ({t('common.optional', 'optionnel')})</Label>
-            <Input id="shipping-postal-code" placeholder={t('shipping.postalCodePlaceholder', 'Ex: 75001')} />
+            <Label htmlFor="shipping-postal-code">
+              {t('shipping.postalCode', 'Code postal')} ({t('common.optional', 'optionnel')})
+            </Label>
+            <Input
+              id="shipping-postal-code"
+              placeholder={t('shipping.postalCodePlaceholder', 'Ex: 75001')}
+            />
           </div>
         </div>
 
@@ -114,24 +133,48 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
         {error && (
           <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
             <AlertCircle className="h-4 w-4" />
-            <span className="text-sm">{t('shipping.calculationError', 'Erreur lors du calcul du shipping')}</span>
+            <span className="text-sm">
+              {t('shipping.calculationError', 'Erreur lors du calcul du shipping')}
+            </span>
           </div>
         )}
 
         {quote && (
           <div className="space-y-4 pt-4 border-t">
+            <div className="flex items-center justify-between gap-2">
+              <Badge variant={quote.quote_source === 'fedex' ? 'default' : 'secondary'}>
+                {quote.quote_source === 'fedex'
+                  ? t('shipping.carrierRate', 'Tarif transporteur')
+                  : quote.quote_source === 'heuristic'
+                    ? t('shipping.estimate', 'Estimation')
+                    : t('shipping.noShipping', 'Sans livraison')}
+              </Badge>
+              {quote.fedex_service_name && (
+                <span className="text-xs text-muted-foreground truncate">
+                  {quote.fedex_service_name}
+                </span>
+              )}
+            </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{t('shipping.baseShipping', 'Shipping de base')}</span>
-              <span className="font-medium">{quote.base_shipping.toLocaleString()} {quote.currency}</span>
+              <span className="text-sm text-muted-foreground">
+                {t('shipping.baseShipping', 'Shipping de base')}
+              </span>
+              <span className="font-medium">
+                {quote.base_shipping.toLocaleString()} {quote.currency}
+              </span>
             </div>
 
             {quote.insurance_cost > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-primary" />
-                  <span className="text-sm text-muted-foreground">{t('shipping.insurance', 'Assurance')}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {t('shipping.insurance', 'Assurance')}
+                  </span>
                 </div>
-                <span className="font-medium">{quote.insurance_cost.toLocaleString()} {quote.currency}</span>
+                <span className="font-medium">
+                  {quote.insurance_cost.toLocaleString()} {quote.currency}
+                </span>
               </div>
             )}
 
@@ -139,16 +182,24 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-primary" />
-                  <span className="text-sm text-muted-foreground">{t('shipping.specializedPackaging', 'Emballage spécialisé')}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {t('shipping.specializedPackaging', 'Emballage spécialisé')}
+                  </span>
                 </div>
-                <span className="font-medium">{quote.packaging_cost.toLocaleString()} {quote.currency}</span>
+                <span className="font-medium">
+                  {quote.packaging_cost.toLocaleString()} {quote.currency}
+                </span>
               </div>
             )}
 
             {quote.special_handling_cost > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{t('shipping.specialHandling', 'Manutention spéciale')}</span>
-                <span className="font-medium">{quote.special_handling_cost.toLocaleString()} {quote.currency}</span>
+                <span className="text-sm text-muted-foreground">
+                  {t('shipping.specialHandling', 'Manutention spéciale')}
+                </span>
+                <span className="font-medium">
+                  {quote.special_handling_cost.toLocaleString()} {quote.currency}
+                </span>
               </div>
             )}
 
@@ -163,12 +214,19 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
 
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Truck className="h-4 w-4" />
-              <span>{t('shipping.estimatedDelivery', { days: quote.estimated_delivery_days, defaultValue: `Livraison estimée : ${quote.estimated_delivery_days} jours` })}</span>
+              <span>
+                {t('shipping.estimatedDelivery', {
+                  days: quote.estimated_delivery_days,
+                  defaultValue: `Livraison estimée : ${quote.estimated_delivery_days} jours`,
+                })}
+              </span>
             </div>
 
             {quote.carrier_recommendations.length > 0 && (
               <div className="space-y-2">
-                <span className="text-sm font-medium">{t('shipping.recommendedCarriers', 'Transporteurs recommandés :')}</span>
+                <span className="text-sm font-medium">
+                  {t('shipping.recommendedCarriers', 'Transporteurs recommandés :')}
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {quote.carrier_recommendations.map((carrier, index) => (
                     <Badge key={index} variant="outline">
@@ -184,10 +242,3 @@ export function ArtistShippingCalculator({ productId, artworkValue }: ArtistShip
     </Card>
   );
 }
-
-
-
-
-
-
-

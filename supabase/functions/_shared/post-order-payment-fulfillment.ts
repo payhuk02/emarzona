@@ -185,26 +185,34 @@ async function processArtistOrderItems(
           artistProduct.artwork_edition_type === 'limited_edition');
 
       if (shouldGenerate) {
-        const certResponse = await fetch(
-          `${supabaseUrl}/functions/v1/generate-artist-certificate`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${supabaseServiceKey}`,
-            },
-            body: JSON.stringify({
-              order_id: orderId,
-              order_item_id: item.id,
-              product_id: item.product_id,
-              artist_product_id: artistProductId,
-              user_id: userId,
-            }),
-          }
-        );
+        const edgeInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
+        if (!edgeInternalSecret) {
+          console.error('generate-artist-certificate: EDGE_INTERNAL_SECRET is not configured');
+        } else {
+          const certHeaders: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${supabaseServiceKey}`,
+            'x-internal-secret': edgeInternalSecret,
+          };
 
-        if (!certResponse.ok) {
-          console.error('generate-artist-certificate:', await certResponse.text());
+          const certResponse = await fetch(
+            `${supabaseUrl}/functions/v1/generate-artist-certificate`,
+            {
+              method: 'POST',
+              headers: certHeaders,
+              body: JSON.stringify({
+                order_id: orderId,
+                order_item_id: item.id,
+                product_id: item.product_id,
+                artist_product_id: artistProductId,
+                user_id: userId,
+              }),
+            }
+          );
+
+          if (!certResponse.ok) {
+            console.error('generate-artist-certificate:', await certResponse.text());
+          }
         }
       }
 
