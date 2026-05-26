@@ -9,6 +9,7 @@ import {
   uploadArtistCertificatePdf,
   type ArtistCertificatePdfInput,
 } from '../_shared/artist-certificate-pdf.ts';
+import { logArtistFulfillmentEvent } from '../_shared/artist-fulfillment-observability.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -123,6 +124,14 @@ serve(async req => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  let fulfillmentCtx: {
+    order_id?: string;
+    product_id?: string;
+    artist_product_id?: string;
+  } = {};
+
   try {
     const internalSecret = req.headers.get('x-internal-secret');
     const expectedInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
@@ -140,12 +149,11 @@ serve(async req => {
       });
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body: CertificateGenerationRequest = await req.json();
     const { order_id, order_item_id, product_id, artist_product_id, user_id } = body;
+    fulfillmentCtx = { order_id, product_id, artist_product_id };
 
     if (!order_id || !product_id || !artist_product_id || !user_id) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -284,6 +292,15 @@ serve(async req => {
 
     const pdfUrl = await generatePdfAndUpload(supabase, certificate);
 
+    await logArtistFulfillmentEvent(supabase, {
+      event_type: 'certificate.pdf_ready',
+      severity: 'info',
+      order_id,
+      product_id,
+      artist_product_id,
+      metadata: { certificate_id: certificate.id, certificate_number: certificateNumber },
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -297,6 +314,17 @@ serve(async req => {
     );
   } catch (error) {
     console.error('Error in generate-artist-certificate:', error);
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      await logArtistFulfillmentEvent(supabase, {
+        event_type: 'certificate.edge_error',
+        severity: 'error',
+        order_id: fulfillmentCtx.order_id,
+        product_id: fulfillmentCtx.product_id,
+        artist_product_id: fulfillmentCtx.artist_product_id,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Unknown error',

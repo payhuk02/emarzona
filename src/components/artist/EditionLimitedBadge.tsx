@@ -46,6 +46,7 @@ export const EditionLimitedBadge = ({
 
   return (
     <div
+      data-testid="edition-limited-badge"
       className={cn(
         'space-y-2 mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800',
         className
@@ -82,10 +83,3 @@ export const EditionLimitedBadge = ({
     </div>
   );
 };
-
-
-
-
-
-
-

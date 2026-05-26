@@ -4,6 +4,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { logArtistFulfillmentEvent } from '../_shared/artist-fulfillment-observability.ts';
 
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const defaultAllowedOrigin = SITE_URL;
@@ -151,6 +152,11 @@ serve(async req => {
     const { error: statusError } = await supabase.rpc('update_auction_statuses');
     if (statusError) {
       console.error('update_auction_statuses:', statusError);
+      await logArtistFulfillmentEvent(supabase, {
+        event_type: 'auction.status_update_failed',
+        severity: 'error',
+        message: statusError.message,
+      });
     }
 
     const { data: pendingNotify, error: fetchError } = await supabase
@@ -184,11 +190,29 @@ serve(async req => {
       if (!bidderId) continue;
 
       if (!auction.winner_checkout_order_id) {
-        await supabase.rpc('create_auction_winner_order', { p_auction_id: auction.id });
+        const { error: orderError } = await supabase.rpc('create_auction_winner_order', {
+          p_auction_id: auction.id,
+        });
+        if (orderError) {
+          await logArtistFulfillmentEvent(supabase, {
+            event_type: 'auction.winner_order_failed',
+            severity: 'error',
+            auction_id: auction.id,
+            message: orderError.message,
+          });
+        }
       }
 
       const result = await notifyAuctionWinner(supabase, auction, bidderId, expectedInternal);
       emailResults.push({ auction_id: auction.id, ...result });
+      if (!result.sent && result.error) {
+        await logArtistFulfillmentEvent(supabase, {
+          event_type: 'auction.winner_notify_failed',
+          severity: 'error',
+          auction_id: auction.id,
+          message: result.error,
+        });
+      }
     }
 
     return new Response(
@@ -203,6 +227,16 @@ serve(async req => {
     );
   } catch (error) {
     console.error('process-auction-statuses:', error);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      await logArtistFulfillmentEvent(supabase, {
+        event_type: 'auction.cron_error',
+        severity: 'error',
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

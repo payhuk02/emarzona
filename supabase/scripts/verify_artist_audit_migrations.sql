@@ -74,6 +74,29 @@ BEGIN
     RAISE EXCEPTION 'MISSING: notification_templates auction_won (fr)';
   END IF;
 
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = 'get_edition_tracking'
+  ) THEN
+    RAISE EXCEPTION 'MISSING: function get_edition_tracking';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = 'get_artist_audit_health'
+  ) THEN
+    RAISE EXCEPTION 'MISSING: function get_artist_audit_health';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'artist_fulfillment_events'
+  ) THEN
+    RAISE EXCEPTION 'MISSING: table artist_fulfillment_events';
+  END IF;
+
   RAISE NOTICE 'OK: all artist audit migration objects present';
 END $$;
 
@@ -84,6 +107,8 @@ WHERE version IN (
   '20260526120500',
   '20260526120100',
   '20260526140000',
-  '20260526150000'
+  '20260526150000',
+  '20260526160000',
+  '20260526170000'
 )
 ORDER BY version;

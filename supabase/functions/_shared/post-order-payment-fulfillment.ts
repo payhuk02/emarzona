@@ -4,6 +4,7 @@
  */
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts';
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 
 const ORDER_SELECT =
@@ -188,6 +189,14 @@ async function processArtistOrderItems(
         const edgeInternalSecret = Deno.env.get('EDGE_INTERNAL_SECRET');
         if (!edgeInternalSecret) {
           console.error('generate-artist-certificate: EDGE_INTERNAL_SECRET is not configured');
+          await logArtistFulfillmentEvent(supabase, {
+            event_type: 'certificate.config_missing',
+            severity: 'error',
+            order_id: orderId,
+            product_id: item.product_id as string,
+            artist_product_id: artistProductId,
+            message: 'EDGE_INTERNAL_SECRET is not configured',
+          });
         } else {
           const certHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -211,7 +220,25 @@ async function processArtistOrderItems(
           );
 
           if (!certResponse.ok) {
-            console.error('generate-artist-certificate:', await certResponse.text());
+            const errText = await certResponse.text();
+            console.error('generate-artist-certificate:', errText);
+            await logArtistFulfillmentEvent(supabase, {
+              event_type: 'certificate.generation_failed',
+              severity: 'error',
+              order_id: orderId,
+              product_id: item.product_id as string,
+              artist_product_id: artistProductId,
+              message: errText.slice(0, 500),
+              metadata: { http_status: certResponse.status },
+            });
+          } else {
+            await logArtistFulfillmentEvent(supabase, {
+              event_type: 'certificate.generation_ok',
+              severity: 'info',
+              order_id: orderId,
+              product_id: item.product_id as string,
+              artist_product_id: artistProductId,
+            });
           }
         }
       }

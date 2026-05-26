@@ -78,6 +78,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { FileText } from 'lucide-react';
+import { EditionLimitedBadge } from '@/components/artist/EditionLimitedBadge';
 
 const ArtistProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -529,6 +530,17 @@ const ArtistProductDetail = () => {
                     )}
                   </div>
                 </div>
+                {product.artist.artwork_edition_type === 'limited_edition' &&
+                  product.artist.edition_number &&
+                  product.artist.total_editions &&
+                  productId && (
+                    <EditionLimitedBadge
+                      productId={productId}
+                      editionNumber={product.artist.edition_number}
+                      totalEditions={product.artist.total_editions}
+                      className="mt-4 mb-0"
+                    />
+                  )}
               </CardContent>
             </Card>
           )}
@@ -572,6 +584,7 @@ const ArtistProductDetail = () => {
           {/* Actions */}
           <div className="space-y-3">
             <Button
+              data-testid="artist-add-to-cart"
               onClick={handleAddToCart}
               className="w-full"
               size="lg"
