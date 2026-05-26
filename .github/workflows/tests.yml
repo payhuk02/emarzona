@@ -61,7 +61,9 @@ jobs:
         run: npm ci
 
       - name: Run unit tests with coverage
-        run: npm run test:coverage
+        run: npm run test:ci
+        env:
+          CI: true
 
       - name: Check coverage thresholds
         run: |

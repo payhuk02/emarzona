@@ -1,7 +1,7 @@
 /**
  * Rendu des notification_templates (canal email) côté Edge
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { replaceVariables } from './email-template-utils.ts';
 
 export interface NotificationEmailPayload {

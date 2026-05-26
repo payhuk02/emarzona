@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Edit, Trash2, GripVertical } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Edit, Trash2, GripVertical } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
  * Interface pour une variante de produit
@@ -29,7 +29,7 @@ interface VariantCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onToggleActive: () => void;
-  onUpdate: (field: keyof ProductVariant, value: any) => void;
+  onUpdate: (field: keyof ProductVariant, value: ProductVariant[keyof ProductVariant]) => void;
   currencySymbol?: string;
 }
 
@@ -45,24 +45,24 @@ const VariantCardComponent = ({
   onDelete,
   onToggleActive,
   onUpdate,
-  currencySymbol = "FCFA"
+  currencySymbol = 'FCFA',
 }: VariantCardProps) => {
   return (
-    <Card className={cn(
-      "border-2 transition-all",
-      variant.is_active 
-        ? "border-gray-700 bg-gray-800/50" 
-        : "border-gray-700/50 bg-gray-800/30 opacity-70"
-    )} style={{ willChange: 'transform' }}>
+    <Card
+      className={cn(
+        'border-2 transition-all',
+        variant.is_active
+          ? 'border-gray-700 bg-gray-800/50'
+          : 'border-gray-700/50 bg-gray-800/30 opacity-70'
+      )}
+      style={{ willChange: 'transform' }}
+    >
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <div className="flex items-center gap-2 touch-manipulation">
-            <GripVertical 
-              className="h-5 w-5 text-gray-400 cursor-move" 
-              aria-hidden="true"
-            />
+            <GripVertical className="h-5 w-5 text-gray-400 cursor-move" aria-hidden="true" />
           </div>
-          
+
           <div className="flex-1 space-y-4">
             {/* En-tête de la variante */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -71,15 +71,15 @@ const VariantCardComponent = ({
                   Variante {index + 1}
                   {variant.name && `: ${variant.name}`}
                 </h4>
-                <Badge 
+                <Badge
                   className={cn(
-                    "text-xs",
-                    variant.is_active 
-                      ? "bg-green-500/20 text-green-400 border-green-500/30" 
-                      : "bg-gray-700 text-gray-400"
+                    'text-xs',
+                    variant.is_active
+                      ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                      : 'bg-gray-700 text-gray-400'
                   )}
                 >
-                  {variant.is_active ? "Active" : "Inactive"}
+                  {variant.is_active ? 'Active' : 'Inactive'}
                 </Badge>
                 {variant.stock <= 0 && (
                   <Badge variant="destructive" className="text-xs">
@@ -114,13 +114,13 @@ const VariantCardComponent = ({
                 </Button>
               </div>
             </div>
-            
+
             {/* Formulaire d'édition */}
             {isEditing && (
               <div className="space-y-4 pt-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label 
+                    <Label
                       htmlFor={`variant-name-${variant.id}`}
                       className="text-sm font-medium text-white"
                     >
@@ -129,14 +129,14 @@ const VariantCardComponent = ({
                     <Input
                       id={`variant-name-${variant.id}`}
                       value={variant.name}
-                      onChange={(e) => onUpdate("name", e.target.value)}
+                      onChange={e => onUpdate('name', e.target.value)}
                       placeholder="Ex: Rouge, Taille L, etc."
                       aria-label="Nom de la variante"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label 
+                    <Label
                       htmlFor={`variant-sku-${variant.id}`}
                       className="text-sm font-medium text-white"
                     >
@@ -145,7 +145,7 @@ const VariantCardComponent = ({
                     <Input
                       id={`variant-sku-${variant.id}`}
                       value={variant.sku}
-                      onChange={(e) => onUpdate("sku", e.target.value)}
+                      onChange={e => onUpdate('sku', e.target.value)}
                       placeholder="PROD-RED-L"
                       aria-label="SKU de la variante"
                       className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -155,7 +155,7 @@ const VariantCardComponent = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label 
+                    <Label
                       htmlFor={`variant-price-${variant.id}`}
                       className="text-sm font-medium text-white"
                     >
@@ -166,7 +166,7 @@ const VariantCardComponent = ({
                         id={`variant-price-${variant.id}`}
                         type="number"
                         value={variant.price}
-                        onChange={(e) => onUpdate("price", parseFloat(e.target.value) || 0)}
+                        onChange={e => onUpdate('price', parseFloat(e.target.value) || 0)}
                         placeholder="0"
                         min="0"
                         step="0.01"
@@ -179,7 +179,7 @@ const VariantCardComponent = ({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label 
+                    <Label
                       htmlFor={`variant-stock-${variant.id}`}
                       className="text-sm font-medium text-white"
                     >
@@ -189,20 +189,20 @@ const VariantCardComponent = ({
                       id={`variant-stock-${variant.id}`}
                       type="number"
                       value={variant.stock}
-                      onChange={(e) => onUpdate("stock", parseInt(e.target.value) || 0)}
+                      onChange={e => onUpdate('stock', parseInt(e.target.value) || 0)}
                       placeholder="0"
                       min="0"
                       aria-label="Stock de la variante"
                       className={cn(
-                        "bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]",
-                        variant.stock <= 0 && "border-red-500/50"
+                        'bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]',
+                        variant.stock <= 0 && 'border-red-500/50'
                       )}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label 
+                  <Label
                     htmlFor={`variant-image-${variant.id}`}
                     className="text-sm font-medium text-white"
                   >
@@ -210,8 +210,8 @@ const VariantCardComponent = ({
                   </Label>
                   <Input
                     id={`variant-image-${variant.id}`}
-                    value={variant.image || ""}
-                    onChange={(e) => onUpdate("image", e.target.value)}
+                    value={variant.image || ''}
+                    onChange={e => onUpdate('image', e.target.value)}
                     placeholder="https://example.com/image.jpg"
                     aria-label="URL de l'image de la variante"
                     className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 min-h-[44px]"
@@ -225,30 +225,38 @@ const VariantCardComponent = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                 <div>
                   <span className="text-gray-400">SKU:</span>
-                  <p className="text-white font-medium">{variant.sku || "—"}</p>
+                  <p className="text-white font-medium">{variant.sku || '—'}</p>
                 </div>
                 <div>
                   <span className="text-gray-400">Prix:</span>
-                  <p className="text-white font-medium">{variant.price.toLocaleString()} {currencySymbol}</p>
+                  <p className="text-white font-medium">
+                    {variant.price.toLocaleString('fr-FR')} {currencySymbol}
+                  </p>
                 </div>
                 <div>
                   <span className="text-gray-400">Stock:</span>
-                  <p className={cn(
-                    "font-medium",
-                    variant.stock > 10 ? "text-green-400" :
-                    variant.stock > 0 ? "text-yellow-400" :
-                    "text-red-400"
-                  )}>
+                  <p
+                    className={cn(
+                      'font-medium',
+                      variant.stock > 10
+                        ? 'text-green-400'
+                        : variant.stock > 0
+                          ? 'text-yellow-400'
+                          : 'text-red-400'
+                    )}
+                  >
                     {variant.stock}
                   </p>
                 </div>
                 <div>
                   <span className="text-gray-400">Statut:</span>
-                  <p className={cn(
-                    "font-medium",
-                    variant.is_active ? "text-green-400" : "text-gray-500"
-                  )}>
-                    {variant.is_active ? "Active" : "Inactive"}
+                  <p
+                    className={cn(
+                      'font-medium',
+                      variant.is_active ? 'text-green-400' : 'text-gray-500'
+                    )}
+                  >
+                    {variant.is_active ? 'Active' : 'Inactive'}
                   </p>
                 </div>
               </div>
@@ -280,10 +288,3 @@ export const VariantCard = React.memo(VariantCardComponent, (prevProps, nextProp
 });
 
 VariantCard.displayName = 'VariantCard';
-
-
-
-
-
-
-

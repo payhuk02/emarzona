@@ -1,7 +1,7 @@
 /**
  * Résolution des destinataires de campagnes email
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 
 export interface CampaignRecipient {
   email: string;
