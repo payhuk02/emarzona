@@ -1,10 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Config dédiée aux tests auth (hors testDir ./tests/e2e du config principal).
+ * Specs produits (hors testDir ./tests/e2e du config principal).
  */
 export default defineConfig({
-  testDir: './tests/auth',
+  testDir: './tests/products',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
