@@ -268,6 +268,7 @@ serve(async req => {
       buyer_name: customer?.name || customer?.full_name || 'Client',
       buyer_email: customer?.email || order.customer_email || null,
       is_generated: false,
+      is_public: true,
       verification_code: verificationCode,
     };
 

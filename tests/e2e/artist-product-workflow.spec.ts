@@ -75,6 +75,29 @@ test.describe('Artist product workflow', () => {
     expect(page.url()).toMatch(/\/(login|auth)/);
   });
 
+  test('public certificate verify page loads', async ({ page }) => {
+    const response = await gotoApp(page, '/verify/TESTCODE1');
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page).toHaveURL(/\/verify\/TESTCODE1/);
+    await expect(page.getByRole('heading', { name: /vérification de certificat/i })).toBeVisible();
+    await expect(
+      page.getByText(/certificat non valide|certificat authentique|aucun certificat/i)
+    ).toBeVisible({ timeout: 15_000 });
+  });
+
+  test('auction detail shows bid UI when E2E_AUCTION_SLUG is set', async ({ page }) => {
+    const slug = process.env.E2E_AUCTION_SLUG;
+    test.skip(!slug, 'Set E2E_AUCTION_SLUG for bid form test');
+
+    const response = await gotoApp(page, `/auctions/${slug}`);
+    expect(response?.status()).toBeLessThan(500);
+    await expect(
+      page
+        .getByRole('button', { name: /enchérir|placer|bid|offre/i })
+        .or(page.locator('input[type="number"]'))
+    ).toBeVisible({ timeout: 15_000 });
+  });
+
   test('logged-in buyer can open artist portal shell', async ({ page }) => {
     test.skip(
       !process.env.E2E_RUN_AUTH_TESTS,

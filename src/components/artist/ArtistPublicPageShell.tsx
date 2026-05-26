@@ -3,7 +3,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { MarketplaceHeader } from '@/components/marketplace/MarketplaceHeader';
+import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
 import { cn } from '@/lib/utils';
 
 export interface ArtistPublicPageShellProps {

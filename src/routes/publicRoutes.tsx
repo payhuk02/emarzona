@@ -67,6 +67,7 @@ const CollectionDetail = lazyPage(() =>
 );
 const AuctionsListPage = lazyPage(() => import('@/pages/artist/AuctionsListPage'));
 const AuctionDetailPage = lazyPage(() => import('@/pages/artist/AuctionDetailPage'));
+const VerifyCertificatePage = lazyPage(() => import('@/pages/artist/VerifyCertificatePage'));
 const StyleQuizPage = lazyPage(() =>
   import('@/pages/personalization/StyleQuizPage').then(m => ({ default: m.default }))
 );
@@ -236,6 +237,7 @@ export const publicRoutes = (
     {/* TODO: Ajouter redirection collections vers sous-domaine quand les routes subdomain les supporteront */}
     <Route path="/auctions" element={<AuctionsListPage />} />
     <Route path="/auctions/:slug" element={<AuctionDetailPage />} />
+    <Route path="/verify/:code" element={<VerifyCertificatePage />} />
 
     {/* Affiliation */}
     <Route path="/aff/:code" element={<ShortLinkRedirect />} />

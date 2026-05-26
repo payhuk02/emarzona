@@ -10,7 +10,8 @@ import { logger } from '@/lib/logger';
 import { generateAndUploadCertificate } from '@/lib/artist-certificate-generator';
 import type { ArtistCertificateData } from '@/lib/artist-certificate-generator';
 
-const ARTIST_CERTIFICATE_FIELDS = 'id, order_id, order_item_id, product_id, artist_product_id, user_id, certificate_number, certificate_type, edition_number, total_edition, signed_by_artist, signed_date, certificate_pdf_url, certificate_image_url, artwork_title, artist_name, artwork_medium, artwork_year, purchase_date, buyer_name, buyer_email, is_generated, generated_at, downloaded_at, download_count, is_valid, revoked, revoked_at, revoked_reason, is_public, verification_code, created_at, updated_at';
+const ARTIST_CERTIFICATE_FIELDS =
+  'id, order_id, order_item_id, product_id, artist_product_id, user_id, certificate_number, certificate_type, edition_number, total_edition, signed_by_artist, signed_date, certificate_pdf_url, certificate_image_url, artwork_title, artist_name, artwork_medium, artwork_year, purchase_date, buyer_name, buyer_email, is_generated, generated_at, downloaded_at, download_count, is_valid, revoked, revoked_at, revoked_reason, is_public, verification_code, created_at, updated_at';
 
 export interface ArtistCertificate {
   id: string;
@@ -151,11 +152,7 @@ export const useCreateArtistCertificate = () => {
     }) => {
       try {
         // Générer et uploader le PDF
-        const { pdfUrl } = await generateAndUploadCertificate(
-          certificateData,
-          orderId,
-          productId
-        );
+        const { pdfUrl } = await generateAndUploadCertificate(certificateData, orderId, productId);
 
         // Créer l'enregistrement dans la base de données
         const { data, error } = await supabase
@@ -209,16 +206,19 @@ export const useCreateArtistCertificate = () => {
       queryClient.invalidateQueries({ queryKey: ['artist-certificates'] });
       queryClient.invalidateQueries({ queryKey: ['artist-certificate', data.id] });
       queryClient.invalidateQueries({ queryKey: ['artist-certificates-order', variables.orderId] });
-      
+
       toast({
         title: '✅ Certificat généré',
-        description: 'Votre certificat d\'authenticité a été généré avec succès.',
+        description: "Votre certificat d'authenticité a été généré avec succès.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: '❌ Erreur',
-        description: error.message || 'Une erreur est survenue lors de la génération du certificat.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Une erreur est survenue lors de la génération du certificat.',
         variant: 'destructive',
       });
     },
@@ -230,7 +230,6 @@ export const useCreateArtistCertificate = () => {
  */
 export const useUpdateCertificateDownload = () => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (certificateId: string) => {
@@ -258,7 +257,7 @@ export const useUpdateCertificateDownload = () => {
 
       return data as ArtistCertificate;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['artist-certificate', data.id] });
     },
   });
@@ -267,38 +266,44 @@ export const useUpdateCertificateDownload = () => {
 /**
  * Hook pour vérifier un certificat par code de vérification
  */
+export interface PublicCertificateVerification {
+  valid: boolean;
+  reason?: 'invalid_code' | 'not_found' | 'revoked';
+  certificate_number?: string;
+  certificate_type?: string;
+  edition_number?: number | null;
+  total_edition?: number | null;
+  artwork_title?: string;
+  artist_name?: string;
+  artwork_medium?: string | null;
+  artwork_year?: number | null;
+  purchase_date?: string;
+  signed_by_artist?: boolean;
+  is_generated?: boolean;
+  generated_at?: string | null;
+  verification_code?: string;
+  revoked_at?: string | null;
+  revoked_reason?: string | null;
+}
+
 export const useVerifyCertificate = (verificationCode: string | undefined) => {
   return useQuery({
     queryKey: ['verify-certificate', verificationCode],
     queryFn: async () => {
       if (!verificationCode) return null;
 
-      const { data, error } = await supabase
-        .from('artist_product_certificates')
-        .select(ARTIST_CERTIFICATE_FIELDS)
-        .eq('verification_code', verificationCode)
-        .eq('is_valid', true)
-        .eq('revoked', false)
-        .single();
+      const code = verificationCode.trim().toUpperCase();
+      const { data, error } = await supabase.rpc('verify_artist_certificate_by_code', {
+        p_code: code,
+      });
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          // Not found
-          return null;
-        }
-        logger.error('Error verifying certificate', { error, verificationCode });
+        logger.error('Error verifying certificate', { error, verificationCode: code });
         throw error;
       }
 
-      return data as ArtistCertificate;
+      return (data ?? null) as PublicCertificateVerification | null;
     },
-    enabled: !!verificationCode && verificationCode.length >= 8,
+    enabled: !!verificationCode && verificationCode.trim().length >= 8,
   });
 };
-
-
-
-
-
-
-

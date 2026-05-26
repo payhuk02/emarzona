@@ -6,7 +6,7 @@
  * Améliorée avec SEO, analytics, recommandations, partage social et wishlist
  */
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArtistPublicPageShell } from '@/components/artist/ArtistPublicPageShell';
@@ -896,6 +896,11 @@ const ArtistProductDetail = () => {
                                   Code de vérification:
                                 </span>
                                 <p className="font-mono">{cert.verification_code}</p>
+                                <Button variant="link" className="h-auto p-0 mt-1" asChild>
+                                  <Link to={`/verify/${cert.verification_code}`}>
+                                    Vérifier ce certificat
+                                  </Link>
+                                </Button>
                               </div>
                             )}
                           </div>

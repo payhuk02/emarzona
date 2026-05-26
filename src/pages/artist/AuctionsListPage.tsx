@@ -22,10 +22,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { SEOMeta } from '@/components/seo/SEOMeta';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { CountdownTimer } from '@/components/artist/AuctionCountdownTimer';
-import { MarketplaceHeader } from '@/components/marketplace/MarketplaceHeader';
+import MarketplaceHeader from '@/components/marketplace/MarketplaceHeader';
 
 export default function AuctionsListPage() {
   const navigate = useNavigate();
@@ -57,7 +55,7 @@ export default function AuctionsListPage() {
         auction_id: auctionId,
         add: !isInWatchlist(auctionId),
       });
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };

@@ -50,49 +50,12 @@ export default function CustomerArtistPortal() {
     const loadOrders = async () => {
       setOrdersLoading(true);
       try {
-        const { data: orderRows, error } = await supabase
-          .from('orders')
-          .select(
-            `
-            id,
-            order_number,
-            total_amount,
-            currency,
-            payment_status,
-            created_at,
-            order_items!inner (
-              product_name,
-              product_id,
-              product_type
-            )
-          `
-          )
-          .eq('customer_id', userId)
-          .eq('order_items.product_type', 'artist')
-          .order('created_at', { ascending: false })
-          .limit(50);
+        const { data, error } = await supabase.rpc('list_my_artist_orders');
 
         if (error) throw error;
 
-        const mapped: ArtistOrderRow[] = (orderRows ?? []).map(row => {
-          const items = Array.isArray(row.order_items) ? row.order_items : [row.order_items];
-          return {
-            id: row.id,
-            order_number: row.order_number,
-            total_amount: row.total_amount,
-            currency: row.currency,
-            payment_status: row.payment_status,
-            created_at: row.created_at,
-            items: items
-              .filter((i: { product_type?: string }) => i.product_type === 'artist')
-              .map((i: { product_name: string; product_id: string }) => ({
-                product_name: i.product_name,
-                product_id: i.product_id,
-              })),
-          };
-        });
-
-        setOrders(mapped);
+        const rows = Array.isArray(data) ? data : [];
+        setOrders(rows as ArtistOrderRow[]);
       } catch {
         setOrders([]);
       } finally {
@@ -215,7 +178,14 @@ export default function CustomerArtistPortal() {
                             </Button>
                           )}
                           {cert.verification_code && (
-                            <Badge variant="outline">Code: {cert.verification_code}</Badge>
+                            <>
+                              <Badge variant="outline">Code: {cert.verification_code}</Badge>
+                              <Button asChild size="sm" variant="secondary">
+                                <Link to={`/verify/${cert.verification_code}`}>
+                                  Vérifier en ligne
+                                </Link>
+                              </Button>
+                            </>
                           )}
                         </CardContent>
                       </Card>
