@@ -28,7 +28,7 @@ test.describe('Authentication', () => {
     await page.click('button[type="submit"]');
 
     // Check for validation message (any alert)
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('alert').first()).toBeVisible();
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
@@ -39,7 +39,7 @@ test.describe('Authentication', () => {
     await page.click('button[type="submit"]');
 
     // Wait for error message (alert or toast)
-    await expect(page.getByRole('alert')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('alert').first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should successfully login with valid credentials', async ({ page }) => {
