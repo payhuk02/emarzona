@@ -222,23 +222,98 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       area('pricing.footnote', 'Note de bas de page', lp.pricing.footnote),
       text('pricing.periodMonth', 'Période — mois', lp.pricing.periodMonth),
       text('pricing.periodSale', 'Période — vente', lp.pricing.periodSale),
-      text('pricing.physical.name', 'Plan physique — nom', lp.pricing.physical.name),
-      text('pricing.physical.badge', 'Plan physique — badge', lp.pricing.physical.badge),
-      area('pricing.physical.desc', 'Plan physique — description', lp.pricing.physical.desc),
-      text('pricing.physical.cta', 'Plan physique — CTA', lp.pricing.physical.cta),
-      ...stringListFields(
-        'pricing.physical.features',
-        lp.pricing.physical.features,
-        'Plan physique — fonctionnalité'
+      // Plans physiques (Basic/Standard/Premium)
+      text(
+        'pricing.physicalBasic.name',
+        'Physique Basic — nom',
+        lp.pricing.physicalBasic?.name ?? ''
       ),
-      text('pricing.digital.name', 'Plan digital — nom', lp.pricing.digital.name),
-      text('pricing.digital.badge', 'Plan digital — badge', lp.pricing.digital.badge),
-      area('pricing.digital.desc', 'Plan digital — description', lp.pricing.digital.desc),
-      text('pricing.digital.cta', 'Plan digital — CTA', lp.pricing.digital.cta),
+      text(
+        'pricing.physicalBasic.badge',
+        'Physique Basic — badge',
+        lp.pricing.physicalBasic?.badge ?? ''
+      ),
+      area(
+        'pricing.physicalBasic.desc',
+        'Physique Basic — description',
+        lp.pricing.physicalBasic?.desc ?? ''
+      ),
+      text(
+        'pricing.physicalBasic.cta',
+        'Physique Basic — CTA',
+        lp.pricing.physicalBasic?.cta ?? ''
+      ),
       ...stringListFields(
-        'pricing.digital.features',
-        lp.pricing.digital.features,
-        'Plan digital — fonctionnalité'
+        'pricing.physicalBasic.features',
+        lp.pricing.physicalBasic?.features ?? [],
+        'Physique Basic — fonctionnalité'
+      ),
+
+      text(
+        'pricing.physicalStandard.name',
+        'Physique Standard — nom',
+        lp.pricing.physicalStandard?.name ?? ''
+      ),
+      text(
+        'pricing.physicalStandard.badge',
+        'Physique Standard — badge',
+        lp.pricing.physicalStandard?.badge ?? ''
+      ),
+      area(
+        'pricing.physicalStandard.desc',
+        'Physique Standard — description',
+        lp.pricing.physicalStandard?.desc ?? ''
+      ),
+      text(
+        'pricing.physicalStandard.cta',
+        'Physique Standard — CTA',
+        lp.pricing.physicalStandard?.cta ?? ''
+      ),
+      ...stringListFields(
+        'pricing.physicalStandard.features',
+        lp.pricing.physicalStandard?.features ?? [],
+        'Physique Standard — fonctionnalité'
+      ),
+
+      text(
+        'pricing.physicalPremium.name',
+        'Physique Premium — nom',
+        lp.pricing.physicalPremium?.name ?? ''
+      ),
+      text(
+        'pricing.physicalPremium.badge',
+        'Physique Premium — badge',
+        lp.pricing.physicalPremium?.badge ?? ''
+      ),
+      area(
+        'pricing.physicalPremium.desc',
+        'Physique Premium — description',
+        lp.pricing.physicalPremium?.desc ?? ''
+      ),
+      text(
+        'pricing.physicalPremium.cta',
+        'Physique Premium — CTA',
+        lp.pricing.physicalPremium?.cta ?? ''
+      ),
+      ...stringListFields(
+        'pricing.physicalPremium.features',
+        lp.pricing.physicalPremium?.features ?? [],
+        'Physique Premium — fonctionnalité'
+      ),
+
+      // Plan commission (digital/services/cours/œuvres)
+      text('pricing.commission.name', 'Commission — nom', lp.pricing.commission?.name ?? ''),
+      text('pricing.commission.badge', 'Commission — badge', lp.pricing.commission?.badge ?? ''),
+      area(
+        'pricing.commission.desc',
+        'Commission — description',
+        lp.pricing.commission?.desc ?? ''
+      ),
+      text('pricing.commission.cta', 'Commission — CTA', lp.pricing.commission?.cta ?? ''),
+      ...stringListFields(
+        'pricing.commission.features',
+        lp.pricing.commission?.features ?? [],
+        'Commission — fonctionnalité'
       ),
     ],
   },

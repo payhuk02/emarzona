@@ -97,6 +97,7 @@ const OfflineQueueManager = lazyPage(() => import('@/pages/admin/OfflineQueueMan
 const StorageDiagnosticPage = lazyPage(() => import('@/pages/admin/StorageDiagnosticPage'));
 const IntegrationsPage = lazyPage(() => import('@/pages/admin/IntegrationsPage'));
 const AdminApiKeys = lazyPage(() => import('@/pages/admin/AdminApiKeys'));
+const AdminSubscriptions = lazyPage(() => import('@/pages/admin/AdminSubscriptions'));
 const AdminVendorBilling = lazyPage(() => import('@/pages/admin/AdminVendorBilling'));
 const PlatformRevenue = lazyPage(() => import('@/pages/PlatformRevenue'));
 const AdminKYC = lazyPage(() => import('@/pages/AdminKYC'));
