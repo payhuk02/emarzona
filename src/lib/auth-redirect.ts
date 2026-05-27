@@ -13,8 +13,24 @@ function isSafeInternalPath(path: string | undefined | null): path is string {
 /**
  * Vérifie si l'utilisateur courant a accès à l'espace admin.
  */
+const ADMIN_PANEL_PROFILE_ROLES = new Set(['admin', 'staff', 'manager', 'support', 'viewer']);
+
 export async function checkUserIsAdmin(userId: string, email?: string | null): Promise<boolean> {
   if (isPrincipalAdminEmail(email)) {
+    return true;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, is_super_admin')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (profile?.is_super_admin || profile?.role === 'admin') {
+    return true;
+  }
+
+  if (profile?.role && ADMIN_PANEL_PROFILE_ROLES.has(profile.role)) {
     return true;
   }
 

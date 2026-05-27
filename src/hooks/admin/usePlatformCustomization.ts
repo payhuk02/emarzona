@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { validateSection, validateCustomizationData } from '@/lib/schemas/platform-customization';
 import type { PlatformCustomizationSchemaType } from '@/lib/schemas/platform-customization';
+import { stripIntegrationsTree } from '@/lib/admin/integration-secrets';
 
 // Types pour les structures flexibles (emails, notifications, etc.)
 export interface EmailTemplateData {
@@ -275,12 +276,17 @@ export const usePlatformCustomization = () => {
         // Utiliser le ref pour avoir les données les plus récentes
         const currentData = customizationDataRef.current;
 
+        const sectionPayload =
+          section === 'integrations' && data && typeof data === 'object'
+            ? stripIntegrationsTree(data as Record<string, unknown>)
+            : data;
+
         // Fusionner les données existantes avec les nouvelles
         const updatedData = {
           ...currentData,
           [section]: {
             ...currentData?.[section as keyof PlatformCustomizationData],
-            ...data,
+            ...sectionPayload,
           },
         };
 

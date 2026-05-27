@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
+import { AdminRoutePermissionGuard } from '@/components/admin/AdminRoutePermissionGuard';
 
 export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
@@ -37,5 +38,5 @@ export const ProtectedAdminRoute = ({ children }: { children: ReactNode }) => {
     return null;
   }
 
-  return <>{children}</>;
+  return <AdminRoutePermissionGuard>{children}</AdminRoutePermissionGuard>;
 };

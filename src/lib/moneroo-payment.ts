@@ -24,6 +24,12 @@ export interface PaymentOptions {
   customerName?: string;
   customerPhone?: string;
   metadata?: Record<string, unknown>;
+  /**
+   * Override return URL used by Moneroo checkout.
+   * Defaults to /checkout/success and /checkout/cancel for order flows.
+   */
+  returnUrl?: string;
+  cancelUrl?: string;
 }
 
 export interface RefundOptions {
@@ -61,6 +67,8 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     customerName,
     customerPhone,
     metadata = {},
+    returnUrl,
+    cancelUrl,
   } = options;
 
   // Valider la devise
@@ -274,8 +282,10 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       description,
       customer_email: customerEmail,
       customer_name: customerName,
-      return_url: `${window.location.origin}/checkout/success?transaction_id=${transaction.id}`,
-      cancel_url: `${window.location.origin}/checkout/cancel?transaction_id=${transaction.id}`,
+      return_url:
+        returnUrl || `${window.location.origin}/checkout/success?transaction_id=${transaction.id}`,
+      cancel_url:
+        cancelUrl || `${window.location.origin}/checkout/cancel?transaction_id=${transaction.id}`,
       metadata: cleanMetadata,
     };
 

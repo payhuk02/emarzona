@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { AdminRoute } from '@/components/AdminRoute';
+import { RequireAAL2 } from '@/components/admin/RequireAAL2';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,178 +11,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { isPrincipalAdminEmail } from '@/lib/principal-admin';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  UserPlus,
-  Settings,
-  Bell,
-  Menu,
-  X,
-  Store,
-  Package,
-  History,
-  BoxIcon,
-  CreditCard,
-  Scale,
-  TrendingUp,
-  BarChart3,
-  ShieldCheck,
-  Headphones,
-  GraduationCap,
-  Brain,
-  Warehouse,
-  Truck,
-  DollarSign,
-  FileText,
-  Sparkles,
-  Shield,
-  RotateCcw,
-  Webhook,
-  Gift,
-  Star,
-  Percent,
-  MessageSquare,
-  Activity,
-  Accessibility,
-  Bot,
-  Wallet,
-  Megaphone,
-  GitCompare,
-  Factory,
-  Layers,
-  LineChart,
-  Calculator,
-  PackageCheck,
-  Database,
-  WifiOff,
-  AlertTriangle,
-  HardDrive,
-} from 'lucide-react';
+import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
+import { ADMIN_NAV_SECTIONS, filterAdminNavSections } from '@/lib/admin/admin-nav';
+import { Menu, X } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
-
-// Menu organisé par sections pour une meilleure navigation
-const menuSections = [
-  {
-    label: 'Administration',
-    items: [
-      { icon: LayoutDashboard, label: "Vue d'ensemble", path: '/admin' },
-      { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
-      { icon: Store, label: 'Boutiques', path: '/admin/stores' },
-      { icon: Users, label: 'Communauté', path: '/admin/community' },
-    ],
-  },
-  {
-    label: 'Catalogue',
-    items: [
-      { icon: Package, label: 'Produits', path: '/admin/products' },
-      { icon: GraduationCap, label: 'Cours', path: '/admin/courses' },
-      { icon: FileText, label: 'Avis', path: '/admin/reviews' },
-      { icon: Layers, label: 'Kits produits', path: '/admin/product-kits' },
-    ],
-  },
-  {
-    label: 'Commerce',
-    items: [
-      { icon: ShoppingCart, label: 'Ventes', path: '/admin/sales' },
-      { icon: BoxIcon, label: 'Commandes', path: '/admin/orders' },
-      { icon: Warehouse, label: 'Inventaire', path: '/admin/inventory' },
-      { icon: Factory, label: 'Fournisseurs', path: '/admin/suppliers' },
-      { icon: Warehouse, label: 'Entrepôts', path: '/admin/warehouses' },
-      { icon: Truck, label: 'Expéditions', path: '/admin/shipping' },
-      { icon: PackageCheck, label: 'Expédition groupée', path: '/admin/batch-shipping' },
-      {
-        icon: MessageSquare,
-        label: 'Conversations Livraison',
-        path: '/admin/shipping-conversations',
-      },
-      {
-        icon: MessageSquare,
-        label: 'Conversations Clients-Vendeurs',
-        path: '/admin/vendor-conversations',
-      },
-      { icon: RotateCcw, label: 'Retours', path: '/admin/returns' },
-      { icon: LineChart, label: 'Prévisions demande', path: '/admin/demand-forecasting' },
-      { icon: Calculator, label: 'Optimisation coûts', path: '/admin/cost-optimization' },
-    ],
-  },
-  {
-    label: 'Finance',
-    items: [
-      { icon: DollarSign, label: 'Revenus', path: '/admin/revenue' },
-      { icon: CreditCard, label: 'Paiements', path: '/admin/payments' },
-      { icon: Wallet, label: 'Retraits boutiques', path: '/admin/store-withdrawals' },
-      { icon: Percent, label: 'Taxes', path: '/admin/taxes' },
-      { icon: Scale, label: 'Litiges', path: '/admin/disputes' },
-      {
-        icon: GitCompare,
-        label: 'Réconciliation transactions',
-        path: '/admin/transaction-reconciliation',
-      },
-      { icon: BarChart3, label: 'Statistiques Moneroo', path: '/admin/moneroo-analytics' },
-      { icon: RotateCcw, label: 'Réconciliation Moneroo', path: '/admin/moneroo-reconciliation' },
-    ],
-  },
-  {
-    label: 'Marketing & Engagement',
-    items: [
-      { icon: Megaphone, label: 'Marketing automation', path: '/admin/marketing' },
-      { icon: UserPlus, label: 'Parrainages', path: '/admin/referrals' },
-      { icon: TrendingUp, label: 'Affiliation', path: '/admin/affiliates' },
-      { icon: Star, label: 'Programme de Fidélité', path: '/admin/loyalty' },
-      { icon: Gift, label: 'Cartes Cadeaux', path: '/admin/gift-cards' },
-    ],
-  },
-  {
-    label: 'Systèmes & Intégrations',
-    items: [
-      { icon: Settings, label: 'Intégrations', path: '/admin/integrations' },
-      { icon: Webhook, label: 'Webhooks', path: '/admin/webhooks' },
-      { icon: Database, label: 'Stockage données', path: '/admin/data-storage' },
-      { icon: HardDrive, label: 'Diagnostic stockage', path: '/admin/storage-diagnostic' },
-      { icon: WifiOff, label: 'File offline', path: '/admin/offline-queue' },
-    ],
-  },
-  {
-    label: 'Analytics & Monitoring',
-    items: [
-      { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
-      { icon: BarChart3, label: 'Monitoring Transactions', path: '/admin/transaction-monitoring' },
-      { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
-      { icon: AlertTriangle, label: 'Monitoring erreurs', path: '/admin/error-monitoring' },
-    ],
-  },
-  {
-    label: 'Sécurité & Support',
-    items: [
-      { icon: ShieldCheck, label: 'Admin KYC', path: '/admin/kyc' },
-      { icon: Shield, label: 'Sécurité 2FA', path: '/admin/security' },
-      { icon: History, label: 'Activité', path: '/admin/activity' },
-      { icon: FileText, label: 'Audit', path: '/admin/audit' },
-      { icon: Headphones, label: 'Support', path: '/admin/support' },
-      { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
-      { icon: Accessibility, label: 'Accessibilité', path: '/admin/accessibility' },
-    ],
-  },
-  {
-    label: 'Configuration',
-    items: [
-      { icon: Settings, label: 'Paramètres', path: '/admin/settings' },
-      { icon: Bot, label: 'Centre AI', path: '/admin/ai-management' },
-      { icon: Brain, label: 'IA Recommandations', path: '/admin/ai-settings' },
-      { icon: Percent, label: 'Commissions', path: '/admin/commission-settings' },
-      { icon: DollarSign, label: 'Paiements Commissions', path: '/admin/commission-payments' },
-      { icon: Sparkles, label: 'Personnalisation', path: '/admin/platform-customization' },
-    ],
-  },
-];
-
-// Menu flat pour la navigation
-const menuItems = menuSections.flatMap(section => section.items);
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const isMobile = useIsMobile();
@@ -191,7 +27,14 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const { user } = useAuth();
   const { isAAL2 } = useAdminMFA();
+  const { can, isSuperAdmin, platformRole, loading: permLoading } = useCurrentAdminPermissions();
   const showMfaStatus = !isPrincipalAdminEmail(user?.email);
+
+  const menuSections = useMemo(() => {
+    if (permLoading) return [];
+    return filterAdminNavSections(ADMIN_NAV_SECTIONS, can, isSuperAdmin);
+  }, [permLoading, can, isSuperAdmin]);
+  const menuItems = useMemo(() => menuSections.flatMap(section => section.items), [menuSections]);
 
   // Sur mobile: sidebar desktop par défaut fermée (sinon elle écrase le contenu).
   useEffect(() => {
@@ -234,7 +77,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                       {isAAL2 ? 'AAL2' : 'AAL1'}
                     </Badge>
                   )}
-                  <span className="truncate text-xs text-muted-foreground">Admin</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {platformRole ?? 'Admin'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -392,7 +237,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             sidebarOpen ? 'md:ml-64' : 'md:ml-20'
           )}
         >
-          {children}
+          <RequireAAL2>{children}</RequireAAL2>
         </main>
       </div>
     </AdminRoute>

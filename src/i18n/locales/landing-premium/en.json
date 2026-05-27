@@ -180,31 +180,55 @@
     "footnote": "All amounts in CFA franc (XOF). 10% commission only on completed sales for digital products, courses, services and artist works.",
     "periodMonth": "/ month",
     "periodSale": "per sale",
-    "physical": {
-      "name": "Physical products",
+    "physicalBasic": {
+      "name": "Physical — Basic",
       "badge": "1 month free trial",
-      "desc": "Ideal for stores with stock, logistics and shipping.",
+      "desc": "Start selling physical products (stock + shipping).",
       "features": [
-        "Full online store",
+        "Sell physical products",
         "Stock & variant management",
-        "FCFA & international payments",
-        "Emarzona marketplace",
+        "Shipping zones & rates",
         "30-day free trial"
       ],
       "cta": "Try 1 month free"
     },
-    "digital": {
-      "name": "Digital, services, online courses & artist works",
+    "physicalStandard": {
+      "name": "Physical — Standard",
+      "badge": "Recommended",
+      "desc": "For growing stores: more orders, fewer mistakes, better support load.",
+      "features": [
+        "Everything in Basic",
+        "Shipping tracking",
+        "Returns (RMA) & policies",
+        "Inventory CSV import/export",
+        "Stock alerts"
+      ],
+      "cta": "Start trial"
+    },
+    "physicalPremium": {
+      "name": "Physical — Premium",
+      "badge": "Advanced",
+      "desc": "Scale operations with advanced logistics, optimization and automations.",
+      "features": [
+        "Everything in Standard",
+        "Batch shipping & labels",
+        "Lots / expiration / FEFO",
+        "Multi-warehouses & transfers",
+        "Demand forecasting"
+      ],
+      "cta": "Go Premium"
+    },
+    "commission": {
+      "name": "Digital, services, courses & artist works",
       "badge": "No subscription",
-      "desc": "Digital products, online courses, services and artist works.",
+      "desc": "For the other 4 commerce systems: commission only on successful sales.",
       "features": [
         "No fixed monthly fee",
         "10% commission on successful sales",
-        "Digital delivery & bookings",
-        "Courses & artist works",
+        "Digital delivery, bookings & courses",
         "Secure payments included"
       ],
-      "cta": "Start without subscription"
+      "cta": "Get started"
     }
   },
   "cta": {

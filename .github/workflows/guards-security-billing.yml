@@ -1,0 +1,39 @@
+name: Guards Security/Billing
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/components/billing/**'
+      - 'src/lib/billing/**'
+      - 'src/lib/admin/**'
+      - 'src/components/layout/SalesSidebar.tsx'
+      - 'src/routes/dashboardRoutes.tsx'
+      - 'supabase/migrations/20260527*'
+      - 'package.json'
+      - '.github/workflows/guards-security-billing.yml'
+
+jobs:
+  test-guards:
+    name: Test Guards
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run targeted guards suite
+        run: npm run test:guards
+        env:
+          CI: true
+

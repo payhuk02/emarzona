@@ -5,8 +5,10 @@ import { useLandingPremiumT } from '@/hooks/useLandingPremiumT';
 import { usePremiumReveal } from './usePremiumReveal';
 
 const planConfig = [
-  { key: 'physical' as const, icon: Package, highlight: true, price: 7_500 },
-  { key: 'digital' as const, icon: Layers, highlight: false, priceLabel: '10 %' },
+  { key: 'physicalBasic' as const, icon: Package, highlight: false, price: 7_500 },
+  { key: 'physicalStandard' as const, icon: Package, highlight: true, price: 12_500 },
+  { key: 'physicalPremium' as const, icon: Package, highlight: false, price: 15_000 },
+  { key: 'commission' as const, icon: Layers, highlight: false, priceLabel: '10 %' },
 ];
 
 export function PricingSection() {
@@ -27,13 +29,13 @@ export function PricingSection() {
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:mt-14 md:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:mt-14 md:grid-cols-2">
           {planConfig.map(plan => {
             const features = t(`pricing.${plan.key}.features`, {
               returnObjects: true,
             }) as string[];
             const period =
-              plan.key === 'physical' ? t('pricing.periodMonth') : t('pricing.periodSale');
+              plan.key === 'commission' ? t('pricing.periodSale') : t('pricing.periodMonth');
 
             return (
               <article

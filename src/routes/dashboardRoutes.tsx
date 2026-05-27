@@ -2,6 +2,7 @@ import React from 'react';
 import { lazyPage } from '@/routes/lazyPage';
 import { Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { SellerRoutePermissionGuard } from '@/components/billing/SellerRoutePermissionGuard';
 import { logger } from '@/lib/logger';
 
 // Helper pour route protégée
@@ -10,7 +11,9 @@ const pr = (path: string, Component: React.LazyExoticComponent<React.ComponentTy
     path={path}
     element={
       <ProtectedRoute>
-        <Component />
+        <SellerRoutePermissionGuard>
+          <Component />
+        </SellerRoutePermissionGuard>
       </ProtectedRoute>
     }
   />
@@ -105,6 +108,7 @@ const PaymentMethods = lazyPage(() => import('@/pages/PaymentMethods'));
 const PaymentConnectionsPage = lazyPage(() => import('@/pages/dashboard/PaymentConnectionsPage'));
 const Settings = lazyPage(() => import('@/pages/Settings'));
 const CreateProduct = lazyPage(() => import('@/pages/CreateProduct'));
+const StorePhysicalBilling = lazyPage(() => import('@/pages/dashboard/StorePhysicalBilling'));
 const EditProduct = lazyPage(() => import('@/pages/EditProduct'));
 const KYC = lazyPage(() => import('@/pages/KYC'));
 const Referrals = lazyPage(() => import('@/pages/Referrals'));
@@ -280,6 +284,7 @@ export const dashboardRoutes = (
     {/* Products CRUD */}
     {pr('/dashboard/products/new', CreateProduct)}
     {pr('/dashboard/products/new/:type', CreateProduct)}
+    {pr('/dashboard/billing/physical', StorePhysicalBilling)}
     {pr('/dashboard/products/:id/edit', EditProduct)}
 
     {/* Webhooks */}

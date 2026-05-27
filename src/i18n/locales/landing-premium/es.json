@@ -180,31 +180,55 @@
     "footnote": "Importes en franco CFA (XOF). Comisión del 10 % solo en ventas concretadas para productos digitales, cursos, servicios y obras de artista.",
     "periodMonth": "/ mes",
     "periodSale": "por venta",
-    "physical": {
-      "name": "Productos físicos",
+    "physicalBasic": {
+      "name": "Físico — Basic",
       "badge": "1 mes de prueba gratis",
-      "desc": "Ideal para tiendas con stock, logística y envío.",
+      "desc": "Para empezar a vender productos físicos (stock + envío).",
       "features": [
-        "Tienda online completa",
+        "Vender productos físicos",
         "Gestión de stock y variantes",
-        "Pagos FCFA e internacional",
-        "Marketplace Emarzona",
+        "Zonas y tarifas de envío",
         "Prueba gratis 30 días"
       ],
       "cta": "Probar 1 mes gratis"
     },
-    "digital": {
-      "name": "Digital, servicios, cursos online y obras de artista",
+    "physicalStandard": {
+      "name": "Físico — Standard",
+      "badge": "Recomendado",
+      "desc": "Para tiendas en crecimiento: más pedidos y menos errores.",
+      "features": [
+        "Todo en Basic",
+        "Seguimiento de envíos",
+        "Devoluciones (RMA) y políticas",
+        "Importación/Exportación CSV inventario",
+        "Alertas de stock"
+      ],
+      "cta": "Empezar prueba"
+    },
+    "physicalPremium": {
+      "name": "Físico — Premium",
+      "badge": "Avanzado",
+      "desc": "Para escalar operaciones con logística avanzada y optimización.",
+      "features": [
+        "Todo en Standard",
+        "Envíos por lotes y etiquetas",
+        "Lotes / caducidad / FEFO",
+        "Multi-almacenes y transferencias",
+        "Predicción de demanda"
+      ],
+      "cta": "Pasar a Premium"
+    },
+    "commission": {
+      "name": "Digital, servicios, cursos y obras de artista",
       "badge": "Sin suscripción",
-      "desc": "Productos digitales, cursos online, servicios y obras de artista.",
+      "desc": "Para los otros 4 sistemas: solo comisión en ventas exitosas.",
       "features": [
         "Sin cuota mensual fija",
         "10 % de comisión en ventas exitosas",
-        "Entrega digital y reservas",
-        "Formaciones y obras de artista",
+        "Entrega digital, reservas y cursos",
         "Pagos seguros incluidos"
       ],
-      "cta": "Empezar sin suscripción"
+      "cta": "Empezar"
     }
   },
   "cta": {

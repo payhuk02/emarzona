@@ -96,6 +96,8 @@ const AdminDataStorage = lazyPage(() => import('@/pages/admin/AdminDataStorage')
 const OfflineQueueManager = lazyPage(() => import('@/pages/admin/OfflineQueueManager'));
 const StorageDiagnosticPage = lazyPage(() => import('@/pages/admin/StorageDiagnosticPage'));
 const IntegrationsPage = lazyPage(() => import('@/pages/admin/IntegrationsPage'));
+const AdminApiKeys = lazyPage(() => import('@/pages/admin/AdminApiKeys'));
+const AdminVendorBilling = lazyPage(() => import('@/pages/admin/AdminVendorBilling'));
 const PlatformRevenue = lazyPage(() => import('@/pages/PlatformRevenue'));
 const AdminKYC = lazyPage(() => import('@/pages/AdminKYC'));
 const MarketingAutomationDashboard = lazyPage(() =>
@@ -145,6 +147,9 @@ export const adminRoutes = (
     {pr('/admin/returns', AdminReturnManagement)}
     {pr('/admin/integrations', IntegrationsPage)}
     {pr('/admin/webhooks', AdminWebhookManagement)}
+    {pr('/admin/api-keys', AdminApiKeys)}
+    {pr('/admin/subscriptions', AdminSubscriptions)}
+    {pr('/admin/vendor-billing', AdminVendorBilling)}
     {pr('/admin/loyalty', AdminLoyaltyManagement)}
     {pr('/admin/gift-cards', AdminGiftCardManagement)}
     {pr('/admin/suppliers', AdminSuppliersManagement)}

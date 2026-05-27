@@ -12,8 +12,8 @@ export const usePlatformSettings = (key: string = 'admin') => {
   const [settings, setSettings] = useState<PlatformSettings>({});
 
   const refresh = useCallback(async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('admin_config')
@@ -22,8 +22,8 @@ export const usePlatformSettings = (key: string = 'admin') => {
         .maybeSingle();
       if (error) throw error;
       setSettings((data?.settings as PlatformSettings) || {});
-    } catch ( _e: any) {
-      setError(e.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur de chargement des paramètres');
     } finally {
       setLoading(false);
     }
@@ -33,20 +33,25 @@ export const usePlatformSettings = (key: string = 'admin') => {
     refresh();
   }, [refresh]);
 
-  const updateSettings = useCallback(async (partial: Record<string, unknown>) => {
-    const next = { ...(settings || {}), ...(partial || {}) } as PlatformSettings;
-    const { error } = await supabase
-      .from('admin_config')
-      .upsert({ key, settings: next, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-    if (!error) setSettings(next);
-    return !error;
-  }, [key, settings]);
+  const updateSettings = useCallback(
+    async (partial: Record<string, unknown>) => {
+      const next = { ...(settings || {}), ...(partial || {}) } as PlatformSettings;
+      const { error: upsertError } = await supabase
+        .from('admin_config')
+        .upsert(
+          { key, settings: next, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+      if (upsertError) {
+        setError(upsertError.message);
+        return false;
+      }
+      setSettings(next);
+      setError(null);
+      return true;
+    },
+    [key, settings]
+  );
 
   return { loading, error, settings, refresh, updateSettings };
 };
-
-
-
-
-
-

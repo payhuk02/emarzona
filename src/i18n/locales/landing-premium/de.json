@@ -186,31 +186,55 @@
     "footnote": "Beträge in CFA-Franc (XOF). 10 % Provision nur bei abgeschlossenen Verkäufen für digitale Produkte, Kurse, Services und Kunstwerke.",
     "periodMonth": "/ Monat",
     "periodSale": "pro Verkauf",
-    "physical": {
-      "name": "Physische Produkte",
+    "physicalBasic": {
+      "name": "Physisch — Basic",
       "badge": "1 Monat kostenlos testen",
-      "desc": "Ideal für Shops mit Lager, Logistik und Versand.",
+      "desc": "Zum Start: physische Produkte verkaufen (Lager + Versand).",
       "features": [
-        "Vollständiger Online-Shop",
+        "Physische Produkte verkaufen",
         "Lager- & Variantenverwaltung",
-        "FCFA & internationale Zahlungen",
-        "Emarzona-Marktplatz",
+        "Versandzonen und Tarife",
         "30 Tage kostenlos testen"
       ],
       "cta": "1 Monat gratis testen"
     },
-    "digital": {
-      "name": "Digital, Services, Online-Kurse & Kunstwerke",
+    "physicalStandard": {
+      "name": "Physisch — Standard",
+      "badge": "Empfohlen",
+      "desc": "Für wachsende Shops: mehr Bestellungen, weniger Fehler.",
+      "features": [
+        "Alles aus Basic",
+        "Sendungsverfolgung",
+        "Retouren (RMA) & Richtlinien",
+        "CSV Import/Export Inventar",
+        "Bestandsalarme"
+      ],
+      "cta": "Test starten"
+    },
+    "physicalPremium": {
+      "name": "Physisch — Premium",
+      "badge": "Fortgeschritten",
+      "desc": "Für skalierte Ops: erweiterte Logistik, Optimierung und Automationen.",
+      "features": [
+        "Alles aus Standard",
+        "Batch-Versand & Labels",
+        "Chargen / Ablauf / FEFO",
+        "Multi-Lager & Transfers",
+        "Nachfrageprognose"
+      ],
+      "cta": "Zu Premium"
+    },
+    "commission": {
+      "name": "Digital, Services, Kurse & Kunstwerke",
       "badge": "Kein Abo",
-      "desc": "Digitale Produkte, Online-Kurse, Services und Kunstwerke.",
+      "desc": "Für die anderen 4 Systeme: nur Provision bei erfolgreichen Verkäufen.",
       "features": [
         "Keine feste Monatsgebühr",
         "10 % Provision bei erfolgreichen Verkäufen",
-        "Digitale Lieferung & Buchungen",
-        "Kurse & Kunstwerke",
+        "Digitale Lieferung, Buchungen & Kurse",
         "Sichere Zahlungen inklusive"
       ],
-      "cta": "Ohne Abo starten"
+      "cta": "Starten"
     }
   },
   "cta": {

@@ -3,11 +3,19 @@
  * Design professionnel et totalement responsive
  */
 
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BreadcrumbItem } from './Breadcrumb';
 import { BaseContextSidebar } from './BaseContextSidebar';
 import { ContextSidebarNavItem } from './ContextSidebarNavItem';
+import { useStore } from '@/hooks/useStore';
+import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { useToast } from '@/hooks/use-toast';
+import {
+  hasPhysicalFeatureAccess,
+  requiredPlanForFeature,
+  type PhysicalFeatureKey,
+} from '@/lib/billing/physical-plan-capabilities';
 import {
   ShoppingCart,
   Users,
@@ -119,11 +127,13 @@ const salesNavItems = [
     label: 'Services de Livraison',
     path: '/dashboard/shipping-services',
     icon: Truck,
+    featureKey: 'shipping.tracking' as PhysicalFeatureKey,
   },
   {
     label: 'Expéditions Batch',
     path: '/dashboard/batch-shipping',
     icon: PackageSearch,
+    featureKey: 'batch_shipping.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Kits Produits',
@@ -134,21 +144,25 @@ const salesNavItems = [
     label: 'Prévisions Demande',
     path: '/dashboard/demand-forecasting',
     icon: TrendingUp,
+    featureKey: 'forecasting.demand' as PhysicalFeatureKey,
   },
   {
     label: 'Optimisation Coûts',
     path: '/dashboard/cost-optimization',
     icon: DollarSign,
+    featureKey: 'cost_optimization.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Fournisseurs',
     path: '/dashboard/suppliers',
     icon: Factory,
+    featureKey: 'suppliers.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Entrepôts',
     path: '/dashboard/warehouses',
     icon: Building2,
+    featureKey: 'warehouses.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Gestion Stocks',
@@ -159,36 +173,43 @@ const salesNavItems = [
     label: 'Analytics Produits Physiques',
     path: '/dashboard/physical-analytics',
     icon: TrendingUp,
+    featureKey: 'analytics.physical' as PhysicalFeatureKey,
   },
   {
     label: 'Lots & Expiration',
     path: '/dashboard/physical-lots',
     icon: Package,
+    featureKey: 'lots_expiration.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Numéros de Série',
     path: '/dashboard/physical-serial-tracking',
     icon: Hash,
+    featureKey: 'serial_tracking.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Scanner Codes-barres',
     path: '/dashboard/physical-barcode-scanner',
     icon: Camera,
+    featureKey: 'barcode_scanner.use' as PhysicalFeatureKey,
   },
   {
     label: 'Précommandes',
     path: '/dashboard/physical-preorders',
     icon: Package,
+    featureKey: 'preorders.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Backorders',
     path: '/dashboard/physical-backorders',
     icon: Package,
+    featureKey: 'backorders.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Bundles Produits',
     path: '/dashboard/physical-bundles',
     icon: ShoppingBag,
+    featureKey: 'bundles.manage' as PhysicalFeatureKey,
   },
   {
     label: 'Multi-devises',
@@ -223,7 +244,22 @@ const salesNavGroups = [
 
 export const SalesSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { store } = useStore();
+  const { planSlug } = useStorePhysicalAccess(store?.id ?? null);
   const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
+
+  const resolvedGroups = useMemo(() => {
+    return salesNavGroups.map(group => ({
+      ...group,
+      items: group.items.map(item => {
+        const featureKey = item.featureKey as PhysicalFeatureKey | undefined;
+        const locked = featureKey ? !hasPhysicalFeatureAccess(planSlug, featureKey) : false;
+        return { ...item, locked, featureKey };
+      }),
+    }));
+  }, [planSlug]);
 
   const getActiveSection = () => {
     const activeItem = salesNavItems.find(
@@ -244,7 +280,7 @@ export const SalesSidebar = () => {
   return (
     <BaseContextSidebar breadcrumbItems={breadcrumbItems}>
       <nav className="space-y-4 md:space-y-6" aria-label="Navigation ventes">
-        {salesNavGroups.map((group, groupIndex) => (
+        {resolvedGroups.map((group, groupIndex) => (
           <div key={groupIndex} className="space-y-2">
             <button
               type="button"
@@ -273,21 +309,32 @@ export const SalesSidebar = () => {
                     (item.path !== '/dashboard/orders' && location.pathname.startsWith(item.path));
 
                   return (
-                    <ContextSidebarNavItem
-                      key={item.path}
-                      label={item.label}
-                      path={item.path}
-                      icon={item.icon}
-                      isActive={isActive}
-                      onClick={() => {
-                        if (window.innerWidth < 768) {
-                          setTimeout(() => {
-                            const event = new Event('close-mobile-sidebar');
-                            window.dispatchEvent(event);
-                          }, 100);
-                        }
-                      }}
-                    />
+                    <div key={item.path} className="relative">
+                      <ContextSidebarNavItem
+                        label={item.locked ? `${item.label} (upgrade)` : item.label}
+                        path={item.locked ? '/dashboard/billing/physical' : item.path}
+                        icon={item.icon}
+                        isActive={isActive}
+                        onClick={() => {
+                          if (item.locked && item.featureKey) {
+                            const required = requiredPlanForFeature(item.featureKey)
+                              .replace('physical_', '')
+                              .toUpperCase();
+                            toast({
+                              title: 'Fonctionnalité verrouillée',
+                              description: `${item.label} requiert le plan ${required}.`,
+                            });
+                            navigate('/dashboard/billing/physical');
+                          }
+                          if (window.innerWidth < 768) {
+                            setTimeout(() => {
+                              const event = new Event('close-mobile-sidebar');
+                              window.dispatchEvent(event);
+                            }, 100);
+                          }
+                        }}
+                      />
+                    </div>
                   );
                 })}
               </div>

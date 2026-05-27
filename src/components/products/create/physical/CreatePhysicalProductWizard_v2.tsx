@@ -51,6 +51,12 @@ import { ProductStatisticsDisplaySettings } from '../shared/ProductStatisticsDis
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/hooks/useStore';
 import { useWizardServerValidation } from '@/hooks/useWizardServerValidation';
+import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { PhysicalSubscriptionRequired } from '@/components/billing/PhysicalSubscriptionRequired';
+import {
+  formatPhysicalSubscriptionError,
+  isPhysicalSubscriptionError,
+} from '@/lib/billing/platform-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -167,6 +173,7 @@ export const CreatePhysicalProductWizard = ({
 
   // Use props or fallback to hook store
   const storeId = propsStoreId || store?.id;
+  const physicalAccess = useStorePhysicalAccess(storeId);
 
   // Server validation hook
   const {
@@ -279,7 +286,7 @@ export const CreatePhysicalProductWizard = ({
       // Handle affiliate updates
       if (data.affiliate !== undefined) {
         // Si prev.affiliate existe, l'utiliser comme base, sinon utiliser les valeurs par défaut
-        const  defaultAffiliate: PhysicalProductAffiliateSettings = {
+        const defaultAffiliate: PhysicalProductAffiliateSettings = {
           enabled: false,
           commission_rate: 10,
           commission_type: 'percentage',
@@ -357,7 +364,7 @@ export const CreatePhysicalProductWizard = ({
    * Load draft from localStorage
    */
   useEffect(() => {
-    let  savedDraft: string | null = null;
+    let savedDraft: string | null = null;
     try {
       savedDraft = localStorage.getItem('physical-product-draft');
     } catch {
@@ -386,7 +393,7 @@ export const CreatePhysicalProductWizard = ({
    */
   const validateStep = useCallback(
     async (step: number): Promise<boolean> => {
-      const  errors: string[] = [];
+      const errors: string[] = [];
 
       // Réinitialiser les erreurs serveur
       clearServerErrors();
@@ -635,7 +642,7 @@ export const CreatePhysicalProductWizard = ({
 
       // 1. Generate slug from name and ensure uniqueness
       // Utiliser le slug du formulaire s'il est fourni, sinon générer depuis le nom
-      let  slug=
+      let slug =
         formData.slug?.trim() ||
         formData.name
           ?.toLowerCase()
@@ -644,7 +651,7 @@ export const CreatePhysicalProductWizard = ({
         'product';
 
       // Vérifier l'unicité du slug et générer un nouveau si nécessaire
-      let  attempts= 0;
+      let attempts = 0;
       const maxAttempts = 10;
       while (attempts < maxAttempts) {
         const { data: existing } = await supabase
@@ -711,6 +718,9 @@ export const CreatePhysicalProductWizard = ({
         .single();
 
       if (productError) {
+        if (isPhysicalSubscriptionError(productError.message)) {
+          throw new Error(formatPhysicalSubscriptionError());
+        }
         // Gestion améliorée des erreurs de contrainte unique
         if (productError.code === '23505' || productError.message?.includes('duplicate key')) {
           const constraintMatch = productError.message?.match(/constraint ['"]([^'"]+)['"]/);
@@ -827,7 +837,7 @@ export const CreatePhysicalProductWizard = ({
             price: product.price,
             currency: product.currency,
             created_at: product.created_at,
-          }).catch( err => {
+          }).catch(err => {
             logger.error('Error triggering webhook', { error: err, productId: product.id });
           });
         });
@@ -882,8 +892,8 @@ export const CreatePhysicalProductWizard = ({
    */
   const handlePublish = useCallback(async () => {
     // Validate required steps (1-4 are required, 5-7 are optional)
-    let  allValid= true;
-    for (let  step= 1; step <= 4; step++) {
+    let allValid = true;
+    for (let step = 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -1025,10 +1035,18 @@ export const CreatePhysicalProductWizard = ({
     };
   }, []);
 
-  if (storeLoading) {
+  if (storeLoading || physicalAccess.loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (storeId && !physicalAccess.allowed) {
+    return (
+      <div className="min-h-screen bg-background py-6">
+        <PhysicalSubscriptionRequired storeId={storeId} onBack={onBack} />
       </div>
     );
   }
@@ -1365,9 +1383,3 @@ export const CreatePhysicalProductWizard = ({
     </div>
   );
 };
-
-
-
-
-
-

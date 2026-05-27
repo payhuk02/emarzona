@@ -27,6 +27,7 @@ import {
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { stripIntegrationsTree } from '@/lib/admin/integration-secrets';
 
 interface IntegrationsSectionProps {
   onChange?: () => void;
@@ -125,7 +126,10 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
 
     setIntegrations(updatedIntegrations);
 
-    await save('integrations', updatedIntegrations);
+    await save(
+      'integrations',
+      stripIntegrationsTree(updatedIntegrations as Record<string, unknown>)
+    );
 
     if (onChange) onChange();
   };
@@ -755,9 +759,10 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
             <div className="space-y-1">
               <Label className="text-amber-500">Important</Label>
               <p className="text-sm text-muted-foreground">
-                Les clés API Moneroo et PayDunya doivent être configurées dans Supabase Edge
-                Functions Secrets pour des raisons de sécurité. Les configurations ici sont à titre
-                informatif uniquement.
+                Les clés API (Moneroo, Resend, Stripe, FedEx, OpenAI, etc.) doivent être configurées
+                dans Supabase Edge Functions Secrets. Cette interface enregistre uniquement les
+                options non sensibles (activation, IDs publics, mode) — les secrets saisis ne sont
+                pas persistés.
               </p>
             </div>
           </div>

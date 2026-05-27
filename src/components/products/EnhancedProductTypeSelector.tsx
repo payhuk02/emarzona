@@ -12,6 +12,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,14 +35,14 @@ import {
   Info,
   Keyboard,
   Palette,
-  Music,
-  BookOpen,
-  Brush,
-  Video,
+  Lock,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { useToast } from '@/hooks/use-toast';
+import { PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
 
 interface ProductType {
   value: string;
@@ -103,7 +104,7 @@ const PRODUCT_TYPES: ProductType[] = [
     label: 'Produit Physique',
     icon: Package,
     description: 'Vêtements, accessoires, objets artisanaux',
-    features: ['Variants & Attributs', 'Gestion inventaire', 'Suivi livraison', 'Options shipping'],
+    features: ['Variants & Attributs', 'Gestion inventaire', 'Abonnement requis', 'Essai 30 jours'],
     color: 'green',
     gradient: 'from-green-500 to-emerald-500',
     popular: false,
@@ -181,6 +182,9 @@ export const EnhancedProductTypeSelector = ({
   storeId,
 }: EnhancedProductTypeSelectorProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const physicalAccess = useStorePhysicalAccess(storeId);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ProductStats>({
     digital: 0,
@@ -278,10 +282,19 @@ export const EnhancedProductTypeSelector = ({
    */
   const handleSelect = useCallback(
     (type: string) => {
+      if (type === 'physical' && !physicalAccess.loading && !physicalAccess.allowed) {
+        toast({
+          title: 'Abonnement produits physiques requis',
+          description: `Activez un plan (essai ${PHYSICAL_TRIAL_DAYS} jours, puis 7500 / 12500 / 15000 XOF).`,
+          variant: 'destructive',
+        });
+        navigate('/dashboard/billing/physical');
+        return;
+      }
       logger.info('Type de produit sélectionné', { type });
       onSelect(type);
     },
-    [onSelect]
+    [onSelect, physicalAccess.loading, physicalAccess.allowed, toast, navigate]
   );
 
   /**
@@ -538,6 +551,8 @@ export const EnhancedProductTypeSelector = ({
             const Icon = type.icon;
             const count = stats[type.value as keyof ProductStats] || 0;
             const isHovered = hoveredType === type.value;
+            const isPhysicalLocked =
+              type.value === 'physical' && !physicalAccess.loading && !physicalAccess.allowed;
 
             return (
               <Card
@@ -548,7 +563,8 @@ export const EnhancedProductTypeSelector = ({
                   'animate-in fade-in slide-in-from-bottom-4',
                   'touch-manipulation',
                   isHovered && 'ring-2 ring-primary shadow-xl',
-                  'bg-card/50 backdrop-blur-sm'
+                  'bg-card/50 backdrop-blur-sm',
+                  isPhysicalLocked && 'opacity-90 border-amber-500/40'
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
                 onMouseEnter={() => setHoveredType(type.value)}
@@ -575,6 +591,25 @@ export const EnhancedProductTypeSelector = ({
 
                 {/* Badges */}
                 <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
+                  {type.value === 'physical' &&
+                    physicalAccess.allowed &&
+                    physicalAccess.status === 'trialing' && (
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] sm:text-xs bg-green-500/15 text-green-700"
+                      >
+                        Essai {physicalAccess.trialDaysRemaining ?? PHYSICAL_TRIAL_DAYS}j
+                      </Badge>
+                    )}
+                  {isPhysicalLocked && (
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] sm:text-xs bg-amber-500/15 text-amber-700"
+                    >
+                      <Lock className="h-3 w-3 mr-1" />
+                      Abonnement
+                    </Badge>
+                  )}
                   {type.popular && (
                     <Badge
                       variant="secondary"
@@ -734,7 +769,10 @@ export const EnhancedProductTypeSelector = ({
               <strong>{t('products.help.digital', 'Les Produits digitaux')}</strong>{' '}
               {t('products.help.digitalDesc', 'pour des fichiers téléchargeables.')}{' '}
               <strong>{t('products.help.physical', 'Les Produits physiques')}</strong>{' '}
-              {t('products.help.physicalDesc', 'nécessitent une livraison.')}{' '}
+              {t(
+                'products.help.physicalDesc',
+                'requièrent un abonnement mensuel (essai 30 jours). Les autres systèmes sont à commission 10%.'
+              )}{' '}
               <strong>{t('products.help.services', 'Les Services')}</strong>{' '}
               {t('products.help.servicesDesc', 'pour des prestations avec réservations.')}
             </p>

@@ -1,0 +1,222 @@
+/**
+ * Écran de blocage / onboarding abonnement produits physiques (Enterprise UX)
+ */
+
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useStorePhysicalAccess } from '@/hooks/billing/useStorePhysicalAccess';
+import { PHYSICAL_PLAN_PRICES_XOF, PHYSICAL_TRIAL_DAYS } from '@/lib/billing/platform-pricing';
+import { formatCurrency } from '@/lib/utils';
+import { Package, Lock, Sparkles, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { initiateMonerooPayment } from '@/lib/moneroo-payment';
+import { useToast } from '@/hooks/use-toast';
+
+type PhysicalSubscriptionRequiredProps = {
+  storeId: string;
+  onBack?: () => void;
+  compact?: boolean;
+};
+
+const PLAN_CARDS = [
+  { slug: 'physical_basic', label: 'Basic', price: PHYSICAL_PLAN_PRICES_XOF.basic },
+  { slug: 'physical_standard', label: 'Standard', price: PHYSICAL_PLAN_PRICES_XOF.standard },
+  { slug: 'physical_premium', label: 'Premium', price: PHYSICAL_PLAN_PRICES_XOF.premium },
+] as const;
+
+export function PhysicalSubscriptionRequired({
+  storeId,
+  onBack,
+  compact = false,
+}: PhysicalSubscriptionRequiredProps) {
+  const access = useStorePhysicalAccess(storeId);
+  const { toast } = useToast();
+  const [checkingOutSlug, setCheckingOutSlug] = useState<string | null>(null);
+
+  if (access.loading) {
+    return (
+      <div className={compact ? 'p-4' : 'container mx-auto max-w-4xl p-6 space-y-4'}>
+        <Skeleton className="h-12 w-2/3" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  const statusMessage = (() => {
+    switch (access.status) {
+      case 'trialing':
+        return access.trialDaysRemaining != null
+          ? `Essai gratuit — ${access.trialDaysRemaining} jour(s) restant(s)`
+          : `Essai gratuit — ${PHYSICAL_TRIAL_DAYS} jours`;
+      case 'expired':
+        return 'Votre essai gratuit est terminé. Choisissez un plan pour continuer.';
+      case 'past_due':
+        return 'Paiement en retard — régularisez votre abonnement.';
+      case 'cancelled':
+        return 'Abonnement annulé — réactivez un plan pour vendre des produits physiques.';
+      case 'active':
+        return `Plan actif : ${access.planName ?? 'Physique'}`;
+      default:
+        return 'Abonnement requis pour activer l’e-commerce produits physiques.';
+    }
+  })();
+
+  return (
+    <div className={compact ? 'space-y-4' : 'container mx-auto max-w-4xl p-4 sm:p-6 space-y-6'}>
+      {!compact && onBack && (
+        <Button variant="ghost" onClick={onBack} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Retour au choix du type
+        </Button>
+      )}
+
+      <div className="flex items-start gap-3">
+        <div className="rounded-lg bg-primary/10 p-3">
+          <Package className="h-8 w-8 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">Produits physiques — abonnement requis</h1>
+          <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+            Seul le système <strong>produits physiques</strong> nécessite un abonnement mensuel (
+            {PHYSICAL_TRIAL_DAYS} jours d&apos;essai gratuit). Les autres systèmes (digital,
+            services, cours, œuvres) restent à <strong>commission 10%</strong> par vente réussie.
+          </p>
+        </div>
+      </div>
+
+      <Alert variant={access.allowed ? 'default' : 'destructive'}>
+        {access.allowed ? <CheckCircle2 className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+        <AlertTitle>{access.allowed ? 'Accès autorisé' : 'Création bloquée'}</AlertTitle>
+        <AlertDescription>{statusMessage}</AlertDescription>
+      </Alert>
+
+      {access.trialEndsAt && access.status === 'trialing' && (
+        <p className="text-xs text-muted-foreground">
+          Fin d&apos;essai :{' '}
+          {format(new Date(access.trialEndsAt), "dd MMMM yyyy 'à' HH:mm", { locale: fr })}
+        </p>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {PLAN_CARDS.map(plan => (
+          <Card
+            key={plan.slug}
+            className={
+              access.planSlug === plan.slug ? 'border-primary ring-1 ring-primary/30' : undefined
+            }
+          >
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">{plan.label}</CardTitle>
+                {access.planSlug === plan.slug && <Badge variant="secondary">Plan actuel</Badge>}
+              </div>
+              <CardDescription>Produits physiques</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{formatCurrency(plan.price)}</p>
+              <p className="text-xs text-muted-foreground">/ mois après essai</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {!access.allowed && (
+        <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sm">Activez votre abonnement physique</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Consultez votre facturation ou contactez le support pour choisir un plan (7500 /
+                  12500 / 15000 XOF).
+                </p>
+              </div>
+            </div>
+            <Button asChild className="shrink-0">
+              <Link to="/dashboard/billing/physical">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Voir la facturation
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {!access.allowed && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Activer un plan</CardTitle>
+            <CardDescription>
+              Paiement sécurisé via Moneroo. À confirmation, votre accès “produits physiques” est
+              activé automatiquement.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-3">
+            {PLAN_CARDS.map(plan => (
+              <Button
+                key={plan.slug}
+                variant={plan.slug === 'physical_standard' ? 'default' : 'outline'}
+                disabled={checkingOutSlug !== null}
+                onClick={async () => {
+                  setCheckingOutSlug(plan.slug);
+                  try {
+                    const {
+                      data: { user },
+                      error: userErr,
+                    } = await supabase.auth.getUser();
+                    if (userErr) throw userErr;
+                    if (!user?.email) {
+                      throw new Error('Email requis pour initier le paiement.');
+                    }
+
+                    const result = await initiateMonerooPayment({
+                      storeId,
+                      amount: plan.price,
+                      currency: 'XOF',
+                      description: `Abonnement produits physiques — ${plan.label}`,
+                      customerEmail: user.email,
+                      customerName:
+                        (user.user_metadata?.full_name as string | undefined) ||
+                        user.email.split('@')[0] ||
+                        undefined,
+                      metadata: {
+                        purpose: 'physical_subscription',
+                        plan_slug: plan.slug,
+                        product_type: 'physical',
+                      },
+                      returnUrl: `${window.location.origin}/dashboard/billing/physical?success=1`,
+                      cancelUrl: `${window.location.origin}/dashboard/billing/physical?cancel=1`,
+                    });
+
+                    if (!result?.checkout_url) {
+                      throw new Error("Impossible d'initier le checkout.");
+                    }
+                    window.location.href = result.checkout_url;
+                  } catch (e: unknown) {
+                    toast({
+                      title: 'Erreur checkout',
+                      description: e instanceof Error ? e.message : 'Erreur inconnue',
+                      variant: 'destructive',
+                    });
+                  } finally {
+                    setCheckingOutSlug(null);
+                  }
+                }}
+              >
+                {checkingOutSlug === plan.slug ? 'Redirection…' : `Choisir ${plan.label}`}
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

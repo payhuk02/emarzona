@@ -299,6 +299,60 @@ async function resolveAuthorizedPaymentAmount(
     (validated.metadata?.order_id as string | undefined) ||
     (validated.metadata?.orderId as string | undefined);
 
+  // -----------------------------------------------------------------------
+  // Physical subscription checkout: validate amount against plan price
+  // -----------------------------------------------------------------------
+  const purpose = (validated.metadata?.purpose as string | undefined) || undefined;
+  const planSlug =
+    (validated.metadata?.plan_slug as string | undefined) ||
+    (validated.metadata?.planSlug as string | undefined) ||
+    undefined;
+
+  if (purpose === 'physical_subscription') {
+    if (!supabaseUrl || !serviceKey) {
+      return {
+        valid: false,
+        error: 'Configuration serveur incomplète pour la validation du paiement',
+      };
+    }
+    if (!validated.storeId) {
+      return { valid: false, error: 'storeId requis pour un abonnement physique' };
+    }
+    if (!planSlug) {
+      return { valid: false, error: 'plan_slug requis pour un abonnement physique' };
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+    const { data: plan, error } = await supabase
+      .from('platform_vendor_plans')
+      .select('slug, monthly_price, currency, is_active, applies_to_product_type')
+      .eq('slug', planSlug)
+      .maybeSingle();
+
+    if (error || !plan) {
+      return { valid: false, error: 'Plan introuvable' };
+    }
+    if (!plan.is_active || plan.applies_to_product_type !== 'physical') {
+      return { valid: false, error: 'Plan non valide pour produits physiques' };
+    }
+
+    const expected = Math.round(Number(plan.monthly_price));
+    if (Math.round(validated.amount) !== expected) {
+      console.warn('[Moneroo] Physical subscription amount mismatch', {
+        clientAmount: validated.amount,
+        serverAmount: expected,
+        planSlug,
+      });
+      return { valid: false, error: 'Montant invalide pour ce plan' };
+    }
+
+    return {
+      valid: true,
+      amount: expected,
+      currency: (plan.currency as string) || validated.currency,
+    };
+  }
+
   const needsDbLookup = !!(
     validated.productId ||
     (orderIdFromMeta && isValidUUID(String(orderIdFromMeta)))

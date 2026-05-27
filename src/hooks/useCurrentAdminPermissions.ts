@@ -1,24 +1,20 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { isPrincipalAdminEmail } from '@/lib/principal-admin';
+import {
+  fallbackPermissionsForRole,
+  normalizeRolePermissions,
+  resolvePlatformRole,
+  type EffectivePermissions,
+  type PlatformRoleName,
+} from '@/lib/admin/admin-permissions';
 
-export type EffectivePermissions = Record<string, boolean>;
-
-// Toutes les permissions disponibles
-const ALL_PERMISSIONS: EffectivePermissions = {
-  'users.manage': true,
-  'users.roles': true,
-  'products.manage': true,
-  'orders.manage': true,
-  'payments.manage': true,
-  'disputes.manage': true,
-  'settings.manage': true,
-  'emails.manage': true,
-  'analytics.view': true,
-};
+export type { EffectivePermissions } from '@/lib/admin/admin-permissions';
 
 export const useCurrentAdminPermissions = () => {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string>('user');
+  const [platformRole, setPlatformRole] = useState<PlatformRoleName | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
   const [permissions, setPermissions] = useState<EffectivePermissions>({});
   const [error, setError] = useState<string | null>(null);
@@ -27,48 +23,60 @@ export const useCurrentAdminPermissions = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Vérifier le rôle admin via user_roles (fonction sécurisée has_role)
-      const { data: isAdmin } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin',
+      const principalAdmin = isPrincipalAdminEmail(user.email);
+
+      const [{ data: profile }, { data: isAdminRpc }] = await Promise.all([
+        supabase.from('profiles').select('role, is_super_admin').eq('id', user.id).maybeSingle(),
+        supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
+      ]);
+
+      const profileRole = profile?.role ?? null;
+      const isStaffLike = profileRole === 'staff' || profileRole === 'moderator';
+
+      const resolved = resolvePlatformRole({
+        isSuperAdmin: principalAdmin || Boolean(profile?.is_super_admin),
+        profileRole,
+        hasAdminRole: Boolean(isAdminRpc),
+        hasModeratorRole: isStaffLike,
       });
 
-      if (isAdmin) {
-        setRole('admin');
-        setIsSuperAdmin(true);
-        setPermissions(ALL_PERMISSIONS);
-        setLoading(false);
-        return;
-      }
-
-      // Vérifier le rôle moderator
-      const { data: isModerator } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'moderator',
-      });
-
-      if (isModerator) {
-        setRole('moderator');
+      if (!resolved) {
+        setRole('user');
+        setPlatformRole(null);
         setIsSuperAdmin(false);
-        setPermissions({
-          'products.manage': true,
-          'orders.manage': true,
-          'disputes.manage': true,
-          'analytics.view': true,
-        });
-        setLoading(false);
+        setPermissions({});
         return;
       }
 
-      // Utilisateur standard
-      setRole('user');
-      setIsSuperAdmin(false);
-      setPermissions({});
+      setPlatformRole(resolved);
+      setRole(resolved);
+      setIsSuperAdmin(resolved === 'super_admin');
+
+      const { data: roleRow, error: roleError } = await supabase
+        .from('platform_roles')
+        .select('permissions')
+        .eq('role', resolved)
+        .maybeSingle();
+
+      if (roleError) {
+        setPermissions(fallbackPermissionsForRole(resolved));
+        return;
+      }
+
+      const fromDb = normalizeRolePermissions(roleRow?.permissions);
+      const hasAny = Object.values(fromDb).some(Boolean);
+      setPermissions(hasAny ? fromDb : fallbackPermissionsForRole(resolved));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Unknown error');
+      setRole('user');
+      setPlatformRole(null);
+      setIsSuperAdmin(false);
+      setPermissions({});
     } finally {
       setLoading(false);
     }
@@ -78,10 +86,13 @@ export const useCurrentAdminPermissions = () => {
     refresh();
   }, [refresh]);
 
-  const can = useCallback((key: string) => {
-    if (isSuperAdmin) return true;
-    return Boolean(permissions?.[key]);
-  }, [isSuperAdmin, permissions]);
+  const can = useCallback(
+    (key: string) => {
+      if (isSuperAdmin) return true;
+      return Boolean(permissions?.[key]);
+    },
+    [isSuperAdmin, permissions]
+  );
 
-  return { loading, error, role, isSuperAdmin, permissions, can, refresh };
+  return { loading, error, role, platformRole, isSuperAdmin, permissions, can, refresh };
 };

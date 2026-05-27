@@ -26,6 +26,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:unit": "vitest run",
+    "test:guards": "vitest run src/components/billing/__tests__/SellerRoutePermissionGuard.test.tsx src/lib/billing/__tests__/physical-route-capabilities.test.ts src/lib/admin/__tests__/admin-route-permissions.test.ts",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --config vitest.ci.config.ts",

@@ -26,6 +26,14 @@ export const RequireAAL2 = ({ children }: RequireAAL2Props) => {
       '/admin/users',
       '/admin/products',
       '/admin/disputes',
+      '/admin/settings',
+      '/admin/commission-settings',
+      '/admin/commission-payments',
+      '/admin/store-withdrawals',
+      '/admin/webhooks',
+      '/admin/integrations',
+      '/admin/api-keys',
+      '/admin/vendor-billing',
     ];
     return prefixes.some(prefix => location.pathname.startsWith(prefix));
   }, [settings, location.pathname, isPrincipalAdmin]);

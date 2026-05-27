@@ -386,6 +386,64 @@ serve(async req => {
         }
       }
 
+      // -------------------------------------------------------------------
+      // 🧾 Abonnement produits physiques (pas de order_id)
+      // -------------------------------------------------------------------
+      try {
+        const purpose =
+          (transaction?.metadata as Record<string, unknown> | null | undefined)?.purpose ||
+          (metadata as Record<string, unknown> | null | undefined)?.purpose;
+        const planSlug =
+          (transaction?.metadata as Record<string, unknown> | null | undefined)?.plan_slug ||
+          (metadata as Record<string, unknown> | null | undefined)?.plan_slug;
+
+        if (!transaction.order_id && purpose === 'physical_subscription' && planSlug) {
+          const { data: plan, error: planError } = await supabase
+            .from('platform_vendor_plans')
+            .select('id, slug, monthly_price, currency, trial_days, applies_to_product_type')
+            .eq('slug', String(planSlug))
+            .maybeSingle();
+
+          if (planError || !plan) {
+            console.error('Subscription plan not found for webhook:', planError);
+          } else if (plan.applies_to_product_type !== 'physical') {
+            console.error('Subscription plan not physical, ignoring:', plan.slug);
+          } else {
+            const now = new Date();
+            const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            // Activer / mettre à jour la souscription boutique
+            await supabase
+              .from('store_platform_subscriptions')
+              .update({
+                plan_id: plan.id,
+                status: 'active',
+                billing_cycle: 'monthly',
+                current_period_start: now.toISOString(),
+                current_period_end: periodEnd.toISOString(),
+                trial_ends_at: null,
+                payment_provider: 'moneroo_platform',
+                external_subscription_id: transaction.moneroo_transaction_id ?? null,
+                metadata: {
+                  last_transaction_id: transaction.id,
+                  last_moneroo_transaction_id: transaction.moneroo_transaction_id ?? null,
+                  activated_via: 'moneroo_webhook',
+                },
+                updated_at: now.toISOString(),
+              })
+              .eq('store_id', transaction.store_id);
+
+            console.log('Activated physical subscription for store', {
+              store_id: transaction.store_id,
+              plan: plan.slug,
+              transaction_id: transaction.id,
+            });
+          }
+        }
+      } catch (subErr: unknown) {
+        console.error('Error activating physical subscription:', subErr);
+      }
+
       // ✅ Créer une notification de paiement réussi
       // NOTE: Cette notification sera automatiquement affichée avec son via useRealtimeNotifications
       // Pour une meilleure cohérence, idéalement utiliser sendUnifiedNotification (nécessite adaptation pour Edge Functions)
