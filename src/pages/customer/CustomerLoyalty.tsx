@@ -40,6 +40,7 @@ import {
   TrendingUp,
   Sparkles,
   Trophy,
+  Award,
   Star,
   ArrowRight,
   CheckCircle,
