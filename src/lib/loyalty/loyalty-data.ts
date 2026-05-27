@@ -130,6 +130,13 @@ export const loyaltyQueryOptions = {
   staleTime: 60_000,
 };
 
+function isUuid(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  );
+}
+
 function toTierType(value: unknown): LoyaltyTierType {
   const tiers: LoyaltyTierType[] = ['bronze', 'silver', 'gold', 'platinum'];
   return tiers.includes(value as LoyaltyTierType) ? (value as LoyaltyTierType) : 'bronze';
@@ -373,6 +380,7 @@ export async function fetchLoyaltyTiersByIds(tierIds: string[]): Promise<Map<str
 }
 
 export async function fetchMyLoyaltyPointsRows(userId: string): Promise<LoyaltyPoints[]> {
+  if (!isUuid(userId)) return [];
   try {
     // 1) Moderne (2025-01-27)
     const modern = await supabase
@@ -444,6 +452,7 @@ export async function fetchLoyaltyPointsForStore(
   storeId: string,
   userId: string
 ): Promise<LoyaltyPoints | null> {
+  if (!isUuid(storeId) || !isUuid(userId)) return null;
   try {
     // 1) Moderne
     const modern = await supabase
@@ -487,6 +496,7 @@ export async function fetchLoyaltyTransactions(
   userId: string,
   filters?: { transaction_type?: string; date_from?: string; date_to?: string }
 ): Promise<LoyaltyTransaction[]> {
+  if (!isUuid(storeId) || !isUuid(userId)) return [];
   try {
     // 1) Legacy v1 (colonnes reason/reference/metadata)
     let queryV1 = supabase
@@ -551,6 +561,8 @@ export async function fetchLoyaltyRedemptions(
   userId: string,
   storeId?: string
 ): Promise<LoyaltyRewardRedemption[]> {
+  if (!isUuid(userId)) return [];
+  if (storeId && !isUuid(storeId)) return [];
   try {
     // IMPORTANT: pas de join embed ici pour éviter des 400 si le schéma de `loyalty_rewards` diverge.
     const fetchModern = async (): Promise<LoyaltyRewardRedemption[] | null> => {

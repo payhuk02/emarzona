@@ -58,6 +58,7 @@ export const useMyLoyaltyPoints = () => {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return [];
+      if (!user.id) return [];
 
       return fetchMyLoyaltyPointsRows(user.id);
     },
