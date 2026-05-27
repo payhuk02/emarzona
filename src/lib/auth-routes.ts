@@ -41,6 +41,18 @@ export function getPlatformUrl(path: string): string {
   return `${PLATFORM_ORIGIN}${normalized}`;
 }
 
+/** Lien SPA sur emarzona.com ou URL absolue depuis une boutique (*.myemarzona.shop). */
+export function resolvePlatformNavTarget(path: string): {
+  href: string;
+  useSpaLink: boolean;
+} {
+  if (isOffPlatformHost()) {
+    return { href: getPlatformUrl(path), useSpaLink: false };
+  }
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return { href: normalized, useSpaLink: true };
+}
+
 export function getPlatformLoginUrl(): string {
   return getPlatformUrl(AUTH_LOGIN_PATH);
 }

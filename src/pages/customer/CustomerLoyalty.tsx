@@ -46,20 +46,19 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { LoyaltyTierType, LoyaltyRewardType } from '@/types/loyalty';
 
-const  TIER_COLORS: Record<LoyaltyTierType, string> = {
+const TIER_COLORS: Record<LoyaltyTierType, string> = {
   bronze: '#CD7F32',
   silver: '#C0C0C0',
   gold: '#FFD700',
   platinum: '#E5E4E2',
 };
 
-const  REWARD_TYPE_LABELS: Record<LoyaltyRewardType, string> = {
+const REWARD_TYPE_LABELS: Record<LoyaltyRewardType, string> = {
   discount: 'Réduction',
   free_product: 'Produit gratuit',
   free_shipping: 'Livraison gratuite',
@@ -78,13 +77,16 @@ export default function CustomerLoyalty() {
   const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null);
   const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
 
-  // Sélectionner le premier store par défaut
-  const defaultStore = useMemo(() => {
+  useEffect(() => {
     if (myPoints && myPoints.length > 0 && !selectedStoreId) {
       setSelectedStoreId(myPoints[0].store_id);
-      return myPoints[0];
     }
-    return myPoints?.find(p => p.store_id === selectedStoreId);
+  }, [myPoints, selectedStoreId]);
+
+  const defaultStore = useMemo(() => {
+    if (!myPoints?.length) return undefined;
+    if (!selectedStoreId) return myPoints[0];
+    return myPoints.find(p => p.store_id === selectedStoreId) ?? myPoints[0];
   }, [myPoints, selectedStoreId]);
 
   // Charger les données pour le store sélectionné
@@ -595,9 +597,3 @@ export default function CustomerLoyalty() {
     </SidebarProvider>
   );
 }
-
-
-
-
-
-

@@ -63,7 +63,7 @@ function useOrbitRadius() {
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
-      setRadius(w < 380 ? 92 : w < 640 ? 108 : w < 1024 ? 140 : 168);
+      setRadius(w < 380 ? 96 : w < 640 ? 112 : w < 1024 ? 148 : 178);
     };
     update();
     window.addEventListener('resize', update);
@@ -149,7 +149,7 @@ export function PremiumCompassHeroVisual() {
   const orbitRadius = useOrbitRadius();
 
   return (
-    <div className="relative mx-auto flex w-full max-w-[min(100%,300px)] min-[380px]:max-w-[min(100%,360px)] sm:max-w-[min(100%,440px)] lg:max-w-[min(100%,520px)] aspect-square items-center justify-center">
+    <div className="relative mx-auto flex aspect-square w-full max-w-[min(100%,320px)] min-[380px]:max-w-[min(100%,380px)] sm:max-w-[min(100%,460px)] lg:max-w-[min(100%,560px)] items-center justify-center">
       <div
         className="lp-compass-glow pointer-events-none absolute inset-[8%] rounded-full"
         style={{
@@ -207,7 +207,7 @@ export function PremiumCompassHeroVisual() {
 
       {/* Globe terrestre — rotation 3D optimisée */}
       <div
-        className="relative z-10 flex h-[46%] w-[46%] min-h-[148px] min-w-[148px] items-center justify-center"
+        className="relative z-10 flex h-[58%] w-[58%] min-h-[176px] min-w-[176px] sm:min-h-[200px] sm:min-w-[200px] lg:min-h-[220px] lg:min-w-[220px] items-center justify-center"
         style={{ perspective: 900 }}
       >
         <motion.div

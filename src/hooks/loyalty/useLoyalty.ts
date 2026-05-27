@@ -18,11 +18,16 @@ import type {
   LoyaltyFilters,
 } from '@/types/loyalty';
 
-const LOYALTY_POINTS_FIELDS = 'id, store_id, customer_id, total_points, available_points, lifetime_points, current_tier_id, current_tier_type, points_earned_this_month, points_redeemed_this_month, created_at, updated_at';
-const LOYALTY_TIER_FIELDS = 'id, store_id, tier_type, name, description, min_points_required, min_orders_required, min_spent_amount, points_multiplier, discount_percentage, free_shipping, exclusive_access, badge_color, badge_icon, is_active, is_default, display_order, created_at, updated_at';
-const LOYALTY_REWARD_FIELDS = 'id, store_id, name, description, reward_type, points_cost, discount_percentage, discount_amount, free_product_id, gift_card_amount, cash_back_amount, custom_value, max_redemptions, max_redemptions_per_customer, redemption_count, available_from, available_until, min_tier, applicable_to_product_types, applicable_to_products, image_url, badge_text, status, display_order, created_at, updated_at';
-const LOYALTY_TRANSACTION_FIELDS = 'id, store_id, customer_id, points_amount, transaction_type, source_type, source_id, description, reference_order_id, created_at';
-const LOYALTY_REDEMPTION_FIELDS = 'id, store_id, customer_id, reward_id, redemption_code, points_spent, status, redeemed_at, expires_at, used_at, metadata, created_at, updated_at';
+const LOYALTY_POINTS_FIELDS =
+  'id, store_id, customer_id, total_points, available_points, lifetime_points, current_tier_id, current_tier_type, total_orders, total_spent, last_activity_at, points_expiring_soon, next_expiration_date, metadata, created_at, updated_at';
+const LOYALTY_TIER_FIELDS =
+  'id, store_id, tier_type, name, description, min_points_required, min_orders_required, min_spent_amount, points_multiplier, discount_percentage, free_shipping, exclusive_access, badge_color, badge_icon, is_active, is_default, display_order, created_at, updated_at';
+const LOYALTY_REWARD_FIELDS =
+  'id, store_id, name, description, reward_type, points_cost, discount_percentage, discount_amount, free_product_id, gift_card_amount, cash_back_amount, custom_value, max_redemptions, max_redemptions_per_customer, redemption_count, available_from, available_until, min_tier, applicable_to_product_types, applicable_to_products, image_url, badge_text, status, display_order, created_at, updated_at';
+const LOYALTY_TRANSACTION_FIELDS =
+  'id, loyalty_points_id, store_id, customer_id, transaction_type, points_amount, balance_before, balance_after, order_id, reward_id, description, reference_number, expires_at, metadata, created_at, created_by';
+const LOYALTY_REDEMPTION_FIELDS =
+  'id, store_id, customer_id, reward_id, loyalty_points_id, redemption_code, points_used, status, used_at, expires_at, applied_to_order_id, applied_at, metadata, created_at';
 
 // ============================================================================
 // useLoyaltyPoints: Points de fidélité d'un client
@@ -35,16 +40,18 @@ export const useLoyaltyPoints = (storeId: string | undefined, customerId?: strin
     queryKey: ['loyalty-points', storeId, customerId || user?.id],
     queryFn: async () => {
       if (!storeId) return null;
-      
+
       const userId = customerId || user?.id;
       if (!userId) return null;
 
       const { data, error } = await supabase
         .from('loyalty_points')
-        .select(`
+        .select(
+          `
           ${LOYALTY_POINTS_FIELDS},
           current_tier:loyalty_tiers(${LOYALTY_TIER_FIELDS})
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .eq('customer_id', userId)
         .single();
@@ -64,16 +71,20 @@ export const useMyLoyaltyPoints = () => {
   return useQuery({
     queryKey: ['my-loyalty-points'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       // Récupérer les points de fidélité sans jointure avec stores pour éviter les problèmes RLS
       const { data: pointsData, error: pointsError } = await supabase
         .from('loyalty_points')
-        .select(`
+        .select(
+          `
           ${LOYALTY_POINTS_FIELDS},
           current_tier:loyalty_tiers(${LOYALTY_TIER_FIELDS})
-        `)
+        `
+        )
         .eq('customer_id', user.id)
         .order('updated_at', { ascending: false });
 
@@ -83,7 +94,7 @@ export const useMyLoyaltyPoints = () => {
       // Récupérer les informations des stores séparément pour chaque store_id unique
       const storeIds = [...new Set(pointsData.map(p => p.store_id))];
       const { data: storesData } = await supabase
-        .from('stores_public' as any)
+        .from('stores_public')
         .select('id, name, slug')
         .in('id', storeIds);
 
@@ -98,6 +109,7 @@ export const useMyLoyaltyPoints = () => {
 
       return pointsWithStores;
     },
+    retry: 1,
   });
 };
 
@@ -136,7 +148,7 @@ export const useLoyaltyRewards = (storeId: string | undefined, customerTier?: st
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('loyalty_rewards')
         .select(LOYALTY_REWARD_FIELDS)
         .eq('store_id', storeId)
@@ -174,7 +186,7 @@ export const useLoyaltyTransactions = (
     queryFn: async () => {
       if (!storeId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('loyalty_transactions')
         .select(LOYALTY_TRANSACTION_FIELDS)
         .eq('store_id', storeId)
@@ -210,24 +222,23 @@ export const useLoyaltyTransactions = (
 // useLoyaltyRewardRedemptions: Historique des échanges
 // ============================================================================
 
-export const useLoyaltyRewardRedemptions = (
-  storeId: string | undefined,
-  customerId?: string
-) => {
+export const useLoyaltyRewardRedemptions = (storeId: string | undefined, customerId?: string) => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['loyalty-redemptions', storeId, customerId || user?.id],
     queryFn: async () => {
       const userId = customerId || user?.id;
       if (!userId) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('loyalty_reward_redemptions')
-        .select(`
+        .select(
+          `
           ${LOYALTY_REDEMPTION_FIELDS},
           reward:loyalty_rewards(${LOYALTY_REWARD_FIELDS})
-        `)
+        `
+        )
         .eq('customer_id', userId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -243,6 +254,7 @@ export const useLoyaltyRewardRedemptions = (
       return (data || []) as LoyaltyRewardRedemption[];
     },
     enabled: !!(customerId || user?.id),
+    retry: 1,
   });
 };
 
@@ -281,17 +293,17 @@ export const useCreateLoyaltyTier = () => {
       if (error) throw error;
       return data as LoyaltyTier;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['loyalty-tiers', data.store_id] });
       toast({
         title: 'Tier créé',
         description: `Le tier "${data.name}" a été créé avec succès.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la création du tier',
+        description: error instanceof Error ? error.message : 'Erreur lors de la création du tier',
         variant: 'destructive',
       });
     },
@@ -339,17 +351,18 @@ export const useCreateLoyaltyReward = () => {
       if (error) throw error;
       return data as LoyaltyReward;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['loyalty-rewards', data.store_id] });
       toast({
         title: 'Récompense créée',
         description: `La récompense "${data.name}" a été créée avec succès.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de la création de la récompense',
+        description:
+          error instanceof Error ? error.message : 'Erreur lors de la création de la récompense',
         variant: 'destructive',
       });
     },
@@ -383,7 +396,7 @@ export const useRedeemLoyaltyReward = () => {
       if (error) throw error;
       return redemptionCode as string;
     },
-    onSuccess: (redemptionCode) => {
+    onSuccess: redemptionCode => {
       queryClient.invalidateQueries({ queryKey: ['loyalty-points'] });
       queryClient.invalidateQueries({ queryKey: ['loyalty-redemptions'] });
       queryClient.invalidateQueries({ queryKey: ['loyalty-rewards'] });
@@ -392,10 +405,11 @@ export const useRedeemLoyaltyReward = () => {
         description: `Code d'échange : ${redemptionCode}`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'échange de la récompense',
+        description:
+          error instanceof Error ? error.message : "Erreur lors de l'échange de la récompense",
         variant: 'destructive',
       });
     },
@@ -420,32 +434,33 @@ export const useLoyaltyStats = (storeId: string | undefined) => {
           .select('points_amount')
           .eq('store_id', storeId)
           .eq('transaction_type', 'earned'),
-        
+
         // Total points échangés
         supabase
           .from('loyalty_transactions')
           .select('points_amount')
           .eq('store_id', storeId)
           .eq('transaction_type', 'redeemed'),
-        
+
         // Récompenses actives
         supabase
           .from('loyalty_rewards')
           .select('redemption_count')
           .eq('store_id', storeId)
           .eq('status', 'active'),
-        
+
         // Distribution des tiers
-        supabase
-          .from('loyalty_points')
-          .select('current_tier_type')
-          .eq('store_id', storeId),
+        supabase.from('loyalty_points').select('current_tier_type').eq('store_id', storeId),
       ]);
 
-      const totalPointsIssued = pointsData.data?.reduce((sum, t) => sum + (t.points_amount || 0), 0) || 0;
-      const totalPointsRedeemed = Math.abs(rewardsData.data?.reduce((sum, t) => sum + (t.points_amount || 0), 0) || 0);
-      const totalRedemptions = redemptionsData.data?.reduce((sum, r) => sum + (r.redemption_count || 0), 0) || 0;
-      
+      const totalPointsIssued =
+        pointsData.data?.reduce((sum, t) => sum + (t.points_amount || 0), 0) || 0;
+      const totalPointsRedeemed = Math.abs(
+        rewardsData.data?.reduce((sum, t) => sum + (t.points_amount || 0), 0) || 0
+      );
+      const totalRedemptions =
+        redemptionsData.data?.reduce((sum, r) => sum + (r.redemption_count || 0), 0) || 0;
+
       // Compter par tier
       const tierDistribution = {
         bronze: 0,
@@ -453,8 +468,8 @@ export const useLoyaltyStats = (storeId: string | undefined) => {
         gold: 0,
         platinum: 0,
       };
-      
-      tiersData.data?.forEach((point) => {
+
+      tiersData.data?.forEach(point => {
         if (point.current_tier_type && point.current_tier_type in tierDistribution) {
           tierDistribution[point.current_tier_type as keyof typeof tierDistribution]++;
         }
@@ -478,10 +493,3 @@ export const useLoyaltyStats = (storeId: string | undefined) => {
     enabled: !!storeId,
   });
 };
-
-
-
-
-
-
-
