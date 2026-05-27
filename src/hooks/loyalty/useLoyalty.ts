@@ -7,27 +7,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import type {
-  LoyaltyPoints,
   LoyaltyTier,
   LoyaltyReward,
-  LoyaltyTransaction,
-  LoyaltyRewardRedemption,
   CreateLoyaltyTierForm,
   CreateLoyaltyRewardForm,
   LoyaltyStats,
   LoyaltyFilters,
 } from '@/types/loyalty';
-
-const LOYALTY_POINTS_FIELDS =
-  'id, store_id, customer_id, total_points, available_points, lifetime_points, current_tier_id, current_tier_type, total_orders, total_spent, last_activity_at, points_expiring_soon, next_expiration_date, metadata, created_at, updated_at';
-const LOYALTY_TIER_FIELDS =
-  'id, store_id, tier_type, name, description, min_points_required, min_orders_required, min_spent_amount, points_multiplier, discount_percentage, free_shipping, exclusive_access, badge_color, badge_icon, is_active, is_default, display_order, created_at, updated_at';
-const LOYALTY_REWARD_FIELDS =
-  'id, store_id, name, description, reward_type, points_cost, discount_percentage, discount_amount, free_product_id, gift_card_amount, cash_back_amount, custom_value, max_redemptions, max_redemptions_per_customer, redemption_count, available_from, available_until, min_tier, applicable_to_product_types, applicable_to_products, image_url, badge_text, status, display_order, created_at, updated_at';
-const LOYALTY_TRANSACTION_FIELDS =
-  'id, loyalty_points_id, store_id, customer_id, transaction_type, points_amount, balance_before, balance_after, order_id, reward_id, description, reference_number, expires_at, metadata, created_at, created_by';
-const LOYALTY_REDEMPTION_FIELDS =
-  'id, store_id, customer_id, reward_id, loyalty_points_id, redemption_code, points_used, status, used_at, expires_at, applied_to_order_id, applied_at, metadata, created_at';
+import {
+  LOYALTY_REWARD_SELECT,
+  loyaltyQueryOptions,
+  fetchMyLoyaltyPointsRows,
+  fetchLoyaltyPointsForStore,
+  fetchLoyaltyTiersForStore,
+  fetchLoyaltyTransactions,
+  fetchLoyaltyRedemptions,
+} from '@/lib/loyalty/loyalty-data';
 
 // ============================================================================
 // useLoyaltyPoints: Points de fidélité d'un client
@@ -44,22 +39,10 @@ export const useLoyaltyPoints = (storeId: string | undefined, customerId?: strin
       const userId = customerId || user?.id;
       if (!userId) return null;
 
-      const { data, error } = await supabase
-        .from('loyalty_points')
-        .select(
-          `
-          ${LOYALTY_POINTS_FIELDS},
-          current_tier:loyalty_tiers(${LOYALTY_TIER_FIELDS})
-        `
-        )
-        .eq('store_id', storeId)
-        .eq('customer_id', userId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
-      return data as LoyaltyPoints | null;
+      return fetchLoyaltyPointsForStore(storeId, userId);
     },
     enabled: !!storeId && (!!customerId || !!user),
+    ...loyaltyQueryOptions,
   });
 };
 
@@ -76,40 +59,9 @@ export const useMyLoyaltyPoints = () => {
       } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // Récupérer les points de fidélité sans jointure avec stores pour éviter les problèmes RLS
-      const { data: pointsData, error: pointsError } = await supabase
-        .from('loyalty_points')
-        .select(
-          `
-          ${LOYALTY_POINTS_FIELDS},
-          current_tier:loyalty_tiers(${LOYALTY_TIER_FIELDS})
-        `
-        )
-        .eq('customer_id', user.id)
-        .order('updated_at', { ascending: false });
-
-      if (pointsError) throw pointsError;
-      if (!pointsData || pointsData.length === 0) return [];
-
-      // Récupérer les informations des stores séparément pour chaque store_id unique
-      const storeIds = [...new Set(pointsData.map(p => p.store_id))];
-      const { data: storesData } = await supabase
-        .from('stores_public')
-        .select('id, name, slug')
-        .in('id', storeIds);
-
-      // Combiner les données
-      const pointsWithStores = pointsData.map(point => {
-        const store = storesData?.find(s => s.id === point.store_id);
-        return {
-          ...point,
-          store: store || null,
-        } as LoyaltyPoints;
-      });
-
-      return pointsWithStores;
+      return fetchMyLoyaltyPointsRows(user.id);
     },
-    retry: 1,
+    ...loyaltyQueryOptions,
   });
 };
 
@@ -122,19 +74,10 @@ export const useLoyaltyTiers = (storeId: string | undefined) => {
     queryKey: ['loyalty-tiers', storeId],
     queryFn: async () => {
       if (!storeId) return [];
-
-      const { data, error } = await supabase
-        .from('loyalty_tiers')
-        .select(LOYALTY_TIER_FIELDS)
-        .eq('store_id', storeId)
-        .eq('is_active', true)
-        .order('display_order', { ascending: true })
-        .order('min_points_required', { ascending: true });
-
-      if (error) throw error;
-      return (data || []) as LoyaltyTier[];
+      return fetchLoyaltyTiersForStore(storeId);
     },
     enabled: !!storeId,
+    ...loyaltyQueryOptions,
   });
 };
 
@@ -150,7 +93,7 @@ export const useLoyaltyRewards = (storeId: string | undefined, customerTier?: st
 
       let query = supabase
         .from('loyalty_rewards')
-        .select(LOYALTY_REWARD_FIELDS)
+        .select(LOYALTY_REWARD_SELECT)
         .eq('store_id', storeId)
         .eq('status', 'active');
 
@@ -165,10 +108,11 @@ export const useLoyaltyRewards = (storeId: string | undefined, customerTier?: st
         .order('display_order', { ascending: true })
         .order('points_cost', { ascending: true });
 
-      if (error) throw error;
+      if (error) return [];
       return (data || []) as LoyaltyReward[];
     },
     enabled: !!storeId,
+    ...loyaltyQueryOptions,
   });
 };
 
@@ -184,37 +128,11 @@ export const useLoyaltyTransactions = (
   return useQuery({
     queryKey: ['loyalty-transactions', storeId, customerId, filters],
     queryFn: async () => {
-      if (!storeId) return [];
-
-      let query = supabase
-        .from('loyalty_transactions')
-        .select(LOYALTY_TRANSACTION_FIELDS)
-        .eq('store_id', storeId)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (customerId) {
-        query = query.eq('customer_id', customerId);
-      }
-
-      if (filters?.transaction_type) {
-        query = query.eq('transaction_type', filters.transaction_type);
-      }
-
-      if (filters?.date_from) {
-        query = query.gte('created_at', filters.date_from);
-      }
-
-      if (filters?.date_to) {
-        query = query.lte('created_at', filters.date_to);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return (data || []) as LoyaltyTransaction[];
+      if (!storeId || !customerId) return [];
+      return fetchLoyaltyTransactions(storeId, customerId, filters);
     },
-    enabled: !!storeId,
+    enabled: !!storeId && !!customerId,
+    ...loyaltyQueryOptions,
   });
 };
 
@@ -230,31 +148,10 @@ export const useLoyaltyRewardRedemptions = (storeId: string | undefined, custome
     queryFn: async () => {
       const userId = customerId || user?.id;
       if (!userId) return [];
-
-      let query = supabase
-        .from('loyalty_reward_redemptions')
-        .select(
-          `
-          ${LOYALTY_REDEMPTION_FIELDS},
-          reward:loyalty_rewards(${LOYALTY_REWARD_FIELDS})
-        `
-        )
-        .eq('customer_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      // Si storeId est fourni, filtrer par store
-      if (storeId) {
-        query = query.eq('store_id', storeId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return (data || []) as LoyaltyRewardRedemption[];
+      return fetchLoyaltyRedemptions(userId, storeId);
     },
     enabled: !!(customerId || user?.id),
-    retry: 1,
+    ...loyaltyQueryOptions,
   });
 };
 
