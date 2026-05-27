@@ -298,160 +298,188 @@ export function mapLoyaltyPointsRow(
 }
 
 export async function fetchLoyaltyTiersForStore(storeId: string): Promise<LoyaltyTier[]> {
-  // 1) Essayer le schéma moderne
-  const modern = await supabase
-    .from('loyalty_tiers')
-    .select(MODERN_TIER_SELECT)
-    .eq('store_id', storeId)
-    .order('display_order', { ascending: true })
-    .order('min_points_required', { ascending: true });
+  try {
+    // 1) Essayer le schéma moderne
+    const modern = await supabase
+      .from('loyalty_tiers')
+      .select(MODERN_TIER_SELECT)
+      .eq('store_id', storeId)
+      .order('display_order', { ascending: true })
+      .order('min_points_required', { ascending: true });
 
-  if (!modern.error && modern.data?.length) {
-    return (modern.data ?? []).map(row => mapModernTier(row as Record<string, unknown>));
-  }
+    if (!modern.error && modern.data?.length) {
+      return (modern.data ?? []).map(row => mapModernTier(row as Record<string, unknown>));
+    }
 
-  // 2) Fallback schéma legacy
-  const legacy = await supabase
-    .from('loyalty_tiers')
-    .select(LEGACY_TIER_SELECT)
-    .eq('store_id', storeId)
-    .order('level', { ascending: true });
+    // 2) Fallback schéma legacy
+    const legacy = await supabase
+      .from('loyalty_tiers')
+      .select(LEGACY_TIER_SELECT)
+      .eq('store_id', storeId)
+      .order('level', { ascending: true });
 
-  if (legacy.error) {
-    logger.warn('fetchLoyaltyTiersForStore failed', { error: legacy.error, storeId });
+    if (legacy.error) {
+      logger.warn('fetchLoyaltyTiersForStore failed', { error: legacy.error, storeId });
+      return [];
+    }
+
+    return (legacy.data ?? []).map(row => mapLegacyTier(row as LegacyTierRow));
+  } catch (error) {
+    logger.warn('fetchLoyaltyTiersForStore threw', { error, storeId });
     return [];
   }
-
-  return (legacy.data ?? []).map(row => mapLegacyTier(row as LegacyTierRow));
 }
 
 export async function fetchLoyaltyTiersByIds(tierIds: string[]): Promise<Map<string, LoyaltyTier>> {
   if (tierIds.length === 0) return new Map();
 
-  // 1) Moderne
-  const modern = await supabase.from('loyalty_tiers').select(MODERN_TIER_SELECT).in('id', tierIds);
+  try {
+    // 1) Moderne
+    const modern = await supabase
+      .from('loyalty_tiers')
+      .select(MODERN_TIER_SELECT)
+      .in('id', tierIds);
 
-  if (!modern.error && modern.data?.length) {
+    if (!modern.error && modern.data?.length) {
+      const map = new Map<string, LoyaltyTier>();
+      for (const row of modern.data ?? []) {
+        const tier = mapModernTier(row as Record<string, unknown>);
+        map.set(tier.id, tier);
+      }
+      return map;
+    }
+
+    // 2) Legacy
+    const legacy = await supabase
+      .from('loyalty_tiers')
+      .select(LEGACY_TIER_SELECT)
+      .in('id', tierIds);
+
+    if (legacy.error) {
+      logger.warn('fetchLoyaltyTiersByIds failed', { error: legacy.error });
+      return new Map();
+    }
+
     const map = new Map<string, LoyaltyTier>();
-    for (const row of modern.data ?? []) {
-      const tier = mapModernTier(row as Record<string, unknown>);
+    for (const row of legacy.data ?? []) {
+      const tier = mapLegacyTier(row as LegacyTierRow);
       map.set(tier.id, tier);
     }
     return map;
-  }
-
-  // 2) Legacy
-  const legacy = await supabase.from('loyalty_tiers').select(LEGACY_TIER_SELECT).in('id', tierIds);
-
-  if (legacy.error) {
-    logger.warn('fetchLoyaltyTiersByIds failed', { error: legacy.error });
+  } catch (error) {
+    logger.warn('fetchLoyaltyTiersByIds threw', { error });
     return new Map();
   }
-
-  const map = new Map<string, LoyaltyTier>();
-  for (const row of legacy.data ?? []) {
-    const tier = mapLegacyTier(row as LegacyTierRow);
-    map.set(tier.id, tier);
-  }
-  return map;
 }
 
 export async function fetchMyLoyaltyPointsRows(userId: string): Promise<LoyaltyPoints[]> {
-  // 1) Moderne (2025-01-27)
-  const modern = await supabase
-    .from('loyalty_points')
-    .select(LOYALTY_POINTS_SELECT)
-    .eq('customer_id', userId)
-    .order('updated_at', { ascending: false });
+  try {
+    // 1) Moderne (2025-01-27)
+    const modern = await supabase
+      .from('loyalty_points')
+      .select(LOYALTY_POINTS_SELECT)
+      .eq('customer_id', userId)
+      .order('updated_at', { ascending: false });
 
-  if (!modern.error && modern.data?.length) {
-    const rows = modern.data as ModernPointsRow[];
-    const tierIds = [
-      ...new Set(
-        rows.map(p => p.current_tier_id).filter((id): id is string => typeof id === 'string')
-      ),
+    if (!modern.error && modern.data?.length) {
+      const rows = modern.data as ModernPointsRow[];
+      const tierIds = [
+        ...new Set(
+          rows.map(p => p.current_tier_id).filter((id): id is string => typeof id === 'string')
+        ),
+      ];
+      const tiersById = await fetchLoyaltyTiersByIds(tierIds);
+
+      const storeIds = [...new Set(rows.map(p => p.store_id))];
+      const { data: storesData } = await supabase
+        .from('stores_public')
+        .select('id, name, slug')
+        .in('id', storeIds);
+
+      return (modern.data ?? []).map(row => {
+        const typedRow = row as ModernPointsRow & Record<string, unknown>;
+        const point = mapLoyaltyPointsRow(
+          typedRow,
+          typedRow.current_tier_id ? tiersById.get(typedRow.current_tier_id) : null
+        );
+        const store = storesData?.find(s => s.id === point.store_id);
+        return { ...point, store: store ?? null } as LoyaltyPoints;
+      });
+    }
+
+    // 2) Legacy (2026-03-29) : customer_id => user_id, points => available_points, tier => current_tier_type
+    const legacy = await supabase
+      .from('loyalty_points')
+      .select(LEGACY_POINTS_SELECT_V603)
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false });
+
+    if (legacy.error) {
+      logger.warn('fetchMyLoyaltyPointsRows failed', { error: legacy.error, userId });
+      return [];
+    }
+
+    if (!legacy.data?.length) return [];
+
+    const storeIds = [
+      ...new Set((legacy.data ?? []).map(p => (p as LegacyPointsV603Row).store_id)),
     ];
-    const tiersById = await fetchLoyaltyTiersByIds(tierIds);
-
-    const storeIds = [...new Set(rows.map(p => p.store_id))];
     const { data: storesData } = await supabase
       .from('stores_public')
       .select('id, name, slug')
       .in('id', storeIds);
 
-    return (modern.data ?? []).map(row => {
-      const typedRow = row as ModernPointsRow & Record<string, unknown>;
-      const point = mapLoyaltyPointsRow(
-        typedRow,
-        typedRow.current_tier_id ? tiersById.get(typedRow.current_tier_id) : null
-      );
+    return (legacy.data ?? []).map(row => {
+      const point = mapLegacyPointsV603Row(row as LegacyPointsV603Row);
       const store = storesData?.find(s => s.id === point.store_id);
       return { ...point, store: store ?? null } as LoyaltyPoints;
     });
-  }
-
-  // 2) Legacy (2026-03-29) : customer_id => user_id, points => available_points, tier => current_tier_type
-  const legacy = await supabase
-    .from('loyalty_points')
-    .select(LEGACY_POINTS_SELECT_V603)
-    .eq('user_id', userId)
-    .order('updated_at', { ascending: false });
-
-  if (legacy.error) {
-    logger.warn('fetchMyLoyaltyPointsRows failed', { error: legacy.error, userId });
+  } catch (error) {
+    logger.warn('fetchMyLoyaltyPointsRows threw', { error, userId });
     return [];
   }
-
-  if (!legacy.data?.length) return [];
-
-  const storeIds = [...new Set((legacy.data ?? []).map(p => (p as LegacyPointsV603Row).store_id))];
-  const { data: storesData } = await supabase
-    .from('stores_public')
-    .select('id, name, slug')
-    .in('id', storeIds);
-
-  return (legacy.data ?? []).map(row => {
-    const point = mapLegacyPointsV603Row(row as LegacyPointsV603Row);
-    const store = storesData?.find(s => s.id === point.store_id);
-    return { ...point, store: store ?? null } as LoyaltyPoints;
-  });
 }
 
 export async function fetchLoyaltyPointsForStore(
   storeId: string,
   userId: string
 ): Promise<LoyaltyPoints | null> {
-  // 1) Moderne
-  const modern = await supabase
-    .from('loyalty_points')
-    .select(LOYALTY_POINTS_SELECT)
-    .eq('store_id', storeId)
-    .eq('customer_id', userId)
-    .maybeSingle();
+  try {
+    // 1) Moderne
+    const modern = await supabase
+      .from('loyalty_points')
+      .select(LOYALTY_POINTS_SELECT)
+      .eq('store_id', storeId)
+      .eq('customer_id', userId)
+      .maybeSingle();
 
-  if (!modern.error && modern.data) {
-    const row = modern.data as ModernPointsRow & Record<string, unknown>;
-    const tier = row.current_tier_id
-      ? (await fetchLoyaltyTiersByIds([row.current_tier_id])).get(row.current_tier_id)
-      : null;
+    if (!modern.error && modern.data) {
+      const row = modern.data as ModernPointsRow & Record<string, unknown>;
+      const tier = row.current_tier_id
+        ? (await fetchLoyaltyTiersByIds([row.current_tier_id])).get(row.current_tier_id)
+        : null;
 
-    return mapLoyaltyPointsRow(row, tier);
-  }
+      return mapLoyaltyPointsRow(row, tier);
+    }
 
-  // 2) Legacy
-  const legacy = await supabase
-    .from('loyalty_points')
-    .select(LEGACY_POINTS_SELECT_V603)
-    .eq('store_id', storeId)
-    .eq('user_id', userId)
-    .maybeSingle();
+    // 2) Legacy
+    const legacy = await supabase
+      .from('loyalty_points')
+      .select(LEGACY_POINTS_SELECT_V603)
+      .eq('store_id', storeId)
+      .eq('user_id', userId)
+      .maybeSingle();
 
-  if (legacy.error || !legacy.data) {
-    logger.warn('fetchLoyaltyPointsForStore failed', { error: legacy.error, storeId, userId });
+    if (legacy.error || !legacy.data) {
+      logger.warn('fetchLoyaltyPointsForStore failed', { error: legacy.error, storeId, userId });
+      return null;
+    }
+
+    return mapLegacyPointsV603Row(legacy.data as LegacyPointsV603Row);
+  } catch (error) {
+    logger.warn('fetchLoyaltyPointsForStore threw', { error, storeId, userId });
     return null;
   }
-
-  return mapLegacyPointsV603Row(legacy.data as LegacyPointsV603Row);
 }
 
 export async function fetchLoyaltyTransactions(
@@ -459,155 +487,168 @@ export async function fetchLoyaltyTransactions(
   userId: string,
   filters?: { transaction_type?: string; date_from?: string; date_to?: string }
 ): Promise<LoyaltyTransaction[]> {
-  // 1) Legacy v1 (colonnes reason/reference/metadata)
-  let queryV1 = supabase
-    .from('loyalty_transactions')
-    .select(LEGACY_TRANSACTION_SELECT)
-    .eq('store_id', storeId)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(100);
+  try {
+    // 1) Legacy v1 (colonnes reason/reference/metadata)
+    let queryV1 = supabase
+      .from('loyalty_transactions')
+      .select(LEGACY_TRANSACTION_SELECT)
+      .eq('store_id', storeId)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(100);
 
-  if (filters?.transaction_type) {
-    const legacyType = filters.transaction_type === 'redeemed' ? 'spent' : filters.transaction_type;
-    queryV1 = queryV1.eq('type', legacyType);
-  }
-  if (filters?.date_from) queryV1 = queryV1.gte('created_at', filters.date_from);
-  if (filters?.date_to) queryV1 = queryV1.lte('created_at', filters.date_to);
-
-  const v1Res = await queryV1;
-  if (!v1Res.error && v1Res.data) {
-    return (v1Res.data ?? []).map(row => mapLegacyTransaction(row as LegacyTransactionRow));
-  }
-
-  // 2) Legacy v603 (colonnes source/order_id/description)
-  let queryV603 = supabase
-    .from('loyalty_transactions')
-    .select(LEGACY_TRANSACTION_SELECT_V603)
-    .eq('store_id', storeId)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(100);
-
-  if (filters?.transaction_type) {
-    if (filters.transaction_type === 'earned') {
-      // Certains systèmes stockent 'earn' au lieu de 'earned'
-      queryV603 = queryV603.or('type.eq.earned,type.eq.earn');
-    } else {
+    if (filters?.transaction_type) {
       const legacyType =
         filters.transaction_type === 'redeemed' ? 'spent' : filters.transaction_type;
-      queryV603 = queryV603.eq('type', legacyType);
+      queryV1 = queryV1.eq('type', legacyType);
     }
-  }
-  if (filters?.date_from) queryV603 = queryV603.gte('created_at', filters.date_from);
-  if (filters?.date_to) queryV603 = queryV603.lte('created_at', filters.date_to);
+    if (filters?.date_from) queryV1 = queryV1.gte('created_at', filters.date_from);
+    if (filters?.date_to) queryV1 = queryV1.lte('created_at', filters.date_to);
 
-  const v603Res = await queryV603;
-  if (v603Res.error) {
-    logger.warn('fetchLoyaltyTransactions failed', { error: v603Res.error, storeId, userId });
+    const v1Res = await queryV1;
+    if (!v1Res.error && v1Res.data) {
+      return (v1Res.data ?? []).map(row => mapLegacyTransaction(row as LegacyTransactionRow));
+    }
+
+    // 2) Legacy v603 (colonnes source/order_id/description)
+    let queryV603 = supabase
+      .from('loyalty_transactions')
+      .select(LEGACY_TRANSACTION_SELECT_V603)
+      .eq('store_id', storeId)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (filters?.transaction_type) {
+      if (filters.transaction_type === 'earned') {
+        // Certains systèmes stockent 'earn' au lieu de 'earned'
+        queryV603 = queryV603.or('type.eq.earned,type.eq.earn');
+      } else {
+        const legacyType =
+          filters.transaction_type === 'redeemed' ? 'spent' : filters.transaction_type;
+        queryV603 = queryV603.eq('type', legacyType);
+      }
+    }
+    if (filters?.date_from) queryV603 = queryV603.gte('created_at', filters.date_from);
+    if (filters?.date_to) queryV603 = queryV603.lte('created_at', filters.date_to);
+
+    const v603Res = await queryV603;
+    if (v603Res.error) {
+      logger.warn('fetchLoyaltyTransactions failed', { error: v603Res.error, storeId, userId });
+      return [];
+    }
+
+    return (v603Res.data ?? []).map(row =>
+      mapLegacyTransactionV603(row as LegacyTransactionV603Row)
+    );
+  } catch (error) {
+    logger.warn('fetchLoyaltyTransactions threw', { error, storeId, userId });
     return [];
   }
-
-  return (v603Res.data ?? []).map(row => mapLegacyTransactionV603(row as LegacyTransactionV603Row));
 }
 
 export async function fetchLoyaltyRedemptions(
   userId: string,
   storeId?: string
 ): Promise<LoyaltyRewardRedemption[]> {
-  // IMPORTANT: pas de join embed ici pour éviter des 400 si le schéma de `loyalty_rewards` diverge.
-  const fetchModern = async (): Promise<LoyaltyRewardRedemption[] | null> => {
-    let query = supabase
-      .from('loyalty_reward_redemptions')
-      .select(LOYALTY_REDEMPTION_SELECT)
-      .eq('customer_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50);
+  try {
+    // IMPORTANT: pas de join embed ici pour éviter des 400 si le schéma de `loyalty_rewards` diverge.
+    const fetchModern = async (): Promise<LoyaltyRewardRedemption[] | null> => {
+      let query = supabase
+        .from('loyalty_reward_redemptions')
+        .select(LOYALTY_REDEMPTION_SELECT)
+        .eq('customer_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    if (storeId) query = query.eq('store_id', storeId);
+      if (storeId) query = query.eq('store_id', storeId);
 
-    const { data, error } = await query;
-    if (error) return null;
-    return (data ?? []).map((row): LoyaltyRewardRedemption => {
-      const r = row as RedemptionRow;
-      return {
-        id: r.id,
-        reward_id: r.reward_id,
-        loyalty_points_id: r.loyalty_points_id,
-        store_id: r.store_id,
-        customer_id: r.customer_id ?? '',
-        points_used: Number(r.points_used ?? 0),
-        redemption_code: r.redemption_code,
-        status: r.status,
-        used_at: r.used_at ?? null,
-        expires_at: r.expires_at ?? null,
-        applied_to_order_id: r.applied_to_order_id ?? null,
-        applied_at: r.applied_at ?? null,
-        metadata: (r.metadata ?? {}) as LoyaltyRewardRedemption['metadata'],
-        created_at: r.created_at,
-      };
-    });
-  };
+      const { data, error } = await query;
+      if (error) return null;
+      return (data ?? []).map((row): LoyaltyRewardRedemption => {
+        const r = row as RedemptionRow;
+        return {
+          id: r.id,
+          reward_id: r.reward_id,
+          loyalty_points_id: r.loyalty_points_id,
+          store_id: r.store_id,
+          customer_id: r.customer_id ?? '',
+          points_used: Number(r.points_used ?? 0),
+          redemption_code: r.redemption_code,
+          status: r.status,
+          used_at: r.used_at ?? null,
+          expires_at: r.expires_at ?? null,
+          applied_to_order_id: r.applied_to_order_id ?? null,
+          applied_at: r.applied_at ?? null,
+          metadata: (r.metadata ?? {}) as LoyaltyRewardRedemption['metadata'],
+          created_at: r.created_at,
+        };
+      });
+    };
 
-  const fetchLegacy = async (): Promise<LoyaltyRewardRedemption[] | null> => {
-    let query = supabase
-      .from('loyalty_reward_redemptions')
-      .select(LEGACY_REDEMPTION_SELECT_V603)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50);
+    const fetchLegacy = async (): Promise<LoyaltyRewardRedemption[] | null> => {
+      let query = supabase
+        .from('loyalty_reward_redemptions')
+        .select(LEGACY_REDEMPTION_SELECT_V603)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    if (storeId) query = query.eq('store_id', storeId);
+      if (storeId) query = query.eq('store_id', storeId);
 
-    const { data, error } = await query;
-    if (error) return null;
+      const { data, error } = await query;
+      if (error) return null;
 
-    return (data ?? []).map((row): LoyaltyRewardRedemption => {
-      const r = row as RedemptionRow;
-      return {
-        id: r.id,
-        reward_id: r.reward_id,
-        loyalty_points_id: r.loyalty_points_id,
-        store_id: r.store_id,
-        customer_id: r.user_id ?? '',
-        points_used: Number(r.points_used ?? 0),
-        redemption_code: r.redemption_code,
-        status: r.status,
-        used_at: r.used_at ?? null,
-        expires_at: r.expires_at ?? null,
-        applied_to_order_id: r.applied_to_order_id ?? null,
-        applied_at: r.applied_at ?? null,
-        metadata: (r.metadata ?? {}) as LoyaltyRewardRedemption['metadata'],
-        created_at: r.created_at,
-      };
-    });
-  };
+      return (data ?? []).map((row): LoyaltyRewardRedemption => {
+        const r = row as RedemptionRow;
+        return {
+          id: r.id,
+          reward_id: r.reward_id,
+          loyalty_points_id: r.loyalty_points_id,
+          store_id: r.store_id,
+          customer_id: r.user_id ?? '',
+          points_used: Number(r.points_used ?? 0),
+          redemption_code: r.redemption_code,
+          status: r.status,
+          used_at: r.used_at ?? null,
+          expires_at: r.expires_at ?? null,
+          applied_to_order_id: r.applied_to_order_id ?? null,
+          applied_at: r.applied_at ?? null,
+          metadata: (r.metadata ?? {}) as LoyaltyRewardRedemption['metadata'],
+          created_at: r.created_at,
+        };
+      });
+    };
 
-  const redemptions = (await fetchModern()) ?? (await fetchLegacy());
+    const redemptions = (await fetchModern()) ?? (await fetchLegacy());
 
-  if (!redemptions) {
-    logger.warn('fetchLoyaltyRedemptions failed', { userId, storeId });
+    if (!redemptions) {
+      logger.warn('fetchLoyaltyRedemptions failed', { userId, storeId });
+      return [];
+    }
+
+    // Enrichissement récompenses (best-effort)
+    const rewardIds = [...new Set(redemptions.map(r => r.reward_id))].filter(Boolean);
+    if (rewardIds.length > 0) {
+      const { data: rewardsData, error: rewardsError } = await supabase
+        .from('loyalty_rewards')
+        .select(LOYALTY_REWARD_SELECT)
+        .in('id', rewardIds);
+
+      if (!rewardsError && rewardsData?.length) {
+        const rewardsById = new Map(rewardsData.map(r => [r.id, r as LoyaltyReward]));
+        redemptions.forEach(redemption => {
+          const reward = rewardsById.get(redemption.reward_id);
+          if (reward) redemption.reward = reward;
+        });
+      }
+    }
+
+    return redemptions;
+  } catch (error) {
+    logger.warn('fetchLoyaltyRedemptions threw', { error, userId, storeId });
     return [];
   }
-
-  // Enrichissement récompenses (best-effort)
-  const rewardIds = [...new Set(redemptions.map(r => r.reward_id))].filter(Boolean);
-  if (rewardIds.length > 0) {
-    const { data: rewardsData, error: rewardsError } = await supabase
-      .from('loyalty_rewards')
-      .select(LOYALTY_REWARD_SELECT)
-      .in('id', rewardIds);
-
-    if (!rewardsError && rewardsData?.length) {
-      const rewardsById = new Map(rewardsData.map(r => [r.id, r as LoyaltyReward]));
-      redemptions.forEach(redemption => {
-        const reward = rewardsById.get(redemption.reward_id);
-        if (reward) redemption.reward = reward;
-      });
-    }
-  }
-
-  return redemptions;
 }
 
 export { LOYALTY_REWARD_SELECT };
