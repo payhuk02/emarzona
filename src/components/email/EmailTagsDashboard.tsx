@@ -34,6 +34,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useAdmin } from '@/hooks/useAdmin';
 
 interface TagStats {
   tag: string;
@@ -62,6 +63,7 @@ interface CronJobStatus {
 
 export function EmailTagsDashboard({ storeId }: { storeId: string }) {
   const { toast } = useToast();
+  const { isAdmin } = useAdmin();
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<TagStats[]>([]);
   const [expiringTags, setExpiringTags] = useState<ExpiringTag[]>([]);
@@ -89,18 +91,21 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
       const expiring = await emailTagService.getExpiringTags(storeId, 7);
       setExpiringTags(expiring);
 
-      // Charger l'état des cron jobs via fonction SQL safe
-      try {
-        const { data: cronData, error: cronError } = await supabase.rpc(
-          'get_email_tags_cron_jobs_status_safe'
-        );
-        if (cronError) {
-          logger.error('Error fetching cron jobs status', { error: cronError });
-        } else if (cronData) {
-          setCronJobs(cronData as CronJobStatus[]);
+      if (isAdmin) {
+        try {
+          const { data: cronData, error: cronError } = await supabase.rpc(
+            'get_email_tags_cron_jobs_status_safe'
+          );
+          if (cronError) {
+            logger.error('Error fetching cron jobs status', { error: cronError });
+          } else if (cronData) {
+            setCronJobs(cronData as CronJobStatus[]);
+          }
+        } catch (cronErr: unknown) {
+          logger.error('Error fetching cron jobs status', { error: cronErr });
         }
-      } catch (cronErr: unknown) {
-        logger.error('Error fetching cron jobs status', { error: cronErr });
+      } else {
+        setCronJobs([]);
       }
     } catch (loadErr: unknown) {
       const message =
@@ -117,7 +122,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
 
   useEffect(() => {
     loadData();
-  }, [storeId, selectedCategory]);
+  }, [storeId, selectedCategory, isAdmin]);
 
   // Nettoyer les tags expirés
   const handleCleanupExpired = async () => {
@@ -278,12 +283,16 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
             icon: AlertTriangle,
             color: 'from-yellow-600 to-orange-600',
           },
-          {
-            label: 'Cron Jobs Actifs',
-            value: `${stats.activeCronJobs}/${stats.totalCronJobs}`,
-            icon: TrendingUp,
-            color: 'from-green-600 to-emerald-600',
-          },
+          ...(isAdmin
+            ? [
+                {
+                  label: 'Cron Jobs Actifs',
+                  value: `${stats.activeCronJobs}/${stats.totalCronJobs}`,
+                  icon: TrendingUp,
+                  color: 'from-green-600 to-emerald-600',
+                },
+              ]
+            : []),
         ].map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -320,7 +329,7 @@ export function EmailTagsDashboard({ storeId }: { storeId: string }) {
             <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="expiring">Tags Expirant</TabsTrigger>
             <TabsTrigger value="cleanup">Nettoyage</TabsTrigger>
-            <TabsTrigger value="cron">Cron Jobs</TabsTrigger>
+            {isAdmin ? <TabsTrigger value="cron">Cron Jobs</TabsTrigger> : null}
           </TabsList>
 
           {/* Onglet Tags */}

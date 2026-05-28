@@ -9,6 +9,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     exclude: ['node_modules/**', 'tests/**', 'dist/**'],
+    // Réduit les crashs worker (OOM) sur Windows / gros suites RTL
+    pool: 'forks',
+    maxWorkers: process.env.CI ? 4 : 2,
+    minWorkers: 1,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
