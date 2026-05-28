@@ -400,3 +400,7 @@ GRANT EXECUTE ON FUNCTION public.get_user_product_recommendations(UUID, INTEGER)
 
 COMMENT ON FUNCTION public.get_user_product_recommendations(UUID, INTEGER) IS
   'Recommandations personnalisées. Requiert auth; p_user_id doit correspondre à auth.uid().';
+
+-- sync_email_tags_cron_jobs (voir aussi 20260528160000)
+REVOKE EXECUTE ON FUNCTION public.sync_email_tags_cron_jobs() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.sync_email_tags_cron_jobs() FROM anon;
