@@ -20,6 +20,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useBehavioralAnalytics } from '@/hooks/useBehavioralAnalytics';
 
 import React, { Suspense, lazy, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 // Lazy-loaded non-critical components
 const PerformanceOptimizer = lazy(() =>
@@ -125,7 +126,7 @@ const ErrorFallbackComponent = ({ error, onRetry }: ErrorFallbackProps) => {
     error instanceof Error ? error.message : error != null ? String(error) : null;
 
   if (errorMessage) {
-    console.error('[Emarzona] Erreur interface:', error);
+    logger.error('[Emarzona] Erreur interface:', { error });
   }
 
   return (

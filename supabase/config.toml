@@ -14,6 +14,13 @@ verify_jwt = false
 [functions.execute-email-workflow]
 verify_jwt = true
 
+# Webhooks PSP : authentification par signature HMAC (pas de JWT Supabase)
+[functions.moneroo-webhook]
+verify_jwt = false
+
+[functions.stripe-connect-webhook]
+verify_jwt = false
+
 # ---------------------------------------------------------------------------
 # Auth — confirmation email + SMTP Resend (mail.emarzona.com)
 # Production : configurer aussi le Dashboard Supabase (voir docs/CONFIGURATION_AUTH_EMAIL_RESEND.md)

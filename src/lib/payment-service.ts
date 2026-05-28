@@ -10,6 +10,7 @@ import { logger } from './logger';
 import { isSupportedCurrency, type Currency } from './currency-converter';
 import { isPaymentOrchestrationV2Enabled, createOrchestratedPayment } from './payments';
 import type { PaymentProviderCode } from '@/types/store-payment-connection';
+import { toast } from '@/hooks/use-toast';
 
 /** Type checkout — `moneroo` legacy UI ; codes orchestrateur après migration UI */
 export type PaymentProvider = 'moneroo' | PaymentProviderCode;
@@ -82,7 +83,17 @@ export const initiatePayment = async (options: PaymentOptions): Promise<PaymentR
         error: orchestrated.error,
       };
     } catch (error: unknown) {
-      logger.error('Orchestrator initiatePayment failed, falling back to Moneroo', { error });
+      logger.error('CRITICAL: Orchestrator initiatePayment failed, falling back to Moneroo', {
+        error,
+        orderId: options.orderId,
+        storeId: options.storeId,
+      });
+
+      toast({
+        title: 'Information de paiement',
+        description:
+          'Le système de paiement principal est temporairement indisponible. Redirection vers le système de secours.',
+      });
     }
   }
 

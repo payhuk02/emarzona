@@ -119,7 +119,6 @@ export class EmailPreferencesService {
       p_unsubscribe_type: params.unsubscribeType,
       p_reason: params.reason || null,
       p_campaign_id: params.campaignId || null,
-      p_user_id: params.userId || null,
     });
 
     if (rpcError) {

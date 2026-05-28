@@ -18,7 +18,7 @@ export function sanitizeString(input: string): string {
   }
 
   // Remove HTML tags
-  let  sanitized= input.replace(/<[^>]*>/g, '');
+  let sanitized = input.replace(/<[^>]*>/g, '');
 
   // Remove script tags and content
   sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
@@ -77,8 +77,8 @@ export function validatePasswordStrength(password: string): {
   strength: 'weak' | 'medium' | 'strong';
   errors: string[];
 } {
-  const  errors: string[] = [];
-  let  strength: 'weak' | 'medium' | 'strong' = 'weak';
+  const errors: string[] = [];
+  let strength: 'weak' | 'medium' | 'strong' = 'weak';
 
   if (password.length < 8) {
     errors.push('Le mot de passe doit contenir au moins 8 caractères');
@@ -119,7 +119,7 @@ export function validatePasswordStrength(password: string): {
  * Escape HTML to prevent XSS
  */
 export function escapeHtml(text: string): string {
-  const  map: Record<string, string> = {
+  const map: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
@@ -171,7 +171,14 @@ export function generateCSRFToken(): string {
  * Validate CSRF token
  */
 export function validateCSRFToken(token: string, storedToken: string): boolean {
-  return token === storedToken && token.length === 64;
+  if (!token || !storedToken || token.length !== 64 || storedToken.length !== 64) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < 64; i++) {
+    result |= token.charCodeAt(i) ^ storedToken.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 // =====================================================
@@ -265,9 +272,3 @@ export function applySecurityHeaders(headers: Headers): void {
     headers.set(key, value);
   });
 }
-
-
-
-
-
-

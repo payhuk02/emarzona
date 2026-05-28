@@ -2,6 +2,11 @@ import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
+import {
+  markWebhookProcessed,
+  recordWebhookEvent,
+  validateOrderPaymentAmount,
+} from '../_shared/complete-order-payment.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -46,6 +51,25 @@ async function calculateHMACSignature(payload: string, secret: string): Promise<
   const signature = await crypto.subtle.sign('HMAC', key, messageData);
   const hashArray = Array.from(new Uint8Array(signature));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPayload(raw: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function resolveMonerooExternalEventId(
+  payload: Record<string, unknown>,
+  transactionId: string,
+  payloadHash: string
+): string {
+  const explicit = payload.event_id ?? payload.webhook_id ?? payload.id ?? payload.reference;
+  if (explicit != null && String(explicit).trim() !== '') {
+    return `moneroo:${String(explicit).trim()}`;
+  }
+  return `moneroo:${transactionId}:${payloadHash}`;
 }
 
 function constantTimeEquals(a: string, b: string): boolean {
@@ -198,119 +222,107 @@ serve(async req => {
 
     const mappedStatus = statusMap[status?.toLowerCase()] || 'processing';
 
-    // 🆕 Vérifier l'idempotence (éviter les webhooks dupliqués)
-    if (mappedStatus === transaction.status) {
-      // Si le statut est identique, vérifier si le webhook a déjà été traité
-      const { data: alreadyProcessed } = await supabase.rpc('is_webhook_already_processed', {
-        p_transaction_id: transaction.id,
-        p_status: mappedStatus,
-        p_provider: 'moneroo',
+    // Prevent state regression on out-of-order events.
+    const TERMINAL: Record<string, number> = {
+      processing: 1,
+      cancelled: 2,
+      failed: 2,
+      completed: 3,
+      refunded: 4,
+    };
+    const currentRank = TERMINAL[String(transaction.status ?? 'processing')] ?? 0;
+    const nextRank = TERMINAL[String(mappedStatus)] ?? 0;
+    if (currentRank >= 3 && nextRank < currentRank) {
+      console.warn('Ignoring webhook that would regress terminal status', {
+        transaction_id: transaction.id,
+        current: transaction.status,
+        incoming: mappedStatus,
       });
+      return new Response(JSON.stringify({ success: true, ignored: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-      if (alreadyProcessed) {
-        console.log('Webhook already processed, ignoring duplicate');
+    const payloadHash = await hashPayload(rawPayload);
+    const externalEventId = resolveMonerooExternalEventId(
+      payload as Record<string, unknown>,
+      transaction_id,
+      payloadHash
+    );
+
+    const isNewEvent = await recordWebhookEvent(
+      supabase,
+      'moneroo',
+      externalEventId,
+      String(status ?? 'unknown'),
+      safePayloadForLogs,
+      transaction.order_id,
+      transaction.id
+    );
+
+    if (!isNewEvent) {
+      console.log('Duplicate Moneroo webhook ignored', { externalEventId });
+      return new Response(
+        JSON.stringify({ success: true, message: 'Webhook already processed', duplicate: true }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 🔒 Valider montant + devise avant mise à jour
+    if (amount != null && transaction.order_id) {
+      const webhookAmount = typeof amount === 'string' ? parseFloat(amount) : Number(amount);
+      const paymentCheck = await validateOrderPaymentAmount(
+        supabase,
+        transaction.order_id,
+        webhookAmount,
+        typeof currency === 'string' ? currency : null
+      );
+
+      if (!paymentCheck.valid) {
+        console.error('SECURITY: Moneroo payment validation failed', {
+          transaction_id: transaction.id,
+          order_id: transaction.order_id,
+          reason: paymentCheck.reason,
+          difference: paymentCheck.difference,
+        });
+
+        await supabase
+          .from('payment_webhook_events')
+          .update({
+            processing_error: paymentCheck.reason ?? 'payment_validation_failed',
+          })
+          .eq('provider', 'moneroo')
+          .eq('external_event_id', externalEventId);
+
+        await supabase.from('transaction_logs').insert({
+          event_type: 'webhook_amount_mismatch',
+          status: 'failed',
+          transaction_id: transaction.id,
+          request_data: safePayloadForLogs,
+          error_data: {
+            error: paymentCheck.reason ?? 'payment_validation_failed',
+            severity: 'high',
+          },
+        });
+
         return new Response(
-          JSON.stringify({ success: true, message: 'Webhook already processed' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({
+            error: 'Payment validation failed',
+            reason: paymentCheck.reason,
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
 
-    // 🔒 SÉCURITÉ: Valider le montant avant de mettre à jour la transaction
-    if (amount && transaction.order_id) {
-      // Récupérer le montant de la commande
-      const { data: orderData } = await supabase
-        .from('orders')
-        .select('total_amount, currency')
-        .eq('id', transaction.order_id)
-        .single();
-
-      if (orderData) {
-        const webhookAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-        const orderAmount =
-          typeof orderData.total_amount === 'string'
-            ? parseFloat(orderData.total_amount)
-            : orderData.total_amount;
-
-        // Récupérer la tolérance depuis platform_settings (défaut: 1 XOF)
-        let tolerance = 1.0;
-        try {
-          const { data: settings } = await supabase
-            .from('platform_settings')
-            .select('settings')
-            .eq('key', 'admin')
-            .single();
-
-          if (settings?.settings?.max_amount_tolerance) {
-            tolerance = parseFloat(settings.settings.max_amount_tolerance.toString()) || 1.0;
-          }
-        } catch (error) {
-          console.warn(
-            'Could not fetch max_amount_tolerance from platform_settings, using default:',
-            error
-          );
-        }
-
-        const amountDifference = Math.abs(webhookAmount - orderAmount);
-
-        if (amountDifference > tolerance) {
-          console.error('🚨 SECURITY ALERT: Amount mismatch detected', {
-            transaction_id: transaction.id,
-            order_id: transaction.order_id,
-            webhook_amount: webhookAmount,
-            order_amount: orderAmount,
-            difference: amountDifference,
-            tolerance,
-            percentage_diff: ((amountDifference / orderAmount) * 100).toFixed(2) + '%',
-          });
-
-          // Logger l'alerte de sécurité
-          await supabase
-            .from('transaction_logs')
-            .insert({
-              event_type: 'webhook_amount_mismatch',
-              status: 'failed',
-              transaction_id: transaction.id,
-              request_data: {
-                webhook_amount: webhookAmount,
-                order_amount: orderAmount,
-                difference: amountDifference,
-                tolerance,
-                percentage_diff: ((amountDifference / orderAmount) * 100).toFixed(2) + '%',
-                timestamp: new Date().toISOString(),
-              },
-              error_data: {
-                error: 'Amount mismatch - possible fraud attempt',
-                severity: 'high',
-              },
-            })
-            .then(null, (err: unknown) => console.error('Error logging amount mismatch:', err));
-
-          // 🔴 REJETER le webhook si la différence dépasse la tolérance configurée
-          // Plus de tolérance de 10 XOF - on utilise maintenant la tolérance configurée
-          return new Response(
-            JSON.stringify({
-              error: 'Amount mismatch - transaction rejected',
-              message: `Webhook amount (${webhookAmount}) differs from order amount (${orderAmount}) by ${amountDifference} XOF, exceeding tolerance of ${tolerance} XOF`,
-              webhook_amount: webhookAmount,
-              expected_amount: orderAmount,
-              difference: amountDifference,
-              tolerance,
-            }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-      }
-    }
-
     // Update transaction
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       status: mappedStatus,
-      moneroo_response: payload,
+      moneroo_response: safePayloadForLogs,
       updated_at: new Date().toISOString(),
       webhook_processed_at: new Date().toISOString(),
       webhook_attempts: (transaction.webhook_attempts || 0) + 1,
-      last_webhook_payload: payload,
+      last_webhook_payload: safePayloadForLogs,
     };
 
     if (mappedStatus === 'completed') {
@@ -634,6 +646,8 @@ serve(async req => {
       status: mappedStatus,
       response_data: safePayloadForLogs,
     });
+
+    await markWebhookProcessed(supabase, 'moneroo', externalEventId);
 
     console.log('Transaction updated successfully:', transaction.id);
 

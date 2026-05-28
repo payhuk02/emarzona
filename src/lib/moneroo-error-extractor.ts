@@ -17,7 +17,7 @@ export async function extractErrorBody(error: unknown): Promise<Record<string, u
       const responseText = await supabaseError.context.text();
       try {
         const parsed = JSON.parse(responseText);
-        logger.info('[MonerooErrorExtractor] Extracted error body from context Response');
+        logger.debug('[MonerooErrorExtractor] Extracted error body from context Response');
         return parsed;
       } catch {
         return { raw: responseText };
@@ -29,7 +29,7 @@ export async function extractErrorBody(error: unknown): Promise<Record<string, u
 
   // Méthode 2: error.data peut contenir le body parsé
   if (supabaseError?.data) {
-    logger.info('[MonerooErrorExtractor] Using error.data');
+    logger.debug('[MonerooErrorExtractor] Using error.data');
     return supabaseError.data as Record<string, unknown>;
   }
 
@@ -39,7 +39,7 @@ export async function extractErrorBody(error: unknown): Promise<Record<string, u
     typeof supabaseError.context === 'object' &&
     !(supabaseError.context instanceof Response)
   ) {
-    logger.info('[MonerooErrorExtractor] Using error.context as object');
+    logger.debug('[MonerooErrorExtractor] Using error.context as object');
     return supabaseError.context as Record<string, unknown>;
   }
 
@@ -72,7 +72,7 @@ export async function extractErrorDetails(
             const responseText = await context.text();
             try {
               errorDetails = JSON.parse(responseText) as ExtractedErrorDetails;
-              logger.info('[MonerooErrorExtractor] Parsed error from Response context');
+              logger.debug('[MonerooErrorExtractor] Parsed error from Response context');
             } catch {
               errorDetails = { message: responseText, raw: responseText };
             }
@@ -87,7 +87,7 @@ export async function extractErrorDetails(
       // 2. error.data
       else if (supabaseError?.data) {
         errorDetails = supabaseError.data as unknown as ExtractedErrorDetails;
-        logger.info('[MonerooErrorExtractor] Using error.data');
+        logger.debug('[MonerooErrorExtractor] Using error.data');
       }
       // 3. error.body
       else if (supabaseError?.body) {
@@ -96,7 +96,7 @@ export async function extractErrorDetails(
             typeof supabaseError.body === 'string'
               ? (JSON.parse(supabaseError.body) as ExtractedErrorDetails)
               : (supabaseError.body as unknown as ExtractedErrorDetails);
-          logger.info('[MonerooErrorExtractor] Using error.body');
+          logger.debug('[MonerooErrorExtractor] Using error.body');
         } catch {
           errorDetails = { message: String(supabaseError.body), raw: String(supabaseError.body) };
         }
@@ -105,7 +105,7 @@ export async function extractErrorDetails(
       else if (errorMessage.trim().startsWith('{')) {
         try {
           errorDetails = JSON.parse(errorMessage) as ExtractedErrorDetails;
-          logger.info('[MonerooErrorExtractor] Parsed error from message');
+          logger.debug('[MonerooErrorExtractor] Parsed error from message');
         } catch {
           // Pas du JSON, ignorer
         }

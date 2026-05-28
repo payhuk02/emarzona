@@ -2,6 +2,11 @@
 import 'https://deno.land/x/xhr@0.1.0/mod.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import {
+  maskEmail,
+  sanitizeMonerooApiResponseLog,
+  sanitizeMonerooRequestLog,
+} from '../_shared/payment-log-sanitize.ts';
 
 // ============================================================================
 // VALIDATION - Intégrée directement pour le déploiement via Dashboard
@@ -552,11 +557,6 @@ serve(async req => {
   try {
     // Vérifier les clés API
     const monerooApiKey = Deno.env.get('MONEROO_API_KEY');
-    console.log('[Moneroo Edge Function] API Key check:', {
-      hasApiKey: !!monerooApiKey,
-      apiKeyLength: monerooApiKey?.length || 0,
-    });
-
     if (!monerooApiKey) {
       console.error('MONEROO_API_KEY is not configured');
       return new Response(
@@ -616,6 +616,9 @@ serve(async req => {
     console.log('[Moneroo Edge Function] Processing request:', {
       action,
       hasData: !!data,
+      ...sanitizeMonerooRequestLog(
+        typeof data === 'object' && data ? (data as Record<string, unknown>) : undefined
+      ),
       dataKeys:
         data && typeof data === 'object' ? Object.keys(data as Record<string, unknown>) : [],
     });
@@ -733,20 +736,14 @@ serve(async req => {
         firstName = firstName.trim() || 'Client';
         lastName = lastName.trim() || 'Client';
 
-        // Log pour diagnostic
         console.log('[Moneroo Edge Function] Customer name processing:', {
-          originalCustomerName:
+          hasCustomerName: !!customerName,
+          namePartCount: customerNameParts.length,
+          customerEmailMasked: maskEmail(
             typeof data === 'object' && data
-              ? (data as Record<string, unknown>).customer_name
-              : undefined,
-          processedCustomerName: customerName,
-          firstName,
-          lastName,
-          customerEmail:
-            typeof data === 'object' && data
-              ? (data as Record<string, unknown>).customer_email
-              : undefined,
-          nameParts: customerNameParts,
+              ? String((data as Record<string, unknown>).customer_email ?? '')
+              : undefined
+          ),
         });
 
         // Construire metadata en incluant productId et storeId si présents
@@ -926,13 +923,10 @@ serve(async req => {
     const contentType = monerooResponse.headers.get('content-type') || '';
     const isJson = contentType.includes('application/json');
 
-    console.log('[Moneroo Edge Function] Moneroo API response:', {
-      status: monerooResponse.status,
-      statusText: monerooResponse.statusText,
-      ok: monerooResponse.ok,
-      contentType,
-      isJson,
-    });
+    console.log(
+      '[Moneroo Edge Function] Moneroo API response:',
+      sanitizeMonerooApiResponseLog(monerooResponse.status, isJson)
+    );
 
     // Parser la réponse JSON avec gestion d'erreur améliorée
     let responseData;
@@ -941,12 +935,8 @@ serve(async req => {
     try {
       responseText = await monerooResponse.text();
 
-      // Logger le contenu brut pour debugging (limité à 500 caractères)
-      const previewText =
-        responseText.length > 500 ? responseText.substring(0, 500) + '...' : responseText;
-      console.log('[Moneroo Edge Function] Response preview:', {
+      console.log('[Moneroo Edge Function] Response body:', {
         length: responseText.length,
-        preview: previewText,
         startsWithJson: responseText.trim().startsWith('{') || responseText.trim().startsWith('['),
       });
 
@@ -968,7 +958,7 @@ serve(async req => {
         } catch (jsonError: any) {
           console.error('[Moneroo Edge Function] Failed to parse JSON-like response:', {
             error: jsonError.message,
-            preview: previewText,
+            responseLength: responseText.length,
           });
           throw jsonError;
         }
@@ -997,7 +987,7 @@ serve(async req => {
         responseData = {
           error: 'Unexpected Response',
           message: `Moneroo API returned ${contentType} instead of JSON`,
-          rawResponse: previewText,
+          responseLength: responseText.length,
         };
       }
     } catch (parseError: any) {
@@ -1005,12 +995,8 @@ serve(async req => {
         error: parseError.message,
         errorName: parseError.name,
         status: monerooResponse.status,
-        statusText: monerooResponse.statusText,
         contentType,
         responseLength: responseText.length,
-        responsePreview: responseText.substring(0, 200),
-        fullResponse:
-          responseText.length < 1000 ? responseText : responseText.substring(0, 1000) + '...',
       });
 
       // Retourner une erreur détaillée avec le contenu brut pour debugging
@@ -1024,7 +1010,6 @@ serve(async req => {
             statusText: monerooResponse.statusText,
             contentType,
             responseLength: responseText.length,
-            responsePreview: responseText.substring(0, 200),
           },
           troubleshooting: {
             step1: 'Vérifiez les logs Supabase Edge Functions pour voir la réponse complète',
@@ -1043,8 +1028,7 @@ serve(async req => {
     if (!monerooResponse.ok) {
       console.error('Moneroo API error:', {
         status: monerooResponse.status,
-        statusText: monerooResponse.statusText,
-        response: responseData,
+        hasResponseData: !!responseData,
       });
       return new Response(
         JSON.stringify({

@@ -7,8 +7,19 @@ import {
   completeTransactionAndOrder,
   markWebhookProcessed,
   recordWebhookEvent,
+  validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
+import { fromStripeAmount } from '../_shared/stripe-api.ts';
+
+function constantTimeEquals(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
 
 async function verifyStripeSignature(
   payload: string,
@@ -19,14 +30,33 @@ async function verifyStripeSignature(
   const parts = signatureHeader.split(',').reduce(
     (acc, part) => {
       const [k, v] = part.split('=');
-      if (k && v) acc[k.trim()] = v.trim();
+      if (!k || !v) return acc;
+      const key = k.trim();
+      const value = v.trim();
+      if (key === 'v1') {
+        acc.v1.push(value);
+        return acc;
+      }
+      if (key === 't') {
+        acc.t = value;
+        return acc;
+      }
       return acc;
     },
-    {} as Record<string, string>
+    { t: null as string | null, v1: [] as string[] }
   );
   const timestamp = parts.t;
-  const signature = parts.v1;
-  if (!timestamp || !signature) return false;
+  const signatures = parts.v1;
+  if (!timestamp || signatures.length === 0) return false;
+
+  // Replay protection: reject if timestamp is too far from now.
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts)) return false;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const toleranceSec = 5 * 60;
+  if (Math.abs(nowSec - ts) > toleranceSec) {
+    return false;
+  }
 
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -40,7 +70,7 @@ async function verifyStripeSignature(
   const expected = Array.from(new Uint8Array(signed))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
-  return expected === signature;
+  return signatures.some(sig => constantTimeEquals(expected, sig));
 }
 
 serve(async req => {
@@ -87,6 +117,8 @@ serve(async req => {
         id: string;
         payment_status?: string;
         payment_intent?: string;
+        amount_total?: number | null;
+        currency?: string | null;
         metadata?: Record<string, string>;
       };
 
@@ -97,6 +129,41 @@ serve(async req => {
 
       const transactionId = session.metadata?.transaction_id;
       if (transactionId) {
+        const { data: txRow } = await supabase
+          .from('transactions')
+          .select('order_id')
+          .eq('id', transactionId)
+          .maybeSingle();
+
+        if (txRow?.order_id && session.amount_total != null && session.currency) {
+          const paidAmount = fromStripeAmount(session.amount_total, session.currency);
+          const paymentCheck = await validateOrderPaymentAmount(
+            supabase,
+            txRow.order_id,
+            paidAmount,
+            session.currency
+          );
+
+          if (!paymentCheck.valid) {
+            console.error('SECURITY: Stripe amount/currency mismatch', {
+              transactionId,
+              orderId: txRow.order_id,
+              reason: paymentCheck.reason,
+              difference: paymentCheck.difference,
+            });
+            await supabase
+              .from('payment_webhook_events')
+              .update({
+                processing_error: paymentCheck.reason ?? 'payment_validation_failed',
+              })
+              .eq('provider', 'stripe_connect')
+              .eq('external_event_id', event.id);
+            return new Response(JSON.stringify({ error: 'Payment validation failed' }), {
+              status: 400,
+            });
+          }
+        }
+
         const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
           supabase,
           transactionId,

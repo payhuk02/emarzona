@@ -212,61 +212,60 @@ export default function Checkout() {
   // IMPORTANT: Ne charger que si le coupon n'est pas déjà chargé
   // pour éviter la double application
   useEffect(() => {
-    // Ne charger que si appliedCouponCode n'est pas déjà défini
-    if (appliedCouponCode) {
-      return; // Déjà chargé, ne pas recharger
-    }
+    setAppliedCouponCode(prev => {
+      if (prev) return prev; // Déjà chargé, ne pas recharger
+      try {
+        const savedCoupon = localStorage.getItem('applied_coupon');
+        if (savedCoupon) {
+          const coupon = JSON.parse(savedCoupon) as unknown;
+          const c = coupon as {
+            id?: unknown;
+            discountAmount?: unknown;
+            code?: unknown;
+            appliedAt?: unknown;
+          };
+          // Vérifier que le coupon n'est pas expiré (24h)
+          if (c.appliedAt) {
+            const appliedAt = new Date(String(c.appliedAt));
+            const now = new Date();
+            const hoursDiff = (now.getTime() - appliedAt.getTime()) / (1000 * 60 * 60);
 
-    try {
-      const savedCoupon = localStorage.getItem('applied_coupon');
-      if (savedCoupon) {
-        const coupon = JSON.parse(savedCoupon) as unknown;
-        const c = coupon as {
-          id?: unknown;
-          discountAmount?: unknown;
-          code?: unknown;
-          appliedAt?: unknown;
-        };
-        // Vérifier que le coupon n'est pas expiré (24h)
-        if (c.appliedAt) {
-          const appliedAt = new Date(String(c.appliedAt));
-          const now = new Date();
-          const hoursDiff = (now.getTime() - appliedAt.getTime()) / (1000 * 60 * 60);
-
-          if (hoursDiff >= 24) {
-            // Coupon expiré, le supprimer
-            try {
-              localStorage.removeItem('applied_coupon');
-            } catch {
-              // ignore
+            if (hoursDiff >= 24) {
+              // Coupon expiré, le supprimer
+              try {
+                localStorage.removeItem('applied_coupon');
+              } catch {
+                // ignore
+              }
+              return null;
             }
-            return;
+          }
+
+          const discountAmount = Number(c.discountAmount);
+          if (
+            typeof c.id === 'string' &&
+            typeof c.code === 'string' &&
+            Number.isFinite(discountAmount)
+          ) {
+            return {
+              id: c.id,
+              discountAmount, // S'assurer que c'est un nombre
+              code: c.code,
+            };
           }
         }
-
-        const discountAmount = Number(c.discountAmount);
-        if (
-          typeof c.id === 'string' &&
-          typeof c.code === 'string' &&
-          Number.isFinite(discountAmount)
-        ) {
-          setAppliedCouponCode({
-            id: c.id,
-            discountAmount, // S'assurer que c'est un nombre
-            code: c.code,
-          });
+      } catch (_error: unknown) {
+        const errorObj = _error instanceof Error ? _error : new Error(String(_error));
+        logger.warn('Error loading coupon from localStorage:', errorObj);
+        try {
+          localStorage.removeItem('applied_coupon');
+        } catch {
+          // ignore
         }
       }
-    } catch (_error: unknown) {
-      const errorObj = _error instanceof Error ? _error : new Error(String(_error));
-      logger.warn('Error loading coupon from localStorage:', errorObj);
-      try {
-        localStorage.removeItem('applied_coupon');
-      } catch {
-        // ignore
-      }
-    }
-  }, [appliedCouponCode]); // Ne s'exécute qu'une fois au montage ou quand appliedCouponCode change
+      return null;
+    });
+  }, []); // S'exécute uniquement au montage
 
   // Charger le customer_id et vérifier si c'est la première commande
   useEffect(() => {
@@ -337,7 +336,7 @@ export default function Checkout() {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof ShippingAddress, string>>>({});
 
   // Pré-remplir avec données utilisateur si disponible
-  useMemo(() => {
+  useEffect(() => {
     if (user?.email && !formData.email) {
       setFormData(prev => ({
         ...prev,

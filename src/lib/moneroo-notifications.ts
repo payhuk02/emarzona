@@ -8,6 +8,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { sendUnifiedNotification } from './notifications/unified-notifications';
 import { logger } from './logger';
+import { maskEmail, maskPhone } from './moneroo-log-sanitize';
 
 export interface PaymentNotificationData {
   transactionId: string;
@@ -268,8 +269,7 @@ async function _sendPaymentEmail(params: {
     }
 
     logger.log('Email sent successfully:', {
-      to: params.to,
-      subject: params.subject,
+      toMasked: maskEmail(params.to),
       template: params.template,
       messageId: data?.messageId,
     });
@@ -277,7 +277,7 @@ async function _sendPaymentEmail(params: {
     const errorMessage = _error instanceof Error ? _error.message : String(_error);
     logger.error('Error sending payment email:', {
       error: errorMessage,
-      to: params.to,
+      toMasked: maskEmail(params.to),
       template: params.template,
     });
     // Ne pas faire échouer l'opération principale si l'email échoue
@@ -308,7 +308,7 @@ export async function sendPaymentSMS(params: {
     }
 
     logger.log('SMS sent successfully:', {
-      to: params.to,
+      toMasked: maskPhone(params.to),
       template: params.template,
       messageId: data?.messageId,
     });
@@ -316,7 +316,7 @@ export async function sendPaymentSMS(params: {
     const errorMessage = _error instanceof Error ? _error.message : String(_error);
     logger.error('Error sending payment SMS:', {
       error: errorMessage,
-      to: params.to,
+      toMasked: maskPhone(params.to),
       template: params.template,
     });
     // Ne pas faire échouer l'opération principale si le SMS échoue

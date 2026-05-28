@@ -138,14 +138,10 @@ class MonerooClient {
         const errorMessage = supabaseError.message || 'Erreur inconnue';
 
         // Logger l'erreur complète pour debugging
-        logger.error('[MonerooClient] Supabase function  _error:', {
-          error,
+        logger.error('[MonerooClient] Supabase function error:', {
           errorMessage,
-          errorType: typeof error,
-          errorKeys: error ? Object.keys(error) : [],
-          hasContext: !!supabaseError?.context,
-          hasData: !!supabaseError?.data,
-          hasBody: !!supabaseError?.body,
+          status: supabaseError?.context?.status ?? supabaseError?.status,
+          action,
           hasErrorBody: !!errorBody,
         });
 
@@ -165,7 +161,7 @@ class MonerooClient {
               `3. Que l'Edge Function est accessible: ${supabaseUrl}/functions/v1/moneroo\n` +
               `4. Les logs Supabase Edge Functions → Logs → moneroo pour plus de détails\n\n` +
               `Erreur technique: ${errorMessage}`,
-            { originalError: error, action, data, supabaseUrl }
+            { originalError: errorMessage, action, supabaseUrl }
           );
         }
 
@@ -173,12 +169,9 @@ class MonerooClient {
         const errorDetails = await extractErrorDetails(error, errorMessage);
         const detailedMessage = extractDetailedMessage(errorDetails, errorMessage);
 
-        // Logger les détails trouvés
-        logger.info('[MonerooClient] Error details extracted:', {
+        logger.debug('[MonerooClient] Error details extracted:', {
           hasErrorBody: !!errorBody,
-          hasDetails: Object.keys(errorDetails).length > 0,
           detailsKeys: Object.keys(errorDetails),
-          errorDetails,
         });
 
         // Vérifier si c'est une erreur de configuration API

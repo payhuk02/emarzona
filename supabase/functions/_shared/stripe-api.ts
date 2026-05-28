@@ -38,13 +38,23 @@ export async function stripeGet<T>(path: string): Promise<T> {
 }
 
 /** Montant en unité mineure (centimes) */
+const ZERO_DECIMAL_CURRENCIES = new Set(['xof', 'xaf', 'jpy', 'krw', 'vnd']);
+
 export function toStripeAmount(amountMajor: number, currency: string): number {
-  const zeroDecimal = new Set(['xof', 'xaf', 'jpy', 'krw', 'vnd']);
   const c = currency.toLowerCase();
-  if (zeroDecimal.has(c)) {
+  if (ZERO_DECIMAL_CURRENCIES.has(c)) {
     return Math.round(amountMajor);
   }
   return Math.round(amountMajor * 100);
+}
+
+/** Convertit un montant Stripe (unité mineure) vers l'unité majeure de la commande */
+export function fromStripeAmount(amountMinor: number, currency: string): number {
+  const c = currency.toLowerCase();
+  if (ZERO_DECIMAL_CURRENCIES.has(c)) {
+    return amountMinor;
+  }
+  return amountMinor / 100;
 }
 
 export function computeApplicationFee(

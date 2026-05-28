@@ -15,7 +15,10 @@ export const config = {
 const BOT_REGEX =
   /(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|slackbot|telegrambot|discordbot|pinterest|redditbot|applebot|gptbot|claudebot|perplexitybot|google-extended|chatgpt-user|oai-searchbot)/i;
 
-const SUPABASE_URL = 'https://hbdnzajbyjakdhuavrvb.supabase.co';
+const SUPABASE_URL =
+  globalThis.process?.env?.VITE_SUPABASE_URL ||
+  globalThis.process?.env?.SUPABASE_URL ||
+  'https://hbdnzajbyjakdhuavrvb.supabase.co';
 const SITE = 'https://www.emarzona.com';
 const STORE_DOMAIN = 'myemarzona.shop';
 
@@ -38,16 +41,25 @@ const DEFAULT_META: Meta = {
   type: 'website',
 };
 
+function getAuthHeaders() {
+  const anonKey =
+    globalThis.process?.env?.SUPABASE_ANON_KEY || globalThis.process?.env?.VITE_SUPABASE_ANON_KEY;
+  if (!anonKey) {
+    console.error('[Middleware] Missing SUPABASE_ANON_KEY environment variable.');
+  }
+  return {
+    apikey: anonKey || '',
+    Authorization: `Bearer ${anonKey || ''}`,
+  };
+}
+
 async function fetchProductMeta(slug: string, storeId?: string): Promise<Meta | null> {
   try {
     const filter = storeId ? `slug=eq.${slug}&store_id=eq.${storeId}` : `slug=eq.${slug}`;
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/products?${filter}&select=name,description,image_url,price,currency,meta_title,meta_description,slug&is_active=eq.true&limit=1`,
       {
-        headers: {
-          apikey: globalThis.process?.env?.SUPABASE_ANON_KEY || '',
-          Authorization: `Bearer ${globalThis.process?.env?.SUPABASE_ANON_KEY || ''}`,
-        },
+        headers: getAuthHeaders(),
       }
     );
     const data = await r.json();
@@ -72,10 +84,7 @@ async function fetchStoreMeta(slugOrSubdomain: string): Promise<Meta | null> {
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/stores?or=(subdomain.eq.${slugOrSubdomain},slug.eq.${slugOrSubdomain})&select=name,description,about,logo_url,meta_title,meta_description,slug,subdomain&is_active=eq.true&limit=1`,
       {
-        headers: {
-          apikey: globalThis.process?.env?.SUPABASE_ANON_KEY || '',
-          Authorization: `Bearer ${globalThis.process?.env?.SUPABASE_ANON_KEY || ''}`,
-        },
+        headers: getAuthHeaders(),
       }
     );
     const data = await r.json();
@@ -98,10 +107,7 @@ async function fetchCollectionMeta(slug: string): Promise<Meta | null> {
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/artist_collections?collection_slug=eq.${slug}&select=collection_name,collection_description,cover_image_url&is_public=eq.true&limit=1`,
       {
-        headers: {
-          apikey: globalThis.process?.env?.SUPABASE_ANON_KEY || '',
-          Authorization: `Bearer ${globalThis.process?.env?.SUPABASE_ANON_KEY || ''}`,
-        },
+        headers: getAuthHeaders(),
       }
     );
     const data = await r.json();
@@ -124,10 +130,7 @@ async function fetchAuctionMeta(slug: string): Promise<Meta | null> {
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/artist_product_auctions?auction_slug=eq.${slug}&select=auction_title,auction_description,current_bid,artist_products(products(image_url))&limit=1`,
       {
-        headers: {
-          apikey: globalThis.process?.env?.SUPABASE_ANON_KEY || '',
-          Authorization: `Bearer ${globalThis.process?.env?.SUPABASE_ANON_KEY || ''}`,
-        },
+        headers: getAuthHeaders(),
       }
     );
     const data = await r.json();

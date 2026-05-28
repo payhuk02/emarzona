@@ -11,6 +11,12 @@ import {
 import { Currency, isSupportedCurrency } from './currency-converter';
 import { MonerooCheckoutResponse } from './moneroo-types';
 import { validateAmount } from './moneroo-amount-validator';
+import {
+  sanitizeMonerooApiResponse,
+  sanitizeMonerooCheckoutLog,
+  sanitizePaymentOptionsForAudit,
+  maskEmail,
+} from './moneroo-log-sanitize';
 
 export interface PaymentOptions {
   storeId: string;
@@ -79,17 +85,19 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
 
   // Validation des paramètres obligatoires
   if (!storeId || typeof storeId !== 'string' || storeId.trim() === '') {
-    logger.error('Invalid storeId in initiateMonerooPayment:', { storeId, options });
+    logger.error('Invalid storeId in initiateMonerooPayment:', { storeId });
     throw new MonerooValidationError(`storeId invalide: ${storeId}. Doit être un UUID valide.`);
   }
 
   if (productId && (typeof productId !== 'string' || productId.trim() === '')) {
-    logger.error('Invalid productId in initiateMonerooPayment:', { productId, options });
+    logger.error('Invalid productId in initiateMonerooPayment:', { productId });
     throw new MonerooValidationError(`productId invalide: ${productId}. Doit être un UUID valide.`);
   }
 
   if (!customerEmail || typeof customerEmail !== 'string' || !customerEmail.includes('@')) {
-    logger.error('Invalid customerEmail in initiateMonerooPayment:', { customerEmail, options });
+    logger.error('Invalid customerEmail in initiateMonerooPayment:', {
+      customerEmailMasked: maskEmail(customerEmail),
+    });
     throw new MonerooValidationError(
       `customerEmail invalide: ${customerEmail}. Doit être une adresse email valide.`
     );
@@ -100,7 +108,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
     productId,
     amount,
     currency,
-    customerEmail,
+    customerEmailMasked: maskEmail(customerEmail),
     hasDescription: !!description,
     hasMetadata: Object.keys(metadata).length > 0,
   });
@@ -150,11 +158,10 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         details: transactionError.details,
         hint: transactionError.hint,
         storeId,
-        customerId: currentUserId,
+        hasCustomerId: !!currentUserId,
         productId,
         amount,
         currency,
-        transactionData,
       });
 
       // Afficher un message d'erreur plus détaillé
@@ -215,9 +222,8 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         code: transactionError.code,
         message: transactionError.message,
         storeId,
-        customerId: currentUserId,
+        hasCustomerId: !!currentUserId,
         productId,
-        transactionData,
         isColumnMissingError,
       });
 
@@ -239,7 +245,9 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
           transaction_id: transaction.id,
           event_type: 'created',
           status: 'pending',
-          request_data: JSON.parse(JSON.stringify(options)),
+          request_data: sanitizePaymentOptionsForAudit(
+            options as unknown as Record<string, unknown>
+          ),
         },
       ]);
     } catch (_logError: unknown) {
@@ -298,31 +306,17 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       ...(orderId && { orderId }),
     };
 
-    logger.log('Initiating Moneroo checkout:', {
-      ...checkoutDataWithIds,
-      amount:
-        typeof checkoutDataWithIds.amount === 'number'
-          ? checkoutDataWithIds.amount
-          : Number(checkoutDataWithIds.amount),
-      currency: checkoutDataWithIds.currency,
-      hasReturnUrl: !!checkoutDataWithIds.return_url,
-      hasCancelUrl: !!checkoutDataWithIds.cancel_url,
-      metadataKeys: Object.keys(checkoutDataWithIds.metadata || {}),
-      hasProductId: !!checkoutDataWithIds.productId,
-      hasStoreId: !!checkoutDataWithIds.storeId,
-    });
+    logger.log('Initiating Moneroo checkout:', sanitizeMonerooCheckoutLog(checkoutDataWithIds));
 
     let monerooResponse;
     try {
       logger.log('Calling monerooClient.createCheckout...');
       // Passer checkoutDataWithIds qui contient productId et storeId directement
       monerooResponse = await monerooClient.createCheckout(checkoutDataWithIds);
-      logger.log('Moneroo response received successfully:', {
-        hasResponse: !!monerooResponse,
-        responseType: typeof monerooResponse,
-        responseKeys: monerooResponse ? Object.keys(monerooResponse) : [],
-        fullResponse: monerooResponse,
-      });
+      logger.log(
+        'Moneroo response received successfully:',
+        sanitizeMonerooApiResponse(monerooResponse)
+      );
     } catch (_checkoutError: unknown) {
       const error =
         _checkoutError instanceof Error ? _checkoutError : new Error(String(_checkoutError));
@@ -330,8 +324,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
         error: _checkoutError,
         errorMessage: error.message,
         errorName: error.name,
-        errorStack: error.stack,
-        checkoutData,
+        checkout: sanitizeMonerooCheckoutLog(checkoutData),
       });
       // Relancer l'erreur pour qu'elle soit gérée par le catch principal
       throw _checkoutError;
@@ -373,7 +366,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
       .update({
         moneroo_transaction_id: transactionId,
         moneroo_checkout_url: checkoutUrl,
-        moneroo_response: monerooResponse as Json,
+        moneroo_response: sanitizeMonerooApiResponse(monerooResponse) as Json,
         status: 'processing',
       })
       .eq('id', transaction.id);
@@ -389,7 +382,7 @@ export const initiateMonerooPayment = async (options: PaymentOptions) => {
           transaction_id: transaction.id,
           event_type: 'payment_initiated',
           status: 'processing',
-          response_data: monerooResponse as Json,
+          response_data: sanitizeMonerooApiResponse(monerooResponse) as Json,
         },
       ]);
     } catch (_logError: unknown) {

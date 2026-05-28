@@ -99,6 +99,61 @@ export async function completeTransactionAndOrder(
   return { orderId, alreadyCompleted: false };
 }
 
+export async function getMaxAmountTolerance(supabase: SupabaseClient): Promise<number> {
+  try {
+    const { data: settings } = await supabase
+      .from('platform_settings')
+      .select('settings')
+      .eq('key', 'admin')
+      .single();
+
+    if (settings?.settings?.max_amount_tolerance != null) {
+      return parseFloat(String(settings.settings.max_amount_tolerance)) || 1.0;
+    }
+  } catch {
+    // default below
+  }
+  return 1.0;
+}
+
+export async function validateOrderPaymentAmount(
+  supabase: SupabaseClient,
+  orderId: string,
+  paidAmount: number,
+  paidCurrency?: string | null
+): Promise<{ valid: boolean; orderAmount?: number; difference?: number; reason?: string }> {
+  const { data: orderData } = await supabase
+    .from('orders')
+    .select('total_amount, currency')
+    .eq('id', orderId)
+    .single();
+
+  if (!orderData) {
+    return { valid: false, reason: 'order_not_found' };
+  }
+
+  const orderCurrency = String(orderData.currency ?? '').toUpperCase();
+  const webhookCurrency = paidCurrency ? String(paidCurrency).toUpperCase() : orderCurrency;
+
+  if (orderCurrency && webhookCurrency && orderCurrency !== webhookCurrency) {
+    return { valid: false, reason: 'currency_mismatch' };
+  }
+
+  const orderAmount =
+    typeof orderData.total_amount === 'string'
+      ? parseFloat(orderData.total_amount)
+      : Number(orderData.total_amount);
+
+  const tolerance = await getMaxAmountTolerance(supabase);
+  const difference = Math.abs(paidAmount - orderAmount);
+
+  if (difference > tolerance) {
+    return { valid: false, orderAmount, difference, reason: 'amount_mismatch' };
+  }
+
+  return { valid: true, orderAmount, difference };
+}
+
 export async function resolvePlatformFeePercent(
   supabase: SupabaseClient,
   storeId: string

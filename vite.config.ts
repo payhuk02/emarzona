@@ -113,6 +113,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(publicBackendKey),
       'import.meta.env.VITE_SUPABASE_PROJECT_ID': JSON.stringify(publicBackendProjectId),
       'import.meta.env.VITE_BUILD_ID': JSON.stringify(buildId),
+      'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(''),
     },
     server: { host: '::', port: 8080 },
     plugins: [
