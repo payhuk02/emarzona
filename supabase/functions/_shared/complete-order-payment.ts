@@ -1,4 +1,5 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { sanitizePaymentWebhookPayload } from './payment-log-sanitize.ts';
 
 export async function recordWebhookEvent(
   supabase: SupabaseClient,
@@ -9,13 +10,14 @@ export async function recordWebhookEvent(
   orderId?: string | null,
   transactionId?: string | null
 ): Promise<boolean> {
+  const safePayload = sanitizePaymentWebhookPayload(provider, payload);
   const { error } = await supabase.from('payment_webhook_events').insert({
     provider,
     external_event_id: externalEventId,
     event_type: eventType,
     order_id: orderId ?? null,
     transaction_id: transactionId ?? null,
-    payload,
+    payload: safePayload,
   });
   if (error?.code === '23505') {
     return false;
@@ -76,7 +78,12 @@ export async function completeTransactionAndOrder(
       provider_payment_intent_id: extras?.provider_payment_intent_id ?? null,
       connected_account_id: extras?.connected_account_id ?? null,
       application_fee_amount: extras?.application_fee_amount ?? null,
-      last_webhook_payload: extras?.webhookPayload ?? null,
+      last_webhook_payload: extras?.webhookPayload
+        ? sanitizePaymentWebhookPayload(
+            extras.paymentProviderUsed ?? transaction.payment_provider ?? 'unknown',
+            extras.webhookPayload
+          )
+        : null,
     })
     .eq('id', transactionId);
 
@@ -152,6 +159,32 @@ export async function validateOrderPaymentAmount(
   }
 
   return { valid: true, orderAmount, difference };
+}
+
+/** Validates order amount before marking paid; throws on mismatch. */
+export async function assertOrderPaymentBeforeComplete(
+  supabase: SupabaseClient,
+  transactionId: string,
+  paidAmount: number,
+  paidCurrency?: string | null
+): Promise<string | null> {
+  const { data: tx } = await supabase
+    .from('transactions')
+    .select('order_id')
+    .eq('id', transactionId)
+    .maybeSingle();
+
+  if (!tx?.order_id) {
+    return null;
+  }
+
+  const check = await validateOrderPaymentAmount(supabase, tx.order_id, paidAmount, paidCurrency);
+
+  if (!check.valid) {
+    throw new Error(check.reason ?? 'payment_validation_failed');
+  }
+
+  return tx.order_id;
 }
 
 export async function resolvePlatformFeePercent(

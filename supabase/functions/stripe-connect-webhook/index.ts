@@ -4,10 +4,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
 import {
+  assertOrderPaymentBeforeComplete,
   completeTransactionAndOrder,
   markWebhookProcessed,
   recordWebhookEvent,
-  validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 import { fromStripeAmount } from '../_shared/stripe-api.ts';
@@ -129,33 +129,27 @@ serve(async req => {
 
       const transactionId = session.metadata?.transaction_id;
       if (transactionId) {
-        const { data: txRow } = await supabase
-          .from('transactions')
-          .select('order_id')
-          .eq('id', transactionId)
-          .maybeSingle();
-
-        if (txRow?.order_id && session.amount_total != null && session.currency) {
+        if (session.amount_total != null && session.currency) {
           const paidAmount = fromStripeAmount(session.amount_total, session.currency);
-          const paymentCheck = await validateOrderPaymentAmount(
-            supabase,
-            txRow.order_id,
-            paidAmount,
-            session.currency
-          );
-
-          if (!paymentCheck.valid) {
-            console.error('SECURITY: Stripe amount/currency mismatch', {
+          try {
+            await assertOrderPaymentBeforeComplete(
+              supabase,
               transactionId,
-              orderId: txRow.order_id,
-              reason: paymentCheck.reason,
-              difference: paymentCheck.difference,
+              paidAmount,
+              session.currency
+            );
+          } catch (validationError) {
+            const reason =
+              validationError instanceof Error
+                ? validationError.message
+                : 'payment_validation_failed';
+            console.error('SECURITY: Stripe payment validation failed', {
+              transactionId,
+              reason,
             });
             await supabase
               .from('payment_webhook_events')
-              .update({
-                processing_error: paymentCheck.reason ?? 'payment_validation_failed',
-              })
+              .update({ processing_error: reason })
               .eq('provider', 'stripe_connect')
               .eq('external_event_id', event.id);
             return new Response(JSON.stringify({ error: 'Payment validation failed' }), {
@@ -172,6 +166,7 @@ serve(async req => {
             provider_payment_intent_id:
               typeof session.payment_intent === 'string' ? session.payment_intent : undefined,
             webhookPayload: session as unknown as Record<string, unknown>,
+            paymentProviderUsed: 'stripe_connect',
           }
         );
 

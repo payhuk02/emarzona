@@ -9,10 +9,12 @@ import {
   verifyPayPalWebhookSignature,
 } from '../_shared/paypal-api.ts';
 import {
+  assertOrderPaymentBeforeComplete,
   completeTransactionAndOrder,
   markWebhookProcessed,
   recordWebhookEvent,
 } from '../_shared/complete-order-payment.ts';
+import { extractPayPalCaptureAmount } from '../_shared/payment-log-sanitize.ts';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 import { syncStoreEnabledPaymentProviders } from '../_shared/sync-enabled-providers.ts';
 import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
@@ -24,10 +26,23 @@ async function completePayPalPayment(
     provider_session_id?: string;
     provider_payment_intent_id?: string;
     webhookPayload?: Record<string, unknown>;
+    paidAmount?: number;
+    paidCurrency?: string;
   }
 ): Promise<void> {
+  if (extras.paidAmount != null && Number.isFinite(extras.paidAmount)) {
+    await assertOrderPaymentBeforeComplete(
+      supabase,
+      transactionId,
+      extras.paidAmount,
+      extras.paidCurrency
+    );
+  }
+
   const { orderId, alreadyCompleted } = await completeTransactionAndOrder(supabase, transactionId, {
-    ...extras,
+    provider_session_id: extras.provider_session_id,
+    provider_payment_intent_id: extras.provider_payment_intent_id,
+    webhookPayload: extras.webhookPayload,
     paymentProviderUsed: 'paypal_commerce',
   });
 
@@ -133,10 +148,13 @@ serve(async req => {
       const transactionId = capture.customId;
 
       if (transactionId && capture.status === 'COMPLETED') {
+        const captureAmount = extractPayPalCaptureAmount(resource);
         await completePayPalPayment(supabase, transactionId, {
           provider_session_id: paypalOrderId,
           provider_payment_intent_id: capture.captureId,
           webhookPayload: resource,
+          paidAmount: captureAmount?.amount,
+          paidCurrency: captureAmount?.currency,
         });
       }
     }
@@ -159,9 +177,12 @@ serve(async req => {
       }
 
       if (transactionId) {
+        const captureAmount = extractPayPalCaptureAmount(resource);
         await completePayPalPayment(supabase, transactionId, {
           provider_payment_intent_id: resource.id as string,
           webhookPayload: resource,
+          paidAmount: captureAmount?.amount,
+          paidCurrency: captureAmount?.currency,
         });
       }
     }
