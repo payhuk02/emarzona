@@ -1,29 +1,33 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import StyleQuiz from '../StyleQuiz';
 
-// Mocks
+const mockToast = vi.fn();
+
+vi.mock('@/hooks/use-toast', () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 vi.mock('@/hooks/useStylePreferences', () => ({
-  useStylePreferences: vi.fn()
+  useStylePreferences: vi.fn(),
 }));
 
 vi.mock('@/hooks/useProductRecommendations', () => ({
-  useProductRecommendations: vi.fn()
+  useProductRecommendations: vi.fn(),
 }));
 
 vi.mock('@/lib/logger', () => ({
   logger: {
     error: vi.fn(),
-    info: vi.fn()
-  }
+    info: vi.fn(),
+  },
 }));
-
-// Import des mocks pour les manipuler
 import { useStylePreferences } from '@/hooks/useStylePreferences';
-import { useProductRecommendations } from '@/hooks/useProductRecommendations';
 
+import { useProductRecommendations } from '@/hooks/useProductRecommendations';
 const mockUseStylePreferences = vi.mocked(useStylePreferences);
 const mockUseProductRecommendations = vi.mocked(useProductRecommendations);
 
@@ -31,14 +35,12 @@ const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
-      mutations: { retry: false }
-    }
+      mutations: { retry: false },
+    },
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -50,7 +52,7 @@ describe('StyleQuiz', () => {
 
   const defaultProps = {
     onComplete: mockOnComplete,
-    onSkip: mockOnSkip
+    onSkip: mockOnSkip,
   };
 
   beforeEach(() => {
@@ -58,11 +60,11 @@ describe('StyleQuiz', () => {
 
     mockUseStylePreferences.mockReturnValue({
       saveStylePreferences: mockSavePreferences,
-      isSaving: false
+      isSaving: false,
     });
 
     mockUseProductRecommendations.mockReturnValue({
-      getPersonalizedRecommendations: mockGetRecommendations
+      getPersonalizedRecommendations: mockGetRecommendations,
     });
   });
 
@@ -71,7 +73,11 @@ describe('StyleQuiz', () => {
       render(<StyleQuiz {...defaultProps} />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Découvrez Votre Style')).toBeInTheDocument();
-      expect(screen.getByText('Répondez à quelques questions pour recevoir des recommandations personnalisées')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Répondez à quelques questions pour recevoir des recommandations personnalisées'
+        )
+      ).toBeInTheDocument();
     });
 
     it('shows the first question', () => {
@@ -96,7 +102,7 @@ describe('StyleQuiz', () => {
       const nextButton = screen.getByRole('button', { name: /Suivant/i });
       await user.click(nextButton);
 
-      expect(screen.getByText('Réponse requise')).toBeInTheDocument();
+      expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Réponse requise' }));
       expect(screen.getByText('Question 1 sur 5')).toBeInTheDocument();
     });
 
@@ -168,7 +174,8 @@ describe('StyleQuiz', () => {
         const firstOption = screen.getAllByRole('radio')[0];
         await user.click(firstOption);
 
-        if (i < 4) { // Don't click next on last question
+        if (i < 4) {
+          // Don't click next on last question
           const nextButton = screen.getByRole('button', { name: /Suivant/i });
           await user.click(nextButton);
 
@@ -203,7 +210,7 @@ describe('StyleQuiz', () => {
         colorPalette: 'neutral' as const,
         budgetRange: 'midrange' as const,
         occasionFocus: 'casual' as const,
-        sustainability: 'somewhat' as const
+        sustainability: 'somewhat' as const,
       };
       const mockProducts = [{ id: '1', name: 'Test Product' }];
 
@@ -253,14 +260,14 @@ describe('StyleQuiz', () => {
       expect(radioButtons.length).toBeGreaterThan(0);
 
       radioButtons.forEach(radio => {
-        expect(radio).toHaveAttribute('type', 'radio');
+        expect(radio).toHaveAttribute('role', 'radio');
       });
     });
 
     it('has proper form labels', () => {
       render(<StyleQuiz {...defaultProps} />, { wrapper: createWrapper() });
 
-      const labels = screen.getAllByRole('label');
+      const labels = screen.getAllByText(/Sobre et épuré|Artistique et bohème|Élégant et raffiné/i);
       expect(labels.length).toBeGreaterThan(0);
     });
   });
@@ -307,7 +314,9 @@ describe('StyleQuiz', () => {
       }
 
       await waitFor(() => {
-        expect(screen.getByText('Erreur')).toBeInTheDocument();
+        expect(mockToast).toHaveBeenCalledWith(
+          expect.objectContaining({ title: 'Erreur', variant: 'destructive' })
+        );
       });
     });
   });

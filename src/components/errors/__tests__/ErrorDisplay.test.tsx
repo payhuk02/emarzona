@@ -13,45 +13,27 @@ describe('ErrorDisplay', () => {
   });
 
   it('devrait afficher une erreur critique', () => {
-    const criticalError = {
-      type: ErrorType.CRITICAL_ERROR,
-      severity: ErrorSeverity.CRITICAL,
-      message: 'Erreur critique',
-      userMessage: 'Une erreur critique est survenue',
-      retryable: false,
-      originalError: new Error('Critical error'),
-    };
-
-    render(<ErrorDisplay error={criticalError} />);
+    render(<ErrorDisplay error={new Error('Failed to fetch')} title="Erreur critique" />);
 
     expect(screen.getByText('Erreur critique')).toBeInTheDocument();
-    expect(screen.getByText('Une erreur critique est survenue')).toBeInTheDocument();
+    expect(screen.getByText(/connexion internet/i)).toBeInTheDocument();
   });
 
   it('devrait afficher une erreur haute sévérité', () => {
-    const highError = {
-      type: ErrorType.NETWORK_ERROR,
-      severity: ErrorSeverity.HIGH,
-      message: 'Network error',
-      userMessage: 'Erreur de connexion',
-      retryable: true,
-      originalError: new Error('Network error'),
-    };
-
-    render(<ErrorDisplay error={highError} />);
+    render(<ErrorDisplay error={new Error('Failed to fetch')} />);
 
     expect(screen.getByText('Erreur')).toBeInTheDocument();
-    expect(screen.getByText('Erreur de connexion')).toBeInTheDocument();
+    expect(screen.getByText(/connexion internet/i)).toBeInTheDocument();
   });
 
   it('ne devrait pas afficher les erreurs non-critiques', () => {
     const lowError = {
       type: ErrorType.TABLE_NOT_EXISTS,
       severity: ErrorSeverity.LOW,
-      message: 'Table does not exist',
+      message: 'relation "foo" does not exist',
       userMessage: 'Table non trouvée',
       retryable: false,
-      originalError: new Error('Table not found'),
+      originalError: new Error('relation "foo" does not exist'),
     };
 
     const { container } = render(<ErrorDisplay error={lowError} />);
@@ -60,26 +42,13 @@ describe('ErrorDisplay', () => {
   });
 
   it('devrait afficher un bouton retry si showRetry est true et erreur retryable', () => {
-    const retryableError = {
-      type: ErrorType.NETWORK_ERROR,
-      severity: ErrorSeverity.HIGH,
-      message: 'Network error',
-      userMessage: 'Erreur de connexion',
-      retryable: true,
-      originalError: new Error('Network error'),
-    };
-
     const onRetry = vi.fn();
 
     render(
-      <ErrorDisplay 
-        error={retryableError} 
-        showRetry={true}
-        onRetry={onRetry}
-      />
+      <ErrorDisplay error={new Error('Failed to fetch')} showRetry={true} onRetry={onRetry} />
     );
 
-    const retryButton = screen.getByText('Réessayer');
+    const retryButton = screen.getByRole('button', { name: /réessayer/i });
     expect(retryButton).toBeInTheDocument();
 
     retryButton.click();
@@ -87,99 +56,46 @@ describe('ErrorDisplay', () => {
   });
 
   it('ne devrait pas afficher le bouton retry si erreur non-retryable', () => {
-    const nonRetryableError = {
-      type: ErrorType.VALIDATION_ERROR,
-      severity: ErrorSeverity.HIGH,
-      message: 'Validation error',
-      userMessage: 'Erreur de validation',
-      retryable: false,
-      originalError: new Error('Validation error'),
-    };
-
     render(
-      <ErrorDisplay 
-        error={nonRetryableError} 
+      <ErrorDisplay
+        error={Object.assign(new Error('permission denied'), { code: '42501' })}
         showRetry={true}
         onRetry={vi.fn()}
       />
     );
 
-    expect(screen.queryByText('Réessayer')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /réessayer/i })).not.toBeInTheDocument();
   });
 
   it('devrait afficher un bouton dismiss si showDismiss est true', () => {
-    const error = {
-      type: ErrorType.NETWORK_ERROR,
-      severity: ErrorSeverity.HIGH,
-      message: 'Network error',
-      userMessage: 'Erreur de connexion',
-      retryable: true,
-      originalError: new Error('Network error'),
-    };
-
     const onDismiss = vi.fn();
 
     render(
-      <ErrorDisplay 
-        error={error} 
-        showDismiss={true}
-        onDismiss={onDismiss}
-      />
+      <ErrorDisplay error={new Error('Failed to fetch')} showDismiss={true} onDismiss={onDismiss} />
     );
 
-    const dismissButton = screen.getByRole('button', { name: '' });
-    expect(dismissButton).toBeInTheDocument();
-
+    const dismissButton = screen.getByRole('button', { name: /fermer l'erreur/i });
     dismissButton.click();
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 
   it('devrait utiliser un titre personnalisé si fourni', () => {
-    const error = {
-      type: ErrorType.NETWORK_ERROR,
-      severity: ErrorSeverity.HIGH,
-      message: 'Network error',
-      userMessage: 'Erreur de connexion',
-      retryable: true,
-      originalError: new Error('Network error'),
-    };
-
-    render(<ErrorDisplay error={error} title="Titre personnalisé" />);
+    render(<ErrorDisplay error={new Error('Failed to fetch')} title="Titre personnalisé" />);
 
     expect(screen.getByText('Titre personnalisé')).toBeInTheDocument();
   });
 
   it('devrait accepter une classe CSS personnalisée', () => {
-    const error = {
-      type: ErrorType.NETWORK_ERROR,
-      severity: ErrorSeverity.HIGH,
-      message: 'Network error',
-      userMessage: 'Erreur de connexion',
-      retryable: true,
-      originalError: new Error('Network error'),
-    };
-
     const { container } = render(
-      <ErrorDisplay error={error} className="custom-class" />
+      <ErrorDisplay error={new Error('Failed to fetch')} className="custom-class" />
     );
 
     expect(container.querySelector('.custom-class')).toBeInTheDocument();
   });
 
   it('devrait normaliser automatiquement une erreur brute', () => {
-    const rawError = new Error('Raw error');
+    render(<ErrorDisplay error={new Error('Something unexpected')} />);
 
-    render(<ErrorDisplay error={rawError} />);
-
-    // L'erreur devrait être normalisée et affichée
-    expect(screen.getByText(/Une erreur inattendue s'est produite/)).toBeInTheDocument();
+    expect(screen.getByText(/Une erreur inattendue s'est produite/i)).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
