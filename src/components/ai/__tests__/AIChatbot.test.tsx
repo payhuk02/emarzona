@@ -2,19 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
-import { AIChatbot } from '../AIChatbot';
+import AIChatbot from '../AIChatbot';
+import { useAIChatbot } from '@/hooks/useAIChatbot';
 
 // Mocks
 vi.mock('@/hooks/useAIChatbot', () => ({
-  useAIChatbot: vi.fn()
+  useAIChatbot: vi.fn(),
 }));
 
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({
     user: {
-      id: 'user-1'
-    }
-  })
+      id: 'user-1',
+    },
+  }),
 }));
 
 const mockUseAIChatbot = vi.mocked(useAIChatbot);
@@ -23,18 +24,16 @@ const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: false
+        retry: false,
       },
       mutations: {
-        retry: false
-      }
-    }
+        retry: false,
+      },
+    },
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -42,22 +41,24 @@ describe('AIChatbot', () => {
   const defaultMock = {
     isOpen: true,
     isMinimized: false,
-    messages: [{
-      id: 'welcome',
-      content: 'Bonjour ! Comment puis-je vous aider ?',
-      role: 'assistant',
-      timestamp: new Date(),
-      metadata: {
-        suggestions: ['Aide commande', 'Support']
-      }
-    }],
+    messages: [
+      {
+        id: 'welcome',
+        content: 'Bonjour ! Comment puis-je vous aider ?',
+        role: 'assistant',
+        timestamp: new Date(),
+        metadata: {
+          suggestions: ['Aide commande', 'Support'],
+        },
+      },
+    ],
     isTyping: false,
     sessionId: 'test-session',
     toggleChatbot: vi.fn(),
     minimizeChatbot: vi.fn(),
     sendMessage: vi.fn(),
     clearMessages: vi.fn(),
-    markAsRead: vi.fn()
+    markAsRead: vi.fn(),
   };
 
   beforeEach(() => {
@@ -69,25 +70,36 @@ describe('AIChatbot', () => {
     it('renders chatbot button when closed', () => {
       mockUseAIChatbot.mockReturnValue({
         ...defaultMock,
-        isOpen: false
+        isOpen: false,
       });
 
       const mockToggle = vi.fn(); // Define mockToggle here
-      render(<AIChatbot isOpen={false} onToggle={mockToggle} messages={defaultMock.messages} isTyping={defaultMock.isTyping} sessionId={defaultMock.sessionId} sendMessage={defaultMock.sendMessage} isMinimized={defaultMock.isMinimized} minimizeChatbot={defaultMock.minimizeChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={false}
+          onToggle={mockToggle}
+          messages={defaultMock.messages}
+          isTyping={defaultMock.isTyping}
+          sessionId={defaultMock.sessionId}
+          sendMessage={defaultMock.sendMessage}
+          isMinimized={defaultMock.isMinimized}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        {
+          wrapper: createWrapper(),
+        }
+      );
 
-      expect(screen.getByRole('button', {
-        name: /ouvrir le chatbot/i
-      })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: /ouvrir le chatbot/i,
+        })
+      ).toBeInTheDocument();
     });
 
     it('renders full chatbot interface when open', () => {
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
+      render(<AIChatbot {...defaultMock} onToggle={defaultMock.toggleChatbot} />, {
+        wrapper: createWrapper(),
       });
 
       expect(screen.getByText('Assistant IA')).toBeInTheDocument();
@@ -95,10 +107,8 @@ describe('AIChatbot', () => {
     });
 
     it('shows welcome message with suggestions', () => {
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
+      render(<AIChatbot {...defaultMock} onToggle={defaultMock.toggleChatbot} />, {
+        wrapper: createWrapper(),
       });
 
       expect(screen.getByText('Aide commande')).toBeInTheDocument();
@@ -113,16 +123,14 @@ describe('AIChatbot', () => {
       mockUseAIChatbot.mockReturnValue({
         ...defaultMock,
         toggleChatbot: mockToggle,
-        isOpen: false
+        isOpen: false,
       });
-      render(<AIChatbot {...defaultMock
-      } isOpen={false} onToggle={mockToggle} />,
-      {
-        wrapper: createWrapper()
+      render(<AIChatbot {...defaultMock} isOpen={false} onToggle={mockToggle} />, {
+        wrapper: createWrapper(),
       });
 
       const button = screen.getByRole('button', {
-        name: /ouvrir le chatbot/i
+        name: /ouvrir le chatbot/i,
       });
       await user.click(button);
 
@@ -133,14 +141,22 @@ describe('AIChatbot', () => {
       const user = userEvent.setup();
       const mockToggle = vi.fn();
 
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={false}
+          onToggle={mockToggle}
+          messages={defaultMock.messages}
+          isTyping={false}
+          sessionId={defaultMock.sessionId}
+          sendMessage={defaultMock.sendMessage}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        { wrapper: createWrapper() }
+      );
 
       const closeButton = screen.getByRole('button', {
-        name: /fermer le chatbot/i
+        name: /fermer le chatbot/i,
       });
       await user.click(closeButton);
 
@@ -150,18 +166,22 @@ describe('AIChatbot', () => {
     it('minimizes/maximizes chatbot when header is clicked', async () => {
       const user = userEvent.setup();
       const mockMinimize = vi.fn();
-      mockUseAIChatbot.mockReturnValue({
-        ...defaultMock,
-        minimizeChatbot: mockMinimize
-      });
 
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={false}
+          onToggle={defaultMock.toggleChatbot}
+          messages={defaultMock.messages}
+          isTyping={false}
+          sessionId={defaultMock.sessionId}
+          sendMessage={defaultMock.sendMessage}
+          minimizeChatbot={mockMinimize}
+        />,
+        { wrapper: createWrapper() }
+      );
 
-      const header = screen.getByText('Assistant IA').closest('div');
+      const header = screen.getByText('Assistant IA').closest('[class*="cursor-pointer"]');
       await user.click(header!);
 
       expect(mockMinimize).toHaveBeenCalledTimes(1);
@@ -172,22 +192,26 @@ describe('AIChatbot', () => {
     it('sends message when send button is clicked', async () => {
       const user = userEvent.setup();
       const mockSend = vi.fn();
-      mockUseAIChatbot.mockReturnValue({
-        ...defaultMock,
-        sendMessage: mockSend
-      });
 
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={false}
+          onToggle={defaultMock.toggleChatbot}
+          messages={defaultMock.messages}
+          isTyping={false}
+          sessionId={defaultMock.sessionId}
+          sendMessage={mockSend}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        { wrapper: createWrapper() }
+      );
 
       const input = screen.getByPlaceholderText(/tapez votre message/i);
       await user.type(input, 'Bonjour');
 
       const sendButton = screen.getByRole('button', {
-        name: /envoyer/i
+        name: /envoyer/i,
       });
       await user.click(sendButton);
 
@@ -197,16 +221,20 @@ describe('AIChatbot', () => {
     it('sends message when Enter is pressed', async () => {
       const user = userEvent.setup();
       const mockSend = vi.fn();
-      mockUseAIChatbot.mockReturnValue({
-        ...defaultMock,
-        sendMessage: mockSend
-      });
 
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={false}
+          onToggle={defaultMock.toggleChatbot}
+          messages={defaultMock.messages}
+          isTyping={false}
+          sessionId={defaultMock.sessionId}
+          sendMessage={mockSend}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        { wrapper: createWrapper() }
+      );
 
       const input = screen.getByPlaceholderText(/tapez votre message/i);
       await user.type(input, 'Test message{enter}');
@@ -214,17 +242,20 @@ describe('AIChatbot', () => {
       expect(mockSend).toHaveBeenCalledWith('Test message');
     });
 
-    it('shows typing indicator when sending message', async () => {
-      mockUseAIChatbot.mockReturnValue({
-        ...defaultMock,
-        isTyping: true
-      });
-
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+    it('shows typing indicator when sending message', () => {
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={false}
+          onToggle={defaultMock.toggleChatbot}
+          messages={defaultMock.messages}
+          isTyping={true}
+          sessionId={defaultMock.sessionId}
+          sendMessage={defaultMock.sendMessage}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        { wrapper: createWrapper() }
+      );
 
       expect(screen.getByText('Tape en cours...')).toBeInTheDocument();
     });
@@ -234,16 +265,20 @@ describe('AIChatbot', () => {
     it('clicks on suggestion sends message', async () => {
       const user = userEvent.setup();
       const mockSend = vi.fn();
-      mockUseAIChatbot.mockReturnValue({
-        ...defaultMock,
-        sendMessage: mockSend
-      });
 
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={false}
+          onToggle={defaultMock.toggleChatbot}
+          messages={defaultMock.messages}
+          isTyping={false}
+          sessionId={defaultMock.sessionId}
+          sendMessage={mockSend}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        { wrapper: createWrapper() }
+      );
 
       const suggestion = screen.getByText('Aide commande');
       await user.click(suggestion);
@@ -254,38 +289,38 @@ describe('AIChatbot', () => {
 
   describe('Accessibility', () => {
     it('has proper ARIA labels', () => {
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
+      render(<AIChatbot {...defaultMock} onToggle={defaultMock.toggleChatbot} />, {
+        wrapper: createWrapper(),
       });
 
-      expect(screen.getByRole('button', {
-        name: /fermer le chatbot/i
-      })).toBeInTheDocument();
-      expect(screen.getByRole('button', {
-        name: /envoyer/i
-      })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: /fermer le chatbot/i,
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: /envoyer/i,
+        })
+      ).toBeInTheDocument();
     });
 
     it('has proper heading structure', () => {
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
+      render(<AIChatbot {...defaultMock} onToggle={defaultMock.toggleChatbot} />, {
+        wrapper: createWrapper(),
       });
 
-      expect(screen.getByRole('heading', {
-        name: 'Assistant IA'
-      })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', {
+          name: 'Assistant IA',
+        })
+      ).toBeInTheDocument();
     });
 
     it('supports keyboard navigation', async () => {
       const _user = userEvent.setup(); // Renamed to _user
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
+      render(<AIChatbot {...defaultMock} onToggle={defaultMock.toggleChatbot} />, {
+        wrapper: createWrapper(),
       });
 
       const input = screen.getByPlaceholderText(/tapez votre message/i);
@@ -299,19 +334,21 @@ describe('AIChatbot', () => {
 
   describe('Minimization', () => {
     it('shows minimized view when isMinimized is true', () => {
-      mockUseAIChatbot.mockReturnValue({
-        ...defaultMock,
-        isMinimized: true
-      });
-
-      render(<AIChatbot {...defaultMock
-      } onToggle={defaultMock.toggleChatbot} />,
-      {
-        wrapper: createWrapper()
-      });
+      render(
+        <AIChatbot
+          isOpen={true}
+          isMinimized={true}
+          onToggle={defaultMock.toggleChatbot}
+          messages={defaultMock.messages}
+          isTyping={false}
+          sessionId={defaultMock.sessionId}
+          sendMessage={defaultMock.sendMessage}
+          minimizeChatbot={defaultMock.minimizeChatbot}
+        />,
+        { wrapper: createWrapper() }
+      );
 
       expect(screen.getByText('Assistant IA')).toBeInTheDocument();
-      // Messages should not be visible in minimized state
       expect(screen.queryByText('Bonjour ! Comment puis-je vous aider ?')).not.toBeInTheDocument();
     });
   });

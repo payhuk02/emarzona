@@ -55,7 +55,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   ...props
 }) => {
   // Pour les fichiers locaux, pas besoin de transition d'opacité (pas de serveur d'images)
-  const isLocalFile = src.startsWith('/') || src.startsWith('./') || src.startsWith('../') || src.startsWith('data:') || src.includes('/assets/');
+  const isLocalFile =
+    src.startsWith('/') ||
+    src.startsWith('./') ||
+    src.startsWith('../') ||
+    src.startsWith('data:') ||
+    src.includes('/assets/');
   const [isLoaded, setIsLoaded] = useState(isLocalFile);
   const [hasError, setHasError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -69,7 +74,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     alt,
     width,
     height,
-    lazy ? 'lazy' : 'eager'
+    lazy && !priority ? 'lazy' : 'eager'
   );
 
   // Gérer le chargement de l'image

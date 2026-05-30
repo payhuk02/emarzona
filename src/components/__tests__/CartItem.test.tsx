@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { CartItem } from '../cart/CartItem';
 import type { CartItem as CartItemType } from '@/types/cart';
@@ -124,15 +124,14 @@ describe('CartItem', () => {
   it('should call onRemove when quantity is set to 0', () => {
     render(
       <CartItem
-        item={mockCartItem}
+        item={{ ...mockCartItem, quantity: 1 }}
         onUpdateQuantity={mockOnUpdateQuantity}
         onRemove={mockOnRemove}
       />
     );
 
     const minusButton = screen.getByRole('button', { name: /diminuer/i });
-    fireEvent.click(minusButton); // Quantity becomes 1
-    fireEvent.click(minusButton); // Quantity becomes 0, should remove
+    fireEvent.click(minusButton);
 
     expect(mockOnRemove).toHaveBeenCalledWith('cart-item-1');
   });
@@ -155,7 +154,7 @@ describe('CartItem', () => {
   it('should display discount when discount_amount is present', () => {
     const itemWithDiscount: CartItemType = {
       ...mockCartItem,
-      discount_amount: 5.00,
+      discount_amount: 5.0,
     };
 
     render(
@@ -212,7 +211,7 @@ describe('CartItem', () => {
     const itemWithDiscount: CartItemType = {
       ...mockCartItem,
       quantity: 3,
-      discount_amount: 5.00,
+      discount_amount: 5.0,
     };
 
     render(
@@ -239,7 +238,9 @@ describe('CartItem', () => {
     const quantityGroup = screen.getByRole('group', { name: /quantité pour test product/i });
     expect(quantityGroup).toBeInTheDocument();
 
-    const plusButton = screen.getByRole('button', { name: /augmenter la quantité de test product/i });
+    const plusButton = screen.getByRole('button', {
+      name: /augmenter la quantité de test product/i,
+    });
     expect(plusButton).toBeInTheDocument();
   });
 });

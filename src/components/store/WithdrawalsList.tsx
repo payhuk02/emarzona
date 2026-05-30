@@ -7,8 +7,21 @@ import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Pagination,
   PaginationContent,
@@ -18,16 +31,16 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { 
-  Wallet, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  Wallet,
+  Clock,
+  CheckCircle2,
+  XCircle,
   AlertCircle,
   X,
   Loader2,
   History,
-  Download
+  Download,
 } from 'lucide-react';
 import { StoreWithdrawal, StoreWithdrawalStatus } from '@/types/store-withdrawals';
 import { formatCurrency } from '@/lib/utils';
@@ -45,7 +58,12 @@ interface WithdrawalsListProps {
   showExport?: boolean;
 }
 
-export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = true }: WithdrawalsListProps) => {
+export const WithdrawalsList = ({
+  withdrawals,
+  loading,
+  onCancel,
+  showExport = true,
+}: WithdrawalsListProps) => {
   const [statusFilter, setStatusFilter] = useState<StoreWithdrawalStatus | 'all'>('all');
   const [selectedWithdrawalId, setSelectedWithdrawalId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,7 +74,14 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   type StatusIcon = typeof Clock | typeof Loader2 | typeof CheckCircle2 | typeof XCircle | typeof X;
 
   const getStatusBadge = (status: StoreWithdrawalStatus) => {
-    const  variants: Record<StoreWithdrawalStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline', icon: StatusIcon, label: string }> = {
+    const variants: Record<
+      StoreWithdrawalStatus,
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        icon: StatusIcon;
+        label: string;
+      }
+    > = {
       pending: { variant: 'secondary', icon: Clock, label: 'En attente' },
       processing: { variant: 'default', icon: Loader2, label: 'En cours' },
       completed: { variant: 'default', icon: CheckCircle2, label: 'Complété' },
@@ -76,7 +101,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   };
 
   const getPaymentMethodLabel = (method: string) => {
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       mobile_money: 'Mobile Money',
       bank_card: 'Carte bancaire',
       bank_transfer: 'Virement bancaire',
@@ -85,8 +110,8 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
   };
 
   const filteredWithdrawals = useMemo(() => {
-    return statusFilter === 'all' 
-      ? withdrawals 
+    return statusFilter === 'all'
+      ? withdrawals
       : withdrawals.filter(w => w.status === statusFilter);
   }, [withdrawals, statusFilter]);
 
@@ -104,12 +129,12 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         title: 'Export réussi',
         description: `${filteredWithdrawals.length} retrait(s) exporté(s) en CSV`,
       });
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       logger.error('Error exporting withdrawals CSV', { error: errorMessage });
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'exporter les retraits',
+        description: "Impossible d'exporter les retraits",
         variant: 'destructive',
       });
     }
@@ -122,10 +147,12 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
         title: 'Export réussi',
         description: `${filteredWithdrawals.length} retrait(s) exporté(s) en JSON`,
       });
-    } catch ( _error: unknown) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      logger.error('Error exporting withdrawals JSON', { error: errorMessage });
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'exporter les retraits',
+        description: "Impossible d'exporter les retraits",
         variant: 'destructive',
       });
     }
@@ -167,10 +194,13 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
               )}
             </CardTitle>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <Select value={statusFilter} onValueChange={(value: StoreWithdrawalStatus | 'all') => {
-                setStatusFilter(value);
-                setCurrentPage(1);
-              }}>
+              <Select
+                value={statusFilter}
+                onValueChange={(value: StoreWithdrawalStatus | 'all') => {
+                  setStatusFilter(value);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-full sm:w-[180px] h-8 sm:h-9 text-[10px] sm:text-xs md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -214,7 +244,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                 <span>Lignes par page:</span>
                 <Select
                   value={itemsPerPage.toString()}
-                  onValueChange={(value) => {
+                  onValueChange={value => {
                     setItemsPerPage(Number(value));
                     setCurrentPage(1);
                   }}
@@ -231,7 +261,8 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                 </Select>
               </div>
               <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
-                Page {currentPage} sur {totalPages} ({filteredWithdrawals.length} retrait{filteredWithdrawals.length > 1 ? 's' : ''})
+                Page {currentPage} sur {totalPages} ({filteredWithdrawals.length} retrait
+                {filteredWithdrawals.length > 1 ? 's' : ''})
               </div>
             </div>
           )}
@@ -240,11 +271,11 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
       <CardContent>
         {filteredWithdrawals.length === 0 ? (
           <div className="text-center py-8 sm:py-12 text-muted-foreground">
-            <Wallet  className ="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
+            <Wallet className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-20" />
             <p className="text-xs sm:text-sm md:text-base">Aucun retrait</p>
             <p className="text-[10px] sm:text-xs md:text-sm mt-2 px-4">
-              {statusFilter === 'all' 
-                ? 'Vous n\'avez pas encore effectué de retrait'
+              {statusFilter === 'all'
+                ? "Vous n'avez pas encore effectué de retrait"
                 : `Aucun retrait avec le statut "${statusFilter}"`}
             </p>
           </div>
@@ -255,21 +286,27 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                 <TableRow>
                   <TableHead className="text-[10px] sm:text-xs md:text-sm">Date</TableHead>
                   <TableHead className="text-[10px] sm:text-xs md:text-sm">Montant</TableHead>
-                  <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">Méthode</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">
+                    Méthode
+                  </TableHead>
                   <TableHead className="text-[10px] sm:text-xs md:text-sm">Statut</TableHead>
-                  <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">Référence</TableHead>
+                  <TableHead className="text-[10px] sm:text-xs md:text-sm hidden md:table-cell">
+                    Référence
+                  </TableHead>
                   <TableHead className="text-[10px] sm:text-xs md:text-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedWithdrawals.map((withdrawal) => (
+                {paginatedWithdrawals.map(withdrawal => (
                   <TableRow key={withdrawal.id}>
                     <TableCell className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap">
                       <span className="sm:hidden">
                         {format(new Date(withdrawal.created_at), 'dd/MM/yy', { locale: fr })}
                       </span>
                       <span className="hidden sm:inline">
-                        {format(new Date(withdrawal.created_at), 'dd MMM yyyy HH:mm', { locale: fr })}
+                        {format(new Date(withdrawal.created_at), 'dd MMM yyyy HH:mm', {
+                          locale: fr,
+                        })}
                       </span>
                     </TableCell>
                     <TableCell className="font-semibold text-[10px] sm:text-xs md:text-sm">
@@ -278,9 +315,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                     <TableCell className="text-[10px] sm:text-xs md:text-sm hidden sm:table-cell">
                       {getPaymentMethodLabel(withdrawal.payment_method)}
                     </TableCell>
-                    <TableCell>
-                      {getStatusBadge(withdrawal.status)}
-                    </TableCell>
+                    <TableCell>{getStatusBadge(withdrawal.status)}</TableCell>
                     <TableCell className="text-[10px] sm:text-xs text-muted-foreground hidden md:table-cell">
                       {withdrawal.transaction_reference || '-'}
                     </TableCell>
@@ -329,7 +364,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       if (currentPage > 1) setCurrentPage(currentPage - 1);
                     }}
@@ -337,7 +372,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                   />
                 </PaginationItem>
                 {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  let  pageNum: number;
+                  let pageNum: number;
                   if (totalPages <= 5) {
                     pageNum = i + 1;
                   } else if (currentPage <= 3) {
@@ -351,7 +386,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                     <PaginationItem key={pageNum}>
                       <PaginationLink
                         href="#"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.preventDefault();
                           setCurrentPage(pageNum);
                         }}
@@ -371,7 +406,7 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
                 <PaginationItem>
                   <PaginationNext
                     href="#"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       if (currentPage < totalPages) setCurrentPage(currentPage + 1);
                     }}
@@ -386,10 +421,3 @@ export const WithdrawalsList = ({ withdrawals, loading, onCancel, showExport = t
     </Card>
   );
 };
-
-
-
-
-
-
-

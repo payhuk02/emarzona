@@ -41,11 +41,7 @@ const mockProduct = {
 const renderComponent = (props: Partial<UnifiedProductCardProps> = {}) => {
   return render(
     <BrowserRouter>
-      <UnifiedProductCard
-        product={mockProduct as any}
-        variant="marketplace"
-        {...props}
-      />
+      <UnifiedProductCard product={mockProduct} variant="marketplace" {...props} />
     </BrowserRouter>
   );
 };
@@ -76,8 +72,8 @@ describe('UnifiedProductCard', () => {
 
   it('devrait avoir un bouton "Voir" avec aria-label', () => {
     renderComponent();
-    const viewButton = screen.getByLabelText(/Voir les détails de Test Product/i);
-    expect(viewButton).toBeInTheDocument();
+    const viewButtons = screen.getAllByLabelText(/Voir les détails de Test Product/i);
+    expect(viewButtons.length).toBeGreaterThan(0);
   });
 
   it('devrait avoir un bouton "Acheter" avec aria-label', () => {
@@ -102,10 +98,3 @@ describe('UnifiedProductCard', () => {
     expect(article).toHaveAttribute('tabIndex', '0');
   });
 });
-
-
-
-
-
-
-

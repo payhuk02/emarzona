@@ -1,7 +1,7 @@
 /**
  * Tests unitaires pour CartItem
  * Composant critique pour la gestion du panier
- * 
+ *
  * Couverture :
  * - Affichage des informations produit
  * - Modification de la quantité
@@ -12,12 +12,18 @@
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CartItem } from '../CartItem';
 import type { CartItem as CartItemType } from '@/types/cart';
 
-const  mockItem: CartItemType = {
+vi.mock('@/components/ui/lazy-image', () => ({
+  LazyImage: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="lazy-image" />
+  ),
+}));
+
+const mockItem: CartItemType = {
   id: '1',
   product_id: 'prod-1',
   product_name: 'Produit Test',
@@ -41,39 +47,27 @@ describe('CartItem', () => {
 
   it('should render product information', () => {
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     expect(screen.getByText('Produit Test')).toBeInTheDocument();
     expect(screen.getByText('Variant: Variant A')).toBeInTheDocument();
-    expect(screen.getByText('20,000 XOF')).toBeInTheDocument();
+    expect(screen.getByText(/20[\s\u202F]*000\s*XOF/i)).toBeInTheDocument();
   });
 
   it('should display product image', () => {
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
-    const image = screen.getByAltText('Produit Test');
-    expect(image).toBeInTheDocument();
+    const image = screen.getByTestId('lazy-image');
     expect(image).toHaveAttribute('src', 'https://example.com/image.jpg');
+    expect(image).toHaveAttribute('alt', 'Produit Test');
   });
 
   it('should display current quantity', () => {
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     const quantityInput = screen.getByRole('spinbutton', { name: /quantité de produit test/i });
@@ -83,11 +77,7 @@ describe('CartItem', () => {
   it('should call onUpdateQuantity when increasing quantity', async () => {
     const user = userEvent.setup();
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     const increaseButton = screen.getByLabelText(/augmenter la quantité/i);
@@ -99,11 +89,7 @@ describe('CartItem', () => {
   it('should call onUpdateQuantity when decreasing quantity', async () => {
     const user = userEvent.setup();
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     const decreaseButton = screen.getByLabelText(/diminuer la quantité/i);
@@ -114,7 +100,7 @@ describe('CartItem', () => {
 
   it('should call onRemove when quantity becomes 0', async () => {
     const user = userEvent.setup();
-    const  itemWithQuantity1: CartItemType = {
+    const itemWithQuantity1: CartItemType = {
       ...mockItem,
       quantity: 1,
     };
@@ -136,11 +122,7 @@ describe('CartItem', () => {
   it('should call onRemove when delete button is clicked', async () => {
     const user = userEvent.setup();
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     const deleteButton = screen.getByLabelText(/supprimer produit test du panier/i);
@@ -150,7 +132,7 @@ describe('CartItem', () => {
   });
 
   it('should display discount when discount_amount is greater than 0', () => {
-    const  itemWithDiscount: CartItemType = {
+    const itemWithDiscount: CartItemType = {
       ...mockItem,
       discount_amount: 2000,
     };
@@ -163,23 +145,17 @@ describe('CartItem', () => {
       />
     );
 
-    // Le formatage peut utiliser des espaces ou des virgules (toLocaleString utilise des espaces en français)
-    expect(screen.getByText(/20[\s,]*000\s*XOF/i)).toBeInTheDocument(); // Prix barré
-    expect(screen.getByText(/16[\s,]*000\s*XOF/i)).toBeInTheDocument(); // Prix après remise
+    expect(screen.getByText(/20[\s\u202F]*000\s*XOF/i)).toBeInTheDocument();
+    expect(screen.getByText(/16[\s\u202F]*000\s*XOF/i)).toBeInTheDocument();
     expect(screen.getByText(/économie:/i)).toBeInTheDocument();
   });
 
   it('should calculate total price correctly', () => {
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
-    // 10000 * 2 = 20000
-    expect(screen.getByText(/20[,\s]?000\s*XOF/i)).toBeInTheDocument();
+    expect(screen.getByText(/20[\s\u202F]*000\s*XOF/i)).toBeInTheDocument();
   });
 
   it('should be disabled when isLoading is true', () => {
@@ -199,30 +175,20 @@ describe('CartItem', () => {
     expect(increaseButton).toBeDisabled();
   });
 
-  it('should handle quantity input change', async () => {
-    const user = userEvent.setup();
+  it('should handle quantity input change', () => {
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     const quantityInput = screen.getByRole('spinbutton', { name: /quantité de produit test/i });
-    await user.clear(quantityInput);
-    await user.type(quantityInput, '5');
+    fireEvent.change(quantityInput, { target: { value: '5' } });
 
     expect(mockOnUpdateQuantity).toHaveBeenCalledWith('1', 5);
   });
 
   it('should have proper accessibility attributes', () => {
     render(
-      <CartItem
-        item={mockItem}
-        onUpdateQuantity={mockOnUpdateQuantity}
-        onRemove={mockOnRemove}
-      />
+      <CartItem item={mockItem} onUpdateQuantity={mockOnUpdateQuantity} onRemove={mockOnRemove} />
     );
 
     expect(screen.getByLabelText(/augmenter la quantité/i)).toBeInTheDocument();
@@ -230,10 +196,3 @@ describe('CartItem', () => {
     expect(screen.getByLabelText(/supprimer produit test du panier/i)).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-

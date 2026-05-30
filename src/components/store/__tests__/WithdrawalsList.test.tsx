@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { WithdrawalsList } from '../WithdrawalsList';
-import { StoreWithdrawal, StoreWithdrawalStatus } from '@/types/store-withdrawals';
+import { StoreWithdrawal } from '@/types/store-withdrawals';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock dependencies
@@ -17,9 +18,9 @@ vi.mock('@/lib/logger', () => ({
 }));
 
 const mockToast = vi.fn();
-(useToast as any).mockReturnValue({ toast: mockToast });
+vi.mocked(useToast).mockReturnValue({ toast: mockToast });
 
-const  mockWithdrawals: StoreWithdrawal[] = [
+const mockWithdrawals: StoreWithdrawal[] = [
   {
     id: '1',
     store_id: 'store-1',
@@ -86,16 +87,15 @@ describe('WithdrawalsList', () => {
   });
 
   it('should filter withdrawals by status', async () => {
+    const user = userEvent.setup();
     render(<WithdrawalsList withdrawals={mockWithdrawals} loading={false} />);
-    
-    // Find and click the status filter
-    const filterSelect = screen.getByRole('combobox');
-    fireEvent.click(filterSelect);
-    
-    // Select "completed" status
-    const completedOption = screen.getByText(/complété/i);
-    fireEvent.click(completedOption);
-    
+
+    const filterSelect = screen.getAllByRole('combobox')[0];
+    await user.click(filterSelect);
+
+    const completedOption = await screen.findByRole('option', { name: /complétés/i });
+    await user.click(completedOption);
+
     await waitFor(() => {
       expect(screen.getByText(/20[,\s\u202F]?000/i)).toBeInTheDocument();
       expect(screen.queryByText(/10[,\s\u202F]?000/i)).not.toBeInTheDocument();
@@ -104,41 +104,41 @@ describe('WithdrawalsList', () => {
 
   it('should display correct status badges', () => {
     render(<WithdrawalsList withdrawals={mockWithdrawals} loading={false} />);
-    
+
     expect(screen.getByText(/en attente/i)).toBeInTheDocument();
     expect(screen.getByText(/complété/i)).toBeInTheDocument();
   });
 
   it('should handle pagination', async () => {
+    const user = userEvent.setup();
     const manyWithdrawals = Array.from({ length: 25 }, (_, i) => ({
       ...mockWithdrawals[0],
       id: `withdrawal-${i}`,
       amount: (i + 1) * 1000,
     }));
-    
+
     render(<WithdrawalsList withdrawals={manyWithdrawals} loading={false} />);
-    
-    // Should show first page (10 items)
+
     expect(screen.getByText(/1[,\s\u202F]?000/i)).toBeInTheDocument();
     expect(screen.getByText(/10[,\s\u202F]?000/i)).toBeInTheDocument();
-    
-    // Click next page
-    const nextButton = screen.getByLabelText(/suivant/i);
-    fireEvent.click(nextButton);
-    
+
+    const nextButton = screen.getByLabelText(/go to next page/i);
+    await user.click(nextButton);
+
     await waitFor(() => {
       expect(screen.getByText(/11[,\s\u202F]?000/i)).toBeInTheDocument();
     });
   });
 
   it('should export to CSV', async () => {
+    const user = userEvent.setup();
     const { downloadWithdrawalsCSV } = await import('@/lib/withdrawal-export');
-    
+
     render(<WithdrawalsList withdrawals={mockWithdrawals} loading={false} showExport={true} />);
-    
-    const exportButton = screen.getByText(/exporter en csv/i);
-    fireEvent.click(exportButton);
-    
+
+    const exportButton = screen.getByText('CSV', { hidden: true });
+    await user.click(exportButton);
+
     await waitFor(() => {
       expect(downloadWithdrawalsCSV).toHaveBeenCalledWith(mockWithdrawals);
       expect(mockToast).toHaveBeenCalledWith(
@@ -150,13 +150,14 @@ describe('WithdrawalsList', () => {
   });
 
   it('should export to JSON', async () => {
+    const user = userEvent.setup();
     const { downloadWithdrawalsJSON } = await import('@/lib/withdrawal-export');
-    
+
     render(<WithdrawalsList withdrawals={mockWithdrawals} loading={false} showExport={true} />);
-    
-    const exportButton = screen.getByText(/exporter en json/i);
-    fireEvent.click(exportButton);
-    
+
+    const exportButton = screen.getByText('JSON', { hidden: true });
+    await user.click(exportButton);
+
     await waitFor(() => {
       expect(downloadWithdrawalsJSON).toHaveBeenCalledWith(mockWithdrawals);
       expect(mockToast).toHaveBeenCalledWith(
@@ -168,16 +169,17 @@ describe('WithdrawalsList', () => {
   });
 
   it('should handle export errors', async () => {
+    const user = userEvent.setup();
     const { downloadWithdrawalsCSV } = await import('@/lib/withdrawal-export');
-    (downloadWithdrawalsCSV as any).mockImplementation(() => {
+    vi.mocked(downloadWithdrawalsCSV).mockImplementation(() => {
       throw new Error('Export failed');
     });
-    
+
     render(<WithdrawalsList withdrawals={mockWithdrawals} loading={false} showExport={true} />);
-    
-    const exportButton = screen.getByText(/exporter en csv/i);
-    fireEvent.click(exportButton);
-    
+
+    const exportButton = screen.getByText('CSV', { hidden: true });
+    await user.click(exportButton);
+
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -189,20 +191,14 @@ describe('WithdrawalsList', () => {
   });
 
   it('should call onCancel when cancel button is clicked', async () => {
+    const user = userEvent.setup();
     const onCancel = vi.fn().mockResolvedValue(undefined);
-    
-    render(
-      <WithdrawalsList 
-        withdrawals={mockWithdrawals} 
-        loading={false} 
-        onCancel={onCancel}
-      />
-    );
-    
-    // Find cancel button for pending withdrawal
-    const cancelButtons = screen.getAllByText(/annuler/i);
-    fireEvent.click(cancelButtons[0]);
-    
+
+    render(<WithdrawalsList withdrawals={mockWithdrawals} loading={false} onCancel={onCancel} />);
+
+    const cancelButtons = screen.getAllByText(/annuler/i, { hidden: true });
+    await user.click(cancelButtons[0]);
+
     await waitFor(() => {
       expect(onCancel).toHaveBeenCalledWith('1');
     });
@@ -213,14 +209,3 @@ describe('WithdrawalsList', () => {
     expect(screen.getByText(/historique des retraits/i)).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-

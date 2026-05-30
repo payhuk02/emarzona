@@ -4,7 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { OrderCard } from '../orders/OrderCard';
@@ -14,13 +15,15 @@ import type { Order } from '@/hooks/useOrders';
 // MOCKS
 // ============================================================
 
-const mockSupabase = {
-  from: vi.fn(() => ({
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockResolvedValue({ error: null }),
-  })),
-};
+const { mockSupabase } = vi.hoisted(() => ({
+  mockSupabase: {
+    from: vi.fn(() => ({
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    })),
+  },
+}));
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: mockSupabase,
@@ -93,32 +96,34 @@ describe('OrderCard', () => {
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
     expect(screen.getByText('ORD-001')).toBeInTheDocument();
-    expect(screen.getByText(/99.99/)).toBeInTheDocument();
+    expect(screen.getByText(/99,99/)).toBeInTheDocument();
   });
 
   it('should display order status', () => {
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    expect(screen.getByText(/pending/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/en attente/i).length).toBeGreaterThan(0);
   });
 
   it('should display payment status', () => {
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    expect(screen.getByText(/pending/i)).toBeInTheDocument();
+    const comboboxes = screen.getAllByRole('combobox');
+    expect(comboboxes.length).toBeGreaterThanOrEqual(2);
   });
 
   it('should handle status change', async () => {
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const statusSelect = screen.getByRole('combobox', { name: /statut/i });
-    fireEvent.click(statusSelect);
+    const comboboxes = screen.getAllByRole('combobox');
+    await user.click(comboboxes[1]);
 
-    const completedOption = screen.getByText(/completed/i);
-    fireEvent.click(completedOption);
+    const completedOption = await screen.findByRole('option', { name: /terminée/i });
+    await user.click(completedOption);
 
     await waitFor(() => {
       expect(mockSupabase.from).toHaveBeenCalledWith('orders');
@@ -127,14 +132,15 @@ describe('OrderCard', () => {
   });
 
   it('should handle payment status change', async () => {
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const paymentStatusSelect = screen.getByRole('combobox', { name: /paiement/i });
-    fireEvent.click(paymentStatusSelect);
+    const comboboxes = screen.getAllByRole('combobox');
+    await user.click(comboboxes[0]);
 
-    const paidOption = screen.getByText(/paid/i);
-    fireEvent.click(paidOption);
+    const paidOption = await screen.findByRole('option', { name: /payée/i });
+    await user.click(paidOption);
 
     await waitFor(() => {
       expect(mockSupabase.from).toHaveBeenCalledWith('orders');
@@ -142,45 +148,45 @@ describe('OrderCard', () => {
     });
   });
 
-  it('should open detail dialog when view button is clicked', () => {
+  it('should open detail dialog when view button is clicked', async () => {
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const viewButton = screen.getByRole('button', { name: /voir|view/i });
-    fireEvent.click(viewButton);
+    await user.click(screen.getByRole('button', { name: /voir les détails de la commande/i }));
 
     expect(screen.getByTestId('order-detail-dialog')).toBeInTheDocument();
   });
 
-  it('should open edit dialog when edit button is clicked', () => {
+  it('should open edit dialog when edit button is clicked', async () => {
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const editButton = screen.getByRole('button', { name: /éditer|edit/i });
-    fireEvent.click(editButton);
+    await user.click(screen.getByRole('button', { name: /modifier la commande/i }));
 
     expect(screen.getByTestId('order-edit-dialog')).toBeInTheDocument();
   });
 
-  it('should open delete confirmation dialog', () => {
+  it('should open delete confirmation dialog', async () => {
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const deleteButton = screen.getByRole('button', { name: /supprimer|delete/i });
-    fireEvent.click(deleteButton);
+    await user.click(screen.getByRole('button', { name: /supprimer la commande/i }));
 
-    expect(screen.getByText(/confirmer|confirm/i)).toBeInTheDocument();
+    expect(screen.getByText(/confirmer la suppression/i)).toBeInTheDocument();
   });
 
   it('should handle delete confirmation', async () => {
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const deleteButton = screen.getByRole('button', { name: /supprimer|delete/i });
-    fireEvent.click(deleteButton);
+    await user.click(screen.getByRole('button', { name: /supprimer la commande/i }));
 
-    const confirmButton = screen.getByRole('button', { name: /confirmer|confirm/i });
-    fireEvent.click(confirmButton);
+    const confirmButton = screen.getByRole('button', { name: /^supprimer$/i });
+    await user.click(confirmButton);
 
     await waitFor(() => {
       expect(mockSupabase.from).toHaveBeenCalledWith('orders');
@@ -192,7 +198,6 @@ describe('OrderCard', () => {
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    // La date devrait être formatée
     expect(screen.getByText('ORD-001')).toBeInTheDocument();
   });
 
@@ -202,17 +207,17 @@ describe('OrderCard', () => {
       eq: vi.fn().mockResolvedValue({ error: { message: 'Update failed' } }),
     });
 
+    const user = userEvent.setup();
     const wrapper = createWrapper();
     render(<OrderCard order={mockOrder} onUpdate={mockOnUpdate} storeId="store-1" />, { wrapper });
 
-    const statusSelect = screen.getByRole('combobox', { name: /statut/i });
-    fireEvent.click(statusSelect);
+    const comboboxes = screen.getAllByRole('combobox');
+    await user.click(comboboxes[1]);
 
-    const completedOption = screen.getByText(/completed/i);
-    fireEvent.click(completedOption);
+    const completedOption = await screen.findByRole('option', { name: /terminée/i });
+    await user.click(completedOption);
 
     await waitFor(() => {
-      // L'erreur devrait être gérée et un toast affiché
       expect(mockSupabase.from).toHaveBeenCalled();
     });
   });

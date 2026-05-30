@@ -44,6 +44,7 @@ import { StoreLegalPagesComponent } from './StoreLegalPages';
 import { StoreAnalyticsSettings } from './StoreAnalyticsSettings';
 import { RequireTermsConsent } from './RequireTermsConsent';
 import { StoreFieldHelper } from './StoreFieldHelper';
+import { StoreSuggestions } from './StoreSuggestions';
 import type { StoreOpeningHours, StoreLegalPages } from '@/hooks/useStores';
 import { sanitizeStorePayload } from '@/lib/store-payload-utils';
 
@@ -155,7 +156,16 @@ interface StoreFormProps {
   };
 }
 
-const StoreForm = ({ onSuccess, initialData }: StoreFormProps) => {
+const StoreForm = ({
+  onSuccess,
+  initialData,
+  wizardMode = false,
+  wizardStep,
+  onNextStep,
+  onPreviousStep,
+  currentStep,
+  totalSteps,
+}: StoreFormProps) => {
   const [name, setName] = useState(initialData?.name || '');
   const [slug, setSlug] = useState(initialData?.slug || '');
   const [description, setDescription] = useState(initialData?.description || '');
