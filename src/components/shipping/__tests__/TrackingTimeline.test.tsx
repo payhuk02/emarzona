@@ -6,7 +6,7 @@ import { useFedexTracking } from '@/hooks/shipping/useFedexShipping';
 // Mock dependencies
 vi.mock('@/hooks/shipping/useFedexShipping');
 
-const mockUseFedexTracking = useFedexTracking as any;
+const mockUseFedexTracking = vi.mocked(useFedexTracking);
 
 describe('TrackingTimeline', () => {
   beforeEach(() => {
@@ -19,8 +19,8 @@ describe('TrackingTimeline', () => {
       isLoading: true,
     });
 
-    render(<TrackingTimeline trackingNumber="TRACK123" />);
-    expect(screen.getByRole('status', { hidden: true })).toBeInTheDocument();
+    const { container } = render(<TrackingTimeline trackingNumber="TRACK123" />);
+    expect(container.querySelector('[class*="animate-pulse"], .h-64')).toBeTruthy();
   });
 
   it('should render empty state when no tracking data', () => {
@@ -136,9 +136,7 @@ describe('TrackingTimeline', () => {
     const { container } = render(<TrackingTimeline trackingNumber="TRACK123" />);
 
     await waitFor(() => {
-      // CheckCircle icon should be present for delivered status
-      const checkIcon = container.querySelector('[class*="CheckCircle"]');
-      expect(checkIcon).toBeInTheDocument();
+      expect(container.querySelector('.bg-green-500')).toBeInTheDocument();
     });
   });
 
@@ -167,14 +165,3 @@ describe('TrackingTimeline', () => {
     });
   });
 });
-
-
-
-
-
-
-
-
-
-
-

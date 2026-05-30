@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AdminRoute } from '../AdminRoute';
 import * as AuthContext from '@/contexts/AuthContext';
@@ -55,7 +55,7 @@ describe('AdminRoute', () => {
     expect(screen.getByText('Contenu admin')).toBeInTheDocument();
   });
 
-  it("devrait rediriger vers /login si l'utilisateur n'est pas authentifié", () => {
+  it("devrait rediriger vers /login si l'utilisateur n'est pas authentifié", async () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: null,
       loading: false,
@@ -69,7 +69,12 @@ describe('AdminRoute', () => {
       </BrowserRouter>
     );
 
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/login',
+        expect.objectContaining({ replace: true })
+      );
+    });
   });
 
   it("devrait afficher un message d'accès refusé si l'utilisateur n'est pas admin", () => {
