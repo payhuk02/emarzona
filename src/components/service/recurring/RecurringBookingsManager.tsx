@@ -1,7 +1,7 @@
 /**
  * Recurring Bookings Manager
  * Date: 27 Janvier 2025
- * 
+ *
  * Gestionnaire pour les séries de réservations récurrentes
  * Design responsive avec cards sur mobile et table sur desktop
  */
@@ -25,19 +25,27 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Repeat, Calendar, MoreVertical, Trash2, Eye } from '@/components/icons';
 import {
-  Repeat,
-  Calendar,
-  MoreVertical,
-  Trash2,
-  Eye,
-} from '@/components/icons';
-import { useRecurringSeries, useCancelRecurringSeries, useRecurringBookingsBySeries, type RecurringBookingSeries } from '@/hooks/services/useRecurringBookings';
+  useRecurringSeries,
+  useCancelRecurringSeries,
+  useRecurringBookingsBySeries,
+  type RecurringBookingSeries,
+} from '@/hooks/services/useRecurringBookings';
 import { useStore } from '@/hooks/useStore';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const RecurringBookingsManager = React.memo(() => {
   const { store } = useStore();
@@ -89,8 +97,8 @@ const RecurringBookingsManager = React.memo(() => {
       <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
         <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 w-full" />
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} data-testid="recurring-series-skeleton" className="h-24 w-full" />
             ))}
           </div>
         </CardContent>
@@ -132,15 +140,13 @@ const RecurringBookingsManager = React.memo(() => {
                     {series.map((s: RecurringBookingSeries) => (
                       <TableRow key={s.id}>
                         <TableCell>
-                          <div className="font-medium">
-                            {s.service?.product?.name || 'Service'}
-                          </div>
+                          <div className="font-medium">{s.service?.product?.name || 'Service'}</div>
                           <div className="text-sm text-muted-foreground">
-                            {s.parent_booking?.scheduled_date ? (
-                              format(new Date(s.parent_booking.scheduled_date), 'PPP', { locale: fr })
-                            ) : (
-                              'Date non définie'
-                            )}
+                            {s.parent_booking?.scheduled_date
+                              ? format(new Date(s.parent_booking.scheduled_date), 'PPP', {
+                                  locale: fr,
+                                })
+                              : 'Date non définie'}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -149,7 +155,8 @@ const RecurringBookingsManager = React.memo(() => {
                           </div>
                           {s.recurrence_end_date && (
                             <div className="text-xs text-muted-foreground">
-                              Jusqu'au {format(new Date(s.recurrence_end_date), 'PPP', { locale: fr })}
+                              Jusqu'au{' '}
+                              {format(new Date(s.recurrence_end_date), 'PPP', { locale: fr })}
                             </div>
                           )}
                         </TableCell>
@@ -166,20 +173,27 @@ const RecurringBookingsManager = React.memo(() => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Select>
-                            <SelectTrigger>
-
-                                <MoreVertical className="h-4 w-4" />
-                              
-</SelectTrigger>
+                          <Select
+                            onValueChange={value => {
+                              if (value === 'details') handleViewDetails(s.id);
+                              if (value === 'cancel') handleCancelSeries(s.id);
+                            }}
+                          >
+                            <SelectTrigger
+                              aria-label={`Actions pour la série ${s.service?.product?.name || 'Service'}`}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                              <SelectItem value="edit" onSelect={() => handleViewDetails(s.id)}
+                              <SelectItem
+                                value="details"
                                 aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
                               </SelectItem>
-                              <SelectItem value="delete" onSelect={() => handleCancelSeries(s.id)}
+                              <SelectItem
+                                value="cancel"
                                 className="text-destructive"
                                 aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >
@@ -210,27 +224,35 @@ const RecurringBookingsManager = React.memo(() => {
                               {s.service?.product?.name || 'Service'}
                             </h3>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {s.parent_booking?.scheduled_date ? (
-                                format(new Date(s.parent_booking.scheduled_date), 'PPP', { locale: fr })
-                              ) : (
-                                'Date non définie'
-                              )}
+                              {s.parent_booking?.scheduled_date
+                                ? format(new Date(s.parent_booking.scheduled_date), 'PPP', {
+                                    locale: fr,
+                                  })
+                                : 'Date non définie'}
                             </p>
                           </div>
-                          <Select>
-                            <SelectTrigger className="h-8 w-8 p-0">
-
-                                <MoreVertical className="h-4 w-4" />
-                              
-</SelectTrigger>
+                          <Select
+                            onValueChange={value => {
+                              if (value === 'details') handleViewDetails(s.id);
+                              if (value === 'cancel') handleCancelSeries(s.id);
+                            }}
+                          >
+                            <SelectTrigger
+                              className="h-8 w-8 p-0"
+                              aria-label={`Actions pour la série ${s.service?.product?.name || 'Service'}`}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </SelectTrigger>
                             <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                              <SelectItem value="copy" onSelect={() => handleViewDetails(s.id)}
+                              <SelectItem
+                                value="details"
                                 aria-label={`Voir les détails de la série ${s.service?.product?.name || 'Service'}`}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir les détails
                               </SelectItem>
-                              <SelectItem value="view" onSelect={() => handleCancelSeries(s.id)}
+                              <SelectItem
+                                value="cancel"
                                 className="text-destructive"
                                 aria-label={`Annuler la série de réservations ${s.service?.product?.name || 'Service'}`}
                               >
@@ -250,7 +272,8 @@ const RecurringBookingsManager = React.memo(() => {
 
                         {s.recurrence_end_date && (
                           <div className="text-xs text-muted-foreground">
-                            Jusqu'au {format(new Date(s.recurrence_end_date), 'PPP', { locale: fr })}
+                            Jusqu'au{' '}
+                            {format(new Date(s.recurrence_end_date), 'PPP', { locale: fr })}
                           </div>
                         )}
 
@@ -265,7 +288,10 @@ const RecurringBookingsManager = React.memo(() => {
                           <Badge variant="destructive" className="text-xs">
                             {s.cancelled_bookings} annulées
                           </Badge>
-                          <Badge variant={s.is_active ? 'default' : 'secondary'} className="text-xs ml-auto">
+                          <Badge
+                            variant={s.is_active ? 'default' : 'secondary'}
+                            className="text-xs ml-auto"
+                          >
                             {s.is_active ? 'Actif' : 'Inactif'}
                           </Badge>
                         </div>
@@ -307,7 +333,7 @@ const RecurringBookingsManager = React.memo(() => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {bookings.map((booking) => (
+                      {bookings.map(booking => (
                         <TableRow key={booking.id}>
                           <TableCell>
                             {format(new Date(booking.scheduled_date), 'PPP', { locale: fr })}
@@ -321,10 +347,10 @@ const RecurringBookingsManager = React.memo(() => {
                                 booking.status === 'completed'
                                   ? 'secondary'
                                   : booking.status === 'cancelled'
-                                  ? 'destructive'
-                                  : booking.status === 'confirmed'
-                                  ? 'default'
-                                  : 'outline'
+                                    ? 'destructive'
+                                    : booking.status === 'confirmed'
+                                      ? 'default'
+                                      : 'outline'
                               }
                             >
                               {booking.status}
@@ -338,7 +364,7 @@ const RecurringBookingsManager = React.memo(() => {
 
                 {/* Mobile Card View */}
                 <div className="sm:hidden space-y-3">
-                  {bookings.map((booking) => (
+                  {bookings.map(booking => (
                     <Card key={booking.id} className="border-border/50 bg-card/50 backdrop-blur-sm">
                       <CardContent className="p-3">
                         <div className="space-y-2">
@@ -351,10 +377,10 @@ const RecurringBookingsManager = React.memo(() => {
                                 booking.status === 'completed'
                                   ? 'secondary'
                                   : booking.status === 'cancelled'
-                                  ? 'destructive'
-                                  : booking.status === 'confirmed'
-                                  ? 'default'
-                                  : 'outline'
+                                    ? 'destructive'
+                                    : booking.status === 'confirmed'
+                                      ? 'default'
+                                      : 'outline'
                               }
                               className="text-xs"
                             >
@@ -379,10 +405,12 @@ const RecurringBookingsManager = React.memo(() => {
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <AlertDialogContent className="max-w-[95vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg sm:text-xl">Annuler la série récurrente</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg sm:text-xl">
+              Annuler la série récurrente
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs sm:text-sm">
-              Êtes-vous sûr de vouloir annuler toutes les réservations de cette série ?
-              Cette action est irréversible.
+              Êtes-vous sûr de vouloir annuler toutes les réservations de cette série ? Cette action
+              est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
@@ -403,10 +431,3 @@ const RecurringBookingsManager = React.memo(() => {
 RecurringBookingsManager.displayName = 'RecurringBookingsManager';
 
 export default RecurringBookingsManager;
-
-
-
-
-
-
-

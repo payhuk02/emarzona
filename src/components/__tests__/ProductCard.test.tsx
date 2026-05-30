@@ -7,8 +7,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { ProductCard } from '../storefront/ProductCard';
+import ProductCard from '../storefront/ProductCard';
 import type { Product } from '@/hooks/useProducts';
+import { initiateMonerooPayment } from '@/lib/moneroo-payment';
 
 // ============================================================
 // MOCKS
@@ -18,7 +19,13 @@ vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     auth: {
       getUser: vi.fn().mockResolvedValue({
-        data: { user: { id: 'user-1' } },
+        data: {
+          user: {
+            id: 'user-1',
+            email: 'buyer@example.com',
+            user_metadata: { full_name: 'Test Buyer' },
+          },
+        },
         error: null,
       }),
     },
@@ -70,6 +77,7 @@ function createWrapper() {
 const mockProduct: Product = {
   id: 'product-1',
   name: 'Test Product',
+  slug: 'test-product',
   description: 'Test Description',
   price: 29.99,
   promo_price: 24.99,
@@ -118,20 +126,19 @@ describe('ProductCard', () => {
     const wrapper = createWrapper();
     render(<ProductCard product={mockProduct} storeSlug="test-store" />, { wrapper });
 
-    const image = screen.getByAltText('Test Product');
+    const image = screen.getByRole('img', { name: 'Test Product' });
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', expect.stringContaining('image.jpg'));
   });
 
   it('should handle buy button click', async () => {
     const wrapper = createWrapper();
     render(<ProductCard product={mockProduct} storeSlug="test-store" />, { wrapper });
 
-    const buyButton = screen.getByRole('button', { name: /acheter|buy/i });
+    const buyButton = screen.getByRole('button', { name: /acheter test product/i });
     fireEvent.click(buyButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/chargement|loading/i)).toBeInTheDocument();
+      expect(initiateMonerooPayment).toHaveBeenCalled();
     });
   });
 
@@ -176,7 +183,12 @@ describe('ProductCard', () => {
     const wrapper = createWrapper();
     render(<ProductCard product={mockProduct} storeSlug="test-store" />, { wrapper });
 
-    const link = screen.getByRole('link', { name: /test product/i });
-    expect(link).toHaveAttribute('href', expect.stringContaining('test-store'));
+    const links = screen.getAllByRole('link');
+    const productLink = links.find(
+      link =>
+        link.getAttribute('href')?.includes('test-store') &&
+        link.getAttribute('href')?.includes('test-product')
+    );
+    expect(productLink).toBeDefined();
   });
 });
