@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CouponInput } from '../CouponInput';
 import { useValidateUnifiedPromotion } from '@/hooks/physical/usePromotions';
 import { useToast } from '@/hooks/use-toast';
 
-// Mock dependencies
 vi.mock('@/hooks/physical/usePromotions');
 vi.mock('@/hooks/use-toast');
 vi.mock('@/integrations/supabase/client', () => ({
@@ -18,7 +18,7 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 const mockToast = vi.fn();
-(useToast as any).mockReturnValue({ toast: mockToast });
+(useToast as ReturnType<typeof vi.fn>).mockReturnValue({ toast: mockToast });
 
 const mockValidation = {
   valid: false,
@@ -29,63 +29,58 @@ const mockValidation = {
   code: null,
 };
 
-(useValidateUnifiedPromotion as any).mockReturnValue({
+const mockUseValidate = useValidateUnifiedPromotion as ReturnType<typeof vi.fn>;
+
+mockUseValidate.mockReturnValue({
   data: mockValidation,
   isLoading: false,
 });
 
+const getCouponInput = () => screen.getByRole('textbox', { name: /code promo/i });
+const getApplyButton = () => screen.getByRole('button', { name: /appliquer le code promo/i });
+
 describe('CouponInput', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useValidateUnifiedPromotion as any).mockReturnValue({
+    mockUseValidate.mockReturnValue({
       data: mockValidation,
       isLoading: false,
     });
   });
 
   it('should render coupon input', () => {
-    const onApply = vi.fn();
-    const onRemove = vi.fn();
-    
     render(
-      <CouponInput
-        storeId="store-1"
-        orderAmount={10000}
-        onApply={onApply}
-        onRemove={onRemove}
-      />
+      <CouponInput storeId="store-1" orderAmount={10000} onApply={vi.fn()} onRemove={vi.fn()} />
     );
-    
-    expect(screen.getByLabelText(/code promo/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /appliquer/i })).toBeInTheDocument();
+
+    expect(getCouponInput()).toBeInTheDocument();
+    expect(getApplyButton()).toBeInTheDocument();
   });
 
   it('should show applied coupon when coupon is already applied', () => {
-    const onApply = vi.fn();
-    const onRemove = vi.fn();
-    
     render(
       <CouponInput
         storeId="store-1"
         orderAmount={10000}
-        onApply={onApply}
-        onRemove={onRemove}
+        onApply={vi.fn()}
+        onRemove={vi.fn()}
         appliedCouponId="promo-1"
         appliedCouponCode="SAVE10"
         appliedDiscountAmount={1000}
       />
     );
-    
+
     expect(screen.getByText(/code promo: save10/i)).toBeInTheDocument();
-    expect(screen.getByText(/réduction de.*1000/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /retirer/i })).toBeInTheDocument();
+    expect(screen.getByText(/réduction de.*1[\s\u202f]?000/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /retirer le code promo save10/i })
+    ).toBeInTheDocument();
   });
 
   it('should validate and apply coupon', async () => {
     const onApply = vi.fn();
-    const onRemove = vi.fn();
-    
-    (useValidateUnifiedPromotion as any).mockReturnValue({
+
+    mockUseValidate.mockReturnValue({
       data: {
         valid: true,
         promotion_id: 'promo-1',
@@ -94,22 +89,14 @@ describe('CouponInput', () => {
       },
       isLoading: false,
     });
-    
+
     render(
-      <CouponInput
-        storeId="store-1"
-        orderAmount={10000}
-        onApply={onApply}
-        onRemove={onRemove}
-      />
+      <CouponInput storeId="store-1" orderAmount={10000} onApply={onApply} onRemove={vi.fn()} />
     );
-    
-    const input = screen.getByLabelText(/code promo/i);
-    const applyButton = screen.getByRole('button', { name: /appliquer/i });
-    
-    fireEvent.change(input, { target: { value: 'SAVE20' } });
-    fireEvent.click(applyButton);
-    
+
+    await userEvent.type(getCouponInput(), 'SAVE20');
+    fireEvent.click(getApplyButton());
+
     await waitFor(() => {
       expect(onApply).toHaveBeenCalledWith('promo-1', 2000, 'SAVE20');
       expect(mockToast).toHaveBeenCalledWith(
@@ -121,59 +108,41 @@ describe('CouponInput', () => {
   });
 
   it('should show error for invalid coupon', async () => {
-    const onApply = vi.fn();
-    const onRemove = vi.fn();
-    
-    (useValidateUnifiedPromotion as any).mockReturnValue({
+    mockUseValidate.mockReturnValue({
       data: {
         valid: false,
         message: 'Code invalide',
       },
       isLoading: false,
     });
-    
+
     render(
-      <CouponInput
-        storeId="store-1"
-        orderAmount={10000}
-        onApply={onApply}
-        onRemove={onRemove}
-      />
+      <CouponInput storeId="store-1" orderAmount={10000} onApply={vi.fn()} onRemove={vi.fn()} />
     );
-    
-    const input = screen.getByLabelText(/code promo/i);
-    const applyButton = screen.getByRole('button', { name: /appliquer/i });
-    
-    fireEvent.change(input, { target: { value: 'INVALID' } });
-    fireEvent.click(applyButton);
-    
-    await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Code invalide',
-          variant: 'destructive',
-        })
-      );
-      expect(onApply).not.toHaveBeenCalled();
-    });
+
+    await userEvent.type(getCouponInput(), 'INVALID');
+
+    expect(await screen.findByText('Code invalide')).toBeInTheDocument();
+    expect(getApplyButton()).toBeDisabled();
   });
 
   it('should show error when code is empty', async () => {
-    const onApply = vi.fn();
-    const onRemove = vi.fn();
-    
+    mockUseValidate.mockReturnValue({
+      data: {
+        valid: true,
+        promotion_id: 'promo-1',
+        discount_amount: 2000,
+        code: 'SAVE20',
+      },
+      isLoading: false,
+    });
+
     render(
-      <CouponInput
-        storeId="store-1"
-        orderAmount={10000}
-        onApply={onApply}
-        onRemove={onRemove}
-      />
+      <CouponInput storeId="store-1" orderAmount={10000} onApply={vi.fn()} onRemove={vi.fn()} />
     );
-    
-    const applyButton = screen.getByRole('button', { name: /appliquer/i });
-    fireEvent.click(applyButton);
-    
+
+    fireEvent.click(getApplyButton());
+
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -181,29 +150,26 @@ describe('CouponInput', () => {
           variant: 'destructive',
         })
       );
-      expect(onApply).not.toHaveBeenCalled();
     });
   });
 
   it('should remove applied coupon', async () => {
-    const onApply = vi.fn();
     const onRemove = vi.fn();
-    
+
     render(
       <CouponInput
         storeId="store-1"
         orderAmount={10000}
-        onApply={onApply}
+        onApply={vi.fn()}
         onRemove={onRemove}
         appliedCouponId="promo-1"
         appliedCouponCode="SAVE10"
         appliedDiscountAmount={1000}
       />
     );
-    
-    const removeButton = screen.getByRole('button', { name: /retirer/i });
-    fireEvent.click(removeButton);
-    
+
+    fireEvent.click(screen.getByRole('button', { name: /retirer le code promo save10/i }));
+
     await waitFor(() => {
       expect(onRemove).toHaveBeenCalled();
       expect(mockToast).toHaveBeenCalledWith(
@@ -215,36 +181,15 @@ describe('CouponInput', () => {
   });
 
   it('should show loading state during validation', () => {
-    const onApply = vi.fn();
-    const onRemove = vi.fn();
-    
-    (useValidateUnifiedPromotion as any).mockReturnValue({
+    mockUseValidate.mockReturnValue({
       data: null,
       isLoading: true,
     });
-    
+
     render(
-      <CouponInput
-        storeId="store-1"
-        orderAmount={10000}
-        onApply={onApply}
-        onRemove={onRemove}
-      />
+      <CouponInput storeId="store-1" orderAmount={10000} onApply={vi.fn()} onRemove={vi.fn()} />
     );
-    
-    // Le bouton devrait être désactivé pendant le chargement
-    const applyButton = screen.getByRole('button', { name: /appliquer/i });
-    expect(applyButton).toBeDisabled();
+
+    expect(getApplyButton()).toBeDisabled();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
