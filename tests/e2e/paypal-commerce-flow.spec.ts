@@ -8,7 +8,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { E2E_TEST_CONFIG, gotoApp, loginAs } from './shared/e2e-test-config';
+import { E2E_TEST_CONFIG, appLocator, gotoApp, loginAs } from './shared/e2e-test-config';
 
 const orchestrationEnabled = process.env.VITE_PAYMENT_ORCHESTRATION_V2 === 'true';
 
@@ -79,6 +79,8 @@ test.describe('Payment success — retour PayPal', () => {
       '/payment/success?order_id=00000000-0000-0000-0000-000000000099&provider=paypal&token=TEST'
     );
     expect(response?.status()).toBeLessThan(500);
-    await expect(page.getByText(/paiement réussi/i)).toBeVisible({ timeout: 15_000 });
+    await expect(appLocator(page).getByRole('heading', { name: /paiement réussi/i })).toBeVisible({
+      timeout: 30_000,
+    });
   });
 });

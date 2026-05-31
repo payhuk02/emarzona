@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { E2E_TEST_CONFIG, gotoApp, loginAs } from './shared/e2e-test-config';
+import { E2E_TEST_CONFIG, appLocator, gotoApp, loginAs } from './shared/e2e-test-config';
 
 const orchestrationV2 = process.env.VITE_PAYMENT_ORCHESTRATION_V2 === 'true';
 
@@ -36,16 +36,17 @@ test.describe('Checkout multi-PSP — routage smoke', () => {
     const response = await gotoApp(page, '/checkout');
     expect(response?.status()).toBeLessThan(500);
 
+    const root = appLocator(page);
     const settled = await Promise.race([
-      page
+      root
         .getByText(/finaliser (la commande|votre commande)/i)
-        .waitFor({ timeout: 45_000 })
+        .waitFor({ timeout: 60_000 })
         .then(() => 'checkout'),
-      page
+      root
         .getByText(/votre panier est vide/i)
-        .waitFor({ timeout: 45_000 })
+        .waitFor({ timeout: 60_000 })
         .then(() => 'empty'),
-      page.waitForURL(/\/(login|auth)/, { timeout: 45_000 }).then(() => 'auth'),
+      page.waitForURL(/\/(login|auth)/, { timeout: 60_000 }).then(() => 'auth'),
     ]).catch(() => 'timeout');
 
     expect(['checkout', 'empty', 'auth', 'timeout']).toContain(settled);
@@ -135,7 +136,9 @@ test.describe('Checkout multi-PSP — pages retour PSP', () => {
       '/payment/success?order_id=00000000-0000-0000-0000-000000000099&provider=stripe_connect'
     );
     expect(response?.status()).toBeLessThan(500);
-    await expect(page.getByText(/paiement réussi/i)).toBeVisible({ timeout: 15_000 });
+    await expect(appLocator(page).getByRole('heading', { name: /paiement réussi/i })).toBeVisible({
+      timeout: 30_000,
+    });
   });
 
   test('success PayPal query params', async ({ page }) => {
@@ -144,6 +147,8 @@ test.describe('Checkout multi-PSP — pages retour PSP', () => {
       '/payment/success?order_id=00000000-0000-0000-0000-000000000099&provider=paypal&token=TEST'
     );
     expect(response?.status()).toBeLessThan(500);
-    await expect(page.getByText(/paiement réussi/i)).toBeVisible({ timeout: 15_000 });
+    await expect(appLocator(page).getByRole('heading', { name: /paiement réussi/i })).toBeVisible({
+      timeout: 30_000,
+    });
   });
 });

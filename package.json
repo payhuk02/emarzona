@@ -43,7 +43,7 @@
     "test:e2e:marketplace": "playwright test tests/e2e/marketplace",
     "test:e2e:products": "playwright test --config=playwright.products.config.ts",
     "test:e2e:cart": "playwright test cart-checkout-workflow",
-    "test:e2e:checkout": "playwright test tests/e2e/cart-checkout-workflow.spec.ts tests/e2e/checkout-multi-psp.spec.ts tests/e2e/paypal-commerce-flow.spec.ts",
+    "test:e2e:checkout": "playwright test --config=playwright.checkout.config.ts tests/e2e/cart-checkout-workflow.spec.ts tests/e2e/checkout-multi-psp.spec.ts tests/e2e/paypal-commerce-flow.spec.ts",
     "test:e2e:email": "playwright test email-unsubscribe email-campaign-test-send --project=chromium",
     "verify:supabase-keys": "node scripts/verify-supabase-publishable-key.mjs",
     "test:visual": "playwright test visual-regression",

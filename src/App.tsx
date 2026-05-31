@@ -68,7 +68,6 @@ const AutoSEO = lazy(() => import('@/components/seo/AutoSEO').then(m => ({ defau
 import { initSentry } from '@/lib/sentry';
 import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
-import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { shouldUseAppPremiumTheme } from '@/lib/premium-theme';
 import { AppPremiumShell } from '@/components/layout/AppPremiumShell';

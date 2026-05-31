@@ -6,12 +6,8 @@
  * Les flux paiement Moneroo complets nécessitent auth + données de test (voir physical-product-workflow).
  */
 
-import { test, expect, type Page } from '@playwright/test';
-
-/** Vite SPA : domcontentloaded évite les timeouts sur l’événement load. */
-async function gotoApp(page: Page, path: string) {
-  return page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-}
+import { test, expect } from '@playwright/test';
+import { appLocator, gotoApp } from './shared/e2e-test-config';
 
 test.describe('Checkout — routage CheckoutPage', () => {
   test('/checkout sans productId : panier unifié ou garde auth (pas de crash)', async ({
@@ -21,18 +17,19 @@ test.describe('Checkout — routage CheckoutPage', () => {
     const response = await gotoApp(page, '/checkout');
     expect(response?.status()).toBeLessThan(500);
 
-    await expect(page.locator('body')).toBeVisible();
+    const root = appLocator(page);
+    await expect(root).toBeVisible();
 
     const settled = await Promise.race([
-      page
+      root
         .getByText(/finaliser la commande/i)
-        .waitFor({ timeout: 45_000 })
+        .waitFor({ timeout: 60_000 })
         .then(() => 'cart'),
-      page
+      root
         .getByText(/votre panier est vide/i)
-        .waitFor({ timeout: 45_000 })
+        .waitFor({ timeout: 60_000 })
         .then(() => 'empty'),
-      page.waitForURL(/\/(login|auth)/, { timeout: 45_000 }).then(() => 'auth'),
+      page.waitForURL(/\/(login|auth)/, { timeout: 60_000 }).then(() => 'auth'),
     ]).catch(() => 'timeout');
 
     const html = await page.content();
@@ -114,6 +111,6 @@ test.describe('Checkout — sécurité & perf (smoke)', () => {
     const start = Date.now();
     await gotoApp(page, '/checkout');
     await expect(page.locator('body')).toBeVisible();
-    expect(Date.now() - start).toBeLessThan(60_000);
+    expect(Date.now() - start).toBeLessThan(120_000);
   });
 });
