@@ -56,6 +56,11 @@ const CurrencyRatesInitializer = lazy(() =>
 const PWAInstallPrompt = lazy(() =>
   import('@/components/mobile/PWAInstallPrompt').then(m => ({ default: m.PWAInstallPrompt }))
 );
+const PlatformPopupMessage = lazy(() =>
+  import('@/components/platform/PlatformPopupMessage').then(m => ({
+    default: m.PlatformPopupMessage,
+  }))
+);
 
 const SkipLink = lazy(() =>
   import('@/components/accessibility/SkipLink').then(m => ({ default: m.SkipLink }))
@@ -304,6 +309,7 @@ const AppContent = () => {
         </Suspense>
         <Suspense fallback={null}>
           <PWAInstallPrompt showAsBanner={isMobile} />
+          <PlatformPopupMessage />
         </Suspense>
       </SentryErrorBoundary>
     </ErrorBoundary>
