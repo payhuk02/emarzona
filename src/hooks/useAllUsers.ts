@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { logger } from "@/lib/logger";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface UserProfile {
   id: string;
@@ -53,12 +53,21 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      logger.log('Fetching users with options:', { page, pageSize, sortBy, sortDirection, filters });
+      logger.log('Fetching users with options:', {
+        page,
+        pageSize,
+        sortBy,
+        sortDirection,
+        filters,
+      });
 
       // Construire la requête de base
-      let  query= supabase
+      let query = supabase
         .from('profiles')
-        .select('id,user_id,display_name,first_name,last_name,role,is_suspended,suspended_at,created_at,updated_at', { count: 'exact' });
+        .select(
+          'id,user_id,display_name,first_name,last_name,role,is_suspended,suspended_at,created_at,updated_at',
+          { count: 'exact' }
+        );
 
       // Appliquer les filtres
       if (filters.status === 'active') {
@@ -71,7 +80,9 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       // Note: email n'est pas dans profiles, il est dans auth.users
       if (filters.searchTerm && filters.searchTerm.trim()) {
         const search = filters.searchTerm.trim().toLowerCase();
-        query = query.or(`display_name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+        query = query.or(
+          `display_name.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`
+        );
       }
 
       // Appliquer le tri
@@ -100,8 +111,9 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
 
       // Récupérer les emails pour tous les utilisateurs en une seule requête RPC
       const userIds = profilesData.map(p => p.user_id);
-      const { data: emailsData, error: emailsError } = await supabase
-        .rpc('get_users_emails', { p_user_ids: userIds });
+      const { data: emailsData, error: emailsError } = await supabase.rpc('get_users_emails', {
+        p_user_ids: userIds,
+      });
 
       if (emailsError) {
         logger.error('Error fetching emails:', emailsError);
@@ -110,14 +122,14 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       // Créer une map user_id => email pour un accès rapide
       const emailMap = new Map<string, string>();
       if (emailsData) {
-        emailsData.forEach((item: any) => {
+        emailsData.forEach((item: { user_id: string; email: string }) => {
           emailMap.set(item.user_id, item.email);
         });
       }
 
       // Récupérer les rôles pour chaque utilisateur
       const usersWithDetails = await Promise.all(
-        profilesData.map(async (profile) => {
+        profilesData.map(async profile => {
           const { data: roleData } = await supabase
             .from('user_roles')
             .select('role')
@@ -144,20 +156,21 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
       );
 
       // Appliquer filtre par rôle (côté client car user_roles est une table séparée)
-      let  filteredUsers= usersWithDetails;
+      let filteredUsers = usersWithDetails;
       if (filters.role && filters.role !== 'all') {
         filteredUsers = usersWithDetails.filter(user => user.role === filters.role);
       }
 
       setUsers(filteredUsers);
       logger.log('Users loaded:', filteredUsers.length);
-
-    } catch ( _error: any) {
-      logger.error('Failed to fetch users:', error);
+    } catch (fetchError: unknown) {
+      const message =
+        fetchError instanceof Error ? fetchError.message : 'Impossible de charger les utilisateurs';
+      logger.error('Failed to fetch users:', fetchError);
       toast({
-        title: "Erreur",
-        description: error.message || "Impossible de charger les utilisateurs",
-        variant: "destructive",
+        title: 'Erreur',
+        description: message,
+        variant: 'destructive',
       });
       setUsers([]);
       setTotalCount(0);
@@ -177,9 +190,3 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
     refetch: fetchUsers,
   };
 };
-
-
-
-
-
-

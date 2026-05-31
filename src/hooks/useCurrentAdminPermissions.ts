@@ -1,6 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { isPrincipalAdminEmail } from '@/lib/principal-admin';
+import { logger } from '@/lib/logger';
 import {
   fallbackPermissionsForRole,
   normalizeRolePermissions,
@@ -9,26 +11,45 @@ import {
   type PlatformRoleName,
 } from '@/lib/admin/admin-permissions';
 
+const PERMISSIONS_LOAD_TIMEOUT_MS = 12_000;
+
 export type { EffectivePermissions } from '@/lib/admin/admin-permissions';
 
 export const useCurrentAdminPermissions = () => {
+  const { user: authUser, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string>('user');
   const [platformRole, setPlatformRole] = useState<PlatformRoleName | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
   const [permissions, setPermissions] = useState<EffectivePermissions>({});
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
+
+    const timeoutId = window.setTimeout(() => {
+      if (requestIdRef.current !== requestId) return;
+      logger.warn('useCurrentAdminPermissions: timeout');
+      setError('permissions_timeout');
+      setLoading(false);
+    }, PERMISSIONS_LOAD_TIMEOUT_MS);
+
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = authUser;
       if (!user) throw new Error('Not authenticated');
 
       const principalAdmin = isPrincipalAdminEmail(user.email);
+
+      if (principalAdmin) {
+        setPlatformRole('super_admin');
+        setRole('super_admin');
+        setIsSuperAdmin(true);
+        setPermissions(fallbackPermissionsForRole('super_admin'));
+        return;
+      }
 
       const [{ data: profile }, { data: isAdminRpc }] = await Promise.all([
         supabase
@@ -82,13 +103,18 @@ export const useCurrentAdminPermissions = () => {
       setIsSuperAdmin(false);
       setPermissions({});
     } finally {
-      setLoading(false);
+      window.clearTimeout(timeoutId);
+      if (requestIdRef.current === requestId) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [authUser]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (!authLoading) {
+      refresh();
+    }
+  }, [authLoading, refresh]);
 
   const can = useCallback(
     (key: string) => {

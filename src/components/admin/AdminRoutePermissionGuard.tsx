@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
@@ -10,15 +10,27 @@ type AdminRoutePermissionGuardProps = {
   children: ReactNode;
 };
 
+const PERM_GUARD_TIMEOUT_MS = 15_000;
+
 /**
  * Bloque l'accès direct aux URLs admin sans permission RBAC (redirect → /admin).
  */
 export function AdminRoutePermissionGuard({ children }: AdminRoutePermissionGuardProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { can, isSuperAdmin, loading, platformRole } = useCurrentAdminPermissions();
+  const { can, isSuperAdmin, loading, platformRole, error } = useCurrentAdminPermissions();
+  const [timedOut, setTimedOut] = useState(false);
 
   const allowed = canAccessAdminPath(location.pathname, can, isSuperAdmin);
+
+  useEffect(() => {
+    if (!loading) {
+      setTimedOut(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setTimedOut(true), PERM_GUARD_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
     if (loading) return;
@@ -32,8 +44,21 @@ export function AdminRoutePermissionGuard({ children }: AdminRoutePermissionGuar
 
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 p-4">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+        {timedOut ? (
+          <>
+            <p className="text-sm text-muted-foreground text-center max-w-md">
+              Le chargement des permissions prend trop de temps
+              {error ? ` (${error})` : ''}.
+            </p>
+            <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">Chargement des permissions…</p>
+        )}
       </div>
     );
   }
