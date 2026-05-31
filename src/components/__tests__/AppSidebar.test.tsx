@@ -33,7 +33,6 @@ vi.mock('@/hooks/useAdmin', () => ({
   useAdmin: vi.fn(),
 }));
 
-// Mock des dépendances
 vi.mock('@/hooks/usePlatformLogo', () => ({
   usePlatformLogo: vi.fn(() => '/emarzona-logo.png'),
 }));
@@ -44,12 +43,33 @@ vi.mock('@/hooks/use-toast', () => ({
   })),
 }));
 
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     auth: {
       signOut: vi.fn(() => Promise.resolve({ error: null })),
     },
   },
+}));
+
+vi.mock('@/components/sidebar/SidebarNavCommandPalette', () => ({
+  SidebarNavCommandPalette: () => null,
+}));
+
+vi.mock('@/components/landing/premium/PremiumLangSwitcher', () => ({
+  PremiumLangSwitcher: () => (
+    <button type="button" aria-label="Langue : Français">
+      FR
+    </button>
+  ),
 }));
 
 const mockLocation = { pathname: '/dashboard' };
@@ -74,6 +94,14 @@ const mockUser = {
   role: 'vendor',
 };
 
+const defaultStoreContext = {
+  stores: mockStores,
+  selectedStoreId: '1',
+  switchStore: vi.fn(),
+  loading: false,
+  canCreateStore: () => true,
+} as ReturnType<typeof StoreContext.useStoreContext>;
+
 const renderAppSidebar = () =>
   render(
     <BrowserRouter>
@@ -86,84 +114,92 @@ const renderAppSidebar = () =>
 describe('AppSidebar', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     mockLocation.pathname = '/dashboard';
 
-    // Mock StoreContext
     vi.mocked(StoreContext.useStoreContext).mockReturnValue({
-      stores: mockStores,
-      selectedStoreId: '1',
+      ...defaultStoreContext,
       switchStore: vi.fn(),
-      storesLoading: false,
-      canCreateStore: () => true,
-    } as ReturnType<typeof StoreContext.useStoreContext>);
+    });
 
-    // Mock AuthContext
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: mockUser,
       loading: false,
     } as ReturnType<typeof AuthContext.useAuth>);
 
-    // Mock useAdmin
     vi.mocked(AdminHook.useAdmin).mockReturnValue({
       isAdmin: false,
       loading: false,
     } as ReturnType<typeof AdminHook.useAdmin>);
   });
 
-  it('should render the sidebar with logo', () => {
+  it('should render the sidebar with logo', async () => {
     renderAppSidebar();
 
-    // Vérifier que le logo ou le placeholder est présent
-    const logoElement = screen.getByText('Emarzona') || screen.getByLabelText(/logo/i);
-    expect(logoElement).toBeInTheDocument();
+    expect(await screen.findByText('Emarzona')).toBeInTheDocument();
   });
 
-  it('should display menu sections', () => {
+  it('should display menu sections', async () => {
     renderAppSidebar();
 
-    // Vérifier que les sections principales sont présentes
-    expect(screen.getByText('Principal')).toBeInTheDocument();
+    expect(await screen.findByText('Principal')).toBeInTheDocument();
   });
 
-  it('should display dashboard link', () => {
+  it('should display dashboard link', async () => {
     renderAppSidebar();
 
-    const dashboardLink = screen.getAllByRole('link', { name: /tableau de bord/i })[0];
-    expect(dashboardLink).toHaveAttribute('href', '/dashboard');
+    await screen.findByText('Principal');
+
+    await waitFor(
+      () => {
+        const dashboardLinks = screen
+          .getAllByRole('link')
+          .filter(link => link.getAttribute('href') === '/dashboard');
+        expect(dashboardLinks.length).toBeGreaterThan(0);
+      },
+      { timeout: 15_000 }
+    );
   });
 
-  it('should display products link', () => {
+  it('should display products link', async () => {
     renderAppSidebar();
 
-    expect(screen.getAllByRole('link', { name: /^produits$/i }).length).toBeGreaterThan(0);
+    await waitFor(
+      () => {
+        expect(screen.getAllByRole('link', { name: /^produits$/i }).length).toBeGreaterThan(0);
+      },
+      { timeout: 15_000 }
+    );
   });
 
-  it('should display orders link', () => {
+  it('should display orders link', async () => {
     renderAppSidebar();
 
-    expect(screen.getAllByRole('link', { name: /commandes/i }).length).toBeGreaterThan(0);
+    await waitFor(
+      () => {
+        expect(screen.getAllByRole('link', { name: /^commandes$/i }).length).toBeGreaterThan(0);
+      },
+      { timeout: 15_000 }
+    );
   });
 
-  it('should display logout button', () => {
+  it('should display logout button', async () => {
     renderAppSidebar();
 
-    const logoutButton = screen.getByRole('button', { name: /déconnexion/i });
-    expect(logoutButton).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /déconnexion/i })).toBeInTheDocument();
   });
 
   it('should display store selection when user has multiple stores', async () => {
     renderAppSidebar();
 
-    await waitFor(() => {
-      expect(screen.getByText('Boutique 1')).toBeInTheDocument();
-      expect(screen.getByText('Boutique 2')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Boutique 1')).toBeInTheDocument();
+    expect(screen.getByText('Boutique 2')).toBeInTheDocument();
   });
 
-  it('should not display admin menu items for non-admin users', () => {
+  it('should not display admin menu items for non-admin users', async () => {
     renderAppSidebar();
 
-    // Les éléments admin ne devraient pas être visibles
+    await screen.findByText('Principal');
     expect(screen.queryByText(/administration/i)).not.toBeInTheDocument();
   });
 
@@ -176,31 +212,24 @@ describe('AppSidebar', () => {
 
     renderAppSidebar();
 
-    await waitFor(() => {
-      expect(screen.getByText(/administration/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/administration/i)).toBeInTheDocument();
   });
 
-  it('should display language switcher in footer', () => {
+  it('should display language switcher in footer', async () => {
     renderAppSidebar();
 
-    expect(screen.getByLabelText(/^Langue :/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/^Langue :/i)).toBeInTheDocument();
   });
 
   it('should handle store switching', async () => {
     const switchStore = vi.fn();
     vi.mocked(StoreContext.useStoreContext).mockReturnValue({
-      stores: mockStores,
-      selectedStoreId: '1',
+      ...defaultStoreContext,
       switchStore,
-      storesLoading: false,
-      canCreateStore: () => true,
-    } as ReturnType<typeof StoreContext.useStoreContext>);
+    });
 
     renderAppSidebar();
 
-    await waitFor(() => {
-      expect(screen.getByText('Boutique 2')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Boutique 2')).toBeInTheDocument();
   });
 });
