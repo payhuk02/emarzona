@@ -20,6 +20,8 @@ export interface AdminBroadcastRecord {
   created_by: string | null;
   title: string;
   message: string;
+  message_html?: string | null;
+  email_design?: string | null;
   channels: string[];
   audience_type: BroadcastAudience;
   audience_filter: Record<string, unknown>;
@@ -56,6 +58,8 @@ export interface PlatformPopupMessage {
 export interface SendAdminBroadcastPayload {
   title: string;
   message: string;
+  message_html?: string;
+  email_design?: 'classic' | 'premium' | 'announcement' | 'minimal';
   channels: BroadcastChannel[];
   audience: BroadcastAudience;
   emails?: string[];

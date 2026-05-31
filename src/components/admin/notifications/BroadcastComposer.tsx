@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -24,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   CalendarClock,
   Eye,
@@ -32,6 +32,7 @@ import {
   Mail,
   Megaphone,
   MessageSquare,
+  Palette,
   Send,
   Sparkles,
   Users,
@@ -43,6 +44,11 @@ import {
   type BroadcastChannel,
 } from '@/lib/admin/admin-broadcast-service';
 import {
+  hasMeaningfulHtml,
+  resolveBroadcastBodies,
+  EMAIL_DESIGN_OPTIONS,
+} from '@/lib/admin/broadcast-html';
+import {
   AUDIENCE_OPTIONS,
   CHANNEL_OPTIONS,
   DEFAULT_BROADCAST_FORM,
@@ -50,6 +56,10 @@ import {
   QUICK_TEMPLATES,
   type BroadcastFormState,
 } from '@/components/admin/notifications/broadcast-constants';
+import {
+  BroadcastMessageEditor,
+  BroadcastMessagePreview,
+} from '@/components/admin/notifications/BroadcastMessagePreview';
 
 interface BroadcastComposerProps {
   initialForm?: BroadcastFormState;
@@ -114,43 +124,55 @@ export function BroadcastComposer({ initialForm, onSent }: BroadcastComposerProp
       ...prev,
       title: template.title,
       message: template.message,
+      messageHtml: template.messageHtml ?? template.message,
+      emailDesign: template.emailDesign ?? prev.emailDesign,
       channels: template.channels,
       popupStyle: template.popupStyle ?? prev.popupStyle,
     }));
   };
 
-  const buildPayload = () => ({
-    title: form.title.trim(),
-    message: form.message.trim(),
-    channels: form.channels,
-    audience: form.audience,
-    emails: emailsList,
-    priority: form.priority,
-    action_url: form.actionUrl.trim() || undefined,
-    action_label: form.actionLabel.trim() || undefined,
-    scheduled_at:
-      form.scheduleEnabled && form.scheduledAt
-        ? new Date(form.scheduledAt).toISOString()
-        : undefined,
-    popup_options: form.channels.includes('popup')
-      ? {
-          style: form.popupStyle,
-          action_url: form.actionUrl.trim() || undefined,
-          action_label: form.actionLabel.trim() || undefined,
-          dismissible: form.dismissible,
-          show_once: true,
-          target_audience:
-            form.audience === 'emails'
-              ? ('all' as const)
-              : form.audience === 'all'
+  const buildPayload = () => {
+    const { plain } = resolveBroadcastBodies(form.message, form.messageHtml);
+    return {
+      title: form.title.trim(),
+      message: plain,
+      message_html: hasMeaningfulHtml(form.messageHtml) ? form.messageHtml.trim() : undefined,
+      email_design: form.emailDesign,
+      channels: form.channels,
+      audience: form.audience,
+      emails: emailsList,
+      priority: form.priority,
+      action_url: form.actionUrl.trim() || undefined,
+      action_label: form.actionLabel.trim() || undefined,
+      scheduled_at:
+        form.scheduleEnabled && form.scheduledAt
+          ? new Date(form.scheduledAt).toISOString()
+          : undefined,
+      popup_options: form.channels.includes('popup')
+        ? {
+            style: form.popupStyle,
+            action_url: form.actionUrl.trim() || undefined,
+            action_label: form.actionLabel.trim() || undefined,
+            dismissible: form.dismissible,
+            show_once: true,
+            target_audience:
+              form.audience === 'emails'
                 ? ('all' as const)
-                : form.audience,
-        }
-      : undefined,
-  });
+                : form.audience === 'all'
+                  ? ('all' as const)
+                  : form.audience,
+          }
+        : undefined,
+    };
+  };
+
+  const hasContent = () => {
+    const { plain } = resolveBroadcastBodies(form.message, form.messageHtml);
+    return Boolean(form.title.trim() && plain);
+  };
 
   const validate = (): boolean => {
-    if (!form.title.trim() || !form.message.trim()) {
+    if (!hasContent()) {
       toast({
         title: 'Champs requis',
         description: 'Le titre et le message sont obligatoires.',
@@ -381,15 +403,70 @@ export function BroadcastComposer({ initialForm, onSent }: BroadcastComposerProp
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
-            <Textarea
-              id="message"
-              placeholder="Contenu du message..."
-              value={form.message}
-              onChange={e => setForm({ ...form, message: e.target.value })}
-              rows={6}
-            />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <Label>Message</Label>
+              {form.channels.includes('email') && (
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-muted-foreground" />
+                  <Select
+                    value={form.emailDesign}
+                    onValueChange={value =>
+                      setForm({
+                        ...form,
+                        emailDesign: value as BroadcastFormState['emailDesign'],
+                      })
+                    }
+                  >
+                    <SelectTrigger className="min-h-[36px] w-[180px]">
+                      <SelectValue placeholder="Design email" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EMAIL_DESIGN_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            {form.channels.includes('email') && (
+              <p className="text-xs text-muted-foreground">
+                {EMAIL_DESIGN_OPTIONS.find(o => o.value === form.emailDesign)?.description}
+              </p>
+            )}
+            <Tabs defaultValue="edit" className="w-full">
+              <TabsList>
+                <TabsTrigger value="edit">Rédaction</TabsTrigger>
+                <TabsTrigger value="preview">Aperçu live</TabsTrigger>
+              </TabsList>
+              <TabsContent value="edit" className="mt-3">
+                <BroadcastMessageEditor
+                  messageHtml={form.messageHtml}
+                  onChange={html => {
+                    const { plain } = resolveBroadcastBodies('', html);
+                    setForm(prev => ({ ...prev, messageHtml: html, message: plain }));
+                  }}
+                  disabled={isSending || isTesting}
+                />
+              </TabsContent>
+              <TabsContent value="preview" className="mt-3">
+                <BroadcastMessagePreview
+                  title={form.title}
+                  message={form.message}
+                  messageHtml={form.messageHtml}
+                  emailDesign={form.emailDesign}
+                  channels={form.channels.length ? form.channels : ['in_app']}
+                  actionUrl={form.actionUrl.trim() || undefined}
+                  actionLabel={form.actionLabel.trim() || undefined}
+                  popupStyle={form.popupStyle}
+                  dismissible={form.dismissible}
+                  recipientCount={recipientCount}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -531,7 +608,7 @@ export function BroadcastComposer({ initialForm, onSent }: BroadcastComposerProp
               variant="outline"
               className="gap-2 min-h-[44px] flex-1"
               onClick={() => setPreviewOpen(true)}
-              disabled={!form.title.trim() || !form.message.trim()}
+              disabled={!hasContent()}
             >
               <Eye className="h-4 w-4" />
               Aperçu
@@ -574,40 +651,26 @@ export function BroadcastComposer({ initialForm, onSent }: BroadcastComposerProp
       </Card>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Aperçu du message</DialogTitle>
+            <DialogTitle>Aperçu multi-canal</DialogTitle>
             <DialogDescription>
-              Rendu approximatif tel que le verront les utilisateurs
+              Email premium, notification interne et popup — rendu tel que perçu par les
+              utilisateurs
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {form.channels.map(ch => (
-                <Badge key={ch} variant="outline">
-                  {CHANNEL_OPTIONS.find(c => c.id === ch)?.label ?? ch}
-                </Badge>
-              ))}
-              {recipientCount !== null && (
-                <Badge variant="secondary">{recipientCount} destinataire(s)</Badge>
-              )}
-            </div>
-            <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
-              <h3 className="font-semibold text-lg">{form.title || 'Sans titre'}</h3>
-              <p className="text-sm whitespace-pre-wrap">{form.message || 'Sans contenu'}</p>
-              {form.actionUrl && form.actionLabel && (
-                <Button size="sm" variant="default" asChild>
-                  <span>{form.actionLabel}</span>
-                </Button>
-              )}
-            </div>
-            {form.channels.includes('popup') && (
-              <div className="rounded-lg border-l-4 border-primary p-3 bg-primary/5 text-sm">
-                <strong>Popup :</strong> {form.popupStyle}
-                {form.dismissible ? ' · fermable' : ' · non fermable'}
-              </div>
-            )}
-          </div>
+          <BroadcastMessagePreview
+            title={form.title}
+            message={form.message}
+            messageHtml={form.messageHtml}
+            emailDesign={form.emailDesign}
+            channels={form.channels.length ? form.channels : ['in_app']}
+            actionUrl={form.actionUrl.trim() || undefined}
+            actionLabel={form.actionLabel.trim() || undefined}
+            popupStyle={form.popupStyle}
+            dismissible={form.dismissible}
+            recipientCount={recipientCount}
+          />
         </DialogContent>
       </Dialog>
     </>

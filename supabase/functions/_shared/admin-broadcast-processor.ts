@@ -5,6 +5,28 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0
 import { canSendEmailToRecipient } from './email-compliance-utils.ts';
 import { logEmailSend } from './email-template-utils.ts';
 import { renderNotificationEmail } from './notification-email-utils.ts';
+import { wrapBroadcastEmailHtml, type BroadcastEmailDesign } from './broadcast-email-templates.ts';
+
+function stripHtmlToPlainText(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+}
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const RESEND_FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@mail.emarzona.com';
@@ -34,6 +56,8 @@ export interface PopupOptions {
 export interface BroadcastPayload {
   title: string;
   message: string;
+  message_html?: string;
+  email_design?: BroadcastEmailDesign;
   channels: BroadcastChannel[];
   audience: AudienceType;
   emails?: string[];
@@ -41,6 +65,12 @@ export interface BroadcastPayload {
   action_url?: string;
   action_label?: string;
   popup_options?: PopupOptions;
+}
+
+export function resolveBroadcastPlainMessage(payload: BroadcastPayload): string {
+  const html = payload.message_html?.trim();
+  if (html) return stripHtmlToPlainText(html) || payload.message.trim();
+  return payload.message.trim();
 }
 
 export interface ProcessBroadcastResult {
@@ -213,7 +243,7 @@ export async function createBroadcastPopup(
     .insert({
       broadcast_id: broadcastId,
       title: payload.title,
-      message: payload.message,
+      message: payload.message_html?.trim() || payload.message,
       action_url: popupOpts.action_url || payload.action_url || null,
       action_label: popupOpts.action_label || payload.action_label || null,
       style: popupOpts.style || 'info',
@@ -260,6 +290,8 @@ export async function processBroadcastDelivery(
   const priority = payload.priority || 'normal';
   const actionUrl = payload.action_url?.trim() || payload.popup_options?.action_url?.trim();
   const actionLabel = payload.action_label?.trim() || payload.popup_options?.action_label?.trim();
+  const plainMessage = resolveBroadcastPlainMessage(payload);
+  const richHtml = payload.message_html?.trim();
 
   for (const recipient of recipients) {
     let recipientOk = true;
@@ -273,11 +305,15 @@ export async function processBroadcastDelivery(
           user_id: recipient.user_id,
           type: 'system_announcement',
           title: payload.title,
-          message: payload.message,
+          message: plainMessage,
           priority,
           action_url: actionUrl || null,
           action_label: actionLabel || null,
-          metadata: { broadcast_id: broadcastId, source: 'admin_broadcast' },
+          metadata: {
+            broadcast_id: broadcastId,
+            source: 'admin_broadcast',
+            message_html: richHtml || null,
+          },
         });
 
         if (notifError) {
@@ -289,21 +325,33 @@ export async function processBroadcastDelivery(
 
     if (channels.includes('email')) {
       const recipientName = recipient.email.split('@')[0];
-      const { subject, html } = await renderNotificationEmail(
-        supabase,
-        {
-          user_id: recipient.user_id ?? '',
-          type: 'system_announcement',
-          title: payload.title,
-          message: payload.message,
-          action_url: actionUrl,
-          action_label: actionLabel,
-          recipient_email: recipient.email,
-          recipient_name: recipientName,
-          metadata: { broadcast_id: broadcastId, source: 'admin_broadcast' },
-        },
-        recipientName
-      );
+      const { subject, html } = richHtml
+        ? {
+            subject: payload.title,
+            html: wrapBroadcastEmailHtml({
+              title: payload.title,
+              bodyHtml: richHtml,
+              recipientName,
+              actionUrl,
+              actionLabel,
+              design: payload.email_design || 'premium',
+            }),
+          }
+        : await renderNotificationEmail(
+            supabase,
+            {
+              user_id: recipient.user_id ?? '',
+              type: 'system_announcement',
+              title: payload.title,
+              message: plainMessage,
+              action_url: actionUrl,
+              action_label: actionLabel,
+              recipient_email: recipient.email,
+              recipient_name: recipientName,
+              metadata: { broadcast_id: broadcastId, source: 'admin_broadcast' },
+            },
+            recipientName
+          );
 
       const sendResult = await sendBroadcastEmail(supabase, {
         to: recipient.email,
@@ -364,9 +412,14 @@ export function payloadFromBroadcastRow(row: Record<string, unknown>): Broadcast
     ? (audienceFilter.emails as string[])
     : undefined;
 
+  const messageHtml = row.message_html ? String(row.message_html) : undefined;
+  const emailDesign = row.email_design ? String(row.email_design) : undefined;
+
   return {
     title: String(row.title),
     message: String(row.message),
+    message_html: messageHtml,
+    email_design: (emailDesign as BroadcastEmailDesign) || 'premium',
     channels: (row.channels as BroadcastChannel[]) || [],
     audience: (row.audience_type as AudienceType) || 'all',
     emails,

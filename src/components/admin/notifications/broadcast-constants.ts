@@ -4,6 +4,7 @@ import type {
   BroadcastPriority,
   PopupStyle,
 } from '@/lib/admin/admin-broadcast-service';
+import type { BroadcastEmailDesign } from '@/lib/admin/broadcast-html';
 
 export const CHANNEL_OPTIONS: { id: BroadcastChannel; label: string }[] = [
   { id: 'email', label: 'Email' },
@@ -41,6 +42,8 @@ export const QUICK_TEMPLATES: Array<{
   label: string;
   title: string;
   message: string;
+  messageHtml?: string;
+  emailDesign?: BroadcastEmailDesign;
   channels: BroadcastChannel[];
   popupStyle?: PopupStyle;
 }> = [
@@ -50,6 +53,9 @@ export const QUICK_TEMPLATES: Array<{
     title: 'Maintenance programmée',
     message:
       'Une maintenance est prévue sur la plateforme. Certaines fonctionnalités pourront être temporairement indisponibles. Merci de votre compréhension.',
+    messageHtml:
+      '<p>Une <strong>maintenance</strong> est prévue sur la plateforme.</p><ul><li>Certaines fonctionnalités pourront être temporairement indisponibles</li><li>Les commandes en cours restent sécurisées</li></ul><p>Merci de votre compréhension.</p>',
+    emailDesign: 'announcement',
     channels: ['email', 'in_app', 'popup'],
     popupStyle: 'warning',
   },
@@ -59,6 +65,9 @@ export const QUICK_TEMPLATES: Array<{
     title: 'Nouveauté sur Emarzona',
     message:
       'Découvrez notre dernière fonctionnalité ! Connectez-vous à votre tableau de bord pour en profiter dès maintenant.',
+    messageHtml:
+      '<p>🎉 <strong>Bonne nouvelle !</strong> Une nouvelle fonctionnalité est disponible sur Emarzona.</p><p>Connectez-vous à votre tableau de bord pour en profiter dès maintenant.</p>',
+    emailDesign: 'premium',
     channels: ['email', 'in_app'],
   },
   {
@@ -67,6 +76,9 @@ export const QUICK_TEMPLATES: Array<{
     title: 'Alerte sécurité',
     message:
       "Par mesure de sécurité, nous vous recommandons de vérifier vos paramètres de connexion et d'activer la double authentification.",
+    messageHtml:
+      '<p><strong>Alerte sécurité</strong></p><p>Par mesure de précaution, nous vous recommandons de :</p><ol><li>Vérifier vos paramètres de connexion</li><li>Activer la double authentification</li><li>Changer votre mot de passe si vous suspectez une activité inhabituelle</li></ol>',
+    emailDesign: 'classic',
     channels: ['email', 'in_app'],
   },
   {
@@ -74,6 +86,9 @@ export const QUICK_TEMPLATES: Array<{
     label: 'Annonce plateforme',
     title: 'Annonce importante',
     message: 'Message important concernant la plateforme Emarzona.',
+    messageHtml:
+      '<p>Nous avons une <em>annonce importante</em> à partager avec vous concernant la plateforme Emarzona.</p><p>Consultez les détails ci-dessous et restez informé des évolutions à venir.</p>',
+    emailDesign: 'announcement',
     channels: ['in_app', 'popup'],
     popupStyle: 'announcement',
   },
@@ -82,6 +97,8 @@ export const QUICK_TEMPLATES: Array<{
 export interface BroadcastFormState {
   title: string;
   message: string;
+  messageHtml: string;
+  emailDesign: BroadcastEmailDesign;
   channels: BroadcastChannel[];
   audience: BroadcastAudience;
   emailsText: string;
@@ -97,6 +114,8 @@ export interface BroadcastFormState {
 export const DEFAULT_BROADCAST_FORM: BroadcastFormState = {
   title: '',
   message: '',
+  messageHtml: '',
+  emailDesign: 'premium',
   channels: ['in_app', 'email'],
   audience: 'all',
   emailsText: '',
@@ -112,6 +131,8 @@ export const DEFAULT_BROADCAST_FORM: BroadcastFormState = {
 export function broadcastToForm(record: {
   title: string;
   message: string;
+  message_html?: string | null;
+  email_design?: string | null;
   channels: string[];
   audience_type: BroadcastAudience;
   audience_filter?: Record<string, unknown>;
@@ -124,9 +145,16 @@ export function broadcastToForm(record: {
     ? (record.audience_filter.emails as string[]).join('\n')
     : '';
 
+  const design = record.email_design as BroadcastEmailDesign | null;
+
   return {
     title: record.title,
     message: record.message,
+    messageHtml: record.message_html || '',
+    emailDesign:
+      design && ['classic', 'premium', 'announcement', 'minimal'].includes(design)
+        ? design
+        : 'premium',
     channels: record.channels.filter((c): c is BroadcastChannel =>
       ['email', 'in_app', 'popup'].includes(c)
     ),

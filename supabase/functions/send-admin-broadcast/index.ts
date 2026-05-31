@@ -8,6 +8,7 @@ import {
   createBroadcastPopup,
   parseEmails,
   processBroadcastDelivery,
+  resolveBroadcastPlainMessage,
   resolveRecipients,
   type BroadcastChannel,
   type BroadcastPayload,
@@ -74,7 +75,15 @@ serve(async req => {
 
     const body = (await req.json()) as SendAdminBroadcastRequest;
     const title = body.title?.trim();
-    const message = body.message?.trim();
+    const messageHtml = body.message_html?.trim();
+    const emailDesign = body.email_design || 'premium';
+    const message = resolveBroadcastPlainMessage({
+      title: title || '',
+      message: body.message?.trim() || '',
+      message_html: messageHtml,
+      channels: [],
+      audience: 'all',
+    });
     const channels = Array.isArray(body.channels) ? body.channels : [];
     const audience = body.audience || 'all';
     const priority = (body.priority || 'normal') as BroadcastPriority;
@@ -103,6 +112,8 @@ serve(async req => {
     const payload: BroadcastPayload = {
       title,
       message,
+      message_html: messageHtml || undefined,
+      email_design: emailDesign,
       channels: channels as BroadcastChannel[],
       audience: audience as AudienceType,
       emails: body.emails,
@@ -158,6 +169,8 @@ serve(async req => {
           created_by: auth.userId,
           title: `[TEST] ${title}`,
           message,
+          message_html: messageHtml || null,
+          email_design: emailDesign,
           channels: testChannels,
           audience_type: 'emails',
           audience_filter: { emails: [testEmail], test_mode: true },
@@ -211,6 +224,8 @@ serve(async req => {
           created_by: auth.userId,
           title,
           message,
+          message_html: messageHtml || null,
+          email_design: emailDesign,
           channels,
           audience_type: audience,
           audience_filter: buildAudienceFilter(audience as AudienceType, body.emails),
@@ -254,6 +269,8 @@ serve(async req => {
         created_by: auth.userId,
         title,
         message,
+        message_html: messageHtml || null,
+        email_design: emailDesign,
         channels,
         audience_type: audience,
         audience_filter: buildAudienceFilter(audience as AudienceType, body.emails),

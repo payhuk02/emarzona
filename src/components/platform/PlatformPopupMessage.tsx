@@ -41,6 +41,10 @@ const styleConfig: Record<PopupStyle, { icon: typeof Info; badge: string; accent
   },
 };
 
+function looksLikeHtml(text: string): boolean {
+  return /<[a-z][\s\S]*>/i.test(text);
+}
+
 export function PlatformPopupMessage() {
   const location = useLocation();
   const { data: popups = [], isLoading } = usePlatformPopupMessages();
@@ -102,9 +106,16 @@ export function PlatformPopupMessage() {
             <Badge variant="secondary">{config.badge}</Badge>
           </div>
           <DialogTitle>{currentPopup.title}</DialogTitle>
-          <DialogDescription className="text-left whitespace-pre-wrap pt-2">
-            {currentPopup.message}
-          </DialogDescription>
+          {looksLikeHtml(currentPopup.message) ? (
+            <div
+              className="text-left pt-2 text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: currentPopup.message }}
+            />
+          ) : (
+            <DialogDescription className="text-left whitespace-pre-wrap pt-2">
+              {currentPopup.message}
+            </DialogDescription>
+          )}
         </DialogHeader>
         <DialogFooter className="flex-col sm:flex-row gap-2">
           {currentPopup.action_url && (
