@@ -8,9 +8,23 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Database,
   RefreshCw,
@@ -21,20 +35,32 @@ import {
   Eye,
   Zap,
   Wifi,
-  WifiOff
+  WifiOff,
 } from 'lucide-react';
 import { localQueue, LocalAction } from '@/lib/localQueue';
-import { syncService } from '@/services/syncService';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
+type QueueStats = Awaited<ReturnType<typeof localQueue.getQueueStats>>;
+
+const EMPTY_QUEUE_STATS: QueueStats = {
+  total: 0,
+  pending: 0,
+  synced: 0,
+  failed: 0,
+  byType: {},
+  byStore: {},
+};
+
 const OfflineQueueManager = () => {
   const { toast } = useToast();
-  const { isOffline, isBackendDown, forceSync, retryFailed } = useOfflineMode();
+  const { isOffline, isBackendDown, forceSync, retryFailed } = useOfflineMode({
+    showToasts: false,
+  });
 
   const [queueItems, setQueueItems] = useState<LocalAction[]>([]);
-  const [queueStats, setQueueStats] = useState<any>({});
+  const [queueStats, setQueueStats] = useState<QueueStats>(EMPTY_QUEUE_STATS);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [selectedAction, setSelectedAction] = useState<LocalAction | null>(null);
@@ -43,19 +69,25 @@ const OfflineQueueManager = () => {
   const loadQueueData = async () => {
     try {
       setLoading(true);
+      await localQueue.ensureReady();
       const [items, stats] = await Promise.all([
-        localQueue.getPendingActions(100), // 100 éléments max pour l'affichage
-        localQueue.getQueueStats()
+        localQueue.getPendingActions(100),
+        localQueue.getQueueStats(),
       ]);
 
       setQueueItems(items);
       setQueueStats(stats);
     } catch (error) {
       logger.error('Erreur chargement queue:', error);
+      setQueueItems([]);
+      setQueueStats(EMPTY_QUEUE_STATS);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les données de la queue",
-        variant: "destructive"
+        title: 'Erreur',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Impossible de charger les données de la queue locale',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -86,14 +118,14 @@ const OfflineQueueManager = () => {
       await retryFailed();
       await loadQueueData();
       toast({
-        title: "Retry lancé",
-        description: "Tentative de synchronisation des actions échouées",
+        title: 'Retry lancé',
+        description: 'Tentative de synchronisation des actions échouées',
       });
     } catch (error) {
       toast({
-        title: "Erreur retry",
+        title: 'Erreur retry',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
   };
@@ -104,14 +136,14 @@ const OfflineQueueManager = () => {
       await localQueue.deleteAction(actionId);
       await loadQueueData();
       toast({
-        title: "Action supprimée",
+        title: 'Action supprimée',
         description: "L'action a été retirée de la queue",
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible de supprimer l'action",
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
   };
@@ -123,7 +155,7 @@ const OfflineQueueManager = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -136,7 +168,7 @@ const OfflineQueueManager = () => {
       create_store: 'bg-orange-100 text-orange-800',
       update_store: 'bg-orange-100 text-orange-800',
       create_user: 'bg-red-100 text-red-800',
-      update_user: 'bg-red-100 text-red-800'
+      update_user: 'bg-red-100 text-red-800',
     };
 
     return (
@@ -201,8 +233,8 @@ const OfflineQueueManager = () => {
             <WifiOff className="h-4 w-4" />
             <AlertTitle>Mode hors ligne détecté</AlertTitle>
             <AlertDescription>
-              Les actions sont stockées localement et seront synchronisées automatiquement
-              dès que la connexion sera rétablie.
+              Les actions sont stockées localement et seront synchronisées automatiquement dès que
+              la connexion sera rétablie.
             </AlertDescription>
           </Alert>
         )}
@@ -212,8 +244,8 @@ const OfflineQueueManager = () => {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Backend indisponible</AlertTitle>
             <AlertDescription>
-              Le serveur est temporairement inaccessible. Les actions sont mises en queue
-              et seront synchronisées automatiquement.
+              Le serveur est temporairement inaccessible. Les actions sont mises en queue et seront
+              synchronisées automatiquement.
             </AlertDescription>
           </Alert>
         )}
@@ -328,7 +360,7 @@ const OfflineQueueManager = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {queueItems.map((action) => (
+                  {queueItems.map(action => (
                     <TableRow key={action.id}>
                       <TableCell>{getActionTypeBadge(action.action_type)}</TableCell>
                       <TableCell>
@@ -337,9 +369,7 @@ const OfflineQueueManager = () => {
                         </code>
                       </TableCell>
                       <TableCell>{getPriorityBadge(action.priority)}</TableCell>
-                      <TableCell className="text-sm">
-                        {formatDate(action.created_at)}
-                      </TableCell>
+                      <TableCell className="text-sm">{formatDate(action.created_at)}</TableCell>
                       <TableCell>
                         {action.retry_count > 0 && (
                           <Badge variant="outline" className="text-red-600">

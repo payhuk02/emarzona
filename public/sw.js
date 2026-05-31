@@ -28,7 +28,16 @@ function networkFirst(request, cacheName, { cacheOk = true } = {}) {
       }
       return response;
     })
-    .catch(() => caches.match(request));
+    .catch(() =>
+      caches.match(request).then(
+        cached =>
+          cached ||
+          new Response('Offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          })
+      )
+    );
 }
 
 async function trimImageCache(cacheName, maxEntries) {
@@ -126,6 +135,11 @@ self.addEventListener('fetch', event => {
   }
 
   if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Health checks & API routes: laisser passer sans interception SW
+  if (url.pathname.startsWith('/api/')) {
     return;
   }
 

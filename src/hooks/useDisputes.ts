@@ -28,6 +28,27 @@ interface DisputeStats {
 type SortColumn = 'created_at' | 'status' | 'subject' | 'order_id';
 type SortDirection = 'asc' | 'desc';
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error && err.message) return err.message;
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = String((err as { message: unknown }).message);
+    if (msg && msg !== 'undefined') return msg;
+  }
+  if (typeof err === 'string' && err) return err;
+  return fallback;
+}
+
+function isDisputesTableMissing(err: unknown): boolean {
+  const msg = getErrorMessage(err, '').toLowerCase();
+  return (
+    msg.includes('disputes') &&
+    (msg.includes('does not exist') ||
+      msg.includes('could not find') ||
+      msg.includes('schema cache') ||
+      msg.includes('relation'))
+  );
+}
+
 interface UseDisputesOptions {
   filters?: DisputesFilters;
   page?: number;
@@ -95,9 +116,15 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       const { data, error: queryError, count } = await query;
 
       if (queryError) {
-        // Vérifier si c'est une erreur de table inexistante
-        if (queryError.message.includes('relation "public.disputes" does not exist')) {
-          const errorMsg = "La table 'disputes' n'existe pas. Veuillez exécuter la migration SQL.";
+        if (queryError.code === '42501' || queryError.message?.includes('permission denied')) {
+          const errorMsg =
+            'Accès refusé aux litiges. Vérifiez que votre compte admin a les droits nécessaires.';
+          setError(errorMsg);
+          throw new Error(errorMsg);
+        }
+        if (isDisputesTableMissing(queryError)) {
+          const errorMsg =
+            "La table 'disputes' n'existe pas encore. La migration SQL doit être appliquée sur Supabase.";
           setError(errorMsg);
           throw new Error(errorMsg);
         }
@@ -106,13 +133,13 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       setDisputes(data || []);
       setTotalCount(count || 0);
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error fetching disputes:', error);
-      setError(errorMessage || 'Erreur lors du chargement des litiges');
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, 'Erreur lors du chargement des litiges');
+      logger.error('Error fetching disputes:', caught);
+      setError(errorMessage);
       toast({
         title: 'Erreur',
-        description: errorMessage || 'Erreur lors du chargement des litiges',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -167,9 +194,8 @@ export const useDisputes = (options?: UseDisputesOptions) => {
         unassigned,
         avgResolutionTime,
       });
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error fetching dispute stats:', error);
+    } catch (caught: unknown) {
+      logger.error('Error fetching dispute stats:', caught);
     }
   }, []);
 
@@ -221,9 +247,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error assigning dispute:', error);
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, "Impossible d'assigner le litige");
+      logger.error('Error assigning dispute:', caught);
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -253,9 +279,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       await fetchDisputes();
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error updating admin notes:', error);
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, 'Impossible de mettre à jour les notes');
+      logger.error('Error updating admin notes:', caught);
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -288,9 +314,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error resolving dispute:', error);
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, 'Impossible de résoudre le litige');
+      logger.error('Error resolving dispute:', caught);
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -321,9 +347,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error closing dispute:', error);
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, 'Impossible de fermer le litige');
+      logger.error('Error closing dispute:', caught);
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -361,9 +387,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       await fetchDisputes();
       await fetchStats();
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error updating dispute status:', error);
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, 'Impossible de changer le statut');
+      logger.error('Error updating dispute status:', caught);
       toast({
         title: 'Erreur',
         description: errorMessage,
@@ -396,9 +422,9 @@ export const useDisputes = (options?: UseDisputesOptions) => {
 
       await fetchDisputes();
       return true;
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error('Error updating dispute priority:', error);
+    } catch (caught: unknown) {
+      const errorMessage = getErrorMessage(caught, 'Impossible de changer la priorité');
+      logger.error('Error updating dispute priority:', caught);
       toast({
         title: 'Erreur',
         description: errorMessage,

@@ -8,6 +8,7 @@ import { localQueue, ActionType } from '@/lib/localQueue';
 import { syncService } from '@/services/syncService';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OfflineModeState {
   isOffline: boolean;
@@ -43,6 +44,7 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
   // Met à jour les statistiques de queue
   const updateQueueStats = useCallback(async () => {
     try {
+      await localQueue.ensureReady();
       const stats = await localQueue.getQueueStats();
       setState(prev => ({
         ...prev,
@@ -55,21 +57,29 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
 
   // Vérifie la connectivité backend
   const checkBackendHealth = useCallback(async (): Promise<boolean> => {
+    if (!navigator.onLine) return false;
+
     try {
-      // Test rapide avec un endpoint léger
       const response = await fetch('/api/health', {
         method: 'GET',
         cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
+        headers: { 'Cache-Control': 'no-cache' },
       });
-
-      return response.ok;
+      if (response.ok) return true;
     } catch (error) {
-      logger.warn('Backend health check failed:', error);
-      return false;
+      logger.warn('Backend health check failed (/api/health):', error);
     }
+
+    try {
+      const { error } = await supabase.from('profiles').select('id').limit(1);
+      if (!error) return true;
+      if (error.code === 'PGRST116') return true;
+      logger.warn('Supabase health fallback:', error.message);
+    } catch (error) {
+      logger.warn('Supabase health fallback failed:', error);
+    }
+
+    return false;
   }, []);
 
   // Met à jour l'état de connectivité
@@ -83,15 +93,18 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
         ? 'backend_down'
         : 'online';
 
-    setState(prev => ({
-      ...prev,
-      isOffline: !isOnline,
-      isBackendDown: !backendUp,
-      connectionStatus: newStatus,
-    }));
+    let shouldAutoSync = false;
+    setState(prev => {
+      shouldAutoSync = isOnline && backendUp && (prev.isOffline || prev.isBackendDown);
+      return {
+        ...prev,
+        isOffline: !isOnline,
+        isBackendDown: !backendUp,
+        connectionStatus: newStatus,
+      };
+    });
 
-    // Si on revient en ligne, déclencher une sync
-    if (isOnline && backendUp && (prev.isOffline || prev.isBackendDown)) {
+    if (shouldAutoSync) {
       setState(prev => ({ ...prev, connectionStatus: 'syncing' }));
 
       try {
@@ -116,10 +129,11 @@ export const useOfflineMode = (options: UseOfflineModeOptions = {}) => {
           ...prev,
           lastSyncTime: new Date().toISOString(),
           connectionStatus: 'online',
+          isBackendDown: false,
         }));
       } catch (error) {
         logger.error('Erreur sync automatique:', error);
-        setState(prev => ({ ...prev, connectionStatus: 'backend_down' }));
+        setState(prev => ({ ...prev, connectionStatus: 'backend_down', isBackendDown: true }));
       }
     }
   }, [checkBackendHealth, showToasts, toast]);

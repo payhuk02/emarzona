@@ -141,44 +141,49 @@ class LocalQueueManager {
   }
 
   /**
-   * Récupère toutes les actions en attente de synchronisation
+   * Récupère toutes les actions de la queue
    */
-  async getPendingActions(limit: number = 50): Promise<LocalAction[]> {
+  private async getAllActions(): Promise<LocalAction[]> {
     if (!this.db) {
       await this.initDB();
     }
 
     const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
     const store = transaction.objectStore(this.STORE_NAME);
-    const index = store.index('synced');
 
     return new Promise((resolve, reject) => {
-      const request = index.getAll(false); // synced = false
+      const request = store.getAll();
 
       request.onsuccess = () => {
-        let actions = request.result as LocalAction[];
-
-        // Trier par priorité (desc) puis par date (asc)
-        actions.sort((a, b) => {
-          if (a.priority !== b.priority) {
-            return b.priority - a.priority; // Priorité descendante
-          }
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime(); // Date ascendante
-        });
-
-        // Limiter le nombre de résultats
-        if (limit > 0) {
-          actions = actions.slice(0, limit);
-        }
-
-        resolve(actions);
+        resolve(request.result as LocalAction[]);
       };
 
       request.onerror = () => {
-        logger.error('Erreur récupération actions en attente:', request.error);
+        logger.error('Erreur récupération actions queue:', request.error);
         reject(request.error);
       };
     });
+  }
+
+  /**
+   * Récupère toutes les actions en attente de synchronisation
+   */
+  async getPendingActions(limit: number = 50): Promise<LocalAction[]> {
+    const allActions = await this.getAllActions();
+    let actions = allActions.filter(action => !action.synced);
+
+    actions.sort((a, b) => {
+      if (a.priority !== b.priority) {
+        return b.priority - a.priority;
+      }
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
+
+    if (limit > 0) {
+      actions = actions.slice(0, limit);
+    }
+
+    return actions;
   }
 
   /**
@@ -355,42 +360,23 @@ class LocalQueueManager {
     byType: Record<string, number>;
     byStore: Record<string, number>;
   }> {
-    if (!this.db) {
-      await this.initDB();
-    }
+    const actions = await this.getAllActions();
 
-    const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
-    const store = transaction.objectStore(this.STORE_NAME);
+    const stats = {
+      total: actions.length,
+      pending: actions.filter(a => !a.synced).length,
+      synced: actions.filter(a => a.synced).length,
+      failed: actions.filter(a => !a.synced && a.retry_count >= this.MAX_RETRY_COUNT).length,
+      byType: {} as Record<string, number>,
+      byStore: {} as Record<string, number>,
+    };
 
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-
-      request.onsuccess = () => {
-        const actions = request.result as LocalAction[];
-
-        const stats = {
-          total: actions.length,
-          pending: actions.filter(a => !a.synced).length,
-          synced: actions.filter(a => a.synced).length,
-          failed: actions.filter(a => !a.synced && a.retry_count >= this.MAX_RETRY_COUNT).length,
-          byType: {} as Record<string, number>,
-          byStore: {} as Record<string, number>,
-        };
-
-        // Statistiques par type
-        actions.forEach(action => {
-          stats.byType[action.action_type] = (stats.byType[action.action_type] || 0) + 1;
-          stats.byStore[action.store_id] = (stats.byStore[action.store_id] || 0) + 1;
-        });
-
-        resolve(stats);
-      };
-
-      request.onerror = () => {
-        logger.error('Erreur récupération stats queue:', request.error);
-        reject(request.error);
-      };
+    actions.forEach(action => {
+      stats.byType[action.action_type] = (stats.byType[action.action_type] || 0) + 1;
+      stats.byStore[action.store_id] = (stats.byStore[action.store_id] || 0) + 1;
     });
+
+    return stats;
   }
 
   /**
@@ -416,36 +402,15 @@ class LocalQueueManager {
    * Récupère les actions synchronisées (pour nettoyage)
    */
   private async getSyncedActions(limit: number = 100): Promise<LocalAction[]> {
-    if (!this.db) {
-      await this.initDB();
+    let actions = (await this.getAllActions()).filter(action => action.synced);
+
+    actions.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+    if (limit > 0) {
+      actions = actions.slice(0, limit);
     }
 
-    const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
-    const store = transaction.objectStore(this.STORE_NAME);
-    const index = store.index('synced');
-
-    return new Promise((resolve, reject) => {
-      const request = index.getAll(true); // synced = true
-
-      request.onsuccess = () => {
-        let actions = request.result as LocalAction[];
-
-        // Trier par date (plus anciennes d'abord)
-        actions.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-
-        // Limiter le nombre de résultats
-        if (limit > 0) {
-          actions = actions.slice(0, limit);
-        }
-
-        resolve(actions);
-      };
-
-      request.onerror = () => {
-        logger.error('Erreur récupération actions synchronisées:', request.error);
-        reject(request.error);
-      };
-    });
+    return actions;
   }
 
   /**
@@ -478,25 +443,7 @@ class LocalQueueManager {
    * Exporte la queue pour debug
    */
   async exportQueue(): Promise<LocalAction[]> {
-    if (!this.db) {
-      await this.initDB();
-    }
-
-    const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
-    const store = transaction.objectStore(this.STORE_NAME);
-
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-
-      request.onsuccess = () => {
-        resolve(request.result as LocalAction[]);
-      };
-
-      request.onerror = () => {
-        logger.error('Erreur export queue:', request.error);
-        reject(request.error);
-      };
-    });
+    return this.getAllActions();
   }
 
   /**
@@ -508,22 +455,23 @@ class LocalQueueManager {
       this.db = null;
     }
   }
+
+  /** Réouvre la connexion si elle a été fermée (navigation SPA). */
+  async ensureReady(): Promise<void> {
+    if (!this.db) {
+      await this.initDB();
+    }
+  }
 }
 
 // Instance globale du gestionnaire de queue locale
 export const localQueue = new LocalQueueManager();
 
-// Initialisation automatique
+// Initialisation automatique (ne pas fermer la DB au beforeunload — casse la navigation SPA)
 if (typeof window !== 'undefined') {
-  // Initialiser au chargement de la page
   window.addEventListener('load', () => {
-    localQueue.initDB().catch(error => {
+    localQueue.ensureReady().catch(error => {
       logger.error('Erreur initialisation localQueue:', error);
     });
-  });
-
-  // Cleanup automatique
-  window.addEventListener('beforeunload', () => {
-    localQueue.destroy();
   });
 }
