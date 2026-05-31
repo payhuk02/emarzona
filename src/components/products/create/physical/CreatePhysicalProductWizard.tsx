@@ -1,7 +1,7 @@
 /**
  * Create Physical Product Wizard - Professional
  * Date: 27 octobre 2025
- * 
+ *
  * Wizard professionnel en 5 étapes pour produits physiques
  * Inspiré de: Shopify, WooCommerce, BigCommerce
  */
@@ -90,12 +90,12 @@ export const CreatePhysicalProductWizard = () => {
     images: [],
     category_id: null,
     tags: [],
-    
+
     // Variants (Step 2)
     has_variants: false,
     variants: [],
     options: [],
-    
+
     // Inventory (Step 3)
     track_inventory: true,
     continue_selling_when_out_of_stock: false,
@@ -103,7 +103,7 @@ export const CreatePhysicalProductWizard = () => {
     quantity: 0,
     sku: '',
     barcode: '',
-    
+
     // Shipping (Step 4)
     requires_shipping: true,
     weight: null,
@@ -116,7 +116,7 @@ export const CreatePhysicalProductWizard = () => {
     },
     shipping_class: null,
     free_shipping: false,
-    
+
     // Meta
     is_active: true,
   });
@@ -128,14 +128,15 @@ export const CreatePhysicalProductWizard = () => {
    * Validate current step
    */
   const validateStep = (step: number): boolean => {
-    const  errors: string[] = [];
+    const errors: string[] = [];
 
     switch (step) {
       case 1:
         if (!formData.name?.trim()) errors.push('Le nom est requis');
         if (!formData.description?.trim()) errors.push('La description est requise');
         if (!formData.price || formData.price <= 0) errors.push('Le prix doit être supérieur à 0');
-        if (!formData.images || formData.images.length === 0) errors.push('Au moins une image est requise');
+        if (!formData.images || formData.images.length === 0)
+          errors.push('Au moins une image est requise');
         break;
 
       case 2:
@@ -208,10 +209,11 @@ export const CreatePhysicalProductWizard = () => {
     }
 
     // 1. Generate slug from name
-    const slug = formData.name
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'product';
+    const slug =
+      formData.name
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') || 'product';
 
     // 2. Create base product
     const { data: product, error: productError } = await supabase
@@ -236,7 +238,7 @@ export const CreatePhysicalProductWizard = () => {
     if (productError) throw productError;
 
     // 3. Create physical_product
-    const { error: physicalError } = await supabase
+    const { data: physicalRow, error: physicalError } = await supabase
       .from('physical_products')
       .insert({
         product_id: product.id,
@@ -253,14 +255,17 @@ export const CreatePhysicalProductWizard = () => {
         is_perishable: formData.is_perishable || false,
         customs_value: formData.customs_value,
         country_of_origin: formData.country_of_origin,
-      });
+      })
+      .select('id')
+      .single();
 
-    if (physicalError) throw physicalError;
+    if (physicalError || !physicalRow)
+      throw physicalError || new Error('Produit physique non créé');
 
     // 4. Create variants
     if (formData.variants && formData.variants.length > 0) {
       const variantsData = formData.variants.map(variant => ({
-        physical_product_id: product.id,
+        physical_product_id: physicalRow.id,
         variant_name: variant.variant_name,
         sku: variant.sku,
         price_adjustment: variant.price_adjustment || 0,
@@ -277,16 +282,16 @@ export const CreatePhysicalProductWizard = () => {
     }
 
     // 5. Create inventory
-    const { error: inventoryError } = await supabase
-      .from('physical_product_inventory')
-      .insert({
-        physical_product_id: product.id,
-        location_name: formData.inventory_location || 'Default',
-        quantity_available: formData.quantity_available || 0,
-        quantity_reserved: 0,
-        low_stock_threshold: formData.low_stock_threshold || 5,
-        track_inventory: formData.track_inventory !== false,
-      });
+    const { error: inventoryError } = await supabase.from('physical_product_inventory').insert({
+      physical_product_id: physicalRow.id,
+      product_id: product.id,
+      store_id: store.id,
+      location_name: formData.inventory_location || 'Default',
+      quantity_available: formData.quantity_available || 0,
+      quantity_reserved: 0,
+      low_stock_threshold: formData.low_stock_threshold || 5,
+      track_inventory: formData.track_inventory !== false,
+    });
 
     if (inventoryError) throw inventoryError;
 
@@ -308,7 +313,7 @@ export const CreatePhysicalProductWizard = () => {
 
       // 7. Create shipping rates for each zone
       if (formData.shipping_rates && zones) {
-        const  ratesData: any[] = [];
+        const ratesData: Record<string, unknown>[] = [];
         zones.forEach((zone, zoneIndex) => {
           const zoneRates = formData.shipping_rates?.filter(
             (_, rateIndex) => rateIndex === zoneIndex
@@ -345,18 +350,19 @@ export const CreatePhysicalProductWizard = () => {
     setIsSaving(true);
     try {
       const product = await savePhysicalProduct(true);
-      
+
       toast({
         title: '✅ Brouillon sauvegardé',
         description: `Produit "${product.name}" enregistré. Vous pouvez continuer plus tard.`,
       });
-      
+
       navigate('/dashboard/products');
     } catch (error) {
       logger.error('Save draft error', { error });
       toast({
         title: '❌ Erreur de sauvegarde',
-        description: error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
+        description:
+          error instanceof Error ? error.message : 'Impossible de sauvegarder le brouillon',
         variant: 'destructive',
       });
     } finally {
@@ -369,8 +375,8 @@ export const CreatePhysicalProductWizard = () => {
    */
   const handlePublish = async () => {
     // Validate all steps
-    let  allValid= true;
-    for (let  step= 1; step <= 4; step++) {
+    let allValid = true;
+    for (let step = 1; step <= 4; step++) {
       if (!validateStep(step)) {
         allValid = false;
       }
@@ -388,12 +394,12 @@ export const CreatePhysicalProductWizard = () => {
     setIsSaving(true);
     try {
       const product = await savePhysicalProduct(false);
-      
+
       toast({
         title: '🎉 Produit publié !',
         description: `"${product.name}" est maintenant en ligne et disponible à l'achat`,
       });
-      
+
       navigate('/dashboard/products');
     } catch (error) {
       logger.error('Publish error', { error });
@@ -421,16 +427,16 @@ export const CreatePhysicalProductWizard = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold">Nouveau Produit Physique</h1>
-              <p className="text-muted-foreground">
-                Créez un produit physique en 5 étapes simples
-              </p>
+              <p className="text-muted-foreground">Créez un produit physique en 5 étapes simples</p>
             </div>
           </div>
 
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Étape {currentStep} sur {STEPS.length}</span>
+              <span className="font-medium">
+                Étape {currentStep} sur {STEPS.length}
+              </span>
               <span className="text-muted-foreground">{Math.round(progress)}% complété</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -440,7 +446,7 @@ export const CreatePhysicalProductWizard = () => {
         {/* Steps Indicator */}
         <div className="mb-8">
           <div className="grid grid-cols-5 gap-2">
-            {STEPS.map((step) => {
+            {STEPS.map(step => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
@@ -463,7 +469,9 @@ export const CreatePhysicalProductWizard = () => {
                   `}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'}`} />
+                    <Icon
+                      className={`h-4 w-4 ${isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'}`}
+                    />
                     {isCompleted && <CheckCircle2 className="h-3 w-3 text-green-600 ml-auto" />}
                     {hasErrors && <AlertCircle className="h-3 w-3 text-red-600 ml-auto" />}
                   </div>
@@ -495,15 +503,10 @@ export const CreatePhysicalProductWizard = () => {
               {React.createElement(STEPS[currentStep - 1].icon, { className: 'h-5 w-5' })}
               {STEPS[currentStep - 1].title}
             </CardTitle>
-            <CardDescription>
-              {STEPS[currentStep - 1].description}
-            </CardDescription>
+            <CardDescription>{STEPS[currentStep - 1].description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <CurrentStepComponent
-              data={formData}
-              onUpdate={handleUpdateFormData}
-            />
+            <CurrentStepComponent data={formData} onUpdate={handleUpdateFormData} />
           </CardContent>
         </Card>
 
@@ -511,11 +514,7 @@ export const CreatePhysicalProductWizard = () => {
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
             {currentStep > 1 && (
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={isSaving}
-              >
+              <Button variant="outline" onClick={handlePrevious} disabled={isSaving}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Précédent
               </Button>
@@ -523,11 +522,7 @@ export const CreatePhysicalProductWizard = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleSaveDraft}
-              disabled={isSaving}
-            >
+            <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
               <Save className="h-4 w-4 mr-2" />
               Sauvegarder brouillon
             </Button>
@@ -548,9 +543,3 @@ export const CreatePhysicalProductWizard = () => {
     </div>
   );
 };
-
-
-
-
-
-

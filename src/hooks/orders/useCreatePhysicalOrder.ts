@@ -14,6 +14,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { initiatePayment } from '@/lib/payment-service';
+import {
+  releasePhysicalInventoryForOrder,
+  reservePhysicalInventoryForOrder,
+} from '@/lib/physical-inventory';
 import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
@@ -21,8 +25,6 @@ import { logger } from '@/lib/logger';
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency, payment_options';
 const PHYSICAL_PRODUCT_FIELDS = 'id, product_id';
 const PHYSICAL_PRODUCT_VARIANT_FIELDS = 'id, is_available, price_adjustment';
-const PHYSICAL_INVENTORY_FIELDS =
-  'id, physical_product_id, quantity_available, quantity_reserved, track_inventory, location_name';
 
 /**
  * Options pour créer une commande physical
@@ -188,43 +190,7 @@ export const useCreatePhysicalOrder = () => {
         variantPrice = variant.price_adjustment || 0;
       }
 
-      // 4. Vérifier et réserver le stock
-      const { data: inventories, error: inventoryError } = await supabase
-        .from('physical_product_inventory')
-        .select(PHYSICAL_INVENTORY_FIELDS)
-        .eq('physical_product_id', physicalProductId)
-        .eq('track_inventory', true)
-        .order('quantity_available', { ascending: false });
-
-      if (inventoryError) {
-        throw new Error('Erreur lors de la vérification du stock');
-      }
-
-      // Trouver l'inventaire avec stock suffisant
-      let selectedInventory = inventories?.find(inv => (inv.quantity_available || 0) >= quantity);
-
-      // Si un inventoryLocationId est spécifié, utiliser celui-là
-      if (inventoryLocationId) {
-        selectedInventory = inventories?.find(inv => inv.id === inventoryLocationId);
-      }
-
-      if (!selectedInventory) {
-        throw new Error(`Stock insuffisant (demandé: ${quantity})`);
-      }
-
-      // Réserver le stock
-      const { error: reserveError } = await supabase
-        .from('physical_product_inventory')
-        .update({
-          quantity_reserved: (selectedInventory.quantity_reserved || 0) + quantity,
-        })
-        .eq('id', selectedInventory.id);
-
-      if (reserveError) {
-        throw new Error('Erreur lors de la réservation du stock');
-      }
-
-      // 5. Récupérer ou créer le customer
+      // 4. Récupérer ou créer le customer
       let customerId: string;
 
       const { data: existingCustomer } = await supabase
@@ -262,14 +228,6 @@ export const useCreatePhysicalOrder = () => {
           .single();
 
         if (customerError || !newCustomer) {
-          // Annuler la réservation en cas d'erreur
-          await supabase
-            .from('physical_product_inventory')
-            .update({
-              quantity_reserved: selectedInventory.quantity_reserved || 0,
-            })
-            .eq('id', selectedInventory.id);
-
           throw new Error('Erreur lors de la création du client');
         }
 
@@ -329,14 +287,6 @@ export const useCreatePhysicalOrder = () => {
         .single();
 
       if (orderError || !order) {
-        // Annuler la réservation
-        await supabase
-          .from('physical_product_inventory')
-          .update({
-            quantity_reserved: selectedInventory.quantity_reserved || 0,
-          })
-          .eq('id', selectedInventory.id);
-
         throw new Error('Erreur lors de la création de la commande');
       }
 
@@ -415,26 +365,37 @@ export const useCreatePhysicalOrder = () => {
           unit_price: unitPrice,
           total_price: totalPrice,
           item_metadata: {
-            inventory_id: selectedInventory.id,
-            inventory_location: selectedInventory.location_name,
             variant_price_adjustment: variantPrice,
             shipping_address: shippingAddress,
+            ...(inventoryLocationId ? { preferred_inventory_id: inventoryLocationId } : {}),
           },
         })
         .select('id')
         .single();
 
       if (orderItemError || !orderItem) {
-        // Annuler la réservation
-        await supabase
-          .from('physical_product_inventory')
-          .update({
-            quantity_reserved: selectedInventory.quantity_reserved || 0,
-          })
-          .eq('id', selectedInventory.id);
-
         throw new Error("Erreur lors de la création de l'élément de commande");
       }
+
+      try {
+        await reservePhysicalInventoryForOrder(order.id);
+      } catch (stockErr) {
+        throw stockErr instanceof Error ? stockErr : new Error('Stock insuffisant');
+      }
+
+      const { data: reservedItem } = await supabase
+        .from('order_items')
+        .select('item_metadata')
+        .eq('id', orderItem.id)
+        .single();
+
+      const reservedMeta = (reservedItem?.item_metadata ?? {}) as Record<string, unknown>;
+      const inventoryId =
+        typeof reservedMeta.inventory_id === 'string' ? reservedMeta.inventory_id : '';
+      const inventoryLocation =
+        typeof reservedMeta.inventory_location === 'string'
+          ? reservedMeta.inventory_location
+          : undefined;
 
       // 10. Créer un secured_payment si paiement escrow
       if (paymentType === 'delivery_secured') {
@@ -474,7 +435,8 @@ export const useCreatePhysicalOrder = () => {
           product_type: 'physical',
           physical_product_id: physicalProductId,
           variant_id: variantId,
-          inventory_id: selectedInventory.id,
+          inventory_id: inventoryId || undefined,
+          inventory_location: inventoryLocation,
           quantity,
           order_item_id: orderItem.id,
           shipping_address: shippingAddress,
@@ -487,14 +449,7 @@ export const useCreatePhysicalOrder = () => {
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
-        // Annuler la réservation
-        await supabase
-          .from('physical_product_inventory')
-          .update({
-            quantity_reserved: selectedInventory.quantity_reserved || 0,
-          })
-          .eq('id', selectedInventory.id);
-
+        await releasePhysicalInventoryForOrder(order.id);
         throw new Error("Erreur lors de l'initialisation du paiement");
       }
 
@@ -502,7 +457,7 @@ export const useCreatePhysicalOrder = () => {
       return {
         orderId: order.id,
         orderItemId: orderItem.id,
-        inventoryId: selectedInventory.id,
+        inventoryId,
         checkoutUrl: paymentResult.checkout_url,
         transactionId: paymentResult.transaction_id,
       };

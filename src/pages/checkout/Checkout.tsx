@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
-import { loadMonerooPayment } from '@/lib/moneroo-lazy';
 import { useToast } from '@/hooks/use-toast';
 import { safeRedirect } from '@/lib/url-validator';
 import { logger } from '@/lib/logger';
@@ -39,6 +38,9 @@ import type {
 import { validateBuyNowForm } from '@/pages/checkout/buy-now/checkout-buy-now-validation';
 import { calculateBuyNowPrice } from '@/pages/checkout/buy-now/checkout-buy-now-pricing';
 import { htmlToPlainText } from '@/lib/html-sanitizer';
+import { createBuyNowOrderBeforePayment } from '@/lib/buy-now-order';
+import { initiatePayment } from '@/lib/payment-service';
+import { releasePhysicalInventoryForOrder } from '@/lib/physical-inventory';
 
 const BuyNowOrderSummary = lazy(() => import('@/components/checkout/buy-now/BuyNowOrderSummary'));
 const BuyNowCustomerForm = lazy(() => import('@/components/checkout/buy-now/BuyNowCustomerForm'));
@@ -407,6 +409,8 @@ const Checkout = () => {
 
       setSubmitting(true);
 
+      let physicalOrderId: string | undefined;
+
       try {
         const finalPrice = calculatePrice();
         const rawCurrency = (product.currency || 'XOF').trim();
@@ -441,33 +445,78 @@ const Checkout = () => {
           }
         }
 
-        // Charger le module Moneroo de manière asynchrone
-        const { initiateMonerooPayment } = await loadMonerooPayment();
+        const shippingAddress = {
+          full_name: customerName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          country: formData.country,
+          postal_code: formData.postalCode,
+        };
 
-        const result = await initiateMonerooPayment({
+        const isPhysical = product.product_type === 'physical';
+        let orderNumber: string | undefined;
+
+        if (isPhysical) {
+          const buyNowOrder = await createBuyNowOrderBeforePayment({
+            productId: product.id,
+            storeId: store.id,
+            productName: product.name ? htmlToPlainText(product.name) : 'Produit',
+            productType: 'physical',
+            unitPrice: finalPrice,
+            quantity: 1,
+            variantId: selectedVariant?.id ?? null,
+            customerId: user.id,
+            customerEmail: formData.email,
+            customerName,
+            customerPhone: formData.phone,
+            totalAmount: finalPrice,
+            currency: finalCurrency,
+            shippingAddress,
+          });
+          physicalOrderId = buyNowOrder.orderId;
+          orderNumber = buyNowOrder.orderNumber;
+        }
+
+        const paymentResult = await initiatePayment({
           storeId: store.id,
           productId: product.id,
+          orderId: physicalOrderId,
+          customerId: user.id,
           amount: finalPrice,
           currency: finalCurrency,
           description: `Achat de ${product.name ? htmlToPlainText(product.name) : 'produit'}`,
           customerEmail: formData.email,
-          customerName: customerName,
+          customerName,
+          customerPhone: formData.phone,
           metadata: {
             productName: product.name,
             storeSlug: store.slug || '',
             userId: user.id,
+            buy_now: true,
+            ...(orderNumber && { order_number: orderNumber }),
             ...(product.product_type && { productType: product.product_type }),
             ...(selectedVariant?.id && { variantId: selectedVariant.id }),
-            // Informations client supplémentaires
             customerPhone: formData.phone,
             customerAddress: formData.address,
             customerCity: formData.city,
             customerCountry: formData.country,
             customerPostalCode: formData.postalCode,
+            shipping_address: shippingAddress,
           },
         });
 
-        if (result.checkout_url) {
+        if (!paymentResult.success || !paymentResult.checkout_url) {
+          if (physicalOrderId) {
+            await releasePhysicalInventoryForOrder(physicalOrderId);
+          }
+          throw new Error(paymentResult.error || "Impossible d'initialiser le paiement");
+        }
+
+        const checkoutUrl = paymentResult.checkout_url;
+
+        if (checkoutUrl) {
           // Sauvegarder les informations client dans user_metadata (optionnel)
           try {
             await supabase.auth.updateUser({
@@ -489,7 +538,7 @@ const Checkout = () => {
           }
 
           // Rediriger vers Moneroo
-          safeRedirect(result.checkout_url, () => {
+          safeRedirect(checkoutUrl, () => {
             toast({
               title: 'Erreur de paiement',
               description: 'URL de paiement invalide. Veuillez réessayer.',
@@ -501,6 +550,9 @@ const Checkout = () => {
           throw new Error('URL de paiement non reçue');
         }
       } catch (_error: unknown) {
+        if (physicalOrderId) {
+          await releasePhysicalInventoryForOrder(physicalOrderId);
+        }
         const errorObj = _error instanceof Error ? _error : new Error(String(_error));
         logger.error('Payment initiation error:', errorObj);
 

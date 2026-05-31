@@ -43,6 +43,11 @@ import { validateShippingForm } from '@/pages/checkout/cart/checkout-validation'
 import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
+import {
+  cartHasPhysicalItems,
+  releasePhysicalInventoryForOrder,
+  reservePhysicalInventoryForOrder,
+} from '@/lib/physical-inventory';
 import { ShoppingBag, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -690,6 +695,17 @@ export default function Checkout() {
           continue;
         }
 
+        if (cartHasPhysicalItems(group.items)) {
+          try {
+            await reservePhysicalInventoryForOrder(order.id);
+          } catch (stockErr: unknown) {
+            const stockMessage = stockErr instanceof Error ? stockErr.message : 'Stock insuffisant';
+            errors.push({ storeId, error: stockMessage });
+            await releasePhysicalInventoryForOrder(order.id);
+            continue;
+          }
+        }
+
         // Créer automatiquement la facture
         try {
           const { createInvoiceFromOrder } = await import('@/lib/supabase-rpc');
@@ -803,6 +819,9 @@ export default function Checkout() {
         });
 
         if (!paymentResult.success || !paymentResult.checkout_url) {
+          if (cartHasPhysicalItems(group.items)) {
+            await releasePhysicalInventoryForOrder(order.id);
+          }
           errors.push({
             storeId,
             error: paymentResult.error || "Impossible d'initialiser le paiement",
@@ -1117,6 +1136,10 @@ export default function Checkout() {
 
       if (itemsError) throw itemsError;
 
+      if (cartHasPhysicalItems(items)) {
+        await reservePhysicalInventoryForOrder(order.id);
+      }
+
       // Créer automatiquement la facture
       try {
         const { createInvoiceFromOrder } = await import('@/lib/supabase-rpc');
@@ -1284,6 +1307,9 @@ export default function Checkout() {
       });
 
       if (!paymentResult.success || !paymentResult.checkout_url) {
+        if (cartHasPhysicalItems(items)) {
+          await releasePhysicalInventoryForOrder(order.id);
+        }
         throw new Error(paymentResult.error || "Impossible d'initialiser le paiement");
       }
 

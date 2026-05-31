@@ -736,29 +736,34 @@ export const CreatePhysicalProductWizard = ({
       }
 
       // 3. Create physical_product
-      const { error: physicalError } = await supabase.from('physical_products').insert({
-        product_id: product.id,
-        sku: formData.sku,
-        barcode: formData.barcode,
-        weight: formData.weight,
-        weight_unit: formData.weight_unit || 'kg',
-        length: formData.dimensions?.length,
-        width: formData.dimensions?.width,
-        height: formData.dimensions?.height,
-        dimension_unit: formData.dimensions?.unit || 'cm',
-        requires_shipping: formData.requires_shipping !== false,
-        is_fragile: formData.is_fragile || false,
-        is_perishable: formData.is_perishable || false,
-        customs_value: formData.customs_value,
-        country_of_origin: formData.country_of_origin || 'CI',
-      });
+      const { data: physicalRow, error: physicalError } = await supabase
+        .from('physical_products')
+        .insert({
+          product_id: product.id,
+          sku: formData.sku,
+          barcode: formData.barcode,
+          weight: formData.weight,
+          weight_unit: formData.weight_unit || 'kg',
+          length: formData.dimensions?.length,
+          width: formData.dimensions?.width,
+          height: formData.dimensions?.height,
+          dimension_unit: formData.dimensions?.unit || 'cm',
+          requires_shipping: formData.requires_shipping !== false,
+          is_fragile: formData.is_fragile || false,
+          is_perishable: formData.is_perishable || false,
+          customs_value: formData.customs_value,
+          country_of_origin: formData.country_of_origin || 'CI',
+        })
+        .select('id')
+        .single();
 
-      if (physicalError) throw physicalError;
+      if (physicalError || !physicalRow)
+        throw physicalError || new Error('Produit physique non créé');
 
       // 4. Create variants if any
       if (formData.variants && formData.variants.length > 0) {
         const variantsData = formData.variants.map((variant: PhysicalProductVariant) => ({
-          physical_product_id: product.id,
+          physical_product_id: physicalRow.id,
           variant_name: variant.variant_name,
           sku: variant.sku,
           price_adjustment: variant.price_adjustment || 0,
@@ -789,7 +794,9 @@ export const CreatePhysicalProductWizard = ({
 
       // 6. Create inventory
       const { error: inventoryError } = await supabase.from('physical_product_inventory').insert({
-        physical_product_id: product.id,
+        physical_product_id: physicalRow.id,
+        product_id: product.id,
+        store_id: store.id,
         location_name: formData.inventory_location || 'Default',
         quantity_available: formData.quantity || 0,
         quantity_reserved: 0,
