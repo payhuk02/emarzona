@@ -1,7 +1,7 @@
 /**
  * Exécution des workflows email (actions côté Edge — envoi Resend réel)
  */
-import type { SupabaseClient } from 'supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { sendMarketingEmailViaResend, type MarketingTemplate } from './resend-send-utils.ts';
 
 export interface WorkflowContext {

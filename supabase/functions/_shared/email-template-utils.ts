@@ -1,7 +1,7 @@
 /**
  * Utilitaires partagés : chargement et rendu des templates email (DB)
  */
-import type { SupabaseClient } from 'supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface DbEmailTemplate {
   id: string;

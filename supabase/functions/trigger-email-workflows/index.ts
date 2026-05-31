@@ -2,7 +2,7 @@
  * Déclenche les workflows email actifs pour un événement métier (order.paid, etc.)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'supabase';
+import { createClient } from '@supabase/supabase-js';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import {
   triggerEmailWorkflowsForEvent,

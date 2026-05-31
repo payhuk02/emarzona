@@ -2,7 +2,7 @@
  * Exécute un workflow email par ID (remplace le stub SQL send_email pour l'envoi réel)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'supabase';
+import { createClient } from '@supabase/supabase-js';
 import { getProjectRefFromSupabaseUrl, isServiceRoleJwt } from '../_shared/edge-auth-utils.ts';
 import { executeEmailWorkflow, type WorkflowContext } from '../_shared/workflow-executor.ts';
 

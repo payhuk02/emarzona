@@ -2,7 +2,7 @@
  * Journal observabilité audit œuvre (table artist_fulfillment_events).
  */
 
-import type { SupabaseClient } from 'supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type ArtistFulfillmentSeverity = 'info' | 'warn' | 'error';
 

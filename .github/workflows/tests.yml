@@ -151,8 +151,8 @@ jobs:
 
       - name: Type check email workflow Edge Functions
         run: |
-          deno check supabase/functions/_shared/workflow-executor.ts
-          deno check supabase/functions/_shared/post-order-payment-fulfillment.ts
-          deno check supabase/functions/trigger-email-workflows/index.ts
-          deno check supabase/functions/execute-email-workflow/index.ts
+          deno check --config supabase/functions/deno.json supabase/functions/_shared/workflow-executor.ts
+          deno check --config supabase/functions/deno.json supabase/functions/_shared/post-order-payment-fulfillment.ts
+          deno check --config supabase/functions/deno.json supabase/functions/trigger-email-workflows/index.ts
+          deno check --config supabase/functions/deno.json supabase/functions/execute-email-workflow/index.ts
 
