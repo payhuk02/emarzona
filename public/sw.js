@@ -19,6 +19,33 @@ function isHashedBuildAsset(pathname) {
   return /\/(js|assets|fonts)\/[^/]+-[A-Za-z0-9_-]{8,}\.(js|css|mjs|woff2?)$/i.test(pathname);
 }
 
+function isSpaNavigation(request) {
+  return (
+    request.mode === 'navigate' ||
+    (request.method === 'GET' && request.headers.get('accept')?.includes('text/html'))
+  );
+}
+
+function serveSpaShell() {
+  return caches.match('/index.html').then(
+    cached => cached || caches.match('/offline.html')
+  );
+}
+
+/** Navigation document : jamais de 503 — toujours index.html en fallback (SPA Vercel). */
+function networkFirstNavigation(request) {
+  return fetch(request)
+    .then(response => {
+      if (response.ok) {
+        const clone = response.clone();
+        void caches.open(DYNAMIC_CACHE_NAME).then(cache => cache.put(request, clone));
+        return response;
+      }
+      return serveSpaShell();
+    })
+    .catch(() => serveSpaShell());
+}
+
 function networkFirst(request, cacheName, { cacheOk = true } = {}) {
   return fetch(request)
     .then(response => {
@@ -28,16 +55,7 @@ function networkFirst(request, cacheName, { cacheOk = true } = {}) {
       }
       return response;
     })
-    .catch(() =>
-      caches.match(request).then(
-        cached =>
-          cached ||
-          new Response('Offline', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' },
-          })
-      )
-    );
+    .catch(() => caches.match(request));
 }
 
 async function trimImageCache(cacheName, maxEntries) {
@@ -69,7 +87,14 @@ function staleWhileRevalidate(request, cacheName) {
         void networkUpdate;
         return cached;
       }
-      return networkUpdate;
+      return networkUpdate.then(
+        response =>
+          response ||
+          new Response('Offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          })
+      );
     })
   );
 }
@@ -214,17 +239,22 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Navigation & API : network-first
+  // Navigation SPA (/admin/*, etc.) : fallback index.html, jamais 503
+  if (isSpaNavigation(request)) {
+    event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+
+  // Autres requêtes HTML / données : network-first avec cache
   event.respondWith(
-    networkFirst(request, DYNAMIC_CACHE_NAME).catch(() => {
-      if (request.mode === 'navigate') {
-        return caches.match('/index.html').then(html => html || caches.match('/offline.html'));
-      }
-      return new Response('Offline', {
-        status: 503,
-        headers: { 'Content-Type': 'text/plain' },
-      });
-    })
+    networkFirst(request, DYNAMIC_CACHE_NAME).then(
+      cached =>
+        cached ||
+        new Response('Offline', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain' },
+        })
+    )
   );
 });
 
