@@ -1,7 +1,7 @@
 /**
  * Envoi marketing / séquences via Resend (provider unifié)
  */
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'supabase';
 import { logEmailSend, pickLocalized, replaceVariables } from './email-template-utils.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');

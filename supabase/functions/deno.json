@@ -4,6 +4,6 @@
     "strict": true
   },
   "imports": {
-    "supabase": "https://esm.sh/@supabase/supabase-js@2.58.0"
+    "supabase": "npm:@supabase/supabase-js@2.58.0"
   }
 }

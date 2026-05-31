@@ -3,7 +3,7 @@
  * Aligné sur moneroo-webhook : bookings, certificats artiste, emails, webhooks store.
  */
 
-import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import type { SupabaseClient } from 'supabase';
 import { logArtistFulfillmentEvent } from './artist-fulfillment-observability.ts';
 import { triggerEmailWorkflowsForEvent } from './workflow-executor.ts';
 

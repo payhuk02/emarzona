@@ -1,6 +1,7 @@
 /**
  * Redaction PII / secrets for Moneroo client logs and DB audit payloads.
  */
+import type { Json } from '@/integrations/supabase/types';
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
@@ -62,9 +63,7 @@ export function sanitizeMonerooApiResponse(response: unknown): Record<string, un
 }
 
 /** Safe JSON for transaction_logs (no raw customer PII). */
-export function sanitizePaymentOptionsForAudit(
-  options: Record<string, unknown>
-): Record<string, unknown> {
+export function sanitizePaymentOptionsForAudit(options: Record<string, unknown>): Json {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(options)) {
     if (key === 'customerEmail' || key === 'customer_email') {
@@ -89,5 +88,5 @@ export function sanitizePaymentOptionsForAudit(
     }
     out[key] = value;
   }
-  return out;
+  return out as Json;
 }
