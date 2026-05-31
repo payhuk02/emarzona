@@ -72,10 +72,20 @@ async function setupCronJobs(
     throw new Error(`Abandoned cart cron setup failed: ${abandonedCart.error.message}`);
   }
 
+  const adminBroadcasts = await supabase.rpc('setup_scheduled_admin_broadcasts_cron_job', {
+    p_project_ref: PROJECT_REF,
+    p_cron_secret: cronSecret,
+    p_anon_key: anonKey,
+  });
+  if (adminBroadcasts.error) {
+    throw new Error(`Admin broadcasts cron setup failed: ${adminBroadcasts.error.message}`);
+  }
+
   return {
     campaigns: campaigns.data,
     sequences: sequences.data,
     abandoned_cart: abandonedCart.data,
+    admin_broadcasts: adminBroadcasts.data,
   };
 }
 

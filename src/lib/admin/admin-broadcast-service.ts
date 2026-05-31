@@ -3,6 +3,15 @@ import { logger } from '@/lib/logger';
 
 export type BroadcastChannel = 'email' | 'in_app' | 'popup';
 export type BroadcastAudience = 'all' | 'vendors' | 'customers' | 'emails';
+export type BroadcastPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type BroadcastStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'partial'
+  | 'failed'
+  | 'scheduled'
+  | 'cancelled';
 export type PopupStyle = 'info' | 'warning' | 'success' | 'announcement';
 export type PopupTargetAudience = 'all' | 'authenticated' | 'vendors' | 'customers';
 
@@ -14,9 +23,13 @@ export interface AdminBroadcastRecord {
   channels: string[];
   audience_type: BroadcastAudience;
   audience_filter: Record<string, unknown>;
-  status: 'pending' | 'processing' | 'completed' | 'partial' | 'failed';
+  status: BroadcastStatus;
   stats: Record<string, unknown>;
   error_message: string | null;
+  scheduled_at: string | null;
+  priority: BroadcastPriority;
+  action_url: string | null;
+  action_label: string | null;
   created_at: string;
   completed_at: string | null;
 }
@@ -46,6 +59,13 @@ export interface SendAdminBroadcastPayload {
   channels: BroadcastChannel[];
   audience: BroadcastAudience;
   emails?: string[];
+  priority?: BroadcastPriority;
+  action_url?: string;
+  action_label?: string;
+  scheduled_at?: string;
+  test_mode?: boolean;
+  test_email?: string;
+  preview_only?: boolean;
   popup_options?: {
     action_url?: string;
     action_label?: string;
@@ -62,6 +82,10 @@ export interface SendAdminBroadcastResult {
   success: boolean;
   broadcast_id?: string;
   popup_id?: string | null;
+  scheduled?: boolean;
+  scheduled_at?: string;
+  test_mode?: boolean;
+  preview?: { count: number; audience: string; channels: string[] };
   stats?: {
     total: number;
     sent: number;
@@ -70,6 +94,15 @@ export interface SendAdminBroadcastResult {
   };
   errors?: string[];
   error?: string;
+}
+
+export interface BroadcastStatsSummary {
+  totalBroadcasts: number;
+  completedCount: number;
+  scheduledCount: number;
+  activePopups: number;
+  totalSent: number;
+  totalFailed: number;
 }
 
 async function parseEdgeFunctionError(error: unknown, data: unknown): Promise<string> {
@@ -136,6 +169,23 @@ export async function sendAdminBroadcast(
   }
 }
 
+export async function previewBroadcastRecipients(
+  audience: BroadcastAudience,
+  emails?: string[]
+): Promise<number> {
+  const { data, error } = await supabase.rpc('count_broadcast_recipients', {
+    p_audience: audience,
+    p_emails: emails?.length ? emails : null,
+  });
+
+  if (error) {
+    logger.warn('previewBroadcastRecipients error', { error: error.message });
+    return 0;
+  }
+
+  return typeof data === 'number' ? data : 0;
+}
+
 export async function fetchAdminBroadcasts(limit = 50): Promise<AdminBroadcastRecord[]> {
   const { data, error } = await supabase
     .from('admin_broadcasts')
@@ -149,6 +199,68 @@ export async function fetchAdminBroadcasts(limit = 50): Promise<AdminBroadcastRe
   }
 
   return (data || []) as AdminBroadcastRecord[];
+}
+
+export async function fetchScheduledBroadcasts(): Promise<AdminBroadcastRecord[]> {
+  const { data, error } = await supabase
+    .from('admin_broadcasts')
+    .select('*')
+    .eq('status', 'scheduled')
+    .order('scheduled_at', { ascending: true });
+
+  if (error) {
+    logger.error('fetchScheduledBroadcasts error', { error: error.message });
+    return [];
+  }
+
+  return (data || []) as AdminBroadcastRecord[];
+}
+
+export async function cancelScheduledBroadcast(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('admin_broadcasts')
+    .update({ status: 'cancelled', completed_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('status', 'scheduled');
+
+  if (error) {
+    logger.error('cancelScheduledBroadcast error', { error: error.message, id });
+    return false;
+  }
+
+  await supabase
+    .from('platform_popup_messages')
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq('broadcast_id', id);
+
+  return true;
+}
+
+export async function fetchBroadcastStatsSummary(): Promise<BroadcastStatsSummary> {
+  const [broadcasts, popups] = await Promise.all([
+    fetchAdminBroadcasts(100),
+    fetchPlatformPopups(100),
+  ]);
+
+  let totalSent = 0;
+  let totalFailed = 0;
+  let completedCount = 0;
+
+  for (const b of broadcasts) {
+    if (b.status === 'completed' || b.status === 'partial') completedCount++;
+    const stats = b.stats as { sent?: number; failed?: number };
+    if (typeof stats.sent === 'number') totalSent += stats.sent;
+    if (typeof stats.failed === 'number') totalFailed += stats.failed;
+  }
+
+  return {
+    totalBroadcasts: broadcasts.length,
+    completedCount,
+    scheduledCount: broadcasts.filter(b => b.status === 'scheduled').length,
+    activePopups: popups.filter(p => p.is_active).length,
+    totalSent,
+    totalFailed,
+  };
 }
 
 export async function fetchPlatformPopups(limit = 50): Promise<PlatformPopupMessage[]> {
@@ -220,4 +332,17 @@ export function dismissPopupLocally(popupId: string): void {
   const current = new Set(getLocallyDismissedPopups());
   current.add(popupId);
   localStorage.setItem(LOCAL_DISMISS_KEY, JSON.stringify([...current]));
+}
+
+export function parseEmailsFromText(text: string): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of text.split(/[\n,;]+/)) {
+    const email = part.trim().toLowerCase();
+    if (email.includes('@') && !seen.has(email)) {
+      seen.add(email);
+      out.push(email);
+    }
+  }
+  return out;
 }

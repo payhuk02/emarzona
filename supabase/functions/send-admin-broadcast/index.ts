@@ -3,8 +3,18 @@
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import {
+  buildAudienceFilter,
+  createBroadcastPopup,
+  parseEmails,
+  processBroadcastDelivery,
+  resolveRecipients,
+  type BroadcastChannel,
+  type BroadcastPayload,
+  type BroadcastPriority,
+  type AudienceType,
+} from '../_shared/admin-broadcast-processor.ts';
 import { authenticateAdminRequest } from '../_shared/admin-auth-utils.ts';
-import { renderNotificationEmail } from '../_shared/notification-email-utils.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -27,110 +37,12 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-type BroadcastChannel = 'email' | 'in_app' | 'popup';
-type AudienceType = 'all' | 'vendors' | 'customers' | 'emails';
-
-interface SendAdminBroadcastRequest {
-  title: string;
-  message: string;
-  channels: BroadcastChannel[];
-  audience: AudienceType;
-  emails?: string[];
-  popup_options?: {
-    action_url?: string;
-    action_label?: string;
-    style?: 'info' | 'warning' | 'success' | 'announcement';
-    dismissible?: boolean;
-    show_once?: boolean;
-    starts_at?: string;
-    ends_at?: string;
-    target_audience?: 'all' | 'authenticated' | 'vendors' | 'customers';
-  };
-}
-
-interface Recipient {
-  user_id: string | null;
-  email: string;
-}
-
-async function getInvokeErrorMessage(
-  error: { message?: string; context?: Response } | null,
-  data: unknown
-): Promise<string> {
-  if (data && typeof data === 'object') {
-    const payload = data as { error?: unknown; details?: unknown };
-    if (payload.error) {
-      const detail =
-        payload.details && typeof payload.details === 'string'
-          ? `: ${payload.details.slice(0, 200)}`
-          : '';
-      return `${String(payload.error)}${detail}`;
-    }
-  }
-
-  if (error?.context instanceof Response) {
-    try {
-      const json = await error.context.json();
-      if (json?.error) {
-        const detail =
-          json.details && typeof json.details === 'string' ? `: ${json.details.slice(0, 200)}` : '';
-        return `${String(json.error)}${detail}`;
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-
-  return error?.message || 'send failed';
-}
-
-function parseEmails(raw?: string[]): string[] {
-  if (!raw?.length) return [];
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const item of raw) {
-    for (const part of item.split(/[\n,;]+/)) {
-      const email = part.trim().toLowerCase();
-      if (email.includes('@') && !seen.has(email)) {
-        seen.add(email);
-        out.push(email);
-      }
-    }
-  }
-  return out;
-}
-
-async function resolveRecipients(
-  supabase: ReturnType<typeof createClient>,
-  audience: AudienceType,
-  emails?: string[]
-): Promise<Recipient[]> {
-  if (audience === 'emails') {
-    const parsed = parseEmails(emails);
-    if (parsed.length === 0) return [];
-
-    const { data, error } = await supabase.rpc('resolve_users_by_emails', { p_emails: parsed });
-    if (error) throw new Error(error.message);
-
-    const byEmail = new Map<string, string>();
-    for (const row of (data || []) as Array<{ user_id: string; email: string }>) {
-      byEmail.set(row.email.toLowerCase(), row.user_id);
-    }
-
-    return parsed.map(email => ({
-      email,
-      user_id: byEmail.get(email) ?? null,
-    }));
-  }
-
-  const { data, error } = await supabase.rpc('get_broadcast_recipients', {
-    p_audience: audience,
-  });
-  if (error) throw new Error(error.message);
-  return ((data || []) as Array<{ user_id: string; email: string }>).map(row => ({
-    user_id: row.user_id,
-    email: row.email,
-  }));
+interface SendAdminBroadcastRequest extends BroadcastPayload {
+  scheduled_at?: string;
+  test_mode?: boolean;
+  test_email?: string;
+  preview_only?: boolean;
+  popup_options?: BroadcastPayload['popup_options'];
 }
 
 serve(async req => {
@@ -143,7 +55,6 @@ serve(async req => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-    const internalSecret = Deno.env.get('EDGE_INTERNAL_SECRET') ?? '';
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
@@ -166,6 +77,7 @@ serve(async req => {
     const message = body.message?.trim();
     const channels = Array.isArray(body.channels) ? body.channels : [];
     const audience = body.audience || 'all';
+    const priority = (body.priority || 'normal') as BroadcastPriority;
 
     if (!title || !message) {
       return new Response(JSON.stringify({ error: 'title and message are required' }), {
@@ -188,6 +100,154 @@ serve(async req => {
       });
     }
 
+    const payload: BroadcastPayload = {
+      title,
+      message,
+      channels: channels as BroadcastChannel[],
+      audience: audience as AudienceType,
+      emails: body.emails,
+      priority,
+      action_url: body.action_url,
+      action_label: body.action_label,
+      popup_options: body.popup_options,
+    };
+
+    if (body.preview_only) {
+      const needsRecipients = channels.includes('email') || channels.includes('in_app');
+      let count = 0;
+      if (needsRecipients) {
+        const recipients = await resolveRecipients(supabase, audience as AudienceType, body.emails);
+        count = recipients.length;
+      }
+      return new Response(
+        JSON.stringify({ success: true, preview: { count, audience, channels } }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const scheduledAt = body.scheduled_at?.trim();
+    const isFutureSchedule = scheduledAt && new Date(scheduledAt).getTime() > Date.now();
+
+    if (body.test_mode) {
+      const testEmail = body.test_email?.trim().toLowerCase();
+      if (!testEmail?.includes('@')) {
+        return new Response(JSON.stringify({ error: 'test_email is required for test mode' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const testChannels = channels.filter(
+        c => c === 'email' || c === 'in_app'
+      ) as BroadcastChannel[];
+      if (testChannels.length === 0) {
+        return new Response(
+          JSON.stringify({ error: 'Test mode requires email or in_app channel' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data: users } = await supabase.rpc('resolve_users_by_emails', {
+        p_emails: [testEmail],
+      });
+      const userRow = ((users || []) as Array<{ user_id: string; email: string }>)[0];
+
+      const { data: broadcast, error: broadcastError } = await supabase
+        .from('admin_broadcasts')
+        .insert({
+          created_by: auth.userId,
+          title: `[TEST] ${title}`,
+          message,
+          channels: testChannels,
+          audience_type: 'emails',
+          audience_filter: { emails: [testEmail], test_mode: true },
+          status: 'processing',
+          priority,
+          action_url: body.action_url || null,
+          action_label: body.action_label || null,
+        })
+        .select('id')
+        .single();
+
+      if (broadcastError || !broadcast) {
+        throw new Error(broadcastError?.message || 'Failed to create test broadcast');
+      }
+
+      const result = await processBroadcastDelivery(
+        supabase,
+        broadcast.id,
+        { ...payload, channels: testChannels, audience: 'emails', emails: [testEmail] },
+        [{ email: testEmail, user_id: userRow?.user_id ?? null }]
+      );
+
+      const finalStatus = result.success ? 'completed' : 'failed';
+      await supabase
+        .from('admin_broadcasts')
+        .update({
+          status: finalStatus,
+          stats: { ...result.stats, test_mode: true },
+          error_message: result.errors.length ? result.errors.join('; ') : null,
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', broadcast.id);
+
+      return new Response(
+        JSON.stringify({
+          success: result.success,
+          test_mode: true,
+          broadcast_id: broadcast.id,
+          stats: result.stats,
+          errors: result.errors.length ? result.errors : undefined,
+          error: result.error,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (isFutureSchedule) {
+      const { data: broadcast, error: broadcastError } = await supabase
+        .from('admin_broadcasts')
+        .insert({
+          created_by: auth.userId,
+          title,
+          message,
+          channels,
+          audience_type: audience,
+          audience_filter: buildAudienceFilter(audience as AudienceType, body.emails),
+          status: 'scheduled',
+          scheduled_at: new Date(scheduledAt).toISOString(),
+          priority,
+          action_url: body.action_url || null,
+          action_label: body.action_label || null,
+          stats: {},
+        })
+        .select('id')
+        .single();
+
+      if (broadcastError || !broadcast) {
+        throw new Error(broadcastError?.message || 'Failed to schedule broadcast');
+      }
+
+      let popupId: string | null = null;
+      if (channels.includes('popup')) {
+        popupId = await createBroadcastPopup(supabase, broadcast.id, payload, auth.userId, {
+          active: false,
+          startsAt: new Date(scheduledAt).toISOString(),
+        });
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          scheduled: true,
+          broadcast_id: broadcast.id,
+          popup_id: popupId,
+          scheduled_at: new Date(scheduledAt).toISOString(),
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { data: broadcast, error: broadcastError } = await supabase
       .from('admin_broadcasts')
       .insert({
@@ -196,8 +256,12 @@ serve(async req => {
         message,
         channels,
         audience_type: audience,
-        audience_filter: audience === 'emails' ? { emails: parseEmails(body.emails) } : {},
+        audience_filter: buildAudienceFilter(audience as AudienceType, body.emails),
         status: 'processing',
+        priority,
+        action_url: body.action_url || null,
+        action_label: body.action_label || null,
+        scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
       })
       .select('id')
       .single();
@@ -206,135 +270,23 @@ serve(async req => {
       throw new Error(broadcastError?.message || 'Failed to create broadcast record');
     }
 
-    let popupId: string | null = null;
-    if (channels.includes('popup')) {
-      const popupOpts = body.popup_options || {};
-      const { data: popup, error: popupError } = await supabase
-        .from('platform_popup_messages')
-        .insert({
-          broadcast_id: broadcast.id,
-          title,
-          message,
-          action_url: popupOpts.action_url || null,
-          action_label: popupOpts.action_label || null,
-          style: popupOpts.style || 'info',
-          target_audience: popupOpts.target_audience || (audience === 'emails' ? 'all' : audience),
-          starts_at: popupOpts.starts_at || new Date().toISOString(),
-          ends_at: popupOpts.ends_at || null,
-          dismissible: popupOpts.dismissible ?? true,
-          show_once: popupOpts.show_once ?? true,
-          is_active: true,
-          created_by: auth.userId,
-        })
-        .select('id')
-        .single();
+    const popupId = await createBroadcastPopup(supabase, broadcast.id, payload, auth.userId);
 
-      if (popupError) throw new Error(popupError.message);
-      popupId = popup?.id ?? null;
-    }
+    const delivery = await processBroadcastDelivery(supabase, broadcast.id, payload);
 
-    const needsRecipients = channels.includes('email') || channels.includes('in_app');
-    let recipients: Recipient[] = [];
-
-    if (needsRecipients) {
-      recipients = await resolveRecipients(supabase, audience, body.emails);
-    }
-
-    let sentCount = 0;
-    let failedCount = 0;
-    let skippedCount = 0;
-    const errors: string[] = [];
-
-    const sendHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (internalSecret) {
-      sendHeaders['x-internal-secret'] = internalSecret;
-    }
-
-    if (needsRecipients && recipients.length === 0) {
-      throw new Error('Aucun destinataire trouvé pour cette audience.');
-    }
-
-    for (const recipient of recipients) {
-      let recipientOk = true;
-
-      if (channels.includes('in_app')) {
-        if (!recipient.user_id) {
-          errors.push(`${recipient.email} (in_app): compte utilisateur introuvable`);
-          recipientOk = false;
-        } else {
-          const { error: notifError } = await supabase.from('notifications').insert({
-            user_id: recipient.user_id,
-            type: 'system_announcement',
-            title,
-            message,
-            priority: 'normal',
-            metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
-          });
-
-          if (notifError) {
-            recipientOk = false;
-            errors.push(`${recipient.email} (in_app): ${notifError.message}`);
-          }
-        }
-      }
-
-      if (channels.includes('email')) {
-        const recipientName = recipient.email.split('@')[0];
-        const { subject, html } = await renderNotificationEmail(
-          supabase,
-          {
-            user_id: recipient.user_id ?? '',
-            type: 'system_announcement',
-            title,
-            message,
-            recipient_email: recipient.email,
-            recipient_name: recipientName,
-            metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
-          },
-          recipientName
-        );
-
-        const response = await supabase.functions.invoke('send-email', {
-          body: {
-            to: recipient.email,
-            toName: recipientName,
-            subject,
-            html,
-            userId: recipient.user_id ?? undefined,
-          },
-          headers: sendHeaders,
-        });
-        const sendResult = response.data as {
-          success?: boolean;
-          skipped?: boolean;
-          error?: string;
-        } | null;
-
-        if (response.error || (sendResult?.success === false && !sendResult?.skipped)) {
-          recipientOk = false;
-          const errorMessage = await getInvokeErrorMessage(response.error, response.data);
-          errors.push(`${recipient.email} (email): ${errorMessage}`);
-        } else if (sendResult?.skipped) {
-          skippedCount++;
-        }
-      }
-
-      if (recipientOk) {
-        sentCount++;
-      } else {
-        failedCount++;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 80));
-    }
-
+    const hasPopupOnly =
+      channels.includes('popup') && !channels.includes('email') && !channels.includes('in_app');
     const finalStatus =
-      failedCount === 0 ? 'completed' : sentCount === 0 && !popupId ? 'failed' : 'partial';
+      delivery.stats.failed === 0 || hasPopupOnly
+        ? 'completed'
+        : delivery.stats.sent === 0 && !popupId
+          ? 'failed'
+          : 'partial';
     const summaryError =
       finalStatus === 'failed'
-        ? errors[0] || "Aucun message n'a pu être envoyé."
-        : errors.length
-          ? errors.slice(0, 3).join('; ')
+        ? delivery.errors[0] || "Aucun message n'a pu être envoyé."
+        : delivery.errors.length
+          ? delivery.errors.slice(0, 3).join('; ')
           : null;
 
     await supabase
@@ -342,13 +294,10 @@ serve(async req => {
       .update({
         status: finalStatus,
         stats: {
-          total: recipients.length,
-          sent: sentCount,
-          failed: failedCount,
-          skipped: skippedCount,
+          ...delivery.stats,
           popup_created: Boolean(popupId),
         },
-        error_message: errors.length ? errors.slice(0, 20).join('; ') : null,
+        error_message: delivery.errors.length ? delivery.errors.slice(0, 20).join('; ') : null,
         completed_at: new Date().toISOString(),
       })
       .eq('id', broadcast.id);
@@ -359,13 +308,8 @@ serve(async req => {
         error: finalStatus === 'failed' ? summaryError : undefined,
         broadcast_id: broadcast.id,
         popup_id: popupId,
-        stats: {
-          total: recipients.length,
-          sent: sentCount,
-          failed: failedCount,
-          skipped: skippedCount,
-        },
-        errors: errors.length ? errors.slice(0, 10) : undefined,
+        stats: delivery.stats,
+        errors: delivery.errors.length ? delivery.errors.slice(0, 10) : undefined,
       }),
       {
         status: 200,
