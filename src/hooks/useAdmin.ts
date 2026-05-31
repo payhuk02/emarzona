@@ -5,7 +5,11 @@ import { checkUserIsAdmin } from '@/lib/auth-redirect';
 export const useAdmin = () => {
   const { user } = useAuth();
 
-  const { data: isAdmin, isLoading } = useQuery({
+  const {
+    data: isAdmin,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['user-is-admin', user?.id],
     queryFn: async () => {
       if (!user) return false;
@@ -13,10 +17,12 @@ export const useAdmin = () => {
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
   });
 
   return {
-    isAdmin: isAdmin ?? false,
-    isLoading,
+    isAdmin: isError ? false : (isAdmin ?? false),
+    isLoading: !!user?.id && isLoading,
   };
 };

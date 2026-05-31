@@ -112,7 +112,7 @@
       Il semble que vous n'êtes pas connecté à Internet. 
       Certaines fonctionnalités peuvent être indisponibles.
     </p>
-    <a href="/" class="button" onclick="window.location.reload(); return false;">
+    <a href="/" class="button" id="retry-offline">
       Réessayer
     </a>
     <div class="info">
@@ -122,6 +122,11 @@
   </div>
   
   <script>
+    document.getElementById('retry-offline')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      window.location.reload();
+    });
+
     // Vérifier la connexion et recharger automatiquement
     window.addEventListener('online', () => {
       console.log('Back online! Reloading...');

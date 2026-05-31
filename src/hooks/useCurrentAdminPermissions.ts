@@ -31,7 +31,11 @@ export const useCurrentAdminPermissions = () => {
       const principalAdmin = isPrincipalAdminEmail(user.email);
 
       const [{ data: profile }, { data: isAdminRpc }] = await Promise.all([
-        supabase.from('profiles').select('role, is_super_admin').eq('id', user.id).maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('role, is_super_admin')
+          .eq('user_id', user.id)
+          .maybeSingle(),
         supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }),
       ]);
 

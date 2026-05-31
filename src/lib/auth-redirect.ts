@@ -23,7 +23,7 @@ export async function checkUserIsAdmin(userId: string, email?: string | null): P
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, is_super_admin')
-    .eq('id', userId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (profile?.is_super_admin || profile?.role === 'admin') {
