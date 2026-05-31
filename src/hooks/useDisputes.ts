@@ -49,6 +49,18 @@ function isDisputesTableMissing(err: unknown): boolean {
   );
 }
 
+function isPermissionError(err: unknown): boolean {
+  const msg = getErrorMessage(err, '').toLowerCase();
+  const code =
+    err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : '';
+  return (
+    code === '42501' ||
+    msg.includes('permission denied') ||
+    msg.includes('unauthorized') ||
+    msg.includes('admin access required')
+  );
+}
+
 interface UseDisputesOptions {
   filters?: DisputesFilters;
   page?: number;
@@ -116,12 +128,27 @@ export const useDisputes = (options?: UseDisputesOptions) => {
       const { data, error: queryError, count } = await query;
 
       if (queryError) {
-        if (queryError.code === '42501' || queryError.message?.includes('permission denied')) {
-          const errorMsg =
-            'Accès refusé aux litiges. Vérifiez que votre compte admin a les droits nécessaires.';
-          setError(errorMsg);
-          throw new Error(errorMsg);
+        if (isPermissionError(queryError)) {
+          const { data: rpcData, error: rpcError } = await supabase.rpc('admin_list_disputes', {
+            p_limit: pageSize,
+            p_offset: from,
+            p_status: filters?.status ?? null,
+            p_initiator_type: filters?.initiator_type ?? null,
+            p_assigned_admin_id: filters?.assigned_admin_id ?? null,
+            p_priority: filters?.priority ?? null,
+            p_search: filters?.search?.trim() || null,
+            p_sort_by: sortBy,
+            p_sort_asc: sortDirection === 'asc',
+          });
+
+          if (rpcError) throw rpcError;
+
+          const payload = rpcData as { data?: Dispute[]; count?: number } | null;
+          setDisputes(payload?.data ?? []);
+          setTotalCount(Number(payload?.count ?? 0));
+          return;
         }
+
         if (isDisputesTableMissing(queryError)) {
           const errorMsg =
             "La table 'disputes' n'existe pas encore. La migration SQL doit être appliquée sur Supabase.";
@@ -150,7 +177,26 @@ export const useDisputes = (options?: UseDisputesOptions) => {
   // Récupérer les statistiques (OPTIMISÉ: 1 seule requête au lieu de 6)
   const fetchStats = useCallback(async () => {
     try {
-      // Une seule requête pour récupérer tous les disputes
+      const { data: rpcStats, error: rpcError } = await supabase.rpc('get_disputes_stats');
+      if (!rpcError && rpcStats && typeof rpcStats === 'object') {
+        const s = rpcStats as Record<string, unknown>;
+        setStats({
+          total: Number(s.total ?? 0),
+          open: Number(s.open ?? 0),
+          investigating: Number(s.investigating ?? 0),
+          waiting_customer: Number(s.waiting_customer ?? 0),
+          waiting_seller: Number(s.waiting_seller ?? 0),
+          resolved: Number(s.resolved ?? 0),
+          closed: Number(s.closed ?? 0),
+          unassigned: Number(s.unassigned ?? 0),
+          avgResolutionTime:
+            s.avg_resolution_time_hours != null
+              ? Math.round(Number(s.avg_resolution_time_hours))
+              : undefined,
+        });
+        return;
+      }
+
       const { data: allDisputes, error } = await supabase
         .from('disputes')
         .select('status, assigned_admin_id, created_at, resolved_at');

@@ -399,6 +399,7 @@ const AdminDisputes = () => {
   }
 
   if (error) {
+    const showMigrationHelp = error.toLowerCase().includes("n'existe pas");
     return (
       <AdminLayout>
         <div className="space-y-6">
@@ -410,48 +411,26 @@ const AdminDisputes = () => {
               </CardTitle>
               <CardDescription>{error}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Pour créer la table 'disputes', exécutez ce SQL dans Supabase SQL Editor :
-                </p>
-                <div className="bg-muted p-4 rounded-lg overflow-auto max-h-96">
-                  <code className="text-xs">
-                    {`-- Créer la table disputes
-CREATE TABLE IF NOT EXISTS disputes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  initiator_type TEXT NOT NULL CHECK (initiator_type IN ('customer', 'seller', 'admin')),
-  initiator_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  subject TEXT NOT NULL,
-  description TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN (
-    'open', 'investigating', 'waiting_customer', 'waiting_seller', 'resolved', 'closed'
-  )),
-  priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
-  assigned_admin_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  admin_notes TEXT,
-  resolution TEXT,
-  resolved_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Index
-CREATE INDEX IF NOT EXISTS idx_disputes_order_id ON disputes(order_id);
-CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status);
-CREATE INDEX IF NOT EXISTS idx_disputes_assigned_admin ON disputes(assigned_admin_id);
-
-ALTER TABLE disputes ENABLE ROW LEVEL SECURITY;
-
--- Voir le fichier complet: supabase/migrations/20250124_disputes_system_complete.sql`}
-                  </code>
+            {showMigrationHelp && (
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Pour créer la table &apos;disputes&apos;, exécutez la migration SQL sur
+                    Supabase.
+                  </p>
+                  <Button onClick={() => window.location.reload()} className="w-full">
+                    Rafraîchir la page après migration
+                  </Button>
                 </div>
+              </CardContent>
+            )}
+            {!showMigrationHelp && (
+              <CardContent>
                 <Button onClick={() => window.location.reload()} className="w-full">
-                  Rafraîchir la page après migration
+                  Réessayer
                 </Button>
-              </div>
-            </CardContent>
+              </CardContent>
+            )}
           </Card>
         </div>
       </AdminLayout>
