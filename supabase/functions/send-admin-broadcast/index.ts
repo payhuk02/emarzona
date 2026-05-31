@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { authenticateAdminRequest } from '../_shared/admin-auth-utils.ts';
+import { renderNotificationEmail } from '../_shared/notification-email-utils.ts';
 
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
   .split(',')
@@ -50,6 +51,37 @@ interface SendAdminBroadcastRequest {
 interface Recipient {
   user_id: string | null;
   email: string;
+}
+
+async function getInvokeErrorMessage(
+  error: { message?: string; context?: Response } | null,
+  data: unknown
+): Promise<string> {
+  if (data && typeof data === 'object') {
+    const payload = data as { error?: unknown; details?: unknown };
+    if (payload.error) {
+      const detail =
+        payload.details && typeof payload.details === 'string'
+          ? `: ${payload.details.slice(0, 200)}`
+          : '';
+      return `${String(payload.error)}${detail}`;
+    }
+  }
+
+  if (error?.context instanceof Response) {
+    try {
+      const json = await error.context.json();
+      if (json?.error) {
+        const detail =
+          json.details && typeof json.details === 'string' ? `: ${json.details.slice(0, 200)}` : '';
+        return `${String(json.error)}${detail}`;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return error?.message || 'send failed';
 }
 
 function parseEmails(raw?: string[]): string[] {
@@ -247,45 +279,41 @@ serve(async req => {
       }
 
       if (channels.includes('email')) {
-        let sendResult: { success?: boolean; skipped?: boolean; error?: string } | null = null;
-        let sendError: Error | null = null;
+        const recipientName = recipient.email.split('@')[0];
+        const { subject, html } = await renderNotificationEmail(
+          supabase,
+          {
+            user_id: recipient.user_id ?? '',
+            type: 'system_announcement',
+            title,
+            message,
+            recipient_email: recipient.email,
+            recipient_name: recipientName,
+            metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
+          },
+          recipientName
+        );
 
-        if (recipient.user_id) {
-          const response = await supabase.functions.invoke('send-notification-email', {
-            body: {
-              user_id: recipient.user_id,
-              type: 'system_announcement',
-              title,
-              message,
-              recipient_email: recipient.email,
-              metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
-            },
-            headers: sendHeaders,
-          });
-          sendResult = response.data as typeof sendResult;
-          sendError = response.error;
-        } else {
-          const response = await supabase.functions.invoke('send-email', {
-            body: {
-              to: recipient.email,
-              templateSlug: 'system_announcement',
-              variables: {
-                title,
-                message,
-                user_name: recipient.email.split('@')[0],
-              },
-            },
-            headers: sendHeaders,
-          });
-          sendResult = response.data as typeof sendResult;
-          sendError = response.error;
-        }
+        const response = await supabase.functions.invoke('send-email', {
+          body: {
+            to: recipient.email,
+            toName: recipientName,
+            subject,
+            html,
+            userId: recipient.user_id ?? undefined,
+          },
+          headers: sendHeaders,
+        });
+        const sendResult = response.data as {
+          success?: boolean;
+          skipped?: boolean;
+          error?: string;
+        } | null;
 
-        if (sendError || (sendResult?.success === false && !sendResult?.skipped)) {
+        if (response.error || (sendResult?.success === false && !sendResult?.skipped)) {
           recipientOk = false;
-          errors.push(
-            `${recipient.email} (email): ${sendError?.message || sendResult?.error || 'send failed'}`
-          );
+          const errorMessage = await getInvokeErrorMessage(response.error, response.data);
+          errors.push(`${recipient.email} (email): ${errorMessage}`);
         } else if (sendResult?.skipped) {
           skippedCount++;
         }
