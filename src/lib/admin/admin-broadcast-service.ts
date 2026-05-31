@@ -72,6 +72,29 @@ export interface SendAdminBroadcastResult {
   error?: string;
 }
 
+async function parseEdgeFunctionError(error: unknown, data: unknown): Promise<string> {
+  const fromData =
+    data && typeof data === 'object' && 'error' in data
+      ? String((data as { error: unknown }).error)
+      : null;
+  if (fromData && fromData !== 'undefined') return fromData;
+
+  const err = error as { message?: string; context?: Response | { error?: string } };
+  if (err?.context instanceof Response) {
+    try {
+      const json = await err.context.json();
+      if (json?.error) return String(json.error);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (err?.context && typeof err.context === 'object' && 'error' in err.context) {
+    return String((err.context as { error: unknown }).error);
+  }
+
+  return err?.message || "Une erreur est survenue lors de l'envoi.";
+}
+
 export async function sendAdminBroadcast(
   payload: SendAdminBroadcastPayload
 ): Promise<SendAdminBroadcastResult> {
@@ -80,14 +103,29 @@ export async function sendAdminBroadcast(
       body: payload,
     });
 
+    const result = (data || {}) as SendAdminBroadcastResult & { error?: string };
+
     if (error) {
-      logger.error('sendAdminBroadcast edge error', { error: error.message });
-      return { success: false, error: error.message };
+      const message = await parseEdgeFunctionError(error, data);
+      logger.error('sendAdminBroadcast edge error', { error: message });
+      return { success: false, error: message, ...result };
     }
 
-    const result = data as SendAdminBroadcastResult & { error?: string };
     if (result?.error) {
-      return { success: false, error: result.error };
+      return { success: false, error: result.error, ...result };
+    }
+
+    if (result?.success === false) {
+      const detail =
+        result.errors?.[0] ||
+        (typeof result.stats?.failed === 'number' && result.stats.failed > 0
+          ? `${result.stats.failed} envoi(s) en échec`
+          : undefined);
+      return {
+        ...result,
+        success: false,
+        error: detail || "Aucun message n'a pu être envoyé.",
+      };
     }
 
     return result;

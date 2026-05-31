@@ -48,7 +48,7 @@ interface SendAdminBroadcastRequest {
 }
 
 interface Recipient {
-  user_id: string;
+  user_id: string | null;
   email: string;
 }
 
@@ -76,16 +76,29 @@ async function resolveRecipients(
   if (audience === 'emails') {
     const parsed = parseEmails(emails);
     if (parsed.length === 0) return [];
+
     const { data, error } = await supabase.rpc('resolve_users_by_emails', { p_emails: parsed });
     if (error) throw new Error(error.message);
-    return (data || []) as Recipient[];
+
+    const byEmail = new Map<string, string>();
+    for (const row of (data || []) as Array<{ user_id: string; email: string }>) {
+      byEmail.set(row.email.toLowerCase(), row.user_id);
+    }
+
+    return parsed.map(email => ({
+      email,
+      user_id: byEmail.get(email) ?? null,
+    }));
   }
 
   const { data, error } = await supabase.rpc('get_broadcast_recipients', {
     p_audience: audience,
   });
   if (error) throw new Error(error.message);
-  return (data || []) as Recipient[];
+  return ((data || []) as Array<{ user_id: string; email: string }>).map(row => ({
+    user_id: row.user_id,
+    email: row.email,
+  }));
 }
 
 serve(async req => {
@@ -205,29 +218,40 @@ serve(async req => {
       sendHeaders['x-internal-secret'] = internalSecret;
     }
 
+    if (needsRecipients && recipients.length === 0) {
+      throw new Error('Aucun destinataire trouvé pour cette audience.');
+    }
+
     for (const recipient of recipients) {
       let recipientOk = true;
 
       if (channels.includes('in_app')) {
-        const { error: notifError } = await supabase.from('notifications').insert({
-          user_id: recipient.user_id,
-          type: 'system_announcement',
-          title,
-          message,
-          priority: 'normal',
-          metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
-        });
-
-        if (notifError) {
+        if (!recipient.user_id) {
+          errors.push(`${recipient.email} (in_app): compte utilisateur introuvable`);
           recipientOk = false;
-          errors.push(`${recipient.email} (in_app): ${notifError.message}`);
+        } else {
+          const { error: notifError } = await supabase.from('notifications').insert({
+            user_id: recipient.user_id,
+            type: 'system_announcement',
+            title,
+            message,
+            priority: 'normal',
+            metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
+          });
+
+          if (notifError) {
+            recipientOk = false;
+            errors.push(`${recipient.email} (in_app): ${notifError.message}`);
+          }
         }
       }
 
       if (channels.includes('email')) {
-        const { data: sendResult, error: sendError } = await supabase.functions.invoke(
-          'send-notification-email',
-          {
+        let sendResult: { success?: boolean; skipped?: boolean; error?: string } | null = null;
+        let sendError: Error | null = null;
+
+        if (recipient.user_id) {
+          const response = await supabase.functions.invoke('send-notification-email', {
             body: {
               user_id: recipient.user_id,
               type: 'system_announcement',
@@ -237,20 +261,32 @@ serve(async req => {
               metadata: { broadcast_id: broadcast.id, source: 'admin_broadcast' },
             },
             headers: sendHeaders,
-          }
-        );
+          });
+          sendResult = response.data as typeof sendResult;
+          sendError = response.error;
+        } else {
+          const response = await supabase.functions.invoke('send-email', {
+            body: {
+              to: recipient.email,
+              templateSlug: 'system_announcement',
+              variables: {
+                title,
+                message,
+                user_name: recipient.email.split('@')[0],
+              },
+            },
+            headers: sendHeaders,
+          });
+          sendResult = response.data as typeof sendResult;
+          sendError = response.error;
+        }
 
-        const result = sendResult as {
-          success?: boolean;
-          skipped?: boolean;
-          error?: string;
-        } | null;
-        if (sendError || (result?.success === false && !result?.skipped)) {
+        if (sendError || (sendResult?.success === false && !sendResult?.skipped)) {
           recipientOk = false;
           errors.push(
-            `${recipient.email} (email): ${sendError?.message || result?.error || 'send failed'}`
+            `${recipient.email} (email): ${sendError?.message || sendResult?.error || 'send failed'}`
           );
-        } else if (result?.skipped) {
+        } else if (sendResult?.skipped) {
           skippedCount++;
         }
       }
@@ -266,6 +302,12 @@ serve(async req => {
 
     const finalStatus =
       failedCount === 0 ? 'completed' : sentCount === 0 && !popupId ? 'failed' : 'partial';
+    const summaryError =
+      finalStatus === 'failed'
+        ? errors[0] || "Aucun message n'a pu être envoyé."
+        : errors.length
+          ? errors.slice(0, 3).join('; ')
+          : null;
 
     await supabase
       .from('admin_broadcasts')
@@ -286,6 +328,7 @@ serve(async req => {
     return new Response(
       JSON.stringify({
         success: finalStatus !== 'failed',
+        error: finalStatus === 'failed' ? summaryError : undefined,
         broadcast_id: broadcast.id,
         popup_id: popupId,
         stats: {
