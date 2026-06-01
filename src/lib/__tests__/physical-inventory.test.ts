@@ -1,6 +1,14 @@
-import { describe, expect, it } from 'vitest';
-import { cartHasPhysicalItems } from '@/lib/physical-inventory';
+import { describe, expect, it, vi } from 'vitest';
 import type { CartItem } from '@/types/cart';
+
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    rpc: vi.fn(),
+    from: vi.fn(),
+  },
+}));
+
+import { cartHasPhysicalItems } from '@/lib/physical-inventory';
 
 const physicalItem: CartItem = {
   product_id: 'p1',

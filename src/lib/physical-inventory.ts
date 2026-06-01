@@ -7,6 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import type { CartItem } from '@/types/cart';
 
+type PhysicalInventoryRpc = (
+  fn: string,
+  params: Record<string, unknown>
+) => Promise<{ data: unknown; error: { message?: string; details?: string } | null }>;
+
+const rpc = supabase.rpc.bind(supabase) as unknown as PhysicalInventoryRpc;
+
 function parseRpcError(error: { message?: string; details?: string } | null): string {
   if (!error) return 'Erreur inventaire';
   return error.message || error.details || 'Erreur inventaire';
@@ -14,7 +21,7 @@ function parseRpcError(error: { message?: string; details?: string } | null): st
 
 /** Réserve le stock pour toutes les lignes physical d'une commande. */
 export async function reservePhysicalInventoryForOrder(orderId: string): Promise<void> {
-  const { error } = await supabase.rpc('reserve_physical_inventory_for_order', {
+  const { error } = await rpc('reserve_physical_inventory_for_order', {
     p_order_id: orderId,
   });
 
@@ -26,7 +33,7 @@ export async function reservePhysicalInventoryForOrder(orderId: string): Promise
 
 /** Libère les réservations si le paiement n'a pas abouti. */
 export async function releasePhysicalInventoryForOrder(orderId: string): Promise<void> {
-  const { error } = await supabase.rpc('release_physical_inventory_for_order', {
+  const { error } = await rpc('release_physical_inventory_for_order', {
     p_order_id: orderId,
   });
 

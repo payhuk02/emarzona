@@ -63,7 +63,7 @@ export async function createBuyNowOrderBeforePayment(
       currency: input.currency,
       payment_status: 'pending',
       status: 'pending',
-      shipping_address: input.shippingAddress,
+      shipping_address: input.shippingAddress as never,
       metadata: { buy_now: true, checkout_source: 'buy_now' },
     })
     .select('id')
@@ -76,7 +76,7 @@ export async function createBuyNowOrderBeforePayment(
   const cartItem = toCartItem(input);
   const orderItems = await buildOrderItemRows(order.id, [cartItem]);
 
-  const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+  const { error: itemsError } = await supabase.from('order_items').insert(orderItems as never);
   if (itemsError) {
     throw new Error(itemsError.message || 'Erreur lors de la création des articles');
   }
