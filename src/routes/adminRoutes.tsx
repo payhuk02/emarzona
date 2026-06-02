@@ -98,6 +98,10 @@ const StorageDiagnosticPage = lazyPage(() => import('@/pages/admin/StorageDiagno
 const AdminPlatformIntegrations = lazyPage(() => import('@/pages/admin/AdminPlatformIntegrations'));
 const AdminDomains = lazyPage(() => import('@/pages/admin/AdminDomains'));
 const AdminFeatureFlags = lazyPage(() => import('@/pages/admin/AdminFeatureFlags'));
+const AdminAdvancedTools = lazyPage(() => import('@/pages/admin/AdminAdvancedTools'));
+const AdminRecommendationInsights = lazyPage(
+  () => import('@/pages/admin/AdminRecommendationInsights')
+);
 const AdminApiKeys = lazyPage(() => import('@/pages/admin/AdminApiKeys'));
 const AdminSubscriptions = lazyPage(() => import('@/pages/admin/AdminSubscriptions'));
 const AdminVendorBilling = lazyPage(() => import('@/pages/admin/AdminVendorBilling'));
@@ -151,6 +155,8 @@ export const adminRoutes = (
     {pr('/admin/integrations', AdminPlatformIntegrations)}
     {pr('/admin/domains', AdminDomains)}
     {pr('/admin/feature-flags', AdminFeatureFlags)}
+    {pr('/admin/advanced-tools', AdminAdvancedTools)}
+    {pr('/admin/recommendation-insights', AdminRecommendationInsights)}
     {pr('/admin/webhooks', AdminWebhookManagement)}
     {pr('/admin/api-keys', AdminApiKeys)}
     {pr('/admin/subscriptions', AdminSubscriptions)}

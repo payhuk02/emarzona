@@ -50,6 +50,7 @@ import {
   Building2,
   Globe,
   Zap,
+  LayoutGrid,
 } from 'lucide-react';
 
 export type AdminNavItem = {
@@ -436,6 +437,12 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         label: 'IA Recommandations',
         path: '/admin/ai-settings',
         permissions: ['settings.manage'],
+      },
+      {
+        icon: LayoutGrid,
+        label: 'Outils avancés',
+        path: '/admin/advanced-tools',
+        permissions: ['settings.manage', 'analytics.view'],
       },
       {
         icon: Percent,

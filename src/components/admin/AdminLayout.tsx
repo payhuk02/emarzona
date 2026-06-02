@@ -14,6 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useCurrentAdminPermissions } from '@/hooks/useCurrentAdminPermissions';
 import { ADMIN_NAV_SECTIONS, filterAdminNavSections } from '@/lib/admin/admin-nav';
 import { Menu, X } from 'lucide-react';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -237,6 +238,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             sidebarOpen ? 'md:ml-64' : 'md:ml-20'
           )}
         >
+          <div className="px-3 sm:px-4 md:px-6 pt-3 sm:pt-4">
+            <AdminBreadcrumb />
+          </div>
           <RequireAAL2>{children}</RequireAAL2>
         </main>
       </div>

@@ -20,6 +20,9 @@ export const ADMIN_ROUTE_ACCESS: Record<string, AdminRouteAccess> = (() => {
       map[item.path] = itemToAccess(item);
     }
   }
+  map['/admin/recommendation-insights'] = {
+    permissions: ['analytics.view', 'settings.manage'],
+  };
   return map;
 })();
 

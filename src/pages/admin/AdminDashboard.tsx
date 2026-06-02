@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminStats } from '@/hooks/useAdminStats';
@@ -17,7 +17,10 @@ import {
   Clock,
   Scale,
   Globe,
+  LayoutGrid,
+  HeartPulse,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
@@ -28,6 +31,21 @@ const AdminDashboard = () => {
   const { stats, loading } = useAdminStats();
   const location = useLocation();
   const { toast } = useToast();
+  const [apiHealthOk, setApiHealthOk] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/health', { method: 'GET', cache: 'no-store' })
+      .then(res => {
+        if (!cancelled) setApiHealthOk(res.ok);
+      })
+      .catch(() => {
+        if (!cancelled) setApiHealthOk(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Animations au scroll
   const headerRef = useScrollAnimation<HTMLDivElement>();
@@ -66,6 +84,7 @@ const AdminDashboard = () => {
         description: `${stats.activeUsers} actifs`,
         color: 'text-blue-600',
         bgColor: 'bg-blue-50 dark:bg-blue-950/50',
+        href: '/admin/users',
       },
       {
         title: 'Boutiques',
@@ -74,6 +93,7 @@ const AdminDashboard = () => {
         description: 'Boutiques créées',
         color: 'text-purple-600',
         bgColor: 'bg-purple-50 dark:bg-purple-950/50',
+        href: '/admin/stores',
       },
       {
         title: 'Produits',
@@ -82,6 +102,7 @@ const AdminDashboard = () => {
         description: 'Produits actifs',
         color: 'text-green-600',
         bgColor: 'bg-green-50 dark:bg-green-950/50',
+        href: '/admin/products',
       },
       {
         title: 'Commandes',
@@ -90,6 +111,7 @@ const AdminDashboard = () => {
         description: 'Commandes totales',
         color: 'text-orange-600',
         bgColor: 'bg-orange-50 dark:bg-orange-950/50',
+        href: '/admin/orders',
       },
       {
         title: 'Revenu total',
@@ -122,6 +144,7 @@ const AdminDashboard = () => {
         description: `${stats.activeSubscriptions} abonnement(s) actifs / essai`,
         color: 'text-violet-600',
         bgColor: 'bg-violet-50 dark:bg-violet-950/50',
+        href: '/admin/vendor-billing',
       },
       {
         title: 'Commandes en attente',
@@ -130,6 +153,7 @@ const AdminDashboard = () => {
         description: 'Paiement pending',
         color: 'text-amber-600',
         bgColor: 'bg-amber-50 dark:bg-amber-950/50',
+        href: '/admin/orders',
       },
       {
         title: 'Litiges ouverts',
@@ -138,6 +162,7 @@ const AdminDashboard = () => {
         description: 'À traiter',
         color: 'text-red-600',
         bgColor: 'bg-red-50 dark:bg-red-950/50',
+        href: '/admin/disputes',
       },
       {
         title: 'Domaines actifs',
@@ -146,6 +171,7 @@ const AdminDashboard = () => {
         description: 'Custom domains vérifiés',
         color: 'text-sky-600',
         bgColor: 'bg-sky-50 dark:bg-sky-950/50',
+        href: '/admin/domains',
       },
     ],
     [stats]
@@ -185,13 +211,28 @@ const AdminDashboard = () => {
               Vue d'ensemble de la plateforme
             </p>
           </div>
-          <div
-            className="flex items-center gap-2 text-muted-foreground"
-            role="status"
-            aria-label="Statistiques globales"
-          >
-            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-            <span className="text-xs sm:text-sm">Statistiques globales</span>
+          <div className="flex flex-wrap items-center gap-2">
+            {apiHealthOk !== null && (
+              <Badge
+                variant={apiHealthOk ? 'default' : 'destructive'}
+                className="gap-1 text-xs"
+                role="status"
+                aria-label={
+                  apiHealthOk ? 'API plateforme opérationnelle' : 'API plateforme indisponible'
+                }
+              >
+                <HeartPulse className="h-3 w-3" aria-hidden />
+                API {apiHealthOk ? 'OK' : 'KO'}
+              </Badge>
+            )}
+            <div
+              className="flex items-center gap-2 text-muted-foreground"
+              role="status"
+              aria-label="Statistiques globales"
+            >
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+              <span className="text-xs sm:text-sm">Statistiques globales</span>
+            </div>
           </div>
         </div>
 
@@ -208,6 +249,12 @@ const AdminDashboard = () => {
           <Button variant="outline" size="sm" asChild>
             <Link to="/admin/monitoring">Monitoring</Link>
           </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/advanced-tools">
+              <LayoutGrid className="h-3.5 w-3.5 mr-1" aria-hidden />
+              Outils avancés
+            </Link>
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -217,43 +264,64 @@ const AdminDashboard = () => {
           role="region"
           aria-label="Cartes statistiques"
         >
-          {statsCards.map((stat, index) => (
-            <Card
-              key={index}
-              className="hover-scale border-muted/50 hover:border-primary/50 transition-all"
-            >
-              <CardHeader className="flex flex-row items-center justify-between pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
-                <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`p-1.5 sm:p-2 rounded-lg ${stat.bgColor}`}>
-                  <stat.icon className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${stat.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
-                <div
-                  className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold ${stat.color}`}
+          {statsCards.map((stat, index) => {
+            const card = (
+              <Card
+                key={index}
+                className="hover-scale border-muted/50 hover:border-primary/50 transition-all h-full"
+              >
+                <CardHeader className="flex flex-row items-center justify-between pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`p-1.5 sm:p-2 rounded-lg ${stat.bgColor}`}>
+                    <stat.icon
+                      className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${stat.color}`}
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                  <div
+                    className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold ${stat.color}`}
+                  >
+                    {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                    {stat.description}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+            if ('href' in stat && stat.href) {
+              return (
+                <Link
+                  key={index}
+                  to={stat.href}
+                  className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
                 >
-                  {stat.value.toLocaleString()}
-                </div>
-                <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+                  {card}
+                </Link>
+              );
+            }
+            return card;
+          })}
         </div>
 
         {/* Recent Users */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
-              <Users className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5" aria-hidden="true" />
-              Utilisateurs récents
-            </CardTitle>
-            <CardDescription className="text-[10px] sm:text-xs md:text-sm">
-              Les 5 derniers utilisateurs inscrits
-            </CardDescription>
+          <CardHeader className="flex flex-row items-start justify-between gap-2">
+            <div>
+              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
+                <Users className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5" aria-hidden="true" />
+                Utilisateurs récents
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs md:text-sm">
+                Les 5 derniers utilisateurs inscrits
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/admin/users">Voir tout</Link>
+            </Button>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6">
             <div
@@ -286,14 +354,19 @@ const AdminDashboard = () => {
 
         {/* Top Stores */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
-              <Store className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5" aria-hidden="true" />
-              Top boutiques
-            </CardTitle>
-            <CardDescription className="text-[10px] sm:text-xs md:text-sm">
-              Boutiques avec le plus de ventes
-            </CardDescription>
+          <CardHeader className="flex flex-row items-start justify-between gap-2">
+            <div>
+              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base lg:text-lg">
+                <Store className="h-4 w-4 sm:h-4.5 sm:w-4.5 md:h-5 md:w-5" aria-hidden="true" />
+                Top boutiques
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs md:text-sm">
+                Boutiques avec le plus de ventes
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/admin/stores">Voir tout</Link>
+            </Button>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6">
             <div
