@@ -127,7 +127,6 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
         });
       }
 
-      const userIds = profilesData.map(p => p.user_id);
       const { data: rolesData } = await supabase
         .from('user_roles')
         .select('user_id, role')
