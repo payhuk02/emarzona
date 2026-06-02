@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface AdminStats {
   totalUsers: number;
@@ -10,7 +11,12 @@ export interface AdminStats {
   totalRevenue: number;
   totalCommissions: number;
   totalReferrals: number;
+  platformMrr: number;
+  activeSubscriptions: number;
   activeUsers: number;
+  pendingOrders: number;
+  openDisputes: number;
+  activeDomains: number;
   recentUsers: Array<{
     id: string;
     email: string;
@@ -24,6 +30,80 @@ export interface AdminStats {
   }>;
 }
 
+type RpcFunction = (
+  fn: string,
+  params: Record<string, unknown>
+) => Promise<{
+  data: unknown;
+  error: { message?: string } | null;
+}>;
+
+const rpc = supabase.rpc.bind(supabase) as unknown as RpcFunction;
+
+async function fetchTopStoresByEarnings(): Promise<AdminStats['topStores']> {
+  const { data: earningsRows, error } = await supabase
+    .from('store_earnings')
+    .select('store_id, net_amount, stores(name)')
+    .eq('status', 'completed');
+
+  if (error) {
+    logger.warn('store_earnings top stores fallback', { error });
+    return fetchTopStoresByOrders();
+  }
+
+  const totals = new Map<string, { name: string; total: number }>();
+  for (const row of earningsRows ?? []) {
+    const storeId = row.store_id as string;
+    const storeName =
+      row.stores && typeof row.stores === 'object' && 'name' in row.stores
+        ? String((row.stores as { name: string }).name)
+        : 'Boutique';
+    const current = totals.get(storeId) ?? { name: storeName, total: 0 };
+    current.total += Number(row.net_amount) || 0;
+    totals.set(storeId, current);
+  }
+
+  if (totals.size === 0) {
+    return fetchTopStoresByOrders();
+  }
+
+  return [...totals.entries()]
+    .map(([id, v]) => ({ id, name: v.name, total_sales: v.total }))
+    .sort((a, b) => b.total_sales - a.total_sales)
+    .slice(0, 5);
+}
+
+async function fetchTopStoresByOrders(): Promise<AdminStats['topStores']> {
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('store_id, total_amount, stores(name)')
+    .in('payment_status', ['paid', 'completed'])
+    .limit(5000);
+
+  if (error) {
+    logger.error('top stores orders aggregation failed', { error });
+    return [];
+  }
+
+  const totals = new Map<string, { name: string; total: number }>();
+  for (const row of orders ?? []) {
+    const storeId = row.store_id as string;
+    if (!storeId) continue;
+    const storeName =
+      row.stores && typeof row.stores === 'object' && 'name' in row.stores
+        ? String((row.stores as { name: string }).name)
+        : 'Boutique';
+    const current = totals.get(storeId) ?? { name: storeName, total: 0 };
+    current.total += Number(row.total_amount) || 0;
+    totals.set(storeId, current);
+  }
+
+  return [...totals.entries()]
+    .map(([id, v]) => ({ id, name: v.name, total_sales: v.total }))
+    .sort((a, b) => b.total_sales - a.total_sales)
+    .slice(0, 5);
+}
+
 export const useAdminStats = () => {
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
@@ -33,129 +113,123 @@ export const useAdminStats = () => {
     totalRevenue: 0,
     totalCommissions: 0,
     totalReferrals: 0,
+    platformMrr: 0,
+    activeSubscriptions: 0,
     activeUsers: 0,
+    pendingOrders: 0,
+    openDisputes: 0,
+    activeDomains: 0,
     recentUsers: [],
     topStores: [],
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
-      // Récupérer le nombre total d'utilisateurs
-      const { count: usersCount } = await supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true });
+      setLoading(true);
 
-      // Récupérer le nombre de stores
-      const { count: storesCount } = await supabase
-        .from('stores')
-        .select('id', { count: 'exact', head: true });
+      const [
+        usersRes,
+        storesRes,
+        productsRes,
+        ordersRes,
+        paymentsRes,
+        commissionsRes,
+        subsRes,
+        referralsRes,
+        recentProfilesRes,
+        pendingOrdersRes,
+        openDisputesRes,
+        domainsRes,
+      ] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('stores').select('id', { count: 'exact', head: true }),
+        supabase.from('products').select('id', { count: 'exact', head: true }),
+        supabase.from('orders').select('id', { count: 'exact', head: true }),
+        supabase.from('payments').select('amount').eq('status', 'completed'),
+        supabase.from('platform_commissions').select('commission_amount').eq('status', 'completed'),
+        supabase.from('store_platform_subscriptions').select('mrr_amount, status'),
+        supabase.from('referrals').select('id', { count: 'exact', head: true }),
+        supabase
+          .from('profiles')
+          .select('user_id, display_name, created_at')
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('payment_status', 'pending'),
+        supabase.from('disputes').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+        supabase
+          .from('custom_domains')
+          .select('id', { count: 'exact', head: true })
+          .in('status', ['active', 'verified']),
+      ]);
 
-      // Récupérer le nombre de produits
-      const { count: productsCount } = await supabase
-        .from('products')
-        .select('id', { count: 'exact', head: true });
+      const totalRevenue = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      const totalCommissions =
+        commissionsRes.data?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0;
 
-      // Récupérer le nombre de commandes
-      const { count: ordersCount } = await supabase
-        .from('orders')
-        .select('id', { count: 'exact', head: true });
+      const activeSubs =
+        subsRes.data?.filter(s => s.status === 'active' || s.status === 'trialing') ?? [];
+      const platformMrr = activeSubs.reduce((sum, s) => sum + Number(s.mrr_amount || 0), 0);
 
-      // Récupérer le revenu total
-      const { data: paymentsData } = await supabase
-        .from('payments')
-        .select('amount')
-        .eq('status', 'completed');
+      const recentProfiles = recentProfilesRes.data ?? [];
+      const userIds = recentProfiles.map(p => p.user_id);
+      const emailMap = new Map<string, string>();
 
-      const totalRevenue = paymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      if (userIds.length > 0) {
+        const { data: emailsData } = await rpc('get_users_emails', { p_user_ids: userIds });
+        if (Array.isArray(emailsData)) {
+          for (const item of emailsData as { user_id: string; email: string }[]) {
+            if (item.user_id) emailMap.set(item.user_id, item.email);
+          }
+        }
+      }
 
-      // Récupérer les commissions totales
-      const { data: commissionsData } = await supabase
-        .from('platform_commissions')
-        .select('commission_amount')
-        .eq('status', 'completed');
-
-      const totalCommissions = commissionsData?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0;
-
-      // Récupérer le nombre de parrainages
-      const { count: referralsCount } = await supabase
-        .from('referrals')
-        .select('id', { count: 'exact', head: true });
-
-      // Récupérer les utilisateurs récents
-      const { data: recentUsersData } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      const recentUsers = (recentUsersData || []).map(profile => ({
+      const recentUsers = recentProfiles.map(profile => ({
         id: profile.user_id,
-        email: 'Utilisateur',
+        email: emailMap.get(profile.user_id) || 'Utilisateur',
         display_name: profile.display_name,
         created_at: profile.created_at,
       }));
 
-      // Récupérer les top stores
-      const { data: topStoresData } = await supabase
-        .from('stores')
-        .select('id, name')
-        .limit(5);
-
-      const topStores = await Promise.all(
-        (topStoresData || []).map(async (store) => {
-          const { data: ordersData } = await supabase
-            .from('orders')
-            .select('total_amount')
-            .eq('store_id', store.id)
-            .eq('status', 'completed');
-
-          const total_sales = ordersData?.reduce((sum, o) => sum + Number(o.total_amount), 0) || 0;
-
-          return {
-            id: store.id,
-            name: store.name,
-            total_sales,
-          };
-        })
-      );
-
-      topStores.sort((a, b) => b.total_sales - a.total_sales);
+      const topStores = await fetchTopStoresByEarnings();
 
       setStats({
-        totalUsers: usersCount || 0,
-        totalStores: storesCount || 0,
-        totalProducts: productsCount || 0,
-        totalOrders: ordersCount || 0,
+        totalUsers: usersRes.count || 0,
+        totalStores: storesRes.count || 0,
+        totalProducts: productsRes.count || 0,
+        totalOrders: ordersRes.count || 0,
         totalRevenue,
         totalCommissions,
-        totalReferrals: referralsCount || 0,
-        activeUsers: usersCount || 0,
-        recentUsers: recentUsers.slice(0, 5),
-        topStores: topStores.slice(0, 5),
+        totalReferrals: referralsRes.count || 0,
+        platformMrr,
+        activeSubscriptions: activeSubs.length,
+        activeUsers: usersRes.count || 0,
+        pendingOrders: pendingOrdersRes.count || 0,
+        openDisputes: openDisputesRes.error ? 0 : openDisputesRes.count || 0,
+        activeDomains: domainsRes.error ? 0 : domainsRes.count || 0,
+        recentUsers,
+        topStores,
       });
-    } catch (_error: unknown) {
-      const errorMessage = _error instanceof Error ? _error.message : 'Erreur inconnue';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+      logger.error('useAdminStats failed', { err });
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   return { stats, loading, refetch: fetchStats };
 };
-
-
-
-
-
-

@@ -14,7 +14,12 @@ import {
   TrendingUp,
   UserPlus,
   BarChart3,
+  Clock,
+  Scale,
+  Globe,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -110,6 +115,38 @@ const AdminDashboard = () => {
         color: 'text-pink-600',
         bgColor: 'bg-pink-50 dark:bg-pink-950/50',
       },
+      {
+        title: 'MRR plateforme',
+        value: formatCurrency(stats.platformMrr),
+        icon: BarChart3,
+        description: `${stats.activeSubscriptions} abonnement(s) actifs / essai`,
+        color: 'text-violet-600',
+        bgColor: 'bg-violet-50 dark:bg-violet-950/50',
+      },
+      {
+        title: 'Commandes en attente',
+        value: stats.pendingOrders,
+        icon: Clock,
+        description: 'Paiement pending',
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-50 dark:bg-amber-950/50',
+      },
+      {
+        title: 'Litiges ouverts',
+        value: stats.openDisputes,
+        icon: Scale,
+        description: 'À traiter',
+        color: 'text-red-600',
+        bgColor: 'bg-red-50 dark:bg-red-950/50',
+      },
+      {
+        title: 'Domaines actifs',
+        value: stats.activeDomains,
+        icon: Globe,
+        description: 'Custom domains vérifiés',
+        color: 'text-sky-600',
+        bgColor: 'bg-sky-50 dark:bg-sky-950/50',
+      },
     ],
     [stats]
   );
@@ -120,7 +157,7 @@ const AdminDashboard = () => {
         <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-12 w-64" />
           <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {[...Array(7)].map((_, i) => (
+            {[...Array(11)].map((_, i) => (
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
@@ -158,10 +195,25 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/vendor-billing">Facturation SaaS</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/domains">Domaines</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/feature-flags">Feature flags</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/monitoring">Monitoring</Link>
+          </Button>
+        </div>
+
         {/* Stats Cards */}
         <div
           ref={statsRef}
-          className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           role="region"
           aria-label="Cartes statistiques"
         >

@@ -127,33 +127,40 @@ export const useAllUsers = (options: UseAllUsersOptions = {}) => {
         });
       }
 
-      // Récupérer les rôles pour chaque utilisateur
-      const usersWithDetails = await Promise.all(
-        profilesData.map(async profile => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profile.user_id)
-            .limit(1);
+      const userIds = profilesData.map(p => p.user_id);
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
 
-          const userRole = roleData && roleData.length > 0 ? roleData[0].role : 'user';
-          const email = emailMap.get(profile.user_id) || profile.display_name || 'Utilisateur';
+      const roleByUserId = new Map<string, string>();
+      for (const row of rolesData ?? []) {
+        if (row.user_id && !roleByUserId.has(row.user_id)) {
+          roleByUserId.set(row.user_id, row.role);
+        }
+      }
 
-          return {
-            id: profile.id,
-            user_id: profile.user_id,
-            email: email,
-            display_name: profile.display_name,
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            avatar_url: profile.avatar_url,
-            created_at: profile.created_at,
-            role: userRole,
-            is_suspended: profile.is_suspended || false,
-            suspension_reason: profile.suspension_reason,
-          };
-        })
-      );
+      const usersWithDetails = profilesData.map(profile => {
+        const email = emailMap.get(profile.user_id) || profile.display_name || 'Utilisateur';
+        const userRole =
+          roleByUserId.get(profile.user_id) ||
+          (typeof profile.role === 'string' ? profile.role : null) ||
+          'user';
+
+        return {
+          id: profile.id,
+          user_id: profile.user_id,
+          email,
+          display_name: profile.display_name,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url,
+          created_at: profile.created_at,
+          role: userRole,
+          is_suspended: profile.is_suspended || false,
+          suspension_reason: profile.suspension_reason,
+        };
+      });
 
       // Appliquer filtre par rôle (côté client car user_roles est une table séparée)
       let filteredUsers = usersWithDetails;

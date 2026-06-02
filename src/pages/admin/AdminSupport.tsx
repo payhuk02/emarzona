@@ -1,20 +1,18 @@
 /**
- * Admin Support Dashboard
- * Gestion des tickets de support
+ * Support admin — file d'attente basée sur les litiges plateforme (données réelles).
+ * Un module tickets dédié pourra s'ajouter ultérieurement.
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { logger } from '@/lib/logger';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { AppSidebar } from '@/components/AppSidebar';
+import { useMemo, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useDisputes } from '@/hooks/useDisputes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MobileTableCard } from '@/components/ui/mobile-table-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -23,337 +21,204 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Headphones,
-  Search,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  MessageSquare,
-  User,
-} from 'lucide-react';
+import { Headphones, Search, AlertCircle, CheckCircle, Clock, ExternalLink } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export default function AdminSupport() {
-  const isMobile = useIsMobile();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  const [search, setSearch] = useState('');
+  const { disputes, stats, loading, error } = useDisputes({
+    page: 1,
+    pageSize: 25,
+    sortBy: 'created_at',
+    sortDirection: 'desc',
+    filters: search.trim() ? { search: search.trim() } : undefined,
+  });
 
-  // Animations au scroll
-  const headerRef = useScrollAnimation<HTMLDivElement>();
-  const statsRef = useScrollAnimation<HTMLDivElement>();
-  const tableRef = useScrollAnimation<HTMLDivElement>();
+  const openCount = stats?.open ?? disputes.filter(d => d.status === 'open').length;
+  const pendingCount =
+    (stats?.waiting_customer ?? 0) +
+    (stats?.waiting_seller ?? 0) +
+    disputes.filter(d => d.status === 'waiting_customer' || d.status === 'waiting_seller').length;
 
-  // Mock data - À remplacer par vraies données
-  const mockTickets = useMemo(
-    () => [
-      {
-        id: '1',
-        ticket_number: 'TICKET-001',
-        user_name: 'Jean Dupont',
-        user_email: 'jean@example.com',
-        subject: 'Problème de paiement',
-        status: 'open',
-        priority: 'high',
-        created_at: new Date().toISOString(),
-        messages_count: 3,
-      },
-      {
-        id: '2',
-        ticket_number: 'TICKET-002',
-        user_name: 'Marie Martin',
-        user_email: 'marie@example.com',
-        subject: 'Question sur livraison',
-        status: 'pending',
-        priority: 'medium',
-        created_at: new Date(Date.now() - 86400000).toISOString(),
-        messages_count: 5,
-      },
-    ],
-    []
-  );
-
-  useEffect(() => {
-    logger.info('Admin Support page chargée');
-  }, []);
-
-  const getStatusBadge = useCallback((status: string) => {
+  const statusBadge = useCallback((status: string) => {
     switch (status) {
       case 'open':
         return (
-          <Badge variant="default">
-            <AlertCircle className="h-3 w-3 mr-1" /> Ouvert
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge variant="secondary">
-            <Clock className="h-3 w-3 mr-1" /> En attente
+          <Badge variant="destructive">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Ouvert
           </Badge>
         );
       case 'resolved':
+      case 'closed':
         return (
           <Badge variant="outline">
-            <CheckCircle className="h-3 w-3 mr-1" /> Résolu
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Clôturé
           </Badge>
         );
       default:
-        return <Badge>{status}</Badge>;
+        return (
+          <Badge variant="secondary">
+            <Clock className="h-3 w-3 mr-1" />
+            {status}
+          </Badge>
+        );
     }
   }, []);
 
-  const getPriorityBadge = useCallback((priority: string) => {
-    switch (priority) {
-      case 'high':
-        return <Badge variant="destructive">Haute</Badge>;
-      case 'medium':
-        return <Badge variant="secondary">Moyenne</Badge>;
-      case 'low':
-        return <Badge variant="outline">Basse</Badge>;
-      default:
-        return <Badge>{priority}</Badge>;
+  const priorityBadge = useCallback((priority: string | null | undefined) => {
+    if (priority === 'high' || priority === 'urgent') {
+      return <Badge variant="destructive">Haute</Badge>;
     }
+    if (priority === 'low') {
+      return <Badge variant="outline">Basse</Badge>;
+    }
+    return <Badge variant="secondary">Moyenne</Badge>;
   }, []);
+
+  const tableMissing = Boolean(error?.includes("table 'disputes'"));
+  const permissionDenied = Boolean(
+    error?.toLowerCase().includes('permission') || error?.toLowerCase().includes('403')
+  );
+
+  const statCards = useMemo(
+    () => [
+      { label: 'Total', value: stats?.total ?? disputes.length },
+      { label: 'Ouverts', value: openCount, accent: 'text-red-600' },
+      { label: 'En attente', value: pendingCount, accent: 'text-orange-600' },
+      {
+        label: 'Non assignés',
+        value: stats?.unassigned ?? 0,
+        accent: 'text-amber-600',
+      },
+    ],
+    [stats, disputes.length, openCount, pendingCount]
+  );
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
-            {/* Header */}
-            <div
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
-              role="banner"
-            >
-              <div>
-                <h1
-                  className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight"
-                  id="admin-support-title"
-                >
-                  Support Client
-                </h1>
-                <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                  Gérez les tickets de support des utilisateurs
-                </p>
-              </div>
-              <Button className="min-h-[44px] w-full sm:w-auto">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                <span className="text-sm sm:text-base">Nouveau Ticket</span>
-              </Button>
-            </div>
-
-            {/* Stats Cards */}
-            <div
-              ref={statsRef}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
-              role="region"
-              aria-label="Statistiques des tickets"
-            >
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-                  <Headphones className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{mockTickets.length}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Ouverts</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
-                    {mockTickets.filter(t => t.status === 'open').length}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">En Attente</CardTitle>
-                  <Clock className="h-4 w-4 text-orange-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {mockTickets.filter(t => t.status === 'pending').length}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Résolus</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {mockTickets.filter(t => t.status === 'resolved').length}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filters & Table */}
-            <div ref={tableRef} role="region" aria-label="Tableau des tickets">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Rechercher tickets..."
-                          value={searchQuery}
-                          onChange={e => setSearchQuery(e.target.value)}
-                          className="pl-8 min-h-[44px]"
-                        />
-                      </div>
-                    </div>
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                      <TabsList>
-                        <TabsTrigger value="all" className="min-h-[44px]">
-                          Tous
-                        </TabsTrigger>
-                        <TabsTrigger value="open" className="min-h-[44px]">
-                          Ouverts
-                        </TabsTrigger>
-                        <TabsTrigger value="pending" className="min-h-[44px]">
-                          En attente
-                        </TabsTrigger>
-                        <TabsTrigger value="resolved" className="min-h-[44px]">
-                          Résolus
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  {isMobile ? (
-                    <MobileTableCard
-                      data={mockTickets.map(t => ({ ...t, id: t.id }))}
-                      columns={[
-                        {
-                          key: 'ticket_number',
-                          label: 'N° Ticket',
-                          priority: 'high',
-                          render: row => <span className="font-medium">{row.ticket_number}</span>,
-                        },
-                        {
-                          key: 'user',
-                          label: 'Utilisateur',
-                          priority: 'high',
-                          render: row => (
-                            <div>
-                              <div className="font-medium">{row.user_name}</div>
-                              <div className="text-sm text-muted-foreground">{row.user_email}</div>
-                            </div>
-                          ),
-                        },
-                        {
-                          key: 'subject',
-                          label: 'Sujet',
-                          priority: 'high',
-                          render: row => <span>{row.subject}</span>,
-                        },
-                        {
-                          key: 'status',
-                          label: 'Statut',
-                          priority: 'high',
-                          render: row => getStatusBadge(row.status),
-                        },
-                        {
-                          key: 'priority',
-                          label: 'Priorité',
-                          priority: 'medium',
-                          render: row => getPriorityBadge(row.priority),
-                        },
-                        {
-                          key: 'messages',
-                          label: 'Messages',
-                          priority: 'low',
-                          render: row => (
-                            <div className="flex items-center gap-1">
-                              <MessageSquare className="h-4 w-4" />
-                              {row.messages_count}
-                            </div>
-                          ),
-                        },
-                        {
-                          key: 'date',
-                          label: 'Date',
-                          priority: 'low',
-                          render: row => (
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(row.created_at).toLocaleDateString()}
-                            </span>
-                          ),
-                        },
-                      ]}
-                      actions={row => (
-                        <Button variant="outline" size="sm" className="min-h-[44px] w-full">
-                          Voir
-                        </Button>
-                      )}
-                    />
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>N° Ticket</TableHead>
-                          <TableHead>Utilisateur</TableHead>
-                          <TableHead>Sujet</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Priorité</TableHead>
-                          <TableHead>Messages</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {mockTickets.map(ticket => (
-                          <TableRow key={ticket.id}>
-                            <TableCell className="font-medium">{ticket.ticket_number}</TableCell>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{ticket.user_name}</div>
-                                <div className="text-sm text-muted-foreground">
-                                  {ticket.user_email}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>{ticket.subject}</TableCell>
-                            <TableCell>{getStatusBadge(ticket.status)}</TableCell>
-                            <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <MessageSquare className="h-4 w-4" />
-                                {ticket.messages_count}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {new Date(ticket.created_at).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button variant="outline" size="sm">
-                                Voir
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+    <AdminLayout>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <Headphones className="h-7 w-7 text-primary" aria-hidden />
+              Support client
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              File prioritaire des litiges et demandes escaladées (données live Supabase).
+            </p>
           </div>
-        </main>
+          <Button asChild>
+            <Link to="/admin/disputes">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Centre litiges
+            </Link>
+          </Button>
+        </div>
+
+        {tableMissing && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              La table <code>disputes</code> est absente. Exécutez les migrations litiges sur
+              Supabase pour activer le support admin.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {permissionDenied && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              Accès refusé (RLS). Vérifiez le rôle admin et la fonction{' '}
+              <code>is_platform_admin()</code>.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {error && !tableMissing && !permissionDenied && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {statCards.map(card => (
+            <Card key={card.label}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {card.label}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className={`text-2xl font-bold ${card.accent ?? ''}`}>{card.value}</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="Rechercher sujet, commande…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Dernières demandes</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 overflow-x-auto">
+            {loading ? (
+              <div className="p-6 space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : disputes.length === 0 ? (
+              <p className="p-6 text-sm text-muted-foreground">Aucun litige pour le moment.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Sujet</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Priorité</TableHead>
+                    <TableHead>Commande</TableHead>
+                    <TableHead>Créé</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {disputes.map(row => (
+                    <TableRow key={row.id}>
+                      <TableCell className="font-medium max-w-[200px] truncate">
+                        {row.subject}
+                      </TableCell>
+                      <TableCell>{statusBadge(row.status)}</TableCell>
+                      <TableCell>{priorityBadge(row.priority)}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {row.order_id?.slice(0, 8) ?? '—'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                        {row.created_at
+                          ? format(new Date(row.created_at), 'dd MMM yyyy', { locale: fr })
+                          : '—'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </div>
-    </SidebarProvider>
+    </AdminLayout>
   );
 }

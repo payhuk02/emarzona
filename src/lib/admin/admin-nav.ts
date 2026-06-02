@@ -48,6 +48,8 @@ import {
   KeyRound,
   Repeat,
   Building2,
+  Globe,
+  Zap,
 } from 'lucide-react';
 
 export type AdminNavItem = {
@@ -314,6 +316,18 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         icon: KeyRound,
         label: 'Clés API',
         path: '/admin/api-keys',
+        permissions: ['settings.manage'],
+      },
+      {
+        icon: Globe,
+        label: 'Domaines & DNS',
+        path: '/admin/domains',
+        permissions: ['settings.manage'],
+      },
+      {
+        icon: Zap,
+        label: 'Feature flags',
+        path: '/admin/feature-flags',
         permissions: ['settings.manage'],
       },
       {

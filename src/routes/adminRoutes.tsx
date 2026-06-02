@@ -95,7 +95,9 @@ const AdminAccessibilityReport = lazyPage(() => import('@/pages/admin/AdminAcces
 const AdminDataStorage = lazyPage(() => import('@/pages/admin/AdminDataStorage'));
 const OfflineQueueManager = lazyPage(() => import('@/pages/admin/OfflineQueueManager'));
 const StorageDiagnosticPage = lazyPage(() => import('@/pages/admin/StorageDiagnosticPage'));
-const IntegrationsPage = lazyPage(() => import('@/pages/admin/IntegrationsPage'));
+const AdminPlatformIntegrations = lazyPage(() => import('@/pages/admin/AdminPlatformIntegrations'));
+const AdminDomains = lazyPage(() => import('@/pages/admin/AdminDomains'));
+const AdminFeatureFlags = lazyPage(() => import('@/pages/admin/AdminFeatureFlags'));
 const AdminApiKeys = lazyPage(() => import('@/pages/admin/AdminApiKeys'));
 const AdminSubscriptions = lazyPage(() => import('@/pages/admin/AdminSubscriptions'));
 const AdminVendorBilling = lazyPage(() => import('@/pages/admin/AdminVendorBilling'));
@@ -146,7 +148,9 @@ export const adminRoutes = (
     {pr('/admin/audit', AdminAudit)}
     {pr('/admin/taxes', AdminTaxManagement)}
     {pr('/admin/returns', AdminReturnManagement)}
-    {pr('/admin/integrations', IntegrationsPage)}
+    {pr('/admin/integrations', AdminPlatformIntegrations)}
+    {pr('/admin/domains', AdminDomains)}
+    {pr('/admin/feature-flags', AdminFeatureFlags)}
     {pr('/admin/webhooks', AdminWebhookManagement)}
     {pr('/admin/api-keys', AdminApiKeys)}
     {pr('/admin/subscriptions', AdminSubscriptions)}
