@@ -26,17 +26,8 @@ export async function applyPaymentRefund(
     throw new Error('Transaction not found');
   }
 
-  const existingMeta =
-    transaction.metadata && typeof transaction.metadata === 'object'
-      ? (transaction.metadata as Record<string, unknown>)
-      : {};
-  const existingRefund = existingMeta.refund as { refund_id?: string } | undefined;
-
   if (transaction.status === 'refunded') {
-    if (!existingRefund?.refund_id || existingRefund.refund_id === refund.refundId) {
-      return { orderId: transaction.order_id };
-    }
-    throw new Error('Transaction already refunded with a different refund id');
+    return { orderId: transaction.order_id };
   }
 
   if (transaction.status !== 'completed') {
@@ -48,6 +39,10 @@ export async function applyPaymentRefund(
     throw new Error('Refund amount exceeds transaction amount');
   }
 
+  const existingMeta =
+    transaction.metadata && typeof transaction.metadata === 'object'
+      ? (transaction.metadata as Record<string, unknown>)
+      : {};
   const now = new Date().toISOString();
 
   await supabase

@@ -143,6 +143,8 @@ Tous les PSP convergent vers `apply-payment-refund.ts` :
 
 Idempotence : `payment_webhook_events.external_event_id` (unique par provider) + `applyPaymentRefund` skip si `transaction.status=refunded`.
 
+**Checklist QA sandbox Stripe** : [QA_STRIPE_REFUND_SANDBOX_CHECKLIST.md](./QA_STRIPE_REFUND_SANDBOX_CHECKLIST.md)
+
 Monitoring :
 
 ```sql
