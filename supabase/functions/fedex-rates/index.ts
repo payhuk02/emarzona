@@ -4,6 +4,11 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  allowFedexMockResponses,
+  fedexMockDisabledError,
+  hasFedexApiCredentials,
+} from '../_shared/fedex-policy.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -102,6 +107,9 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
   const testMode = (Deno.env.get('FEDEX_TEST_MODE') || 'true').toLowerCase() !== 'false';
 
   if (!apiKey || !apiSecret || !accountNumber) {
+    if (!allowFedexMockResponses()) {
+      throw fedexMockDisabledError();
+    }
     return mockRates(body.weight_kg, body.ship_to.country);
   }
 
@@ -155,7 +163,10 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
 
   if (!response.ok) {
     const err = await response.text();
-    console.warn('FedEx rates API failed, using mock:', err);
+    console.warn('FedEx rates API failed:', err);
+    if (!allowFedexMockResponses()) {
+      throw new Error('FEDEX_API_FAILED');
+    }
     return mockRates(body.weight_kg, body.ship_to.country);
   }
 
@@ -163,6 +174,9 @@ async function fetchFedExRates(body: RateRequestBody): Promise<RateQuote[]> {
   const rateReplyDetails = data?.output?.rateReplyDetails || [];
 
   if (!Array.isArray(rateReplyDetails) || rateReplyDetails.length === 0) {
+    if (!allowFedexMockResponses()) {
+      throw new Error('FEDEX_API_EMPTY');
+    }
     return mockRates(body.weight_kg, body.ship_to.country);
   }
 
@@ -210,26 +224,24 @@ serve(async req => {
     const weightKg =
       typeof body.weight_kg === 'number' && body.weight_kg > 0 ? body.weight_kg : 0.5;
 
-    const hasCredentials = Boolean(
-      Deno.env.get('FEDEX_API_KEY') &&
-      Deno.env.get('FEDEX_API_SECRET') &&
-      Deno.env.get('FEDEX_ACCOUNT_NUMBER')
-    );
-
+    const hasCredentials = hasFedexApiCredentials();
     const rates = await fetchFedExRates({ ...body, weight_kg: weightKg });
+    const source = hasCredentials ? 'fedex_api' : 'mock';
 
     return new Response(
       JSON.stringify({
         rates,
-        source: hasCredentials ? 'fedex_api' : 'mock',
+        source,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('fedex-rates error:', error);
     const message = error instanceof Error ? error.message : 'Erreur FedEx';
+    const status =
+      message === 'FEDEX_NOT_CONFIGURED' ? 503 : message.startsWith('FEDEX_API') ? 502 : 500;
     return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

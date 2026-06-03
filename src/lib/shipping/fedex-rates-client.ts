@@ -4,6 +4,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { assertFedexResponseNotMock } from '@/lib/shipping/fedex-policy';
 
 export interface FedexRatesAddress {
   country: string;
@@ -41,6 +42,8 @@ export async function fetchFedexRatesViaEdge(params: {
   if (!data?.rates?.length) {
     throw new Error('Aucun tarif FedEx retourné');
   }
+
+  assertFedexResponseNotMock(data.source);
 
   return data;
 }

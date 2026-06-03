@@ -102,6 +102,14 @@ test.describe('Flux inscription aux cours', () => {
     expect(page.url()).toMatch(/\/checkout|moneroo/);
   });
 
+  test('page checkout répond sans erreur serveur', async ({ page }) => {
+    const response = await gotoApp(page, '/checkout');
+    expect(response?.status()).toBeLessThan(500);
+    await expect(page.locator('body')).toBeVisible();
+    const html = await page.content();
+    expect(html.toLowerCase()).not.toContain('internal server error');
+  });
+
   test('route /learn/:slug répond sans crash', async ({ page }) => {
     const slug = process.env.E2E_COURSE_SLUG ?? 'test-course-slug';
     const response = await gotoApp(page, `/learn/${slug}`);

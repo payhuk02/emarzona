@@ -4,6 +4,11 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import {
+  allowFedexMockResponses,
+  fedexMockDisabledError,
+  hasFedexApiCredentials,
+} from '../_shared/fedex-policy.ts';
 
 const defaultAllowedOrigin = Deno.env.get('SITE_URL') || 'https://www.emarzona.com';
 const allowedOrigins = (Deno.env.get('ALLOWED_ORIGINS') || defaultAllowedOrigin)
@@ -120,6 +125,9 @@ async function createFedExShipment(body: ShipRequestBody): Promise<ShipResponse>
   const testMode = (Deno.env.get('FEDEX_TEST_MODE') || 'true').toLowerCase() !== 'false';
 
   if (!apiKey || !apiSecret || !accountNumber) {
+    if (!allowFedexMockResponses()) {
+      throw fedexMockDisabledError();
+    }
     return mockShipment(body);
   }
 
@@ -199,7 +207,10 @@ async function createFedExShipment(body: ShipRequestBody): Promise<ShipResponse>
 
   if (!response.ok) {
     const err = await response.text();
-    console.warn('FedEx ship API failed, using mock:', err);
+    console.warn('FedEx ship API failed:', err);
+    if (!allowFedexMockResponses()) {
+      throw new Error('FEDEX_API_FAILED');
+    }
     return mockShipment(body);
   }
 
@@ -215,6 +226,9 @@ async function createFedExShipment(body: ShipRequestBody): Promise<ShipResponse>
   );
 
   if (!trackingNumber) {
+    if (!allowFedexMockResponses()) {
+      throw new Error('FEDEX_API_EMPTY');
+    }
     return mockShipment(body);
   }
 
@@ -284,18 +298,12 @@ serve(async req => {
         ? body.package.weight_kg
         : 0.5;
 
-    const hasCredentials = Boolean(
-      Deno.env.get('FEDEX_API_KEY') &&
-      Deno.env.get('FEDEX_API_SECRET') &&
-      Deno.env.get('FEDEX_ACCOUNT_NUMBER')
-    );
-
     const result = await createFedExShipment({
       ...body,
       package: { ...body.package, weight_kg: weightKg },
     });
 
-    if (!hasCredentials && result.source !== 'mock') {
+    if (!hasFedexApiCredentials() && result.source !== 'mock') {
       result.source = 'mock';
     }
 
@@ -306,8 +314,10 @@ serve(async req => {
   } catch (error) {
     console.error('fedex-ship error:', error);
     const message = error instanceof Error ? error.message : 'Erreur FedEx ship';
+    const status =
+      message === 'FEDEX_NOT_CONFIGURED' ? 503 : message.startsWith('FEDEX_API') ? 502 : 500;
     return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

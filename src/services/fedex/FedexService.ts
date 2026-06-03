@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 import { createFedexShipmentViaEdge } from '@/lib/shipping/fedex-ship-client';
 import { cancelFedexShipmentViaEdge } from '@/lib/shipping/fedex-cancel-client';
 import { fetchFedexTrackingViaEdge } from '@/lib/shipping/fedex-track-client';
+import { isFedexMockAllowed, FedexUnavailableError } from '@/lib/shipping/fedex-policy';
 import {
   mockFedexService,
   type FedexRateRequest,
@@ -59,10 +60,13 @@ export class FedexService {
           }));
         }
       } catch (edgeError) {
-        logger.warn('FedEx edge rates fallback to mock', { edgeError });
+        logger.warn('FedEx edge rates failed', { edgeError });
       }
     }
 
+    if (!isFedexMockAllowed()) {
+      throw new FedexUnavailableError();
+    }
     return mockFedexService.getRates(request);
   }
 
@@ -77,10 +81,13 @@ export class FedexService {
       try {
         return await createFedexShipmentViaEdge(request);
       } catch (edgeError) {
-        logger.warn('FedEx edge ship fallback to mock', { edgeError });
+        logger.warn('FedEx edge ship failed', { edgeError });
       }
     }
 
+    if (!isFedexMockAllowed()) {
+      throw new FedexUnavailableError('FedEx expédition indisponible en production');
+    }
     return mockFedexService.createShipment(request);
   }
 
@@ -89,10 +96,13 @@ export class FedexService {
       try {
         return await fetchFedexTrackingViaEdge(trackingNumber.trim());
       } catch (edgeError) {
-        logger.warn('FedEx edge track fallback to mock', { edgeError, trackingNumber });
+        logger.warn('FedEx edge track failed', { edgeError, trackingNumber });
       }
     }
 
+    if (!isFedexMockAllowed()) {
+      throw new FedexUnavailableError('Suivi FedEx indisponible en production');
+    }
     return mockFedexService.getTracking(trackingNumber);
   }
 
@@ -101,10 +111,13 @@ export class FedexService {
       try {
         return await cancelFedexShipmentViaEdge(trackingNumber.trim());
       } catch (edgeError) {
-        logger.warn('FedEx edge cancel fallback to mock', { edgeError, trackingNumber });
+        logger.warn('FedEx edge cancel failed', { edgeError, trackingNumber });
       }
     }
 
+    if (!isFedexMockAllowed()) {
+      throw new FedexUnavailableError('Annulation FedEx indisponible en production');
+    }
     return mockFedexService.cancelShipment(trackingNumber);
   }
 }
