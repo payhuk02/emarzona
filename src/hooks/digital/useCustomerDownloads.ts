@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 const DOWNLOAD_EVENT_FIELDS = 'id, download_id, type, message, created_at';
 
 /**
- * Téléchargement client
+ * Téléchargement client (vue vendeur — agrégée depuis digital_licenses)
  */
 export interface CustomerDownload {
   id: string;
@@ -25,108 +26,184 @@ export interface CustomerDownload {
   amountPaid?: number;
 }
 
+type LicenseRow = {
+  id: string;
+  license_key: string | null;
+  status: string;
+  customer_email: string | null;
+  customer_name: string | null;
+  activated_at: string | null;
+  created_at: string;
+  digital_product_id: string;
+  order_id: string | null;
+  current_activations: number | null;
+  max_activations: number | null;
+  issued_at: string;
+  expires_at: string | null;
+  digital_products: {
+    id: string;
+    products: { id: string; name: string; store_id: string } | null;
+  } | null;
+  orders: {
+    total_amount: number | null;
+    payment_status: string | null;
+    status: string | null;
+    created_at: string;
+  } | null;
+};
+
+function mapLicenseToCustomerDownload(d: LicenseRow): CustomerDownload {
+  const product = d.digital_products?.products;
+  return {
+    id: d.id,
+    customerId: '',
+    customerName: d.customer_name || 'Inconnu',
+    customerEmail: d.customer_email || '',
+    productId: d.digital_product_id,
+    productName: product?.name || 'Produit supprimé',
+    downloadCount: d.current_activations ?? 0,
+    downloadLimit: d.max_activations ?? undefined,
+    licenseKey: d.license_key ?? undefined,
+    status: (d.status as CustomerDownload['status']) || 'pending',
+    purchaseDate: d.orders?.created_at || d.issued_at || d.created_at,
+    lastDownloadDate: d.activated_at ?? undefined,
+    expiryDate: d.expires_at ?? undefined,
+    amountPaid: d.orders?.total_amount ?? undefined,
+  };
+}
+
+async function fetchStoreDigitalProductIds(userId: string): Promise<string[]> {
+  const { data: stores, error: storesError } = await supabase
+    .from('stores')
+    .select('id')
+    .eq('user_id', userId);
+
+  if (storesError) throw storesError;
+  const storeIds = stores?.map(s => s.id) ?? [];
+  if (storeIds.length === 0) return [];
+
+  const { data: products, error: productsError } = await supabase
+    .from('products')
+    .select('id')
+    .in('store_id', storeIds)
+    .eq('product_type', 'digital');
+
+  if (productsError) throw productsError;
+  const productIds = products?.map(p => p.id) ?? [];
+  if (productIds.length === 0) return [];
+
+  const { data: digitalRows, error: digitalError } = await supabase
+    .from('digital_products')
+    .select('id')
+    .in('product_id', productIds);
+
+  if (digitalError) throw digitalError;
+  return digitalRows?.map(d => d.id) ?? [];
+}
+
 /**
- * useCustomerDownloads - Hook pour lister tous les téléchargements clients
+ * useCustomerDownloads - Licences / téléchargements des produits digitaux du vendeur
  */
 export const useCustomerDownloads = () => {
   return useQuery({
     queryKey: ['customerDownloads'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Récupérer les produits de l'utilisateur
-      const { data: products, error: productsError } = await supabase
-        .from('digital_products')
-        .select('id')
-        .eq('user_id', user.id);
+      const digitalProductIds = await fetchStoreDigitalProductIds(user.id);
+      if (digitalProductIds.length === 0) return [];
 
-      if (productsError) throw productsError;
-
-      const productIds = products.map((p) => p.id);
-      if (productIds.length === 0) return [];
-
-      // Récupérer les téléchargements
       const { data, error } = await supabase
-        .from('customer_downloads')
-        .select(`
-          *,
-          customer:customers(name, email),
-          product:digital_products(name)
-        `)
-        .in('product_id', productIds)
-        .order('purchase_date', { ascending: false });
+        .from('digital_licenses')
+        .select(
+          `
+          id,
+          license_key,
+          status,
+          customer_email,
+          customer_name,
+          activated_at,
+          created_at,
+          digital_product_id,
+          order_id,
+          current_activations,
+          max_activations,
+          issued_at,
+          expires_at,
+          digital_products (
+            id,
+            products ( id, name, store_id )
+          ),
+          orders ( total_amount, payment_status, created_at, status )
+        `
+        )
+        .in('digital_product_id', digitalProductIds)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      return data.map((d: any) => ({
-        id: d.id,
-        customerId: d.customer_id,
-        customerName: d.customer?.name || 'Inconnu',
-        customerEmail: d.customer?.email || '',
-        productId: d.product_id,
-        productName: d.product?.name || 'Produit supprimé',
-        downloadCount: d.download_count || 0,
-        downloadLimit: d.download_limit,
-        licenseKey: d.license_key,
-        status: d.status,
-        purchaseDate: d.purchase_date,
-        lastDownloadDate: d.last_download_date,
-        expiryDate: d.expiry_date,
-        ipAddress: d.ip_address,
-        location: d.location,
-        amountPaid: d.amount_paid,
-      })) as CustomerDownload[];
+      return (data as LicenseRow[])
+        .filter(
+          row =>
+            !row.orders?.payment_status ||
+            (row.orders.payment_status === 'paid' &&
+              PAID_REVENUE_ELIGIBLE_STATUSES.includes(
+                row.orders.status as (typeof PAID_REVENUE_ELIGIBLE_STATUSES)[number]
+              ))
+        )
+        .map(mapLicenseToCustomerDownload);
     },
   });
 };
 
 /**
- * useCustomerDownloadsByProduct - Hook pour filtrer par produit
+ * useCustomerDownloadsByProduct - digital_product_id
  */
-export const useCustomerDownloadsByProduct = (productId: string | undefined) => {
+export const useCustomerDownloadsByProduct = (digitalProductId: string | undefined) => {
   return useQuery({
-    queryKey: ['customerDownloads', 'product', productId],
+    queryKey: ['customerDownloads', 'product', digitalProductId],
     queryFn: async () => {
-      if (!productId) throw new Error('ID produit manquant');
+      if (!digitalProductId) throw new Error('ID produit manquant');
 
       const { data, error } = await supabase
-        .from('customer_downloads')
-        .select(`
-          *,
-          customer:customers(name, email),
-          product:digital_products(name)
-        `)
-        .eq('product_id', productId)
-        .order('purchase_date', { ascending: false });
+        .from('digital_licenses')
+        .select(
+          `
+          id,
+          license_key,
+          status,
+          customer_email,
+          customer_name,
+          activated_at,
+          created_at,
+          digital_product_id,
+          order_id,
+          current_activations,
+          max_activations,
+          issued_at,
+          expires_at,
+          digital_products (
+            id,
+            products ( id, name, store_id )
+          ),
+          orders ( total_amount, payment_status, created_at, status )
+        `
+        )
+        .eq('digital_product_id', digitalProductId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      return data.map((d: any) => ({
-        id: d.id,
-        customerId: d.customer_id,
-        customerName: d.customer?.name || 'Inconnu',
-        customerEmail: d.customer?.email || '',
-        productId: d.product_id,
-        productName: d.product?.name || 'Produit supprimé',
-        downloadCount: d.download_count || 0,
-        downloadLimit: d.download_limit,
-        licenseKey: d.license_key,
-        status: d.status,
-        purchaseDate: d.purchase_date,
-        lastDownloadDate: d.last_download_date,
-        expiryDate: d.expiry_date,
-        ipAddress: d.ip_address,
-        location: d.location,
-        amountPaid: d.amount_paid,
-      })) as CustomerDownload[];
+      return (data as LicenseRow[]).map(mapLicenseToCustomerDownload);
     },
-    enabled: !!productId,
+    enabled: !!digitalProductId,
   });
 };
 
 /**
- * useCustomerDownloadsByCustomer - Hook pour filtrer par client
+ * useCustomerDownloadsByCustomer - email client
  */
 export const useCustomerDownloadsByCustomer = (customerId: string | undefined) => {
   return useQuery({
@@ -134,43 +211,59 @@ export const useCustomerDownloadsByCustomer = (customerId: string | undefined) =
     queryFn: async () => {
       if (!customerId) throw new Error('ID client manquant');
 
+      const { data: customer, error: customerError } = await supabase
+        .from('customers')
+        .select('id, email')
+        .eq('id', customerId)
+        .single();
+
+      if (customerError || !customer?.email) throw customerError ?? new Error('Client introuvable');
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
+
+      const digitalProductIds = await fetchStoreDigitalProductIds(user.id);
+      if (digitalProductIds.length === 0) return [];
+
       const { data, error } = await supabase
-        .from('customer_downloads')
-        .select(`
-          *,
-          customer:customers(name, email),
-          product:digital_products(name)
-        `)
-        .eq('customer_id', customerId)
-        .order('purchase_date', { ascending: false });
+        .from('digital_licenses')
+        .select(
+          `
+          id,
+          license_key,
+          status,
+          customer_email,
+          customer_name,
+          activated_at,
+          created_at,
+          digital_product_id,
+          order_id,
+          current_activations,
+          max_activations,
+          issued_at,
+          expires_at,
+          digital_products (
+            id,
+            products ( id, name, store_id )
+          ),
+          orders ( total_amount, payment_status, created_at, status )
+        `
+        )
+        .in('digital_product_id', digitalProductIds)
+        .eq('customer_email', customer.email)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      return data.map((d: any) => ({
-        id: d.id,
-        customerId: d.customer_id,
-        customerName: d.customer?.name || 'Inconnu',
-        customerEmail: d.customer?.email || '',
-        productId: d.product_id,
-        productName: d.product?.name || 'Produit supprimé',
-        downloadCount: d.download_count || 0,
-        downloadLimit: d.download_limit,
-        licenseKey: d.license_key,
-        status: d.status,
-        purchaseDate: d.purchase_date,
-        lastDownloadDate: d.last_download_date,
-        expiryDate: d.expiry_date,
-        ipAddress: d.ip_address,
-        location: d.location,
-        amountPaid: d.amount_paid,
-      })) as CustomerDownload[];
+      return (data as LicenseRow[]).map(mapLicenseToCustomerDownload);
     },
     enabled: !!customerId,
   });
 };
 
 /**
- * useRevokeDownloadAccess - Hook pour révoquer un accès de téléchargement
+ * useRevokeDownloadAccess - Révoque une licence digitale
  */
 export const useRevokeDownloadAccess = () => {
   const queryClient = useQueryClient();
@@ -178,7 +271,7 @@ export const useRevokeDownloadAccess = () => {
   return useMutation({
     mutationFn: async ({ downloadId, reason }: { downloadId: string; reason?: string }) => {
       const { data, error } = await supabase
-        .from('customer_downloads')
+        .from('digital_licenses')
         .update({
           status: 'revoked',
           updated_at: new Date().toISOString(),
@@ -187,9 +280,6 @@ export const useRevokeDownloadAccess = () => {
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Créer un événement de révocation
       if (reason) {
         await supabase.from('download_events').insert({
           download_id: downloadId,
@@ -198,6 +288,7 @@ export const useRevokeDownloadAccess = () => {
         });
       }
 
+      if (error) throw error;
       return data;
     },
     onSuccess: () => {
@@ -207,32 +298,24 @@ export const useRevokeDownloadAccess = () => {
 };
 
 /**
- * useRestoreDownloadAccess - Hook pour restaurer un accès
+ * useRestoreDownloadAccess - Réactive une licence
  */
 export const useRestoreDownloadAccess = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (downloadId: string) => {
+    mutationFn: async (licenseId: string) => {
       const { data, error } = await supabase
-        .from('customer_downloads')
+        .from('digital_licenses')
         .update({
           status: 'active',
           updated_at: new Date().toISOString(),
         })
-        .eq('id', downloadId)
+        .eq('id', licenseId)
         .select()
         .single();
 
       if (error) throw error;
-
-      // Créer un événement de restauration
-      await supabase.from('download_events').insert({
-        download_id: downloadId,
-        type: 'access_granted',
-        message: 'Accès restauré',
-      });
-
       return data;
     },
     onSuccess: () => {
@@ -242,7 +325,7 @@ export const useRestoreDownloadAccess = () => {
 };
 
 /**
- * useUpdateDownloadLimit - Hook pour modifier la limite de téléchargements
+ * useUpdateDownloadLimit - Modifie max_downloads sur la licence
  */
 export const useUpdateDownloadLimit = () => {
   const queryClient = useQueryClient();
@@ -250,9 +333,9 @@ export const useUpdateDownloadLimit = () => {
   return useMutation({
     mutationFn: async ({ downloadId, newLimit }: { downloadId: string; newLimit: number }) => {
       const { data, error } = await supabase
-        .from('customer_downloads')
+        .from('digital_licenses')
         .update({
-          download_limit: newLimit,
+          max_activations: newLimit,
           updated_at: new Date().toISOString(),
         })
         .eq('id', downloadId)
@@ -269,25 +352,19 @@ export const useUpdateDownloadLimit = () => {
 };
 
 /**
- * useCustomerDownloadStats - Hook pour les statistiques des téléchargements clients
+ * useCustomerDownloadStats - Statistiques licences vendeur
  */
 export const useCustomerDownloadStats = () => {
   return useQuery({
     queryKey: ['customerDownloadStats'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Récupérer les produits de l'utilisateur
-      const { data: products, error: productsError } = await supabase
-        .from('digital_products')
-        .select('id')
-        .eq('user_id', user.id);
-
-      if (productsError) throw productsError;
-
-      const productIds = products.map((p) => p.id);
-      if (productIds.length === 0) {
+      const digitalProductIds = await fetchStoreDigitalProductIds(user.id);
+      if (digitalProductIds.length === 0) {
         return {
           totalCustomers: 0,
           activeDownloads: 0,
@@ -297,19 +374,36 @@ export const useCustomerDownloadStats = () => {
         };
       }
 
-      // Récupérer les statistiques
-      const { data: downloads, error } = await supabase
-        .from('customer_downloads')
-        .select('status, amount_paid')
-        .in('product_id', productIds);
+      const { data: licenses, error } = await supabase
+        .from('digital_licenses')
+        .select('status, customer_email, orders(total_amount, payment_status)')
+        .in('digital_product_id', digitalProductIds);
 
       if (error) throw error;
 
-      const uniqueCustomers = new Set(downloads.map((d: any) => d.customer_id)).size;
-      const activeDownloads = downloads.filter((d: any) => d.status === 'active').length;
-      const revokedDownloads = downloads.filter((d: any) => d.status === 'revoked').length;
-      const expiredDownloads = downloads.filter((d: any) => d.status === 'expired').length;
-      const totalRevenue = downloads.reduce((sum: number, d: any) => sum + (d.amount_paid || 0), 0);
+      const rows = licenses ?? [];
+      const uniqueCustomers = new Set(
+        rows.map((d: { customer_email: string | null }) => d.customer_email).filter(Boolean)
+      ).size;
+      const activeDownloads = rows.filter((d: { status: string }) => d.status === 'active').length;
+      const revokedDownloads = rows.filter(
+        (d: { status: string }) => d.status === 'revoked'
+      ).length;
+      const expiredDownloads = rows.filter(
+        (d: { status: string }) => d.status === 'expired'
+      ).length;
+      const totalRevenue = rows.reduce(
+        (
+          sum: number,
+          d: { orders?: { total_amount?: number; payment_status?: string } | null }
+        ) => {
+          if (d.orders?.payment_status === 'paid') {
+            return sum + Number(d.orders?.total_amount ?? 0);
+          }
+          return sum;
+        },
+        0
+      );
 
       return {
         totalCustomers: uniqueCustomers,
@@ -323,7 +417,7 @@ export const useCustomerDownloadStats = () => {
 };
 
 /**
- * useDownloadEvents - Hook pour récupérer les événements de téléchargement
+ * useDownloadEvents - Événements liés à une licence (download_id = license id)
  */
 export const useDownloadEvents = (downloadId: string | undefined) => {
   return useQuery({
@@ -344,9 +438,4 @@ export const useDownloadEvents = (downloadId: string | undefined) => {
   });
 };
 
-
-
-
-
-
-
+export { DOWNLOAD_EVENT_FIELDS };

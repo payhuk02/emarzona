@@ -6,6 +6,8 @@
 import type { CartItem } from '@/types/cart';
 import { calculateArtistShipping } from '@/lib/shipping/artist-shipping';
 import { fetchCheapestFedexShippingCost } from '@/lib/shipping/fedex-rates-client';
+import { resolveStoreZoneShippingAmount } from '@/lib/checkout/shipping-zones';
+import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
 export interface CheckoutShippingInput {
@@ -81,6 +83,49 @@ async function resolvePhysicalShippingAmount(
 ): Promise<number> {
   const country = address.country;
   const postalCode = address.postal_code?.trim();
+
+  const subtotal = items.reduce(
+    (sum, item) => sum + (item.unit_price - (item.discount_amount || 0)) * item.quantity,
+    0
+  );
+
+  const productIds = [...new Set(items.map(i => i.product_id))];
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, store_id')
+    .in('id', productIds);
+
+  const storeByProduct = new Map((products ?? []).map(p => [p.id, p.store_id]));
+  const byStore = new Map<string, CartItem[]>();
+  for (const item of items) {
+    const storeId = storeByProduct.get(item.product_id);
+    if (!storeId) continue;
+    const list = byStore.get(storeId) ?? [];
+    list.push(item);
+    byStore.set(storeId, list);
+  }
+
+  let zoneTotal = 0;
+  let zoneApplied = false;
+  for (const [storeId, storeItems] of byStore) {
+    const storeSubtotal = storeItems.reduce(
+      (sum, item) => sum + (item.unit_price - (item.discount_amount || 0)) * item.quantity,
+      0
+    );
+    const zoneAmount = await resolveStoreZoneShippingAmount(
+      storeId,
+      storeItems,
+      address,
+      storeSubtotal
+    );
+    if (zoneAmount != null) {
+      zoneTotal += zoneAmount;
+      zoneApplied = true;
+    }
+  }
+  if (zoneApplied) {
+    return zoneTotal;
+  }
 
   if (postalCode && country.length >= 2) {
     try {

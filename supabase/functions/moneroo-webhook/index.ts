@@ -437,6 +437,7 @@ serve(async req => {
                 plan_id: plan.id,
                 status: 'active',
                 billing_cycle: 'monthly',
+                mrr_amount: Number(plan.monthly_price ?? 0),
                 current_period_start: now.toISOString(),
                 current_period_end: periodEnd.toISOString(),
                 trial_ends_at: null,

@@ -63,6 +63,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { useAddToComparison } from './DigitalProductsCompare';
 import { FileVersionManager, FileMetadataEditor } from '@/components/digital/files';
+import CouponInput from '@/components/checkout/CouponInput';
 
 interface DigitalProductDetailParams {
   productId: string;
@@ -85,6 +86,9 @@ export default function DigitalProductDetail() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
+  const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
+  const [appliedDiscountAmount, setAppliedDiscountAmount] = useState<number | null>(null);
 
   // Fetch digital product with all relations
   const { data: digitalProduct, isLoading, error } = useDigitalProduct(productId || '');
@@ -201,6 +205,9 @@ export default function DigitalProductDetail() {
               : 'unlimited',
         maxActivations:
           digitalProduct.license_type === 'multi' ? digitalProduct.max_licenses : undefined,
+        couponCode: appliedCouponCode ?? undefined,
+        couponDiscountAmount: appliedDiscountAmount ?? undefined,
+        promotionId: appliedCouponId ?? undefined,
       });
 
       if (result.checkoutUrl) {
@@ -219,8 +226,9 @@ export default function DigitalProductDetail() {
       } else {
         throw new Error('URL de paiement non disponible');
       }
-    } catch (_error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (purchaseError: unknown) {
+      const errorMessage =
+        purchaseError instanceof Error ? purchaseError.message : String(purchaseError);
       logger.error('Error initiating purchase', {
         error: errorMessage,
         digitalProductId: digitalProduct.id,
@@ -437,30 +445,53 @@ export default function DigitalProductDetail() {
                     </CardContent>
                   </Card>
                 ) : (
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start px-6 sm:px-8 rounded-full font-semibold shadow-md hover:shadow-lg"
-                    onClick={handlePurchase}
-                    disabled={
-                      isPurchasing ||
-                      isCreatingOrder ||
-                      !digitalProduct ||
-                      !user ||
-                      !product.is_active
-                    }
-                  >
-                    {isPurchasing || isCreatingOrder ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Traitement...
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="h-4 w-4 mr-2" />
-                        Acheter maintenant
-                      </>
+                  <>
+                    {product?.store_id && (
+                      <CouponInput
+                        storeId={product.store_id}
+                        productId={product.id}
+                        customerId={user?.id}
+                        orderAmount={Number(product.promotional_price ?? product.price ?? 0)}
+                        onApply={(promotionId, discountAmount, code) => {
+                          setAppliedCouponId(promotionId);
+                          setAppliedDiscountAmount(discountAmount);
+                          setAppliedCouponCode(code);
+                        }}
+                        onRemove={() => {
+                          setAppliedCouponId(null);
+                          setAppliedDiscountAmount(null);
+                          setAppliedCouponCode(null);
+                        }}
+                        appliedCouponId={appliedCouponId}
+                        appliedCouponCode={appliedCouponCode}
+                        appliedDiscountAmount={appliedDiscountAmount}
+                      />
                     )}
-                  </Button>
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto sm:max-w-[min(100%,16rem)] sm:self-start px-6 sm:px-8 rounded-full font-semibold shadow-md hover:shadow-lg"
+                      onClick={handlePurchase}
+                      disabled={
+                        isPurchasing ||
+                        isCreatingOrder ||
+                        !digitalProduct ||
+                        !user ||
+                        !product.is_active
+                      }
+                    >
+                      {isPurchasing || isCreatingOrder ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Traitement...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="h-4 w-4 mr-2" />
+                          Acheter maintenant
+                        </>
+                      )}
+                    </Button>
+                  </>
                 )}
 
                 {/* Actions supplémentaires */}
