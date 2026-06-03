@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   useStorePaymentOptions,
   rpcProviderToCheckout,
+  checkoutProviderToRpc,
   type CheckoutPaymentProvider,
 } from '@/hooks/payments/useStorePaymentOptions';
 import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
@@ -130,10 +131,14 @@ export function PaymentProviderSelector({
         const pref = data?.payment_provider_preference;
         if (!pref) return;
 
-        const checkoutPref =
+        const checkoutPref: CheckoutPaymentProvider =
           pref === 'moneroo' || pref === 'moneroo_platform'
             ? 'moneroo'
-            : (pref as CheckoutPaymentProvider);
+            : pref === 'stripe_connect' ||
+                pref === 'paypal_commerce' ||
+                pref === 'flutterwave_connect'
+              ? pref
+              : 'moneroo';
 
         const match = providers.find(p => p.value === checkoutPref);
         if (match) onChange(match.value);
@@ -148,15 +153,15 @@ export function PaymentProviderSelector({
   const handleProviderChange = async (provider: CheckoutPaymentProvider) => {
     onChange(provider);
 
-    if (user && (provider === 'moneroo' || provider === 'stripe_connect')) {
+    if (user) {
       try {
-        const dbPref = provider === 'moneroo' ? 'moneroo' : 'moneroo';
+        const dbPref = checkoutProviderToRpc(provider);
         await supabase
           .from('profiles')
           .update({ payment_provider_preference: dbPref })
           .eq('user_id', user.id);
       } catch (error) {
-        logger.debug('Could not save payment preference (schema may be moneroo-only)', { error });
+        logger.debug('Could not save payment preference', { error, provider });
       }
     }
   };

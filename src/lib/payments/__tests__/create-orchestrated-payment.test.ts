@@ -29,6 +29,7 @@ import {
 } from '../orchestrator/load-connections';
 import { createMonerooPlatformPayment } from '../adapters/moneroo-adapter';
 import { createStripeConnectPayment } from '../adapters/stripe-connect-adapter';
+import { createPayPalCommercePayment } from '../adapters/paypal-commerce-adapter';
 
 const baseConnection = (overrides: Partial<StorePaymentConnection>): StorePaymentConnection => ({
   id: 'conn-1',
@@ -117,5 +118,44 @@ describe('createOrchestratedPayment', () => {
     expect(createMonerooPlatformPayment).toHaveBeenCalledOnce();
     expect(createStripeConnectPayment).not.toHaveBeenCalled();
     expect(result.provider).toBe('moneroo_platform');
+  });
+
+  it('honore preferredProvider via resolve (PayPal si compatible)', async () => {
+    const connections = [
+      baseConnection({ id: 'c-m', provider: 'moneroo_platform' }),
+      baseConnection({
+        id: 'c-p',
+        provider: 'paypal_commerce',
+        external_account_id: 'merchant_1',
+      }),
+      baseConnection({
+        id: 'c-s',
+        provider: 'stripe_connect',
+        capabilities: { card_payments: true },
+      }),
+    ];
+    vi.mocked(loadStorePaymentConnections).mockResolvedValue(connections);
+
+    vi.mocked(createPayPalCommercePayment).mockResolvedValue({
+      success: true,
+      transaction_id: 'tx-p',
+      checkout_url: 'https://paypal.com/checkout',
+      provider: 'paypal_commerce',
+    });
+
+    const result = await createOrchestratedPayment({
+      storeId: 'store-1',
+      orderId: 'order-3',
+      amount: 50,
+      currency: 'USD',
+      description: 'USD order',
+      customerEmail: 'buyer@example.com',
+      preferredProvider: 'paypal_commerce',
+      connections,
+    });
+
+    expect(createPayPalCommercePayment).toHaveBeenCalledOnce();
+    expect(createStripeConnectPayment).not.toHaveBeenCalled();
+    expect(result.provider).toBe('paypal_commerce');
   });
 });

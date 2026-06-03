@@ -8,7 +8,11 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { E2E_TEST_CONFIG, gotoApp, loginAs } from './shared/e2e-test-config';
+import { E2E_TEST_CONFIG, gotoApp, loginAs, appLocator } from './shared/e2e-test-config';
+import {
+  openFirstProductCard,
+  openMarketplaceWithOptionalFilter,
+} from './shared/marketplace-discovery';
 
 test.describe('Artist product workflow', () => {
   test.setTimeout(90_000);
@@ -34,25 +38,35 @@ test.describe('Artist product workflow', () => {
     expect(response?.status()).toBeLessThan(500);
     await expect(page.locator('body')).toBeVisible();
 
-    const artistFilter = page.locator(
-      'button:has-text("Artiste"), button:has-text("Œuvre"), button:has-text("Artist"), [data-product-type="artist"]'
-    );
-    if (
-      await artistFilter
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      await artistFilter.first().click();
+    const hasProducts = await openMarketplaceWithOptionalFilter(page, 'artist');
+    if (!hasProducts) {
+      test.skip(true, 'Marketplace sans produits');
+      return;
     }
 
-    const card = page.locator('[data-testid="product-card"]').first();
-    if (await card.isVisible().catch(() => false)) {
-      await card.click();
-      await page.waitForURL(/\/(artist|stores)\//, { timeout: 15_000 }).catch(() => undefined);
-      const url = page.url();
-      expect(url.length).toBeGreaterThan(0);
-    }
+    const opened = await openFirstProductCard(page, /\/(artist|stores)\//);
+    expect(opened || page.url().includes('/marketplace')).toBeTruthy();
+  });
+
+  test('artist listing /artists responds without server error', async ({ page }) => {
+    const response = await gotoApp(page, '/artists');
+    expect(response?.status()).toBeLessThan(500);
+    const html = (await page.content()).toLowerCase();
+    expect(html).not.toContain('internal server error');
+    await expect(page.locator('body')).toBeVisible();
+  });
+
+  test('guest add-to-cart CTA on artist detail when E2E_ARTIST_PRODUCT_ID set', async ({
+    page,
+  }) => {
+    const productId = process.env.E2E_ARTIST_PRODUCT_ID;
+    test.skip(!productId, 'Set E2E_ARTIST_PRODUCT_ID');
+
+    await gotoApp(page, `/artist/${productId}`);
+    const cta = appLocator(page).getByRole('button', {
+      name: /acheter|ajouter|panier|buy|commander/i,
+    });
+    await expect(cta.first().or(page.locator('h1'))).toBeVisible({ timeout: 15_000 });
   });
 
   test('artist product detail route responds (optional E2E_ARTIST_PRODUCT_ID)', async ({

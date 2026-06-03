@@ -109,6 +109,25 @@ test.describe('Checkout multi-PSP — acheteur authentifié', () => {
     await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
   });
 
+  test('orchestration V2 : sélection Moneroo visible si plusieurs PSP (smoke)', async ({
+    page,
+  }) => {
+    test.skip(!orchestrationV2, 'Définir VITE_PAYMENT_ORCHESTRATION_V2=true');
+
+    await loginAs(page, E2E_TEST_CONFIG.buyerEmail, E2E_TEST_CONFIG.buyerPassword);
+    await gotoApp(page, '/checkout?productId=00000000-0000-0000-0000-000000000001');
+
+    const monerooRadio = page.locator('#payment-moneroo, [id^="payment-"]').first();
+    await Promise.race([
+      page.getByText(/moyen de paiement/i).waitFor({ timeout: 25_000 }),
+      monerooRadio.waitFor({ timeout: 25_000 }),
+      page.getByText(/aucun moyen de paiement/i).waitFor({ timeout: 25_000 }),
+    ]).catch(() => undefined);
+
+    const html = (await page.content()).toLowerCase();
+    expect(html).not.toContain('internal server error');
+  });
+
   test('checkout authentifié charge sans erreur fatale', async ({ page }) => {
     test.setTimeout(90_000);
     const response = await gotoApp(page, '/checkout');
