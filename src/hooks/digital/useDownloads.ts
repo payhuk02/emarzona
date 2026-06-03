@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 const DIGITAL_DOWNLOAD_FIELDS =
   'id, digital_product_id, file_id, user_id, download_date, download_ip, download_country, user_agent, download_duration_seconds, download_success, license_key, file_version, created_at';
@@ -353,8 +354,8 @@ export const useGenerateDownloadLink = () => {
         `
           )
           .eq('product_id', file.digital_product.product_id)
-          .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Paiement confirmé
-          .eq('orders.status', 'completed') // Commande complétée
+          .eq('orders.payment_status', 'paid')
+          .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
           .eq('orders.customers.email', user.email)
           .limit(1);
 
@@ -382,7 +383,7 @@ export const useGenerateDownloadLink = () => {
             )
             .eq('product_id', file.digital_product.product_id)
             .eq('orders.payment_status', 'paid') // ⚠️ CRITIQUE: Paiement confirmé
-            .eq('orders.status', 'completed') // Commande complétée
+            .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
             .eq('orders.customer_id', customer[0].id)
             .limit(1);
 

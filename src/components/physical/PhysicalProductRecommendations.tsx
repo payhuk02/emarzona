@@ -18,6 +18,7 @@ import { PhysicalProductCard } from './PhysicalProductCard';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { SameStoreProductsSection } from '@/components/marketplace/SameStoreProductsSection';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 // Type pour les produits recommandés
 interface RecommendedProduct {
@@ -153,7 +154,7 @@ const useProductRecommendations = (
             )
             .eq('orders.customers.email', user.email)
             .eq('orders.payment_status', 'paid')
-            .eq('orders.status', 'completed')
+            .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
             .eq('product_type', 'physical');
 
           if (purchasedProducts && purchasedProducts.length > 0) {
