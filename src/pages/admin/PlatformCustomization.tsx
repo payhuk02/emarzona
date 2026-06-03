@@ -31,6 +31,7 @@ import {
   RefreshCw,
   Layout,
   Home,
+  PanelBottom,
   Download,
   Upload,
   AlertCircle,
@@ -45,6 +46,7 @@ import { FeaturesSection } from '@/components/admin/customization/FeaturesSectio
 import { NotificationsSection } from '@/components/admin/customization/NotificationsSection';
 import { PagesCustomizationSection } from '@/components/admin/customization/PagesCustomizationSection';
 import { LandingPageCustomizationSection } from '@/components/admin/customization/LandingPageCustomizationSection';
+import { FooterCustomizationSection } from '@/components/admin/customization/FooterCustomizationSection';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import {
   exportCustomization,
@@ -52,7 +54,7 @@ import {
   importCustomizationFromString,
 } from '@/lib/platform-customization-export';
 import { logger } from '@/lib/logger';
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,6 +75,7 @@ type CustomizationSection =
   | 'features'
   | 'notifications'
   | 'landing'
+  | 'footer'
   | 'pages';
 
 interface SectionConfig {
@@ -133,6 +136,13 @@ const sections: SectionConfig[] = [
     icon: Home,
     description: "Personnalisez tous les éléments de la page d'accueil",
     badge: 'Important',
+  },
+  {
+    id: 'footer',
+    label: 'Pied de page',
+    icon: PanelBottom,
+    description: 'Liens, newsletter, réseaux sociaux et mentions légales',
+    badge: 'Sync',
   },
   {
     id: 'pages',
@@ -316,6 +326,8 @@ export const PlatformCustomization = () => {
         return <NotificationsSection onChange={handleChange} />;
       case 'landing':
         return <LandingPageCustomizationSection onChange={handleChange} />;
+      case 'footer':
+        return <FooterCustomizationSection onChange={handleChange} />;
       case 'pages':
         return <PagesCustomizationSection onChange={handleChange} />;
       default:
@@ -452,17 +464,17 @@ export const PlatformCustomization = () => {
                 <div className="flex items-center gap-2">
                   <Select>
                     <SelectTrigger className="gap-2 min-h-[44px]">
-
-                        <Settings className="h-4 w-4" />
-                        <span className="hidden sm:inline">Actions</span>
-                      
-</SelectTrigger>
+                      <Settings className="h-4 w-4" />
+                      <span className="hidden sm:inline">Actions</span>
+                    </SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
                       <SelectItem value="edit" onSelect={handleExport} className="cursor-pointer">
                         <Download className="h-4 w-4 mr-2" />
                         Exporter JSON
                       </SelectItem>
-                      <SelectItem value="delete" onSelect={() => fileInputRef.current?.click()}
+                      <SelectItem
+                        value="delete"
+                        onSelect={() => fileInputRef.current?.click()}
                         className="cursor-pointer"
                       >
                         <Upload className="h-4 w-4 mr-2" />

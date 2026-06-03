@@ -394,13 +394,27 @@
     },
     "footer": {
       "legal": "Légales",
+      "linksTitle": "Liens",
+      "links": {
+        "products": "Produits",
+        "about": "À propos",
+        "reviews": "Avis",
+        "contact": "Contact"
+      },
       "terms": "CGU",
       "privacy": "Confidentialité",
       "refund": "Remboursement",
+      "returnPolicy": "Politique de retour",
+      "shippingPolicy": "Politique de livraison",
+      "cookiePolicy": "Politique des cookies",
+      "faq": "FAQ",
       "location": "Localisation",
       "africa": "Afrique",
       "french": "Français",
-      "multiCurrency": "Multidevise"
+      "multiCurrency": "Multidevise",
+      "followUs": "Nous suivre",
+      "poweredBy": "Propulsé par",
+      "copyright": "© {{year}} {{storeName}}. Tous droits réservés."
     },
     "contact": {
       "title": "Contactez {{storeName}}",

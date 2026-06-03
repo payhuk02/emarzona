@@ -5,6 +5,7 @@ import {
   LANDING_PREMIUM_SECTIONS,
 } from '@/lib/admin/landingPremiumCustomization';
 import { buildPlatformMarketingPageConfigs } from '@/lib/admin/platformMarketingPagesConfig';
+import { STORE_FOOTER_PAGE_ID, STORE_FOOTER_SECTIONS } from '@/lib/admin/storeFooterCustomization';
 
 const landingPremiumPage: PageConfig = {
   id: LANDING_PREMIUM_PAGE_ID,
@@ -30,6 +31,26 @@ const landingPremiumPage: PageConfig = {
 export const publicPagesConfig: PageConfig[] = [
   landingPremiumPage,
   ...buildPlatformMarketingPageConfigs(),
+  {
+    id: STORE_FOOTER_PAGE_ID,
+    name: 'Pied de page boutiques',
+    route: ':slug.myemarzona.shop',
+    description: 'Libellés et liens du footer affiché sur chaque boutique',
+    icon: ShoppingCart,
+    sections: STORE_FOOTER_SECTIONS.map(section => ({
+      id: section.id,
+      name: section.name,
+      type: 'content' as const,
+      elements: section.elements.map(element => ({
+        id: element.id,
+        label: element.label,
+        type: element.type,
+        key: `${STORE_FOOTER_PAGE_ID}.${element.id}`,
+        defaultValue: element.defaultValue,
+        description: element.description,
+      })),
+    })),
+  },
   {
     id: 'marketplace',
     name: 'Marketplace',

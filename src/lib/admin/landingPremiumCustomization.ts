@@ -87,6 +87,8 @@ function stringListFields(
   return items.map((value, i) => text(`${prefix}.${i}`, `${itemLabel} ${i + 1}`, value));
 }
 
+export const FOOTER_CUSTOMIZATION_SECTION_ID = 'footer';
+
 export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
   {
     id: 'seo',

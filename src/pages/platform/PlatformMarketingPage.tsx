@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOMeta } from '@/components/seo/SEOMeta';
+import { PremiumFooter } from '@/components/landing/premium/PremiumFooter';
 import { getPlatformMarketingPageBySlug } from '@/lib/admin/platformMarketingPagesConfig';
 import { usePlatformMarketingPage } from '@/hooks/usePlatformMarketingPage';
 import NotFound from '@/pages/NotFound';
@@ -59,6 +60,7 @@ function PlatformMarketingPageContent({
             dangerouslySetInnerHTML={{ __html: body }}
           />
         </div>
+        <PremiumFooter />
       </div>
     </>
   );

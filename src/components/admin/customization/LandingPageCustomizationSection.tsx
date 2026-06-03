@@ -27,31 +27,58 @@ import {
 
 interface LandingPageCustomizationSectionProps {
   onChange?: () => void;
+  /** Limite les sections affichées (ex. ['footer'] pour le pied de page uniquement) */
+  sectionsFilter?: string[];
+  /** Section active par défaut */
+  defaultSection?: string;
+  /** Identifiant page dans platform_settings.pages (défaut : landingPremium) */
+  pageId?: string;
+  /** Sections à éditer (défaut : LANDING_PREMIUM_SECTIONS) */
+  sectionsConfig?: typeof LANDING_PREMIUM_SECTIONS;
+  /** Masquer l'enveloppe Card (utile quand intégré dans une autre section) */
+  hideCardWrapper?: boolean;
+  title?: string;
+  description?: string;
 }
 
 type PageElement = LandingPremiumElement & {
   type: LandingPremiumElement['type'] | 'font' | 'number' | 'url' | 'boolean';
 };
 
-const LANDING_SECTIONS = LANDING_PREMIUM_SECTIONS;
-
 export const LandingPageCustomizationSection = ({
   onChange,
+  sectionsFilter,
+  defaultSection,
+  pageId = LANDING_PREMIUM_PAGE_ID,
+  sectionsConfig = LANDING_PREMIUM_SECTIONS,
+  hideCardWrapper = false,
+  title = "Personnalisation de la Page d'Accueil",
+  description = "Personnalisez la page d'accueil premium (hero, solutions, tarifs, footer, SEO). Les changements sont visibles en direct.",
 }: LandingPageCustomizationSectionProps) => {
+  const LANDING_SECTIONS = useMemo(
+    () =>
+      sectionsFilter?.length
+        ? sectionsConfig.filter(s => sectionsFilter.includes(s.id))
+        : sectionsConfig,
+    [sectionsFilter, sectionsConfig]
+  );
+
   const { customizationData, save } = usePlatformCustomization();
   const { toast } = useToast();
-  const [selectedSection, setSelectedSection] = useState<string>('seo');
+  const [selectedSection, setSelectedSection] = useState<string>(
+    defaultSection ?? LANDING_SECTIONS[0]?.id ?? 'seo'
+  );
   const [pageValues, setPageValues] = useState<Record<string, string | number | boolean | null>>(
     {}
   );
   const [uploadingImage, setUploadingImage] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    const premium = customizationData?.pages?.[LANDING_PREMIUM_PAGE_ID];
-    if (premium && typeof premium === 'object') {
-      setPageValues(premium as Record<string, string | number | boolean | null>);
+    const pageData = customizationData?.pages?.[pageId];
+    if (pageData && typeof pageData === 'object') {
+      setPageValues(pageData as Record<string, string | number | boolean | null>);
     }
-  }, [customizationData]);
+  }, [customizationData, pageId]);
 
   /**
    * Configuration de la section sélectionnée
@@ -59,7 +86,7 @@ export const LandingPageCustomizationSection = ({
    */
   const selectedSectionConfig = useMemo(
     () => LANDING_SECTIONS.find(s => s.id === selectedSection),
-    [selectedSection]
+    [selectedSection, LANDING_SECTIONS]
   );
 
   // Debounce pour éviter trop de sauvegardes
@@ -80,7 +107,7 @@ export const LandingPageCustomizationSection = ({
         const currentPages = customizationData?.pages || {};
         const pagesPayload = {
           ...currentPages,
-          [LANDING_PREMIUM_PAGE_ID]: updated,
+          [pageId]: updated,
         };
         window.dispatchEvent(
           new CustomEvent('platform-customization-updated', {
@@ -98,7 +125,7 @@ export const LandingPageCustomizationSection = ({
         return updated;
       });
     },
-    [save, onChange, customizationData]
+    [save, onChange, customizationData, pageId]
   );
 
   const handleImageUpload = useCallback(
@@ -106,7 +133,7 @@ export const LandingPageCustomizationSection = ({
       setUploadingImage(prev => ({ ...prev, [elementKey]: true }));
       try {
         const fileExt = file.name.split('.').pop();
-        const filePath = `page-assets/${LANDING_PREMIUM_PAGE_ID}/${elementKey}-${Date.now()}.${fileExt}`;
+        const filePath = `page-assets/${pageId}/${elementKey}-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('platform-assets')
@@ -139,7 +166,7 @@ export const LandingPageCustomizationSection = ({
         setUploadingImage(prev => ({ ...prev, [elementKey]: false }));
       }
     },
-    [handleElementChange, toast]
+    [handleElementChange, toast, pageId]
   );
 
   const handleRemoveImage = useCallback(
@@ -147,7 +174,7 @@ export const LandingPageCustomizationSection = ({
       try {
         const urlParts = imageUrl.split('/');
         const fileName = urlParts[urlParts.length - 1];
-        const filePath = `page-assets/${LANDING_PREMIUM_PAGE_ID}/${fileName}`;
+        const filePath = `page-assets/${pageId}/${fileName}`;
 
         const { error: deleteError } = await supabase.storage
           .from('platform-assets')
@@ -170,7 +197,7 @@ export const LandingPageCustomizationSection = ({
         });
       }
     },
-    [handleElementChange, toast]
+    [handleElementChange, toast, pageId]
   );
 
   const renderElementEditor = useCallback(
@@ -323,73 +350,78 @@ export const LandingPageCustomizationSection = ({
     [pageValues, handleElementChange, handleImageUpload, handleRemoveImage, uploadingImage]
   );
 
+  const editorContent = (
+    <Tabs value={selectedSection} onValueChange={setSelectedSection}>
+      {LANDING_SECTIONS.length > 1 ? (
+        <ScrollArea className="w-full whitespace-nowrap rounded-md border mb-4">
+          <TabsList className="inline-flex w-full justify-start p-1">
+            {LANDING_SECTIONS.map(section => {
+              const Icon = section.icon;
+              return (
+                <TabsTrigger
+                  key={section.id}
+                  value={section.id}
+                  className="text-xs sm:text-sm shrink-0"
+                >
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">{section.name}</span>
+                  <span className="sm:hidden">{section.name.split(' ')[0]}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      ) : null}
+
+      {selectedSectionConfig && (
+        <TabsContent value={selectedSection} className="space-y-4 mt-4">
+          {LANDING_SECTIONS.length > 1 ? (
+            <div className="flex items-center gap-2 mb-4">
+              <selectedSectionConfig.icon className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold">{selectedSectionConfig.name}</h3>
+              <Badge variant="secondary">{selectedSectionConfig.elements.length} éléments</Badge>
+            </div>
+          ) : null}
+          {LANDING_SECTIONS.length > 1 ? <Separator /> : null}
+          <div className="space-y-4">
+            {selectedSectionConfig.elements.map(element => (
+              <div key={element.id} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={`landing-${element.id}`} className="text-sm font-medium">
+                    {element.label}
+                  </Label>
+                  <Badge variant="outline" className="text-xs">
+                    {element.type}
+                  </Badge>
+                </div>
+                {element.description && (
+                  <p className="text-xs text-muted-foreground">{element.description}</p>
+                )}
+                {renderElementEditor(element)}
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+      )}
+    </Tabs>
+  );
+
+  if (hideCardWrapper) {
+    return <div className="space-y-4 sm:space-y-6">{editorContent}</div>;
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Home className="h-5 w-5" />
-            Personnalisation de la Page d'Accueil
+            {title}
           </CardTitle>
-          <CardDescription>
-            Personnalisez la page d'accueil premium (hero, solutions, tarifs, footer, SEO). Les
-            changements sont visibles en direct.
-          </CardDescription>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs value={selectedSection} onValueChange={setSelectedSection}>
-            <ScrollArea className="w-full whitespace-nowrap rounded-md border mb-4">
-              <TabsList className="inline-flex w-full justify-start p-1">
-                {LANDING_SECTIONS.map(section => {
-                  const Icon = section.icon;
-                  return (
-                    <TabsTrigger
-                      key={section.id}
-                      value={section.id}
-                      className="text-xs sm:text-sm shrink-0"
-                    >
-                      <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">{section.name}</span>
-                      <span className="sm:hidden">{section.name.split(' ')[0]}</span>
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-
-            {selectedSectionConfig && (
-              <TabsContent value={selectedSection} className="space-y-4 mt-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <selectedSectionConfig.icon className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-semibold">{selectedSectionConfig.name}</h3>
-                  <Badge variant="secondary">
-                    {selectedSectionConfig.elements.length} éléments
-                  </Badge>
-                </div>
-                <Separator />
-                <div className="space-y-4">
-                  {selectedSectionConfig.elements.map(element => (
-                    <div key={element.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor={`landing-${element.id}`} className="text-sm font-medium">
-                          {element.label}
-                        </Label>
-                        <Badge variant="outline" className="text-xs">
-                          {element.type}
-                        </Badge>
-                      </div>
-                      {element.description && (
-                        <p className="text-xs text-muted-foreground">{element.description}</p>
-                      )}
-                      {renderElementEditor(element)}
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-            )}
-          </Tabs>
-        </CardContent>
+        <CardContent>{editorContent}</CardContent>
       </Card>
     </div>
   );
