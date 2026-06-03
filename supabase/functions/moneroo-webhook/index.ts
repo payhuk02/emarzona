@@ -3,11 +3,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 import {
+  completeTransactionAndOrder,
   markWebhookProcessed,
   recordWebhookEvent,
   validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
-import { resolvePaidOrderStatusForOrder } from '../_shared/order-status.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -366,40 +366,35 @@ serve(async req => {
         }
       }
 
-      // Update associated order if exists
-      let order = null;
+      // Commande : même pipeline que Stripe/PayPal (statut paid + fulfillment unifié)
+      let order: Record<string, unknown> | null = null;
       if (transaction.order_id) {
-        const { data: prevOrder } = await supabase
-          .from('orders')
-          .select('payment_status')
-          .eq('id', transaction.order_id)
-          .single();
-        const wasAlreadyPaid = prevOrder?.payment_status === 'paid';
-
-        const paidOrderStatus = await resolvePaidOrderStatusForOrder(
+        const { orderId, alreadyCompleted } = await completeTransactionAndOrder(
           supabase,
-          transaction.order_id
+          transaction.id,
+          {
+            webhookPayload: safePayloadForLogs,
+            paymentProviderUsed: transaction.payment_provider || 'moneroo_platform',
+          }
         );
 
-        const { data: orderData, error: orderError } = await supabase
-          .from('orders')
-          .update({
-            payment_status: 'paid',
-            status: paidOrderStatus,
-            payment_provider_used: transaction.payment_provider || 'moneroo_platform',
-          })
-          .eq('id', transaction.order_id)
-          .select(
-            'id,store_id,order_number,customer_id,total_amount,currency,status,payment_status,created_at,metadata,customer_email,shipping_address,expected_delivery_date,tracking_number,tracking_link'
-          )
-          .single();
+        if (orderId) {
+          if (!alreadyCompleted) {
+            await runPostOrderPaymentFulfillment(supabase, orderId, transaction.id);
+          }
 
-        if (orderError) {
-          console.error('Error updating order:', orderError);
-        } else if (orderData) {
-          order = orderData;
-          if (!wasAlreadyPaid) {
-            await runPostOrderPaymentFulfillment(supabase, orderData.id, transaction.id);
+          const { data: orderData, error: orderError } = await supabase
+            .from('orders')
+            .select(
+              'id,store_id,order_number,customer_id,total_amount,currency,status,payment_status,created_at,metadata,customer_email,shipping_address,expected_delivery_date,tracking_number,tracking_link'
+            )
+            .eq('id', orderId)
+            .single();
+
+          if (orderError) {
+            console.error('Error loading order after payment:', orderError);
+          } else if (orderData) {
+            order = orderData as Record<string, unknown>;
           }
         }
       }

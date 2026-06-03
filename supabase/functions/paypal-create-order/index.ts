@@ -98,7 +98,7 @@ serve(async req => {
     }
 
     const successSep = body.successUrl.includes('?') ? '&' : '?';
-    const successWithParams = `${body.successUrl}${successSep}order_id=${body.orderId}&provider=paypal`;
+    const successWithParams = `${body.successUrl}${successSep}order_id=${body.orderId}&transaction_id=${transaction.id}&provider=paypal`;
 
     const paypalOrder = await createPayPalCheckoutOrder({
       amount: body.amount,

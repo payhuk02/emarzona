@@ -44,6 +44,8 @@ import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
 import { calculateCheckoutTaxes } from '@/lib/checkout/taxes';
 import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
+import { isPaymentOrchestrationV2Enabled } from '@/lib/payments/feature-flags';
+import { validateMultiStorePaymentProvider } from '@/lib/payments/multi-store-checkout';
 import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
 import {
   cartHasPhysicalItems,
@@ -514,7 +516,7 @@ export default function Checkout() {
     giftCardAmount: number;
     appliedCouponCode: { id: string; discountAmount: number; code: string } | null;
     appliedGiftCard: { id: string; balance: number; code: string } | null;
-    selectedPaymentProvider: 'moneroo';
+    selectedPaymentProvider: PaymentProvider;
   }) => {
     const createdOrders: Array<{
       orderId: string;
@@ -973,7 +975,20 @@ export default function Checkout() {
       if (isMultiStore && storeGroups.size > 1) {
         logger.info('Multi-store checkout detected', { storeCount: storeGroups.size });
 
-        // Implémenter le traitement complet multi-stores
+        const multiStorePaymentCheck = validateMultiStorePaymentProvider({
+          storeCount: storeGroups.size,
+          provider: selectedPaymentProvider,
+          orchestrationEnabled: isPaymentOrchestrationV2Enabled(),
+        });
+        if (!multiStorePaymentCheck.allowed) {
+          toast({
+            title: 'Paiement non disponible',
+            description: multiStorePaymentCheck.message,
+            variant: 'destructive',
+          });
+          return;
+        }
+
         await processMultiStoreCheckout({
           storeGroups,
           formData,
