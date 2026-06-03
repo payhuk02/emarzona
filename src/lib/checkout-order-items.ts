@@ -5,6 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import type { CartItem } from '@/types/cart';
+import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 
 function cartMetadata(item: CartItem): Record<string, unknown> {
   if (item.metadata && typeof item.metadata === 'object' && !Array.isArray(item.metadata)) {
@@ -98,18 +99,16 @@ export async function buildOrderItemRows(
   orderId: string,
   items: CartItem[]
 ): Promise<OrderItemInsertRow[]> {
-  const serviceItems = items.filter(i => i.product_type === 'service');
-  if (serviceItems.length > 0) {
-    throw new Error(
-      'Les services se réservent depuis la page du service, pas via le panier. Retirez-les du panier pour continuer.'
-    );
+  const validation = validateCheckoutCart(items);
+  if (!validation.canCheckout) {
+    throw new Error(validation.message ?? 'Panier incompatible avec le checkout unifié');
   }
 
-  const rows = buildOrderItemRowsSync(orderId, items);
+  const rows = buildOrderItemRowsSync(orderId, validation.checkoutItems);
 
   await Promise.all(
     rows.map(async (row, index) => {
-      const item = items[index];
+      const item = validation.checkoutItems[index];
       if (item.product_type === 'physical' && !row.physical_product_id) {
         const { data } = await supabase
           .from('physical_products')

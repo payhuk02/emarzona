@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAffiliateTrackingCookie } from '@/hooks/useAffiliateTracking';
 import { logger } from '@/lib/logger';
 import { isSupportedCurrency, type Currency } from '@/lib/currency-converter';
+import { validateCheckoutPromotion } from '@/lib/checkout/promotion';
 
 const PRODUCT_FIELDS = 'id, name, price, promotional_price, currency';
 
@@ -59,6 +60,15 @@ export interface CreateDigitalOrderOptions {
 
   /** Montant de la carte cadeau à utiliser (optionnel) */
   giftCardAmount?: number;
+
+  /** Code promo (product_promotions / validate_unified_promotion) */
+  couponCode?: string;
+
+  /** Montant de réduction promo déjà validé côté client */
+  couponDiscountAmount?: number;
+
+  /** ID promotion pour promotion_usage */
+  promotionId?: string;
 }
 
 /**
@@ -140,6 +150,9 @@ export const useCreateDigitalOrder = () => {
         licenseExpiryDays,
         giftCardId,
         giftCardAmount = 0,
+        couponCode,
+        couponDiscountAmount = 0,
+        promotionId,
       } = options;
 
       // 1. Récupérer les détails du produit
@@ -225,9 +238,27 @@ export const useCreateDigitalOrder = () => {
         licenseId = license.id;
       }
 
-      // 4. Calculer le montant final (après carte cadeau si applicable)
-      const baseAmount = product.promotional_price || product.price;
-      const finalAmount = Math.max(0, baseAmount - (giftCardAmount || 0));
+      // 4. Calculer le montant final (promo + carte cadeau)
+      const baseAmount = Number(product.promotional_price ?? product.price);
+      let promoDiscount = Math.max(0, couponDiscountAmount || 0);
+      let resolvedPromotionId = promotionId;
+
+      if (couponCode?.trim() && promoDiscount <= 0) {
+        const validation = await validateCheckoutPromotion({
+          code: couponCode,
+          storeId,
+          productIds: [productId],
+          orderAmount: baseAmount,
+          customerId,
+        });
+        if (!validation.valid) {
+          throw new Error(validation.message);
+        }
+        promoDiscount = validation.promotion.discountAmount;
+        resolvedPromotionId = validation.promotion.promotionId;
+      }
+
+      const finalAmount = Math.max(0, baseAmount - promoDiscount - (giftCardAmount || 0));
 
       // 5. Générer un numéro de commande
       const { data: orderNumberData } = await supabase.rpc('generate_order_number');
@@ -344,6 +375,17 @@ export const useCreateDigitalOrder = () => {
 
       if (orderItemError || !orderItem) {
         throw new Error("Erreur lors de la création de l'élément de commande");
+      }
+
+      if (promoDiscount > 0 && resolvedPromotionId) {
+        await supabase.from('promotion_usage').insert({
+          promotion_id: resolvedPromotionId,
+          order_id: order.id,
+          customer_id: customerId,
+          discount_amount: promoDiscount,
+          order_total_before_discount: baseAmount,
+          order_total_after_discount: finalAmount,
+        });
       }
 
       // 11. Initier le paiement Moneroo

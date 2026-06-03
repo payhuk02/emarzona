@@ -42,6 +42,8 @@ import { isTaxCalculationResult } from '@/pages/checkout/cart/checkout-types';
 import { validateShippingForm } from '@/pages/checkout/cart/checkout-validation';
 import { buildOrderItemRows } from '@/lib/checkout-order-items';
 import { resolveCheckoutShippingAmount } from '@/lib/checkout-shipping';
+import { calculateCheckoutTaxes } from '@/lib/checkout/taxes';
+import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import { reserveArtistLimitedEditionsForCart } from '@/lib/artist-edition-reservation';
 import {
   cartHasPhysicalItems,
@@ -75,21 +77,18 @@ export default function Checkout() {
   const { items, summary, isLoading: cartLoading } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const hasServiceInCart = useMemo(
-    () => items.some(item => item.product_type === 'service'),
-    [items]
-  );
+  const checkoutCartValidation = useMemo(() => validateCheckoutCart(items), [items]);
+  const hasServiceInCart = !checkoutCartValidation.canCheckout;
 
   useEffect(() => {
-    if (hasServiceInCart) {
+    if (!checkoutCartValidation.canCheckout && checkoutCartValidation.message) {
       toast({
-        title: 'Réservation requise',
-        description:
-          'Les services ne passent pas par le panier. Ouvrez la page du service pour choisir un créneau.',
+        title: 'Panier à ajuster',
+        description: checkoutCartValidation.message,
         variant: 'destructive',
       });
     }
-  }, [hasServiceInCart, toast]);
+  }, [checkoutCartValidation.canCheckout, checkoutCartValidation.message, toast]);
 
   // State pour la carte cadeau
   const [appliedGiftCard, setAppliedGiftCard] = useState<AppliedGiftCard | null>(null);
@@ -420,40 +419,14 @@ export default function Checkout() {
         return null;
       }
 
-      const productTypes = Array.from(new Set(items.map(item => item.product_type)));
-
-      const { data, error } = await supabase.rpc('calculate_taxes_pre_order' as never, {
-        p_subtotal: subtotalAfterDiscounts,
-        p_shipping_amount: shippingAmount,
-        p_country_code: formData.country,
-        p_state_province: formData.state || null,
-        p_store_id: storeId || null,
-        p_product_types: productTypes.length > 0 ? productTypes : null,
+      return calculateCheckoutTaxes({
+        subtotal: subtotalAfterDiscounts,
+        shippingAmount,
+        countryCode: formData.country,
+        stateProvince: formData.state || null,
+        storeId: storeId || null,
+        items,
       });
-
-      if (error) {
-        logger.error('Error calculating taxes', { error });
-        // Fallback sur taux par défaut en cas d'erreur
-        return {
-          tax_amount: subtotalAfterDiscounts * 0.18,
-          tax_breakdown: [
-            {
-              type: 'VAT',
-              name: 'TVA',
-              rate: 18,
-              amount: subtotalAfterDiscounts * 0.18,
-              applies_to_shipping: false,
-              tax_inclusive: false,
-              is_default: true,
-            },
-          ],
-          subtotal: subtotalAfterDiscounts,
-          shipping_amount: shippingAmount,
-          total_with_tax: subtotalAfterDiscounts + shippingAmount + subtotalAfterDiscounts * 0.18,
-        };
-      }
-
-      return data;
     },
     enabled: !!formData.country && subtotalAfterDiscounts > 0,
     staleTime: 30000, // Cache pendant 30 secondes
@@ -462,9 +435,8 @@ export default function Checkout() {
   // 5. Calcul des taxes via RPC (utilise les configurations de la base de données)
   const taxAmount = useMemo(() => {
     if (isTaxCalculationResult(taxCalculation)) return Number(taxCalculation.tax_amount);
-    // Fallback si pas encore chargé ou erreur
-    return Math.max(0, subtotalAfterDiscounts * 0.18);
-  }, [taxCalculation, subtotalAfterDiscounts]);
+    return 0;
+  }, [taxCalculation]);
 
   // Breakdown des taxes pour affichage détaillé
   const taxBreakdown = useMemo(() => {
@@ -968,11 +940,12 @@ export default function Checkout() {
       return;
     }
 
-    if (hasServiceInCart) {
+    if (!checkoutCartValidation.canCheckout) {
       toast({
-        title: 'Réservation requise',
+        title: 'Panier à ajuster',
         description:
-          'Les services ne passent pas par le panier. Retirez-les du panier pour continuer.',
+          checkoutCartValidation.message ??
+          'Certains articles ne peuvent pas être payés via ce checkout.',
         variant: 'destructive',
       });
       return;
