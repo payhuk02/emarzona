@@ -2,8 +2,8 @@
  * Service de tracking d'affiliation
  * Gère les cookies d'affiliation et la création de commissions
  */
-import { supabase } from "@/integrations/supabase/client";
-import { logger } from "./logger";
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 const AFFILIATE_COOKIE_NAME = 'emarzona_affiliate';
 const AFFILIATE_COOKIE_EXPIRY_DAYS = 30; // Par défaut, peut être surchargé par produit
@@ -13,7 +13,7 @@ const AFFILIATE_COOKIE_EXPIRY_DAYS = 30; // Par défaut, peut être surchargé p
  */
 export const getAffiliateCookie = (): string | null => {
   if (typeof document === 'undefined') return null;
-  
+
   const cookies = document.cookie.split(';');
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split('=');
@@ -27,12 +27,15 @@ export const getAffiliateCookie = (): string | null => {
 /**
  * Définit le cookie d'affiliation
  */
-export const setAffiliateCookie = (affiliateLinkId: string, expiryDays: number = AFFILIATE_COOKIE_EXPIRY_DAYS) => {
+export const setAffiliateCookie = (
+  affiliateLinkId: string,
+  expiryDays: number = AFFILIATE_COOKIE_EXPIRY_DAYS
+) => {
   if (typeof document === 'undefined') return;
-  
+
   const expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + expiryDays);
-  
+
   document.cookie = `${AFFILIATE_COOKIE_NAME}=${encodeURIComponent(affiliateLinkId)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
 };
 
@@ -48,24 +51,29 @@ export const trackAffiliateClick = async (
     // Récupérer les infos du lien d'affiliation
     const { data: affiliateLink, error: linkError } = await supabase
       .from('affiliate_links')
-      .select(`
+      .select(
+        `
         id,
         affiliate_id,
         product_id,
         store_id,
         cookie_duration_days:product_affiliate_settings(cookie_duration_days)
-      `)
+      `
+      )
       .eq('id', affiliateLinkId)
       .single();
 
     if (linkError || !affiliateLink) {
       logger.error('Affiliate link not found', { affiliateLinkId, error: linkError });
-      return { success: false, error: 'Lien d\'affiliation introuvable' };
+      return { success: false, error: "Lien d'affiliation introuvable" };
     }
 
     // Récupérer la durée du cookie depuis les paramètres du produit
-    const cookieDurationSettings = affiliateLink.cookie_duration_days as { cookie_duration_days?: number }[] | null;
-    const cookieDuration = cookieDurationSettings?.[0]?.cookie_duration_days || AFFILIATE_COOKIE_EXPIRY_DAYS;
+    const cookieDurationSettings = affiliateLink.cookie_duration_days as
+      | { cookie_duration_days?: number }[]
+      | null;
+    const cookieDuration =
+      cookieDurationSettings?.[0]?.cookie_duration_days || AFFILIATE_COOKIE_EXPIRY_DAYS;
 
     // Créer un enregistrement de clic
     const trackingCookie = `${affiliateLinkId}-${Date.now()}`;
@@ -104,7 +112,7 @@ export const trackAffiliateClick = async (
     logger.log('Affiliate click tracked', { affiliateLinkId, trackingCookie });
 
     return { success: true, tracking_cookie: trackingCookie };
-  } catch ( _error: unknown) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in trackAffiliateClick', { error: errorMessage });
     return { success: false, error: errorMessage };
@@ -121,7 +129,7 @@ export const getAffiliateInfo = async (): Promise<{
   tracking_cookie: string | null;
 }> => {
   const trackingCookie = getAffiliateCookie();
-  
+
   if (!trackingCookie) {
     return {
       affiliate_link_id: null,
@@ -159,7 +167,7 @@ export const getAffiliateInfo = async (): Promise<{
       product_id: click.product_id,
       tracking_cookie: trackingCookie,
     };
-  } catch ( _error: unknown) {
+  } catch (error: unknown) {
     logger.error('Error getting affiliate info', { error });
     return {
       affiliate_link_id: null,
@@ -189,13 +197,14 @@ export const createAffiliateCommission = async (
 
     if (!trackingCookie) {
       logger.info('No affiliate tracking cookie found', { orderId });
-      return { success: false, error: 'Aucun cookie d\'affiliation trouvé' };
+      return { success: false, error: "Aucun cookie d'affiliation trouvé" };
     }
 
     // Récupérer les infos du clic d'affiliation
     const { data: click, error: clickError } = await supabase
       .from('affiliate_clicks')
-      .select(`
+      .select(
+        `
         id,
         affiliate_link_id,
         affiliate_id,
@@ -208,7 +217,8 @@ export const createAffiliateCommission = async (
             min_order_amount
           )
         )
-      `)
+      `
+      )
       .eq('tracking_cookie', trackingCookie)
       .eq('product_id', productId)
       .eq('converted', false)
@@ -216,7 +226,7 @@ export const createAffiliateCommission = async (
 
     if (clickError || !click) {
       logger.warn('Affiliate click not found for commission', { trackingCookie, productId });
-      return { success: false, error: 'Clic d\'affiliation non trouvé' };
+      return { success: false, error: "Clic d'affiliation non trouvé" };
     }
 
     type AffiliateSettings = {
@@ -225,29 +235,40 @@ export const createAffiliateCommission = async (
       fixed_commission_amount?: number | null;
       min_order_amount?: number | null;
     };
-    const clickWithLinks = click as { 
+    const clickWithLinks = click as {
       id: string;
       affiliate_link_id: string;
       affiliate_id: string;
       product_id: string;
-      affiliate_links?: { product_affiliate_settings?: AffiliateSettings[] } 
+      affiliate_links?: { product_affiliate_settings?: AffiliateSettings[] };
     };
     const settings = clickWithLinks.affiliate_links?.product_affiliate_settings?.[0];
     if (!settings) {
       logger.warn('Product affiliate settings not found', { productId });
-      return { success: false, error: 'Paramètres d\'affiliation non trouvés' };
+      return { success: false, error: "Paramètres d'affiliation non trouvés" };
     }
 
     // Vérifier le montant minimum
     if (settings.min_order_amount && orderTotal < settings.min_order_amount) {
-      logger.info('Order total below minimum for commission', { orderTotal, minOrderAmount: settings.min_order_amount });
+      logger.info('Order total below minimum for commission', {
+        orderTotal,
+        minOrderAmount: settings.min_order_amount,
+      });
       return { success: false, error: 'Montant de commande insuffisant' };
     }
 
-    // Calculer la commission
-    let  commissionAmount= 0;
+    const { data: storeRow } = await supabase
+      .from('stores')
+      .select('platform_fee_percent')
+      .eq('id', storeId)
+      .maybeSingle();
+
+    const platformFeeRate = Number(storeRow?.platform_fee_percent ?? 10) / 100;
+    const commissionBase = orderTotal * (1 - platformFeeRate);
+
+    let commissionAmount = 0;
     if (settings.commission_type === 'percentage') {
-      commissionAmount = orderTotal * (settings.commission_rate / 100);
+      commissionAmount = commissionBase * (settings.commission_rate / 100);
     } else if (settings.commission_type === 'fixed') {
       commissionAmount = settings.fixed_commission_amount || 0;
     }
@@ -267,7 +288,7 @@ export const createAffiliateCommission = async (
         store_id: storeId,
         order_id: orderId,
         order_total: orderTotal,
-        commission_base: orderTotal,
+        commission_base: commissionBase,
         commission_rate: settings.commission_rate,
         commission_type: settings.commission_type,
         commission_amount: commissionAmount,
@@ -297,22 +318,9 @@ export const createAffiliateCommission = async (
     logger.log('Affiliate commission created', { commissionId: commission.id, orderId });
 
     return { success: true, commission_id: commission.id };
-  } catch ( _error: unknown) {
+  } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     logger.error('Error in createAffiliateCommission', { error: errorMessage });
     return { success: false, error: errorMessage };
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-

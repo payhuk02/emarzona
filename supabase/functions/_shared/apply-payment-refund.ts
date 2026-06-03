@@ -70,6 +70,13 @@ export async function applyPaymentRefund(
       .from('orders')
       .update({ payment_status: 'refunded', updated_at: now })
       .eq('id', transaction.order_id);
+
+    const { error: revokeError } = await supabase.rpc('revoke_digital_access_for_order', {
+      p_order_id: transaction.order_id,
+    });
+    if (revokeError) {
+      console.error('revoke_digital_access_for_order failed:', revokeError);
+    }
   }
 
   await supabase.from('transaction_logs').insert({

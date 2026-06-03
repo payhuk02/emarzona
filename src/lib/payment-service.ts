@@ -135,15 +135,23 @@ export const verifyTransactionStatus = async (
   transactionId: string,
   provider?: PaymentProvider
 ) => {
-  if (!provider) {
-    const { supabase } = await import('@/integrations/supabase/client');
-    const { data: transaction } = await supabase
-      .from('transactions')
-      .select('payment_provider')
-      .eq('id', transactionId)
-      .single();
+  const { supabase } = await import('@/integrations/supabase/client');
+  const { data: transaction } = await supabase
+    .from('transactions')
+    .select('id, status, payment_provider, moneroo_transaction_id')
+    .eq('id', transactionId)
+    .single();
 
-    provider = (transaction?.payment_provider as PaymentProvider) || 'moneroo';
+  const resolvedProvider =
+    provider ?? (transaction?.payment_provider as PaymentProvider) ?? 'moneroo';
+
+  const connectProviders = ['stripe_connect', 'paypal_commerce', 'paypal'];
+  if (connectProviders.includes(resolvedProvider)) {
+    return transaction ?? { id: transactionId, status: 'unknown' };
+  }
+
+  if (!transaction?.moneroo_transaction_id) {
+    return transaction ?? { id: transactionId, status: 'unknown' };
   }
 
   return verifyMonerooTransaction(transactionId);
