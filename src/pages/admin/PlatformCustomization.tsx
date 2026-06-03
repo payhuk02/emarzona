@@ -4,26 +4,19 @@
  * Date: 2025-01-30
  */
 
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
   Palette,
-  Image,
-  Type,
   Settings,
-  Mail,
   Globe,
   Shield,
   Bell,
-  DollarSign,
-  Users,
-  ShoppingCart,
   FileText,
   Zap,
   Save,
@@ -48,11 +41,7 @@ import { PagesCustomizationSection } from '@/components/admin/customization/Page
 import { LandingPageCustomizationSection } from '@/components/admin/customization/LandingPageCustomizationSection';
 import { FooterCustomizationSection } from '@/components/admin/customization/FooterCustomizationSection';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
-import {
-  exportCustomization,
-  importCustomization,
-  importCustomizationFromString,
-} from '@/lib/platform-customization-export';
+import { exportCustomization, importCustomization } from '@/lib/platform-customization-export';
 import { logger } from '@/lib/logger';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
@@ -153,8 +142,15 @@ const sections: SectionConfig[] = [
   },
 ];
 
+function isValidSection(value: string | null): value is CustomizationSection {
+  return value != null && sections.some(section => section.id === value);
+}
+
 export const PlatformCustomization = () => {
-  const [activeSection, setActiveSection] = useState<CustomizationSection>('design');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeSection: CustomizationSection = isValidSection(searchParams.get('section'))
+    ? (searchParams.get('section') as CustomizationSection)
+    : 'design';
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -229,9 +225,19 @@ export const PlatformCustomization = () => {
     }
   };
 
-  const handleSectionChange = useCallback((section: CustomizationSection) => {
-    setActiveSection(section);
-  }, []);
+  const handleSectionChange = useCallback(
+    (section: CustomizationSection) => {
+      setSearchParams(
+        prev => {
+          const next = new URLSearchParams(prev);
+          next.set('section', section);
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   const handleChange = useCallback(() => {
     setHasUnsavedChanges(true);
@@ -308,7 +314,7 @@ export const PlatformCustomization = () => {
     }
   }, [importFile, handleImportFile]);
 
-  const renderSectionContent = useMemo(() => {
+  const renderSectionContent = () => {
     switch (activeSection) {
       case 'design':
         return <DesignBrandingSection onChange={handleChange} />;
@@ -333,16 +339,16 @@ export const PlatformCustomization = () => {
       default:
         return null;
     }
-  }, [activeSection, handleChange]);
+  };
 
   const activeSectionConfig = sections.find(s => s.id === activeSection);
 
   return (
     <AdminLayout>
       <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] min-h-[600px] overflow-hidden">
-        {/* Sidebar - Responsive avec drawer mobile */}
-        <aside className="w-full lg:w-64 border-r bg-card/50 backdrop-blur-sm flex flex-col shrink-0 max-h-screen lg:max-h-[calc(100vh-4rem)]">
-          <div className="p-4 border-b">
+        {/* Sidebar interne — navigation des sections */}
+        <aside className="relative z-20 flex w-full shrink-0 flex-col border-r bg-card/50 backdrop-blur-sm lg:w-64 lg:max-h-[calc(100vh-4rem)]">
+          <div className="p-4 border-b shrink-0">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Palette className="h-5 w-5 text-primary" />
               Personnalisation
@@ -352,44 +358,38 @@ export const PlatformCustomization = () => {
             </p>
           </div>
 
-          <ScrollArea className="flex-1">
-            <nav className="p-2 space-y-1">
-              {sections.map(section => {
-                const Icon = section.icon;
-                const isActive = activeSection === section.id;
+          <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 space-y-1">
+            {sections.map(section => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
 
-                return (
-                  <button
-                    key={section.id}
-                    type="button"
-                    onClick={() => handleSectionChange(section.id)}
-                    className={cn(
-                      'w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all',
-                      'hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
-                      isActive
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground'
-                    )}
-                    aria-label={section.label}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    <Icon
-                      className={cn('h-4 w-4 shrink-0', isActive && 'text-primary-foreground')}
-                    />
-                    <span className="flex-1 text-left truncate">{section.label}</span>
-                    {section.badge && (
-                      <Badge variant="secondary" className="text-xs shrink-0 hidden sm:inline-flex">
-                        {section.badge}
-                      </Badge>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </ScrollArea>
+              return (
+                <Button
+                  key={section.id}
+                  type="button"
+                  variant={isActive ? 'default' : 'ghost'}
+                  onClick={() => handleSectionChange(section.id)}
+                  className={cn(
+                    'h-auto w-full justify-start gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium',
+                    !isActive && 'text-muted-foreground'
+                  )}
+                  aria-label={section.label}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 text-left truncate">{section.label}</span>
+                  {section.badge && (
+                    <Badge variant="secondary" className="text-xs shrink-0 hidden sm:inline-flex">
+                      {section.badge}
+                    </Badge>
+                  )}
+                </Button>
+              );
+            })}
+          </nav>
 
           {/* Footer avec actions */}
-          <div className="p-4 border-t space-y-2">
+          <div className="shrink-0 border-t p-4 space-y-2">
             <Button
               onClick={togglePreview}
               variant={previewMode ? 'default' : 'outline'}
@@ -432,7 +432,7 @@ export const PlatformCustomization = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <main className="relative z-0 min-w-0 flex-1 overflow-auto pb-16 md:pb-0">
           <div className="container mx-auto p-4 sm:p-6 max-w-6xl">
             {/* Header - Responsive */}
             <div className="mb-4 sm:mb-6">
@@ -463,21 +463,22 @@ export const PlatformCustomization = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Select>
+                  <Select
+                    onValueChange={value => {
+                      if (value === 'export') handleExport();
+                      if (value === 'import') fileInputRef.current?.click();
+                    }}
+                  >
                     <SelectTrigger className="gap-2 min-h-[44px]">
                       <Settings className="h-4 w-4" />
                       <span className="hidden sm:inline">Actions</span>
                     </SelectTrigger>
                     <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                      <SelectItem value="edit" onSelect={handleExport} className="cursor-pointer">
+                      <SelectItem value="export" className="cursor-pointer">
                         <Download className="h-4 w-4 mr-2" />
                         Exporter JSON
                       </SelectItem>
-                      <SelectItem
-                        value="delete"
-                        onSelect={() => fileInputRef.current?.click()}
-                        className="cursor-pointer"
-                      >
+                      <SelectItem value="import" className="cursor-pointer">
                         <Upload className="h-4 w-4 mr-2" />
                         Importer JSON
                       </SelectItem>
@@ -507,7 +508,7 @@ export const PlatformCustomization = () => {
                   </div>
                 </div>
               ) : (
-                renderSectionContent
+                renderSectionContent()
               )}
             </div>
           </div>
