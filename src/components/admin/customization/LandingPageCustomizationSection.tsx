@@ -299,6 +299,16 @@ export const LandingPageCustomizationSection = ({
               placeholder={element.defaultValue}
             />
           );
+        case 'email':
+          return (
+            <Input
+              id={inputId}
+              type="email"
+              value={value}
+              onChange={e => handleElementChange(element.id, e.target.value)}
+              placeholder={element.defaultValue}
+            />
+          );
         case 'boolean':
           return (
             <Switch

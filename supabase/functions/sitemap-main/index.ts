@@ -22,6 +22,12 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
   { path: '/products/compare', changefreq: 'weekly', priority: '0.5' },
   { path: '/about', changefreq: 'monthly', priority: '0.6' },
   { path: '/contact', changefreq: 'monthly', priority: '0.6' },
+  { path: '/careers', changefreq: 'monthly', priority: '0.5' },
+  { path: '/press', changefreq: 'monthly', priority: '0.5' },
+  { path: '/blog', changefreq: 'weekly', priority: '0.6' },
+  { path: '/docs', changefreq: 'weekly', priority: '0.6' },
+  { path: '/help', changefreq: 'weekly', priority: '0.6' },
+  { path: '/integrations', changefreq: 'monthly', priority: '0.6' },
   { path: '/pricing', changefreq: 'weekly', priority: '0.7' },
   { path: '/legal/terms', changefreq: 'yearly', priority: '0.3' },
   { path: '/legal/privacy', changefreq: 'yearly', priority: '0.3' },
@@ -30,7 +36,10 @@ const STATIC_PAGES: Array<{ path: string; changefreq: string; priority: string }
 ];
 
 function xmlEscape(s: string): string {
-  return s.replace(/[<>&'"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]!));
+  return s.replace(
+    /[<>&'"]/g,
+    c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]!
+  );
 }
 
 function urlNode(loc: string, lastmod?: string, changefreq?: string, priority?: string): string {
@@ -46,7 +55,9 @@ serve(async () => {
   );
 
   const today = new Date().toISOString().slice(0, 10);
-  const urls: string[] = STATIC_PAGES.map(p => urlNode(`${SITE}${p.path}`, today, p.changefreq, p.priority));
+  const urls: string[] = STATIC_PAGES.map(p =>
+    urlNode(`${SITE}${p.path}`, today, p.changefreq, p.priority)
+  );
 
   // Note: les boutiques sont dans sitemap-stores.xml (sous-domaines *.myemarzona.shop)
   // On ne les inclut PAS ici car /store/:slug redirige vers le sous-domaine (302)

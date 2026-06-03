@@ -4,6 +4,7 @@ import {
   LANDING_PREMIUM_PAGE_ID,
   LANDING_PREMIUM_SECTIONS,
 } from '@/lib/admin/landingPremiumCustomization';
+import { buildPlatformMarketingPageConfigs } from '@/lib/admin/platformMarketingPagesConfig';
 
 const landingPremiumPage: PageConfig = {
   id: LANDING_PREMIUM_PAGE_ID,
@@ -28,6 +29,7 @@ const landingPremiumPage: PageConfig = {
 
 export const publicPagesConfig: PageConfig[] = [
   landingPremiumPage,
+  ...buildPlatformMarketingPageConfigs(),
   {
     id: 'marketplace',
     name: 'Marketplace',

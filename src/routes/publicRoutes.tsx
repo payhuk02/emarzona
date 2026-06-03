@@ -77,6 +77,9 @@ const PersonalizedRecommendationsPage = lazyPage(() =>
   }))
 );
 
+// Pages marketing plateforme (pied de page)
+const PlatformMarketingPage = lazyPage(() => import('@/pages/platform/PlatformMarketingPage'));
+
 // Pages Légales
 const TermsOfService = lazyPage(() => import('@/pages/legal/TermsOfService'));
 const PrivacyPolicy = lazyPage(() => import('@/pages/legal/PrivacyPolicy'));
@@ -202,6 +205,16 @@ export const publicRoutes = (
       element={<StoreProductRedirectToSubdomain />}
     />
     <Route path="/stores/:slug/legal/:page" element={<StoreLegalRedirectToSubdomain />} />
+
+    {/* Pages marketing (footer — contenu admin) */}
+    <Route path="/about" element={<PlatformMarketingPage />} />
+    <Route path="/contact" element={<PlatformMarketingPage />} />
+    <Route path="/careers" element={<PlatformMarketingPage />} />
+    <Route path="/press" element={<PlatformMarketingPage />} />
+    <Route path="/blog" element={<PlatformMarketingPage />} />
+    <Route path="/docs" element={<PlatformMarketingPage />} />
+    <Route path="/help" element={<PlatformMarketingPage />} />
+    <Route path="/integrations" element={<PlatformMarketingPage />} />
 
     {/* Légal */}
     <Route path="/legal/terms" element={<TermsOfService />} />
