@@ -8,6 +8,7 @@ import {
   recordWebhookEvent,
   validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
+import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -593,22 +594,36 @@ serve(async req => {
         }
       }
     } else if (mappedStatus === 'refunded') {
+      const refundAmountRaw = payload.amount ?? transaction.amount;
+      const refundAmount =
+        typeof refundAmountRaw === 'string' ? parseFloat(refundAmountRaw) : Number(refundAmountRaw);
+
+      try {
+        await applyPaymentRefund(supabase, transaction.id, {
+          refundId: String(payload.refund_id ?? externalEventId),
+          amount: Number.isFinite(refundAmount) ? refundAmount : Number(transaction.amount ?? 0),
+          currency: String(payload.currency ?? transaction.currency ?? 'XOF'),
+          reason: typeof payload.reason === 'string' ? payload.reason : undefined,
+          provider: transaction.payment_provider || 'moneroo_platform',
+        });
+      } catch (refundError) {
+        console.error('Moneroo applyPaymentRefund failed:', refundError);
+        await supabase
+          .from('payment_webhook_events')
+          .update({
+            processing_error:
+              refundError instanceof Error ? refundError.message : 'refund_apply_failed',
+          })
+          .eq('provider', 'moneroo')
+          .eq('external_event_id', externalEventId);
+        throw refundError;
+      }
+
+      updates.status = 'refunded';
       updates.refunded_at = new Date().toISOString();
       updates.moneroo_refund_id = payload.refund_id;
       updates.moneroo_refund_amount = payload.amount;
       updates.moneroo_refund_reason = payload.reason;
-
-      // 🔧 CORRECTION : Mettre à jour l'order associée pour déclencher la mise à jour de store_earnings
-      if (transaction.order_id) {
-        await supabase
-          .from('orders')
-          .update({
-            payment_status: 'refunded',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', transaction.order_id)
-          .then(null, (err: unknown) => console.error('Error updating order with refund:', err));
-      }
 
       // Create refund notification
       if (transaction.customer_id) {

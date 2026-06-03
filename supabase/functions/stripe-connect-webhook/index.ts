@@ -1,5 +1,5 @@
 /**
- * Stripe Connect — Webhooks (checkout.session.completed, account.updated)
+ * Stripe Connect — Webhooks (checkout.session.completed, charge.refunded, account.updated)
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createSupabaseAdmin } from '../_shared/supabase-admin.ts';
@@ -9,6 +9,7 @@ import {
   markWebhookProcessed,
   recordWebhookEvent,
 } from '../_shared/complete-order-payment.ts';
+import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
 import { fromStripeAmount } from '../_shared/stripe-api.ts';
 
@@ -173,6 +174,42 @@ serve(async req => {
         if (orderId && !alreadyCompleted) {
           await runPostOrderPaymentFulfillment(supabase, orderId, transactionId);
         }
+      }
+    }
+
+    if (event.type === 'charge.refunded') {
+      const charge = event.data.object as {
+        id?: string;
+        payment_intent?: string | { id?: string };
+        amount_refunded?: number;
+        currency?: string;
+        metadata?: Record<string, string>;
+      };
+
+      const paymentIntentId =
+        typeof charge.payment_intent === 'string'
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+
+      let transactionId = charge.metadata?.transaction_id;
+
+      if (!transactionId && paymentIntentId) {
+        const { data: tx } = await supabase
+          .from('transactions')
+          .select('id, amount, currency')
+          .eq('provider_payment_intent_id', paymentIntentId)
+          .maybeSingle();
+        transactionId = tx?.id;
+      }
+
+      if (transactionId && charge.amount_refunded != null && charge.currency) {
+        const refundAmount = fromStripeAmount(charge.amount_refunded, charge.currency);
+        await applyPaymentRefund(supabase, transactionId, {
+          refundId: charge.id ?? event.id,
+          amount: refundAmount,
+          currency: charge.currency.toUpperCase(),
+          provider: 'stripe_connect',
+        });
       }
     }
 

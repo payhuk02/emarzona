@@ -208,12 +208,25 @@ serve(async req => {
       }
 
       if (transactionId) {
-        await applyPaymentRefund(supabase, transactionId, {
-          refundId: resource.id as string,
-          amount: parseFloat(amountValue ?? '0'),
-          currency: amountCurrency ?? 'USD',
-          provider: 'paypal_commerce',
-        });
+        try {
+          await applyPaymentRefund(supabase, transactionId, {
+            refundId: resource.id as string,
+            amount: parseFloat(amountValue ?? '0'),
+            currency: amountCurrency ?? 'USD',
+            provider: 'paypal_commerce',
+          });
+        } catch (refundError) {
+          console.error('PayPal applyPaymentRefund failed:', refundError);
+          await supabase
+            .from('payment_webhook_events')
+            .update({
+              processing_error:
+                refundError instanceof Error ? refundError.message : 'refund_apply_failed',
+            })
+            .eq('provider', 'paypal_commerce')
+            .eq('external_event_id', event.id);
+          throw refundError;
+        }
       }
     }
 

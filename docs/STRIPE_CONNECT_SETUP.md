@@ -41,6 +41,7 @@ https://hbdnzajbyjakdhuavrvb.supabase.co/functions/v1/stripe-connect-webhook
 
 3. Événements à sélectionner :
    - `checkout.session.completed`
+   - `charge.refunded`
    - `account.updated`
 
 4. Créer l’endpoint → **Signing secret** → **Reveal** → copier `whsec_...`  
