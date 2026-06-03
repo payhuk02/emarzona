@@ -76,44 +76,57 @@ END;
 $$;
 
 -- =========================================================
--- Trigger store_earnings : paid + (completed | confirmed) + remboursements
+-- Triggers store_earnings (2 triggers : pas de OLD dans WHEN sur INSERT — PG 42P17)
 -- =========================================================
 
-CREATE OR REPLACE FUNCTION public.trigger_update_store_earnings_on_order()
+CREATE OR REPLACE FUNCTION public.trigger_update_store_earnings_on_order_paid()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF public.is_order_paid_for_revenue(NEW.status, NEW.payment_status) THEN
-    PERFORM public.update_store_earnings(NEW.store_id);
-  END IF;
+  PERFORM public.update_store_earnings(NEW.store_id);
+  RETURN NEW;
+END;
+$$;
 
-  IF NEW.payment_status = 'refunded'
-    AND (OLD.payment_status IS NULL OR OLD.payment_status IS DISTINCT FROM 'refunded') THEN
-    PERFORM public.update_store_earnings(NEW.store_id);
-  END IF;
-
+CREATE OR REPLACE FUNCTION public.trigger_update_store_earnings_on_order_refunded()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM public.update_store_earnings(NEW.store_id);
   RETURN NEW;
 END;
 $$;
 
 DROP TRIGGER IF EXISTS update_store_earnings_on_order ON public.orders;
-CREATE TRIGGER update_store_earnings_on_order
+DROP TRIGGER IF EXISTS update_store_earnings_on_order_paid ON public.orders;
+DROP TRIGGER IF EXISTS update_store_earnings_on_order_refunded ON public.orders;
+
+CREATE TRIGGER update_store_earnings_on_order_paid
   AFTER INSERT OR UPDATE OF status, payment_status ON public.orders
   FOR EACH ROW
-  WHEN (
-    public.is_order_paid_for_revenue(NEW.status, NEW.payment_status)
-    OR (
-      NEW.payment_status = 'refunded'
-      AND (OLD.payment_status IS DISTINCT FROM 'refunded')
-    )
-  )
-  EXECUTE FUNCTION public.trigger_update_store_earnings_on_order();
+  WHEN (public.is_order_paid_for_revenue(NEW.status, NEW.payment_status))
+  EXECUTE FUNCTION public.trigger_update_store_earnings_on_order_paid();
 
-COMMENT ON FUNCTION public.trigger_update_store_earnings_on_order IS
-  'Recalcule store_earnings quand une commande est payée (completed ou confirmed) ou remboursée.';
+CREATE TRIGGER update_store_earnings_on_order_refunded
+  AFTER UPDATE OF payment_status ON public.orders
+  FOR EACH ROW
+  WHEN (
+    NEW.payment_status = 'refunded'
+    AND OLD.payment_status IS DISTINCT FROM 'refunded'
+  )
+  EXECUTE FUNCTION public.trigger_update_store_earnings_on_order_refunded();
+
+COMMENT ON FUNCTION public.trigger_update_store_earnings_on_order_paid IS
+  'Recalcule store_earnings quand une commande devient payée (completed ou confirmed).';
+
+COMMENT ON FUNCTION public.trigger_update_store_earnings_on_order_refunded IS
+  'Recalcule store_earnings quand une commande est remboursée.';
 
 -- =========================================================
 -- Backfill : commandes digitales/services/cours/artiste déjà payées en confirmed → completed
