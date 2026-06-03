@@ -107,7 +107,7 @@ serve(async req => {
 
     const params: Record<string, string> = {
       mode: 'payment',
-      success_url: `${body.successUrl}${body.successUrl.includes('?') ? '&' : '?'}session_id={CHECKOUT_SESSION_ID}&order_id=${body.orderId}&provider=stripe`,
+      success_url: `${body.successUrl}${body.successUrl.includes('?') ? '&' : '?'}session_id={CHECKOUT_SESSION_ID}&order_id=${body.orderId}&transaction_id=${transaction.id}&provider=stripe`,
       cancel_url: body.cancelUrl,
       customer_email: body.customerEmail,
       'line_items[0][quantity]': '1',

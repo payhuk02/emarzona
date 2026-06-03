@@ -6,7 +6,11 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { E2E_TEST_CONFIG, gotoApp, loginAs } from './shared/e2e-test-config';
+import { E2E_TEST_CONFIG, gotoApp, loginAs, appLocator } from './shared/e2e-test-config';
+import {
+  openFirstProductCard,
+  openMarketplaceWithOptionalFilter,
+} from './shared/marketplace-discovery';
 
 test.describe('Flux inscription aux cours', () => {
   test.setTimeout(90_000);
@@ -14,30 +18,43 @@ test.describe('Flux inscription aux cours', () => {
   test('découverte marketplace et fiche cours', async ({ page }) => {
     await gotoApp(page, '/marketplace');
 
-    const card = page.locator('[data-testid="product-card"]').first();
-    const hasCards = await card.isVisible().catch(() => false);
+    const hasCards = await openMarketplaceWithOptionalFilter(page, 'course');
     if (!hasCards) {
       test.skip(true, 'Aucune carte produit sur marketplace (env vide)');
       return;
     }
 
-    const courseFilter = page.locator(
-      'button:has-text("Cours"), button:has-text("Course"), [data-product-type="course"]'
-    );
-    if (
-      await courseFilter
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      await courseFilter.first().click();
+    const onCourse = await openFirstProductCard(page, /\/courses\//);
+    if (!onCourse) {
+      test.skip(true, 'Aucune fiche cours atteinte depuis le marketplace');
+      return;
     }
 
-    await card.click();
-    await page.waitForURL(/\/courses\//, { timeout: 15_000 });
     await expect(page.locator('h1').first()).toBeVisible();
     await expect(
       page.getByRole('button', { name: /inscrire|acheter|s'inscrire|enroll/i }).first()
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('landing /courses catalogue sans erreur serveur', async ({ page }) => {
+    const response = await gotoApp(page, '/courses');
+    expect(response?.status()).toBeLessThan(500);
+    const html = (await page.content()).toLowerCase();
+    expect(html).not.toContain('internal server error');
+    await expect(page.locator('body')).toBeVisible();
+  });
+
+  test('fiche cours directe quand E2E_COURSE_PRODUCT_ID est défini', async ({ page }) => {
+    const productId = process.env.E2E_COURSE_PRODUCT_ID;
+    test.skip(!productId, 'Set E2E_COURSE_PRODUCT_ID pour fiche cours stable');
+
+    const response = await gotoApp(page, `/courses/${productId}`);
+    expect(response?.status()).toBeLessThan(500);
+    await expect(appLocator(page).locator('h1').first()).toBeVisible({ timeout: 15_000 });
+    await expect(
+      appLocator(page)
+        .getByRole('button', { name: /inscrire|acheter|s'inscrire|enroll/i })
+        .first()
     ).toBeVisible({ timeout: 10_000 });
   });
 

@@ -54,19 +54,14 @@ export async function createOrchestratedPayment(
         : loadStoreForcePlatformPayments(request.storeId),
     ]);
 
-    const resolved = request.preferredProvider
-      ? {
-          provider: request.preferredProvider,
-          connectionId: connections.find(c => c.provider === request.preferredProvider)?.id ?? null,
-          reason: 'explicit_preferred',
-        }
-      : resolvePaymentProvider({
-          storeId: request.storeId,
-          amount: request.amount,
-          currency: request.currency ?? 'XOF',
-          connections,
-          forcePlatformPayments: forcePlatform,
-        });
+    const resolved = resolvePaymentProvider({
+      storeId: request.storeId,
+      amount: request.amount,
+      currency: request.currency ?? 'XOF',
+      connections,
+      forcePlatformPayments: forcePlatform,
+      buyerPreferredProvider: request.preferredProvider,
+    });
 
     logger.log('Payment orchestrator resolved provider', {
       storeId: request.storeId,
