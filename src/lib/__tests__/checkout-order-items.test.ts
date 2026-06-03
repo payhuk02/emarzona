@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildOrderItemRows, orderItemInsertExtras } from '../checkout-order-items';
+import { validateCheckoutCart } from '@/lib/checkout/cart-validation';
 import type { CartItem } from '@/types/cart';
 
 vi.mock('@/integrations/supabase/client', () => ({
@@ -53,9 +54,13 @@ describe('buildOrderItemRows', () => {
   });
 
   it('rejette les services dans le panier', async () => {
-    await expect(
-      buildOrderItemRows('order-1', [baseItem({ product_type: 'service' })])
-    ).rejects.toThrow(/page du service/i);
+    const items = [baseItem({ product_type: 'service' })];
+    const validation = validateCheckoutCart(items);
+    expect(validation.canCheckout).toBe(false);
+
+    await expect(buildOrderItemRows('order-1', items)).rejects.toThrow(
+      validation.message ?? 'service'
+    );
   });
 
   it('construit une ligne physique avec physical_product_id', async () => {
