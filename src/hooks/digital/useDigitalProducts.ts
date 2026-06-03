@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useStoreContext } from '@/contexts/StoreContext';
 import { shouldRetryError, getRetryDelay } from '@/lib/error-handling';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 /**
  * Produit digital complet
@@ -839,7 +840,7 @@ export const useDigitalProductsRevenue = (storeId?: string) => {
         )
         .in('product_id', productIds)
         .eq('orders.payment_status', 'paid')
-        .eq('orders.status', 'completed');
+        .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES]);
 
       if (orderItemsError || !orderItems) {
         logger.warn('Erreur lors du calcul des revenus', { error: orderItemsError });
@@ -993,7 +994,7 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
             )
             .eq('product_id', productId)
             .eq('orders.payment_status', 'paid')
-            .eq('orders.status', 'completed')
+            .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
             .eq('orders.customer_id', customer.id);
 
           if (!customerError && orderItems && orderItems.length > 0) {
@@ -1033,7 +1034,7 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
           )
           .eq('product_id', productId)
           .eq('orders.payment_status', 'paid')
-          .eq('orders.status', 'completed')
+          .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
           .eq('orders.customers.email', user.email);
 
         if (!emailError && orderItemsByEmail && orderItemsByEmail.length > 0) {
@@ -1068,7 +1069,7 @@ export const useHasDownloadAccess = (digitalProductId: string | undefined) => {
           )
           .eq('product_id', productId)
           .eq('orders.payment_status', 'paid')
-          .eq('orders.status', 'completed');
+          .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES]);
 
         if (!metadataError && allOrderItems) {
           // Filtrer côté client pour trouver ceux avec user_id dans metadata

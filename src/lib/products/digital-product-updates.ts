@@ -1,13 +1,14 @@
 /**
  * Digital Product Updates Notification System
  * Date: 28 Janvier 2025
- * 
+ *
  * Système de notifications pour les mises à jour de produits digitaux
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { notifyDigitalProductUpdate } from '@/lib/notifications/unified-notifications';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 export interface ProductUpdate {
   product_id: string;
@@ -39,7 +40,8 @@ export async function notifyAllCustomersOfUpdate(
     // Récupérer tous les clients qui ont acheté ce produit
     const { data: customers, error: customersError } = await supabase
       .from('order_items')
-      .select(`
+      .select(
+        `
         order_id,
         orders!inner(
           customer_id,
@@ -49,9 +51,11 @@ export async function notifyAllCustomersOfUpdate(
             profiles!inner(id, user_id)
           )
         )
-      `)
+      `
+      )
       .eq('product_id', update.product_id)
-      .eq('orders.status', 'completed');
+      .eq('orders.payment_status', 'paid')
+      .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES]);
 
     if (customersError) {
       throw customersError;
@@ -64,7 +68,7 @@ export async function notifyAllCustomersOfUpdate(
 
     // Extraire les IDs utilisateurs uniques
     const userIds = new Set<string>();
-    customers.forEach((item: any) => {
+    customers.forEach((item: { orders?: { customers?: { profiles?: { user_id?: string } } } }) => {
       const customer = item.orders?.customers;
       if (customer?.profiles?.user_id) {
         userIds.add(customer.profiles.user_id);
@@ -86,18 +90,16 @@ export async function notifyAllCustomersOfUpdate(
     const successCount = results.filter(r => r.status === 'fulfilled').length;
 
     // Enregistrer la mise à jour dans la base de données
-    await supabase
-      .from('digital_product_updates')
-      .insert({
-        product_id: update.product_id,
-        version: update.version,
-        version_notes: update.version_notes,
-        download_url: update.download_url,
-        previous_version: update.previous_version,
-        is_major_update: update.is_major_update,
-        notified_count: successCount,
-        total_customers: userIds.size,
-      });
+    await supabase.from('digital_product_updates').insert({
+      product_id: update.product_id,
+      version: update.version,
+      version_notes: update.version_notes,
+      download_url: update.download_url,
+      previous_version: update.previous_version,
+      is_major_update: update.is_major_update,
+      notified_count: successCount,
+      total_customers: userIds.size,
+    });
 
     logger.info('Product update notifications sent', {
       productId: update.product_id,
@@ -107,12 +109,13 @@ export async function notifyAllCustomersOfUpdate(
     });
 
     return { success: true, notified_count: successCount };
-  } catch ( _error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error notifying customers of product update', {
-      error: error.message,
+      error: message,
       update,
     });
-    return { success: false, notified_count: 0, error: error.message };
+    return { success: false, notified_count: 0, error: message };
   }
 }
 
@@ -159,15 +162,9 @@ export async function createProductVersion(
     });
 
     return { success: true };
-  } catch ( _error: any) {
-    logger.error('Error creating product version', { error: error.message, productId });
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Error creating product version', { error: message, productId });
+    return { success: false, error: message };
   }
 }
-
-
-
-
-
-
-

@@ -7,6 +7,7 @@ import {
   recordWebhookEvent,
   validateOrderPaymentAmount,
 } from '../_shared/complete-order-payment.ts';
+import { resolvePaidOrderStatusForOrder } from '../_shared/order-status.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://www.emarzona.com',
@@ -375,11 +376,16 @@ serve(async req => {
           .single();
         const wasAlreadyPaid = prevOrder?.payment_status === 'paid';
 
+        const paidOrderStatus = await resolvePaidOrderStatusForOrder(
+          supabase,
+          transaction.order_id
+        );
+
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
           .update({
             payment_status: 'paid',
-            status: 'confirmed',
+            status: paidOrderStatus,
             payment_provider_used: transaction.payment_provider || 'moneroo_platform',
           })
           .eq('id', transaction.order_id)

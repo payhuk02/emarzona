@@ -1,4 +1,5 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
+import { resolvePaidOrderStatusForOrder } from './order-status.ts';
 import { sanitizePaymentWebhookPayload } from './payment-log-sanitize.ts';
 
 export async function recordWebhookEvent(
@@ -92,11 +93,12 @@ export async function completeTransactionAndOrder(
 
   let orderId: string | null = transaction.order_id;
   if (orderId) {
+    const paidOrderStatus = await resolvePaidOrderStatusForOrder(supabase, orderId);
     await supabase
       .from('orders')
       .update({
         payment_status: 'paid',
-        status: 'confirmed',
+        status: paidOrderStatus,
         payment_provider_used: paymentProviderUsed,
         updated_at: now,
       })

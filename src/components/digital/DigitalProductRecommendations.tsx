@@ -18,6 +18,7 @@ import { DigitalProductCard } from './DigitalProductCard';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { SameStoreProductsSection } from '@/components/marketplace/SameStoreProductsSection';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 interface RecommendationsProps {
   productId: string;
@@ -147,7 +148,7 @@ const useProductRecommendations = (
             )
             .eq('orders.customers.email', user.email)
             .eq('orders.payment_status', 'paid')
-            .eq('orders.status', 'completed');
+            .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES]);
 
           if (purchasedProducts && purchasedProducts.length > 0) {
             const purchasedIds = purchasedProducts.map(p => p.product_id);
@@ -432,7 +433,7 @@ export const YouMightLikeRecommendations = ({ limit = 6 }: { limit?: number }) =
           )
           .eq('orders.customers.email', user.email)
           .eq('orders.payment_status', 'paid')
-          .eq('orders.status', 'completed');
+          .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES]);
 
         if (purchasedCategories && purchasedCategories.length > 0) {
           const productIds = purchasedCategories.map(p => p.product_id);

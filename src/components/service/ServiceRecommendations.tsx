@@ -1,7 +1,7 @@
 /**
  * Service Recommendations Component
  * Date: 29 janvier 2025
- * 
+ *
  * Système de recommandations intelligentes pour services
  * Basé sur : catégories similaires, tags, réservations précédentes, popularité
  */
@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { ServiceCard } from './ServiceCard';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { PAID_REVENUE_ELIGIBLE_STATUSES } from '@/lib/orders/order-status';
 
 interface RecommendationsProps {
   serviceId: string;
@@ -50,7 +51,9 @@ const useServiceRecommendations = (
     queryKey: ['serviceRecommendations', serviceId, category, tags, limit],
     queryFn: async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
         interface ServiceWithStore {
           id: string;
@@ -77,11 +80,12 @@ const useServiceRecommendations = (
           recommendationScore?: number;
         }
         // 1. Recommandations basées sur la catégorie
-        let  categoryRecommendations: ServiceWithStore[] = [];
+        let categoryRecommendations: ServiceWithStore[] = [];
         if (category) {
           const { data: categoryServices } = await supabase
             .from('products')
-            .select(`
+            .select(
+              `
               *,
               stores!inner (
                 id,
@@ -91,7 +95,8 @@ const useServiceRecommendations = (
               service_products (
                 *
               )
-            `)
+            `
+            )
             .eq('product_type', 'service')
             .eq('is_active', true)
             .eq('is_draft', false)
@@ -104,12 +109,13 @@ const useServiceRecommendations = (
         }
 
         // 2. Recommandations basées sur les tags
-        let  tagRecommendations: ServiceWithStore[] = [];
+        let tagRecommendations: ServiceWithStore[] = [];
         if (tags && tags.length > 0) {
           // Rechercher services avec tags similaires
           const { data: tagServices } = await supabase
             .from('products')
-            .select(`
+            .select(
+              `
               *,
               stores!inner (
                 id,
@@ -119,7 +125,8 @@ const useServiceRecommendations = (
               service_products (
                 *
               )
-            `)
+            `
+            )
             .eq('product_type', 'service')
             .eq('is_active', true)
             .eq('is_draft', false)
@@ -129,9 +136,9 @@ const useServiceRecommendations = (
           if (tagServices) {
             // Filtrer ceux qui ont des tags en commun
             tagRecommendations = tagServices
-              .filter((s) => {
+              .filter(s => {
                 const serviceTags = s.tags || [];
-                return tags.some((tag) => serviceTags.includes(tag));
+                return tags.some(tag => serviceTags.includes(tag));
               })
               .sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0))
               .slice(0, limit);
@@ -139,12 +146,13 @@ const useServiceRecommendations = (
         }
 
         // 3. Recommandations basées sur les réservations précédentes (si utilisateur connecté)
-        let  bookingBasedRecommendations: ServiceWithStore[] = [];
+        let bookingBasedRecommendations: ServiceWithStore[] = [];
         if (user) {
           // Récupérer les services réservés par l'utilisateur
           const { data: bookedServices } = await supabase
             .from('order_items')
-            .select(`
+            .select(
+              `
               product_id,
               orders!inner (
                 customer_id,
@@ -152,15 +160,16 @@ const useServiceRecommendations = (
                   email
                 )
               )
-            `)
+            `
+            )
             .eq('orders.customers.email', user.email)
             .eq('orders.payment_status', 'paid')
-            .eq('orders.status', 'completed')
+            .in('orders.status', [...PAID_REVENUE_ELIGIBLE_STATUSES])
             .eq('product_type', 'service');
 
           if (bookedServices && bookedServices.length > 0) {
-            const bookedIds = bookedServices.map((s) => s.product_id);
-            
+            const bookedIds = bookedServices.map(s => s.product_id);
+
             // Obtenir les catégories des services réservés
             const { data: bookedCategories } = await supabase
               .from('products')
@@ -169,13 +178,14 @@ const useServiceRecommendations = (
               .not('category', 'is', null);
 
             const categories = Array.from(
-              new Set(bookedCategories?.map((s) => s.category).filter(Boolean))
+              new Set(bookedCategories?.map(s => s.category).filter(Boolean))
             ) as string[];
 
             if (categories.length > 0) {
               const { data: similarServices } = await supabase
                 .from('products')
-                .select(`
+                .select(
+                  `
                   *,
                   stores!inner (
                     id,
@@ -185,7 +195,8 @@ const useServiceRecommendations = (
                   service_products (
                     *
                   )
-                `)
+                `
+                )
                 .eq('product_type', 'service')
                 .eq('is_active', true)
                 .eq('is_draft', false)
@@ -195,9 +206,9 @@ const useServiceRecommendations = (
                 .limit(limit * 2); // Récupérer plus pour filtrer après
 
               // Filtrer les services déjà réservés
-              bookingBasedRecommendations = (similarServices || []).filter(
-                (s) => !bookedIds.includes(s.id)
-              ).slice(0, limit);
+              bookingBasedRecommendations = (similarServices || [])
+                .filter(s => !bookedIds.includes(s.id))
+                .slice(0, limit);
             }
           }
         }
@@ -205,7 +216,8 @@ const useServiceRecommendations = (
         // 4. Recommandations populaires (fallback)
         const { data: popularServices } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             stores!inner (
               id,
@@ -215,7 +227,8 @@ const useServiceRecommendations = (
             service_products (
               *
             )
-          `)
+          `
+          )
           .eq('product_type', 'service')
           .eq('is_active', true)
           .eq('is_draft', false)
@@ -234,19 +247,19 @@ const useServiceRecommendations = (
 
         // Dédupliquer par ID
         const uniqueRecommendations = Array.from(
-          new Map(allRecommendations.map((s) => [s.id, s])).values()
+          new Map(allRecommendations.map(s => [s.id, s])).values()
         );
 
         // Trier par score de recommandation
-        const scored = uniqueRecommendations.map((service) => {
-          let  score= 0;
+        const scored = uniqueRecommendations.map(service => {
+          let score = 0;
 
           // Score basé sur la catégorie
           if (category && service.category === category) score += 10;
 
           // Score basé sur les tags
           if (tags && service.tags) {
-            const commonTags = tags.filter((tag) => service.tags.includes(tag));
+            const commonTags = tags.filter(tag => service.tags.includes(tag));
             score += commonTags.length * 5;
           }
 
@@ -258,10 +271,8 @@ const useServiceRecommendations = (
         });
 
         // Trier par score et retourner les meilleurs
-        return scored
-          .sort((a, b) => b.recommendationScore - a.recommendationScore)
-          .slice(0, limit);
-      } catch ( _error: unknown) {
+        return scored.sort((a, b) => b.recommendationScore - a.recommendationScore).slice(0, limit);
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching service recommendations', { error });
         return [];
@@ -334,11 +345,7 @@ export const ServiceRecommendations = ({
             <h2 className="text-2xl font-bold">{title}</h2>
             <Badge variant="secondary">{recommendations.length}</Badge>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/marketplace')}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace')}>
             Voir plus
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -390,9 +397,7 @@ export const ServiceRecommendations = ({
               {service.service_products?.[0] && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
-                  <span>
-                    Durée: {service.service_products[0].duration_minutes || 0} min
-                  </span>
+                  <span>Durée: {service.service_products[0].duration_minutes || 0} min</span>
                 </div>
               )}
             </CardContent>
@@ -428,7 +433,7 @@ export const BookedTogetherRecommendations = ({
 
         if (!ordersWithService || ordersWithService.length === 0) return [];
 
-        const orderIds = ordersWithService.map((o) => o.order_id);
+        const orderIds = ordersWithService.map(o => o.order_id);
 
         // Récupérer les autres services dans ces commandes
         const { data: otherServices } = await supabase
@@ -441,10 +446,13 @@ export const BookedTogetherRecommendations = ({
         if (!otherServices || otherServices.length === 0) return [];
 
         // Compter les occurrences
-        const serviceCounts = otherServices.reduce((acc, item) => {
-          acc[item.product_id] = (acc[item.product_id] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
+        const serviceCounts = otherServices.reduce(
+          (acc, item) => {
+            acc[item.product_id] = (acc[item.product_id] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
 
         // Trier par fréquence
         const sortedServiceIds = Object.entries(serviceCounts)
@@ -455,7 +463,8 @@ export const BookedTogetherRecommendations = ({
         // Récupérer les détails des services
         const { data: services } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             stores!inner (
               id,
@@ -465,13 +474,14 @@ export const BookedTogetherRecommendations = ({
             service_products (
               *
             )
-          `)
+          `
+          )
           .in('id', sortedServiceIds)
           .eq('product_type', 'service')
           .eq('is_active', true);
 
         return services || [];
-      } catch ( _error: unknown) {
+      } catch (_error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error fetching booked together recommendations', { error });
         return [];
@@ -552,10 +562,3 @@ export const BookedTogetherRecommendations = ({
     </div>
   );
 };
-
-
-
-
-
-
-
