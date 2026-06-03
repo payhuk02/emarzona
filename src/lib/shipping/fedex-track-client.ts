@@ -4,6 +4,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { assertFedexResponseNotMock } from '@/lib/shipping/fedex-policy';
 import type { FedexTrackingResponse } from '@/services/fedex/mockFedexService';
 
 export interface FedexTrackEdgeResponse extends FedexTrackingResponse {
@@ -25,6 +26,8 @@ export async function fetchFedexTrackingViaEdge(
   if (!data?.success || !data.tracking_number) {
     throw new Error('Réponse FedEx track invalide');
   }
+
+  assertFedexResponseNotMock(data.source);
 
   const { source: _source, ...tracking } = data;
   return tracking;

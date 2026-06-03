@@ -285,15 +285,20 @@ export default function BookingsManagement() {
     start_time: string;
     end_time: string;
     is_active: boolean | null;
-    product_id: string;
-    products: { name: string } | null;
+    service_product_id: string;
+    service_products: {
+      product_id: string;
+      products: { name: string; store_id: string } | null;
+    } | null;
   };
 
   const { data: availabilities } = useQuery<ServiceAvailabilityRow[]>({
-    queryKey: ['service-availabilities'],
+    queryKey: ['service-availabilities', store?.id],
+    enabled: Boolean(store?.id),
     queryFn: async () => {
+      const storeId = store!.id;
       const { data, error } = await supabase
-        .from('service_availability')
+        .from('service_availability_slots')
         .select(
           `
           id,
@@ -301,14 +306,18 @@ export default function BookingsManagement() {
           start_time,
           end_time,
           is_active,
-          product_id,
-          products ( name )
+          service_product_id,
+          service_products!inner (
+            product_id,
+            products!inner ( name, store_id )
+          )
         `
         )
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .eq('service_products.products.store_id', storeId);
 
       if (error) {
-        logger.error('Error fetching availabilities', { error: error.message });
+        logger.error('Error fetching availabilities', { error: error.message, storeId });
         throw error;
       }
       return (data ?? []) as ServiceAvailabilityRow[];
@@ -388,7 +397,7 @@ export default function BookingsManagement() {
             if (!isBooked && start > now) {
               bookingEvents.push({
                 id: `availability-${availability.id}-${format(currentDate, 'yyyy-MM-dd')}`,
-                title: `Disponible - ${availability.products?.name || 'Service'}`,
+                title: `Disponible - ${availability.service_products?.products?.name || 'Service'}`,
                 start,
                 end,
                 type: 'available',

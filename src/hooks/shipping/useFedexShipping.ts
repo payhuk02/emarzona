@@ -1,20 +1,25 @@
 /**
  * FedEx Shipping Hooks
  * Date: 28 octobre 2025
- * 
+ *
  * React Query hooks pour intégration FedEx
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { getFedexService } from '@/services/fedex';
+import { getFedexService, mockFedexService } from '@/services/fedex';
+import { isFedexMockAllowed } from '@/lib/shipping/fedex-policy';
 import type { FedexShipmentRequest, FedexRateRequest } from '@/services/fedex';
 import { useToast } from '@/hooks/use-toast';
 
-const SHIPPING_CARRIER_FIELDS = 'id, store_id, name, code, description, is_active, is_default, credentials, config, supports_tracking, supports_labels, supports_pickup, created_at, updated_at';
-const SHIPMENT_FIELDS = 'id, order_id, carrier_id, store_id, tracking_number, tracking_url, service_type, status, weight_value, shipping_cost, currency, ship_from, ship_to, estimated_delivery, actual_delivery, tracking_events, created_at, updated_at';
-const ORDER_FIELDS = 'id, store_id, customer_id, order_number, subtotal, tax_amount, shipping_amount, discount_amount, total_amount, currency, status, payment_status, created_at, updated_at';
-const SHIPPING_LABEL_FIELDS = 'id, shipment_id, label_format, label_url, label_data, is_printed, printed_at, created_at, updated_at';
+const SHIPPING_CARRIER_FIELDS =
+  'id, store_id, name, code, description, is_active, is_default, credentials, config, supports_tracking, supports_labels, supports_pickup, created_at, updated_at';
+const SHIPMENT_FIELDS =
+  'id, order_id, carrier_id, store_id, tracking_number, tracking_url, service_type, status, weight_value, shipping_cost, currency, ship_from, ship_to, estimated_delivery, actual_delivery, tracking_events, created_at, updated_at';
+const ORDER_FIELDS =
+  'id, store_id, customer_id, order_number, subtotal, tax_amount, shipping_amount, discount_amount, total_amount, currency, status, payment_status, created_at, updated_at';
+const SHIPPING_LABEL_FIELDS =
+  'id, shipment_id, label_format, label_url, label_data, is_printed, printed_at, created_at, updated_at';
 
 // =====================================================
 // TYPES
@@ -86,11 +91,13 @@ export const useShipments = (storeId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shipments')
-        .select(`
+        .select(
+          `
           ${SHIPMENT_FIELDS},
           carrier:shipping_carriers(${SHIPPING_CARRIER_FIELDS}),
           order:orders(order_number, total_amount)
-        `)
+        `
+        )
         .eq('store_id', storeId)
         .order('created_at', { ascending: false });
 
@@ -110,12 +117,14 @@ export const useShipment = (shipmentId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shipments')
-        .select(`
+        .select(
+          `
           ${SHIPMENT_FIELDS},
           carrier:shipping_carriers(${SHIPPING_CARRIER_FIELDS}),
           order:orders(${ORDER_FIELDS}),
           labels:shipping_labels(${SHIPPING_LABEL_FIELDS})
-        `)
+        `
+        )
         .eq('id', shipmentId)
         .single();
 
@@ -135,11 +144,13 @@ export const useOrderShipments = (orderId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shipments')
-        .select(`
+        .select(
+          `
           ${SHIPMENT_FIELDS},
           carrier:shipping_carriers(${SHIPPING_CARRIER_FIELDS}),
           labels:shipping_labels(${SHIPPING_LABEL_FIELDS})
-        `)
+        `
+        )
         .eq('order_id', orderId)
         .order('created_at', { ascending: false });
 
@@ -279,11 +290,12 @@ export const useCreateFedexShipment = () => {
 
       toast({
         title: '✅ Expédition créée',
-        description: 'L\'étiquette d\'expédition a été générée avec succès.',
+        description: "L'étiquette d'expédition a été générée avec succès.",
       });
     },
     onError: (error: unknown) => {
-      const errorMessage = error instanceof Error ? error.message : 'Impossible de créer l\'expédition';
+      const errorMessage =
+        error instanceof Error ? error.message : "Impossible de créer l'expédition";
       toast({
         title: '❌ Erreur',
         description: errorMessage,
@@ -313,9 +325,7 @@ export const useUpdateShipmentTracking = () => {
       }
 
       // 2. Get latest tracking from FedEx
-      const trackingData = await getFedexService().getTracking(
-        shipment.tracking_number
-      );
+      const trackingData = await getFedexService().getTracking(shipment.tracking_number);
 
       if (!trackingData.success) {
         throw new Error('Failed to get tracking info');
@@ -351,7 +361,7 @@ export const useUpdateShipmentTracking = () => {
 
       return updated;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['shipment', data.id] });
       queryClient.invalidateQueries({ queryKey: ['shipments', data.store_id] });
       queryClient.invalidateQueries({
@@ -395,11 +405,11 @@ export const useCancelShipment = () => {
       if (error) throw error;
       return updated;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['shipments', data.store_id] });
       toast({
         title: '✅ Expédition annulée',
-        description: 'L\'expédition a été annulée avec succès.',
+        description: "L'expédition a été annulée avec succès.",
       });
     },
     onError: (error: unknown) => {
@@ -428,7 +438,12 @@ export const useRequestPickup = () => {
       packageCount: number;
       totalWeight: number;
     }) => {
-      // 1. Request pickup from FedEx
+      if (!isFedexMockAllowed()) {
+        throw new Error(
+          'Collecte FedEx indisponible en production. Configurez FEDEX_API_* ou activez VITE_FEDEX_ALLOW_MOCK en dev.'
+        );
+      }
+
       const pickupResponse = await mockFedexService.requestPickup({
         address: data.address,
         pickupDate: data.pickupDate,
@@ -466,17 +481,17 @@ export const useRequestPickup = () => {
       if (error) throw error;
       return pickup;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['pickup-requests', data.store_id] });
       toast({
         title: '✅ Ramassage planifié',
         description: `Confirmation: ${data.confirmation_number}`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: '❌ Erreur',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Erreur inconnue',
         variant: 'destructive',
       });
     },
@@ -487,7 +502,6 @@ export const useRequestPickup = () => {
  * Print shipping label
  */
 export const usePrintLabel = () => {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
@@ -521,7 +535,7 @@ export const usePrintLabel = () => {
         // Create blob from base64 and download
         const byteCharacters = atob(label.label_data);
         const byteNumbers = new Array(byteCharacters.length);
-        for (let  i= 0; i < byteCharacters.length; i++) {
+        for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
         const byteArray = new Uint8Array(byteNumbers);
@@ -535,7 +549,7 @@ export const usePrintLabel = () => {
     onSuccess: () => {
       toast({
         title: '🖨️ Étiquette imprimée',
-        description: 'L\'étiquette a été envoyée à l\'impression.',
+        description: "L'étiquette a été envoyée à l'impression.",
       });
     },
     onError: (error: unknown) => {
@@ -548,10 +562,3 @@ export const usePrintLabel = () => {
     },
   });
 };
-
-
-
-
-
-
-
