@@ -361,7 +361,8 @@ export const PlatformCustomization = () => {
                 return (
                   <button
                     key={section.id}
-                    onSelect={() => handleSectionChange(section.id)}
+                    type="button"
+                    onClick={() => handleSectionChange(section.id)}
                     className={cn(
                       'w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all',
                       'hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
@@ -390,7 +391,7 @@ export const PlatformCustomization = () => {
           {/* Footer avec actions */}
           <div className="p-4 border-t space-y-2">
             <Button
-              onSelect={togglePreview}
+              onClick={togglePreview}
               variant={previewMode ? 'default' : 'outline'}
               className="w-full"
               size="sm"
@@ -404,7 +405,7 @@ export const PlatformCustomization = () => {
               </p>
             )}
             <Button
-              onSelect={handleSave}
+              onClick={handleSave}
               disabled={(!hasUnsavedChanges && !previewMode) || isSaving || previewMode}
               className="w-full"
               size="sm"
