@@ -10,6 +10,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import {
   Palette,
@@ -148,9 +149,10 @@ function isValidSection(value: string | null): value is CustomizationSection {
 
 export const PlatformCustomization = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeSection: CustomizationSection = isValidSection(searchParams.get('section'))
-    ? (searchParams.get('section') as CustomizationSection)
-    : 'design';
+  const [activeSection, setActiveSection] = useState<CustomizationSection>(() => {
+    const param = searchParams.get('section');
+    return isValidSection(param) ? param : 'design';
+  });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -193,6 +195,13 @@ export const PlatformCustomization = () => {
     initialize();
   }, [load, toast]);
 
+  // Sync URL → state (retour navigateur, lien direct)
+  useEffect(() => {
+    const param = searchParams.get('section');
+    const next: CustomizationSection = isValidSection(param) ? param : 'design';
+    setActiveSection(current => (current === next ? current : next));
+  }, [searchParams]);
+
   // Détecter les changements non sauvegardés
   useEffect(() => {
     // Cette logique sera gérée par chaque section via onChange
@@ -226,7 +235,9 @@ export const PlatformCustomization = () => {
   };
 
   const handleSectionChange = useCallback(
-    (section: CustomizationSection) => {
+    (section: string) => {
+      if (!isValidSection(section)) return;
+      setActiveSection(section);
       setSearchParams(
         prev => {
           const next = new URLSearchParams(prev);
@@ -314,41 +325,21 @@ export const PlatformCustomization = () => {
     }
   }, [importFile, handleImportFile]);
 
-  const renderSectionContent = () => {
-    switch (activeSection) {
-      case 'design':
-        return <DesignBrandingSection onChange={handleChange} />;
-      case 'settings':
-        return <PlatformSettingsSection onChange={handleChange} />;
-      case 'content':
-        return <ContentManagementSection onChange={handleChange} />;
-      case 'integrations':
-        return <IntegrationsSection onChange={handleChange} />;
-      case 'security':
-        return <SecuritySection onChange={handleChange} />;
-      case 'features':
-        return <FeaturesSection onChange={handleChange} />;
-      case 'notifications':
-        return <NotificationsSection onChange={handleChange} />;
-      case 'landing':
-        return <LandingPageCustomizationSection onChange={handleChange} />;
-      case 'footer':
-        return <FooterCustomizationSection onChange={handleChange} />;
-      case 'pages':
-        return <PagesCustomizationSection onChange={handleChange} />;
-      default:
-        return null;
-    }
-  };
-
   const activeSectionConfig = sections.find(s => s.id === activeSection);
 
   return (
     <AdminLayout>
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] min-h-[600px] overflow-hidden">
-        {/* Sidebar interne — navigation des sections */}
-        <aside className="relative z-20 flex w-full shrink-0 flex-col border-r bg-card/50 backdrop-blur-sm lg:w-64 lg:max-h-[calc(100vh-4rem)]">
-          <div className="p-4 border-b shrink-0">
+      <Tabs
+        value={activeSection}
+        onValueChange={handleSectionChange}
+        className="flex min-h-[600px] h-[calc(100vh-4rem)] flex-col overflow-hidden lg:flex-row"
+      >
+        {/* Sidebar interne — Radix Tabs (navigation fiable) */}
+        <aside
+          id="platform-customization-nav"
+          className="relative z-30 flex w-full shrink-0 flex-col border-r bg-card/50 backdrop-blur-sm lg:w-64 lg:max-h-[calc(100vh-4rem)]"
+        >
+          <div className="shrink-0 border-b p-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Palette className="h-5 w-5 text-primary" />
               Personnalisation
@@ -358,38 +349,31 @@ export const PlatformCustomization = () => {
             </p>
           </div>
 
-          <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 space-y-1">
+          <TabsList className="platform-customization-tabs-list flex h-auto min-h-0 flex-1 flex-col items-stretch justify-start gap-1 overflow-y-auto rounded-none border-0 bg-transparent p-2">
             {sections.map(section => {
               const Icon = section.icon;
-              const isActive = activeSection === section.id;
-
               return (
-                <Button
+                <TabsTrigger
                   key={section.id}
-                  type="button"
-                  variant={isActive ? 'default' : 'ghost'}
-                  onClick={() => handleSectionChange(section.id)}
+                  value={section.id}
                   className={cn(
-                    'h-auto w-full justify-start gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium',
-                    !isActive && 'text-muted-foreground'
+                    'h-auto w-full justify-start gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium',
+                    'data-[state=inactive]:text-muted-foreground data-[state=active]:shadow-sm'
                   )}
-                  aria-label={section.label}
-                  aria-current={isActive ? 'page' : undefined}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span className="flex-1 text-left truncate">{section.label}</span>
-                  {section.badge && (
-                    <Badge variant="secondary" className="text-xs shrink-0 hidden sm:inline-flex">
+                  <span className="flex-1 truncate text-left">{section.label}</span>
+                  {section.badge ? (
+                    <Badge variant="secondary" className="hidden shrink-0 text-xs sm:inline-flex">
                       {section.badge}
                     </Badge>
-                  )}
-                </Button>
+                  ) : null}
+                </TabsTrigger>
               );
             })}
-          </nav>
+          </TabsList>
 
-          {/* Footer avec actions */}
-          <div className="shrink-0 border-t p-4 space-y-2">
+          <div className="shrink-0 space-y-2 border-t p-4">
             <Button
               onClick={togglePreview}
               variant={previewMode ? 'default' : 'outline'}
@@ -431,89 +415,125 @@ export const PlatformCustomization = () => {
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="relative z-0 min-w-0 flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-4 sm:p-6 max-w-6xl">
-            {/* Header - Responsive */}
-            <div className="mb-4 sm:mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-3 sm:mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 sm:gap-3 flex-wrap">
-                      {activeSectionConfig && (
-                        <>
-                          <activeSectionConfig.icon className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary shrink-0" />
-                          <span className="truncate">{activeSectionConfig.label}</span>
-                        </>
+        {/* Panneau de contenu */}
+        <div
+          id="platform-customization-panel"
+          role="tabpanel"
+          className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto pb-16 md:pb-0">
+            <div className="container mx-auto max-w-6xl p-4 sm:p-6">
+              {/* Header - Responsive */}
+              <div className="mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-3 sm:mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 sm:gap-3 flex-wrap">
+                        {activeSectionConfig && (
+                          <>
+                            <activeSectionConfig.icon className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary shrink-0" />
+                            <span className="truncate">{activeSectionConfig.label}</span>
+                          </>
+                        )}
+                      </h1>
+                      {hasUnsavedChanges && !previewMode && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs sm:text-sm bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 flex items-center gap-1"
+                        >
+                          <AlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          <span className="hidden sm:inline">Modifications non sauvegardées</span>
+                          <span className="sm:hidden">Non sauvegardé</span>
+                        </Badge>
                       )}
-                    </h1>
-                    {hasUnsavedChanges && !previewMode && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs sm:text-sm bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 flex items-center gap-1"
-                      >
-                        <AlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        <span className="hidden sm:inline">Modifications non sauvegardées</span>
-                        <span className="sm:hidden">Non sauvegardé</span>
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm sm:text-base text-muted-foreground mt-1 line-clamp-2">
-                    {activeSectionConfig?.description}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Select
-                    onValueChange={value => {
-                      if (value === 'export') handleExport();
-                      if (value === 'import') fileInputRef.current?.click();
-                    }}
-                  >
-                    <SelectTrigger className="gap-2 min-h-[44px]">
-                      <Settings className="h-4 w-4" />
-                      <span className="hidden sm:inline">Actions</span>
-                    </SelectTrigger>
-                    <SelectContent mobileVariant="sheet" className="min-w-[200px]">
-                      <SelectItem value="export" className="cursor-pointer">
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter JSON
-                      </SelectItem>
-                      <SelectItem value="import" className="cursor-pointer">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Importer JSON
-                      </SelectItem>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="application/json"
-                        className="hidden"
-                        onChange={handleFileSelect}
-                      />
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <Separator />
-            </div>
-
-            {/* Section Content */}
-            <div className="space-y-4 sm:space-y-6">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8 sm:py-12">
-                  <div className="flex flex-col items-center gap-3 sm:gap-4">
-                    <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-                    <p className="text-sm sm:text-base text-muted-foreground">
-                      Chargement des paramètres...
+                    </div>
+                    <p className="text-sm sm:text-base text-muted-foreground mt-1 line-clamp-2">
+                      {activeSectionConfig?.description}
                     </p>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      onValueChange={value => {
+                        if (value === 'export') handleExport();
+                        if (value === 'import') fileInputRef.current?.click();
+                      }}
+                    >
+                      <SelectTrigger className="gap-2 min-h-[44px]">
+                        <Settings className="h-4 w-4" />
+                        <span className="hidden sm:inline">Actions</span>
+                      </SelectTrigger>
+                      <SelectContent mobileVariant="sheet" className="min-w-[200px]">
+                        <SelectItem value="export" className="cursor-pointer">
+                          <Download className="h-4 w-4 mr-2" />
+                          Exporter JSON
+                        </SelectItem>
+                        <SelectItem value="import" className="cursor-pointer">
+                          <Upload className="h-4 w-4 mr-2" />
+                          Importer JSON
+                        </SelectItem>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="application/json"
+                          className="hidden"
+                          onChange={handleFileSelect}
+                        />
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              ) : (
-                renderSectionContent()
-              )}
+                <Separator />
+              </div>
+
+              <div className="space-y-4 sm:space-y-6">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8 sm:py-12">
+                    <div className="flex flex-col items-center gap-3 sm:gap-4">
+                      <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        Chargement des paramètres...
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <TabsContent value="design" className="mt-0 focus-visible:outline-none">
+                      <DesignBrandingSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="settings" className="mt-0 focus-visible:outline-none">
+                      <PlatformSettingsSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="content" className="mt-0 focus-visible:outline-none">
+                      <ContentManagementSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="integrations" className="mt-0 focus-visible:outline-none">
+                      <IntegrationsSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="security" className="mt-0 focus-visible:outline-none">
+                      <SecuritySection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="features" className="mt-0 focus-visible:outline-none">
+                      <FeaturesSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
+                      <NotificationsSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="landing" className="mt-0 focus-visible:outline-none">
+                      <LandingPageCustomizationSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="footer" className="mt-0 focus-visible:outline-none">
+                      <FooterCustomizationSection onChange={handleChange} />
+                    </TabsContent>
+                    <TabsContent value="pages" className="mt-0 focus-visible:outline-none">
+                      <PagesCustomizationSection onChange={handleChange} />
+                    </TabsContent>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </Tabs>
 
       {/* Dialog d'import */}
       <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>

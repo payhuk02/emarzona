@@ -417,3 +417,22 @@
   background: var(--lp-ink-soft) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Personnalisation plateforme — nav interne (évite conflits main.flex-1) */
+#platform-customization-nav {
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+#platform-customization-nav .platform-customization-tabs-list {
+  pointer-events: auto;
+}
+
+#platform-customization-nav [role='tab'] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+#platform-customization-panel {
+  pointer-events: auto;
+}
