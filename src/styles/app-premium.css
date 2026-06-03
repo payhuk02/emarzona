@@ -418,21 +418,30 @@
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Personnalisation plateforme — nav interne (évite conflits main.flex-1) */
+/* Personnalisation plateforme — nav interne */
 #platform-customization-nav {
   pointer-events: auto;
   isolation: isolate;
 }
 
-#platform-customization-nav .platform-customization-tabs-list {
-  pointer-events: auto;
-}
-
-#platform-customization-nav [role='tab'] {
+#platform-customization-nav .platform-customization-nav-list,
+#platform-customization-nav .platform-customization-nav-btn {
   pointer-events: auto;
   cursor: pointer;
 }
 
 #platform-customization-panel {
   pointer-events: auto;
+  min-width: 0;
+}
+
+@media (max-width: 1023px) {
+  #platform-customization-nav {
+    max-height: min(48vh, 28rem);
+  }
+
+  #platform-customization-panel {
+    min-height: min(55vh, 36rem);
+    scroll-margin-top: 4.5rem;
+  }
 }

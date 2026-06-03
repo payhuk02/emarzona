@@ -4,13 +4,12 @@
  * Date: 2025-01-30
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import {
   Palette,
@@ -147,18 +146,49 @@ function isValidSection(value: string | null): value is CustomizationSection {
   return value != null && sections.some(section => section.id === value);
 }
 
+function renderSectionContent(
+  section: CustomizationSection,
+  onChange: () => void
+): React.ReactNode {
+  switch (section) {
+    case 'design':
+      return <DesignBrandingSection onChange={onChange} />;
+    case 'settings':
+      return <PlatformSettingsSection onChange={onChange} />;
+    case 'content':
+      return <ContentManagementSection onChange={onChange} />;
+    case 'integrations':
+      return <IntegrationsSection onChange={onChange} />;
+    case 'security':
+      return <SecuritySection onChange={onChange} />;
+    case 'features':
+      return <FeaturesSection onChange={onChange} />;
+    case 'notifications':
+      return <NotificationsSection onChange={onChange} />;
+    case 'landing':
+      return <LandingPageCustomizationSection onChange={onChange} />;
+    case 'footer':
+      return <FooterCustomizationSection onChange={onChange} />;
+    case 'pages':
+      return <PagesCustomizationSection onChange={onChange} />;
+    default:
+      return null;
+  }
+}
+
 export const PlatformCustomization = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useState<CustomizationSection>(() => {
+  const activeSection = useMemo((): CustomizationSection => {
     const param = searchParams.get('section');
     return isValidSection(param) ? param : 'design';
-  });
+  }, [searchParams]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const {
     saveAll,
@@ -195,12 +225,12 @@ export const PlatformCustomization = () => {
     initialize();
   }, [load, toast]);
 
-  // Sync URL → state (retour navigateur, lien direct)
+  // Mobile : faire défiler vers le contenu après changement de section
   useEffect(() => {
-    const param = searchParams.get('section');
-    const next: CustomizationSection = isValidSection(param) ? param : 'design';
-    setActiveSection(current => (current === next ? current : next));
-  }, [searchParams]);
+    if (typeof window === 'undefined') return;
+    if (!window.matchMedia('(max-width: 1023px)').matches) return;
+    panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [activeSection]);
 
   // Détecter les changements non sauvegardés
   useEffect(() => {
@@ -234,10 +264,8 @@ export const PlatformCustomization = () => {
     }
   };
 
-  const handleSectionChange = useCallback(
-    (section: string) => {
-      if (!isValidSection(section)) return;
-      setActiveSection(section);
+  const selectSection = useCallback(
+    (section: CustomizationSection) => {
       setSearchParams(
         prev => {
           const next = new URLSearchParams(prev);
@@ -329,15 +357,21 @@ export const PlatformCustomization = () => {
 
   return (
     <AdminLayout>
-      <Tabs
-        value={activeSection}
-        onValueChange={handleSectionChange}
-        className="flex min-h-[600px] h-[calc(100vh-4rem)] flex-col overflow-hidden lg:flex-row"
+      <div
+        className={cn(
+          'platform-customization-shell grid w-full',
+          'min-h-0 gap-0',
+          'lg:h-[calc(100vh-4rem)] lg:min-h-[600px] lg:max-h-[calc(100vh-4rem)] lg:grid-cols-[16rem_1fr] lg:overflow-hidden'
+        )}
       >
-        {/* Sidebar interne — Radix Tabs (navigation fiable) */}
+        {/* Sidebar interne — boutons natifs (sans Radix Tabs) */}
         <aside
           id="platform-customization-nav"
-          className="relative z-30 flex w-full shrink-0 flex-col border-r bg-card/50 backdrop-blur-sm lg:w-64 lg:max-h-[calc(100vh-4rem)]"
+          className={cn(
+            'relative z-50 flex w-full shrink-0 flex-col border-b bg-card/50 backdrop-blur-sm',
+            'max-h-[min(48vh,28rem)] lg:max-h-none',
+            'lg:h-full lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r'
+          )}
         >
           <div className="shrink-0 border-b p-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -349,16 +383,25 @@ export const PlatformCustomization = () => {
             </p>
           </div>
 
-          <TabsList className="platform-customization-tabs-list flex h-auto min-h-0 flex-1 flex-col items-stretch justify-start gap-1 overflow-y-auto rounded-none border-0 bg-transparent p-2">
+          <nav
+            aria-label="Sections de personnalisation"
+            className="platform-customization-nav-list flex max-h-[min(32vh,20rem)] flex-1 flex-col items-stretch justify-start gap-1 overflow-y-auto p-2 lg:max-h-none lg:min-h-0"
+          >
             {sections.map(section => {
               const Icon = section.icon;
+              const isActive = activeSection === section.id;
               return (
-                <TabsTrigger
+                <button
                   key={section.id}
-                  value={section.id}
+                  type="button"
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => selectSection(section.id)}
                   className={cn(
-                    'h-auto w-full justify-start gap-2 sm:gap-3 rounded-lg px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium',
-                    'data-[state=inactive]:text-muted-foreground data-[state=active]:shadow-sm'
+                    'platform-customization-nav-btn inline-flex h-auto w-full items-center justify-start gap-2 rounded-lg px-2 py-2 text-xs font-medium touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 sm:text-sm',
+                    'ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    isActive
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -368,10 +411,10 @@ export const PlatformCustomization = () => {
                       {section.badge}
                     </Badge>
                   ) : null}
-                </TabsTrigger>
+                </button>
               );
             })}
-          </TabsList>
+          </nav>
 
           <div className="shrink-0 space-y-2 border-t p-4">
             <Button
@@ -417,11 +460,20 @@ export const PlatformCustomization = () => {
 
         {/* Panneau de contenu */}
         <div
+          ref={panelRef}
           id="platform-customization-panel"
-          role="tabpanel"
-          className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+          className={cn(
+            'relative z-0 flex min-w-0 flex-col',
+            'min-h-[min(50vh,32rem)] lg:min-h-0 lg:overflow-hidden'
+          )}
         >
-          <div className="min-h-0 flex-1 overflow-y-auto pb-16 md:pb-0">
+          {/* Indication mobile : le contenu est sous la liste */}
+          <p className="border-b bg-muted/40 px-4 py-2 text-center text-xs text-muted-foreground lg:hidden">
+            Section :{' '}
+            <span className="font-medium text-foreground">{activeSectionConfig?.label}</span>
+            {' — '}faites défiler pour modifier
+          </p>
+          <div className="min-h-0 flex-1 overflow-y-auto pb-20 lg:pb-0">
             <div className="container mx-auto max-w-6xl p-4 sm:p-6">
               {/* Header - Responsive */}
               <div className="mb-4 sm:mb-6">
@@ -485,7 +537,7 @@ export const PlatformCustomization = () => {
                 <Separator />
               </div>
 
-              <div className="space-y-4 sm:space-y-6">
+              <div key={activeSection} className="space-y-4 sm:space-y-6">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-8 sm:py-12">
                     <div className="flex flex-col items-center gap-3 sm:gap-4">
@@ -496,44 +548,13 @@ export const PlatformCustomization = () => {
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <TabsContent value="design" className="mt-0 focus-visible:outline-none">
-                      <DesignBrandingSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="settings" className="mt-0 focus-visible:outline-none">
-                      <PlatformSettingsSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="content" className="mt-0 focus-visible:outline-none">
-                      <ContentManagementSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="integrations" className="mt-0 focus-visible:outline-none">
-                      <IntegrationsSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="security" className="mt-0 focus-visible:outline-none">
-                      <SecuritySection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="features" className="mt-0 focus-visible:outline-none">
-                      <FeaturesSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
-                      <NotificationsSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="landing" className="mt-0 focus-visible:outline-none">
-                      <LandingPageCustomizationSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="footer" className="mt-0 focus-visible:outline-none">
-                      <FooterCustomizationSection onChange={handleChange} />
-                    </TabsContent>
-                    <TabsContent value="pages" className="mt-0 focus-visible:outline-none">
-                      <PagesCustomizationSection onChange={handleChange} />
-                    </TabsContent>
-                  </>
+                  renderSectionContent(activeSection, handleChange)
                 )}
               </div>
             </div>
           </div>
         </div>
-      </Tabs>
+      </div>
 
       {/* Dialog d'import */}
       <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>
