@@ -180,6 +180,8 @@ npx supabase functions deploy stripe-refund --no-verify-jwt
 
 Remboursements vendeur : `refundPayment()` depuis `@/lib/payments/refund-payment` (délègue à `stripe-refund`).
 
+**Checklist QA remboursements sandbox** : [QA_STRIPE_REFUND_SANDBOX_CHECKLIST.md](./QA_STRIPE_REFUND_SANDBOX_CHECKLIST.md)
+
 ---
 
 _Dernière mise à jour : 2026-05-23_

@@ -20,10 +20,15 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import landingPremiumFR from '@/i18n/locales/landing-premium/fr.json';
+import {
+  FOOTER_COLUMNS,
+  FOOTER_LEGAL_LINKS,
+  FOOTER_SOCIAL_NETWORKS,
+} from '@/lib/admin/footerLinksConfig';
 
 export const LANDING_PREMIUM_PAGE_ID = 'landingPremium';
 
-export type LandingPremiumElementType = 'text' | 'textarea' | 'image' | 'color';
+export type LandingPremiumElementType = 'text' | 'textarea' | 'image' | 'color' | 'url' | 'email';
 
 export interface LandingPremiumElement {
   id: string;
@@ -50,6 +55,19 @@ function area(id: string, label: string, defaultValue: string): LandingPremiumEl
   return { id, label, type: 'textarea', defaultValue };
 }
 
+function url(
+  id: string,
+  label: string,
+  defaultValue: string,
+  description?: string
+): LandingPremiumElement {
+  return { id, label, type: 'url', defaultValue, description };
+}
+
+function email(id: string, label: string, defaultValue: string): LandingPremiumElement {
+  return { id, label, type: 'email', defaultValue };
+}
+
 function itemFields(
   prefix: string,
   items: { title: string; desc: string }[],
@@ -68,6 +86,8 @@ function stringListFields(
 ): LandingPremiumElement[] {
   return items.map((value, i) => text(`${prefix}.${i}`, `${itemLabel} ${i + 1}`, value));
 }
+
+export const FOOTER_CUSTOMIZATION_SECTION_ID = 'footer';
 
 export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
   {
@@ -387,6 +407,23 @@ export const LANDING_PREMIUM_SECTIONS: LandingPremiumSection[] = [
       text('footer.columns.company.contact', 'Lien Contact', lp.footer.columns.company.contact),
       text('footer.columns.company.careers', 'Lien Carrières', lp.footer.columns.company.careers),
       text('footer.columns.company.press', 'Lien Presse', lp.footer.columns.company.press),
+      ...FOOTER_COLUMNS.flatMap(col =>
+        col.links.map(link =>
+          url(
+            link.hrefKey,
+            `URL — ${link.linkKey} (${col.colKey})`,
+            link.defaultHref,
+            'Chemin interne (/about), ancre (/#tarifs), mailto: ou URL externe https://'
+          )
+        )
+      ),
+      ...FOOTER_LEGAL_LINKS.map(link =>
+        url(link.hrefKey, `URL — ${link.linkKey}`, link.defaultHref)
+      ),
+      ...FOOTER_SOCIAL_NETWORKS.map(s =>
+        url(s.hrefKey, `Réseau — ${s.network}`, s.defaultHref, 'Laisser vide pour masquer l’icône')
+      ),
+      email('footer.contactEmail', 'E-mail contact (fallback)', 'contact@emarzona.com'),
     ],
   },
 ];

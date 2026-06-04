@@ -25,6 +25,9 @@ const AdminActivity = lazyPage(() => import('@/pages/admin/AdminActivity'));
 const AdminSettings = lazyPage(() => import('@/pages/admin/AdminSettings'));
 const AdminCommunity = lazyPage(() => import('@/pages/admin/AdminCommunity'));
 const AdminCommissionSettings = lazyPage(() => import('@/pages/admin/AdminCommissionSettings'));
+const AdminNewsletterSubscribers = lazyPage(
+  () => import('@/pages/admin/AdminNewsletterSubscribers')
+);
 const PlatformCustomization = lazyPage(() =>
   import('@/pages/admin/PlatformCustomization')
     .then(m => ({ default: m.PlatformCustomization }))
@@ -126,6 +129,7 @@ export const adminRoutes = (
     {pr('/admin/commission-settings', AdminCommissionSettings)}
     {pr('/admin/commission-payments', AdminCommissionPayments)}
     {pr('/admin/platform-customization', PlatformCustomization)}
+    {pr('/admin/newsletter-subscribers', AdminNewsletterSubscribers)}
     {pr('/admin/moneroo-analytics', MonerooAnalytics)}
     {pr('/admin/moneroo-reconciliation', MonerooReconciliation)}
     {pr('/admin/transaction-monitoring', TransactionMonitoring)}

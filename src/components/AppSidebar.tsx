@@ -1203,6 +1203,11 @@ const adminMenuSections = [
         url: '/admin/platform-customization',
         icon: Sparkles,
       },
+      {
+        title: 'Newsletter',
+        url: '/admin/newsletter-subscribers',
+        icon: Mail,
+      },
     ],
   },
 ];

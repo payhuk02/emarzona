@@ -50,6 +50,10 @@ test.describe('Routing', () => {
       '/legal/privacy',
       '/legal/cookies',
       '/legal/refund',
+      '/about',
+      '/contact',
+      '/help',
+      '/integrations',
     ];
 
     for (const route of publicRoutes) {

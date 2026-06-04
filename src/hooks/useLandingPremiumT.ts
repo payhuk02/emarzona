@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useTranslation, type TFunction, type TOptions } from 'react-i18next';
 import { usePageCustomization } from '@/hooks/usePageCustomization';
 import { LANDING_PREMIUM_PAGE_ID } from '@/lib/admin/landingPremiumCustomization';
+import { getPageCustomizationValue } from '@/lib/admin/pageCustomizationKeys';
 
 function applyArrayOverrides<T>(
   base: T[],
@@ -41,7 +42,7 @@ export function useLandingPremiumT(): {
 
   const t = useCallback(
     (key: string, options?: TOptions) => {
-      const custom = pageCustomization[key];
+      const custom = getPageCustomizationValue(pageCustomization as Record<string, unknown>, key);
       if (typeof custom === 'string' && custom.length > 0 && !options?.returnObjects) {
         if (options && typeof options === 'object' && Object.keys(options).length > 0) {
           let result = custom;

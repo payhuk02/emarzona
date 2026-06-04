@@ -4,7 +4,10 @@
  */
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
+import {
+  PlatformCustomizationStateProvider,
+  usePlatformCustomization,
+} from '@/hooks/admin/usePlatformCustomization';
 import { logger } from '@/lib/logger';
 import type { PlatformCustomizationSchemaType } from '@/lib/schemas/platform-customization';
 
@@ -33,6 +36,14 @@ const PlatformCustomizationContext = createContext<PlatformCustomizationContextT
 );
 
 export const PlatformCustomizationProvider = ({ children }: { children: ReactNode }) => {
+  return (
+    <PlatformCustomizationStateProvider>
+      <PlatformCustomizationProviderInner>{children}</PlatformCustomizationProviderInner>
+    </PlatformCustomizationStateProvider>
+  );
+};
+
+function PlatformCustomizationProviderInner({ children }: { children: ReactNode }) {
   const { customizationData, load } = usePlatformCustomization();
   const [previewMode, setPreviewMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,13 +139,13 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
       Object.entries(design.colors).forEach(([key, value]) => {
         if (typeof value === 'string') {
           // Convertir HSL en format CSS variable (sans hsl())
-          let  hslValue= value;
+          let hslValue = value;
           if (value.startsWith('hsl(')) {
             hslValue = value.replace('hsl(', '').replace(')', '');
           }
 
           // Mapper les clés aux variables CSS
-          const  cssVarMap: Record<string, string> = {
+          const cssVarMap: Record<string, string> = {
             primary: '--primary',
             secondary: '--secondary',
             accent: '--accent',
@@ -184,7 +195,7 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
 
       // Spacing (base spacing unit)
       if (design.tokens.spacing) {
-        const  spacingMap: Record<string, string> = {
+        const spacingMap: Record<string, string> = {
           '0': '0',
           '1': '0.25rem',
           '2': '0.5rem',
@@ -271,7 +282,7 @@ export const PlatformCustomizationProvider = ({ children }: { children: ReactNod
     // Retourner les enfants sans le contexte en cas d'erreur
     return <>{children}</>;
   }
-};
+}
 
 export const usePlatformCustomizationContext = () => {
   const context = useContext(PlatformCustomizationContext);
@@ -282,9 +293,3 @@ export const usePlatformCustomizationContext = () => {
   }
   return context;
 };
-
-
-
-
-
-

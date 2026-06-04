@@ -3,6 +3,28 @@ import { resolveCheckoutShippingAmount } from '../checkout-shipping';
 import { calculateArtistShipping } from '@/lib/shipping/artist-shipping';
 import type { CartItem } from '@/types/cart';
 
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    from: vi.fn((table: string) => {
+      if (table === 'products') {
+        return {
+          select: vi.fn(() => ({
+            in: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          })),
+        };
+      }
+      return {
+        select: vi.fn(() => ({
+          in: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
+          })),
+        })),
+      };
+    }),
+  },
+}));
+
 vi.mock('@/lib/shipping/artist-shipping', () => ({
   calculateArtistShipping: vi.fn(() =>
     Promise.resolve({

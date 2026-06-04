@@ -98,7 +98,7 @@ select {
 /* === NAVIGATION MOBILE === */
 /* Navigation optimisée pour mobile */
 @media (max-width: 768px) {
-  nav {
+  nav:not(.platform-customization-nav-list):not(.context-bottom-nav) {
     position: sticky;
     top: 0;
     z-index: 100;

@@ -11,7 +11,7 @@ import {
 } from '../_shared/complete-order-payment.ts';
 import { applyPaymentRefund } from '../_shared/apply-payment-refund.ts';
 import { runPostOrderPaymentFulfillment } from '../_shared/post-order-payment-fulfillment.ts';
-import { fromStripeAmount } from '../_shared/stripe-api.ts';
+import { fromStripeAmount, stripeGet } from '../_shared/stripe-api.ts';
 
 function constantTimeEquals(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -72,6 +72,21 @@ async function verifyStripeSignature(
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
   return signatures.some(sig => constantTimeEquals(expected, sig));
+}
+
+async function resolveStripeRefundIdFromCharge(charge: {
+  id?: string;
+  refunds?: { data?: Array<{ id?: string }> };
+}): Promise<string | null> {
+  const embedded = charge.refunds?.data?.[0]?.id;
+  if (embedded) return embedded;
+
+  if (!charge.id) return null;
+
+  const list = await stripeGet<{ data: Array<{ id: string }> }>(
+    `/refunds?charge=${encodeURIComponent(charge.id)}&limit=1`
+  );
+  return list.data[0]?.id ?? null;
 }
 
 serve(async req => {
@@ -184,6 +199,7 @@ serve(async req => {
         amount_refunded?: number;
         currency?: string;
         metadata?: Record<string, string>;
+        refunds?: { data?: Array<{ id?: string }> };
       };
 
       const paymentIntentId =
@@ -196,20 +212,35 @@ serve(async req => {
       if (!transactionId && paymentIntentId) {
         const { data: tx } = await supabase
           .from('transactions')
-          .select('id, amount, currency')
+          .select('id')
           .eq('provider_payment_intent_id', paymentIntentId)
           .maybeSingle();
         transactionId = tx?.id;
       }
 
       if (transactionId && charge.amount_refunded != null && charge.currency) {
-        const refundAmount = fromStripeAmount(charge.amount_refunded, charge.currency);
-        await applyPaymentRefund(supabase, transactionId, {
-          refundId: charge.id ?? event.id,
-          amount: refundAmount,
-          currency: charge.currency.toUpperCase(),
-          provider: 'stripe_connect',
-        });
+        const { data: txStatus } = await supabase
+          .from('transactions')
+          .select('status')
+          .eq('id', transactionId)
+          .maybeSingle();
+
+        if (txStatus?.status === 'refunded') {
+          console.log('charge.refunded skipped: transaction already refunded', {
+            transactionId,
+            eventId: event.id,
+          });
+        } else {
+          const refundAmount = fromStripeAmount(charge.amount_refunded, charge.currency);
+          const refundId = (await resolveStripeRefundIdFromCharge(charge)) ?? charge.id ?? event.id;
+
+          await applyPaymentRefund(supabase, transactionId, {
+            refundId,
+            amount: refundAmount,
+            currency: charge.currency.toUpperCase(),
+            provider: 'stripe_connect',
+          });
+        }
       }
     }
 

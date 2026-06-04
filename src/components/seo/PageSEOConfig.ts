@@ -111,6 +111,40 @@ export const PAGE_SEO_CONFIG: Record<string, PageSEOEntry> = {
       'Des produits sélectionnés pour vous en fonction de vos préférences et de votre historique.',
   },
 
+  '/about': {
+    title: 'À propos | Emarzona',
+    description:
+      'Découvrez Emarzona, la plateforme e-commerce tout-en-un pour vendre et développer votre activité.',
+  },
+  '/contact': {
+    title: 'Contact | Emarzona',
+    description: 'Contactez l’équipe Emarzona : support, partenariats et presse.',
+  },
+  '/careers': {
+    title: 'Carrières | Emarzona',
+    description: 'Rejoignez Emarzona et participez à la construction du commerce en ligne.',
+  },
+  '/press': {
+    title: 'Presse | Emarzona',
+    description: 'Espace presse Emarzona : communiqués et contacts médias.',
+  },
+  '/blog': {
+    title: 'Blog | Emarzona',
+    description: 'Conseils e-commerce, études de cas et nouveautés produit.',
+  },
+  '/docs': {
+    title: 'Documentation | Emarzona',
+    description: 'Guides et documentation pour démarrer sur Emarzona.',
+  },
+  '/help': {
+    title: "Centre d'aide | Emarzona",
+    description: 'FAQ et assistance pour vendeurs et acheteurs Emarzona.',
+  },
+  '/integrations': {
+    title: 'Intégrations | Emarzona',
+    description: 'Paiements, logistique et outils connectés à votre boutique Emarzona.',
+  },
+
   // === Pages légales (déjà SEOMeta mais listées pour cohérence) ===
   '/legal/terms': {
     title: "Conditions générales d'utilisation | Emarzona",

@@ -3,7 +3,15 @@
  * Centralise toutes les opérations de sauvegarde et chargement
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  type ReactNode,
+} from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { isSupabaseBackendConfigured, isSupabaseNetworkError } from '@/lib/supabase-config';
 import { useToast } from '@/hooks/use-toast';
@@ -121,7 +129,33 @@ export interface PlatformCustomizationDataLegacy {
 const PREVIEW_STORAGE_KEY = 'platform-customization-preview';
 const LAST_SAVED_KEY = 'platform-customization-last-saved';
 
-export const usePlatformCustomization = () => {
+export type PlatformCustomizationHookValue = ReturnType<typeof usePlatformCustomizationState>;
+
+const PlatformCustomizationStateContext = createContext<PlatformCustomizationHookValue | null>(
+  null
+);
+
+/** Provider unique — état partagé entre admin, footer et pages marketing */
+export function PlatformCustomizationStateProvider({ children }: { children: ReactNode }) {
+  const value = usePlatformCustomizationState();
+  return (
+    <PlatformCustomizationStateContext.Provider value={value}>
+      {children}
+    </PlatformCustomizationStateContext.Provider>
+  );
+}
+
+export const usePlatformCustomization = (): PlatformCustomizationHookValue => {
+  const ctx = useContext(PlatformCustomizationStateContext);
+  if (!ctx) {
+    throw new Error(
+      'usePlatformCustomization must be used within PlatformCustomizationStateProvider'
+    );
+  }
+  return ctx;
+};
+
+function usePlatformCustomizationState() {
   const [isSaving, setIsSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [customizationData, setCustomizationData] = useState<PlatformCustomizationData>({});
@@ -177,11 +211,47 @@ export const usePlatformCustomization = () => {
     }
 
     try {
-      // Utiliser la fonction RPC au lieu d'accéder directement à la table
+      // Pages publiques (footer, landing, marketing) — visiteurs anonymes inclus
+      const { data: publicData, error: publicError } = await supabase.rpc(
+        'get_public_platform_customization'
+      );
+
+      if (!publicError && publicData && typeof publicData === 'object') {
+        const pages = (publicData as { pages?: PlatformCustomizationData['pages'] }).pages;
+        if (pages && typeof pages === 'object') {
+          setCustomizationData(prev => ({
+            ...prev,
+            pages,
+          }));
+        }
+      } else if (
+        publicError &&
+        !(
+          publicError.code === 'PGRST116' ||
+          publicError.message?.includes('function') ||
+          publicError.message?.includes('does not exist')
+        )
+      ) {
+        if (import.meta.env.DEV && isSupabaseNetworkError(publicError)) {
+          logger.debug('Customization publique: backend injoignable.');
+        } else {
+          logger.warn('Erreur chargement personnalisation publique', {
+            error: publicError.message,
+            code: publicError.code,
+          });
+        }
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        return;
+      }
+
       const { data, error } = await supabase.rpc('get_platform_customization');
 
       if (error) {
-        // Si la fonction n'existe pas ou si les données n'existent pas, on continue avec des données vides
         if (
           error.code === 'PGRST116' ||
           error.message.includes('function') ||
@@ -206,14 +276,12 @@ export const usePlatformCustomization = () => {
       }
 
       if (data) {
-        // Valider les données chargées
         const validation = validateCustomizationData(data);
         if (!validation.valid) {
           logger.warn('Données de personnalisation invalides', {
             errors: validation.errors,
             level: 'section',
           });
-          // Utiliser les données validées si disponibles, sinon les données brutes
           if (validation.data) {
             setCustomizationData(validation.data);
           } else {
@@ -223,7 +291,6 @@ export const usePlatformCustomization = () => {
           setCustomizationData(validation.data || (data as PlatformCustomizationData));
         }
 
-        // Sauvegarder le timestamp de dernière sauvegarde (approximatif)
         const now = new Date().toISOString();
         lastSavedTimestampRef.current = now;
         try {
@@ -541,4 +608,4 @@ export const usePlatformCustomization = () => {
     previewMode,
     togglePreview,
   };
-};
+}
