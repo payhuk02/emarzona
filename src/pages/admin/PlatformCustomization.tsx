@@ -4,8 +4,8 @@
  * Date: 2025-01-30
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -43,6 +43,12 @@ import { FooterCustomizationSection } from '@/components/admin/customization/Foo
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { exportCustomization, importCustomization } from '@/lib/platform-customization-export';
 import { logger } from '@/lib/logger';
+import {
+  type CustomizationSection,
+  parseActiveSection,
+  buildSectionHref,
+  isValidCustomizationSection,
+} from '@/lib/admin/platform-customization-sections';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
   AlertDialog,
@@ -54,18 +60,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-type CustomizationSection =
-  | 'design'
-  | 'settings'
-  | 'content'
-  | 'integrations'
-  | 'security'
-  | 'features'
-  | 'notifications'
-  | 'landing'
-  | 'footer'
-  | 'pages';
 
 interface SectionConfig {
   id: CustomizationSection;
@@ -142,21 +136,6 @@ const sections: SectionConfig[] = [
   },
 ];
 
-const PLATFORM_CUSTOMIZATION_PATH = '/admin/platform-customization';
-
-function isValidSection(value: string | null): value is CustomizationSection {
-  return value != null && sections.some(section => section.id === value);
-}
-
-export function parseActiveSection(search: string): CustomizationSection {
-  const param = new URLSearchParams(search).get('section');
-  return isValidSection(param) ? param : 'design';
-}
-
-export function buildSectionHref(section: CustomizationSection): string {
-  return `${PLATFORM_CUSTOMIZATION_PATH}?section=${section}`;
-}
-
 function renderSectionContent(
   section: CustomizationSection,
   onChange: () => void
@@ -190,7 +169,21 @@ function renderSectionContent(
 export const PlatformCustomization = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const activeSection = parseActiveSection(location.search);
+  const sectionFromUrl = useMemo(() => parseActiveSection(location.search), [location.search]);
+  const [activeSection, setActiveSection] = useState<CustomizationSection>(sectionFromUrl);
+
+  // Sync URL → état local (retour navigateur, liens externes)
+  useEffect(() => {
+    setActiveSection(sectionFromUrl);
+  }, [sectionFromUrl]);
+
+  const goToSection = useCallback(
+    (section: CustomizationSection) => {
+      setActiveSection(section);
+      navigate(buildSectionHref(section), { replace: true });
+    },
+    [navigate]
+  );
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -238,7 +231,7 @@ export const PlatformCustomization = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const sectionParam = params.get('section');
-    if (sectionParam && isValidSection(sectionParam)) return;
+    if (sectionParam && isValidCustomizationSection(sectionParam)) return;
     navigate(buildSectionHref('design'), { replace: true });
   }, [location.search, navigate]);
 
@@ -367,6 +360,7 @@ export const PlatformCustomization = () => {
           className={cn(
             'platform-customization-shell grid w-full',
             'min-h-0 gap-0',
+            'lg:grid-cols-[16rem_minmax(0,1fr)]',
             'lg:h-[calc(100vh-5.5rem)] lg:min-h-[600px] lg:max-h-[calc(100vh-5.5rem)] lg:overflow-hidden'
           )}
           data-active-section={activeSection}
@@ -377,7 +371,8 @@ export const PlatformCustomization = () => {
             className={cn(
               'relative z-50 flex w-full shrink-0 flex-col border-b bg-card/50 backdrop-blur-sm',
               'max-h-[min(48vh,28rem)] lg:max-h-none',
-              'lg:h-full lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r'
+              'lg:col-start-1 lg:row-start-1',
+              'lg:h-full lg:w-full lg:max-w-none lg:shrink-0 lg:border-b-0 lg:border-r'
             )}
           >
             <div className="shrink-0 border-b p-4">
@@ -398,22 +393,24 @@ export const PlatformCustomization = () => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
                 return (
-                  <Link
+                  <button
                     key={section.id}
-                    to={buildSectionHref(section.id)}
-                    replace
+                    type="button"
                     aria-current={isActive ? 'page' : undefined}
                     data-section={section.id}
+                    onClick={() => goToSection(section.id)}
                     className={cn(
-                      'platform-customization-nav-btn relative z-[1] inline-flex h-auto w-full items-center justify-start gap-2 rounded-lg px-2 py-2 text-xs font-medium touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 sm:text-sm',
+                      'platform-customization-nav-btn relative z-[1] inline-flex h-auto w-full items-center justify-start gap-2 rounded-lg border-0 bg-transparent px-2 py-2 text-left text-xs font-medium touch-manipulation sm:gap-3 sm:px-3 sm:py-2.5 sm:text-sm',
                       'ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                       isActive
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span className="flex-1 truncate text-left">{section.label}</span>
+                    <Icon className="h-4 w-4 shrink-0 pointer-events-none" />
+                    <span className="flex-1 truncate text-left pointer-events-none">
+                      {section.label}
+                    </span>
                     {section.badge ? (
                       <Badge
                         variant="secondary"
@@ -422,7 +419,7 @@ export const PlatformCustomization = () => {
                         {section.badge}
                       </Badge>
                     ) : null}
-                  </Link>
+                  </button>
                 );
               })}
             </nav>
@@ -475,6 +472,7 @@ export const PlatformCustomization = () => {
             id="platform-customization-panel"
             className={cn(
               'relative z-0 flex min-w-0 flex-col',
+              'lg:col-start-2 lg:row-start-1',
               'min-h-[min(50vh,32rem)] lg:min-h-0 lg:overflow-hidden'
             )}
           >

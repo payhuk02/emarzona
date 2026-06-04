@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseActiveSection, buildSectionHref } from '@/pages/admin/PlatformCustomization';
+import { parseActiveSection, buildSectionHref } from '@/lib/admin/platform-customization-sections';
 
 describe('platform customization section routing', () => {
   it('defaults to design when section is missing', () => {
