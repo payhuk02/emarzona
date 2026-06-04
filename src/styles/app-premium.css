@@ -418,21 +418,60 @@
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Personnalisation plateforme — nav interne */
+/* Personnalisation plateforme — layout 2 colonnes + nav cliquable */
+.platform-customization-shell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .platform-customization-shell {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+}
+
 #platform-customization-nav {
   pointer-events: auto;
   isolation: isolate;
+  position: relative;
+  z-index: 50;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 #platform-customization-nav .platform-customization-nav-list,
 #platform-customization-nav .platform-customization-nav-btn {
   pointer-events: auto;
   cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+
+#platform-customization-nav .platform-customization-nav-btn[aria-current='page'],
+#platform-customization-nav .platform-customization-nav-btn[aria-current='page'] span,
+#platform-customization-nav .platform-customization-nav-btn[aria-current='page'] svg {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+@media (max-width: 1023px) {
+  #platform-customization-nav .platform-customization-nav-list {
+    position: static;
+    top: auto;
+    z-index: auto;
+  }
 }
 
 #platform-customization-panel {
   pointer-events: auto;
   min-width: 0;
+  grid-column: 1;
+  grid-row: 2;
+}
+
+@media (min-width: 1024px) {
+  #platform-customization-panel {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 @media (max-width: 1023px) {

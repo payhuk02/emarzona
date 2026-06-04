@@ -124,7 +124,7 @@ export default function AdminNewsletterSubscribers() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" asChild>
-              <Link to="/admin/platform-customization">Personnaliser le footer</Link>
+              <Link to="/admin/platform-customization?section=footer">Personnaliser le footer</Link>
             </Button>
             <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
