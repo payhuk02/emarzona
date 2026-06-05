@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logAdminAction } from '@/lib/audit';
 
 export type RolePermissions = Record<string, boolean>;
 
-export const DEFAULT_PERMISSION_KEYS : string[] = [
+export const DEFAULT_PERMISSION_KEYS: string[] = [
   'users.manage',
   'users.roles',
   'products.manage',
@@ -22,10 +23,12 @@ export const useAdminPermissions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const  DEFAULT_ROLES: Array<{ role: string; permissions: RolePermissions }> = [
+  const DEFAULT_ROLES: Array<{ role: string; permissions: RolePermissions }> = [
     {
       role: 'admin',
-      permissions: Object.fromEntries(DEFAULT_PERMISSION_KEYS.map((k) => [k, true])) as RolePermissions,
+      permissions: Object.fromEntries(
+        DEFAULT_PERMISSION_KEYS.map(k => [k, true])
+      ) as RolePermissions,
     },
     {
       role: 'manager',
@@ -99,7 +102,12 @@ export const useAdminPermissions = () => {
       setError(e instanceof Error ? e.message : 'Erreur inconnue');
       // Fallback: table absente en production → utiliser des rôles par défaut côté client
       setRoles(DEFAULT_ROLES);
-      toast({ title: 'RBAC non initialisé', description: 'Utilisation des rôles par défaut côté client. Veuillez exécuter la migration platform_roles.', variant: 'destructive' });
+      toast({
+        title: 'RBAC non initialisé',
+        description:
+          'Utilisation des rôles par défaut côté client. Veuillez exécuter la migration platform_roles.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -109,31 +117,31 @@ export const useAdminPermissions = () => {
     fetchRoles();
   }, [fetchRoles]);
 
-  const updateRolePermissions = useCallback(async (role: string, permissions: RolePermissions) => {
-    try {
-      const { error } = await supabase
-        .from('platform_roles')
-        .update({ permissions })
-        .eq('role', role);
-      if (error) throw error;
-      toast({ title: 'Permissions enregistrées', description: role });
-      await fetchRoles();
-      return true;
-    } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : 'Erreur inconnue';
-      toast({ title: 'Erreur', description: errorMessage, variant: 'destructive' });
-      return false;
-    }
-  }, [fetchRoles, toast]);
+  const updateRolePermissions = useCallback(
+    async (role: string, permissions: RolePermissions) => {
+      try {
+        const { error } = await supabase
+          .from('platform_roles')
+          .update({ permissions })
+          .eq('role', role);
+        if (error) throw error;
+        await logAdminAction({
+          action: 'UPDATE_RBAC_ROLE',
+          targetType: 'settings',
+          targetId: role,
+          metadata: { permissions },
+        });
+        toast({ title: 'Permissions enregistrées', description: role });
+        await fetchRoles();
+        return true;
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Erreur inconnue';
+        toast({ title: 'Erreur', description: errorMessage, variant: 'destructive' });
+        return false;
+      }
+    },
+    [fetchRoles, toast]
+  );
 
   return { roles, loading, error, refresh: fetchRoles, updateRolePermissions };
 };
-
-
-
-
-
-
-
-
-

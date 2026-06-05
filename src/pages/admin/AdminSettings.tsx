@@ -50,6 +50,7 @@ const AdminSettings = () => {
     '/admin/products',
     '/admin/disputes',
     '/admin/settings',
+    '/admin/kyc',
   ];
   const [roleSearch, setRoleSearch] = useState('');
   useEffect(() => {

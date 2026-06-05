@@ -1,6 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { logAdminAction } from "@/lib/audit";
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { logAdminAction } from '@/lib/audit';
 
 export const useAdminActions = () => {
   const { toast } = useToast();
@@ -21,7 +21,9 @@ export const useAdminActions = () => {
 
   const suspendUser = async (userId: string, reason: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -39,17 +41,17 @@ export const useAdminActions = () => {
       await logAction('SUSPEND_USER', 'user', userId, { reason });
 
       toast({
-        title: "Utilisateur suspendu",
-        description: "Le compte a été suspendu avec succès.",
+        title: 'Utilisateur suspendu',
+        description: 'Le compte a été suspendu avec succès.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -72,17 +74,17 @@ export const useAdminActions = () => {
       await logAction('UNSUSPEND_USER', 'user', userId);
 
       toast({
-        title: "Utilisateur réactivé",
-        description: "Le compte a été réactivé avec succès.",
+        title: 'Utilisateur réactivé',
+        description: 'Le compte a été réactivé avec succès.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -92,25 +94,22 @@ export const useAdminActions = () => {
     try {
       await logAction('DELETE_USER', 'user', userId);
 
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', userId);
+      const { error } = await supabase.from('profiles').delete().eq('user_id', userId);
 
       if (error) throw error;
 
       toast({
-        title: "Utilisateur supprimé",
-        description: "Le compte a été supprimé avec succès.",
+        title: 'Utilisateur supprimé',
+        description: 'Le compte a été supprimé avec succès.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -120,25 +119,22 @@ export const useAdminActions = () => {
     try {
       await logAction('DELETE_STORE', 'store', storeId);
 
-      const { error } = await supabase
-        .from('stores')
-        .delete()
-        .eq('id', storeId);
+      const { error } = await supabase.from('stores').delete().eq('id', storeId);
 
       if (error) throw error;
 
       toast({
-        title: "Boutique supprimée",
-        description: "La boutique a été supprimée avec succès.",
+        title: 'Boutique supprimée',
+        description: 'La boutique a été supprimée avec succès.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -146,7 +142,9 @@ export const useAdminActions = () => {
 
   const setUserRole = async (userId: string, role: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data: isSuperAdmin } = await supabase.rpc('has_role', {
@@ -176,7 +174,9 @@ export const useAdminActions = () => {
 
   const promoteToAdmin = async (email: string, role: string = 'admin') => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data: isSuperAdmin } = await supabase.rpc('has_role', {
@@ -194,10 +194,13 @@ export const useAdminActions = () => {
       if (!target?.user_id) throw new Error('Utilisateur introuvable');
 
       // Insérer le rôle dans user_roles (upsert pour éviter les doublons)
-      const { error } = await supabase.from('user_roles').upsert({
-        user_id: target.user_id,
-        role: role as 'admin' | 'moderator' | 'user',
-      }, { onConflict: 'user_id,role' });
+      const { error } = await supabase.from('user_roles').upsert(
+        {
+          user_id: target.user_id,
+          role: role as 'admin' | 'moderator' | 'user',
+        },
+        { onConflict: 'user_id,role' }
+      );
       if (error) throw error;
 
       await logAction('PROMOTE_ADMIN', 'user', target.user_id, { email, role });
@@ -215,25 +218,22 @@ export const useAdminActions = () => {
     try {
       await logAction('DELETE_PRODUCT', 'product', productId);
 
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId);
+      const { error } = await supabase.from('products').delete().eq('id', productId);
 
       if (error) throw error;
 
       toast({
-        title: "Produit supprimé",
-        description: "Le produit a été supprimé avec succès.",
+        title: 'Produit supprimé',
+        description: 'Le produit a été supprimé avec succès.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -248,24 +248,20 @@ export const useAdminActions = () => {
 
       if (error) throw error;
 
-      await logAction(
-        isActive ? 'DEACTIVATE_PRODUCT' : 'ACTIVATE_PRODUCT',
-        'product',
-        productId
-      );
+      await logAction(isActive ? 'DEACTIVATE_PRODUCT' : 'ACTIVATE_PRODUCT', 'product', productId);
 
       toast({
-        title: isActive ? "Produit désactivé" : "Produit activé",
-        description: "Le statut du produit a été mis à jour.",
+        title: isActive ? 'Produit désactivé' : 'Produit activé',
+        description: 'Le statut du produit a été mis à jour.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -283,17 +279,17 @@ export const useAdminActions = () => {
       await logAction('CANCEL_ORDER', 'order', orderId);
 
       toast({
-        title: "Commande annulée",
-        description: "La commande a été annulée avec succès.",
+        title: 'Commande annulée',
+        description: 'La commande a été annulée avec succès.',
       });
 
       return true;
-    } catch ( _error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -311,9 +307,3 @@ export const useAdminActions = () => {
     promoteToAdmin,
   };
 };
-
-
-
-
-
-

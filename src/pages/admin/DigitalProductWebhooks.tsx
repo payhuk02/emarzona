@@ -4,30 +4,18 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { WebhooksManager } from '@/components/digital/webhooks';
 
 const DigitalProductWebhooks = () => {
   const { t } = useTranslation();
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full overflow-x-hidden">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6">
-            <WebhooksManager />
-          </div>
-        </main>
+    <DashboardLayout>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+        <WebhooksManager />
       </div>
-    </SidebarProvider>
+    </DashboardLayout>
   );
 };
 
 export default DigitalProductWebhooks;
-
-
-
-
-
-

@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { logAdminAction } from '@/lib/audit';
 
-const KYC_SUBMISSION_FIELDS = 'id, user_id, full_name, date_of_birth, address, city, country, document_type, document_front_url, document_back_url, status, rejection_reason, reviewed_by, reviewed_at, created_at, updated_at';
+const KYC_SUBMISSION_FIELDS =
+  'id, user_id, full_name, date_of_birth, address, city, country, document_type, document_front_url, document_back_url, status, rejection_reason, reviewed_by, reviewed_at, created_at, updated_at';
 
 export interface KYCSubmission {
   id: string;
@@ -40,7 +42,9 @@ export const useKYC = () => {
   const { data: submission, isLoading } = useQuery({
     queryKey: ['kyc-submission'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       const { data: submissionData, error } = await supabase
@@ -50,7 +54,9 @@ export const useKYC = () => {
         .limit(1);
 
       if (error) throw error;
-      return submissionData && submissionData.length > 0 ? submissionData[0] as KYCSubmission : null;
+      return submissionData && submissionData.length > 0
+        ? (submissionData[0] as KYCSubmission)
+        : null;
     },
   });
 
@@ -67,21 +73,23 @@ export const useKYC = () => {
 
     if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('kyc-documents')
-      .getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('kyc-documents').getPublicUrl(fileName);
 
     return publicUrl;
   };
 
   const submitKYC = useMutation({
     mutationFn: async (formData: KYCFormData) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Upload documents
       const frontUrl = await uploadDocument(formData.document_front, user.id, 'front');
-      let  backUrl= null;
+      let backUrl = null;
       if (formData.document_back) {
         backUrl = await uploadDocument(formData.document_back, user.id, 'back');
       }
@@ -114,10 +122,11 @@ export const useKYC = () => {
         description: 'Votre demande de vérification KYC a été soumise avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de soumettre la demande KYC',
+        description:
+          error instanceof Error ? error.message : 'Impossible de soumettre la demande KYC',
         variant: 'destructive',
       });
     },
@@ -157,8 +166,16 @@ export const useAdminKYC = () => {
       status: 'verified' | 'rejected';
       rejectionReason?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
+
+      const { data: existing } = await supabase
+        .from('kyc_submissions')
+        .select('user_id')
+        .eq('id', submissionId)
+        .maybeSingle();
 
       const { data, error } = await supabase
         .from('kyc_submissions')
@@ -173,6 +190,18 @@ export const useAdminKYC = () => {
         .limit(1);
 
       if (error) throw error;
+
+      await logAdminAction({
+        action: status === 'verified' ? 'KYC_VERIFY' : 'KYC_REJECT',
+        targetType: 'user',
+        targetId: existing?.user_id ?? submissionId,
+        metadata: {
+          submissionId,
+          status,
+          rejectionReason: rejectionReason ?? null,
+        },
+      });
+
       return data && data.length > 0 ? data[0] : null;
     },
     onSuccess: () => {
@@ -182,10 +211,11 @@ export const useAdminKYC = () => {
         description: 'Le statut KYC a été mis à jour avec succès.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour le statut',
+        description:
+          error instanceof Error ? error.message : 'Impossible de mettre à jour le statut',
         variant: 'destructive',
       });
     },
@@ -198,9 +228,3 @@ export const useAdminKYC = () => {
     isUpdating: updateStatus.isPending,
   };
 };
-
-
-
-
-
-

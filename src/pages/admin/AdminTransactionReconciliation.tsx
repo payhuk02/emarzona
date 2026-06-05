@@ -4,11 +4,10 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { logger } from '@/lib/logger';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AppSidebar } from '@/components/AppSidebar';
 import { MobileTableCard } from '@/components/ui/mobile-table-card';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -341,322 +340,316 @@ export default function AdminTransactionReconciliation() {
   }, [isLoading, transactions]);
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-6 space-y-6">
-            {/* Header */}
-            <div
-              ref={headerRef}
-              role="banner"
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+    <AdminLayout>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div
+          ref={headerRef}
+          role="banner"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+        >
+          <div>
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight">
+              Réconciliation des Transactions
+            </h1>
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+              Vérification et réconciliation manuelle des transactions
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Actualiser
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={!filteredTransactions || filteredTransactions.length === 0}
             >
-              <div>
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight">
-                  Réconciliation des Transactions
-                </h1>
-                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Vérification et réconciliation manuelle des transactions
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                  Actualiser
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExport}
-                  disabled={!filteredTransactions || filteredTransactions.length === 0}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Exporter CSV
-                </Button>
+              <Download className="h-4 w-4 mr-2" />
+              Exporter CSV
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        {stats && (
+          <div
+            ref={statsRef}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
+            role="region"
+            aria-label="Statistiques"
+          >
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
+                <p className="text-xs text-muted-foreground">transactions</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Montant Total</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg sm:text-2xl font-bold">
+                  {stats.totalAmount.toLocaleString('fr-FR')} XOF
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">En Attente</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg sm:text-2xl font-bold">
+                  {stats.byStatus.processing || 0}
+                </div>
+                <p className="text-xs text-muted-foreground">processing</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Anciennes</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg sm:text-2xl font-bold">{stats.oldCount}</div>
+                <p className="text-xs text-muted-foreground">&gt; 24h</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap [-webkit-overflow-scrolling:touch]">
+            <TabsTrigger value="pending">En Attente</TabsTrigger>
+            <TabsTrigger value="old">Anciennes (&gt; 24h)</TabsTrigger>
+            <TabsTrigger value="failed">Échouées</TabsTrigger>
+            <TabsTrigger value="all">Toutes</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="space-y-4">
+            {/* Search */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par ID, order number, email..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
               </div>
             </div>
 
-            {/* Stats Cards */}
-            {stats && (
-              <div
-                ref={statsRef}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
-                role="region"
-                aria-label="Statistiques"
-              >
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
-                    <p className="text-xs text-muted-foreground">transactions</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs sm:text-sm font-medium">Montant Total</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg sm:text-2xl font-bold">
-                      {stats.totalAmount.toLocaleString('fr-FR')} XOF
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs sm:text-sm font-medium">En Attente</CardTitle>
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg sm:text-2xl font-bold">
-                      {stats.byStatus.processing || 0}
-                    </div>
-                    <p className="text-xs text-muted-foreground">processing</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs sm:text-sm font-medium">Anciennes</CardTitle>
-                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg sm:text-2xl font-bold">{stats.oldCount}</div>
-                    <p className="text-xs text-muted-foreground">&gt; 24h</p>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full justify-start overflow-x-auto flex-nowrap [-webkit-overflow-scrolling:touch]">
-                <TabsTrigger value="pending">En Attente</TabsTrigger>
-                <TabsTrigger value="old">Anciennes (&gt; 24h)</TabsTrigger>
-                <TabsTrigger value="failed">Échouées</TabsTrigger>
-                <TabsTrigger value="all">Toutes</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={activeTab} className="space-y-4">
-                {/* Search */}
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher par ID, order number, email..."
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className="pl-8"
-                    />
+            {/* Table */}
+            <Card ref={tableRef}>
+              <CardHeader>
+                <CardTitle>Transactions</CardTitle>
+                <CardDescription>
+                  {filteredTransactions.length} transaction(s) trouvée(s)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                </div>
-
-                {/* Table */}
-                <Card ref={tableRef}>
-                  <CardHeader>
-                    <CardTitle>Transactions</CardTitle>
-                    <CardDescription>
-                      {filteredTransactions.length} transaction(s) trouvée(s)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : filteredTransactions.length === 0 ? (
-                      <Alert>
-                        <AlertDescription>Aucune transaction trouvée</AlertDescription>
-                      </Alert>
-                    ) : isMobile ? (
-                      <MobileTableCard
-                        data={filteredTransactions as unknown as TransactionRowData[]}
-                        columns={[
-                          {
-                            key: 'id',
-                            header: 'ID',
-                            priority: 'high',
-                            render: value => (
-                              <span className="font-mono text-xs">
-                                {String(value).substring(0, 8)}...
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'order',
-                            header: 'Commande',
-                            priority: 'high',
-                            render: (_value, row) => {
-                              const t = row as unknown as Transaction;
-                              return (
-                                <div className="space-y-1">
-                                  <div className="font-medium">
-                                    {t.order?.order_number ||
-                                      (t.order_id ? t.order_id.substring(0, 8) : '') ||
-                                      'N/A'}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {t.order?.customer_email || ''}
-                                  </div>
-                                </div>
-                              );
-                            },
-                          },
-                          {
-                            key: 'amount',
-                            header: 'Montant',
-                            priority: 'high',
-                            render: (value, row) => {
-                              const t = row as unknown as Transaction;
-                              return (
-                                <div className="font-semibold">
-                                  {Number(value || 0).toLocaleString('fr-FR')} {t.currency}
-                                </div>
-                              );
-                            },
-                            className: 'font-semibold',
-                          },
-                          {
-                            key: 'status',
-                            header: 'Statut',
-                            priority: 'high',
-                            render: value => getStatusBadge(String(value)),
-                          },
-                          {
-                            key: 'payment_provider',
-                            header: 'Provider',
-                            priority: 'medium',
-                            render: value => <Badge variant="outline">{String(value)}</Badge>,
-                          },
-                          {
-                            key: 'created_at',
-                            header: 'Créée le',
-                            priority: 'medium',
-                            render: (value, _row) => (
-                              <div>
-                                <div className={`text-xs ${getAgeColor(String(value))}`}>
-                                  {format(new Date(String(value)), 'dd MMM yyyy HH:mm', {
-                                    locale: fr,
-                                  })}
+                ) : filteredTransactions.length === 0 ? (
+                  <Alert>
+                    <AlertDescription>Aucune transaction trouvée</AlertDescription>
+                  </Alert>
+                ) : isMobile ? (
+                  <MobileTableCard
+                    data={filteredTransactions as unknown as TransactionRowData[]}
+                    columns={[
+                      {
+                        key: 'id',
+                        header: 'ID',
+                        priority: 'high',
+                        render: value => (
+                          <span className="font-mono text-xs">
+                            {String(value).substring(0, 8)}...
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'order',
+                        header: 'Commande',
+                        priority: 'high',
+                        render: (_value, row) => {
+                          const t = row as unknown as Transaction;
+                          return (
+                            <div className="space-y-1">
+                              <div className="font-medium">
+                                {t.order?.order_number ||
+                                  (t.order_id ? t.order_id.substring(0, 8) : '') ||
+                                  'N/A'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {t.order?.customer_email || ''}
+                              </div>
+                            </div>
+                          );
+                        },
+                      },
+                      {
+                        key: 'amount',
+                        header: 'Montant',
+                        priority: 'high',
+                        render: (value, row) => {
+                          const t = row as unknown as Transaction;
+                          return (
+                            <div className="font-semibold">
+                              {Number(value || 0).toLocaleString('fr-FR')} {t.currency}
+                            </div>
+                          );
+                        },
+                        className: 'font-semibold',
+                      },
+                      {
+                        key: 'status',
+                        header: 'Statut',
+                        priority: 'high',
+                        render: value => getStatusBadge(String(value)),
+                      },
+                      {
+                        key: 'payment_provider',
+                        header: 'Provider',
+                        priority: 'medium',
+                        render: value => <Badge variant="outline">{String(value)}</Badge>,
+                      },
+                      {
+                        key: 'created_at',
+                        header: 'Créée le',
+                        priority: 'medium',
+                        render: (value, _row) => (
+                          <div>
+                            <div className={`text-xs ${getAgeColor(String(value))}`}>
+                              {format(new Date(String(value)), 'dd MMM yyyy HH:mm', {
+                                locale: fr,
+                              })}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {Math.round(
+                                (Date.now() - new Date(String(value)).getTime()) / (1000 * 60 * 60)
+                              )}
+                              h
+                            </div>
+                          </div>
+                        ),
+                      },
+                    ]}
+                    actions={row => (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => verifyTransactionMutation.mutate(String(row.id))}
+                        disabled={verifyTransactionMutation.isPending}
+                        className="min-h-[44px]"
+                      >
+                        {verifyTransactionMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            Vérifier
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Order</TableHead>
+                          <TableHead>Montant</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead>Provider</TableHead>
+                          <TableHead>Créée le</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredTransactions.map(transaction => (
+                          <TableRow key={transaction.id}>
+                            <TableCell className="font-mono text-xs">
+                              {transaction.id.substring(0, 8)}...
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium">
+                                  {transaction.order?.order_number ||
+                                    transaction.order_id?.substring(0, 8) ||
+                                    'N/A'}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  {Math.round(
-                                    (Date.now() - new Date(String(value)).getTime()) /
-                                      (1000 * 60 * 60)
-                                  )}
-                                  h
+                                  {transaction.order?.customer_email || ''}
                                 </div>
                               </div>
-                            ),
-                          },
-                        ]}
-                        actions={row => (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => verifyTransactionMutation.mutate(String(row.id))}
-                            disabled={verifyTransactionMutation.isPending}
-                            className="min-h-[44px]"
-                          >
-                            {verifyTransactionMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <>
-                                <RefreshCw className="h-4 w-4 mr-1" />
-                                Vérifier
-                              </>
-                            )}
-                          </Button>
-                        )}
-                      />
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>ID</TableHead>
-                              <TableHead>Order</TableHead>
-                              <TableHead>Montant</TableHead>
-                              <TableHead>Statut</TableHead>
-                              <TableHead>Provider</TableHead>
-                              <TableHead>Créée le</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {filteredTransactions.map(transaction => (
-                              <TableRow key={transaction.id}>
-                                <TableCell className="font-mono text-xs">
-                                  {transaction.id.substring(0, 8)}...
-                                </TableCell>
-                                <TableCell>
-                                  <div className="space-y-1">
-                                    <div className="font-medium">
-                                      {transaction.order?.order_number ||
-                                        transaction.order_id?.substring(0, 8) ||
-                                        'N/A'}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {transaction.order?.customer_email || ''}
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-semibold">
-                                    {Number(transaction.amount ?? 0).toLocaleString('fr-FR')}{' '}
-                                    {transaction.currency}
-                                  </div>
-                                </TableCell>
-                                <TableCell>{getStatusBadge(transaction.status)}</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline">{transaction.payment_provider}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <div className={`text-xs ${getAgeColor(transaction.created_at)}`}>
-                                    {format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', {
-                                      locale: fr,
-                                    })}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {Math.round(
-                                      (Date.now() - new Date(transaction.created_at).getTime()) /
-                                        (1000 * 60 * 60)
-                                    )}
-                                    h
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => verifyTransactionMutation.mutate(transaction.id)}
-                                    disabled={verifyTransactionMutation.isPending}
-                                  >
-                                    {verifyTransactionMutation.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <>
-                                        <RefreshCw className="h-4 w-4 mr-1" />
-                                        Vérifier
-                                      </>
-                                    )}
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-semibold">
+                                {Number(transaction.amount ?? 0).toLocaleString('fr-FR')}{' '}
+                                {transaction.currency}
+                              </div>
+                            </TableCell>
+                            <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{transaction.payment_provider}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className={`text-xs ${getAgeColor(transaction.created_at)}`}>
+                                {format(new Date(transaction.created_at), 'dd MMM yyyy HH:mm', {
+                                  locale: fr,
+                                })}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {Math.round(
+                                  (Date.now() - new Date(transaction.created_at).getTime()) /
+                                    (1000 * 60 * 60)
+                                )}
+                                h
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => verifyTransactionMutation.mutate(transaction.id)}
+                                disabled={verifyTransactionMutation.isPending}
+                              >
+                                {verifyTransactionMutation.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <>
+                                    <RefreshCw className="h-4 w-4 mr-1" />
+                                    Vérifier
+                                  </>
+                                )}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </SidebarProvider>
+    </AdminLayout>
   );
 }

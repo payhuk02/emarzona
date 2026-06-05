@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { logAdminAction } from '@/lib/audit';
 
 export const PLATFORM_SETTINGS_SINGLETON_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -89,6 +90,12 @@ export const usePlatformSettingsDirect = () => {
         logger.error('Error updating platform settings', { error });
         throw error;
       }
+
+      await logAdminAction({
+        action: 'UPDATE_PLATFORM_SETTINGS',
+        targetType: 'settings',
+        metadata: { updates },
+      });
 
       return data as PlatformSettings;
     },

@@ -38,6 +38,7 @@ export const RequireAAL2 = ({ children }: RequireAAL2Props) => {
       '/admin/feature-flags',
       '/admin/advanced-tools',
       '/admin/recommendation-insights',
+      '/admin/kyc',
     ];
     return prefixes.some(prefix => location.pathname.startsWith(prefix));
   }, [settings, location.pathname, isPrincipalAdmin]);

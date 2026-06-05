@@ -5,7 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -117,7 +116,7 @@ export default function AdminShippingConversations() {
   const { data: conversations, isLoading } = useQuery({
     queryKey: ['admin-shipping-conversations', statusFilter, disputedFilter],
     queryFn: async () => {
-      let  query= supabase
+      let query = supabase
         .from('shipping_service_conversations')
         .select(SHIPPING_ADMIN_CONVERSATION_FIELDS)
         .order('last_message_at', { ascending: false });
@@ -379,207 +378,220 @@ export default function AdminShippingConversations() {
   };
 
   return (
-    <SidebarProvider>
-      <AdminLayout>
-        <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
-          {/* Header */}
-          <div className="flex flex-col gap-2 sm:gap-3">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex flex-wrap items-center gap-2">
-              <Shield className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-500 flex-shrink-0" />
-              <span className="break-words">Conversations Services de Livraison</span>
-            </h1>
-            <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-              Contrôle et intervention dans les échanges entre vendeurs et services de livraison
-            </p>
-          </div>
+    <AdminLayout>
+      <div className="container mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-2 sm:gap-3">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex flex-wrap items-center gap-2">
+            <Shield className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-500 flex-shrink-0" />
+            <span className="break-words">Conversations Services de Livraison</span>
+          </h1>
+          <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+            Contrôle et intervention dans les échanges entre vendeurs et services de livraison
+          </p>
+        </div>
 
-          {/* Statistiques */}
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 md:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-2 p-3 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
-                <p className="text-xs text-muted-foreground">Conversations</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2 p-3 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm font-medium">Actives</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.active}</div>
-                <p className="text-xs text-muted-foreground">En cours</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2 p-3 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm font-medium">Litiges</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.disputed}</div>
-                <p className="text-xs text-muted-foreground">À traiter</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2 p-3 sm:p-4">
-                <CardTitle className="text-xs sm:text-sm font-medium">Fermées</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold text-gray-600">{stats.closed}</div>
-                <p className="text-xs text-muted-foreground">Résolues</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filtres */}
+        {/* Statistiques */}
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 md:grid-cols-4">
           <Card>
-            <CardHeader className="p-3 sm:p-4">
-              <CardTitle className="text-sm sm:text-base">Filtres</CardTitle>
+            <CardHeader className="pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <div className="flex-1 min-w-0">
-                  <Input
-                    placeholder="Rechercher par sujet, boutique, service..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full min-h-[44px]"
-                  />
-                </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
-                    <SelectValue placeholder="Statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    <SelectItem value="active">Actives</SelectItem>
-                    <SelectItem value="closed">Fermées</SelectItem>
-                    <SelectItem value="archived">Archivées</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={disputedFilter} onValueChange={setDisputedFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
-                    <SelectValue placeholder="Litiges" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous</SelectItem>
-                    <SelectItem value="disputed">Avec litige</SelectItem>
-                    <SelectItem value="not_disputed">Sans litige</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+              <p className="text-xs text-muted-foreground">Conversations</p>
             </CardContent>
           </Card>
-
-          {/* Liste des conversations */}
           <Card>
-            <CardHeader>
-              <CardTitle>Conversations</CardTitle>
-              <CardDescription>
-                {filteredConversations.length} conversation
-                {filteredConversations.length > 1 ? 's' : ''} trouvée
-                {filteredConversations.length > 1 ? 's' : ''}
-              </CardDescription>
+            <CardHeader className="pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium">Actives</CardTitle>
             </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : filteredConversations.length === 0 ? (
-                <div className="text-center py-12">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Aucune conversation trouvée</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredConversations.map((conversation: ShippingConversation) => (
-                    <Card
-                      key={conversation.id}
-                      className={`cursor-pointer transition-colors hover:bg-muted/50 ${
-                        conversation.is_disputed
-                          ? 'border-red-500 bg-red-50/50 dark:bg-red-950/20'
-                          : ''
-                      }`}
-                      onClick={() => {
-                        setSelectedConversation(conversation);
-                        setViewingMessages(true);
-                      }}
-                    >
-                      <CardContent className="p-3 sm:p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="font-semibold text-sm sm:text-base break-words">
-                                {conversation.subject || 'Sans sujet'}
-                              </h3>
-                              {conversation.is_disputed && (
-                                <Badge variant="destructive">
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
-                                  Litige
-                                </Badge>
-                              )}
-                              <Badge
-                                variant={
-                                  conversation.status === 'active'
-                                    ? 'default'
-                                    : conversation.status === 'closed'
-                                      ? 'secondary'
-                                      : 'outline'
-                                }
-                              >
-                                {conversation.status === 'active'
-                                  ? 'Active'
-                                  : conversation.status === 'closed'
-                                    ? 'Fermée'
-                                    : 'Archivée'}
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.active}</div>
+              <p className="text-xs text-muted-foreground">En cours</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium">Litiges</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.disputed}</div>
+              <p className="text-xs text-muted-foreground">À traiter</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2 p-3 sm:p-4">
+              <CardTitle className="text-xs sm:text-sm font-medium">Fermées</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-gray-600">{stats.closed}</div>
+              <p className="text-xs text-muted-foreground">Résolues</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filtres */}
+        <Card>
+          <CardHeader className="p-3 sm:p-4">
+            <CardTitle className="text-sm sm:text-base">Filtres</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-4 pt-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <Input
+                  placeholder="Rechercher par sujet, boutique, service..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full min-h-[44px]"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="active">Actives</SelectItem>
+                  <SelectItem value="closed">Fermées</SelectItem>
+                  <SelectItem value="archived">Archivées</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={disputedFilter} onValueChange={setDisputedFilter}>
+                <SelectTrigger className="w-full sm:w-[180px] min-h-[44px]">
+                  <SelectValue placeholder="Litiges" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous</SelectItem>
+                  <SelectItem value="disputed">Avec litige</SelectItem>
+                  <SelectItem value="not_disputed">Sans litige</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Liste des conversations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Conversations</CardTitle>
+            <CardDescription>
+              {filteredConversations.length} conversation
+              {filteredConversations.length > 1 ? 's' : ''} trouvée
+              {filteredConversations.length > 1 ? 's' : ''}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : filteredConversations.length === 0 ? (
+              <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Aucune conversation trouvée</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredConversations.map((conversation: ShippingConversation) => (
+                  <Card
+                    key={conversation.id}
+                    className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                      conversation.is_disputed
+                        ? 'border-red-500 bg-red-50/50 dark:bg-red-950/20'
+                        : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedConversation(conversation);
+                      setViewingMessages(true);
+                    }}
+                  >
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-semibold text-sm sm:text-base break-words">
+                              {conversation.subject || 'Sans sujet'}
+                            </h3>
+                            {conversation.is_disputed && (
+                              <Badge variant="destructive">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Litige
                               </Badge>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                                <span className="truncate">
-                                  {conversation.store?.name || 'Boutique inconnue'}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                                <span className="truncate">
-                                  {conversation.shipping_service?.name || 'Service inconnu'}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                                <span>
-                                  {conversation.message_count || 0} message
-                                  {conversation.message_count !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-                            </div>
-
-                            {conversation.last_message && (
-                              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 break-words">
-                                {conversation.last_message.content}
-                              </p>
                             )}
+                            <Badge
+                              variant={
+                                conversation.status === 'active'
+                                  ? 'default'
+                                  : conversation.status === 'closed'
+                                    ? 'secondary'
+                                    : 'outline'
+                              }
+                            >
+                              {conversation.status === 'active'
+                                ? 'Active'
+                                : conversation.status === 'closed'
+                                  ? 'Fermée'
+                                  : 'Archivée'}
+                            </Badge>
+                          </div>
 
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              {conversation.last_message_at && (
-                                <span className="truncate">
-                                  Dernier message:{' '}
-                                  {formatDistanceToNow(new Date(conversation.last_message_at), {
-                                    addSuffix: true,
-                                    locale: fr,
-                                  })}
-                                </span>
-                              )}
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span className="truncate">
+                                {conversation.store?.name || 'Boutique inconnue'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span className="truncate">
+                                {conversation.shipping_service?.name || 'Service inconnu'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span>
+                                {conversation.message_count || 0} message
+                                {conversation.message_count !== 1 ? 's' : ''}
+                              </span>
                             </div>
                           </div>
 
-                          <div className="flex flex-row sm:flex-col gap-2 flex-shrink-0">
+                          {conversation.last_message && (
+                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 break-words">
+                              {conversation.last_message.content}
+                            </p>
+                          )}
+
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            {conversation.last_message_at && (
+                              <span className="truncate">
+                                Dernier message:{' '}
+                                {formatDistanceToNow(new Date(conversation.last_message_at), {
+                                  addSuffix: true,
+                                  locale: fr,
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-row sm:flex-col gap-2 flex-shrink-0">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 sm:flex-none min-h-[44px]"
+                            onClick={e => {
+                              e.stopPropagation();
+                              setSelectedConversation(conversation);
+                              setViewingMessages(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Voir</span>
+                          </Button>
+                          {!conversation.is_disputed && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -587,127 +599,111 @@ export default function AdminShippingConversations() {
                               onClick={e => {
                                 e.stopPropagation();
                                 setSelectedConversation(conversation);
-                                setViewingMessages(true);
+                                setShowInterventionDialog(true);
                               }}
                             >
-                              <Eye className="h-4 w-4 sm:mr-2" />
-                              <span className="hidden sm:inline">Voir</span>
+                              <Shield className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Intervenir</span>
                             </Button>
-                            {!conversation.is_disputed && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 sm:flex-none min-h-[44px]"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  setSelectedConversation(conversation);
-                                  setShowInterventionDialog(true);
-                                }}
-                              >
-                                <Shield className="h-4 w-4 sm:mr-2" />
-                                <span className="hidden sm:inline">Intervenir</span>
-                              </Button>
-                            )}
-                          </div>
+                          )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Dialog d'intervention */}
-        <Dialog open={showInterventionDialog} onOpenChange={setShowInterventionDialog}>
-          <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Intervenir dans la conversation</DialogTitle>
-              <DialogDescription>
-                Envoyez un message en tant qu'administrateur. La conversation sera automatiquement
-                marquée comme litige.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedConversation && (
-              <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm font-medium mb-2">Conversation:</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedConversation.store?.name} ↔{' '}
-                    {selectedConversation.shipping_service?.name}
-                  </p>
-                  {selectedConversation.subject && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Sujet: {selectedConversation.subject}
-                    </p>
-                  )}
-                </div>
-                <Textarea
-                  placeholder="Votre message d'intervention..."
-                  value={interventionMessage}
-                  onChange={e => setInterventionMessage(e.target.value)}
-                  className="min-h-[150px]"
-                />
-                <div className="flex flex-col sm:flex-row justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto min-h-[44px]"
-                    onClick={() => {
-                      setShowInterventionDialog(false);
-                      setInterventionMessage('');
-                    }}
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    className="w-full sm:w-auto min-h-[44px]"
-                    onClick={() => sendInterventionMessageMutation.mutate()}
-                    disabled={
-                      !interventionMessage.trim() || sendInterventionMessageMutation.isPending
-                    }
-                  >
-                    {sendInterventionMessageMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4 mr-2" />
-                    )}
-                    Envoyer l'intervention
-                  </Button>
-                </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
-          </DialogContent>
-        </Dialog>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Dialog de visualisation des messages */}
-        <Dialog open={viewingMessages} onOpenChange={setViewingMessages}>
-          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Messages - {selectedConversation?.store?.name} ↔{' '}
-                {selectedConversation?.shipping_service?.name}
-              </DialogTitle>
-              <DialogDescription>{selectedConversation?.subject || 'Sans sujet'}</DialogDescription>
-            </DialogHeader>
-            {selectedConversation && (
-              <ConversationMessagesView
-                conversationId={selectedConversation.id}
-                conversation={selectedConversation}
-                onMarkDisputed={() => markAsDisputedMutation.mutate(selectedConversation.id)}
-                onResolveDispute={() => resolveDisputeMutation.mutate(selectedConversation.id)}
-                onClose={() => closeConversationMutation.mutate(selectedConversation.id)}
-                isDisputed={selectedConversation.is_disputed}
-                onIntervene={() => {
-                  setViewingMessages(false);
-                  setShowInterventionDialog(true);
-                }}
+      {/* Dialog d'intervention */}
+      <Dialog open={showInterventionDialog} onOpenChange={setShowInterventionDialog}>
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Intervenir dans la conversation</DialogTitle>
+            <DialogDescription>
+              Envoyez un message en tant qu'administrateur. La conversation sera automatiquement
+              marquée comme litige.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedConversation && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-2">Conversation:</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedConversation.store?.name} ↔ {selectedConversation.shipping_service?.name}
+                </p>
+                {selectedConversation.subject && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Sujet: {selectedConversation.subject}
+                  </p>
+                )}
+              </div>
+              <Textarea
+                placeholder="Votre message d'intervention..."
+                value={interventionMessage}
+                onChange={e => setInterventionMessage(e.target.value)}
+                className="min-h-[150px]"
               />
-            )}
-          </DialogContent>
-        </Dialog>
-      </AdminLayout>
-    </SidebarProvider>
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto min-h-[44px]"
+                  onClick={() => {
+                    setShowInterventionDialog(false);
+                    setInterventionMessage('');
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  className="w-full sm:w-auto min-h-[44px]"
+                  onClick={() => sendInterventionMessageMutation.mutate()}
+                  disabled={
+                    !interventionMessage.trim() || sendInterventionMessageMutation.isPending
+                  }
+                >
+                  {sendInterventionMessageMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Envoyer l'intervention
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de visualisation des messages */}
+      <Dialog open={viewingMessages} onOpenChange={setViewingMessages}>
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Messages - {selectedConversation?.store?.name} ↔{' '}
+              {selectedConversation?.shipping_service?.name}
+            </DialogTitle>
+            <DialogDescription>{selectedConversation?.subject || 'Sans sujet'}</DialogDescription>
+          </DialogHeader>
+          {selectedConversation && (
+            <ConversationMessagesView
+              conversationId={selectedConversation.id}
+              conversation={selectedConversation}
+              onMarkDisputed={() => markAsDisputedMutation.mutate(selectedConversation.id)}
+              onResolveDispute={() => resolveDisputeMutation.mutate(selectedConversation.id)}
+              onClose={() => closeConversationMutation.mutate(selectedConversation.id)}
+              isDisputed={selectedConversation.is_disputed}
+              onIntervene={() => {
+                setViewingMessages(false);
+                setShowInterventionDialog(true);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
   );
 }
 
@@ -790,7 +786,7 @@ function ConversationMessagesView({
       );
 
       setMessages(messagesWithSenders);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Error loading messages', error);
       toast({
         title: '❌ Erreur',
@@ -837,7 +833,7 @@ function ConversationMessagesView({
         title: '✅ Message envoyé',
         description: 'Votre intervention a été envoyée.',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Error sending intervention', error);
       toast({
@@ -983,9 +979,3 @@ function ConversationMessagesView({
     </div>
   );
 }
-
-
-
-
-
-

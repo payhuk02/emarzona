@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logAdminAction } from '@/lib/audit';
 
 export type PlatformSettings = {
   require_aal2_routes?: string[];
@@ -46,6 +47,12 @@ export const usePlatformSettings = (key: string = 'admin') => {
         setError(upsertError.message);
         return false;
       }
+      await logAdminAction({
+        action: 'UPDATE_ADMIN_CONFIG',
+        targetType: 'settings',
+        targetId: key,
+        metadata: { partial },
+      });
       setSettings(next);
       setError(null);
       return true;

@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useQuery } from '@tanstack/react-query';
 import { useStore } from '@/hooks/useStore';
 import {
@@ -47,8 +48,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Search, Gift, Copy, Edit, TrendingUp, DollarSign, Users, X } from 'lucide-react';
 import { GiftCardStatus } from '@/types/giftCards';
 import { formatCurrency } from '@/lib/utils';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -83,7 +82,7 @@ export default function AdminGiftCardManagement() {
   };
 
   const getStatusBadge = (status: GiftCardStatus) => {
-    const  variants: Record<GiftCardStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<GiftCardStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       active: 'default',
       redeemed: 'secondary',
       expired: 'destructive',
@@ -91,7 +90,7 @@ export default function AdminGiftCardManagement() {
       pending: 'outline',
     };
 
-    const  labels: Record<GiftCardStatus, string> = {
+    const labels: Record<GiftCardStatus, string> = {
       active: 'Active',
       redeemed: 'Utilisée',
       expired: 'Expirée',
@@ -115,517 +114,499 @@ export default function AdminGiftCardManagement() {
 
   if (!currentStore) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-x-hidden">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto pb-16 md:pb-0">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6">
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="pt-6">
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Veuillez sélectionner un store.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </main>
+      <AdminLayout>
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardContent className="pt-6">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Veuillez sélectionner un store.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </AdminLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full overflow-x-hidden">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header - Responsive & Animated */}
-            <div
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-            >
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Gift
-                      className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Cartes Cadeaux
-                  </span>
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
-                  Créez et gérez les cartes cadeaux de votre store
-                </p>
+    <AdminLayout>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header - Responsive & Animated */}
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <Gift
+                  className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                  aria-hidden="true"
+                />
               </div>
-              <CreateGiftCardDialog
-                storeId={currentStore.id}
-                open={isCreateDialogOpen}
-                onOpenChange={setIsCreateDialogOpen}
-              />
-            </div>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Cartes Cadeaux
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm lg:text-base text-muted-foreground">
+              Créez et gérez les cartes cadeaux de votre store
+            </p>
+          </div>
+          <CreateGiftCardDialog
+            storeId={currentStore.id}
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          />
+        </div>
 
-            {/* Stats - Responsive */}
-            <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Cartes</p>
-                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        {stats.total}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">{stats.active} actives</p>
+        {/* Stats - Responsive */}
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Cartes</p>
+                  <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    {stats.total}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{stats.active} actives</p>
+                </div>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+                  <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Valeur Totale</p>
+                  <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    {formatCurrency(stats.totalValue)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatCurrency(stats.remainingBalance)} restant
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
+                  <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Utilisées</p>
+                  <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                    {stats.redeemed}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatCurrency(stats.totalRedeemed)} rédimées
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Expirées</p>
+                  <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                    {stats.expired}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Cartes expirées</p>
+                </div>
+                <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Liste des cartes cadeaux */}
+        <Tabs defaultValue="cards" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="cards" className="text-xs sm:text-sm">
+              <span className="hidden sm:inline">Cartes Cadeaux</span>
+              <span className="sm:hidden">Cartes</span>
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="text-xs sm:text-sm">
+              <span className="hidden sm:inline">Transactions</span>
+              <span className="sm:hidden">Trans.</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="cards" className="space-y-4 sm:space-y-6">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                  <CardTitle className="text-lg sm:text-xl">Cartes Cadeaux</CardTitle>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:flex-initial">
+                      <Search className="absolute left-2.5 sm:left-3 top-2.5 sm:top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Rechercher..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="pl-8 sm:pl-10 pr-8 sm:pr-10 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm w-full sm:w-64"
+                      />
+                      {searchTerm && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1 min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12"
+                          onClick={() => setSearchTerm('')}
+                          aria-label="Effacer la recherche"
+                        >
+                          <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        </Button>
+                      )}
                     </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5">
-                      <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm w-full sm:w-40">
+                        <SelectValue placeholder="Statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="redeemed">Utilisée</SelectItem>
+                        <SelectItem value="expired">Expirée</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Valeur Totale</p>
-                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                        {formatCurrency(stats.totalValue)}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatCurrency(stats.remainingBalance)} restant
-                      </p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5">
-                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                    </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-16 sm:h-20 w-full" />
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Utilisées</p>
-                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                        {stats.redeemed}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatCurrency(stats.totalRedeemed)} rédimées
-                      </p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5">
-                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                    </div>
+                ) : giftCards.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Gift className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground/50" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Aucune carte cadeau trouvée
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Expirées</p>
-                      <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                        {stats.expired}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">Cartes expirées</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-red-500/5">
-                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Liste des cartes cadeaux */}
-            <Tabs defaultValue="cards" className="space-y-4 sm:space-y-6">
-              <TabsList className="grid grid-cols-2 w-full">
-                <TabsTrigger value="cards" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Cartes Cadeaux</span>
-                  <span className="sm:hidden">Cartes</span>
-                </TabsTrigger>
-                <TabsTrigger value="transactions" className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">Transactions</span>
-                  <span className="sm:hidden">Trans.</span>
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="cards" className="space-y-4 sm:space-y-6">
-                <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <CardHeader>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                      <CardTitle className="text-lg sm:text-xl">Cartes Cadeaux</CardTitle>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                        <div className="relative flex-1 sm:flex-initial">
-                          <Search className="absolute left-2.5 sm:left-3 top-2.5 sm:top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            placeholder="Rechercher..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="pl-8 sm:pl-10 pr-8 sm:pr-10 min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm w-full sm:w-64"
-                          />
-                          {searchTerm && (
+                ) : isMobile ? (
+                  <MobileTableCard
+                    data={giftCards.map(c => ({ ...c, id: c.id }))}
+                    columns={[
+                      {
+                        key: 'code',
+                        label: 'Code',
+                        priority: 'high',
+                        render: (row: GiftCard) => (
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                              {row.code}
+                            </code>
                             <Button
                               variant="ghost"
-                              size="icon"
-                              className="absolute right-1 top-1 min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12"
-                              onClick={() => setSearchTerm('')}
-                              aria-label="Effacer la recherche"
+                              size="sm"
+                              onClick={() => handleCopyCode(row.code)}
+                              className="h-7 w-7 min-h-[44px] min-w-[44px]"
+                              aria-label={`Copier le code ${row.code}`}
                             >
-                              <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              <Copy className="h-3.5 w-3.5" />
                             </Button>
-                          )}
-                        </div>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                          <SelectTrigger className="min-h-[44px] h-11 sm:h-12 text-xs sm:text-sm w-full sm:w-40">
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Tous</SelectItem>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="redeemed">Utilisée</SelectItem>
-                            <SelectItem value="expired">Expirée</SelectItem>
-                            <SelectItem value="pending">En attente</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoading ? (
-                      <div className="space-y-3 sm:space-y-4">
-                        {[1, 2, 3].map(i => (
-                          <Skeleton key={i} className="h-16 sm:h-20 w-full" />
-                        ))}
-                      </div>
-                    ) : giftCards.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Gift className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground/50" />
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          Aucune carte cadeau trouvée
-                        </p>
-                      </div>
-                    ) : isMobile ? (
-                      <MobileTableCard
-                        data={giftCards.map(c => ({ ...c, id: c.id }))}
-                        columns={[
-                          {
-                            key: 'code',
-                            label: 'Code',
-                            priority: 'high',
-                            render: (row: GiftCard) => (
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'amount',
+                        label: 'Montant Initial',
+                        priority: 'high',
+                        render: (row: GiftCard) => (
+                          <span className="font-medium text-sm">
+                            {formatCurrency(row.initial_amount)}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'balance',
+                        label: 'Solde Restant',
+                        priority: 'high',
+                        render: (row: GiftCard) => (
+                          <span className="text-sm">{formatCurrency(row.current_balance)}</span>
+                        ),
+                      },
+                      {
+                        key: 'status',
+                        label: 'Statut',
+                        priority: 'high',
+                        render: (row: GiftCard) => getStatusBadge(row.status),
+                      },
+                      {
+                        key: 'recipient',
+                        label: 'Bénéficiaire',
+                        priority: 'medium',
+                        render: (row: GiftCard) =>
+                          row.recipient_email ? (
+                            <div>
+                              <div className="font-medium text-xs">
+                                {row.recipient_name || 'N/A'}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {row.recipient_email}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">-</span>
+                          ),
+                      },
+                      {
+                        key: 'issued',
+                        label: "Date d'émission",
+                        priority: 'low',
+                        render: (row: GiftCard) => (
+                          <span className="text-xs">
+                            {new Date(row.issued_at).toLocaleDateString('fr-FR')}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'expires',
+                        label: 'Expiration',
+                        priority: 'low',
+                        render: (row: GiftCard) => (
+                          <span className="text-xs">
+                            {row.expires_at
+                              ? new Date(row.expires_at).toLocaleDateString('fr-FR')
+                              : 'Jamais'}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    actions={(row: GiftCard) => (
+                      <Button variant="ghost" size="sm" className="min-h-[44px] w-full">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Modifier
+                      </Button>
+                    )}
+                  />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs sm:text-sm">Code</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Montant Initial</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Solde Restant</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Statut</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Bénéficiaire</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Date d'émission</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Expiration</TableHead>
+                          <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {giftCards.map(card => (
+                          <TableRow key={card.id} className="hover:bg-muted/50">
+                            <TableCell>
                               <div className="flex items-center gap-2">
-                                <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                                  {row.code}
+                                <code className="text-xs sm:text-sm font-mono bg-muted px-2 py-1 rounded">
+                                  {card.code}
                                 </code>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleCopyCode(row.code)}
-                                  className="h-7 w-7 min-h-[44px] min-w-[44px]"
-                                  aria-label={`Copier le code ${row.code}`}
+                                  onClick={() => handleCopyCode(card.code)}
+                                  className="h-7 w-7 sm:h-8 sm:w-8"
                                 >
-                                  <Copy className="h-3.5 w-3.5" />
+                                  <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 </Button>
                               </div>
-                            ),
-                          },
-                          {
-                            key: 'amount',
-                            label: 'Montant Initial',
-                            priority: 'high',
-                            render: (row: GiftCard) => (
-                              <span className="font-medium text-sm">
-                                {formatCurrency(row.initial_amount)}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'balance',
-                            label: 'Solde Restant',
-                            priority: 'high',
-                            render: (row: GiftCard) => (
-                              <span className="text-sm">{formatCurrency(row.current_balance)}</span>
-                            ),
-                          },
-                          {
-                            key: 'status',
-                            label: 'Statut',
-                            priority: 'high',
-                            render: (row: GiftCard) => getStatusBadge(row.status),
-                          },
-                          {
-                            key: 'recipient',
-                            label: 'Bénéficiaire',
-                            priority: 'medium',
-                            render: (row: GiftCard) =>
-                              row.recipient_email ? (
+                            </TableCell>
+                            <TableCell className="font-medium text-xs sm:text-sm">
+                              {formatCurrency(card.initial_amount)}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              {formatCurrency(card.current_balance)}
+                            </TableCell>
+                            <TableCell>{getStatusBadge(card.status)}</TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              {card.recipient_email ? (
                                 <div>
-                                  <div className="font-medium text-xs">
-                                    {row.recipient_name || 'N/A'}
-                                  </div>
+                                  <div className="font-medium">{card.recipient_name || 'N/A'}</div>
                                   <div className="text-xs text-muted-foreground">
-                                    {row.recipient_email}
+                                    {card.recipient_email}
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-muted-foreground text-xs">-</span>
-                              ),
-                          },
-                          {
-                            key: 'issued',
-                            label: "Date d'émission",
-                            priority: 'low',
-                            render: (row: GiftCard) => (
-                              <span className="text-xs">
-                                {new Date(row.issued_at).toLocaleDateString('fr-FR')}
-                              </span>
-                            ),
-                          },
-                          {
-                            key: 'expires',
-                            label: 'Expiration',
-                            priority: 'low',
-                            render: (row: GiftCard) => (
-                              <span className="text-xs">
-                                {row.expires_at
-                                  ? new Date(row.expires_at).toLocaleDateString('fr-FR')
-                                  : 'Jamais'}
-                              </span>
-                            ),
-                          },
-                        ]}
-                        actions={(row: GiftCard) => (
-                          <Button variant="ghost" size="sm" className="min-h-[44px] w-full">
-                            <Edit className="h-4 w-4 mr-2" />
-                            Modifier
-                          </Button>
-                        )}
-                      />
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Code</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Montant Initial</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Solde Restant</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Statut</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Bénéficiaire</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date d'émission</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Expiration</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {giftCards.map(card => (
-                              <TableRow key={card.id} className="hover:bg-muted/50">
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <code className="text-xs sm:text-sm font-mono bg-muted px-2 py-1 rounded">
-                                      {card.code}
-                                    </code>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleCopyCode(card.code)}
-                                      className="h-7 w-7 sm:h-8 sm:w-8"
-                                    >
-                                      <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="font-medium text-xs sm:text-sm">
-                                  {formatCurrency(card.initial_amount)}
-                                </TableCell>
-                                <TableCell className="text-xs sm:text-sm">
-                                  {formatCurrency(card.current_balance)}
-                                </TableCell>
-                                <TableCell>{getStatusBadge(card.status)}</TableCell>
-                                <TableCell className="text-xs sm:text-sm">
-                                  {card.recipient_email ? (
-                                    <div>
-                                      <div className="font-medium">
-                                        {card.recipient_name || 'N/A'}
-                                      </div>
-                                      <div className="text-xs text-muted-foreground">
-                                        {card.recipient_email}
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <span className="text-muted-foreground">-</span>
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-xs sm:text-sm">
-                                  {new Date(card.issued_at).toLocaleDateString('fr-FR')}
-                                </TableCell>
-                                <TableCell className="text-xs sm:text-sm">
-                                  {card.expires_at
-                                    ? new Date(card.expires_at).toLocaleDateString('fr-FR')
-                                    : 'Jamais'}
-                                </TableCell>
-                                <TableCell>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12"
-                                    aria-label={`Modifier la carte cadeau ${card.code || card.id}`}
-                                  >
-                                    <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              {new Date(card.issued_at).toLocaleDateString('fr-FR')}
+                            </TableCell>
+                            <TableCell className="text-xs sm:text-sm">
+                              {card.expires_at
+                                ? new Date(card.expires_at).toLocaleDateString('fr-FR')
+                                : 'Jamais'}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-12 sm:w-12"
+                                aria-label={`Modifier la carte cadeau ${card.code || card.id}`}
+                              >
+                                <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <TabsContent value="transactions">
-                <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <CardHeader>
-                    <CardTitle className="text-lg sm:text-xl">Transactions</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
-                      Historique de toutes les transactions sur les cartes cadeaux
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {transactions.length === 0 ? (
-                      <div className="text-center py-8">
-                        <TrendingUp className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground/50" />
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          Aucune transaction
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Desktop Table */}
-                        <div className="hidden lg:block overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                                <TableHead className="text-xs sm:text-sm">Type</TableHead>
-                                <TableHead className="text-xs sm:text-sm">Code Carte</TableHead>
-                                <TableHead className="text-xs sm:text-sm">Montant</TableHead>
-                                <TableHead className="text-xs sm:text-sm">Solde Avant</TableHead>
-                                <TableHead className="text-xs sm:text-sm">Solde Après</TableHead>
-                                <TableHead className="text-xs sm:text-sm">Commande</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {transactions.map(transaction => (
-                                <TableRow key={transaction.id} className="hover:bg-muted/50">
-                                  <TableCell className="text-xs sm:text-sm">
-                                    {new Date(transaction.created_at).toLocaleString('fr-FR')}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge variant="outline" className="text-xs">
-                                      {transaction.transaction_type}
-                                    </Badge>
-                                  </TableCell>
-                                  <TableCell>
-                                    <code className="text-xs sm:text-sm font-mono">
-                                      {transaction.gift_card?.code}
-                                    </code>
-                                  </TableCell>
-                                  <TableCell
-                                    className={`text-xs sm:text-sm font-medium ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}
-                                  >
-                                    {transaction.amount > 0 ? '+' : ''}
-                                    {formatCurrency(transaction.amount)}
-                                  </TableCell>
-                                  <TableCell className="text-xs sm:text-sm">
-                                    {formatCurrency(transaction.balance_before)}
-                                  </TableCell>
-                                  <TableCell className="text-xs sm:text-sm">
-                                    {formatCurrency(transaction.balance_after)}
-                                  </TableCell>
-                                  <TableCell className="text-xs sm:text-sm">
-                                    {transaction.order?.order_number || '-'}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Mobile Cards */}
-                        <div className="lg:hidden space-y-3 sm:space-y-4">
+          <TabsContent value="transactions">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl">Transactions</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Historique de toutes les transactions sur les cartes cadeaux
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {transactions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <TrendingUp className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground/50" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">Aucune transaction</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop Table */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Type</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Code Carte</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Montant</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Solde Avant</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Solde Après</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Commande</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
                           {transactions.map(transaction => (
-                            <Card
-                              key={transaction.id}
-                              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
-                            >
-                              <CardContent className="p-3 sm:p-4">
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <Badge variant="outline" className="text-xs">
-                                      {transaction.transaction_type}
-                                    </Badge>
-                                    <span
-                                      className={`text-xs sm:text-sm font-medium ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}
-                                    >
-                                      {transaction.amount > 0 ? '+' : ''}
-                                      {formatCurrency(transaction.amount)}
-                                    </span>
-                                  </div>
-                                  <div className="text-xs sm:text-sm">
-                                    <p className="text-muted-foreground">Date</p>
-                                    <p>
-                                      {new Date(transaction.created_at).toLocaleString('fr-FR')}
-                                    </p>
-                                  </div>
-                                  <div className="text-xs sm:text-sm">
-                                    <p className="text-muted-foreground">Code Carte</p>
-                                    <code className="font-mono">{transaction.gift_card?.code}</code>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                                    <div>
-                                      <p className="text-muted-foreground">Solde Avant</p>
-                                      <p className="font-medium">
-                                        {formatCurrency(transaction.balance_before)}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-muted-foreground">Solde Après</p>
-                                      <p className="font-medium">
-                                        {formatCurrency(transaction.balance_after)}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  {transaction.order?.order_number && (
-                                    <div className="text-xs sm:text-sm">
-                                      <p className="text-muted-foreground">Commande</p>
-                                      <p className="font-medium">
-                                        {transaction.order.order_number}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
+                            <TableRow key={transaction.id} className="hover:bg-muted/50">
+                              <TableCell className="text-xs sm:text-sm">
+                                {new Date(transaction.created_at).toLocaleString('fr-FR')}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">
+                                  {transaction.transaction_type}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <code className="text-xs sm:text-sm font-mono">
+                                  {transaction.gift_card?.code}
+                                </code>
+                              </TableCell>
+                              <TableCell
+                                className={`text-xs sm:text-sm font-medium ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}
+                              >
+                                {transaction.amount > 0 ? '+' : ''}
+                                {formatCurrency(transaction.amount)}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {formatCurrency(transaction.balance_before)}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {formatCurrency(transaction.balance_after)}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {transaction.order?.order_number || '-'}
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="lg:hidden space-y-3 sm:space-y-4">
+                      {transactions.map(transaction => (
+                        <Card
+                          key={transaction.id}
+                          className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
+                        >
+                          <CardContent className="p-3 sm:p-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Badge variant="outline" className="text-xs">
+                                  {transaction.transaction_type}
+                                </Badge>
+                                <span
+                                  className={`text-xs sm:text-sm font-medium ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}
+                                >
+                                  {transaction.amount > 0 ? '+' : ''}
+                                  {formatCurrency(transaction.amount)}
+                                </span>
+                              </div>
+                              <div className="text-xs sm:text-sm">
+                                <p className="text-muted-foreground">Date</p>
+                                <p>{new Date(transaction.created_at).toLocaleString('fr-FR')}</p>
+                              </div>
+                              <div className="text-xs sm:text-sm">
+                                <p className="text-muted-foreground">Code Carte</p>
+                                <code className="font-mono">{transaction.gift_card?.code}</code>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                                <div>
+                                  <p className="text-muted-foreground">Solde Avant</p>
+                                  <p className="font-medium">
+                                    {formatCurrency(transaction.balance_before)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Solde Après</p>
+                                  <p className="font-medium">
+                                    {formatCurrency(transaction.balance_after)}
+                                  </p>
+                                </div>
+                              </div>
+                              {transaction.order?.order_number && (
+                                <div className="text-xs sm:text-sm">
+                                  <p className="text-muted-foreground">Commande</p>
+                                  <p className="font-medium">{transaction.order.order_number}</p>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </SidebarProvider>
+    </AdminLayout>
   );
 }
 
@@ -690,7 +671,7 @@ function CreateGiftCardDialog({
         auto_activate: true,
         notes: '',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       toast({
         title: 'Erreur',
@@ -839,9 +820,3 @@ function CreateGiftCardDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
