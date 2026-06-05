@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { logAdminAction } from '@/lib/audit';
 
 export type PlatformSettings = {
@@ -40,7 +41,7 @@ export const usePlatformSettings = (key: string = 'admin') => {
       const { error: upsertError } = await supabase
         .from('admin_config')
         .upsert(
-          { key, settings: next, updated_at: new Date().toISOString() },
+          { key, settings: next as Json, updated_at: new Date().toISOString() },
           { onConflict: 'key' }
         );
       if (upsertError) {

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { isSensitiveAuditAction } from '@/lib/audit-alerts';
 
 type AuditPayload = {
@@ -39,7 +40,7 @@ export async function logAdminAction(payload: AuditPayload): Promise<void> {
       action: payload.action,
       target_type: payload.targetType ?? null,
       target_id: payload.targetId ?? null,
-      metadata: payload.metadata ?? {},
+      metadata: (payload.metadata ?? {}) as Json,
     });
 
     if (isSensitiveAuditAction(payload.action)) {
