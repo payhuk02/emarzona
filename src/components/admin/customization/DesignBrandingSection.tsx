@@ -584,7 +584,7 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
   return (
     <div className="space-y-4 sm:space-y-6">
       <Tabs defaultValue="colors" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2">
+        <TabsList className="grid h-auto min-h-0 w-full grid-cols-2 gap-1 sm:grid-cols-4 sm:gap-2">
           <TabsTrigger value="colors" className="text-xs sm:text-sm">
             <Palette className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Couleurs</span>
@@ -983,7 +983,10 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                     <button
                       key={key}
                       onClick={() => {
-                        setLocalDesignTokens(prev => ({ ...prev, shadow: key as typeof prev.shadow }));
+                        setLocalDesignTokens(prev => ({
+                          ...prev,
+                          shadow: key as typeof prev.shadow,
+                        }));
                         const shadows = {
                           sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                           base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -1002,7 +1005,16 @@ export const DesignBrandingSection = ({ onChange }: DesignBrandingSectionProps) 
                             ...customizationData?.design,
                             tokens: {
                               ...customizationData?.design?.tokens,
-                              shadow: key as "base" | "glow" | "large" | "lg" | "md" | "medium" | "sm" | "soft" | "xl",
+                              shadow: key as
+                                | 'base'
+                                | 'glow'
+                                | 'large'
+                                | 'lg'
+                                | 'md'
+                                | 'medium'
+                                | 'sm'
+                                | 'soft'
+                                | 'xl',
                             },
                           },
                         };

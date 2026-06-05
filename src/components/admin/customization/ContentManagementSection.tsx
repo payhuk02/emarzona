@@ -34,14 +34,14 @@ const KEY_TEXTS = [
   { key: 'marketplace.title', label: 'Titre marketplace', category: 'Marketplace' },
   { key: 'marketplace.subtitle', label: 'Sous-titre marketplace', category: 'Marketplace' },
   { key: 'marketplace.searchPlaceholder', label: 'Placeholder recherche', category: 'Marketplace' },
-  
+
   // Dashboard
   { key: 'dashboard.welcome', label: 'Message de bienvenue dashboard', category: 'Dashboard' },
   { key: 'dashboard.stats.totalSales', label: 'Total ventes', category: 'Dashboard' },
   { key: 'dashboard.stats.totalOrders', label: 'Total commandes', category: 'Dashboard' },
   { key: 'dashboard.stats.totalProducts', label: 'Total produits', category: 'Dashboard' },
   { key: 'dashboard.stats.totalCustomers', label: 'Total clients', category: 'Dashboard' },
-  
+
   // Navigation
   { key: 'nav.home', label: 'Accueil', category: 'Navigation' },
   { key: 'nav.marketplace', label: 'Marketplace', category: 'Navigation' },
@@ -49,7 +49,7 @@ const KEY_TEXTS = [
   { key: 'nav.products', label: 'Produits', category: 'Navigation' },
   { key: 'nav.orders', label: 'Commandes', category: 'Navigation' },
   { key: 'nav.settings', label: 'Paramètres', category: 'Navigation' },
-  
+
   // Auth
   { key: 'auth.welcome', label: 'Bienvenue', category: 'Authentification' },
   { key: 'auth.welcomeSubtitle', label: 'Sous-titre bienvenue', category: 'Authentification' },
@@ -57,21 +57,21 @@ const KEY_TEXTS = [
   { key: 'auth.login.subtitle', label: 'Sous-titre connexion', category: 'Authentification' },
   { key: 'auth.signup.title', label: 'Titre inscription', category: 'Authentification' },
   { key: 'auth.signup.subtitle', label: 'Sous-titre inscription', category: 'Authentification' },
-  
+
   // Footer
   { key: 'footer.about', label: 'À propos (footer)', category: 'Footer' },
   { key: 'footer.contact', label: 'Contact (footer)', category: 'Footer' },
-  { key: 'footer.terms', label: 'Conditions d\'utilisation', category: 'Footer' },
+  { key: 'footer.terms', label: "Conditions d'utilisation", category: 'Footer' },
   { key: 'footer.privacy', label: 'Confidentialité', category: 'Footer' },
   { key: 'footer.help', label: 'Aide', category: 'Footer' },
-  
+
   // Erreurs
-  { key: 'errors.generic', label: 'Message d\'erreur générique', category: 'Erreurs' },
+  { key: 'errors.generic', label: "Message d'erreur générique", category: 'Erreurs' },
   { key: 'errors.notFound', label: 'Page non trouvée', category: 'Erreurs' },
   { key: 'errors.network', label: 'Erreur réseau', category: 'Erreurs' },
   { key: 'errors.unauthorized', label: 'Non autorisé', category: 'Erreurs' },
   { key: 'errors.serverError', label: 'Erreur serveur', category: 'Erreurs' },
-  
+
   // Paramètres
   { key: 'settings.title', label: 'Titre paramètres', category: 'Paramètres' },
   { key: 'settings.profile', label: 'Profil', category: 'Paramètres' },
@@ -79,12 +79,12 @@ const KEY_TEXTS = [
   { key: 'settings.payment', label: 'Paiement', category: 'Paramètres' },
   { key: 'settings.notifications', label: 'Notifications', category: 'Paramètres' },
   { key: 'settings.security', label: 'Sécurité', category: 'Paramètres' },
-  
+
   // Notifications
   { key: 'notifications.title', label: 'Titre notifications', category: 'Notifications' },
   { key: 'notifications.markAllRead', label: 'Tout marquer comme lu', category: 'Notifications' },
   { key: 'notifications.noNotifications', label: 'Aucune notification', category: 'Notifications' },
-  
+
   // Common
   { key: 'common.welcome', label: 'Bienvenue', category: 'Commun' },
   { key: 'common.loading', label: 'Chargement...', category: 'Commun' },
@@ -100,7 +100,7 @@ const KEY_TEXTS = [
   { key: 'common.back', label: 'Retour', category: 'Commun' },
   { key: 'common.next', label: 'Suivant', category: 'Commun' },
   { key: 'common.previous', label: 'Précédent', category: 'Commun' },
-  
+
   // Products
   { key: 'products.title', label: 'Titre produits', category: 'Produits' },
   { key: 'products.create', label: 'Créer produit', category: 'Produits' },
@@ -110,7 +110,7 @@ const KEY_TEXTS = [
   { key: 'products.addToCart', label: 'Ajouter au panier', category: 'Produits' },
   { key: 'products.price', label: 'Prix', category: 'Produits' },
   { key: 'products.stock', label: 'Stock', category: 'Produits' },
-  
+
   // Orders
   { key: 'orders.title', label: 'Titre commandes', category: 'Commandes' },
   { key: 'orders.status', label: 'Statut commande', category: 'Commandes' },
@@ -118,14 +118,14 @@ const KEY_TEXTS = [
   { key: 'orders.date', label: 'Date commande', category: 'Commandes' },
   { key: 'orders.view', label: 'Voir commande', category: 'Commandes' },
   { key: 'orders.cancel', label: 'Annuler commande', category: 'Commandes' },
-  
+
   // Cart
   { key: 'cart.title', label: 'Titre panier', category: 'Panier' },
   { key: 'cart.empty', label: 'Panier vide', category: 'Panier' },
   { key: 'cart.checkout', label: 'Passer commande', category: 'Panier' },
   { key: 'cart.remove', label: 'Retirer du panier', category: 'Panier' },
   { key: 'cart.total', label: 'Total panier', category: 'Panier' },
-  
+
   // Storefront
   { key: 'storefront.title', label: 'Titre boutique', category: 'Boutique' },
   { key: 'storefront.description', label: 'Description boutique', category: 'Boutique' },
@@ -144,8 +144,11 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
-  const [templateContent, setTemplateContent] = useState<{ subject: string; html: string }>({ subject: '', html: '' });
-  
+  const [templateContent, setTemplateContent] = useState<{ subject: string; html: string }>({
+    subject: '',
+    html: '',
+  });
+
   const { data: templates, isLoading: templatesLoading } = useEmailTemplates();
 
   useEffect(() => {
@@ -171,43 +174,45 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
     }
   }, [editingTemplate, currentLanguage]);
 
-  const categories = useMemo(() => 
-    Array.from(new Set(KEY_TEXTS.map(t => t.category))), 
-    []
-  );
+  const categories = useMemo(() => Array.from(new Set(KEY_TEXTS.map(t => t.category))), []);
 
   /**
    * Textes filtrés selon la recherche et la catégorie sélectionnée
    * Mémorisé pour éviter les recalculs à chaque render
    */
-  const filteredTexts = useMemo(() => 
-    KEY_TEXTS.filter(text => {
-      const matchesSearch = text.label.toLowerCase().includes(searchText.toLowerCase()) ||
-                           text.key.toLowerCase().includes(searchText.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || text.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    }),
+  const filteredTexts = useMemo(
+    () =>
+      KEY_TEXTS.filter(text => {
+        const matchesSearch =
+          text.label.toLowerCase().includes(searchText.toLowerCase()) ||
+          text.key.toLowerCase().includes(searchText.toLowerCase());
+        const matchesCategory = selectedCategory === 'all' || text.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      }),
     [searchText, selectedCategory]
   );
 
-  const handleTextChange = useCallback((key: string, value: string) => {
-    setCustomTexts(prev => {
-      const updated = { ...prev, [key]: value };
-      // Utiliser les données à jour du state local
-      save('content', {
-        ...customizationData?.content,
-        texts: updated,
-      }).catch((error) => {
-        logger.error('Error saving text customization', { error, key, value });
+  const handleTextChange = useCallback(
+    (key: string, value: string) => {
+      setCustomTexts(prev => {
+        const updated = { ...prev, [key]: value };
+        // Utiliser les données à jour du state local
+        save('content', {
+          ...customizationData?.content,
+          texts: updated,
+        }).catch(error => {
+          logger.error('Error saving text customization', { error, key, value });
+        });
+        return updated;
       });
-      return updated;
-    });
-    if (onChange) onChange();
-  }, [customizationData, save, onChange]);
+      if (onChange) onChange();
+    },
+    [customizationData, save, onChange]
+  );
 
   /**
    * Met à jour un template d'email dans la base de données et l'état local
-   * 
+   *
    * @param updatedTemplate - Template d'email avec les modifications
    * @returns Promise qui se résout avec le template mis à jour
    * @throws Error si la mise à jour échoue
@@ -229,12 +234,10 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
 
       // Mettre à jour l'état local
       const updated = { ...updatedTemplate };
-      setEmailTemplates(prev => 
-        prev.map(t => t.id === updatedTemplate.id ? updated : t)
-      );
+      setEmailTemplates(prev => prev.map(t => (t.id === updatedTemplate.id ? updated : t)));
       setEditingTemplate(updated);
       setSelectedTemplate(updated);
-      
+
       return updated;
     } catch (error) {
       logger.error('Error updating template', { error, templateId: updatedTemplate.id });
@@ -242,24 +245,27 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
     }
   }, []);
 
-  const resetText = useCallback((key: string) => {
-    setCustomTexts(prev => {
-      const newTexts = { ...prev };
-      delete newTexts[key];
-      save('content', {
-        ...customizationData?.content,
-        texts: newTexts,
-      }).catch((error) => {
-        logger.error('Error resetting text customization', { error, key });
+  const resetText = useCallback(
+    (key: string) => {
+      setCustomTexts(prev => {
+        const newTexts = { ...prev };
+        delete newTexts[key];
+        save('content', {
+          ...customizationData?.content,
+          texts: newTexts,
+        }).catch(error => {
+          logger.error('Error resetting text customization', { error, key });
+        });
+        return newTexts;
       });
-      return newTexts;
-    });
-  }, [customizationData, save]);
+    },
+    [customizationData, save]
+  );
 
   return (
     <div className="space-y-6">
       <Tabs defaultValue="texts" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
+        <TabsList className="grid h-auto min-h-0 w-full grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-2">
           <TabsTrigger value="texts" className="text-xs sm:text-sm">
             <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Textes ({KEY_TEXTS.length})</span>
@@ -282,7 +288,8 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
             <CardHeader>
               <CardTitle>Textes de la plateforme</CardTitle>
               <CardDescription>
-                Personnalisez les textes affichés sur la plateforme. Les modifications sont appliquées en temps réel.
+                Personnalisez les textes affichés sur la plateforme. Les modifications sont
+                appliquées en temps réel.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -293,7 +300,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                   <Input
                     placeholder="Rechercher un texte..."
                     value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
+                    onChange={e => setSearchText(e.target.value)}
                     className="pl-10 text-sm"
                   />
                 </div>
@@ -323,8 +330,8 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
               <Separator />
 
               {/* Liste des textes */}
-              <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                {filteredTexts.map((text: typeof KEY_TEXTS[number]) => {
+              <div className="space-y-4">
+                {filteredTexts.map((text: (typeof KEY_TEXTS)[number]) => {
                   const currentValue = customTexts[text.key] || text.key;
                   const isCustom = !!customTexts[text.key];
 
@@ -343,11 +350,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                               </Badge>
                             </div>
                             {isCustom && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => resetText(text.key)}
-                              >
+                              <Button variant="ghost" size="sm" onClick={() => resetText(text.key)}>
                                 <RefreshCw className="h-3 w-3 mr-1" />
                                 Réinitialiser
                               </Button>
@@ -359,7 +362,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                             </Label>
                             <Textarea
                               value={currentValue}
-                              onChange={(e) => handleTextChange(text.key, e.target.value)}
+                              onChange={e => handleTextChange(text.key, e.target.value)}
                               rows={2}
                               className="font-medium"
                             />
@@ -387,12 +390,11 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                 <div>
                   <CardTitle>Modèles d'emails</CardTitle>
                   <CardDescription>
-                    Personnalisez les emails envoyés aux utilisateurs. Les templates sont multilingues et supportent des variables dynamiques.
+                    Personnalisez les emails envoyés aux utilisateurs. Les templates sont
+                    multilingues et supportent des variables dynamiques.
                   </CardDescription>
                 </div>
-                {templatesLoading && (
-                  <Badge variant="outline">Chargement...</Badge>
-                )}
+                {templatesLoading && <Badge variant="outline">Chargement...</Badge>}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -404,15 +406,17 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                 <div className="text-center py-8 text-muted-foreground">
                   <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Aucun template d'email trouvé.</p>
-                  <p className="text-sm mt-2">Les templates seront créés automatiquement lors de leur première utilisation.</p>
+                  <p className="text-sm mt-2">
+                    Les templates seront créés automatiquement lors de leur première utilisation.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {/* Liste des templates */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {emailTemplates.map((template) => (
-                      <Card 
-                        key={template.id} 
+                    {emailTemplates.map(template => (
+                      <Card
+                        key={template.id}
                         className={`cursor-pointer transition-all hover:shadow-md ${
                           selectedTemplate?.id === template.id ? 'ring-2 ring-primary' : ''
                         }`}
@@ -444,7 +448,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation();
                                 setSelectedTemplate(template);
                                 setEditingTemplate(template);
@@ -478,7 +482,8 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                           <div>
                             <CardTitle>Éditer: {editingTemplate.name}</CardTitle>
                             <CardDescription>
-                              Slug: <code className="bg-muted px-1 rounded">{editingTemplate.slug}</code>
+                              Slug:{' '}
+                              <code className="bg-muted px-1 rounded">{editingTemplate.slug}</code>
                             </CardDescription>
                           </div>
                           <Button
@@ -500,7 +505,9 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                             <Label>Sujet (FR)</Label>
                             <Input
                               value={templateContent.subject}
-                              onChange={(e) => setTemplateContent(prev => ({ ...prev, subject: e.target.value }))}
+                              onChange={e =>
+                                setTemplateContent(prev => ({ ...prev, subject: e.target.value }))
+                              }
                               placeholder="Sujet de l'email en français"
                             />
                           </div>
@@ -511,9 +518,12 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                                 <input
                                   type="checkbox"
                                   checked={editingTemplate.is_active}
-                                  onChange={async (e) => {
+                                  onChange={async e => {
                                     try {
-                                      const updated = { ...editingTemplate, is_active: e.target.checked };
+                                      const updated = {
+                                        ...editingTemplate,
+                                        is_active: e.target.checked,
+                                      };
                                       await updateTemplate(updated);
                                     } catch (_error) {
                                       toast({
@@ -531,9 +541,12 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                                 <input
                                   type="checkbox"
                                   checked={editingTemplate.is_default}
-                                  onChange={async (e) => {
+                                  onChange={async e => {
                                     try {
-                                      const updated = { ...editingTemplate, is_default: e.target.checked };
+                                      const updated = {
+                                        ...editingTemplate,
+                                        is_default: e.target.checked,
+                                      };
                                       await updateTemplate(updated);
                                     } catch (_error) {
                                       toast({
@@ -554,21 +567,30 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                           <Label>Contenu HTML (FR)</Label>
                           <Textarea
                             value={templateContent.html}
-                            onChange={(e) => setTemplateContent(prev => ({ ...prev, html: e.target.value }))}
+                            onChange={e =>
+                              setTemplateContent(prev => ({ ...prev, html: e.target.value }))
+                            }
                             placeholder="Contenu HTML de l'email en français"
                             rows={12}
                             className="font-mono text-sm"
                           />
                           <p className="text-xs text-muted-foreground">
-                            Variables disponibles: {editingTemplate.variables.join(', ') || 'Aucune'}
+                            Variables disponibles:{' '}
+                            {editingTemplate.variables.join(', ') || 'Aucune'}
                           </p>
                         </div>
                         <div className="flex gap-2">
                           <Button
                             onClick={async () => {
                               try {
-                                const updatedSubject = { ...editingTemplate.subject, fr: templateContent.subject };
-                                const updatedHtml = { ...editingTemplate.html_content, fr: templateContent.html };
+                                const updatedSubject = {
+                                  ...editingTemplate.subject,
+                                  fr: templateContent.subject,
+                                };
+                                const updatedHtml = {
+                                  ...editingTemplate.html_content,
+                                  fr: templateContent.html,
+                                };
                                 const updated = {
                                   ...editingTemplate,
                                   subject: updatedSubject,
@@ -626,7 +648,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                   <Input
                     placeholder="Vous avez reçu une nouvelle commande"
                     defaultValue={customizationData?.content?.notifications?.newOrder || ''}
-                    onChange={(e) => {
+                    onChange={e => {
                       save('content', {
                         ...customizationData?.content,
                         notifications: {
@@ -642,7 +664,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                   <Input
                     placeholder="Paiement reçu avec succès"
                     defaultValue={customizationData?.content?.notifications?.paymentReceived || ''}
-                    onChange={(e) => {
+                    onChange={e => {
                       save('content', {
                         ...customizationData?.content,
                         notifications: {
@@ -658,7 +680,7 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
                   <Input
                     placeholder="Vous avez reçu un nouveau message"
                     defaultValue={customizationData?.content?.notifications?.newMessage || ''}
-                    onChange={(e) => {
+                    onChange={e => {
                       save('content', {
                         ...customizationData?.content,
                         notifications: {
@@ -677,9 +699,3 @@ export const ContentManagementSection = ({ onChange }: ContentManagementSectionP
     </div>
   );
 };
-
-
-
-
-
-
