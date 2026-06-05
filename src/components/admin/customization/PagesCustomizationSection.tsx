@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Layout, RefreshCw } from 'lucide-react';
 import { PAGES_CONFIG } from './pages/pagesConfig';
 import { PageElementEditor } from './pages/PageElementEditor';
@@ -106,20 +105,19 @@ export const PagesCustomizationSection = ({ onChange }: PagesCustomizationSectio
               value={selectedSection || selectedPageConfig.sections[0]?.id}
               onValueChange={setSelectedSection}
             >
-              <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-                <TabsList className="inline-flex w-full justify-start p-1">
+              <div className="platform-customization-section-tabs mb-4 w-full overflow-x-auto rounded-md border">
+                <TabsList className="inline-flex h-auto min-h-0 w-max min-w-full justify-start gap-1 rounded-none border-0 bg-transparent p-1">
                   {selectedPageConfig.sections.map(section => (
                     <TabsTrigger
                       key={section.id}
                       value={section.id}
-                      className="text-xs sm:text-sm shrink-0"
+                      className="h-auto min-h-[2.5rem] shrink-0 px-2 py-1.5 text-xs sm:px-3 sm:text-sm"
                     >
                       {section.name}
                     </TabsTrigger>
                   ))}
                 </TabsList>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              </div>
 
               {selectedPageConfig.sections.map(section => (
                 <TabsContent key={section.id} value={section.id} className="space-y-4 mt-4">

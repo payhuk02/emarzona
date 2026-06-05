@@ -191,6 +191,7 @@ export const PlatformCustomization = () => {
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const {
     saveAll,
@@ -235,12 +236,13 @@ export const PlatformCustomization = () => {
     navigate(buildSectionHref('design'), { replace: true });
   }, [location.search, navigate]);
 
-  // Mobile : faire défiler vers le contenu après changement de section
+  // Remonter le panneau contenu au changement de section (desktop + mobile)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!window.matchMedia('(max-width: 1023px)').matches) return;
     requestAnimationFrame(() => {
-      panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches) {
+        panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
   }, [activeSection]);
 
@@ -371,7 +373,7 @@ export const PlatformCustomization = () => {
             className={cn(
               'relative z-50 flex w-full shrink-0 flex-col border-b bg-card/50 backdrop-blur-sm',
               'max-h-[min(48vh,28rem)] lg:max-h-none',
-              'lg:col-start-1 lg:row-start-1',
+              'lg:col-start-1 lg:row-start-1 lg:overflow-hidden',
               'lg:h-full lg:w-full lg:max-w-none lg:shrink-0 lg:border-b-0 lg:border-r'
             )}
           >
@@ -471,18 +473,22 @@ export const PlatformCustomization = () => {
             ref={panelRef}
             id="platform-customization-panel"
             className={cn(
-              'relative z-0 flex min-w-0 flex-col',
+              'relative z-0 flex min-h-0 min-w-0 flex-col',
               'lg:col-start-2 lg:row-start-1',
               'min-h-[min(50vh,32rem)] lg:min-h-0 lg:overflow-hidden'
             )}
           >
             {/* Indication mobile : le contenu est sous la liste */}
-            <p className="border-b bg-muted/40 px-4 py-2 text-center text-xs text-muted-foreground lg:hidden">
+            <p className="shrink-0 border-b bg-muted/40 px-4 py-2 text-center text-xs text-muted-foreground lg:hidden">
               Section :{' '}
               <span className="font-medium text-foreground">{activeSectionConfig?.label}</span>
               {' — '}faites défiler pour modifier
             </p>
-            <div className="min-h-0 flex-1 overflow-y-auto pb-20 lg:pb-0">
+            <div
+              ref={scrollContainerRef}
+              id="platform-customization-scroll"
+              className="platform-customization-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-24 lg:pb-8"
+            >
               <div className="container mx-auto max-w-6xl p-4 sm:p-6">
                 {/* Header - Responsive */}
                 <div className="mb-4 sm:mb-6">

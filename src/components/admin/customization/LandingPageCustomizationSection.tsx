@@ -17,7 +17,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { Switch } from '@/components/ui/switch';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { logger } from '@/lib/logger';
 import {
   LANDING_PREMIUM_PAGE_ID,
@@ -353,15 +352,15 @@ export const LandingPageCustomizationSection = ({
   const editorContent = (
     <Tabs value={selectedSection} onValueChange={setSelectedSection}>
       {LANDING_SECTIONS.length > 1 ? (
-        <ScrollArea className="w-full whitespace-nowrap rounded-md border mb-4">
-          <TabsList className="inline-flex w-full justify-start p-1">
+        <div className="platform-customization-section-tabs mb-4 w-full overflow-x-auto rounded-md border">
+          <TabsList className="inline-flex h-auto min-h-0 w-max min-w-full justify-start gap-1 rounded-none border-0 bg-transparent p-1">
             {LANDING_SECTIONS.map(section => {
               const Icon = section.icon;
               return (
                 <TabsTrigger
                   key={section.id}
                   value={section.id}
-                  className="text-xs sm:text-sm shrink-0"
+                  className="h-auto min-h-[2.5rem] shrink-0 px-2 py-1.5 text-xs sm:px-3 sm:text-sm"
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">{section.name}</span>
@@ -370,8 +369,7 @@ export const LandingPageCustomizationSection = ({
               );
             })}
           </TabsList>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        </div>
       ) : null}
 
       {selectedSectionConfig && (

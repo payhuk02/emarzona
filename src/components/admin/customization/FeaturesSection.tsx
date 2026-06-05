@@ -529,7 +529,7 @@ export const FeaturesSection = ({ onChange }: FeaturesSectionProps) => {
           <Separator />
 
           {/* Liste des fonctionnalités */}
-          <div className="space-y-3 max-h-[600px] overflow-y-auto">
+          <div className="space-y-3">
             {filteredFeatures.map(feature => {
               const Icon = feature.icon;
 

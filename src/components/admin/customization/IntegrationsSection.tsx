@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { usePlatformCustomization } from '@/hooks/admin/usePlatformCustomization';
 import { useToast } from '@/hooks/use-toast';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { stripIntegrationsTree } from '@/lib/admin/integration-secrets';
 
 interface IntegrationsSectionProps {
@@ -149,31 +148,42 @@ export const IntegrationsSection = ({ onChange }: IntegrationsSectionProps) => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="payments" className="w-full">
-        <ScrollArea className="w-full whitespace-nowrap rounded-md border mb-4">
-          <TabsList className="inline-flex w-full justify-start p-1">
-            <TabsTrigger value="payments" className="text-xs sm:text-sm shrink-0">
+        <div className="platform-customization-section-tabs mb-4 w-full overflow-x-auto rounded-md border">
+          <TabsList className="inline-flex h-auto min-h-0 w-max min-w-full justify-start gap-1 rounded-none border-0 bg-transparent p-1">
+            <TabsTrigger
+              value="payments"
+              className="h-auto min-h-[2.5rem] shrink-0 px-2 py-1.5 text-xs sm:px-3 sm:text-sm"
+            >
               <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Paiements</span>
               <span className="sm:hidden">Pay</span>
             </TabsTrigger>
-            <TabsTrigger value="video" className="text-xs sm:text-sm shrink-0">
+            <TabsTrigger
+              value="video"
+              className="h-auto min-h-[2.5rem] shrink-0 px-2 py-1.5 text-xs sm:px-3 sm:text-sm"
+            >
               <Video className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Vidéo</span>
               <span className="sm:hidden">Vidéo</span>
             </TabsTrigger>
-            <TabsTrigger value="shipping" className="text-xs sm:text-sm shrink-0">
+            <TabsTrigger
+              value="shipping"
+              className="h-auto min-h-[2.5rem] shrink-0 px-2 py-1.5 text-xs sm:px-3 sm:text-sm"
+            >
               <Truck className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Livraison</span>
               <span className="sm:hidden">Ship</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs sm:text-sm shrink-0">
+            <TabsTrigger
+              value="analytics"
+              className="h-auto min-h-[2.5rem] shrink-0 px-2 py-1.5 text-xs sm:px-3 sm:text-sm"
+            >
               <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Analytics</span>
               <span className="sm:hidden">Analytics</span>
             </TabsTrigger>
           </TabsList>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        </div>
 
         {/* Paiements */}
         <TabsContent value="payments" className="space-y-4">

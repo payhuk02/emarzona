@@ -474,6 +474,12 @@
   }
 }
 
+#platform-customization-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-bottom: 2rem;
+}
+
 @media (max-width: 1023px) {
   #platform-customization-nav {
     max-height: min(48vh, 28rem);
@@ -483,4 +489,15 @@
     min-height: min(55vh, 36rem);
     scroll-margin-top: 4.5rem;
   }
+
+  .platform-customization-shell {
+    min-height: 0;
+  }
+}
+
+/* Onglets horizontaux : défilement natif (évite ScrollArea qui masque le contenu) */
+.platform-customization-section-tabs {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
 }
