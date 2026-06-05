@@ -7,7 +7,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
-const PLATFORM_SETTINGS_FIELDS = 'id, platform_commission_rate, referral_commission_rate, min_withdrawal_amount, auto_approve_withdrawals, email_notifications, sms_notifications, created_at, updated_at, updated_by';
+export const PLATFORM_SETTINGS_SINGLETON_ID = '00000000-0000-0000-0000-000000000001';
+
+const PLATFORM_SETTINGS_FIELDS =
+  'id, platform_commission_rate, referral_commission_rate, min_withdrawal_amount, auto_approve_withdrawals, email_notifications, sms_notifications, created_at, updated_at, updated_by';
 
 export interface PlatformSettings {
   id: string;
@@ -50,7 +53,7 @@ export const usePlatformSettingsDirect = () => {
       const { data, error } = await supabase
         .from('platform_settings')
         .select(PLATFORM_SETTINGS_FIELDS)
-        .limit(1)
+        .eq('id', PLATFORM_SETTINGS_SINGLETON_ID)
         .single();
 
       if (error) {
@@ -67,7 +70,9 @@ export const usePlatformSettingsDirect = () => {
   const updateSettings = useMutation({
     mutationFn: async (updates: PlatformSettingsUpdate) => {
       // Récupérer l'utilisateur actuel
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('platform_settings')
@@ -76,7 +81,7 @@ export const usePlatformSettingsDirect = () => {
           updated_by: user?.id,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', '00000000-0000-0000-0000-000000000001') // Singleton ID
+        .eq('id', PLATFORM_SETTINGS_SINGLETON_ID)
         .select()
         .single();
 
@@ -87,7 +92,7 @@ export const usePlatformSettingsDirect = () => {
 
       return data as PlatformSettings;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.setQueryData(['platform-settings'], data);
       queryClient.invalidateQueries({ queryKey: ['platform-settings'] });
       toast({
@@ -115,16 +120,3 @@ export const usePlatformSettingsDirect = () => {
     isUpdating: updateSettings.isPending,
   };
 };
-
-
-
-
-
-
-
-
-
-
-
-
-

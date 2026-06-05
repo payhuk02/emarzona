@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { validateSection, validateCustomizationData } from '@/lib/schemas/platform-customization';
 import type { PlatformCustomizationSchemaType } from '@/lib/schemas/platform-customization';
+import { stripFinancialSettingsFromCustomizationSettings } from '@/lib/admin/customization-settings';
 import { stripIntegrationsTree } from '@/lib/admin/integration-secrets';
 
 // Types pour les structures flexibles (emails, notifications, etc.)
@@ -343,10 +344,16 @@ function usePlatformCustomizationState() {
         // Utiliser le ref pour avoir les données les plus récentes
         const currentData = customizationDataRef.current;
 
-        const sectionPayload =
+        let sectionPayload: unknown =
           section === 'integrations' && data && typeof data === 'object'
             ? stripIntegrationsTree(data as Record<string, unknown>)
             : data;
+
+        if (section === 'settings' && sectionPayload && typeof sectionPayload === 'object') {
+          sectionPayload = stripFinancialSettingsFromCustomizationSettings(
+            sectionPayload as Record<string, unknown>
+          );
+        }
 
         // Fusionner les données existantes avec les nouvelles
         const updatedData = {
@@ -469,9 +476,17 @@ function usePlatformCustomizationState() {
 
       // Utiliser le ref pour avoir les données les plus récentes
       const currentData = customizationDataRef.current;
+      const dataToValidate = currentData?.settings
+        ? {
+            ...currentData,
+            settings: stripFinancialSettingsFromCustomizationSettings(
+              currentData.settings as Record<string, unknown>
+            ),
+          }
+        : currentData;
 
       // Valider toutes les données avant sauvegarde
-      const validation = validateCustomizationData(currentData);
+      const validation = validateCustomizationData(dataToValidate);
       if (!validation.valid) {
         const errorMessages = validation.errors.map(e => {
           const fieldName = e.path || 'champ inconnu';

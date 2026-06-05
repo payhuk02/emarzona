@@ -205,7 +205,7 @@ const ALL_FEATURES: Feature[] = [
     category: 'Commerce',
     icon: Star,
     enabled: true,
-    route: '/dashboard/wishlist',
+    route: '/account/wishlist',
   },
   {
     id: 'coupons',
@@ -214,7 +214,7 @@ const ALL_FEATURES: Feature[] = [
     category: 'Commerce',
     icon: Gift,
     enabled: true,
-    route: '/admin/coupons',
+    route: '/dashboard/coupons',
   },
   {
     id: 'reviews',
@@ -232,7 +232,7 @@ const ALL_FEATURES: Feature[] = [
     category: 'Commerce',
     icon: CreditCard,
     enabled: true,
-    route: '/dashboard/subscriptions',
+    route: '/admin/subscriptions',
   },
   {
     id: 'invoicing',
@@ -241,7 +241,7 @@ const ALL_FEATURES: Feature[] = [
     category: 'Commerce',
     icon: FileText,
     enabled: true,
-    route: '/dashboard/invoices',
+    route: '/account/invoices',
   },
 
   // Produits avancés
@@ -294,7 +294,7 @@ const ALL_FEATURES: Feature[] = [
     category: 'Marketplace',
     icon: Shield,
     enabled: true,
-    route: '/admin/vendors',
+    route: '/admin/stores',
   },
   {
     id: 'disputes',
@@ -314,7 +314,6 @@ const ALL_FEATURES: Feature[] = [
     category: 'Communication',
     icon: MessageSquare,
     enabled: true,
-    route: '/dashboard/messages',
   },
   {
     id: 'live_chat',
@@ -331,7 +330,7 @@ const ALL_FEATURES: Feature[] = [
     category: 'Communication',
     icon: Bell,
     enabled: true,
-    route: '/admin/announcements',
+    route: '/admin/notifications',
   },
 
   // Analytics & Reporting

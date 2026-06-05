@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePlatformSettings } from '@/hooks/usePlatformSettings';
-import { Settings, Save, Info, Loader2, AlertCircle } from 'lucide-react';
+import { usePlatformSettingsDirect } from '@/hooks/usePlatformSettingsDirect';
+import { Settings, Save, Info, Loader2, AlertCircle, Percent, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAdminPermissions, DEFAULT_PERMISSION_KEYS } from '@/hooks/useAdminPermissions';
@@ -18,7 +20,13 @@ import { Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminSettings = () => {
-  const { settings: dbSettings, loading, error, updateSettings } = usePlatformSettings();
+  const { settings: dbSettings, loading, error } = usePlatformSettings();
+  const {
+    settings: platformSettings,
+    isLoading: platformSettingsLoading,
+    updateSettings: updatePlatformSettings,
+    isUpdating: isPlatformSettingsUpdating,
+  } = usePlatformSettingsDirect();
   const {
     roles,
     loading: rolesLoading,
@@ -51,54 +59,30 @@ const AdminSettings = () => {
   const normalizePermissions = (input: unknown): Record<string, boolean> => {
     if (!input || typeof input !== 'object') return {};
     const obj = input as Record<string, unknown>;
-    const  out: Record<string, boolean> = {};
+    const out: Record<string, boolean> = {};
     for (const [k, v] of Object.entries(obj)) out[k] = Boolean(v);
     return out;
   };
 
-  // État local pour le formulaire
-  const [localSettings, setLocalSettings] = useState({
-    platformCommissionRate: 10,
-    referralCommissionRate: 2,
-    minWithdrawalAmount: 10000,
-    autoApproveWithdrawals: false,
-    emailNotifications: true,
-    smsNotifications: false,
-  });
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(false);
 
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Synchroniser l'état local avec les paramètres chargés depuis la DB
   useEffect(() => {
-    if (dbSettings) {
-      setLocalSettings({
-        platformCommissionRate: dbSettings.platform_commission_rate,
-        referralCommissionRate: dbSettings.referral_commission_rate,
-        minWithdrawalAmount: dbSettings.min_withdrawal_amount,
-        autoApproveWithdrawals: dbSettings.auto_approve_withdrawals,
-        emailNotifications: dbSettings.email_notifications,
-        smsNotifications: dbSettings.sms_notifications,
-      });
+    if (platformSettings) {
+      setEmailNotifications(platformSettings.email_notifications);
+      setSmsNotifications(platformSettings.sms_notifications);
     }
-  }, [dbSettings]);
+  }, [platformSettings]);
 
-  const handleSave = async () => {
-    setIsSaving(true);
-
-    await updateSettings({
-      platform_commission_rate: localSettings.platformCommissionRate,
-      referral_commission_rate: localSettings.referralCommissionRate,
-      min_withdrawal_amount: localSettings.minWithdrawalAmount,
-      auto_approve_withdrawals: localSettings.autoApproveWithdrawals,
-      email_notifications: localSettings.emailNotifications,
-      sms_notifications: localSettings.smsNotifications,
+  const handleSaveNotifications = () => {
+    updatePlatformSettings({
+      email_notifications: emailNotifications,
+      sms_notifications: smsNotifications,
     });
-
-    setIsSaving(false);
   };
 
   // Loading state
-  if (loading) {
+  if (loading || platformSettingsLoading) {
     return (
       <AdminLayout>
         <div className="container mx-auto p-6 space-y-6">
@@ -143,116 +127,31 @@ const AdminSettings = () => {
           <Settings className="h-8 w-8 text-muted-foreground" />
         </div>
 
-        {/* Commission Settings */}
-        {can('users.roles') && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Taux de commission</CardTitle>
-              <CardDescription>Configurer les commissions de la plateforme</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="platformCommission">Commission Plateforme (%)</Label>
-                <Input
-                  id="platformCommission"
-                  type="number"
-                  value={localSettings.platformCommissionRate}
-                  onChange={e =>
-                    setLocalSettings({
-                      ...localSettings,
-                      platformCommissionRate: Number(e.target.value),
-                    })
-                  }
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  className="min-h-[44px]"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Commission prélevée sur chaque vente
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="referralCommission">Commission Parrainage (%)</Label>
-                <Input
-                  id="referralCommission"
-                  type="number"
-                  value={localSettings.referralCommissionRate}
-                  onChange={e =>
-                    setLocalSettings({
-                      ...localSettings,
-                      referralCommissionRate: Number(e.target.value),
-                    })
-                  }
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  className="min-h-[44px]"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Commission versée au parrain sur les ventes du filleul
-                </p>
-              </div>
-
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  Les modifications des taux s'appliquent uniquement aux nouvelles transactions.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Withdrawal Settings */}
+        {/* Commissions & retraits — source canonique */}
         <Card>
           <CardHeader>
-            <CardTitle>Paramètres de retrait</CardTitle>
-            <CardDescription>Configuration des retraits de fonds</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Percent className="h-5 w-5" />
+              Commissions et retraits
+            </CardTitle>
+            <CardDescription>
+              Taux de commission, parrainage et règles de retrait des vendeurs
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="minWithdrawal">Montant minimum de retrait (XOF)</Label>
-              <Input
-                id="minWithdrawal"
-                type="number"
-                value={localSettings.minWithdrawalAmount}
-                onChange={e =>
-                  setLocalSettings({
-                    ...localSettings,
-                    minWithdrawalAmount: Number(e.target.value),
-                  })
-                }
-                min="0"
-                step="1"
-                className="min-h-[44px]"
-              />
-              <p className="text-sm text-muted-foreground">
-                Montant minimum requis pour effectuer un retrait
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Approbation automatique</Label>
-                <p className="text-sm text-muted-foreground">
-                  Approuver automatiquement les demandes de retrait
-                </p>
-              </div>
-              <Button
-                variant={localSettings.autoApproveWithdrawals ? 'default' : 'outline'}
-                size="sm"
-                onClick={() =>
-                  setLocalSettings({
-                    ...localSettings,
-                    autoApproveWithdrawals: !localSettings.autoApproveWithdrawals,
-                  })
-                }
-              >
-                {localSettings.autoApproveWithdrawals ? 'Activé' : 'Désactivé'}
-              </Button>
-            </div>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Les paramètres financiers sont centralisés sur la page dédiée. Les modifications des
+                taux s&apos;appliquent uniquement aux nouvelles transactions.
+              </AlertDescription>
+            </Alert>
+            <Button asChild variant="outline" className="gap-2">
+              <Link to="/admin/commission-settings">
+                Ouvrir les paramètres de commission
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -271,16 +170,11 @@ const AdminSettings = () => {
                 </p>
               </div>
               <Button
-                variant={localSettings.emailNotifications ? 'default' : 'outline'}
+                variant={emailNotifications ? 'default' : 'outline'}
                 size="sm"
-                onClick={() =>
-                  setLocalSettings({
-                    ...localSettings,
-                    emailNotifications: !localSettings.emailNotifications,
-                  })
-                }
+                onClick={() => setEmailNotifications(prev => !prev)}
               >
-                {localSettings.emailNotifications ? 'Activé' : 'Désactivé'}
+                {emailNotifications ? 'Activé' : 'Désactivé'}
               </Button>
             </div>
 
@@ -292,16 +186,11 @@ const AdminSettings = () => {
                 </p>
               </div>
               <Button
-                variant={localSettings.smsNotifications ? 'default' : 'outline'}
+                variant={smsNotifications ? 'default' : 'outline'}
                 size="sm"
-                onClick={() =>
-                  setLocalSettings({
-                    ...localSettings,
-                    smsNotifications: !localSettings.smsNotifications,
-                  })
-                }
+                onClick={() => setSmsNotifications(prev => !prev)}
               >
-                {localSettings.smsNotifications ? 'Activé' : 'Désactivé'}
+                {smsNotifications ? 'Activé' : 'Désactivé'}
               </Button>
             </div>
           </CardContent>
@@ -605,8 +494,13 @@ const AdminSettings = () => {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} size="lg" className="gap-2" disabled={isSaving}>
-            {isSaving ? (
+          <Button
+            onClick={handleSaveNotifications}
+            size="lg"
+            className="gap-2"
+            disabled={isPlatformSettingsUpdating}
+          >
+            {isPlatformSettingsUpdating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Sauvegarde en cours...
@@ -614,7 +508,7 @@ const AdminSettings = () => {
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Sauvegarder les paramètres
+                Sauvegarder les notifications
               </>
             )}
           </Button>
@@ -625,9 +519,3 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
-
-
-
-
-
-

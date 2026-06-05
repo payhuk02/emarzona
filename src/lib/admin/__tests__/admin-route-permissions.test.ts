@@ -30,4 +30,13 @@ describe('admin-route-permissions', () => {
     expect(getAdminRouteAccess('/admin/security')?.permissions).toBeUndefined();
     expect(canAccessAdminPath('/admin/security', can, false)).toBe(true);
   });
+
+  it('newsletter route requires settings.manage', () => {
+    expect(getAdminRouteAccess('/admin/newsletter-subscribers')?.permissions).toEqual([
+      'settings.manage',
+    ]);
+    expect(canAccessAdminPath('/admin/newsletter-subscribers', can, false)).toBe(false);
+    const canSettings = (key: string) => key === 'settings.manage';
+    expect(canAccessAdminPath('/admin/newsletter-subscribers', canSettings, false)).toBe(true);
+  });
 });
