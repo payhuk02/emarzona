@@ -7,7 +7,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePlatformLogo } from '@/hooks/usePlatformLogo';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { UserUtilityActions } from '@/components/layout/UserUtilityActions';
 import { ThemeSelectorCompact } from '@/components/navigation/ThemeSelector';
 import { Button } from '@/components/ui/button';
 import { LazyImage } from '@/components/ui/lazy-image';
@@ -22,11 +22,9 @@ import {
   BarChart3,
   Settings,
   User,
-  LogOut,
   Menu,
 } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { LoyaltyBadge } from '@/components/loyalty/LoyaltyBadge';
 import { cn } from '@/lib/utils';
@@ -35,8 +33,7 @@ export const TopNavigationBar = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const platformLogo = usePlatformLogo();
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const mainNavItems = [
@@ -57,22 +54,6 @@ export const TopNavigationBar = () => {
     },
     { label: t('navigation.settings', 'Paramètres'), path: '/dashboard/settings', icon: Settings },
   ];
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: t('auth.signOutSuccess', 'Déconnexion réussie'),
-        description: t('auth.signOutSuccessDescription', 'Vous avez été déconnecté avec succès.'),
-      });
-    } catch (_error) {
-      toast({
-        title: t('common.error', 'Erreur'),
-        description: t('auth.signOutError', 'Une erreur est survenue lors de la déconnexion.'),
-        variant: 'destructive',
-      });
-    }
-  };
 
   const isActive = (path: string) => {
     if (path === '/dashboard') {
@@ -164,12 +145,7 @@ export const TopNavigationBar = () => {
                       </span>
                       <ThemeSelectorCompact variant="select" />
                     </div>
-                    <div>
-                      <span className="text-sm font-medium mb-2 block">
-                        {t('common.language', 'Langue')}
-                      </span>
-                      <LanguageSwitcher variant="outline" showLabel={true} className="w-full" />
-                    </div>
+                    <UserUtilityActions variant="floating" className="w-full justify-between" />
                   </div>
                 </div>
               </SheetContent>
@@ -205,9 +181,7 @@ export const TopNavigationBar = () => {
           <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 ml-auto">
             <NotificationBell />
             <ThemeSelectorCompact variant="nav" className="hidden sm:inline-flex" />
-            <div className="hidden md:block">
-              <LanguageSwitcher display="nav" />
-            </div>
+            <UserUtilityActions variant="topnav" />
             <div className="hidden xl:flex shrink-0">
               <LoyaltyBadge display="nav" />
             </div>
@@ -253,16 +227,6 @@ export const TopNavigationBar = () => {
                       <Settings className="h-5 w-5" />
                       <span>{t('navigation.settings', 'Paramètres')}</span>
                     </NavLink>
-                  </div>
-                  <div className="border-t pt-4">
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer w-full text-left"
-                    >
-                      <LogOut className="h-5 w-5" />
-                      <span>{t('auth.signOut', 'Déconnexion')}</span>
-                    </button>
                   </div>
                 </div>
               </SheetContent>

@@ -11,5 +11,6 @@ export { BaseContextSidebar } from './BaseContextSidebar';
 export type { ContextQuickNavItem } from './BaseContextSidebar';
 export { ContextSidebarNavItem } from './ContextSidebarNavItem';
 export { ConfigContextSidebar, SectionContextSidebar } from './SectionContextSidebar';
+export { UserUtilityActions } from './UserUtilityActions';
 export { MainLayout } from './MainLayout';
 export type { LayoutType } from './MainLayout';

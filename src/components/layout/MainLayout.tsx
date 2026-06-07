@@ -178,14 +178,14 @@ export const MainLayout = ({ children, layoutType, showTopNav = true }: MainLayo
               - Quand une sidebar contextuelle est présente (produits, commandes, inventaire, etc.) :
                 on ne l'affiche pas sur desktop pour éviter une double colonne vide, mais on le rend
                 toujours sur mobile pour que le Sheet fonctionne. */}
-          {!hasFixedSidebar && <AppSidebar />}
+          {!hasFixedSidebar && <AppSidebar hideUtilityActions={showTopNav} />}
 
           {/* AppSidebar uniquement pour mobile lorsqu'une sidebar contextuelle est présente.
               Sur mobile, le composant Sidebar bascule automatiquement en Sheet,
               et ce wrapper est masqué sur desktop pour ne pas réserver d'espace supplémentaire. */}
           {hasFixedSidebar && (
             <div className="md:hidden">
-              <AppSidebar />
+              <AppSidebar hideUtilityActions={showTopNav} />
             </div>
           )}
 

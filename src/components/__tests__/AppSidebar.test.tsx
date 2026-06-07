@@ -64,11 +64,16 @@ vi.mock('@/components/sidebar/SidebarNavCommandPalette', () => ({
   SidebarNavCommandPalette: () => null,
 }));
 
-vi.mock('@/components/landing/premium/PremiumLangSwitcher', () => ({
-  PremiumLangSwitcher: () => (
-    <button type="button" aria-label="Langue : Français">
-      FR
-    </button>
+vi.mock('@/components/layout/UserUtilityActions', () => ({
+  UserUtilityActions: () => (
+    <div>
+      <button type="button" aria-label="Langue : Français">
+        FR
+      </button>
+      <button type="button" aria-label="Déconnexion">
+        Déconnexion
+      </button>
+    </div>
   ),
 }));
 
@@ -125,6 +130,7 @@ describe('AppSidebar', () => {
     vi.mocked(AuthContext.useAuth).mockReturnValue({
       user: mockUser,
       loading: false,
+      signOut: vi.fn(),
     } as ReturnType<typeof AuthContext.useAuth>);
 
     vi.mocked(AdminHook.useAdmin).mockReturnValue({
@@ -215,7 +221,7 @@ describe('AppSidebar', () => {
     expect(await screen.findByText(/administration/i)).toBeInTheDocument();
   });
 
-  it('should display language switcher in footer', async () => {
+  it('should display language switcher in utility bar', async () => {
     renderAppSidebar();
 
     expect(await screen.findByLabelText(/^Langue :/i)).toBeInTheDocument();
