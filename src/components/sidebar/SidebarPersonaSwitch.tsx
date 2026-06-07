@@ -1,4 +1,5 @@
 import { Store, User, Shield } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { SidebarPersona } from '@/config/navigation.types';
 
@@ -9,25 +10,39 @@ type SidebarPersonaSwitchProps = {
   onPersonaChange: (persona: SidebarPersona) => void;
 };
 
-const PERSONAS: {
-  id: SidebarPersona;
-  label: string;
-  shortLabel: string;
-  icon: typeof Store;
-  adminOnly?: boolean;
-}[] = [
-  { id: 'seller', label: 'Vendre', shortLabel: 'V', icon: Store },
-  { id: 'buyer', label: 'Acheter', shortLabel: 'A', icon: User },
-  { id: 'admin', label: 'Admin', shortLabel: 'Ad', icon: Shield, adminOnly: true },
-];
-
 export function SidebarPersonaSwitch({
   persona,
   isAdmin,
   isCollapsed,
   onPersonaChange,
 }: SidebarPersonaSwitchProps) {
-  const options = PERSONAS.filter(p => !p.adminOnly || isAdmin);
+  const { t } = useTranslation();
+
+  const options: {
+    id: SidebarPersona;
+    labelKey: string;
+    icon: typeof Store;
+    adminOnly?: boolean;
+  }[] = [
+    {
+      id: 'seller',
+      labelKey: 'sidebar.chrome.personaSeller',
+      icon: Store,
+    },
+    {
+      id: 'buyer',
+      labelKey: 'sidebar.chrome.personaBuyer',
+      icon: User,
+    },
+    {
+      id: 'admin',
+      labelKey: 'sidebar.chrome.personaAdmin',
+      icon: Shield,
+      adminOnly: true,
+    },
+  ];
+
+  const visibleOptions = options.filter(p => !p.adminOnly || isAdmin);
 
   return (
     <div
@@ -38,18 +53,19 @@ export function SidebarPersonaSwitch({
           : 'flex rounded-lg border border-white/12 p-0.5 bg-white/[0.04]'
       )}
       role="tablist"
-      aria-label="Mode de navigation"
+      aria-label={t('sidebar.chrome.personaNavMode')}
     >
-      {options.map(option => {
+      {visibleOptions.map(option => {
         const Icon = option.icon;
         const isActive = persona === option.id;
+        const label = t(option.labelKey);
         return (
           <button
             key={option.id}
             type="button"
             role="tab"
             aria-selected={isActive}
-            title={option.label}
+            title={label}
             onClick={() => onPersonaChange(option.id)}
             className={cn(
               'flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-all duration-200',
@@ -60,8 +76,8 @@ export function SidebarPersonaSwitch({
             )}
           >
             <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {!isCollapsed && <span>{option.label}</span>}
-            {isCollapsed && <span className="sr-only">{option.label}</span>}
+            {!isCollapsed && <span>{label}</span>}
+            {isCollapsed && <span className="sr-only">{label}</span>}
           </button>
         );
       })}

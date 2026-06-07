@@ -3,7 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -122,16 +122,16 @@ export default function PaymentConnectionsPage() {
 
   if (storeLoading || !store) {
     return (
-      <MainLayout layoutType="finance">
+      <AppPageShell layoutType="finance">
         <div className="container mx-auto flex min-h-[40vh] items-center justify-center p-4 md:p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="finance">
+    <AppPageShell layoutType="finance">
       <div className="container mx-auto overflow-x-hidden p-4 md:p-8 max-w-4xl">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold">Connexions paiement</h1>
@@ -200,6 +200,6 @@ export default function PaymentConnectionsPage() {
           aria-label="Rafraîchir"
         />
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 }

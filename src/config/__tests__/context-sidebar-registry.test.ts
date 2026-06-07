@@ -3,6 +3,7 @@ import {
   CONTEXT_SIDEBAR_LAYOUT_TYPES,
   LAYOUT_CONTEXT_SIDEBAR_MAP,
   getContextSidebarConfigId,
+  hasContextSidebarForPath,
 } from '@/config/contextSidebar.registry';
 import { CONTEXT_SIDEBAR_CONFIGS } from '@/config/navigation.context';
 
@@ -23,5 +24,11 @@ describe('context sidebar registry', () => {
   it('returns null for layouts without a context sidebar', () => {
     expect(getContextSidebarConfigId('default')).toBeNull();
     expect(getContextSidebarConfigId('minimal')).toBeNull();
+  });
+
+  it('detects context sidebar routes by pathname', () => {
+    expect(hasContextSidebarForPath('/dashboard/products')).toBe(true);
+    expect(hasContextSidebarForPath('/dashboard')).toBe(false);
+    expect(hasContextSidebarForPath('/dashboard/settings')).toBe(true);
   });
 });

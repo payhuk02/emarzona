@@ -5,13 +5,15 @@
  */
 
 import { NavLink, useLocation } from 'react-router-dom';
-import { LucideIcon } from 'lucide-react';
+import type { ComponentType } from 'react';
 import { cn } from '@/lib/utils';
+
+type ContextNavIcon = ComponentType<{ className?: string }>;
 
 interface ContextSidebarNavItemProps {
   label: string;
   path: string;
-  icon: LucideIcon;
+  icon: ContextNavIcon;
   isActive?: boolean;
   onClick?: () => void;
   horizontal?: boolean; // Mode horizontal pour mobile

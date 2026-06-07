@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Key, Download, BarChart3, Settings } from 'lucide-react';
@@ -22,7 +22,7 @@ export default function CustomerDigitalPortal() {
   const headerRef = useScrollAnimation<HTMLDivElement>();
 
   return (
-    <MainLayout layoutType="digital-portal">
+    <AppPageShell layoutType="digital-portal">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div
@@ -114,12 +114,6 @@ export default function CustomerDigitalPortal() {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-

@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -133,18 +133,18 @@ const PaymentMethods = () => {
 
   if (storeLoading) {
     return (
-      <MainLayout layoutType="finance">
+      <AppPageShell layoutType="finance">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-64 w-full" />
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   if (!store) {
     return (
-      <MainLayout layoutType="finance">
+      <AppPageShell layoutType="finance">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
           <Alert variant="destructive" className="border-border/50 bg-card/50 backdrop-blur-sm">
             <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -153,12 +153,12 @@ const PaymentMethods = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="finance">
+    <AppPageShell layoutType="finance">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -334,7 +334,7 @@ const PaymentMethods = () => {
           onSubmit={handleSubmit}
         />
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };
 

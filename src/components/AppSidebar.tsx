@@ -18,6 +18,7 @@ import { useSidebarNavigation } from '@/hooks/useSidebarNavigation';
 import { recordNavClick, sortEntriesByNavFrequency } from '@/hooks/useNavigationAnalytics';
 import { useState, useEffect, useMemo } from 'react';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Sidebar,
   SidebarContent,
@@ -140,6 +141,7 @@ const LogoImageWithFallback = ({ src, className }: { src: string; className?: st
 };
 
 export function AppSidebar() {
+  const { t } = useTranslation();
   const { state } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
@@ -300,7 +302,7 @@ export function AppSidebar() {
   );
 
   const collapseAllSections = () => {
-    setCollapsedSections(activeSections.map(s => s.label));
+    setCollapsedSections(activeSections.map(s => s.sectionKey));
   };
 
   const expandAllSections = () => {
@@ -311,10 +313,13 @@ export function AppSidebar() {
     const feature = requiredPhysicalFeatureForPath(getNavItemPath(itemUrl));
     const requiredPlan = feature
       ? requiredPlanForFeature(feature).replace('physical_', '').toUpperCase()
-      : 'SUPÉRIEUR';
+      : t('sidebar.chrome.planLockFallbackPlan');
     toast({
-      title: 'Fonctionnalité verrouillée',
-      description: `${itemTitle} requiert le plan ${requiredPlan}.`,
+      title: t('sidebar.context.planLockTitle'),
+      description: t('sidebar.context.planLockRequiresPlan', {
+        item: itemTitle,
+        plan: requiredPlan,
+      }),
     });
     navigate('/dashboard/billing/physical', {
       state: { blockedPath: getNavItemPath(itemUrl), requiredFeature: feature, requiredPlan },
@@ -338,7 +343,7 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             className="flex items-center gap-1.5 group transition-opacity duration-200 hover:opacity-90 shrink-0"
-            aria-label="Retour au tableau de bord Emarzona"
+            aria-label={t('sidebar.chrome.backToDashboard')}
           >
             {platformLogo ? (
               <LogoImageWithFallback
@@ -371,7 +376,7 @@ export function AppSidebar() {
               size="icon"
               className="h-8 w-8 text-white hover:bg-white/10 shrink-0"
               onClick={() => setCommandOpen(true)}
-              aria-label="Rechercher (Ctrl+K)"
+              aria-label={t('sidebar.chrome.searchAriaLabelCollapsed')}
             >
               <Search className="h-4 w-4" />
             </Button>
@@ -380,10 +385,12 @@ export function AppSidebar() {
               type="button"
               onClick={() => setCommandOpen(true)}
               className="app-sidebar-command-trigger flex flex-1 items-center gap-2 h-9 rounded-lg border border-white/12 bg-white/[0.05] px-2.5 text-left text-sm text-white/70 hover:border-[#d4af37]/35 hover:bg-white/[0.08] hover:text-white transition-all duration-200 min-w-0"
-              aria-label="Ouvrir la palette de navigation (Ctrl+K)"
+              aria-label={t('sidebar.chrome.searchAriaLabel')}
             >
               <Search className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
-              <span className="flex-1 truncate text-xs">Rechercher…</span>
+              <span className="flex-1 truncate text-xs">
+                {t('sidebar.chrome.searchPlaceholder')}
+              </span>
               <kbd className="hidden lg:inline-flex h-5 items-center rounded border border-white/15 bg-white/5 px-1.5 text-[10px] font-medium text-white/50">
                 Ctrl+K
               </kbd>
@@ -406,8 +413,8 @@ export function AppSidebar() {
               className="h-7 px-2 text-xs text-white/90 hover:bg-white/10 hover:text-white"
             >
               {currentNavItem && pinnedUrls.includes(currentNavItem.url)
-                ? 'Désépingler'
-                : 'Épingler'}
+                ? t('sidebar.context.unpin')
+                : t('sidebar.context.pin')}
             </Button>
             <div className="flex gap-1">
               <Button
@@ -416,7 +423,7 @@ export function AppSidebar() {
                 onClick={expandAllSections}
                 className="h-7 px-2 text-[10px] text-white/70 hover:text-white hover:bg-white/10"
               >
-                Tout ouvrir
+                {t('sidebar.chrome.expandAll')}
               </Button>
               <Button
                 variant="ghost"
@@ -424,7 +431,7 @@ export function AppSidebar() {
                 onClick={collapseAllSections}
                 className="h-7 px-2 text-[10px] text-white/70 hover:text-white hover:bg-white/10"
               >
-                Tout replier
+                {t('sidebar.chrome.collapseAll')}
               </Button>
             </div>
           </div>
@@ -458,7 +465,7 @@ export function AppSidebar() {
           {pinnedItems.length > 0 && (
             <div>
               <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1">
-                Accès épinglés
+                {t('sidebar.chrome.pinnedAccess')}
               </p>
               <div className="space-y-1">
                 {pinnedItems.slice(0, 5).map(item => (
@@ -480,7 +487,7 @@ export function AppSidebar() {
             <div>
               <p className="text-[11px] uppercase tracking-wide text-white font-semibold mb-1 flex items-center gap-1">
                 <Clock3 className="h-3 w-3" />
-                Récents
+                {t('sidebar.context.recent')}
               </p>
               <div className="space-y-1">
                 {recentItems.slice(0, MAX_RECENT_ITEMS).map(item => (
@@ -562,7 +569,9 @@ export function AppSidebar() {
                                 className="ml-6 mt-1 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
                                 aria-expanded={storesMenuOpen}
                               >
-                                <span>Mes boutiques ({stores.length})</span>
+                                <span>
+                                  {t('sidebar.chrome.myStores', { count: stores.length })}
+                                </span>
                                 {storesMenuOpen ? (
                                   <ChevronDown className="h-3.5 w-3.5 shrink-0" />
                                 ) : (
@@ -587,8 +596,10 @@ export function AppSidebar() {
                                         switchStore(store.id);
                                         navigate('/dashboard');
                                         toast({
-                                          title: 'Boutique changée',
-                                          description: `Vous consultez maintenant les données de "${store.name}"`,
+                                          title: t('sidebar.chrome.storeChangedTitle'),
+                                          description: t('sidebar.chrome.storeChangedDescription', {
+                                            name: store.name,
+                                          }),
                                         });
                                       }}
                                       className={`w-full justify-start transition-all duration-200 opacity-90 ${
@@ -611,7 +622,7 @@ export function AppSidebar() {
                                       className={`w-full justify-start ${NAV_LINK_INACTIVE} transition-all duration-200`}
                                     >
                                       <Plus className="h-3 w-3 mr-2" />
-                                      <span>Créer une boutique</span>
+                                      <span>{t('sidebar.chrome.createStore')}</span>
                                     </Button>
                                   )}
                                 </div>
@@ -628,7 +639,7 @@ export function AppSidebar() {
                         return (
                           <SidebarMenuItem key={`${section.label}-${item.title}-${item.url}`}>
                             <SidebarMenuButton
-                              tooltip={`${item.title} — plan supérieur requis`}
+                              tooltip={t('sidebar.chrome.planLockTooltip', { item: item.title })}
                               onClick={() => handleLockedNavClick(item.title, item.url)}
                               className={`${NAV_LINK_INACTIVE} opacity-75 transition-all duration-200 group relative flex items-center`}
                             >
@@ -643,7 +654,7 @@ export function AppSidebar() {
                                 </>
                               ) : (
                                 <span className="sr-only">
-                                  {item.title} — plan supérieur requis
+                                  {t('sidebar.chrome.planLockTooltip', { item: item.title })}
                                 </span>
                               )}
                             </SidebarMenuButton>

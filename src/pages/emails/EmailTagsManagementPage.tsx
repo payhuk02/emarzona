@@ -6,7 +6,7 @@
 
 import { EmailTagsDashboard } from '@/components/email/EmailTagsDashboard';
 import { useStoreContext } from '@/contexts/StoreContext';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function EmailTagsManagementPage() {
@@ -14,7 +14,7 @@ export default function EmailTagsManagementPage() {
 
   if (!selectedStore) {
     return (
-      <MainLayout layoutType="emails">
+      <AppPageShell layoutType="emails">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardContent className="p-6 sm:p-8 md:p-12 text-center">
@@ -22,22 +22,15 @@ export default function EmailTagsManagementPage() {
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="emails">
+    <AppPageShell layoutType="emails">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         <EmailTagsDashboard storeId={selectedStore.id} />
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-
-

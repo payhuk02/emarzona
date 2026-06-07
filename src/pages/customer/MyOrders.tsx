@@ -12,7 +12,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -144,7 +144,7 @@ export default function MyOrders() {
     queryFn: async (): Promise<Order[]> => {
       if (!user?.id) return [];
 
-      let  query= supabase
+      let query = supabase
         .from('orders')
         .select(CUSTOMER_ORDER_FIELDS)
         .eq('customer_id', user.id)
@@ -162,7 +162,7 @@ export default function MyOrders() {
       // Fetch order items for each order
       const ordersWithItems = await Promise.all(
         (ordersData || []).map(async order => {
-          let  itemsQuery= supabase
+          let itemsQuery = supabase
             .from('order_items')
             .select(ORDER_ITEM_FIELDS)
             .eq('order_id', order.id);
@@ -290,7 +290,7 @@ export default function MyOrders() {
   );
 
   const getStatusBadge = (status: string, paymentStatus: string) => {
-    const  statusMap: Record<
+    const statusMap: Record<
       string,
       { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
     > = {
@@ -325,7 +325,7 @@ export default function MyOrders() {
 
   if (isLoading) {
     return (
-      <MainLayout layoutType="account">
+      <AppPageShell layoutType="account">
         <div className="container mx-auto p-6 space-y-6">
           <div className="hidden lg:block space-y-2">
             <Skeleton className="h-10 w-64" />
@@ -333,12 +333,12 @@ export default function MyOrders() {
           </div>
           <Skeleton className="h-96" />
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="account">
+    <AppPageShell layoutType="account">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div
@@ -779,12 +779,6 @@ export default function MyOrders() {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-

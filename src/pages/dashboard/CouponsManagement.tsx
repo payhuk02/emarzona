@@ -87,7 +87,7 @@ import { useQuery } from '@tanstack/react-query';
 import { logger } from '@/lib/logger';
 import { CreatePromotionDialog } from '@/components/promotions/CreatePromotionDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 
 interface PromotionUsage {
   id: string;
@@ -276,7 +276,7 @@ export default function CouponsManagement() {
 
   if (storeLoading || promotionsLoading) {
     return (
-      <MainLayout layoutType="promotions">
+      <AppPageShell layoutType="promotions">
         <div className="container mx-auto p-4 lg:p-6 space-y-6">
           <Skeleton className="h-12 w-full" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -286,12 +286,12 @@ export default function CouponsManagement() {
           </div>
           <Skeleton className="h-96 w-full" />
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="promotions">
+    <AppPageShell layoutType="promotions">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Annonce pour screen readers - État de chargement */}
         <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
@@ -799,6 +799,6 @@ export default function CouponsManagement() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 }

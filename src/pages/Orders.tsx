@@ -7,7 +7,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -153,7 +153,7 @@ const Orders = () => {
         paymentStatusFilter === 'all' || order.payment_status === paymentStatusFilter;
 
       // Date range filter
-      let  matchesDateRange= true;
+      let matchesDateRange = true;
       if (dateRange?.from && dateRange?.to) {
         const orderDate = new Date(order.created_at);
         matchesDateRange = isWithinInterval(orderDate, {
@@ -206,7 +206,7 @@ const Orders = () => {
           count: filteredOrders.length,
         }),
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error("Erreur lors de l'export CSV", error);
       toast({
         title: t('orders.toast.error', '❌ Erreur'),
@@ -299,19 +299,19 @@ const Orders = () => {
   // Loading state
   if (storeLoading) {
     return (
-      <MainLayout layoutType="orders">
+      <AppPageShell layoutType="orders">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Skeleton className="h-8 w-64 mb-6" />
           <Skeleton className="h-96 w-full" />
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   // No store state
   if (!store) {
     return (
-      <MainLayout layoutType="orders">
+      <AppPageShell layoutType="orders">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <CardHeader>
@@ -333,14 +333,14 @@ const Orders = () => {
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <MainLayout layoutType="orders">
+      <AppPageShell layoutType="orders">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-red-500/50 bg-red-50 dark:bg-red-950/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
             <CardHeader>
@@ -358,12 +358,12 @@ const Orders = () => {
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="orders">
+    <AppPageShell layoutType="orders">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Responsive & Animated */}
         <div
@@ -757,14 +757,8 @@ const Orders = () => {
           storeId={store.id}
         />
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };
 
 export default Orders;
-
-
-
-
-
-

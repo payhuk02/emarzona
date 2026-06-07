@@ -1,7 +1,8 @@
-import type { LayoutType } from '@/components/layout/MainLayout';
+import type { LayoutType } from '@/components/layout/layout.types';
 import type { ContextSidebarConfigId } from '@/config/navigation.context';
+import { detectLayoutType } from '@/config/layoutTypeDetection';
 
-/** Maps MainLayout layout types to context sidebar configs (Phase 7) */
+/** Maps layout types to context sidebar configs */
 export const LAYOUT_CONTEXT_SIDEBAR_MAP: Partial<Record<LayoutType, ContextSidebarConfigId>> = {
   settings: 'settings',
   emails: 'emails',
@@ -29,4 +30,9 @@ export const CONTEXT_SIDEBAR_LAYOUT_TYPES = Object.keys(LAYOUT_CONTEXT_SIDEBAR_M
 
 export function getContextSidebarConfigId(layoutType: LayoutType): ContextSidebarConfigId | null {
   return LAYOUT_CONTEXT_SIDEBAR_MAP[layoutType] ?? null;
+}
+
+/** True when the route uses a context sidebar (mobile bottom nav). */
+export function hasContextSidebarForPath(pathname: string): boolean {
+  return getContextSidebarConfigId(detectLayoutType(pathname)) !== null;
 }

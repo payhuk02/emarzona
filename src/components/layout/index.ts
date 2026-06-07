@@ -15,5 +15,5 @@ export { AppPageShell } from './AppPageShell';
 export type { AppPageShellProps } from './AppPageShell';
 export { UtilityBarHeader } from './UtilityBarHeader';
 export { UserUtilityActions } from './UserUtilityActions';
+export type { LayoutType } from './layout.types';
 export { MainLayout } from './MainLayout';
-export type { LayoutType } from './MainLayout';

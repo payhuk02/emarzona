@@ -27,7 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import type { NotificationPreferences } from '@/types/notifications';
 import { EmailPreferencesSettings } from '@/components/settings/EmailPreferencesSettings';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 
 const NotificationSettings = () => {
   const { toast } = useToast();
@@ -53,7 +53,7 @@ const NotificationSettings = () => {
 
   if (isLoading || !localPrefs) {
     return (
-      <MainLayout layoutType="settings">
+      <AppPageShell layoutType="settings">
         <div className="container mx-auto py-8 max-w-4xl">
           <Skeleton className="h-12 w-64 mb-6" />
           <div className="space-y-4">
@@ -62,7 +62,7 @@ const NotificationSettings = () => {
             ))}
           </div>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
@@ -92,7 +92,7 @@ const NotificationSettings = () => {
   };
 
   return (
-    <MainLayout layoutType="settings">
+    <AppPageShell layoutType="settings">
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
@@ -362,7 +362,7 @@ const NotificationSettings = () => {
           </Button>
         </div>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };
 

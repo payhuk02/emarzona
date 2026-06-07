@@ -25,7 +25,7 @@ import { CommunityPostForm } from '@/components/community/CommunityPostForm';
 import { Users, MessageSquare, Plus, Search, LogIn } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 
 export default function CommunityPage() {
   const { user } = useAuth();
@@ -80,7 +80,7 @@ export default function CommunityPage() {
         url="https://www.emarzona.com/community"
         canonical="https://www.emarzona.com/community"
       />
-      <MainLayout>
+      <AppPageShell>
         <div className="container mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
           <header className="border-b bg-card/95 backdrop-blur-sm rounded-lg">
@@ -275,7 +275,7 @@ export default function CommunityPage() {
             </DialogContent>
           </Dialog>
         </div>
-      </MainLayout>
+      </AppPageShell>
     </>
   );
 }

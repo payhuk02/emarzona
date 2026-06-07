@@ -1,4 +1,4 @@
-import type { LayoutType } from '@/components/layout/MainLayout';
+import type { LayoutType } from '@/components/layout/layout.types';
 
 export type LayoutTypeRule = {
   layoutType: LayoutType;

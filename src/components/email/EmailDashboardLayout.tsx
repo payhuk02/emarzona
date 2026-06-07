@@ -1,11 +1,11 @@
 /**
  * Layout commun pour les pages /dashboard/emails/*
- * Utilise MainLayout + EmailsSidebar (navigation email dédiée)
+ * Utilise AppPageShell + sidebar contextuelle emails
  */
 
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useStore } from '@/hooks/useStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -34,7 +34,7 @@ export const EmailDashboardLayout = ({
 
   if (!store) {
     return (
-      <MainLayout layoutType="emails">
+      <AppPageShell layoutType="emails">
         <div className="container mx-auto p-3 sm:p-4 lg:p-6">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardContent className="p-6 sm:p-8 md:p-12 text-center">
@@ -42,12 +42,12 @@ export const EmailDashboardLayout = ({
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="emails">
+    <AppPageShell layoutType="emails">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         <div
           ref={headerRef}
@@ -86,6 +86,6 @@ export const EmailDashboardLayout = ({
 
         {children}
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };

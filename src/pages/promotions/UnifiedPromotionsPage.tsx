@@ -13,13 +13,13 @@ import { PromotionsManager } from '@/components/physical/promotions/PromotionsMa
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Tag, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 
-export const UnifiedPromotionsPage : React.FC = () => {
+export const UnifiedPromotionsPage: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <MainLayout layoutType="promotions">
+    <AppPageShell layoutType="promotions">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="space-y-2">
@@ -115,13 +115,6 @@ export const UnifiedPromotionsPage : React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };
-
-
-
-
-
-
-

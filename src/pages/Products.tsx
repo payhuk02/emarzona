@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -707,7 +707,7 @@ const Products = () => {
 
   if (storeLoading) {
     return (
-      <MainLayout layoutType="products">
+      <AppPageShell layoutType="products">
         <div
           className="flex items-center justify-center min-h-[60vh]"
           role="status"
@@ -722,13 +722,13 @@ const Products = () => {
             <p className="mt-2 text-muted-foreground">{t('products.loadingProducts')}</p>
           </div>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   if (!store) {
     return (
-      <MainLayout layoutType="products">
+      <AppPageShell layoutType="products">
         <div className="flex items-center justify-center min-h-[60vh]">
           <Card className="max-w-md">
             <CardHeader className="text-center">
@@ -747,12 +747,12 @@ const Products = () => {
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="products">
+    <AppPageShell layoutType="products">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header avec animation - Style Inventaire et Mes Cours */}
         <div
@@ -1438,7 +1438,7 @@ const Products = () => {
           </DialogContent>
         </Dialog>
       )}
-    </MainLayout>
+    </AppPageShell>
   );
 };
 

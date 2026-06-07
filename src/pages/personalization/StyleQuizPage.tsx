@@ -16,7 +16,7 @@ import { useStylePreferences } from '@/hooks/useStylePreferences';
 import { useProductRecommendations } from '@/hooks/useProductRecommendations';
 import { logger } from '@/lib/logger';
 import type { Database } from '@/integrations/supabase/types';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 
 type Product = Database['public']['Tables']['products']['Row'] & {
   store?: Database['public']['Tables']['stores']['Row'];
@@ -104,7 +104,7 @@ const StyleQuizPage: React.FC = () => {
 
   if (quizCompleted && showRecommendations) {
     return (
-      <MainLayout>
+      <AppPageShell>
         <div className="bg-gradient-to-br from-background via-background to-accent/10">
           <div className="container mx-auto px-4 py-8">
             {/* Header avec profil de style */}
@@ -230,13 +230,13 @@ const StyleQuizPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   if (isLoadingRecommendations) {
     return (
-      <MainLayout>
+      <AppPageShell>
         <div className="flex min-h-[50vh] items-center justify-center bg-gradient-to-br from-background via-background to-accent/10">
           <Card className="max-w-md w-full mx-4">
             <CardContent className="p-8 text-center">
@@ -248,12 +248,12 @@ const StyleQuizPage: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout>
+    <AppPageShell>
       <div className="bg-gradient-to-br from-background via-background to-accent/10 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
@@ -310,7 +310,7 @@ const StyleQuizPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };
 

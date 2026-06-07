@@ -3,7 +3,7 @@
  * Gère desktop (fixed) et mobile (drawer + barre horizontale en bas) avec animations fluides
  */
 
-import { ReactNode, useMemo, useEffect, useState } from 'react';
+import { ReactNode, useMemo, useEffect, useState, type ComponentType } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Menu, Search, Clock3, Pin, ChevronDown } from 'lucide-react';
@@ -14,12 +14,13 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useNavigate } from 'react-router-dom';
 import { logger } from '@/lib/logger';
-import type { LucideIcon } from 'lucide-react';
+
+type ContextNavIcon = ComponentType<{ className?: string }>;
 
 export type ContextQuickNavItem = {
   label: string;
   path: string;
-  icon: LucideIcon;
+  icon: ContextNavIcon;
   isActive?: boolean;
 };
 
@@ -128,7 +129,7 @@ export const BaseContextSidebar = ({
   const desktopSidebar = (
     <aside
       className={cn(
-        'app-context-sidebar hidden md:block fixed left-0 top-16 w-[15rem] lg:w-60 xl:w-64 h-[calc(100vh-4rem)]',
+        'app-context-sidebar hidden md:flex md:flex-col shrink-0 w-[15rem] lg:w-60 xl:w-64 min-h-screen sticky top-0',
         'border-r border-white/10',
         'text-white',
         'overflow-y-auto overflow-x-hidden z-40',
@@ -276,7 +277,7 @@ export const BaseContextSidebar = ({
       size="sm"
       onClick={() => setOpenMobile(true)}
       className={cn(
-        'md:hidden fixed top-16 left-2 z-[60]',
+        'md:hidden fixed top-3 left-2 z-[60]',
         'h-10 w-10 p-0 rounded-lg',
         'bg-background border border-border',
         'text-foreground',

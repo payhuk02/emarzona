@@ -4,14 +4,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tag, TrendingUp, Percent, Users, DollarSign, Loader2 } from 'lucide-react';
 import { useStore } from '@/hooks/useStore';
 import { usePromotions } from '@/hooks/usePromotions';
 import { useTranslation } from 'react-i18next';
 
-export const PromotionsStatsPage : React.FC = () => {
+export const PromotionsStatsPage: React.FC = () => {
   const { t } = useTranslation();
   const { store, loading: storeLoading } = useStore();
   const { data: promotionsData, isLoading: promotionsLoading } = usePromotions({
@@ -61,7 +61,7 @@ export const PromotionsStatsPage : React.FC = () => {
   const isLoading = storeLoading || promotionsLoading;
 
   return (
-    <MainLayout layoutType="promotions">
+    <AppPageShell layoutType="promotions">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -196,13 +196,6 @@ export const PromotionsStatsPage : React.FC = () => {
           </>
         )}
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 };
-
-
-
-
-
-
-

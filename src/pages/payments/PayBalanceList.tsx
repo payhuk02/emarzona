@@ -8,7 +8,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { MainLayout } from '@/components/layout';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -370,7 +370,7 @@ export default function PayBalanceList() {
 
   if (isLoading) {
     return (
-      <MainLayout layoutType="finance">
+      <AppPageShell layoutType="finance">
         <div className="container mx-auto py-8">
           <div className="flex items-center justify-center h-[40vh]">
             <div className="text-center space-y-4">
@@ -379,13 +379,13 @@ export default function PayBalanceList() {
             </div>
           </div>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   if (error) {
     return (
-      <MainLayout layoutType="finance">
+      <AppPageShell layoutType="finance">
         <div className="container mx-auto py-8">
           <div className="flex items-center justify-center min-h-[60vh]">
             <Card className="max-w-md">
@@ -399,12 +399,12 @@ export default function PayBalanceList() {
             </Card>
           </div>
         </div>
-      </MainLayout>
+      </AppPageShell>
     );
   }
 
   return (
-    <MainLayout layoutType="finance">
+    <AppPageShell layoutType="finance">
       <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div
@@ -717,6 +717,6 @@ export default function PayBalanceList() {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+    </AppPageShell>
   );
 }

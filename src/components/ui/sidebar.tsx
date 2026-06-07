@@ -19,6 +19,19 @@ const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
+function readSidebarCookie(defaultOpen: boolean): boolean {
+  if (typeof document === 'undefined') return defaultOpen;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${SIDEBAR_COOKIE_NAME}=([^;]*)`));
+  if (!match) return defaultOpen;
+  return match[1] === 'true';
+}
+
+function writeSidebarCookie(openState: boolean) {
+  const secure =
+    typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
+}
+
 type SidebarContext = {
   state: 'expanded' | 'collapsed';
   open: boolean;
@@ -62,10 +75,11 @@ const SidebarProvider = React.forwardRef<
   ) => {
     const isMobile = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
+    const initialOpen = React.useMemo(() => readSidebarCookie(defaultOpen), [defaultOpen]);
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
-    const [_open, _setOpen] = React.useState(defaultOpen);
+    const [_open, _setOpen] = React.useState(initialOpen);
     const open = openProp ?? _open;
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
@@ -77,10 +91,16 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+        writeSidebarCookie(openState);
       },
       [setOpenProp, open]
     );
+
+    React.useEffect(() => {
+      const handleCloseMobile = () => setOpenMobile(false);
+      window.addEventListener('close-mobile-sidebar', handleCloseMobile);
+      return () => window.removeEventListener('close-mobile-sidebar', handleCloseMobile);
+    }, []);
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
