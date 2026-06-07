@@ -113,8 +113,9 @@ export const CookieConsentBanner = () => {
                     personnaliser.{' '}
                     <a
                       href="/legal/cookies"
-                      className="text-blue-600 hover:underline"
+                      className="font-medium text-blue-800 underline decoration-blue-800/80 hover:text-blue-900"
                       target="_blank"
+                      rel="noopener noreferrer"
                     >
                       En savoir plus
                     </a>

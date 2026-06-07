@@ -8,8 +8,6 @@ import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from '@/components/icons';
 import { Loader2 } from 'lucide-react';
-import { MobileDropdown } from '@/components/ui/mobile-dropdown';
-import { SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { AVAILABLE_LANGUAGES, type LanguageCode } from '@/i18n/config';
 import { cn } from '@/lib/utils';
@@ -117,21 +115,6 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     </Button>
   );
 
-  // For desktop: use a span to avoid <button> inside <button> (SelectTrigger already renders a button)
-  const desktopTriggerContent = (
-    <span className={cn('gap-2 inline-flex items-center', buttonClassName)}>
-      {isChanging ? (
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-      ) : (
-        <Globe className="h-4 w-4" aria-hidden="true" />
-      )}
-      <span className="text-lg" aria-hidden="true">
-        {currentLanguage.flag}
-      </span>
-      {showLabel && <span className="hidden sm:inline">{currentLanguage.name}</span>}
-    </span>
-  );
-
   const shellBtnClass =
     'h-9 min-h-9 shrink-0 gap-1.5 rounded-lg border-0 bg-transparent px-2 sm:px-2.5 shadow-none text-muted-foreground hover:text-foreground hover:bg-accent/60';
 
@@ -146,6 +129,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             size="sm"
             className={cn(shellBtnClass, buttonClassName)}
             aria-label={`Changer la langue (actuelle : ${currentLanguage.name})`}
+            aria-expanded={open}
+            aria-haspopup="menu"
             disabled={isChanging}
           >
             {isChanging ? (
@@ -198,6 +183,8 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
               buttonClassName
             )}
             aria-label={`Changer la langue (actuelle : ${currentLanguage.name})`}
+            aria-expanded={open}
+            aria-haspopup="menu"
             disabled={isChanging}
           >
             {isChanging ? (
@@ -268,32 +255,50 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     );
   }
 
-  // Desktop / tablette : dropdown classique ancré au trigger
+  // Desktop / tablette : DropdownMenu (évite combobox Select sans aria-expanded sur pages auth)
   return (
-    <MobileDropdown
-      trigger={desktopTriggerContent}
-      onValueChange={value => changeLanguage(value as LanguageCode)}
-      className={className}
-      contentClassName="min-w-[180px]"
-    >
-      {AVAILABLE_LANGUAGES.map(lang => (
-        <SelectItem
-          key={lang.code}
-          value={lang.code}
-          className={cn(
-            'gap-2 cursor-pointer touch-manipulation min-h-[44px]',
-            'select-none',
-            currentLanguage.code === lang.code && 'bg-accent'
-          )}
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant={variant}
+          size="sm"
+          className={cn('gap-2 touch-manipulation', buttonClassName, className)}
+          aria-label={`Changer la langue (actuelle : ${currentLanguage.name})`}
+          aria-expanded={open}
+          aria-haspopup="menu"
+          disabled={isChanging}
         >
-          <span className="text-lg">{lang.flag}</span>
-          <span>{lang.name}</span>
-          {currentLanguage.code === lang.code && (
-            <span className="ml-auto text-xs text-muted-foreground">✓</span>
+          {isChanging ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Globe className="h-4 w-4" aria-hidden="true" />
           )}
-        </SelectItem>
-      ))}
-    </MobileDropdown>
+          <span className="text-lg" aria-hidden="true">
+            {currentLanguage.flag}
+          </span>
+          {showLabel && <span className="hidden sm:inline">{currentLanguage.name}</span>}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[180px]">
+        {AVAILABLE_LANGUAGES.map(lang => (
+          <DropdownMenuItem
+            key={lang.code}
+            onClick={() => changeLanguage(lang.code)}
+            className={cn(
+              'gap-2 cursor-pointer min-h-[44px]',
+              currentLanguage.code === lang.code && 'bg-accent'
+            )}
+          >
+            <span className="text-lg">{lang.flag}</span>
+            <span>{lang.name}</span>
+            {currentLanguage.code === lang.code && (
+              <span className="ml-auto text-xs text-muted-foreground">✓</span>
+            )}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

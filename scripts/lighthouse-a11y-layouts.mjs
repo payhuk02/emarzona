@@ -133,7 +133,9 @@ async function auditRoute(route, hasAuth) {
     skipLink: audits['skip-link']?.score ?? null,
     mainLandmark: audits['landmark-one-main']?.score ?? null,
     ariaValid: audits['aria-valid-attr']?.score ?? null,
+    ariaRequiredAttr: audits['aria-required-attr']?.score ?? null,
     colorContrast: audits['color-contrast']?.score ?? null,
+    linkInTextBlock: audits['link-in-text-block']?.score ?? null,
   };
 
   console.log(`   Score: ${(score * 100).toFixed(0)}/100`);
@@ -141,6 +143,8 @@ async function auditRoute(route, hasAuth) {
   console.log(`   skip-link: ${summary.skipLink === 1 ? '✓' : summary.skipLink ?? 'N/A'}`);
   console.log(`   landmark-one-main: ${summary.mainLandmark === 1 ? '✓' : summary.mainLandmark}`);
   console.log(`   color-contrast: ${summary.colorContrast === 1 ? '✓' : summary.colorContrast}`);
+  console.log(`   aria-required-attr: ${summary.ariaRequiredAttr === 1 ? '✓' : summary.ariaRequiredAttr}`);
+  console.log(`   link-in-text-block: ${summary.linkInTextBlock === 1 ? '✓' : summary.linkInTextBlock}`);
 
   if (route.requiresAuth && hasAuth && redirectedToLogin) {
     throw new Error(`Route ${route.path} redirigée vers login malgré l'authentification`);
@@ -189,6 +193,20 @@ async function main() {
     if (contrastFailed.length) {
       console.error(`\n❌ Contraste insuffisant sur ${contrastFailed.length} route(s)`);
       contrastFailed.forEach(r => console.error(`   - ${r.route}`));
+      process.exit(1);
+    }
+
+    const ariaFailed = results.filter(r => r.ariaRequiredAttr !== 1 && r.ariaRequiredAttr !== null);
+    if (ariaFailed.length) {
+      console.error(`\n❌ Attributs ARIA requis manquants sur ${ariaFailed.length} route(s)`);
+      ariaFailed.forEach(r => console.error(`   - ${r.route}`));
+      process.exit(1);
+    }
+
+    const linkFailed = results.filter(r => r.linkInTextBlock !== 1 && r.linkInTextBlock !== null);
+    if (linkFailed.length) {
+      console.error(`\n❌ Liens indistinguables dans le texte sur ${linkFailed.length} route(s)`);
+      linkFailed.forEach(r => console.error(`   - ${r.route}`));
       process.exit(1);
     }
 

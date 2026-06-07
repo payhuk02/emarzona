@@ -87,7 +87,6 @@ const SelectTrigger = React.forwardRef<
       )}
       aria-label={props['aria-label'] || 'Sélectionner une option'}
       aria-haspopup="listbox"
-      aria-expanded={props['aria-expanded']}
       aria-invalid={hasError}
       aria-describedby={hasError && errorId ? errorId : props['aria-describedby']}
       // Empêcher le zoom automatique sur iOS

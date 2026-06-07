@@ -473,7 +473,7 @@ const Auth = () => {
           <Link
             to="/"
             className="relative inline-flex items-center gap-2 mb-4 sm:mb-6"
-            aria-label="Retour à l'accueil"
+            aria-label={`Emarzona — ${t('common.backToHome', "Retour à l'accueil")}`}
           >
             <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 sm:relative sm:left-auto sm:top-auto sm:translate-y-0 sm:h-10 sm:w-10 z-0">
               {platformLogo ? (
@@ -571,7 +571,6 @@ const Auth = () => {
                           setResetEmail('');
                         }}
                         className="text-xs sm:text-sm text-primary hover:underline min-h-[44px] px-2 flex items-center touch-manipulation"
-                        aria-label="Réinitialiser le mot de passe"
                       >
                         {t('auth.login.forgotPassword', 'Mot de passe oublié ?')}
                       </button>
