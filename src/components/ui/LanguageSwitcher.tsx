@@ -272,7 +272,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   return (
     <MobileDropdown
       trigger={desktopTriggerContent}
-      onValueChange={value => changeLanguage(value)}
+      onValueChange={value => changeLanguage(value as LanguageCode)}
       className={className}
       contentClassName="min-w-[180px]"
     >

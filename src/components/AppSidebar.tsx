@@ -692,13 +692,10 @@ export function AppSidebar({ hideUtilityActions = false }: AppSidebarProps) {
                                   to={parseNavTo(item.url)}
                                   end
                                   onClick={() => recordNavClick(item.url)}
-                                  isActive={() =>
+                                  className={
                                     isNavItemActive(item.url, location.pathname, location.search)
-                                  }
-                                  className={({ isActive }) =>
-                                    `transition-all duration-200 group relative flex items-center ${
-                                      isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
-                                    }`
+                                      ? `transition-all duration-200 group relative flex items-center ${NAV_LINK_ACTIVE}`
+                                      : `transition-all duration-200 group relative flex items-center ${NAV_LINK_INACTIVE}`
                                   }
                                 >
                                   <IconComponent
@@ -776,13 +773,10 @@ export function AppSidebar({ hideUtilityActions = false }: AppSidebarProps) {
                                   to={parseNavTo(item.url)}
                                   end
                                   onClick={() => recordNavClick(item.url)}
-                                  isActive={() =>
+                                  className={
                                     isNavItemActive(item.url, location.pathname, location.search)
-                                  }
-                                  className={({ isActive }) =>
-                                    `transition-all duration-200 ${
-                                      isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE
-                                    }`
+                                      ? `transition-all duration-200 ${NAV_LINK_ACTIVE}`
+                                      : `transition-all duration-200 ${NAV_LINK_INACTIVE}`
                                   }
                                 >
                                   <IconComponent className="h-4 w-4" aria-hidden="true" />

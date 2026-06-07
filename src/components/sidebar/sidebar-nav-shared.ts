@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+import type { ComponentType } from 'react';
 
 /** Styles partagés navigation sidebar */
 export const NAV_LINK_ACTIVE =
@@ -10,6 +10,6 @@ export const NAV_LINK_INACTIVE =
 export type SidebarNavEntry = {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   sectionLabel: string;
 };

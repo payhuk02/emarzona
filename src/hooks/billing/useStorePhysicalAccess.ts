@@ -14,6 +14,17 @@ export type StorePhysicalAccessState = {
   refresh: () => Promise<void>;
 };
 
+type StorePlatformSubRow = {
+  status: string | null;
+  trial_ends_at: string | null;
+  platform_vendor_plans: {
+    name: string;
+    slug: string;
+    monthly_price: number;
+    trial_days: number | null;
+  } | null;
+};
+
 const defaultState: Omit<StorePhysicalAccessState, 'refresh'> = {
   loading: true,
   allowed: false,
@@ -44,7 +55,7 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
 
     try {
       const { data, error } = await supabase
-        .from('store_platform_subscriptions')
+        .from('store_platform_subscriptions' as never)
         .select(
           `
           status,
@@ -57,20 +68,17 @@ export function useStorePhysicalAccess(storeId?: string | null): StorePhysicalAc
 
       if (error) throw error;
 
-      if (!data) {
+      const row = data as StorePlatformSubRow | null;
+
+      if (!row) {
         setState({ ...defaultState, loading: false });
         return;
       }
 
-      const plan = data.platform_vendor_plans as {
-        name: string;
-        slug: string;
-        monthly_price: number;
-        trial_days: number | null;
-      } | null;
+      const plan = row.platform_vendor_plans;
 
-      const status = (data.status ?? 'none') as StorePhysicalAccessState['status'];
-      const trialEndsAt = data.trial_ends_at as string | null;
+      const status = (row.status ?? 'none') as StorePhysicalAccessState['status'];
+      const trialEndsAt = row.trial_ends_at;
       const trialExpired =
         status === 'trialing' && trialEndsAt !== null && new Date(trialEndsAt) <= new Date();
 
