@@ -5,29 +5,16 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import CustomerMyGiftCards from './CustomerMyGiftCards';
 
 export default function CustomerMyGiftCardsPage() {
   const { t } = useTranslation();
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50 dark:bg-gray-900">
-        <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <CustomerMyGiftCards />
-          </div>
-        </main>
+    <AppPageShell shellClassName="bg-gray-50 dark:bg-gray-900" mainClassName="p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <CustomerMyGiftCards />
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-
-

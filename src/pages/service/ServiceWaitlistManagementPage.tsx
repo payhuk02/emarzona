@@ -1,14 +1,13 @@
 /**
  * Page de Gestion de la Waitlist des Services
  * Date: 1 Février 2025
- * 
+ *
  * Interface complète pour gérer les listes d'attente des services
  */
 
 import { useState } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users } from 'lucide-react';
@@ -57,7 +56,7 @@ export default function ServiceWaitlistManagementPage() {
   });
 
   // Convertir les entrées waitlist au format du composant
-  const  waitlistEntries: WaitlistEntry[] = (waitlist || []).map((entry) => ({
+  const waitlistEntries: WaitlistEntry[] = (waitlist || []).map(entry => ({
     id: entry.id,
     serviceId: entry.service_id,
     serviceName: entry.products?.name || 'Service',
@@ -83,8 +82,8 @@ export default function ServiceWaitlistManagementPage() {
   const handleNotifyAll = async (serviceId?: string) => {
     // Notification de tous les clients en attente
     const entriesToNotify = serviceId
-      ? waitlistEntries.filter((e) => e.serviceId === serviceId && e.status === 'waiting')
-      : waitlistEntries.filter((e) => e.status === 'waiting');
+      ? waitlistEntries.filter(e => e.serviceId === serviceId && e.status === 'waiting')
+      : waitlistEntries.filter(e => e.status === 'waiting');
 
     // Notifier par batch de 10 pour éviter la surcharge
     for (const entry of entriesToNotify.slice(0, 10)) {
@@ -95,7 +94,7 @@ export default function ServiceWaitlistManagementPage() {
         logger.error('Error notifying waitlist entry', { entryId: entry.id, error });
       }
     }
-    
+
     if (entriesToNotify.length > 10) {
       toast({
         title: 'Notification partielle',
@@ -105,7 +104,7 @@ export default function ServiceWaitlistManagementPage() {
   };
 
   const handleConvert = async (entryId: string) => {
-    const entry = waitlistEntries.find((e) => e.id === entryId);
+    const entry = waitlistEntries.find(e => e.id === entryId);
     if (!entry) {
       toast({
         title: 'Erreur',
@@ -120,7 +119,7 @@ export default function ServiceWaitlistManagementPage() {
       // On peut utiliser convertToBooking directement
       // Option 2: Naviguer vers la page de booking avec pré-remplissage
       // La page de booking créera la réservation et appellera convertToBooking
-      
+
       // Pour l'instant, naviguer vers la page de booking avec les paramètres waitlist
       // La page ServiceBooking créera la réservation et appellera automatiquement convertToBooking
       navigate(`/service/${entry.serviceId}/book?waitlist=${entryId}`, {
@@ -152,52 +151,35 @@ export default function ServiceWaitlistManagementPage() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-8">
-            <Skeleton className="h-8 w-64 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </main>
-        </div>
-      </SidebarProvider>
+      <AppPageShell mainClassName="p-8">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <Skeleton className="h-64 w-full" />
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <Users className="h-8 w-8" />
-                Gestion des Listes d'Attente
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Gérez les clients en attente de disponibilité pour vos services
-              </p>
-            </div>
+    <AppPageShell mainClassName="p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Users className="h-8 w-8" />
+            Gestion des Listes d'Attente
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Gérez les clients en attente de disponibilité pour vos services
+          </p>
+        </div>
 
-            <WaitlistManager
-              entries={waitlistEntries}
-              onNotify={handleNotify}
-              onNotifyAll={handleNotifyAll}
-              onConvert={handleConvert}
-              onRemove={handleRemove}
-              availableServices={services || []}
-            />
-          </div>
-        </main>
+        <WaitlistManager
+          entries={waitlistEntries}
+          onNotify={handleNotify}
+          onNotifyAll={handleNotifyAll}
+          onConvert={handleConvert}
+          onRemove={handleRemove}
+          availableServices={services || []}
+        />
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-
-

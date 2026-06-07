@@ -1,7 +1,5 @@
 import { ReactNode } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
-import { SkipToMainContent } from '@/components/accessibility/SkipToMainContent';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { cn } from '@/lib/utils';
 
 interface DashboardShellLayoutProps {
@@ -28,22 +26,16 @@ export function DashboardShellLayout({
   maxWidth = 'default',
 }: DashboardShellLayoutProps) {
   return (
-    <SidebarProvider>
-      <SkipToMainContent />
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
-          <div
-            className={cn(
-              'container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6',
-              maxWidthClass[maxWidth],
-              className
-            )}
-          >
-            {children}
-          </div>
-        </main>
+    <AppPageShell>
+      <div
+        className={cn(
+          'container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6',
+          maxWidthClass[maxWidth],
+          className
+        )}
+      >
+        {children}
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }

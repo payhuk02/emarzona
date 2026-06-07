@@ -11,9 +11,8 @@
  */
 
 import { useLocation } from 'react-router-dom';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -174,18 +173,9 @@ function WebhookPageShell({ adminMode, children }: { adminMode: boolean; childre
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full overflow-x-hidden">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <main className="flex-1 overflow-auto pb-16 md:pb-0">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              {children}
-            </div>
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+    <AppPageShell mainClassName="pb-16 md:pb-0">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">{children}</div>
+    </AppPageShell>
   );
 }
 

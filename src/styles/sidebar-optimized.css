@@ -3,6 +3,10 @@
  * Texte blanc par défaut pour lisibilité sur fond foncé.
  */
 
+.app-sidebar {
+  --sidebar-background: #282870;
+}
+
 [data-sidebar='sidebar'] {
   --sidebar-background: 244 47% 30%;
   --sidebar-foreground: 0 0% 100%;

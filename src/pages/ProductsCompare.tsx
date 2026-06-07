@@ -10,9 +10,8 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -100,7 +99,7 @@ export default function ProductsCompare() {
     const urlIds = searchParams.get('ids')?.split(',').filter(Boolean) || [];
     if (urlIds.length > 0) return urlIds.slice(0, MAX_COMPARISON);
 
-    let  saved: string | null = null;
+    let saved: string | null = null;
     try {
       saved = localStorage.getItem('products-comparison');
     } catch {
@@ -280,7 +279,7 @@ export default function ProductsCompare() {
 
   // Filtrer et trier les produits
   const filteredAndSortedProducts = useMemo(() => {
-    let  filtered= products || [];
+    let filtered = products || [];
 
     if (typeFilter !== 'all') {
       filtered = filtered.filter(p => p.product_type === typeFilter);
@@ -327,7 +326,7 @@ export default function ProductsCompare() {
       { key: 'reviews_count', label: 'Avis', type: 'number' },
     ];
 
-    const  typeSpecificFields: Record<
+    const typeSpecificFields: Record<
       string,
       Array<{ key: string; label: string; type: string }>
     > = {
@@ -397,7 +396,7 @@ export default function ProductsCompare() {
 
   // Grouper par type pour l'affichage (doit être avant les early returns)
   const productsByType = useMemo(() => {
-    const  groups: Record<string, ComparisonProduct[]> = {};
+    const groups: Record<string, ComparisonProduct[]> = {};
     filteredAndSortedProducts.forEach(product => {
       if (!groups[product.product_type]) {
         groups[product.product_type] = [];
@@ -409,44 +408,34 @@ export default function ProductsCompare() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 lg:p-6 space-y-6">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-96 w-full" />
-            </div>
-          </main>
+      <AppPageShell>
+        <div className="container mx-auto p-4 lg:p-6 space-y-6">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-96 w-full" />
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   if (productIds.length === 0) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 lg:p-6">
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h2 className="text-xl font-semibold mb-2">Aucun produit à comparer</h2>
-                  <p className="text-muted-foreground mb-4">
-                    Ajoutez des produits à votre comparaison depuis les pages de produits
-                  </p>
-                  <Button onClick={() => navigate('/marketplace')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Parcourir les produits
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </main>
+      <AppPageShell>
+        <div className="container mx-auto p-4 lg:p-6">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Aucun produit à comparer</h2>
+              <p className="text-muted-foreground mb-4">
+                Ajoutez des produits à votre comparaison depuis les pages de produits
+              </p>
+              <Button onClick={() => navigate('/marketplace')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Parcourir les produits
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
@@ -464,276 +453,263 @@ export default function ProductsCompare() {
         url="https://www.emarzona.com/products/compare"
         canonical="https://www.emarzona.com/products/compare"
       />
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-4 lg:p-6 space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-                  <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-                  Comparaison de Produits
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Comparez jusqu'à {MAX_COMPARISON} produits côte à côte
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={clearComparison}>
-                  <X className="h-4 w-4 mr-2" />
-                  Vider
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/marketplace')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ajouter
-                </Button>
-              </div>
+      <AppPageShell>
+        <div className="container mx-auto p-4 lg:p-6 space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+                <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                Comparaison de Produits
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Comparez jusqu'à {MAX_COMPARISON} produits côte à côte
+              </p>
             </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={clearComparison}>
+                <X className="h-4 w-4 mr-2" />
+                Vider
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/marketplace')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter
+              </Button>
+            </div>
+          </div>
 
-            {/* Stats */}
-            {bestPrice && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Produits</CardTitle>
-                    <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{filteredAndSortedProducts.length}</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Prix Min</CardTitle>
-                    <TrendingDown className="h-4 w-4 text-green-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
-                      {bestPrice.min.toLocaleString('fr-FR')} XOF
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Prix Max</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-red-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-red-600">
-                      {bestPrice.max.toLocaleString('fr-FR')} XOF
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Écart</CardTitle>
-                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {(bestPrice.max - bestPrice.min).toLocaleString('fr-FR')} XOF
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Filtres */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher dans la comparaison..."
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les types</SelectItem>
-                      <SelectItem value="digital">Digital</SelectItem>
-                      <SelectItem value="physical">Physique</SelectItem>
-                      <SelectItem value="service">Service</SelectItem>
-                      <SelectItem value="course">Cours</SelectItem>
-                      <SelectItem value="artist">Artiste</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={sortBy}
-                    onValueChange={v => setSortBy(v as 'price' | 'rating' | 'name' | 'sales')}
-                  >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="price">Prix</SelectItem>
-                      <SelectItem value="rating">Note</SelectItem>
-                      <SelectItem value="sales">Ventes</SelectItem>
-                      <SelectItem value="name">Nom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Comparaison */}
-            {filteredAndSortedProducts.length === 0 ? (
+          {/* Stats */}
+          {bestPrice && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
-                <CardContent className="py-12 text-center">
-                  <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    Aucun produit ne correspond à vos critères
-                  </p>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Produits</CardTitle>
+                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{filteredAndSortedProducts.length}</div>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="space-y-6">
-                {/* Tableau de comparaison */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Comparaison Détaillée</CardTitle>
-                    <CardDescription>
-                      {filteredAndSortedProducts.length} produit
-                      {filteredAndSortedProducts.length > 1 ? 's' : ''} à comparer
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left p-3 font-semibold sticky left-0 bg-background z-10">
-                              Propriété
-                            </th>
-                            {filteredAndSortedProducts.map(product => (
-                              <th
-                                key={product.id}
-                                className="text-center p-3 font-semibold min-w-[200px]"
-                              >
-                                <div className="space-y-2">
-                                  <div className="relative w-24 h-24 mx-auto rounded-lg overflow-hidden border">
-                                    <OptimizedImage
-                                      src={product.image_url || '/placeholder-product.png'}
-                                      alt={product.name}
-                                      className="w-full h-full object-cover"
-                                      width={96}
-                                      height={96}
-                                    />
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="absolute top-1 right-1 h-6 w-6 bg-background/80 hover:bg-background"
-                                      onClick={() => removeProduct(product.id)}
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                  <div className="font-medium text-sm">{product.name}</div>
-                                  <Badge variant="secondary">{product.product_type}</Badge>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Prix Min</CardTitle>
+                  <TrendingDown className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {bestPrice.min.toLocaleString('fr-FR')} XOF
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Prix Max</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">
+                    {bestPrice.max.toLocaleString('fr-FR')} XOF
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Écart</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {(bestPrice.max - bestPrice.min).toLocaleString('fr-FR')} XOF
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Filtres */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher dans la comparaison..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les types</SelectItem>
+                    <SelectItem value="digital">Digital</SelectItem>
+                    <SelectItem value="physical">Physique</SelectItem>
+                    <SelectItem value="service">Service</SelectItem>
+                    <SelectItem value="course">Cours</SelectItem>
+                    <SelectItem value="artist">Artiste</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={sortBy}
+                  onValueChange={v => setSortBy(v as 'price' | 'rating' | 'name' | 'sales')}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="price">Prix</SelectItem>
+                    <SelectItem value="rating">Note</SelectItem>
+                    <SelectItem value="sales">Ventes</SelectItem>
+                    <SelectItem value="name">Nom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Comparaison */}
+          {filteredAndSortedProducts.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Aucun produit ne correspond à vos critères</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {/* Tableau de comparaison */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Comparaison Détaillée</CardTitle>
+                  <CardDescription>
+                    {filteredAndSortedProducts.length} produit
+                    {filteredAndSortedProducts.length > 1 ? 's' : ''} à comparer
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-3 font-semibold sticky left-0 bg-background z-10">
+                            Propriété
+                          </th>
+                          {filteredAndSortedProducts.map(product => (
+                            <th
+                              key={product.id}
+                              className="text-center p-3 font-semibold min-w-[200px]"
+                            >
+                              <div className="space-y-2">
+                                <div className="relative w-24 h-24 mx-auto rounded-lg overflow-hidden border">
+                                  <OptimizedImage
+                                    src={product.image_url || '/placeholder-product.png'}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                    width={96}
+                                    height={96}
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute top-1 right-1 h-6 w-6 bg-background/80 hover:bg-background"
+                                    onClick={() => removeProduct(product.id)}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
                                 </div>
-                              </th>
+                                <div className="font-medium text-sm">{product.name}</div>
+                                <Badge variant="secondary">{product.product_type}</Badge>
+                              </div>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparisonFields.map(field => (
+                          <tr key={field.key} className="border-b hover:bg-muted/50">
+                            <td className="p-3 font-medium sticky left-0 bg-background z-10">
+                              {field.label}
+                            </td>
+                            {filteredAndSortedProducts.map(product => (
+                              <td key={product.id} className="p-3 text-center">
+                                {renderValue(getPropertyValue(product, field.key), field.type)}
+                              </td>
                             ))}
                           </tr>
-                        </thead>
-                        <tbody>
-                          {comparisonFields.map(field => (
-                            <tr key={field.key} className="border-b hover:bg-muted/50">
-                              <td className="p-3 font-medium sticky left-0 bg-background z-10">
-                                {field.label}
-                              </td>
-                              {filteredAndSortedProducts.map(product => (
-                                <td key={product.id} className="p-3 text-center">
-                                  {renderValue(getPropertyValue(product, field.key), field.type)}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
 
-                {/* Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {filteredAndSortedProducts.map(product => (
-                        <Card key={product.id}>
-                          <CardContent className="p-4 space-y-3">
-                            <div className="font-medium text-sm">{product.name}</div>
-                            <div className="text-lg font-bold">
-                              {(product.promotional_price || product.price).toLocaleString('fr-FR')}{' '}
-                              {product.currency}
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                className="flex-1"
-                                onClick={() => {
-                                  addItem({
-                                    product_id: product.id,
-                                    product_type: product.product_type as
-                                      | 'digital'
-                                      | 'physical'
-                                      | 'service'
-                                      | 'course'
-                                      | 'artist',
-                                    product_name: product.name,
-                                    product_image_url: product.image_url || '',
-                                    quantity: 1,
-                                    unit_price: product.promotional_price || product.price,
-                                    currency: product.currency,
-                                  });
-                                  toast({
-                                    title: 'Ajouté au panier',
-                                    description: `${product.name} a été ajouté à votre panier`,
-                                  });
-                                }}
-                              >
-                                <ShoppingCart className="h-4 w-4 mr-1" />
-                                Panier
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigate(`/products/${product.id}`)}
-                              >
-                                Voir
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+              {/* Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {filteredAndSortedProducts.map(product => (
+                      <Card key={product.id}>
+                        <CardContent className="p-4 space-y-3">
+                          <div className="font-medium text-sm">{product.name}</div>
+                          <div className="text-lg font-bold">
+                            {(product.promotional_price || product.price).toLocaleString('fr-FR')}{' '}
+                            {product.currency}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => {
+                                addItem({
+                                  product_id: product.id,
+                                  product_type: product.product_type as
+                                    | 'digital'
+                                    | 'physical'
+                                    | 'service'
+                                    | 'course'
+                                    | 'artist',
+                                  product_name: product.name,
+                                  product_image_url: product.image_url || '',
+                                  quantity: 1,
+                                  unit_price: product.promotional_price || product.price,
+                                  currency: product.currency,
+                                });
+                                toast({
+                                  title: 'Ajouté au panier',
+                                  description: `${product.name} a été ajouté à votre panier`,
+                                });
+                              }}
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              Panier
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/products/${product.id}`)}
+                            >
+                              Voir
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </AppPageShell>
     </>
   );
 }
-
-
-
-
-
-

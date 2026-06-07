@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useEffect, useState, lazy, Suspense } from 'react';
 import type React from 'react';
 import { useStore } from '@/hooks/useStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -225,45 +224,40 @@ const EditProduct = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1">
-          {product.product_type === 'physical' && (
-            <SuspenseWrapper>
-              <EditPhysicalProductWizard {...wizardProps} />
-            </SuspenseWrapper>
-          )}
-          {product.product_type === 'digital' && (
-            <SuspenseWrapper>
-              <EditDigitalProductWizard {...wizardProps} />
-            </SuspenseWrapper>
-          )}
-          {product.product_type === 'service' && (
-            <SuspenseWrapper>
-              <EditServiceProductWizard {...wizardProps} />
-            </SuspenseWrapper>
-          )}
-          {product.product_type === 'course' && (
-            <SuspenseWrapper>
-              <EditCourseProductWizard {...wizardProps} />
-            </SuspenseWrapper>
-          )}
-          {product.product_type === 'artist' && (
-            <SuspenseWrapper>
-              <EditArtistProductWizard {...wizardProps} />
-            </SuspenseWrapper>
-          )}
-          {!['physical', 'digital', 'service', 'course', 'artist'].includes(
-            product.product_type || ''
-          ) && (
-            <SuspenseWrapper>
-              <EditGenericProductWizard {...wizardProps} />
-            </SuspenseWrapper>
-          )}
-        </main>
-      </div>
-    </SidebarProvider>
+    <AppPageShell>
+      {product.product_type === 'physical' && (
+        <SuspenseWrapper>
+          <EditPhysicalProductWizard {...wizardProps} />
+        </SuspenseWrapper>
+      )}
+      {product.product_type === 'digital' && (
+        <SuspenseWrapper>
+          <EditDigitalProductWizard {...wizardProps} />
+        </SuspenseWrapper>
+      )}
+      {product.product_type === 'service' && (
+        <SuspenseWrapper>
+          <EditServiceProductWizard {...wizardProps} />
+        </SuspenseWrapper>
+      )}
+      {product.product_type === 'course' && (
+        <SuspenseWrapper>
+          <EditCourseProductWizard {...wizardProps} />
+        </SuspenseWrapper>
+      )}
+      {product.product_type === 'artist' && (
+        <SuspenseWrapper>
+          <EditArtistProductWizard {...wizardProps} />
+        </SuspenseWrapper>
+      )}
+      {!['physical', 'digital', 'service', 'course', 'artist'].includes(
+        product.product_type || ''
+      ) && (
+        <SuspenseWrapper>
+          <EditGenericProductWizard {...wizardProps} />
+        </SuspenseWrapper>
+      )}
+    </AppPageShell>
   );
 };
 

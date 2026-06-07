@@ -11,8 +11,7 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -476,638 +475,610 @@ export default function NotificationsManagement() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 lg:p-6 space-y-6">
-              <Skeleton className="h-12 w-full" />
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map(i => (
-                  <Skeleton key={i} className="h-24" />
-                ))}
-              </div>
-              <Skeleton className="h-96 w-full" />
-            </div>
-          </main>
+      <AppPageShell>
+        <div className="container mx-auto p-4 lg:p-6 space-y-6">
+          <Skeleton className="h-12 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <Skeleton key={i} className="h-24" />
+            ))}
+          </div>
+          <Skeleton className="h-96 w-full" />
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header */}
-            <div
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-            >
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
-                    <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
-                  </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Mes Notifications
-                  </span>
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Gérez toutes vos notifications en un seul endroit
-                </p>
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header */}
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 mb-1 sm:mb-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20">
+                <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsPreferencesOpen(true)}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Préférences
-                </Button>
-                {unreadCount > 0 && (
-                  <Button onClick={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Tout marquer lu
-                  </Button>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Mes Notifications
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Gérez toutes vos notifications en un seul endroit
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setIsPreferencesOpen(true)}>
+              <Settings className="h-4 w-4 mr-2" />
+              Préférences
+            </Button>
+            {unreadCount > 0 && (
+              <Button onClick={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Tout marquer lu
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div
+          ref={statsRef}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Non lues</CardTitle>
+              <BellOff className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg sm:text-2xl font-bold text-yellow-600">{stats.unread}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Lues</CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.read}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Archivées</CardTitle>
+              <Archive className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg sm:text-2xl font-bold">{stats.archived}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filtres */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher une notification..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les types</SelectItem>
+                  <SelectItem value="digital_product_purchased">Produits digitaux</SelectItem>
+                  <SelectItem value="physical_product_order_placed">Produits physiques</SelectItem>
+                  <SelectItem value="service_booking_confirmed">Services</SelectItem>
+                  <SelectItem value="course_enrollment">Cours</SelectItem>
+                  <SelectItem value="artist_product_purchased">Artistes</SelectItem>
+                  <SelectItem value="order_payment_received">Paiements</SelectItem>
+                  <SelectItem value="vendor_message_received">Messages</SelectItem>
+                  <SelectItem value="product_review_received">Avis</SelectItem>
+                  <SelectItem value="affiliate_commission_earned">Affiliation</SelectItem>
+                  <SelectItem value="system_announcement">Système</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={statusFilter}
+                onValueChange={v => setStatusFilter(v as 'all' | 'read' | 'unread' | 'archived')}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous</SelectItem>
+                  <SelectItem value="unread">Non lues</SelectItem>
+                  <SelectItem value="read">Lues</SelectItem>
+                  <SelectItem value="archived">Archivées</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={v => setSortBy(v as 'date' | 'priority')}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">Date</SelectItem>
+                  <SelectItem value="priority">Priorité</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                title={sortOrder === 'asc' ? 'Trier décroissant' : 'Trier croissant'}
+              >
+                {sortOrder === 'asc' ? (
+                  <ArrowUp className="h-4 w-4" />
+                ) : (
+                  <ArrowDown className="h-4 w-4" />
                 )}
-              </div>
+              </Button>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Stats */}
-            <div
-              ref={statsRef}
-              className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Non lues</CardTitle>
-                  <BellOff className="h-4 w-4 text-yellow-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-yellow-600">
-                    {stats.unread}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Lues</CardTitle>
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.read}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Archivées</CardTitle>
-                  <Archive className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg sm:text-2xl font-bold">{stats.archived}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filtres */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Rechercher une notification..."
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les types</SelectItem>
-                      <SelectItem value="digital_product_purchased">Produits digitaux</SelectItem>
-                      <SelectItem value="physical_product_order_placed">
-                        Produits physiques
-                      </SelectItem>
-                      <SelectItem value="service_booking_confirmed">Services</SelectItem>
-                      <SelectItem value="course_enrollment">Cours</SelectItem>
-                      <SelectItem value="artist_product_purchased">Artistes</SelectItem>
-                      <SelectItem value="order_payment_received">Paiements</SelectItem>
-                      <SelectItem value="vendor_message_received">Messages</SelectItem>
-                      <SelectItem value="product_review_received">Avis</SelectItem>
-                      <SelectItem value="affiliate_commission_earned">Affiliation</SelectItem>
-                      <SelectItem value="system_announcement">Système</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={statusFilter}
-                    onValueChange={v =>
-                      setStatusFilter(v as 'all' | 'read' | 'unread' | 'archived')
+        {/* Notifications List */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Notifications ({filteredNotifications.length})</CardTitle>
+              {filteredNotifications.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={
+                      filteredNotifications.length > 0 &&
+                      selectedNotifications.length === filteredNotifications.length
                     }
-                  >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="unread">Non lues</SelectItem>
-                      <SelectItem value="read">Lues</SelectItem>
-                      <SelectItem value="archived">Archivées</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={sortBy} onValueChange={v => setSortBy(v as 'date' | 'priority')}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="date">Date</SelectItem>
-                      <SelectItem value="priority">Priorité</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                    title={sortOrder === 'asc' ? 'Trier décroissant' : 'Trier croissant'}
-                  >
-                    {sortOrder === 'asc' ? (
-                      <ArrowUp className="h-4 w-4" />
-                    ) : (
-                      <ArrowDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Notifications List */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Notifications ({filteredNotifications.length})</CardTitle>
-                  {filteredNotifications.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={
-                          filteredNotifications.length > 0 &&
-                          selectedNotifications.length === filteredNotifications.length
-                        }
-                        onCheckedChange={handleSelectAll}
-                        onSelect={e => e.stopPropagation()}
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        {selectedNotifications.length > 0
-                          ? `${selectedNotifications.length} sélectionnée(s)`
-                          : 'Sélectionner tout'}
-                      </span>
-                      {selectedNotifications.length > 0 && (
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleBulkMarkAsRead();
-                            }}
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-1" />
-                            Marquer lu
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleBulkArchive();
-                            }}
-                          >
-                            <Archive className="h-4 w-4 mr-1" />
-                            Archiver
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleBulkDelete();
-                            }}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Supprimer
-                          </Button>
-                        </div>
-                      )}
+                    onCheckedChange={handleSelectAll}
+                    onSelect={e => e.stopPropagation()}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {selectedNotifications.length > 0
+                      ? `${selectedNotifications.length} sélectionnée(s)`
+                      : 'Sélectionner tout'}
+                  </span>
+                  {selectedNotifications.length > 0 && (
+                    <div className="flex gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleBulkMarkAsRead();
+                        }}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        Marquer lu
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleBulkArchive();
+                        }}
+                      >
+                        <Archive className="h-4 w-4 mr-1" />
+                        Archiver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleBulkDelete();
+                        }}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Supprimer
+                      </Button>
                     </div>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent>
-                {filteredNotifications.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
-                      {searchQuery || typeFilter !== 'all' || statusFilter !== 'all'
-                        ? 'Aucune notification ne correspond à vos critères'
-                        : 'Aucune notification'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {filteredNotifications.map(notification => (
-                      <div
-                        key={notification.id}
-                        className={cn(
-                          'flex items-start gap-3 p-4 rounded-lg border transition-colors',
-                          selectedNotifications.includes(notification.id)
-                            ? 'bg-primary/10 border-primary/40'
-                            : !notification.is_read
-                              ? 'bg-primary/5 border-primary/20 hover:bg-primary/10'
-                              : 'bg-muted/30 hover:bg-muted/50',
-                          notification.action_url && 'cursor-pointer'
-                        )}
-                        onSelect={() =>
-                          handleNotificationClick({
-                            ...notification,
-                            id: notification.id,
-                            is_read: notification.is_read,
-                            type: notification.type,
-                          })
-                        }
-                      >
-                        <Checkbox
-                          checked={selectedNotifications.includes(notification.id)}
-                          onCheckedChange={() => handleToggleSelect(notification.id)}
-                          onSelect={e => e.stopPropagation()}
-                          className="mt-1"
-                        />
-                        <div className="flex-shrink-0 mt-0.5">
-                          <div className="p-2 rounded-full bg-primary/10">
-                            {getNotificationIcon(notification.type)}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium text-sm">{notification.title}</h4>
-                                {!notification.is_read && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Nouveau
-                                  </Badge>
-                                )}
-                                <Badge variant="outline" className="text-xs">
-                                  {getTypeLabel(notification.type)}
-                                </Badge>
-                              </div>
-                              {notification.message && (
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                  {notification.message}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                <span>
-                                  {format(
-                                    new Date(notification.created_at),
-                                    'dd MMM yyyy à HH:mm',
-                                    { locale: fr }
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                            <StableDropdownMenu
-                              triggerContent={<MoreVertical className="h-4 w-4" />}
-                              triggerProps={{
-                                variant: 'ghost' as const,
-                                size: 'sm' as const,
-                                'aria-label': `Actions pour la notification ${notification.id}`,
-                              }}
-                            >
-                              {!notification.is_read && (
-                                <SelectItem
-                                  value="edit"
-                                  onSelect={() => handleMarkAsRead(notification.id)}
-                                >
-                                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                                  Marquer comme lu
-                                </SelectItem>
-                              )}
-                              <SelectItem
-                                value="delete"
-                                onSelect={() => handleArchive(notification.id)}
-                              >
-                                <Archive className="h-4 w-4 mr-2" />
-                                Archiver
-                              </SelectItem>
-                              <DropdownMenuSeparator />
-                              <SelectItem
-                                value="copy"
-                                onSelect={() => handleDelete(notification.id)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Supprimer
-                              </SelectItem>
-                            </StableDropdownMenu>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-sm text-muted-foreground">
-                  Page {page} sur {totalPages} • {totalCount} notification(s) au total
-                </div>
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onSelect={e => {
-                          e.preventDefault();
-                          if (page > 1) setPage(page - 1);
-                        }}
-                        className={page === 1 ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum: number;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (page <= 3) {
-                        pageNum = i + 1;
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = page - 2 + i;
-                      }
-                      return (
-                        <PaginationItem key={pageNum}>
-                          <PaginationLink
-                            href="#"
-                            onSelect={e => {
-                              e.preventDefault();
-                              setPage(pageNum);
-                            }}
-                            isActive={page === pageNum}
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    })}
-                    {totalPages > 5 && page < totalPages - 2 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {filteredNotifications.length === 0 ? (
+              <div className="text-center py-12">
+                <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  {searchQuery || typeFilter !== 'all' || statusFilter !== 'all'
+                    ? 'Aucune notification ne correspond à vos critères'
+                    : 'Aucune notification'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredNotifications.map(notification => (
+                  <div
+                    key={notification.id}
+                    className={cn(
+                      'flex items-start gap-3 p-4 rounded-lg border transition-colors',
+                      selectedNotifications.includes(notification.id)
+                        ? 'bg-primary/10 border-primary/40'
+                        : !notification.is_read
+                          ? 'bg-primary/5 border-primary/20 hover:bg-primary/10'
+                          : 'bg-muted/30 hover:bg-muted/50',
+                      notification.action_url && 'cursor-pointer'
                     )}
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onSelect={e => {
-                          e.preventDefault();
-                          if (page < totalPages) setPage(page + 1);
-                        }}
-                        className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-                <Select
-                  value={pageSize.toString()}
-                  onValueChange={value => {
-                    setPageSize(Number(value));
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
+                    onSelect={() =>
+                      handleNotificationClick({
+                        ...notification,
+                        id: notification.id,
+                        is_read: notification.is_read,
+                        type: notification.type,
+                      })
+                    }
+                  >
+                    <Checkbox
+                      checked={selectedNotifications.includes(notification.id)}
+                      onCheckedChange={() => handleToggleSelect(notification.id)}
+                      onSelect={e => e.stopPropagation()}
+                      className="mt-1"
+                    />
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-sm">{notification.title}</h4>
+                            {!notification.is_read && (
+                              <Badge variant="secondary" className="text-xs">
+                                Nouveau
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {getTypeLabel(notification.type)}
+                            </Badge>
+                          </div>
+                          {notification.message && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {notification.message}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {format(new Date(notification.created_at), 'dd MMM yyyy à HH:mm', {
+                                locale: fr,
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        <StableDropdownMenu
+                          triggerContent={<MoreVertical className="h-4 w-4" />}
+                          triggerProps={{
+                            variant: 'ghost' as const,
+                            size: 'sm' as const,
+                            'aria-label': `Actions pour la notification ${notification.id}`,
+                          }}
+                        >
+                          {!notification.is_read && (
+                            <SelectItem
+                              value="edit"
+                              onSelect={() => handleMarkAsRead(notification.id)}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Marquer comme lu
+                            </SelectItem>
+                          )}
+                          <SelectItem
+                            value="delete"
+                            onSelect={() => handleArchive(notification.id)}
+                          >
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archiver
+                          </SelectItem>
+                          <DropdownMenuSeparator />
+                          <SelectItem
+                            value="copy"
+                            onSelect={() => handleDelete(notification.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Supprimer
+                          </SelectItem>
+                        </StableDropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
+          </CardContent>
+        </Card>
 
-            {/* Preferences Dialog */}
-            <Dialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen}>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Préférences de Notifications</DialogTitle>
-                  <DialogDescription>Configurez vos préférences de notifications</DialogDescription>
-                </DialogHeader>
-                {preferences && (
-                  <div className="space-y-6 py-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="email_notifications">Notifications Email</Label>
-                        <Switch
-                          id="email_notifications"
-                          checked={preferences.email_notifications ?? true}
-                          onCheckedChange={checked => {
-                            updatePreferences.mutate({ email_notifications: checked });
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="push_notifications">Notifications Push</Label>
-                        <Switch
-                          id="push_notifications"
-                          checked={preferences.push_notifications ?? true}
-                          onCheckedChange={checked => {
-                            updatePreferences.mutate({ push_notifications: checked });
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="sms_notifications">Notifications SMS</Label>
-                        <Switch
-                          id="sms_notifications"
-                          checked={preferences.sms_notifications ?? false}
-                          onCheckedChange={checked => {
-                            updatePreferences.mutate({ sms_notifications: checked });
-                          }}
-                        />
-                      </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-muted-foreground">
+              Page {page} sur {totalPages} • {totalCount} notification(s) au total
+            </div>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onSelect={e => {
+                      e.preventDefault();
+                      if (page > 1) setPage(page - 1);
+                    }}
+                    className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        href="#"
+                        onSelect={e => {
+                          e.preventDefault();
+                          setPage(pageNum);
+                        }}
+                        isActive={page === pageNum}
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                {totalPages > 5 && page < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onSelect={e => {
+                      e.preventDefault();
+                      if (page < totalPages) setPage(page + 1);
+                    }}
+                    className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={value => {
+                setPageSize(Number(value));
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Preferences Dialog */}
+        <Dialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Préférences de Notifications</DialogTitle>
+              <DialogDescription>Configurez vos préférences de notifications</DialogDescription>
+            </DialogHeader>
+            {preferences && (
+              <div className="space-y-6 py-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="email_notifications">Notifications Email</Label>
+                    <Switch
+                      id="email_notifications"
+                      checked={preferences.email_notifications ?? true}
+                      onCheckedChange={checked => {
+                        updatePreferences.mutate({ email_notifications: checked });
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="push_notifications">Notifications Push</Label>
+                    <Switch
+                      id="push_notifications"
+                      checked={preferences.push_notifications ?? true}
+                      onCheckedChange={checked => {
+                        updatePreferences.mutate({ push_notifications: checked });
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="sms_notifications">Notifications SMS</Label>
+                    <Switch
+                      id="sms_notifications"
+                      checked={preferences.sms_notifications ?? false}
+                      onCheckedChange={checked => {
+                        updatePreferences.mutate({ sms_notifications: checked });
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Section Sons et Vibrations */}
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Volume2 className="h-5 w-5" />
+                    Sons et Vibrations
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="sound_notifications" className="flex items-center gap-2">
+                        Sons de notifications
+                        <span className="text-sm text-muted-foreground">
+                          (recommandé pour l'accessibilité)
+                        </span>
+                      </Label>
+                      <Switch
+                        id="sound_notifications"
+                        checked={preferences.sound_notifications ?? true}
+                        onCheckedChange={checked => {
+                          updatePreferences.mutate({ sound_notifications: checked });
+                        }}
+                      />
                     </div>
 
-                    {/* Section Sons et Vibrations */}
-                    <div className="border-t pt-4">
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Volume2 className="h-5 w-5" />
-                        Sons et Vibrations
-                      </h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="sound_notifications" className="flex items-center gap-2">
-                            Sons de notifications
-                            <span className="text-sm text-muted-foreground">
-                              (recommandé pour l'accessibilité)
-                            </span>
-                          </Label>
-                          <Switch
-                            id="sound_notifications"
-                            checked={preferences.sound_notifications ?? true}
-                            onCheckedChange={checked => {
-                              updatePreferences.mutate({ sound_notifications: checked });
-                            }}
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <Label
-                            htmlFor="vibration_notifications"
-                            className="flex items-center gap-2"
-                          >
-                            Vibrations
-                            <span className="text-sm text-muted-foreground">
-                              (mobile uniquement)
-                            </span>
-                          </Label>
-                          <Switch
-                            id="vibration_notifications"
-                            checked={preferences.vibration_notifications ?? true}
-                            onCheckedChange={checked => {
-                              updatePreferences.mutate({ vibration_notifications: checked });
-                            }}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="vibration_intensity">Intensité des vibrations</Label>
-                          <Select
-                            value={preferences.vibration_intensity || 'medium'}
-                            onValueChange={value => {
-                              updatePreferences.mutate({
-                                vibration_intensity: value as 'light' | 'medium' | 'heavy',
-                              });
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="light">Légère</SelectItem>
-                              <SelectItem value="medium">Normale</SelectItem>
-                              <SelectItem value="heavy">Intense</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="notification_sound_type">Type de son</Label>
-                          <Select
-                            value={preferences.notification_sound_type || 'default'}
-                            onValueChange={value => {
-                              updatePreferences.mutate({
-                                notification_sound_type: value as 'default' | 'gentle' | 'urgent',
-                              });
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="default">Par défaut</SelectItem>
-                              <SelectItem value="gentle">Doux</SelectItem>
-                              <SelectItem value="urgent">Urgent</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="vibration_notifications" className="flex items-center gap-2">
+                        Vibrations
+                        <span className="text-sm text-muted-foreground">(mobile uniquement)</span>
+                      </Label>
+                      <Switch
+                        id="vibration_notifications"
+                        checked={preferences.vibration_notifications ?? true}
+                        onCheckedChange={checked => {
+                          updatePreferences.mutate({ vibration_notifications: checked });
+                        }}
+                      />
                     </div>
 
-                    {/* Section Accessibilité */}
-                    <div className="border-t pt-4">
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Accessibility className="h-5 w-5" />
-                        Accessibilité
-                      </h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="accessibility_mode" className="flex items-center gap-2">
-                            Mode accessibilité
-                            <span className="text-sm text-muted-foreground">
-                              (optimisations pour les utilisateurs handicapés)
-                            </span>
-                          </Label>
-                          <Switch
-                            id="accessibility_mode"
-                            checked={preferences.accessibility_mode ?? false}
-                            onCheckedChange={checked => {
-                              updatePreferences.mutate({ accessibility_mode: checked });
-                            }}
-                          />
-                        </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="vibration_intensity">Intensité des vibrations</Label>
+                      <Select
+                        value={preferences.vibration_intensity || 'medium'}
+                        onValueChange={value => {
+                          updatePreferences.mutate({
+                            vibration_intensity: value as 'light' | 'medium' | 'heavy',
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Légère</SelectItem>
+                          <SelectItem value="medium">Normale</SelectItem>
+                          <SelectItem value="heavy">Intense</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="high_contrast_sounds" className="flex items-center gap-2">
-                            Sons haute contraste
-                            <span className="text-sm text-muted-foreground">
-                              (différenciation améliorée)
-                            </span>
-                          </Label>
-                          <Switch
-                            id="high_contrast_sounds"
-                            checked={preferences.high_contrast_sounds ?? false}
-                            onCheckedChange={checked => {
-                              updatePreferences.mutate({ high_contrast_sounds: checked });
-                            }}
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <Label
-                            htmlFor="screen_reader_friendly"
-                            className="flex items-center gap-2"
-                          >
-                            Compatible lecteur d'écran
-                            <span className="text-sm text-muted-foreground">
-                              (optimisations ARIA)
-                            </span>
-                          </Label>
-                          <Switch
-                            id="screen_reader_friendly"
-                            checked={preferences.screen_reader_friendly ?? true}
-                            onCheckedChange={checked => {
-                              updatePreferences.mutate({ screen_reader_friendly: checked });
-                            }}
-                          />
-                        </div>
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="notification_sound_type">Type de son</Label>
+                      <Select
+                        value={preferences.notification_sound_type || 'default'}
+                        onValueChange={value => {
+                          updatePreferences.mutate({
+                            notification_sound_type: value as 'default' | 'gentle' | 'urgent',
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="default">Par défaut</SelectItem>
+                          <SelectItem value="gentle">Doux</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                )}
-              </DialogContent>
-            </Dialog>
-          </div>
-        </main>
+                </div>
+
+                {/* Section Accessibilité */}
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Accessibility className="h-5 w-5" />
+                    Accessibilité
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="accessibility_mode" className="flex items-center gap-2">
+                        Mode accessibilité
+                        <span className="text-sm text-muted-foreground">
+                          (optimisations pour les utilisateurs handicapés)
+                        </span>
+                      </Label>
+                      <Switch
+                        id="accessibility_mode"
+                        checked={preferences.accessibility_mode ?? false}
+                        onCheckedChange={checked => {
+                          updatePreferences.mutate({ accessibility_mode: checked });
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="high_contrast_sounds" className="flex items-center gap-2">
+                        Sons haute contraste
+                        <span className="text-sm text-muted-foreground">
+                          (différenciation améliorée)
+                        </span>
+                      </Label>
+                      <Switch
+                        id="high_contrast_sounds"
+                        checked={preferences.high_contrast_sounds ?? false}
+                        onCheckedChange={checked => {
+                          updatePreferences.mutate({ high_contrast_sounds: checked });
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="screen_reader_friendly" className="flex items-center gap-2">
+                        Compatible lecteur d'écran
+                        <span className="text-sm text-muted-foreground">(optimisations ARIA)</span>
+                      </Label>
+                      <Switch
+                        id="screen_reader_friendly"
+                        checked={preferences.screen_reader_friendly ?? true}
+                        onCheckedChange={checked => {
+                          updatePreferences.mutate({ screen_reader_friendly: checked });
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }

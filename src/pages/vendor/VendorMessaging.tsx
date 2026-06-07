@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,8 +31,6 @@ import {
   ChevronUp,
   Camera,
 } from 'lucide-react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { useVendorMessaging } from '@/hooks/useVendorMessaging';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -225,9 +224,9 @@ export default function VendorMessaging() {
       setUploadProgress(0);
 
       // Upload files if any (utilise le hook avec progress tracking)
-      const  fileUrls: string[] = [];
-      const  storagePaths: string[] = [];
-      let  uploadResults: Array<{
+      const fileUrls: string[] = [];
+      const storagePaths: string[] = [];
+      let uploadResults: Array<{
         path: string;
         publicUrl: string;
         fileName: string;
@@ -254,7 +253,7 @@ export default function VendorMessaging() {
               .map(f => `• ${f.file.name}: ${f.error}`)
               .join('\n');
 
-            let  errorMessage= `${uploadState.failed.length} fichier(s) n'ont pas pu être uploadés`;
+            let errorMessage = `${uploadState.failed.length} fichier(s) n'ont pas pu être uploadés`;
             if (failedFilesDetails) {
               errorMessage += `:\n${failedFilesDetails}`;
             } else {
@@ -343,7 +342,7 @@ export default function VendorMessaging() {
               }
 
               return { success: true, result };
-            } catch ( _verifyError: unknown) {
+            } catch (_verifyError: unknown) {
               // Si c'est une erreur d'abort (timeout), essayer avec signedUrl si disponible
               const verifyErr = verifyError as Error;
               if (verifyErr.name === 'AbortError') {
@@ -404,7 +403,7 @@ export default function VendorMessaging() {
 
           fileUrls.push(...successfulResults.map(r => r.publicUrl));
           storagePaths.push(...successfulResults.map(r => r.path));
-        } catch ( _uploadError: unknown) {
+        } catch (_uploadError: unknown) {
           // Si l'upload échoue complètement, on peut quand même envoyer le message sans fichiers
           logger.error('File upload failed, attempting to send message without attachments', {
             error: uploadError,
@@ -457,7 +456,7 @@ Le message sera envoyé sans pièces jointes.`;
       }
 
       // Determine message type
-      let  messageType: 'text' | 'image' | 'video' | 'file' = 'text';
+      let messageType: 'text' | 'image' | 'video' | 'file' = 'text';
       if (selectedFiles.length > 0) {
         const firstFile = selectedFiles[0];
         if (firstFile.type.startsWith('image/')) {
@@ -536,12 +535,12 @@ Le message sera envoyé sans pièces jointes.`;
             ? `Votre message a été envoyé avec ${fileUrls.length} pièce(s) jointe(s)`
             : 'Votre message a été envoyé avec succès',
       });
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Send vendor message error', { error, storeId, productId });
 
       // Message d'erreur détaillé
       const err = error instanceof Error ? error : new Error(String(error));
-      let  errorMessage= err.message || "Impossible d'envoyer le message";
+      let errorMessage = err.message || "Impossible d'envoyer le message";
 
       // Améliorer le message selon le type d'erreur
       if (err.message?.includes("n'a pas pu être uploadé") || err.message?.includes('uploadé')) {
@@ -614,692 +613,667 @@ Le message sera envoyé sans pièces jointes.`;
 
   if (loading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-x-hidden">
-            <div className="container mx-auto p-6">
-              <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="text-center">
-                  <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-                  <p className="text-muted-foreground">Chargement de la messagerie...</p>
-                </div>
-              </div>
+      <AppPageShell mainClassName="overflow-x-hidden">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">Chargement de la messagerie...</p>
             </div>
-          </main>
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   // Si pas de storeId spécifique, afficher la liste des conversations
   if (!finalStoreId && conversations.length > 0 && !currentConversation) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-x-hidden">
-            <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
-              <div className="mb-6">
-                <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
-                  <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                  Messages Clients
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Gérez toutes vos conversations avec vos clients
-                </p>
-              </div>
+      <AppPageShell mainClassName="overflow-x-hidden">
+        <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+              <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              Messages Clients
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gérez toutes vos conversations avec vos clients
+            </p>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 md:gap-6">
-                {/* Liste des conversations */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base md:text-lg">
-                      Conversations ({conversations.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <ScrollArea className="h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] max-h-[500px] md:max-h-none">
-                      <div className="space-y-1">
-                        {conversations.map(conv => (
-                          <button
-                            key={conv.id}
-                            onClick={() => openConversation(conv.id)}
-                            className="w-full text-left p-2 md:p-3 hover:bg-accent transition-colors border-b last:border-b-0"
-                          >
-                            <div className="flex items-start gap-2 md:gap-3">
-                              <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
-                                <AvatarImage src={conv.store?.logo_url || undefined} />
-                                <AvatarFallback>
-                                  <Store className="h-3 w-3 md:h-4 md:w-4" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1 gap-2">
-                                  <p className="font-medium text-xs md:text-sm truncate">
-                                    {conv.store?.name || 'Boutique'}
-                                  </p>
-                                  {conv.unread_count && conv.unread_count > 0 && (
-                                    <Badge
-                                      variant="destructive"
-                                      className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 flex-shrink-0"
-                                    >
-                                      {conv.unread_count}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {conv.product && (
-                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate mb-1">
-                                    {conv.product.name}
-                                  </p>
-                                )}
-                                {conv.last_message && (
-                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate">
-                                    {conv.last_message.content || 'Pièce jointe'}
-                                  </p>
-                                )}
-                                {conv.last_message_at && (
-                                  <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-                                    {format(new Date(conv.last_message_at), 'dd MMM yyyy HH:mm', {
-                                      locale: fr,
-                                    })}
-                                  </p>
-                                )}
-                              </div>
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 md:gap-6">
+            {/* Liste des conversations */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base md:text-lg">
+                  Conversations ({conversations.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] max-h-[500px] md:max-h-none">
+                  <div className="space-y-1">
+                    {conversations.map(conv => (
+                      <button
+                        key={conv.id}
+                        onClick={() => openConversation(conv.id)}
+                        className="w-full text-left p-2 md:p-3 hover:bg-accent transition-colors border-b last:border-b-0"
+                      >
+                        <div className="flex items-start gap-2 md:gap-3">
+                          <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
+                            <AvatarImage src={conv.store?.logo_url || undefined} />
+                            <AvatarFallback>
+                              <Store className="h-3 w-3 md:h-4 md:w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1 gap-2">
+                              <p className="font-medium text-xs md:text-sm truncate">
+                                {conv.store?.name || 'Boutique'}
+                              </p>
+                              {conv.unread_count && conv.unread_count > 0 && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 flex-shrink-0"
+                                >
+                                  {conv.unread_count}
+                                </Badge>
+                              )}
                             </div>
-                          </button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                            {conv.product && (
+                              <p className="text-[10px] md:text-xs text-muted-foreground truncate mb-1">
+                                {conv.product.name}
+                              </p>
+                            )}
+                            {conv.last_message && (
+                              <p className="text-[10px] md:text-xs text-muted-foreground truncate">
+                                {conv.last_message.content || 'Pièce jointe'}
+                              </p>
+                            )}
+                            {conv.last_message_at && (
+                              <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+                                {format(new Date(conv.last_message_at), 'dd MMM yyyy HH:mm', {
+                                  locale: fr,
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
 
-                {/* Zone de message vide */}
-                <Card>
-                  <CardContent className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                      <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">Sélectionnez une conversation</h3>
-                      <p className="text-muted-foreground">
-                        Choisissez une conversation dans la liste pour commencer à échanger
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </main>
+            {/* Zone de message vide */}
+            <Card>
+              <CardContent className="flex items-center justify-center min-h-[60vh]">
+                <div className="text-center">
+                  <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Sélectionnez une conversation</h3>
+                  <p className="text-muted-foreground">
+                    Choisissez une conversation dans la liste pour commencer à échanger
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   if (!currentConversation && conversations.length === 0) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-x-hidden">
-            <div className="container mx-auto p-6">
-              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour
-              </Button>
+      <AppPageShell mainClassName="overflow-x-hidden">
+        <div className="container mx-auto p-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
 
-              <Card>
-                <CardContent className="flex items-center justify-center min-h-[60vh]">
-                  <div className="text-center">
-                    <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Aucune conversation</h3>
-                    <p className="text-muted-foreground mb-4">
-                      {finalStoreId
-                        ? "Vous n'avez pas encore de conversation avec ce vendeur"
-                        : "Vous n'avez pas encore de conversation avec vos clients"}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </main>
+          <Card>
+            <CardContent className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center">
+                <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Aucune conversation</h3>
+                <p className="text-muted-foreground mb-4">
+                  {finalStoreId
+                    ? "Vous n'avez pas encore de conversation avec ce vendeur"
+                    : "Vous n'avez pas encore de conversation avec vos clients"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
+    <AppPageShell mainClassName="overflow-x-hidden">
+      <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
+        {/* Header */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
 
-        <main className="flex-1 overflow-x-hidden">
-          <div className="container mx-auto p-3 sm:p-4 md:p-6 max-w-7xl">
-            {/* Header */}
-            <div className="mb-6">
-              <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour
-              </Button>
-
-              <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
-                    <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                    {finalStoreId ? 'Contacter le vendeur' : 'Messages Clients'}
-                  </h1>
-                  <p className="text-muted-foreground mt-1">
-                    {currentConversation?.store?.name ? (
-                      <>
-                        Communication avec{' '}
-                        <span className="font-medium">{currentConversation.store.name}</span>
-                      </>
-                    ) : finalStoreId ? (
-                      'Communication sécurisée avec le vendeur'
-                    ) : (
-                      'Gérez toutes vos conversations avec vos clients'
-                    )}
-                  </p>
-                </div>
-
-                {/* Conversation Status */}
-                {currentConversation && (
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={currentConversation.status === 'active' ? 'default' : 'secondary'}
-                    >
-                      {currentConversation.status === 'active'
-                        ? 'Active'
-                        : currentConversation.status === 'closed'
-                          ? 'Fermée'
-                          : 'Litige'}
-                    </Badge>
-
-                    {currentConversation.admin_intervention && (
-                      <Badge variant="destructive" className="flex items-center gap-1">
-                        <Crown className="h-3 w-3" />
-                        Intervention Admin
-                      </Badge>
-                    )}
-                  </div>
+          <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                {finalStoreId ? 'Contacter le vendeur' : 'Messages Clients'}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {currentConversation?.store?.name ? (
+                  <>
+                    Communication avec{' '}
+                    <span className="font-medium">{currentConversation.store.name}</span>
+                  </>
+                ) : finalStoreId ? (
+                  'Communication sécurisée avec le vendeur'
+                ) : (
+                  'Gérez toutes vos conversations avec vos clients'
                 )}
-              </div>
+              </p>
             </div>
 
-            {/* Main Chat Interface */}
-            <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_220px] gap-3 md:gap-4">
-              {/* Liste des conversations (si pas de storeId spécifique) */}
-              {!finalStoreId && conversations.length > 1 && (
-                <Card className="md:block">
-                  <CardHeader className="p-3 md:p-6">
-                    <CardTitle className="text-base md:text-lg">Conversations</CardTitle>
-                    <CardDescription className="text-xs md:text-sm">
-                      {conversations.length} conversation(s)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <ScrollArea className="h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] max-h-[600px] md:max-h-none">
-                      <div className="space-y-1">
-                        {conversations.map(conv => (
-                          <button
-                            key={conv.id}
-                            onClick={() => openConversation(conv.id)}
-                            className={`w-full text-left p-2 md:p-3 hover:bg-accent transition-colors border-b last:border-b-0 ${
-                              currentConversation?.id === conv.id ? 'bg-accent' : ''
-                            }`}
-                          >
-                            <div className="flex items-start gap-2 md:gap-3">
-                              <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
-                                <AvatarImage src={conv.store?.logo_url || undefined} />
-                                <AvatarFallback>
-                                  <Store className="h-3 w-3 md:h-4 md:w-4" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1 gap-2">
-                                  <p className="font-medium text-xs md:text-sm truncate">
-                                    {conv.store?.name || 'Boutique'}
-                                  </p>
-                                  {conv.unread_count && conv.unread_count > 0 && (
-                                    <Badge
-                                      variant="destructive"
-                                      className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 flex-shrink-0"
-                                    >
-                                      {conv.unread_count}
-                                    </Badge>
-                                  )}
-                                </div>
-                                {conv.product && (
-                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate mb-1">
-                                    {conv.product.name}
-                                  </p>
-                                )}
-                                {conv.last_message && (
-                                  <p className="text-[10px] md:text-xs text-muted-foreground truncate">
-                                    {conv.last_message.content || 'Pièce jointe'}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              )}
-              {/* Messages Thread */}
-              <Card className="flex flex-col h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] min-h-[400px] md:min-h-[500px]">
-                <CardHeader className="border-b p-3 md:p-6">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                      <CardTitle className="text-base md:text-lg">Messages</CardTitle>
-                      <CardDescription className="text-xs md:text-sm">
-                        {searchResults
-                          ? `${searchResults.total} résultat(s)`
-                          : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {showSearch ? (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="text"
-                            placeholder="Rechercher dans les messages..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            onKeyDown={async e => {
-                              if (e.key === 'Enter' && searchQuery.trim()) {
-                                await searchMessages({
-                                  conversationId: currentConversation?.id,
-                                  query: searchQuery.trim(),
-                                });
-                              }
-                            }}
-                            className="w-full sm:w-48 md:w-64"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={async () => {
-                              if (searchQuery.trim()) {
-                                await searchMessages({
-                                  conversationId: currentConversation?.id,
-                                  query: searchQuery.trim(),
-                                });
-                              }
-                            }}
-                            disabled={isSearchingMessages || !searchQuery.trim()}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setSearchQuery('');
-                              setShowSearch(false);
-                              clearSearch();
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
-                          <Search className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
+            {/* Conversation Status */}
+            {currentConversation && (
+              <div className="flex items-center gap-2">
+                <Badge variant={currentConversation.status === 'active' ? 'default' : 'secondary'}>
+                  {currentConversation.status === 'active'
+                    ? 'Active'
+                    : currentConversation.status === 'closed'
+                      ? 'Fermée'
+                      : 'Litige'}
+                </Badge>
 
-                {/* Messages List */}
-                <ScrollArea
-                  className="flex-1 p-2 sm:p-3 md:p-4"
-                  onScrollCapture={e => {
-                    // Infinite scroll: charger plus de messages quand on scroll en haut
-                    const target = e.target as HTMLElement;
-                    if (
-                      target.scrollTop === 0 &&
-                      !messagesLoading &&
-                      currentConversation &&
-                      hasMoreMessages
-                    ) {
-                      loadMoreMessages();
-                    }
-                  }}
-                >
-                  {messagesLoading || isSearchingMessages ? (
-                    <div className="flex items-center justify-center h-full">
-                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (searchResults ? searchResults.messages : messages).length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                      <div className="text-center">
-                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">
-                          {searchResults ? 'Aucun résultat trouvé' : 'Aucun message pour le moment'}
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {searchResults
-                            ? "Essayez avec d'autres mots-clés"
-                            : 'Commencez la conversation ci-dessous'}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Référence pour le scroll automatique */}
-                      <div ref={messagesTopRef} />
-
-                      {/* Bouton "Charger plus" en haut si disponible */}
-                      {!searchResults && hasMoreMessages && (
-                        <div className="flex justify-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={loadMoreMessages}
-                            disabled={messagesLoading}
-                            className="text-xs"
-                          >
-                            <ChevronUp className="h-3 w-3 mr-1" />
-                            {messagesLoading
-                              ? 'Chargement...'
-                              : `Charger plus (${totalMessagesCount - messages.length} restants)`}
-                          </Button>
-                        </div>
-                      )}
-
-                      {(searchResults ? searchResults.messages : messages).map(message => {
-                        const isOwn = message.sender_id === user?.id;
-                        const isAdmin = message.sender_type === 'admin';
-
-                        return (
-                          <div
-                            key={message.id}
-                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
-                            >
-                              {/* Sender Info */}
-                              <div className="flex items-center gap-2 px-2">
-                                {!isOwn && (
-                                  <div className="flex items-center gap-1">
-                                    {getSenderIcon(message.sender_type)}
-                                    <span className="text-xs font-medium">
-                                      {isAdmin
-                                        ? 'Admin'
-                                        : message.sender_type === 'store'
-                                          ? 'Vendeur'
-                                          : 'Vous'}
-                                    </span>
-                                  </div>
-                                )}
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
-                                </span>
-                                {isOwn && message.is_read && (
-                                  <CheckCheck className="h-3 w-3 text-primary" />
-                                )}
-                                {isOwn && !message.is_read && (
-                                  <Check className="h-3 w-3 text-muted-foreground" />
-                                )}
-                              </div>
-
-                              {/* Message Bubble */}
-                              <div
-                                className={`rounded-lg px-4 py-2 ${
-                                  isOwn
-                                    ? 'bg-primary text-primary-foreground'
-                                    : isAdmin
-                                      ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100'
-                                      : 'bg-muted'
-                                }`}
-                              >
-                                {message.content && (
-                                  <p className="text-sm whitespace-pre-wrap break-words">
-                                    {searchResults && searchQuery ? (
-                                      <span>{highlightText(message.content, searchQuery)}</span>
-                                    ) : (
-                                      message.content
-                                    )}
-                                  </p>
-                                )}
-
-                                {/* Attachments */}
-                                {message.attachments && message.attachments.length > 0 && (
-                                  <div className="mt-2 space-y-2">
-                                    {message.attachments.map(attachment => (
-                                      <MediaAttachment
-                                        key={attachment.id}
-                                        attachment={{
-                                          id: attachment.id,
-                                          file_name: attachment.file_name,
-                                          file_type: attachment.file_type,
-                                          file_url: attachment.file_url,
-                                          storage_path: attachment.storage_path,
-                                          file_size: attachment.file_size,
-                                        }}
-                                        size="medium"
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div ref={messagesEndRef} />
-                    </div>
-                  )}
-                </ScrollArea>
-
-                {/* Message Input */}
-                <div className="border-t p-2 sm:p-3 md:p-4">
-                  {/* Selected Files Preview */}
-                  {selectedFiles.length > 0 && (
-                    <div className="mb-2 flex flex-wrap gap-2">
-                      {selectedFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 bg-muted px-2 py-1 rounded text-sm"
-                        >
-                          <Paperclip className="h-3 w-3" />
-                          <span className="truncate max-w-[150px]">{file.name}</span>
-                          <button
-                            onClick={() =>
-                              setSelectedFiles(prev => prev.filter((_, i) => i !== index))
-                            }
-                            className="text-destructive hover:text-destructive/80"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <Textarea
-                      value={messageContent}
-                      onChange={e => setMessageContent(e.target.value)}
-                      placeholder="Tapez votre message..."
-                      className="min-h-[60px] sm:min-h-[80px] resize-none text-sm sm:text-base"
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <div className="flex flex-row sm:flex-col gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setShowCameraDialog(true)}
-                        disabled={uploadingFiles}
-                        aria-label="Prendre une photo"
-                        title="Prendre une photo"
-                        className="h-9 w-9 sm:h-10 sm:w-10"
-                      >
-                        <Camera className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadingFiles}
-                        aria-label="Joindre un fichier"
-                        title="Joindre un fichier"
-                        className="h-9 w-9 sm:h-10 sm:w-10"
-                      >
-                        <Paperclip className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        className="hidden"
-                        onChange={handleFileSelect}
-                        accept="image/*,video/*,.pdf,.doc,.docx,.txt"
-                      />
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={
-                          sendingMessage ||
-                          uploadingFiles ||
-                          (!messageContent.trim() && selectedFiles.length === 0)
-                        }
-                        size="icon"
-                        aria-label="Envoyer le message"
-                        className="h-9 w-9 sm:h-10 sm:w-10"
-                      >
-                        {sendingMessage || uploadingFiles ? (
-                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                        ) : (
-                          <Send className="h-3 w-3 sm:h-4 sm:w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Sidebar - Store/Product Info (Desktop) */}
-              <div className="space-y-4 hidden lg:block">
-                {currentConversation?.store && (
-                  <Card>
-                    <CardHeader className="p-3 md:p-6">
-                      <CardTitle className="text-base md:text-lg">Boutique</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 md:p-6">
-                      <div className="flex items-center gap-3">
-                        {currentConversation.store.logo_url && (
-                          <Avatar>
-                            <AvatarImage src={currentConversation.store.logo_url} />
-                            <AvatarFallback>
-                              <Store className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div>
-                          <p className="font-medium text-sm md:text-base">
-                            {currentConversation.store.name}
-                          </p>
-                          <p className="text-xs md:text-sm text-muted-foreground">
-                            {currentConversation.store.slug}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {currentConversation?.product && (
-                  <Card>
-                    <CardHeader className="p-3 md:p-6">
-                      <CardTitle className="text-base md:text-lg">Produit</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3 md:p-6">
-                      <div className="flex items-center gap-3">
-                        {currentConversation.product.image_url && (
-                          <img
-                            src={currentConversation.product.image_url}
-                            alt={currentConversation.product.name}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded object-cover"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        )}
-                        <div>
-                          <p className="font-medium text-xs md:text-sm">
-                            {currentConversation.product.name}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
-
-            {/* Sidebar - Store/Product Info (Mobile/Tablet - Below) */}
-            {(currentConversation?.store || currentConversation?.product) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:hidden mt-4">
-                {currentConversation?.store && (
-                  <Card>
-                    <CardHeader className="p-3">
-                      <CardTitle className="text-base">Boutique</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-3">
-                        {currentConversation.store.logo_url && (
-                          <Avatar>
-                            <AvatarImage src={currentConversation.store.logo_url} />
-                            <AvatarFallback>
-                              <Store className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div>
-                          <p className="font-medium text-sm">{currentConversation.store.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {currentConversation.store.slug}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {currentConversation?.product && (
-                  <Card>
-                    <CardHeader className="p-3">
-                      <CardTitle className="text-base">Produit</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-3">
-                        {currentConversation.product.image_url && (
-                          <img
-                            src={currentConversation.product.image_url}
-                            alt={currentConversation.product.name}
-                            className="w-10 h-10 rounded object-cover"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        )}
-                        <div>
-                          <p className="font-medium text-xs">{currentConversation.product.name}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {currentConversation.admin_intervention && (
+                  <Badge variant="destructive" className="flex items-center gap-1">
+                    <Crown className="h-3 w-3" />
+                    Intervention Admin
+                  </Badge>
                 )}
               </div>
             )}
           </div>
-        </main>
+        </div>
+
+        {/* Main Chat Interface */}
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_220px] gap-3 md:gap-4">
+          {/* Liste des conversations (si pas de storeId spécifique) */}
+          {!finalStoreId && conversations.length > 1 && (
+            <Card className="md:block">
+              <CardHeader className="p-3 md:p-6">
+                <CardTitle className="text-base md:text-lg">Conversations</CardTitle>
+                <CardDescription className="text-xs md:text-sm">
+                  {conversations.length} conversation(s)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] max-h-[600px] md:max-h-none">
+                  <div className="space-y-1">
+                    {conversations.map(conv => (
+                      <button
+                        key={conv.id}
+                        onClick={() => openConversation(conv.id)}
+                        className={`w-full text-left p-2 md:p-3 hover:bg-accent transition-colors border-b last:border-b-0 ${
+                          currentConversation?.id === conv.id ? 'bg-accent' : ''
+                        }`}
+                      >
+                        <div className="flex items-start gap-2 md:gap-3">
+                          <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
+                            <AvatarImage src={conv.store?.logo_url || undefined} />
+                            <AvatarFallback>
+                              <Store className="h-3 w-3 md:h-4 md:w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1 gap-2">
+                              <p className="font-medium text-xs md:text-sm truncate">
+                                {conv.store?.name || 'Boutique'}
+                              </p>
+                              {conv.unread_count && conv.unread_count > 0 && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 flex-shrink-0"
+                                >
+                                  {conv.unread_count}
+                                </Badge>
+                              )}
+                            </div>
+                            {conv.product && (
+                              <p className="text-[10px] md:text-xs text-muted-foreground truncate mb-1">
+                                {conv.product.name}
+                              </p>
+                            )}
+                            {conv.last_message && (
+                              <p className="text-[10px] md:text-xs text-muted-foreground truncate">
+                                {conv.last_message.content || 'Pièce jointe'}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
+          {/* Messages Thread */}
+          <Card className="flex flex-col h-[calc(100vh-280px)] md:h-[calc(100vh-280px)] min-h-[400px] md:min-h-[500px]">
+            <CardHeader className="border-b p-3 md:p-6">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle className="text-base md:text-lg">Messages</CardTitle>
+                  <CardDescription className="text-xs md:text-sm">
+                    {searchResults
+                      ? `${searchResults.total} résultat(s)`
+                      : `${messages.length} message${messages.length > 1 ? 's' : ''}`}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {showSearch ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Rechercher dans les messages..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        onKeyDown={async e => {
+                          if (e.key === 'Enter' && searchQuery.trim()) {
+                            await searchMessages({
+                              conversationId: currentConversation?.id,
+                              query: searchQuery.trim(),
+                            });
+                          }
+                        }}
+                        className="w-full sm:w-48 md:w-64"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (searchQuery.trim()) {
+                            await searchMessages({
+                              conversationId: currentConversation?.id,
+                              query: searchQuery.trim(),
+                            });
+                          }
+                        }}
+                        disabled={isSearchingMessages || !searchQuery.trim()}
+                      >
+                        <Search className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setShowSearch(false);
+                          clearSearch();
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="ghost" size="icon" onClick={() => setShowSearch(true)}>
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+
+            {/* Messages List */}
+            <ScrollArea
+              className="flex-1 p-2 sm:p-3 md:p-4"
+              onScrollCapture={e => {
+                // Infinite scroll: charger plus de messages quand on scroll en haut
+                const target = e.target as HTMLElement;
+                if (
+                  target.scrollTop === 0 &&
+                  !messagesLoading &&
+                  currentConversation &&
+                  hasMoreMessages
+                ) {
+                  loadMoreMessages();
+                }
+              }}
+            >
+              {messagesLoading || isSearchingMessages ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : (searchResults ? searchResults.messages : messages).length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">
+                      {searchResults ? 'Aucun résultat trouvé' : 'Aucun message pour le moment'}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {searchResults
+                        ? "Essayez avec d'autres mots-clés"
+                        : 'Commencez la conversation ci-dessous'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Référence pour le scroll automatique */}
+                  <div ref={messagesTopRef} />
+
+                  {/* Bouton "Charger plus" en haut si disponible */}
+                  {!searchResults && hasMoreMessages && (
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={loadMoreMessages}
+                        disabled={messagesLoading}
+                        className="text-xs"
+                      >
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                        {messagesLoading
+                          ? 'Chargement...'
+                          : `Charger plus (${totalMessagesCount - messages.length} restants)`}
+                      </Button>
+                    </div>
+                  )}
+
+                  {(searchResults ? searchResults.messages : messages).map(message => {
+                    const isOwn = message.sender_id === user?.id;
+                    const isAdmin = message.sender_type === 'admin';
+
+                    return (
+                      <div
+                        key={message.id}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
+                        >
+                          {/* Sender Info */}
+                          <div className="flex items-center gap-2 px-2">
+                            {!isOwn && (
+                              <div className="flex items-center gap-1">
+                                {getSenderIcon(message.sender_type)}
+                                <span className="text-xs font-medium">
+                                  {isAdmin
+                                    ? 'Admin'
+                                    : message.sender_type === 'store'
+                                      ? 'Vendeur'
+                                      : 'Vous'}
+                                </span>
+                              </div>
+                            )}
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
+                            </span>
+                            {isOwn && message.is_read && (
+                              <CheckCheck className="h-3 w-3 text-primary" />
+                            )}
+                            {isOwn && !message.is_read && (
+                              <Check className="h-3 w-3 text-muted-foreground" />
+                            )}
+                          </div>
+
+                          {/* Message Bubble */}
+                          <div
+                            className={`rounded-lg px-4 py-2 ${
+                              isOwn
+                                ? 'bg-primary text-primary-foreground'
+                                : isAdmin
+                                  ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100'
+                                  : 'bg-muted'
+                            }`}
+                          >
+                            {message.content && (
+                              <p className="text-sm whitespace-pre-wrap break-words">
+                                {searchResults && searchQuery ? (
+                                  <span>{highlightText(message.content, searchQuery)}</span>
+                                ) : (
+                                  message.content
+                                )}
+                              </p>
+                            )}
+
+                            {/* Attachments */}
+                            {message.attachments && message.attachments.length > 0 && (
+                              <div className="mt-2 space-y-2">
+                                {message.attachments.map(attachment => (
+                                  <MediaAttachment
+                                    key={attachment.id}
+                                    attachment={{
+                                      id: attachment.id,
+                                      file_name: attachment.file_name,
+                                      file_type: attachment.file_type,
+                                      file_url: attachment.file_url,
+                                      storage_path: attachment.storage_path,
+                                      file_size: attachment.file_size,
+                                    }}
+                                    size="medium"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </ScrollArea>
+
+            {/* Message Input */}
+            <div className="border-t p-2 sm:p-3 md:p-4">
+              {/* Selected Files Preview */}
+              {selectedFiles.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-muted px-2 py-1 rounded text-sm"
+                    >
+                      <Paperclip className="h-3 w-3" />
+                      <span className="truncate max-w-[150px]">{file.name}</span>
+                      <button
+                        onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Textarea
+                  value={messageContent}
+                  onChange={e => setMessageContent(e.target.value)}
+                  placeholder="Tapez votre message..."
+                  className="min-h-[60px] sm:min-h-[80px] resize-none text-sm sm:text-base"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                />
+                <div className="flex flex-row sm:flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowCameraDialog(true)}
+                    disabled={uploadingFiles}
+                    aria-label="Prendre une photo"
+                    title="Prendre une photo"
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                  >
+                    <Camera className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingFiles}
+                    aria-label="Joindre un fichier"
+                    title="Joindre un fichier"
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                  >
+                    <Paperclip className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileSelect}
+                    accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={
+                      sendingMessage ||
+                      uploadingFiles ||
+                      (!messageContent.trim() && selectedFiles.length === 0)
+                    }
+                    size="icon"
+                    aria-label="Envoyer le message"
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                  >
+                    {sendingMessage || uploadingFiles ? (
+                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-3 w-3 sm:h-4 sm:w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Sidebar - Store/Product Info (Desktop) */}
+          <div className="space-y-4 hidden lg:block">
+            {currentConversation?.store && (
+              <Card>
+                <CardHeader className="p-3 md:p-6">
+                  <CardTitle className="text-base md:text-lg">Boutique</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 md:p-6">
+                  <div className="flex items-center gap-3">
+                    {currentConversation.store.logo_url && (
+                      <Avatar>
+                        <AvatarImage src={currentConversation.store.logo_url} />
+                        <AvatarFallback>
+                          <Store className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div>
+                      <p className="font-medium text-sm md:text-base">
+                        {currentConversation.store.name}
+                      </p>
+                      <p className="text-xs md:text-sm text-muted-foreground">
+                        {currentConversation.store.slug}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {currentConversation?.product && (
+              <Card>
+                <CardHeader className="p-3 md:p-6">
+                  <CardTitle className="text-base md:text-lg">Produit</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 md:p-6">
+                  <div className="flex items-center gap-3">
+                    {currentConversation.product.image_url && (
+                      <img
+                        src={currentConversation.product.image_url}
+                        alt={currentConversation.product.name}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
+                    <div>
+                      <p className="font-medium text-xs md:text-sm">
+                        {currentConversation.product.name}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Sidebar - Store/Product Info (Mobile/Tablet - Below) */}
+        {(currentConversation?.store || currentConversation?.product) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:hidden mt-4">
+            {currentConversation?.store && (
+              <Card>
+                <CardHeader className="p-3">
+                  <CardTitle className="text-base">Boutique</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    {currentConversation.store.logo_url && (
+                      <Avatar>
+                        <AvatarImage src={currentConversation.store.logo_url} />
+                        <AvatarFallback>
+                          <Store className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div>
+                      <p className="font-medium text-sm">{currentConversation.store.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {currentConversation.store.slug}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {currentConversation?.product && (
+              <Card>
+                <CardHeader className="p-3">
+                  <CardTitle className="text-base">Produit</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    {currentConversation.product.image_url && (
+                      <img
+                        src={currentConversation.product.image_url}
+                        alt={currentConversation.product.name}
+                        className="w-10 h-10 rounded object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
+                    <div>
+                      <p className="font-medium text-xs">{currentConversation.product.name}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Camera Capture Dialog */}
@@ -1309,12 +1283,6 @@ Le message sera envoyé sans pièces jointes.`;
         onCapture={handleCameraCapture}
         captureLabel="Prendre la photo"
       />
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-

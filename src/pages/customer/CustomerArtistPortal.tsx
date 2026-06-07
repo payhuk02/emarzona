@@ -3,9 +3,8 @@
  */
 
 import { useEffect, useState } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Link } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,136 +66,125 @@ export default function CustomerArtistPortal() {
   }, [userId]);
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl">
-            <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-                <Palette className="h-8 w-8 text-pink-500" />
-                Mon espace Artiste
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Vos achats d&apos;œuvres et certificats d&apos;authenticité
-              </p>
-            </div>
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl">
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Palette className="h-8 w-8 text-pink-500" />
+            Mon espace Artiste
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Vos achats d&apos;œuvres et certificats d&apos;authenticité
+          </p>
+        </div>
 
-            <Tabs defaultValue="purchases">
-              <TabsList className="mb-4">
-                <TabsTrigger value="purchases">Mes achats</TabsTrigger>
-                <TabsTrigger value="certificates">Certificats ({certificates.length})</TabsTrigger>
-              </TabsList>
+        <Tabs defaultValue="purchases">
+          <TabsList className="mb-4">
+            <TabsTrigger value="purchases">Mes achats</TabsTrigger>
+            <TabsTrigger value="certificates">Certificats ({certificates.length})</TabsTrigger>
+          </TabsList>
 
-              <TabsContent value="purchases">
-                {ordersLoading ? (
-                  <div className="flex justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : orders.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center text-muted-foreground">
-                      <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-40" />
-                      <p>Aucun achat d&apos;œuvre pour le moment.</p>
-                      <Button asChild className="mt-4" variant="secondary">
-                        <Link to="/collections">Explorer les collections</Link>
-                      </Button>
+          <TabsContent value="purchases">
+            {ordersLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : orders.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                  <p>Aucun achat d&apos;œuvre pour le moment.</p>
+                  <Button asChild className="mt-4" variant="secondary">
+                    <Link to="/collections">Explorer les collections</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {orders.map(order => (
+                  <Card key={order.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <CardTitle className="text-base">Commande {order.order_number}</CardTitle>
+                        <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
+                          {order.payment_status}
+                        </Badge>
+                      </div>
+                      <CardDescription>
+                        {format(new Date(order.created_at), 'PPP', { locale: fr })} —{' '}
+                        {order.total_amount.toLocaleString('fr-FR')} {order.currency}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {order.items.map(item => (
+                        <div
+                          key={`${order.id}-${item.product_id}`}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <span>{item.product_name}</span>
+                          <Button asChild variant="link" className="h-auto p-0">
+                            <Link to={`/artist/${item.product_id}`}>Voir l&apos;œuvre</Link>
+                          </Button>
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map(order => (
-                      <Card key={order.id}>
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <CardTitle className="text-base">
-                              Commande {order.order_number}
-                            </CardTitle>
-                            <Badge
-                              variant={order.payment_status === 'paid' ? 'default' : 'secondary'}
-                            >
-                              {order.payment_status}
-                            </Badge>
-                          </div>
-                          <CardDescription>
-                            {format(new Date(order.created_at), 'PPP', { locale: fr })} —{' '}
-                            {order.total_amount.toLocaleString('fr-FR')} {order.currency}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {order.items.map(item => (
-                            <div
-                              key={`${order.id}-${item.product_id}`}
-                              className="flex items-center justify-between text-sm"
-                            >
-                              <span>{item.product_name}</span>
-                              <Button asChild variant="link" className="h-auto p-0">
-                                <Link to={`/artist/${item.product_id}`}>Voir l&apos;œuvre</Link>
-                              </Button>
-                            </div>
-                          ))}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-              <TabsContent value="certificates">
-                {certsLoading ? (
-                  <div className="flex justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : certificates.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center text-muted-foreground">
-                      <FileCheck className="h-12 w-12 mx-auto mb-4 opacity-40" />
-                      <p>Aucun certificat disponible pour le moment.</p>
+          <TabsContent value="certificates">
+            {certsLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : certificates.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <FileCheck className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                  <p>Aucun certificat disponible pour le moment.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {certificates.map(cert => (
+                  <Card key={cert.id}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">{cert.artwork_title}</CardTitle>
+                      <CardDescription>
+                        {cert.artist_name} — N° {cert.certificate_number}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
+                      {cert.certificate_pdf_url && (
+                        <Button asChild size="sm" variant="outline">
+                          <a
+                            href={cert.certificate_pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            PDF
+                          </a>
+                        </Button>
+                      )}
+                      {cert.verification_code && (
+                        <>
+                          <Badge variant="outline">Code: {cert.verification_code}</Badge>
+                          <Button asChild size="sm" variant="secondary">
+                            <Link to={`/verify/${cert.verification_code}`}>Vérifier en ligne</Link>
+                          </Button>
+                        </>
+                      )}
                     </CardContent>
                   </Card>
-                ) : (
-                  <div className="space-y-4">
-                    {certificates.map(cert => (
-                      <Card key={cert.id}>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">{cert.artwork_title}</CardTitle>
-                          <CardDescription>
-                            {cert.artist_name} — N° {cert.certificate_number}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex flex-wrap gap-2">
-                          {cert.certificate_pdf_url && (
-                            <Button asChild size="sm" variant="outline">
-                              <a
-                                href={cert.certificate_pdf_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                PDF
-                              </a>
-                            </Button>
-                          )}
-                          {cert.verification_code && (
-                            <>
-                              <Badge variant="outline">Code: {cert.verification_code}</Badge>
-                              <Button asChild size="sm" variant="secondary">
-                                <Link to={`/verify/${cert.verification_code}`}>
-                                  Vérifier en ligne
-                                </Link>
-                              </Button>
-                            </>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }

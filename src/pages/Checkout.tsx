@@ -13,9 +13,8 @@
  */
 
 import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -1343,132 +1342,120 @@ export default function Checkout() {
 
   if (cartLoading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-6 pb-16 md:pb-0">
-            <div className="max-w-6xl mx-auto space-y-6">
-              <Skeleton className="h-10 w-64" />
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-4">
-                  <Skeleton className="h-96" />
-                </div>
-                <Skeleton className="h-96" />
-              </div>
+      <AppPageShell mainClassName="p-6 pb-16 md:pb-0">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <Skeleton className="h-10 w-64" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-96" />
             </div>
-          </main>
+            <Skeleton className="h-96" />
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   if (items.length === 0) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-6 pb-16 md:pb-0">
-            <div className="max-w-4xl mx-auto">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Votre panier est vide.{' '}
-                  <Button variant="link" onClick={() => navigate('/cart')}>
-                    Retour au panier
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            </div>
-          </main>
+      <AppPageShell mainClassName="p-6 pb-16 md:pb-0">
+        <div className="max-w-4xl mx-auto">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Votre panier est vide.{' '}
+              <Button variant="link" onClick={() => navigate('/cart')}>
+                Retour au panier
+              </Button>
+            </AlertDescription>
+          </Alert>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50 dark:bg-gray-900">
-        <AppSidebar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8 pb-16 md:pb-0">
-          <div className="max-w-6xl mx-auto space-y-6">
-            {/* Header */}
-            <header>
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
-                <ShoppingBag className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" aria-hidden="true" />
-                Finaliser la commande
-              </h1>
-              <p
-                className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1"
-                id="checkout-description"
-              >
-                Remplissez vos informations pour compléter votre achat
-              </p>
-            </header>
+    <AppPageShell
+      shellClassName="bg-gray-50 dark:bg-gray-900"
+      mainClassName="p-4 md:p-6 lg:p-8 pb-16 md:pb-0"
+    >
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <header>
+          <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2">
+            <ShoppingBag className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" aria-hidden="true" />
+            Finaliser la commande
+          </h1>
+          <p
+            className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground mt-0.5 sm:mt-1"
+            id="checkout-description"
+          >
+            Remplissez vos informations pour compléter votre achat
+          </p>
+        </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Formulaire (2/3) */}
-              <div className="lg:col-span-2 space-y-6">
-                <Suspense fallback={<CheckoutSectionFallback />}>
-                  <CheckoutShippingSection
-                    formData={formData}
-                    setFormData={setFormData}
-                    formErrors={formErrors}
-                    setFormErrors={setFormErrors}
-                    storeId={storeId}
-                    appliedGiftCard={appliedGiftCard}
-                    onGiftCardApply={handleGiftCardApply}
-                    onGiftCardRemove={handleGiftCardRemove}
-                  />
-                </Suspense>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Formulaire (2/3) */}
+          <div className="lg:col-span-2 space-y-6">
+            <Suspense fallback={<CheckoutSectionFallback />}>
+              <CheckoutShippingSection
+                formData={formData}
+                setFormData={setFormData}
+                formErrors={formErrors}
+                setFormErrors={setFormErrors}
+                storeId={storeId}
+                appliedGiftCard={appliedGiftCard}
+                onGiftCardApply={handleGiftCardApply}
+                onGiftCardRemove={handleGiftCardRemove}
+              />
+            </Suspense>
 
-                {/* Méthode de paiement */}
-                <PaymentProviderSelector
-                  value={selectedPaymentProvider}
-                  onChange={setSelectedPaymentProvider}
-                  storeId={storeId || undefined}
-                  amount={finalTotal}
-                  currency={
-                    items[0]?.currency && items[0].currency.length === 3
-                      ? items[0].currency.toUpperCase()
-                      : 'XOF'
-                  }
-                  buyerCountry={formData.country || null}
-                />
-              </div>
-
-              <aside className="lg:col-span-1" aria-label="Récapitulatif de la commande">
-                <Suspense fallback={<CheckoutSectionFallback />}>
-                  <CheckoutOrderSummary
-                    items={items}
-                    summary={summary}
-                    isCheckingStores={isCheckingStores}
-                    isMultiStore={isMultiStore}
-                    storeGroups={storeGroups}
-                    appliedCouponCode={appliedCouponCode}
-                    couponDiscount={couponDiscount}
-                    giftCardAmount={giftCardAmount}
-                    appliedGiftCard={appliedGiftCard}
-                    taxLoading={taxLoading}
-                    taxBreakdown={taxBreakdown}
-                    taxAmount={taxAmount}
-                    itemDiscounts={itemDiscounts}
-                    shippingAmount={shippingAmount}
-                    finalTotal={finalTotal}
-                    storeId={storeId}
-                    customerId={customerId}
-                    isFirstOrder={isFirstOrder}
-                    isProcessing={isProcessing}
-                    hasServiceInCart={hasServiceInCart}
-                    handleCheckout={handleCheckout}
-                    onCouponApply={handleCouponApply}
-                    onCouponRemove={handleCouponRemove}
-                  />
-                </Suspense>
-              </aside>
-            </div>
+            {/* Méthode de paiement */}
+            <PaymentProviderSelector
+              value={selectedPaymentProvider}
+              onChange={setSelectedPaymentProvider}
+              storeId={storeId || undefined}
+              amount={finalTotal}
+              currency={
+                items[0]?.currency && items[0].currency.length === 3
+                  ? items[0].currency.toUpperCase()
+                  : 'XOF'
+              }
+              buyerCountry={formData.country || null}
+            />
           </div>
-        </main>
+
+          <aside className="lg:col-span-1" aria-label="Récapitulatif de la commande">
+            <Suspense fallback={<CheckoutSectionFallback />}>
+              <CheckoutOrderSummary
+                items={items}
+                summary={summary}
+                isCheckingStores={isCheckingStores}
+                isMultiStore={isMultiStore}
+                storeGroups={storeGroups}
+                appliedCouponCode={appliedCouponCode}
+                couponDiscount={couponDiscount}
+                giftCardAmount={giftCardAmount}
+                appliedGiftCard={appliedGiftCard}
+                taxLoading={taxLoading}
+                taxBreakdown={taxBreakdown}
+                taxAmount={taxAmount}
+                itemDiscounts={itemDiscounts}
+                shippingAmount={shippingAmount}
+                finalTotal={finalTotal}
+                storeId={storeId}
+                customerId={customerId}
+                isFirstOrder={isFirstOrder}
+                isProcessing={isProcessing}
+                hasServiceInCart={hasServiceInCart}
+                handleCheckout={handleCheckout}
+                onCouponApply={handleCouponApply}
+                onCouponRemove={handleCouponRemove}
+              />
+            </Suspense>
+          </aside>
+        </div>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }

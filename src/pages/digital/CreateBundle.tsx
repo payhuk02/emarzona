@@ -4,8 +4,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { AppPageShell } from '@/components/layout/AppPageShell';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useStore } from '@/hooks/useStore';
@@ -75,7 +75,9 @@ export default function CreateBundle() {
         setProductsLoading(true);
         const { data, error } = await supabase
           .from('products')
-          .select('id, name, description, price, currency, image_url, category, is_active, is_draft')
+          .select(
+            'id, name, description, price, currency, image_url, category, is_active, is_draft'
+          )
           .eq('store_id', store.id)
           .eq('product_type', 'digital')
           .order('created_at', { ascending: false });
@@ -87,7 +89,8 @@ export default function CreateBundle() {
           storeId: store.id,
         });
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Erreur lors du chargement des produits');
+        const err =
+          error instanceof Error ? error : new Error('Erreur lors du chargement des produits');
         setError(err);
         logger.error(err, {
           error,
@@ -118,52 +121,61 @@ export default function CreateBundle() {
     isAvailable: product.is_active !== false && product.is_draft !== true,
   }));
 
-  const handleSave = useCallback(async (bundle: DigitalBundle) => {
-    if (!store?.id) {
-      toast({
-        title: 'Erreur',
-        description: 'Boutique non trouvée',
-        variant: 'destructive',
-      });
-      logger.error('Boutique non trouvée lors de la création du bundle', {
-        storeId: store?.id,
-      });
-      return;
-    }
+  const handleSave = useCallback(
+    async (bundle: DigitalBundle) => {
+      if (!store?.id) {
+        toast({
+          title: 'Erreur',
+          description: 'Boutique non trouvée',
+          variant: 'destructive',
+        });
+        logger.error('Boutique non trouvée lors de la création du bundle', {
+          storeId: store?.id,
+        });
+        return;
+      }
 
-    try {
-      const slug = generateSlug(bundle.name);
-      
-      await createBundle.mutateAsync({
-        store_id: store.id,
-        name: bundle.name,
-        slug,
-        description: bundle.description,
-        short_description: bundle.description?.substring(0, 200),
-        original_price: bundle.originalTotalPrice || 0,
-        bundle_price: bundle.discountedPrice || 0,
-        discount_type: bundle.discountType === 'percentage' ? 'percentage' : bundle.discountType === 'fixed' ? 'fixed' : 'custom',
-        discount_value: bundle.discountValue || 0,
-        product_ids: bundle.productIds || [],
-      });
+      try {
+        const slug = generateSlug(bundle.name);
 
-      logger.info('Bundle créé avec succès', {
-        bundleName: bundle.name,
-        storeId: store.id,
-        productCount: bundle.productIds?.length || 0,
-      });
+        await createBundle.mutateAsync({
+          store_id: store.id,
+          name: bundle.name,
+          slug,
+          description: bundle.description,
+          short_description: bundle.description?.substring(0, 200),
+          original_price: bundle.originalTotalPrice || 0,
+          bundle_price: bundle.discountedPrice || 0,
+          discount_type:
+            bundle.discountType === 'percentage'
+              ? 'percentage'
+              : bundle.discountType === 'fixed'
+                ? 'fixed'
+                : 'custom',
+          discount_value: bundle.discountValue || 0,
+          product_ids: bundle.productIds || [],
+        });
 
-      navigate(`/dashboard/digital-products/bundles`);
-    } catch ( _error: unknown) {
-      const err = error instanceof Error ? error : new Error('Erreur lors de la création du bundle');
-      logger.error(err, {
-        error,
-        bundleName: bundle.name,
-        storeId: store.id,
-      });
-      // Error handled by hook
-    }
-  }, [store?.id, createBundle, navigate, toast]);
+        logger.info('Bundle créé avec succès', {
+          bundleName: bundle.name,
+          storeId: store.id,
+          productCount: bundle.productIds?.length || 0,
+        });
+
+        navigate(`/dashboard/digital-products/bundles`);
+      } catch (_error: unknown) {
+        const err =
+          error instanceof Error ? error : new Error('Erreur lors de la création du bundle');
+        logger.error(err, {
+          error,
+          bundleName: bundle.name,
+          storeId: store.id,
+        });
+        // Error handled by hook
+      }
+    },
+    [store?.id, createBundle, navigate, toast]
+  );
 
   const handleCancel = useCallback(() => {
     navigate(-1);
@@ -185,123 +197,111 @@ export default function CreateBundle() {
   // Cela évite l'affichage prématuré de l'erreur
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <Skeleton className="h-10 w-64" />
-              <Skeleton className="h-96" />
-            </div>
-          </main>
+      <AppPageShell>
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-96" />
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   // Afficher l'erreur seulement après que le chargement soit complètement terminé
   if (shouldShowError) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6">
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="pt-6">
-                  <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      Vous devez créer une boutique avant de créer un bundle.
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
-            </div>
-          </main>
+      <AppPageShell>
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <CardContent className="pt-6">
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Vous devez créer une boutique avant de créer un bundle.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header avec animation - Style Inventaire */}
-            <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3">
-                <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500 shrink-0">
-                        <Package className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
-                      </div>
-                      <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
-                        Créer un Bundle de Produits Digitaux
-                      </span>
-                    </div>
-                  </h1>
-                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                    Regroupez plusieurs produits et offrez-les à prix réduit
-                  </p>
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header avec animation - Style Inventaire */}
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+            <SidebarTrigger className="mt-1 sm:mt-0 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 mb-1 sm:mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500 shrink-0">
+                    <Package
+                      className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
+                    Créer un Bundle de Produits Digitaux
+                  </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Error Alert - Style Inventaire */}
-            {error && (
-              <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-4">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  {error instanceof Error ? error.message : 'Erreur lors du chargement des produits digitaux'}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Bundle Manager */}
-            <div ref={contentRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
-                <CardHeader className="p-3 sm:p-4 lg:p-6">
-                  <CardTitle className="text-base sm:text-lg md:text-xl">Configuration du Bundle</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm mt-1 sm:mt-2">
-                    Sélectionnez les produits à inclure et configurez la remise
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-4 lg:p-6 pt-0 sm:pt-0">
-                  {createBundle.isPending ? (
-                    <div className="flex flex-col sm:flex-row items-center justify-center py-8 sm:py-12 gap-2 sm:gap-3">
-                      <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-purple-600" />
-                      <span className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-                        Création du bundle...
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="w-full overflow-x-auto">
-                      <DigitalBundleManager
-                        availableProducts={availableProducts}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
-                        mode="create"
-                      />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              </h1>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                Regroupez plusieurs produits et offrez-les à prix réduit
+              </p>
             </div>
           </div>
-        </main>
+        </div>
+
+        {/* Error Alert - Style Inventaire */}
+        {error && (
+          <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {error instanceof Error
+                ? error.message
+                : 'Erreur lors du chargement des produits digitaux'}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Bundle Manager */}
+        <div ref={contentRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+            <CardHeader className="p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-base sm:text-lg md:text-xl">
+                Configuration du Bundle
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm mt-1 sm:mt-2">
+                Sélectionnez les produits à inclure et configurez la remise
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0 sm:pt-0">
+              {createBundle.isPending ? (
+                <div className="flex flex-col sm:flex-row items-center justify-center py-8 sm:py-12 gap-2 sm:gap-3">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-purple-600" />
+                  <span className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+                    Création du bundle...
+                  </span>
+                </div>
+              ) : (
+                <div className="w-full overflow-x-auto">
+                  <DigitalBundleManager
+                    availableProducts={availableProducts}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                    mode="create"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-
-

@@ -12,8 +12,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -400,538 +399,506 @@ export default function MyProfile() {
 
   if (!user) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Chargement du profil...</p>
-              </div>
-            </div>
-          </main>
+      <AppPageShell>
+        <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Chargement du profil...</p>
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header avec animation - Style Inventaire et Mes Cours */}
-            <div
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header avec animation - Style Inventaire et Mes Cours */}
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <div>
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <User
+                  className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
+                  aria-hidden="true"
+                />
+              </div>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Mon Profil
+              </span>
+            </h1>
+            <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
+              Gérez vos informations personnelles et vos préférences
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleRefresh}
+              size="sm"
+              variant="outline"
+              className="min-h-[44px] h-11 sm:h-12 transition-all hover:scale-105 text-xs sm:text-sm"
             >
-              <div>
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <User
-                      className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-500 dark:text-purple-400"
-                      aria-hidden="true"
+              <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">Rafraîchir</span>
+              <span className="sm:hidden">Raf.</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Gestion d'erreurs */}
+        {error && (
+          <Alert
+            variant="destructive"
+            className="animate-in fade-in slide-in-from-top-4 duration-500"
+          >
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Tabs */}
+        <div
+          ref={tabsRef}
+          className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100"
+        >
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+            <TabsList className="w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 bg-muted/50">
+              <TabsTrigger
+                value="profile"
+                className="shrink-0 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm py-2 sm:py-2.5"
+              >
+                <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                Profil
+              </TabsTrigger>
+              <TabsTrigger
+                value="addresses"
+                className="shrink-0 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm py-2 sm:py-2.5"
+              >
+                <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                Adresses
+              </TabsTrigger>
+              <TabsTrigger
+                value="security"
+                className="shrink-0 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm py-2 sm:py-2.5"
+              >
+                <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                Sécurité
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Profile Tab */}
+            <TabsContent
+              value="profile"
+              className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
+            >
+              <div ref={contentRef}>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
+                      Informations Personnelles
+                    </CardTitle>
+                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
+                      Mettez à jour vos informations de profil
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 sm:space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-xs sm:text-sm">
+                        Email
+                      </Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          type="email"
+                          value={profileData.email}
+                          disabled
+                          className="pl-10 sm:pl-12 bg-muted min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        L'email ne peut pas être modifié
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="full_name" className="text-xs sm:text-sm">
+                        Nom Complet
+                      </Label>
+                      <Input
+                        id="full_name"
+                        value={profileData.full_name}
+                        onChange={e =>
+                          setProfileData({ ...profileData, full_name: e.target.value })
+                        }
+                        onKeyDown={handleSpaceKeyDown}
+                        placeholder="Jean Dupont"
+                        className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-xs sm:text-sm">
+                        Téléphone
+                      </Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={profileData.phone}
+                          onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
+                          onKeyDown={handleSpaceKeyDown}
+                          placeholder="+226 70 12 34 56"
+                          className="pl-10 sm:pl-12 min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => updateProfile.mutate(profileData)}
+                      disabled={updateProfile.isPending}
+                      className="min-h-[44px] touch-manipulation w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-300"
+                    >
+                      {updateProfile.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sauvegarde...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Sauvegarder
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Addresses Tab */}
+            <TabsContent
+              value="addresses"
+              className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
+            >
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-base sm:text-lg">Mes Adresses de Livraison</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Gérez vos adresses de livraison
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 sm:space-y-6">
+                  {/* Address Form */}
+                  <div className="space-y-4 p-3 sm:p-4 border border-border/50 rounded-lg bg-muted/30">
+                    <h3 className="font-semibold text-sm sm:text-base">
+                      {editingAddress ? "Modifier l'adresse" : 'Nouvelle adresse'}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="addr_full_name" className="text-xs sm:text-sm">
+                          Nom complet *
+                        </Label>
+                        <Input
+                          id="addr_full_name"
+                          value={addressForm.full_name}
+                          onChange={e =>
+                            setAddressForm({ ...addressForm, full_name: e.target.value })
+                          }
+                          onKeyDown={handleSpaceKeyDown}
+                          placeholder="Jean Dupont"
+                          className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="addr_phone" className="text-xs sm:text-sm">
+                          Téléphone *
+                        </Label>
+                        <Input
+                          id="addr_phone"
+                          value={addressForm.phone}
+                          onChange={e => setAddressForm({ ...addressForm, phone: e.target.value })}
+                          onKeyDown={handleSpaceKeyDown}
+                          placeholder="+226 70 12 34 56"
+                          className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="addr_line1" className="text-xs sm:text-sm">
+                          Adresse *
+                        </Label>
+                        <Input
+                          id="addr_line1"
+                          value={addressForm.address_line1}
+                          onChange={e =>
+                            setAddressForm({ ...addressForm, address_line1: e.target.value })
+                          }
+                          onKeyDown={handleSpaceKeyDown}
+                          placeholder="123 Rue principale"
+                          className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="addr_line2" className="text-xs sm:text-sm">
+                          Complément d'adresse
+                        </Label>
+                        <Input
+                          id="addr_line2"
+                          value={addressForm.address_line2}
+                          onChange={e =>
+                            setAddressForm({ ...addressForm, address_line2: e.target.value })
+                          }
+                          placeholder="Appartement, étage..."
+                          className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="addr_city" className="text-xs sm:text-sm">
+                          Ville *
+                        </Label>
+                        <Input
+                          id="addr_city"
+                          value={addressForm.city}
+                          onChange={e => setAddressForm({ ...addressForm, city: e.target.value })}
+                          onKeyDown={handleSpaceKeyDown}
+                          placeholder="Ouagadougou"
+                          className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="addr_postal" className="text-xs sm:text-sm">
+                          Code postal
+                        </Label>
+                        <Input
+                          id="addr_postal"
+                          value={addressForm.postal_code}
+                          onChange={e =>
+                            setAddressForm({ ...addressForm, postal_code: e.target.value })
+                          }
+                          placeholder="01 BP 1234"
+                          className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
+                        />
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="addr_country" className="text-xs sm:text-sm">
+                          Pays *
+                        </Label>
+                        <select
+                          id="addr_country"
+                          value={addressForm.country}
+                          onChange={e =>
+                            setAddressForm({ ...addressForm, country: e.target.value })
+                          }
+                          className="flex min-h-[44px] h-11 sm:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base touch-manipulation cursor-pointer"
+                        >
+                          <option value="BF">Burkina Faso</option>
+                          <option value="CI">Côte d'Ivoire</option>
+                          <option value="SN">Sénégal</option>
+                          <option value="ML">Mali</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        onClick={handleSaveAddress}
+                        size="sm"
+                        className="min-h-[44px] touch-manipulation bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-300"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {editingAddress ? 'Mettre à jour' : 'Ajouter'}
+                      </Button>
+                      {editingAddress && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingAddress(null);
+                            setAddressForm({
+                              full_name: '',
+                              phone: '',
+                              address_line1: '',
+                              address_line2: '',
+                              city: '',
+                              postal_code: '',
+                              country: 'BF',
+                              state: '',
+                              is_default: false,
+                            });
+                          }}
+                          className="min-h-[44px] touch-manipulation"
+                        >
+                          Annuler
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Saved Addresses */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h3 className="font-semibold text-sm sm:text-base">Adresses enregistrées</h3>
+                    {addresses.length === 0 ? (
+                      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                        <CardContent className="p-8 sm:p-12 text-center">
+                          <MapPin className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 animate-in zoom-in duration-500" />
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">Aucune adresse</h3>
+                          <p className="text-sm sm:text-base text-muted-foreground">
+                            Aucune adresse enregistrée pour le moment
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      addresses.map(addr => (
+                        <Card
+                          key={addr.id}
+                          className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
+                        >
+                          <CardContent className="p-4 sm:p-5">
+                            <div className="flex items-start justify-between gap-3 sm:gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                  <p className="font-semibold text-sm sm:text-base break-words">
+                                    {addr.full_name}
+                                  </p>
+                                  {addr.is_default && (
+                                    <Badge variant="default" className="text-xs">
+                                      Par défaut
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                                  {addr.address_line1}
+                                  {addr.address_line2 && `, ${addr.address_line2}`}
+                                </p>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                                  {addr.city}, {addr.postal_code}
+                                </p>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                                  {addr.phone}
+                                </p>
+                              </div>
+                              <div className="flex gap-2 flex-shrink-0">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingAddress(addr);
+                                    setAddressForm(addr);
+                                  }}
+                                  className="min-h-[44px] touch-manipulation"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteAddress(addr.id!)}
+                                  className="min-h-[44px] touch-manipulation text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Security Tab */}
+            <TabsContent
+              value="security"
+              className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
+            >
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
+                    Mot de passe
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Changez votre mot de passe pour plus de sécurité
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 sm:space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="current_password" className="text-xs sm:text-sm">
+                      Mot de passe actuel
+                    </Label>
+                    <Input
+                      id="current_password"
+                      type="password"
+                      className="h-10 sm:h-11 text-sm sm:text-base"
                     />
                   </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Mon Profil
-                  </span>
-                </h1>
-                <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
-                  Gérez vos informations personnelles et vos préférences
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleRefresh}
-                  size="sm"
-                  variant="outline"
-                  className="min-h-[44px] h-11 sm:h-12 transition-all hover:scale-105 text-xs sm:text-sm"
-                >
-                  <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                  <span className="hidden sm:inline">Rafraîchir</span>
-                  <span className="sm:hidden">Raf.</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Gestion d'erreurs */}
-            {error && (
-              <Alert
-                variant="destructive"
-                className="animate-in fade-in slide-in-from-top-4 duration-500"
-              >
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Tabs */}
-            <div
-              ref={tabsRef}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100"
-            >
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="space-y-4 sm:space-y-6"
-              >
-                <TabsList className="w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 bg-muted/50">
-                  <TabsTrigger
-                    value="profile"
-                    className="shrink-0 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm py-2 sm:py-2.5"
-                  >
-                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                    Profil
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="addresses"
-                    className="shrink-0 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm py-2 sm:py-2.5"
-                  >
-                    <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                    Adresses
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="security"
-                    className="shrink-0 min-h-[44px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300 text-xs sm:text-sm py-2 sm:py-2.5"
-                  >
-                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                    Sécurité
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Profile Tab */}
-                <TabsContent
-                  value="profile"
-                  className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
-                >
-                  <div ref={contentRef}>
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                      <CardHeader>
-                        <CardTitle className="text-xs sm:text-sm md:text-base lg:text-lg">
-                          Informations Personnelles
-                        </CardTitle>
-                        <CardDescription className="text-[10px] sm:text-xs md:text-sm">
-                          Mettez à jour vos informations de profil
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4 sm:space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="email" className="text-xs sm:text-sm">
-                            Email
-                          </Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                            <Input
-                              id="email"
-                              type="email"
-                              value={profileData.email}
-                              disabled
-                              className="pl-10 sm:pl-12 bg-muted min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            L'email ne peut pas être modifié
-                          </p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="full_name" className="text-xs sm:text-sm">
-                            Nom Complet
-                          </Label>
-                          <Input
-                            id="full_name"
-                            value={profileData.full_name}
-                            onChange={e =>
-                              setProfileData({ ...profileData, full_name: e.target.value })
-                            }
-                            onKeyDown={handleSpaceKeyDown}
-                            placeholder="Jean Dupont"
-                            className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="phone" className="text-xs sm:text-sm">
-                            Téléphone
-                          </Label>
-                          <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                            <Input
-                              id="phone"
-                              type="tel"
-                              value={profileData.phone}
-                              onChange={e =>
-                                setProfileData({ ...profileData, phone: e.target.value })
-                              }
-                              onKeyDown={handleSpaceKeyDown}
-                              placeholder="+226 70 12 34 56"
-                              className="pl-10 sm:pl-12 min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-                        </div>
-
-                        <Button
-                          onClick={() => updateProfile.mutate(profileData)}
-                          disabled={updateProfile.isPending}
-                          className="min-h-[44px] touch-manipulation w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-300"
-                        >
-                          {updateProfile.isPending ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Sauvegarde...
-                            </>
-                          ) : (
-                            <>
-                              <Save className="h-4 w-4 mr-2" />
-                              Sauvegarder
-                            </>
-                          )}
-                        </Button>
-                      </CardContent>
-                    </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="new_password" className="text-xs sm:text-sm">
+                      Nouveau mot de passe
+                    </Label>
+                    <Input
+                      id="new_password"
+                      type="password"
+                      className="h-10 sm:h-11 text-sm sm:text-base"
+                    />
                   </div>
-                </TabsContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm_password" className="text-xs sm:text-sm">
+                      Confirmer le mot de passe
+                    </Label>
+                    <Input
+                      id="confirm_password"
+                      type="password"
+                      className="h-10 sm:h-11 text-sm sm:text-base"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="min-h-[44px] touch-manipulation w-full sm:w-auto"
+                  >
+                    <Lock className="h-4 w-4 mr-2" />
+                    Changer le mot de passe
+                  </Button>
+                </CardContent>
+              </Card>
 
-                {/* Addresses Tab */}
-                <TabsContent
-                  value="addresses"
-                  className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
-                >
-                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-lg">
-                        Mes Adresses de Livraison
-                      </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm">
-                        Gérez vos adresses de livraison
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4 sm:space-y-6">
-                      {/* Address Form */}
-                      <div className="space-y-4 p-3 sm:p-4 border border-border/50 rounded-lg bg-muted/30">
-                        <h3 className="font-semibold text-sm sm:text-base">
-                          {editingAddress ? "Modifier l'adresse" : 'Nouvelle adresse'}
-                        </h3>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="addr_full_name" className="text-xs sm:text-sm">
-                              Nom complet *
-                            </Label>
-                            <Input
-                              id="addr_full_name"
-                              value={addressForm.full_name}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, full_name: e.target.value })
-                              }
-                              onKeyDown={handleSpaceKeyDown}
-                              placeholder="Jean Dupont"
-                              className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="addr_phone" className="text-xs sm:text-sm">
-                              Téléphone *
-                            </Label>
-                            <Input
-                              id="addr_phone"
-                              value={addressForm.phone}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, phone: e.target.value })
-                              }
-                              onKeyDown={handleSpaceKeyDown}
-                              placeholder="+226 70 12 34 56"
-                              className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-
-                          <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="addr_line1" className="text-xs sm:text-sm">
-                              Adresse *
-                            </Label>
-                            <Input
-                              id="addr_line1"
-                              value={addressForm.address_line1}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, address_line1: e.target.value })
-                              }
-                              onKeyDown={handleSpaceKeyDown}
-                              placeholder="123 Rue principale"
-                              className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-
-                          <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="addr_line2" className="text-xs sm:text-sm">
-                              Complément d'adresse
-                            </Label>
-                            <Input
-                              id="addr_line2"
-                              value={addressForm.address_line2}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, address_line2: e.target.value })
-                              }
-                              placeholder="Appartement, étage..."
-                              className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="addr_city" className="text-xs sm:text-sm">
-                              Ville *
-                            </Label>
-                            <Input
-                              id="addr_city"
-                              value={addressForm.city}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, city: e.target.value })
-                              }
-                              onKeyDown={handleSpaceKeyDown}
-                              placeholder="Ouagadougou"
-                              className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="addr_postal" className="text-xs sm:text-sm">
-                              Code postal
-                            </Label>
-                            <Input
-                              id="addr_postal"
-                              value={addressForm.postal_code}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, postal_code: e.target.value })
-                              }
-                              placeholder="01 BP 1234"
-                              className="min-h-[44px] h-11 sm:h-12 text-sm sm:text-base"
-                            />
-                          </div>
-
-                          <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="addr_country" className="text-xs sm:text-sm">
-                              Pays *
-                            </Label>
-                            <select
-                              id="addr_country"
-                              value={addressForm.country}
-                              onChange={e =>
-                                setAddressForm({ ...addressForm, country: e.target.value })
-                              }
-                              className="flex min-h-[44px] h-11 sm:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base touch-manipulation cursor-pointer"
-                            >
-                              <option value="BF">Burkina Faso</option>
-                              <option value="CI">Côte d'Ivoire</option>
-                              <option value="SN">Sénégal</option>
-                              <option value="ML">Mali</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button
-                            onClick={handleSaveAddress}
-                            size="sm"
-                            className="min-h-[44px] touch-manipulation bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white transition-all duration-300"
-                          >
-                            <Save className="h-4 w-4 mr-2" />
-                            {editingAddress ? 'Mettre à jour' : 'Ajouter'}
-                          </Button>
-                          {editingAddress && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEditingAddress(null);
-                                setAddressForm({
-                                  full_name: '',
-                                  phone: '',
-                                  address_line1: '',
-                                  address_line2: '',
-                                  city: '',
-                                  postal_code: '',
-                                  country: 'BF',
-                                  state: '',
-                                  is_default: false,
-                                });
-                              }}
-                              className="min-h-[44px] touch-manipulation"
-                            >
-                              Annuler
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Saved Addresses */}
-                      <div className="space-y-3 sm:space-y-4">
-                        <h3 className="font-semibold text-sm sm:text-base">
-                          Adresses enregistrées
-                        </h3>
-                        {addresses.length === 0 ? (
-                          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                            <CardContent className="p-8 sm:p-12 text-center">
-                              <MapPin className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 animate-in zoom-in duration-500" />
-                              <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                                Aucune adresse
-                              </h3>
-                              <p className="text-sm sm:text-base text-muted-foreground">
-                                Aucune adresse enregistrée pour le moment
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ) : (
-                          addresses.map(addr => (
-                            <Card
-                              key={addr.id}
-                              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300"
-                            >
-                              <CardContent className="p-4 sm:p-5">
-                                <div className="flex items-start justify-between gap-3 sm:gap-4">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                      <p className="font-semibold text-sm sm:text-base break-words">
-                                        {addr.full_name}
-                                      </p>
-                                      {addr.is_default && (
-                                        <Badge variant="default" className="text-xs">
-                                          Par défaut
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                                      {addr.address_line1}
-                                      {addr.address_line2 && `, ${addr.address_line2}`}
-                                    </p>
-                                    <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                                      {addr.city}, {addr.postal_code}
-                                    </p>
-                                    <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                                      {addr.phone}
-                                    </p>
-                                  </div>
-                                  <div className="flex gap-2 flex-shrink-0">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setEditingAddress(addr);
-                                        setAddressForm(addr);
-                                      }}
-                                      className="min-h-[44px] touch-manipulation"
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleDeleteAddress(addr.id!)}
-                                      className="min-h-[44px] touch-manipulation text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                {/* Security Tab */}
-                <TabsContent
-                  value="security"
-                  className="space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
-                >
-                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                        <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
-                        Mot de passe
-                      </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm">
-                        Changez votre mot de passe pour plus de sécurité
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4 sm:space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="current_password" className="text-xs sm:text-sm">
-                          Mot de passe actuel
-                        </Label>
-                        <Input
-                          id="current_password"
-                          type="password"
-                          className="h-10 sm:h-11 text-sm sm:text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="new_password" className="text-xs sm:text-sm">
-                          Nouveau mot de passe
-                        </Label>
-                        <Input
-                          id="new_password"
-                          type="password"
-                          className="h-10 sm:h-11 text-sm sm:text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="confirm_password" className="text-xs sm:text-sm">
-                          Confirmer le mot de passe
-                        </Label>
-                        <Input
-                          id="confirm_password"
-                          type="password"
-                          className="h-10 sm:h-11 text-sm sm:text-base"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="min-h-[44px] touch-manipulation w-full sm:w-auto"
-                      >
-                        <Lock className="h-4 w-4 mr-2" />
-                        Changer le mot de passe
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                        <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
-                        Authentification à deux facteurs (2FA)
-                      </CardTitle>
-                      <CardDescription className="text-xs sm:text-sm">
-                        Ajoutez une couche de sécurité supplémentaire à votre compte
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        variant="outline"
-                        className="min-h-[44px] touch-manipulation w-full sm:w-auto"
-                      >
-                        <Shield className="h-4 w-4 mr-2" />
-                        Configurer le 2FA
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-        </main>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
+                    Authentification à deux facteurs (2FA)
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Ajoutez une couche de sécurité supplémentaire à votre compte
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    variant="outline"
+                    className="min-h-[44px] touch-manipulation w-full sm:w-auto"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Configurer le 2FA
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-

@@ -7,10 +7,9 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { sanitizeProductDescription } from '@/lib/html-sanitizer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -353,40 +352,30 @@ export default function PhysicalProductDetail() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-8">
-            <div className="space-y-8">
-              <Skeleton className="h-10 w-32" />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Skeleton className="h-96 w-full" />
-                <Skeleton className="h-96 w-full" />
-              </div>
-            </div>
-          </main>
+      <AppPageShell mainClassName="p-8">
+        <div className="space-y-8">
+          <Skeleton className="h-10 w-32" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-96 w-full" />
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   if (!product) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-8">
-            <Card className="border-destructive">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-2 text-destructive">
-                  <AlertCircle className="h-5 w-5" />
-                  <p>Produit non trouvé</p>
-                </div>
-              </CardContent>
-            </Card>
-          </main>
-        </div>
-      </SidebarProvider>
+      <AppPageShell mainClassName="p-8">
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              <p>Produit non trouvé</p>
+            </div>
+          </CardContent>
+        </Card>
+      </AppPageShell>
     );
   }
 
@@ -400,201 +389,281 @@ export default function PhysicalProductDetail() {
   const productUrl = `${window.location.origin}/physical/${productId}`;
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 p-8">
-          {/* SEO Meta Tags */}
-          <SEOMeta
-            title={product.name}
-            description={
-              product.short_description ||
-              product.description ||
-              `${product.name} - Disponible sur Emarzona`
-            }
-            keywords={product.category}
-            url={productUrl}
-            image={images[0]}
-            imageAlt={product.name}
-            type="product"
-            price={currentPrice}
-            currency={product.currency}
-            availability={availability}
+    <AppPageShell mainClassName="p-8">
+      {/* SEO Meta Tags */}
+      <SEOMeta
+        title={product.name}
+        description={
+          product.short_description ||
+          product.description ||
+          `${product.name} - Disponible sur Emarzona`
+        }
+        keywords={product.category}
+        url={productUrl}
+        image={images[0]}
+        imageAlt={product.name}
+        type="product"
+        price={currentPrice}
+        currency={product.currency}
+        availability={availability}
+      />
+
+      {/* Product Schema.org */}
+      {product.store && (
+        <ProductSchema
+          product={{
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description || product.short_description || '',
+            price: currentPrice,
+            currency: product.currency,
+            image_url: images[0],
+            images: images.map((url: string) => ({ url })),
+            category: product.category,
+            is_active: product.is_active,
+            created_at: product.created_at,
+          }}
+          store={{
+            name: product.store.name,
+            slug: product.store.slug,
+            logo_url: product.store.logo_url,
+          }}
+          url={productUrl}
+        />
+      )}
+
+      {/* Back Button */}
+      <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Retour
+      </Button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Left: Images */}
+        <AdvancedProductImages
+          productId={productId || ''}
+          productName={product?.name || 'Produit'}
+          standardImages={images}
+          selectedVariantId={selectedVariant?.id}
+          physicalProductId={product?.physical?.id}
+        />
+
+        {/* Right: Product Info */}
+        <div className="space-y-6">
+          {/* Title & Category */}
+          <div>
+            <Badge className="mb-2">{product?.category}</Badge>
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{product?.name}</h1>
+            {product?.short_description && (
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                {product.short_description}
+              </p>
+            )}
+          </div>
+
+          {/* Price */}
+          <div className="flex items-center gap-4">
+            <span className="text-lg sm:text-2xl md:text-3xl font-bold">
+              {product?.price.toLocaleString()} {product?.currency}
+            </span>
+            {product?.promotional_price && (
+              <span className="text-xl line-through text-gray-500">
+                {product.promotional_price.toLocaleString()} {product?.currency}
+              </span>
+            )}
+          </div>
+
+          {/* Stock Indicator */}
+          <InventoryStockIndicator
+            quantity={stockQuantity}
+            lowStockThreshold={10}
+            showProgress={true}
+            variant="default"
           />
 
-          {/* Product Schema.org */}
-          {product.store && (
-            <ProductSchema
-              product={{
-                id: product.id,
-                name: product.name,
-                slug: product.slug,
-                description: product.description || product.short_description || '',
-                price: currentPrice,
-                currency: product.currency,
-                image_url: images[0],
-                images: images.map((url: string) => ({ url })),
-                category: product.category,
-                is_active: product.is_active,
-                created_at: product.created_at,
-              }}
-              store={{
-                name: product.store.name,
-                slug: product.store.slug,
-                logo_url: product.store.logo_url,
-              }}
-              url={productUrl}
-            />
+          {/* Variants */}
+          {product?.variants && product.variants.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">Variantes</h3>
+              <VariantSelector
+                variants={product.variants}
+                onSelect={(variant: PhysicalProductVariant) => setSelectedVariant(variant)}
+              />
+            </div>
           )}
 
-          {/* Back Button */}
-          <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour
-          </Button>
+          {/* Quantity */}
+          <div>
+            <h3 className="font-semibold mb-3">Quantité</h3>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label="Diminuer la quantité"
+              >
+                -
+              </Button>
+              <span className="text-lg font-medium w-12 text-center">{quantity}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
+                disabled={quantity >= stockQuantity}
+                aria-label="Augmenter la quantité"
+              >
+                +
+              </Button>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Left: Images */}
-            <AdvancedProductImages
-              productId={productId || ''}
-              productName={product?.name || 'Produit'}
-              standardImages={images}
-              selectedVariantId={selectedVariant?.id}
-              physicalProductId={product?.physical?.id}
-            />
-
-            {/* Right: Product Info */}
-            <div className="space-y-6">
-              {/* Title & Category */}
-              <div>
-                <Badge className="mb-2">{product?.category}</Badge>
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2">{product?.name}</h1>
-                {product?.short_description && (
-                  <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
-                    {product.short_description}
-                  </p>
-                )}
-              </div>
-
-              {/* Price */}
-              <div className="flex items-center gap-4">
-                <span className="text-lg sm:text-2xl md:text-3xl font-bold">
-                  {product?.price.toLocaleString()} {product?.currency}
-                </span>
-                {product?.promotional_price && (
-                  <span className="text-xl line-through text-gray-500">
-                    {product.promotional_price.toLocaleString()} {product?.currency}
-                  </span>
-                )}
-              </div>
-
-              {/* Stock Indicator */}
-              <InventoryStockIndicator
-                quantity={stockQuantity}
-                lowStockThreshold={10}
-                showProgress={true}
-                variant="default"
-              />
-
-              {/* Variants */}
-              {product?.variants && product.variants.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3">Variantes</h3>
-                  <VariantSelector
-                    variants={product.variants}
-                    onSelect={(variant: PhysicalProductVariant) => setSelectedVariant(variant)}
-                  />
-                </div>
+          {/* Actions */}
+          <div className="space-y-3">
+            <Button
+              onClick={handleAddToCart}
+              className="w-full"
+              size="lg"
+              disabled={stockQuantity === 0 || isAddingToCart}
+            >
+              {isAddingToCart ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Ajout en cours...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  {stockQuantity === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
+                </>
               )}
+            </Button>
 
-              {/* Quantity */}
-              <div>
-                <h3 className="font-semibold mb-3">Quantité</h3>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                    aria-label="Diminuer la quantité"
-                  >
-                    -
-                  </Button>
-                  <span className="text-lg font-medium w-12 text-center">{quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
-                    disabled={quantity >= stockQuantity}
-                    aria-label="Augmenter la quantité"
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleWishlistToggle}
+                disabled={isCheckingWishlist}
+              >
+                {isCheckingWishlist ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Heart
+                    className={`h-4 w-4 mr-2 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`}
+                  />
+                )}
+                {isInWishlist ? 'Retiré' : 'Favori'}
+              </Button>
+              <Button variant="outline" className="w-full" onClick={handleShare}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Partager
+              </Button>
+            </div>
+          </div>
 
-              {/* Actions */}
-              <div className="space-y-3">
-                <Button
-                  onClick={handleAddToCart}
-                  className="w-full"
-                  size="lg"
-                  disabled={stockQuantity === 0 || isAddingToCart}
-                >
-                  {isAddingToCart ? (
-                    <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Ajout en cours...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      {stockQuantity === 0 ? 'Rupture de stock' : 'Ajouter au panier'}
-                    </>
-                  )}
-                </Button>
+          {/* Shipping Info */}
+          {product?.physical && <ShippingInfoDisplay productId={productId!} />}
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleWishlistToggle}
-                    disabled={isCheckingWishlist}
-                  >
-                    {isCheckingWishlist ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Heart
-                        className={`h-4 w-4 mr-2 ${isInWishlist ? 'fill-red-500 text-red-500' : ''}`}
-                      />
-                    )}
-                    {isInWishlist ? 'Retiré' : 'Favori'}
-                  </Button>
-                  <Button variant="outline" className="w-full" onClick={handleShare}>
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Partager
-                  </Button>
-                </div>
-              </div>
+          {/* Features */}
+          {product?.physical && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Caractéristiques</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {product.physical.weight_kg && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Poids</span>
+                    <span className="font-medium">{product.physical.weight_kg} kg</span>
+                  </div>
+                )}
+                {product.physical.dimensions && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Dimensions</span>
+                    <span className="font-medium">
+                      {product.physical.length_cm} x {product.physical.width_cm} x{' '}
+                      {product.physical.height_cm} cm
+                    </span>
+                  </div>
+                )}
+                {product.physical.sku && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">SKU</span>
+                    <span className="font-medium">{product.physical.sku}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
-              {/* Shipping Info */}
-              {product?.physical && <ShippingInfoDisplay productId={productId!} />}
+      {/* Content Tabs */}
+      <Tabs defaultValue="description" className="mt-12 space-y-6">
+        <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
+          <TabsTrigger value="description" className="min-h-[44px] shrink-0">
+            Description
+          </TabsTrigger>
+          <TabsTrigger value="specifications" className="min-h-[44px] shrink-0">
+            Spécifications
+          </TabsTrigger>
+          <TabsTrigger value="reviews" className="min-h-[44px] shrink-0">
+            Avis
+          </TabsTrigger>
+        </TabsList>
 
-              {/* Features */}
+        {/* Description Tab */}
+        <TabsContent value="description" className="space-y-6">
+          {product?.description && (
+            <Card>
+              <CardHeader>
+                <CardTitle>À propos de ce produit</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div
+                  className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeProductDescription(product.description || ''),
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Size Chart */}
+          {product?.size_chart_id && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Guide des tailles</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SizeChartDisplay sizeChartId={product.size_chart_id} />
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Specifications Tab */}
+        <TabsContent value="specifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Spécifications</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               {product?.physical && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Caractéristiques</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {product.physical.weight_kg && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Poids</span>
-                        <span className="font-medium">{product.physical.weight_kg} kg</span>
-                      </div>
-                    )}
-                    {product.physical.dimensions && (
-                      <div className="flex justify-between text-sm">
+                <>
+                  {product.physical.weight_kg && (
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">Poids</span>
+                      <span className="font-medium">{product.physical.weight_kg} kg</span>
+                    </div>
+                  )}
+                  {product.physical.length_cm &&
+                    product.physical.width_cm &&
+                    product.physical.height_cm && (
+                      <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Dimensions</span>
                         <span className="font-medium">
                           {product.physical.length_cm} x {product.physical.width_cm} x{' '}
@@ -602,164 +671,79 @@ export default function PhysicalProductDetail() {
                         </span>
                       </div>
                     )}
-                    {product.physical.sku && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">SKU</span>
-                        <span className="font-medium">{product.physical.sku}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-
-          {/* Content Tabs */}
-          <Tabs defaultValue="description" className="mt-12 space-y-6">
-            <TabsList className="w-full overflow-x-auto flex-nowrap justify-start">
-              <TabsTrigger value="description" className="min-h-[44px] shrink-0">
-                Description
-              </TabsTrigger>
-              <TabsTrigger value="specifications" className="min-h-[44px] shrink-0">
-                Spécifications
-              </TabsTrigger>
-              <TabsTrigger value="reviews" className="min-h-[44px] shrink-0">
-                Avis
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Description Tab */}
-            <TabsContent value="description" className="space-y-6">
-              {product?.description && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>À propos de ce produit</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div
-                      className="bg-white dark:bg-white text-black dark:text-black prose max-w-none prose-headings:text-black dark:prose-headings:text-black prose-p:text-black dark:prose-p:text-black prose-a:text-primary prose-strong:text-black dark:prose-strong:text-black p-4 sm:p-6 rounded-lg"
-                      dangerouslySetInnerHTML={{
-                        __html: sanitizeProductDescription(product.description || ''),
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Size Chart */}
-              {product?.size_chart_id && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Guide des tailles</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <SizeChartDisplay sizeChartId={product.size_chart_id} />
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            {/* Specifications Tab */}
-            <TabsContent value="specifications" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Spécifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {product?.physical && (
-                    <>
-                      {product.physical.weight_kg && (
-                        <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Poids</span>
-                          <span className="font-medium">{product.physical.weight_kg} kg</span>
-                        </div>
-                      )}
-                      {product.physical.length_cm &&
-                        product.physical.width_cm &&
-                        product.physical.height_cm && (
-                          <div className="flex justify-between py-2 border-b">
-                            <span className="text-muted-foreground">Dimensions</span>
-                            <span className="font-medium">
-                              {product.physical.length_cm} x {product.physical.width_cm} x{' '}
-                              {product.physical.height_cm} cm
-                            </span>
-                          </div>
-                        )}
-                      {product.physical.sku && (
-                        <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">SKU</span>
-                          <span className="font-medium">{product.physical.sku}</span>
-                        </div>
-                      )}
-                      {product.physical.manufacturer && (
-                        <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Fabricant</span>
-                          <span className="font-medium">{product.physical.manufacturer}</span>
-                        </div>
-                      )}
-                      {product.physical.country_of_origin && (
-                        <div className="flex justify-between py-2 border-b">
-                          <span className="text-muted-foreground">Origine</span>
-                          <span className="font-medium">{product.physical.country_of_origin}</span>
-                        </div>
-                      )}
-                    </>
+                  {product.physical.sku && (
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">SKU</span>
+                      <span className="font-medium">{product.physical.sku}</span>
+                    </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Reviews Tab */}
-            <TabsContent value="reviews" className="space-y-6">
-              <ProductReviewsSummary productId={productId!} productType="physical" />
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Avis des utilisateurs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ReviewsList productId={productId!} productType="physical" />
-                </CardContent>
-              </Card>
-
-              {user && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Donner votre avis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ReviewForm productId={productId!} productType="physical" />
-                  </CardContent>
-                </Card>
+                  {product.physical.manufacturer && (
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">Fabricant</span>
+                      <span className="font-medium">{product.physical.manufacturer}</span>
+                    </div>
+                  )}
+                  {product.physical.country_of_origin && (
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-muted-foreground">Origine</span>
+                      <span className="font-medium">{product.physical.country_of_origin}</span>
+                    </div>
+                  )}
+                </>
               )}
-            </TabsContent>
-          </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          {/* Recommendations Section */}
-          <Separator className="my-12" />
-
-          <PhysicalProductRecommendations
-            productId={productId!}
-            category={product?.category}
-            tags={product?.tags}
-            limit={6}
-            variant="grid"
-            title="Produits similaires"
-          />
-
-          {product?.store_id && (
-            <BoughtTogetherPhysicalRecommendations
-              productId={productId!}
-              storeId={product.store_id}
-              storeName={product.store?.name}
-              limit={4}
-            />
-          )}
-
-          {/* Reviews Summary (outside tabs for visibility) */}
+        {/* Reviews Tab */}
+        <TabsContent value="reviews" className="space-y-6">
           <ProductReviewsSummary productId={productId!} productType="physical" />
-        </main>
-      </div>
-    </SidebarProvider>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Avis des utilisateurs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReviewsList productId={productId!} productType="physical" />
+            </CardContent>
+          </Card>
+
+          {user && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Donner votre avis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReviewForm productId={productId!} productType="physical" />
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Recommendations Section */}
+      <Separator className="my-12" />
+
+      <PhysicalProductRecommendations
+        productId={productId!}
+        category={product?.category}
+        tags={product?.tags}
+        limit={6}
+        variant="grid"
+        title="Produits similaires"
+      />
+
+      {product?.store_id && (
+        <BoughtTogetherPhysicalRecommendations
+          productId={productId!}
+          storeId={product.store_id}
+          storeName={product.store?.name}
+          limit={4}
+        />
+      )}
+
+      {/* Reviews Summary (outside tabs for visibility) */}
+      <ProductReviewsSummary productId={productId!} productType="physical" />
+    </AppPageShell>
   );
 }

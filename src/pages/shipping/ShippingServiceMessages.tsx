@@ -4,10 +4,9 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -123,13 +122,15 @@ export default function ShippingServiceMessages() {
       interface MessageWithSender extends ShippingServiceMessage {
         sender?: ProfileData;
       }
-      const messagesWithSenders = (messagesData || []).map((message: MessageData): MessageWithSender => ({
-        ...message as MessageWithSender,
-        sender: profilesData?.find((p: ProfileData) => p.user_id === message.sender_id),
-      }));
+      const messagesWithSenders = (messagesData || []).map(
+        (message: MessageData): MessageWithSender => ({
+          ...(message as MessageWithSender),
+          sender: profilesData?.find((p: ProfileData) => p.user_id === message.sender_id),
+        })
+      );
 
       setMessages(messagesWithSenders as ShippingServiceMessage[]);
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Error loading messages', error);
       toast({
         title: '❌ Erreur',
@@ -192,7 +193,7 @@ export default function ShippingServiceMessages() {
 
       setMessageContent('');
       await loadMessages();
-    } catch ( _error: unknown) {
+    } catch (_error: unknown) {
       logger.error('Error sending message', error);
     }
   };
@@ -206,268 +207,254 @@ export default function ShippingServiceMessages() {
 
   if (isLoadingConversation) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 p-4 md:p-6 space-y-6">
-            <div className="flex items-center justify-center h-[60vh]">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Chargement de la conversation...</p>
-              </div>
-            </div>
-          </main>
+      <AppPageShell mainClassName="p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Chargement de la conversation...</p>
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   if (!conversation) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 p-4 md:p-6 space-y-6">
-            <Alert variant="destructive">
-              <AlertDescription>
-                Conversation introuvable. Veuillez retourner à la liste des services.
-              </AlertDescription>
-            </Alert>
-            <Button asChild>
-              <Link to="/dashboard/contact-shipping-service">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour aux services
-              </Link>
-            </Button>
-          </main>
-        </div>
-      </SidebarProvider>
+      <AppPageShell mainClassName="p-4 md:p-6 space-y-6">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Conversation introuvable. Veuillez retourner à la liste des services.
+          </AlertDescription>
+        </Alert>
+        <Button asChild>
+          <Link to="/dashboard/contact-shipping-service">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour aux services
+          </Link>
+        </Button>
+      </AppPageShell>
     );
   }
 
-  const shippingService = conversation.shipping_service as any;
+  const shippingService = conversation.shipping_service as string;
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-              <div className="flex items-start gap-2 sm:gap-4 min-w-0 flex-1">
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="flex-shrink-0"
-                >
-                  <Link to="/dashboard/contact-shipping-service">
-                    <ArrowLeft className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Retour</span>
-                  </Link>
-                </Button>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex flex-wrap items-center gap-2">
-                    <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8 text-blue-500 flex-shrink-0" />
-                    <span className="break-words">
-                      Conversation avec {shippingService?.name || 'Service de Livraison'}
-                    </span>
-                  </h1>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
-                    {conversation.subject || 'Communication avec le service de livraison'}
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-2 sm:gap-4 min-w-0 flex-1">
+            <Button asChild variant="ghost" size="sm" className="flex-shrink-0">
+              <Link to="/dashboard/contact-shipping-service">
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Retour</span>
+              </Link>
+            </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold flex flex-wrap items-center gap-2">
+                <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8 text-blue-500 flex-shrink-0" />
+                <span className="break-words">
+                  Conversation avec {shippingService?.name || 'Service de Livraison'}
+                </span>
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+                {conversation.subject || 'Communication avec le service de livraison'}
+              </p>
+            </div>
+          </div>
+          <Badge
+            variant={conversation.status === 'active' ? 'default' : 'secondary'}
+            className="flex-shrink-0 w-fit"
+          >
+            {conversation.status === 'active' ? 'Active' : conversation.status}
+          </Badge>
+        </div>
+
+        {/* Service Info Card */}
+        {shippingService && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                Informations du Service
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium mb-1">Nom</p>
+                  <p className="text-sm text-muted-foreground">{shippingService.name}</p>
+                </div>
+                {shippingService.contact_email && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Email</p>
+                    <a
+                      href={`mailto:${shippingService.contact_email}`}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {shippingService.contact_email}
+                    </a>
+                  </div>
+                )}
+                {shippingService.contact_phone && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Téléphone</p>
+                    <a
+                      href={`tel:${shippingService.contact_phone}`}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      {shippingService.contact_phone}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Messages */}
+        <Card
+          className="flex flex-col"
+          style={{
+            height: 'calc(100vh - 300px)',
+            minHeight: '400px',
+            maxHeight: 'calc(100vh - 200px)',
+          }}
+        >
+          <CardHeader>
+            <CardTitle>Messages</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col p-0">
+            <ScrollArea className="flex-1 p-4">
+              {isLoadingMessages ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 text-center">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    Aucun message pour le moment. Commencez la conversation !
                   </p>
                 </div>
-              </div>
-              <Badge 
-                variant={conversation.status === 'active' ? 'default' : 'secondary'}
-                className="flex-shrink-0 w-fit"
-              >
-                {conversation.status === 'active' ? 'Active' : conversation.status}
-              </Badge>
-            </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map(message => {
+                    const isStore = message.sender_type === 'store';
+                    const isAdmin = message.sender_type === 'admin';
 
-            {/* Service Info Card */}
-            {shippingService && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5" />
-                    Informations du Service
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium mb-1">Nom</p>
-                      <p className="text-sm text-muted-foreground">{shippingService.name}</p>
-                    </div>
-                    {shippingService.contact_email && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">Email</p>
-                        <a
-                          href={`mailto:${shippingService.contact_email}`}
-                          className="text-sm text-blue-600 hover:underline"
+                    return (
+                      <div
+                        key={message.id}
+                        className={`flex gap-3 ${isStore ? 'flex-row-reverse' : 'flex-row'}`}
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={message.sender?.avatar_url} />
+                          <AvatarFallback>
+                            {message.sender?.display_name || message.sender?.first_name ? (
+                              `${message.sender?.first_name?.[0] || ''}${message.sender?.last_name?.[0] || ''}`.toUpperCase()
+                            ) : isStore ? (
+                              <Store className="h-4 w-4" />
+                            ) : isAdmin ? (
+                              <User className="h-4 w-4" />
+                            ) : (
+                              <Truck className="h-4 w-4" />
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div
+                          className={`flex-1 ${isStore ? 'items-end' : 'items-start'} flex flex-col gap-1`}
                         >
-                          {shippingService.contact_email}
-                        </a>
-                      </div>
-                    )}
-                    {shippingService.contact_phone && (
-                      <div>
-                        <p className="text-sm font-medium mb-1">Téléphone</p>
-                        <a
-                          href={`tel:${shippingService.contact_phone}`}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {shippingService.contact_phone}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Messages */}
-            <Card className="flex flex-col" style={{ height: 'calc(100vh - 300px)', minHeight: '400px', maxHeight: 'calc(100vh - 200px)' }}>
-              <CardHeader>
-                <CardTitle>Messages</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col p-0">
-                <ScrollArea className="flex-1 p-4">
-                  {isLoadingMessages ? (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                  ) : messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-center">
-                      <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">
-                        Aucun message pour le moment. Commencez la conversation !
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {messages.map((message) => {
-                        const isStore = message.sender_type === 'store';
-                        const isAdmin = message.sender_type === 'admin';
-
-                        return (
                           <div
-                            key={message.id}
-                            className={`flex gap-3 ${isStore ? 'flex-row-reverse' : 'flex-row'}`}
+                            className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                              isStore
+                                ? 'bg-blue-600 text-white'
+                                : isAdmin
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-muted'
+                            }`}
                           >
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={message.sender?.avatar_url} />
-                              <AvatarFallback>
-                                {message.sender?.display_name || message.sender?.first_name
-                                  ? `${message.sender?.first_name?.[0] || ''}${message.sender?.last_name?.[0] || ''}`.toUpperCase()
-                                  : isStore ? (
-                                    <Store className="h-4 w-4" />
-                                  ) : isAdmin ? (
-                                    <User className="h-4 w-4" />
-                                  ) : (
-                                    <Truck className="h-4 w-4" />
-                                  )}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className={`flex-1 ${isStore ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
-                              <div
-                                className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                                  isStore
-                                    ? 'bg-blue-600 text-white'
-                                    : isAdmin
-                                    ? 'bg-purple-600 text-white'
-                                    : 'bg-muted'
-                                }`}
-                              >
-                                {message.content && (
-                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                                )}
-                                
-                                {/* Attachments */}
-                                {message.attachments && message.attachments.length > 0 && (
-                                  <div className="mt-2 space-y-2">
-                                    {message.attachments?.map((attachment: ShippingServiceMessageAttachment) => (
-                                      <MediaAttachment
-                                        key={attachment.id}
-                                        attachment={{
-                                          id: attachment.id,
-                                          file_name: attachment.file_name,
-                                          file_type: attachment.file_type,
-                                          file_url: attachment.file_url,
-                                          storage_path: attachment.storage_path,
-                                          file_size: attachment.file_size,
-                                        }}
-                                        size="medium"
-                                      />
-                                    ))}
-                                  </div>
+                            {message.content && (
+                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            )}
+
+                            {/* Attachments */}
+                            {message.attachments && message.attachments.length > 0 && (
+                              <div className="mt-2 space-y-2">
+                                {message.attachments?.map(
+                                  (attachment: ShippingServiceMessageAttachment) => (
+                                    <MediaAttachment
+                                      key={attachment.id}
+                                      attachment={{
+                                        id: attachment.id,
+                                        file_name: attachment.file_name,
+                                        file_type: attachment.file_type,
+                                        file_url: attachment.file_url,
+                                        storage_path: attachment.storage_path,
+                                        file_size: attachment.file_size,
+                                      }}
+                                      size="medium"
+                                    />
+                                  )
                                 )}
                               </div>
-                              <div className={`flex items-center gap-2 text-xs text-muted-foreground ${isStore ? 'flex-row-reverse' : 'flex-row'}`}>
-                                <span>
-                                  {format(new Date(message.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
-                                </span>
-                                {message.is_read && (
-                                  <CheckCheck className="h-3 w-3 text-blue-500" />
-                                )}
-                              </div>
-                            </div>
+                            )}
                           </div>
-                        );
-                      })}
-                      <div ref={messagesEndRef} />
-                    </div>
+                          <div
+                            className={`flex items-center gap-2 text-xs text-muted-foreground ${isStore ? 'flex-row-reverse' : 'flex-row'}`}
+                          >
+                            <span>
+                              {format(new Date(message.created_at), 'dd/MM/yyyy HH:mm', {
+                                locale: fr,
+                              })}
+                            </span>
+                            {message.is_read && <CheckCheck className="h-3 w-3 text-blue-500" />}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </ScrollArea>
+
+            <Separator />
+
+            {/* Message Input */}
+            <form onSubmit={handleSendMessage} className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Textarea
+                  value={messageContent}
+                  onChange={e => setMessageContent(e.target.value)}
+                  placeholder="Tapez votre message..."
+                  className="min-h-[80px] resize-none flex-1"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
+                />
+                <Button
+                  type="submit"
+                  disabled={!messageContent.trim() || isSending}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full sm:w-auto flex-shrink-0"
+                >
+                  {isSending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
                   )}
-                </ScrollArea>
-
-                <Separator />
-
-                {/* Message Input */}
-                <form onSubmit={handleSendMessage} className="p-3 sm:p-4">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Textarea
-                      value={messageContent}
-                      onChange={(e) => setMessageContent(e.target.value)}
-                      placeholder="Tapez votre message..."
-                      className="min-h-[80px] resize-none flex-1"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage(e);
-                        }
-                      }}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={!messageContent.trim() || isSending}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full sm:w-auto flex-shrink-0"
-                    >
-                      {isSending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne
+              </p>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
-
-
-
-
-
-
-

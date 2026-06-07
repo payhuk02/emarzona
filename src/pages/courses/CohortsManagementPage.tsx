@@ -1,7 +1,7 @@
 /**
  * Page de Gestion des Cohorts de Cours
  * Date: 1 Février 2025
- * 
+ *
  * Interface complète pour gérer les cohorts de cours :
  * - Liste des cohorts
  * - Création et édition
@@ -10,9 +10,8 @@
  */
 
 import { useState } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate, useParams } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +19,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -74,9 +86,7 @@ export default function CohortsManagementPage() {
   const deleteCohort = useDeleteCohort();
 
   // Filtrer par cours si courseId est fourni
-  const filteredCohorts = courseId
-    ? cohorts?.filter((c) => c.course_id === courseId)
-    : cohorts;
+  const filteredCohorts = courseId ? cohorts?.filter(c => c.course_id === courseId) : cohorts;
 
   const handleCreateCohort = async (formData: Partial<CourseCohort>) => {
     if (!store?.id) return;
@@ -93,7 +103,7 @@ export default function CohortsManagementPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       draft: 'secondary',
       open: 'default',
       full: 'outline',
@@ -102,7 +112,7 @@ export default function CohortsManagementPage() {
       cancelled: 'destructive',
     };
 
-    const  labels: Record<string, string> = {
+    const labels: Record<string, string> = {
       draft: 'Brouillon',
       open: 'Inscriptions ouvertes',
       full: 'Complet',
@@ -111,249 +121,235 @@ export default function CohortsManagementPage() {
       cancelled: 'Annulé',
     };
 
-    return (
-      <Badge variant={variants[status] || 'secondary'}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
   };
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-8">
-            <Skeleton className="h-8 w-64 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </main>
-        </div>
-      </SidebarProvider>
+      <AppPageShell mainClassName="p-8">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <Skeleton className="h-64 w-full" />
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                  <Users className="h-8 w-8" />
-                  Gestion des Cohorts
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Gérez les cohorts (groupes d'étudiants) pour vos cours
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {courseId && (
-                  <Button variant="outline" onClick={() => navigate(-1)}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Retour au cours
-                  </Button>
-                )}
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nouveau Cohort
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Créer un Nouveau Cohort</DialogTitle>
-                      <DialogDescription>
-                        Créez un nouveau groupe d'étudiants pour un cours
-                      </DialogDescription>
-                    </DialogHeader>
-                    <CreateCohortForm
-                      courseId={courseId}
-                      onSubmit={handleCreateCohort}
-                      onCancel={() => setIsCreateDialogOpen(false)}
-                    />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Cohorts</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{filteredCohorts?.length || 0}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">En cours</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {filteredCohorts?.filter((c) => c.status === 'in_progress').length || 0}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Inscriptions ouvertes</CardTitle>
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {filteredCohorts?.filter((c) => c.status === 'open').length || 0}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Étudiants</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {filteredCohorts?.reduce((sum, c) => sum + c.current_students, 0) || 0}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Cohorts List */}
-            {filteredCohorts && filteredCohorts.length > 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Liste des Cohorts</CardTitle>
-                  <CardDescription>Tous vos cohorts de cours</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Cours</TableHead>
-                        <TableHead>Cohort</TableHead>
-                        <TableHead>Dates</TableHead>
-                        <TableHead>Étudiants</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredCohorts.map((cohort) => (
-                        <TableRow key={cohort.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {cohort.products?.image_url && (
-                                <img
-                                  src={cohort.products.image_url}
-                                  alt={cohort.products.name}
-                                  className="h-10 w-10 rounded object-cover"
-                                />
-                              )}
-                              <div>
-                                <p className="font-medium">{cohort.products?.name || 'Cours'}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  #{cohort.cohort_number || 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <p className="font-medium">{cohort.cohort_name}</p>
-                            {cohort.cohort_description && (
-                              <p className="text-sm text-muted-foreground line-clamp-1">
-                                {cohort.cohort_description}
-                              </p>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              <p>Début: {format(new Date(cohort.start_date), 'PP', { locale: fr })}</p>
-                              {cohort.end_date && (
-                                <p>Fin: {format(new Date(cohort.end_date), 'PP', { locale: fr })}</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-semibold">{cohort.current_students}</span>
-                              {cohort.max_students && (
-                                <span className="text-muted-foreground">/ {cohort.max_students}</span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(cohort.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate(`/dashboard/cohorts/${cohort.id}`)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedCohort(cohort)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  if (confirm('Êtes-vous sûr de vouloir supprimer ce cohort ?')) {
-                                    deleteCohort.mutate(cohort.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Aucun cohort</h3>
-                  <p className="text-muted-foreground text-center mb-4">
-                    Créez votre premier cohort pour organiser vos étudiants en groupes
-                  </p>
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Créer un cohort
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Edit Cohort Dialog */}
-            {selectedCohort && (
-              <EditCohortDialog
-                cohort={selectedCohort}
-                onClose={() => setSelectedCohort(null)}
-                onUpdate={updateCohort.mutateAsync}
-              />
-            )}
+    <AppPageShell mainClassName="p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Users className="h-8 w-8" />
+              Gestion des Cohorts
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Gérez les cohorts (groupes d'étudiants) pour vos cours
+            </p>
           </div>
-        </main>
+          <div className="flex gap-2">
+            {courseId && (
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour au cours
+              </Button>
+            )}
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau Cohort
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Créer un Nouveau Cohort</DialogTitle>
+                  <DialogDescription>
+                    Créez un nouveau groupe d'étudiants pour un cours
+                  </DialogDescription>
+                </DialogHeader>
+                <CreateCohortForm
+                  courseId={courseId}
+                  onSubmit={handleCreateCohort}
+                  onCancel={() => setIsCreateDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Cohorts</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{filteredCohorts?.length || 0}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">En cours</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {filteredCohorts?.filter(c => c.status === 'in_progress').length || 0}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Inscriptions ouvertes</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {filteredCohorts?.filter(c => c.status === 'open').length || 0}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Étudiants</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {filteredCohorts?.reduce((sum, c) => sum + c.current_students, 0) || 0}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Cohorts List */}
+        {filteredCohorts && filteredCohorts.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Liste des Cohorts</CardTitle>
+              <CardDescription>Tous vos cohorts de cours</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cours</TableHead>
+                    <TableHead>Cohort</TableHead>
+                    <TableHead>Dates</TableHead>
+                    <TableHead>Étudiants</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCohorts.map(cohort => (
+                    <TableRow key={cohort.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {cohort.products?.image_url && (
+                            <img
+                              src={cohort.products.image_url}
+                              alt={cohort.products.name}
+                              className="h-10 w-10 rounded object-cover"
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium">{cohort.products?.name || 'Cours'}</p>
+                            <p className="text-xs text-muted-foreground">
+                              #{cohort.cohort_number || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-medium">{cohort.cohort_name}</p>
+                        {cohort.cohort_description && (
+                          <p className="text-sm text-muted-foreground line-clamp-1">
+                            {cohort.cohort_description}
+                          </p>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p>Début: {format(new Date(cohort.start_date), 'PP', { locale: fr })}</p>
+                          {cohort.end_date && (
+                            <p>Fin: {format(new Date(cohort.end_date), 'PP', { locale: fr })}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-semibold">{cohort.current_students}</span>
+                          {cohort.max_students && (
+                            <span className="text-muted-foreground">/ {cohort.max_students}</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(cohort.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/dashboard/cohorts/${cohort.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedCohort(cohort)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm('Êtes-vous sûr de vouloir supprimer ce cohort ?')) {
+                                deleteCohort.mutate(cohort.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Users className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Aucun cohort</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                Créez votre premier cohort pour organiser vos étudiants en groupes
+              </p>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Créer un cohort
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Edit Cohort Dialog */}
+        {selectedCohort && (
+          <EditCohortDialog
+            cohort={selectedCohort}
+            onClose={() => setSelectedCohort(null)}
+            onUpdate={updateCohort.mutateAsync}
+          />
+        )}
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
 
@@ -378,7 +374,7 @@ function CreateCohortForm({
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={e => {
         e.preventDefault();
         onSubmit(formData);
       }}
@@ -390,7 +386,7 @@ function CreateCohortForm({
           <Input
             id="course_id"
             value={formData.course_id}
-            onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
+            onChange={e => setFormData({ ...formData, course_id: e.target.value })}
             placeholder="ID du cours"
             required
           />
@@ -402,7 +398,7 @@ function CreateCohortForm({
         <Input
           id="cohort_name"
           value={formData.cohort_name || ''}
-          onChange={(e) => setFormData({ ...formData, cohort_name: e.target.value })}
+          onChange={e => setFormData({ ...formData, cohort_name: e.target.value })}
           placeholder="Cohort 1 - Janvier 2025"
           required
         />
@@ -413,7 +409,7 @@ function CreateCohortForm({
         <Textarea
           id="cohort_description"
           value={formData.cohort_description || ''}
-          onChange={(e) => setFormData({ ...formData, cohort_description: e.target.value })}
+          onChange={e => setFormData({ ...formData, cohort_description: e.target.value })}
           rows={3}
         />
       </div>
@@ -425,7 +421,9 @@ function CreateCohortForm({
             id="cohort_number"
             type="number"
             value={formData.cohort_number || ''}
-            onChange={(e) => setFormData({ ...formData, cohort_number: parseInt(e.target.value) || undefined })}
+            onChange={e =>
+              setFormData({ ...formData, cohort_number: parseInt(e.target.value) || undefined })
+            }
             placeholder="1"
           />
         </div>
@@ -436,7 +434,9 @@ function CreateCohortForm({
             id="max_students"
             type="number"
             value={formData.max_students || ''}
-            onChange={(e) => setFormData({ ...formData, max_students: parseInt(e.target.value) || undefined })}
+            onChange={e =>
+              setFormData({ ...formData, max_students: parseInt(e.target.value) || undefined })
+            }
             placeholder="50"
           />
         </div>
@@ -449,7 +449,7 @@ function CreateCohortForm({
             id="start_date"
             type="date"
             value={formData.start_date ? format(new Date(formData.start_date), 'yyyy-MM-dd') : ''}
-            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+            onChange={e => setFormData({ ...formData, start_date: e.target.value })}
             required
           />
         </div>
@@ -460,7 +460,7 @@ function CreateCohortForm({
             id="end_date"
             type="date"
             value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''}
-            onChange={(e) => setFormData({ ...formData, end_date: e.target.value || undefined })}
+            onChange={e => setFormData({ ...formData, end_date: e.target.value || undefined })}
           />
         </div>
       </div>
@@ -471,8 +471,14 @@ function CreateCohortForm({
           <Input
             id="enrollment_start_date"
             type="date"
-            value={formData.enrollment_start_date ? format(new Date(formData.enrollment_start_date), 'yyyy-MM-dd') : ''}
-            onChange={(e) => setFormData({ ...formData, enrollment_start_date: e.target.value || undefined })}
+            value={
+              formData.enrollment_start_date
+                ? format(new Date(formData.enrollment_start_date), 'yyyy-MM-dd')
+                : ''
+            }
+            onChange={e =>
+              setFormData({ ...formData, enrollment_start_date: e.target.value || undefined })
+            }
           />
         </div>
 
@@ -481,8 +487,14 @@ function CreateCohortForm({
           <Input
             id="enrollment_end_date"
             type="date"
-            value={formData.enrollment_end_date ? format(new Date(formData.enrollment_end_date), 'yyyy-MM-dd') : ''}
-            onChange={(e) => setFormData({ ...formData, enrollment_end_date: e.target.value || undefined })}
+            value={
+              formData.enrollment_end_date
+                ? format(new Date(formData.enrollment_end_date), 'yyyy-MM-dd')
+                : ''
+            }
+            onChange={e =>
+              setFormData({ ...formData, enrollment_end_date: e.target.value || undefined })
+            }
           />
         </div>
       </div>
@@ -491,7 +503,9 @@ function CreateCohortForm({
         <Label htmlFor="status">Statut</Label>
         <Select
           value={formData.status}
-          onValueChange={(value) => setFormData({ ...formData, status: value as any })}
+          onValueChange={value =>
+            setFormData({ ...formData, status: value as CourseCohort['status'] })
+          }
         >
           <SelectTrigger>
             <SelectValue />
@@ -511,7 +525,7 @@ function CreateCohortForm({
         <Switch
           id="is_public"
           checked={formData.is_public}
-          onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+          onCheckedChange={checked => setFormData({ ...formData, is_public: checked })}
         />
       </div>
 
@@ -520,7 +534,7 @@ function CreateCohortForm({
         <Switch
           id="allow_late_enrollment"
           checked={formData.allow_late_enrollment}
-          onCheckedChange={(checked) => setFormData({ ...formData, allow_late_enrollment: checked })}
+          onCheckedChange={checked => setFormData({ ...formData, allow_late_enrollment: checked })}
         />
       </div>
 
@@ -529,7 +543,7 @@ function CreateCohortForm({
         <Switch
           id="waitlist_enabled"
           checked={formData.waitlist_enabled}
-          onCheckedChange={(checked) => setFormData({ ...formData, waitlist_enabled: checked })}
+          onCheckedChange={checked => setFormData({ ...formData, waitlist_enabled: checked })}
         />
       </div>
 
@@ -577,7 +591,9 @@ function EditCohortDialog({
             <Label htmlFor="status">Statut</Label>
             <Select
               value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value as any })}
+              onValueChange={value =>
+                setFormData({ ...formData, status: value as CourseCohort['status'] })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -598,7 +614,7 @@ function EditCohortDialog({
             <Switch
               id="is_public"
               checked={formData.is_public}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+              onCheckedChange={checked => setFormData({ ...formData, is_public: checked })}
             />
           </div>
 
@@ -607,7 +623,9 @@ function EditCohortDialog({
             <Switch
               id="allow_late_enrollment"
               checked={formData.allow_late_enrollment}
-              onCheckedChange={(checked) => setFormData({ ...formData, allow_late_enrollment: checked })}
+              onCheckedChange={checked =>
+                setFormData({ ...formData, allow_late_enrollment: checked })
+              }
             />
           </div>
 
@@ -622,10 +640,3 @@ function EditCohortDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

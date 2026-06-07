@@ -5,9 +5,9 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -320,7 +320,7 @@ const MyCourses = () => {
   const filteredAndSortedCourses = useMemo(() => {
     if (!enrollments) return [];
 
-    let  filtered= [...enrollments];
+    let filtered = [...enrollments];
 
     // Filtre de recherche
     if (searchQuery) {
@@ -458,559 +458,524 @@ const MyCourses = () => {
   }, [enrollments]);
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header
-            className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur-md shadow-sm transition-all duration-300"
-            role="banner"
-          >
-            <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 lg:gap-4 px-2 sm:px-3 lg:px-6 overflow-hidden">
-              <SidebarTrigger
-                aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
-                className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
+    <AppPageShell>
+      {/* Header */}
+      <header
+        className="sticky top-0 z-20 border-b bg-card/95 backdrop-blur-md shadow-sm transition-all duration-300"
+        role="banner"
+      >
+        <div className="flex h-14 sm:h-16 items-center gap-2 sm:gap-3 lg:gap-4 px-2 sm:px-3 lg:px-6 overflow-hidden">
+          <SidebarTrigger
+            aria-label={t('dashboard.sidebarToggle', 'Toggle sidebar')}
+            className="hover:bg-accent/50 transition-colors duration-200 flex-shrink-0 touch-manipulation min-h-[44px] min-w-[44px]"
+          />
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <h1
+              className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1"
+              id="courses-title"
+            >
+              {t('courses.myCourses', 'Mes Cours')}
+            </h1>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              aria-label={t('common.refresh', 'Actualiser')}
+              className="sm:hidden hover:scale-110 active:scale-95 transition-transform duration-200 touch-manipulation min-h-[44px] min-w-[44px]"
+              title="Actualiser"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                aria-hidden="true"
               />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <h1
-                  className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate px-1"
-                  id="courses-title"
-                >
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              aria-label={t('common.refresh', 'Actualiser')}
+              className="hidden sm:flex hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px]"
+              title="Actualiser (F5)"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
+              <span className="hidden lg:inline ml-2">{t('common.refresh', 'Actualiser')}</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {isLoading ? (
+        <div className="p-4 sm:p-6 lg:p-8">
+          <Skeleton className="h-10 w-64 mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-96" />
+            ))}
+          </div>
+        </div>
+      ) : error ? (
+        <div className="p-4 sm:p-6 lg:p-8">
+          <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {t('courses.error.loading', 'Erreur lors du chargement de vos cours.')}
+            </AlertDescription>
+          </Alert>
+        </div>
+      ) : (
+        <>
+          {/* Hero Section - Bannière Bleue Professionnelle */}
+          <div
+            ref={headerRef}
+            className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700"
+          >
+            <div
+              className="absolute inset-0 opacity-20 pointer-events-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                backgroundRepeat: 'repeat',
+              }}
+            ></div>
+            <div className="max-w-7xl mx-auto py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 relative z-10">
+              <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-lg bg-white/10 backdrop-blur-sm">
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
+                </div>
+                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
                   {t('courses.myCourses', 'Mes Cours')}
                 </h1>
               </div>
-              <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  aria-label={t('common.refresh', 'Actualiser')}
-                  className="sm:hidden hover:scale-110 active:scale-95 transition-transform duration-200 touch-manipulation min-h-[44px] min-w-[44px]"
-                  title="Actualiser"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
-                    aria-hidden="true"
-                  />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  aria-label={t('common.refresh', 'Actualiser')}
-                  className="hidden sm:flex hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation min-h-[36px]"
-                  title="Actualiser (F5)"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
-                    aria-hidden="true"
-                  />
-                  <span className="hidden lg:inline ml-2">{t('common.refresh', 'Actualiser')}</span>
-                </Button>
+              <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-blue-100 max-w-2xl">
+                {t('courses.subtitle', 'Suivez votre progression et continuez votre apprentissage')}
+              </p>
+              <div className="mt-2 sm:mt-3 md:mt-4 flex items-center gap-1.5 sm:gap-2">
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-yellow-300 animate-pulse" />
+                <span className="text-[9px] sm:text-[10px] md:text-xs text-blue-100">
+                  {stats.total}{' '}
+                  {stats.total > 1 ? t('courses.courses', 'cours') : t('courses.course', 'cours')}{' '}
+                  {stats.total > 0 ? t('courses.enrolled', 'inscrits') : ''}
+                </span>
               </div>
             </div>
-          </header>
+          </div>
 
-          <main
-            className="flex-1 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden"
-            role="main"
-            aria-labelledby="courses-title"
-          >
-            {isLoading ? (
-              <div className="p-4 sm:p-6 lg:p-8">
-                <Skeleton className="h-10 w-64 mb-6" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {[1, 2, 3].map(i => (
-                    <Skeleton key={i} className="h-96" />
-                  ))}
+          {/* Contenu */}
+          <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 lg:p-8 space-y-3 sm:space-y-4 lg:space-y-6">
+            {/* Statistiques */}
+            <div
+              ref={statsRef}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
+              role="region"
+              aria-label={t('courses.stats.ariaLabel', 'Statistiques des cours')}
+            >
+              <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    {t('courses.stats.total', 'Total des cours')}
+                  </CardTitle>
+                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
+                </CardHeader>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
+                    {stats.total}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    {t('courses.stats.totalDescription', 'Cours inscrits')}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    {t('courses.stats.inProgress', 'En cours')}
+                  </CardTitle>
+                  <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
+                </CardHeader>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
+                    {stats.inProgress}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    {t('courses.stats.inProgressDescription', 'En progression')}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
+                    {t('courses.stats.completed', 'Terminés')}
+                  </CardTitle>
+                  <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-green-600 group-hover:text-green-700 transition-colors duration-200 flex-shrink-0" />
+                </CardHeader>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
+                  <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
+                    {stats.completed}
+                  </div>
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
+                    {t('courses.stats.completedDescription', 'Cours terminés')}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Filtres et recherche */}
+            {stats.total > 0 && (
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-2.5 sm:p-3 lg:p-4 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
+                {/* Recherche */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                  <Input
+                    type="search"
+                    placeholder={t(
+                      'courses.search.placeholder',
+                      'Rechercher un cours... (Cmd/Ctrl+K)'
+                    )}
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-9 sm:pr-20 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm"
+                  />
+                  {searchQuery ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-accent/50 transition-all duration-200 z-10"
+                      aria-label="Effacer la recherche"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-muted-foreground pointer-events-none">
+                      <kbd className="hidden sm:inline-flex px-1.5 py-0.5 bg-muted/80 rounded border border-border/50 font-mono">
+                        ⌘K
+                      </kbd>
+                    </div>
+                  )}
+                </div>
+
+                {/* Filtres */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value: string) => setStatusFilter(value)}
+                  >
+                    <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] min-h-[44px] h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm">
+                      <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
+                      <SelectValue placeholder={t('courses.filters.status', 'Statut')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">
+                        {t('courses.filters.all', 'Tous les statuts')}
+                      </SelectItem>
+                      <SelectItem value="completed">
+                        {t('courses.filters.completed', 'Terminés')}
+                      </SelectItem>
+                      <SelectItem value="in_progress">
+                        {t('courses.filters.inProgress', 'En cours')}
+                      </SelectItem>
+                      <SelectItem value="not_started">
+                        {t('courses.filters.notStarted', 'Non commencés')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={sortBy} onValueChange={(value: string) => setSortBy(value)}>
+                    <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] min-h-[44px] h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm">
+                      <BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
+                      <SelectValue placeholder={t('courses.sort.placeholder', 'Trier par')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">
+                        {t('courses.sort.recent', 'Plus récents')}
+                      </SelectItem>
+                      <SelectItem value="progress">
+                        {t('courses.sort.progress', 'Progression')}
+                      </SelectItem>
+                      <SelectItem value="name">{t('courses.sort.name', 'Nom (A-Z)')}</SelectItem>
+                      <SelectItem value="duration">
+                        {t('courses.sort.duration', 'Durée')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Vue grille/liste */}
+                  <div className="flex items-center gap-1 border border-border/50 rounded-lg p-1 bg-background/50">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className="h-7 sm:h-8 w-7 sm:w-8 p-0 transition-all duration-200 hover:scale-110"
+                      aria-label="Vue en grille"
+                      title="Vue en grille (G)"
+                    >
+                      <Grid3X3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="h-7 sm:h-8 w-7 sm:w-8 p-0 transition-all duration-200 hover:scale-110"
+                      aria-label="Vue en liste"
+                      title="Vue en liste (G)"
+                    >
+                      <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </Button>
+                  </div>
+
+                  {(searchQuery || statusFilter !== 'all' || sortBy !== 'recent') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="h-9 sm:h-10 text-xs sm:text-sm hover:bg-accent/50 transition-all duration-200"
+                    >
+                      <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
+                      <span className="hidden sm:inline">
+                        {t('common.clearFilters', 'Réinitialiser')}
+                      </span>
+                    </Button>
+                  )}
                 </div>
               </div>
-            ) : error ? (
-              <div className="p-4 sm:p-6 lg:p-8">
-                <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {t('courses.error.loading', 'Erreur lors du chargement de vos cours.')}
-                  </AlertDescription>
-                </Alert>
-              </div>
+            )}
+
+            {/* Résultats */}
+            {filteredAndSortedCourses.length === 0 ? (
+              <Card className="shadow-sm border-border/50 bg-card/30 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+                <CardContent className="py-8 sm:py-12 text-center">
+                  <GraduationCap className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground animate-pulse" />
+                  <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-1 sm:mb-2">
+                    {searchQuery || statusFilter !== 'all'
+                      ? t('courses.empty.noResults', 'Aucun cours trouvé')
+                      : t('courses.empty.noCourses', 'Aucun cours pour le moment')}
+                  </h3>
+                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-3 sm:mb-4 max-w-md mx-auto">
+                    {searchQuery || statusFilter !== 'all'
+                      ? t(
+                          'courses.empty.noResultsDescription',
+                          'Essayez de modifier vos filtres de recherche'
+                        )
+                      : t(
+                          'courses.empty.noCoursesDescription',
+                          'Explorez notre catalogue et inscrivez-vous à votre premier cours !'
+                        )}
+                  </p>
+                  {(searchQuery || statusFilter !== 'all') && (
+                    <Button
+                      variant="outline"
+                      onClick={clearFilters}
+                      className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
+                    >
+                      {t('common.clearFilters', 'Réinitialiser les filtres')}
+                    </Button>
+                  )}
+                  {!searchQuery && statusFilter === 'all' && (
+                    <Button
+                      onClick={() => navigate('/marketplace')}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-200" />
+                      {t('courses.empty.explore', 'Explorer les cours')}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             ) : (
               <>
-                {/* Hero Section - Bannière Bleue Professionnelle */}
-                <div
-                  ref={headerRef}
-                  className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700"
-                >
-                  <div
-                    className="absolute inset-0 opacity-20 pointer-events-none"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'repeat',
-                    }}
-                  ></div>
-                  <div className="max-w-7xl mx-auto py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="flex items-center gap-3 mb-3 sm:mb-4">
-                      <div className="p-2 sm:p-3 rounded-lg bg-white/10 backdrop-blur-sm">
-                        <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-                      </div>
-                      <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">
-                        {t('courses.myCourses', 'Mes Cours')}
-                      </h1>
-                    </div>
-                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-blue-100 max-w-2xl">
-                      {t(
-                        'courses.subtitle',
-                        'Suivez votre progression et continuez votre apprentissage'
-                      )}
+                {/* Info et pagination supérieure */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-2.5 sm:p-3 lg:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-xs sm:text-sm font-medium text-foreground">
+                      {filteredAndSortedCourses.length}{' '}
+                      {filteredAndSortedCourses.length > 1
+                        ? t('courses.courses', 'cours')
+                        : t('courses.course', 'cours')}{' '}
+                      {t('courses.found', 'trouvé')}
+                      {filteredAndSortedCourses.length > 1 ? 's' : ''}
                     </p>
-                    <div className="mt-2 sm:mt-3 md:mt-4 flex items-center gap-1.5 sm:gap-2">
-                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-yellow-300 animate-pulse" />
-                      <span className="text-[9px] sm:text-[10px] md:text-xs text-blue-100">
-                        {stats.total}{' '}
-                        {stats.total > 1
-                          ? t('courses.courses', 'cours')
-                          : t('courses.course', 'cours')}{' '}
-                        {stats.total > 0 ? t('courses.enrolled', 'inscrits') : ''}
+                    {searchQuery && (
+                      <Badge variant="secondary" className="text-xs">
+                        {t('courses.search.result', 'Recherche')}: {searchQuery}
+                      </Badge>
+                    )}
+                  </div>
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                      <label htmlFor="items-per-page" className="sr-only">
+                        {t('common.itemsPerPage', 'Éléments par page')}
+                      </label>
+                      <span className="hidden sm:inline">
+                        {t('common.displaying', 'Affichage de')}
                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contenu */}
-                <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 lg:p-8 space-y-3 sm:space-y-4 lg:space-y-6">
-                  {/* Statistiques */}
-                  <div
-                    ref={statsRef}
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-                    role="region"
-                    aria-label={t('courses.stats.ariaLabel', 'Statistiques des cours')}
-                  >
-                    <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
-                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
-                          {t('courses.stats.total', 'Total des cours')}
-                        </CardTitle>
-                        <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
-                      </CardHeader>
-                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
-                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
-                          {stats.total}
-                        </div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
-                          {t('courses.stats.totalDescription', 'Cours inscrits')}
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
-                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
-                          {t('courses.stats.inProgress', 'En cours')}
-                        </CardTitle>
-                        <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-blue-600 group-hover:text-blue-700 transition-colors duration-200 flex-shrink-0" />
-                      </CardHeader>
-                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
-                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
-                          {stats.inProgress}
-                        </div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
-                          {t('courses.stats.inProgressDescription', 'En progression')}
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="group hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 sm:pb-2 p-2.5 sm:p-3 md:p-4 lg:p-6">
-                        <CardTitle className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm font-medium">
-                          {t('courses.stats.completed', 'Terminés')}
-                        </CardTitle>
-                        <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 text-green-600 group-hover:text-green-700 transition-colors duration-200 flex-shrink-0" />
-                      </CardHeader>
-                      <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6 pt-0">
-                        <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mb-0.5 sm:mb-1">
-                          {stats.completed}
-                        </div>
-                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground">
-                          {t('courses.stats.completedDescription', 'Cours terminés')}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Filtres et recherche */}
-                  {stats.total > 0 && (
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 p-2.5 sm:p-3 lg:p-4 bg-card/30 rounded-lg border border-border/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
-                      {/* Recherche */}
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                        <Input
-                          type="search"
-                          placeholder={t(
-                            'courses.search.placeholder',
-                            'Rechercher un cours... (Cmd/Ctrl+K)'
-                          )}
-                          value={searchQuery}
-                          onChange={e => setSearchQuery(e.target.value)}
-                          className="pl-10 pr-9 sm:pr-20 h-9 sm:h-10 bg-background/50 border-border/50 focus:bg-background focus:border-primary/50 transition-all duration-200 text-[10px] sm:text-xs md:text-sm"
-                        />
-                        {searchQuery ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-accent/50 transition-all duration-200 z-10"
-                            aria-label="Effacer la recherche"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </Button>
-                        ) : (
-                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-muted-foreground pointer-events-none">
-                            <kbd className="hidden sm:inline-flex px-1.5 py-0.5 bg-muted/80 rounded border border-border/50 font-mono">
-                              ⌘K
-                            </kbd>
-                          </div>
+                      <select
+                        id="items-per-page"
+                        value={itemsPerPage}
+                        onChange={e => handleItemsPerPageChange(Number(e.target.value))}
+                        className="px-2 py-1.5 min-h-[44px] border rounded-md bg-background text-xs sm:text-sm hover:bg-accent/50 transition-colors duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-1 touch-manipulation cursor-pointer"
+                        aria-label={t(
+                          'common.selectItemsPerPage',
+                          "Sélectionner le nombre d'éléments par page"
                         )}
-                      </div>
-
-                      {/* Filtres */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Select
-                          value={statusFilter}
-                          onValueChange={(value: string) => setStatusFilter(value)}
-                        >
-                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] min-h-[44px] h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm">
-                            <Filter className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
-                            <SelectValue placeholder={t('courses.filters.status', 'Statut')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">
-                              {t('courses.filters.all', 'Tous les statuts')}
-                            </SelectItem>
-                            <SelectItem value="completed">
-                              {t('courses.filters.completed', 'Terminés')}
-                            </SelectItem>
-                            <SelectItem value="in_progress">
-                              {t('courses.filters.inProgress', 'En cours')}
-                            </SelectItem>
-                            <SelectItem value="not_started">
-                              {t('courses.filters.notStarted', 'Non commencés')}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Select value={sortBy} onValueChange={(value: string) => setSortBy(value)}>
-                          <SelectTrigger className="w-full sm:w-[140px] lg:w-[160px] min-h-[44px] h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-all duration-200 text-sm">
-                            <BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
-                            <SelectValue placeholder={t('courses.sort.placeholder', 'Trier par')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="recent">
-                              {t('courses.sort.recent', 'Plus récents')}
-                            </SelectItem>
-                            <SelectItem value="progress">
-                              {t('courses.sort.progress', 'Progression')}
-                            </SelectItem>
-                            <SelectItem value="name">
-                              {t('courses.sort.name', 'Nom (A-Z)')}
-                            </SelectItem>
-                            <SelectItem value="duration">
-                              {t('courses.sort.duration', 'Durée')}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        {/* Vue grille/liste */}
-                        <div className="flex items-center gap-1 border border-border/50 rounded-lg p-1 bg-background/50">
-                          <Button
-                            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                            size="sm"
-                            onClick={() => setViewMode('grid')}
-                            className="h-7 sm:h-8 w-7 sm:w-8 p-0 transition-all duration-200 hover:scale-110"
-                            aria-label="Vue en grille"
-                            title="Vue en grille (G)"
-                          >
-                            <Grid3X3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </Button>
-                          <Button
-                            variant={viewMode === 'list' ? 'default' : 'ghost'}
-                            size="sm"
-                            onClick={() => setViewMode('list')}
-                            className="h-7 sm:h-8 w-7 sm:w-8 p-0 transition-all duration-200 hover:scale-110"
-                            aria-label="Vue en liste"
-                            title="Vue en liste (G)"
-                          >
-                            <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </Button>
-                        </div>
-
-                        {(searchQuery || statusFilter !== 'all' || sortBy !== 'recent') && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={clearFilters}
-                            className="h-9 sm:h-10 text-xs sm:text-sm hover:bg-accent/50 transition-all duration-200"
-                          >
-                            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
-                            <span className="hidden sm:inline">
-                              {t('common.clearFilters', 'Réinitialiser')}
-                            </span>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Résultats */}
-                  {filteredAndSortedCourses.length === 0 ? (
-                    <Card className="shadow-sm border-border/50 bg-card/30 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
-                      <CardContent className="py-8 sm:py-12 text-center">
-                        <GraduationCap className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground animate-pulse" />
-                        <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-1 sm:mb-2">
-                          {searchQuery || statusFilter !== 'all'
-                            ? t('courses.empty.noResults', 'Aucun cours trouvé')
-                            : t('courses.empty.noCourses', 'Aucun cours pour le moment')}
-                        </h3>
-                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-3 sm:mb-4 max-w-md mx-auto">
-                          {searchQuery || statusFilter !== 'all'
-                            ? t(
-                                'courses.empty.noResultsDescription',
-                                'Essayez de modifier vos filtres de recherche'
-                              )
-                            : t(
-                                'courses.empty.noCoursesDescription',
-                                'Explorez notre catalogue et inscrivez-vous à votre premier cours !'
-                              )}
-                        </p>
-                        {(searchQuery || statusFilter !== 'all') && (
-                          <Button
-                            variant="outline"
-                            onClick={clearFilters}
-                            className="hover:bg-accent/50 transition-all duration-200 hover:scale-105 active:scale-95"
-                          >
-                            {t('common.clearFilters', 'Réinitialiser les filtres')}
-                          </Button>
-                        )}
-                        {!searchQuery && statusFilter === 'all' && (
-                          <Button
-                            onClick={() => navigate('/marketplace')}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 group"
-                          >
-                            <Sparkles className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-200" />
-                            {t('courses.empty.explore', 'Explorer les cours')}
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <>
-                      {/* Info et pagination supérieure */}
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-2.5 sm:p-3 lg:p-4 bg-card/50 rounded-lg border border-border/50 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-xs sm:text-sm font-medium text-foreground">
-                            {filteredAndSortedCourses.length}{' '}
-                            {filteredAndSortedCourses.length > 1
-                              ? t('courses.courses', 'cours')
-                              : t('courses.course', 'cours')}{' '}
-                            {t('courses.found', 'trouvé')}
-                            {filteredAndSortedCourses.length > 1 ? 's' : ''}
-                          </p>
-                          {searchQuery && (
-                            <Badge variant="secondary" className="text-xs">
-                              {t('courses.search.result', 'Recherche')}: {searchQuery}
-                            </Badge>
-                          )}
-                        </div>
-                        {totalPages > 1 && (
-                          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                            <label htmlFor="items-per-page" className="sr-only">
-                              {t('common.itemsPerPage', 'Éléments par page')}
-                            </label>
-                            <span className="hidden sm:inline">
-                              {t('common.displaying', 'Affichage de')}
-                            </span>
-                            <select
-                              id="items-per-page"
-                              value={itemsPerPage}
-                              onChange={e => handleItemsPerPageChange(Number(e.target.value))}
-                              className="px-2 py-1.5 min-h-[44px] border rounded-md bg-background text-xs sm:text-sm hover:bg-accent/50 transition-colors duration-200 focus:ring-2 focus:ring-primary focus:ring-offset-1 touch-manipulation cursor-pointer"
-                              aria-label={t(
-                                'common.selectItemsPerPage',
-                                "Sélectionner le nombre d'éléments par page"
-                              )}
-                            >
-                              {PAGINATION_OPTIONS.map(option => (
-                                <option key={option} value={option}>
-                                  {option}
-                                </option>
-                              ))}
-                            </select>
-                            <span className="hidden sm:inline">
-                              {t('common.perPage', 'par page')}
-                            </span>
-                            <span className="sm:hidden">/ page</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Liste des cours */}
-                      <div
-                        ref={coursesRef}
-                        className={
-                          viewMode === 'grid'
-                            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700'
-                            : 'space-y-2.5 sm:space-y-3 lg:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700'
-                        }
-                        role="region"
-                        aria-label={t('courses.list.ariaLabel', 'Liste des cours')}
                       >
-                        {paginatedCourses.map((enrollment: CourseEnrollment, index) => (
-                          <div
-                            key={enrollment.id}
-                            className="animate-in fade-in"
-                            style={{ animationDelay: `${index * 50}ms` }}
-                          >
-                            <CourseCard enrollment={enrollment} viewMode={viewMode} />
-                          </div>
+                        {PAGINATION_OPTIONS.map(option => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
                         ))}
-                      </div>
-
-                      {/* Pagination */}
-                      {totalPages > 1 && (
-                        <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
-                          <CardContent className="p-3 sm:p-4">
-                            <nav
-                              className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
-                              role="navigation"
-                              aria-label={t('courses.pagination.ariaLabel', 'Navigation des pages')}
-                            >
-                              <div className="text-xs sm:text-sm text-muted-foreground font-medium">
-                                {t('courses.pagination.page', 'Page')} {currentPage}{' '}
-                                <span className="hidden sm:inline">
-                                  {t('courses.pagination.of', 'sur')}
-                                </span>{' '}
-                                <span className="sm:hidden">/</span> {totalPages}
-                              </div>
-
-                              <div
-                                className="flex items-center gap-1"
-                                role="group"
-                                aria-label={t(
-                                  'courses.pagination.controls',
-                                  'Contrôles de pagination'
-                                )}
-                              >
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handlePageChange(1)}
-                                  disabled={currentPage === 1}
-                                  aria-label={t('courses.pagination.firstPage', 'Première page')}
-                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
-                                >
-                                  <span className="sr-only">
-                                    {t('courses.pagination.firstPage', 'Première page')}
-                                  </span>
-                                  «
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handlePageChange(currentPage - 1)}
-                                  disabled={currentPage === 1}
-                                  aria-label={t(
-                                    'courses.pagination.previousPage',
-                                    'Page précédente'
-                                  )}
-                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
-                                >
-                                  <span className="sr-only">
-                                    {t('courses.pagination.previousPage', 'Page précédente')}
-                                  </span>
-                                  ‹
-                                </Button>
-
-                                <div className="flex items-center gap-1 px-1 sm:px-2">
-                                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                    let  _pageNumber;
-                                    if (totalPages <= 5) {
-                                      pageNumber = i + 1;
-                                    } else if (currentPage <= 3) {
-                                      pageNumber = i + 1;
-                                    } else if (currentPage >= totalPages - 2) {
-                                      pageNumber = totalPages - 4 + i;
-                                    } else {
-                                      pageNumber = currentPage - 2 + i;
-                                    }
-
-                                    return (
-                                      <Button
-                                        key={pageNumber}
-                                        variant={currentPage === pageNumber ? 'default' : 'outline'}
-                                        size="sm"
-                                        onClick={() => handlePageChange(pageNumber)}
-                                        className="min-w-[32px] sm:min-w-[36px] h-8 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
-                                        aria-label={`${t('courses.pagination.goToPage', 'Aller à la page')} ${pageNumber}`}
-                                        aria-current={
-                                          currentPage === pageNumber ? 'page' : undefined
-                                        }
-                                      >
-                                        {pageNumber}
-                                      </Button>
-                                    );
-                                  })}
-                                </div>
-
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handlePageChange(currentPage + 1)}
-                                  disabled={currentPage === totalPages}
-                                  aria-label={t('courses.pagination.nextPage', 'Page suivante')}
-                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
-                                >
-                                  <span className="sr-only">
-                                    {t('courses.pagination.nextPage', 'Page suivante')}
-                                  </span>
-                                  ›
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handlePageChange(totalPages)}
-                                  disabled={currentPage === totalPages}
-                                  aria-label={t('courses.pagination.lastPage', 'Dernière page')}
-                                  className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
-                                >
-                                  <span className="sr-only">
-                                    {t('courses.pagination.lastPage', 'Dernière page')}
-                                  </span>
-                                  »
-                                </Button>
-                              </div>
-                            </nav>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </>
+                      </select>
+                      <span className="hidden sm:inline">{t('common.perPage', 'par page')}</span>
+                      <span className="sm:hidden">/ page</span>
+                    </div>
                   )}
                 </div>
+
+                {/* Liste des cours */}
+                <div
+                  ref={coursesRef}
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700'
+                      : 'space-y-2.5 sm:space-y-3 lg:space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700'
+                  }
+                  role="region"
+                  aria-label={t('courses.list.ariaLabel', 'Liste des cours')}
+                >
+                  {paginatedCourses.map((enrollment: CourseEnrollment, index) => (
+                    <div
+                      key={enrollment.id}
+                      className="animate-in fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <CourseCard enrollment={enrollment} viewMode={viewMode} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Card className="shadow-sm border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <CardContent className="p-3 sm:p-4">
+                      <nav
+                        className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+                        role="navigation"
+                        aria-label={t('courses.pagination.ariaLabel', 'Navigation des pages')}
+                      >
+                        <div className="text-xs sm:text-sm text-muted-foreground font-medium">
+                          {t('courses.pagination.page', 'Page')} {currentPage}{' '}
+                          <span className="hidden sm:inline">
+                            {t('courses.pagination.of', 'sur')}
+                          </span>{' '}
+                          <span className="sm:hidden">/</span> {totalPages}
+                        </div>
+
+                        <div
+                          className="flex items-center gap-1"
+                          role="group"
+                          aria-label={t('courses.pagination.controls', 'Contrôles de pagination')}
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(1)}
+                            disabled={currentPage === 1}
+                            aria-label={t('courses.pagination.firstPage', 'Première page')}
+                            className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
+                          >
+                            <span className="sr-only">
+                              {t('courses.pagination.firstPage', 'Première page')}
+                            </span>
+                            «
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            aria-label={t('courses.pagination.previousPage', 'Page précédente')}
+                            className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
+                          >
+                            <span className="sr-only">
+                              {t('courses.pagination.previousPage', 'Page précédente')}
+                            </span>
+                            ‹
+                          </Button>
+
+                          <div className="flex items-center gap-1 px-1 sm:px-2">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              let _pageNumber;
+                              if (totalPages <= 5) {
+                                pageNumber = i + 1;
+                              } else if (currentPage <= 3) {
+                                pageNumber = i + 1;
+                              } else if (currentPage >= totalPages - 2) {
+                                pageNumber = totalPages - 4 + i;
+                              } else {
+                                pageNumber = currentPage - 2 + i;
+                              }
+
+                              return (
+                                <Button
+                                  key={pageNumber}
+                                  variant={currentPage === pageNumber ? 'default' : 'outline'}
+                                  size="sm"
+                                  onClick={() => handlePageChange(pageNumber)}
+                                  className="min-w-[32px] sm:min-w-[36px] h-8 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
+                                  aria-label={`${t('courses.pagination.goToPage', 'Aller à la page')} ${pageNumber}`}
+                                  aria-current={currentPage === pageNumber ? 'page' : undefined}
+                                >
+                                  {pageNumber}
+                                </Button>
+                              );
+                            })}
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            aria-label={t('courses.pagination.nextPage', 'Page suivante')}
+                            className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
+                          >
+                            <span className="sr-only">
+                              {t('courses.pagination.nextPage', 'Page suivante')}
+                            </span>
+                            ›
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(totalPages)}
+                            disabled={currentPage === totalPages}
+                            aria-label={t('courses.pagination.lastPage', 'Dernière page')}
+                            className="h-8 w-8 p-0 hover:bg-accent/50 transition-all duration-200 disabled:opacity-40 touch-manipulation"
+                          >
+                            <span className="sr-only">
+                              {t('courses.pagination.lastPage', 'Dernière page')}
+                            </span>
+                            »
+                          </Button>
+                        </div>
+                      </nav>
+                    </CardContent>
+                  </Card>
+                )}
               </>
             )}
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+          </div>
+        </>
+      )}
+    </AppPageShell>
   );
 };
 
 export default MyCourses;
-
-
-
-
-
-

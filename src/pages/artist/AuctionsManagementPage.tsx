@@ -1,7 +1,7 @@
 /**
  * Page de Gestion des Ventes aux Enchères
  * Date: 1 Février 2025
- * 
+ *
  * Interface complète pour gérer les ventes aux enchères d'œuvres d'artistes :
  * - Création et édition d'enchères
  * - Suivi des offres
@@ -9,9 +9,8 @@
  */
 
 import { useState } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useNavigate } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +18,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { _Tabs, _TabsContent, _TabsList, _TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -87,7 +99,7 @@ export default function AuctionsManagementPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const  variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       draft: 'secondary',
       scheduled: 'outline',
       active: 'default',
@@ -97,7 +109,7 @@ export default function AuctionsManagementPage() {
       sold: 'default',
     };
 
-    const  colors: Record<string, string> = {
+    const colors: Record<string, string> = {
       active: 'bg-green-500',
       sold: 'bg-blue-500',
     };
@@ -111,233 +123,228 @@ export default function AuctionsManagementPage() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <main className="flex-1 p-8">
-            <Skeleton className="h-8 w-64 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </main>
-        </div>
-      </SidebarProvider>
+      <AppPageShell mainClassName="p-8">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <Skeleton className="h-64 w-full" />
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                  <Gavel className="h-8 w-8" />
-                  Ventes aux Enchères
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Gérez vos ventes aux enchères d'œuvres d'artistes
-                </p>
-              </div>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nouvelle Enchère
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Créer une Nouvelle Enchère</DialogTitle>
-                    <DialogDescription>
-                      Configurez une nouvelle vente aux enchères pour une œuvre d'artiste
-                    </DialogDescription>
-                  </DialogHeader>
-                  <CreateAuctionForm
-                    onSubmit={handleCreateAuction}
-                    onCancel={() => setIsCreateDialogOpen(false)}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Enchères Actives</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {auctions?.filter(a => a.status === 'active').length || 0}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Enchères</CardTitle>
-                  <Gavel className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{auctions?.length || 0}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Offres</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {auctions?.reduce((sum, a) => sum + (a.total_bids || 0), 0) || 0}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Valeur Totale</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {auctions?.reduce((sum, a) => sum + (a.current_bid || 0), 0).toLocaleString('fr-FR') || 0} XOF
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Auctions List */}
-            {auctions && auctions.length > 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Liste des Enchères</CardTitle>
-                  <CardDescription>Toutes vos ventes aux enchères</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Œuvre</TableHead>
-                        <TableHead>Titre</TableHead>
-                        <TableHead>Prix Actuel</TableHead>
-                        <TableHead>Offres</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Dates</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {auctions.map((auction) => (
-                        <TableRow key={auction.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {auction.artist_products?.products?.image_url && (
-                                <img
-                                  src={auction.artist_products.products.image_url}
-                                  alt={auction.auction_title}
-                                  className="h-10 w-10 rounded object-cover"
-                                />
-                              )}
-                              <div>
-                                <p className="font-medium">{auction.artist_products?.artwork_title}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {auction.artist_products?.artist_name}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <p className="font-medium">{auction.auction_title}</p>
-                          </TableCell>
-                          <TableCell>
-                            <p className="font-semibold">{auction.current_bid.toLocaleString('fr-FR')} XOF</p>
-                            {auction.reserve_price && (
-                              <p className="text-xs text-muted-foreground">
-                                Réserve: {auction.reserve_price.toLocaleString('fr-FR')} XOF
-                              </p>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4 text-muted-foreground" />
-                              <span>{auction.total_bids}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {auction.unique_bidders} enchérisseurs
-                            </p>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(auction.status)}</TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              <p>Début: {format(new Date(auction.start_date), 'PP', { locale: fr })}</p>
-                              <p>Fin: {format(new Date(auction.end_date), 'PP', { locale: fr })}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate(`/auctions/${auction.auction_slug}`)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedAuction(auction)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  if (confirm('Êtes-vous sûr de vouloir supprimer cette enchère ?')) {
-                                    deleteAuction.mutate(auction.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Gavel className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Aucune enchère</h3>
-                  <p className="text-muted-foreground text-center mb-4">
-                    Commencez par créer une nouvelle vente aux enchères pour une œuvre d'artiste
-                  </p>
-                  <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Créer une enchère
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Edit Auction Dialog */}
-            {selectedAuction && (
-              <EditAuctionDialog
-                auction={selectedAuction}
-                onClose={() => setSelectedAuction(null)}
-                onUpdate={updateAuction.mutateAsync}
-              />
-            )}
+    <AppPageShell mainClassName="p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Gavel className="h-8 w-8" />
+              Ventes aux Enchères
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Gérez vos ventes aux enchères d'œuvres d'artistes
+            </p>
           </div>
-        </main>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvelle Enchère
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Créer une Nouvelle Enchère</DialogTitle>
+                <DialogDescription>
+                  Configurez une nouvelle vente aux enchères pour une œuvre d'artiste
+                </DialogDescription>
+              </DialogHeader>
+              <CreateAuctionForm
+                onSubmit={handleCreateAuction}
+                onCancel={() => setIsCreateDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Enchères Actives</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {auctions?.filter(a => a.status === 'active').length || 0}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Enchères</CardTitle>
+              <Gavel className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{auctions?.length || 0}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Offres</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {auctions?.reduce((sum, a) => sum + (a.total_bids || 0), 0) || 0}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Valeur Totale</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {auctions
+                  ?.reduce((sum, a) => sum + (a.current_bid || 0), 0)
+                  .toLocaleString('fr-FR') || 0}{' '}
+                XOF
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Auctions List */}
+        {auctions && auctions.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Liste des Enchères</CardTitle>
+              <CardDescription>Toutes vos ventes aux enchères</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Œuvre</TableHead>
+                    <TableHead>Titre</TableHead>
+                    <TableHead>Prix Actuel</TableHead>
+                    <TableHead>Offres</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Dates</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {auctions.map(auction => (
+                    <TableRow key={auction.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {auction.artist_products?.products?.image_url && (
+                            <img
+                              src={auction.artist_products.products.image_url}
+                              alt={auction.auction_title}
+                              className="h-10 w-10 rounded object-cover"
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium">{auction.artist_products?.artwork_title}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {auction.artist_products?.artist_name}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-medium">{auction.auction_title}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-semibold">
+                          {auction.current_bid.toLocaleString('fr-FR')} XOF
+                        </p>
+                        {auction.reserve_price && (
+                          <p className="text-xs text-muted-foreground">
+                            Réserve: {auction.reserve_price.toLocaleString('fr-FR')} XOF
+                          </p>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span>{auction.total_bids}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {auction.unique_bidders} enchérisseurs
+                        </p>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(auction.status)}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p>Début: {format(new Date(auction.start_date), 'PP', { locale: fr })}</p>
+                          <p>Fin: {format(new Date(auction.end_date), 'PP', { locale: fr })}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/auctions/${auction.auction_slug}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedAuction(auction)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm('Êtes-vous sûr de vouloir supprimer cette enchère ?')) {
+                                deleteAuction.mutate(auction.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Gavel className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Aucune enchère</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                Commencez par créer une nouvelle vente aux enchères pour une œuvre d'artiste
+              </p>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Créer une enchère
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Edit Auction Dialog */}
+        {selectedAuction && (
+          <EditAuctionDialog
+            auction={selectedAuction}
+            onClose={() => setSelectedAuction(null)}
+            onUpdate={updateAuction.mutateAsync}
+          />
+        )}
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }
 
@@ -358,7 +365,7 @@ function CreateAuctionForm({
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={e => {
         e.preventDefault();
         onSubmit(formData);
       }}
@@ -369,7 +376,7 @@ function CreateAuctionForm({
         <Input
           id="auction_title"
           value={formData.auction_title || ''}
-          onChange={(e) => setFormData({ ...formData, auction_title: e.target.value })}
+          onChange={e => setFormData({ ...formData, auction_title: e.target.value })}
           required
         />
       </div>
@@ -379,7 +386,7 @@ function CreateAuctionForm({
         <Textarea
           id="auction_description"
           value={formData.auction_description || ''}
-          onChange={(e) => setFormData({ ...formData, auction_description: e.target.value })}
+          onChange={e => setFormData({ ...formData, auction_description: e.target.value })}
           rows={4}
         />
       </div>
@@ -391,7 +398,7 @@ function CreateAuctionForm({
             id="starting_price"
             type="number"
             value={formData.starting_price || ''}
-            onChange={(e) => setFormData({ ...formData, starting_price: parseFloat(e.target.value) })}
+            onChange={e => setFormData({ ...formData, starting_price: parseFloat(e.target.value) })}
             required
             min={0}
           />
@@ -403,7 +410,9 @@ function CreateAuctionForm({
             id="reserve_price"
             type="number"
             value={formData.reserve_price || ''}
-            onChange={(e) => setFormData({ ...formData, reserve_price: parseFloat(e.target.value) || undefined })}
+            onChange={e =>
+              setFormData({ ...formData, reserve_price: parseFloat(e.target.value) || undefined })
+            }
             min={0}
           />
         </div>
@@ -415,8 +424,12 @@ function CreateAuctionForm({
           <Input
             id="start_date"
             type="datetime-local"
-            value={formData.start_date ? format(new Date(formData.start_date), "yyyy-MM-dd'T'HH:mm") : ''}
-            onChange={(e) => setFormData({ ...formData, start_date: new Date(e.target.value).toISOString() })}
+            value={
+              formData.start_date ? format(new Date(formData.start_date), "yyyy-MM-dd'T'HH:mm") : ''
+            }
+            onChange={e =>
+              setFormData({ ...formData, start_date: new Date(e.target.value).toISOString() })
+            }
             required
           />
         </div>
@@ -426,8 +439,12 @@ function CreateAuctionForm({
           <Input
             id="end_date"
             type="datetime-local"
-            value={formData.end_date ? format(new Date(formData.end_date), "yyyy-MM-dd'T'HH:mm") : ''}
-            onChange={(e) => setFormData({ ...formData, end_date: new Date(e.target.value).toISOString() })}
+            value={
+              formData.end_date ? format(new Date(formData.end_date), "yyyy-MM-dd'T'HH:mm") : ''
+            }
+            onChange={e =>
+              setFormData({ ...formData, end_date: new Date(e.target.value).toISOString() })
+            }
             required
           />
         </div>
@@ -439,7 +456,9 @@ function CreateAuctionForm({
           id="minimum_bid_increment"
           type="number"
           value={formData.minimum_bid_increment || 1000}
-          onChange={(e) => setFormData({ ...formData, minimum_bid_increment: parseFloat(e.target.value) })}
+          onChange={e =>
+            setFormData({ ...formData, minimum_bid_increment: parseFloat(e.target.value) })
+          }
           min={1}
         />
       </div>
@@ -449,7 +468,9 @@ function CreateAuctionForm({
         <Switch
           id="allow_automatic_extension"
           checked={formData.allow_automatic_extension}
-          onCheckedChange={(checked) => setFormData({ ...formData, allow_automatic_extension: checked })}
+          onCheckedChange={checked =>
+            setFormData({ ...formData, allow_automatic_extension: checked })
+          }
         />
       </div>
 
@@ -481,7 +502,7 @@ function EditAuctionDialog({
       await onUpdate({ id: auction.id, ...formData });
       toast({
         title: 'Enchère mise à jour',
-        description: 'L\'enchère a été mise à jour avec succès.',
+        description: "L'enchère a été mise à jour avec succès.",
       });
       onClose();
     } catch (error) {
@@ -501,7 +522,9 @@ function EditAuctionDialog({
             <Label htmlFor="status">Statut</Label>
             <Select
               value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value as ArtistProductAuction['status'] })}
+              onValueChange={value =>
+                setFormData({ ...formData, status: value as ArtistProductAuction['status'] })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -522,7 +545,9 @@ function EditAuctionDialog({
             <Switch
               id="allow_automatic_extension"
               checked={formData.allow_automatic_extension}
-              onCheckedChange={(checked) => setFormData({ ...formData, allow_automatic_extension: checked })}
+              onCheckedChange={checked =>
+                setFormData({ ...formData, allow_automatic_extension: checked })
+              }
             />
           </div>
 
@@ -537,10 +562,3 @@ function EditAuctionDialog({
     </Dialog>
   );
 }
-
-
-
-
-
-
-

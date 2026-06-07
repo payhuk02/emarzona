@@ -65,6 +65,7 @@
     "test:responsive:visual": "playwright test --grep \"Régression visuelle\"",
     "audit:responsive": "node scripts/responsivity-audit.js",
     "audit:lighthouse": "node scripts/lighthouse-web-vitals.js",
+    "audit:lighthouse:a11y": "node scripts/lighthouse-a11y-layouts.mjs",
     "audit:lighthouse:legacy": "node scripts/lighthouse-test.js",
     "measure:vitals": "node scripts/measure-web-vitals.js",
     "audit:all": "npm run audit:responsive && npm run audit:lighthouse",

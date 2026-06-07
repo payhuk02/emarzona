@@ -3,8 +3,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useStore } from '@/hooks/useStore';
 import { PhysicalSubscriptionRequired } from '@/components/billing/PhysicalSubscriptionRequired';
 import { Button } from '@/components/ui/button';
@@ -80,27 +79,22 @@ export default function StorePhysicalBilling() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden">
-          <div className="border-b px-4 py-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/products')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Mes produits
-            </Button>
-          </div>
-          <PhysicalSubscriptionRequired storeId={store.id} />
-          <div className="container mx-auto max-w-4xl px-4 pb-8">
-            <p className="text-xs text-muted-foreground">
-              Besoin d&apos;aide ?{' '}
-              <Link to="/dashboard/support" className="text-primary hover:underline">
-                Contacter le support
-              </Link>
-            </p>
-          </div>
-        </main>
+    <AppPageShell mainClassName="overflow-x-hidden">
+      <div className="border-b px-4 py-3">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/products')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Mes produits
+        </Button>
       </div>
-    </SidebarProvider>
+      <PhysicalSubscriptionRequired storeId={store.id} />
+      <div className="container mx-auto max-w-4xl px-4 pb-8">
+        <p className="text-xs text-muted-foreground">
+          Besoin d&apos;aide ?{' '}
+          <Link to="/dashboard/support" className="text-primary hover:underline">
+            Contacter le support
+          </Link>
+        </p>
+      </div>
+    </AppPageShell>
   );
 }

@@ -1,7 +1,6 @@
 import { useStore } from '@/hooks/useStore';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { ProductCreationRouter } from '@/components/products/ProductCreationRouter';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Loader2 } from 'lucide-react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 
@@ -35,34 +34,23 @@ const CreateProduct = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-x-hidden">
-          <ProductCreationRouter
-            storeId={store.id}
-            storeSlug={store.slug}
-            initialProductType={productType}
-            onSuccess={() => {
-              // Rediriger vers la page appropriée selon le type de produit
-              if (productType === 'digital') {
-                navigate('/dashboard/digital-products');
-              } else {
-                // Pour les produits physiques et services, rediriger vers la liste générale
-                navigate('/dashboard/products');
-              }
-            }}
-          />
-        </main>
-      </div>
-    </SidebarProvider>
+    <AppPageShell mainClassName="overflow-x-hidden">
+      <ProductCreationRouter
+        storeId={store.id}
+        storeSlug={store.slug}
+        initialProductType={productType}
+        onSuccess={() => {
+          // Rediriger vers la page appropriée selon le type de produit
+          if (productType === 'digital') {
+            navigate('/dashboard/digital-products');
+          } else {
+            // Pour les produits physiques et services, rediriger vers la liste générale
+            navigate('/dashboard/products');
+          }
+        }}
+      />
+    </AppPageShell>
   );
 };
 
 export default CreateProduct;
-
-
-
-
-
-

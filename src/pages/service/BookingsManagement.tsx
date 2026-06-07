@@ -5,10 +5,9 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -701,573 +700,553 @@ export default function BookingsManagement() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1 p-4 md:p-6 space-y-6">
-            <div className="flex items-center justify-center h-[60vh]">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Chargement des réservations...</p>
-              </div>
-            </div>
-          </main>
+      <AppPageShell mainClassName="p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Chargement des réservations...</p>
+          </div>
         </div>
-      </SidebarProvider>
+      </AppPageShell>
     );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
-            {/* Header avec animation - Style MyTemplates */}
-            <div
-              ref={headerRef}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
-            >
-              <div>
-                <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
-                  <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
-                    <Calendar
-                      className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-4.5 md:w-4.5 lg:h-5 lg:w-5 text-purple-500 dark:text-purple-400"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Gestion des réservations
-                  </span>
-                </h1>
-                <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
-                  Gérez vos réservations de services et disponibilités
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => refetch()}
-                  size="sm"
-                  className="h-8 sm:h-9 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
-                >
-                  <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
-                  <span className="hidden sm:inline">Actualiser</span>
-                  <span className="sm:hidden">Raf.</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Stats Cards - Style MyTemplates (Purple-Pink Gradient) */}
-            <div
-              ref={statsRef}
-              className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              {[
-                {
-                  label: 'Total',
-                  value: stats.total,
-                  icon: CalendarDays,
-                  color: 'from-purple-600 to-pink-600',
-                  subtitle: 'réservations',
-                },
-                {
-                  label: 'Confirmées',
-                  value: stats.confirmed,
-                  icon: CheckCircle2,
-                  color: 'from-green-600 to-emerald-600',
-                  subtitle: 'réservations',
-                },
-                {
-                  label: 'En attente',
-                  value: stats.pending,
-                  icon: AlertCircle,
-                  color: 'from-yellow-600 to-orange-600',
-                  subtitle: 'réservations',
-                },
-                {
-                  label: 'Annulées',
-                  value: stats.cancelled,
-                  icon: XCircle,
-                  color: 'from-red-600 to-rose-600',
-                  subtitle: 'réservations',
-                },
-                {
-                  label: 'Revenu',
-                  value: `${stats.totalRevenue.toLocaleString('fr-FR')} XOF`,
-                  icon: DollarSign,
-                  color: 'from-blue-600 to-cyan-600',
-                  subtitle: '',
-                },
-              ].map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <Card
-                    key={stat.label}
-                    className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CardHeader className="pb-2 sm:pb-3 p-2.5 sm:p-3 md:p-4">
-                      <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                        <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        {stat.label}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
-                      <div
-                        className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
-                      >
-                        {stat.value}
-                      </div>
-                      {stat.subtitle && (
-                        <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
-                          {stat.subtitle}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {/* Filters et Actions - Style MyTemplates */}
-            <Card
-              ref={filtersRef}
-              className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
-            >
-              <CardContent className="p-3 sm:p-4">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                  {/* Recherche */}
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
-                    <Input
-                      id="search-input"
-                      placeholder="Rechercher (client, service, email...)"
-                      value={searchInput}
-                      onChange={e => setSearchInput(e.target.value)}
-                      className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm"
-                      aria-label="Rechercher"
-                    />
-                    {searchInput && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
-                        onClick={() => setSearchInput('')}
-                        aria-label="Effacer"
-                      >
-                        <X className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </Button>
-                    )}
-                    {/* Keyboard shortcut indicator */}
-                    <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
-                      <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
-                        ⌘K
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Filtres */}
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm">
-                      <SelectValue placeholder="Statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les statuts</SelectItem>
-                      <SelectItem value="pending">En attente</SelectItem>
-                      <SelectItem value="confirmed">Confirmées</SelectItem>
-                      <SelectItem value="completed">Terminées</SelectItem>
-                      <SelectItem value="cancelled">Annulées</SelectItem>
-                      <SelectItem value="no_show">Absents</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={dateFilter} onValueChange={setDateFilter}>
-                    <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm">
-                      <SelectValue placeholder="Période" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes les dates</SelectItem>
-                      <SelectItem value="today">Aujourd'hui</SelectItem>
-                      <SelectItem value="week">Cette semaine</SelectItem>
-                      <SelectItem value="month">Ce mois</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {/* Mode vue */}
-                  <Tabs value={viewMode} onValueChange={v => setViewMode(v as ViewMode)}>
-                    <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1">
-                      <TabsTrigger
-                        value="list"
-                        className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
-                      >
-                        <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Liste</span>
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="grid"
-                        className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
-                      >
-                        <Grid3x3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Grille</span>
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-
-                  {/* Actions */}
-                  <Button
-                    onClick={handleExportCSV}
-                    variant="outline"
-                    size="sm"
-                    disabled={isExporting || filteredBookings.length === 0}
-                    className="h-8 sm:h-9 transition-all hover:scale-105 text-xs sm:text-sm"
-                  >
-                    {isExporting ? (
-                      <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2 animate-spin" />
-                    ) : (
-                      <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
-                    )}
-                    <span className="hidden sm:inline">Exporter</span>
-                    <span className="sm:hidden">Exp.</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Error Alert */}
-            {error && (
-              <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Calendar/List View */}
-            <div
-              ref={calendarRef}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300"
-            >
-              {viewMode === 'grid' ? (
-                <ServiceBookingCalendar
-                  events={events}
-                  onSelectEvent={handleSelectEvent}
-                  onSelectSlot={handleSelectSlot}
-                  defaultView={calendarView}
-                  enableSelection={true}
-                  showLegend={true}
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+        {/* Header avec animation - Style MyTemplates */}
+        <div
+          ref={headerRef}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-4 duration-700"
+        >
+          <div>
+            <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 animate-in zoom-in duration-500">
+                <Calendar
+                  className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-4.5 md:w-4.5 lg:h-5 lg:w-5 text-purple-500 dark:text-purple-400"
+                  aria-hidden="true"
                 />
-              ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm sm:text-base md:text-lg">
-                      Liste des réservations
-                    </CardTitle>
-                    <CardDescription className="text-[10px] sm:text-xs md:text-sm">
-                      {filteredBookings.length} réservation(s) trouvée(s)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {filteredBookings.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2">
-                          Aucune réservation
-                        </h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          {searchInput || statusFilter !== 'all' || dateFilter !== 'all'
-                            ? 'Aucune réservation ne correspond aux filtres sélectionnés.'
-                            : 'Les réservations apparaîtront ici.'}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {filteredBookings.map((booking: VendorBookingRow) => {
-                          const bookingEvent = events.find(e => e.id === booking.id);
-                          return (
-                            <Card
-                              key={booking.id}
-                              className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50"
-                              onClick={() => bookingEvent && handleSelectEvent(bookingEvent)}
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                  <div className="flex-1 space-y-2">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <h3 className="text-sm sm:text-base font-semibold">
-                                        {booking.customer?.full_name || 'Client anonyme'}
-                                      </h3>
-                                      <Badge
-                                        variant={
-                                          booking.status === 'confirmed'
-                                            ? 'default'
-                                            : booking.status === 'pending'
-                                              ? 'secondary'
-                                              : booking.status === 'cancelled'
-                                                ? 'destructive'
-                                                : 'outline'
-                                        }
-                                      >
-                                        {booking.status === 'confirmed'
-                                          ? 'Confirmé'
-                                          : booking.status === 'pending'
-                                            ? 'En attente'
-                                            : booking.status === 'cancelled'
-                                              ? 'Annulé'
-                                              : booking.status === 'completed'
-                                                ? 'Terminé'
-                                                : booking.status === 'no_show'
-                                                  ? 'Absent'
-                                                  : booking.status}
-                                      </Badge>
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
-                                      <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4" />
-                                        {format(
-                                          parseISO(`${booking.booking_date}T00:00:00`),
-                                          'PPP',
-                                          { locale: fr }
-                                        )}
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4" />
-                                        {booking.start_time || booking.booking_time || 'N/A'}
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Users className="h-4 w-4" />
-                                        {booking.participants_count ||
-                                          booking.participants ||
-                                          1}{' '}
-                                        participant(s)
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <DollarSign className="h-4 w-4" />
-                                        {booking.total_price?.toLocaleString('fr-FR') || 0} XOF
-                                      </div>
-                                    </div>
-                                    <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
-                                      {booking.service_product?.[0]?.product?.name || 'Service'}
-                                    </p>
+              </div>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Gestion des réservations
+              </span>
+            </h1>
+            <p className="text-[9px] sm:text-[10px] md:text-xs lg:text-sm text-muted-foreground">
+              Gérez vos réservations de services et disponibilités
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => refetch()}
+              size="sm"
+              className="h-8 sm:h-9 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+            >
+              <RefreshCw className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
+              <span className="hidden sm:inline">Actualiser</span>
+              <span className="sm:hidden">Raf.</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards - Style MyTemplates (Purple-Pink Gradient) */}
+        <div
+          ref={statsRef}
+          className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
+          {[
+            {
+              label: 'Total',
+              value: stats.total,
+              icon: CalendarDays,
+              color: 'from-purple-600 to-pink-600',
+              subtitle: 'réservations',
+            },
+            {
+              label: 'Confirmées',
+              value: stats.confirmed,
+              icon: CheckCircle2,
+              color: 'from-green-600 to-emerald-600',
+              subtitle: 'réservations',
+            },
+            {
+              label: 'En attente',
+              value: stats.pending,
+              icon: AlertCircle,
+              color: 'from-yellow-600 to-orange-600',
+              subtitle: 'réservations',
+            },
+            {
+              label: 'Annulées',
+              value: stats.cancelled,
+              icon: XCircle,
+              color: 'from-red-600 to-rose-600',
+              subtitle: 'réservations',
+            },
+            {
+              label: 'Revenu',
+              value: `${stats.totalRevenue.toLocaleString('fr-FR')} XOF`,
+              icon: DollarSign,
+              color: 'from-blue-600 to-cyan-600',
+              subtitle: '',
+            },
+          ].map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <Card
+                key={stat.label}
+                className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardHeader className="pb-2 sm:pb-3 p-2.5 sm:p-3 md:p-4">
+                  <CardTitle className="text-[9px] sm:text-[10px] md:text-xs font-medium text-muted-foreground flex items-center gap-1.5 sm:gap-2">
+                    <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    {stat.label}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2.5 sm:p-3 md:p-4 pt-0">
+                  <div
+                    className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
+                    {stat.value}
+                  </div>
+                  {stat.subtitle && (
+                    <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground mt-1">
+                      {stat.subtitle}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Filters et Actions - Style MyTemplates */}
+        <Card
+          ref={filtersRef}
+          className="border-border/50 bg-card/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              {/* Recherche */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                <Input
+                  id="search-input"
+                  placeholder="Rechercher (client, service, email...)"
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
+                  className="pl-8 sm:pl-10 pr-8 sm:pr-20 h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm"
+                  aria-label="Rechercher"
+                />
+                {searchInput && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8"
+                    onClick={() => setSearchInput('')}
+                    aria-label="Effacer"
+                  >
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </Button>
+                )}
+                {/* Keyboard shortcut indicator */}
+                <div className="absolute right-2.5 sm:right-10 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:flex items-center">
+                  <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0">
+                    ⌘K
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Filtres */}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm">
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="pending">En attente</SelectItem>
+                  <SelectItem value="confirmed">Confirmées</SelectItem>
+                  <SelectItem value="completed">Terminées</SelectItem>
+                  <SelectItem value="cancelled">Annulées</SelectItem>
+                  <SelectItem value="no_show">Absents</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-full sm:w-[160px] h-9 sm:h-10 text-[10px] sm:text-xs md:text-sm">
+                  <SelectValue placeholder="Période" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les dates</SelectItem>
+                  <SelectItem value="today">Aujourd'hui</SelectItem>
+                  <SelectItem value="week">Cette semaine</SelectItem>
+                  <SelectItem value="month">Ce mois</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Mode vue */}
+              <Tabs value={viewMode} onValueChange={v => setViewMode(v as ViewMode)}>
+                <TabsList className="bg-muted/50 backdrop-blur-sm h-auto p-1">
+                  <TabsTrigger
+                    value="list"
+                    className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  >
+                    <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Liste</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="grid"
+                    className="gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs md:text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all duration-300"
+                  >
+                    <Grid3x3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Grille</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {/* Actions */}
+              <Button
+                onClick={handleExportCSV}
+                variant="outline"
+                size="sm"
+                disabled={isExporting || filteredBookings.length === 0}
+                className="h-8 sm:h-9 transition-all hover:scale-105 text-xs sm:text-sm"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" />
+                )}
+                <span className="hidden sm:inline">Exporter</span>
+                <span className="sm:hidden">Exp.</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Calendar/List View */}
+        <div
+          ref={calendarRef}
+          className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300"
+        >
+          {viewMode === 'grid' ? (
+            <ServiceBookingCalendar
+              events={events}
+              onSelectEvent={handleSelectEvent}
+              onSelectSlot={handleSelectSlot}
+              defaultView={calendarView}
+              enableSelection={true}
+              showLegend={true}
+            />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm sm:text-base md:text-lg">
+                  Liste des réservations
+                </CardTitle>
+                <CardDescription className="text-[10px] sm:text-xs md:text-sm">
+                  {filteredBookings.length} réservation(s) trouvée(s)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {filteredBookings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2">
+                      Aucune réservation
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {searchInput || statusFilter !== 'all' || dateFilter !== 'all'
+                        ? 'Aucune réservation ne correspond aux filtres sélectionnés.'
+                        : 'Les réservations apparaîtront ici.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredBookings.map((booking: VendorBookingRow) => {
+                      const bookingEvent = events.find(e => e.id === booking.id);
+                      return (
+                        <Card
+                          key={booking.id}
+                          className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50"
+                          onClick={() => bookingEvent && handleSelectEvent(bookingEvent)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="text-sm sm:text-base font-semibold">
+                                    {booking.customer?.full_name || 'Client anonyme'}
+                                  </h3>
+                                  <Badge
+                                    variant={
+                                      booking.status === 'confirmed'
+                                        ? 'default'
+                                        : booking.status === 'pending'
+                                          ? 'secondary'
+                                          : booking.status === 'cancelled'
+                                            ? 'destructive'
+                                            : 'outline'
+                                    }
+                                  >
+                                    {booking.status === 'confirmed'
+                                      ? 'Confirmé'
+                                      : booking.status === 'pending'
+                                        ? 'En attente'
+                                        : booking.status === 'cancelled'
+                                          ? 'Annulé'
+                                          : booking.status === 'completed'
+                                            ? 'Terminé'
+                                            : booking.status === 'no_show'
+                                              ? 'Absent'
+                                              : booking.status}
+                                  </Badge>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-2">
+                                    <Calendar className="h-4 w-4" />
+                                    {format(parseISO(`${booking.booking_date}T00:00:00`), 'PPP', {
+                                      locale: fr,
+                                    })}
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    {booking.status === 'pending' && (
-                                      <Button
-                                        size="sm"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          handleConfirmBooking(booking.id);
-                                        }}
-                                        className="bg-green-600 hover:bg-green-700"
-                                      >
-                                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                                        Confirmer
-                                      </Button>
-                                    )}
-                                    {booking.status === 'confirmed' && (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          handleCompleteBooking(booking.id);
-                                        }}
-                                      >
-                                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                                        Terminer
-                                      </Button>
-                                    )}
-                                    {booking.status !== 'cancelled' && (
-                                      <Button
-                                        size="sm"
-                                        variant="destructive"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          handleCancelBooking(booking.id);
-                                        }}
-                                      >
-                                        <XCircle className="h-4 w-4 mr-2" />
-                                        Annuler
-                                      </Button>
-                                    )}
+                                    <Clock className="h-4 w-4" />
+                                    {booking.start_time || booking.booking_time || 'N/A'}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    {booking.participants_count || booking.participants || 1}{' '}
+                                    participant(s)
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <DollarSign className="h-4 w-4" />
+                                    {booking.total_price?.toLocaleString('fr-FR') || 0} XOF
                                   </div>
                                 </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
+                                  {booking.service_product?.[0]?.product?.name || 'Service'}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {booking.status === 'pending' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleConfirmBooking(booking.id);
+                                    }}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                                    Confirmer
+                                  </Button>
+                                )}
+                                {booking.status === 'confirmed' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleCompleteBooking(booking.id);
+                                    }}
+                                  >
+                                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                                    Terminer
+                                  </Button>
+                                )}
+                                {booking.status !== 'cancelled' && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleCancelBooking(booking.id);
+                                    }}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Annuler
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-            {/* Event Detail Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-lg sm:text-xl md:text-2xl">
-                    {selectedEvent?.title}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {selectedEvent && (
-                      <>
-                        {format(selectedEvent.start, 'PPP à HH:mm', { locale: fr })} -{' '}
-                        {format(selectedEvent.end, 'HH:mm', { locale: fr })}
-                      </>
-                    )}
-                  </DialogDescription>
-                </DialogHeader>
-
+        {/* Event Detail Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg sm:text-xl md:text-2xl">
+                {selectedEvent?.title}
+              </DialogTitle>
+              <DialogDescription>
                 {selectedEvent && (
-                  <div className="space-y-4">
-                    {/* Status Badge */}
-                    <div>
-                      <Badge
-                        variant={
-                          selectedEvent.type === 'booked'
-                            ? 'default'
-                            : selectedEvent.type === 'available'
-                              ? 'secondary'
-                              : 'destructive'
-                        }
-                        className="text-base px-3 py-1"
-                      >
-                        {selectedEvent.type === 'booked'
-                          ? 'Réservé'
-                          : selectedEvent.type === 'available'
-                            ? 'Disponible'
-                            : 'Indisponible'}
-                      </Badge>
-                    </div>
+                  <>
+                    {format(selectedEvent.start, 'PPP à HH:mm', { locale: fr })} -{' '}
+                    {format(selectedEvent.end, 'HH:mm', { locale: fr })}
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
 
-                    {/* Details */}
-                    {selectedEvent.resource && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {selectedEvent.resource.customerName && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium flex items-center gap-2">
-                              <User className="h-4 w-4" />
-                              Client
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {selectedEvent.resource.customerName}
-                            </p>
-                          </div>
-                        )}
-                        {selectedEvent.resource.customerEmail && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium flex items-center gap-2">
-                              <Mail className="h-4 w-4" />
-                              Email
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {selectedEvent.resource.customerEmail}
-                            </p>
-                          </div>
-                        )}
-                        {selectedEvent.resource.customerPhone && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium flex items-center gap-2">
-                              <Phone className="h-4 w-4" />
-                              Téléphone
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {selectedEvent.resource.customerPhone}
-                            </p>
-                          </div>
-                        )}
-                        {selectedEvent.resource.participants && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium flex items-center gap-2">
-                              <Users className="h-4 w-4" />
-                              Participants
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {selectedEvent.resource.participants}
-                            </p>
-                          </div>
-                        )}
-                        {selectedEvent.resource.price && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium flex items-center gap-2">
-                              <DollarSign className="h-4 w-4" />
-                              Prix total
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {selectedEvent.resource.price.toLocaleString('fr-FR')} XOF
-                            </p>
-                          </div>
-                        )}
-                        {selectedEvent.resource.status && (
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium">Statut</p>
-                            <Badge variant="outline">{selectedEvent.resource.status}</Badge>
-                          </div>
-                        )}
+            {selectedEvent && (
+              <div className="space-y-4">
+                {/* Status Badge */}
+                <div>
+                  <Badge
+                    variant={
+                      selectedEvent.type === 'booked'
+                        ? 'default'
+                        : selectedEvent.type === 'available'
+                          ? 'secondary'
+                          : 'destructive'
+                    }
+                    className="text-base px-3 py-1"
+                  >
+                    {selectedEvent.type === 'booked'
+                      ? 'Réservé'
+                      : selectedEvent.type === 'available'
+                        ? 'Disponible'
+                        : 'Indisponible'}
+                  </Badge>
+                </div>
+
+                {/* Details */}
+                {selectedEvent.resource && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {selectedEvent.resource.customerName && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium flex items-center gap-2">
+                          <User className="h-4 w-4" />
+                          Client
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedEvent.resource.customerName}
+                        </p>
                       </div>
                     )}
-
-                    {/* Actions */}
-                    {selectedEvent.type === 'booked' && selectedEvent.resource?.status && (
-                      <div className="flex flex-wrap gap-2 pt-4 border-t">
-                        {selectedEvent.resource.status === 'pending' && (
-                          <Button
-                            onClick={() =>
-                              selectedEvent.id && handleConfirmBooking(selectedEvent.id)
-                            }
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-2" />
-                            Confirmer
-                          </Button>
-                        )}
-                        {selectedEvent.resource.status === 'confirmed' && (
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              selectedEvent.id && handleCompleteBooking(selectedEvent.id)
-                            }
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-2" />
-                            Terminer
-                          </Button>
-                        )}
-                        {selectedEvent.resource.status !== 'cancelled' && (
-                          <>
-                            <Button
-                              variant="destructive"
-                              onClick={() =>
-                                selectedEvent.id && handleCancelBooking(selectedEvent.id)
-                              }
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Annuler
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => selectedEvent.id && handleMarkNoShow(selectedEvent.id)}
-                            >
-                              <Ban className="h-4 w-4 mr-2" />
-                              Marquer absent
-                            </Button>
-                          </>
-                        )}
+                    {selectedEvent.resource.customerEmail && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          Email
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedEvent.resource.customerEmail}
+                        </p>
                       </div>
                     )}
-
-                    {selectedEvent.type === 'available' && (
-                      <Button className="w-full">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Créer une réservation
-                      </Button>
+                    {selectedEvent.resource.customerPhone && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          Téléphone
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedEvent.resource.customerPhone}
+                        </p>
+                      </div>
+                    )}
+                    {selectedEvent.resource.participants && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          Participants
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedEvent.resource.participants}
+                        </p>
+                      </div>
+                    )}
+                    {selectedEvent.resource.price && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Prix total
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedEvent.resource.price.toLocaleString('fr-FR')} XOF
+                        </p>
+                      </div>
+                    )}
+                    {selectedEvent.resource.status && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Statut</p>
+                        <Badge variant="outline">{selectedEvent.resource.status}</Badge>
+                      </div>
                     )}
                   </div>
                 )}
-              </DialogContent>
-            </Dialog>
-          </div>
-        </main>
+
+                {/* Actions */}
+                {selectedEvent.type === 'booked' && selectedEvent.resource?.status && (
+                  <div className="flex flex-wrap gap-2 pt-4 border-t">
+                    {selectedEvent.resource.status === 'pending' && (
+                      <Button
+                        onClick={() => selectedEvent.id && handleConfirmBooking(selectedEvent.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Confirmer
+                      </Button>
+                    )}
+                    {selectedEvent.resource.status === 'confirmed' && (
+                      <Button
+                        variant="outline"
+                        onClick={() => selectedEvent.id && handleCompleteBooking(selectedEvent.id)}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Terminer
+                      </Button>
+                    )}
+                    {selectedEvent.resource.status !== 'cancelled' && (
+                      <>
+                        <Button
+                          variant="destructive"
+                          onClick={() => selectedEvent.id && handleCancelBooking(selectedEvent.id)}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Annuler
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => selectedEvent.id && handleMarkNoShow(selectedEvent.id)}
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          Marquer absent
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {selectedEvent.type === 'available' && (
+                  <Button className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Créer une réservation
+                  </Button>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }

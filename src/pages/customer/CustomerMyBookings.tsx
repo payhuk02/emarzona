@@ -3,11 +3,10 @@
  */
 
 import { useMemo, useState } from 'react';
+import { AppPageShell } from '@/components/layout/AppPageShell';
 import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -106,114 +105,108 @@ export default function CustomerMyBookings() {
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Mes réservations</h1>
-                <p className="text-muted-foreground mt-1">
-                  Consultez et gérez vos rendez-vous de services
-                </p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
-                Actualiser
-              </Button>
-            </div>
-
-            <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="upcoming">À venir ({upcoming.length})</TabsTrigger>
-                <TabsTrigger value="past">Passées ({past.length})</TabsTrigger>
-                <TabsTrigger value="cancelled">Annulées ({cancelled.length})</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={tab}>
-                {isLoading ? (
-                  <div className="flex justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : error ? (
-                  <Card>
-                    <CardContent className="py-8 text-center text-destructive">
-                      Impossible de charger vos réservations. Réessayez plus tard.
-                    </CardContent>
-                  </Card>
-                ) : list.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center text-muted-foreground">
-                      <Calendar className="h-12 w-12 mx-auto mb-4 opacity-40" />
-                      <p>Aucune réservation dans cette catégorie.</p>
-                      <Button asChild className="mt-4" variant="secondary">
-                        <Link to="/marketplace">Découvrir des services</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-4">
-                    {list.map(booking => (
-                      <Card key={booking.id}>
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-wrap items-start justify-between gap-2">
-                            <CardTitle className="text-lg">
-                              {booking.product?.name ?? 'Service'}
-                            </CardTitle>
-                            <Badge variant={statusVariant(booking.status)}>
-                              {STATUS_LABELS[booking.status] ?? booking.status}
-                            </Badge>
-                          </div>
-                          <CardDescription className="flex items-center gap-2 mt-1">
-                            <Clock className="h-4 w-4 shrink-0" />
-                            {formatBookingWhen(booking)}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          {booking.service?.location_address && (
-                            <p className="text-sm text-muted-foreground flex items-start gap-2">
-                              <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                              {booking.service.location_address}
-                            </p>
-                          )}
-                          {(booking.meeting_url || booking.service?.meeting_url) && (
-                            <Button asChild variant="outline" size="sm">
-                              <a
-                                href={booking.meeting_url || booking.service?.meeting_url || '#'}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Video className="h-4 w-4 mr-2" />
-                                Rejoindre la visio
-                              </a>
-                            </Button>
-                          )}
-                          {booking.product?.id && (
-                            <Button asChild variant="link" className="px-0 h-auto">
-                              <Link to={`/service/${booking.product.id}`}>Voir le service</Link>
-                            </Button>
-                          )}
-                          {['pending', 'confirmed'].includes(booking.status) && (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => setCancelId(booking.id)}
-                            >
-                              Annuler la réservation
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+    <AppPageShell>
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Mes réservations</h1>
+            <p className="text-muted-foreground mt-1">
+              Consultez et gérez vos rendez-vous de services
+            </p>
           </div>
-        </main>
-      </div>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+            Actualiser
+          </Button>
+        </div>
 
+        <Tabs value={tab} onValueChange={v => setTab(v as typeof tab)}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="upcoming">À venir ({upcoming.length})</TabsTrigger>
+            <TabsTrigger value="past">Passées ({past.length})</TabsTrigger>
+            <TabsTrigger value="cancelled">Annulées ({cancelled.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={tab}>
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <Card>
+                <CardContent className="py-8 text-center text-destructive">
+                  Impossible de charger vos réservations. Réessayez plus tard.
+                </CardContent>
+              </Card>
+            ) : list.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                  <p>Aucune réservation dans cette catégorie.</p>
+                  <Button asChild className="mt-4" variant="secondary">
+                    <Link to="/marketplace">Découvrir des services</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {list.map(booking => (
+                  <Card key={booking.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <CardTitle className="text-lg">
+                          {booking.product?.name ?? 'Service'}
+                        </CardTitle>
+                        <Badge variant={statusVariant(booking.status)}>
+                          {STATUS_LABELS[booking.status] ?? booking.status}
+                        </Badge>
+                      </div>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Clock className="h-4 w-4 shrink-0" />
+                        {formatBookingWhen(booking)}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {booking.service?.location_address && (
+                        <p className="text-sm text-muted-foreground flex items-start gap-2">
+                          <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                          {booking.service.location_address}
+                        </p>
+                      )}
+                      {(booking.meeting_url || booking.service?.meeting_url) && (
+                        <Button asChild variant="outline" size="sm">
+                          <a
+                            href={booking.meeting_url || booking.service?.meeting_url || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Video className="h-4 w-4 mr-2" />
+                            Rejoindre la visio
+                          </a>
+                        </Button>
+                      )}
+                      {booking.product?.id && (
+                        <Button asChild variant="link" className="px-0 h-auto">
+                          <Link to={`/service/${booking.product.id}`}>Voir le service</Link>
+                        </Button>
+                      )}
+                      {['pending', 'confirmed'].includes(booking.status) && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setCancelId(booking.id)}
+                        >
+                          Annuler la réservation
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
       <AlertDialog open={!!cancelId} onOpenChange={open => !open && setCancelId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -235,6 +228,6 @@ export default function CustomerMyBookings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </SidebarProvider>
+    </AppPageShell>
   );
 }

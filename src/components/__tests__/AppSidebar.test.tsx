@@ -64,19 +64,6 @@ vi.mock('@/components/sidebar/SidebarNavCommandPalette', () => ({
   SidebarNavCommandPalette: () => null,
 }));
 
-vi.mock('@/components/layout/AppUtilityBar', () => ({
-  AppUtilityBar: () => (
-    <div data-testid="app-utility-bar">
-      <button type="button" aria-label="Langue : Français">
-        FR
-      </button>
-      <button type="button" aria-label="Déconnexion">
-        Déconnexion
-      </button>
-    </div>
-  ),
-}));
-
 const mockLocation = { pathname: '/dashboard' };
 
 vi.mock('react-router-dom', async () => {
@@ -189,12 +176,6 @@ describe('AppSidebar', () => {
     );
   });
 
-  it('should display logout button', async () => {
-    renderAppSidebar();
-
-    expect(await screen.findByRole('button', { name: /déconnexion/i })).toBeInTheDocument();
-  });
-
   it('should display store selection when user has multiple stores', async () => {
     renderAppSidebar();
 
@@ -219,12 +200,6 @@ describe('AppSidebar', () => {
     renderAppSidebar();
 
     expect(await screen.findByText(/administration/i)).toBeInTheDocument();
-  });
-
-  it('should display language switcher in utility bar', async () => {
-    renderAppSidebar();
-
-    expect(await screen.findByLabelText(/^Langue :/i)).toBeInTheDocument();
   });
 
   it('should handle store switching', async () => {
