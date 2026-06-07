@@ -73,6 +73,7 @@ import { initWebVitals } from '@/lib/web-vitals';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { hasContextSidebarForPath } from '@/config/contextSidebar.registry';
 import { shouldUseAppPremiumTheme } from '@/lib/premium-theme';
+import { cn } from '@/lib/utils';
 import { AppPremiumShell } from '@/components/layout/AppPremiumShell';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 import { startAlertMonitoring } from '@/lib/sentry-alerts';
